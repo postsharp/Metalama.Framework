@@ -3,6 +3,7 @@
 
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Aspects;
+using Caravela.Framework.Impl.CodeModel.Builders;
 using Caravela.Framework.Impl.Linking;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -15,6 +16,16 @@ namespace Caravela.Framework.Impl.Transformations
     /// </summary>
     internal class IntroducedMember
     {
+        /// <summary>
+        /// Gets the name of the introduced declaration (for sorting only).
+        /// </summary>
+        public string SortingName { get; }
+
+        /// <summary>
+        /// Gets the kind of declaration (for sorting only).
+        /// </summary>
+        public DeclarationKind DeclarationKind { get; }
+
         /// <summary>
         /// Gets the <see cref="IMemberIntroduction" /> that created this object.
         /// </summary>
@@ -42,8 +53,52 @@ namespace Caravela.Framework.Impl.Transformations
         /// </summary>
         public IDeclaration? Declaration { get; }
 
+        private static string GetSortingName( IMember member )
+            => member is IMethod ? member.ToDisplayString( CodeDisplayFormat.MinimallyQualified ) : member.Name;
+
         public IntroducedMember(
+            MemberBuilder introduction,
+            MemberDeclarationSyntax syntax,
+            AspectLayerId aspectLayerId,
+            IntroducedMemberSemantic semantic,
+            IDeclaration? declaration ) : this(
+            introduction,
+            GetSortingName( introduction ),
+            introduction.DeclarationKind,
+            syntax,
+            aspectLayerId,
+            semantic,
+            declaration ) { }
+
+        public IntroducedMember(
+            OverriddenMember introduction,
+            MemberDeclarationSyntax syntax,
+            AspectLayerId aspectLayerId,
+            IntroducedMemberSemantic semantic,
+            IDeclaration? declaration ) : this(
+            introduction,
+            GetSortingName( introduction.OverriddenDeclaration ),
+            introduction.OverriddenDeclaration.DeclarationKind,
+            syntax,
+            aspectLayerId,
+            semantic,
+            declaration ) { }
+
+        protected IntroducedMember(
+            IntroducedMember prototype,
+            MemberDeclarationSyntax syntax ) : this(
+            prototype.Introduction,
+            prototype.SortingName,
+            prototype.DeclarationKind,
+            syntax,
+            prototype.AspectLayerId,
+            prototype.Semantic,
+            prototype.Declaration ) { }
+
+        internal IntroducedMember(
             IMemberIntroduction introduction,
+            string sortingName,
+            DeclarationKind kind,
             MemberDeclarationSyntax syntax,
             AspectLayerId aspectLayerId,
             IntroducedMemberSemantic semantic,
@@ -54,6 +109,8 @@ namespace Caravela.Framework.Impl.Transformations
             this.AspectLayerId = aspectLayerId;
             this.Semantic = semantic;
             this.Declaration = declaration;
+            this.SortingName = sortingName;
+            this.DeclarationKind = kind;
         }
     }
 }

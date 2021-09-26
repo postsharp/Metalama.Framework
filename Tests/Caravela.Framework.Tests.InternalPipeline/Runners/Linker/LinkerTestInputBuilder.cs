@@ -164,7 +164,6 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
             {
                 var containingNodeId = ((ITestTransformation) transformation).ContainingNodeId;
                 var insertPositionNodeId = ((ITestTransformation) transformation).InsertPositionNodeId;
-                var insertPositionBuilder = ((ITestTransformation) transformation).InsertPositionBuilder;
                 var insertPositionRelation = ((ITestTransformation) transformation).InsertPositionRelation;
                 var symbolHelperNodeId = ((ITestTransformation) transformation).SymbolHelperNodeId;
                 var symbolHelperNode = nodeIdToSyntaxNode[symbolHelperNodeId];
@@ -179,7 +178,7 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
                     var insertPositionNode =
                         insertPositionNodeId != null
                             ? nodeIdToSyntaxNode[insertPositionNodeId]
-                            : null;
+                            : containingNode;
 
                     if ( insertPositionNode is VariableDeclaratorSyntax )
                     {
@@ -226,8 +225,7 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
                     }
                     else
                     {
-                        A.CallTo( () => ((IMemberIntroduction) overriddenDeclaration).InsertPosition )
-                            .Returns( new InsertPosition( insertPositionRelation, insertPositionBuilder.AssertNotNull() ) );
+                        throw new AssertionFailedException();
                     }
 
                     A.CallTo( () => overriddenDeclaration.OverriddenDeclaration ).Returns( overridenMember );
@@ -240,7 +238,7 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
                     var insertPositionNode =
                         insertPositionNodeId != null
                             ? nodeIdToSyntaxNode[insertPositionNodeId]
-                            : null;
+                            : containingNode;
 
                     if ( insertPositionNode is VariableDeclaratorSyntax )
                     {
@@ -296,8 +294,7 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
                                     symbolHelperMethod,
                                     containingDeclaration,
                                     insertPositionRelation,
-                                    insertPositionNode,
-                                    insertPositionBuilder,
+                                    insertPositionNode!,
                                     introducedElementName );
 
                                 break;
@@ -309,8 +306,7 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
                                     symbolHelperProperty,
                                     containingDeclaration,
                                     insertPositionRelation,
-                                    insertPositionNode,
-                                    insertPositionBuilder,
+                                    insertPositionNode!,
                                     introducedElementName );
 
                                 break;
@@ -322,8 +318,7 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
                                     symbolHelperEvent,
                                     containingDeclaration,
                                     insertPositionRelation,
-                                    insertPositionNode,
-                                    insertPositionBuilder,
+                                    insertPositionNode!,
                                     introducedElementName );
 
                                 break;
@@ -335,8 +330,7 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
                                     symbolHelperField,
                                     containingDeclaration,
                                     insertPositionRelation,
-                                    insertPositionNode,
-                                    insertPositionBuilder,
+                                    insertPositionNode!,
                                     introducedElementName );
 
                                 break;
@@ -355,8 +349,7 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
             IMethod symbolHelperElement,
             IDeclaration containingDeclaration,
             InsertPositionRelation insertPositionRelation,
-            SyntaxNode? insertPositionNode,
-            IDeclarationBuilder? insertPositionBuilder,
+            SyntaxNode insertPositionNode,
             string introducedElementName )
         {
             FinalizeTransformation(
@@ -366,7 +359,6 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
                 containingDeclaration,
                 insertPositionRelation,
                 insertPositionNode,
-                insertPositionBuilder,
                 introducedElementName );
 
             A.CallTo( () => ((IMethod) observableTransformation).LocalFunctions ).Returns( symbolHelperElement.LocalFunctions );
@@ -385,8 +377,7 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
             IProperty symbolHelperElement,
             IDeclaration containingDeclaration,
             InsertPositionRelation insertPositionRelation,
-            SyntaxNode? insertPositionNode,
-            IDeclarationBuilder? insertPositionBuilder,
+            SyntaxNode insertPositionNode,
             string introducedElementName )
         {
             FinalizeTransformation(
@@ -396,7 +387,6 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
                 containingDeclaration,
                 insertPositionRelation,
                 insertPositionNode,
-                insertPositionBuilder,
                 introducedElementName );
 
             A.CallTo( () => ((IProperty) observableTransformation).Parameters ).Returns( symbolHelperElement.Parameters );
@@ -409,8 +399,7 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
             IField symbolHelperField,
             IDeclaration containingDeclaration,
             InsertPositionRelation insertPositionRelation,
-            SyntaxNode? insertPositionNode,
-            IDeclarationBuilder? insertPositionBuilder,
+            SyntaxNode insertPositionNode,
             string introducedElementName )
         {
             FinalizeTransformation(
@@ -420,7 +409,6 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
                 containingDeclaration,
                 insertPositionRelation,
                 insertPositionNode,
-                insertPositionBuilder,
                 introducedElementName );
 
             A.CallTo( () => ((IField) observableTransformation).Type ).Returns( symbolHelperField.Type );
@@ -432,8 +420,7 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
             IEvent symbolHelperElement,
             IDeclaration containingDeclaration,
             InsertPositionRelation insertPositionRelation,
-            SyntaxNode? insertPositionNode,
-            IDeclarationBuilder? insertPositionBuilder,
+            SyntaxNode insertPositionNode,
             string introducedElementName )
         {
             FinalizeTransformation(
@@ -443,7 +430,6 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
                 containingDeclaration,
                 insertPositionRelation,
                 insertPositionNode,
-                insertPositionBuilder,
                 introducedElementName );
 
             A.CallTo( () => ((IEvent) observableTransformation).Type ).Returns( symbolHelperElement.Type );
@@ -455,8 +441,7 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
             IMember symbolHelperElement,
             IDeclaration containingDeclaration,
             InsertPositionRelation insertPositionRelation,
-            SyntaxNode? insertPositionNode,
-            IDeclarationBuilder? insertPositionBuilder,
+            SyntaxNode insertPositionNode,
             string introducedElementName )
         {
             A.CallTo( () => observableTransformation.ContainingDeclaration ).Returns( containingDeclaration );
@@ -464,16 +449,8 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
             A.CallTo( () => ((IDeclarationImpl) observableTransformation).ToRef() )
                 .Returns( new DeclarationRef<IDeclaration>( (IDeclarationBuilder) observableTransformation ) );
 
-            if ( insertPositionNode != null )
-            {
-                A.CallTo( () => ((IMemberIntroduction) observableTransformation).InsertPosition )
-                    .Returns( new InsertPosition( insertPositionRelation, (MemberDeclarationSyntax) insertPositionNode ) );
-            }
-            else
-            {
-                A.CallTo( () => ((IMemberIntroduction) observableTransformation).InsertPosition )
-                    .Returns( new InsertPosition( insertPositionRelation, insertPositionBuilder.AssertNotNull() ) );
-            }
+            A.CallTo( () => ((IMemberIntroduction) observableTransformation).InsertPosition )
+                .Returns( new InsertPosition( insertPositionRelation, (MemberDeclarationSyntax) insertPositionNode ) );
 
             A.CallTo( () => ((IMemberIntroduction) observableTransformation).TargetSyntaxTree ).Returns( symbolHelperNode.SyntaxTree );
 

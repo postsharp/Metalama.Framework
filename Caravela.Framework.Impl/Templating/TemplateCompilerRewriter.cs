@@ -1530,5 +1530,19 @@ namespace Caravela.Framework.Impl.Templating
                 return base.TransformYieldStatement( node );
             }
         }
+
+        protected override ExpressionSyntax TransformPostfixUnaryExpression( PostfixUnaryExpressionSyntax node )
+        {
+            if ( node.Kind() == SyntaxKind.SuppressNullableWarningExpression )
+            {
+                return InvocationExpression(
+                        this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.SuppressNullableWarningExpression) ) )
+                    .WithArgumentList( ArgumentList( SingletonSeparatedList( Argument( (ExpressionSyntax) this.Visit( node.Operand )! ) ) ) );
+            }
+            else
+            {
+                return base.TransformPostfixUnaryExpression( node );
+            }
+        }
     }
 }

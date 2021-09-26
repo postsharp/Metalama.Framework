@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Code.DeclarationBuilders;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 
@@ -19,23 +18,10 @@ namespace Caravela.Framework.Impl.Transformations
         /// </summary>
         public MemberDeclarationSyntax? SyntaxNode { get; }
 
-        /// <summary>
-        /// Gets the builder near to which/into which new nodes should be inserted.
-        /// </summary>
-        public IDeclarationBuilder? Builder { get; }
-
         public InsertPosition( InsertPositionRelation relation, MemberDeclarationSyntax node )
         {
             this.Relation = relation;
             this.SyntaxNode = node;
-            this.Builder = null;
-        }
-
-        public InsertPosition( InsertPositionRelation relation, IDeclarationBuilder builder )
-        {
-            this.Relation = relation;
-            this.SyntaxNode = null;
-            this.Builder = builder;
         }
 
         public override bool Equals( object? obj )
@@ -47,13 +33,12 @@ namespace Caravela.Framework.Impl.Transformations
         {
             return
                 this.Relation == other.Relation &&
-                this.SyntaxNode == other.SyntaxNode &&
-                this.Builder == other.Builder;
+                this.SyntaxNode == other.SyntaxNode;
         }
 
         public override int GetHashCode()
         {
-            return HashCode.Combine( this.Relation, this.SyntaxNode, this.Builder );
+            return HashCode.Combine( this.Relation, this.SyntaxNode );
         }
     }
 }

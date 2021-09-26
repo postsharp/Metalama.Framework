@@ -1,46 +1,7 @@
-    [Introduction]
+[Introduction]
     [Override]
     public class TargetClass:global::Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.ExplicitMembers_Override_NotInlineable.IInterface    {
 
-
-global::System.Int32 global::Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.ExplicitMembers_Override_NotInlineable.IInterface.InterfaceMethod()
-{
-    global::System.Console.WriteLine("This is overridden method.");
-    _ = this.IInterface_InterfaceMethod_Introduction();
-    return this.IInterface_InterfaceMethod_Introduction();
-}
-
-global::System.Int32 IInterface_InterfaceMethod_Introduction()
-{
-    global::System.Console.WriteLine("This is introduced interface member.");
-    return default(global::System.Int32);
-}
-
-global::System.Int32 global::Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.ExplicitMembers_Override_NotInlineable.IInterface.Property
-{get    {
-        global::System.Console.WriteLine("This is overridden method.");
-        _ = this.IInterface_Property_Introduction;
-        return this.IInterface_Property_Introduction;
-    }
-
-set    {
-        global::System.Console.WriteLine("This is overridden method.");
-this.IInterface_Property_Introduction= value;
-this.IInterface_Property_Introduction= value;
-        return;
-    }
-}
-
-global::System.Int32 IInterface_Property_Introduction
-{get    {
-        global::System.Console.WriteLine("This is introduced interface member.");
-        return default(global::System.Int32);
-    }
-
-set    {
-        global::System.Console.WriteLine("This is introduced interface member.");
-    }
-}
 
 private global::System.Int32 _autoProperty;
 
@@ -70,6 +31,45 @@ private global::System.Int32 AutoProperty_Source
     {
         this._autoProperty = value;
     }
+}
+
+global::System.Int32 global::Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.ExplicitMembers_Override_NotInlineable.IInterface.Property
+{get    {
+        global::System.Console.WriteLine("This is overridden method.");
+        _ = this.IInterface_Property_Introduction;
+        return this.IInterface_Property_Introduction;
+    }
+
+set    {
+        global::System.Console.WriteLine("This is overridden method.");
+this.IInterface_Property_Introduction= value;
+this.IInterface_Property_Introduction= value;
+        return;
+    }
+}
+
+global::System.Int32 IInterface_Property_Introduction
+{get    {
+        global::System.Console.WriteLine("This is introduced interface member.");
+        return default(global::System.Int32);
+    }
+
+set    {
+        global::System.Console.WriteLine("This is introduced interface member.");
+    }
+}
+
+global::System.Int32 global::Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.ExplicitMembers_Override_NotInlineable.IInterface.InterfaceMethod()
+{
+    global::System.Console.WriteLine("This is overridden method.");
+    _ = this.IInterface_InterfaceMethod_Introduction();
+    return this.IInterface_InterfaceMethod_Introduction();
+}
+
+global::System.Int32 IInterface_InterfaceMethod_Introduction()
+{
+    global::System.Console.WriteLine("This is introduced interface member.");
+    return default(global::System.Int32);
 }
 
 event global::System.EventHandler? global::Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.ExplicitMembers_Override_NotInlineable.IInterface.Event

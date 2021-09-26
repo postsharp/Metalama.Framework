@@ -3,6 +3,17 @@
     {
 
 
+public global::System.Int32 IntroducedProperty_Accessors
+{get    {
+        global::System.Console.WriteLine("Get");
+        return (global::System.Int32)42;
+    }
+
+set    {
+        global::System.Console.WriteLine(value);
+    }
+}
+
 private global::System.Int32 _introducedProperty_Auto;
 
 
@@ -12,17 +23,6 @@ return this._introducedProperty_Auto;    }
 
 set    {
 this._introducedProperty_Auto=value;    }
-}
-
-private global::System.Int32 _introducedProperty_Auto_Initializer = 42;
-
-
-public global::System.Int32 IntroducedProperty_Auto_Initializer
-{get    {
-return this._introducedProperty_Auto_Initializer;    }
-
-set    {
-this._introducedProperty_Auto_Initializer=value;    }
 }
 
 private global::System.Int32 _introducedProperty_Auto_GetOnly;
@@ -41,6 +41,17 @@ public global::System.Int32 IntroducedProperty_Auto_GetOnly_Initializer
 return this._introducedProperty_Auto_GetOnly_Initializer;    }
 }
 
+private global::System.Int32 _introducedProperty_Auto_Initializer = 42;
+
+
+public global::System.Int32 IntroducedProperty_Auto_Initializer
+{get    {
+return this._introducedProperty_Auto_Initializer;    }
+
+set    {
+this._introducedProperty_Auto_Initializer=value;    }
+}
+
 private static global::System.Int32 _introducedProperty_Auto_Static;
 
 
@@ -50,15 +61,4 @@ return global::Caravela.Framework.IntegrationTests.Aspects.Introductions.Propert
 
 set    {
 global::Caravela.Framework.IntegrationTests.Aspects.Introductions.Properties.Declarative.TargetClass._introducedProperty_Auto_Static=value;    }
-}
-
-public global::System.Int32 IntroducedProperty_Accessors
-{get    {
-        global::System.Console.WriteLine("Get");
-        return (global::System.Int32)42;
-    }
-
-set    {
-        global::System.Console.WriteLine(value);
-    }
 }    }

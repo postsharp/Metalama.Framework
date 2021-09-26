@@ -1,13 +1,13 @@
-    class Target
+class Target
     {
 
 
-public int Foo()
+public static int Bar()
 {
     return 42;
 }
 
-public static int Bar()
+public int Foo()
 {
     return 42;
 }    }

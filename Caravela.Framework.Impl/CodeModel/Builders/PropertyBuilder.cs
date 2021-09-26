@@ -69,7 +69,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                 InsertPositionRelation.Within,
                 (MemberDeclarationSyntax) ((NamedType) this.DeclaringType).Symbol.GetPrimaryDeclaration().AssertNotNull() );
 
-        public override DeclarationKind DeclarationKind => throw new NotImplementedException();
+        public override DeclarationKind DeclarationKind => DeclarationKind.Property;
 
         public IReadOnlyList<IProperty> ExplicitInterfaceImplementations { get; set; } = Array.Empty<IProperty>();
 

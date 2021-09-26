@@ -358,5 +358,17 @@ namespace Caravela.Framework.Impl.Templating
 
             return new RuntimeExpression( syntax, expressionType, syntaxGenerationContext, false );
         }
+
+        public static ExpressionSyntax SuppressNullableWarningExpression( ExpressionSyntax operand )
+        {
+            if ( TemplateExpansionContext.Current.SyntaxGenerator.IsNullAware )
+            {
+                return SyntaxFactory.PostfixUnaryExpression( SyntaxKind.SuppressNullableWarningExpression, operand );
+            }
+            else
+            {
+                return operand;
+            }
+        }
     }
 }
