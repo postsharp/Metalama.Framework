@@ -75,5 +75,7 @@ namespace Caravela.Framework.Aspects
         /// Gets the code model of the whole compilation.
         /// </summary>
         ICompilation Compilation { get; }
+        
+        IProject Project { get; }
     }
 }

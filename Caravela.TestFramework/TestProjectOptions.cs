@@ -13,8 +13,10 @@ namespace Caravela.TestFramework
     /// </summary>
     public class TestProjectOptions : DefaultPathOptions, IProjectOptions, IDisposable
     {
-        public TestProjectOptions()
+        private ImmutableDictionary<string, string> _properties;
+        public TestProjectOptions( ImmutableDictionary<string, string>? properties  = null)
         {
+            this._properties = properties = ImmutableDictionary<string, string>.Empty;
             this.BaseTestDirectory = Path.Combine( Path.GetTempPath(), "Caravela", "Tests", Guid.NewGuid().ToString() );
 
             var compileTimeProjectCacheDirectory = Path.Combine( this.BaseTestDirectory, "Cache" );
@@ -58,9 +60,19 @@ namespace Caravela.TestFramework
 
         public bool IsUserCodeTrusted => true;
 
+        public string? ProjectPath => null;
+
+
+        public string? TargetFramework => "net5.0";
+
+        public string? Configuration => "Debug";
+        
+
         public string ProjectDirectory { get; }
 
         public IProjectOptions Apply( IProjectOptions options ) => options;
+
+        public bool TryGetProperty( string name, out string? value ) => this._properties.TryGetValue( name, out value );
 
         public void Dispose()
         {

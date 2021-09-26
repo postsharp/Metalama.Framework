@@ -85,7 +85,7 @@ class A : Attribute
             using var isolatedTest = this.WithIsolatedTest();
 
             var roslynCompilation = CreateCSharpCompilation( code );
-            var compilation = CompilationModel.CreateInitialInstance( roslynCompilation );
+            var compilation = CompilationModel.CreateInitialInstance( NullProject.Instance, roslynCompilation );
 
             var compileTimeDomain = new UnloadableCompileTimeDomain();
             var loader = CompileTimeProjectLoader.Create( compileTimeDomain, isolatedTest.ServiceProvider );

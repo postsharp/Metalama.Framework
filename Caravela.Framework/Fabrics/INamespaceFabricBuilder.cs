@@ -7,15 +7,11 @@ using Caravela.Framework.Validation;
 using System;
 using System.Collections.Generic;
 
-namespace Caravela.Framework.Policies
+namespace Caravela.Framework.Fabrics
 {
-    /// <summary>
-    /// (Not implemented.)
-    /// </summary>
     [InternalImplement]
-    [Obsolete( "Not implemented." )]
     [CompileTimeOnly]
-    public interface INamespacePolicyBuilder
+    public interface INamespaceFabricBuilder
     {
         IProject Project { get; }
 
@@ -23,6 +19,7 @@ namespace Caravela.Framework.Policies
 
         INamedTypeSelection WithTypes( Func<INamespace, IEnumerable<INamedType>> typeQuery );
 
+        [Obsolete("Not implemented.")]
         void AddValidator( Action<ValidateDeclarationContext<INamespace>> validator );
 
         // TODO: Adding reference validators to namespaces is problematic

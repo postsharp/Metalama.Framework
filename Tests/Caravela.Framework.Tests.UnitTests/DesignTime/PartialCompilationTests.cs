@@ -25,7 +25,7 @@ namespace Caravela.Framework.Tests.UnitTests.DesignTime
 
             // Under bug 28733, the following line would throw
             // `AssertionFailedException: The item Class1.Nested of type NonErrorNamedTypeSymbol has been visited twice.`
-            _ = CompilationModel.CreateInitialInstance( partialCompilation );
+            _ = CompilationModel.CreateInitialInstance( NullProject.Instance, partialCompilation );
         }
 
         [Fact]
@@ -46,17 +46,17 @@ namespace Caravela.Framework.Tests.UnitTests.DesignTime
 
             // Tests for Class1.
             var syntaxTree1 = compilation.SyntaxTrees.Single( t => t.FilePath == "Class1.cs" );
-            var compilationModel1 = CompilationModel.CreateInitialInstance( compilation, syntaxTree1 );
+            var compilationModel1 = CompilationModel.CreateInitialInstance( NullProject.Instance, compilation, syntaxTree1 );
             Assert.Single( compilationModel1.DeclaredTypes.Select( t => t.Name ), "Class1" );
 
             // Tests for Class3. The Types collection must contain the base class.
             var syntaxTree3 = compilation.SyntaxTrees.Single( t => t.FilePath == "Class3.cs" );
-            var compilationModel3 = CompilationModel.CreateInitialInstance( compilation, syntaxTree3 );
+            var compilationModel3 = CompilationModel.CreateInitialInstance(NullProject.Instance, compilation, syntaxTree3 );
             Assert.Equal( new[] { "Class2", "Class3" }, compilationModel3.DeclaredTypes.Select( t => t.Name ).OrderBy( t => t ) );
 
             // Tests for Class4: the Types collection must contain the base class and the interfaces.
             var semanticModel4 = compilation.SyntaxTrees.Single( t => t.FilePath == "Class4.cs" );
-            var compilationModel4 = CompilationModel.CreateInitialInstance( compilation, semanticModel4 );
+            var compilationModel4 = CompilationModel.CreateInitialInstance( NullProject.Instance,compilation, semanticModel4 );
 
             Assert.Equal(
                 new[] { "Class2", "Class3", "Class4", "Interface1", "Interface2", "Interface3" },

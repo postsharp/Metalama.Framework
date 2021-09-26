@@ -4,10 +4,10 @@
 using Caravela.Framework.Aspects;
 using System;
 
-namespace Caravela.Framework.Policies
+namespace Caravela.Framework.Fabrics
 {
     /// <summary>
-    /// A project policy is a type that can add aspects and validators to the compilation in which they are defined. (Not implemented.)
+    /// A project policy is a type that can add aspects and validators to the compilation in which they are defined.
     /// </summary>
     /// <remarks>
     ///  Project policies can also be defined outside the project in a file named <c>CaravelaPolicy.cs</c> and located
@@ -18,8 +18,8 @@ namespace Caravela.Framework.Policies
     /// </remarks>
     [CompileTimeOnly]
     [Obsolete( "Not implemented." )]
-    public interface IProjectPolicy
+    public interface IProjectFabric
     {
-        void BuildPolicy( IProjectPolicyBuilder builder );
+        void BuildPolicy( IProjectFabricBuilder builder );
     }
 }

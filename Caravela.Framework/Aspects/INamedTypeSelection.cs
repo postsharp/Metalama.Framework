@@ -11,7 +11,6 @@ namespace Caravela.Framework.Aspects
     /// Represents a set of types. Offers the ability to add aspects to types or to select members
     /// using <see cref="WithMembers{T}"/>.
     /// </summary>
-    [Obsolete( "Not implemented." )]
     public interface INamedTypeSelection : IDeclarationSelection<INamedType>
     {
         IDeclarationSelection<T> WithMembers<T>( Func<INamedType, IEnumerable<T>> selector )

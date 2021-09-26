@@ -7,6 +7,7 @@ using Caravela.Framework.Impl.DesignTime.Refactoring;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Formatting;
 using Caravela.Framework.Impl.Templating;
+using Caravela.Framework.Tests.Integration.Runners.Linker;
 using Caravela.TestFramework;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -34,7 +35,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
 
             using var buildOptions = new TestProjectOptions();
             using var domain = new UnloadableCompileTimeDomain();
-            var compilation = CompilationModel.CreateInitialInstance( testResult.InputCompilation! );
+            var compilation = CompilationModel.CreateInitialInstance(NullProject.Instance, testResult.InputCompilation! );
 
             using var designTimePipeline = new DesignTimeAspectPipeline( buildOptions, domain, true );
 

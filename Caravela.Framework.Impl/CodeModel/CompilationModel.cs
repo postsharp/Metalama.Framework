@@ -24,16 +24,17 @@ namespace Caravela.Framework.Impl.CodeModel
     {
         public PartialCompilation PartialCompilation { get; }
 
-        public static CompilationModel CreateInitialInstance( PartialCompilation compilation ) => new( compilation );
+        public static CompilationModel CreateInitialInstance( IProject project, PartialCompilation compilation ) => new( project, compilation );
 
-        public static CompilationModel CreateInitialInstance( Compilation compilation, ImmutableArray<ResourceDescription> resources = default )
-            => new( PartialCompilation.CreateComplete( compilation, resources ) );
+        public static CompilationModel CreateInitialInstance( IProject project, Compilation compilation, ImmutableArray<ResourceDescription> resources = default )
+            => new( project, PartialCompilation.CreateComplete( compilation, resources ) );
 
         public static CompilationModel CreateInitialInstance(
+            IProject project, 
             Compilation compilation,
             SyntaxTree syntaxTree,
             ImmutableArray<ResourceDescription> resources = default )
-            => new( PartialCompilation.CreatePartial( compilation, syntaxTree, resources ) );
+            => new( project, PartialCompilation.CreatePartial( compilation, syntaxTree, resources ) );
 
         internal CompilationModel WithTransformations( IReadOnlyList<IObservableTransformation> introducedDeclarations )
         {
@@ -66,9 +67,10 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public DeclarationFactory Factory { get; }
 
-        private CompilationModel( PartialCompilation partialCompilation )
+        private CompilationModel( IProject project, PartialCompilation partialCompilation )
         {
             this.PartialCompilation = partialCompilation;
+            this.Project = project;
             this.ReflectionMapper = ReflectionMapper.GetInstance( this.RoslynCompilation );
             this.InvariantComparer = new DeclarationEqualityComparer( this.ReflectionMapper, this.RoslynCompilation );
 
@@ -95,7 +97,7 @@ namespace Caravela.Framework.Impl.CodeModel
         /// </summary>
         /// <param name="prototype"></param>
         /// <param name="observableTransformations"></param>
-        private CompilationModel( CompilationModel prototype, IReadOnlyList<IObservableTransformation> observableTransformations ) : this( prototype )
+        private CompilationModel( CompilationModel prototype, IReadOnlyList<IObservableTransformation> observableTransformations) : this( prototype )
         {
             this._transformations = prototype._transformations.AddRange(
                 observableTransformations,
@@ -123,6 +125,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         private CompilationModel( CompilationModel prototype )
         {
+            this.Project = prototype.Project;
             this.Revision = prototype.Revision + 1;
 
             this.AspectLayerId = prototype.AspectLayerId;
@@ -136,7 +139,7 @@ namespace Caravela.Framework.Impl.CodeModel
             this._aspects = prototype._aspects;
         }
 
-        private CompilationModel( CompilationModel prototype, AspectLayerId aspectLayerId ) : this( prototype )
+        private CompilationModel( CompilationModel prototype, AspectLayerId aspectLayerId) : this( prototype )
         {
             this.AspectLayerId = aspectLayerId;
         }
@@ -147,6 +150,12 @@ namespace Caravela.Framework.Impl.CodeModel
         }
 
         public int Revision { get; }
+
+        public IProject Project { get; }
+        
+
+        public string AssemblyName => this.RoslynCompilation.AssemblyName ?? "";
+        
 
         [Memo]
         public INamedTypeList DeclaredTypes

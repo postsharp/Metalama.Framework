@@ -5,6 +5,7 @@ using Microsoft.CodeAnalysis.Diagnostics;
 using System;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 
 namespace Caravela.Framework.Impl.Options
 {
@@ -50,6 +51,19 @@ namespace Caravela.Framework.Impl.Options
         public bool FormatCompileTimeCode => this.GetBooleanOption( "CaravelaFormatCompileTimeCode" );
 
         public bool IsUserCodeTrusted => this.GetBooleanOption( "CaravelaUserCodeTrusted", true );
+
+        public string? ProjectPath => this.GetStringOption( "MSBuildProjectFullPath" );
+
+        public string? TargetFramework => this.GetStringOption( "Configuration" );
+
+        public string? Configuration => this.GetStringOption( "TargetFramework" );
+
+        public bool TryGetProperty( string name, out string? value )
+        {
+            value = this.GetStringOption( name );
+
+            return value != null;
+        }
 
         private bool GetBooleanOption( string name, bool defaultValue = false )
         {

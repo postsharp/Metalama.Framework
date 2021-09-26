@@ -5,12 +5,11 @@ using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using System;
 
-namespace Caravela.Framework.Policies
+namespace Caravela.Framework.Fabrics
 {
     /// <summary>
     /// (Not implemented.)
     /// </summary>
-    [Obsolete( "Not implemented." )]
     [CompileTimeOnly]
-    public interface ITypePolicyBuilder : IAspectBuilder<INamedType> { }
+    public interface ITypeFabricBuilder : IAspectBuilder<INamedType> { }
 }

@@ -5,13 +5,11 @@ using Caravela.Framework.Aspects;
 using Caravela.Framework.Validation;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Caravela.Framework.Code
 {
-    /// <summary>
-    /// Not implemented.
-    /// </summary>
-    [Obsolete( "Not implemented." )]
     [InternalImplement]
     [CompileTimeOnly]
     public interface IProject
@@ -21,28 +19,26 @@ namespace Caravela.Framework.Code
         /// </summary>
         string Path { get; }
 
-        string AssemblyName { get; }
-
         /// <summary>
         /// Gets the list of defined symbols like <c>DEBUG</c>, <c>TRACE</c> (also named constants).
         /// </summary>
-        string DefinedSymbols { get; }
+        ImmutableHashSet<string> DefinedSymbols { get; }
 
         /// <summary>
         /// Gets the name of the build configuration, for instance <c>Debug</c> or <c>Release</c>.
         /// </summary>
-        string Configuration { get; }
+        string? Configuration { get; }
 
         /// <summary>
         /// Gets the identifier of the target framework, for instance <c>netstandard2.0</c>.
         /// </summary>
-        string TargetFramework { get; }
+        string? TargetFramework { get; }
 
         /// <summary>
         /// Gets the set of properties passed from MSBuild. To expose an MSBuild property to this collection,
         /// define the <c>CompilerVisibleProperty</c> item. 
         /// </summary>
-        IReadOnlyDictionary<string, string> Properties { get; }
+        bool TryGetProperty( string name, [NotNullWhen(true)] out string? value );
 
         /// <summary>
         /// Gets or creates a project extension and creates a new instance if not has been created before.
@@ -53,5 +49,7 @@ namespace Caravela.Framework.Code
         /// <typeparam name="T">Extension type.</typeparam>
         T Extension<T>()
             where T : IProjectExtension, new();
+        
+        IServiceProvider ServiceProvider { get; }
     }
 }

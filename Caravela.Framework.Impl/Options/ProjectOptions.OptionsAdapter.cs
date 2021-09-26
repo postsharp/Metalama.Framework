@@ -3,6 +3,7 @@
 
 using Microsoft.CodeAnalysis.Diagnostics;
 using System;
+using System.Collections.Immutable;
 
 namespace Caravela.Framework.Impl.Options
 {
@@ -26,6 +27,7 @@ namespace Caravela.Framework.Impl.Options
             }
 
             public bool TryGetValue( string name, out string? value ) => this._options.TryGetValue( name, out value );
+
         }
 
         public IProjectOptions Apply( IProjectOptions options ) => throw new NotSupportedException();

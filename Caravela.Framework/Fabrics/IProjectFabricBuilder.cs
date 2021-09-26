@@ -7,15 +7,14 @@ using Caravela.Framework.Validation;
 using System;
 using System.Collections.Generic;
 
-namespace Caravela.Framework.Policies
+namespace Caravela.Framework.Fabrics
 {
     /// <summary>
     /// (Not implemented.)
     /// </summary>
     [InternalImplement]
-    [Obsolete( "Not implemented." )]
     [CompileTimeOnly]
-    public interface IProjectPolicyBuilder
+    public interface IProjectFabricBuilder
     {
         // The builder intentionally does not give write access to project properties. All configuration must use IProjectExtension.
 
@@ -29,6 +28,7 @@ namespace Caravela.Framework.Policies
         /// Adds a validator, which gets executed after all aspects have been added to the compilation.
         /// </summary>
         /// <param name="validator"></param>
+        [Obsolete("Not implemented.")]
         void AddValidator( Action<ValidateDeclarationContext<ICompilation>> validator );
 
         /// <summary>
@@ -38,6 +38,7 @@ namespace Caravela.Framework.Policies
         /// <typeparam name="TTarget">The type of the target of the annotation.</typeparam>
         /// <typeparam name="TAspect">The type of the aspect.</typeparam>
         /// <typeparam name="TAnnotation">The type of the annotation.</typeparam>
+        [Obsolete("Not implemented.")]
         void AddAnnotationRule<TTarget, TAspect, TAnnotation>( Func<TTarget, TAnnotation?> getAnnotation )
             where TAnnotation : IAnnotation<TTarget, TAspect>
             where TAspect : IAspect

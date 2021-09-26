@@ -41,7 +41,9 @@ namespace Caravela.Framework.Impl.Pipeline
             CancellationToken cancellationToken,
             [NotNullWhen( true )] out PipelineStageResult? result )
         {
-            var compilation = CompilationModel.CreateInitialInstance( input.PartialCompilation );
+
+            var projectModel = new ProjectModel( input.PartialCompilation.Compilation, this.ServiceProvider );
+            var compilation = CompilationModel.CreateInitialInstance( projectModel, input.PartialCompilation );
 
             this.ServiceProvider.GetOptionalService<ICompilationModelObserver>()?.OnInitialCompilationModelCreated( compilation );
 

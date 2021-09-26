@@ -14,6 +14,10 @@ namespace Caravela.Framework.Code
     [CompileTimeOnly]
     public interface ICompilation : IAssembly
     {
+        IProject Project { get; }
+        
+        string AssemblyName { get; }
+        
         /// <summary>
         /// Gets the list of types declared in the current compilation, in all namespaces, but not the nested types.
         /// </summary>
