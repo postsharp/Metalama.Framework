@@ -249,7 +249,9 @@ namespace Caravela.Framework.Impl.CompileTime
             
             private void CheckNullableContext( MemberDeclarationSyntax member, SyntaxToken name )
             {
-                if ( this.RunTimeCompilation.GetSemanticModel( member.SyntaxTree ).GetNullableContext( member.SpanStart ) != NullableContext.Enabled )
+                var nullableContext = this.RunTimeCompilation.GetSemanticModel( member.SyntaxTree ).GetNullableContext( member.SpanStart );
+
+                if ( (nullableContext & NullableContext.Enabled) != NullableContext.Enabled )
                 {
                     this.Success = false;
 

@@ -5,7 +5,7 @@ internal class TargetCode
 
 private global::System.String? Introduced(global::System.String? a)
 {
-    return (global::System.String? )a?.ToString();
+    return (global::System.String? )a!.ToString();
 }}
 
 #nullable disable
@@ -15,6 +15,6 @@ private global::System.String? Introduced(global::System.String? a)
 
 private global::System.String Introduced(global::System.String a)
 {
-    return (global::System.String)a?.ToString();
+    return (global::System.String)a.ToString();
 }}
     }
