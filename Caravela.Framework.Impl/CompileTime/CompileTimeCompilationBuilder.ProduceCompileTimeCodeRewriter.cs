@@ -39,7 +39,7 @@ namespace Caravela.Framework.Impl.CompileTime
             private readonly TemplateCompiler _templateCompiler;
             private readonly CancellationToken _cancellationToken;
             private readonly TypeSyntax _compileTimeType;
-            private SyntaxGenerationContext _syntaxGenerationContext;
+            private readonly SyntaxGenerationContext _syntaxGenerationContext;
             private Context _currentContext;
             private HashSet<string>? _currentTypeTemplateNames;
             private string? _currentTypeName;

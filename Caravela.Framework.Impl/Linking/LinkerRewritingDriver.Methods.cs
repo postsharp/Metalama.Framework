@@ -39,13 +39,13 @@ namespace Caravela.Framework.Impl.Linking
                 if ( this._analysisRegistry.IsReachable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Default ) )
                      && !this._analysisRegistry.IsInlineable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Default ), out _ ) )
                 {
-                    members.Add( this.GetOriginalImplMethod( methodDeclaration, symbol, generationContext ) );
+                    members.Add( GetOriginalImplMethod( methodDeclaration, symbol, generationContext ) );
                 }
 
                 if ( this._analysisRegistry.IsReachable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Base ) )
                      && !this._analysisRegistry.IsInlineable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Base ), out _ ) )
                 {
-                    members.Add( this.GetEmptyImplMethod( methodDeclaration, symbol, generationContext ) );
+                    members.Add( GetEmptyImplMethod( methodDeclaration, symbol, generationContext ) );
                 }
 
                 return members;
@@ -91,28 +91,32 @@ namespace Caravela.Framework.Impl.Linking
             }
         }
 
-        private MemberDeclarationSyntax GetOriginalImplMethod( MethodDeclarationSyntax method, IMethodSymbol symbol, SyntaxGenerationContext generationContext )
-        {
-            return this.GetSpecialImplMethod(
+        private static MemberDeclarationSyntax GetOriginalImplMethod(
+            MethodDeclarationSyntax method,
+            IMethodSymbol symbol,
+            SyntaxGenerationContext generationContext )
+            => GetSpecialImplMethod(
                 method,
                 method.Body.AddSourceCodeAnnotation(),
                 method.ExpressionBody.AddSourceCodeAnnotation(),
                 symbol,
                 GetOriginalImplMemberName( symbol ),
                 generationContext );
-        }
 
-        private MemberDeclarationSyntax GetEmptyImplMethod( MethodDeclarationSyntax method, IMethodSymbol symbol, SyntaxGenerationContext generationContext )
+        private static MemberDeclarationSyntax GetEmptyImplMethod(
+            MethodDeclarationSyntax method,
+            IMethodSymbol symbol,
+            SyntaxGenerationContext generationContext )
         {
             var emptyBody =
                 symbol.ReturnsVoid
                     ? Block()
                     : Block( ReturnStatement( DefaultExpression( method.ReturnType ) ) ).NormalizeWhitespace();
 
-            return this.GetSpecialImplMethod( method, emptyBody, null, symbol, GetEmptyImplMemberName( symbol ), generationContext );
+            return GetSpecialImplMethod( method, emptyBody, null, symbol, GetEmptyImplMemberName( symbol ), generationContext );
         }
 
-        private MemberDeclarationSyntax GetSpecialImplMethod(
+        private static MemberDeclarationSyntax GetSpecialImplMethod(
             MethodDeclarationSyntax method,
             BlockSyntax? body,
             ArrowExpressionClauseSyntax? expressionBody,
