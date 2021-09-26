@@ -20,7 +20,7 @@ namespace Caravela.Framework.Impl.Transformations
     internal static class ProceedHelper
     {
         public static UserExpression CreateProceedDynamicExpression(
-            in SyntaxGenerationContext generationContext,
+            SyntaxGenerationContext generationContext,
             ExpressionSyntax invocationExpression,
             Template<IMethod> template,
             IMethod overriddenMethod )

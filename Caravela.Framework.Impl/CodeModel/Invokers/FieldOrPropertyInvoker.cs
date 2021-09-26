@@ -27,7 +27,7 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
 
         protected virtual void AssertNoArgument() { }
 
-        private ExpressionSyntax CreatePropertyExpression( RuntimeExpression instance, AspectReferenceTargetKind targetKind )
+        private ExpressionSyntax CreatePropertyExpression( RuntimeExpression instance, AspectReferenceTargetKind targetKind, SyntaxGenerationContext generationContext )
         {
             if ( this.Member.DeclaringType.IsOpenGeneric )
             {
@@ -37,7 +37,7 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
 
             this.AssertNoArgument();
 
-            var receiver = this.Member.GetReceiverSyntax( instance );
+            var receiver = this.Member.GetReceiverSyntax( instance, generationContext );
             var name = IdentifierName( this.Member.Name );
 
             if ( this._invokerOperator == InvokerOperator.Default )
@@ -59,7 +59,8 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
             return new UserExpression(
                 this.CreatePropertyExpression(
                     RuntimeExpression.FromValue( instance, this.Compilation, generationContext ),
-                    AspectReferenceTargetKind.PropertyGetAccessor ),
+                    AspectReferenceTargetKind.PropertyGetAccessor,
+                    generationContext),
                 this._invokerOperator == InvokerOperator.Default ? this.Member.Type : this.Member.Type.ConstructNullable(),
                 generationContext,
                 isReferenceable: this.Member is Field,
@@ -77,7 +78,8 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
 
             var propertyAccess = this.CreatePropertyExpression(
                 RuntimeExpression.FromValue( instance, this.Compilation, generationContext ),
-                AspectReferenceTargetKind.PropertySetAccessor );
+                AspectReferenceTargetKind.PropertySetAccessor,
+                generationContext);
 
             var expression = AssignmentExpression(
                 SyntaxKind.SimpleAssignmentExpression,

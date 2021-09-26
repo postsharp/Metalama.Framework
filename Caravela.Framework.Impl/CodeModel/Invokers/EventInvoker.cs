@@ -29,7 +29,7 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
 
         protected virtual void AssertNoArgument() { }
 
-        private ExpressionSyntax CreateEventExpression( RuntimeExpression instance, AspectReferenceTargetKind targetKind )
+        private ExpressionSyntax CreateEventExpression( RuntimeExpression instance, AspectReferenceTargetKind targetKind, SyntaxGenerationContext generationContext )
         {
             if ( this._event.DeclaringType.IsOpenGeneric )
             {
@@ -42,7 +42,7 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
             return
                 MemberAccessExpression(
                         SyntaxKind.SimpleMemberAccessExpression,
-                        this._event.GetReceiverSyntax( instance ),
+                        this._event.GetReceiverSyntax( instance, generationContext ),
                         IdentifierName( this._event.Name ) )
                     .WithAspectReferenceAnnotation( this.AspectReference.WithTargetKind( targetKind ) );
         }
@@ -53,7 +53,8 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
 
             var eventAccess = this.CreateEventExpression(
                 RuntimeExpression.FromValue( instance, this.Compilation, generationContext ),
-                AspectReferenceTargetKind.EventAddAccessor );
+                AspectReferenceTargetKind.EventAddAccessor,
+                generationContext);
 
             var expression = AssignmentExpression(
                 SyntaxKind.AddAssignmentExpression,
@@ -69,14 +70,15 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
 
             var eventAccess = this.CreateEventExpression(
                 RuntimeExpression.FromValue( instance, this.Compilation, generationContext ),
-                AspectReferenceTargetKind.EventRemoveAccessor );
+                AspectReferenceTargetKind.EventRemoveAccessor,
+                generationContext);
 
             var expression = AssignmentExpression(
                 SyntaxKind.SubtractAssignmentExpression,
                 eventAccess,
                 RuntimeExpression.GetSyntaxFromValue( value, this.Compilation, generationContext ) );
 
-            return new UserExpression( expression, this._event.Type, in generationContext );
+            return new UserExpression( expression, this._event.Type, generationContext );
         }
 
         public object? Raise( object? instance, params object?[] args )
@@ -85,7 +87,8 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
 
             var eventAccess = this.CreateEventExpression(
                 RuntimeExpression.FromValue( instance, this.Compilation, generationContext ),
-                AspectReferenceTargetKind.EventRaiseAccessor );
+                AspectReferenceTargetKind.EventRaiseAccessor,
+                generationContext);
 
             var arguments = this._event.GetArguments(
                 this._event.Signature.Parameters,

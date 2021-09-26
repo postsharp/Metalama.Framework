@@ -27,6 +27,8 @@ namespace Caravela.Framework.Impl.Linking
     {
         private IReadOnlyList<MemberDeclarationSyntax> RewriteProperty( PropertyDeclarationSyntax propertyDeclaration, IPropertySymbol symbol )
         {
+            var generationContext = SyntaxGenerationContext.Create( this.IntermediateCompilation, propertyDeclaration );
+            
             if ( this._introductionRegistry.IsOverrideTarget( symbol ) )
             {
                 var members = new List<MemberDeclarationSyntax>();
@@ -51,7 +53,7 @@ namespace Caravela.Framework.Impl.Linking
                 if ( this._analysisRegistry.IsReachable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Default ) )
                      && !this._analysisRegistry.IsInlineable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Default ), out _ ) )
                 {
-                    members.Add( GetOriginalImplProperty( propertyDeclaration, symbol ) );
+                    members.Add( GetOriginalImplProperty( propertyDeclaration, symbol, generationContext ) );
                 }
 
                 if ( this._analysisRegistry.IsReachable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Base ) )
@@ -93,7 +95,7 @@ namespace Caravela.Framework.Impl.Linking
                                     getAccessorDeclaration.Modifiers,
                                     this.GetLinkedBody(
                                         symbol.GetMethod.ToSemantic( semanticKind ),
-                                        InliningContext.Create( this, symbol.GetMethod ) ) ) );
+                                        InliningContext.Create( this, symbol.GetMethod, generationContext ) ) ) );
 
                             break;
 
@@ -105,7 +107,7 @@ namespace Caravela.Framework.Impl.Linking
                                     TokenList(),
                                     this.GetLinkedBody(
                                         symbol.GetMethod.ToSemantic( semanticKind ),
-                                        InliningContext.Create( this, symbol.GetMethod ) ) ) );
+                                        InliningContext.Create( this, symbol.GetMethod, generationContext ) ) ) );
 
                             break;
                     }
@@ -122,7 +124,7 @@ namespace Caravela.Framework.Impl.Linking
                             setDeclaration.Modifiers,
                             this.GetLinkedBody(
                                 symbol.SetMethod.ToSemantic( semanticKind ),
-                                InliningContext.Create( this, symbol.SetMethod ) ) ) );
+                                InliningContext.Create( this, symbol.SetMethod, generationContext ) ) ) );
                 }
 
                 return
@@ -154,20 +156,20 @@ namespace Caravela.Framework.Impl.Linking
                 .WithTrailingTrivia( LineFeed )
                 .AddGeneratedCodeAnnotation();
 
-        private static BlockSyntax GetImplicitGetterBody( IMethodSymbol symbol )
+        private static BlockSyntax GetImplicitGetterBody( IMethodSymbol symbol, SyntaxGenerationContext generationContext )
             => Block(
                     ReturnStatement(
                         Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( ElasticSpace ),
                         MemberAccessExpression(
                             SyntaxKind.SimpleMemberAccessExpression,
                             symbol.IsStatic
-                                ? OurSyntaxGenerator.Default.Type( symbol.ContainingType )
+                                ? generationContext.SyntaxGenerator.Type( symbol.ContainingType )
                                 : ThisExpression(),
                             IdentifierName( GetBackingFieldName( (IPropertySymbol) symbol.AssociatedSymbol.AssertNotNull() ) ) ),
                         Token( SyntaxKind.SemicolonToken ) ) )
                 .AddGeneratedCodeAnnotation();
 
-        private static BlockSyntax GetImplicitSetterBody( IMethodSymbol symbol )
+        private static BlockSyntax GetImplicitSetterBody( IMethodSymbol symbol, SyntaxGenerationContext generationContext )
             => Block(
                     ExpressionStatement(
                         AssignmentExpression(
@@ -175,7 +177,7 @@ namespace Caravela.Framework.Impl.Linking
                             MemberAccessExpression(
                                 SyntaxKind.SimpleMemberAccessExpression,
                                 symbol.IsStatic
-                                    ? OurSyntaxGenerator.Default.Type( symbol.ContainingType )
+                                    ? generationContext.SyntaxGenerator.Type( symbol.ContainingType )
                                     : ThisExpression(),
                                 IdentifierName( GetBackingFieldName( (IPropertySymbol) symbol.AssociatedSymbol.AssertNotNull() ) ) ),
                             IdentifierName( "value" ) ) ) )
@@ -186,7 +188,7 @@ namespace Caravela.Framework.Impl.Linking
                && propertyDeclaration.AccessorList?.Accessors.All( x => x.Body == null && x.ExpressionBody == null ) == true
                && propertyDeclaration.Modifiers.All( x => x.Kind() != SyntaxKind.AbstractKeyword );
 
-        private static MemberDeclarationSyntax GetOriginalImplProperty( PropertyDeclarationSyntax property, IPropertySymbol symbol )
+        private static MemberDeclarationSyntax GetOriginalImplProperty( PropertyDeclarationSyntax property, IPropertySymbol symbol, SyntaxGenerationContext generationContext )
         {
             var accessorList =
                 IsAutoPropertyDeclaration( property )
@@ -197,12 +199,12 @@ namespace Caravela.Framework.Impl.Linking
                                         symbol.GetMethod != null
                                             ? AccessorDeclaration(
                                                 SyntaxKind.GetAccessorDeclaration,
-                                                GetImplicitGetterBody( symbol.GetMethod ) )
+                                                GetImplicitGetterBody( symbol.GetMethod, generationContext ) )
                                             : null,
                                         symbol.SetMethod != null
                                             ? AccessorDeclaration(
                                                 SyntaxKind.SetAccessorDeclaration,
-                                                GetImplicitSetterBody( symbol.SetMethod ) )
+                                                GetImplicitSetterBody( symbol.SetMethod, generationContext ) )
                                             : null
                                     }.Where( a => a != null )
                                     .AssertNoneNull() ) )

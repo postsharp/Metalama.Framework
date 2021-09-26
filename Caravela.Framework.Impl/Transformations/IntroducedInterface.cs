@@ -45,8 +45,15 @@ namespace Caravela.Framework.Impl.Transformations
         {
             if ( !this.TargetType.ImplementedInterfaces.Contains( this.InterfaceType ) )
             {
+                var targetSyntax = this.TargetType.GetSymbol().GetPrimarySyntaxReference().AssertNotNull();
+
+                var generationContext = SyntaxGenerationContext.Create(
+                    this.TargetType.GetCompilationModel().RoslynCompilation,
+                    targetSyntax.SyntaxTree,
+                    targetSyntax.Span.Start );
+                
                 // The type already implements the interface itself.
-                return new[] { (BaseTypeSyntax) SimpleBaseType( OurSyntaxGenerator.Default.Type( this.InterfaceType.GetSymbol() ) ) };
+                return new[] { (BaseTypeSyntax) SimpleBaseType( generationContext.SyntaxGenerator.Type( this.InterfaceType.GetSymbol() ) ) };
             }
             else
             {

@@ -206,12 +206,12 @@ namespace Caravela.Framework.Impl.CodeModel
             return arguments.ToArray();
         }
 
-        internal static ExpressionSyntax GetReceiverSyntax<T>( this T declaration, RuntimeExpression instance )
+        internal static ExpressionSyntax GetReceiverSyntax<T>( this T declaration, RuntimeExpression instance, SyntaxGenerationContext generationContext )
             where T : IMember
         {
             if ( declaration.IsStatic )
             {
-                return OurSyntaxGenerator.Default.Type( declaration.DeclaringType.GetSymbol() );
+                return generationContext.SyntaxGenerator.Type( declaration.DeclaringType.GetSymbol() );
             }
 
             if ( instance.Syntax.Kind() == SyntaxKind.NullLiteralExpression )

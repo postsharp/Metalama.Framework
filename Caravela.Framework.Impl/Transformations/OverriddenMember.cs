@@ -40,7 +40,7 @@ namespace Caravela.Framework.Impl.Transformations
 
         public abstract IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context );
 
-        protected ExpressionSyntax CreateMemberAccessExpression( AspectReferenceTargetKind referenceTargetKind )
+        protected ExpressionSyntax CreateMemberAccessExpression( AspectReferenceTargetKind referenceTargetKind, SyntaxGenerationContext generationContext )
         {
             ExpressionSyntax expression;
 
@@ -62,7 +62,7 @@ namespace Caravela.Framework.Impl.Transformations
                         SyntaxKind.SimpleMemberAccessExpression,
                         ParenthesizedExpression(
                             CastExpression(
-                                OurSyntaxGenerator.Default.Type( implementedInterfaceMember.DeclaringType.GetSymbol() ),
+                                generationContext.SyntaxGenerator.Type( implementedInterfaceMember.DeclaringType.GetSymbol() ),
                                 ThisExpression() ) ),
                         memberName );
                 }
@@ -79,7 +79,7 @@ namespace Caravela.Framework.Impl.Transformations
                 expression =
                     MemberAccessExpression(
                         SyntaxKind.SimpleMemberAccessExpression,
-                        OurSyntaxGenerator.Default.Type( this.OverriddenDeclaration.DeclaringType.GetSymbol() ),
+                        generationContext.SyntaxGenerator.Type( this.OverriddenDeclaration.DeclaringType.GetSymbol() ),
                         memberName );
             }
 

@@ -4,6 +4,7 @@
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.Aspects;
+using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Serialization;
 using Caravela.Framework.Impl.ServiceProvider;
 using Caravela.Framework.Impl.Templating;
@@ -75,7 +76,7 @@ namespace Caravela.Framework.Impl.Transformations
                     }
                     else
                     {
-                        getAccessorBody = this.CreateIdentityAccessorBody( SyntaxKind.GetAccessorDeclaration );
+                        getAccessorBody = this.CreateIdentityAccessorBody( SyntaxKind.GetAccessorDeclaration, context.SyntaxGenerationContext );
                     }
                 }
                 else
@@ -97,7 +98,7 @@ namespace Caravela.Framework.Impl.Transformations
                     }
                     else
                     {
-                        setAccessorBody = this.CreateIdentityAccessorBody( SyntaxKind.SetAccessorDeclaration );
+                        setAccessorBody = this.CreateIdentityAccessorBody( SyntaxKind.SetAccessorDeclaration, context.SyntaxGenerationContext );
                     }
                 }
                 else
@@ -165,11 +166,11 @@ namespace Caravela.Framework.Impl.Transformations
                     {
                         MethodKind.PropertyGet => ProceedHelper.CreateProceedDynamicExpression(
                             context.SyntaxGenerationContext,
-                            this.CreateProceedGetExpression(),
+                            this.CreateProceedGetExpression(context.SyntaxGenerationContext),
                             this.GetTemplate,
                             this.OverriddenDeclaration.GetMethod.AssertNotNull() ),
                         MethodKind.PropertySet => new UserExpression(
-                            this.CreateProceedSetExpression(),
+                            this.CreateProceedSetExpression(context.SyntaxGenerationContext),
                             this.OverriddenDeclaration.Compilation.TypeFactory.GetSpecialType( SpecialType.Void ),
                             context.SyntaxGenerationContext ),
                         _ => throw new AssertionFailedException()
@@ -207,28 +208,28 @@ namespace Caravela.Framework.Impl.Transformations
         /// </summary>
         /// <param name="accessorDeclarationKind"></param>
         /// <returns></returns>
-        private BlockSyntax? CreateIdentityAccessorBody( SyntaxKind accessorDeclarationKind )
+        private BlockSyntax? CreateIdentityAccessorBody( SyntaxKind accessorDeclarationKind, SyntaxGenerationContext generationContext )
         {
             switch ( accessorDeclarationKind )
             {
                 case SyntaxKind.GetAccessorDeclaration:
-                    return Block( ReturnStatement( this.CreateProceedGetExpression() ) );
+                    return Block( ReturnStatement( this.CreateProceedGetExpression(generationContext) ) );
 
                 case SyntaxKind.SetAccessorDeclaration:
                 case SyntaxKind.InitAccessorDeclaration:
-                    return Block( ExpressionStatement( this.CreateProceedSetExpression() ) );
+                    return Block( ExpressionStatement( this.CreateProceedSetExpression(generationContext) ) );
 
                 default:
                     throw new AssertionFailedException();
             }
         }
 
-        private ExpressionSyntax CreateProceedGetExpression() => this.CreateMemberAccessExpression( AspectReferenceTargetKind.PropertyGetAccessor );
+        private ExpressionSyntax CreateProceedGetExpression(SyntaxGenerationContext generationContext) => this.CreateMemberAccessExpression( AspectReferenceTargetKind.PropertyGetAccessor, generationContext );
 
-        private ExpressionSyntax CreateProceedSetExpression()
+        private ExpressionSyntax CreateProceedSetExpression(SyntaxGenerationContext generationContext)
             => AssignmentExpression(
                 SyntaxKind.SimpleAssignmentExpression,
-                this.CreateMemberAccessExpression( AspectReferenceTargetKind.PropertySetAccessor ),
+                this.CreateMemberAccessExpression( AspectReferenceTargetKind.PropertySetAccessor, generationContext ),
                 IdentifierName( "value" ) );
     }
 }

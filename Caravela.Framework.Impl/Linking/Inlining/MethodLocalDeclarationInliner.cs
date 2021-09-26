@@ -100,7 +100,7 @@ namespace Caravela.Framework.Impl.Linking.Inlining
             newNode = Block(
                     LocalDeclarationStatement(
                             VariableDeclaration(
-                                OurSyntaxGenerator.Default.Type( targetSymbol.ReturnType ),
+                                context.SyntaxGenerationContext.SyntaxGenerator.Type( targetSymbol.ReturnType ),
                                 SingletonSeparatedList( VariableDeclarator( variableDeclarator.Identifier ) ) ) )
                         .NormalizeWhitespace()
                         .WithTrailingTrivia( ElasticLineFeed ),

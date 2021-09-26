@@ -9,6 +9,7 @@ using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.ReflectionMocks;
 using Caravela.Framework.Impl.Templating;
+using Caravela.Framework.Impl.Templating.MetaModel;
 using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -39,6 +40,7 @@ namespace Caravela.Framework.Impl.CompileTime
             private readonly TemplateCompiler _templateCompiler;
             private readonly CancellationToken _cancellationToken;
             private readonly TypeSyntax _compileTimeType;
+            private SyntaxGenerationContext _syntaxGenerationContext;
             private Context _currentContext;
             private HashSet<string>? _currentTypeTemplateNames;
             private string? _currentTypeName;
@@ -62,8 +64,9 @@ namespace Caravela.Framework.Impl.CompileTime
                 this._cancellationToken = cancellationToken;
                 this._currentContext = new Context( TemplatingScope.Both, this );
 
+                this._syntaxGenerationContext = SyntaxGenerationContext.CreateDefault( compileTimeCompilation );
                 this._compileTimeType =
-                    OurSyntaxGenerator.Default.Type( ReflectionMapper.GetInstance( this._compileTimeCompilation ).GetTypeSymbol( typeof(CompileTimeType) ) );
+                    this._syntaxGenerationContext.SyntaxGenerator.Type( this._syntaxGenerationContext.ReflectionMapper.GetTypeSymbol( typeof(CompileTimeType) ) );
             }
 
             // TODO: assembly and module-level attributes?
@@ -170,7 +173,7 @@ namespace Caravela.Framework.Impl.CompileTime
                     }
 
                     // Add non-implemented members of IAspect and IEligible.
-                    var syntaxGenerator = OurSyntaxGenerator.Default;
+                    var syntaxGenerator = this._syntaxGenerationContext.SyntaxGenerator;
                     var allImplementedInterfaces = symbol.SelectManyRecursive( i => i.Interfaces, throwOnDuplicate: false );
 
                     foreach ( var implementedInterface in allImplementedInterfaces )

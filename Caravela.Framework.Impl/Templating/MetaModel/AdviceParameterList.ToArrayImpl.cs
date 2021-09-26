@@ -25,7 +25,8 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
             public RuntimeExpression ToRunTimeExpression()
             {
-                var syntaxGenerator = OurSyntaxGenerator.Default;
+                var syntaxGenerationContext = TemplateExpansionContext.CurrentSyntaxGenerationContext;
+                var syntaxGenerator = syntaxGenerationContext.SyntaxGenerator;
 
                 var array = (ExpressionSyntax) syntaxGenerator.ArrayCreationExpression(
                     syntaxGenerator.Type( SpecialType.System_Object ),
@@ -38,7 +39,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
                 return new RuntimeExpression(
                     array,
                     this._parent.Compilation.Factory.GetTypeByReflectionType( typeof(object[]) ),
-                    TemplateExpansionContext.CurrentSyntaxGenerationContext );
+                    syntaxGenerationContext );
             }
 
             public IType Type => this._parent.Compilation.Factory.GetTypeByReflectionType( typeof(object[]) );

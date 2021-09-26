@@ -6,7 +6,7 @@ using Microsoft.CodeAnalysis.CSharp;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    internal readonly struct SyntaxGenerationContext
+    internal class SyntaxGenerationContext
     {
         public Compilation Compilation { get; }
 
@@ -27,6 +27,8 @@ namespace Caravela.Framework.Impl.CodeModel
                     ? OurSyntaxGenerator.Default
                     : OurSyntaxGenerator.NullOblivious );
 
+        public static SyntaxGenerationContext Create( Compilation compilation, SyntaxNode node ) => Create( compilation, node.SyntaxTree, node.SpanStart );
+        
         public static SyntaxGenerationContext Create( Compilation compilation, SyntaxTree syntaxTree, int position )
         {
             var semanticModel = compilation.GetSemanticModel( syntaxTree );

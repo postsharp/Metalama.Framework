@@ -29,7 +29,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
             var items = this._arrayBuilder.Items.Select( i => RuntimeExpression.FromValue( i, this.Type.Compilation, syntaxGenerationContext ).Syntax )
                 .ToArray();
 
-            var generator = OurSyntaxGenerator.Default;
+            var generator = syntaxGenerationContext.SyntaxGenerator;
 
             var syntax = generator.ArrayCreationExpression(
                 generator.Type( this._itemType.GetSymbol() ),

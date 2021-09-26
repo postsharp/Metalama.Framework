@@ -18,7 +18,7 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
 
         protected override void AssertNoArgument() => this.Member.CheckArguments( this.Property.Parameters, null );
 
-        private ExpressionSyntax CreateIndexerAccess( RuntimeExpression instance, RuntimeExpression[]? args )
+        private ExpressionSyntax CreateIndexerAccess( RuntimeExpression instance, RuntimeExpression[]? args, SyntaxGenerationContext generationContext )
         {
             if ( this.Member.DeclaringType.IsOpenGeneric )
             {
@@ -26,7 +26,7 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
                     $"Cannot invoke the '{this.Property.ToDisplayString()}' event because the declaring type has unbound type parameters." );
             }
 
-            var receiver = this.Member.GetReceiverSyntax( instance );
+            var receiver = this.Member.GetReceiverSyntax( instance, generationContext );
             var arguments = this.Member.GetArguments( this.Property.Parameters, args );
 
             var expression = ElementAccessExpression( receiver ).AddArgumentListArguments( arguments );
@@ -41,7 +41,8 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
             return new UserExpression(
                 this.CreateIndexerAccess(
                     RuntimeExpression.FromValue( instance, this.Compilation, syntaxGenerationContext ),
-                    RuntimeExpression.FromValue( args, this.Compilation, syntaxGenerationContext ) ),
+                    RuntimeExpression.FromValue( args, this.Compilation, syntaxGenerationContext ),
+                    syntaxGenerationContext),
                 this.Member.Type,
                 syntaxGenerationContext,
                 isReferenceable: this.Member.Writeability != Writeability.None );
@@ -53,7 +54,8 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
 
             var propertyAccess = this.CreateIndexerAccess(
                 RuntimeExpression.FromValue( instance, this.Compilation, syntaxGenerationContext ),
-                RuntimeExpression.FromValue( args, this.Compilation, syntaxGenerationContext ) );
+                RuntimeExpression.FromValue( args, this.Compilation, syntaxGenerationContext ),
+                syntaxGenerationContext);
 
             var expression = AssignmentExpression(
                 SyntaxKind.SimpleAssignmentExpression,

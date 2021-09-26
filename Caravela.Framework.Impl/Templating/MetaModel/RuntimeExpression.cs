@@ -22,7 +22,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
     {
         private const string _typeIdAnnotationName = "caravela-typeid";
 
-        private readonly SyntaxGenerationContext _generationContext;
+        internal SyntaxGenerationContext SyntaxGenerationContext { get; }
 
         /// <summary>
         /// Gets the expression type, or <c>null</c> if the expression is actually the <c>null</c> or <c>default</c> expression.
@@ -68,7 +68,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
             }
         }
 
-        internal RuntimeExpression( ExpressionSyntax syntax, ITypeSymbol? expressionType, in SyntaxGenerationContext generationContext, bool isReferenceable )
+        internal RuntimeExpression( ExpressionSyntax syntax, ITypeSymbol? expressionType, SyntaxGenerationContext generationContext, bool isReferenceable )
         {
             if ( expressionType == null )
             {
@@ -83,20 +83,20 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
             this.Syntax = syntax;
             this.ExpressionType = expressionType;
             this.IsReferenceable = isReferenceable;
-            this._generationContext = generationContext;
+            this.SyntaxGenerationContext = generationContext;
         }
 
-        internal RuntimeExpression( ExpressionSyntax syntax, IType type, in SyntaxGenerationContext generationContext, bool isReferenceable = false )
+        internal RuntimeExpression( ExpressionSyntax syntax, IType type, SyntaxGenerationContext generationContext, bool isReferenceable = false )
             : this( syntax, type.GetSymbol(), generationContext, isReferenceable ) { }
 
         // This overload must be used only in tests or when the expression type is really unknown.
         internal RuntimeExpression( ExpressionSyntax syntax, ICompilation compilation )
             : this( syntax, (ITypeSymbol) null!, SyntaxGenerationContext.CreateDefault( compilation.GetCompilationModel().RoslynCompilation ), false ) { }
 
-        internal static ExpressionSyntax GetSyntaxFromValue( object? value, ICompilation compilation, in SyntaxGenerationContext generationContext )
+        internal static ExpressionSyntax GetSyntaxFromValue( object? value, ICompilation compilation, SyntaxGenerationContext generationContext )
             => FromValue( value, compilation, generationContext ).Syntax;
 
-        internal static RuntimeExpression FromValue( object? value, ICompilation compilation, in SyntaxGenerationContext generationContext )
+        internal static RuntimeExpression FromValue( object? value, ICompilation compilation, SyntaxGenerationContext generationContext )
         {
             switch ( value )
             {
@@ -128,7 +128,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
             }
         }
 
-        internal static RuntimeExpression[]? FromValue( object?[]? array, ICompilation compilation, in SyntaxGenerationContext generationContext )
+        internal static RuntimeExpression[]? FromValue( object?[]? array, ICompilation compilation, SyntaxGenerationContext generationContext )
         {
             switch ( array )
             {
@@ -205,7 +205,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
             }
 
             // We may need a cast. We are not sure, but we cannot do more. This could be removed later in the simplification step.
-            var cast = (ExpressionSyntax) this._generationContext.SyntaxGenerator.CastExpression( targetTypeSymbol, this.Syntax );
+            var cast = (ExpressionSyntax) this.SyntaxGenerationContext.SyntaxGenerator.CastExpression( targetTypeSymbol, this.Syntax );
 
             var expression = (addsParenthesis ? SyntaxFactory.ParenthesizedExpression( cast ) : cast).WithAdditionalAnnotations( Simplifier.Annotation );
 
@@ -221,7 +221,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
             return new UserExpression(
                 this.Syntax,
                 this.ExpressionType != null ? declarationFactory.GetIType( this.ExpressionType ) : declarationFactory.GetSpecialType( SpecialType.Object ),
-                this._generationContext,
+                this.SyntaxGenerationContext,
                 isReferenceable: this.IsReferenceable,
                 isAssignable: false );
         }

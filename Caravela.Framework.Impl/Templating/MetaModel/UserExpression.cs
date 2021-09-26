@@ -17,7 +17,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
         public UserExpression(
             ExpressionSyntax expression,
             IType type,
-            in SyntaxGenerationContext generationContext,
+            SyntaxGenerationContext generationContext,
             bool isReferenceable = false,
             bool isAssignable = false )
         {

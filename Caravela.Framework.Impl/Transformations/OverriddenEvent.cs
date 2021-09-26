@@ -4,6 +4,7 @@
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.Aspects;
+using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Serialization;
 using Caravela.Framework.Impl.ServiceProvider;
 using Caravela.Framework.Impl.Templating;
@@ -79,11 +80,12 @@ namespace Caravela.Framework.Impl.Transformations
                         context,
                         addTemplateMethod,
                         this.OverriddenDeclaration.AddMethod,
+                        context.SyntaxGenerationContext,
                         out addAccessorBody );
                 }
                 else
                 {
-                    addAccessorBody = this.CreateIdentityAccessorBody( SyntaxKind.GetAccessorDeclaration );
+                    addAccessorBody = this.CreateIdentityAccessorBody( SyntaxKind.GetAccessorDeclaration, context.SyntaxGenerationContext );
                 }
 
                 BlockSyntax? removeAccessorBody = null;
@@ -94,11 +96,12 @@ namespace Caravela.Framework.Impl.Transformations
                         context,
                         removeTemplateMethod,
                         this.OverriddenDeclaration.RemoveMethod,
+                        context.SyntaxGenerationContext,
                         out removeAccessorBody );
                 }
                 else
                 {
-                    removeAccessorBody = this.CreateIdentityAccessorBody( SyntaxKind.SetAccessorDeclaration );
+                    removeAccessorBody = this.CreateIdentityAccessorBody( SyntaxKind.SetAccessorDeclaration, context.SyntaxGenerationContext );
                 }
 
                 if ( templateExpansionError )
@@ -146,6 +149,7 @@ namespace Caravela.Framework.Impl.Transformations
             in MemberIntroductionContext context,
             Template<IMethod> accessorTemplate,
             IMethod accessor,
+            SyntaxGenerationContext generationContext,
             [NotNullWhen( true )] out BlockSyntax? body )
         {
             using ( context.DiagnosticSink.WithDefaultScope( accessor ) )
@@ -153,8 +157,8 @@ namespace Caravela.Framework.Impl.Transformations
                 var proceedExpression = new UserExpression(
                     accessor.MethodKind switch
                     {
-                        MethodKind.EventAdd => this.CreateAddExpression(),
-                        MethodKind.EventRemove => this.CreateRemoveExpression(),
+                        MethodKind.EventAdd => this.CreateAddExpression(generationContext),
+                        MethodKind.EventRemove => this.CreateRemoveExpression(generationContext),
                         _ => throw new AssertionFailedException()
                     },
                     this.OverriddenDeclaration.Compilation.TypeFactory.GetSpecialType( SpecialType.Void ),
@@ -192,31 +196,31 @@ namespace Caravela.Framework.Impl.Transformations
         /// </summary>
         /// <param name="accessorDeclarationKind"></param>
         /// <returns></returns>
-        private BlockSyntax? CreateIdentityAccessorBody( SyntaxKind accessorDeclarationKind )
+        private BlockSyntax? CreateIdentityAccessorBody( SyntaxKind accessorDeclarationKind, SyntaxGenerationContext generationContext )
         {
             switch ( accessorDeclarationKind )
             {
                 case SyntaxKind.AddAccessorDeclaration:
-                    return Block( ExpressionStatement( this.CreateAddExpression() ) );
+                    return Block( ExpressionStatement( this.CreateAddExpression(generationContext) ) );
 
                 case SyntaxKind.RemoveAccessorDeclaration:
-                    return Block( ExpressionStatement( this.CreateRemoveExpression() ) );
+                    return Block( ExpressionStatement( this.CreateRemoveExpression(generationContext) ) );
 
                 default:
                     throw new AssertionFailedException();
             }
         }
 
-        private ExpressionSyntax CreateAddExpression()
+        private ExpressionSyntax CreateAddExpression(SyntaxGenerationContext generationContext)
             => AssignmentExpression(
                 SyntaxKind.AddAssignmentExpression,
-                this.CreateMemberAccessExpression( AspectReferenceTargetKind.EventAddAccessor ),
+                this.CreateMemberAccessExpression( AspectReferenceTargetKind.EventAddAccessor, generationContext ),
                 IdentifierName( "value" ) );
 
-        private ExpressionSyntax CreateRemoveExpression()
+        private ExpressionSyntax CreateRemoveExpression(SyntaxGenerationContext generationContext)
             => AssignmentExpression(
                 SyntaxKind.SubtractAssignmentExpression,
-                this.CreateMemberAccessExpression( AspectReferenceTargetKind.EventRemoveAccessor ),
+                this.CreateMemberAccessExpression( AspectReferenceTargetKind.EventRemoveAccessor, generationContext ),
                 IdentifierName( "value" ) );
     }
 }

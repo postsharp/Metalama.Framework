@@ -26,7 +26,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
             if ( expression is not DefaultExpressionSyntax )
             {
                 // We need to specify the type explicitly to preserve the typing.
-                expression = OurSyntaxGenerator.Default.CastExpression(
+                expression = syntaxGenerationContext.SyntaxGenerator.CastExpression(
                     typeSymbol.IsReferenceType ? typeSymbol.WithNullableAnnotation( NullableAnnotation.Annotated ) : typeSymbol,
                     expression );
             }

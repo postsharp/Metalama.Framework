@@ -42,7 +42,7 @@ namespace Caravela.Framework.Impl.Transformations
             {
                 var proceedExpression = ProceedHelper.CreateProceedDynamicExpression(
                     context.SyntaxGenerationContext,
-                    this.CreateInvocationExpression(),
+                    this.CreateInvocationExpression(context.SyntaxGenerationContext),
                     this.Template,
                     this.OverriddenDeclaration );
 
@@ -99,12 +99,12 @@ namespace Caravela.Framework.Impl.Transformations
 
                     if ( TypeExtensions.Equals( this.OverriddenDeclaration.ReturnType, SpecialType.Void ) )
                     {
-                        returnType = OurSyntaxGenerator.Default.Type(
+                        returnType = context.SyntaxGenerator.Type(
                             this.OverriddenDeclaration.GetCompilationModel().Factory.GetSpecialType( SpecialType.ValueTask ).GetSymbol() );
                     }
                 }
 
-                returnType ??= OurSyntaxGenerator.Default.Type( this.OverriddenDeclaration.ReturnType.GetSymbol() );
+                returnType ??= context.SyntaxGenerator.Type( this.OverriddenDeclaration.ReturnType.GetSymbol() );
 
                 var introducedMethod = MethodDeclaration(
                     List<AttributeListSyntax>(),
@@ -136,9 +136,9 @@ namespace Caravela.Framework.Impl.Transformations
             }
         }
 
-        private ExpressionSyntax CreateInvocationExpression()
+        private ExpressionSyntax CreateInvocationExpression(SyntaxGenerationContext generationContext)
             => InvocationExpression(
-                this.CreateMemberAccessExpression( AspectReferenceTargetKind.Self ),
+                this.CreateMemberAccessExpression( AspectReferenceTargetKind.Self, generationContext ),
                 ArgumentList(
                     SeparatedList(
                         this.OverriddenDeclaration.Parameters.Select(
