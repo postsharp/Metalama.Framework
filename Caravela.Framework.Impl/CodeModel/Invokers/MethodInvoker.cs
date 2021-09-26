@@ -119,7 +119,9 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
                     syntaxGenerationContext );
             }
 
-            var receiver = this._method.GetReceiverSyntax( RuntimeExpression.FromValue( instance!, this.Compilation, syntaxGenerationContext ), syntaxGenerationContext );
+            var receiver = this._method.GetReceiverSyntax(
+                RuntimeExpression.FromValue( instance!, this.Compilation, syntaxGenerationContext ),
+                syntaxGenerationContext );
 
             if ( this._invokerOperator == InvokerOperator.Default )
             {

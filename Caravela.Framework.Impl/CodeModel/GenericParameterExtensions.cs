@@ -17,7 +17,7 @@ namespace Caravela.Framework.Impl.CodeModel
                 _ => null
             };
 
-        public static bool? IsNullableImpl( this IGenericParameter genericParameter ) 
+        public static bool? IsNullableImpl( this IGenericParameter genericParameter )
             => genericParameter.TypeKindConstraint switch
             {
                 TypeKindConstraint.Class => genericParameter.HasDefaultConstructorConstraint,
@@ -26,7 +26,7 @@ namespace Caravela.Framework.Impl.CodeModel
                 TypeKindConstraint.Unmanaged => false,
                 _ => null
             };
-        
+
         public static bool IsCompatibleWith( this IGenericParameter a, IGenericParameter b )
         {
             // Check new() constraint.

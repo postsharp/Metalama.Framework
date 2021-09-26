@@ -11,7 +11,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
     internal sealed class GenericParameterBuilder : DeclarationBuilder, IGenericParameterBuilder
     {
         private readonly List<IType> _typeConstraints = new();
-        
+
         public string Name { get; set; }
 
         public int Index { get; }

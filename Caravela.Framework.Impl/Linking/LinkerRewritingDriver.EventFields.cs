@@ -17,7 +17,6 @@ namespace Caravela.Framework.Impl.Linking
         {
             var generationContext = SyntaxGenerationContext.Create( this.IntermediateCompilation, eventFieldDeclaration );
 
-            
             if ( this._introductionRegistry.IsOverrideTarget( symbol ) )
             {
                 var members = new List<MemberDeclarationSyntax>();
@@ -40,7 +39,6 @@ namespace Caravela.Framework.Impl.Linking
                 if ( this._analysisRegistry.IsReachable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Default ) )
                      && !this._analysisRegistry.IsInlineable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Default ), out _ ) )
                 {
-                    
                     members.Add( GetOriginalImplEventField( eventFieldDeclaration.Declaration.Type, symbol, generationContext ) );
                 }
 
@@ -102,7 +100,9 @@ namespace Caravela.Framework.Impl.Linking
                         List(
                             new[]
                             {
-                                AccessorDeclaration( SyntaxKind.AddAccessorDeclaration, GetImplicitAdderBody( symbol.AddMethod.AssertNotNull(), generationContext ) ),
+                                AccessorDeclaration(
+                                    SyntaxKind.AddAccessorDeclaration,
+                                    GetImplicitAdderBody( symbol.AddMethod.AssertNotNull(), generationContext ) ),
                                 AccessorDeclaration(
                                     SyntaxKind.RemoveAccessorDeclaration,
                                     GetImplicitRemoverBody( symbol.RemoveMethod.AssertNotNull(), generationContext ) )

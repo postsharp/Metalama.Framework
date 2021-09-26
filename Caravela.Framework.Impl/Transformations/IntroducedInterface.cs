@@ -51,7 +51,7 @@ namespace Caravela.Framework.Impl.Transformations
                     this.TargetType.GetCompilationModel().RoslynCompilation,
                     targetSyntax.SyntaxTree,
                     targetSyntax.Span.Start );
-                
+
                 // The type already implements the interface itself.
                 return new[] { (BaseTypeSyntax) SimpleBaseType( generationContext.SyntaxGenerator.Type( this.InterfaceType.GetSymbol() ) ) };
             }

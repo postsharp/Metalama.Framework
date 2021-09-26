@@ -42,7 +42,7 @@ namespace Caravela.Framework.Impl.Transformations
             {
                 var proceedExpression = ProceedHelper.CreateProceedDynamicExpression(
                     context.SyntaxGenerationContext,
-                    this.CreateInvocationExpression(context.SyntaxGenerationContext),
+                    this.CreateInvocationExpression( context.SyntaxGenerationContext ),
                     this.Template,
                     this.OverriddenDeclaration );
 
@@ -136,7 +136,7 @@ namespace Caravela.Framework.Impl.Transformations
             }
         }
 
-        private ExpressionSyntax CreateInvocationExpression(SyntaxGenerationContext generationContext)
+        private ExpressionSyntax CreateInvocationExpression( SyntaxGenerationContext generationContext )
             => InvocationExpression(
                 this.CreateMemberAccessExpression( AspectReferenceTargetKind.Self, generationContext ),
                 ArgumentList(

@@ -34,8 +34,6 @@ namespace Caravela.Framework.Impl.Linking
             {
                 // TODO: Other transformations than method overrides.
                 var newMembers = new List<MemberDeclarationSyntax>();
-                
-                
 
                 foreach ( var member in node.Members )
                 {
@@ -48,7 +46,7 @@ namespace Caravela.Framework.Impl.Linking
                     //  * Otherwise create a stub that calls the last override.
 
                     var semanticModel = this._intermediateCompilation.GetSemanticModel( node.SyntaxTree );
-                    
+
                     var generationContext = SyntaxGenerationContext.Create( this._intermediateCompilation, node.SyntaxTree, member.SpanStart );
 
                     var symbols =
@@ -76,7 +74,6 @@ namespace Caravela.Framework.Impl.Linking
                         // Simple case where the declaration declares a single symbol.
                         if ( this._rewritingDriver.IsRewriteTarget( symbols[0].AssertNotNull() ) )
                         {
-                            
                             // Add rewritten member and it's induced members (or nothing if the member is discarded).
                             newMembers.AddRange( this._rewritingDriver.RewriteMember( member, symbols[0].AssertNotNull(), generationContext ) );
                         }

@@ -42,7 +42,7 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
                 this.CreateIndexerAccess(
                     RuntimeExpression.FromValue( instance, this.Compilation, syntaxGenerationContext ),
                     RuntimeExpression.FromValue( args, this.Compilation, syntaxGenerationContext ),
-                    syntaxGenerationContext),
+                    syntaxGenerationContext ),
                 this.Member.Type,
                 syntaxGenerationContext,
                 isReferenceable: this.Member.Writeability != Writeability.None );
@@ -55,7 +55,7 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
             var propertyAccess = this.CreateIndexerAccess(
                 RuntimeExpression.FromValue( instance, this.Compilation, syntaxGenerationContext ),
                 RuntimeExpression.FromValue( args, this.Compilation, syntaxGenerationContext ),
-                syntaxGenerationContext);
+                syntaxGenerationContext );
 
             var expression = AssignmentExpression(
                 SyntaxKind.SimpleAssignmentExpression,

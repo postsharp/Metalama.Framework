@@ -29,7 +29,10 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
 
         protected virtual void AssertNoArgument() { }
 
-        private ExpressionSyntax CreateEventExpression( RuntimeExpression instance, AspectReferenceTargetKind targetKind, SyntaxGenerationContext generationContext )
+        private ExpressionSyntax CreateEventExpression(
+            RuntimeExpression instance,
+            AspectReferenceTargetKind targetKind,
+            SyntaxGenerationContext generationContext )
         {
             if ( this._event.DeclaringType.IsOpenGeneric )
             {
@@ -54,7 +57,7 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
             var eventAccess = this.CreateEventExpression(
                 RuntimeExpression.FromValue( instance, this.Compilation, generationContext ),
                 AspectReferenceTargetKind.EventAddAccessor,
-                generationContext);
+                generationContext );
 
             var expression = AssignmentExpression(
                 SyntaxKind.AddAssignmentExpression,
@@ -71,7 +74,7 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
             var eventAccess = this.CreateEventExpression(
                 RuntimeExpression.FromValue( instance, this.Compilation, generationContext ),
                 AspectReferenceTargetKind.EventRemoveAccessor,
-                generationContext);
+                generationContext );
 
             var expression = AssignmentExpression(
                 SyntaxKind.SubtractAssignmentExpression,
@@ -88,7 +91,7 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
             var eventAccess = this.CreateEventExpression(
                 RuntimeExpression.FromValue( instance, this.Compilation, generationContext ),
                 AspectReferenceTargetKind.EventRaiseAccessor,
-                generationContext);
+                generationContext );
 
             var arguments = this._event.GetArguments(
                 this._event.Signature.Parameters,

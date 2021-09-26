@@ -9,7 +9,6 @@ using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.ReflectionMocks;
 using Caravela.Framework.Impl.Templating;
-using Caravela.Framework.Impl.Templating.MetaModel;
 using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -44,7 +43,7 @@ namespace Caravela.Framework.Impl.CompileTime
             private Context _currentContext;
             private HashSet<string>? _currentTypeTemplateNames;
             private string? _currentTypeName;
-            
+
             public bool Success { get; private set; } = true;
 
             public bool FoundCompileTimeCode { get; private set; }
@@ -65,8 +64,10 @@ namespace Caravela.Framework.Impl.CompileTime
                 this._currentContext = new Context( TemplatingScope.Both, this );
 
                 this._syntaxGenerationContext = SyntaxGenerationContext.CreateDefault( compileTimeCompilation );
+
                 this._compileTimeType =
-                    this._syntaxGenerationContext.SyntaxGenerator.Type( this._syntaxGenerationContext.ReflectionMapper.GetTypeSymbol( typeof(CompileTimeType) ) );
+                    this._syntaxGenerationContext.SyntaxGenerator.Type(
+                        this._syntaxGenerationContext.ReflectionMapper.GetTypeSymbol( typeof(CompileTimeType) ) );
             }
 
             // TODO: assembly and module-level attributes?

@@ -28,7 +28,7 @@ namespace Caravela.Framework.Impl.CodeModel
                     : OurSyntaxGenerator.NullOblivious );
 
         public static SyntaxGenerationContext Create( Compilation compilation, SyntaxNode node ) => Create( compilation, node.SyntaxTree, node.SpanStart );
-        
+
         public static SyntaxGenerationContext Create( Compilation compilation, SyntaxTree syntaxTree, int position )
         {
             var semanticModel = compilation.GetSemanticModel( syntaxTree );

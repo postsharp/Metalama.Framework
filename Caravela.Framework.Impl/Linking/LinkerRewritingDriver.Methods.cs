@@ -17,7 +17,10 @@ namespace Caravela.Framework.Impl.Linking
 {
     internal partial class LinkerRewritingDriver
     {
-        public IReadOnlyList<MemberDeclarationSyntax> RewriteMethod( MethodDeclarationSyntax methodDeclaration, IMethodSymbol symbol, SyntaxGenerationContext generationContext )
+        public IReadOnlyList<MemberDeclarationSyntax> RewriteMethod(
+            MethodDeclarationSyntax methodDeclaration,
+            IMethodSymbol symbol,
+            SyntaxGenerationContext generationContext )
         {
             if ( this._introductionRegistry.IsOverrideTarget( symbol ) )
             {

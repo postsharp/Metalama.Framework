@@ -19,7 +19,9 @@ namespace Caravela.Framework.Impl.Serialization
     {
         public CaravelaMethodBaseSerializer( SyntaxSerializationService service ) : base( service ) { }
 
-        internal static ExpressionSyntax SerializeMethodBase( ICompileTimeReflectionObject<IMethodBase> method, SyntaxSerializationContext serializationContext )
+        internal static ExpressionSyntax SerializeMethodBase(
+            ICompileTimeReflectionObject<IMethodBase> method,
+            SyntaxSerializationContext serializationContext )
             => SerializeMethodBase(
                 (IMethodSymbol) method.Target.GetSymbol( serializationContext.Compilation )
                     .AssertNotNull( Justifications.SerializersNotImplementedForIntroductions ),

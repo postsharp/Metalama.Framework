@@ -28,7 +28,7 @@ namespace Caravela.Framework.Impl.Linking
         private IReadOnlyList<MemberDeclarationSyntax> RewriteProperty( PropertyDeclarationSyntax propertyDeclaration, IPropertySymbol symbol )
         {
             var generationContext = SyntaxGenerationContext.Create( this.IntermediateCompilation, propertyDeclaration );
-            
+
             if ( this._introductionRegistry.IsOverrideTarget( symbol ) )
             {
                 var members = new List<MemberDeclarationSyntax>();
@@ -188,7 +188,10 @@ namespace Caravela.Framework.Impl.Linking
                && propertyDeclaration.AccessorList?.Accessors.All( x => x.Body == null && x.ExpressionBody == null ) == true
                && propertyDeclaration.Modifiers.All( x => x.Kind() != SyntaxKind.AbstractKeyword );
 
-        private static MemberDeclarationSyntax GetOriginalImplProperty( PropertyDeclarationSyntax property, IPropertySymbol symbol, SyntaxGenerationContext generationContext )
+        private static MemberDeclarationSyntax GetOriginalImplProperty(
+            PropertyDeclarationSyntax property,
+            IPropertySymbol symbol,
+            SyntaxGenerationContext generationContext )
         {
             var accessorList =
                 IsAutoPropertyDeclaration( property )

@@ -166,11 +166,11 @@ namespace Caravela.Framework.Impl.Transformations
                     {
                         MethodKind.PropertyGet => ProceedHelper.CreateProceedDynamicExpression(
                             context.SyntaxGenerationContext,
-                            this.CreateProceedGetExpression(context.SyntaxGenerationContext),
+                            this.CreateProceedGetExpression( context.SyntaxGenerationContext ),
                             this.GetTemplate,
                             this.OverriddenDeclaration.GetMethod.AssertNotNull() ),
                         MethodKind.PropertySet => new UserExpression(
-                            this.CreateProceedSetExpression(context.SyntaxGenerationContext),
+                            this.CreateProceedSetExpression( context.SyntaxGenerationContext ),
                             this.OverriddenDeclaration.Compilation.TypeFactory.GetSpecialType( SpecialType.Void ),
                             context.SyntaxGenerationContext ),
                         _ => throw new AssertionFailedException()
@@ -213,20 +213,21 @@ namespace Caravela.Framework.Impl.Transformations
             switch ( accessorDeclarationKind )
             {
                 case SyntaxKind.GetAccessorDeclaration:
-                    return Block( ReturnStatement( this.CreateProceedGetExpression(generationContext) ) );
+                    return Block( ReturnStatement( this.CreateProceedGetExpression( generationContext ) ) );
 
                 case SyntaxKind.SetAccessorDeclaration:
                 case SyntaxKind.InitAccessorDeclaration:
-                    return Block( ExpressionStatement( this.CreateProceedSetExpression(generationContext) ) );
+                    return Block( ExpressionStatement( this.CreateProceedSetExpression( generationContext ) ) );
 
                 default:
                     throw new AssertionFailedException();
             }
         }
 
-        private ExpressionSyntax CreateProceedGetExpression(SyntaxGenerationContext generationContext) => this.CreateMemberAccessExpression( AspectReferenceTargetKind.PropertyGetAccessor, generationContext );
+        private ExpressionSyntax CreateProceedGetExpression( SyntaxGenerationContext generationContext )
+            => this.CreateMemberAccessExpression( AspectReferenceTargetKind.PropertyGetAccessor, generationContext );
 
-        private ExpressionSyntax CreateProceedSetExpression(SyntaxGenerationContext generationContext)
+        private ExpressionSyntax CreateProceedSetExpression( SyntaxGenerationContext generationContext )
             => AssignmentExpression(
                 SyntaxKind.SimpleAssignmentExpression,
                 this.CreateMemberAccessExpression( AspectReferenceTargetKind.PropertySetAccessor, generationContext ),

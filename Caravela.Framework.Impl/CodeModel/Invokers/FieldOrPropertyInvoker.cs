@@ -27,7 +27,10 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
 
         protected virtual void AssertNoArgument() { }
 
-        private ExpressionSyntax CreatePropertyExpression( RuntimeExpression instance, AspectReferenceTargetKind targetKind, SyntaxGenerationContext generationContext )
+        private ExpressionSyntax CreatePropertyExpression(
+            RuntimeExpression instance,
+            AspectReferenceTargetKind targetKind,
+            SyntaxGenerationContext generationContext )
         {
             if ( this.Member.DeclaringType.IsOpenGeneric )
             {
@@ -60,7 +63,7 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
                 this.CreatePropertyExpression(
                     RuntimeExpression.FromValue( instance, this.Compilation, generationContext ),
                     AspectReferenceTargetKind.PropertyGetAccessor,
-                    generationContext),
+                    generationContext ),
                 this._invokerOperator == InvokerOperator.Default ? this.Member.Type : this.Member.Type.ConstructNullable(),
                 generationContext,
                 isReferenceable: this.Member is Field,
@@ -79,7 +82,7 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
             var propertyAccess = this.CreatePropertyExpression(
                 RuntimeExpression.FromValue( instance, this.Compilation, generationContext ),
                 AspectReferenceTargetKind.PropertySetAccessor,
-                generationContext);
+                generationContext );
 
             var expression = AssignmentExpression(
                 SyntaxKind.SimpleAssignmentExpression,

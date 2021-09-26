@@ -157,8 +157,8 @@ namespace Caravela.Framework.Impl.Transformations
                 var proceedExpression = new UserExpression(
                     accessor.MethodKind switch
                     {
-                        MethodKind.EventAdd => this.CreateAddExpression(generationContext),
-                        MethodKind.EventRemove => this.CreateRemoveExpression(generationContext),
+                        MethodKind.EventAdd => this.CreateAddExpression( generationContext ),
+                        MethodKind.EventRemove => this.CreateRemoveExpression( generationContext ),
                         _ => throw new AssertionFailedException()
                     },
                     this.OverriddenDeclaration.Compilation.TypeFactory.GetSpecialType( SpecialType.Void ),
@@ -201,23 +201,23 @@ namespace Caravela.Framework.Impl.Transformations
             switch ( accessorDeclarationKind )
             {
                 case SyntaxKind.AddAccessorDeclaration:
-                    return Block( ExpressionStatement( this.CreateAddExpression(generationContext) ) );
+                    return Block( ExpressionStatement( this.CreateAddExpression( generationContext ) ) );
 
                 case SyntaxKind.RemoveAccessorDeclaration:
-                    return Block( ExpressionStatement( this.CreateRemoveExpression(generationContext) ) );
+                    return Block( ExpressionStatement( this.CreateRemoveExpression( generationContext ) ) );
 
                 default:
                     throw new AssertionFailedException();
             }
         }
 
-        private ExpressionSyntax CreateAddExpression(SyntaxGenerationContext generationContext)
+        private ExpressionSyntax CreateAddExpression( SyntaxGenerationContext generationContext )
             => AssignmentExpression(
                 SyntaxKind.AddAssignmentExpression,
                 this.CreateMemberAccessExpression( AspectReferenceTargetKind.EventAddAccessor, generationContext ),
                 IdentifierName( "value" ) );
 
-        private ExpressionSyntax CreateRemoveExpression(SyntaxGenerationContext generationContext)
+        private ExpressionSyntax CreateRemoveExpression( SyntaxGenerationContext generationContext )
             => AssignmentExpression(
                 SyntaxKind.SubtractAssignmentExpression,
                 this.CreateMemberAccessExpression( AspectReferenceTargetKind.EventRemoveAccessor, generationContext ),

@@ -14,7 +14,7 @@ namespace Caravela.Framework.Impl.Linking
             {
                 throw new AssertionFailedException( Justifications.CoverageMissing );
             }
-            
+
             /*
             var dirty = false;
 

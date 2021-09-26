@@ -93,7 +93,10 @@ namespace Caravela.Framework.Impl.Linking.Inlining
             }
         }
 
-        public static InliningContext Create( LinkerRewritingDriver rewritingDriver, IMethodSymbol targetDeclaration, SyntaxGenerationContext generationContext )
+        public static InliningContext Create(
+            LinkerRewritingDriver rewritingDriver,
+            IMethodSymbol targetDeclaration,
+            SyntaxGenerationContext generationContext )
             => new( rewritingDriver, targetDeclaration, generationContext );
 
         [ExcludeFromCodeCoverage]

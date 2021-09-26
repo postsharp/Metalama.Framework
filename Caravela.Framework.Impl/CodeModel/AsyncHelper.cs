@@ -115,7 +115,10 @@ namespace Caravela.Framework.Impl.CodeModel
         /// Gets the return type of intermediate methods introduced by the linker or by transformations. The difficulty is that void async methods
         /// must be transformed into async methods returning a ValueType.
         /// </summary>
-        public static TypeSyntax GetIntermediateMethodReturnType( IMethodSymbol method, TypeSyntax? returnTypeSyntax, SyntaxGenerationContext generationContext )
+        public static TypeSyntax GetIntermediateMethodReturnType(
+            IMethodSymbol method,
+            TypeSyntax? returnTypeSyntax,
+            SyntaxGenerationContext generationContext )
             => method.IsAsync && method.ReturnsVoid
                 ? generationContext.SyntaxGenerator.Type( generationContext.ReflectionMapper.GetTypeSymbol( typeof(ValueTask) ) )
                 : returnTypeSyntax ?? generationContext.SyntaxGenerator.Type( method.ReturnType );
