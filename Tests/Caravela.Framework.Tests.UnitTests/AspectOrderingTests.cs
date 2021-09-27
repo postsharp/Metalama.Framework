@@ -41,7 +41,7 @@ namespace Caravela.Framework.Tests.UnitTests
                 this.ServiceProvider,
                 new AspectDriverFactory( this.ServiceProvider, compilation.RoslynCompilation, ImmutableArray<object>.Empty ) );
 
-            var aspectNamedTypes = aspectNames.Select( name => compilation.DeclaredTypes.OfName( name ).Single().GetSymbol() ).ToReadOnlyList();
+            var aspectNamedTypes = aspectNames.Select( name => compilation.Types.OfName( name ).Single().GetSymbol() ).ToReadOnlyList();
             var aspectTypes = aspectTypeFactory.GetAspectClasses( aspectNamedTypes, compileTimeProject!, diagnostics ).ToImmutableArray();
             var allLayers = aspectTypes.SelectMany( a => a.Layers ).ToImmutableArray();
 

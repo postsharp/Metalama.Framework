@@ -246,7 +246,7 @@ namespace Caravela.Framework.Impl.CompileTime
                     return false;
                 }
             }
-            
+
             private void CheckNullableContext( MemberDeclarationSyntax member, SyntaxToken name )
             {
                 var nullableContext = this.RunTimeCompilation.GetSemanticModel( member.SyntaxTree ).GetNullableContext( member.SpanStart );
@@ -260,7 +260,7 @@ namespace Caravela.Framework.Impl.CompileTime
                             name.GetLocation(),
                             name.Text ) );
                 }
-                
+
                 foreach ( var trivia in member.DescendantNodes( descendIntoTrivia: true ).Where( t => t.Kind() == SyntaxKind.NullableDirectiveTrivia ) )
                 {
                     if ( ((NullableDirectiveTriviaSyntax) trivia).SettingToken.Kind() != SyntaxKind.EnableKeyword )
@@ -290,7 +290,7 @@ namespace Caravela.Framework.Impl.CompileTime
                 {
                     yield break;
                 }
-                
+
                 this.CheckNullableContext( node, node.Identifier );
 
                 var success =
@@ -466,7 +466,7 @@ namespace Caravela.Framework.Impl.CompileTime
                 {
                     yield break;
                 }
-                
+
                 this.CheckNullableContext( node, node.Identifier );
 
                 var success = true;

@@ -64,7 +64,6 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
         public ICompilation Compilation { get; }
 
         public IProject Project => this.Compilation.Project;
-        
 
         private ThisInstanceUserReceiver GetThisOrBase( string expressionName, AspectReferenceSpecification linkerAnnotation )
             => this._type switch

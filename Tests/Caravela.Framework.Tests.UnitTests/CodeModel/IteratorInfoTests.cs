@@ -21,7 +21,7 @@ class C
 ";
 
             var compilation = CreateCompilationModel( code );
-            var iteratorInfo = compilation.DeclaredTypes.Single().Methods.Single().GetIteratorInfo();
+            var iteratorInfo = compilation.Types.Single().Methods.Single().GetIteratorInfo();
 
             Assert.True( iteratorInfo.IsIterator );
             Assert.Equal( EnumerableKind.IEnumerable, iteratorInfo.EnumerableKind );
@@ -40,7 +40,7 @@ class C
 ";
 
             var compilation = CreateCompilationModel( code );
-            var iteratorInfo = compilation.DeclaredTypes.Single().Methods.Single().GetIteratorInfo();
+            var iteratorInfo = compilation.Types.Single().Methods.Single().GetIteratorInfo();
 
             Assert.True( iteratorInfo.IsIterator );
             Assert.Equal( EnumerableKind.IEnumerator, iteratorInfo.EnumerableKind );
@@ -59,7 +59,7 @@ class C
 ";
 
             var compilation = CreateCompilationModel( code );
-            var iteratorInfo = compilation.DeclaredTypes.Single().Methods.Single().GetIteratorInfo();
+            var iteratorInfo = compilation.Types.Single().Methods.Single().GetIteratorInfo();
 
             Assert.True( iteratorInfo.IsIterator );
             Assert.Equal( EnumerableKind.IAsyncEnumerable, iteratorInfo.EnumerableKind );
@@ -78,7 +78,7 @@ class C
 ";
 
             var compilation = CreateCompilationModel( code );
-            var iteratorInfo = compilation.DeclaredTypes.Single().Methods.Single().GetIteratorInfo();
+            var iteratorInfo = compilation.Types.Single().Methods.Single().GetIteratorInfo();
 
             Assert.True( iteratorInfo.IsIterator );
             Assert.Equal( EnumerableKind.IAsyncEnumerator, iteratorInfo.EnumerableKind );
@@ -97,7 +97,7 @@ class C
 ";
 
             var compilation = CreateCompilationModel( code );
-            var iteratorInfo = compilation.DeclaredTypes.Single().Methods.Single().GetIteratorInfo();
+            var iteratorInfo = compilation.Types.Single().Methods.Single().GetIteratorInfo();
 
             Assert.True( iteratorInfo.IsIterator );
             Assert.Equal( EnumerableKind.UntypedIEnumerator, iteratorInfo.EnumerableKind );
@@ -116,7 +116,7 @@ class C
 ";
 
             var compilation = CreateCompilationModel( code );
-            var iteratorInfo = compilation.DeclaredTypes.Single().Methods.Single().GetIteratorInfo();
+            var iteratorInfo = compilation.Types.Single().Methods.Single().GetIteratorInfo();
 
             Assert.True( iteratorInfo.IsIterator );
             Assert.Equal( EnumerableKind.UntypedIEnumerable, iteratorInfo.EnumerableKind );
@@ -135,7 +135,7 @@ class C
 ";
 
             var compilation = CreateCompilationModel( code );
-            var iteratorInfo = compilation.DeclaredTypes.Single().Methods.Single().GetIteratorInfo();
+            var iteratorInfo = compilation.Types.Single().Methods.Single().GetIteratorInfo();
 
             Assert.False( iteratorInfo.IsIterator );
             Assert.Equal( EnumerableKind.IEnumerable, iteratorInfo.EnumerableKind );
@@ -154,7 +154,7 @@ class C
 ";
 
             var compilation = CreateCompilationModel( code );
-            var iteratorInfo = compilation.DeclaredTypes.Single().Methods.Single().GetIteratorInfo();
+            var iteratorInfo = compilation.Types.Single().Methods.Single().GetIteratorInfo();
 
             Assert.False( iteratorInfo.IsIterator );
             Assert.Equal( EnumerableKind.IEnumerator, iteratorInfo.EnumerableKind );
@@ -173,7 +173,7 @@ class C
 ";
 
             var compilation = CreateCompilationModel( code );
-            var iteratorInfo = compilation.DeclaredTypes.Single().Methods.Single().GetIteratorInfo();
+            var iteratorInfo = compilation.Types.Single().Methods.Single().GetIteratorInfo();
 
             Assert.False( iteratorInfo.IsIterator );
             Assert.Equal( EnumerableKind.IAsyncEnumerable, iteratorInfo.EnumerableKind );
@@ -192,7 +192,7 @@ class C
 ";
 
             var compilation = CreateCompilationModel( code );
-            var iteratorInfo = compilation.DeclaredTypes.Single().Methods.Single().GetIteratorInfo();
+            var iteratorInfo = compilation.Types.Single().Methods.Single().GetIteratorInfo();
 
             Assert.False( iteratorInfo.IsIterator );
             Assert.Equal( EnumerableKind.IAsyncEnumerator, iteratorInfo.EnumerableKind );
@@ -211,7 +211,7 @@ class C
 ";
 
             var compilation = CreateCompilationModel( code );
-            var iteratorInfo = compilation.DeclaredTypes.Single().Methods.Single().GetIteratorInfo();
+            var iteratorInfo = compilation.Types.Single().Methods.Single().GetIteratorInfo();
 
             Assert.False( iteratorInfo.IsIterator );
             Assert.Equal( EnumerableKind.UntypedIEnumerator, iteratorInfo.EnumerableKind );
@@ -230,7 +230,7 @@ class C
 ";
 
             var compilation = CreateCompilationModel( code );
-            var iteratorInfo = compilation.DeclaredTypes.Single().Methods.Single().GetIteratorInfo();
+            var iteratorInfo = compilation.Types.Single().Methods.Single().GetIteratorInfo();
 
             Assert.False( iteratorInfo.IsIterator );
             Assert.Equal( EnumerableKind.UntypedIEnumerable, iteratorInfo.EnumerableKind );

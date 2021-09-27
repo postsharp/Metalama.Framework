@@ -7,7 +7,6 @@ using Caravela.Framework.Impl.DesignTime.Refactoring;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Formatting;
 using Caravela.Framework.Impl.Templating;
-using Caravela.Framework.Tests.Integration.Runners.Linker;
 using Caravela.TestFramework;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -35,7 +34,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
 
             using var buildOptions = new TestProjectOptions();
             using var domain = new UnloadableCompileTimeDomain();
-            var compilation = CompilationModel.CreateInitialInstance(NullProject.Instance, testResult.InputCompilation! );
+            var compilation = CompilationModel.CreateInitialInstance( NullProject.Instance, testResult.InputCompilation! );
 
             using var designTimePipeline = new DesignTimeAspectPipeline( buildOptions, domain, true );
 
@@ -47,7 +46,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
                 out var configuration );
 
             var partialCompilation = PartialCompilation.CreateComplete( testResult.InputCompilation! );
-            var target = compilation.DeclaredTypes.OfName( "TargetClass" ).Single().Methods.OfName( "TargetMethod" ).Single().GetSymbol();
+            var target = compilation.Types.OfName( "TargetClass" ).Single().Methods.OfName( "TargetMethod" ).Single().GetSymbol();
             var aspectClass = designTimePipeline.AspectClasses!.Single( a => a.DisplayName == "TestAspect" );
 
             var success = LiveTemplateAspectPipeline.TryExecute(

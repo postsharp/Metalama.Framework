@@ -162,7 +162,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
         private string SerializeIndexerParameter( string code )
         {
             var compilation = CreateCompilationModel( code );
-            var targetType = compilation.DeclaredTypes.Single( t => t.Name == "Target" );
+            var targetType = compilation.Types.Single( t => t.Name == "Target" );
             var single = targetType.Properties.Single( m => m.Name == "this[]" ).Parameters.First( p => p.Name == "target" );
             var parameter = single;
 
@@ -177,7 +177,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
         {
             var compilation = CreateCompilationModel( code );
 
-            var single = compilation.DeclaredTypes.Single( t => t.Name == "Target" )
+            var single = compilation.Types.Single( t => t.Name == "Target" )
                 .Methods.Single( m => m.Name == "Method" )
                 .Parameters.First( p => p.Name == "target" );
 
@@ -193,7 +193,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
         private string SerializeReturnParameter( string code )
         {
             var compilation = CreateCompilationModel( code );
-            var single = compilation.DeclaredTypes.Single( t => t.Name == "Target" ).Methods.Single( m => m.Name == "Method" ).ReturnParameter;
+            var single = compilation.Types.Single( t => t.Name == "Target" ).Methods.Single( m => m.Name == "Method" ).ReturnParameter;
             var p = (MethodReturnParameter) single;
 
             var actual = this.Serialize( CompileTimeReturnParameterInfo.Create( p ) )
@@ -205,7 +205,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
         private string SerializeReturnParameterOfProperty( string code )
         {
             var compilation = CreateCompilationModel( code );
-            var single = compilation.DeclaredTypes.Single( t => t.Name == "Target" ).Properties.Single( m => m.Name == "Property" ).GetMethod!.ReturnParameter;
+            var single = compilation.Types.Single( t => t.Name == "Target" ).Properties.Single( m => m.Name == "Property" ).GetMethod!.ReturnParameter;
             var p = (MethodReturnParameter) single;
 
             var actual = this.Serialize( CompileTimeReturnParameterInfo.Create( p ) )

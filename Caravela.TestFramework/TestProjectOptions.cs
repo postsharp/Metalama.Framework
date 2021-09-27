@@ -14,7 +14,8 @@ namespace Caravela.TestFramework
     public class TestProjectOptions : DefaultPathOptions, IProjectOptions, IDisposable
     {
         private ImmutableDictionary<string, string> _properties;
-        public TestProjectOptions( ImmutableDictionary<string, string>? properties  = null)
+
+        public TestProjectOptions( ImmutableDictionary<string, string>? properties = null )
         {
             this._properties = properties = ImmutableDictionary<string, string>.Empty;
             this.BaseTestDirectory = Path.Combine( Path.GetTempPath(), "Caravela", "Tests", Guid.NewGuid().ToString() );
@@ -62,11 +63,9 @@ namespace Caravela.TestFramework
 
         public string? ProjectPath => null;
 
-
         public string? TargetFramework => "net5.0";
 
         public string? Configuration => "Debug";
-        
 
         public string ProjectDirectory { get; }
 

@@ -43,7 +43,7 @@ class TargetCode
 
             using ( TemplateExpansionContext.WithSyntaxGenerationContext( SyntaxGenerationContext.CreateDefault( compilation.RoslynCompilation ) ) )
             {
-                var type = compilation.DeclaredTypes[0];
+                var type = compilation.Types[0];
                 var toString = type.Methods.OfName( "ToString" ).Single();
                 var fooMethod = type.Methods.OfName( "Foo" ).Single();
                 var byRefMethod = type.Methods.OfName( "ByRef" ).Single();
@@ -130,7 +130,7 @@ class TargetCode
 
             using ( TemplateExpansionContext.WithSyntaxGenerationContext( SyntaxGenerationContext.CreateDefault( compilation.RoslynCompilation ) ) )
             {
-                var type = compilation.DeclaredTypes.OfName( "TargetCode" ).Single();
+                var type = compilation.Types.OfName( "TargetCode" ).Single();
                 var nestedType = type.NestedTypes.Single();
 
                 // Testing static members.
@@ -194,7 +194,7 @@ class TargetCode
 
             using ( TemplateExpansionContext.WithSyntaxGenerationContext( SyntaxGenerationContext.CreateDefault( compilation.RoslynCompilation ) ) )
             {
-                var type = compilation.DeclaredTypes.OfName( "TargetCode" ).Single();
+                var type = compilation.Types.OfName( "TargetCode" ).Single();
                 var nestedType = type.NestedTypes.Single().ConstructGenericInstance( compilation.Factory.GetTypeByReflectionType( typeof(string) ) );
 
                 // Testing static members.
@@ -269,7 +269,7 @@ class TargetCode
 
             using ( TemplateExpansionContext.WithSyntaxGenerationContext( SyntaxGenerationContext.CreateDefault( compilation.RoslynCompilation ) ) )
             {
-                var localFunction = compilation.DeclaredTypes.OfName( "TargetCode" ).Single().Methods.Single().LocalFunctions.Single();
+                var localFunction = compilation.Types.OfName( "TargetCode" ).Single().Methods.Single().LocalFunctions.Single();
 
                 AssertEx.DynamicEquals(
                     localFunction.Invokers.Final.Invoke( null ),
@@ -296,7 +296,7 @@ class TargetCode
 
             using ( TemplateExpansionContext.WithSyntaxGenerationContext( SyntaxGenerationContext.CreateDefault( compilation.RoslynCompilation ) ) )
             {
-                var method = compilation.DeclaredTypes.Single().Methods.Single();
+                var method = compilation.Types.Single().Methods.Single();
 
                 AdvisedParameterList advisedParameterList = new( method );
 
@@ -327,7 +327,7 @@ class TargetCode
 
             using ( TemplateExpansionContext.WithSyntaxGenerationContext( SyntaxGenerationContext.CreateDefault( compilation.RoslynCompilation ) ) )
             {
-                var type = compilation.DeclaredTypes.Single();
+                var type = compilation.Types.Single();
                 var property = type.Properties.OfName( "P" ).Single();
                 RuntimeExpression thisExpression = new( SyntaxFactory.ThisExpression(), compilation );
 
@@ -361,7 +361,7 @@ class TargetCode
 
             using ( TemplateExpansionContext.WithSyntaxGenerationContext( SyntaxGenerationContext.CreateDefault( compilation.RoslynCompilation ) ) )
             {
-                var type = compilation.DeclaredTypes.Single();
+                var type = compilation.Types.Single();
                 var property = type.Properties.OfName( "P" ).Single();
                 RuntimeExpression thisExpression = new( SyntaxFactory.ThisExpression(), compilation );
 
@@ -390,7 +390,7 @@ class TargetCode
 
             using ( TemplateExpansionContext.WithSyntaxGenerationContext( SyntaxGenerationContext.CreateDefault( compilation.RoslynCompilation ) ) )
             {
-                var type = compilation.DeclaredTypes.Single();
+                var type = compilation.Types.Single();
                 var @event = type.Events.Single();
 
                 RuntimeExpression thisExpression = new( SyntaxFactory.ThisExpression(), compilation );
@@ -418,7 +418,7 @@ class TargetCode
 
             using ( TemplateExpansionContext.WithSyntaxGenerationContext( SyntaxGenerationContext.CreateDefault( compilation.RoslynCompilation ) ) )
             {
-                var type = compilation.DeclaredTypes.Single();
+                var type = compilation.Types.Single();
                 var @event = type.Events.Single();
 
                 RuntimeExpression thisExpression = new( SyntaxFactory.ThisExpression(), compilation );
@@ -462,7 +462,7 @@ class TargetCode
 
             using ( TemplateExpansionContext.WithSyntaxGenerationContext( SyntaxGenerationContext.CreateDefault( compilation.RoslynCompilation ) ) )
             {
-                var type = compilation.DeclaredTypes.Single();
+                var type = compilation.Types.Single();
                 var method = type.Methods.OfName( "A" ).Single();
                 var longMethod = type.Methods.OfName( "B" ).Single();
                 var noParameterMethod = type.Methods.OfName( "C" ).Single();

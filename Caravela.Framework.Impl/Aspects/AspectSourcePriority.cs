@@ -28,6 +28,11 @@ namespace Caravela.Framework.Impl.Aspects
         FromAttribute,
 
         /// <summary>
+        /// Aspects defined programmatically.
+        /// </summary>
+        Programmatic,
+
+        /// <summary>
         /// Provided implicitly by <see cref="IAspectDependencyBuilder.RequiresAspect{TAspect}"/>.
         /// </summary>
         Implicit,

@@ -45,7 +45,7 @@ class User {
 }";
 
             var compilation = CreateCompilationModel( this._code );
-            this._topLevelTypes = compilation.DeclaredTypes;
+            this._topLevelTypes = compilation.Types;
         }
 
         [Fact]

@@ -17,18 +17,23 @@ namespace Caravela.Framework.Impl.CodeModel
     {
         private readonly ConcurrentDictionary<Type, IProjectExtension> _extensions = new();
         private readonly IProjectOptions _projectOptions;
-        private readonly Compilation _compilation;
-        private readonly SyntaxTree _anySyntaxTree;
+        private readonly SyntaxTree? _anySyntaxTree;
+        private readonly Lazy<ImmutableArray<IAssemblyIdentity>> _projectReferences;
 
         public ProjectModel( Compilation compilation, IServiceProvider serviceProvider )
         {
             this._projectOptions = serviceProvider.GetService<IProjectOptions>();
-            this._compilation = compilation;
-            this._anySyntaxTree = this._compilation.SyntaxTrees.FirstOrDefault();
+            this._anySyntaxTree = compilation.SyntaxTrees.FirstOrDefault();
             this.ServiceProvider = serviceProvider;
+
+            this._projectReferences =
+                new Lazy<ImmutableArray<IAssemblyIdentity>>(
+                    () => compilation.ReferencedAssemblyNames.Select( a => new AssemblyIdentityModel( a ) ).ToImmutableArray<IAssemblyIdentity>() );
         }
 
-        public string Path => this._projectOptions.ProjectPath;
+        public string? Path => this._projectOptions.ProjectPath;
+
+        public ImmutableArray<IAssemblyIdentity> AssemblyReferences => this._projectReferences.Value;
 
         [Memo]
         public ImmutableHashSet<string> DefinedSymbols

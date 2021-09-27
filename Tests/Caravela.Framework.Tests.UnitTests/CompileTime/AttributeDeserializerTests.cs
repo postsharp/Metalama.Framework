@@ -274,7 +274,7 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime
             var compilation = CreateCompilationModel( code, ignoreErrors: true );
 
             Assert.Empty( compilation.Attributes );
-            Assert.Empty( compilation.DeclaredTypes.Single().Attributes );
+            Assert.Empty( compilation.Types.Single().Attributes );
         }
 
         [Fact]
@@ -302,7 +302,7 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime
             var compilation = CreateCompilationModel( code, ignoreErrors: true );
 
             Assert.Empty( compilation.Attributes );
-            Assert.Empty( compilation.DeclaredTypes.Single().Attributes );
+            Assert.Empty( compilation.Types.Single().Attributes );
         }
 
         [Fact]

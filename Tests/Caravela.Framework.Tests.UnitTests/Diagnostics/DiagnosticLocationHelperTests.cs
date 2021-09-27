@@ -34,7 +34,7 @@ class C<T> : object
 
             var compilation = CreateCompilationModel( code );
 
-            var type = compilation.DeclaredTypes.Single();
+            var type = compilation.Types.Single();
             var method = type.Methods.OfName( "Method" ).Single();
 
             // Type

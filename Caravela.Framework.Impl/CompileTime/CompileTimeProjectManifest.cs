@@ -18,14 +18,18 @@ namespace Caravela.Framework.Impl.CompileTime
         public CompileTimeProjectManifest(
             string assemblyName,
             IReadOnlyList<string> aspectTypes,
-            IReadOnlyList<string> compilerPlugIns,
+            IReadOnlyList<string> plugInTypes,
+            IReadOnlyList<string> fabricTypes,
+            IReadOnlyList<string> transitiveFabricTypes,
             IReadOnlyList<string>? references,
             ulong sourceHash,
             IReadOnlyList<CompileTimeFile> files )
         {
             this.AssemblyName = assemblyName;
             this.AspectTypes = aspectTypes;
-            this.CompilerPlugIns = compilerPlugIns;
+            this.PlugInTypes = plugInTypes;
+            this.FabricTypes = fabricTypes;
+            this.TransitiveFabricTypes = transitiveFabricTypes;
             this.References = references;
             this.SourceHash = sourceHash;
             this.Files = files;
@@ -38,7 +42,11 @@ namespace Caravela.Framework.Impl.CompileTime
         /// </summary>
         public IReadOnlyList<string> AspectTypes { get; }
 
-        public IReadOnlyList<string> CompilerPlugIns { get; }
+        public IReadOnlyList<string> PlugInTypes { get; }
+
+        public IReadOnlyList<string> FabricTypes { get; }
+
+        public IReadOnlyList<string> TransitiveFabricTypes { get; }
 
         /// <summary>
         /// Gets the name of all project references (a fully-qualified assembly identity) of the compile-time project.

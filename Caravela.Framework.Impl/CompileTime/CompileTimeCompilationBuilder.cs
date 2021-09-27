@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Aspects;
+using Caravela.Framework.Fabrics;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Formatting;
@@ -614,10 +615,24 @@ namespace Caravela.Framework.Impl.CompileTime
                         textMapDirectory.Write( outputPaths.Directory );
 
                         var aspectType = compileTimeCompilation.GetTypeByMetadataName( typeof(IAspect).FullName );
+                        var fabricType = compileTimeCompilation.GetTypeByMetadataName( typeof(IFabric).FullName );
+                        var transitiveFabricType = compileTimeCompilation.GetTypeByMetadataName( typeof(ITransitiveProjectFabric).FullName );
 
                         var aspectTypes = compileTimeCompilation.Assembly
                             .GetTypes()
                             .Where( t => compileTimeCompilation.HasImplicitConversion( t, aspectType ) )
+                            .Select( t => t.GetReflectionName() )
+                            .ToList();
+
+                        var fabricTypes = compileTimeCompilation.Assembly
+                            .GetTypes()
+                            .Where( t => compileTimeCompilation.HasImplicitConversion( t, fabricType ) )
+                            .Select( t => t.GetReflectionName() )
+                            .ToList();
+
+                        var transitiveFabricTypes = compileTimeCompilation.Assembly
+                            .GetTypes()
+                            .Where( t => compileTimeCompilation.HasImplicitConversion( t, transitiveFabricType ) )
                             .Select( t => t.GetReflectionName() )
                             .ToList();
 
@@ -631,6 +646,8 @@ namespace Caravela.Framework.Impl.CompileTime
                             compileTimeCompilation.AssemblyName!,
                             aspectTypes,
                             compilerPlugInTypes,
+                            fabricTypes,
+                            transitiveFabricTypes,
                             referencedProjects.Select( r => r.RunTimeIdentity.GetDisplayName() ).ToList(),
                             sourceHash,
                             textMapDirectory.FilesByTargetPath.Values.Select( f => new CompileTimeFile( f ) ).ToImmutableList() );

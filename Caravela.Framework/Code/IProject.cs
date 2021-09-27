@@ -4,7 +4,6 @@
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Validation;
 using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 
@@ -17,7 +16,9 @@ namespace Caravela.Framework.Code
         /// <summary>
         /// Gets the path to the <c>csproj</c> file.
         /// </summary>
-        string Path { get; }
+        string? Path { get; }
+
+        ImmutableArray<IAssemblyIdentity> AssemblyReferences { get; }
 
         /// <summary>
         /// Gets the list of defined symbols like <c>DEBUG</c>, <c>TRACE</c> (also named constants).
@@ -38,7 +39,7 @@ namespace Caravela.Framework.Code
         /// Gets the set of properties passed from MSBuild. To expose an MSBuild property to this collection,
         /// define the <c>CompilerVisibleProperty</c> item. 
         /// </summary>
-        bool TryGetProperty( string name, [NotNullWhen(true)] out string? value );
+        bool TryGetProperty( string name, [NotNullWhen( true )] out string? value );
 
         /// <summary>
         /// Gets or creates a project extension and creates a new instance if not has been created before.
@@ -49,7 +50,7 @@ namespace Caravela.Framework.Code
         /// <typeparam name="T">Extension type.</typeparam>
         T Extension<T>()
             where T : IProjectExtension, new();
-        
+
         IServiceProvider ServiceProvider { get; }
     }
 }

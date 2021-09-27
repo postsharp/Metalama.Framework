@@ -209,7 +209,7 @@ namespace Caravela.TestFramework
                 return null;
             }
 
-            var programTypes = testResult.InitialCompilationModel!.DeclaredTypes.Where( t => t.Name == "Program" ).ToList();
+            var programTypes = testResult.InitialCompilationModel!.Types.Where( t => t.Name == "Program" ).ToList();
 
             switch ( programTypes.Count )
             {

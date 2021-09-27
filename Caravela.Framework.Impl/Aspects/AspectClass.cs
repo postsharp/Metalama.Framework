@@ -24,10 +24,33 @@ using TypeKind = Microsoft.CodeAnalysis.TypeKind;
 
 namespace Caravela.Framework.Impl.Aspects
 {
+    internal interface IAspectClassImpl : IAspectClass
+    {
+        ImmutableDictionary<string, AspectClassMember> Members { get; }
+        
+        Type AspectType { get; }
+        
+        bool TryGetInterfaceMember( ISymbol symbol, [NotNullWhen( true )] out AspectClassMember? member );
+
+        TemplateDriver GetTemplateDriver( IMethod sourceTemplate );
+        
+        CompileTimeProject? Project { get; }
+
+    }
+    
+    internal interface IAspectClassGroup : IAspectClass
+    {
+
+        IAspectClassImpl GetImplementation( IDeclaration target );
+        
+       
+      
+    }
+    
     /// <summary>
     /// Represents the metadata of an aspect class. This class is compilation-independent. 
     /// </summary>
-    internal partial class AspectClass : IAspectClass
+    internal partial class AspectClass : IAspectClassGroup, IAspectClassImpl
     {
         private readonly Dictionary<string, TemplateDriver> _templateDrivers = new( StringComparer.Ordinal );
 
@@ -54,6 +77,8 @@ namespace Caravela.Framework.Impl.Aspects
         /// Gets metadata of the base aspect class.
         /// </summary>
         public AspectClass? BaseClass { get; }
+
+        IAspectClassImpl IAspectClassGroup.GetImplementation( IDeclaration target ) => this;
 
         public CompileTimeProject? Project { get; }
 

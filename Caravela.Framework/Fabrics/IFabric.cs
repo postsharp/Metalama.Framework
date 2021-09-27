@@ -6,8 +6,5 @@ using Caravela.Framework.Aspects;
 namespace Caravela.Framework.Fabrics
 {
     [CompileTimeOnly]
-    public interface IFabric
-    {
-        
-    }
+    public interface IFabric { }
 }

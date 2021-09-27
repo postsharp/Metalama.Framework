@@ -47,6 +47,7 @@ namespace Caravela.Framework.Impl.Pipeline
 
             return new PipelineStageResult(
                 linkerResult.Compilation,
+                input.Project,
                 input.AspectLayers,
                 pipelineStepResult.Diagnostics.Concat( linkerResult.Diagnostics ),
                 pipelineStepResult.ExternalAspectSources );

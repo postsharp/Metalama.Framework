@@ -50,7 +50,7 @@ namespace Caravela.Framework.Tests.UnitTests
         {
             var code = $"using System.Collections.Generic; class T {{ {type} field; }} ";
             var compilation = CreateCompilationModel( code );
-            var fieldType = compilation.DeclaredTypes.Single().Fields.Single().Type.GetSymbol();
+            var fieldType = compilation.Types.Single().Fields.Single().Type.GetSymbol();
 
             var defaultSyntaxGenerator = OurSyntaxGenerator.GetInstance( nullable );
 
@@ -94,7 +94,7 @@ namespace Caravela.Framework.Tests.UnitTests
         {
             var code = $"using System.Collections.Generic; class T {{ {type} field; }} ";
             var compilation = CreateCompilationModel( code );
-            var fieldType = compilation.DeclaredTypes.Single().Fields.Single().Type.GetSymbol();
+            var fieldType = compilation.Types.Single().Fields.Single().Type.GetSymbol();
 
             var defaultSyntaxGenerator = OurSyntaxGenerator.GetInstance( nullable );
 

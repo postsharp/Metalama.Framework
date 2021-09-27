@@ -2,11 +2,13 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Aspects;
+using Caravela.Framework.Code;
 using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.Aspects;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
+using Caravela.Framework.Impl.Fabrics;
 using Caravela.Framework.Impl.Options;
 using Caravela.Framework.Impl.Sdk;
 using Caravela.Framework.Impl.ServiceProvider;
@@ -134,17 +136,17 @@ namespace Caravela.Framework.Impl.Pipeline
             var driverFactory = new AspectDriverFactory( this.ServiceProvider, compilation.Compilation, compilerPlugIns );
             var aspectTypeFactory = new AspectClassMetadataFactory( this.ServiceProvider, driverFactory );
 
-            var aspectTypes = aspectTypeFactory.GetAspectClasses( compilation.Compilation, compileTimeProject, diagnosticAdder ).ToImmutableArray();
+            var aspectClasses = aspectTypeFactory.GetAspectClasses( compilation.Compilation, compileTimeProject, diagnosticAdder ).ToImmutableArray();
 
             // Get aspect parts and sort them.
-            var unsortedAspectLayers = aspectTypes
+            var unsortedAspectLayers = aspectClasses
                 .Where( t => !t.IsAbstract )
                 .SelectMany( at => at.Layers )
                 .ToImmutableArray();
 
             var aspectOrderSources = new IAspectOrderingSource[]
             {
-                new AttributeAspectOrderingSource( compilation.Compilation, loader ), new AspectLayerOrderingSource( aspectTypes )
+                new AttributeAspectOrderingSource( compilation.Compilation, loader ), new AspectLayerOrderingSource( aspectClasses )
             };
 
             if ( !AspectLayerSorter.TrySort( unsortedAspectLayers, aspectOrderSources, diagnosticAdder, out var sortedAspectLayers ) )
@@ -161,7 +163,7 @@ namespace Caravela.Framework.Impl.Pipeline
                 .Select( g => this.CreateStage( g.Key, g.ToImmutableArray(), loader, compileTimeProject! ) )
                 .ToImmutableArray();
 
-            configuration = new AspectPipelineConfiguration( stages, aspectTypes, sortedAspectLayers, compileTimeProject, loader );
+            configuration = new AspectPipelineConfiguration( stages, aspectClasses, sortedAspectLayers, compileTimeProject, loader );
 
             return true;
 
@@ -179,9 +181,24 @@ namespace Caravela.Framework.Impl.Pipeline
                 };
         }
 
-        private protected virtual IReadOnlyList<IAspectSource> CreateAspectSources( AspectPipelineConfiguration configuration )
+        private protected virtual ImmutableArray<IAspectSource> CreateAspectSources( AspectPipelineConfiguration configuration, IProject project )
         {
-            return new[] { new CompilationAspectSource( configuration.AspectClasses, configuration.CompileTimeProjectLoader ) };
+            var sources = ImmutableArray.Create<IAspectSource>(
+                new CompilationAspectSource( configuration.AspectClasses, configuration.CompileTimeProjectLoader ) );
+
+            if ( configuration.CompileTimeProject != null )
+            {
+                var fabricManager = new FabricManager( this.ServiceProvider );
+
+                var result = fabricManager.ExecuteFabrics(
+                    configuration.CompileTimeProject,
+                    project,
+                    new AspectClassRegistry( configuration.AspectClasses.ToImmutableDictionary( c => c.FullName, c => c ) ) );
+
+                sources = sources.AddRange( result.AspectSources );
+            }
+
+            return sources;
         }
 
         /// <summary>
@@ -195,17 +212,19 @@ namespace Caravela.Framework.Impl.Pipeline
             CancellationToken cancellationToken,
             [NotNullWhen( true )] out PipelineStageResult? pipelineStageResult )
         {
-            // If there is no aspect in the compilation, don't execute the pipeline.
+            var project = new ProjectModel( compilation.Compilation, this.ServiceProvider );
+
             if ( pipelineConfiguration.CompileTimeProject == null || pipelineConfiguration.AspectClasses.Count == 0 )
             {
-                pipelineStageResult = new PipelineStageResult( compilation, Array.Empty<OrderedAspectLayer>() );
+                // If there is no aspect in the compilation, don't execute the pipeline.
+                pipelineStageResult = new PipelineStageResult( compilation, project, Array.Empty<OrderedAspectLayer>() );
 
                 return true;
             }
 
-            var aspectSources = this.CreateAspectSources( pipelineConfiguration );
+            var aspectSources = this.CreateAspectSources( pipelineConfiguration, project );
 
-            pipelineStageResult = new PipelineStageResult( compilation, pipelineConfiguration.Layers, aspectSources: aspectSources );
+            pipelineStageResult = new PipelineStageResult( compilation, project, pipelineConfiguration.Layers, aspectSources: aspectSources );
 
             foreach ( var stage in pipelineConfiguration.Stages )
             {

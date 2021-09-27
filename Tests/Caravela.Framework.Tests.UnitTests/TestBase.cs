@@ -107,7 +107,9 @@ namespace Caravela.Framework.Tests.UnitTests
         {
             var roslynCompilation = CreateCSharpCompilation( code, dependentCode, ignoreErrors, additionalReferences, name, addCaravelaReferences );
 
-            return CompilationModel.CreateInitialInstance( new ProjectModel( roslynCompilation, ServiceProviderFactory.AsyncLocalProvider ), roslynCompilation );
+            return CompilationModel.CreateInitialInstance(
+                new ProjectModel( roslynCompilation, ServiceProviderFactory.AsyncLocalProvider ),
+                roslynCompilation );
         }
 
         protected static object? ExecuteExpression( string context, string expression )

@@ -47,20 +47,20 @@ namespace Caravela.Framework.Tests.UnitTests.DesignTime
             // Tests for Class1.
             var syntaxTree1 = compilation.SyntaxTrees.Single( t => t.FilePath == "Class1.cs" );
             var compilationModel1 = CompilationModel.CreateInitialInstance( NullProject.Instance, compilation, syntaxTree1 );
-            Assert.Single( compilationModel1.DeclaredTypes.Select( t => t.Name ), "Class1" );
+            Assert.Single( compilationModel1.Types.Select( t => t.Name ), "Class1" );
 
             // Tests for Class3. The Types collection must contain the base class.
             var syntaxTree3 = compilation.SyntaxTrees.Single( t => t.FilePath == "Class3.cs" );
-            var compilationModel3 = CompilationModel.CreateInitialInstance(NullProject.Instance, compilation, syntaxTree3 );
-            Assert.Equal( new[] { "Class2", "Class3" }, compilationModel3.DeclaredTypes.Select( t => t.Name ).OrderBy( t => t ) );
+            var compilationModel3 = CompilationModel.CreateInitialInstance( NullProject.Instance, compilation, syntaxTree3 );
+            Assert.Equal( new[] { "Class2", "Class3" }, compilationModel3.Types.Select( t => t.Name ).OrderBy( t => t ) );
 
             // Tests for Class4: the Types collection must contain the base class and the interfaces.
             var semanticModel4 = compilation.SyntaxTrees.Single( t => t.FilePath == "Class4.cs" );
-            var compilationModel4 = CompilationModel.CreateInitialInstance( NullProject.Instance,compilation, semanticModel4 );
+            var compilationModel4 = CompilationModel.CreateInitialInstance( NullProject.Instance, compilation, semanticModel4 );
 
             Assert.Equal(
                 new[] { "Class2", "Class3", "Class4", "Interface1", "Interface2", "Interface3" },
-                compilationModel4.DeclaredTypes.Select( t => t.Name ).OrderBy( t => t ) );
+                compilationModel4.Types.Select( t => t.Name ).OrderBy( t => t ) );
         }
     }
 }

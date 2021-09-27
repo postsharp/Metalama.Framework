@@ -38,7 +38,7 @@ class C : IAspect
 ";
 
             var compilation = CreateCompilationModel( code );
-            var type = compilation.DeclaredTypes.OfName( "C" ).Single();
+            var type = compilation.Types.OfName( "C" ).Single();
             this.AssertScope( type, TemplatingScope.Both );
             this.AssertScope( type.Fields.OfName( "F" ).Single(), TemplatingScope.Both );
             this.AssertScope( type.Methods.OfName( "M" ).Single(), TemplatingScope.Both );
@@ -64,12 +64,12 @@ class D : System.IDisposable
 ";
 
             var compilation = CreateCompilationModel( code );
-            var type = compilation.DeclaredTypes.OfName( "C" ).Single();
+            var type = compilation.Types.OfName( "C" ).Single();
             this.AssertScope( type, TemplatingScope.RunTimeOnly );
             this.AssertScope( type.Fields.OfName( "F" ).Single(), TemplatingScope.RunTimeOnly );
             this.AssertScope( type.Methods.OfName( "M" ).Single(), TemplatingScope.RunTimeOnly );
 
-            this.AssertScope( compilation.DeclaredTypes.OfName( "D" ).Single(), TemplatingScope.RunTimeOnly );
+            this.AssertScope( compilation.Types.OfName( "D" ).Single(), TemplatingScope.RunTimeOnly );
         }
 
         [Fact]
@@ -84,7 +84,7 @@ class C
 ";
 
             var compilation = CreateCompilationModel( code );
-            var type = compilation.DeclaredTypes.OfName( "C" ).Single();
+            var type = compilation.Types.OfName( "C" ).Single();
             this.AssertScope( type, TemplatingScope.Both );
         }
 
@@ -103,7 +103,7 @@ class C
 ";
 
             var compilation = CreateCompilationModel( code );
-            var type = compilation.DeclaredTypes.OfName( "C" ).Single();
+            var type = compilation.Types.OfName( "C" ).Single();
             this.AssertScope( type, TemplatingScope.CompileTimeOnly );
             this.AssertScope( type.Fields.OfName( "F" ).Single(), TemplatingScope.CompileTimeOnlyReturningBoth );
             this.AssertScope( type.Methods.OfName( "M" ).Single(), TemplatingScope.CompileTimeOnly );
@@ -124,7 +124,7 @@ class C
 ";
 
             var compilation = CreateCompilationModel( code );
-            this.AssertScope( compilation.DeclaredTypes.OfName( "C" ).Single(), TemplatingScope.Both );
+            this.AssertScope( compilation.Types.OfName( "C" ).Single(), TemplatingScope.Both );
         }
 
         [Fact]
@@ -134,7 +134,7 @@ class C
             var compilation = CreateCompilationModel( code, addCaravelaReferences: false );
             this.AssertScope( (INamedType) compilation.Factory.GetTypeByReflectionType( typeof(int) ), TemplatingScope.Both );
             this.AssertScope( (INamedType) compilation.Factory.GetTypeByReflectionType( typeof(Console) ), TemplatingScope.RunTimeOnly );
-            this.AssertScope( compilation.DeclaredTypes.Single(), TemplatingScope.RunTimeOnly );
+            this.AssertScope( compilation.Types.Single(), TemplatingScope.RunTimeOnly );
         }
     }
 }

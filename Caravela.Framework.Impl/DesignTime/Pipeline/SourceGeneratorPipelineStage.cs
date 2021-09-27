@@ -130,6 +130,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
 
             return new PipelineStageResult(
                 input.PartialCompilation,
+                input.Project,
                 input.AspectLayers,
                 input.Diagnostics.Concat( pipelineStepResult.Diagnostics ).Concat( diagnostics.ToImmutable() ),
                 input.AspectSources.Concat( pipelineStepResult.ExternalAspectSources ),

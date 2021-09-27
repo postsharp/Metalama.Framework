@@ -78,7 +78,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
         private string SerializeConstructor( string code )
         {
             var compilation = CreateCompilationModel( code );
-            var namedTypes = compilation.DeclaredTypes;
+            var namedTypes = compilation.Types;
             var type = namedTypes.Single( t => t.Name == "Target" );
             var methods = type.Constructors;
             var single = methods.Single();

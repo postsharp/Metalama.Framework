@@ -26,11 +26,14 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public static CompilationModel CreateInitialInstance( IProject project, PartialCompilation compilation ) => new( project, compilation );
 
-        public static CompilationModel CreateInitialInstance( IProject project, Compilation compilation, ImmutableArray<ResourceDescription> resources = default )
+        public static CompilationModel CreateInitialInstance(
+            IProject project,
+            Compilation compilation,
+            ImmutableArray<ResourceDescription> resources = default )
             => new( project, PartialCompilation.CreateComplete( compilation, resources ) );
 
         public static CompilationModel CreateInitialInstance(
-            IProject project, 
+            IProject project,
             Compilation compilation,
             SyntaxTree syntaxTree,
             ImmutableArray<ResourceDescription> resources = default )
@@ -97,7 +100,7 @@ namespace Caravela.Framework.Impl.CodeModel
         /// </summary>
         /// <param name="prototype"></param>
         /// <param name="observableTransformations"></param>
-        private CompilationModel( CompilationModel prototype, IReadOnlyList<IObservableTransformation> observableTransformations) : this( prototype )
+        private CompilationModel( CompilationModel prototype, IReadOnlyList<IObservableTransformation> observableTransformations ) : this( prototype )
         {
             this._transformations = prototype._transformations.AddRange(
                 observableTransformations,
@@ -139,7 +142,7 @@ namespace Caravela.Framework.Impl.CodeModel
             this._aspects = prototype._aspects;
         }
 
-        private CompilationModel( CompilationModel prototype, AspectLayerId aspectLayerId) : this( prototype )
+        private CompilationModel( CompilationModel prototype, AspectLayerId aspectLayerId ) : this( prototype )
         {
             this.AspectLayerId = aspectLayerId;
         }
@@ -152,13 +155,11 @@ namespace Caravela.Framework.Impl.CodeModel
         public int Revision { get; }
 
         public IProject Project { get; }
-        
 
         public string AssemblyName => this.RoslynCompilation.AssemblyName ?? "";
-        
 
         [Memo]
-        public INamedTypeList DeclaredTypes
+        public INamedTypeList Types
             => new NamedTypeList(
                 this,
                 this.PartialCompilation.Types
@@ -184,6 +185,10 @@ namespace Caravela.Framework.Impl.CodeModel
         public IReadOnlyList<IManagedResource> ManagedResources => throw new NotImplementedException();
 
         public IDeclarationComparer InvariantComparer { get; }
+
+        public INamespace RootNamespace => throw new NotImplementedException();
+
+        public INamespace? GetNamespace( string ns ) => throw new NotImplementedException();
 
         public IEnumerable<T> GetAspectsOf<T>( IDeclaration declaration )
             where T : IAspect

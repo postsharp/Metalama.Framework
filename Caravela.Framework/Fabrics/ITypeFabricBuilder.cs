@@ -3,13 +3,8 @@
 
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
-using System;
 
 namespace Caravela.Framework.Fabrics
 {
-    /// <summary>
-    /// (Not implemented.)
-    /// </summary>
-    [CompileTimeOnly]
-    public interface ITypeFabricBuilder : IAspectBuilder<INamedType> { }
+    public interface ITypeFabricBuilder : IFabricBuilder<INamedType>, INamedTypeSelection { }
 }

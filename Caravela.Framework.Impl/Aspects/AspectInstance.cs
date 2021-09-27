@@ -3,6 +3,10 @@
 
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
+using Caravela.Framework.Impl.ServiceProvider;
+using Caravela.Framework.Impl.Utilities;
+using System;
+using System.Linq.Expressions;
 
 namespace Caravela.Framework.Impl.Aspects
 {
@@ -21,7 +25,7 @@ namespace Caravela.Framework.Impl.Aspects
         /// </summary>
         public IDeclaration TargetDeclaration { get; }
 
-        public AspectClass AspectClass { get; }
+        public IAspectClassImpl AspectClass { get; }
 
         public bool IsSkipped { get; private set; }
 
@@ -29,9 +33,23 @@ namespace Caravela.Framework.Impl.Aspects
 
         IAspectClass IAspectInstance.AspectClass => this.AspectClass;
 
-        internal AspectInstance( IAspect aspect, IDeclaration declaration, AspectClass aspectClass )
+        internal AspectInstance( IAspect aspect, IDeclaration declaration, IAspectClassImpl aspectClass )
         {
             this.Aspect = aspect;
+            this.TargetDeclaration = declaration;
+            this.AspectClass = aspectClass;
+        }
+
+        internal AspectInstance(
+            IServiceProvider serviceProvider,
+            Expression<Func<IAspect>> aspectExpression,
+            IDeclaration declaration,
+            IAspectClassImpl aspectClass )
+        {
+            var userCodeInvoker = serviceProvider.GetService<UserCodeInvoker>();
+
+            var aspectFunc = aspectExpression.Compile();
+            this.Aspect = userCodeInvoker.Invoke( () => aspectFunc() );
             this.TargetDeclaration = declaration;
             this.AspectClass = aspectClass;
         }

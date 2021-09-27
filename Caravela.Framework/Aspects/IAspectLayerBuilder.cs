@@ -67,7 +67,7 @@ namespace Caravela.Framework.Aspects
 
         /// <summary>
         /// Selects members of the current target declaration with the purpose of adding aspects and annotations to them
-        /// using e.g. <see cref="IDeclarationSelection{TDeclaration}.AddAspect{TAspect}(System.Linq.Expressions.Expression{System.Func{TDeclaration,TAspect}})"/>
+        /// using e.g. <see cref="IDeclarationSelection{TDeclaration}.AddAspect{TAspect}(System.Func{TDeclaration,System.Linq.Expressions.Expression{System.Func{TAspect}}})"/>
         /// or <see cref="IDeclarationSelection{TDeclaration}.AddAnnotation{TAspect,TAnnotation}"/>.
         /// </summary>
         /// <param name="selector"></param>

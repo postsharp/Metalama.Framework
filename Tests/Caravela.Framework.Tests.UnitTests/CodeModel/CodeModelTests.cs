@@ -26,8 +26,8 @@ namespace Caravela.Framework.Tests.UnitTests.CodeModel
             var code = "";
             var compilation = CreateCompilationModel( code );
 
-            var types1 = compilation.DeclaredTypes;
-            var types2 = compilation.DeclaredTypes;
+            var types1 = compilation.Types;
+            var types2 = compilation.Types;
 
             Assert.Same( types1, types2 );
         }
@@ -48,7 +48,7 @@ namespace NS
 
             var compilation = CreateCompilationModel( code );
 
-            var types = compilation.DeclaredTypes.ToList();
+            var types = compilation.Types.ToList();
             Assert.Equal( 2, types.Count );
 
             var c1 = types[0];
@@ -84,7 +84,7 @@ class C
 
             var compilation = CreateCompilationModel( code );
 
-            var type = compilation.DeclaredTypes.Single();
+            var type = compilation.Types.Single();
             Assert.Equal( "C", type.Name );
 
             var methods = type.Methods;
@@ -127,7 +127,7 @@ class TestAttribute : Attribute
 
             var compilation = CreateCompilationModel( code );
 
-            var attribute = compilation.DeclaredTypes.ElementAt( 1 ).Attributes.Single();
+            var attribute = compilation.Types.ElementAt( 1 ).Attributes.Single();
             Assert.Equal( "TestAttribute", attribute.Type.FullName );
             Assert.Equal( new object?[] { 42, "foo", null }, attribute.ConstructorArguments.Select( a => a.Value ) );
             var namedArguments = attribute.NamedArguments;
@@ -156,7 +156,7 @@ interface I<T>
 
             var compilation = CreateCompilationModel( code );
 
-            var methods = compilation.DeclaredTypes.Single().Methods.ToList();
+            var methods = compilation.Types.Single().Methods.ToList();
             Assert.Equal( 2, methods.Count );
 
             var m1 = methods[0];
@@ -212,7 +212,7 @@ class C<T1, T2>
 
             var compilation = CreateCompilationModel( code );
 
-            var type = compilation.DeclaredTypes.Single();
+            var type = compilation.Types.Single();
 
             Assert.Equal( new[] { "T1", "T2" }, type.TypeArguments.Select<IType, string>( t => t.ToString()! ) );
 
@@ -262,7 +262,7 @@ class C
 
             var compilation = CreateCompilationModel( code );
 
-            var parameterTypes = from type in compilation.DeclaredTypes
+            var parameterTypes = from type in compilation.Types
                                  from method in type.Methods
                                  from parameter in method.Parameters
                                  select parameter.Type;
@@ -296,7 +296,7 @@ class C
 
             var compilation = CreateCompilationModel( code );
 
-            var type = Assert.Single( compilation.DeclaredTypes )!;
+            var type = Assert.Single( compilation.Types )!;
 
             var propertyNames = type.Properties.Select( p => p.Name );
 
@@ -319,7 +319,7 @@ class C
 
             var compilation = CreateCompilationModel( code );
 
-            var type = Assert.Single( compilation.DeclaredTypes )!;
+            var type = Assert.Single( compilation.Types )!;
 
             var fieldNames = type.Fields.Select( p => p.Name );
 
@@ -341,7 +341,7 @@ class C
 
             var compilation = CreateCompilationModel( code );
 
-            var type = Assert.Single( compilation.DeclaredTypes )!;
+            var type = Assert.Single( compilation.Types )!;
 
             var refKinds = type.Properties.Select( p => p.RefKind );
 
@@ -367,7 +367,7 @@ class C
 
             var compilation = CreateCompilationModel( code );
 
-            var type = Assert.Single( compilation.DeclaredTypes )!;
+            var type = Assert.Single( compilation.Types )!;
 
             var eventNames = type.Events.Select( p => p.Name );
 
@@ -397,7 +397,7 @@ class C : IDisposable
 
             var compilation = CreateCompilationModel( code );
 
-            var type = Assert.Single( compilation.DeclaredTypes )!;
+            var type = Assert.Single( compilation.Types )!;
 
             Assert.Equal(
                 new[] { Default, Finalizer, ExplicitInterfaceImplementation, ConversionOperator, UserDefinedOperator },
@@ -431,7 +431,7 @@ class C<T>
 
             var compilation = CreateCompilationModel( code );
 
-            var type = Assert.Single( compilation.DeclaredTypes )!;
+            var type = Assert.Single( compilation.Types )!;
 
             var typeKinds = new[] { TypeKind.Array, Class, TypeKind.Delegate, Dynamic, TypeKind.Enum, GenericParameter, Interface, Pointer, Struct };
 
@@ -453,7 +453,7 @@ class C
 
             var compilation = CreateCompilationModel( code );
 
-            var type = Assert.Single( compilation.DeclaredTypes )!;
+            var type = Assert.Single( compilation.Types )!;
 
             Assert.Equal( new[] { None, In, Ref, Out }, type.Methods.First().Parameters.Select( p => p.RefKind ) );
             Assert.Equal( new[] { None, Ref, RefReadOnly }, type.Methods.Select( m => m.ReturnParameter.RefKind ) );
@@ -472,7 +472,7 @@ class C
 
             var compilation = CreateCompilationModel( code );
 
-            var type = Assert.Single( compilation.DeclaredTypes )!;
+            var type = Assert.Single( compilation.Types )!;
 
             var method = type.Methods.First();
 
@@ -529,7 +529,7 @@ class C<T>
 
             var compilation = CreateCompilationModel( code );
 
-            var type = Assert.Single( compilation.DeclaredTypes )!;
+            var type = Assert.Single( compilation.Types )!;
 
             var fieldTypes = type.Fields.Select( p => (INamedType) p.Type ).ToList();
 
@@ -557,10 +557,10 @@ partial class B
 
             var compilation = CreateCompilationModel( code );
 
-            Assert.Equal( 2, compilation.DeclaredTypes.Count );
+            Assert.Equal( 2, compilation.Types.Count );
 
-            Assert.False( compilation.DeclaredTypes.Single( t => t.Name == "A" ).IsPartial );
-            Assert.True( compilation.DeclaredTypes.Single( t => t.Name == "B" ).IsPartial );
+            Assert.False( compilation.Types.Single( t => t.Name == "A" ).IsPartial );
+            Assert.True( compilation.Types.Single( t => t.Name == "B" ).IsPartial );
         }
 
         [Fact]
@@ -575,7 +575,7 @@ class C<TC>
 
             var compilation = CreateCompilationModel( code );
 
-            var type = Assert.Single( compilation.DeclaredTypes )!;
+            var type = Assert.Single( compilation.Types )!;
             Assert.True( type.IsOpenGeneric );
 
             var openTypeMethod = type.Methods.First();
@@ -610,7 +610,7 @@ class Class<T>
 
             var compilation = CreateCompilationModel( code );
 
-            var openType = compilation.DeclaredTypes.Single();
+            var openType = compilation.Types.Single();
             var typeInstance = openType.ConstructGenericInstance( typeof(string) );
 
             Assert.Equal( "string", openType.Fields.Single().ForTypeInstance( typeInstance ).Type.ToString() );
@@ -644,7 +644,7 @@ class Parent<TParent>
             var compilation = CreateCompilationModel( code );
 
             // Find the different types and check the IsGeneric and IsOpenGeneric properties.
-            var openParentType = Assert.Single( compilation.DeclaredTypes )!;
+            var openParentType = Assert.Single( compilation.Types )!;
 
             var genericNestedTypeOnOpenGenericParent = openParentType.NestedTypes.OfName( "NestedGeneric" ).Single();
             Assert.True( genericNestedTypeOnOpenGenericParent.IsOpenGeneric );
@@ -704,15 +704,15 @@ interface L : J, K {}
 
             var compilation = CreateCompilationModel( code );
 
-            var type = compilation.DeclaredTypes.OfName( "C" ).Single();
+            var type = compilation.Types.OfName( "C" ).Single();
 
             Assert.Equal( 3, compilation.GetDepth( type ) );
             Assert.Equal( 4, compilation.GetDepth( type.Methods.OfName( "M" ).Single() ) );
             Assert.Equal( 5, compilation.GetDepth( type.Methods.OfName( "M" ).Single().LocalFunctions.Single() ) );
-            Assert.Equal( 1, compilation.GetDepth( compilation.DeclaredTypes.OfName( "I" ).Single() ) );
-            Assert.Equal( 2, compilation.GetDepth( compilation.DeclaredTypes.OfName( "J" ).Single() ) );
-            Assert.Equal( 2, compilation.GetDepth( compilation.DeclaredTypes.OfName( "K" ).Single() ) );
-            Assert.Equal( 3, compilation.GetDepth( compilation.DeclaredTypes.OfName( "L" ).Single() ) );
+            Assert.Equal( 1, compilation.GetDepth( compilation.Types.OfName( "I" ).Single() ) );
+            Assert.Equal( 2, compilation.GetDepth( compilation.Types.OfName( "J" ).Single() ) );
+            Assert.Equal( 2, compilation.GetDepth( compilation.Types.OfName( "K" ).Single() ) );
+            Assert.Equal( 3, compilation.GetDepth( compilation.Types.OfName( "L" ).Single() ) );
             Assert.Equal( 4, compilation.GetDepth( type.NestedTypes.OfName( "D" ).Single() ) );
         }
     }

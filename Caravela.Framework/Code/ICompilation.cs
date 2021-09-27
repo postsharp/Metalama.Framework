@@ -15,13 +15,13 @@ namespace Caravela.Framework.Code
     public interface ICompilation : IAssembly
     {
         IProject Project { get; }
-        
+
         string AssemblyName { get; }
-        
+
         /// <summary>
         /// Gets the list of types declared in the current compilation, in all namespaces, but not the nested types.
         /// </summary>
-        INamedTypeList DeclaredTypes { get; }
+        INamedTypeList Types { get; }
 
         /// <summary>
         /// Gets a service that allows to create type instances and compare them.
@@ -38,6 +38,10 @@ namespace Caravela.Framework.Code
         /// the same type or declaration even if they belong to different compilation versions.
         /// </summary>
         IDeclarationComparer InvariantComparer { get; }
+
+        INamespace RootNamespace { get; }
+
+        INamespace? GetNamespace( string ns );
 
         IEnumerable<T> GetAspectsOf<T>( IDeclaration declaration )
             where T : IAspect;

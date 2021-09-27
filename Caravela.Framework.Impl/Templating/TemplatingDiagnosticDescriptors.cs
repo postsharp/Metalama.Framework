@@ -236,7 +236,7 @@ namespace Caravela.Framework.Impl.Templating
                 "The type '{0}' is forbidden in a template 'dynamic' cannot be used as a generic argument type or an array element type.",
                 _category,
                 Error );
-        
+
         internal static readonly DiagnosticDefinition<string> TemplateMustBeInNullableContext
             = new(
                 "CR0228",

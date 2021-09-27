@@ -37,7 +37,8 @@ namespace Caravela.Framework.Impl.DesignTime.Refactoring
             this._source = new InteractiveAspectSource( aspectClass, targetSymbol );
         }
 
-        private protected override IReadOnlyList<IAspectSource> CreateAspectSources( AspectPipelineConfiguration configuration ) => new[] { this._source };
+        private protected override ImmutableArray<IAspectSource> CreateAspectSources( AspectPipelineConfiguration configuration, IProject project )
+            => ImmutableArray.Create<IAspectSource>( this._source );
 
         public static bool TryExecute(
             IProjectOptions projectOptions,
