@@ -40,7 +40,7 @@ class C
 }
 ";
 
-            var compilation = CreateCompilationModel( code );
+            var compilation = this.CreateCompilationModel( code );
             var type = compilation.Types[0];
             var intType = compilation.Factory.GetTypeByReflectionType( typeof(int) );
             var objectType = compilation.Factory.GetTypeByReflectionType( typeof(object) );
@@ -96,7 +96,7 @@ class C
 }
 ";
 
-            var compilation = CreateCompilationModel( code );
+            var compilation = this.CreateCompilationModel( code );
             var type = compilation.Types[0];
             var intType = compilation.Factory.GetTypeByReflectionType( typeof(int) );
 
@@ -152,7 +152,7 @@ class C
 }
 ";
 
-            var compilation = CreateCompilationModel( code );
+            var compilation = this.CreateCompilationModel( code );
             var type = compilation.Types[0];
 
             var matchedMethods1 = type.Methods.OfCompatibleSignature( "Foo", Array.Empty<IType>() ).ToArray();
@@ -183,7 +183,7 @@ class C
 }
 ";
 
-            var compilation = CreateCompilationModel( code );
+            var compilation = this.CreateCompilationModel( code );
             var type = compilation.Types[0];
 
             var matchedMethods1 = type.Methods.OfCompatibleSignature( "Foo", Array.Empty<IType>(), isStatic: false );
@@ -244,7 +244,7 @@ class C
 }
 ";
 
-            var compilation = CreateCompilationModel( code );
+            var compilation = this.CreateCompilationModel( code );
             var type = compilation.Types[0];
             var intType = compilation.Factory.GetTypeByReflectionType( typeof(int) );
             var objectType = compilation.Factory.GetTypeByReflectionType( typeof(object) );
@@ -304,7 +304,7 @@ class C : B
 }
 ";
 
-            var compilation = CreateCompilationModel( code );
+            var compilation = this.CreateCompilationModel( code );
             var typeA = compilation.Types[0];
             var typeB = compilation.Types[1];
             var typeC = compilation.Types[2];

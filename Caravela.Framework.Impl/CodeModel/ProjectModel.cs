@@ -9,6 +9,7 @@ using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 namespace Caravela.Framework.Impl.CodeModel
@@ -43,7 +44,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public string? TargetFramework => this._projectOptions.TargetFramework;
 
-        public bool TryGetProperty( string name, out string? value ) => this._projectOptions.TryGetProperty( name, out value );
+        public bool TryGetProperty( string name, [NotNullWhen( true )] out string? value ) => this._projectOptions.TryGetProperty( name, out value );
 
         public T Extension<T>()
             where T : IProjectExtension, new()

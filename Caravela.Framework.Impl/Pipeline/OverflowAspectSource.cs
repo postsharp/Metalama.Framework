@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Aspects;
 using Caravela.Framework.Impl.CodeModel;
@@ -18,17 +19,17 @@ namespace Caravela.Framework.Impl.Pipeline
     /// </summary>
     internal class OverflowAspectSource : IAspectSource
     {
-        private readonly List<(IAspectSource Source, AspectClass AspectClass)> _aspectSources = new();
+        private readonly List<(IAspectSource Source, IAspectClass AspectClass)> _aspectSources = new();
 
         public AspectSourcePriority Priority => AspectSourcePriority.Aggregate;
 
-        public IEnumerable<AspectClass> AspectTypes => this._aspectSources.Select( a => a.AspectClass ).Distinct();
+        public IEnumerable<IAspectClass> AspectTypes => this._aspectSources.Select( a => a.AspectClass ).Distinct();
 
         public IEnumerable<IDeclaration> GetExclusions( INamedType aspectType ) => Enumerable.Empty<IDeclaration>();
 
         public IEnumerable<AspectInstance> GetAspectInstances(
             CompilationModel compilation,
-            AspectClass aspectClass,
+            IAspectClass aspectClass,
             IDiagnosticAdder diagnosticAdder,
             CancellationToken cancellationToken )
         {
@@ -41,7 +42,7 @@ namespace Caravela.Framework.Impl.Pipeline
                 .SelectMany( a => a.GetAspectInstances( compilation, aspectClass, diagnosticAdder, cancellationToken ) );
         }
 
-        public void Add( IAspectSource aspectSource, AspectClass aspectClass )
+        public void Add( IAspectSource aspectSource, IAspectClass aspectClass )
         {
             this._aspectSources.Add( (aspectSource, aspectClass) );
         }

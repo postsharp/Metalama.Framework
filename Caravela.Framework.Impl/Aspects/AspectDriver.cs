@@ -30,11 +30,11 @@ namespace Caravela.Framework.Impl.Aspects
         private readonly UserCodeInvoker _userCodeInvoker;
         private readonly IServiceProvider _serviceProvider;
         private readonly Compilation _compilation;
-        private readonly List<AspectClassMember> _declarativeAdviceAttributes;
+        private readonly List<TemplateClassMember> _declarativeAdviceAttributes;
 
-        public AspectClass AspectClass { get; }
+        public IAspectClassImpl AspectClass { get; }
 
-        public AspectDriver( IServiceProvider serviceProvider, AspectClass aspectClass, Compilation compilation )
+        public AspectDriver( IServiceProvider serviceProvider, IAspectClassImpl aspectClass, Compilation compilation )
         {
             this._userCodeInvoker = serviceProvider.GetService<UserCodeInvoker>();
             this._serviceProvider = serviceProvider;
@@ -42,7 +42,9 @@ namespace Caravela.Framework.Impl.Aspects
             this.AspectClass = aspectClass;
 
             // Introductions must have a deterministic order because of testing.
-            this._declarativeAdviceAttributes = aspectClass.Members.Where( m => m.Value.TemplateInfo.AttributeType == TemplateAttributeType.Introduction )
+            this._declarativeAdviceAttributes = aspectClass
+                .TemplateClasses.SelectMany( c => c.Members )
+                .Where( m => m.Value.TemplateInfo.AttributeType == TemplateAttributeType.Introduction )
                 .Select( m => m.Value )
                 .OrderBy( m => m.Symbol.GetPrimarySyntaxReference()?.SyntaxTree.FilePath )
                 .ThenBy( m => m.Symbol.GetPrimarySyntaxReference()?.Span.Start )
@@ -103,13 +105,20 @@ namespace Caravela.Framework.Impl.Aspects
                 return CreateResultForError( diagnostic );
             }
 
-            var diagnosticSink = new UserDiagnosticSink( aspectInstance.AspectClass.Project, targetDeclaration );
+            var diagnosticSink = new UserDiagnosticSink( this.AspectClass.Project, targetDeclaration );
 
             using ( DiagnosticContext.WithDefaultLocation( diagnosticSink.DefaultScope?.DiagnosticLocation ) )
             {
                 var declarativeAdvices =
                     this._declarativeAdviceAttributes
-                        .Select( x => CreateDeclarativeAdvice( aspectInstance, diagnosticSink, targetDeclaration, x.TemplateInfo, x.Symbol ) )
+                        .Select(
+                            x => CreateDeclarativeAdvice(
+                                aspectInstance,
+                                aspectInstance.TemplateInstances[x.TemplateClass],
+                                diagnosticSink,
+                                targetDeclaration,
+                                x.TemplateInfo,
+                                x.Symbol ) )
                         .WhereNotNull()
                         .ToArray();
 
@@ -118,6 +127,7 @@ namespace Caravela.Framework.Impl.Aspects
                     diagnosticSink,
                     declarativeAdvices,
                     aspectInstance,
+                    aspectInstance.TemplateInstances.Count == 1 ? aspectInstance.TemplateInstances.Values.Single() : null,
                     this._serviceProvider );
 
                 var aspectBuilder = new AspectBuilder<T>( targetDeclaration, diagnosticSink, declarativeAdvices, adviceFactory, cancellationToken );
@@ -135,7 +145,7 @@ namespace Caravela.Framework.Impl.Aspects
                             false,
                             new ImmutableUserDiagnosticList( e.Diagnostics, ImmutableArray<ScopedSuppression>.Empty ),
                             ImmutableArray<Advice>.Empty,
-                            ImmutableArray<IAspectSource>.Empty );
+                            aspectBuilder.AspectSources.ToImmutableArray() );
                 }
                 catch ( Exception e )
                 {
@@ -159,6 +169,7 @@ namespace Caravela.Framework.Impl.Aspects
 
         private static Advice? CreateDeclarativeAdvice<T>(
             AspectInstance aspect,
+            TemplateClassInstance templateInstance,
             IDiagnosticAdder diagnosticAdder,
             T aspectTarget,
             TemplateInfo template,
@@ -167,6 +178,7 @@ namespace Caravela.Framework.Impl.Aspects
         {
             template.TryCreateAdvice(
                 aspect,
+                templateInstance,
                 diagnosticAdder,
                 aspectTarget,
                 ((CompilationModel) aspectTarget.Compilation).Factory.GetDeclaration( templateDeclaration ),

@@ -32,7 +32,7 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime
                        + " struct GenericStruct {} "
                        + additionalCode;
 
-            var compilation = CreateCompilationModel( code, dependentCode );
+            var compilation = this.CreateCompilationModel( code, dependentCode );
 
             using UnloadableCompileTimeDomain domain = new();
             var loader = CompileTimeProjectLoader.Create( domain, this.ServiceProvider );
@@ -60,7 +60,7 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime
         public void TestField()
         {
             var code = $@"[assembly: Caravela.Framework.Tests.UnitTests.CompileTime.AttributeDeserializerTests.TestAttribute( Field = 5 )]";
-            var compilation = CreateCompilationModel( code );
+            var compilation = this.CreateCompilationModel( code );
 
             using UnloadableCompileTimeDomain domain = new();
             var loader = CompileTimeProjectLoader.Create( domain, this.ServiceProvider );
@@ -244,7 +244,7 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime
             object Deserialize( string args )
             {
                 var code = $@"[assembly: Caravela.Framework.Tests.UnitTests.CompileTime.AttributeDeserializerTests.TestParamsAttribute( {args} )]";
-                var compilation = CreateCompilationModel( code );
+                var compilation = this.CreateCompilationModel( code );
 
                 using UnloadableCompileTimeDomain domain = new();
                 var loader = CompileTimeProjectLoader.Create( domain, this.ServiceProvider );
@@ -271,7 +271,7 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime
         public void AttributesOfUnknownTypeAreIgnored()
         {
             var code = @"[assembly: UnknownType] [UnknownType] class C {}";
-            var compilation = CreateCompilationModel( code, ignoreErrors: true );
+            var compilation = this.CreateCompilationModel( code, ignoreErrors: true );
 
             Assert.Empty( compilation.Attributes );
             Assert.Empty( compilation.Types.Single().Attributes );
@@ -281,7 +281,7 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime
         public void PropertiesOfInvalidNameAreIgnored()
         {
             var code = $@"[assembly: Caravela.Framework.Tests.UnitTests.CompileTime.AttributeDeserializerTests.TestAttribute( InvalidProperty = 0 )]";
-            var compilation = CreateCompilationModel( code, ignoreErrors: true );
+            var compilation = this.CreateCompilationModel( code, ignoreErrors: true );
 
             using UnloadableCompileTimeDomain domain = new();
             var loader = CompileTimeProjectLoader.Create( domain, this.ServiceProvider );
@@ -299,7 +299,7 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime
             var code = $@"[assembly: Caravela.Framework.Tests.UnitTests.CompileTime.AttributeDeserializerTests.TestAttribute( 0 )] "
                        + "[Caravela.Framework.Tests.UnitTests.CompileTime.AttributeDeserializerTests.TestAttribute( 0 )] class C {}";
 
-            var compilation = CreateCompilationModel( code, ignoreErrors: true );
+            var compilation = this.CreateCompilationModel( code, ignoreErrors: true );
 
             Assert.Empty( compilation.Attributes );
             Assert.Empty( compilation.Types.Single().Attributes );
@@ -309,7 +309,7 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime
         public void PropertiesWithInvalidValueAreIgnored()
         {
             var code = @"[assembly: Caravela.Framework.Tests.UnitTests.CompileTime.AttributeDeserializerTests.TestAttribute( Int32Property = ""a"" )]";
-            var compilation = CreateCompilationModel( code, ignoreErrors: true );
+            var compilation = this.CreateCompilationModel( code, ignoreErrors: true );
 
             using UnloadableCompileTimeDomain domain = new();
             var loader = CompileTimeProjectLoader.Create( domain, this.ServiceProvider );
@@ -325,7 +325,7 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime
         public void AttributesWithInvalidConstructorArgumentsAreIgnored()
         {
             var code = @"[assembly: Caravela.Framework.Tests.UnitTests.CompileTime.AttributeDeserializerTests.TestAttribute( 0 )]";
-            var compilation = CreateCompilationModel( code, ignoreErrors: true );
+            var compilation = this.CreateCompilationModel( code, ignoreErrors: true );
 
             Assert.Empty( compilation.Attributes );
         }
@@ -334,7 +334,7 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime
         public void ThrowingConstructorFailsSafely()
         {
             var code = @"[assembly: Caravela.Framework.Tests.UnitTests.CompileTime.AttributeDeserializerTests.ThrowingAttribute( true )]";
-            var compilation = CreateCompilationModel( code );
+            var compilation = this.CreateCompilationModel( code );
             var attribute = compilation.Attributes.Single();
 
             using UnloadableCompileTimeDomain domain = new();
@@ -351,7 +351,7 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime
         public void ThrowingPropertyFailsSafely()
         {
             var code = @"[assembly: Caravela.Framework.Tests.UnitTests.CompileTime.AttributeDeserializerTests.ThrowingAttribute( false, Property = 0 )]";
-            var compilation = CreateCompilationModel( code );
+            var compilation = this.CreateCompilationModel( code );
             var attribute = compilation.Attributes.Single();
 
             using UnloadableCompileTimeDomain domain = new();
@@ -369,7 +369,7 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime
         {
             var code = @"[assembly: MyAttribute] class MyAttribute : System.Attribute {}";
 
-            var compilation = CreateCompilationModel( code );
+            var compilation = this.CreateCompilationModel( code );
             var attribute = compilation.Attributes.Single();
 
             using UnloadableCompileTimeDomain domain = new();

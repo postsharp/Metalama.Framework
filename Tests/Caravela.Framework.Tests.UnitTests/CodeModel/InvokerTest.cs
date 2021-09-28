@@ -39,7 +39,7 @@ class TargetCode
 
             var generator = OurSyntaxGenerator.Default;
 
-            var compilation = CreateCompilationModel( code );
+            var compilation = this.CreateCompilationModel( code );
 
             using ( TemplateExpansionContext.WithSyntaxGenerationContext( SyntaxGenerationContext.CreateDefault( compilation.RoslynCompilation ) ) )
             {
@@ -126,7 +126,7 @@ class TargetCode
     }
 }";
 
-            var compilation = CreateCompilationModel( code );
+            var compilation = this.CreateCompilationModel( code );
 
             using ( TemplateExpansionContext.WithSyntaxGenerationContext( SyntaxGenerationContext.CreateDefault( compilation.RoslynCompilation ) ) )
             {
@@ -190,7 +190,7 @@ class TargetCode
     }
 }";
 
-            var compilation = CreateCompilationModel( code );
+            var compilation = this.CreateCompilationModel( code );
 
             using ( TemplateExpansionContext.WithSyntaxGenerationContext( SyntaxGenerationContext.CreateDefault( compilation.RoslynCompilation ) ) )
             {
@@ -265,7 +265,7 @@ class TargetCode
     }
 }";
 
-            var compilation = CreateCompilationModel( code );
+            var compilation = this.CreateCompilationModel( code );
 
             using ( TemplateExpansionContext.WithSyntaxGenerationContext( SyntaxGenerationContext.CreateDefault( compilation.RoslynCompilation ) ) )
             {
@@ -292,7 +292,7 @@ class TargetCode
     }
 }";
 
-            var compilation = CreateCompilationModel( code );
+            var compilation = this.CreateCompilationModel( code );
 
             using ( TemplateExpansionContext.WithSyntaxGenerationContext( SyntaxGenerationContext.CreateDefault( compilation.RoslynCompilation ) ) )
             {
@@ -323,7 +323,7 @@ class TargetCode
     int this[int index] => 42;
 }";
 
-            var compilation = CreateCompilationModel( code );
+            var compilation = this.CreateCompilationModel( code );
 
             using ( TemplateExpansionContext.WithSyntaxGenerationContext( SyntaxGenerationContext.CreateDefault( compilation.RoslynCompilation ) ) )
             {
@@ -357,7 +357,7 @@ class TargetCode
     int this[int index] => 42;
 }";
 
-            var compilation = CreateCompilationModel( code );
+            var compilation = this.CreateCompilationModel( code );
 
             using ( TemplateExpansionContext.WithSyntaxGenerationContext( SyntaxGenerationContext.CreateDefault( compilation.RoslynCompilation ) ) )
             {
@@ -386,7 +386,7 @@ class TargetCode
     event System.EventHandler MyEvent;
 }";
 
-            var compilation = CreateCompilationModel( code );
+            var compilation = this.CreateCompilationModel( code );
 
             using ( TemplateExpansionContext.WithSyntaxGenerationContext( SyntaxGenerationContext.CreateDefault( compilation.RoslynCompilation ) ) )
             {
@@ -414,7 +414,7 @@ class TargetCode
     event System.EventHandler MyEvent;
 }";
 
-            var compilation = CreateCompilationModel( code );
+            var compilation = this.CreateCompilationModel( code );
 
             using ( TemplateExpansionContext.WithSyntaxGenerationContext( SyntaxGenerationContext.CreateDefault( compilation.RoslynCompilation ) ) )
             {
@@ -458,7 +458,7 @@ class TargetCode
     }
 }";
 
-            var compilation = CreateCompilationModel( code );
+            var compilation = this.CreateCompilationModel( code );
 
             using ( TemplateExpansionContext.WithSyntaxGenerationContext( SyntaxGenerationContext.CreateDefault( compilation.RoslynCompilation ) ) )
             {

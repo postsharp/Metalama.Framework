@@ -37,7 +37,7 @@ class C : IAspect
 }
 ";
 
-            var compilation = CreateCompilationModel( code );
+            var compilation = this.CreateCompilationModel( code );
             var type = compilation.Types.OfName( "C" ).Single();
             this.AssertScope( type, TemplatingScope.Both );
             this.AssertScope( type.Fields.OfName( "F" ).Single(), TemplatingScope.Both );
@@ -63,7 +63,7 @@ class D : System.IDisposable
 }
 ";
 
-            var compilation = CreateCompilationModel( code );
+            var compilation = this.CreateCompilationModel( code );
             var type = compilation.Types.OfName( "C" ).Single();
             this.AssertScope( type, TemplatingScope.RunTimeOnly );
             this.AssertScope( type.Fields.OfName( "F" ).Single(), TemplatingScope.RunTimeOnly );
@@ -83,7 +83,7 @@ class C
 }
 ";
 
-            var compilation = CreateCompilationModel( code );
+            var compilation = this.CreateCompilationModel( code );
             var type = compilation.Types.OfName( "C" ).Single();
             this.AssertScope( type, TemplatingScope.Both );
         }
@@ -102,7 +102,7 @@ class C
 }
 ";
 
-            var compilation = CreateCompilationModel( code );
+            var compilation = this.CreateCompilationModel( code );
             var type = compilation.Types.OfName( "C" ).Single();
             this.AssertScope( type, TemplatingScope.CompileTimeOnly );
             this.AssertScope( type.Fields.OfName( "F" ).Single(), TemplatingScope.CompileTimeOnlyReturningBoth );
@@ -123,7 +123,7 @@ class C
 }
 ";
 
-            var compilation = CreateCompilationModel( code );
+            var compilation = this.CreateCompilationModel( code );
             this.AssertScope( compilation.Types.OfName( "C" ).Single(), TemplatingScope.Both );
         }
 
@@ -131,7 +131,7 @@ class C
         public void NoCaravelaReference()
         {
             var code = "class C {}";
-            var compilation = CreateCompilationModel( code, addCaravelaReferences: false );
+            var compilation = this.CreateCompilationModel( code, addCaravelaReferences: false );
             this.AssertScope( (INamedType) compilation.Factory.GetTypeByReflectionType( typeof(int) ), TemplatingScope.Both );
             this.AssertScope( (INamedType) compilation.Factory.GetTypeByReflectionType( typeof(Console) ), TemplatingScope.RunTimeOnly );
             this.AssertScope( compilation.Types.Single(), TemplatingScope.RunTimeOnly );

@@ -49,7 +49,7 @@ namespace Caravela.Framework.Tests.UnitTests
         public void TypeOfSyntax( string type, string expectedTypeOf, bool nullable )
         {
             var code = $"using System.Collections.Generic; class T {{ {type} field; }} ";
-            var compilation = CreateCompilationModel( code );
+            var compilation = this.CreateCompilationModel( code );
             var fieldType = compilation.Types.Single().Fields.Single().Type.GetSymbol();
 
             var defaultSyntaxGenerator = OurSyntaxGenerator.GetInstance( nullable );
@@ -93,7 +93,7 @@ namespace Caravela.Framework.Tests.UnitTests
         public void TypeSyntax( string type, string expectedTypeOf, bool nullable )
         {
             var code = $"using System.Collections.Generic; class T {{ {type} field; }} ";
-            var compilation = CreateCompilationModel( code );
+            var compilation = this.CreateCompilationModel( code );
             var fieldType = compilation.Types.Single().Fields.Single().Type.GetSymbol();
 
             var defaultSyntaxGenerator = OurSyntaxGenerator.GetInstance( nullable );

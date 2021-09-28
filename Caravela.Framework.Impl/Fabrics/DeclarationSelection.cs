@@ -7,8 +7,6 @@ using Caravela.Framework.Eligibility;
 using Caravela.Framework.Impl.Aspects;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Diagnostics;
-using Caravela.Framework.Impl.ServiceProvider;
-using Caravela.Framework.Impl.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,29 +22,22 @@ namespace Caravela.Framework.Impl.Fabrics
 
         protected Func<CompilationModel, IEnumerable<T>> Selector { get; }
 
-        protected AspectClassRegistry AspectClasses { get; }
-
-        protected IServiceProvider ServiceProvider { get; }
-
-        protected UserCodeInvoker UserCodeInvoker { get; }
+        protected FabricContext Context { get; }
 
         public DeclarationSelection(
             Action<IAspectSource> registerAspectSource,
             Func<CompilationModel, IEnumerable<T>> selectTargets,
-            IServiceProvider serviceProvider,
-            AspectClassRegistry aspectClasses )
+            FabricContext context )
         {
             this._registerAspectSource = registerAspectSource;
             this.Selector = selectTargets;
-            this.AspectClasses = aspectClasses;
-            this.ServiceProvider = serviceProvider;
-            this.UserCodeInvoker = serviceProvider.GetService<UserCodeInvoker>();
+            this.Context = context;
         }
 
         private AspectClass GetAspectClass<TAspect>()
             where TAspect : IAspect
         {
-            var aspectClass = this.AspectClasses.AspectClasses[typeof(TAspect).FullName];
+            var aspectClass = this.Context.AspectClasses[typeof(TAspect).FullName];
 
             if ( aspectClass.IsAbstract )
             {
@@ -69,9 +60,9 @@ namespace Caravela.Framework.Impl.Fabrics
                     compilation => this.Selector( compilation )
                         .Select(
                             t => new AspectInstance(
-                                this.ServiceProvider,
+                                this.Context.ServiceProvider,
                                 Expression.Lambda<Func<IAspect>>(
-                                    this.UserCodeInvoker.Invoke( () => createAspect( t ) ).Body,
+                                    this.Context.UserCodeInvoker.Invoke( () => createAspect( t ) ).Body,
                                     Array.Empty<ParameterExpression>() ),
                                 t,
                                 aspectClass ) ) ) );
@@ -88,7 +79,7 @@ namespace Caravela.Framework.Impl.Fabrics
                     compilation => this.Selector( compilation )
                         .Select(
                             t => new AspectInstance(
-                                this.UserCodeInvoker.Invoke( () => createAspect( t ) ),
+                                this.Context.UserCodeInvoker.Invoke( () => createAspect( t ) ),
                                 t,
                                 aspectClass ) ) ) );
         }

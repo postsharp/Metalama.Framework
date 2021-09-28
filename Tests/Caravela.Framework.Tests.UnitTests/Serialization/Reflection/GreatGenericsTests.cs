@@ -44,7 +44,7 @@ class User {
     public Descendant<float> FullyInstantiated;
 }";
 
-            var compilation = CreateCompilationModel( this._code );
+            var compilation = this.CreateCompilationModel( this._code );
             this._topLevelTypes = compilation.Types;
         }
 

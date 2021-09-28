@@ -7,78 +7,40 @@ using Caravela.Framework.Eligibility;
 using Caravela.Framework.Fabrics;
 using Caravela.Framework.Impl.Aspects;
 using Caravela.Framework.Impl.CodeModel;
-using Caravela.Framework.Impl.Diagnostics;
+using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
-using System.Reflection;
-using System.Threading;
 using Attribute = System.Attribute;
 
 namespace Caravela.Framework.Impl.Fabrics
 {
-    internal class TypeFabricAspectSource : IAspectSource
-    {
-        public AspectSourcePriority Priority => throw new NotImplementedException();
-
-        public IEnumerable<AspectClass> AspectTypes => throw new NotImplementedException();
-
-        public IEnumerable<IDeclaration> GetExclusions( INamedType aspectType ) => throw new NotImplementedException();
-
-        public IEnumerable<AspectInstance> GetAspectInstances(
-            CompilationModel compilation,
-            AspectClass aspectClass,
-            IDiagnosticAdder diagnosticAdder,
-            CancellationToken cancellationToken )
-            => throw new NotImplementedException();
-    }
-
     internal class TypeFabricDriver : FabricDriver
     {
-        private readonly string _targetTypeName;
+        public TypeFabricDriver( FabricContext context, IFabric fabric, Compilation runTimeCompilation ) : base( context, fabric, runTimeCompilation ) { }
 
-        public TypeFabricDriver( IServiceProvider serviceProvider, AspectClassRegistry aspectClasses, IFabric fabric ) : base(
-            serviceProvider,
-            aspectClasses,
-            fabric )
+        public override void Execute( IAspectBuilderInternal aspectBuilder )
         {
-            var attribute = this.Fabric.GetType().GetCustomAttribute<FabricAttribute>();
-            this._targetTypeName = attribute.TargetTypeName.AssertNotNull();
-        }
-
-        public override FabricResult Execute( IProject project )
-        {
-            var builder = new Builder( this.ServiceProvider, project, this.AspectClasses, this._targetTypeName );
+            // Type fabrics execute as aspects, called from FabricAspectClass.
+            var builder = new Builder( (INamedType) aspectBuilder.Target, this.Context, aspectBuilder );
             ((ITypeFabric) this.Fabric).BuildFabric( builder );
-
-            return new FabricResult( builder );
         }
 
         public override FabricKind Kind => FabricKind.Type;
 
-        public override string OrderingKey => this._targetTypeName;
+        public override IDeclaration GetTarget( CompilationModel compilation ) => compilation.Factory.GetNamedType( (INamedTypeSymbol) this.TargetSymbol );
 
         private class Builder : BaseBuilder<INamedType>, ITypeFabricBuilder
         {
-            private readonly string _targetTypeName;
             private readonly NamedTypeSelection _namedTypeSelection;
 
-            public Builder( IServiceProvider serviceProvider, IProject project, AspectClassRegistry aspectClasses, string targetTypeName ) : base(
-                serviceProvider,
-                project,
-                aspectClasses )
+            public Builder( INamedType namedType, FabricContext context, IAspectBuilderInternal aspectBuilder ) : base( namedType, context, aspectBuilder )
             {
-                this._targetTypeName = targetTypeName;
-
                 this._namedTypeSelection = new NamedTypeSelection(
                     this.RegisterAspectSource,
-                    compilation => new[] { compilation.Factory.GetTypeByReflectionName( this._targetTypeName ) },
-                    serviceProvider,
-                    aspectClasses );
+                    compilation => new[] { compilation.Factory.GetDeclaration( namedType ) },
+                    context );
             }
-
-            protected override INamedType GetTargetDeclaration( CompilationModel compilation )
-                => compilation.Factory.GetTypeByReflectionName( this._targetTypeName );
 
             public void AddAspect<TAspect>( Func<INamedType, Expression<Func<TAspect>>> createAspect )
                 where TAspect : Attribute, IAspect<INamedType>

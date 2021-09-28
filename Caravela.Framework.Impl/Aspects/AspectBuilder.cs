@@ -14,7 +14,7 @@ using System.Threading;
 
 namespace Caravela.Framework.Impl.Aspects
 {
-    internal class AspectBuilder<T> : IAspectBuilder<T>
+    internal class AspectBuilder<T> : IAspectBuilder<T>, IAspectBuilderInternal
         where T : class, IDeclaration
     {
         private readonly UserDiagnosticSink _diagnosticSink;
@@ -22,8 +22,11 @@ namespace Caravela.Framework.Impl.Aspects
         private readonly AdviceFactory _adviceFactory;
         private bool _skipped;
 
-        [Obsolete( "Not implemented." )]
-        IProject IAspectLayerBuilder.Project => throw new NotImplementedException();
+        public IProject Project => this.Target.Compilation.Project;
+
+        public ImmutableArray<IAspectSource> AspectSources { get; private set; } = ImmutableArray<IAspectSource>.Empty;
+
+        public void AddAspectSource( IAspectSource aspectSource ) => this.AspectSources = this.AspectSources.Add( aspectSource );
 
         IReadOnlyList<IAspectInstance> IAspectLayerBuilder.UpstreamAspects => throw new NotImplementedException();
 

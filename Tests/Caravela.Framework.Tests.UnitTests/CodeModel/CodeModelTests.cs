@@ -24,7 +24,7 @@ namespace Caravela.Framework.Tests.UnitTests.CodeModel
             // This basically tests that [Memo] works.
 
             var code = "";
-            var compilation = CreateCompilationModel( code );
+            var compilation = this.CreateCompilationModel( code );
 
             var types1 = compilation.Types;
             var types2 = compilation.Types;
@@ -46,7 +46,7 @@ namespace NS
     class C {}
 }";
 
-            var compilation = CreateCompilationModel( code );
+            var compilation = this.CreateCompilationModel( code );
 
             var types = compilation.Types.ToList();
             Assert.Equal( 2, types.Count );
@@ -82,7 +82,7 @@ class C
     }
 }";
 
-            var compilation = CreateCompilationModel( code );
+            var compilation = this.CreateCompilationModel( code );
 
             var type = compilation.Types.Single();
             Assert.Equal( "C", type.Name );
@@ -125,7 +125,7 @@ class TestAttribute : Attribute
     public Type[] Types { get; set; }
 }";
 
-            var compilation = CreateCompilationModel( code );
+            var compilation = this.CreateCompilationModel( code );
 
             var attribute = compilation.Types.ElementAt( 1 ).Attributes.Single();
             Assert.Equal( "TestAttribute", attribute.Type.FullName );
@@ -154,7 +154,7 @@ interface I<T>
     ref readonly int M2();
 }";
 
-            var compilation = CreateCompilationModel( code );
+            var compilation = this.CreateCompilationModel( code );
 
             var methods = compilation.Types.Single().Methods.ToList();
             Assert.Equal( 2, methods.Count );
@@ -210,7 +210,7 @@ class C<T1, T2>
     static C<int, string> GetInstance() => null;
 }";
 
-            var compilation = CreateCompilationModel( code );
+            var compilation = this.CreateCompilationModel( code );
 
             var type = compilation.Types.Single();
 
@@ -237,7 +237,7 @@ class MyAttribute : Attribute
 }
 ";
 
-            var compilation = CreateCompilationModel( code );
+            var compilation = this.CreateCompilationModel( code );
 
             var attributes = compilation.Attributes.ToArray();
 
@@ -260,7 +260,7 @@ class C
 }
 ";
 
-            var compilation = CreateCompilationModel( code );
+            var compilation = this.CreateCompilationModel( code );
 
             var parameterTypes = from type in compilation.Types
                                  from method in type.Methods
@@ -294,7 +294,7 @@ class C
     int field;
 }";
 
-            var compilation = CreateCompilationModel( code );
+            var compilation = this.CreateCompilationModel( code );
 
             var type = Assert.Single( compilation.Types )!;
 
@@ -317,7 +317,7 @@ class C
     delegate void Handler();
 }";
 
-            var compilation = CreateCompilationModel( code );
+            var compilation = this.CreateCompilationModel( code );
 
             var type = Assert.Single( compilation.Types )!;
 
@@ -339,7 +339,7 @@ class C
     ref readonly int RefReadonly => ref field;
 }";
 
-            var compilation = CreateCompilationModel( code );
+            var compilation = this.CreateCompilationModel( code );
 
             var type = Assert.Single( compilation.Types )!;
 
@@ -365,7 +365,7 @@ class C
     delegate void Handler();
 }";
 
-            var compilation = CreateCompilationModel( code );
+            var compilation = this.CreateCompilationModel( code );
 
             var type = Assert.Single( compilation.Types )!;
 
@@ -395,7 +395,7 @@ class C : IDisposable
 	public static C operator -(C c) => c;
 }";
 
-            var compilation = CreateCompilationModel( code );
+            var compilation = this.CreateCompilationModel( code );
 
             var type = Assert.Single( compilation.Types )!;
 
@@ -429,7 +429,7 @@ class C<T>
     int s;
 }";
 
-            var compilation = CreateCompilationModel( code );
+            var compilation = this.CreateCompilationModel( code );
 
             var type = Assert.Single( compilation.Types )!;
 
@@ -451,7 +451,7 @@ class C
     ref readonly int M3() => ref i;
 }";
 
-            var compilation = CreateCompilationModel( code );
+            var compilation = this.CreateCompilationModel( code );
 
             var type = Assert.Single( compilation.Types )!;
 
@@ -470,7 +470,7 @@ class C
     void M(int i, int j = 42, string s = ""forty two"", decimal d = 3.14m, DateTime dt = default, DateTime? dt2 = null, object o = null) {}
 }";
 
-            var compilation = CreateCompilationModel( code );
+            var compilation = this.CreateCompilationModel( code );
 
             var type = Assert.Single( compilation.Types )!;
 
@@ -497,7 +497,7 @@ class C
         [Fact]
         public void GetTypeByReflectionType()
         {
-            var compilation = CreateCompilationModel( "" );
+            var compilation = this.CreateCompilationModel( "" );
 
             Assert.Equal(
                 "System.Collections.Generic.List<T>.Enumerator",
@@ -527,7 +527,7 @@ class C<T>
     (int i, int j) t;
 }";
 
-            var compilation = CreateCompilationModel( code );
+            var compilation = this.CreateCompilationModel( code );
 
             var type = Assert.Single( compilation.Types )!;
 
@@ -555,7 +555,7 @@ partial class B
 }
 ";
 
-            var compilation = CreateCompilationModel( code );
+            var compilation = this.CreateCompilationModel( code );
 
             Assert.Equal( 2, compilation.Types.Count );
 
@@ -573,7 +573,7 @@ class C<TC>
 }
 ";
 
-            var compilation = CreateCompilationModel( code );
+            var compilation = this.CreateCompilationModel( code );
 
             var type = Assert.Single( compilation.Types )!;
             Assert.True( type.IsOpenGeneric );
@@ -608,7 +608,7 @@ class Class<T>
 }
 ";
 
-            var compilation = CreateCompilationModel( code );
+            var compilation = this.CreateCompilationModel( code );
 
             var openType = compilation.Types.Single();
             var typeInstance = openType.ConstructGenericInstance( typeof(string) );
@@ -641,7 +641,7 @@ class Parent<TParent>
 }
 ";
 
-            var compilation = CreateCompilationModel( code );
+            var compilation = this.CreateCompilationModel( code );
 
             // Find the different types and check the IsGeneric and IsOpenGeneric properties.
             var openParentType = Assert.Single( compilation.Types )!;
@@ -702,7 +702,7 @@ interface K : I {}
 interface L : J, K {}
 ";
 
-            var compilation = CreateCompilationModel( code );
+            var compilation = this.CreateCompilationModel( code );
 
             var type = compilation.Types.OfName( "C" ).Single();
 

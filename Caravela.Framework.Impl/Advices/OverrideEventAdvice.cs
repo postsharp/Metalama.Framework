@@ -11,21 +11,22 @@ namespace Caravela.Framework.Impl.Advices
 {
     internal class OverrideEventAdvice : OverrideMemberAdvice<IEvent>
     {
-        public Template<IEvent> EventTemplate { get; }
+        public TemplateMember<IEvent> EventTemplate { get; }
 
-        public Template<IMethod> AddTemplate { get; }
+        public TemplateMember<IMethod> AddTemplate { get; }
 
-        public Template<IMethod> RemoveTemplate { get; }
+        public TemplateMember<IMethod> RemoveTemplate { get; }
 
         public OverrideEventAdvice(
             AspectInstance aspect,
+            TemplateClassInstance templateInstance,
             IEvent targetDeclaration,
-            Template<IEvent> eventTemplate,
-            Template<IMethod> addTemplate,
-            Template<IMethod> removeTemplate,
+            TemplateMember<IEvent> eventTemplate,
+            TemplateMember<IMethod> addTemplate,
+            TemplateMember<IMethod> removeTemplate,
             string? layerName,
             Dictionary<string, object?>? tags )
-            : base( aspect, targetDeclaration, layerName, tags )
+            : base( aspect, templateInstance, targetDeclaration, layerName, tags )
         {
             // We need either property template or both accessor templates, but never both.
             Invariant.Assert( eventTemplate.IsNotNull || (addTemplate.IsNotNull && removeTemplate.IsNotNull) );

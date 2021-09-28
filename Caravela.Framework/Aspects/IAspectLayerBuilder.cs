@@ -17,7 +17,6 @@ namespace Caravela.Framework.Aspects
     [InternalImplement]
     public interface IAspectLayerBuilder : IValidatorAdder
     {
-        [Obsolete( "Not implemented." )]
         IProject Project { get; }
 
         /// <summary>

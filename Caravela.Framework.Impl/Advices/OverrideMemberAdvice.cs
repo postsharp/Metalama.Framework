@@ -15,9 +15,10 @@ namespace Caravela.Framework.Impl.Advices
 
         public OverrideMemberAdvice(
             AspectInstance aspect,
+            TemplateClassInstance templateInstance,
             TMember targetDeclaration,
             string? layerName,
-            Dictionary<string, object?>? tags ) : base( aspect, targetDeclaration, layerName, tags ) { }
+            Dictionary<string, object?>? tags ) : base( aspect, templateInstance, targetDeclaration, layerName, tags ) { }
 
         public override void Initialize( IReadOnlyList<Advice>? declarativeAdvices, IDiagnosticAdder diagnosticAdder )
         {

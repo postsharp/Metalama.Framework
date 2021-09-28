@@ -24,13 +24,14 @@ namespace Caravela.Framework.Impl.Advices
 
         public IntroduceFieldAdvice(
             AspectInstance aspect,
+            TemplateClassInstance templateInstance,
             INamedType targetDeclaration,
             string? explicitName,
-            Template<IField> fieldTemplate,
+            TemplateMember<IField> fieldTemplate,
             IntroductionScope scope,
             OverrideStrategy overrideStrategy,
             string? layerName )
-            : base( aspect, targetDeclaration, fieldTemplate, scope, overrideStrategy, layerName, null )
+            : base( aspect, templateInstance, targetDeclaration, fieldTemplate, scope, overrideStrategy, layerName, null )
         {
             this.MemberBuilder = new FieldBuilder( this, this.TargetDeclaration, (explicitName ?? fieldTemplate.Declaration?.Name).AssertNotNull() );
         }

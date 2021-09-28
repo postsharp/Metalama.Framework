@@ -18,7 +18,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
     /// </summary>
     internal record MetaApiProperties(
         UserDiagnosticSink Diagnostics,
-        Template<IMemberOrNamedType> Template,
+        TemplateMember<IMemberOrNamedType> Template,
         IReadOnlyDictionary<string, object?> Tags,
         AspectLayerId AspectLayerId,
         SyntaxGenerationContext SyntaxGenerationContext,

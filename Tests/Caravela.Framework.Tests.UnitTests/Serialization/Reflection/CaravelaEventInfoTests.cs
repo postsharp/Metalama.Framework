@@ -81,7 +81,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
 
         private string SerializeEvent( string code )
         {
-            var compilation = CreateCompilationModel( code );
+            var compilation = this.CreateCompilationModel( code );
             var single = compilation.Types.Single( t => t.Name == "Target" ).Events.Single( m => m.Name == "Activated" );
             var e = (single as Event)!;
 

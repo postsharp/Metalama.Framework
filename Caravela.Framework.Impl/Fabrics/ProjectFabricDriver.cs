@@ -3,17 +3,18 @@
 
 using Caravela.Framework.Code;
 using Caravela.Framework.Fabrics;
+using Caravela.Framework.Impl.Aspects;
 using Caravela.Framework.Impl.CodeModel;
-using System;
+using Microsoft.CodeAnalysis;
 using System.IO;
 using System.Reflection;
 
 namespace Caravela.Framework.Impl.Fabrics
 {
-    internal class CompilationFabricDriver : FabricDriver
+    internal class ProjectFabricDriver : FabricDriver
     {
-        public CompilationFabricDriver( IServiceProvider serviceProvider, AspectClassRegistry aspectClasses, IFabric fabric ) :
-            base( serviceProvider, aspectClasses, fabric )
+        public ProjectFabricDriver( FabricContext context, IFabric fabric, Compilation runTimeCompilation ) :
+            base( context, fabric, runTimeCompilation )
         {
             var attribute = this.Fabric.GetType().GetCustomAttribute<FabricAttribute>();
 
@@ -35,26 +36,24 @@ namespace Caravela.Framework.Impl.Fabrics
             }
         }
 
-        public override FabricResult Execute( IProject project )
+        public override void Execute( IAspectBuilderInternal aspectBuilder )
         {
-            var builder = new Builder( this.ServiceProvider, project, this.AspectClasses );
+            var builder = new Builder( (ICompilation) aspectBuilder.Target, this.Context, aspectBuilder );
             ((IProjectFabric) this.Fabric).BuildFabric( builder );
-
-            return new FabricResult( builder );
         }
 
         public override FabricKind Kind => this.Fabric is ITransitiveProjectFabric ? FabricKind.Transitive : FabricKind.Compilation;
 
         public override string OrderingKey { get; }
 
+        public override IDeclaration GetTarget( CompilationModel compilation ) => compilation;
+
         private class Builder : BaseBuilder<ICompilation>, IProjectFabricBuilder
         {
-            public Builder( IServiceProvider serviceProvider, IProject project, AspectClassRegistry aspectClasses ) : base(
-                serviceProvider,
-                project,
-                aspectClasses ) { }
-
-            protected override ICompilation GetTargetDeclaration( CompilationModel compilation ) => compilation;
+            public Builder( ICompilation compilation, FabricContext context, IAspectBuilderInternal aspectBuilder ) : base(
+                compilation,
+                context,
+                aspectBuilder ) { }
         }
     }
 }

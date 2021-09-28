@@ -23,18 +23,18 @@ namespace Caravela.Framework.Impl.Transformations
     {
         public new IEvent OverriddenDeclaration => (IEvent) base.OverriddenDeclaration;
 
-        public Template<IEvent> EventTemplate { get; }
+        public TemplateMember<IEvent> EventTemplate { get; }
 
-        public Template<IMethod> AddTemplate { get; }
+        public TemplateMember<IMethod> AddTemplate { get; }
 
-        public Template<IMethod> RemoveTemplate { get; }
+        public TemplateMember<IMethod> RemoveTemplate { get; }
 
         public OverriddenEvent(
             Advice advice,
             IEvent overriddenDeclaration,
-            Template<IEvent> eventTemplate,
-            Template<IMethod> addTemplate,
-            Template<IMethod> removeTemplate )
+            TemplateMember<IEvent> eventTemplate,
+            TemplateMember<IMethod> addTemplate,
+            TemplateMember<IMethod> removeTemplate )
             : base( advice, overriddenDeclaration )
         {
             // We need event template xor both accessor templates.
@@ -64,11 +64,11 @@ namespace Caravela.Framework.Impl.Transformations
                     this.OverriddenDeclaration );
 
                 var addTemplateMethod = this.EventTemplate.Declaration != null
-                    ? Template.Create( this.EventTemplate.Declaration.AddMethod, this.AddTemplate.TemplateInfo )
+                    ? TemplateMember.Create( this.EventTemplate.Declaration.AddMethod, this.AddTemplate.TemplateInfo )
                     : this.AddTemplate;
 
                 var removeTemplateMethod = this.EventTemplate.Declaration != null
-                    ? Template.Create( this.EventTemplate.Declaration.RemoveMethod, this.RemoveTemplate.TemplateInfo )
+                    ? TemplateMember.Create( this.EventTemplate.Declaration.RemoveMethod, this.RemoveTemplate.TemplateInfo )
                     : this.RemoveTemplate;
 
                 var templateExpansionError = false;
@@ -147,7 +147,7 @@ namespace Caravela.Framework.Impl.Transformations
 
         private bool TryExpandAccessorTemplate(
             in MemberIntroductionContext context,
-            Template<IMethod> accessorTemplate,
+            TemplateMember<IMethod> accessorTemplate,
             IMethod accessor,
             SyntaxGenerationContext generationContext,
             [NotNullWhen( true )] out BlockSyntax? body )
@@ -185,7 +185,7 @@ namespace Caravela.Framework.Impl.Transformations
                     default,
                     proceedExpression );
 
-                var templateDriver = this.Advice.Aspect.AspectClass.GetTemplateDriver( accessorTemplate.Declaration! );
+                var templateDriver = this.Advice.TemplateInstance.TemplateClass.GetTemplateDriver( accessorTemplate.Declaration! );
 
                 return templateDriver.TryExpandDeclaration( expansionContext, context.DiagnosticSink, out body );
             }

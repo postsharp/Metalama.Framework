@@ -57,7 +57,7 @@ namespace Caravela.Framework.Impl.Options
 
         public string? Configuration => this.GetStringOption( "TargetFramework" );
 
-        public bool TryGetProperty( string name, out string? value )
+        public bool TryGetProperty( string name, [NotNullWhen( true )] out string? value )
         {
             value = this.GetStringOption( name );
 

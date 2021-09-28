@@ -3,6 +3,7 @@
 
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
+using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Validation;
 using System;
 using System.Collections.Generic;
@@ -15,9 +16,13 @@ namespace Caravela.Framework.Fabrics
     [InternalImplement]
     [CompileTimeOnly]
     public interface IFabricBuilder<T>
-        where T : IDeclaration
+        where T : class, IDeclaration
     {
         IProject Project { get; }
+
+        T Target { get; }
+
+        IDiagnosticSink Diagnostics { get; }
 
         // The builder intentionally does not give write access to project properties. All configuration must use IProjectExtension.
 

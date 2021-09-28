@@ -19,6 +19,7 @@ namespace Caravela.Framework.Impl.Advices
         public static bool TryCreateAdvice<T>(
             this TemplateInfo template,
             AspectInstance aspect,
+            TemplateClassInstance templateInstance,
             IDiagnosticAdder diagnosticAdder,
             T aspectTargetDeclaration,
             IDeclaration templateDeclaration,
@@ -61,8 +62,9 @@ namespace Caravela.Framework.Impl.Advices
                             case IMethod templateMethod:
                                 var introduceMethodAdvice = new IntroduceMethodAdvice(
                                     aspect,
+                                    templateInstance,
                                     targetType,
-                                    Template.Create( templateMethod, template, TemplateKind.Introduction ),
+                                    TemplateMember.Create( templateMethod, template, TemplateKind.Introduction ),
                                     template.Attribute.Scope,
                                     template.Attribute.WhenExists,
                                     layerName,
@@ -74,11 +76,12 @@ namespace Caravela.Framework.Impl.Advices
                                 break;
 
                             case IProperty templateProperty:
-                                var propertyTemplate = Template.Create( templateProperty, template, TemplateKind.Introduction );
+                                var propertyTemplate = TemplateMember.Create( templateProperty, template, TemplateKind.Introduction );
                                 var accessorTemplates = propertyTemplate.GetAccessorTemplates();
 
                                 var introducePropertyAdvice = new IntroducePropertyAdvice(
                                     aspect,
+                                    templateInstance,
                                     targetType,
                                     null,
                                     propertyTemplate,
@@ -97,9 +100,10 @@ namespace Caravela.Framework.Impl.Advices
                             case IEvent templateEvent:
                                 var introduceEventAdvice = new IntroduceEventAdvice(
                                     aspect,
+                                    templateInstance,
                                     targetType,
                                     null,
-                                    Template.Create( templateEvent, template, TemplateKind.Introduction ),
+                                    TemplateMember.Create( templateEvent, template, TemplateKind.Introduction ),
                                     default,
                                     default,
                                     template.Attribute.Scope,
@@ -115,9 +119,10 @@ namespace Caravela.Framework.Impl.Advices
                             case IField templateField:
                                 var introduceFieldAdvice = new IntroduceFieldAdvice(
                                     aspect,
+                                    templateInstance,
                                     targetType,
                                     null,
-                                    Template.Create( templateField, template, TemplateKind.Introduction ),
+                                    TemplateMember.Create( templateField, template, TemplateKind.Introduction ),
                                     template.Attribute.Scope,
                                     template.Attribute.WhenExists,
                                     layerName );

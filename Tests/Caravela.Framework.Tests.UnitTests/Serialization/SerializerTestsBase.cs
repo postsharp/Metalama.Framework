@@ -24,7 +24,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization
             // Note that we cannot easily get a reference to Caravela.Compiler.Interfaces this way because we have a reference assembly.
 
             this.SerializationContext = new SyntaxSerializationContext(
-                CreateCompilationModel(
+                this.CreateCompilationModel(
                     "/* No code is necessary, only references */",
                     additionalReferences: new[]
                     {

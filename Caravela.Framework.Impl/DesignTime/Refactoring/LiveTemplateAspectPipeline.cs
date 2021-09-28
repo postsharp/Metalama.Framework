@@ -12,7 +12,6 @@ using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Options;
 using Caravela.Framework.Impl.Pipeline;
 using Microsoft.CodeAnalysis;
-using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
@@ -37,7 +36,7 @@ namespace Caravela.Framework.Impl.DesignTime.Refactoring
             this._source = new InteractiveAspectSource( aspectClass, targetSymbol );
         }
 
-        private protected override ImmutableArray<IAspectSource> CreateAspectSources( AspectPipelineConfiguration configuration, IProject project )
+        private protected override ImmutableArray<IAspectSource> CreateAspectSources( AspectPipelineConfiguration configuration, Compilation compilation )
             => ImmutableArray.Create<IAspectSource>( this._source );
 
         public static bool TryExecute(
@@ -110,20 +109,19 @@ namespace Caravela.Framework.Impl.DesignTime.Refactoring
 
             public AspectSourcePriority Priority => AspectSourcePriority.FromAttribute;
 
-            public IEnumerable<AspectClass> AspectTypes => new[] { this._aspectClass };
+            public IEnumerable<IAspectClass> AspectTypes => new[] { this._aspectClass };
 
             public IEnumerable<IDeclaration> GetExclusions( INamedType aspectType ) => Enumerable.Empty<IDeclaration>();
 
             public IEnumerable<AspectInstance> GetAspectInstances(
                 CompilationModel compilation,
-                AspectClass aspectClass,
+                IAspectClass aspectClass,
                 IDiagnosticAdder diagnosticAdder,
                 CancellationToken cancellationToken )
             {
                 var targetDeclaration = compilation.Factory.GetDeclaration( this._targetSymbol );
-                var aspectInstance = (IAspect) Activator.CreateInstance( aspectClass.AspectType ).AssertNotNull();
 
-                return new[] { aspectClass.CreateAspectInstance( aspectInstance, targetDeclaration ) };
+                return new[] { ((AspectClass) aspectClass).CreateDefaultAspectInstance( targetDeclaration ) };
             }
         }
     }

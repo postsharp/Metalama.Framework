@@ -2,7 +2,6 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
 using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.Aspects;
 using Caravela.Framework.Impl.CodeModel;
@@ -181,21 +180,23 @@ namespace Caravela.Framework.Impl.Pipeline
                 };
         }
 
-        private protected virtual ImmutableArray<IAspectSource> CreateAspectSources( AspectPipelineConfiguration configuration, IProject project )
+        private protected virtual ImmutableArray<IAspectSource> CreateAspectSources( AspectPipelineConfiguration configuration, Compilation compilation )
         {
             var sources = ImmutableArray.Create<IAspectSource>(
                 new CompilationAspectSource( configuration.AspectClasses, configuration.CompileTimeProjectLoader ) );
 
             if ( configuration.CompileTimeProject != null )
             {
-                var fabricManager = new FabricManager( this.ServiceProvider );
+                var fabricContext = new FabricContext(
+                    configuration.AspectClasses.ToImmutableDictionary( c => c.FullName, c => c ),
+                    this.ServiceProvider,
+                    configuration.CompileTimeProject );
 
-                var result = fabricManager.ExecuteFabrics(
-                    configuration.CompileTimeProject,
-                    project,
-                    new AspectClassRegistry( configuration.AspectClasses.ToImmutableDictionary( c => c.FullName, c => c ) ) );
+                var fabricManager = new FabricManager( fabricContext );
 
-                sources = sources.AddRange( result.AspectSources );
+                fabricManager.ExecuteFabrics( configuration.CompileTimeProject, compilation );
+
+                sources = sources.Add( fabricManager.AspectSource );
             }
 
             return sources;
@@ -222,7 +223,7 @@ namespace Caravela.Framework.Impl.Pipeline
                 return true;
             }
 
-            var aspectSources = this.CreateAspectSources( pipelineConfiguration, project );
+            var aspectSources = this.CreateAspectSources( pipelineConfiguration, compilation.Compilation );
 
             pipelineStageResult = new PipelineStageResult( compilation, project, pipelineConfiguration.Layers, aspectSources: aspectSources );
 

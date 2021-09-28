@@ -29,8 +29,9 @@ namespace Caravela.Framework.Impl.Advices
 
         public ImplementInterfaceAdvice(
             AspectInstance aspect,
+            TemplateClassInstance template,
             INamedType targetType,
-            string? layerName ) : base( aspect, targetType, layerName, null )
+            string? layerName ) : base( aspect, template, targetType, layerName, null )
         {
             this._introducedInterfaceTypes = new List<IntroducedInterfaceSpecification>();
 
@@ -43,7 +44,7 @@ namespace Caravela.Framework.Impl.Advices
 
         public override void Initialize( IReadOnlyList<Advice> declarativeAdvices, IDiagnosticAdder diagnosticAdder )
         {
-            var aspectTypeName = this.Aspect.AspectClass.AspectType.FullName.AssertNotNull();
+            var aspectTypeName = this.Aspect.AspectClass.FullName.AssertNotNull();
             var compilation = this.TargetDeclaration.Compilation;
             var aspectType = compilation.TypeFactory.GetTypeByReflectionName( aspectTypeName );
 
@@ -75,7 +76,7 @@ namespace Caravela.Framework.Impl.Advices
                 IMember member,
                 [NotNullWhen( true )] out TemplateInfo? templateInfo )
             {
-                if ( this.Aspect.AspectClass.TryGetInterfaceMember(
+                if ( this.TemplateInstance.TemplateClass.TryGetInterfaceMember(
                     member.GetSymbol().AssertNotNull( Justifications.ImplementingIntroducedInterfacesNotSupported ),
                     out var aspectClassMember ) )
                 {
@@ -308,7 +309,7 @@ namespace Caravela.Framework.Impl.Advices
                                     ? new OverriddenMethod(
                                         this,
                                         (IMethod) memberBuilder,
-                                        Template.Create( implementationMethod, memberSpec.TemplateInfo, TemplateKind.Introduction ) )
+                                        TemplateMember.Create( implementationMethod, memberSpec.TemplateInfo, TemplateKind.Introduction ) )
                                     : new RedirectedMethod(
                                         this,
                                         (IMethod) memberBuilder,
@@ -330,7 +331,7 @@ namespace Caravela.Framework.Impl.Advices
 
                             if ( aspectProperty?.IsAutoPropertyOrField != true )
                             {
-                                var propertyTemplate = Template.Create( aspectProperty, memberSpec.TemplateInfo, TemplateKind.Introduction );
+                                var propertyTemplate = TemplateMember.Create( aspectProperty, memberSpec.TemplateInfo, TemplateKind.Introduction );
                                 var accessorTemplates = propertyTemplate.GetAccessorTemplates();
 
                                 overrides.Add(
@@ -363,7 +364,7 @@ namespace Caravela.Framework.Impl.Advices
                                         ? new OverriddenEvent(
                                             this,
                                             (IEvent) memberBuilder,
-                                            Template.Create( (IEvent) memberSpec.AspectInterfaceMember, memberSpec.TemplateInfo, TemplateKind.Introduction ),
+                                            TemplateMember.Create( (IEvent) memberSpec.AspectInterfaceMember, memberSpec.TemplateInfo, TemplateKind.Introduction ),
                                             default,
                                             default )
                                         : new RedirectedEvent(

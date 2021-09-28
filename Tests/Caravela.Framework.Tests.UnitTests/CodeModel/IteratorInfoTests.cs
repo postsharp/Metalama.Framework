@@ -20,7 +20,7 @@ class C
 }
 ";
 
-            var compilation = CreateCompilationModel( code );
+            var compilation = this.CreateCompilationModel( code );
             var iteratorInfo = compilation.Types.Single().Methods.Single().GetIteratorInfo();
 
             Assert.True( iteratorInfo.IsIterator );
@@ -39,7 +39,7 @@ class C
 }
 ";
 
-            var compilation = CreateCompilationModel( code );
+            var compilation = this.CreateCompilationModel( code );
             var iteratorInfo = compilation.Types.Single().Methods.Single().GetIteratorInfo();
 
             Assert.True( iteratorInfo.IsIterator );
@@ -58,7 +58,7 @@ class C
 }
 ";
 
-            var compilation = CreateCompilationModel( code );
+            var compilation = this.CreateCompilationModel( code );
             var iteratorInfo = compilation.Types.Single().Methods.Single().GetIteratorInfo();
 
             Assert.True( iteratorInfo.IsIterator );
@@ -77,7 +77,7 @@ class C
 }
 ";
 
-            var compilation = CreateCompilationModel( code );
+            var compilation = this.CreateCompilationModel( code );
             var iteratorInfo = compilation.Types.Single().Methods.Single().GetIteratorInfo();
 
             Assert.True( iteratorInfo.IsIterator );
@@ -96,7 +96,7 @@ class C
 }
 ";
 
-            var compilation = CreateCompilationModel( code );
+            var compilation = this.CreateCompilationModel( code );
             var iteratorInfo = compilation.Types.Single().Methods.Single().GetIteratorInfo();
 
             Assert.True( iteratorInfo.IsIterator );
@@ -115,7 +115,7 @@ class C
 }
 ";
 
-            var compilation = CreateCompilationModel( code );
+            var compilation = this.CreateCompilationModel( code );
             var iteratorInfo = compilation.Types.Single().Methods.Single().GetIteratorInfo();
 
             Assert.True( iteratorInfo.IsIterator );
@@ -134,7 +134,7 @@ class C
 }
 ";
 
-            var compilation = CreateCompilationModel( code );
+            var compilation = this.CreateCompilationModel( code );
             var iteratorInfo = compilation.Types.Single().Methods.Single().GetIteratorInfo();
 
             Assert.False( iteratorInfo.IsIterator );
@@ -153,7 +153,7 @@ class C
 }
 ";
 
-            var compilation = CreateCompilationModel( code );
+            var compilation = this.CreateCompilationModel( code );
             var iteratorInfo = compilation.Types.Single().Methods.Single().GetIteratorInfo();
 
             Assert.False( iteratorInfo.IsIterator );
@@ -172,7 +172,7 @@ class C
 }
 ";
 
-            var compilation = CreateCompilationModel( code );
+            var compilation = this.CreateCompilationModel( code );
             var iteratorInfo = compilation.Types.Single().Methods.Single().GetIteratorInfo();
 
             Assert.False( iteratorInfo.IsIterator );
@@ -191,7 +191,7 @@ class C
 }
 ";
 
-            var compilation = CreateCompilationModel( code );
+            var compilation = this.CreateCompilationModel( code );
             var iteratorInfo = compilation.Types.Single().Methods.Single().GetIteratorInfo();
 
             Assert.False( iteratorInfo.IsIterator );
@@ -210,7 +210,7 @@ class C
 }
 ";
 
-            var compilation = CreateCompilationModel( code );
+            var compilation = this.CreateCompilationModel( code );
             var iteratorInfo = compilation.Types.Single().Methods.Single().GetIteratorInfo();
 
             Assert.False( iteratorInfo.IsIterator );
@@ -229,7 +229,7 @@ class C
 }
 ";
 
-            var compilation = CreateCompilationModel( code );
+            var compilation = this.CreateCompilationModel( code );
             var iteratorInfo = compilation.Types.Single().Methods.Single().GetIteratorInfo();
 
             Assert.False( iteratorInfo.IsIterator );

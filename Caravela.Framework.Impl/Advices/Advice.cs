@@ -13,6 +13,8 @@ namespace Caravela.Framework.Impl.Advices
     {
         public AspectInstance Aspect { get; }
 
+        public TemplateClassInstance TemplateInstance { get; }
+
         public IDeclaration TargetDeclaration { get; }
 
         public AspectLayerId AspectLayerId { get; }
@@ -21,18 +23,25 @@ namespace Caravela.Framework.Impl.Advices
 
         public ImmutableDictionary<string, object?> ReadOnlyTags => this.Tags?.ToImmutableDictionary() ?? ImmutableDictionary<string, object?>.Empty;
 
-        protected Advice( AspectInstance aspect, AspectLayerId aspectLayerId, Dictionary<string, object?>? tags )
+        protected Advice( AspectInstance aspect, TemplateClassInstance template, AspectLayerId aspectLayerId, Dictionary<string, object?>? tags )
         {
             this.Tags = tags;
             this.Aspect = aspect;
             this.TargetDeclaration = aspect.TargetDeclaration;
             this.AspectLayerId = aspectLayerId;
+            this.TemplateInstance = template;
         }
 
-        protected Advice( AspectInstance aspect, IDeclaration targetDeclaration, string? layerName, Dictionary<string, object?>? tags )
+        protected Advice(
+            AspectInstance aspect,
+            TemplateClassInstance template,
+            IDeclaration targetDeclaration,
+            string? layerName,
+            Dictionary<string, object?>? tags )
         {
             this.Tags = tags;
             this.Aspect = aspect;
+            this.TemplateInstance = template;
             this.TargetDeclaration = targetDeclaration.AssertNotNull();
             this.AspectLayerId = new AspectLayerId( this.Aspect.AspectClass, layerName );
         }

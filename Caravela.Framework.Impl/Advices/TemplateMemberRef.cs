@@ -11,9 +11,9 @@ using System.Linq;
 
 namespace Caravela.Framework.Impl.Advices
 {
-    internal readonly struct TemplateRef
+    internal readonly struct TemplateMemberRef
     {
-        public AspectClassMember TemplateMember { get; }
+        public TemplateClassMember TemplateMember { get; }
 
         public TemplateKind SelectedKind { get; }
 
@@ -21,16 +21,16 @@ namespace Caravela.Framework.Impl.Advices
 
         public bool IsNull => this.SelectedKind == TemplateKind.None;
 
-        public TemplateRef( in AspectClassMember template, TemplateKind selectedKind ) : this( template, selectedKind, selectedKind ) { }
+        public TemplateMemberRef( in TemplateClassMember template, TemplateKind selectedKind ) : this( template, selectedKind, selectedKind ) { }
 
-        private TemplateRef( in AspectClassMember template, TemplateKind selectedKind, TemplateKind interpretedKind )
+        private TemplateMemberRef( in TemplateClassMember template, TemplateKind selectedKind, TemplateKind interpretedKind )
         {
             this.TemplateMember = template;
             this.SelectedKind = selectedKind;
             this.InterpretedKind = interpretedKind;
         }
 
-        public Template<T> GetTemplate<T>( CompilationModel compilation, IServiceProvider serviceProvider )
+        public TemplateMember<T> GetTemplateMember<T>( CompilationModel compilation, IServiceProvider serviceProvider )
             where T : class, IMemberOrNamedType
         {
             if ( this.IsNull )
@@ -40,7 +40,7 @@ namespace Caravela.Framework.Impl.Advices
 
             var classifier = serviceProvider.GetService<SymbolClassificationService>().GetClassifier( compilation.RoslynCompilation );
 
-            var type = compilation.RoslynCompilation.GetTypeByMetadataNameSafe( this.TemplateMember.AspectClass.FullName );
+            var type = compilation.RoslynCompilation.GetTypeByMetadataNameSafe( this.TemplateMember.TemplateClass.FullName );
             var symbol = type.GetMembers( this.TemplateMember.Name ).Single( m => !classifier.GetTemplateInfo( m ).IsNone );
 
             var declaration = compilation.Factory.GetDeclaration( symbol );
@@ -51,10 +51,10 @@ namespace Caravela.Framework.Impl.Advices
                     $"The template '{symbol}' is a {declaration.DeclarationKind} but it was expected to be an {typeof(T).Name}" );
             }
 
-            return Template.Create( typedSymbol, this.TemplateMember.TemplateInfo, this.SelectedKind, this.InterpretedKind );
+            return Advices.TemplateMember.Create( typedSymbol, this.TemplateMember.TemplateInfo, this.SelectedKind, this.InterpretedKind );
         }
 
-        public TemplateRef InterpretedAs( TemplateKind interpretedKind ) => new( this.TemplateMember, this.SelectedKind, interpretedKind );
+        public TemplateMemberRef InterpretedAs( TemplateKind interpretedKind ) => new( this.TemplateMember, this.SelectedKind, interpretedKind );
 
         public override string ToString() => this.IsNull ? "null" : $"{this.TemplateMember.Name}:{this.SelectedKind}";
     }

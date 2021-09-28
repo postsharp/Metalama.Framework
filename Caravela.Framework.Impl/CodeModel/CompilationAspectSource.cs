@@ -25,14 +25,14 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public AspectSourcePriority Priority => AspectSourcePriority.FromAttribute;
 
-        public IEnumerable<AspectClass> AspectTypes { get; }
+        public IEnumerable<IAspectClass> AspectTypes { get; }
 
         // TODO: implement aspect exclusion based on ExcludeAspectAttribute
         public IEnumerable<IDeclaration> GetExclusions( INamedType aspectType ) => Enumerable.Empty<IDeclaration>();
 
         public IEnumerable<AspectInstance> GetAspectInstances(
             CompilationModel compilation,
-            AspectClass aspectClass,
+            IAspectClass aspectClass,
             IDiagnosticAdder diagnosticAdder,
             CancellationToken cancellationToken )
         {
@@ -51,7 +51,9 @@ namespace Caravela.Framework.Impl.CodeModel
 
                         if ( this._loader.AttributeDeserializer.TryCreateAttribute( attribute.GetAttributeData(), diagnosticAdder, out var attributeInstance ) )
                         {
-                            return aspectClass.CreateAspectInstance( (IAspect) attributeInstance, attribute.ContainingDeclaration.AssertNotNull() );
+                            return ((AspectClass) aspectClass).CreateAspectInstance(
+                                (IAspect) attributeInstance,
+                                attribute.ContainingDeclaration.AssertNotNull() );
                         }
                         else
                         {

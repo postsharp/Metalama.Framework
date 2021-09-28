@@ -211,7 +211,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
                 var driver = new TemplateDriver( this.ServiceProvider, null!, templateMethod, compiledTemplateMethod );
 
                 var compilationModel = CompilationModel.CreateInitialInstance( NullProject.Instance, (CSharpCompilation) testResult.InputCompilation );
-                var template = Template.Create<IMemberOrNamedType>( compilationModel.Factory.GetMethod( templateMethod ), TemplateInfo.None );
+                var template = TemplateMember.Create<IMemberOrNamedType>( compilationModel.Factory.GetMethod( templateMethod ), TemplateInfo.None );
 
                 var (expansionContext, targetMethod) = this.CreateTemplateExpansionContext( this.ServiceProvider, assembly, compilationModel, template );
 
@@ -242,7 +242,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
             IServiceProvider serviceProvider,
             Assembly assembly,
             CompilationModel compilation,
-            Template<IMemberOrNamedType> template )
+            TemplateMember<IMemberOrNamedType> template )
         {
             var roslynCompilation = compilation.RoslynCompilation;
 

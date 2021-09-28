@@ -4,6 +4,7 @@
 using Caravela.Framework.Impl.Options;
 using System;
 using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 
 namespace Caravela.TestFramework
@@ -13,11 +14,11 @@ namespace Caravela.TestFramework
     /// </summary>
     public class TestProjectOptions : DefaultPathOptions, IProjectOptions, IDisposable
     {
-        private ImmutableDictionary<string, string> _properties;
+        private readonly ImmutableDictionary<string, string> _properties;
 
         public TestProjectOptions( ImmutableDictionary<string, string>? properties = null )
         {
-            this._properties = properties = ImmutableDictionary<string, string>.Empty;
+            this._properties = properties ?? ImmutableDictionary<string, string>.Empty;
             this.BaseTestDirectory = Path.Combine( Path.GetTempPath(), "Caravela", "Tests", Guid.NewGuid().ToString() );
 
             var compileTimeProjectCacheDirectory = Path.Combine( this.BaseTestDirectory, "Cache" );
@@ -71,7 +72,8 @@ namespace Caravela.TestFramework
 
         public IProjectOptions Apply( IProjectOptions options ) => options;
 
-        public bool TryGetProperty( string name, out string? value ) => this._properties.TryGetValue( name, out value );
+        public bool TryGetProperty( string name, [NotNullWhen( true )] out string? value )
+            => this._properties.TryGetValue( name, out value );
 
         public void Dispose()
         {

@@ -3,80 +3,79 @@
 
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
+using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Fabrics;
 using Caravela.Framework.Impl.Aspects;
 using Caravela.Framework.Impl.CodeModel;
-using Caravela.Framework.Impl.ServiceProvider;
-using Caravela.Framework.Impl.Utilities;
 using Caravela.Framework.Validation;
+using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
+using System.Reflection;
 
 namespace Caravela.Framework.Impl.Fabrics
 {
-    internal record AspectClassRegistry( ImmutableDictionary<string, AspectClass> AspectClasses );
-
     internal abstract class FabricDriver
     {
-        protected AspectClassRegistry AspectClasses { get; }
+        protected FabricContext Context { get; }
 
-        protected IServiceProvider ServiceProvider { get; }
+        public IFabric Fabric { get; }
 
-        protected IFabric Fabric { get; }
-
-        protected UserCodeInvoker UserCodeInvoker { get; }
-
-        protected FabricDriver( IServiceProvider serviceProvider, AspectClassRegistry aspectClasses, IFabric fabric )
+        protected FabricDriver( FabricContext context, IFabric fabric, Compilation runTimeCompilation )
         {
-            this.AspectClasses = aspectClasses;
-            this.ServiceProvider = serviceProvider;
-            this.UserCodeInvoker = serviceProvider.GetService<UserCodeInvoker>();
+            this.Context = context;
             this.Fabric = fabric;
+            var attribute = this.Fabric.GetType().GetCustomAttribute<FabricAttribute>().AssertNotNull();
+            this.FabricSymbol = (INamedTypeSymbol) DocumentationCommentId.GetFirstSymbolForDeclarationId( attribute.Id, runTimeCompilation ).AssertNotNull();
+            this.TargetSymbol = DocumentationCommentId.GetFirstSymbolForDeclarationId( attribute.TargetId, runTimeCompilation ).AssertNotNull();
+            this.FabricPath = attribute.Path;
         }
 
-        public abstract FabricResult Execute( IProject project );
+        public INamedTypeSymbol FabricSymbol { get; }
+
+        public ISymbol TargetSymbol { get; }
+
+        public string FabricPath { get; }
+
+        public abstract void Execute( IAspectBuilderInternal aspectBuilder );
 
         public abstract FabricKind Kind { get; }
 
-        public abstract string OrderingKey { get; }
+        public virtual string OrderingKey => DocumentationCommentId.CreateDeclarationId( this.FabricSymbol );
 
-        protected abstract class BaseBuilder<T> : IFabricBuilder<T>, IFabricBuilderInternal
-            where T : IDeclaration
+        public abstract IDeclaration GetTarget( CompilationModel compilation );
+
+        protected abstract class BaseBuilder<T> : IFabricBuilder<T>
+            where T : class, IDeclaration
         {
-            private readonly IServiceProvider _serviceProvider;
-            private AspectClassRegistry _aspectClasses;
-            private readonly List<IAspectSource> _aspectSources = new();
+            private readonly IAspectBuilderInternal _aspectBuilder;
+            private readonly FabricContext _context;
 
-            protected UserCodeInvoker UserCodeInvoker { get; }
-
-            public BaseBuilder( IServiceProvider serviceProvider, IProject project, AspectClassRegistry aspectClasses )
+            protected BaseBuilder( T target, FabricContext context, IAspectBuilderInternal aspectBuilder )
             {
-                this._serviceProvider = serviceProvider;
-                this.UserCodeInvoker = serviceProvider.GetService<UserCodeInvoker>();
-                this.Project = project;
-                this._aspectClasses = aspectClasses;
+                this._aspectBuilder = aspectBuilder;
+                this._context = context;
+                this.Target = target;
             }
 
-            public IReadOnlyList<IAspectSource> AspectSources => this._aspectSources;
+            public IProject Project => this.Target.Compilation.Project;
 
-            protected abstract T GetTargetDeclaration( CompilationModel compilation );
+            public T Target { get; }
 
-            public IProject Project { get; }
+            public IDiagnosticSink Diagnostics => this._aspectBuilder.Diagnostics;
 
             public INamedTypeSelection WithTypes( Func<T, IEnumerable<INamedType>> typeQuery )
                 => new NamedTypeSelection(
                     this.RegisterAspectSource,
                     compilation =>
                     {
-                        var targetDeclaration = this.GetTargetDeclaration( compilation );
+                        var targetDeclaration = compilation.Factory.GetDeclaration( this.Target );
 
-                        return this.UserCodeInvoker.Wrap( this.UserCodeInvoker.Invoke( () => typeQuery( targetDeclaration ) ) );
+                        return this._context.UserCodeInvoker.Wrap( this._context.UserCodeInvoker.Invoke( () => typeQuery( targetDeclaration ) ) );
                     },
-                    this._serviceProvider,
-                    this._aspectClasses );
+                    this._context );
 
-            protected void RegisterAspectSource( IAspectSource aspectSource ) => this._aspectSources.Add( aspectSource );
+            protected void RegisterAspectSource( IAspectSource aspectSource ) => this._aspectBuilder.AddAspectSource( aspectSource );
 
             [Obsolete( "Not implemented." )]
             public void AddValidator( Action<ValidateDeclarationContext<T>> validator ) => throw new NotImplementedException();

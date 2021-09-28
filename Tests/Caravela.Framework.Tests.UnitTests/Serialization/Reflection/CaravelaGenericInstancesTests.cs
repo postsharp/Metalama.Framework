@@ -34,7 +34,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
 
         private void AssertFieldType( string code, Type expectedType, string expected )
         {
-            var allTypes = CreateCompilationModel( code ).Types;
+            var allTypes = this.CreateCompilationModel( code ).Types;
             var nestedTypes = allTypes.Single().NestedTypes;
             var innerType = nestedTypes.Single();
             var allProperties = innerType.Fields;

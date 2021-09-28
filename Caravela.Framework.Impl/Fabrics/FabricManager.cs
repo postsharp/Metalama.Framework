@@ -1,12 +1,11 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Code;
 using Caravela.Framework.Fabrics;
+using Caravela.Framework.Impl.Aspects;
 using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.CompileTime;
-using Caravela.Framework.Impl.ServiceProvider;
-using Caravela.Framework.Impl.Utilities;
+using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,16 +14,18 @@ namespace Caravela.Framework.Impl.Fabrics
 {
     internal sealed class FabricManager
     {
-        private readonly UserCodeInvoker _userCodeInvoker;
-        private readonly IServiceProvider _serviceProvider;
+        private readonly FabricAspectSource _aspectSource;
+        private readonly FabricContext _context;
 
-        public FabricManager( IServiceProvider serviceProvider )
+        public FabricManager( FabricContext context )
         {
-            this._serviceProvider = serviceProvider;
-            this._userCodeInvoker = serviceProvider.GetService<UserCodeInvoker>();
+            this._context = context;
+            this._aspectSource = new FabricAspectSource( context );
         }
 
-        public FabricResult ExecuteFabrics( CompileTimeProject compileTimeProject, IProject project, AspectClassRegistry aspectClasses )
+        public IAspectSource AspectSource => this._aspectSource;
+
+        public void ExecuteFabrics( CompileTimeProject compileTimeProject, Compilation runTimeCompilation )
         {
             // Discover the transitive fabrics from project dependencies, and execute them.
             var transitiveFabricTypes = new Tuple<CompileTimeProject, int>( compileTimeProject, 0 )
@@ -35,51 +36,47 @@ namespace Caravela.Framework.Impl.Fabrics
                 .OrderByDescending( x => x.Depth )
                 .ThenBy( x => x.Type )
                 .Select( x => x.Project.GetType( x.Type ) )
-                .Select( fabricType => this.CreateDriver( fabricType, aspectClasses ) );
+                .Select( x => this.CreateDriver( x, runTimeCompilation ) );
 
-            FabricResult result = new();
-            ExecuteFabrics( transitiveFabricTypes, project, ref result );
+            this.RegisterFabrics( transitiveFabricTypes );
 
             // Discover the fabrics inside the current project.
             var fabrics =
                 compileTimeProject.FabricTypes
                     .OrderBy( t => t )
                     .Select( compileTimeProject.GetType )
-                    .Select( fabricType => this.CreateDriver( fabricType, aspectClasses ) )
+                    .Select( x => this.CreateDriver( x, runTimeCompilation ) )
                     .OrderBy( x => x.Kind )
                     .ThenBy( x => x.OrderingKey );
 
-            ExecuteFabrics( fabrics, project, ref result );
-
-            return result;
+            this.RegisterFabrics( fabrics );
         }
 
-        private static void ExecuteFabrics( IEnumerable<FabricDriver> drivers, IProject project, ref FabricResult result )
+        private void RegisterFabrics( IEnumerable<FabricDriver> drivers )
         {
             foreach ( var driver in drivers )
             {
-                var partialResult = driver.Execute( project );
-                result = result.Merge( partialResult );
+                this._aspectSource.Register( driver );
             }
         }
 
-        private FabricDriver CreateDriver( Type fabricType, AspectClassRegistry aspectClasses )
+        private FabricDriver CreateDriver( Type fabricType, Compilation runTimeCompilation )
         {
-            var fabric = (IFabric) this._userCodeInvoker.Invoke( () => Activator.CreateInstance( fabricType ) );
+            var fabric = (IFabric) this._context.UserCodeInvoker.Invoke( () => Activator.CreateInstance( fabricType ) );
 
             switch ( fabric )
             {
                 case ITypeFabric typeFabric:
-                    return new TypeFabricDriver( this._serviceProvider, aspectClasses, typeFabric );
+                    return new TypeFabricDriver( this._context, typeFabric, runTimeCompilation );
 
                 case ITransitiveProjectFabric transitiveCompilationFabric:
-                    return new CompilationFabricDriver( this._serviceProvider, aspectClasses, transitiveCompilationFabric );
+                    return new ProjectFabricDriver( this._context, transitiveCompilationFabric, runTimeCompilation );
 
                 case IProjectFabric compilationFabric:
-                    return new CompilationFabricDriver( this._serviceProvider, aspectClasses, compilationFabric );
+                    return new ProjectFabricDriver( this._context, compilationFabric, runTimeCompilation );
 
                 case INamespaceFabric namespaceFabric:
-                    return new NamespaceFabricDriver( this._serviceProvider, aspectClasses, namespaceFabric );
+                    return new NamespaceFabricDriver( this._context, namespaceFabric, runTimeCompilation );
 
                 default:
                     throw new AssertionFailedException();

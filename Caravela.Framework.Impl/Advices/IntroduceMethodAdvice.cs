@@ -21,13 +21,14 @@ namespace Caravela.Framework.Impl.Advices
 
         public IntroduceMethodAdvice(
             AspectInstance aspect,
+            TemplateClassInstance templateInstance,
             INamedType targetDeclaration,
-            Template<IMethod> templateMethod,
+            TemplateMember<IMethod> templateMethod,
             IntroductionScope scope,
             OverrideStrategy overrideStrategy,
             string? layerName,
             Dictionary<string, object?>? tags )
-            : base( aspect, targetDeclaration, templateMethod, scope, overrideStrategy, layerName, tags )
+            : base( aspect, templateInstance, targetDeclaration, templateMethod, scope, overrideStrategy, layerName, tags )
         {
             Invariant.Assert( templateMethod.IsNotNull );
 

@@ -97,7 +97,7 @@ namespace Caravela.Framework.Tests.UnitTests
             }
         }
 
-        internal static CompilationModel CreateCompilationModel(
+        internal CompilationModel CreateCompilationModel(
             string code,
             string? dependentCode = null,
             bool ignoreErrors = false,
@@ -108,7 +108,7 @@ namespace Caravela.Framework.Tests.UnitTests
             var roslynCompilation = CreateCSharpCompilation( code, dependentCode, ignoreErrors, additionalReferences, name, addCaravelaReferences );
 
             return CompilationModel.CreateInitialInstance(
-                new ProjectModel( roslynCompilation, ServiceProviderFactory.AsyncLocalProvider ),
+                new ProjectModel( roslynCompilation, this.ServiceProvider ),
                 roslynCompilation );
         }
 

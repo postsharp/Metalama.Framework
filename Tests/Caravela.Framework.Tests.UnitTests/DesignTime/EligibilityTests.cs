@@ -48,7 +48,7 @@ class Class<T>
 }
 ";
 
-            var compilation = CreateCompilationModel( code );
+            var compilation = this.CreateCompilationModel( code );
 
             static string GetName( INamedDeclaration d )
                 => d switch

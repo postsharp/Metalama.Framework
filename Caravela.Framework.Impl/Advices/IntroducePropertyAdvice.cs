@@ -16,23 +16,24 @@ namespace Caravela.Framework.Impl.Advices
 {
     internal class IntroducePropertyAdvice : IntroduceMemberAdvice<IProperty, PropertyBuilder>
     {
-        private readonly Template<IMethod> _getTemplate;
-        private readonly Template<IMethod> _setTemplate;
+        private readonly TemplateMember<IMethod> _getTemplate;
+        private readonly TemplateMember<IMethod> _setTemplate;
 
         public IPropertyBuilder Builder => this.MemberBuilder;
 
         public IntroducePropertyAdvice(
             AspectInstance aspect,
+            TemplateClassInstance templateInstance,
             INamedType targetDeclaration,
             string? explicitName,
-            Template<IProperty> propertyTemplate,
-            Template<IMethod> getTemplate,
-            Template<IMethod> setTemplate,
+            TemplateMember<IProperty> propertyTemplate,
+            TemplateMember<IMethod> getTemplate,
+            TemplateMember<IMethod> setTemplate,
             IntroductionScope scope,
             OverrideStrategy overrideStrategy,
             string? layerName,
             Dictionary<string, object?>? tags )
-            : base( aspect, targetDeclaration, propertyTemplate, scope, overrideStrategy, layerName, tags )
+            : base( aspect, templateInstance, targetDeclaration, propertyTemplate, scope, overrideStrategy, layerName, tags )
         {
             this._getTemplate = getTemplate;
             this._setTemplate = setTemplate;

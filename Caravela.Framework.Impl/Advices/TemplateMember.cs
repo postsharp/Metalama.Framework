@@ -7,18 +7,18 @@ using Caravela.Framework.Impl.CompileTime;
 
 namespace Caravela.Framework.Impl.Advices
 {
-    internal static class Template
+    internal static class TemplateMember
     {
-        public static Template<T> Create<T>( T? implementation, TemplateInfo templateInfo, TemplateKind selectedKind, TemplateKind interpretedKind )
+        public static TemplateMember<T> Create<T>( T? implementation, TemplateInfo templateInfo, TemplateKind selectedKind, TemplateKind interpretedKind )
             where T : class, IMemberOrNamedType
             => new( implementation, templateInfo, selectedKind, interpretedKind );
 
-        public static Template<T> Create<T>( T? implementation, TemplateInfo templateInfo, TemplateKind selectedKind = TemplateKind.Default )
+        public static TemplateMember<T> Create<T>( T? implementation, TemplateInfo templateInfo, TemplateKind selectedKind = TemplateKind.Default )
             where T : class, IMemberOrNamedType
             => new( implementation, templateInfo, selectedKind );
     }
 
-    internal readonly struct Template<T>
+    internal readonly struct TemplateMember<T>
         where T : class, IMemberOrNamedType
     {
         public T? Declaration { get; }
@@ -33,13 +33,13 @@ namespace Caravela.Framework.Impl.Advices
 
         public bool IsNotNull => this.SelectedKind != TemplateKind.None;
 
-        public Template( T? implementation, TemplateInfo templateInfo, TemplateKind selectedKind = TemplateKind.Default ) : this(
+        public TemplateMember( T? implementation, TemplateInfo templateInfo, TemplateKind selectedKind = TemplateKind.Default ) : this(
             implementation,
             templateInfo,
             selectedKind,
             selectedKind ) { }
 
-        public Template( T? implementation, TemplateInfo templateInfo, TemplateKind selectedKind, TemplateKind interpretedKind )
+        public TemplateMember( T? implementation, TemplateInfo templateInfo, TemplateKind selectedKind, TemplateKind interpretedKind )
         {
             this.Declaration = implementation;
             this.TemplateInfo = templateInfo;
@@ -56,8 +56,8 @@ namespace Caravela.Framework.Impl.Advices
             }
         }
 
-        public Template<IMemberOrNamedType> Cast()
-            => Template.Create<IMemberOrNamedType>( this.Declaration!, this.TemplateInfo, this.SelectedKind, this.InterpretedKind );
+        public TemplateMember<IMemberOrNamedType> Cast()
+            => TemplateMember.Create<IMemberOrNamedType>( this.Declaration!, this.TemplateInfo, this.SelectedKind, this.InterpretedKind );
 
         public override string ToString() => this.IsNull ? "null" : $"{this.Declaration!.Name}:{this.SelectedKind}";
     }

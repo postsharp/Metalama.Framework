@@ -21,7 +21,7 @@ namespace Caravela.Framework.Tests.UnitTests
     {
         private bool TryGetOrderedAspectLayers( string code, string[] aspectNames, DiagnosticList diagnostics, [NotNullWhen( true )] out string? sortedAspects )
         {
-            var compilation = CreateCompilationModel( code );
+            var compilation = this.CreateCompilationModel( code );
 
             using var isolatedTest = this.WithIsolatedTest();
 

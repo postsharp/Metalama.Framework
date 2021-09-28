@@ -10,7 +10,6 @@ using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Sdk;
 using Caravela.Framework.Impl.ServiceProvider;
-using Caravela.Framework.Impl.Templating;
 using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
@@ -24,63 +23,29 @@ using TypeKind = Microsoft.CodeAnalysis.TypeKind;
 
 namespace Caravela.Framework.Impl.Aspects
 {
-    internal interface IAspectClassImpl : IAspectClass
-    {
-        ImmutableDictionary<string, AspectClassMember> Members { get; }
-        
-        Type AspectType { get; }
-        
-        bool TryGetInterfaceMember( ISymbol symbol, [NotNullWhen( true )] out AspectClassMember? member );
-
-        TemplateDriver GetTemplateDriver( IMethod sourceTemplate );
-        
-        CompileTimeProject? Project { get; }
-
-    }
-    
-    internal interface IAspectClassGroup : IAspectClass
-    {
-
-        IAspectClassImpl GetImplementation( IDeclaration target );
-        
-       
-      
-    }
-    
     /// <summary>
-    /// Represents the metadata of an aspect class. This class is compilation-independent. 
+    /// Represents the metadata of an aspect class. This class is compilation-independent. It is not used to represent a fabric class.
     /// </summary>
-    internal partial class AspectClass : IAspectClassGroup, IAspectClassImpl
+    internal partial class AspectClass : TemplateClass, IAspectClassImpl
     {
-        private readonly Dictionary<string, TemplateDriver> _templateDrivers = new( StringComparer.Ordinal );
-
-        public ImmutableDictionary<string, AspectClassMember> Members { get; }
-
-        private readonly IServiceProvider _serviceProvider;
         private readonly UserCodeInvoker _userCodeInvoker;
         private readonly IAspectDriver? _aspectDriver;
 
         private readonly IAspect? _prototypeAspectInstance; // Null for abstract classes.
         private IReadOnlyList<AspectLayer>? _layers;
 
-        public Type AspectType { get; }
+        public override Type AspectType { get; }
 
-        /// <inheritdoc />
-        public string FullName { get; }
+        public override string FullName { get; }
 
         /// <inheritdoc />
         public string DisplayName { get; private set; }
 
         public string? Description { get; private set; }
 
-        /// <summary>
-        /// Gets metadata of the base aspect class.
-        /// </summary>
-        public AspectClass? BaseClass { get; }
+        public override CompileTimeProject? Project { get; }
 
-        IAspectClassImpl IAspectClassGroup.GetImplementation( IDeclaration target ) => this;
-
-        public CompileTimeProject? Project { get; }
+        public ImmutableArray<TemplateClass> TemplateClasses { get; }
 
         /// <summary>
         /// Gets the aspect driver of the current class, responsible for executing the aspect.
@@ -113,94 +78,21 @@ namespace Caravela.Framework.Impl.Aspects
             IAspect? prototype,
             IDiagnosticAdder diagnosticAdder,
             Compilation compilation,
-            AspectDriverFactory aspectDriverFactory )
+            AspectDriverFactory aspectDriverFactory ) : base( serviceProvider, compilation, aspectTypeSymbol, diagnosticAdder, baseClass )
         {
             this.FullName = aspectTypeSymbol.GetReflectionName();
             this.DisplayName = AttributeRef.GetShortName( aspectTypeSymbol.Name );
             this.IsAbstract = aspectTypeSymbol.IsAbstract;
-            this.BaseClass = baseClass;
             this.Project = project;
-            this._serviceProvider = serviceProvider;
             this._userCodeInvoker = serviceProvider.GetService<UserCodeInvoker>();
             this.DiagnosticLocation = aspectTypeSymbol.GetDiagnosticLocation();
             this.AspectType = aspectType;
             this._prototypeAspectInstance = prototype;
-            this.Members = this.GetMembers( compilation, aspectTypeSymbol, diagnosticAdder );
+
+            this.TemplateClasses = ImmutableArray.Create<TemplateClass>( this );
 
             // This must be called after Members is built and assigned.
             this._aspectDriver = aspectDriverFactory.GetAspectDriver( this, aspectTypeSymbol );
-        }
-
-        public bool TryGetInterfaceMember( ISymbol symbol, [NotNullWhen( true )] out AspectClassMember? member )
-            => this.Members.TryGetValue( DocumentationCommentId.CreateDeclarationId( symbol ), out member )
-               && member.TemplateInfo.AttributeType == TemplateAttributeType.InterfaceMember;
-
-        private ImmutableDictionary<string, AspectClassMember> GetMembers( Compilation compilation, INamedTypeSymbol type, IDiagnosticAdder diagnosticAdder )
-        {
-            if ( compilation == null! )
-            {
-                // This is a test scenario where templates must not be detected.
-                return ImmutableDictionary<string, AspectClassMember>.Empty;
-            }
-
-            var symbolClassifier = this._serviceProvider.GetService<SymbolClassificationService>().GetClassifier( compilation );
-
-            var members = this.BaseClass?.Members.ToBuilder()
-                          ?? ImmutableDictionary.CreateBuilder<string, AspectClassMember>( StringComparer.Ordinal );
-
-            foreach ( var memberSymbol in type.GetMembers() )
-            {
-                var templateInfo = symbolClassifier.GetTemplateInfo( memberSymbol ).AssertNotNull();
-                var memberName = memberSymbol.Name;
-
-                if ( templateInfo.AttributeType == TemplateAttributeType.Introduction && memberSymbol is IMethodSymbol { AssociatedSymbol: not null } )
-                {
-                    // This is an accessor of an introduced event or property. We don't index them.
-                    continue;
-                }
-                else if ( templateInfo.AttributeType == TemplateAttributeType.InterfaceMember )
-                {
-                    // For interface members, we don't require a unique name.
-                    memberName = DocumentationCommentId.CreateDeclarationId( memberSymbol );
-                }
-
-                var aspectClassMember = new AspectClassMember(
-                    memberName,
-                    this,
-                    templateInfo,
-                    memberSymbol is IMethodSymbol { IsAsync: true },
-                    memberSymbol );
-
-                if ( !templateInfo.IsNone )
-                {
-                    if ( members.TryGetValue( memberName, out var existingMember ) && !memberSymbol.IsOverride &&
-                         !existingMember.TemplateInfo.IsNone )
-                    {
-                        // Note we cannot get here when the member is defined in the same type because the compile-time assembly creation
-                        // would have failed. The
-
-                        // The template is already defined and we are not overwriting a template of the base class.
-                        diagnosticAdder.Report(
-                            GeneralDiagnosticDescriptors.TemplateWithSameNameAlreadyDefinedInBaseClass.CreateDiagnostic(
-                                memberSymbol.GetDiagnosticLocation(),
-                                (memberName, type.Name, existingMember.AspectClass.AspectType.Name) ) );
-
-                        continue;
-                    }
-
-                    // Add or replace the template.
-                    members[memberName] = aspectClassMember;
-                }
-                else
-                {
-                    if ( !members.ContainsKey( memberName ) )
-                    {
-                        members.Add( memberName, aspectClassMember );
-                    }
-                }
-            }
-
-            return members.ToImmutable();
         }
 
         private bool TryInitialize( IDiagnosticAdder diagnosticAdder )
@@ -245,6 +137,8 @@ namespace Caravela.Framework.Impl.Aspects
         /// <returns></returns>
         public AspectInstance CreateAspectInstance( IAspect aspect, IDeclaration target ) => new( aspect, target, this );
 
+        public AspectInstance CreateDefaultAspectInstance( IDeclaration target ) => new( (IAspect) Activator.CreateInstance( this.AspectType ), target, this );
+
         /// <summary>
         /// Creates an instance of the <see cref="AspectClass"/> class.
         /// </summary>
@@ -278,30 +172,6 @@ namespace Caravela.Framework.Impl.Aspects
             }
 
             return true;
-        }
-
-        public TemplateDriver GetTemplateDriver( IMethod sourceTemplate )
-        {
-            var templateSymbol = sourceTemplate.GetSymbol().AssertNotNull();
-            var id = templateSymbol.GetDocumentationCommentId()!;
-
-            if ( this._templateDrivers.TryGetValue( id, out var templateDriver ) )
-            {
-                return templateDriver;
-            }
-
-            var templateName = TemplateNameHelper.GetCompiledTemplateName( templateSymbol );
-            var compiledTemplateMethodInfo = this.AspectType.GetMethod( templateName );
-
-            if ( compiledTemplateMethodInfo == null )
-            {
-                throw new AssertionFailedException( $"Could not find the compile template for {sourceTemplate}." );
-            }
-
-            templateDriver = new TemplateDriver( this._serviceProvider, this, sourceTemplate.GetSymbol().AssertNotNull(), compiledTemplateMethodInfo );
-            this._templateDrivers.Add( id, templateDriver );
-
-            return templateDriver;
         }
 
         private static bool IsMethod( MethodKind methodKind )

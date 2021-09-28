@@ -12,6 +12,9 @@ using System.Threading;
 
 namespace Caravela.Framework.Impl.Fabrics
 {
+    /// <summary>
+    /// An implementation of <see cref="IAspectSource"/> that relies on a delegate that returns the aspect instances.
+    /// </summary>
     internal class ProgrammaticAspectSource<TAspect, TDeclaration> : IAspectSource
         where TDeclaration : class, IDeclaration
         where TAspect : IAspect<TDeclaration>
@@ -32,13 +35,13 @@ namespace Caravela.Framework.Impl.Fabrics
 
         public AspectSourcePriority Priority => AspectSourcePriority.Programmatic;
 
-        public IEnumerable<AspectClass> AspectTypes => new[] { this._aspectClass };
+        public IEnumerable<IAspectClass> AspectTypes => new[] { this._aspectClass };
 
         public IEnumerable<IDeclaration> GetExclusions( INamedType aspectType ) => Array.Empty<IDeclaration>();
 
         public IEnumerable<AspectInstance> GetAspectInstances(
             CompilationModel compilation,
-            AspectClass aspectClass,
+            IAspectClass aspectClass,
             IDiagnosticAdder diagnosticAdder,
             CancellationToken cancellationToken )
         {

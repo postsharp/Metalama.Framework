@@ -19,15 +19,13 @@ namespace Caravela.Framework.Impl.Fabrics
                 this.RegisterAspectSource,
                 compilation
                     => this.Selector( compilation )
-                        .SelectMany( t => this.UserCodeInvoker.Wrap( this.UserCodeInvoker.Invoke( () => selector( t ) ) ) ),
-                this.ServiceProvider,
-                this.AspectClasses );
+                        .SelectMany( t => this.Context.UserCodeInvoker.Wrap( this.Context.UserCodeInvoker.Invoke( () => selector( t ) ) ) ),
+                this.Context );
 
         public NamedTypeSelection(
             Action<IAspectSource> registerAspectSource,
             Func<CompilationModel, IEnumerable<INamedType>> selectTargets,
-            IServiceProvider serviceProvider,
-            AspectClassRegistry aspectClasses ) : base( registerAspectSource, selectTargets, serviceProvider, aspectClasses ) { }
+            FabricContext context ) : base( registerAspectSource, selectTargets, context ) { }
 
         public IDeclarationSelection<IMethod> WithMethods( Func<INamedType, IEnumerable<IMethod>> selector ) => this.WithMembers( selector );
 

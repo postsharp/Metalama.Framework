@@ -59,7 +59,7 @@ namespace Foo
             var code = @"
 using System;
 using Caravela.Framework.Aspects;
-using Caravela.Framework.Policies;
+using Caravela.Framework.Fabrics;
 
 [assembly: A(42, new[] { E.A }, new[] { typeof(C<int[]>.N<string>), typeof(C<>.N<>) }, P = 13)]
 [assembly: CompileTime]
@@ -336,7 +336,7 @@ class B
 
             var code = @"
 
-using Caravela.Framework.Policies;
+using Caravela.Framework.Fabrics;
 [CompileTime]
 class B
 {

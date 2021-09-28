@@ -15,7 +15,7 @@ namespace Caravela.Framework.Impl.Advices
     [Obfuscation( Exclude = true )] // Not obfuscated to have a decent call stack in case of user exception.
     internal static class TemplateValidationHelper
     {
-        public static Template<IMethod> ValidateTarget( this in Template<IMethod> template, IMethod? targetMethod )
+        public static TemplateMember<IMethod> ValidateTarget( this in TemplateMember<IMethod> template, IMethod? targetMethod )
         {
             if ( targetMethod == null || template.IsNull )
             {

@@ -3,47 +3,30 @@
 
 using Caravela.Framework.Code;
 using Caravela.Framework.Fabrics;
+using Caravela.Framework.Impl.Aspects;
 using Caravela.Framework.Impl.CodeModel;
-using Caravela.Framework.Impl.Utilities;
-using System;
+using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl.Fabrics
 {
     internal class NamespaceFabricDriver : FabricDriver
     {
-        private readonly string _ns;
+        public NamespaceFabricDriver( FabricContext context, IFabric fabric, Compilation runTimeCompilation ) :
+            base( context, fabric, runTimeCompilation ) { }
 
-        public NamespaceFabricDriver( IServiceProvider serviceProvider, AspectClassRegistry aspectClasses, IFabric fabric ) :
-            base( serviceProvider, aspectClasses, fabric )
+        public override void Execute( IAspectBuilderInternal aspectBuilder )
         {
-            this._ns = NamespaceHelper.GetNamespace( this.Fabric.GetType().FullName );
-        }
-
-        public override FabricResult Execute( IProject project )
-        {
-            var builder = new Builder( this.ServiceProvider, project, this.AspectClasses, this._ns );
+            var builder = new Builder( (INamespace) aspectBuilder.Target, this.Context, aspectBuilder );
             ((INamespaceFabric) this.Fabric).BuildFabric( builder );
-
-            return new FabricResult( builder );
         }
 
         public override FabricKind Kind => FabricKind.Namespace;
 
-        public override string OrderingKey => this._ns;
+        public override IDeclaration GetTarget( CompilationModel compilation ) => compilation.Factory.GetNamespace( (INamespaceSymbol) this.TargetSymbol );
 
         private class Builder : BaseBuilder<INamespace>, INamespaceFabricBuilder
         {
-            private readonly string _ns;
-
-            public Builder( IServiceProvider serviceProvider, IProject project, AspectClassRegistry aspectClasses, string ns ) : base(
-                serviceProvider,
-                project,
-                aspectClasses )
-            {
-                this._ns = ns;
-            }
-
-            protected override INamespace GetTargetDeclaration( CompilationModel compilation ) => compilation.GetNamespace( this._ns ).AssertNotNull();
+            public Builder( INamespace ns, FabricContext context, IAspectBuilderInternal aspectBuilder ) : base( ns, context, aspectBuilder ) { }
         }
     }
 }
