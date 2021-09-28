@@ -7,7 +7,6 @@ using Caravela.Framework.Impl.Aspects;
 using Caravela.Framework.Impl.CodeModel;
 using Microsoft.CodeAnalysis;
 using System.IO;
-using System.Reflection;
 
 namespace Caravela.Framework.Impl.Fabrics
 {
@@ -16,25 +15,18 @@ namespace Caravela.Framework.Impl.Fabrics
         public ProjectFabricDriver( FabricContext context, IFabric fabric, Compilation runTimeCompilation ) :
             base( context, fabric, runTimeCompilation )
         {
-            var attribute = this.Fabric.GetType().GetCustomAttribute<FabricAttribute>();
-
             var depth = 0;
 
-            if ( attribute != null )
+            // Compute the distance of the path to the root.
+            for ( var path = this.OriginalPath; !string.IsNullOrEmpty( path ); path = Path.GetDirectoryName( path ) )
             {
-                // Compute the distance of the path to the root.
-                for ( var path = attribute.Path; !string.IsNullOrEmpty( path ); path = Path.GetDirectoryName( path ) )
-                {
-                    depth++;
-                }
+                depth++;
+            }
 
-                this.OrderingKey = $"{depth:D3}:{this.Fabric.GetType().FullName}";
-            }
-            else
-            {
-                this.OrderingKey = $"XXX:{this.Fabric.GetType().FullName}";
-            }
+            this.OrderingKey = $"{depth:D3}:{this.Fabric.GetType().FullName}";
         }
+
+        public override ISymbol TargetSymbol => this.FabricSymbol.ContainingAssembly;
 
         public override void Execute( IAspectBuilderInternal aspectBuilder )
         {

@@ -7,6 +7,7 @@ using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Fabrics;
 using Caravela.Framework.Impl.Aspects;
 using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Validation;
 using Microsoft.CodeAnalysis;
 using System;
@@ -25,17 +26,16 @@ namespace Caravela.Framework.Impl.Fabrics
         {
             this.Context = context;
             this.Fabric = fabric;
-            var attribute = this.Fabric.GetType().GetCustomAttribute<FabricAttribute>().AssertNotNull();
-            this.FabricSymbol = (INamedTypeSymbol) DocumentationCommentId.GetFirstSymbolForDeclarationId( attribute.Id, runTimeCompilation ).AssertNotNull();
-            this.TargetSymbol = DocumentationCommentId.GetFirstSymbolForDeclarationId( attribute.TargetId, runTimeCompilation ).AssertNotNull();
-            this.FabricPath = attribute.Path;
+            var originalName = this.Fabric.GetType().GetCustomAttribute<OriginalIdAttribute>().AssertNotNull().Id;
+            this.FabricSymbol = (INamedTypeSymbol) DocumentationCommentId.GetFirstSymbolForDeclarationId( originalName, runTimeCompilation ).AssertNotNull();
+            this.OriginalPath = this.Fabric.GetType().GetCustomAttribute<OriginalPathAttribute>().AssertNotNull().Path;
         }
 
         public INamedTypeSymbol FabricSymbol { get; }
 
-        public ISymbol TargetSymbol { get; }
+        public abstract ISymbol TargetSymbol { get; }
 
-        public string FabricPath { get; }
+        public string OriginalPath { get; }
 
         public abstract void Execute( IAspectBuilderInternal aspectBuilder );
 

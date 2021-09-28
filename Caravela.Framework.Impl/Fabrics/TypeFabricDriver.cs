@@ -19,6 +19,8 @@ namespace Caravela.Framework.Impl.Fabrics
     {
         public TypeFabricDriver( FabricContext context, IFabric fabric, Compilation runTimeCompilation ) : base( context, fabric, runTimeCompilation ) { }
 
+        public override ISymbol TargetSymbol => this.FabricSymbol.ContainingType;
+
         public override void Execute( IAspectBuilderInternal aspectBuilder )
         {
             // Type fabrics execute as aspects, called from FabricAspectClass.

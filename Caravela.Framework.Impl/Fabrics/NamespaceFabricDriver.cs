@@ -14,6 +14,8 @@ namespace Caravela.Framework.Impl.Fabrics
         public NamespaceFabricDriver( FabricContext context, IFabric fabric, Compilation runTimeCompilation ) :
             base( context, fabric, runTimeCompilation ) { }
 
+        public override ISymbol TargetSymbol => this.FabricSymbol.ContainingNamespace;
+
         public override void Execute( IAspectBuilderInternal aspectBuilder )
         {
             var builder = new Builder( (INamespace) aspectBuilder.Target, this.Context, aspectBuilder );

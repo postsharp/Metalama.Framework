@@ -4,6 +4,7 @@
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Eligibility;
+using Caravela.Framework.Fabrics;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.Diagnostics;
@@ -38,8 +39,12 @@ namespace Caravela.Framework.Impl.CompileTime
             private readonly IDiagnosticAdder _diagnosticAdder;
             private readonly TemplateCompiler _templateCompiler;
             private readonly CancellationToken _cancellationToken;
-            private readonly TypeSyntax _compileTimeType;
+            private readonly NameSyntax _compileTimeType;
             private readonly SyntaxGenerationContext _syntaxGenerationContext;
+            private readonly Dictionary<ITypeSymbol, string> _relocatedTypes = new();
+            private readonly NameSyntax _originalNameTypeSyntax;
+            private readonly NameSyntax _originalPathTypeSyntax;
+            private readonly ITypeSymbol _fabricType;
             private Context _currentContext;
             private HashSet<string>? _currentTypeTemplateNames;
             private string? _currentTypeName;
@@ -65,27 +70,38 @@ namespace Caravela.Framework.Impl.CompileTime
 
                 this._syntaxGenerationContext = SyntaxGenerationContext.CreateDefault( compileTimeCompilation );
 
-                this._compileTimeType =
+                this._compileTimeType = (NameSyntax)
                     this._syntaxGenerationContext.SyntaxGenerator.Type(
                         this._syntaxGenerationContext.ReflectionMapper.GetTypeSymbol( typeof(CompileTimeType) ) );
+
+                this._originalNameTypeSyntax = (NameSyntax)
+                    this._syntaxGenerationContext.SyntaxGenerator.Type(
+                        this._syntaxGenerationContext.ReflectionMapper.GetTypeSymbol( typeof(OriginalIdAttribute) ) );
+
+                this._originalPathTypeSyntax = (NameSyntax)
+                    this._syntaxGenerationContext.SyntaxGenerator.Type(
+                        this._syntaxGenerationContext.ReflectionMapper.GetTypeSymbol( typeof(OriginalPathAttribute) ) );
+
+                this._fabricType = ReflectionMapper.GetInstance( runTimeCompilation ).GetTypeSymbol( typeof(IFabric) );
             }
 
             // TODO: assembly and module-level attributes?
+
             public override SyntaxNode? VisitAttributeList( AttributeListSyntax node ) => node.Parent is CompilationUnitSyntax ? null : node;
 
-            public override SyntaxNode? VisitClassDeclaration( ClassDeclarationSyntax node ) => this.VisitTypeDeclaration( node );
+            public override SyntaxNode? VisitClassDeclaration( ClassDeclarationSyntax node ) => this.VisitTypeDeclaration( node ).SingleOrDefault();
 
-            public override SyntaxNode? VisitStructDeclaration( StructDeclarationSyntax node ) => this.VisitTypeDeclaration( node );
+            public override SyntaxNode? VisitStructDeclaration( StructDeclarationSyntax node ) => this.VisitTypeDeclaration( node ).SingleOrDefault();
 
-            public override SyntaxNode? VisitInterfaceDeclaration( InterfaceDeclarationSyntax node ) => this.VisitTypeDeclaration( node );
+            public override SyntaxNode? VisitInterfaceDeclaration( InterfaceDeclarationSyntax node ) => this.VisitTypeDeclaration( node ).SingleOrDefault();
 
-            public override SyntaxNode? VisitRecordDeclaration( RecordDeclarationSyntax node ) => this.VisitTypeDeclaration( node );
+            public override SyntaxNode? VisitRecordDeclaration( RecordDeclarationSyntax node ) => this.VisitTypeDeclaration( node ).SingleOrDefault();
 
             public override SyntaxNode? VisitEnumDeclaration( EnumDeclarationSyntax node )
             {
                 this._cancellationToken.ThrowIfCancellationRequested();
 
-                var symbol = this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node )!;
+                var symbol = this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node ).AssertNotNull();
                 var scope = this.SymbolClassifier.GetTemplatingScope( symbol );
 
                 if ( scope == TemplatingScope.RunTimeOnly )
@@ -102,7 +118,7 @@ namespace Caravela.Framework.Impl.CompileTime
             {
                 this._cancellationToken.ThrowIfCancellationRequested();
 
-                var symbol = this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node )!;
+                var symbol = this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node ).AssertNotNull();
                 var scope = this.SymbolClassifier.GetTemplatingScope( symbol );
 
                 if ( scope == TemplatingScope.RunTimeOnly )
@@ -115,116 +131,208 @@ namespace Caravela.Framework.Impl.CompileTime
                 }
             }
 
-            private T? VisitTypeDeclaration<T>( T node )
-                where T : TypeDeclarationSyntax
+            private void PopulateNestedCompileTimeTypes( TypeDeclarationSyntax node, List<MemberDeclarationSyntax> list, string namePrefix )
+            {
+                // Compute the new name of the relocated children.
+                namePrefix += node.Identifier.Text;
+
+                if ( node.TypeParameterList is { Parameters: { Count: > 0 } } )
+                {
+                    // This does not guarantee the absence of conflict.
+                    namePrefix += "X" + node.TypeParameterList.Parameters.Count;
+                }
+
+                namePrefix += "_";
+
+                foreach ( var child in node.Members )
+                {
+                    if ( child is TypeDeclarationSyntax childType )
+                    {
+                        var childSymbol = this.RunTimeCompilation.GetSemanticModel( child.SyntaxTree ).GetDeclaredSymbol( child ).AssertNotNull();
+                        var childScope = this.SymbolClassifier.GetTemplatingScope( childSymbol );
+
+                        if ( childScope != TemplatingScope.RunTimeOnly )
+                        {
+                            // We have a build-time type nested in a run-time type. We have to un-nest it.
+
+                            var newName = namePrefix + "" + childType.Identifier.Text;
+
+                            var newFullName = string.Join(
+                                ".",
+                                node.Ancestors()
+                                    .OfType<NamespaceDeclarationSyntax>()
+                                    .Select( x => x.Name.ToString() )
+                                    .Concat( new[] { newName } ) );
+
+                            this._relocatedTypes.Add( (ITypeSymbol) childSymbol, newFullName );
+
+                            var originalId = DocumentationCommentId.CreateDeclarationId( childSymbol );
+
+                            var originalNameAttribute = Attribute( this._originalNameTypeSyntax )
+                                .WithArgumentList(
+                                    AttributeArgumentList( SingletonSeparatedList( AttributeArgument( SyntaxFactoryEx.LiteralExpression( originalId ) ) ) ) );
+
+                            var transformedChild = (TypeDeclarationSyntax) this.Visit( childType )!;
+
+                            transformedChild = transformedChild
+                                .WithIdentifier( Identifier( namePrefix + "" + childType.Identifier.Text ) )
+                                .WithAttributeLists( transformedChild.AttributeLists.Add( AttributeList( SingletonSeparatedList( originalNameAttribute ) ) ) );
+
+                            list.Add( transformedChild );
+                        }
+                        else
+                        {
+                            // We have a run-time child type, and it must be further checked for un-nesting.
+
+                            this.PopulateNestedCompileTimeTypes( childType, list, namePrefix );
+                        }
+                    }
+                    else if ( child is BaseTypeDeclarationSyntax or DelegateDeclarationSyntax )
+                    {
+                        // TODO: emit an error, this is not supported.
+                        throw new NotImplementedException();
+                    }
+                    else
+                    {
+                        // Non-type members of a run-time type are always run-time too and should not be copied to the compile-time assembly.
+                    }
+                }
+            }
+
+            private IEnumerable<MemberDeclarationSyntax> VisitTypeDeclaration( TypeDeclarationSyntax node )
             {
                 this._cancellationToken.ThrowIfCancellationRequested();
 
-                var symbol = this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node )!;
+                var symbol = this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node ).AssertNotNull();
 
                 var scope = this.SymbolClassifier.GetTemplatingScope( symbol );
 
                 if ( scope == TemplatingScope.RunTimeOnly )
                 {
-                    return null;
+                    // If the type contains compile-time nested types, we have to un-nest them.
+                    var compileTimeMembers = new List<MemberDeclarationSyntax>();
+                    this.PopulateNestedCompileTimeTypes( node, compileTimeMembers, "" );
+
+                    return compileTimeMembers;
                 }
                 else
                 {
-                    this.FoundCompileTimeCode = true;
+                    var transformedNode = this.TransformCompileTimeType( node, symbol, scope );
 
-                    this._currentTypeTemplateNames = new HashSet<string>( StringComparer.OrdinalIgnoreCase );
-                    this._currentTypeName = symbol.Name;
-
-                    // Add type members.
-
-                    var members = new List<MemberDeclarationSyntax>();
-
-                    using ( this.WithScope( scope ) )
-                    {
-                        foreach ( var member in node.Members )
-                        {
-                            switch ( member )
-                            {
-                                case MethodDeclarationSyntax method:
-                                    members.AddRange( this.VisitMethodDeclaration( method ).AssertNoneNull() );
-
-                                    break;
-
-                                case IndexerDeclarationSyntax:
-                                    throw new NotImplementedException( "Indexers are not implemented." );
-
-                                // members.AddRange( this.VisitBasePropertyDeclaration( indexer ).AssertNoneNull() );
-
-                                case PropertyDeclarationSyntax property:
-                                    members.AddRange( this.VisitBasePropertyDeclaration( property ).AssertNoneNull() );
-
-                                    break;
-
-                                case EventDeclarationSyntax @event:
-                                    members.AddRange( this.VisitEventDeclaration( @event ).AssertNoneNull() );
-
-                                    break;
-
-                                default:
-                                    members.Add( (MemberDeclarationSyntax) this.Visit( member ).AssertNotNull() );
-
-                                    break;
-                            }
-                        }
-                    }
-
-                    // Add non-implemented members of IAspect and IEligible.
-                    var syntaxGenerator = this._syntaxGenerationContext.SyntaxGenerator;
-                    var allImplementedInterfaces = symbol.SelectManyRecursive( i => i.Interfaces, throwOnDuplicate: false );
-
-                    foreach ( var implementedInterface in allImplementedInterfaces )
-                    {
-#pragma warning disable 618
-                        if ( implementedInterface.Name == nameof(IAspect) || implementedInterface.Name == nameof(IEligible<IDeclaration>) )
-#pragma warning restore 618
-                        {
-                            foreach ( var member in implementedInterface.GetMembers() )
-                            {
-                                if ( member is not IMethodSymbol method )
-                                {
-                                    // IAspect and IEligible have only methods.
-                                    throw new AssertionFailedException();
-                                }
-
-                                var memberImplementation = (IMethodSymbol?) symbol.FindImplementationForInterfaceMember( member );
-
-                                if ( memberImplementation == null || memberImplementation.ContainingType.TypeKind == TypeKind.Interface )
-                                {
-                                    var newMethod = MethodDeclaration(
-                                            default,
-                                            default,
-                                            syntaxGenerator.Type( method.ReturnType ),
-                                            ExplicitInterfaceSpecifier( (NameSyntax) syntaxGenerator.Type( implementedInterface ) ),
-                                            Identifier( method.Name ),
-                                            default,
-                                            ParameterList(
-                                                SeparatedList(
-                                                    method.Parameters.Select(
-                                                        p => Parameter(
-                                                            default,
-                                                            default,
-                                                            syntaxGenerator.Type( p.Type ),
-                                                            Identifier( p.Name ),
-                                                            default ) ) ) ),
-                                            default,
-                                            Block(),
-                                            default,
-                                            Token( SyntaxKind.SemicolonToken ) )
-                                        .NormalizeWhitespace();
-
-                                    members.Add( newMethod );
-                                }
-                            }
-                        }
-                    }
-
-                    return (T) node.WithMembers( List( members ) ).WithAdditionalAnnotations( _hasCompileTimeCodeAnnotation );
+                    return new[] { transformedNode };
                 }
+            }
+
+            private TypeDeclarationSyntax TransformCompileTimeType( TypeDeclarationSyntax node, INamedTypeSymbol symbol, TemplatingScope scope )
+            {
+                this.FoundCompileTimeCode = true;
+
+                this._currentTypeTemplateNames = new HashSet<string>( StringComparer.OrdinalIgnoreCase );
+                this._currentTypeName = symbol.Name;
+
+                // Add type members.
+
+                var members = new List<MemberDeclarationSyntax>();
+
+                using ( this.WithScope( scope ) )
+                {
+                    foreach ( var member in node.Members )
+                    {
+                        switch ( member )
+                        {
+                            case MethodDeclarationSyntax method:
+                                members.AddRange( this.VisitMethodDeclaration( method ).AssertNoneNull() );
+
+                                break;
+
+                            case IndexerDeclarationSyntax:
+                                throw new NotImplementedException( "Indexers are not implemented." );
+
+                            // members.AddRange( this.VisitBasePropertyDeclaration( indexer ).AssertNoneNull() );
+
+                            case PropertyDeclarationSyntax property:
+                                members.AddRange( this.VisitBasePropertyDeclaration( property ).AssertNoneNull() );
+
+                                break;
+
+                            case EventDeclarationSyntax @event:
+                                members.AddRange( this.VisitEventDeclaration( @event ).AssertNoneNull() );
+
+                                break;
+
+                            default:
+                                members.Add( (MemberDeclarationSyntax) this.Visit( member ).AssertNotNull() );
+
+                                break;
+                        }
+                    }
+                }
+
+                // Add non-implemented members of IAspect and IEligible.
+                var syntaxGenerator = this._syntaxGenerationContext.SyntaxGenerator;
+                var allImplementedInterfaces = symbol.SelectManyRecursive( i => i.Interfaces, throwOnDuplicate: false );
+
+                foreach ( var implementedInterface in allImplementedInterfaces )
+                {
+#pragma warning disable 618
+                    if ( implementedInterface.Name == nameof(IAspect) || implementedInterface.Name == nameof(IEligible<IDeclaration>) )
+#pragma warning restore 618
+                    {
+                        foreach ( var member in implementedInterface.GetMembers() )
+                        {
+                            if ( member is not IMethodSymbol method )
+                            {
+                                // IAspect and IEligible have only methods.
+                                throw new AssertionFailedException();
+                            }
+
+                            var memberImplementation = (IMethodSymbol?) symbol.FindImplementationForInterfaceMember( member );
+
+                            if ( memberImplementation == null || memberImplementation.ContainingType.TypeKind == TypeKind.Interface )
+                            {
+                                var newMethod = MethodDeclaration(
+                                        default,
+                                        default,
+                                        syntaxGenerator.Type( method.ReturnType ),
+                                        ExplicitInterfaceSpecifier( (NameSyntax) syntaxGenerator.Type( implementedInterface ) ),
+                                        Identifier( method.Name ),
+                                        default,
+                                        ParameterList(
+                                            SeparatedList(
+                                                method.Parameters.Select(
+                                                    p => Parameter(
+                                                        default,
+                                                        default,
+                                                        syntaxGenerator.Type( p.Type ),
+                                                        Identifier( p.Name ),
+                                                        default ) ) ) ),
+                                        default,
+                                        Block(),
+                                        default,
+                                        Token( SyntaxKind.SemicolonToken ) )
+                                    .NormalizeWhitespace();
+
+                                members.Add( newMethod );
+                            }
+                        }
+                    }
+                }
+
+                var transformedNode = node.WithMembers( List( members ) ).WithAdditionalAnnotations( _hasCompileTimeCodeAnnotation );
+
+                // If the type is a fabric, add the OriginalPath attribute.
+                if ( this.RunTimeCompilation.HasImplicitConversion( symbol, this._fabricType ) )
+                {
+                    var originalPathAttribute = Attribute( this._originalPathTypeSyntax )
+                        .WithArgumentList(
+                            AttributeArgumentList(
+                                SingletonSeparatedList( AttributeArgument( SyntaxFactoryEx.LiteralExpression( node.SyntaxTree.FilePath ) ) ) ) );
+
+                    transformedNode = transformedNode
+                        .WithAttributeLists( transformedNode.AttributeLists.Add( AttributeList( SingletonSeparatedList( originalPathAttribute ) ) ) );
+                }
+
+                return transformedNode;
             }
 
             private bool CheckTemplateName( ISymbol symbol )
@@ -525,13 +633,41 @@ namespace Caravela.Framework.Impl.CompileTime
                 }
             }
 
+            private SyntaxList<MemberDeclarationSyntax> VisitTypeOrNamespaceMembers( SyntaxList<MemberDeclarationSyntax> members )
+            {
+                var resultingMembers = new List<MemberDeclarationSyntax>( members.Count );
+
+                foreach ( var member in members )
+                {
+                    switch ( member )
+                    {
+                        case TypeDeclarationSyntax type:
+                            resultingMembers.AddRange( this.VisitTypeDeclaration( type ) );
+
+                            break;
+
+                        default:
+                            var transformedMember = (MemberDeclarationSyntax?) this.Visit( member );
+
+                            if ( transformedMember != null )
+                            {
+                                resultingMembers.Add( transformedMember );
+                            }
+
+                            break;
+                    }
+                }
+
+                return List( resultingMembers );
+            }
+
             public override SyntaxNode? VisitNamespaceDeclaration( NamespaceDeclarationSyntax node )
             {
-                var transformedNode = (NamespaceDeclarationSyntax) base.VisitNamespaceDeclaration( node )!;
+                var transformedMembers = this.VisitTypeOrNamespaceMembers( node.Members );
 
-                if ( transformedNode.Members.Any( m => m.HasAnnotation( _hasCompileTimeCodeAnnotation ) ) )
+                if ( transformedMembers.Any( m => m.HasAnnotation( _hasCompileTimeCodeAnnotation ) ) )
                 {
-                    return transformedNode.WithAdditionalAnnotations( _hasCompileTimeCodeAnnotation );
+                    return node.WithMembers( transformedMembers ).WithAdditionalAnnotations( _hasCompileTimeCodeAnnotation );
                 }
                 else
                 {
@@ -541,11 +677,11 @@ namespace Caravela.Framework.Impl.CompileTime
 
             public override SyntaxNode? VisitCompilationUnit( CompilationUnitSyntax node )
             {
-                var transformedNode = (CompilationUnitSyntax) base.VisitCompilationUnit( node )!;
+                var transformedMembers = this.VisitTypeOrNamespaceMembers( node.Members );
 
-                if ( transformedNode.Members.Any( m => m.HasAnnotation( _hasCompileTimeCodeAnnotation ) ) )
+                if ( transformedMembers.Any( m => m.HasAnnotation( _hasCompileTimeCodeAnnotation ) ) )
                 {
-                    return transformedNode.WithAdditionalAnnotations( _hasCompileTimeCodeAnnotation );
+                    return node.WithMembers( transformedMembers ).WithAdditionalAnnotations( _hasCompileTimeCodeAnnotation );
                 }
                 else
                 {

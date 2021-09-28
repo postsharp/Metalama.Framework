@@ -44,6 +44,17 @@ namespace Caravela.Framework.Impl.CompileTime
                 {
                     this.HasCompileTimeCode = true;
                 }
+
+                if ( node is TypeDeclarationSyntax typeWithMembers )
+                {
+                    foreach ( var childType in typeWithMembers.Members )
+                    {
+                        if ( childType is BaseTypeDeclarationSyntax or DelegateDeclarationSyntax )
+                        {
+                            this.VisitTypeDeclaration( childType );
+                        }
+                    }
+                }
             }
 
             public override void VisitClassDeclaration( ClassDeclarationSyntax node ) => this.VisitTypeDeclaration( node );

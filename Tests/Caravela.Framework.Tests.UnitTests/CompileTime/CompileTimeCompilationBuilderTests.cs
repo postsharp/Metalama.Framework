@@ -801,7 +801,7 @@ public class MyAspect : OverrideMethodAspect
         }
 
         private static string GetCompileTimeCode( IsolatedTest test, string code )
-            => GetCompileTimeCode( test, new Dictionary<string, string> { { Guid.NewGuid() + ".cs", code } } ).Values.Single();
+            => GetCompileTimeCode( test, new Dictionary<string, string> { { "main.cs", code } } ).Values.Single();
 
         private static IReadOnlyDictionary<string, string> GetCompileTimeCode( IsolatedTest test, IReadOnlyDictionary<string, string> code )
         {
@@ -847,6 +847,57 @@ public class MyAspect : OverrideMethodAspect
                 "namespace Ns2",
                 compileTimeCode.Single( p => p.Key.StartsWith( "Both_", StringComparison.OrdinalIgnoreCase ) ).Value,
                 StringComparison.Ordinal );
+        }
+
+        [Fact]
+        public void FabricClassesAreUnNested()
+        {
+            using var isolatedTest = this.WithIsolatedTest();
+            isolatedTest.ProjectOptions.FormatCompileTimeCode = true;
+
+            var code = @"
+using System;
+using Caravela.Framework.Fabrics;
+
+public class SomeClass
+{
+    class Fabric : IFabric {}
+}
+
+namespace SomeNamespace
+{
+    class OtherClass<T>
+    {
+        class NestedTwice
+        {
+            class Fabric : IFabric {}
+        }
+    }
+}
+";
+
+            var compileTimeCode = GetCompileTimeCode( isolatedTest, code );
+
+            var expected = @"
+using System;
+using Caravela.Framework.Fabrics;
+using Caravela.Framework.Impl.CompileTime;
+
+[OriginalPath(""main.cs"")]
+[OriginalId(""T:SomeClass.Fabric"")]
+class SomeClass_Fabric : IFabric
+{ }
+
+namespace SomeNamespace
+{
+    [OriginalPath(""main.cs"")]
+    [OriginalId(""T:SomeNamespace.OtherClass`1.NestedTwice.Fabric"")]
+    class OtherClassX1_NestedTwice_Fabric : IFabric
+    { }
+}
+";
+
+            Assert.Equal( expected, compileTimeCode );
         }
 
         private class Rewriter : ICompileTimeAssemblyBinaryRewriter
