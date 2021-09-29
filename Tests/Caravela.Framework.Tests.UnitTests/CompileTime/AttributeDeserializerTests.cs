@@ -433,6 +433,7 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime
 
         public class ThrowingAttribute : Attribute
         {
+            // ReSharper disable once ParameterOnlyUsedForPreconditionCheck.Local
             public ThrowingAttribute( bool throws )
             {
                 if ( throws )

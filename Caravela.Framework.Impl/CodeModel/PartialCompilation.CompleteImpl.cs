@@ -19,7 +19,7 @@ namespace Caravela.Framework.Impl.CodeModel
             public CompleteImpl( Compilation compilation, ImmutableArray<ResourceDescription> resources )
                 : base( compilation, resources ) { }
 
-            public CompleteImpl(
+            private CompleteImpl(
                 PartialCompilation baseCompilation,
                 IReadOnlyList<ModifiedSyntaxTree>? modifiedSyntaxTrees,
                 IReadOnlyList<SyntaxTree>? addedTrees,

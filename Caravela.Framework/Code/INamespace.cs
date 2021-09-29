@@ -40,6 +40,5 @@ namespace Caravela.Framework.Code
         /// Gets the list of children namespaces of the current namespace.
         /// </summary>
         INamespaceList Namespaces { get; }
-
     }
 }

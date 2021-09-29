@@ -11,6 +11,7 @@ using Xunit;
 using Xunit.Abstractions;
 
 // ReSharper disable RedundantTypeArgumentsOfMethod
+// ReSharper disable ParameterOnlyUsedForPreconditionCheck.Local
 
 namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
 {

@@ -8,6 +8,8 @@ using System.Linq;
 using Xunit;
 using Xunit.Abstractions;
 
+// ReSharper disable ParameterOnlyUsedForPreconditionCheck.Local
+
 namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
 {
     public class CaravelaTypeTests : ReflectionTestBase

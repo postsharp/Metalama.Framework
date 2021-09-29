@@ -81,7 +81,7 @@ namespace Caravela.Framework.Impl.Aspects
                     cancellationToken ),
                 IEvent @event => this.EvaluateAspect( @event, aspectInstance, compilationModelRevision, projectConfiguration, cancellationToken ),
                 INamespace ns => this.EvaluateAspect( ns, aspectInstance, compilationModelRevision, projectConfiguration, cancellationToken ),
-                _ => throw new NotSupportedException($"Cannot add an aspect to a declaration of type {aspectInstance.TargetDeclaration.DeclarationKind}.")
+                _ => throw new NotSupportedException( $"Cannot add an aspect to a declaration of type {aspectInstance.TargetDeclaration.DeclarationKind}." )
             };
 
         private AspectInstanceResult EvaluateAspect<T>(

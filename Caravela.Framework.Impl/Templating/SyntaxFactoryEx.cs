@@ -111,7 +111,7 @@ namespace Caravela.Framework.Impl.Templating
         {
             public static readonly NormalizeRewriter Instance = new();
 
-            public NormalizeRewriter() : base( true ) { }
+            private NormalizeRewriter() : base( true ) { }
 
             public override SyntaxNode? VisitQualifiedName( QualifiedNameSyntax node )
             {

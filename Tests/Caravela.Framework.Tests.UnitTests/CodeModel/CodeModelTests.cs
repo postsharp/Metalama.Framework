@@ -785,7 +785,7 @@ class T2 {}
             Assert.Equal( "Ns2", ns2.Name );
             Assert.Equal( "Ns1.Ns2", ns2.FullName );
             Assert.Same( ns1, ns2.ParentNamespace );
-            
+
             Assert.Equal( 2, ns2.AllTypes.Count );
 
             var t1 = ns2.Types.Single();

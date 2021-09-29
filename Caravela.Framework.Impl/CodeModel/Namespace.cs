@@ -43,10 +43,10 @@ namespace Caravela.Framework.Impl.CodeModel
                     .Select( n => new MemberRef<INamedType>( n ) ) );
 
         [Memo]
-        public INamedTypeList AllTypes 
+        public INamedTypeList AllTypes
             => new NamedTypeList(
                 this,
-                this._symbol.SelectManyRecursive( ns => ns.GetNamespaceMembers(), includeThis:true )
+                this._symbol.SelectManyRecursive( ns => ns.GetNamespaceMembers(), includeThis: true )
                     .SelectMany( ns => ns.GetTypeMembers() )
                     .Where( t => this.Compilation.ContainsType( t ) )
                     .Select( n => new MemberRef<INamedType>( n ) ) );

@@ -30,7 +30,7 @@ namespace Caravela.Framework.Impl.CodeModel
                 this._syntaxTrees = syntaxTrees;
             }
 
-            public PartialImpl(
+            private PartialImpl(
                 ImmutableDictionary<string, SyntaxTree> syntaxTrees,
                 ImmutableHashSet<INamedTypeSymbol>? types,
                 PartialCompilation baseCompilation,
