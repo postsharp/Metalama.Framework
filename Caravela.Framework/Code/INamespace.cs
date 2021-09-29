@@ -1,13 +1,13 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System;
-using System.Collections.Generic;
+using Caravela.Framework.Code.Collections;
 
 namespace Caravela.Framework.Code
 {
     /// <summary>
-    /// Represents a namespace.
+    /// Represents a namespace inside the current compilation. Note that you cannot get the <see cref="INamespace"/>
+    /// for an assembly outside of the current compilation.
     /// </summary>
     public interface INamespace : INamedDeclaration
     {
@@ -16,18 +16,30 @@ namespace Caravela.Framework.Code
         /// </summary>
         string FullName { get; }
 
+        /// <summary>
+        /// Gets a value indicating whether the current namespace represents the global (or root) namespace.
+        /// </summary>
         bool IsGlobalNamespace { get; }
 
-        /// <exclude/>
-        [Obsolete( "Not implemented." )]
+        /// <summary>
+        /// Gets the parent namespace, or <c>null</c> if <see cref="IsGlobalNamespace"/> is <c>true</c>.
+        /// </summary>
         INamespace? ParentNamespace { get; }
 
-        /// <exclude/>
-        [Obsolete( "Not implemented." )]
-        IReadOnlyList<INamedType> Types { get; }
+        /// <summary>
+        /// Gets the list of types defined in the current namespace (inside the current assembly).
+        /// </summary>
+        INamedTypeList Types { get; }
 
-        /// <exclude/>
-        [Obsolete( "Not implemented." )]
-        IReadOnlyList<INamespace> ChildrenNamespaces { get; }
+        /// <summary>
+        /// Gets the list of types defined in the current namespace or in any descendant namespace.
+        /// </summary>
+        INamedTypeList AllTypes { get; }
+
+        /// <summary>
+        /// Gets the list of children namespaces of the current namespace.
+        /// </summary>
+        INamespaceList Namespaces { get; }
+
     }
 }

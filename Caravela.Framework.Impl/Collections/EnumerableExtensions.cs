@@ -37,6 +37,27 @@ namespace Caravela.Framework.Impl.Collections
             }
         }
 
+        public static IEnumerable<T> SelectRecursive<T>( T item, Func<T, T?> getNext )
+            where T : class
+        {
+            for ( var i = item; i != null; i = getNext( i ) )
+            {
+                yield return i;
+            }
+        }
+
+        public static IEnumerable<T> SelectRecursive<T>( this IEnumerable<T> items, Func<T, T?> getNext )
+            where T : class
+        {
+            foreach ( var item in items )
+            {
+                for ( var i = item; i != null; i = getNext( i ) )
+                {
+                    yield return i;
+                }
+            }
+        }
+
         /// <summary>
         /// Selects the closure of a graph. This is typically used to select all descendants of a tree node.  This method returns distinct nodes only.
         /// </summary>

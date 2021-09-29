@@ -4,6 +4,7 @@
 using Caravela.Framework.Code;
 using Caravela.Framework.Code.Collections;
 using Caravela.Framework.Code.Types;
+using Caravela.Framework.Impl;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -735,6 +736,68 @@ class D
             var compilation = this.CreateCompilationModel( code );
             Assert.Single( compilation.Types );
             Assert.Empty( compilation.Types.Single().NestedTypes );
+        }
+
+        [Fact]
+        public void Namespaces()
+        {
+            var code = @"
+namespace Ns1
+{
+    namespace Ns2
+    {
+        class T1 {}
+
+        namespace Ns4 
+        {
+            class T3 {}
+        }
+    }
+
+    namespace Ns3
+    {
+        // Empty namespaces may or may not appear in the code model.
+        // They do appear, de facto, in a complete compilation. They do not in a partial compilation.
+    }
+}
+
+class T2 {}
+";
+
+            var compilation = this.CreateCompilationModel( code );
+
+            Assert.True( compilation.GlobalNamespace.IsGlobalNamespace );
+            Assert.Equal( "", compilation.GlobalNamespace.Name );
+            Assert.Equal( "", compilation.GlobalNamespace.FullName );
+            Assert.Null( compilation.GlobalNamespace.ParentNamespace );
+            Assert.Same( compilation, compilation.GlobalNamespace.ContainingDeclaration );
+
+            var t2 = compilation.GlobalNamespace.Types.Single();
+            Assert.Same( compilation.GlobalNamespace, t2.Namespace );
+
+            var ns1 = compilation.GlobalNamespace.Namespaces.Single();
+            Assert.Equal( "Ns1", ns1.Name );
+            Assert.Equal( "Ns1", ns1.FullName );
+
+            Assert.Equal( 2, ns1.Namespaces.Count );
+
+            var ns2 = ns1.Namespaces.OfName( "Ns2" ).AssertNotNull();
+            Assert.Equal( "Ns2", ns2.Name );
+            Assert.Equal( "Ns1.Ns2", ns2.FullName );
+            Assert.Same( ns1, ns2.ParentNamespace );
+            
+            Assert.Equal( 2, ns2.AllTypes.Count );
+
+            var t1 = ns2.Types.Single();
+            Assert.Same( ns2, t1.Namespace );
+
+            Assert.Same( ns2, compilation.GetNamespace( "Ns1.Ns2" ) );
+            Assert.Same( compilation.GlobalNamespace, compilation.GetNamespace( "" ) );
+            Assert.Null( compilation.GetNamespace( "Ns1.NsX" ) );
+
+            var externalType = (INamedType) compilation.Factory.GetTypeByReflectionType( typeof(EventHandler) );
+            Assert.True( externalType.IsExternal );
+            Assert.Throws<InvalidOperationException>( () => externalType.Namespace );
         }
     }
 }

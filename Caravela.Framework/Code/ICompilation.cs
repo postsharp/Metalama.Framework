@@ -3,6 +3,7 @@
 
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code.Collections;
+using System;
 using System.Collections.Generic;
 
 // TODO: InternalImplement
@@ -31,6 +32,7 @@ namespace Caravela.Framework.Code
         /// <summary>
         /// Gets the list of managed resources in the current compilation.
         /// </summary>
+        [Obsolete( "Not implemented." )]
         IReadOnlyList<IManagedResource> ManagedResources { get; }
 
         /// <summary>
@@ -39,8 +41,14 @@ namespace Caravela.Framework.Code
         /// </summary>
         IDeclarationComparer InvariantComparer { get; }
 
-        INamespace RootNamespace { get; }
+        /// <summary>
+        /// Gets the global namespace (i.e. the one with an empty name).
+        /// </summary>
+        INamespace GlobalNamespace { get; }
 
+        /// <summary>
+        /// Gets a namespace given its full name.
+        /// </summary>
         INamespace? GetNamespace( string ns );
 
         IEnumerable<T> GetAspectsOf<T>( IDeclaration declaration )

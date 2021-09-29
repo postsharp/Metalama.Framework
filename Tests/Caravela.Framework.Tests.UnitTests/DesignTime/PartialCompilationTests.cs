@@ -29,7 +29,7 @@ namespace Caravela.Framework.Tests.UnitTests.DesignTime
         }
 
         [Fact]
-        public void CreatePartialCompilationModel()
+        public void TypeClosure()
         {
             var code = new Dictionary<string, string>
             {
@@ -62,6 +62,28 @@ namespace Caravela.Framework.Tests.UnitTests.DesignTime
             Assert.Equal(
                 new[] { "Class2", "Class3", "Class4", "Interface1", "Interface2", "Interface3" },
                 compilationModel4.Types.Select( t => t.Name ).OrderBy( t => t ) );
+        }
+
+        [Fact]
+        public void Namespaces()
+        {
+            var code = new Dictionary<string, string>
+            {
+                ["Class1.cs"] = "namespace Ns1 { public class Class1 { } }",
+                ["Class2.cs"] = "namespace Ns1 { public class Class2 : Class1 { } }",
+                ["Class3.cs"] = "namespace Ns2 { public class Class3 { } }",
+                ["Class4.cs"] = "namespace Ns1 { public class Class4 { } }"
+            };
+
+            var compilation = CreateCSharpCompilation( code );
+            var nullProject = new NullProject( this.ServiceProvider );
+
+            var syntaxTree1 = compilation.SyntaxTrees.Single( t => t.FilePath == "Class2.cs" );
+            var compilationModel1 = CompilationModel.CreateInitialInstance( nullProject, compilation, syntaxTree1 );
+
+            var ns1 = compilationModel1.GlobalNamespace.Namespaces.Single();
+
+            Assert.Equal( new[] { "Class1", "Class2" }, ns1.Types.Select( t => t.Name ).OrderBy( t => t ) );
         }
     }
 }

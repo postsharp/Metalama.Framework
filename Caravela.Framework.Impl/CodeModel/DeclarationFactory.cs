@@ -68,9 +68,16 @@ namespace Caravela.Framework.Impl.CodeModel
         public IType GetTypeByReflectionType( Type type ) => this.GetIType( this.CompilationModel.ReflectionMapper.GetTypeSymbol( type ) );
 
         internal INamespace GetNamespace( INamespaceSymbol namespaceSymbol )
-            => (INamespace) this._cache.GetOrAdd(
+        {
+            if ( namespaceSymbol.ContainingAssembly != this.Compilation.Assembly )
+            {
+                throw new InvalidOperationException( "Cannot get the namespace of a type that is not a part of the current compilation." );
+            }
+
+            return (INamespace) this._cache.GetOrAdd(
                 namespaceSymbol.ToRef(),
                 l => new Namespace( (INamespaceSymbol) l.GetSymbol( this.Compilation ), this.CompilationModel ) );
+        }
 
         internal IAssembly GetAssembly( IAssemblySymbol assemblySymbol )
             => (IAssembly) this._cache.GetOrAdd(
@@ -123,7 +130,6 @@ namespace Caravela.Framework.Impl.CodeModel
         internal IDeclaration GetDeclaration( ISymbol? symbol, DeclarationSpecialKind kind = DeclarationSpecialKind.Default )
             => symbol switch
             {
-                INamespaceSymbol => this.CompilationModel,
                 INamedTypeSymbol namedType => this.GetNamedType( namedType ),
                 IMethodSymbol method =>
                     kind == DeclarationSpecialKind.ReturnParameter
@@ -137,6 +143,8 @@ namespace Caravela.Framework.Impl.CodeModel
                 IParameterSymbol parameter => this.GetParameter( parameter ),
                 IEventSymbol @event => this.GetEvent( @event ),
                 IAssemblySymbol assembly => this.GetAssembly( assembly ),
+                INamespaceSymbol ns => this.GetNamespace( ns ),
+                IModuleSymbol => this.CompilationModel,
                 _ => throw new ArgumentException( nameof(symbol) )
             };
 

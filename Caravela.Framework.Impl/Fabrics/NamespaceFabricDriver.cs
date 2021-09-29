@@ -30,6 +30,8 @@ namespace Caravela.Framework.Impl.Fabrics
         private class Builder : BaseBuilder<INamespace>, INamespaceFabricBuilder
         {
             public Builder( INamespace ns, AspectProjectConfiguration context, IAspectBuilderInternal aspectBuilder ) : base( ns, context, aspectBuilder ) { }
+
+            public INamespace Namespace => this.Target;
         }
     }
 }

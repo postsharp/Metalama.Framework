@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code.Collections;
+using System;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Caravela.Framework.Code
@@ -15,6 +16,11 @@ namespace Caravela.Framework.Code
         /// Gets a value indicating whether the type is marked as <c>partial</c> in source code. 
         /// </summary>
         bool IsPartial { get; }
+
+        /// <summary>
+        /// Gets a value indicating whether the type is defined in a different project or assembly than the current <see cref="ICompilation"/>.
+        /// </summary>
+        bool IsExternal { get; }
 
         // TODO: there should probably be an interface to represent named tuples. It would be derived from INamedType
         // and be augmented by the names of tuple members.
@@ -38,7 +44,8 @@ namespace Caravela.Framework.Code
         IImplementedInterfaceList ImplementedInterfaces { get; }
 
         /// <summary>
-        /// Gets the namespace of the current type.
+        /// Gets the namespace of the current type. If the <see cref="IsExternal"/> property is <c>true</c>,
+        /// this property throws an <see cref="InvalidOperationException"/>.
         /// </summary>
         INamespace Namespace { get; }
 

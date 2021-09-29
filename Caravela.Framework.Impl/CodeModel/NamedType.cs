@@ -128,6 +128,8 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public bool IsReadOnly => this.TypeSymbol.IsReadOnly;
 
+        public bool IsExternal => this.TypeSymbol.ContainingAssembly != this.Compilation.RoslynCompilation.Assembly;
+
         public bool HasDefaultConstructor
             => this.TypeSymbol.TypeKind == RoslynTypeKind.Struct ||
                (this.TypeSymbol.TypeKind == RoslynTypeKind.Class && !this.TypeSymbol.IsAbstract &&
@@ -257,7 +259,7 @@ namespace Caravela.Framework.Impl.CodeModel
             {
                 INamespaceSymbol => this.Compilation.Factory.GetAssembly( this.TypeSymbol.ContainingAssembly ),
                 INamedTypeSymbol containingType => this.Compilation.Factory.GetNamedType( containingType ),
-                _ => throw new NotImplementedException()
+                _ => throw new AssertionFailedException()
             };
 
         public override DeclarationKind DeclarationKind => DeclarationKind.NamedType;

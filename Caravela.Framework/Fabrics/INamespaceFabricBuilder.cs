@@ -5,5 +5,8 @@ using Caravela.Framework.Code;
 
 namespace Caravela.Framework.Fabrics
 {
-    public interface INamespaceFabricBuilder : IFabricBuilder<INamespace> { }
+    public interface INamespaceFabricBuilder : IFabricBuilder<INamespace>
+    {
+        INamespace Namespace { get; }
+    }
 }
