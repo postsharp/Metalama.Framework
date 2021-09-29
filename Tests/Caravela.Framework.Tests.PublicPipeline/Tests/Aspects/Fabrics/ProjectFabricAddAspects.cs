@@ -11,8 +11,7 @@ namespace Caravela.Framework.Tests.PublicPipeline.Aspects.Fabrics.ProjectFabricA
         public void BuildProject( IProjectFabricBuilder builder )
         {
             builder
-                .WithTypes( c => c.Types )
-                .WithMethods( t => t.Methods.Where( m => m.ReturnType.Is( typeof(string) ) ) )
+                .WithMembers( c => c.Types.SelectMany( t => t.Methods ).Where( m => m.ReturnType.Is( typeof(string) ) ) )
                 .AddAspect<Aspect>();
         }
     }

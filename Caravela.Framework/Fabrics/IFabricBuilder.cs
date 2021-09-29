@@ -26,9 +26,8 @@ namespace Caravela.Framework.Fabrics
 
         // The builder intentionally does not give write access to project properties. All configuration must use IProjectExtension.
 
-        // The builder intentionally does not give access to any ICompilation because project policies are compilation-independent.
-
-        INamedTypeSelection WithTypes( Func<T, IEnumerable<INamedType>> typeQuery );
+        IDeclarationSelection<TChild> WithMembers<TChild>( Func<T, IEnumerable<TChild>> selector )
+            where TChild : class, IDeclaration;
 
         /// <summary>
         /// Registers a validator, which gets executed after all aspects have been added to the compilation.

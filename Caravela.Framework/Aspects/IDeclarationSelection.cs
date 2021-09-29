@@ -15,7 +15,7 @@ namespace Caravela.Framework.Aspects
     /// <typeparam name="TDeclaration"></typeparam>
     [InternalImplement]
     [CompileTimeOnly]
-    public interface IDeclarationSelection<TDeclaration>
+    public interface IDeclarationSelection<out TDeclaration>
         where TDeclaration : class, IDeclaration
     {
         /// <summary>

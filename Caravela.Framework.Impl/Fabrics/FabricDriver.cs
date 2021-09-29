@@ -77,18 +77,19 @@ namespace Caravela.Framework.Impl.Fabrics
 
             public IDiagnosticSink Diagnostics => this._aspectBuilder.Diagnostics;
 
-            public INamedTypeSelection WithTypes( Func<T, IEnumerable<INamedType>> typeQuery )
-                => new NamedTypeSelection(
+            protected void RegisterAspectSource( IAspectSource aspectSource ) => this._aspectBuilder.AddAspectSource( aspectSource );
+
+            public IDeclarationSelection<TChild> WithMembers<TChild>( Func<T, IEnumerable<TChild>> selector )
+                where TChild : class, IDeclaration
+                => new DeclarationSelection<TChild>(
                     this.RegisterAspectSource,
                     compilation =>
                     {
                         var targetDeclaration = compilation.Factory.GetDeclaration( this.Target );
 
-                        return this._context.UserCodeInvoker.Wrap( this._context.UserCodeInvoker.Invoke( () => typeQuery( targetDeclaration ) ) );
+                        return this._context.UserCodeInvoker.Wrap( this._context.UserCodeInvoker.Invoke( () => selector( targetDeclaration ) ) );
                     },
                     this._context );
-
-            protected void RegisterAspectSource( IAspectSource aspectSource ) => this._aspectBuilder.AddAspectSource( aspectSource );
 
             [Obsolete( "Not implemented." )]
             public void AddValidator( Action<ValidateDeclarationContext<T>> validator ) => throw new NotImplementedException();
