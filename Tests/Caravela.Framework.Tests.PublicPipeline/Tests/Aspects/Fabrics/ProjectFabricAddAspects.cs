@@ -8,7 +8,7 @@ namespace Caravela.Framework.Tests.PublicPipeline.Aspects.Fabrics.ProjectFabricA
 {
     internal class Fabric : IProjectFabric
     {
-        public void BuildProject( IProjectFabricBuilder builder )
+        public void AmendProject( IProjectAmender builder )
         {
             builder
                 .WithMembers( c => c.Types.SelectMany( t => t.Methods ).Where( m => m.ReturnType.Is( typeof(string) ) ) )

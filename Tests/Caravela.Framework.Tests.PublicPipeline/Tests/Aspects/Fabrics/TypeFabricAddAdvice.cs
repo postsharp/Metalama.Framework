@@ -18,7 +18,7 @@ namespace Caravela.Framework.Tests.PublicPipeline.Aspects.Fabrics.TypeFabricAddA
         
         class Fabric : ITypeFabric
         {
-            public void BuildType( ITypeFabricBuilder builder )
+            public void AmendType( ITypeAmender builder )
             {
                 foreach ( var method in builder.Target.Methods )
                 {

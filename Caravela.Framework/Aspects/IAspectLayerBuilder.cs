@@ -45,7 +45,7 @@ namespace Caravela.Framework.Aspects
         IDeclaration Target { get; }
 
         /// <summary>
-        /// Gets an object that exposes methods that allow to create advices.
+        /// Gets an object that allows to create advices, e.g. overriding members, introducing members, or implementing new interfaces.
         /// </summary>
         IAdviceFactory Advices { get; }
 

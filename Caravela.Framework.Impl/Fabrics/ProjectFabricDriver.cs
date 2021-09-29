@@ -32,7 +32,7 @@ namespace Caravela.Framework.Impl.Fabrics
         public override void Execute( IAspectBuilderInternal aspectBuilder, FabricTemplateClass fabricTemplateClass )
         {
             var builder = new Builder( (ICompilation) aspectBuilder.Target, this.Configuration, aspectBuilder );
-            ((IProjectFabric) this.Fabric).BuildProject( builder );
+            ((IProjectFabric) this.Fabric).AmendProject( builder );
         }
 
         public override FabricKind Kind => this.Fabric is ITransitiveProjectFabric ? FabricKind.Transitive : FabricKind.Compilation;
@@ -41,7 +41,7 @@ namespace Caravela.Framework.Impl.Fabrics
 
         public override IDeclaration GetTarget( CompilationModel compilation ) => compilation;
 
-        private class Builder : BaseBuilder<ICompilation>, IProjectFabricBuilder
+        private class Builder : BaseBuilder<ICompilation>, IProjectAmender
         {
             public Builder( ICompilation compilation, AspectProjectConfiguration context, IAspectBuilderInternal aspectBuilder ) : base(
                 compilation,

@@ -20,14 +20,14 @@ namespace Caravela.Framework.Impl.Fabrics
         public override void Execute( IAspectBuilderInternal aspectBuilder, FabricTemplateClass fabricTemplateClass )
         {
             var builder = new Builder( (INamespace) aspectBuilder.Target, this.Configuration, aspectBuilder );
-            ((INamespaceFabric) this.Fabric).BuildNamespace( builder );
+            ((INamespaceFabric) this.Fabric).AmendNamespace( builder );
         }
 
         public override FabricKind Kind => FabricKind.Namespace;
 
         public override IDeclaration GetTarget( CompilationModel compilation ) => compilation.Factory.GetNamespace( (INamespaceSymbol) this.TargetSymbol );
 
-        private class Builder : BaseBuilder<INamespace>, INamespaceFabricBuilder
+        private class Builder : BaseBuilder<INamespace>, INamespaceAmender
         {
             public Builder( INamespace ns, AspectProjectConfiguration context, IAspectBuilderInternal aspectBuilder ) : base( ns, context, aspectBuilder ) { }
 

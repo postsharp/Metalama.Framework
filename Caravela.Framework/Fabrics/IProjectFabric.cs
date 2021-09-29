@@ -3,8 +3,15 @@
 
 namespace Caravela.Framework.Fabrics
 {
+    /// <summary>
+    /// An interface that, when implemented by a type in a project (under any name or namespace), allows that type to analyze and
+    /// add aspects to that project.
+    /// </summary>
     public interface IProjectFabric : IFabric
     {
-        void BuildProject( IProjectFabricBuilder builder );
+        /// <summary>
+        /// The user can implement this method to analyze types in the current project, add aspects, and report or suppress diagnostics.
+        /// </summary>
+        void AmendProject( IProjectAmender builder );
     }
 }

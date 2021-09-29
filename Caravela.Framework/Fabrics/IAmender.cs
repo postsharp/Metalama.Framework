@@ -11,21 +11,35 @@ using System.Collections.Generic;
 namespace Caravela.Framework.Fabrics
 {
     /// <summary>
-    /// (Not implemented.)
+    /// Base interface for the argument of <see cref="IProjectFabric.AmendProject"/>, <see cref="INamespaceFabric.AmendNamespace"/>
+    /// or <see cref="ITypeFabric.AmendType"/>. Allows to report diagnostics and add aspects to the target declaration of the fabric.
     /// </summary>
     [InternalImplement]
     [CompileTimeOnly]
-    public interface IFabricBuilder<T>
+    public interface IAmender<T>
         where T : class, IDeclaration
     {
+        /// <summary>
+        /// Gets the project being built.
+        /// </summary>
         IProject Project { get; }
 
+        /// <summary>
+        /// Gets the target declaration of the current <see cref="IFabric"/>.
+        /// </summary>
         T Target { get; }
 
+        /// <summary>
+        /// Gets an object that allows to report or suppress warnings and errors.
+        /// </summary>
         IDiagnosticSink Diagnostics { get; }
 
-        // The builder intentionally does not give write access to project properties. All configuration must use IProjectExtension.
-
+        /// <summary>
+        /// Creates an object that allows to add aspects to members of the <see cref="Target"/> declaration.
+        /// </summary>
+        /// <param name="selector"></param>
+        /// <typeparam name="TChild"></typeparam>
+        /// <returns></returns>
         IDeclarationSelection<TChild> WithMembers<TChild>( Func<T, IEnumerable<TChild>> selector )
             where TChild : class, IDeclaration;
 

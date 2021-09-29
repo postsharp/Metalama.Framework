@@ -7,7 +7,7 @@ namespace Caravela.Framework.Tests.PublicPipeline.Aspects.Fabrics.ErrorPublicFab
     {
         public class F : ITypeFabric
         {
-            public void BuildType( ITypeFabricBuilder builder ) { }
+            public void AmendType( ITypeAmender builder ) { }
         }
     }
 }

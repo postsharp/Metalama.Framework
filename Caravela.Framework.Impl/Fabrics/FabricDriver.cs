@@ -58,7 +58,7 @@ namespace Caravela.Framework.Impl.Fabrics
 
         public abstract IDeclaration GetTarget( CompilationModel compilation );
 
-        protected abstract class BaseBuilder<T> : IFabricBuilder<T>
+        protected abstract class BaseBuilder<T> : IAmender<T>
             where T : class, IDeclaration
         {
             private readonly IAspectBuilderInternal _aspectBuilder;

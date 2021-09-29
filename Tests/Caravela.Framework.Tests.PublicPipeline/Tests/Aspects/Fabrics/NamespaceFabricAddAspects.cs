@@ -8,7 +8,7 @@ namespace Caravela.Framework.Tests.PublicPipeline.Aspects.Fabrics.NamespaceFabri
 {
     internal class Fabric : INamespaceFabric
     {
-        public void BuildNamespace( INamespaceFabricBuilder builder )
+        public void AmendNamespace( INamespaceAmender builder )
         {
             builder
                 .WithMembers( c => c.AllTypes

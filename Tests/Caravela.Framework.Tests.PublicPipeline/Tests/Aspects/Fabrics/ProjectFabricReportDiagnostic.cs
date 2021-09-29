@@ -13,7 +13,7 @@ namespace Caravela.Framework.Tests.PublicPipeline.Aspects.Fabrics.ProjectFabricR
     {
         static DiagnosticDefinition _warning = new DiagnosticDefinition( "MY01", Severity.Warning, "Warning" );
         
-        public void BuildProject( IProjectFabricBuilder builder )
+        public void AmendProject( IProjectAmender builder )
         {
             foreach ( var m in builder.Target.Types.SelectMany( m => m.Methods ) )
             {

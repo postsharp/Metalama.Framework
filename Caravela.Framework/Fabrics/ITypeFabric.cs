@@ -3,8 +3,15 @@
 
 namespace Caravela.Framework.Fabrics
 {
+    /// <summary>
+    /// An interface that, when implemented by a nested type in a given type, allows that nested type to analyze and
+    /// add aspects to the parent type.
+    /// </summary>
     public interface ITypeFabric : IFabric
     {
-        void BuildType( ITypeFabricBuilder builder );
+        /// <summary>
+        /// The user can implement this method to analyze types in the declaring type, add aspects, and report or suppress diagnostics.
+        /// </summary>
+        void AmendType( ITypeAmender builder );
     }
 }

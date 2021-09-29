@@ -5,8 +5,8 @@ using Caravela.Framework.Code;
 
 namespace Caravela.Framework.Fabrics
 {
-    public interface INamespaceFabricBuilder : IFabricBuilder<INamespace>
-    {
-        INamespace Namespace { get; }
-    }
+    /// <summary>
+    /// Argument of <see cref="IProjectFabric.AmendProject"/>. Allows to report diagnostics and add aspects to the target project. 
+    /// </summary>
+    public interface IProjectAmender : IAmender<ICompilation> { }
 }
