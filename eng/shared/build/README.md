@@ -276,7 +276,7 @@ Build steps:
 | 1 | Local Release Signed Build And Test | PowerShell | Format stderr output as: error; Script: file; Script file: eng/Build.ps1; Script arguments: -Local -Release -Sign -Test |
 | 2 | Public Release Signed Build | PowerShell | Format stderr output as: error; Script: file; Script file: eng/Build.ps1; Script arguments: -Public -Release -Sign |
 
-The tests are not performed on the public release build, as some test may require NuGet packages, which leads to a package version conflict. The tests then may use different packages with the same package version producing false test results.
+The tests are not performed on the public release build, as some tests may require NuGet packages, which leads to a package version conflict. The tests then may use different packages with the same package version producing false test results.
 
 Artifact paths:
 
