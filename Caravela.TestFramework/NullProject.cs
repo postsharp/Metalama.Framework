@@ -10,7 +10,6 @@ namespace Caravela.TestFramework
 {
     internal class NullProject : IProject
     {
-
         public NullProject( IServiceProvider serviceProvider ) { this.ServiceProvider = serviceProvider; }
 
         public string Path => throw new NotImplementedException();
@@ -25,7 +24,7 @@ namespace Caravela.TestFramework
 
         public bool TryGetProperty( string name, [NotNullWhen( true )] out string? value ) => throw new NotImplementedException();
 
-        public T Extension<T>() 
+        public T Extension<T>()
             where T : IProjectExtension, new()
             => throw new NotImplementedException();
 

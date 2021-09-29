@@ -210,7 +210,10 @@ namespace Caravela.Framework.Tests.Integration.Runners
                 Invariant.Assert( compiledTemplateMethod != null );
                 var driver = new TemplateDriver( this.ServiceProvider, null!, templateMethod, compiledTemplateMethod );
 
-                var compilationModel = CompilationModel.CreateInitialInstance( new NullProject( this.ServiceProvider), (CSharpCompilation) testResult.InputCompilation );
+                var compilationModel = CompilationModel.CreateInitialInstance(
+                    new NullProject( this.ServiceProvider ),
+                    (CSharpCompilation) testResult.InputCompilation );
+
                 var template = TemplateMember.Create<IMemberOrNamedType>( compilationModel.Factory.GetMethod( templateMethod ), TemplateInfo.None );
 
                 var (expansionContext, targetMethod) = this.CreateTemplateExpansionContext( this.ServiceProvider, assembly, compilationModel, template );

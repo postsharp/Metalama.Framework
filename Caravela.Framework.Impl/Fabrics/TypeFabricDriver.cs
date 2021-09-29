@@ -37,7 +37,11 @@ namespace Caravela.Framework.Impl.Fabrics
         {
             private readonly NamedTypeSelection _namedTypeSelection;
 
-            public Builder( INamedType namedType, FabricContext context, IAspectBuilderInternal aspectBuilder, TemplateClassInstance templateClassInstance ) : base( namedType, context, aspectBuilder )
+            public Builder(
+                INamedType namedType,
+                FabricContext context,
+                IAspectBuilderInternal aspectBuilder,
+                TemplateClassInstance templateClassInstance ) : base( namedType, context, aspectBuilder )
             {
                 this._namedTypeSelection = new NamedTypeSelection(
                     this.RegisterAspectSource,

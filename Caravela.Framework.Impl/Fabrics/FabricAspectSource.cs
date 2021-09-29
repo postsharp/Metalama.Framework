@@ -73,7 +73,7 @@ namespace Caravela.Framework.Impl.Fabrics
 
                 // Create an aggregate aspect class composed of all fabric classes.
                 var aggregateClass = new FabricAggregateAspectClass( this._context.CompileTimeProject, drivers.As<TemplateClass>() );
-                
+
                 // Create a TemplateInstance for all fabrics.
                 var templateInstances = drivers.Select( d => new TemplateClassInstance( d.Driver.Fabric, d, target ) ).ToImmutableArray();
 

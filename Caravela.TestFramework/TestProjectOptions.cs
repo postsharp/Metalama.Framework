@@ -72,8 +72,7 @@ namespace Caravela.TestFramework
 
         public IProjectOptions Apply( IProjectOptions options ) => options;
 
-        public bool TryGetProperty( string name, [NotNullWhen( true )] out string? value )
-            => this._properties.TryGetValue( name, out value );
+        public bool TryGetProperty( string name, [NotNullWhen( true )] out string? value ) => this._properties.TryGetValue( name, out value );
 
         public void Dispose()
         {

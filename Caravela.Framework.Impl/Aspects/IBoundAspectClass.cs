@@ -2,14 +2,15 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Aspects;
-using Caravela.Framework.Impl.Advices;
+using Caravela.Framework.Impl.Sdk;
+using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl.Aspects
 {
-    internal interface IAspectBuilderInternal : IAspectBuilder
+    internal interface IBoundAspectClass : IAspectClass
     {
-        void AddAspectSource( IAspectSource aspectSource );
+        IAspectDriver AspectDriver { get; }
 
-        AdviceFactory AdviceFactory { get; }
+        Location? DiagnosticLocation { get; }
     }
 }

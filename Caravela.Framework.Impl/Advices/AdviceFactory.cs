@@ -53,13 +53,13 @@ namespace Caravela.Framework.Impl.Advices
         }
 
         /// <summary>
-        /// Creates a child <see cref="AdviceFactory"/> that has a different <see cref="TemplateClassInstance"/> but shares the same mutable
-        /// state as the parent.
+        /// Initializes a new instance of the <see cref="AdviceFactory"/> class.
+        /// that has a different <see cref="TemplateClassInstance"/> but shares the same mutable state as the parent.
         /// </summary>
         /// <param name="parent"></param>
         /// <param name="templateClassInstance"></param>
         private AdviceFactory( AdviceFactory parent, TemplateClassInstance templateClassInstance )
-        { 
+        {
             this._aspect = parent._aspect;
             this._templateInstance = templateClassInstance;
             this._serviceProvider = parent._serviceProvider;
@@ -70,7 +70,7 @@ namespace Caravela.Framework.Impl.Advices
             this._advices = parent._advices;
         }
 
-        public AdviceFactory WithTemplateClassInstance( TemplateClassInstance templateClassInstance ) => new AdviceFactory( this, templateClassInstance );
+        public AdviceFactory WithTemplateClassInstance( TemplateClassInstance templateClassInstance ) => new( this, templateClassInstance );
 
         private TemplateMemberRef ValidateTemplateName( string? templateName, TemplateKind templateKind, bool required = false )
         {
@@ -78,7 +78,7 @@ namespace Caravela.Framework.Impl.Advices
             {
                 throw new AssertionFailedException();
             }
-            
+
             if ( templateName == null )
             {
                 if ( required )
@@ -285,7 +285,7 @@ namespace Caravela.Framework.Impl.Advices
             {
                 throw new InvalidOperationException();
             }
-            
+
             var diagnosticList = new DiagnosticList();
 
             var template = this.SelectTemplate( targetMethod, templateSelector )
@@ -311,7 +311,7 @@ namespace Caravela.Framework.Impl.Advices
             {
                 throw new InvalidOperationException();
             }
-            
+
             var diagnosticList = new DiagnosticList();
 
             var template = this.ValidateTemplateName( defaultTemplate, TemplateKind.Default, true )
@@ -345,7 +345,7 @@ namespace Caravela.Framework.Impl.Advices
             {
                 throw new InvalidOperationException();
             }
-            
+
             // Set template represents both set and init accessors.
             var diagnosticList = new DiagnosticList();
 
@@ -383,7 +383,7 @@ namespace Caravela.Framework.Impl.Advices
             {
                 throw new InvalidOperationException();
             }
-            
+
             // Set template represents both set and init accessors.
             var diagnosticList = new DiagnosticList();
 
@@ -428,7 +428,7 @@ namespace Caravela.Framework.Impl.Advices
             {
                 throw new InvalidOperationException();
             }
-            
+
             var diagnosticList = new DiagnosticList();
 
             var advice = new IntroduceFieldAdvice(
@@ -461,7 +461,7 @@ namespace Caravela.Framework.Impl.Advices
             {
                 throw new InvalidOperationException();
             }
-            
+
             var diagnosticList = new DiagnosticList();
 
             var propertyTemplate = this.ValidateTemplateName( defaultTemplate, TemplateKind.Default, true )
@@ -504,7 +504,7 @@ namespace Caravela.Framework.Impl.Advices
             {
                 throw new InvalidOperationException();
             }
-            
+
             var diagnosticList = new DiagnosticList();
 
             var getTemplateRef = this.ValidateTemplateName( getTemplate, TemplateKind.Default, true )
@@ -546,7 +546,7 @@ namespace Caravela.Framework.Impl.Advices
             {
                 throw new InvalidOperationException();
             }
-            
+
             if ( invokeTemplate != null )
             {
                 throw GeneralDiagnosticDescriptors.UnsupportedFeature.CreateException( $"Invoker overrides." );
@@ -593,7 +593,7 @@ namespace Caravela.Framework.Impl.Advices
             {
                 throw new InvalidOperationException();
             }
-            
+
             var diagnosticList = new DiagnosticList();
 
             var template = this.ValidateTemplateName( eventTemplate, TemplateKind.Default, true )
@@ -635,7 +635,7 @@ namespace Caravela.Framework.Impl.Advices
             {
                 throw new InvalidOperationException();
             }
-            
+
             var diagnosticList = new DiagnosticList();
 
             var addTemplateRef = this.ValidateTemplateName( addTemplate, TemplateKind.Default, true )
@@ -676,7 +676,7 @@ namespace Caravela.Framework.Impl.Advices
             {
                 throw new InvalidOperationException();
             }
-            
+
             var diagnosticList = new DiagnosticList();
 
             if ( !this._implementInterfaceAdvices.TryGetValue( targetType, out var advice ) )
@@ -718,7 +718,7 @@ namespace Caravela.Framework.Impl.Advices
             {
                 throw new InvalidOperationException();
             }
-            
+
             var diagnosticList = new DiagnosticList();
 
             if ( !this._implementInterfaceAdvices.TryGetValue( targetType, out var advice ) )

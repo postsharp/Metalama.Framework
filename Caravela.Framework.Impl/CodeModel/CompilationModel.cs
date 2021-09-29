@@ -24,7 +24,6 @@ namespace Caravela.Framework.Impl.CodeModel
 {
     internal partial class CompilationModel : ICompilationInternal, IDeclarationImpl
     {
-        
         public static CompilationModel CreateInitialInstance( IProject project, PartialCompilation compilation ) => new( project, compilation );
 
         public static CompilationModel CreateInitialInstance(
@@ -40,8 +39,6 @@ namespace Caravela.Framework.Impl.CodeModel
             ImmutableArray<ResourceDescription> resources = default )
             => new( project, PartialCompilation.CreatePartial( compilation, syntaxTree, resources ) );
 
-     
-
         private readonly ImmutableMultiValueDictionary<DeclarationRef<IDeclaration>, IObservableTransformation> _transformations;
 
         // This collection index all attributes on types and members, but not attributes on the assembly and the module.
@@ -52,11 +49,11 @@ namespace Caravela.Framework.Impl.CodeModel
         private ImmutableDictionary<DeclarationRef<IDeclaration>, int> _depthsCache = ImmutableDictionary.Create<DeclarationRef<IDeclaration>, int>();
 
         public DeclarationFactory Factory { get; }
-        
+
         public int Revision { get; }
 
         public IProject Project { get; }
-        
+
         public PartialCompilation PartialCompilation { get; }
 
         public ReflectionMapper ReflectionMapper { get; }
@@ -146,8 +143,7 @@ namespace Caravela.Framework.Impl.CodeModel
         {
             this._aspects = this._aspects.AddRange( aspectInstances, a => a.TargetDeclaration.ToRef() );
         }
-        
-        
+
         internal CompilationModel WithTransformations( IReadOnlyList<IObservableTransformation> introducedDeclarations )
         {
             if ( !introducedDeclarations.Any() )
@@ -165,7 +161,6 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public CompilationModel WithAspectInstances( IReadOnlyList<AspectInstance> aspectInstances )
             => aspectInstances.Count == 0 ? this : new CompilationModel( this, aspectInstances );
-
 
         public string AssemblyName => this.RoslynCompilation.AssemblyName ?? "";
 

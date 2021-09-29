@@ -18,7 +18,7 @@ namespace Caravela.Framework.Tests.UnitTests.Templating
         {
             this.AssertScope( ((Declaration) declaration).Compilation.RoslynCompilation, declaration.GetSymbol()!, expectedScope );
         }
-        
+
         private void AssertScope( Compilation compilation, ISymbol symbol, TemplatingScope expectedScope )
         {
             var classifier = this.ServiceProvider.GetService<SymbolClassificationService>()
@@ -111,15 +111,15 @@ class C
             var compilation = CreateCSharpCompilation( code );
             var type = (ITypeSymbol) compilation.GetSymbolsWithName( "C" ).Single();
             this.AssertScope( compilation, type, TemplatingScope.CompileTimeOnly );
-            this.AssertScope(  compilation, type.GetMembers("F").Single(), TemplatingScope.CompileTimeOnlyReturningBoth );
-            this.AssertScope(  compilation,  type.GetMembers( "M" ).Single(), TemplatingScope.CompileTimeOnly );
+            this.AssertScope( compilation, type.GetMembers( "F" ).Single(), TemplatingScope.CompileTimeOnlyReturningBoth );
+            this.AssertScope( compilation, type.GetMembers( "M" ).Single(), TemplatingScope.CompileTimeOnly );
         }
 
         [Fact]
         public void MarkedAsCompileTime()
         {
             // We cannot use CompilationModel for this test because CompileTimeOnly are hidden from the model.
-            
+
             var code = @"
 using Caravela.Framework.Aspects;
 

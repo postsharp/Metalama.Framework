@@ -364,7 +364,10 @@ namespace Caravela.Framework.Impl.Advices
                                         ? new OverriddenEvent(
                                             this,
                                             (IEvent) memberBuilder,
-                                            TemplateMember.Create( (IEvent) memberSpec.AspectInterfaceMember, memberSpec.TemplateInfo, TemplateKind.Introduction ),
+                                            TemplateMember.Create(
+                                                (IEvent) memberSpec.AspectInterfaceMember,
+                                                memberSpec.TemplateInfo,
+                                                TemplateKind.Introduction ),
                                             default,
                                             default )
                                         : new RedirectedEvent(

@@ -841,7 +841,9 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
 
                 var fakeAspectInstance = new AspectInstance( A.Fake<IAspect>(), A.Fake<IDeclaration>(), aspectClass );
 
-                return A.Fake<Advice>( i => i.WithArgumentsForConstructor( new object?[] { fakeAspectInstance, fakeAspectInstance.TemplateInstances.Values.Single(), aspectLayer, null } ) );
+                return A.Fake<Advice>(
+                    i => i.WithArgumentsForConstructor(
+                        new object?[] { fakeAspectInstance, fakeAspectInstance.TemplateInstances.Values.Single(), aspectLayer, null } ) );
             }
         }
     }

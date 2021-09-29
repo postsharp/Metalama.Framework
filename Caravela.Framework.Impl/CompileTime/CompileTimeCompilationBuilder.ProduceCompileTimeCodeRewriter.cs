@@ -41,7 +41,6 @@ namespace Caravela.Framework.Impl.CompileTime
             private readonly CancellationToken _cancellationToken;
             private readonly NameSyntax _compileTimeType;
             private readonly SyntaxGenerationContext _syntaxGenerationContext;
-            private readonly Dictionary<ITypeSymbol, string> _relocatedTypes = new();
             private readonly NameSyntax _originalNameTypeSyntax;
             private readonly NameSyntax _originalPathTypeSyntax;
             private readonly ITypeSymbol _fabricType;
@@ -146,55 +145,54 @@ namespace Caravela.Framework.Impl.CompileTime
 
                 foreach ( var child in node.Members )
                 {
-                    if ( child is TypeDeclarationSyntax childType )
+                    switch ( child )
                     {
-                        var childSymbol = this.RunTimeCompilation.GetSemanticModel( child.SyntaxTree ).GetDeclaredSymbol( child ).AssertNotNull();
-                        var childScope = this.SymbolClassifier.GetTemplatingScope( childSymbol );
+                        case TypeDeclarationSyntax childType:
+                            {
+                                var childSymbol = this.RunTimeCompilation.GetSemanticModel( child.SyntaxTree ).GetDeclaredSymbol( child ).AssertNotNull();
+                                var childScope = this.SymbolClassifier.GetTemplatingScope( childSymbol );
+                                
+                                // TODO: any other scope than RunTimeOnly or CompileTimeOnly is forbidden for types nested in a run-time type.
 
-                        if ( childScope != TemplatingScope.RunTimeOnly )
-                        {
-                            // We have a build-time type nested in a run-time type. We have to un-nest it.
+                                if ( childScope != TemplatingScope.RunTimeOnly )
+                                {
+                                    // We have a build-time type nested in a run-time type. We have to un-nest it.
 
-                            var newName = namePrefix + "" + childType.Identifier.Text;
+                                    var newName = namePrefix + "" + childType.Identifier.Text;
 
-                            var newFullName = string.Join(
-                                ".",
-                                node.Ancestors()
-                                    .OfType<NamespaceDeclarationSyntax>()
-                                    .Select( x => x.Name.ToString() )
-                                    .Concat( new[] { newName } ) );
+                                    // TODO: compile-time types nested in run-time run-time types must be private.
 
-                            this._relocatedTypes.Add( (ITypeSymbol) childSymbol, newFullName );
+                                    var originalId = DocumentationCommentId.CreateDeclarationId( childSymbol );
 
-                            var originalId = DocumentationCommentId.CreateDeclarationId( childSymbol );
+                                    var originalNameAttribute = Attribute( this._originalNameTypeSyntax )
+                                        .WithArgumentList(
+                                            AttributeArgumentList( SingletonSeparatedList( AttributeArgument( SyntaxFactoryEx.LiteralExpression( originalId ) ) ) ) );
 
-                            var originalNameAttribute = Attribute( this._originalNameTypeSyntax )
-                                .WithArgumentList(
-                                    AttributeArgumentList( SingletonSeparatedList( AttributeArgument( SyntaxFactoryEx.LiteralExpression( originalId ) ) ) ) );
+                                    var transformedChild = (TypeDeclarationSyntax) this.Visit( childType )!;
 
-                            var transformedChild = (TypeDeclarationSyntax) this.Visit( childType )!;
+                                    transformedChild = transformedChild
+                                        .WithIdentifier( Identifier( newName ) )
+                                        .WithAttributeLists( transformedChild.AttributeLists.Add( AttributeList( SingletonSeparatedList( originalNameAttribute ) ) ) );
 
-                            transformedChild = transformedChild
-                                .WithIdentifier( Identifier( namePrefix + "" + childType.Identifier.Text ) )
-                                .WithAttributeLists( transformedChild.AttributeLists.Add( AttributeList( SingletonSeparatedList( originalNameAttribute ) ) ) );
+                                    list.Add( transformedChild );
+                                }
+                                else
+                                {
+                                    // We have a run-time child type, and it must be further checked for un-nesting.
 
-                            list.Add( transformedChild );
-                        }
-                        else
-                        {
-                            // We have a run-time child type, and it must be further checked for un-nesting.
+                                    this.PopulateNestedCompileTimeTypes( childType, list, namePrefix );
+                                }
 
-                            this.PopulateNestedCompileTimeTypes( childType, list, namePrefix );
-                        }
-                    }
-                    else if ( child is BaseTypeDeclarationSyntax or DelegateDeclarationSyntax )
-                    {
-                        // TODO: emit an error, this is not supported.
-                        throw new NotImplementedException();
-                    }
-                    else
-                    {
-                        // Non-type members of a run-time type are always run-time too and should not be copied to the compile-time assembly.
+                                break;
+                            }
+
+                        case BaseTypeDeclarationSyntax or DelegateDeclarationSyntax:
+                            // TODO: emit an error, this is not supported.
+                            throw new NotImplementedException();
+
+                        default:
+                            // Non-type members of a run-time type are always run-time too and should not be copied to the compile-time assembly.
+                            break;
                     }
                 }
             }

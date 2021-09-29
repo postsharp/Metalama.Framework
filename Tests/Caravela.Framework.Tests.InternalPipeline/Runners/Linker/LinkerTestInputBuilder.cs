@@ -60,7 +60,7 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
         private readonly IServiceProvider _serviceProvider;
         private readonly TestRewriter _rewriter;
 
-        public LinkerTestInputBuilder(IServiceProvider serviceProvider)
+        public LinkerTestInputBuilder( IServiceProvider serviceProvider )
         {
             this._serviceProvider = serviceProvider;
             this._rewriter = new TestRewriter();

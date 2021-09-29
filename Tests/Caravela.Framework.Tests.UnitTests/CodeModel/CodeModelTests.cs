@@ -715,7 +715,7 @@ interface L : J, K {}
             Assert.Equal( 3, compilation.GetDepth( compilation.Types.OfName( "L" ).Single() ) );
             Assert.Equal( 4, compilation.GetDepth( type.NestedTypes.OfName( "D" ).Single() ) );
         }
-        
+
         [Fact]
         public void CompileTimeOnlyTypesAreInvisible()
         {

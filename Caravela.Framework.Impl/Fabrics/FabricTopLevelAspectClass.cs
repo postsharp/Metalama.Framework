@@ -4,14 +4,11 @@
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.Aspects;
-using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
-using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Sdk;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Immutable;
-using System.Threading;
 
 namespace Caravela.Framework.Impl.Fabrics
 {
@@ -23,9 +20,7 @@ namespace Caravela.Framework.Impl.Fabrics
     internal class FabricTopLevelAspectClass : IBoundAspectClass, IAspectClassImpl
     {
         public const string FabricAspectName = "<Fabric>";
-        
 
-        
         public AspectLayer Layer { get; }
 
         string IAspectClass.FullName => FabricAspectName;
@@ -51,8 +46,4 @@ namespace Caravela.Framework.Impl.Fabrics
 
         ImmutableArray<TemplateClass> IAspectClassImpl.TemplateClasses => ImmutableArray<TemplateClass>.Empty;
     }
-    
-  
-
-   
 }

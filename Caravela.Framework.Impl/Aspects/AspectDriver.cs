@@ -8,7 +8,6 @@ using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
-using Caravela.Framework.Impl.Sdk;
 using Caravela.Framework.Impl.ServiceProvider;
 using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
@@ -22,14 +21,6 @@ namespace Caravela.Framework.Impl.Aspects
 {
     // TODO: AspectDriver should not store a reference to a Compilation we should not store references to a Roslyn compilation.
 
-    internal interface IHighLevelAspectDriver : IAspectDriver
-    {
-        AspectInstanceResult ExecuteAspect(
-            AspectInstance aspectInstance,
-            CompilationModel compilationModelRevision,
-            CancellationToken cancellationToken );
-    }
-    
     /// <summary>
     /// Executes aspects.
     /// </summary>

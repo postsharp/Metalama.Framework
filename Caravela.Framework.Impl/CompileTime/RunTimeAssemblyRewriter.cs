@@ -36,7 +36,7 @@ namespace Caravela.Compiler
             new( () => CSharpSyntaxTree.ParseText( _intrinsics, CSharpParseOptions.Default ) );
 
         private readonly INamedTypeSymbol? _aspectDriverSymbol;
-        private ISymbolClassifier _classifier;
+        private readonly ISymbolClassifier _classifier;
 
         private RunTimeAssemblyRewriter( Compilation runTimeCompilation, IServiceProvider serviceProvider )
             : base( runTimeCompilation, serviceProvider )
@@ -68,7 +68,7 @@ namespace Caravela.Compiler
             {
                 return null;
             }
-            
+
             // Special case: aspect weavers and other aspect drivers are preserved in the runtime assembly.
             // This only happens if regular Caravela.Framework is referenced from the weaver project, which generally shouldn't happen.
             // But it is a pattern used by Caravela.Samples for try.postsharp.net.
