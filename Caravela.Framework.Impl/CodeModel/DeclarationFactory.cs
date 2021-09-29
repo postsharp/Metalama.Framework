@@ -2,7 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
-using Caravela.Framework.Code.Builders;
+using Caravela.Framework.Code.DeclarationBuilders;
 using Caravela.Framework.Code.Types;
 using Caravela.Framework.Impl.CodeModel.Builders;
 using Caravela.Framework.Impl.CodeModel.References;
@@ -223,6 +223,7 @@ namespace Caravela.Framework.Impl.CodeModel
                 GenericParameterBuilder genericParameterBuilder => this.GetGenericParameter( genericParameterBuilder ),
 
                 // This is for linker tests (fake builders), which resolve to themselves.
+                // ReSharper disable once SuspiciousTypeConversion.Global
                 IDeclarationRef<IDeclaration> reference => reference.Resolve( this.CompilationModel ).AssertNotNull(),
                 _ => throw new AssertionFailedException()
             };

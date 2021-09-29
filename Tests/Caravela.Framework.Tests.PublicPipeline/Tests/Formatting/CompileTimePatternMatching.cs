@@ -24,10 +24,10 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Highlighting.IfStateme
                     Console.WriteLine("1");
                     break;
                 case IEnumerable<IParameter> enumerable when enumerable.Any():
-                    meta.Comment(enumerable.Count().ToString());
+                    meta.InsertComment(enumerable.Count().ToString());
                     break;
                 case IEnumerable<IParameter> enumerable when !enumerable.Any():
-                    meta.Comment("none");
+                    meta.InsertComment("none");
                     break;
                 default:
                     break;

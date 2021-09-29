@@ -5,10 +5,10 @@ using Caravela.Framework.Aspects;
 using System;
 using System.Collections.Generic;
 
-namespace Caravela.Framework.Code.ExpressionBuilders
+namespace Caravela.Framework.Code.SyntaxBuilders
 {
     /// <summary>
-    /// Compile-time object that allows to build a run-time array.
+    /// Compile-time object that allows to build a run-time array. Items of the array are run-time expressions.
     /// </summary>
     [CompileTimeOnly]
     public sealed class ArrayBuilder : IExpressionBuilder
@@ -48,8 +48,14 @@ namespace Caravela.Framework.Code.ExpressionBuilders
         /// </summary>
         public void Add( dynamic? expression ) => this._items.Add( (object?) expression );
 
+        /// <summary>
+        /// Returns a clone of the current <see cref="ArrayBuilder"/>.
+        /// </summary>
         public IExpression ToExpression() => meta.CurrentContext.CodeBuilder.BuildArray( this );
 
+        /// <summary>
+        /// Returns a clone of the current <see cref="ArrayBuilder"/>.
+        /// </summary>
         public ArrayBuilder Clone() => new( this );
     }
 }

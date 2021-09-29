@@ -11,7 +11,7 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Highlighting.IfStateme
         {
             meta.CompileTime( 0 );
             meta.CompileTime<long>( 0 );
-            meta.Comment( "Hey" );
+            meta.InsertComment( "Hey" );
             return meta.Proceed();
         }
     }

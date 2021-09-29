@@ -228,5 +228,13 @@ namespace Caravela.Framework.Impl.Templating
                 "The generic type '{0}' combines run-time-only and compile-time-only types.",
                 _category,
                 Error );
+
+        internal static readonly DiagnosticDefinition<string> InvalidDynamicTypeConstruction
+            = new(
+                "CR0227",
+                "'dynamic' is forbidden as a generic parameter type or array element type in a template.",
+                "The type '{0}' is forbidden in a template 'dynamic' cannot be used as a generic argument type or an array element type.",
+                _category,
+                Error );
     }
 }

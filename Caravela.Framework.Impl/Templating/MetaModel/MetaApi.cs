@@ -4,7 +4,7 @@
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Code.Advised;
-using Caravela.Framework.Code.ExpressionBuilders;
+using Caravela.Framework.Code.SyntaxBuilders;
 using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Impl.Aspects;
 using Caravela.Framework.Impl.CodeModel;
@@ -118,11 +118,18 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
         public IExpression BuildInterpolatedString( InterpolatedStringBuilder interpolatedStringBuilder )
             => new InterpolatedStringDynamicExpression( interpolatedStringBuilder, this.Compilation );
 
-        public IExpression Parse( string code )
+        public IExpression ParseExpression( string code )
         {
             var expression = SyntaxFactory.ParseExpression( code ).WithAdditionalAnnotations( Formatter.Annotation );
 
             return new UserExpression( new RuntimeExpression( expression, this.Compilation ), this.Compilation );
+        }
+
+        public IStatement ParseStatement( string code )
+        {
+            var statement = SyntaxFactory.ParseStatement( code );
+
+            return new UserStatement( statement );
         }
 
         public void AppendLiteral( object? value, StringBuilder stringBuilder, SpecialType specialType, bool stronglyTyped )
@@ -135,25 +142,35 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
             {
                 var code = SyntaxFactoryEx.LiteralExpression( value ).Token.Text;
 
-                var suffix = specialType switch
-                {
-                    SpecialType.UInt32 => "u",
-                    SpecialType.Int64 => "l",
-                    SpecialType.UInt64 => "ul",
-                    SpecialType.Single => "f",
-                    SpecialType.Double => "d",
-                    SpecialType.Decimal => "m",
-                    _ => ""
-                };
+                string suffix = "", prefix = "";
 
-                var prefix = specialType switch
+                if ( stronglyTyped )
                 {
-                    SpecialType.Byte => "(byte) ",
-                    SpecialType.SByte => "(sbyte) ",
-                    SpecialType.Int16 => "(short) ",
-                    SpecialType.UInt16 => "(ushort) ",
-                    _ => ""
-                };
+                    if ( int.TryParse( code, out _ ) && specialType != SpecialType.Int32 )
+                    {
+                        // Specify the suffix if there is an ambiguity.
+
+                        suffix = specialType switch
+                        {
+                            SpecialType.UInt32 => "u",
+                            SpecialType.Int64 => "l",
+                            SpecialType.UInt64 => "ul",
+                            SpecialType.Single => "f",
+                            SpecialType.Double => "d",
+                            SpecialType.Decimal => "m",
+                            _ => ""
+                        };
+                    }
+
+                    prefix = specialType switch
+                    {
+                        SpecialType.Byte => "(byte) ",
+                        SpecialType.SByte => "(sbyte) ",
+                        SpecialType.Int16 => "(short) ",
+                        SpecialType.UInt16 => "(ushort) ",
+                        _ => ""
+                    };
+                }
 
                 stringBuilder.Append( prefix );
                 stringBuilder.Append( code );

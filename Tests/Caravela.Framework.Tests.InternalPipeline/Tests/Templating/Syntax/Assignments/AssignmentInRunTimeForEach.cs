@@ -18,7 +18,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.AssignmentInRun
             
             
             
-            meta.Comment( "x = " + x.ToString());
+            meta.InsertComment( "x = " + x.ToString());
             return null;
         }
     }

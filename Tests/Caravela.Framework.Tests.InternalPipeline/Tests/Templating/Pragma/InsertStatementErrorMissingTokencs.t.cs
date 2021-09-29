@@ -1,0 +1,2 @@
+// The compiled template failed. 
+// Error CR0112 on `Template`: `The advice 'Aspect.Template()' threw 'ArgumentOutOfRangeException' when applied to 'TargetCode.Method(int)': The code is missing a SemicolonToken at position 9. (Parameter 'statement'). For more information, attach a debugger to the compiler using the  '-p:DebugCaravela=True' command-line option.`
