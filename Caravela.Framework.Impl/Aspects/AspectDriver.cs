@@ -8,6 +8,7 @@ using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
+using Caravela.Framework.Impl.Pipeline;
 using Caravela.Framework.Impl.ServiceProvider;
 using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
@@ -26,7 +27,6 @@ namespace Caravela.Framework.Impl.Aspects
     /// </summary>
     internal class AspectDriver : IHighLevelAspectDriver
     {
-        private readonly UserCodeInvoker _userCodeInvoker;
         private readonly IServiceProvider _serviceProvider;
         private readonly Compilation _compilation;
         private readonly List<TemplateClassMember> _declarativeAdviceAttributes;
@@ -35,7 +35,6 @@ namespace Caravela.Framework.Impl.Aspects
 
         public AspectDriver( IServiceProvider serviceProvider, IAspectClassImpl aspectClass, Compilation compilation )
         {
-            this._userCodeInvoker = serviceProvider.GetService<UserCodeInvoker>();
             this._serviceProvider = serviceProvider;
             this._compilation = compilation;
             this.AspectClass = aspectClass;
@@ -53,18 +52,34 @@ namespace Caravela.Framework.Impl.Aspects
         public AspectInstanceResult ExecuteAspect(
             AspectInstance aspectInstance,
             CompilationModel compilationModelRevision,
+            AspectProjectConfiguration projectConfiguration,
             CancellationToken cancellationToken )
             => aspectInstance.TargetDeclaration switch
             {
-                ICompilation compilation => this.EvaluateAspect( compilation, aspectInstance, compilationModelRevision, cancellationToken ),
-                INamedType type => this.EvaluateAspect( type, aspectInstance, compilationModelRevision, cancellationToken ),
-                IMethod method => this.EvaluateAspect( method, aspectInstance, compilationModelRevision, cancellationToken ),
-                IField field => this.EvaluateAspect( field, aspectInstance, compilationModelRevision, cancellationToken ),
-                IProperty property => this.EvaluateAspect( property, aspectInstance, compilationModelRevision, cancellationToken ),
-                IConstructor constructor => this.EvaluateAspect( constructor, aspectInstance, compilationModelRevision, cancellationToken ),
-                IParameter parameter => this.EvaluateAspect( parameter, aspectInstance, compilationModelRevision, cancellationToken ),
-                IGenericParameter genericParameter => this.EvaluateAspect( genericParameter, aspectInstance, compilationModelRevision, cancellationToken ),
-                IEvent @event => this.EvaluateAspect( @event, aspectInstance, compilationModelRevision, cancellationToken ),
+                ICompilation compilation => this.EvaluateAspect(
+                    compilation,
+                    aspectInstance,
+                    compilationModelRevision,
+                    projectConfiguration,
+                    cancellationToken ),
+                INamedType type => this.EvaluateAspect( type, aspectInstance, compilationModelRevision, projectConfiguration, cancellationToken ),
+                IMethod method => this.EvaluateAspect( method, aspectInstance, compilationModelRevision, projectConfiguration, cancellationToken ),
+                IField field => this.EvaluateAspect( field, aspectInstance, compilationModelRevision, projectConfiguration, cancellationToken ),
+                IProperty property => this.EvaluateAspect( property, aspectInstance, compilationModelRevision, projectConfiguration, cancellationToken ),
+                IConstructor constructor => this.EvaluateAspect(
+                    constructor,
+                    aspectInstance,
+                    compilationModelRevision,
+                    projectConfiguration,
+                    cancellationToken ),
+                IParameter parameter => this.EvaluateAspect( parameter, aspectInstance, compilationModelRevision, projectConfiguration, cancellationToken ),
+                IGenericParameter genericParameter => this.EvaluateAspect(
+                    genericParameter,
+                    aspectInstance,
+                    compilationModelRevision,
+                    projectConfiguration,
+                    cancellationToken ),
+                IEvent @event => this.EvaluateAspect( @event, aspectInstance, compilationModelRevision, projectConfiguration, cancellationToken ),
                 _ => throw new NotImplementedException()
             };
 
@@ -72,6 +87,7 @@ namespace Caravela.Framework.Impl.Aspects
             T targetDeclaration,
             AspectInstance aspectInstance,
             CompilationModel compilationModelRevision,
+            AspectProjectConfiguration projectConfiguration,
             CancellationToken cancellationToken )
             where T : class, IDeclaration
         {
@@ -129,11 +145,17 @@ namespace Caravela.Framework.Impl.Aspects
                     aspectInstance.TemplateInstances.Count == 1 ? aspectInstance.TemplateInstances.Values.Single() : null,
                     this._serviceProvider );
 
-                var aspectBuilder = new AspectBuilder<T>( targetDeclaration, diagnosticSink, declarativeAdvices, adviceFactory, cancellationToken );
+                var aspectBuilder = new AspectBuilder<T>(
+                    targetDeclaration,
+                    diagnosticSink,
+                    declarativeAdvices,
+                    adviceFactory,
+                    projectConfiguration,
+                    cancellationToken );
 
                 try
                 {
-                    this._userCodeInvoker.Invoke( () => aspectOfT.BuildAspect( aspectBuilder ) );
+                    this._serviceProvider.GetService<UserCodeInvoker>().Invoke( () => aspectOfT.BuildAspect( aspectBuilder ) );
                 }
                 catch ( InvalidUserCodeException e )
                 {

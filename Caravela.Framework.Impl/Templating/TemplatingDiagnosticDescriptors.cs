@@ -4,6 +4,7 @@
 using Caravela.Framework.Code;
 using Caravela.Framework.Diagnostics;
 using Microsoft.CodeAnalysis;
+using System;
 using static Caravela.Framework.Diagnostics.Severity;
 
 namespace Caravela.Framework.Impl.Templating
@@ -242,6 +243,30 @@ namespace Caravela.Framework.Impl.Templating
                 "CR0228",
                 "A template must be fully in a nullable context",
                 "The template '{0}' must be contained in a nullable context.",
+                _category,
+                Error );
+
+        internal static readonly DiagnosticDefinition<ITypeSymbol> NeutralTypesForbiddenInNestedRunTimeTypes
+            = new(
+                "CR0229",
+                "Types that are both compile-time and run-time are forbidden in run-time-only types.",
+                "The type '{0}' cannot be [CompileTime] because it is nested in a run-time-type. It can however be [CompileTimeOnly].",
+                _category,
+                Error );
+
+        internal static readonly DiagnosticDefinition<ITypeSymbol> NestedCompileTypesMustBePrivate
+            = new(
+                "CR0230",
+                "Nested compile-time types must have private accessibility.",
+                "The compile-time type '{0}' must have private visibility because it is nested in a run-time-type.",
+                _category,
+                Error );
+
+        internal static readonly DiagnosticDefinition<(ITypeSymbol NestedType, Type Interface)> RunTimeTypesCannotHaveCompileTimeTypesExceptClasses
+            = new(
+                "CR0231",
+                "Run-time types cannot have other compile-time types than classes.",
+                "The compile-time type '{0}' cannot be nested in a run-time class. The only compile-time type that can be nested in run-time type is a class implementing '{1}'.",
                 _category,
                 Error );
     }

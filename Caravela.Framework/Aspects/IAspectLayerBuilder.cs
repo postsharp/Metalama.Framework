@@ -72,8 +72,7 @@ namespace Caravela.Framework.Aspects
         /// <param name="selector"></param>
         /// <typeparam name="TMember"></typeparam>
         /// <returns></returns>
-        [Obsolete( "Not implemented." )]
-        IDeclarationSelection<TMember> WithMembers<TMember>( Func<TAspectTarget, TMember> selector )
+        IDeclarationSelection<TMember> WithMembers<TMember>( Func<TAspectTarget, IEnumerable<TMember>> selector )
             where TMember : class, IDeclaration;
     }
 }

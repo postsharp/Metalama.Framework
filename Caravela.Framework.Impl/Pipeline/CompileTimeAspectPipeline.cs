@@ -10,7 +10,6 @@ using Caravela.Framework.Impl.Formatting;
 using Caravela.Framework.Impl.Options;
 using Caravela.Framework.Impl.Templating;
 using Microsoft.CodeAnalysis;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
@@ -134,7 +133,7 @@ namespace Caravela.Framework.Impl.Pipeline
         }
 
         private protected override HighLevelPipelineStage CreateStage(
-            IReadOnlyList<OrderedAspectLayer> parts,
+            ImmutableArray<OrderedAspectLayer> parts,
             CompileTimeProject compileTimeProject,
             CompileTimeProjectLoader compileTimeProjectLoader )
             => new CompileTimePipelineStage( compileTimeProject, parts, this.ServiceProvider );

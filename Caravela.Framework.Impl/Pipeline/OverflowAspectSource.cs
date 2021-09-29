@@ -9,6 +9,7 @@ using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
 
@@ -23,7 +24,7 @@ namespace Caravela.Framework.Impl.Pipeline
 
         public AspectSourcePriority Priority => AspectSourcePriority.Aggregate;
 
-        public IEnumerable<IAspectClass> AspectClasses => this._aspectSources.Select( a => a.AspectClass ).Distinct();
+        public ImmutableArray<IAspectClass> AspectClasses => this._aspectSources.Select( a => a.AspectClass ).Distinct().ToImmutableArray();
 
         public IEnumerable<IDeclaration> GetExclusions( INamedType aspectType ) => Enumerable.Empty<IDeclaration>();
 

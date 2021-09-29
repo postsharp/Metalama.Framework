@@ -168,8 +168,12 @@ namespace Caravela.Framework.Impl.CompileTime
 
             if ( !produceCompileTimeCodeRewriter.FoundCompileTimeCode )
             {
-                // This should not happen because we handle this condition before calling this method.
-                throw new AssertionFailedException( "No compile-time code was found." );
+                // This happens if all compile-time code is illegitimate, i.e. was reported as an error and stripped.
+
+                compileTimeCompilation = null;
+                syntaxTreeMap = null;
+
+                return true;
             }
 
             compileTimeCompilation = compileTimeCompilation.AddSyntaxTrees( syntaxTrees.Select( t => t.TransformedTree ) );

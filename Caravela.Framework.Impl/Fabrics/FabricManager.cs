@@ -5,6 +5,7 @@ using Caravela.Framework.Fabrics;
 using Caravela.Framework.Impl.Aspects;
 using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.CompileTime;
+using Caravela.Framework.Impl.Pipeline;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -15,12 +16,12 @@ namespace Caravela.Framework.Impl.Fabrics
     internal sealed class FabricManager
     {
         private readonly FabricAspectSource _aspectSource;
-        private readonly FabricContext _context;
+        private readonly AspectProjectConfiguration _configuration;
 
-        public FabricManager( FabricContext context )
+        public FabricManager( AspectProjectConfiguration configuration )
         {
-            this._context = context;
-            this._aspectSource = new FabricAspectSource( context );
+            this._configuration = configuration;
+            this._aspectSource = new FabricAspectSource( configuration );
         }
 
         public IAspectSource AspectSource => this._aspectSource;
@@ -62,21 +63,21 @@ namespace Caravela.Framework.Impl.Fabrics
 
         private FabricDriver CreateDriver( Type fabricType, Compilation runTimeCompilation )
         {
-            var fabric = (IFabric) this._context.UserCodeInvoker.Invoke( () => Activator.CreateInstance( fabricType ) );
+            var fabric = (IFabric) this._configuration.UserCodeInvoker.Invoke( () => Activator.CreateInstance( fabricType ) );
 
             switch ( fabric )
             {
                 case ITypeFabric typeFabric:
-                    return new TypeFabricDriver( this._context, typeFabric, runTimeCompilation );
+                    return new TypeFabricDriver( this._configuration, typeFabric, runTimeCompilation );
 
                 case ITransitiveProjectFabric transitiveCompilationFabric:
-                    return new ProjectFabricDriver( this._context, transitiveCompilationFabric, runTimeCompilation );
+                    return new ProjectFabricDriver( this._configuration, transitiveCompilationFabric, runTimeCompilation );
 
                 case IProjectFabric compilationFabric:
-                    return new ProjectFabricDriver( this._context, compilationFabric, runTimeCompilation );
+                    return new ProjectFabricDriver( this._configuration, compilationFabric, runTimeCompilation );
 
                 case INamespaceFabric namespaceFabric:
-                    return new NamespaceFabricDriver( this._context, namespaceFabric, runTimeCompilation );
+                    return new NamespaceFabricDriver( this._configuration, namespaceFabric, runTimeCompilation );
 
                 default:
                     throw new AssertionFailedException();

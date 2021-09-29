@@ -6,6 +6,7 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Diagnostics;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Threading;
 
 namespace Caravela.Framework.Impl.Aspects
@@ -14,7 +15,7 @@ namespace Caravela.Framework.Impl.Aspects
     {
         AspectSourcePriority Priority { get; }
 
-        IEnumerable<IAspectClass> AspectClasses { get; }
+        ImmutableArray<IAspectClass> AspectClasses { get; }
 
         IEnumerable<IDeclaration> GetExclusions( INamedType aspectType );
 

@@ -8,6 +8,7 @@ using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
 
@@ -17,7 +18,7 @@ namespace Caravela.Framework.Impl.CodeModel
     {
         private readonly CompileTimeProjectLoader _loader;
 
-        public CompilationAspectSource( IReadOnlyList<IBoundAspectClass> aspectTypes, CompileTimeProjectLoader loader )
+        public CompilationAspectSource( ImmutableArray<IAspectClass> aspectTypes, CompileTimeProjectLoader loader )
         {
             this._loader = loader;
             this.AspectClasses = aspectTypes;
@@ -25,7 +26,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public AspectSourcePriority Priority => AspectSourcePriority.FromAttribute;
 
-        public IEnumerable<IAspectClass> AspectClasses { get; }
+        public ImmutableArray<IAspectClass> AspectClasses { get; }
 
         // TODO: implement aspect exclusion based on ExcludeAspectAttribute
         public IEnumerable<IDeclaration> GetExclusions( INamedType aspectType ) => Enumerable.Empty<IDeclaration>();

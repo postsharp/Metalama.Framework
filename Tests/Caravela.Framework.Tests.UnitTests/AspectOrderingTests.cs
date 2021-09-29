@@ -39,7 +39,7 @@ namespace Caravela.Framework.Tests.UnitTests
 
             var aspectTypeFactory = new AspectClassMetadataFactory(
                 this.ServiceProvider,
-                new AspectDriverFactory( this.ServiceProvider, compilation.RoslynCompilation, ImmutableArray<object>.Empty ) );
+                new AspectDriverFactory( compilation.RoslynCompilation, ImmutableArray<object>.Empty, isolatedTest.ServiceProvider ) );
 
             var aspectNamedTypes = aspectNames.Select( name => compilation.Types.OfName( name ).Single().GetSymbol() ).ToReadOnlyList();
             var aspectTypes = aspectTypeFactory.GetAspectClasses( aspectNamedTypes, compileTimeProject!, diagnostics ).ToImmutableArray();

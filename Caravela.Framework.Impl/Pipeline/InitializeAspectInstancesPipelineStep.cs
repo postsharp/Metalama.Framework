@@ -29,7 +29,8 @@ namespace Caravela.Framework.Impl.Pipeline
         {
             var aspectDriver = (IHighLevelAspectDriver) this.AspectLayer.AspectClass.AspectDriver;
 
-            var aspectInstanceResults = this._aspectInstances.Select( ai => aspectDriver.ExecuteAspect( ai, compilation, cancellationToken ) )
+            var aspectInstanceResults = this._aspectInstances
+                .Select( ai => aspectDriver.ExecuteAspect( ai, compilation, pipelineStepsState.ProjectConfiguration, cancellationToken ) )
                 .ToImmutableArray();
 
             var success = aspectInstanceResults.All( ar => ar.Success );

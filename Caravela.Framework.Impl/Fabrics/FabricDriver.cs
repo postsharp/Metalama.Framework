@@ -8,6 +8,7 @@ using Caravela.Framework.Fabrics;
 using Caravela.Framework.Impl.Aspects;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
+using Caravela.Framework.Impl.Pipeline;
 using Caravela.Framework.Validation;
 using Microsoft.CodeAnalysis;
 using System;
@@ -18,13 +19,13 @@ namespace Caravela.Framework.Impl.Fabrics
 {
     internal abstract class FabricDriver
     {
-        protected FabricContext Context { get; }
+        protected AspectProjectConfiguration Configuration { get; }
 
         public IFabric Fabric { get; }
 
-        protected FabricDriver( FabricContext context, IFabric fabric, Compilation runTimeCompilation )
+        protected FabricDriver( AspectProjectConfiguration configuration, IFabric fabric, Compilation runTimeCompilation )
         {
-            this.Context = context;
+            this.Configuration = configuration;
             this.Fabric = fabric;
             this.OriginalPath = this.Fabric.GetType().GetCustomAttribute<OriginalPathAttribute>().AssertNotNull().Path;
 
@@ -61,9 +62,9 @@ namespace Caravela.Framework.Impl.Fabrics
             where T : class, IDeclaration
         {
             private readonly IAspectBuilderInternal _aspectBuilder;
-            private readonly FabricContext _context;
+            private readonly AspectProjectConfiguration _context;
 
-            protected BaseBuilder( T target, FabricContext context, IAspectBuilderInternal aspectBuilder )
+            protected BaseBuilder( T target, AspectProjectConfiguration context, IAspectBuilderInternal aspectBuilder )
             {
                 this._aspectBuilder = aspectBuilder;
                 this._context = context;

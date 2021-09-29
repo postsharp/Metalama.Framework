@@ -89,7 +89,7 @@ namespace Caravela.Framework.Impl.Pipeline
             PartialCompilation compilation,
             IReadOnlyList<SyntaxTree>? compileTimeTreesHint,
             CancellationToken cancellationToken,
-            [NotNullWhen( true )] out AspectPipelineConfiguration? configuration )
+            [NotNullWhen( true )] out AspectProjectConfiguration? configuration )
         {
             this.PipelineInitializationCount++;
 
@@ -133,7 +133,7 @@ namespace Caravela.Framework.Impl.Pipeline
             }
 
             // Create aspect types.
-            var driverFactory = new AspectDriverFactory( this.ServiceProvider, compilation.Compilation, compilerPlugIns );
+            var driverFactory = new AspectDriverFactory( compilation.Compilation, compilerPlugIns, this.ServiceProvider );
             var aspectTypeFactory = new AspectClassMetadataFactory( this.ServiceProvider, driverFactory );
 
             var aspectClasses = aspectTypeFactory.GetAspectClasses( compilation.Compilation, compileTimeProject, diagnosticAdder ).ToImmutableArray();
@@ -178,7 +178,13 @@ namespace Caravela.Framework.Impl.Pipeline
                 .Select( g => this.CreateStage( g.Key, g.ToImmutableArray(), loader, compileTimeProject! ) )
                 .ToImmutableArray();
 
-            configuration = new AspectPipelineConfiguration( stages, allAspectClasses, allOrderedAspectLayers, compileTimeProject, loader );
+            configuration = new AspectProjectConfiguration(
+                stages,
+                allAspectClasses,
+                allOrderedAspectLayers,
+                compileTimeProject,
+                loader,
+                this.ServiceProvider );
 
             return true;
 
@@ -196,19 +202,16 @@ namespace Caravela.Framework.Impl.Pipeline
                 };
         }
 
-        private protected virtual ImmutableArray<IAspectSource> CreateAspectSources( AspectPipelineConfiguration configuration, Compilation compilation )
+        private protected virtual ImmutableArray<IAspectSource> CreateAspectSources(
+            AspectProjectConfiguration configuration,
+            Compilation compilation )
         {
             var sources = ImmutableArray.Create<IAspectSource>(
-                new CompilationAspectSource( configuration.AspectClasses, configuration.CompileTimeProjectLoader ) );
+                new CompilationAspectSource( configuration.AspectClasses.As<IAspectClass>(), configuration.CompileTimeProjectLoader ) );
 
             if ( configuration.CompileTimeProject != null )
             {
-                var fabricContext = new FabricContext(
-                    configuration.AspectClasses.ToImmutableDictionary( c => c.FullName, c => c ),
-                    this.ServiceProvider,
-                    configuration.CompileTimeProject );
-
-                var fabricManager = new FabricManager( fabricContext );
+                var fabricManager = new FabricManager( configuration );
 
                 fabricManager.ExecuteFabrics( configuration.CompileTimeProject, compilation );
 
@@ -225,13 +228,13 @@ namespace Caravela.Framework.Impl.Pipeline
         private protected bool TryExecute(
             PartialCompilation compilation,
             IDiagnosticAdder diagnosticAdder,
-            AspectPipelineConfiguration pipelineConfiguration,
+            AspectProjectConfiguration projectConfiguration,
             CancellationToken cancellationToken,
             [NotNullWhen( true )] out PipelineStageResult? pipelineStageResult )
         {
             var project = new ProjectModel( compilation.Compilation, this.ServiceProvider );
 
-            if ( pipelineConfiguration.CompileTimeProject == null || pipelineConfiguration.AspectClasses.Count == 0 )
+            if ( projectConfiguration.CompileTimeProject == null || projectConfiguration.AspectClasses.Length == 0 )
             {
                 // If there is no aspect in the compilation, don't execute the pipeline.
                 pipelineStageResult = new PipelineStageResult( compilation, project, Array.Empty<OrderedAspectLayer>() );
@@ -239,13 +242,13 @@ namespace Caravela.Framework.Impl.Pipeline
                 return true;
             }
 
-            var aspectSources = this.CreateAspectSources( pipelineConfiguration, compilation.Compilation );
+            var aspectSources = this.CreateAspectSources( projectConfiguration, compilation.Compilation );
 
-            pipelineStageResult = new PipelineStageResult( compilation, project, pipelineConfiguration.Layers, aspectSources: aspectSources );
+            pipelineStageResult = new PipelineStageResult( compilation, project, projectConfiguration.AspectLayers, aspectSources: aspectSources );
 
-            foreach ( var stage in pipelineConfiguration.Stages )
+            foreach ( var stage in projectConfiguration.Stages )
             {
-                if ( !stage.TryExecute( pipelineStageResult, diagnosticAdder, cancellationToken, out var newStageResult ) )
+                if ( !stage.TryExecute( projectConfiguration, pipelineStageResult, diagnosticAdder, cancellationToken, out var newStageResult ) )
                 {
                     return false;
                 }
@@ -274,13 +277,13 @@ namespace Caravela.Framework.Impl.Pipeline
         /// <param name="compileTimeProjectLoader"></param>
         /// <returns></returns>
         private protected abstract HighLevelPipelineStage CreateStage(
-            IReadOnlyList<OrderedAspectLayer> parts,
+            ImmutableArray<OrderedAspectLayer> parts,
             CompileTimeProject compileTimeProject,
             CompileTimeProjectLoader compileTimeProjectLoader );
 
         private PipelineStage CreateStage(
             object groupKey,
-            IReadOnlyList<OrderedAspectLayer> parts,
+            ImmutableArray<OrderedAspectLayer> parts,
             CompileTimeProjectLoader compileTimeProjectLoader,
             CompileTimeProject compileTimeProject )
         {

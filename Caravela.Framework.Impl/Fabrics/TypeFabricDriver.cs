@@ -7,6 +7,7 @@ using Caravela.Framework.Eligibility;
 using Caravela.Framework.Fabrics;
 using Caravela.Framework.Impl.Aspects;
 using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.Pipeline;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -17,7 +18,10 @@ namespace Caravela.Framework.Impl.Fabrics
 {
     internal class TypeFabricDriver : FabricDriver
     {
-        public TypeFabricDriver( FabricContext context, IFabric fabric, Compilation runTimeCompilation ) : base( context, fabric, runTimeCompilation ) { }
+        public TypeFabricDriver( AspectProjectConfiguration configuration, IFabric fabric, Compilation runTimeCompilation ) : base(
+            configuration,
+            fabric,
+            runTimeCompilation ) { }
 
         public override ISymbol TargetSymbol => this.FabricSymbol.ContainingType;
 
@@ -25,7 +29,7 @@ namespace Caravela.Framework.Impl.Fabrics
         {
             // Type fabrics execute as aspects, called from FabricAspectClass.
             var templateInstance = new TemplateClassInstance( this.Fabric, templateClass, aspectBuilder.Target );
-            var builder = new Builder( (INamedType) aspectBuilder.Target, this.Context, aspectBuilder, templateInstance );
+            var builder = new Builder( (INamedType) aspectBuilder.Target, this.Configuration, aspectBuilder, templateInstance );
             ((ITypeFabric) this.Fabric).BuildType( builder );
         }
 
@@ -39,7 +43,7 @@ namespace Caravela.Framework.Impl.Fabrics
 
             public Builder(
                 INamedType namedType,
-                FabricContext context,
+                AspectProjectConfiguration context,
                 IAspectBuilderInternal aspectBuilder,
                 TemplateClassInstance templateClassInstance ) : base( namedType, context, aspectBuilder )
             {

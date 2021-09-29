@@ -5,6 +5,7 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Fabrics;
 using Caravela.Framework.Impl.Aspects;
 using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.Pipeline;
 using Microsoft.CodeAnalysis;
 using System.IO;
 
@@ -12,8 +13,8 @@ namespace Caravela.Framework.Impl.Fabrics
 {
     internal class ProjectFabricDriver : FabricDriver
     {
-        public ProjectFabricDriver( FabricContext context, IFabric fabric, Compilation runTimeCompilation ) :
-            base( context, fabric, runTimeCompilation )
+        public ProjectFabricDriver( AspectProjectConfiguration configuration, IFabric fabric, Compilation runTimeCompilation ) :
+            base( configuration, fabric, runTimeCompilation )
         {
             var depth = 0;
 
@@ -30,7 +31,7 @@ namespace Caravela.Framework.Impl.Fabrics
 
         public override void Execute( IAspectBuilderInternal aspectBuilder, FabricTemplateClass fabricTemplateClass )
         {
-            var builder = new Builder( (ICompilation) aspectBuilder.Target, this.Context, aspectBuilder );
+            var builder = new Builder( (ICompilation) aspectBuilder.Target, this.Configuration, aspectBuilder );
             ((IProjectFabric) this.Fabric).BuildProject( builder );
         }
 
@@ -42,7 +43,7 @@ namespace Caravela.Framework.Impl.Fabrics
 
         private class Builder : BaseBuilder<ICompilation>, IProjectFabricBuilder
         {
-            public Builder( ICompilation compilation, FabricContext context, IAspectBuilderInternal aspectBuilder ) : base(
+            public Builder( ICompilation compilation, AspectProjectConfiguration context, IAspectBuilderInternal aspectBuilder ) : base(
                 compilation,
                 context,
                 aspectBuilder ) { }

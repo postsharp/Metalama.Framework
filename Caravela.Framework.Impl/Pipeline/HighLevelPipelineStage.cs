@@ -36,6 +36,7 @@ namespace Caravela.Framework.Impl.Pipeline
 
         /// <inheritdoc/>
         public override bool TryExecute(
+            AspectProjectConfiguration projectConfiguration,
             PipelineStageResult input,
             IDiagnosticAdder diagnostics,
             CancellationToken cancellationToken,
@@ -48,8 +49,8 @@ namespace Caravela.Framework.Impl.Pipeline
             var pipelineStepsState = new PipelineStepsState(
                 this._aspectLayers,
                 compilation,
-                this.CompileTimeProject,
-                input.AspectSources );
+                input.AspectSources,
+                projectConfiguration );
 
             pipelineStepsState.Execute( cancellationToken );
 

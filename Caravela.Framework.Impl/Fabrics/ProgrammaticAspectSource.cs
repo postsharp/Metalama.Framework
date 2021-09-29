@@ -8,6 +8,7 @@ using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Diagnostics;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Threading;
 
 namespace Caravela.Framework.Impl.Fabrics
@@ -20,7 +21,6 @@ namespace Caravela.Framework.Impl.Fabrics
         where TAspect : IAspect<TDeclaration>
     {
         private readonly Func<CompilationModel, IEnumerable<AspectInstance>> _getInstances;
-        private readonly IAspectClass _aspectClass;
 
         public ProgrammaticAspectSource( IAspectClass aspectClass, Func<CompilationModel, IEnumerable<AspectInstance>> getInstances )
         {
@@ -30,12 +30,12 @@ namespace Caravela.Framework.Impl.Fabrics
             }
 
             this._getInstances = getInstances;
-            this._aspectClass = aspectClass;
+            this.AspectClasses = ImmutableArray.Create( aspectClass );
         }
 
         public AspectSourcePriority Priority => AspectSourcePriority.Programmatic;
 
-        public IEnumerable<IAspectClass> AspectClasses => new[] { this._aspectClass };
+        public ImmutableArray<IAspectClass> AspectClasses { get; }
 
         public IEnumerable<IDeclaration> GetExclusions( INamedType aspectType ) => Array.Empty<IDeclaration>();
 

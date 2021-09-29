@@ -19,6 +19,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
+using Accessibility = Microsoft.CodeAnalysis.Accessibility;
 using TypeKind = Microsoft.CodeAnalysis.TypeKind;
 
 namespace Caravela.Framework.Impl.CompileTime
@@ -44,6 +45,7 @@ namespace Caravela.Framework.Impl.CompileTime
             private readonly NameSyntax _originalNameTypeSyntax;
             private readonly NameSyntax _originalPathTypeSyntax;
             private readonly ITypeSymbol _fabricType;
+            private readonly ITypeSymbol _typeFabricType;
             private Context _currentContext;
             private HashSet<string>? _currentTypeTemplateNames;
             private string? _currentTypeName;
@@ -82,6 +84,7 @@ namespace Caravela.Framework.Impl.CompileTime
                         this._syntaxGenerationContext.ReflectionMapper.GetTypeSymbol( typeof(OriginalPathAttribute) ) );
 
                 this._fabricType = ReflectionMapper.GetInstance( runTimeCompilation ).GetTypeSymbol( typeof(IFabric) );
+                this._typeFabricType = ReflectionMapper.GetInstance( runTimeCompilation ).GetTypeSymbol( typeof(ITypeFabric) );
             }
 
             // TODO: assembly and module-level attributes?
@@ -145,50 +148,93 @@ namespace Caravela.Framework.Impl.CompileTime
 
                 foreach ( var child in node.Members )
                 {
+                    var childSymbol = this.RunTimeCompilation.GetSemanticModel( child.SyntaxTree ).GetDeclaredSymbol( child )
+                        as ITypeSymbol;
+
                     switch ( child )
                     {
-                        case TypeDeclarationSyntax childType:
+                        case ClassDeclarationSyntax childType:
                             {
-                                var childSymbol = this.RunTimeCompilation.GetSemanticModel( child.SyntaxTree ).GetDeclaredSymbol( child ).AssertNotNull();
+                                Invariant.Assert( childSymbol != null );
+
                                 var childScope = this.SymbolClassifier.GetTemplatingScope( childSymbol );
-                                
-                                // TODO: any other scope than RunTimeOnly or CompileTimeOnly is forbidden for types nested in a run-time type.
 
-                                if ( childScope != TemplatingScope.RunTimeOnly )
+                                switch ( childScope )
                                 {
-                                    // We have a build-time type nested in a run-time type. We have to un-nest it.
+                                    case TemplatingScope.CompileTimeOnly:
+                                        {
+                                            // We have a build-time type nested in a run-time type. We have to un-nest it.
 
-                                    var newName = namePrefix + "" + childType.Identifier.Text;
+                                            // Check that the visibility is private.
+                                            if ( childSymbol.DeclaredAccessibility != Accessibility.Private )
+                                            {
+                                                this._diagnosticAdder.Report(
+                                                    TemplatingDiagnosticDescriptors.NestedCompileTypesMustBePrivate.CreateDiagnostic(
+                                                        childType.Identifier.GetLocation(),
+                                                        childSymbol ) );
+                                            }
 
-                                    // TODO: compile-time types nested in run-time run-time types must be private.
+                                            // Check that it implements ITypeFabric.
+                                            if ( !this.RunTimeCompilation.HasImplicitConversion( childSymbol, this._typeFabricType ) )
+                                            {
+                                                this._diagnosticAdder.Report(
+                                                    TemplatingDiagnosticDescriptors.RunTimeTypesCannotHaveCompileTimeTypesExceptClasses.CreateDiagnostic(
+                                                        childSymbol.GetDiagnosticLocation(),
+                                                        (childSymbol, typeof(ITypeFabric)) ) );
+                                            }
 
-                                    var originalId = DocumentationCommentId.CreateDeclarationId( childSymbol );
+                                            // Create the [OriginalId] attribute.
+                                            var originalId = DocumentationCommentId.CreateDeclarationId( childSymbol );
 
-                                    var originalNameAttribute = Attribute( this._originalNameTypeSyntax )
-                                        .WithArgumentList(
-                                            AttributeArgumentList( SingletonSeparatedList( AttributeArgument( SyntaxFactoryEx.LiteralExpression( originalId ) ) ) ) );
+                                            var originalNameAttribute = Attribute( this._originalNameTypeSyntax )
+                                                .WithArgumentList(
+                                                    AttributeArgumentList(
+                                                        SingletonSeparatedList( AttributeArgument( SyntaxFactoryEx.LiteralExpression( originalId ) ) ) ) );
 
-                                    var transformedChild = (TypeDeclarationSyntax) this.Visit( childType )!;
+                                            // Transform the type.
+                                            var transformedChild = (TypeDeclarationSyntax) this.Visit( childType )!;
 
-                                    transformedChild = transformedChild
-                                        .WithIdentifier( Identifier( newName ) )
-                                        .WithAttributeLists( transformedChild.AttributeLists.Add( AttributeList( SingletonSeparatedList( originalNameAttribute ) ) ) );
+                                            // Rename the type and add [OriginalId].
+                                            var newName = namePrefix + "" + childType.Identifier.Text;
 
-                                    list.Add( transformedChild );
-                                }
-                                else
-                                {
-                                    // We have a run-time child type, and it must be further checked for un-nesting.
+                                            transformedChild = transformedChild
+                                                .WithIdentifier( Identifier( newName ) )
+                                                .WithAttributeLists(
+                                                    transformedChild.AttributeLists.Add( AttributeList( SingletonSeparatedList( originalNameAttribute ) ) ) );
 
-                                    this.PopulateNestedCompileTimeTypes( childType, list, namePrefix );
+                                            list.Add( transformedChild );
+
+                                            break;
+                                        }
+
+                                    case TemplatingScope.RunTimeOnly:
+                                        // We have a run-time child type, and it must be further checked for un-nesting.
+
+                                        this.PopulateNestedCompileTimeTypes( childType, list, namePrefix );
+
+                                        break;
+
+                                    default:
+                                        this._diagnosticAdder.Report(
+                                            TemplatingDiagnosticDescriptors.NeutralTypesForbiddenInNestedRunTimeTypes.CreateDiagnostic(
+                                                childType.Identifier.GetLocation(),
+                                                childSymbol ) );
+
+                                        break;
                                 }
 
                                 break;
                             }
 
                         case BaseTypeDeclarationSyntax or DelegateDeclarationSyntax:
-                            // TODO: emit an error, this is not supported.
-                            throw new NotImplementedException();
+                            Invariant.Assert( childSymbol != null );
+
+                            this._diagnosticAdder.Report(
+                                TemplatingDiagnosticDescriptors.RunTimeTypesCannotHaveCompileTimeTypesExceptClasses.CreateDiagnostic(
+                                    childSymbol.GetDiagnosticLocation(),
+                                    (childSymbol, typeof(ITypeFabric)) ) );
+
+                            break;
 
                         // ReSharper disable once RedundantEmptySwitchSection
                         default:
@@ -685,8 +731,10 @@ namespace Caravela.Framework.Impl.CompileTime
                 else
                 {
                     // The rewriter should not have been invoked in a compilation unit that does not
-                    // contain any build-time code.
-                    throw new AssertionFailedException();
+                    // contain any build-time code. However, the compilation unit can contain only illegitimate compile-time
+                    // code which has been stripped. In this case, we return an empty compilation unit.
+
+                    return CompilationUnit( default, default, default, default );
                 }
             }
 

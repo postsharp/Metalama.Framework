@@ -6,6 +6,7 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Aspects;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Diagnostics;
+using Caravela.Framework.Impl.Pipeline;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -19,15 +20,15 @@ namespace Caravela.Framework.Impl.Fabrics
     /// </summary>
     internal class FabricAspectSource : IAspectSource
     {
-        private readonly FabricContext _context;
+        private readonly AspectProjectConfiguration _context;
 
         private readonly List<FabricDriver> _drivers = new(); // Note that this list is ordered.
-        private readonly IEnumerable<IAspectClass> _aspectClasses;
+        private readonly ImmutableArray<IAspectClass> _aspectClasses;
 
-        public FabricAspectSource( FabricContext context )
+        public FabricAspectSource( AspectProjectConfiguration context )
         {
             this._context = context;
-            this._aspectClasses = new[] { context.AspectClasses[FabricTopLevelAspectClass.FabricAspectName] };
+            this._aspectClasses = ImmutableArray.Create<IAspectClass>( context.GetAspectClass( FabricTopLevelAspectClass.FabricAspectName ) );
         }
 
         public void Register( FabricDriver driver )
@@ -37,7 +38,7 @@ namespace Caravela.Framework.Impl.Fabrics
 
         AspectSourcePriority IAspectSource.Priority => AspectSourcePriority.Programmatic;
 
-        IEnumerable<IAspectClass> IAspectSource.AspectClasses => this._aspectClasses;
+        ImmutableArray<IAspectClass> IAspectSource.AspectClasses => this._aspectClasses;
 
         IEnumerable<IDeclaration> IAspectSource.GetExclusions( INamedType aspectType ) => Array.Empty<IDeclaration>();
 
@@ -59,6 +60,8 @@ namespace Caravela.Framework.Impl.Fabrics
                 var target = driverGroup.Key;
 
                 // Create template classes for all fabrics.
+                var compileTimeProject = this._context.CompileTimeProject!;
+
                 var drivers = driverGroup
                     .Select( x => x.Driver )
                     .Select(
@@ -68,11 +71,11 @@ namespace Caravela.Framework.Impl.Fabrics
                             compilation.RoslynCompilation,
                             diagnosticAdder,
                             null,
-                            this._context.CompileTimeProject ) )
+                            compileTimeProject ) )
                     .ToImmutableArray();
 
                 // Create an aggregate aspect class composed of all fabric classes.
-                var aggregateClass = new FabricAggregateAspectClass( this._context.CompileTimeProject, drivers.As<TemplateClass>() );
+                var aggregateClass = new FabricAggregateAspectClass( compileTimeProject, drivers.As<TemplateClass>() );
 
                 // Create a TemplateInstance for all fabrics.
                 var templateInstances = drivers.Select( d => new TemplateClassInstance( d.Driver.Fabric, d, target ) ).ToImmutableArray();

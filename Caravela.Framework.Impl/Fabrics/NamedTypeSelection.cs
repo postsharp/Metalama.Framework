@@ -5,6 +5,7 @@ using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Aspects;
 using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.Pipeline;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,13 +20,14 @@ namespace Caravela.Framework.Impl.Fabrics
                 this.RegisterAspectSource,
                 compilation
                     => this.Selector( compilation )
-                        .SelectMany( t => this.Context.UserCodeInvoker.Wrap( this.Context.UserCodeInvoker.Invoke( () => selector( t ) ) ) ),
-                this.Context );
+                        .SelectMany(
+                            t => this.ProjectConfiguration.UserCodeInvoker.Wrap( this.ProjectConfiguration.UserCodeInvoker.Invoke( () => selector( t ) ) ) ),
+                this.ProjectConfiguration );
 
         public NamedTypeSelection(
             Action<IAspectSource> registerAspectSource,
             Func<CompilationModel, IEnumerable<INamedType>> selectTargets,
-            FabricContext context ) : base( registerAspectSource, selectTargets, context ) { }
+            AspectProjectConfiguration projectConfiguration ) : base( registerAspectSource, selectTargets, projectConfiguration ) { }
 
         public IDeclarationSelection<IMethod> WithMethods( Func<INamedType, IEnumerable<IMethod>> selector ) => this.WithMembers( selector );
 

@@ -6,6 +6,8 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.Diagnostics;
+using Caravela.Framework.Impl.Fabrics;
+using Caravela.Framework.Impl.Pipeline;
 using Caravela.Framework.Validation;
 using System;
 using System.Collections.Generic;
@@ -18,14 +20,34 @@ namespace Caravela.Framework.Impl.Aspects
         where T : class, IDeclaration
     {
         private readonly UserDiagnosticSink _diagnosticSink;
+        private readonly AspectProjectConfiguration _configuration;
         private readonly IImmutableList<Advice> _declarativeAdvices;
         private bool _skipped;
+
+        public AspectBuilder(
+            T target,
+            UserDiagnosticSink diagnosticSink,
+            IEnumerable<Advice> declarativeAdvices,
+            AdviceFactory adviceFactory,
+            AspectProjectConfiguration configuration,
+            CancellationToken cancellationToken )
+        {
+            this.Target = target;
+            this._declarativeAdvices = declarativeAdvices.ToImmutableArray();
+            this._diagnosticSink = diagnosticSink;
+            this._configuration = configuration;
+            this.AdviceFactory = adviceFactory;
+            this.CancellationToken = cancellationToken;
+        }
 
         public IProject Project => this.Target.Compilation.Project;
 
         public ImmutableArray<IAspectSource> AspectSources { get; private set; } = ImmutableArray<IAspectSource>.Empty;
 
-        public void AddAspectSource( IAspectSource aspectSource ) => this.AspectSources = this.AspectSources.Add( aspectSource );
+        public void AddAspectSource( IAspectSource aspectSource )
+        {
+            this.AspectSources = this.AspectSources.Add( aspectSource );
+        }
 
         public AdviceFactory AdviceFactory { get; }
 
@@ -38,9 +60,17 @@ namespace Caravela.Framework.Impl.Aspects
         public T Target { get; }
 
         [Obsolete( "Not implemented." )]
-        public IDeclarationSelection<TMember> WithMembers<TMember>( Func<T, TMember> selector )
+        public IDeclarationSelection<TMember> WithMembers<TMember>( Func<T, IEnumerable<TMember>> selector )
             where TMember : class, IDeclaration
-            => throw new NotImplementedException();
+            => new DeclarationSelection<TMember>(
+                this.AddAspectSource,
+                compilation =>
+                {
+                    var translatedTarget = compilation.Factory.GetDeclaration( this.Target );
+
+                    return this._configuration.UserCodeInvoker.Invoke( () => selector( translatedTarget ) );
+                },
+                this._configuration );
 
         IDeclaration IAspectLayerBuilder.Target => this.Target;
 
@@ -49,20 +79,6 @@ namespace Caravela.Framework.Impl.Aspects
         public void SkipAspect() => this._skipped = true;
 
         public CancellationToken CancellationToken { get; }
-
-        public AspectBuilder(
-            T target,
-            UserDiagnosticSink diagnosticSink,
-            IEnumerable<Advice> declarativeAdvices,
-            AdviceFactory adviceFactory,
-            CancellationToken cancellationToken )
-        {
-            this.Target = target;
-            this._declarativeAdvices = declarativeAdvices.ToImmutableArray();
-            this._diagnosticSink = diagnosticSink;
-            this.AdviceFactory = adviceFactory;
-            this.CancellationToken = cancellationToken;
-        }
 
         internal AspectInstanceResult ToResult()
         {

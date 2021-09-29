@@ -38,7 +38,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
         // that this specific tree is outdated, which then allows us to display a warning.
         private ImmutableDictionary<string, SyntaxTree?>? _compileTimeSyntaxTrees;
 
-        private AspectPipelineConfiguration? _lastKnownConfiguration;
+        private AspectProjectConfiguration? _lastKnownConfiguration;
 
         /// <summary>
         /// Gets an object that can be locked to get exclusive access to
@@ -289,7 +289,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
             IDiagnosticAdder diagnosticAdder,
             bool ignoreStatus,
             CancellationToken cancellationToken,
-            [NotNullWhen( true )] out AspectPipelineConfiguration? configuration )
+            [NotNullWhen( true )] out AspectProjectConfiguration? configuration )
         {
             lock ( this._configureSync )
             {
@@ -394,7 +394,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
 
         /// <inheritdoc/>
         private protected override HighLevelPipelineStage CreateStage(
-            IReadOnlyList<OrderedAspectLayer> parts,
+            ImmutableArray<OrderedAspectLayer> parts,
             CompileTimeProject compileTimeProject,
             CompileTimeProjectLoader compileTimeProjectLoader )
             => new SourceGeneratorPipelineStage( compileTimeProject, parts, this.ServiceProvider );
