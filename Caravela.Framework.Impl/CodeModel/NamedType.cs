@@ -7,6 +7,7 @@ using Caravela.Framework.Code.DeclarationBuilders;
 using Caravela.Framework.Impl.CodeModel.Collections;
 using Caravela.Framework.Impl.CodeModel.References;
 using Caravela.Framework.Impl.Collections;
+using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.ReflectionMocks;
 using Caravela.Framework.Impl.Transformations;
@@ -137,7 +138,12 @@ namespace Caravela.Framework.Impl.CodeModel
         public bool IsGeneric => this.TypeSymbol.IsGenericType;
 
         [Memo]
-        public INamedTypeList NestedTypes => new NamedTypeList( this, this.TypeSymbol.GetTypeMembers().Select( t => new MemberRef<INamedType>( t ) ) );
+        public INamedTypeList NestedTypes 
+            => new NamedTypeList( 
+            this, 
+            this.TypeSymbol.GetTypeMembers()
+                .Where( t => this.Compilation.SymbolClassifier.GetTemplatingScope( t ) != TemplatingScope.CompileTimeOnly )
+                .Select( t => new MemberRef<INamedType>( t ) ) );
 
         [Memo]
         public IPropertyList Properties

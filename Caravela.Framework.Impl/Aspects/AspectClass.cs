@@ -23,10 +23,15 @@ using TypeKind = Microsoft.CodeAnalysis.TypeKind;
 
 namespace Caravela.Framework.Impl.Aspects
 {
+    internal interface IBoundAspectClass : IAspectClass
+    {
+        IAspectDriver AspectDriver { get; }        
+        Location? DiagnosticLocation { get; }
+    }
     /// <summary>
     /// Represents the metadata of an aspect class. This class is compilation-independent. It is not used to represent a fabric class.
     /// </summary>
-    internal partial class AspectClass : TemplateClass, IAspectClassImpl
+    internal partial class AspectClass : TemplateClass, IAspectClassImpl, IBoundAspectClass
     {
         private readonly UserCodeInvoker _userCodeInvoker;
         private readonly IAspectDriver? _aspectDriver;

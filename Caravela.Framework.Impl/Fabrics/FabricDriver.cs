@@ -26,9 +26,21 @@ namespace Caravela.Framework.Impl.Fabrics
         {
             this.Context = context;
             this.Fabric = fabric;
-            var originalName = this.Fabric.GetType().GetCustomAttribute<OriginalIdAttribute>().AssertNotNull().Id;
-            this.FabricSymbol = (INamedTypeSymbol) DocumentationCommentId.GetFirstSymbolForDeclarationId( originalName, runTimeCompilation ).AssertNotNull();
             this.OriginalPath = this.Fabric.GetType().GetCustomAttribute<OriginalPathAttribute>().AssertNotNull().Path;
+
+            // Get the original symbol for the fabric. If it has been moved, we have a custom attribute.
+            var originalId = this.Fabric.GetType().GetCustomAttribute<OriginalIdAttribute>()?.Id;
+
+            if ( originalId != null )
+            {
+                this.FabricSymbol =
+                    (INamedTypeSymbol) DocumentationCommentId.GetFirstSymbolForDeclarationId( originalId, runTimeCompilation ).AssertNotNull();
+            }
+            else
+            {
+                this.FabricSymbol = (INamedTypeSymbol)
+                    ReflectionMapper.GetInstance( runTimeCompilation ).GetTypeSymbol( fabric.GetType() );
+            }
         }
 
         public INamedTypeSymbol FabricSymbol { get; }
@@ -37,7 +49,7 @@ namespace Caravela.Framework.Impl.Fabrics
 
         public string OriginalPath { get; }
 
-        public abstract void Execute( IAspectBuilderInternal aspectBuilder );
+        public abstract void Execute( IAspectBuilderInternal aspectBuilder, FabricTemplateClass fabricTemplateClass );
 
         public abstract FabricKind Kind { get; }
 

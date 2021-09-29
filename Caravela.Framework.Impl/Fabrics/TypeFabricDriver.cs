@@ -21,11 +21,12 @@ namespace Caravela.Framework.Impl.Fabrics
 
         public override ISymbol TargetSymbol => this.FabricSymbol.ContainingType;
 
-        public override void Execute( IAspectBuilderInternal aspectBuilder )
+        public override void Execute( IAspectBuilderInternal aspectBuilder, FabricTemplateClass templateClass )
         {
             // Type fabrics execute as aspects, called from FabricAspectClass.
-            var builder = new Builder( (INamedType) aspectBuilder.Target, this.Context, aspectBuilder );
-            ((ITypeFabric) this.Fabric).BuildFabric( builder );
+            var templateInstance = new TemplateClassInstance( this.Fabric, templateClass, aspectBuilder.Target );
+            var builder = new Builder( (INamedType) aspectBuilder.Target, this.Context, aspectBuilder, templateInstance );
+            ((ITypeFabric) this.Fabric).BuildType( builder );
         }
 
         public override FabricKind Kind => FabricKind.Type;
@@ -36,12 +37,14 @@ namespace Caravela.Framework.Impl.Fabrics
         {
             private readonly NamedTypeSelection _namedTypeSelection;
 
-            public Builder( INamedType namedType, FabricContext context, IAspectBuilderInternal aspectBuilder ) : base( namedType, context, aspectBuilder )
+            public Builder( INamedType namedType, FabricContext context, IAspectBuilderInternal aspectBuilder, TemplateClassInstance templateClassInstance ) : base( namedType, context, aspectBuilder )
             {
                 this._namedTypeSelection = new NamedTypeSelection(
                     this.RegisterAspectSource,
                     compilation => new[] { compilation.Factory.GetDeclaration( namedType ) },
                     context );
+
+                this.Advices = aspectBuilder.AdviceFactory.WithTemplateClassInstance( templateClassInstance );
             }
 
             public void AddAspect<TAspect>( Func<INamedType, Expression<Func<TAspect>>> createAspect )
@@ -82,6 +85,8 @@ namespace Caravela.Framework.Impl.Fabrics
 
             public IDeclarationSelection<IConstructor> WithConstructors( Func<INamedType, IEnumerable<IConstructor>> selector )
                 => this._namedTypeSelection.WithConstructors( selector );
+
+            public IAdviceFactory Advices { get; }
         }
     }
 }

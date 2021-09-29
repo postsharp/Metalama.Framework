@@ -5,6 +5,7 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.ServiceProvider;
+using Microsoft.CodeAnalysis;
 using System;
 using System.Linq;
 using Xunit;
@@ -15,10 +16,15 @@ namespace Caravela.Framework.Tests.UnitTests.Templating
     {
         private void AssertScope( IDeclaration declaration, TemplatingScope expectedScope )
         {
+            this.AssertScope( ((Declaration) declaration).Compilation.RoslynCompilation, declaration.GetSymbol()!, expectedScope );
+        }
+        
+        private void AssertScope( Compilation compilation, ISymbol symbol, TemplatingScope expectedScope )
+        {
             var classifier = this.ServiceProvider.GetService<SymbolClassificationService>()
-                .GetClassifier( ((Declaration) declaration).Compilation.RoslynCompilation );
+                .GetClassifier( compilation );
 
-            var actualScope = classifier.GetTemplatingScope( declaration.GetSymbol()! );
+            var actualScope = classifier.GetTemplatingScope( symbol );
             Assert.Equal( expectedScope, actualScope );
         }
 
@@ -102,16 +108,18 @@ class C
 }
 ";
 
-            var compilation = this.CreateCompilationModel( code );
-            var type = compilation.Types.OfName( "C" ).Single();
-            this.AssertScope( type, TemplatingScope.CompileTimeOnly );
-            this.AssertScope( type.Fields.OfName( "F" ).Single(), TemplatingScope.CompileTimeOnlyReturningBoth );
-            this.AssertScope( type.Methods.OfName( "M" ).Single(), TemplatingScope.CompileTimeOnly );
+            var compilation = CreateCSharpCompilation( code );
+            var type = (ITypeSymbol) compilation.GetSymbolsWithName( "C" ).Single();
+            this.AssertScope( compilation, type, TemplatingScope.CompileTimeOnly );
+            this.AssertScope(  compilation, type.GetMembers("F").Single(), TemplatingScope.CompileTimeOnlyReturningBoth );
+            this.AssertScope(  compilation,  type.GetMembers( "M" ).Single(), TemplatingScope.CompileTimeOnly );
         }
 
         [Fact]
         public void MarkedAsCompileTime()
         {
+            // We cannot use CompilationModel for this test because CompileTimeOnly are hidden from the model.
+            
             var code = @"
 using Caravela.Framework.Aspects;
 

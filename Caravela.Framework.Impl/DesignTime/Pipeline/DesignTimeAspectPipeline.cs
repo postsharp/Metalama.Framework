@@ -19,6 +19,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Linq;
 using System.Threading;
 
 namespace Caravela.Framework.Impl.DesignTime.Pipeline
@@ -48,7 +49,8 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
         internal DesignTimeAspectPipelineStatus Status { get; private set; }
 
         // It's ok if we return an obsolete project in this case.
-        internal IReadOnlyList<AspectClass>? AspectClasses => this._lastKnownConfiguration?.AspectClasses;
+        [Memo]
+        internal IReadOnlyList<AspectClass>? AspectClasses => this._lastKnownConfiguration?.AspectClasses.OfType<AspectClass>().ToList();
 
         public DesignTimeAspectPipeline(
             IProjectOptions projectOptions,

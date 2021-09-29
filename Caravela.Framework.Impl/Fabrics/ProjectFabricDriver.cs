@@ -28,10 +28,10 @@ namespace Caravela.Framework.Impl.Fabrics
 
         public override ISymbol TargetSymbol => this.FabricSymbol.ContainingAssembly;
 
-        public override void Execute( IAspectBuilderInternal aspectBuilder )
+        public override void Execute( IAspectBuilderInternal aspectBuilder, FabricTemplateClass fabricTemplateClass )
         {
             var builder = new Builder( (ICompilation) aspectBuilder.Target, this.Context, aspectBuilder );
-            ((IProjectFabric) this.Fabric).BuildFabric( builder );
+            ((IProjectFabric) this.Fabric).BuildProject( builder );
         }
 
         public override FabricKind Kind => this.Fabric is ITransitiveProjectFabric ? FabricKind.Transitive : FabricKind.Compilation;

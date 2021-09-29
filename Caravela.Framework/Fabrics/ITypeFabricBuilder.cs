@@ -6,5 +6,8 @@ using Caravela.Framework.Code;
 
 namespace Caravela.Framework.Fabrics
 {
-    public interface ITypeFabricBuilder : IFabricBuilder<INamedType>, INamedTypeSelection { }
+    public interface ITypeFabricBuilder : IFabricBuilder<INamedType>, INamedTypeSelection
+    {
+        IAdviceFactory Advices { get; }
+    }
 }

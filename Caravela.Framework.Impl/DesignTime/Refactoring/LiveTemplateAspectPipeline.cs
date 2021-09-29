@@ -109,7 +109,7 @@ namespace Caravela.Framework.Impl.DesignTime.Refactoring
 
             public AspectSourcePriority Priority => AspectSourcePriority.FromAttribute;
 
-            public IEnumerable<IAspectClass> AspectTypes => new[] { this._aspectClass };
+            public IEnumerable<IAspectClass> AspectClasses => new[] { this._aspectClass };
 
             public IEnumerable<IDeclaration> GetExclusions( INamedType aspectType ) => Enumerable.Empty<IDeclaration>();
 

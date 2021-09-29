@@ -113,7 +113,7 @@ namespace Caravela.Framework.Impl.Pipeline
 
             foreach ( var aspectSource in aspectSources )
             {
-                foreach ( var aspectType in aspectSource.AspectTypes )
+                foreach ( var aspectType in aspectSource.AspectClasses )
                 {
                     var aspectLayerId = new AspectLayerId( aspectType );
 

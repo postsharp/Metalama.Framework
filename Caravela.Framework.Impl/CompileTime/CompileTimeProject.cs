@@ -269,7 +269,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
         private DiagnosticManifest GetDiagnosticManifest( IServiceProvider serviceProvider )
         {
-            var aspectTypes = this.AspectTypes.Select( this.GetTypeOrNull ).WhereNotNull().ToArray();
+            var aspectTypes = this.AspectTypes.Concat( this.FabricTypes ).Concat( this.TransitiveFabricTypes ).Select( this.GetTypeOrNull ).WhereNotNull().ToArray();
             var service = new DiagnosticDefinitionDiscoveryService( serviceProvider );
             var diagnostics = service.GetDiagnosticDefinitions( aspectTypes ).ToImmutableArray();
             var suppressions = service.GetSuppressionDefinitions( aspectTypes ).ToImmutableArray();

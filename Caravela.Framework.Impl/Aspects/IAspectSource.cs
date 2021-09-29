@@ -14,7 +14,7 @@ namespace Caravela.Framework.Impl.Aspects
     {
         AspectSourcePriority Priority { get; }
 
-        IEnumerable<IAspectClass> AspectTypes { get; }
+        IEnumerable<IAspectClass> AspectClasses { get; }
 
         IEnumerable<IDeclaration> GetExclusions( INamedType aspectType );
 

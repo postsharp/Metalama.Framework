@@ -11,7 +11,7 @@ using System.Collections.Immutable;
 namespace Caravela.Framework.Impl.Fabrics
 {
     internal record FabricContext(
-        ImmutableDictionary<string, AspectClass> AspectClasses,
+        ImmutableDictionary<string, IBoundAspectClass> AspectClasses,
         IServiceProvider ServiceProvider,
         CompileTimeProject CompileTimeProject )
     {

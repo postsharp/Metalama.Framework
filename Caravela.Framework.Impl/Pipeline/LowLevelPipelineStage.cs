@@ -23,9 +23,9 @@ namespace Caravela.Framework.Impl.Pipeline
     internal sealed class LowLevelPipelineStage : PipelineStage
     {
         private readonly IAspectWeaver _aspectWeaver;
-        private readonly AspectClass _aspectClass;
+        private readonly IBoundAspectClass _aspectClass;
 
-        public LowLevelPipelineStage( IAspectWeaver aspectWeaver, AspectClass aspectClass, IServiceProvider serviceProvider ) : base( serviceProvider )
+        public LowLevelPipelineStage( IAspectWeaver aspectWeaver, IBoundAspectClass aspectClass, IServiceProvider serviceProvider ) : base( serviceProvider )
         {
             this._aspectWeaver = aspectWeaver;
             this._aspectClass = aspectClass;

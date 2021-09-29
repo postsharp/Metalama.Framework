@@ -10,6 +10,8 @@ using Caravela.Framework.Impl.CodeModel.Builders;
 using Caravela.Framework.Impl.CodeModel.Collections;
 using Caravela.Framework.Impl.CodeModel.References;
 using Caravela.Framework.Impl.Collections;
+using Caravela.Framework.Impl.CompileTime;
+using Caravela.Framework.Impl.ServiceProvider;
 using Caravela.Framework.Impl.Transformations;
 using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
@@ -22,8 +24,7 @@ namespace Caravela.Framework.Impl.CodeModel
 {
     internal partial class CompilationModel : ICompilationInternal, IDeclarationImpl
     {
-        public PartialCompilation PartialCompilation { get; }
-
+        
         public static CompilationModel CreateInitialInstance( IProject project, PartialCompilation compilation ) => new( project, compilation );
 
         public static CompilationModel CreateInitialInstance(
@@ -39,25 +40,7 @@ namespace Caravela.Framework.Impl.CodeModel
             ImmutableArray<ResourceDescription> resources = default )
             => new( project, PartialCompilation.CreatePartial( compilation, syntaxTree, resources ) );
 
-        internal CompilationModel WithTransformations( IReadOnlyList<IObservableTransformation> introducedDeclarations )
-        {
-            if ( !introducedDeclarations.Any() )
-            {
-                return this;
-            }
-
-            return new CompilationModel( this, introducedDeclarations );
-        }
-
-        /// <summary>
-        /// Returns a shallow clone of the current compilation, but annotated with a given <see cref="AspectLayerId"/>.
-        /// </summary>
-        internal CompilationModel WithAspectLayer( AspectLayerId aspectLayerId ) => new( this, aspectLayerId );
-
-        public CompilationModel WithAspectInstances( IReadOnlyList<AspectInstance> aspectInstances )
-            => aspectInstances.Count == 0 ? this : new CompilationModel( this, aspectInstances );
-
-        internal ReflectionMapper ReflectionMapper { get; }
+     
 
         private readonly ImmutableMultiValueDictionary<DeclarationRef<IDeclaration>, IObservableTransformation> _transformations;
 
@@ -69,6 +52,16 @@ namespace Caravela.Framework.Impl.CodeModel
         private ImmutableDictionary<DeclarationRef<IDeclaration>, int> _depthsCache = ImmutableDictionary.Create<DeclarationRef<IDeclaration>, int>();
 
         public DeclarationFactory Factory { get; }
+        
+        public int Revision { get; }
+
+        public IProject Project { get; }
+        
+        public PartialCompilation PartialCompilation { get; }
+
+        public ReflectionMapper ReflectionMapper { get; }
+
+        public ISymbolClassifier SymbolClassifier { get; }
 
         private CompilationModel( IProject project, PartialCompilation partialCompilation )
         {
@@ -93,6 +86,7 @@ namespace Caravela.Framework.Impl.CodeModel
             this._allMemberAttributesByTypeName = attributeDiscoveryVisitor.GetDiscoveredAttributes();
 
             this._aspects = ImmutableMultiValueDictionary<DeclarationRef<IDeclaration>, IAspectInstance>.Empty;
+            this.SymbolClassifier = project.ServiceProvider.GetService<SymbolClassificationService>().GetClassifier( this.RoslynCompilation );
         }
 
         /// <summary>
@@ -140,6 +134,7 @@ namespace Caravela.Framework.Impl.CodeModel
             this._depthsCache = prototype._depthsCache;
             this._allMemberAttributesByTypeName = prototype._allMemberAttributesByTypeName;
             this._aspects = prototype._aspects;
+            this.SymbolClassifier = prototype.SymbolClassifier;
         }
 
         private CompilationModel( CompilationModel prototype, AspectLayerId aspectLayerId ) : this( prototype )
@@ -151,10 +146,26 @@ namespace Caravela.Framework.Impl.CodeModel
         {
             this._aspects = this._aspects.AddRange( aspectInstances, a => a.TargetDeclaration.ToRef() );
         }
+        
+        
+        internal CompilationModel WithTransformations( IReadOnlyList<IObservableTransformation> introducedDeclarations )
+        {
+            if ( !introducedDeclarations.Any() )
+            {
+                return this;
+            }
 
-        public int Revision { get; }
+            return new CompilationModel( this, introducedDeclarations );
+        }
 
-        public IProject Project { get; }
+        /// <summary>
+        /// Returns a shallow clone of the current compilation, but annotated with a given <see cref="AspectLayerId"/>.
+        /// </summary>
+        internal CompilationModel WithAspectLayer( AspectLayerId aspectLayerId ) => new( this, aspectLayerId );
+
+        public CompilationModel WithAspectInstances( IReadOnlyList<AspectInstance> aspectInstances )
+            => aspectInstances.Count == 0 ? this : new CompilationModel( this, aspectInstances );
+
 
         public string AssemblyName => this.RoslynCompilation.AssemblyName ?? "";
 
@@ -163,6 +174,7 @@ namespace Caravela.Framework.Impl.CodeModel
             => new NamedTypeList(
                 this,
                 this.PartialCompilation.Types
+                    .Where( t => this.SymbolClassifier.GetTemplatingScope( t ) != TemplatingScope.CompileTimeOnly )
                     .Select( t => new MemberRef<INamedType>( t ) ) );
 
         [Memo]

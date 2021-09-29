@@ -19,7 +19,6 @@ namespace Caravela.Framework.Impl.Aspects
     {
         private readonly UserDiagnosticSink _diagnosticSink;
         private readonly IImmutableList<Advice> _declarativeAdvices;
-        private readonly AdviceFactory _adviceFactory;
         private bool _skipped;
 
         public IProject Project => this.Target.Compilation.Project;
@@ -27,6 +26,8 @@ namespace Caravela.Framework.Impl.Aspects
         public ImmutableArray<IAspectSource> AspectSources { get; private set; } = ImmutableArray<IAspectSource>.Empty;
 
         public void AddAspectSource( IAspectSource aspectSource ) => this.AspectSources = this.AspectSources.Add( aspectSource );
+
+        public AdviceFactory AdviceFactory { get; }
 
         IReadOnlyList<IAspectInstance> IAspectLayerBuilder.UpstreamAspects => throw new NotImplementedException();
 
@@ -43,7 +44,7 @@ namespace Caravela.Framework.Impl.Aspects
 
         IDeclaration IAspectLayerBuilder.Target => this.Target;
 
-        public IAdviceFactory Advices => this._adviceFactory;
+        public IAdviceFactory Advices => this.AdviceFactory;
 
         public void SkipAspect() => this._skipped = true;
 
@@ -59,7 +60,7 @@ namespace Caravela.Framework.Impl.Aspects
             this.Target = target;
             this._declarativeAdvices = declarativeAdvices.ToImmutableArray();
             this._diagnosticSink = diagnosticSink;
-            this._adviceFactory = adviceFactory;
+            this.AdviceFactory = adviceFactory;
             this.CancellationToken = cancellationToken;
         }
 
@@ -71,8 +72,8 @@ namespace Caravela.Framework.Impl.Aspects
                 ? new AspectInstanceResult(
                     success,
                     this._diagnosticSink.ToImmutable(),
-                    this._declarativeAdvices.ToImmutableArray().AddRange( this._adviceFactory.Advices ),
-                    Array.Empty<IAspectSource>() )
+                    this._declarativeAdvices.ToImmutableArray().AddRange( this.AdviceFactory.Advices ),
+                    this.AspectSources )
                 : new AspectInstanceResult(
                     success,
                     this._diagnosticSink.ToImmutable(),

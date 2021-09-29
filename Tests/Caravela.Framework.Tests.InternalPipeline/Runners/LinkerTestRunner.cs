@@ -41,7 +41,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
         /// <returns>The result of the test execution.</returns>
         private protected override async Task RunAsync( TestInput testInput, TestResult testResult, Dictionary<string, object?> state )
         {
-            var builder = new LinkerTestInputBuilder();
+            var builder = new LinkerTestInputBuilder(this.ServiceProvider);
 
             state["builder"] = builder;
 

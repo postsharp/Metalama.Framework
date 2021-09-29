@@ -44,7 +44,7 @@ namespace Caravela.Framework.Impl.Fabrics
                 throw new ArgumentOutOfRangeException( nameof(TAspect), UserMessageFormatter.Format( $"'{typeof(TAspect)}' is an abstract type." ) );
             }
 
-            return aspectClass;
+            return (AspectClass) aspectClass;
         }
 
         protected void RegisterAspectSource( IAspectSource aspectSource ) => this._registerAspectSource( aspectSource );

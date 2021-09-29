@@ -34,7 +34,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
 
             using var buildOptions = new TestProjectOptions();
             using var domain = new UnloadableCompileTimeDomain();
-            var compilation = CompilationModel.CreateInitialInstance( NullProject.Instance, testResult.InputCompilation! );
+            var compilation = CompilationModel.CreateInitialInstance( new NullProject(this.ServiceProvider), testResult.InputCompilation! );
 
             using var designTimePipeline = new DesignTimeAspectPipeline( buildOptions, domain, true );
 

@@ -10,9 +10,8 @@ namespace Caravela.TestFramework
 {
     internal class NullProject : IProject
     {
-        public static IProject Instance { get; } = new NullProject();
 
-        private NullProject() { }
+        public NullProject( IServiceProvider serviceProvider ) { this.ServiceProvider = serviceProvider; }
 
         public string Path => throw new NotImplementedException();
 
@@ -30,6 +29,6 @@ namespace Caravela.TestFramework
             where T : IProjectExtension, new()
             => throw new NotImplementedException();
 
-        public IServiceProvider ServiceProvider => throw new NotImplementedException();
+        public IServiceProvider ServiceProvider { get; }
     }
 }

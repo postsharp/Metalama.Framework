@@ -20,9 +20,9 @@ namespace Caravela.Framework.Impl.Fabrics
         where TAspect : IAspect<TDeclaration>
     {
         private readonly Func<CompilationModel, IEnumerable<AspectInstance>> _getInstances;
-        private readonly AspectClass _aspectClass;
+        private readonly IAspectClass _aspectClass;
 
-        public ProgrammaticAspectSource( AspectClass aspectClass, Func<CompilationModel, IEnumerable<AspectInstance>> getInstances )
+        public ProgrammaticAspectSource( IAspectClass aspectClass, Func<CompilationModel, IEnumerable<AspectInstance>> getInstances )
         {
             if ( aspectClass.FullName != typeof(TAspect).FullName )
             {
@@ -35,7 +35,7 @@ namespace Caravela.Framework.Impl.Fabrics
 
         public AspectSourcePriority Priority => AspectSourcePriority.Programmatic;
 
-        public IEnumerable<IAspectClass> AspectTypes => new[] { this._aspectClass };
+        public IEnumerable<IAspectClass> AspectClasses => new[] { this._aspectClass };
 
         public IEnumerable<IDeclaration> GetExclusions( INamedType aspectType ) => Array.Empty<IDeclaration>();
 

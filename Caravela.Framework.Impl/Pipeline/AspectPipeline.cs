@@ -28,6 +28,7 @@ namespace Caravela.Framework.Impl.Pipeline
     /// </summary>
     public abstract class AspectPipeline : IDisposable
     {
+        private const string _highLevelStageGroupingKey = nameof(_highLevelStageGroupingKey);
         private readonly bool _ownsDomain;
 
         public IProjectOptions ProjectOptions { get; }
@@ -148,21 +149,36 @@ namespace Caravela.Framework.Impl.Pipeline
                 new AttributeAspectOrderingSource( compilation.Compilation, loader ), new AspectLayerOrderingSource( aspectClasses )
             };
 
-            if ( !AspectLayerSorter.TrySort( unsortedAspectLayers, aspectOrderSources, diagnosticAdder, out var sortedAspectLayers ) )
+            if ( !AspectLayerSorter.TrySort( unsortedAspectLayers, aspectOrderSources, diagnosticAdder, out var orderedAspectLayers ) )
             {
                 configuration = null;
 
                 return false;
             }
 
-            var aspectLayers = sortedAspectLayers.ToImmutableArray();
+            ImmutableArray<OrderedAspectLayer> allOrderedAspectLayers;
+            ImmutableArray<IBoundAspectClass> allAspectClasses;
 
-            var stages = aspectLayers
+            if ( compileTimeProject != null )
+            {
+                var fabricTopLevelAspectClass = new FabricTopLevelAspectClass( this.ServiceProvider, roslynCompilation, compileTimeProject );
+                var fabricAspectLayer = new OrderedAspectLayer( -1, fabricTopLevelAspectClass.Layer );
+
+                allOrderedAspectLayers = orderedAspectLayers.Insert( 0, fabricAspectLayer );
+                allAspectClasses = aspectClasses.As<IBoundAspectClass>().Add( fabricTopLevelAspectClass );
+            }
+            else
+            {
+                allOrderedAspectLayers = orderedAspectLayers;
+                allAspectClasses = aspectClasses.As<IBoundAspectClass>();
+            }
+
+            var stages = allOrderedAspectLayers
                 .GroupAdjacent( x => GetGroupingKey( x.AspectClass.AspectDriver ) )
                 .Select( g => this.CreateStage( g.Key, g.ToImmutableArray(), loader, compileTimeProject! ) )
                 .ToImmutableArray();
 
-            configuration = new AspectPipelineConfiguration( stages, aspectClasses, sortedAspectLayers, compileTimeProject, loader );
+            configuration = new AspectPipelineConfiguration( stages, allAspectClasses, allOrderedAspectLayers, compileTimeProject, loader );
 
             return true;
 
@@ -174,9 +190,9 @@ namespace Caravela.Framework.Impl.Pipeline
                     IAspectWeaver weaver => weaver,
 
                     // AspectDrivers are grouped together
-                    AspectDriver => nameof(AspectDriver),
+                    IHighLevelAspectDriver => _highLevelStageGroupingKey,
 
-                    _ => throw new NotSupportedException()
+                    _ => throw new AssertionFailedException()
                 };
         }
 
@@ -276,7 +292,7 @@ namespace Caravela.Framework.Impl.Pipeline
 
                     return new LowLevelPipelineStage( weaver, partData.AspectClass, this.ServiceProvider );
 
-                case nameof(AspectDriver):
+                case _highLevelStageGroupingKey:
 
                     return this.CreateStage( parts, compileTimeProject, compileTimeProjectLoader );
 

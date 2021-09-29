@@ -5,6 +5,6 @@ namespace Caravela.Framework.Fabrics
 {
     public interface IProjectFabric : IFabric
     {
-        void BuildFabric( IProjectFabricBuilder builder );
+        void BuildProject( IProjectFabricBuilder builder );
     }
 }

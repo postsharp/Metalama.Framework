@@ -57,10 +57,12 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
 
     internal partial class LinkerTestInputBuilder
     {
+        private readonly IServiceProvider _serviceProvider;
         private readonly TestRewriter _rewriter;
 
-        public LinkerTestInputBuilder()
+        public LinkerTestInputBuilder(IServiceProvider serviceProvider)
         {
+            this._serviceProvider = serviceProvider;
             this._rewriter = new TestRewriter();
         }
 
@@ -71,7 +73,7 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
 
         public AspectLinkerInput ToAspectLinkerInput( PartialCompilation inputCompilation )
         {
-            var initialCompilationModel = CompilationModel.CreateInitialInstance( NullProject.Instance, inputCompilation );
+            var initialCompilationModel = CompilationModel.CreateInitialInstance( new NullProject( this._serviceProvider ), inputCompilation );
 
             FinalizeTransformationFakes( this._rewriter, (CSharpCompilation) inputCompilation.Compilation, initialCompilationModel );
 

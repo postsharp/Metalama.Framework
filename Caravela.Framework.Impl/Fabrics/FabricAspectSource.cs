@@ -22,10 +22,12 @@ namespace Caravela.Framework.Impl.Fabrics
         private readonly FabricContext _context;
 
         private readonly List<FabricDriver> _drivers = new(); // Note that this list is ordered.
+        private readonly IEnumerable<IAspectClass> _aspectClasses;
 
         public FabricAspectSource( FabricContext context )
         {
             this._context = context;
+            this._aspectClasses = new[] { context.AspectClasses[FabricTopLevelAspectClass.FabricAspectName] };
         }
 
         public void Register( FabricDriver driver )
@@ -35,7 +37,7 @@ namespace Caravela.Framework.Impl.Fabrics
 
         AspectSourcePriority IAspectSource.Priority => AspectSourcePriority.Programmatic;
 
-        IEnumerable<IAspectClass> IAspectSource.AspectTypes => new[] { FabricTopLevelAspectClass.Instance };
+        IEnumerable<IAspectClass> IAspectSource.AspectClasses => this._aspectClasses;
 
         IEnumerable<IDeclaration> IAspectSource.GetExclusions( INamedType aspectType ) => Array.Empty<IDeclaration>();
 

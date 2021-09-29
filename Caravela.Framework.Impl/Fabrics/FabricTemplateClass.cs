@@ -30,6 +30,6 @@ namespace Caravela.Framework.Impl.Fabrics
 
         public override CompileTimeProject? Project { get; }
 
-        public override string FullName => this.Driver.Fabric.GetType().FullName;
+        public override string FullName => this.Driver.FabricSymbol.GetReflectionName();
     }
 }

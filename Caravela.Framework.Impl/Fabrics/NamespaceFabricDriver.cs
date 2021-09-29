@@ -16,10 +16,10 @@ namespace Caravela.Framework.Impl.Fabrics
 
         public override ISymbol TargetSymbol => this.FabricSymbol.ContainingNamespace;
 
-        public override void Execute( IAspectBuilderInternal aspectBuilder )
+        public override void Execute( IAspectBuilderInternal aspectBuilder, FabricTemplateClass fabricTemplateClass )
         {
             var builder = new Builder( (INamespace) aspectBuilder.Target, this.Context, aspectBuilder );
-            ((INamespaceFabric) this.Fabric).BuildFabric( builder );
+            ((INamespaceFabric) this.Fabric).BuildNamespace( builder );
         }
 
         public override FabricKind Kind => FabricKind.Namespace;

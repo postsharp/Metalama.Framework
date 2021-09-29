@@ -57,7 +57,7 @@ namespace Caravela.Framework.Impl.Transformations
                         context.ServiceProvider ) );
 
                 var expansionContext = new TemplateExpansionContext(
-                    this.Advice.Aspect.Aspect,
+                    this.Advice.TemplateInstance.Instance,
                     metaApi,
                     this.OverriddenDeclaration.Compilation,
                     context.LexicalScopeProvider.GetLexicalScope( this.OverriddenDeclaration ),

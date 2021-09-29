@@ -23,7 +23,7 @@ namespace Caravela.Framework.Impl.Pipeline
 
         public AspectSourcePriority Priority => AspectSourcePriority.Aggregate;
 
-        public IEnumerable<IAspectClass> AspectTypes => this._aspectSources.Select( a => a.AspectClass ).Distinct();
+        public IEnumerable<IAspectClass> AspectClasses => this._aspectSources.Select( a => a.AspectClass ).Distinct();
 
         public IEnumerable<IDeclaration> GetExclusions( INamedType aspectType ) => Enumerable.Empty<IDeclaration>();
 

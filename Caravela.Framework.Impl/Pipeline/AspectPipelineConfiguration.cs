@@ -18,7 +18,7 @@ namespace Caravela.Framework.Impl.Pipeline
     /// </summary>
     internal record AspectPipelineConfiguration(
         ImmutableArray<PipelineStage> Stages,
-        IReadOnlyList<AspectClass> AspectClasses,
+        IReadOnlyList<IBoundAspectClass> AspectClasses,
         ImmutableArray<OrderedAspectLayer> Layers,
         CompileTimeProject? CompileTimeProject,
         CompileTimeProjectLoader CompileTimeProjectLoader )

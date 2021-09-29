@@ -22,10 +22,18 @@ namespace Caravela.Framework.Impl.Aspects
 {
     // TODO: AspectDriver should not store a reference to a Compilation we should not store references to a Roslyn compilation.
 
+    internal interface IHighLevelAspectDriver : IAspectDriver
+    {
+        AspectInstanceResult ExecuteAspect(
+            AspectInstance aspectInstance,
+            CompilationModel compilationModelRevision,
+            CancellationToken cancellationToken );
+    }
+    
     /// <summary>
     /// Executes aspects.
     /// </summary>
-    internal class AspectDriver : IAspectDriver
+    internal class AspectDriver : IHighLevelAspectDriver
     {
         private readonly UserCodeInvoker _userCodeInvoker;
         private readonly IServiceProvider _serviceProvider;
@@ -51,7 +59,7 @@ namespace Caravela.Framework.Impl.Aspects
                 .ToList();
         }
 
-        internal AspectInstanceResult ExecuteAspect(
+        public AspectInstanceResult ExecuteAspect(
             AspectInstance aspectInstance,
             CompilationModel compilationModelRevision,
             CancellationToken cancellationToken )

@@ -17,15 +17,15 @@ namespace Caravela.Framework.Impl.CodeModel
     {
         private readonly CompileTimeProjectLoader _loader;
 
-        public CompilationAspectSource( IReadOnlyList<AspectClass> aspectTypes, CompileTimeProjectLoader loader )
+        public CompilationAspectSource( IReadOnlyList<IBoundAspectClass> aspectTypes, CompileTimeProjectLoader loader )
         {
             this._loader = loader;
-            this.AspectTypes = aspectTypes;
+            this.AspectClasses = aspectTypes;
         }
 
         public AspectSourcePriority Priority => AspectSourcePriority.FromAttribute;
 
-        public IEnumerable<IAspectClass> AspectTypes { get; }
+        public IEnumerable<IAspectClass> AspectClasses { get; }
 
         // TODO: implement aspect exclusion based on ExcludeAspectAttribute
         public IEnumerable<IDeclaration> GetExclusions( INamedType aspectType ) => Enumerable.Empty<IDeclaration>();

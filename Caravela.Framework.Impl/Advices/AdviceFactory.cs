@@ -28,7 +28,7 @@ namespace Caravela.Framework.Impl.Advices
         private readonly IServiceProvider _serviceProvider;
         private readonly IDiagnosticAdder _diagnosticAdder;
         private readonly IReadOnlyList<Advice> _declarativeAdvices;
-        private readonly List<Advice> _advices = new();
+        private readonly List<Advice> _advices;
 
         private readonly Dictionary<INamedType, ImplementInterfaceAdvice> _implementInterfaceAdvices;
 
@@ -49,7 +49,28 @@ namespace Caravela.Framework.Impl.Advices
             this._diagnosticAdder = diagnosticAdder;
             this._declarativeAdvices = declarativeAdvices;
             this._implementInterfaceAdvices = new Dictionary<INamedType, ImplementInterfaceAdvice>( compilation.InvariantComparer );
+            this._advices = new List<Advice>();
         }
+
+        /// <summary>
+        /// Creates a child <see cref="AdviceFactory"/> that has a different <see cref="TemplateClassInstance"/> but shares the same mutable
+        /// state as the parent.
+        /// </summary>
+        /// <param name="parent"></param>
+        /// <param name="templateClassInstance"></param>
+        private AdviceFactory( AdviceFactory parent, TemplateClassInstance templateClassInstance )
+        { 
+            this._aspect = parent._aspect;
+            this._templateInstance = templateClassInstance;
+            this._serviceProvider = parent._serviceProvider;
+            this._compilation = parent._compilation;
+            this._diagnosticAdder = parent._diagnosticAdder;
+            this._declarativeAdvices = parent._declarativeAdvices;
+            this._implementInterfaceAdvices = parent._implementInterfaceAdvices;
+            this._advices = parent._advices;
+        }
+
+        public AdviceFactory WithTemplateClassInstance( TemplateClassInstance templateClassInstance ) => new AdviceFactory( this, templateClassInstance );
 
         private TemplateMemberRef ValidateTemplateName( string? templateName, TemplateKind templateKind, bool required = false )
         {

@@ -15,20 +15,20 @@ namespace Caravela.Framework.Impl.Fabrics
     internal class FabricAspect<T> : IAspect<T>
         where T : class, IDeclaration
     {
-        private ImmutableArray<FabricTemplateClass> _aspectClasses;
+        private ImmutableArray<FabricTemplateClass> _templateClasses;
 
-        public FabricAspect( ImmutableArray<FabricTemplateClass> aspectClasses )
+        public FabricAspect( ImmutableArray<FabricTemplateClass> templateClasses )
         {
-            this._aspectClasses = aspectClasses;
+            this._templateClasses = templateClasses;
         }
 
         public void BuildAspect( IAspectBuilder<T> builder )
         {
             var internalBuilder = (IAspectBuilderInternal) builder;
 
-            foreach ( var aspectClass in this._aspectClasses )
+            foreach ( var templateClass in this._templateClasses )
             {
-                aspectClass.Driver.Execute( internalBuilder );
+                templateClass.Driver.Execute( internalBuilder, templateClass );
             }
         }
 

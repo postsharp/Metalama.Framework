@@ -715,5 +715,26 @@ interface L : J, K {}
             Assert.Equal( 3, compilation.GetDepth( compilation.Types.OfName( "L" ).Single() ) );
             Assert.Equal( 4, compilation.GetDepth( type.NestedTypes.OfName( "D" ).Single() ) );
         }
+        
+        [Fact]
+        public void CompileTimeOnlyTypesAreInvisible()
+        {
+            var code = @"
+using Caravela.Framework.Aspects;
+
+[CompileTimeOnly]
+class C { }
+
+class D 
+{
+    [CompileTimeOnly]
+    class E { }
+}
+";
+
+            var compilation = this.CreateCompilationModel( code );
+            Assert.Single( compilation.Types );
+            Assert.Empty( compilation.Types.Single().NestedTypes );
+        }
     }
 }
