@@ -190,6 +190,7 @@ namespace Caravela.Framework.Impl.CompileTime
                             // TODO: emit an error, this is not supported.
                             throw new NotImplementedException();
 
+                        // ReSharper disable once RedundantEmptySwitchSection
                         default:
                             // Non-type members of a run-time type are always run-time too and should not be copied to the compile-time assembly.
                             break;
