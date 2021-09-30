@@ -6,6 +6,7 @@ using Caravela.Framework.Impl.Options;
 using Caravela.Framework.Impl.Pipeline;
 using Caravela.Framework.Impl.Serialization;
 using Caravela.Framework.Impl.Utilities;
+using Caravela.Framework.Project;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 

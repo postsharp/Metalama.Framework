@@ -9,6 +9,7 @@ using Caravela.Framework.Impl.Aspects;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Pipeline;
+using Caravela.Framework.Project;
 using Caravela.Framework.Validation;
 using Microsoft.CodeAnalysis;
 using System;

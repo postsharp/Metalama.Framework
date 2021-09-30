@@ -7,7 +7,7 @@ using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Observers;
 using Caravela.Framework.Impl.Sdk;
-using Caravela.Framework.Impl.ServiceProvider;
+using Caravela.Framework.Project;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;

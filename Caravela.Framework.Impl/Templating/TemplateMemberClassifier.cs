@@ -4,8 +4,8 @@
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
-using Caravela.Framework.Impl.ServiceProvider;
 using Caravela.Framework.Impl.Utilities;
+using Caravela.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;

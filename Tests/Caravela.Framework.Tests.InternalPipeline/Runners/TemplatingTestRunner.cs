@@ -14,6 +14,7 @@ using Caravela.Framework.Impl.ServiceProvider;
 using Caravela.Framework.Impl.Templating;
 using Caravela.Framework.Impl.Templating.MetaModel;
 using Caravela.Framework.Impl.Utilities;
+using Caravela.Framework.Project;
 using Caravela.TestFramework;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;

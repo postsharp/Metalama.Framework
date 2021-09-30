@@ -4,7 +4,7 @@
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
-using Caravela.Framework.Impl.ServiceProvider;
+using Caravela.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Linq;

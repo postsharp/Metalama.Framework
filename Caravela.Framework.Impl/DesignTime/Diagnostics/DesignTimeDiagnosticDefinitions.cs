@@ -9,6 +9,7 @@ using Caravela.Framework.Impl.Options;
 using Caravela.Framework.Impl.Serialization;
 using Caravela.Framework.Impl.ServiceProvider;
 using Caravela.Framework.Impl.Templating;
+using Caravela.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Immutable;

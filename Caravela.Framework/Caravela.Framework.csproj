@@ -29,10 +29,6 @@
     <PackageReference Include="System.Collections.Immutable" Version="$(SystemCollectionsImmutableVersion)" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Internals" />
-  </ItemGroup>
-
   <!-- based on https://stackoverflow.com/a/56018426/41071 -->
   <PropertyGroup>
     <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);SetPackageContent</TargetsForTfmSpecificBuildOutput>

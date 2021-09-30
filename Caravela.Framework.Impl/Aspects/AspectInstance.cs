@@ -3,8 +3,8 @@
 
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
-using Caravela.Framework.Impl.ServiceProvider;
 using Caravela.Framework.Impl.Utilities;
+using Caravela.Framework.Project;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;

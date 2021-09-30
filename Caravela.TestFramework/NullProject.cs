@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
+using Caravela.Framework.Project;
 using System;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
@@ -24,8 +25,8 @@ namespace Caravela.TestFramework
 
         public bool TryGetProperty( string name, [NotNullWhen( true )] out string? value ) => throw new NotImplementedException();
 
-        public T Extension<T>()
-            where T : IProjectExtension, new()
+        public T Data<T>()
+            where T : class, IProjectData, new()
             => throw new NotImplementedException();
 
         public IServiceProvider ServiceProvider { get; }

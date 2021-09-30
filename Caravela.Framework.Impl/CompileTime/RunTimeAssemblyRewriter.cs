@@ -3,7 +3,7 @@
 
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Sdk;
-using Caravela.Framework.Impl.ServiceProvider;
+using Caravela.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;

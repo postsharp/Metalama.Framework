@@ -8,6 +8,7 @@ using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Fabrics;
 using Caravela.Framework.Impl.Pipeline;
+using Caravela.Framework.Project;
 using Caravela.Framework.Validation;
 using System;
 using System.Collections.Generic;

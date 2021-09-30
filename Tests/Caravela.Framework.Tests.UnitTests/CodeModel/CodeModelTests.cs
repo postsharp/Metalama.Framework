@@ -5,6 +5,7 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Code.Collections;
 using Caravela.Framework.Code.Types;
 using Caravela.Framework.Impl;
+using Caravela.Framework.Tests.UnitTests.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -49,8 +50,8 @@ namespace NS
 
             var compilation = this.CreateCompilationModel( code );
 
-            var types = compilation.Types.ToList();
-            Assert.Equal( 2, types.Count );
+            var types = compilation.Types.OrderBySource();
+            Assert.Equal( 2, types.Length );
 
             var c1 = types[0];
             Assert.Equal( "C", c1.Name );
@@ -128,7 +129,7 @@ class TestAttribute : Attribute
 
             var compilation = this.CreateCompilationModel( code );
 
-            var attribute = compilation.Types.ElementAt( 1 ).Attributes.Single();
+            var attribute = compilation.Types.OrderBySource().ElementAt( 1 ).Attributes.Single();
             Assert.Equal( "TestAttribute", attribute.Type.FullName );
             Assert.Equal( new object?[] { 42, "foo", null }, attribute.ConstructorArguments.Select( a => a.Value ) );
             var namedArguments = attribute.NamedArguments;

@@ -4,6 +4,7 @@
 using Caravela.Framework.Code;
 using Caravela.Framework.Code.Advised;
 using Caravela.Framework.Code.Invokers;
+using Caravela.Framework.Project;
 using Caravela.Framework.Validation;
 using System;
 

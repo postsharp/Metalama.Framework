@@ -11,6 +11,7 @@ using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.ReflectionMocks;
 using Caravela.Framework.Impl.Templating;
 using Caravela.Framework.Impl.Utilities;
+using Caravela.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -313,14 +314,14 @@ namespace Caravela.Framework.Impl.CompileTime
                     }
                 }
 
-                // Add non-implemented members of IAspect and IEligible.
+                // Add non-implemented members of IAspect, IEligible and IProjectData.
                 var syntaxGenerator = this._syntaxGenerationContext.SyntaxGenerator;
                 var allImplementedInterfaces = symbol.SelectManyRecursive( i => i.Interfaces, throwOnDuplicate: false );
 
                 foreach ( var implementedInterface in allImplementedInterfaces )
                 {
 #pragma warning disable 618
-                    if ( implementedInterface.Name == nameof(IAspect) || implementedInterface.Name == nameof(IEligible<IDeclaration>) )
+                    if ( implementedInterface.Name is nameof(IAspect) or nameof(IEligible<IDeclaration>) or nameof(IProjectData) )
 #pragma warning restore 618
                     {
                         foreach ( var member in implementedInterface.GetMembers() )

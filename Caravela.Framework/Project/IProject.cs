@@ -2,12 +2,13 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Aspects;
+using Caravela.Framework.Code;
 using Caravela.Framework.Validation;
 using System;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 
-namespace Caravela.Framework.Code
+namespace Caravela.Framework.Project
 {
     [InternalImplement]
     [CompileTimeOnly]
@@ -42,15 +43,17 @@ namespace Caravela.Framework.Code
         bool TryGetProperty( string name, [NotNullWhen( true )] out string? value );
 
         /// <summary>
-        /// Gets or creates a project extension and creates a new instance if not has been created before.
+        /// Gets a project data extension or creates a new instance if not has been created before. If the type may implement <see cref="IProjectData"/>,
+        /// new instances will be initialized using <see cref="IProjectData.Initialize"/>.
         /// </summary>
-        /// <remarks>
-        /// If this method is called when the project is read-only, a new instance but read-only instance is returned.  
-        /// </remarks>
-        /// <typeparam name="T">Extension type.</typeparam>
-        T Extension<T>()
-            where T : IProjectExtension, new();
+        /// <typeparam name="T">The data type, which may implement <see cref="IProjectData"/>.</typeparam>
+        T Data<T>()
+            where T : class, IProjectData, new();
 
+        /// <summary>
+        /// Gets an <see cref="IServiceProvider"/> that gives access to the compiler services exposed using the <c>[CompileTimePlugIn]</c> facility.
+        /// Only interfaces that derive from <see cref="IService"/> are accessible from this property.
+        /// </summary>
         IServiceProvider ServiceProvider { get; }
     }
 }

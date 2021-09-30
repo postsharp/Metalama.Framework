@@ -12,6 +12,7 @@ using Caravela.Framework.Impl.Options;
 using Caravela.Framework.Impl.Sdk;
 using Caravela.Framework.Impl.ServiceProvider;
 using Caravela.Framework.Impl.Utilities;
+using Caravela.Framework.Project;
 using Microsoft.CodeAnalysis;
 using MoreLinq;
 using System;
@@ -64,8 +65,18 @@ namespace Caravela.Framework.Impl.Pipeline
                 projectOptions = existingProjectOptions.Apply( projectOptions );
             }
 
+            // Register project options.
             this.ServiceProvider.AddService( projectOptions );
             this.ProjectOptions = projectOptions;
+
+            // Register plug ins to the Service Provider.
+            foreach ( var plugIn in projectOptions.PlugIns )
+            {
+                if ( plugIn is IService service )
+                {
+                    this.ServiceProvider.AddService( service );
+                }
+            }
 
             if ( domain != null )
             {

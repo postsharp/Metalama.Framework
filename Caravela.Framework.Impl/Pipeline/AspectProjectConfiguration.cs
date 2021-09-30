@@ -4,8 +4,8 @@
 using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.Aspects;
 using Caravela.Framework.Impl.CompileTime;
-using Caravela.Framework.Impl.ServiceProvider;
 using Caravela.Framework.Impl.Utilities;
+using Caravela.Framework.Project;
 using System;
 using System.Collections.Immutable;
 using System.Linq;

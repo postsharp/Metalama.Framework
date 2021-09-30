@@ -7,6 +7,7 @@ using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Options;
 using Caravela.Framework.Impl.ServiceProvider;
+using Caravela.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Immutable;

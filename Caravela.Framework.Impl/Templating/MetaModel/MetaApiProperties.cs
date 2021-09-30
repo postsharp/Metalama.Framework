@@ -7,7 +7,7 @@ using Caravela.Framework.Impl.Aspects;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Pipeline;
-using Caravela.Framework.Impl.ServiceProvider;
+using Caravela.Framework.Project;
 using System;
 using System.Collections.Generic;
 

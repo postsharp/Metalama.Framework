@@ -4,6 +4,7 @@
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Options;
 using Caravela.Framework.Impl.ServiceProvider;
+using Caravela.Framework.Project;
 using Caravela.Framework.Tests.UnitTests.CompileTime;
 using Caravela.TestFramework;
 using System.Threading.Tasks;

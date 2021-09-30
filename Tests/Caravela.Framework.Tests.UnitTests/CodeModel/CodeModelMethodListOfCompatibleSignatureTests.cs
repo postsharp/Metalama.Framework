@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
+using Caravela.Framework.Tests.UnitTests.Utilities;
 using System;
 using System.Linq;
 using Xunit;
@@ -305,9 +306,10 @@ class C : B
 ";
 
             var compilation = this.CreateCompilationModel( code );
-            var typeA = compilation.Types[0];
-            var typeB = compilation.Types[1];
-            var typeC = compilation.Types[2];
+            var types = compilation.Types.OrderBySource();
+            var typeA = types[0];
+            var typeB = types[1];
+            var typeC = types[2];
 
             var matchedMethods1 = typeC.Methods.OfCompatibleSignature( "Foo", Array.Empty<IType>(), declaredOnly: false );
             Assert.Equal( new[] { typeB.Methods[0] }, matchedMethods1 );

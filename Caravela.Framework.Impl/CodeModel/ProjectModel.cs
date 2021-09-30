@@ -5,6 +5,7 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Options;
 using Caravela.Framework.Impl.ServiceProvider;
 using Caravela.Framework.Impl.Utilities;
+using Caravela.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Concurrent;
@@ -16,7 +17,7 @@ namespace Caravela.Framework.Impl.CodeModel
 {
     internal class ProjectModel : IProject
     {
-        private readonly ConcurrentDictionary<Type, IProjectExtension> _extensions = new();
+        private readonly ConcurrentDictionary<Type, object> _extensions = new();
         private readonly IProjectOptions _projectOptions;
         private readonly SyntaxTree? _anySyntaxTree;
         private readonly Lazy<ImmutableArray<IAssemblyIdentity>> _projectReferences;
@@ -46,9 +47,17 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public bool TryGetProperty( string name, [NotNullWhen( true )] out string? value ) => this._projectOptions.TryGetProperty( name, out value );
 
-        public T Extension<T>()
-            where T : IProjectExtension, new()
-            => (T) this._extensions.GetOrAdd( typeof(T), t => (IProjectExtension) Activator.CreateInstance( t ) );
+        public T Data<T>()
+            where T : class, IProjectData, new()
+            => (T) this._extensions.GetOrAdd( typeof(T), this.CreateProjectData );
+
+        private object CreateProjectData( Type t )
+        {
+            var data = (IProjectData) Activator.CreateInstance( t );
+            data.Initialize( this );
+
+            return data;
+        }
 
         public IServiceProvider ServiceProvider { get; }
     }
