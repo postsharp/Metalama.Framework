@@ -10,28 +10,6 @@ class Target
 }}
 
 
-public int Bar
-{get
-{
-    return this.Bar_Override5;
-}set
-{
-    this.Bar_Override5 = value;
-}}
-private int Bar_Empty
-{
-    get
-    {
-        Console.WriteLine("This is introduced code (discarded).");
-        return 0;
-    }
-
-    set
-    {
-        Console.WriteLine("This is introduced code (discarded).");
-    }
-}
-
 public int Foo_Override0
 {get    {
         // Should invoke empty code.
@@ -54,6 +32,28 @@ set    {
         this.Bar_Empty= value;
         // Should invoke the final declaration.
         this.Bar= value;
+    }
+}
+
+public int Bar
+{get
+{
+    return this.Bar_Override5;
+}set
+{
+    this.Bar_Override5 = value;
+}}
+private int Bar_Empty
+{
+    get
+    {
+        Console.WriteLine("This is introduced code (discarded).");
+        return 0;
+    }
+
+    set
+    {
+        Console.WriteLine("This is introduced code (discarded).");
     }
 }
 
@@ -132,14 +132,14 @@ set    {
     }
 }
 
-private int Bar_Override1
+private int Bar_Override5
 {get    {
         // Should invoke empty code.
         _ = this.Bar_Empty;
-        // Should invoke empty code.
-        _ = this.Bar_Empty;
-        // Should invoke override 1.
-        _ = this.Bar_Override1;
+        // Should invoke override 3.
+        _ = this.Bar_Override3;
+        // Should invoke the final declaration.
+        _ = this.Bar;
         // Should invoke the final declaration.
         _ = this.Bar;
         return 42;
@@ -148,10 +148,10 @@ private int Bar_Override1
 set    {
         // Should invoke empty code.
         this.Bar_Empty= value;
-        // Should invoke empty code.
-        this.Bar_Empty= value;
-        // Should invoke override 1.
-        this.Bar_Override1= value;
+        // Should invoke override 3.
+        this.Bar_Override3= value;
+        // Should invoke the final declaration.
+        this.Bar= value;
         // Should invoke the final declaration.
         this.Bar= value;
     }
@@ -182,14 +182,14 @@ set    {
     }
 }
 
-private int Bar_Override5
+private int Bar_Override1
 {get    {
         // Should invoke empty code.
         _ = this.Bar_Empty;
-        // Should invoke override 3.
-        _ = this.Bar_Override3;
-        // Should invoke the final declaration.
-        _ = this.Bar;
+        // Should invoke empty code.
+        _ = this.Bar_Empty;
+        // Should invoke override 1.
+        _ = this.Bar_Override1;
         // Should invoke the final declaration.
         _ = this.Bar;
         return 42;
@@ -198,10 +198,10 @@ private int Bar_Override5
 set    {
         // Should invoke empty code.
         this.Bar_Empty= value;
-        // Should invoke override 3.
-        this.Bar_Override3= value;
-        // Should invoke the final declaration.
-        this.Bar= value;
+        // Should invoke empty code.
+        this.Bar_Empty= value;
+        // Should invoke override 1.
+        this.Bar_Override1= value;
         // Should invoke the final declaration.
         this.Bar= value;
     }
