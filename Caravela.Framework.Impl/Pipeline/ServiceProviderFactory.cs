@@ -36,7 +36,7 @@ namespace Caravela.Framework.Impl.Pipeline
         /// </summary>
         public static void InitializeAsyncLocalProvider( IPathOptions? directoryOptions = null )
         {
-            _asyncLocalInstance.Value = CreateBaseServiceProvider( directoryOptions ?? DefaultPathOptions.Instance, true )
+            _asyncLocalInstance.Value = CreateBaseServiceProvider( directoryOptions ?? DefaultPathOptions.Instance )
                 .WithMark( ServiceProviderMark.AsyncLocal );
         }
 
@@ -57,7 +57,7 @@ namespace Caravela.Framework.Impl.Pipeline
             _asyncLocalInstance.Value = AsyncLocalProvider.WithServices( service );
         }
 
-        private static ServiceProvider CreateBaseServiceProvider( IPathOptions pathOptions, bool freeze )
+        private static ServiceProvider CreateBaseServiceProvider( IPathOptions pathOptions )
         {
             var serviceProvider = ServiceProvider.Empty.WithServices(
                 pathOptions,
@@ -79,7 +79,7 @@ namespace Caravela.Framework.Impl.Pipeline
         public static ServiceProvider GlobalProvider
             => LazyInitializer.EnsureInitialized(
                 ref _globalInstance,
-                () => CreateBaseServiceProvider( DefaultPathOptions.Instance, true ).WithMark( ServiceProviderMark.Global ) )!;
+                () => CreateBaseServiceProvider( DefaultPathOptions.Instance ).WithMark( ServiceProviderMark.Global ) )!;
 
         internal static ServiceProvider AsyncLocalProvider => _asyncLocalInstance.Value ??= GlobalProvider;
 
@@ -101,7 +101,7 @@ namespace Caravela.Framework.Impl.Pipeline
             }
             else
             {
-                serviceProvider = CreateBaseServiceProvider( pathOptions, false );
+                serviceProvider = CreateBaseServiceProvider( pathOptions );
             }
 
             if ( assemblyLocator != null )
