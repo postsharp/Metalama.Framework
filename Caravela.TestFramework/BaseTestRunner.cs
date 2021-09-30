@@ -4,6 +4,7 @@
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Formatting;
 using Caravela.Framework.Impl.Pipeline;
+using Caravela.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
@@ -77,13 +78,13 @@ namespace Caravela.TestFramework
             => this.RunAsync( testInput, testResult, new Dictionary<string, object?>( StringComparer.InvariantCulture ) );
 
         /// <summary>
-        /// Runs a test.
+        /// Runs a test. The present implementation of this method only prepares an input project and stores it in the <see cref="TestResult"/>.
+        /// Derived classes must call this base method and continue with running the test.
         /// </summary>
         /// <param name="testInput"></param>
         /// <param name="testResult">The output object must be created by the caller and passed, so that the caller can get
         /// a partial object in case of exception.</param>
         /// <param name="state"></param>
-        /// <returns></returns>
         private protected virtual async Task RunAsync( TestInput testInput, TestResult testResult, Dictionary<string, object?> state )
         {
             if ( testInput.Options.InvalidSourceOptions.Count > 0 )
@@ -113,7 +114,8 @@ namespace Caravela.TestFramework
                     allowUnsafe: true,
                     nullableContextOptions: NullableContextOptions.Enable );
 
-                var project = this.CreateProject( testInput.Options ).WithParseOptions( parseOptions ).WithCompilationOptions( compilationOptions );
+                var emptyProject = this.CreateProject( testInput.Options ).WithParseOptions( parseOptions ).WithCompilationOptions( compilationOptions );
+                var project = emptyProject;
 
                 Document AddDocument( string fileName, string sourceCode )
                 {
@@ -142,15 +144,31 @@ namespace Caravela.TestFramework
                 foreach ( var includedFile in testInput.Options.IncludedFiles )
                 {
                     var includedFullPath = Path.GetFullPath( Path.Combine( Path.GetDirectoryName( testInput.FullPath )!, includedFile ) );
-                    var includedText = File.ReadAllText( includedFullPath );
-                    var includedFileName = Path.GetFileName( includedFullPath );
+                    var includedText = await File.ReadAllTextAsync( includedFullPath );
 
-                    var includedDocument = AddDocument( includedFileName, includedText );
+                    if ( !includedFile.EndsWith( ".Dependency.cs", StringComparison.OrdinalIgnoreCase ) )
+                    {
+                        var includedFileName = Path.GetFileName( includedFullPath );
 
-                    testResult.AddInputDocument( includedDocument, includedFullPath );
+                        var includedDocument = AddDocument( includedFileName, includedText );
 
-                    var includedSyntaxTree = (await includedDocument.GetSyntaxTreeAsync())!;
-                    initialCompilation = initialCompilation.AddSyntaxTrees( includedSyntaxTree );
+                        testResult.AddInputDocument( includedDocument, includedFullPath );
+
+                        var includedSyntaxTree = (await includedDocument.GetSyntaxTreeAsync())!;
+                        initialCompilation = initialCompilation.AddSyntaxTrees( includedSyntaxTree );
+                    }
+                    else
+                    {
+                        // Dependencies must be compiled separately using Caravela.
+                        var dependency = await this.CompileDependencyAsync( includedText, emptyProject, testResult );
+
+                        if ( dependency == null )
+                        {
+                            return;
+                        }
+
+                        initialCompilation = initialCompilation.AddReferences( dependency );
+                    }
                 }
 
                 ValidateCustomAttributes( initialCompilation );
@@ -175,6 +193,48 @@ namespace Caravela.TestFramework
             {
                 _isTestRunning.Value = false;
             }
+        }
+
+        /// <summary>
+        /// Compiles a dependency using the Caravela pipeline, emits a binary assembly, and returns a reference to it.
+        /// </summary>
+        private async Task<MetadataReference?> CompileDependencyAsync( string code, Project project, TestResult testResult )
+        {
+            project = project.AddDocument( "dependency.cs", code ).Project;
+
+            using var domain = new UnloadableCompileTimeDomain();
+
+            // Transform with Caravela.
+            var pipeline = new CompileTimeAspectPipeline( this.ServiceProvider, true, domain );
+
+            if ( !pipeline.TryExecute(
+                testResult.InputCompilationDiagnostics,
+                (await project.GetCompilationAsync())!,
+                default,
+                CancellationToken.None,
+                out var resultCompilation,
+                out var outputResources ) )
+            {
+                testResult.SetFailed( "Transformation of the dependency failed." );
+
+                return null;
+            }
+
+            // Emit the binary assembly.
+            var testOptions = this.ServiceProvider.GetService<TestProjectOptions>();
+            var outputPath = Path.Combine( testOptions.BaseDirectory, "dependency.dll" );
+
+            var emitResult = resultCompilation.Emit( outputPath, manifestResources: outputResources );
+
+            if ( !emitResult.Success )
+            {
+                testResult.InputCompilationDiagnostics.Report( emitResult.Diagnostics );
+                testResult.SetFailed( "Compilation of the dependency failed." );
+
+                return null;
+            }
+
+            return MetadataReference.CreateFromFile( outputPath );
         }
 
         /// <summary>

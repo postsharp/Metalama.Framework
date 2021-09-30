@@ -74,7 +74,7 @@ namespace Caravela.Framework.Impl.Aspects
                                 item.Project,
                                 item.TypeName,
                                 typeSymbol,
-                                compileTimeProject.AssertNotNull().GetType( typeSymbol.GetReflectionName() ) );
+                                item.Project.GetType( typeSymbol.GetReflectionName() ) );
                         } )
                     .WhereNotNull()
                     .Concat( frameworkAspectClasses )

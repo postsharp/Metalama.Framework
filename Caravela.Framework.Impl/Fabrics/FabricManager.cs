@@ -39,18 +39,19 @@ namespace Caravela.Framework.Impl.Fabrics
                 .Select( x => x.Project.GetType( x.Type ) )
                 .Select( x => this.CreateDriver( x, runTimeCompilation ) );
 
-            this.RegisterFabrics( transitiveFabricTypes );
-
             // Discover the fabrics inside the current project.
             var fabrics =
                 compileTimeProject.FabricTypes
                     .OrderBy( t => t )
                     .Select( compileTimeProject.GetType )
                     .Select( x => this.CreateDriver( x, runTimeCompilation ) )
-                    .OrderBy( x => x.Kind )
-                    .ThenBy( x => x.OrderingKey );
+                    .OrderBy( x => x )
+                    .ToList();
 
-            this.RegisterFabrics( fabrics );
+            // Register the fabrics in the correct order.
+            this.RegisterFabrics( fabrics.Where( f => f.Kind == FabricKind.Compilation ) );
+            this.RegisterFabrics( transitiveFabricTypes );
+            this.RegisterFabrics( fabrics.Where( f => f.Kind != FabricKind.Compilation ) );
         }
 
         private void RegisterFabrics( IEnumerable<FabricDriver> drivers )

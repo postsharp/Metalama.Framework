@@ -6,13 +6,17 @@ using Caravela.Framework.Fabrics;
 using Caravela.Framework.Impl.Aspects;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Pipeline;
+using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
+using System;
 using System.IO;
 
 namespace Caravela.Framework.Impl.Fabrics
 {
     internal class ProjectFabricDriver : FabricDriver
     {
+        private readonly int _depth;
+
         public ProjectFabricDriver( AspectProjectConfiguration configuration, IFabric fabric, Compilation runTimeCompilation ) :
             base( configuration, fabric, runTimeCompilation )
         {
@@ -24,7 +28,7 @@ namespace Caravela.Framework.Impl.Fabrics
                 depth++;
             }
 
-            this.OrderingKey = $"{depth:D3}:{this.Fabric.GetType().FullName}";
+            this._depth = depth;
         }
 
         public override ISymbol TargetSymbol => this.FabricSymbol.ContainingAssembly;
@@ -37,7 +41,46 @@ namespace Caravela.Framework.Impl.Fabrics
 
         public override FabricKind Kind => this.Fabric is ITransitiveProjectFabric ? FabricKind.Transitive : FabricKind.Compilation;
 
-        public override string OrderingKey { get; }
+        protected override int CompareToCore( FabricDriver other )
+        {
+            if ( this.Fabric is ITransitiveProjectFabric )
+            {
+                // For transitive project fabrics, we first consider the depth of the dependency in the project graph.
+                var thisReferenceDepth = CompilationReferenceGraph.GetInstance( this.Compilation ).GetDepth( this.FabricSymbol.ContainingAssembly );
+                var otherReferenceDepth = CompilationReferenceGraph.GetInstance( other.Compilation ).GetDepth( other.FabricSymbol.ContainingAssembly );
+
+                var referenceDepthComparison = thisReferenceDepth.Max.CompareTo( otherReferenceDepth.Max );
+
+                if ( referenceDepthComparison != 0 )
+                {
+                    return referenceDepthComparison;
+                }
+
+                // Then we sort by assembly name, to make sure all fabrics of the same project run together.
+                var nameComparison = string.Compare(
+                    this.FabricSymbol.ContainingAssembly.Name,
+                    other.FabricSymbol.ContainingAssembly.Name,
+                    StringComparison.OrdinalIgnoreCase );
+
+                if ( nameComparison != 0 )
+                {
+                    return nameComparison;
+                }
+            }
+
+            var otherProjectFabricDriver = (ProjectFabricDriver) other;
+
+            // Compare by depth from the root directory.
+            var depthComparison = this._depth.CompareTo( otherProjectFabricDriver._depth );
+
+            if ( depthComparison != 0 )
+            {
+                return depthComparison;
+            }
+
+            // Finally compare by type name, ignoring the namespace.
+            return string.Compare( this.FabricSymbol.Name, other.FabricSymbol.Name, StringComparison.Ordinal );
+        }
 
         public override IDeclaration GetTarget( CompilationModel compilation ) => compilation;
 

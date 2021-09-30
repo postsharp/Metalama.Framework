@@ -19,22 +19,22 @@ namespace Caravela.TestFramework
         public TestProjectOptions( ImmutableDictionary<string, string>? properties = null )
         {
             this._properties = properties ?? ImmutableDictionary<string, string>.Empty;
-            this.BaseTestDirectory = Path.Combine( Path.GetTempPath(), "Caravela", "Tests", Guid.NewGuid().ToString() );
+            this.BaseDirectory = Path.Combine( Path.GetTempPath(), "Caravela", "Tests", Guid.NewGuid().ToString() );
 
-            var compileTimeProjectCacheDirectory = Path.Combine( this.BaseTestDirectory, "Cache" );
+            var compileTimeProjectCacheDirectory = Path.Combine( this.BaseDirectory, "Cache" );
             this.CompileTimeProjectCacheDirectory = compileTimeProjectCacheDirectory;
             Directory.CreateDirectory( compileTimeProjectCacheDirectory );
 
-            var settingsDirectory = Path.Combine( this.BaseTestDirectory, "Settings" );
+            var settingsDirectory = Path.Combine( this.BaseDirectory, "Settings" );
             this.SettingsDirectory = settingsDirectory;
             Directory.CreateDirectory( settingsDirectory );
 
-            var projectDirectory = Path.Combine( this.BaseTestDirectory, "Project" );
+            var projectDirectory = Path.Combine( this.BaseDirectory, "Project" );
             this.ProjectDirectory = projectDirectory;
             Directory.CreateDirectory( projectDirectory );
         }
 
-        protected string BaseTestDirectory { get; }
+        public string BaseDirectory { get; }
 
         public bool DebugCompilerProcess => false;
 
@@ -76,9 +76,9 @@ namespace Caravela.TestFramework
 
         public void Dispose()
         {
-            if ( Directory.Exists( this.BaseTestDirectory ) )
+            if ( Directory.Exists( this.BaseDirectory ) )
             {
-                TestExecutionContext.RegisterDisposeAction( () => Directory.Delete( this.BaseTestDirectory, true ) );
+                TestExecutionContext.RegisterDisposeAction( () => Directory.Delete( this.BaseDirectory, true ) );
             }
         }
     }

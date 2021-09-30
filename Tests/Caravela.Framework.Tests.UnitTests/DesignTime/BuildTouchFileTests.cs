@@ -22,7 +22,7 @@ namespace Caravela.Framework.Tests.UnitTests.DesignTime
 
             public BuildTouchFileTestsProjectOptions()
             {
-                this.BuildTouchFile = Path.Combine( this.BaseTestDirectory, "touch.build" );
+                this.BuildTouchFile = Path.Combine( this.BaseDirectory, "touch.build" );
             }
         }
 

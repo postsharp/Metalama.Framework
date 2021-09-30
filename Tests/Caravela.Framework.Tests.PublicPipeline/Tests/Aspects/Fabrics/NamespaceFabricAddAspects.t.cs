@@ -6,6 +6,11 @@ using Caravela.Framework.Fabrics;
 
 namespace Caravela.Framework.Tests.PublicPipeline.Aspects.Fabrics.NamespaceFabricAddAspects
 {
+    internal class Fabric : INamespaceFabric
+    {
+        public void AmendNamespace(INamespaceAmender builder) => throw new System.NotSupportedException("Compile-time only code cannot be called at run-time.");
+
+    }
 
     internal class Aspect : OverrideMethodAspect
     {

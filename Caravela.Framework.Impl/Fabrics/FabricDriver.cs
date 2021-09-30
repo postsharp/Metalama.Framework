@@ -18,16 +18,19 @@ using System.Reflection;
 
 namespace Caravela.Framework.Impl.Fabrics
 {
-    internal abstract class FabricDriver
+    internal abstract class FabricDriver : IComparable<FabricDriver>
     {
         protected AspectProjectConfiguration Configuration { get; }
 
         public IFabric Fabric { get; }
 
+        public Compilation Compilation { get; }
+
         protected FabricDriver( AspectProjectConfiguration configuration, IFabric fabric, Compilation runTimeCompilation )
         {
             this.Configuration = configuration;
             this.Fabric = fabric;
+            this.Compilation = runTimeCompilation;
             this.OriginalPath = this.Fabric.GetType().GetCustomAttribute<OriginalPathAttribute>().AssertNotNull().Path;
 
             // Get the original symbol for the fabric. If it has been moved, we have a custom attribute.
@@ -55,9 +58,46 @@ namespace Caravela.Framework.Impl.Fabrics
 
         public abstract FabricKind Kind { get; }
 
-        public virtual string OrderingKey => DocumentationCommentId.CreateDeclarationId( this.FabricSymbol );
-
         public abstract IDeclaration GetTarget( CompilationModel compilation );
+
+        public int CompareTo( FabricDriver? other )
+        {
+            if ( ReferenceEquals( this, other ) )
+            {
+                return 0;
+            }
+
+            if ( ReferenceEquals( null, other ) )
+            {
+                return 1;
+            }
+
+            var kindComparison = this.Kind.CompareTo( other.Kind );
+
+            if ( kindComparison != 0 )
+            {
+                return kindComparison;
+            }
+
+            var originalPathComparison = string.Compare( this.OriginalPath, other.OriginalPath, StringComparison.Ordinal );
+
+            if ( originalPathComparison != 0 )
+            {
+                return originalPathComparison;
+            }
+
+            return this.Kind.CompareTo( other.Kind );
+        }
+
+        protected virtual int CompareToCore( FabricDriver other )
+        {
+            // This implementation is common for type and namespace fabrics. It is overwritten for project fabrics.
+            // With type and namespace fabrics, having several fabrics per type or namespace is not a useful use case.
+            // If that happens, we sort by name of the fabric class. They are guaranteed to have the same parent type or
+            // namespace, so the symbol name is sufficient.
+
+            return string.Compare( this.FabricSymbol.Name, other.FabricSymbol.Name, StringComparison.Ordinal );
+        }
 
         protected abstract class BaseBuilder<T> : IAmender<T>
             where T : class, IDeclaration

@@ -630,7 +630,9 @@ namespace Caravela.Framework.Impl.CompileTime
 
                         var fabricTypes = compileTimeCompilation.Assembly
                             .GetTypes()
-                            .Where( t => compileTimeCompilation.HasImplicitConversion( t, fabricType ) )
+                            .Where(
+                                t => compileTimeCompilation.HasImplicitConversion( t, fabricType ) &&
+                                     !compileTimeCompilation.HasImplicitConversion( t, transitiveFabricType ) )
                             .Select( t => t.GetReflectionName() )
                             .ToList();
 

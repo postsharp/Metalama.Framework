@@ -3,7 +3,6 @@
 
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Sdk;
-using Caravela.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -31,18 +30,20 @@ namespace Caravela.Compiler
     }
 }
 ";
+        
+        // TODO: We can do more in cleaning the run-time assembly. 
+        // Private compile-time code can be stripped, except when they are templates, because their metadata must be preserved.
+        // In general, accessible compile-time metadata must remain.
 
         private static readonly Lazy<SyntaxTree> _intrinsicsSyntaxTree =
             new( () => CSharpSyntaxTree.ParseText( _intrinsics, CSharpParseOptions.Default ) );
 
         private readonly INamedTypeSymbol? _aspectDriverSymbol;
-        private readonly ISymbolClassifier _classifier;
 
         private RunTimeAssemblyRewriter( Compilation runTimeCompilation, IServiceProvider serviceProvider )
             : base( runTimeCompilation, serviceProvider )
         {
             this._aspectDriverSymbol = runTimeCompilation.GetTypeByMetadataName( typeof(IAspectDriver).FullName );
-            this._classifier = serviceProvider.GetService<SymbolClassificationService>().GetClassifier( runTimeCompilation );
         }
 
         public static Compilation Rewrite( Compilation runTimeCompilation, IServiceProvider serviceProvider )
@@ -62,12 +63,6 @@ namespace Caravela.Compiler
         public override SyntaxNode? VisitClassDeclaration( ClassDeclarationSyntax node )
         {
             var symbol = this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node )!;
-            var scope = this._classifier.GetTemplatingScope( symbol );
-
-            if ( scope == TemplatingScope.CompileTimeOnly )
-            {
-                return null;
-            }
 
             // Special case: aspect weavers and other aspect drivers are preserved in the runtime assembly.
             // This only happens if regular Caravela.Framework is referenced from the weaver project, which generally shouldn't happen.
