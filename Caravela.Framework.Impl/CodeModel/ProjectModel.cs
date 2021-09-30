@@ -3,7 +3,7 @@
 
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Options;
-using Caravela.Framework.Impl.ServiceProvider;
+using Caravela.Framework.Impl.Pipeline;
 using Caravela.Framework.Impl.Utilities;
 using Caravela.Framework.Project;
 using Microsoft.CodeAnalysis;
@@ -24,6 +24,14 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public ProjectModel( Compilation compilation, IServiceProvider serviceProvider )
         {
+            var serviceProviderMetadata = serviceProvider.GetService<ServiceProviderMark>();
+
+            if ( serviceProviderMetadata != ServiceProviderMark.Project && serviceProviderMetadata != ServiceProviderMark.Test )
+            {
+                // We should get a project-specific service provider here, except in unit tests, but not a global or pipeline one.
+                throw new ArgumentOutOfRangeException( nameof(serviceProvider) );
+            }
+
             this._projectOptions = serviceProvider.GetService<IProjectOptions>();
             this._anySyntaxTree = compilation.SyntaxTrees.FirstOrDefault();
             this.ServiceProvider = serviceProvider;

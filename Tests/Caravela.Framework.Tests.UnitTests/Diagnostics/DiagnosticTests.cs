@@ -5,7 +5,7 @@ using Caravela.Framework.Impl.DesignTime.Diagnostics;
 using System.Globalization;
 using Xunit;
 
-namespace Caravela.Framework.Tests.UnitTests
+namespace Caravela.Framework.Tests.UnitTests.Diagnostics
 {
     public class DiagnosticTests
     {

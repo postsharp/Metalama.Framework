@@ -27,7 +27,7 @@ namespace Caravela.TestFramework
         private static readonly SemaphoreSlim _consoleLock = new( 1 );
 
         public AspectTestRunner(
-            IServiceProvider serviceProvider,
+            ServiceProvider serviceProvider,
             string? projectDirectory,
             IEnumerable<MetadataReference> metadataReferences,
             ITestOutputHelper? logger )
@@ -56,17 +56,10 @@ namespace Caravela.TestFramework
             await base.RunAsync( testInput, testResult, state );
 
             using var domain = new UnloadableCompileTimeDomain();
-            var testProjectOptions = (TestProjectOptions?) this.ServiceProvider.GetService( typeof(TestProjectOptions) );
 
-            if ( testProjectOptions == null )
-            {
-                throw new InvalidOperationException( "The service provider does not contain a TestProjectOptions." );
-            }
-
-            var pipeline = new CompileTimeAspectPipeline( testProjectOptions, true, domain, testProjectOptions );
-            var observer = new Observer( testResult );
-            pipeline.ServiceProvider.AddService( observer );
-
+            var serviceProvider = this.ServiceProvider.WithServices( new Observer( testResult ) );
+            var pipeline = new CompileTimeAspectPipeline( serviceProvider, true, domain );
+            
             if ( pipeline.TryExecute(
                 testResult.PipelineDiagnostics,
                 testResult.InputCompilation!,

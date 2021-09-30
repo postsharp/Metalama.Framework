@@ -2,7 +2,9 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Impl.CodeModel;
-using Caravela.Framework.Impl.ServiceProvider;
+using Caravela.Framework.Impl.Pipeline;
+using Caravela.Framework.Project;
+using Caravela.Framework.Tests.UnitTests.Utilities;
 using Caravela.TestFramework;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -26,13 +28,16 @@ namespace Caravela.Framework.Tests.UnitTests
 
         protected ServiceProvider ServiceProvider { get; private set; }
 
-        protected TestBase( TestProjectOptions options )
+        protected TestBase( TestProjectOptions? options = null, Func<ServiceProvider, ServiceProvider>? addServices = null )
         {
-            this.ProjectOptions = options;
-            this.ServiceProvider = ServiceProviderFactory.GetServiceProvider( this.ProjectOptions );
-        }
+            this.ProjectOptions = options ?? new TestProjectOptions();
+            this.ServiceProvider = ServiceProviderFactory.GetServiceProvider( this.ProjectOptions ).WithMark( ServiceProviderMark.Test );
 
-        protected TestBase() : this( new TestProjectOptions() ) { }
+            if ( addServices != null )
+            {
+                this.ServiceProvider = addServices( this.ServiceProvider );
+            }
+        }
 
         protected static CSharpCompilation CreateCSharpCompilation(
             string code,
@@ -157,7 +162,11 @@ class Expression
 
         public void Dispose() => this.Dispose( true );
 
-        protected IsolatedTest WithIsolatedTest() => new( this );
+        protected IsolatedTest WithIsolatedTest() => new( this, null );
+
+        protected IsolatedTest WithIsolatedTest( Func<ServiceProvider, ServiceProvider>? addServices ) => new( this, addServices );
+
+        protected IsolatedTest WithIsolatedTest( params IService[] additionalServices ) => new( this, p => p.WithServices( additionalServices ) );
 
         protected class IsolatedTest : IDisposable
         {
@@ -169,12 +178,17 @@ class Expression
 
             public ServiceProvider ServiceProvider { get; }
 
-            public IsolatedTest( TestBase parent )
+            public IsolatedTest( TestBase parent, Func<ServiceProvider, ServiceProvider>? addServices )
             {
                 this._parent = parent;
                 this._oldServiceProvider = parent.ServiceProvider;
                 this._oldProjectOptions = parent.ProjectOptions;
                 this.ServiceProvider = ServiceProviderFactory.GetServiceProvider( this.ProjectOptions );
+
+                if ( addServices != null )
+                {
+                    this.ServiceProvider = addServices( this.ServiceProvider );
+                }
             }
 
             public void Dispose()

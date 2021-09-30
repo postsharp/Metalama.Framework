@@ -17,9 +17,9 @@ namespace Caravela.Framework.Impl.Templating
             DesignTimeAspectPipeline pipeline,
             CancellationToken cancellationToken )
             => Validate(
+                pipeline.ServiceProvider,
                 semanticModel,
                 reportDiagnostic,
-                pipeline.ServiceProvider,
                 pipeline.IsCompileTimeSyntaxTreeOutdated( semanticModel.SyntaxTree.FilePath ),
                 true,
                 cancellationToken );
@@ -37,7 +37,7 @@ namespace Caravela.Framework.Impl.Templating
             {
                 var semanticModel = compilation.GetSemanticModel( syntaxTree );
 
-                if ( !Validate( semanticModel, diagnosticAdder.Report, serviceProvider, false, false, cancellationToken ) )
+                if ( !Validate( serviceProvider, semanticModel, diagnosticAdder.Report, false, false, cancellationToken ) )
                 {
                     hasError = true;
                 }
@@ -47,9 +47,9 @@ namespace Caravela.Framework.Impl.Templating
         }
 
         public static bool Validate(
+            IServiceProvider serviceProvider,
             SemanticModel semanticModel,
             Action<Diagnostic> reportDiagnostic,
-            IServiceProvider serviceProvider,
             bool isCompileTimeTreeOutdated,
             bool isDesignTime,
             CancellationToken cancellationToken )

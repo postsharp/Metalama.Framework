@@ -10,7 +10,6 @@ using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Fabrics;
 using Caravela.Framework.Impl.Options;
 using Caravela.Framework.Impl.Sdk;
-using Caravela.Framework.Impl.ServiceProvider;
 using Caravela.Framework.Impl.Utilities;
 using Caravela.Framework.Project;
 using Microsoft.CodeAnalysis;
@@ -36,7 +35,9 @@ namespace Caravela.Framework.Impl.Pipeline
 
         private readonly CompileTimeDomain _domain;
 
-        public ServiceProvider.ServiceProvider ServiceProvider { get; }
+        // This member is intentionally protected because there can be one ServiceProvider per project,
+        // but the pipeline can be used by many projects.
+        protected internal ServiceProvider ServiceProvider { get; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AspectPipeline"/> class.
@@ -48,35 +49,17 @@ namespace Caravela.Framework.Impl.Pipeline
         /// <param name="directoryOptions"></param>
         /// <param name="assemblyLocator"></param>
         protected AspectPipeline(
-            IProjectOptions projectOptions,
+            ServiceProvider serviceProvider,
             AspectExecutionScenario executionScenario,
             bool isTest,
-            CompileTimeDomain? domain,
-            IPathOptions? directoryOptions = null,
-            IAssemblyLocator? assemblyLocator = null )
+            CompileTimeDomain? domain )
         {
-            this.ServiceProvider = ServiceProviderFactory.GetServiceProvider( directoryOptions, assemblyLocator );
+            this.ProjectOptions = serviceProvider.GetService<IProjectOptions>();
 
-            var existingProjectOptions = this.ServiceProvider.GetOptionalService<IProjectOptions>();
-
-            if ( existingProjectOptions != null )
-            {
-                // TryCaravela uses this scenario to define options.
-                projectOptions = existingProjectOptions.Apply( projectOptions );
-            }
-
-            // Register project options.
-            this.ServiceProvider.AddService( projectOptions );
-            this.ProjectOptions = projectOptions;
-
-            // Register plug ins to the Service Provider.
-            foreach ( var plugIn in projectOptions.PlugIns )
-            {
-                if ( plugIn is IService service )
-                {
-                    this.ServiceProvider.AddService( service );
-                }
-            }
+            this.ServiceProvider = serviceProvider
+                .WithServices( this.ProjectOptions.PlugIns.OfType<IService>() )
+                .WithServices( new AspectPipelineDescription( executionScenario, isTest ) )
+                .WithMark( ServiceProviderMark.Pipeline );
 
             if ( domain != null )
             {
@@ -88,12 +71,9 @@ namespace Caravela.Framework.Impl.Pipeline
                 this._domain = this.ServiceProvider.GetService<ICompileTimeDomainFactory>().CreateDomain();
                 this._ownsDomain = true;
             }
-
-            // ReSharper disable once VirtualMemberCallInConstructor
-            this.ServiceProvider.AddService( new AspectPipelineDescription( executionScenario, isTest ) );
         }
 
-        internal int PipelineInitializationCount { get; set; }
+        internal int PipelineInitializationCount { get; private set; }
 
         private protected bool TryInitialize(
             IDiagnosticAdder diagnosticAdder,
@@ -125,6 +105,7 @@ namespace Caravela.Framework.Impl.Pipeline
 
             // Create compiler plug-ins found in compile-time code.
             ImmutableArray<object> compilerPlugIns;
+            var projectServiceProvider = this.ServiceProvider.WithMark( ServiceProviderMark.Project );
 
             if ( compileTimeProject != null )
             {
@@ -133,8 +114,17 @@ namespace Caravela.Framework.Impl.Pipeline
 
                 var invoker = this.ServiceProvider.GetService<UserCodeInvoker>();
 
-                compilerPlugIns = compileTimeProject.ClosureProjects
+                var additionalPlugIns = compileTimeProject.ClosureProjects
                     .SelectMany( p => p.CompilerPlugInTypes.Select( t => invoker.Invoke( () => Activator.CreateInstance( p.GetType( t ) ) ) ) )
+                    .ToList();
+
+                if ( additionalPlugIns.Count > 0 )
+                {
+                    // If we have plug-in defined in code, we have to fork the service provider for this specific project.
+                    projectServiceProvider = projectServiceProvider.WithServices( additionalPlugIns.OfType<IService>() );
+                }
+
+                compilerPlugIns = additionalPlugIns
                     .Concat( this.ProjectOptions.PlugIns )
                     .ToImmutableArray();
             }
@@ -144,8 +134,8 @@ namespace Caravela.Framework.Impl.Pipeline
             }
 
             // Create aspect types.
-            var driverFactory = new AspectDriverFactory( compilation.Compilation, compilerPlugIns, this.ServiceProvider );
-            var aspectTypeFactory = new AspectClassMetadataFactory( this.ServiceProvider, driverFactory );
+            var driverFactory = new AspectDriverFactory( compilation.Compilation, compilerPlugIns, projectServiceProvider );
+            var aspectTypeFactory = new AspectClassMetadataFactory( projectServiceProvider, driverFactory );
 
             var aspectClasses = aspectTypeFactory.GetAspectClasses( compilation.Compilation, compileTimeProject, diagnosticAdder ).ToImmutableArray();
 
@@ -172,7 +162,7 @@ namespace Caravela.Framework.Impl.Pipeline
 
             if ( compileTimeProject != null )
             {
-                var fabricTopLevelAspectClass = new FabricTopLevelAspectClass( this.ServiceProvider, roslynCompilation, compileTimeProject );
+                var fabricTopLevelAspectClass = new FabricTopLevelAspectClass( projectServiceProvider, roslynCompilation, compileTimeProject );
                 var fabricAspectLayer = new OrderedAspectLayer( -1, fabricTopLevelAspectClass.Layer );
 
                 allOrderedAspectLayers = orderedAspectLayers.Insert( 0, fabricAspectLayer );
@@ -186,7 +176,7 @@ namespace Caravela.Framework.Impl.Pipeline
 
             var stages = allOrderedAspectLayers
                 .GroupAdjacent( x => GetGroupingKey( x.AspectClass.AspectDriver ) )
-                .Select( g => this.CreateStage( g.Key, g.ToImmutableArray(), loader, compileTimeProject! ) )
+                .Select( g => this.CreateStage( g.Key, g.ToImmutableArray(), compileTimeProject! ) )
                 .ToImmutableArray();
 
             configuration = new AspectProjectConfiguration(
@@ -195,7 +185,7 @@ namespace Caravela.Framework.Impl.Pipeline
                 allOrderedAspectLayers,
                 compileTimeProject,
                 loader,
-                this.ServiceProvider );
+                projectServiceProvider );
 
             return true;
 
@@ -243,7 +233,7 @@ namespace Caravela.Framework.Impl.Pipeline
             CancellationToken cancellationToken,
             [NotNullWhen( true )] out PipelineStageResult? pipelineStageResult )
         {
-            var project = new ProjectModel( compilation.Compilation, this.ServiceProvider );
+            var project = new ProjectModel( compilation.Compilation, projectConfiguration.ServiceProvider );
 
             if ( projectConfiguration.CompileTimeProject == null || projectConfiguration.AspectClasses.Length == 0 )
             {
@@ -285,17 +275,14 @@ namespace Caravela.Framework.Impl.Pipeline
         /// </summary>
         /// <param name="parts"></param>
         /// <param name="compileTimeProject"></param>
-        /// <param name="compileTimeProjectLoader"></param>
         /// <returns></returns>
         private protected abstract HighLevelPipelineStage CreateStage(
             ImmutableArray<OrderedAspectLayer> parts,
-            CompileTimeProject compileTimeProject,
-            CompileTimeProjectLoader compileTimeProjectLoader );
+            CompileTimeProject compileTimeProject );
 
         private PipelineStage CreateStage(
             object groupKey,
             ImmutableArray<OrderedAspectLayer> parts,
-            CompileTimeProjectLoader compileTimeProjectLoader,
             CompileTimeProject compileTimeProject )
         {
             switch ( groupKey )
@@ -308,7 +295,7 @@ namespace Caravela.Framework.Impl.Pipeline
 
                 case _highLevelStageGroupingKey:
 
-                    return this.CreateStage( parts, compileTimeProject, compileTimeProjectLoader );
+                    return this.CreateStage( parts, compileTimeProject );
 
                 default:
 

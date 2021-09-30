@@ -8,7 +8,7 @@ using System.IO;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace Caravela.Framework.Tests.UnitTests
+namespace Caravela.Framework.Tests.UnitTests.Utilities
 {
     internal static class CaravelaCompilerUtility
     {

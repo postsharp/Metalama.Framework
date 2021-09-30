@@ -9,7 +9,6 @@ using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.DesignTime.Pipeline;
 using Caravela.Framework.Impl.Diagnostics;
-using Caravela.Framework.Impl.Options;
 using Caravela.Framework.Impl.Pipeline;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
@@ -28,10 +27,10 @@ namespace Caravela.Framework.Impl.DesignTime.Refactoring
         private readonly InteractiveAspectSource _source;
 
         private LiveTemplateAspectPipeline(
-            IProjectOptions projectOptions,
+            ServiceProvider serviceProvider,
             CompileTimeDomain domain,
             AspectClass aspectClass,
-            ISymbol targetSymbol ) : base( projectOptions, AspectExecutionScenario.LiveTemplate, false, domain )
+            ISymbol targetSymbol ) : base( serviceProvider, AspectExecutionScenario.LiveTemplate, false, domain )
         {
             this._source = new InteractiveAspectSource( aspectClass, targetSymbol );
         }
@@ -42,7 +41,7 @@ namespace Caravela.Framework.Impl.DesignTime.Refactoring
             => ImmutableArray.Create<IAspectSource>( this._source );
 
         public static bool TryExecute(
-            IProjectOptions projectOptions,
+            ServiceProvider serviceProvider,
             CompileTimeDomain domain,
             AspectProjectConfiguration configuration,
             AspectClass aspectClass,
@@ -52,7 +51,7 @@ namespace Caravela.Framework.Impl.DesignTime.Refactoring
             [NotNullWhen( true )] out PartialCompilation? outputCompilation,
             out ImmutableArray<Diagnostic> diagnostics )
         {
-            LiveTemplateAspectPipeline pipeline = new( projectOptions, domain, aspectClass, targetSymbol );
+            LiveTemplateAspectPipeline pipeline = new( serviceProvider, domain, aspectClass, targetSymbol );
 
             return pipeline.TryExecute( configuration, inputCompilation, cancellationToken, out outputCompilation, out diagnostics );
         }
@@ -94,8 +93,7 @@ namespace Caravela.Framework.Impl.DesignTime.Refactoring
 
         private protected override HighLevelPipelineStage CreateStage(
             ImmutableArray<OrderedAspectLayer> parts,
-            CompileTimeProject compileTimeProject,
-            CompileTimeProjectLoader compileTimeProjectLoader )
+            CompileTimeProject compileTimeProject )
             => new CompileTimePipelineStage( compileTimeProject, parts, this.ServiceProvider );
 
         private class InteractiveAspectSource : IAspectSource

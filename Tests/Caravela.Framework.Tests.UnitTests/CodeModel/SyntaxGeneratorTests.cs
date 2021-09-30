@@ -6,7 +6,7 @@ using System.Linq;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Caravela.Framework.Tests.UnitTests
+namespace Caravela.Framework.Tests.UnitTests.CodeModel
 {
     public class SyntaxGeneratorTests : TestBase
     {

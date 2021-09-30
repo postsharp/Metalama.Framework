@@ -10,7 +10,6 @@ using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Pipeline;
 using Caravela.Framework.Impl.Serialization;
-using Caravela.Framework.Impl.ServiceProvider;
 using Caravela.Framework.Impl.Templating;
 using Caravela.Framework.Impl.Templating.MetaModel;
 using Caravela.Framework.Impl.Utilities;
@@ -49,7 +48,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
         /// Initializes a new instance of the <see cref="TemplatingTestRunner"/> class.
         /// </summary>
         public TemplatingTestRunner(
-            IServiceProvider serviceProvider,
+            ServiceProvider serviceProvider,
             string? projectDirectory,
             IEnumerable<MetadataReference> metadataReferences,
             ITestOutputHelper? logger ) : this(
@@ -64,7 +63,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
         /// </summary>
         /// <param name="testAnalyzers">A list of analyzers to invoke on the test source.</param>
         public TemplatingTestRunner(
-            IServiceProvider serviceProvider,
+            ServiceProvider serviceProvider,
             string? projectDirectory,
             IEnumerable<MetadataReference> metadataReferences,
             IEnumerable<CSharpSyntaxVisitor> testAnalyzers,
@@ -243,7 +242,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
         }
 
         private (TemplateExpansionContext Context, MethodDeclarationSyntax TargetMethod) CreateTemplateExpansionContext(
-            IServiceProvider serviceProvider,
+            ServiceProvider serviceProvider,
             Assembly assembly,
             CompilationModel compilation,
             TemplateMember<IMemberOrNamedType> template )
@@ -285,9 +284,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
                     targetMethod.ReturnType,
                     syntaxGenerationContext );
 
-            var additionalServices = new ServiceProvider();
-            additionalServices.AddService( new AspectPipelineDescription( AspectExecutionScenario.CompileTime, true ) );
-            var augmentedServiceProvider = new AggregateServiceProvider( serviceProvider, additionalServices );
+            var augmentedServiceProvider = serviceProvider.WithService( new AspectPipelineDescription( AspectExecutionScenario.CompileTime, true ) );
 
             var metaApi = MetaApi.ForMethod(
                 targetMethod,
@@ -335,18 +332,6 @@ namespace Caravela.Framework.Tests.Integration.Runners
                                             },
                                             SyntaxFactory.IdentifierName( p.Name ) ) ) ) ) );
             }
-        }
-
-        private class AggregateServiceProvider : IServiceProvider
-        {
-            private readonly IReadOnlyList<IServiceProvider> _children;
-
-            public AggregateServiceProvider( params IServiceProvider[] children )
-            {
-                this._children = children;
-            }
-
-            public object? GetService( Type serviceType ) => this._children.Select( c => c.GetService( serviceType ) ).FirstOrDefault( s => s != null );
         }
     }
 }

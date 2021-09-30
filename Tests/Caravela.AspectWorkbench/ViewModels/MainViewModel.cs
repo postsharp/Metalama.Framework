@@ -4,7 +4,7 @@
 #pragma warning disable IDE0005
 using Caravela.AspectWorkbench.Model;
 using Caravela.Framework.Impl.Formatting;
-using Caravela.Framework.Impl.ServiceProvider;
+using Caravela.Framework.Impl.Pipeline;
 using Caravela.Framework.Tests.Integration.Runners;
 using Caravela.TestFramework;
 using Microsoft.CodeAnalysis;

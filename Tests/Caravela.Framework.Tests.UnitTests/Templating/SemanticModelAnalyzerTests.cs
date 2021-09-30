@@ -27,9 +27,9 @@ class X { void M() { IMethod m; } }
             var semanticModel = compilation.GetSemanticModel( syntaxTree );
 
             TemplatingCodeValidator.Validate(
+                this.ServiceProvider,
                 semanticModel,
                 diagnostics.Add,
-                this.ServiceProvider,
                 false,
                 false,
                 CancellationToken.None );
@@ -51,9 +51,9 @@ class X : Caravela.Framework.Aspects.OverrideMethodAspect {  public override dyn
             var semanticModel = compilation.GetSemanticModel( syntaxTree );
 
             TemplatingCodeValidator.Validate(
+                this.ServiceProvider,
                 semanticModel,
                 diagnostics.Add,
-                this.ServiceProvider,
                 false,
                 false,
                 CancellationToken.None );

@@ -3,14 +3,13 @@
 
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Options;
-using Caravela.Framework.Impl.Pipeline;
 using Caravela.Framework.Impl.Serialization;
 using Caravela.Framework.Impl.Utilities;
 using Caravela.Framework.Project;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 
-namespace Caravela.Framework.Impl.ServiceProvider
+namespace Caravela.Framework.Impl.Pipeline
 {
     public static class ServiceProviderFactory
     {
@@ -25,12 +24,7 @@ namespace Caravela.Framework.Impl.ServiceProvider
         public static void AddGlobalService<T>( T service )
             where T : IService
         {
-            var newServices = new ServiceProvider( GlobalProvider );
-            newServices.AddService( service );
-            newServices.Freeze();
-
-            _globalInstance = newServices;
-
+            _globalInstance = GlobalProvider.WithServices( service );
             _asyncLocalInstance.Value = null;
         }
 
@@ -42,7 +36,8 @@ namespace Caravela.Framework.Impl.ServiceProvider
         /// </summary>
         public static void InitializeAsyncLocalProvider( IPathOptions? directoryOptions = null )
         {
-            _asyncLocalInstance.Value = CreateBaseServiceProvider( directoryOptions ?? DefaultPathOptions.Instance, true );
+            _asyncLocalInstance.Value = CreateBaseServiceProvider( directoryOptions ?? DefaultPathOptions.Instance, true )
+                .WithMark( ServiceProviderMark.AsyncLocal );
         }
 
         public static bool HasAsyncLocalProvider => _asyncLocalInstance.Value != null;
@@ -59,28 +54,21 @@ namespace Caravela.Framework.Impl.ServiceProvider
         /// </summary>
         public static void AddAsyncLocalService( IService service )
         {
-            var newServices = new ServiceProvider( AsyncLocalProvider );
-            newServices.AddService( service );
-            newServices.Freeze();
-
-            _asyncLocalInstance.Value = newServices;
+            _asyncLocalInstance.Value = AsyncLocalProvider.WithServices( service );
         }
 
         private static ServiceProvider CreateBaseServiceProvider( IPathOptions pathOptions, bool freeze )
         {
-            ServiceProvider serviceProvider = new();
-            serviceProvider.AddService( pathOptions );
-            serviceProvider.AddService( new ReferenceAssemblyLocator( serviceProvider ) );
-            serviceProvider.AddService( new SymbolClassificationService( serviceProvider ) );
-            serviceProvider.AddService( new SyntaxSerializationService() );
-            serviceProvider.AddService( new SystemTypeResolver( serviceProvider ) );
-            serviceProvider.AddService( new DefaultCompileTimeDomainFactory() );
-            serviceProvider.AddService( new CompileTimeExceptionHandler() );
+            var serviceProvider = ServiceProvider.Empty.WithServices(
+                pathOptions,
+                new SyntaxSerializationService(),
+                new DefaultCompileTimeDomainFactory(),
+                new CompileTimeExceptionHandler() );
 
-            if ( freeze )
-            {
-                serviceProvider.Freeze();
-            }
+            serviceProvider = serviceProvider.WithLateBoundServices(
+                LateBoundService.Create( s => new ReferenceAssemblyLocator( s ) ),
+                LateBoundService.Create( s => new SymbolClassificationService( s ) ),
+                LateBoundService.Create( s => new SystemTypeResolver( s ) ) );
 
             return serviceProvider;
         }
@@ -89,7 +77,9 @@ namespace Caravela.Framework.Impl.ServiceProvider
         /// Gets the default <see cref="ServiceProvider"/> instance.
         /// </summary>
         public static ServiceProvider GlobalProvider
-            => LazyInitializer.EnsureInitialized( ref _globalInstance, () => CreateBaseServiceProvider( DefaultPathOptions.Instance, true ) )!;
+            => LazyInitializer.EnsureInitialized(
+                ref _globalInstance,
+                () => CreateBaseServiceProvider( DefaultPathOptions.Instance, true ).WithMark( ServiceProviderMark.Global ) )!;
 
         internal static ServiceProvider AsyncLocalProvider => _asyncLocalInstance.Value ??= GlobalProvider;
 
@@ -99,29 +89,29 @@ namespace Caravela.Framework.Impl.ServiceProvider
         /// <see cref="AddAsyncLocalService"/> are ignored). This scenario is used in tests. Otherwise, a shallow clone of the async-local or the global
         /// provider is provided.
         /// </summary>
-        public static ServiceProvider GetServiceProvider( IPathOptions? directoryOptions = null, IAssemblyLocator? assemblyLocator = null )
+        public static ServiceProvider GetServiceProvider( IPathOptions? pathOptions = null, IAssemblyLocator? assemblyLocator = null )
         {
             ServiceProvider serviceProvider;
 
-            if ( directoryOptions == null )
+            if ( pathOptions == null )
             {
                 // If we are not given specific directories, we try to provide shared, singleton instances of the services that don't depend on
                 // any other configuration. This avoids redundant initializations and improves performance.
-                serviceProvider = new ServiceProvider( AsyncLocalProvider );
+                serviceProvider = AsyncLocalProvider;
             }
             else
             {
-                serviceProvider = CreateBaseServiceProvider( directoryOptions, false );
+                serviceProvider = CreateBaseServiceProvider( pathOptions, false );
             }
 
             if ( assemblyLocator != null )
             {
-                serviceProvider.AddService( assemblyLocator );
+                serviceProvider = serviceProvider.WithService( assemblyLocator );
             }
 
             // This service must be added last because it depends may depend on a service added previously.
             // (This is not nice but this is the only case).
-            serviceProvider.AddService( new UserCodeInvoker( serviceProvider ) );
+            serviceProvider = serviceProvider.WithService( new UserCodeInvoker( serviceProvider ) );
 
             return serviceProvider;
         }

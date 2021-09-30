@@ -132,7 +132,7 @@ namespace Caravela.Framework.Tests.UnitTests.DesignTime.TestCode
             var compilation = CreateCSharpCompilation( code );
 
             using var domain = new UnloadableCompileTimeDomain();
-            using DesignTimeAspectPipeline pipeline = new( this.ProjectOptions, domain, true, directoryOptions: this.ProjectOptions );
+            using DesignTimeAspectPipeline pipeline = new( this.ServiceProvider, domain, true );
 
             var syntaxTree = compilation.SyntaxTrees.Single( t => t.FilePath == "Class1.cs" );
 

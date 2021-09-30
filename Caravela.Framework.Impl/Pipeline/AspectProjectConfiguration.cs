@@ -23,7 +23,7 @@ namespace Caravela.Framework.Impl.Pipeline
         ImmutableArray<OrderedAspectLayer> AspectLayers,
         CompileTimeProject? CompileTimeProject,
         CompileTimeProjectLoader CompileTimeProjectLoader,
-        IServiceProvider ServiceProvider )
+        ServiceProvider ServiceProvider )
     {
         public AspectProjectConfiguration WithStages( Func<PipelineStage, PipelineStage> stageMapper )
             => new(

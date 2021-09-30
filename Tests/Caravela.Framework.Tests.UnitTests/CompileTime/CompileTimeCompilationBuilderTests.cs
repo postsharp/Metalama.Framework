@@ -175,9 +175,8 @@ class ReferencingClass
 
             try
             {
-                using var isolatedTest = this.WithIsolatedTest();
                 var testAssemblyLocator = new TestAssemblyLocator();
-                isolatedTest.ServiceProvider.AddService( testAssemblyLocator );
+                using var isolatedTest = this.WithIsolatedTest( testAssemblyLocator );
 
                 PortableExecutableReference CompileProject( string code, params MetadataReference[] references )
                 {
@@ -728,9 +727,8 @@ public class CompileTimeOnlyClass
         [Fact]
         public void CompileTimeAssemblyBinaryRewriter()
         {
-            using var isolatedTest = this.WithIsolatedTest();
             var rewriter = new Rewriter();
-            isolatedTest.ServiceProvider.AddService( rewriter );
+            using var isolatedTest = this.WithIsolatedTest( rewriter );
 
             var code = @"
 using System;

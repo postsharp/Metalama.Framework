@@ -130,7 +130,7 @@ namespace Caravela.Framework.Impl.CompileTime
             foreach ( var syntaxTree in treesWithCompileTimeCode )
             {
                 var semanticModel = runTimeCompilation.GetSemanticModel( syntaxTree );
-                TemplatingCodeValidator.Validate( semanticModel, diagnosticSink.Report, this._serviceProvider, false, false, cancellationToken );
+                TemplatingCodeValidator.Validate( this._serviceProvider, semanticModel, diagnosticSink.Report, false, false, cancellationToken );
             }
 
             var assemblyName = GetCompileTimeAssemblyName( runTimeCompilation.AssemblyName!, hash );

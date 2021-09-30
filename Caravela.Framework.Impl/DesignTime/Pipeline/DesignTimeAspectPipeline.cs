@@ -53,36 +53,25 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
         internal IReadOnlyList<AspectClass>? AspectClasses => this._lastKnownConfiguration?.AspectClasses.OfType<AspectClass>().ToList();
 
         public DesignTimeAspectPipeline(
-            IProjectOptions projectOptions,
+            ServiceProvider serviceProvider,
             CompileTimeDomain domain,
-            bool isTest,
-            IPathOptions? directoryOptions = null,
-            IAssemblyLocator? assemblyLocator = null )
-            : this( projectOptions, domain, isTest, directoryOptions, assemblyLocator, null ) { }
-
-        internal DesignTimeAspectPipeline(
-            IProjectOptions projectOptions,
-            CompileTimeDomain domain,
-            bool isTest,
-            IPathOptions? directoryOptions,
-            IAssemblyLocator? assemblyLocator,
-            IFileSystemWatcherFactory? fileSystemWatcherFactory )
-            : base( projectOptions, AspectExecutionScenario.DesignTime, isTest, domain, directoryOptions, assemblyLocator )
+            bool isTest )
+            : base( serviceProvider, AspectExecutionScenario.DesignTime, isTest, domain )
         {
-            if ( projectOptions.BuildTouchFile == null )
+            if ( this.ProjectOptions.BuildTouchFile == null )
             {
                 return;
             }
 
-            var watchedFilter = "*" + Path.GetExtension( projectOptions.BuildTouchFile );
-            var watchedDirectory = Path.GetDirectoryName( projectOptions.BuildTouchFile );
+            var watchedFilter = "*" + Path.GetExtension( this.ProjectOptions.BuildTouchFile );
+            var watchedDirectory = Path.GetDirectoryName( this.ProjectOptions.BuildTouchFile );
 
             if ( watchedDirectory == null )
             {
                 return;
             }
 
-            fileSystemWatcherFactory ??= new FileSystemWatcherFactory();
+            var fileSystemWatcherFactory = this.ServiceProvider.GetOptionalService<IFileSystemWatcherFactory>() ?? new FileSystemWatcherFactory();
             this._fileSystemWatcher = fileSystemWatcherFactory.Create( watchedDirectory, watchedFilter );
             this._fileSystemWatcher.IncludeSubdirectories = false;
 
@@ -395,8 +384,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
         /// <inheritdoc/>
         private protected override HighLevelPipelineStage CreateStage(
             ImmutableArray<OrderedAspectLayer> parts,
-            CompileTimeProject compileTimeProject,
-            CompileTimeProjectLoader compileTimeProjectLoader )
+            CompileTimeProject compileTimeProject )
             => new SourceGeneratorPipelineStage( compileTimeProject, parts, this.ServiceProvider );
 
         protected override void Dispose( bool disposing )

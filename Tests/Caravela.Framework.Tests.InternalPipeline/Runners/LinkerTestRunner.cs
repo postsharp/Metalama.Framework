@@ -5,10 +5,10 @@ using Caravela.Framework.Impl;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Linking;
+using Caravela.Framework.Impl.Pipeline;
 using Caravela.Framework.Tests.Integration.Runners.Linker;
 using Caravela.TestFramework;
 using Microsoft.CodeAnalysis;
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
@@ -22,7 +22,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
         /// Initializes a new instance of the <see cref="LinkerTestRunner"/> class.
         /// </summary>
         public LinkerTestRunner(
-            IServiceProvider serviceProvider,
+            ServiceProvider serviceProvider,
             string? projectDirectory,
             IEnumerable<MetadataReference> metadataReferences,
             ITestOutputHelper? logger )

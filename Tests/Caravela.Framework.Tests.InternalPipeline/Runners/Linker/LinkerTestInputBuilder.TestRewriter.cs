@@ -3,7 +3,7 @@
 
 using Caravela.Framework.Impl;
 using Caravela.Framework.Impl.Aspects;
-using Caravela.Framework.Impl.ServiceProvider;
+using Caravela.Framework.Impl.Pipeline;
 using Caravela.Framework.Impl.Transformations;
 using Caravela.Framework.Impl.Utilities;
 using Caravela.Framework.Tests.Integration.Tests.Linker;
@@ -116,9 +116,7 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
                 this._replacedTransformations = new List<IObservableTransformation>();
                 this._nonObservableTransformations = new List<INonObservableTransformation>();
 
-                this.ServiceProvider = new ServiceProvider();
-
-                this.ServiceProvider.AddService( new UserCodeInvoker( this.ServiceProvider ) );
+                this.ServiceProvider = ServiceProvider.Empty.WithService( new UserCodeInvoker( this.ServiceProvider ) );
             }
 
             public override SyntaxNode? VisitUsingDirective( UsingDirectiveSyntax node )

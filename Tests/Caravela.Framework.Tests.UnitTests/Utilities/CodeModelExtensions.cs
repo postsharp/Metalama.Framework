@@ -18,6 +18,5 @@ namespace Caravela.Framework.Tests.UnitTests.Utilities
                 .ThenBy( item => item.Declaration?.SpanStart )
                 .Select( item => item.Item )
                 .ToImmutableArray();
-
     }
 }

@@ -10,6 +10,7 @@ using Caravela.Framework.Impl.Aspects;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Options;
+using Caravela.Framework.Impl.Pipeline;
 using Caravela.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -216,6 +217,14 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
             this.Declaration = declaration;
             this.Compilation = declaration.Compilation;
             this._common = common;
+
+            var serviceProviderMark = this._common.ServiceProvider.GetService<ServiceProviderMark>();
+
+            if ( serviceProviderMark != ServiceProviderMark.Project && serviceProviderMark != ServiceProviderMark.Test )
+            {
+                // We should get a project-specific service provider here.
+                throw new AssertionFailedException();
+            }
         }
 
         private MetaApi( IMethod method, MetaApiProperties common ) : this(

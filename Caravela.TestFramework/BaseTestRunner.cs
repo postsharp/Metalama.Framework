@@ -3,6 +3,7 @@
 
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Formatting;
+using Caravela.Framework.Impl.Pipeline;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
@@ -31,10 +32,10 @@ namespace Caravela.TestFramework
         private readonly MetadataReference[] _metadataReferences;
         private static readonly AsyncLocal<bool> _isTestRunning = new();
 
-        protected IServiceProvider ServiceProvider { get; }
+        protected ServiceProvider ServiceProvider { get; }
 
         protected BaseTestRunner(
-            IServiceProvider serviceProvider,
+            ServiceProvider serviceProvider,
             string? projectDirectory,
             IEnumerable<MetadataReference> metadataReferences,
             ITestOutputHelper? logger )
@@ -43,7 +44,7 @@ namespace Caravela.TestFramework
                 .Append( MetadataReference.CreateFromFile( typeof(BaseTestRunner).Assembly.Location ) )
                 .ToArray();
 
-            this.ServiceProvider = serviceProvider;
+            this.ServiceProvider = serviceProvider.WithMark( ServiceProviderMark.Test );
             this.ProjectDirectory = projectDirectory;
             this.Logger = logger;
         }
