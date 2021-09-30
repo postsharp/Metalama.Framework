@@ -18,8 +18,8 @@
 
     <!-- Versions of dependencies -->
     <PropertyGroup>
-        <RoslynVersion>3.8.0</RoslynVersion>
-        <CaravelaCompilerVersion>3.8.1016-preview</CaravelaCompilerVersion>
+        <RoslynVersion>3.11.0</RoslynVersion>
+        <CaravelaCompilerVersion>3.11.1002-preview</CaravelaCompilerVersion>
         <MicrosoftCSharpVersion>4.7.0</MicrosoftCSharpVersion>
         <NewtonsoftJsonVersion>13.0.1</NewtonsoftJsonVersion>
         <SystemCollectionsImmutableVersion>5.0.0</SystemCollectionsImmutableVersion>

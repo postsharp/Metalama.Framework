@@ -15,7 +15,7 @@ namespace Caravela.SourceTransformer
     [Transformer]
     internal class SourceTransformer : ISourceTransformer
     {
-        public Compilation Execute( TransformerContext context )
+        public void Execute( TransformerContext context )
         {
             var changeDynamicToObject = context.GlobalOptions.TryGetValue( "build_property.ChangeDynamicToObject", out var changeDynamicToObjectStr )
                                         && bool.Parse( changeDynamicToObjectStr );
@@ -35,7 +35,7 @@ namespace Caravela.SourceTransformer
                 context.ReportDiagnostic( diagnostic );
             }
 
-            return compilation;
+            context.Compilation = compilation;
         }
 
         private class Rewriter : CSharpSyntaxRewriter

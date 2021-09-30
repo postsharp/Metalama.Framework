@@ -43,7 +43,7 @@ namespace Caravela.AspectWorkbench.Views
             var highlightColors = new ClassificationHighlightColors();
             var workingDirectory = Directory.GetCurrentDirectory();
 
-            this.sourceTextBox.Initialize( roslynHost, highlightColors, workingDirectory, "" );
+            this.sourceTextBox.Initialize( roslynHost, highlightColors, workingDirectory, "", Microsoft.CodeAnalysis.SourceCodeKind.Regular );
         }
 
         private void ViewModel_PropertyChanged( object? sender, PropertyChangedEventArgs e )
