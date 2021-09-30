@@ -3,16 +3,13 @@
 
 using Caravela.Framework.Impl.DesignTime.Pipeline;
 using Caravela.Framework.Impl.Options;
-using Caravela.Framework.Impl.Pipeline;
 using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
-using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
-using System.Threading;
 
 namespace Caravela.Framework.Impl.DesignTime.Diagnostics
 {
@@ -28,7 +25,7 @@ namespace Caravela.Framework.Impl.DesignTime.Diagnostics
 
         public static UserDiagnosticRegistrationService GetInstance( IPathOptions pathOptions )
             => _instances.GetOrAdd(
-                pathOptions, 
+                pathOptions,
                 options => new UserDiagnosticRegistrationService( pathOptions ) );
 
         private UserDiagnosticRegistrationService( IPathOptions pathOptions )

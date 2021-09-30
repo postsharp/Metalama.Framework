@@ -10,7 +10,7 @@ namespace Caravela.Framework.Impl.Options
         string CompileTimeProjectCacheDirectory { get; }
 
         string AssemblyLocatorCacheDirectory { get; }
-        
+
         string SettingsDirectory { get; }
 
         /// <summary>

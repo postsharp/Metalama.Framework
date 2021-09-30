@@ -31,7 +31,7 @@ namespace Caravela.Framework.Tests.UnitTests
             this.ProjectOptions = options;
             this.ServiceProvider = ServiceProviderFactory.GetServiceProvider( this.ProjectOptions );
         }
-        
+
         protected TestBase() : this( new TestProjectOptions() ) { }
 
         protected static CSharpCompilation CreateCSharpCompilation(

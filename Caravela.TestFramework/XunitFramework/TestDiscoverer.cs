@@ -44,24 +44,24 @@ namespace Caravela.TestFramework.XunitFramework
                 .GetCustomAttributes( typeof(AssemblyMetadataAttribute) )
                 .Where( a => string.Equals( (string) a.GetConstructorArguments().First(), "ProjectDirectory", StringComparison.Ordinal ) )
                 .ToList();
-            
+
             var projectDirectoryAttribute = projectDirectoryAttributes.FirstOrDefault();
-            
+
             if ( projectDirectoryAttribute == null )
             {
                 throw new InvalidOperationException(
                     $"The assembly '{this._assembly.AssemblyPath}' must have a single AssemblyMetadataAttribute with Key = \"ProjectDirectory\"." );
             }
-            
+
             var value = (string?) projectDirectoryAttribute.GetConstructorArguments().ElementAt( 1 );
-            
+
             if ( string.IsNullOrEmpty( value ) )
             {
                 throw new InvalidOperationException(
                     "The project directory cannot be null or empty."
                     + " The project directory is stored as a value of the AssemblyMetadataAttribute with Key = \"ProjectDirectory\"." );
             }
-            
+
             return value;
         }
 
