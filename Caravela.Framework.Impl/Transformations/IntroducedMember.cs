@@ -20,7 +20,6 @@ namespace Caravela.Framework.Impl.Transformations
     /// </summary>
     internal class IntroducedMember : IComparable<IntroducedMember>
     {
-        
         private static readonly ImmutableDictionary<DeclarationKind, int> _orderedDeclarationKinds = new Dictionary<DeclarationKind, int>()
         {
             { DeclarationKind.Field, 0 },
@@ -30,7 +29,6 @@ namespace Caravela.Framework.Impl.Transformations
             { DeclarationKind.Event, 4 },
             { DeclarationKind.NamedType, 5 }
         }.ToImmutableDictionary();
-
 
         /// <summary>
         /// Gets the kind of declaration (for sorting only).
@@ -63,7 +61,6 @@ namespace Caravela.Framework.Impl.Transformations
         /// are not suppressed from the introduced member.
         /// </summary>
         public IMember? Declaration { get; }
-
 
         public IntroducedMember(
             MemberBuilder introduction,
@@ -117,8 +114,6 @@ namespace Caravela.Framework.Impl.Transformations
             this.DeclarationKind = kind;
         }
 
-        
-
         public override string ToString() => this.Introduction.ToString();
 
         public int CompareTo( IntroducedMember? other )
@@ -139,7 +134,7 @@ namespace Caravela.Framework.Impl.Transformations
             {
                 throw new AssertionFailedException( "Dont know how to sort." );
             }
-            
+
             var kindComparison = GetKindOrder( this.DeclarationKind ).CompareTo( GetKindOrder( other.DeclarationKind ) );
 
             if ( kindComparison != 0 )
@@ -175,12 +170,10 @@ namespace Caravela.Framework.Impl.Transformations
             }
 
             return 0;
-            
+
             static int GetKindOrder( DeclarationKind kind ) => _orderedDeclarationKinds.TryGetValue( kind, out var order ) ? order : 10;
 
             static int GetTypeOrder( IMemberIntroduction introduction ) => introduction is IOverriddenDeclaration ? 0 : 1;
-            
-            
         }
     }
 }
