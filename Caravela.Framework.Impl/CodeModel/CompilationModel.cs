@@ -271,6 +271,10 @@ namespace Caravela.Framework.Impl.CodeModel
                     // Order with Compilation matters. We want the root compilation to be ordered first.
                     return 1;
 
+                case INamespace { IsGlobalNamespace: true }:
+                    // We want the global namespace to be processed after all assembly references
+                    return 2;
+
                 default:
                     {
                         var depth = this.GetDepth( declaration.ContainingDeclaration! ) + 1;
@@ -290,16 +294,19 @@ namespace Caravela.Framework.Impl.CodeModel
                 return depth;
             }
 
-            depth = this.GetDepth( namedType.ContainingDeclaration! );
+            depth = this.GetDepth( namedType.Namespace );
 
-            if ( namedType.BaseType != null )
+            if ( namedType.BaseType is { IsExternal: false } baseType )
             {
-                depth = Math.Max( depth, this.GetDepth( namedType.BaseType ) );
+                depth = Math.Max( depth, this.GetDepth( baseType ) );
             }
 
             foreach ( var interfaceImplementation in namedType.ImplementedInterfaces )
             {
-                depth = Math.Max( depth, this.GetDepth( interfaceImplementation ) );
+                if ( !interfaceImplementation.IsExternal )
+                {
+                    depth = Math.Max( depth, this.GetDepth( interfaceImplementation ) );
+                }
             }
 
             depth++;

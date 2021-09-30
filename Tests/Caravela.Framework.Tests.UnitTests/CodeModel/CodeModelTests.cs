@@ -702,6 +702,16 @@ interface I {}
 interface J : I {}
 interface K : I {}
 interface L : J, K {}
+
+namespace Ns1 
+{
+    class E {}
+
+    namespace Ns2 
+    {
+        class F {}
+    } 
+}
 ";
 
             var compilation = this.CreateCompilationModel( code );
@@ -711,11 +721,18 @@ interface L : J, K {}
             Assert.Equal( 3, compilation.GetDepth( type ) );
             Assert.Equal( 4, compilation.GetDepth( type.Methods.OfName( "M" ).Single() ) );
             Assert.Equal( 5, compilation.GetDepth( type.Methods.OfName( "M" ).Single().LocalFunctions.Single() ) );
-            Assert.Equal( 1, compilation.GetDepth( compilation.Types.OfName( "I" ).Single() ) );
-            Assert.Equal( 2, compilation.GetDepth( compilation.Types.OfName( "J" ).Single() ) );
-            Assert.Equal( 2, compilation.GetDepth( compilation.Types.OfName( "K" ).Single() ) );
-            Assert.Equal( 3, compilation.GetDepth( compilation.Types.OfName( "L" ).Single() ) );
-            Assert.Equal( 4, compilation.GetDepth( type.NestedTypes.OfName( "D" ).Single() ) );
+            Assert.Equal( 3, compilation.GetDepth( compilation.Types.OfName( "I" ).Single() ) );
+            Assert.Equal( 4, compilation.GetDepth( compilation.Types.OfName( "J" ).Single() ) );
+            Assert.Equal( 4, compilation.GetDepth( compilation.Types.OfName( "K" ).Single() ) );
+            Assert.Equal( 5, compilation.GetDepth( compilation.Types.OfName( "L" ).Single() ) );
+            Assert.Equal( 6, compilation.GetDepth( type.NestedTypes.OfName( "D" ).Single() ) );
+
+            var ns1 = compilation.GetNamespace( "Ns1" ).AssertNotNull();
+            var ns2 = compilation.GetNamespace( "Ns1.Ns2" ).AssertNotNull();
+            Assert.Equal( 3, compilation.GetDepth( ns1 ) );
+            Assert.Equal( 4, compilation.GetDepth( ns2 ) );
+            Assert.Equal( 4,  compilation.GetDepth(compilation.Types.OfName( "E" ).Single()) );
+            Assert.Equal( 5,  compilation.GetDepth(compilation.Types.OfName( "F" ).Single()) );
         }
 
         [Fact]
