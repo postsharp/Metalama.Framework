@@ -41,7 +41,7 @@ namespace Caravela.TestFramework
         /// Runs the aspect test with the given name and source.
         /// </summary>
         /// <returns>The result of the test execution.</returns>
-        private protected override async Task<TestResult> RunAsync( TestInput testInput, Dictionary<string, object?> state )
+        private protected override async Task RunAsync( TestInput testInput, TestResult testResult, Dictionary<string, object?> state )
         {
             if ( this._runCount > 0 )
             {
@@ -53,7 +53,7 @@ namespace Caravela.TestFramework
                 this._runCount++;
             }
 
-            var testResult = await base.RunAsync( testInput, state );
+            await base.RunAsync( testInput, testResult, state );
 
             using var domain = new UnloadableCompileTimeDomain();
             var testProjectOptions = (TestProjectOptions?) this.ServiceProvider.GetService( typeof(TestProjectOptions) );
@@ -104,7 +104,7 @@ namespace Caravela.TestFramework
                     {
                         if ( !this.VerifyBinaryStream( testInput, testResult, peStream ) )
                         {
-                            return testResult;
+                            return;
                         }
 
                         await ExecuteTestProgramAsync( testInput, testResult, peStream );
@@ -124,8 +124,6 @@ namespace Caravela.TestFramework
             {
                 await this.WriteHtmlAsync( testInput, testResult );
             }
-
-            return testResult;
         }
 
         private static async Task ExecuteTestProgramAsync( TestInput testInput, TestResult testResult, MemoryStream peStream, MemoryStream? pdbStream = null )

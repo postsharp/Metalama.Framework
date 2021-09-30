@@ -23,7 +23,7 @@ using TypedConstant = Caravela.Framework.Code.TypedConstant;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
-    internal class PropertyBuilder : MemberBuilder, IPropertyBuilder, IPropertyInternal
+    internal class PropertyBuilder : MemberBuilder, IPropertyBuilder, IPropertyImpl
     {
         private readonly bool _hasInitOnlySetter;
 
@@ -45,8 +45,6 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public ParameterBuilderList Parameters { get; } = new();
 
         IParameterList IHasParameters.Parameters => this.Parameters;
-
-        IType IFieldOrProperty.Type => this.Type;
 
         public IType Type { get; set; }
 

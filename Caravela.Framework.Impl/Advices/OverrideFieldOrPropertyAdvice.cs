@@ -28,10 +28,6 @@ namespace Caravela.Framework.Impl.Advices
             Dictionary<string, object?>? tags )
             : base( aspect, targetDeclaration, layerName, tags )
         {
-            // We need either property template or (one or more) accessor templates, but never both.
-            Invariant.Assert( !propertyTemplate.IsNull || !getTemplate.IsNull || !setTemplate.IsNull );
-            Invariant.Assert( !(!propertyTemplate.IsNull && (!getTemplate.IsNull || !setTemplate.IsNull)) );
-
             this.PropertyTemplate = propertyTemplate;
             this.GetTemplate = getTemplate;
             this.SetTemplate = setTemplate;

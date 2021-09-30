@@ -145,7 +145,7 @@ namespace Caravela.Framework.Tests.UnitTests.DesignTime.TestCode
 
             var actualContent = File.ReadAllText( diagnosticsFileName );
 
-            Assert.Equal( expectedUserDiagnosticsFileContent, actualContent! );
+            Assert.Equal( expectedUserDiagnosticsFileContent, actualContent );
         }
     }
 }

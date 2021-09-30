@@ -9,13 +9,8 @@ namespace Caravela.Framework.Code
     /// <summary>
     /// A base interface for <see cref="IField"/> and <see cref="IProperty"/>.
     /// </summary>
-    public interface IFieldOrProperty : IMember
+    public interface IFieldOrProperty : IMember, IHasType
     {
-        /// <summary>
-        /// Gets the field or property type.
-        /// </summary>
-        IType Type { get; }
-
         /// <summary>
         /// Gets the property getter, or <c>null</c> if the property is write-only. In case of automatic properties, this property returns
         /// an object that does not map to source code but allows to add aspects and advices as with a normal method. In case of fields,

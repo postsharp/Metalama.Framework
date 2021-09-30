@@ -13,9 +13,9 @@ using MethodBase = System.Reflection.MethodBase;
 
 namespace Caravela.Framework.Impl.Templating.MetaModel
 {
-    internal class AdvisedMethod : AdvisedMember<IMethodInternal>, IAdvisedMethod
+    internal class AdvisedMethod : AdvisedMember<IMethodImpl>, IAdvisedMethod, IMethodImpl
     {
-        public AdvisedMethod( IMethod underlying ) : base( (IMethodInternal) underlying ) { }
+        public AdvisedMethod( IMethod underlying ) : base( (IMethodImpl) underlying ) { }
 
         public IMethodList LocalFunctions => this.Underlying.LocalFunctions;
 
@@ -52,13 +52,15 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         public IType ReturnType => this.Underlying.ReturnType;
 
-        public IGenericParameterList GenericParameters => this.Underlying.GenericParameters;
+        public IGenericParameterList TypeParameters => this.Underlying.TypeParameters;
 
-        public IReadOnlyList<IType> GenericArguments => this.Underlying.GenericArguments;
+        public IReadOnlyList<IType> TypeArguments => this.Underlying.TypeArguments;
 
         public bool IsOpenGeneric => this.Underlying.IsOpenGeneric;
 
-        public IMethod WithGenericArguments( params IType[] genericArguments ) => this.Underlying.WithGenericArguments( genericArguments );
+        public bool IsGeneric => this.Underlying.IsGeneric;
+
+        public IGeneric ConstructGenericInstance( params IType[] typeArguments ) => this.Underlying.ConstructGenericInstance( typeArguments );
 
         public IInvokerFactory<IMethodInvoker> Invokers => this.Underlying.Invokers;
 

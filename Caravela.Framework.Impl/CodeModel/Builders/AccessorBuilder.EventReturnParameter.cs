@@ -12,7 +12,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         {
             public EventReturnParameter( AccessorBuilder accessor ) : base( accessor, -1 ) { }
 
-            public override IType ParameterType
+            public override IType Type
             {
                 get => this.Compilation.Factory.GetSpecialType( SpecialType.Void );
                 set => throw new NotSupportedException( "Cannot change event accessor's return parameter type." );

@@ -22,16 +22,16 @@ namespace Caravela.Framework.Impl.Serialization
         public CaravelaMethodBaseSerializer( SyntaxSerializationService service ) : base( service ) { }
 
         internal ExpressionSyntax SerializeMethodBase( ICompileTimeReflectionObject<IMethodBase> method, ICompilationElementFactory syntaxFactory )
-            => this.SerializeMethodBase(
+            => SerializeMethodBase(
                 (IMethodSymbol) method.Target.GetSymbol( syntaxFactory.Compilation ).AssertNotNull( Justifications.SerializersNotImplementedForIntroductions ),
                 syntaxFactory );
 
-        internal ExpressionSyntax SerializeMethodBase( IMethodSymbol methodSymbol, ICompilationElementFactory syntaxFactory )
+        internal static ExpressionSyntax SerializeMethodBase( IMethodSymbol methodSymbol, ICompilationElementFactory syntaxFactory )
         {
-            return this.SerializeMethodBase( methodSymbol, methodSymbol.ContainingType, syntaxFactory );
+            return SerializeMethodBase( methodSymbol, methodSymbol.ContainingType, syntaxFactory );
         }
 
-        internal ExpressionSyntax SerializeMethodBase(
+        private static ExpressionSyntax SerializeMethodBase(
             IMethodSymbol methodSymbol,
             ITypeSymbol? declaringGenericTypeSymbol,
             ICompilationElementFactory syntaxFactory )
@@ -42,7 +42,7 @@ namespace Caravela.Framework.Impl.Serialization
 
             if ( declaringGenericTypeSymbol is INamedTypeSymbol namedType && namedType.IsGenericType )
             {
-                var typeHandle = this.CreateTypeHandleExpression( declaringGenericTypeSymbol, syntaxFactory );
+                var typeHandle = CreateTypeHandleExpression( declaringGenericTypeSymbol );
 
                 return SyntaxFactory.InvocationExpression(
                         SyntaxFactory.MemberAccessExpression(
@@ -62,9 +62,9 @@ namespace Caravela.Framework.Impl.Serialization
                 .NormalizeWhitespace();
         }
 
-        private ExpressionSyntax CreateTypeHandleExpression( ITypeSymbol type, ICompilationElementFactory syntaxFactory )
+        private static ExpressionSyntax CreateTypeHandleExpression( ITypeSymbol type )
         {
-            var typeExpression = this.Service.TypeSerializer.SerializeTypeSymbolRecursive( type, syntaxFactory );
+            var typeExpression = TypeSerializer.SerializeTypeSymbolRecursive( type );
 
             ExpressionSyntax typeHandle = SyntaxFactory.MemberAccessExpression(
                 SyntaxKind.SimpleMemberAccessExpression,

@@ -17,7 +17,7 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Order.Introduc
         {
             foreach (var method in builder.Target.Methods)
             {
-                builder.AdviceFactory.OverrideMethod(method, nameof(OverrideTemplate));
+                builder.Advices.OverrideMethod(method, nameof(OverrideTemplate));
             }
         }
 
@@ -51,7 +51,7 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Order.Introduc
         {
             foreach (var method in builder.Target.Methods)
             {
-                builder.AdviceFactory.OverrideMethod(method, nameof(OverrideTemplate));
+                builder.Advices.OverrideMethod(method, nameof(OverrideTemplate));
             }
         }
 
@@ -86,7 +86,7 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Order.Introduc
         {
             foreach (var method in builder.Target.Methods)
             {
-                builder.AdviceFactory.OverrideMethod(method, nameof(OverrideTemplate));
+                builder.Advices.OverrideMethod(method, nameof(OverrideTemplate));
             }
         }
 

@@ -31,7 +31,7 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
     {
         public void BuildAspect(IAspectBuilder<INamedType> aspectBuilder)
         {
-            aspectBuilder.AdviceFactory.ImplementInterface(aspectBuilder.Target, typeof(IInterface));
+            aspectBuilder.Advices.ImplementInterface(aspectBuilder.Target, typeof(IInterface));
         }
 
         [InterfaceMember(IsExplicit = true)]
@@ -88,7 +88,7 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
             {
                 if (method.IsExplicitInterfaceImplementation)
                 {
-                    aspectBuilder.AdviceFactory.OverrideMethod(method, nameof(Template));
+                    aspectBuilder.Advices.OverrideMethod(method, nameof(Template));
                 }
             }
 
@@ -96,7 +96,7 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
             {
                 if (property.IsExplicitInterfaceImplementation)
                 {
-                    aspectBuilder.AdviceFactory.OverrideFieldOrPropertyAccessors(property, nameof(Template), nameof(Template));
+                    aspectBuilder.Advices.OverrideFieldOrPropertyAccessors(property, nameof(Template), nameof(Template));
                 }
             }
 
@@ -104,7 +104,7 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
             {
                 if (method.IsExplicitInterfaceImplementation)
                 {
-                    aspectBuilder.AdviceFactory.OverrideEventAccessors(method, nameof(Template), nameof(Template), null);
+                    aspectBuilder.Advices.OverrideEventAccessors(method, nameof(Template), nameof(Template), null);
                 }
             }
         }

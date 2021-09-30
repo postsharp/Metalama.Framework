@@ -39,7 +39,7 @@ class C<T> : object
 
             // Type
             AssertLocation( "C", type.GetDiagnosticLocation() );
-            AssertLocation( "T", type.GenericParameters.Single().GetDiagnosticLocation() );
+            AssertLocation( "T", type.TypeParameters.Single().GetDiagnosticLocation() );
 
             // Constructors
             AssertLocation( "C", type.Constructors.Single().GetDiagnosticLocation() );
@@ -47,7 +47,7 @@ class C<T> : object
 
             // Methods
             AssertLocation( "Method", method.GetDiagnosticLocation() );
-            AssertLocation( "M", method.GenericParameters.Single().GetDiagnosticLocation() );
+            AssertLocation( "M", method.TypeParameters.Single().GetDiagnosticLocation() );
             AssertLocation( "parameter", method.Parameters.Single().GetDiagnosticLocation() );
             AssertLocation( "Method", method.ReturnParameter.GetDiagnosticLocation() );
 

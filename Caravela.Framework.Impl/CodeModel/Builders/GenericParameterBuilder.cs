@@ -10,25 +10,25 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 {
     internal sealed class GenericParameterBuilder : DeclarationBuilder, IGenericParameterBuilder
     {
-        private readonly IGenericParameter _template;
+        private readonly List<IType> _typeConstraints = new();
 
-        public string Name => this._template.Name;
+        public string Name { get; set; }
 
-        public int Index => this._template.Index;
+        public int Index { get; }
 
-        IReadOnlyList<IType> IGenericParameter.TypeConstraints => throw new NotImplementedException();
+        IReadOnlyList<IType> IGenericParameter.TypeConstraints => this._typeConstraints;
 
-        public IList<IType> TypeConstraints { get; } = new List<IType>();
+        public IReadOnlyList<IType> ReadOnlyTypeConstraints => this._typeConstraints;
 
-        public bool IsCovariant { get; set; }
+        public TypeKindConstraint TypeKindConstraint { get; set; }
 
-        public bool IsContravariant { get; set; }
+        public VarianceKind Variance { get; set; }
 
         public bool HasDefaultConstructorConstraint { get; set; }
 
-        public bool HasReferenceTypeConstraint { get; set; }
+        public void AddTypeConstraint( IType type ) => this._typeConstraints.Add( type );
 
-        public bool HasNonNullableValueTypeConstraint { get; set; }
+        public void AddTypeConstraint( Type type ) => this._typeConstraints.Add( this.Compilation.Factory.GetTypeByReflectionType( type ) );
 
         TypeKind IType.TypeKind => TypeKind.GenericParameter;
 
@@ -42,10 +42,11 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public override DeclarationKind DeclarationKind => DeclarationKind.GenericParameter;
 
-        public GenericParameterBuilder( MethodBuilder containingMethod, IGenericParameter template ) : base( containingMethod.ParentAdvice )
+        public GenericParameterBuilder( MethodBuilder containingMethod, int index, string name ) : base( containingMethod.ParentAdvice )
         {
             this.ContainingDeclaration = containingMethod;
-            this._template = template;
+            this.Index = index;
+            this.Name = name;
         }
 
         // TODO: How to implement this?

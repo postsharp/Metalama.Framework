@@ -49,7 +49,7 @@ namespace Caravela.Framework.Aspects
 #endif
 
             this._buildAspectCalled = true;
-            builder.AdviceFactory.OverrideMethod( builder.Target, templates );
+            builder.Advices.OverrideMethod( builder.Target, templates );
         }
 
         private void EnsureBuildAspectNotCalled( [CallerMemberName] string? caller = null )

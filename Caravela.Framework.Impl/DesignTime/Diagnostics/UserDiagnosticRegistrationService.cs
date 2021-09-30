@@ -26,7 +26,7 @@ namespace Caravela.Framework.Impl.DesignTime.Diagnostics
         public static UserDiagnosticRegistrationService GetInstance( IPathOptions pathOptions )
             => _instances.GetOrAdd(
                 pathOptions,
-                options => new UserDiagnosticRegistrationService( pathOptions ) );
+                _ => new UserDiagnosticRegistrationService( pathOptions ) );
 
         private UserDiagnosticRegistrationService( IPathOptions pathOptions )
         {

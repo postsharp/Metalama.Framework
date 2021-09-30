@@ -45,7 +45,7 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
             return this.OfExactSignature( signatureTemplate, null, 0, signatureTemplate.Parameters.Count, GetParameter, false, true );
 
             static (IType Type, RefKind RefKind) GetParameter( IConstructor context, int index )
-                => (context.Parameters[index].ParameterType, context.Parameters[index].RefKind);
+                => (context.Parameters[index].Type, context.Parameters[index].RefKind);
         }
 
         public IConstructor? OfExactSignature( IReadOnlyList<IType> parameterTypes, IReadOnlyList<RefKind>? refKinds = null )

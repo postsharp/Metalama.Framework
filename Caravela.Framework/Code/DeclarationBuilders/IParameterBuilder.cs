@@ -19,7 +19,7 @@ namespace Caravela.Framework.Code.DeclarationBuilders
         /// <summary>
         /// Gets or sets the parameter type.
         /// </summary>
-        new IType ParameterType { get; set; }
+        new IType Type { get; set; }
 
         /// <summary>
         /// Gets or sets the parameter ref kind.

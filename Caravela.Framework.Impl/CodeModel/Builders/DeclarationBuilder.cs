@@ -23,7 +23,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
     /// <see cref="IDeclarationRef{T}"/> so they can resolve, using <see cref="DeclarationFactory"/>, to the consuming <see cref="CompilationModel"/>.
     /// 
     /// </summary>
-    internal abstract class DeclarationBuilder : IDeclarationBuilder, IDeclarationInternal, ITransformation
+    internal abstract class DeclarationBuilder : IDeclarationBuilder, IDeclarationImpl, ITransformation
     {
         internal Advice ParentAdvice { get; }
 
@@ -67,7 +67,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                     (this.ParentAdvice.Aspect.AspectClass.DisplayName, this, type) );
             }
 
-            var ctorArguments = constructorArguments.Select( ( _, i ) => new TypedConstant( ctor.Parameters[i].ParameterType, constructorArguments[i] ) )
+            var ctorArguments = constructorArguments.Select( ( _, i ) => new TypedConstant( ctor.Parameters[i].Type, constructorArguments[i] ) )
                 .ToList();
 
             return new AttributeBuilder( this, ctor, ctorArguments );
@@ -84,8 +84,10 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         ISymbol? ISdkDeclaration.Symbol => null;
 
         public ImmutableArray<SyntaxReference> DeclaringSyntaxReferences
-            => ((IDeclarationInternal?) this.ContainingDeclaration)?.DeclaringSyntaxReferences ?? ImmutableArray<SyntaxReference>.Empty;
+            => ((IDeclarationImpl?) this.ContainingDeclaration)?.DeclaringSyntaxReferences ?? ImmutableArray<SyntaxReference>.Empty;
 
         public override string ToString() => this.ToDisplayString( CodeDisplayFormat.MinimallyQualified );
+
+        public IDeclaration OriginalDefinition => this;
     }
 }

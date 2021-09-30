@@ -11,11 +11,11 @@ namespace Caravela.Framework.Tests.Integration.Tests.Aspects.Introductions.Metho
     {
         public void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            var typedMethod = builder.AdviceFactory.IntroduceMethod(builder.Target, nameof(CloneImpl));
+            var typedMethod = builder.Advices.IntroduceMethod(builder.Target, nameof(CloneImpl));
             typedMethod.Name = "Clone";
             typedMethod.ReturnType = builder.Target;
 
-            builder.AdviceFactory.ImplementInterface(builder.Target, typeof(ICloneable), whenExists: OverrideStrategy.Ignore);
+            builder.Advices.ImplementInterface(builder.Target, typeof(ICloneable), whenExists: OverrideStrategy.Ignore);
         }
 
         [Template]

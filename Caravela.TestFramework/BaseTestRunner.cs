@@ -66,21 +66,24 @@ namespace Caravela.TestFramework
         private async Task RunAndAssertCoreAsync( TestInput testInput )
         {
             Dictionary<string, object?> state = new( StringComparer.Ordinal );
-            using var testResult = await this.RunAsync( testInput, state );
+            using var testResult = new TestResult();
+            await this.RunAsync( testInput, testResult, state );
             this.SaveResults( testInput, testResult, state );
             this.ExecuteAssertions( testInput, testResult, state );
         }
 
-        public Task<TestResult> RunAsync( TestInput testInput )
-            => this.RunAsync( testInput, new Dictionary<string, object?>( StringComparer.InvariantCulture ) );
+        public Task RunAsync( TestInput testInput, TestResult testResult )
+            => this.RunAsync( testInput, testResult, new Dictionary<string, object?>( StringComparer.InvariantCulture ) );
 
         /// <summary>
         /// Runs a test.
         /// </summary>
         /// <param name="testInput"></param>
+        /// <param name="testResult">The output object must be created by the caller and passed, so that the caller can get
+        /// a partial object in case of exception.</param>
         /// <param name="state"></param>
         /// <returns></returns>
-        private protected virtual async Task<TestResult> RunAsync( TestInput testInput, Dictionary<string, object?> state )
+        private protected virtual async Task RunAsync( TestInput testInput, TestResult testResult, Dictionary<string, object?> state )
         {
             if ( testInput.Options.InvalidSourceOptions.Count > 0 )
             {
@@ -100,8 +103,6 @@ namespace Caravela.TestFramework
 
             try
             {
-                var testResult = new TestResult();
-
                 // Source. Note that we don't pass the full path to the Document because it causes call stacks of exceptions to have full paths,
                 // which is more difficult to test.
                 var parseOptions = CSharpParseOptions.Default.WithPreprocessorSymbols( "TESTRUNNER", "CARAVELA" );
@@ -166,12 +167,8 @@ namespace Caravela.TestFramework
                     {
                         testResult.InputCompilationDiagnostics.Report( errors );
                         testResult.SetFailed( "The initial compilation failed." );
-
-                        return testResult;
                     }
                 }
-
-                return testResult;
             }
             finally
             {

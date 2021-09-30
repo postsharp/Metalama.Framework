@@ -15,7 +15,7 @@ namespace Caravela.Framework.Impl.Templating
 {
     internal static class SyntaxAnnotationExtensions
     {
-        private const string _scopeAnnotationKind = "Caravela_Scope";
+        public const string ScopeAnnotationKind = "Caravela_Scope";
         private const string _targetScopeAnnotationKind = "Caravela_TargetScope";
         private const string _proceedAnnotationKind = "Caravela_Proceed";
         private const string _noIndentAnnotationKind = "Caravela_NoIndent";
@@ -30,31 +30,31 @@ namespace Caravela.Framework.Impl.Templating
         private const string _unknownAnnotationData = "unknown";
         private const string _bothAnnotationData = "both";
 
-        private static readonly SyntaxAnnotation _buildTimeOnlyAnnotation = new( _scopeAnnotationKind, _buildTimeAnnotationData );
-        private static readonly SyntaxAnnotation _runTimeOnlyAnnotation = new( _scopeAnnotationKind, _runTimeAnnotationData );
+        private static readonly SyntaxAnnotation _buildTimeOnlyAnnotation = new( ScopeAnnotationKind, _buildTimeAnnotationData );
+        private static readonly SyntaxAnnotation _runTimeOnlyAnnotation = new( ScopeAnnotationKind, _runTimeAnnotationData );
         private static readonly SyntaxAnnotation _buildTimeTargetAnnotation = new( _targetScopeAnnotationKind, _buildTimeAnnotationData );
         private static readonly SyntaxAnnotation _runTimeTargetAnnotation = new( _targetScopeAnnotationKind, _runTimeAnnotationData );
 
         private static readonly SyntaxAnnotation _compileTimeReturningRunTimeOnlyAnnotation =
-            new( _scopeAnnotationKind, _compileTimeReturningRunTimeOnlyAnnotationData );
+            new( ScopeAnnotationKind, _compileTimeReturningRunTimeOnlyAnnotationData );
 
-        private static readonly SyntaxAnnotation _compileTimeReturningBothAnnotation = new( _scopeAnnotationKind, _compileTimeReturningBothAnnotationData );
-        private static readonly SyntaxAnnotation _runTimeDynamicAnnotation = new( _scopeAnnotationKind, _runTimeDynamicAnnotationData );
-        private static readonly SyntaxAnnotation _bothAnnotation = new( _scopeAnnotationKind, _bothAnnotationData );
-        private static readonly SyntaxAnnotation _unknownAnnotation = new( _scopeAnnotationKind, _unknownAnnotationData );
+        private static readonly SyntaxAnnotation _compileTimeReturningBothAnnotation = new( ScopeAnnotationKind, _compileTimeReturningBothAnnotationData );
+        private static readonly SyntaxAnnotation _runTimeDynamicAnnotation = new( ScopeAnnotationKind, _runTimeDynamicAnnotationData );
+        private static readonly SyntaxAnnotation _bothAnnotation = new( ScopeAnnotationKind, _bothAnnotationData );
+        private static readonly SyntaxAnnotation _unknownAnnotation = new( ScopeAnnotationKind, _unknownAnnotationData );
         private static readonly SyntaxAnnotation _templateAnnotation = new( _templateAnnotationKind );
         private static readonly SyntaxAnnotation _noDeepIndentAnnotation = new( _noIndentAnnotationKind );
         private static readonly SyntaxAnnotation _scopeMismatchAnnotation = new( _scopeMismatchKind );
 
         private static readonly ImmutableList<string> _templateAnnotationKinds =
             SyntaxTreeAnnotationMap.AnnotationKinds.AddRange(
-                new[] { _scopeAnnotationKind, _noIndentAnnotationKind, _proceedAnnotationKind, _colorAnnotationKind } );
+                new[] { ScopeAnnotationKind, _noIndentAnnotationKind, _proceedAnnotationKind, _colorAnnotationKind } );
 
-        public static bool HasScopeAnnotation( this SyntaxNode node ) => node.HasAnnotations( _scopeAnnotationKind );
+        public static bool HasScopeAnnotation( this SyntaxNode node ) => node.HasAnnotations( ScopeAnnotationKind );
 
         public static TemplatingScope? GetScopeFromAnnotation( this SyntaxNode node )
         {
-            var annotation = node.GetAnnotations( _scopeAnnotationKind ).SingleOrDefault();
+            var annotation = node.GetAnnotations( ScopeAnnotationKind ).SingleOrDefault();
 
             // No annotation means it is default scope usable for both (runTime or compileTime)
             if ( annotation == null )
@@ -166,7 +166,7 @@ namespace Caravela.Framework.Impl.Templating
                 throw new InvalidOperationException( $"Cannot change the scope of node '{node}' to {scope} because it is already set to {existingScope}." );
             }
 
-            return node.WithoutAnnotations( _scopeAnnotationKind ).AddScopeAnnotation( scope );
+            return node.WithoutAnnotations( ScopeAnnotationKind ).AddScopeAnnotation( scope );
         }
 
         public static StatementSyntax AddRunTimeOnlyAnnotationIfUndetermined( this StatementSyntax statement )
@@ -190,7 +190,7 @@ namespace Caravela.Framework.Impl.Templating
                 return node;
             }
 
-            if ( node.HasAnnotations( _scopeAnnotationKind ) && scope != node.GetScopeFromAnnotation() )
+            if ( node.HasAnnotations( ScopeAnnotationKind ) && scope != node.GetScopeFromAnnotation() )
             {
                 throw new AssertionFailedException(
                     $"The scope of the {node.Kind()} has already been set to {node.GetScopeFromAnnotation()} and cannot be changed to {scope}." );

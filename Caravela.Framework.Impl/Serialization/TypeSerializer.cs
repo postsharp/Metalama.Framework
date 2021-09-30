@@ -3,10 +3,8 @@
 
 using Caravela.Framework.Impl.CodeModel;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
-using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Serialization
@@ -14,39 +12,17 @@ namespace Caravela.Framework.Impl.Serialization
     internal class TypeSerializer : ObjectSerializer<Type>
     {
         public override ExpressionSyntax Serialize( Type obj, ICompilationElementFactory syntaxFactory )
-            => this.SerializeTypeSymbolRecursive( syntaxFactory.GetTypeSymbol( obj ), syntaxFactory );
+            => SerializeTypeSymbolRecursive( syntaxFactory.GetTypeSymbol( obj ) );
 
-        public ExpressionSyntax SerializeTypeSymbolRecursive( ITypeSymbol symbol, ICompilationElementFactory syntaxFactory )
+        public static ExpressionSyntax SerializeTypeSymbolRecursive( ITypeSymbol symbol )
         {
             switch ( symbol )
             {
-                case ITypeParameterSymbol typeParameterSymbol:
-                    {
-                        ExpressionSyntax declaringExpression;
-
-                        if ( typeParameterSymbol.DeclaringMethod is { } method )
-                        {
-                            declaringExpression = this.Service.CompileTimeMethodInfoSerializer.SerializeMethodBase(
-                                method.OriginalDefinition,
-                                method.ContainingType.TypeParameters.Any() ? method.ContainingType : null,
-                                syntaxFactory );
-                        }
-                        else
-                        {
-                            var type = typeParameterSymbol.DeclaringType!.OriginalDefinition;
-                            declaringExpression = this.SerializeTypeSymbolRecursive( type, syntaxFactory );
-                        }
-
-                        // expr.GetGenericArguments()[ordinal]
-                        return ElementAccessExpression(
-                                InvocationExpression(
-                                    MemberAccessExpression(
-                                        SyntaxKind.SimpleMemberAccessExpression,
-                                        declaringExpression,
-                                        IdentifierName( "GetGenericArguments" ) ) ) )
-                            .AddArgumentListArguments(
-                                Argument( LiteralExpression( SyntaxKind.NumericLiteralExpression, Literal( typeParameterSymbol.Ordinal ) ) ) );
-                    }
+                case ITypeParameterSymbol:
+                    // Serializing a generic parameter always assume that we are in a lexical scope where
+                    // the symbol exists. Getting the generic parameter e.g. using typeof(X).GetGenericArguments()[Y]
+                    // is not supported and would require an API change.
+                    return TypeOfExpression( IdentifierName( symbol.Name ) );
 
                 default:
                     return SerializeTypeFromSymbolLeaf( symbol );

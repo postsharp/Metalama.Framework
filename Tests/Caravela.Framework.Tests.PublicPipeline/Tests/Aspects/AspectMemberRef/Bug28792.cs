@@ -19,7 +19,7 @@ namespace Caravela.Framework.Tests.Integration.Tests.Aspects.AspectMembersRef.Bu
         {
             foreach ( var property in builder.Target.FieldsAndProperties.Where( p=> p.IsAutoPropertyOrField))
             {
-                builder.AdviceFactory.OverrideFieldOrProperty( property, nameof(this.OverrideProperty));
+                builder.Advices.OverrideFieldOrProperty( property, nameof(this.OverrideProperty));
             }
             
         }

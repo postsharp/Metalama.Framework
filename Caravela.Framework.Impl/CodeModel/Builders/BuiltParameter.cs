@@ -8,7 +8,7 @@ using System.Reflection;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
-    internal class BuiltParameter : BuiltDeclaration, IParameterInternal
+    internal class BuiltParameter : BuiltDeclaration, IParameterImpl
     {
         public BuiltParameter( IParameterBuilder builder, CompilationModel compilation ) : base( compilation )
         {
@@ -22,7 +22,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public RefKind RefKind => this.ParameterBuilder.RefKind;
 
         [Memo]
-        public IType ParameterType => this.Compilation.Factory.GetIType( this.ParameterBuilder.ParameterType );
+        public IType Type => this.Compilation.Factory.GetIType( this.ParameterBuilder.Type );
 
         public string Name => this.ParameterBuilder.Name;
 

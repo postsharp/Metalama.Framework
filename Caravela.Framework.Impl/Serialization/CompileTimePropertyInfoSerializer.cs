@@ -49,7 +49,7 @@ namespace Caravela.Framework.Impl.Serialization
 
                 foreach ( var parameter in property.Parameters )
                 {
-                    parameterTypes.Add( this.Service.Serialize( CompileTimeType.Create( parameter.ParameterType ), syntaxFactory ) );
+                    parameterTypes.Add( this.Service.Serialize( CompileTimeType.Create( parameter.Type ), syntaxFactory ) );
                 }
 
                 var propertyName = property.GetSymbol().AssertNotNull().MetadataName;

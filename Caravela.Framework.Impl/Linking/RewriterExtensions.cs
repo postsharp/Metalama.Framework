@@ -3,7 +3,6 @@
 
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using System.Collections.Generic;
 
 namespace Caravela.Framework.Impl.Linking
 {
@@ -11,6 +10,12 @@ namespace Caravela.Framework.Impl.Linking
     {
         public static SyntaxTriviaList VisitTriviaList( this CSharpSyntaxRewriter rewriter, SyntaxTriviaList triviaList )
         {
+            if ( triviaList.Count > 0 )
+            {
+                throw new AssertionFailedException( Justifications.CoverageMissing );
+            }
+            
+            /*
             var dirty = false;
 
 #pragma warning disable IDE0059
@@ -21,14 +26,14 @@ namespace Caravela.Framework.Impl.Linking
                 // Not used anywhere yet. 
                 throw new AssertionFailedException( Justifications.CoverageMissing );
 
-                // var rewrittenTrivia = rewriter.VisitTrivia( trivia );
-                //
-                // list.Add( rewrittenTrivia );
-                //
-                // if ( !trivia.Equals( rewrittenTrivia ) )
-                // {
-                //     dirty = true;
-                // }
+                var rewrittenTrivia = rewriter.VisitTrivia( trivia );
+                
+                list.Add( rewrittenTrivia );
+                
+                if ( !trivia.Equals( rewrittenTrivia ) )
+                {
+                    dirty = true;
+                }
             }
 
             if ( dirty )
@@ -42,6 +47,9 @@ namespace Caravela.Framework.Impl.Linking
             {
                 return triviaList;
             }
+            */
+
+            return triviaList;
         }
     }
 }

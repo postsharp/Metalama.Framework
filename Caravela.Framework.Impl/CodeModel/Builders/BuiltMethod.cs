@@ -18,7 +18,7 @@ using MethodKind = Caravela.Framework.Code.MethodKind;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
-    internal class BuiltMethod : BuiltMember, IMethodInternal, IMemberRef<IMethod>
+    internal class BuiltMethod : BuiltMember, IMethodImpl, IMemberRef<IMethod>
     {
         public BuiltMethod( MethodBuilder builder, CompilationModel compilation ) : base( compilation )
         {
@@ -56,19 +56,21 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public IParameter ReturnParameter => new BuiltParameter( this.MethodBuilder.ReturnParameter, this.Compilation );
 
         [Memo]
-        public IType ReturnType => this.Compilation.Factory.GetIType( this.MethodBuilder.ReturnParameter.ParameterType );
+        public IType ReturnType => this.Compilation.Factory.GetIType( this.MethodBuilder.ReturnParameter.Type );
 
         [Memo]
-        public IGenericParameterList GenericParameters
+        public IGenericParameterList TypeParameters
             => new GenericParameterList(
                 this,
                 this.MethodBuilder.GenericParameters.AsBuilderList.Select( DeclarationRef.FromBuilder<IGenericParameter, GenericParameterBuilder> ) );
 
-        public IReadOnlyList<IType> GenericArguments => throw new NotImplementedException();
+        public IReadOnlyList<IType> TypeArguments => throw new NotImplementedException();
 
-        public bool IsOpenGeneric => true;
+        public bool IsOpenGeneric => this.MethodBuilder.IsOpenGeneric;
 
-        public IMethod WithGenericArguments( params IType[] genericArguments ) => throw new NotImplementedException();
+        public bool IsGeneric => this.MethodBuilder.IsGeneric;
+
+        IGeneric IGenericInternal.ConstructGenericInstance( params IType[] typeArguments ) => throw new NotImplementedException();
 
         [Memo]
         public IInvokerFactory<IMethodInvoker> Invokers

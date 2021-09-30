@@ -10,7 +10,7 @@ using System.Collections.Generic;
 namespace Caravela.Framework.Aspects
 {
     /// <summary>
-    /// Exposes all factory methods to create advices. Exposed on the <see cref="IAspectLayerBuilder.AdviceFactory"/> property
+    /// Exposes all factory methods to create advices. Exposed on the <see cref="IAspectLayerBuilder.Advices"/> property
     /// of <see cref="IAspectBuilder{TAspectTarget}"/> or <see cref="IAspectLayerBuilder"/>.
     /// </summary>
     /// <seealso href="@advising-code"/>

@@ -19,7 +19,7 @@ using RefKind = Caravela.Framework.Code.RefKind;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    internal sealed class Property : Member, IPropertyInternal
+    internal sealed class Property : Member, IPropertyImpl
     {
         private readonly IPropertySymbol _symbol;
 

@@ -3,10 +3,10 @@
 
 using Caravela.Framework.Code;
 using Caravela.Framework.Code.Invokers;
-using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Templating.MetaModel;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.CodeModel.Invokers
@@ -21,7 +21,8 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
         {
             if ( this.Member.DeclaringType.IsOpenGeneric )
             {
-                throw GeneralDiagnosticDescriptors.CannotAccessOpenGenericMember.CreateException( this.Member );
+                throw new InvalidOperationException(
+                    $"Cannot invoke the '{this.Property.ToDisplayString()}' event because the declaring type has unbound type parameters." );
             }
 
             var receiver = this.Member.GetReceiverSyntax( instance );

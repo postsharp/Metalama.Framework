@@ -48,7 +48,7 @@ namespace Caravela.Framework.Aspects
         /// <summary>
         /// Gets an object that exposes methods that allow to create advices.
         /// </summary>
-        IAdviceFactory AdviceFactory { get; }
+        IAdviceFactory Advices { get; }
 
         CancellationToken CancellationToken { get; }
     }

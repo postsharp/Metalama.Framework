@@ -10,17 +10,17 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Events.Progr
         public void BuildAspect(IAspectBuilder<INamedType> builder)
         {
             {
-                var propertyBuilder = builder.AdviceFactory.IntroduceEvent(builder.Target, nameof(EventField));
+                var propertyBuilder = builder.Advices.IntroduceEvent(builder.Target, nameof(EventField));
                 propertyBuilder.Accessibility = Accessibility.Public;
             }
 
             {
-                var propertyBuilder = builder.AdviceFactory.IntroduceEvent(builder.Target, nameof(Event));
+                var propertyBuilder = builder.Advices.IntroduceEvent(builder.Target, nameof(Event));
                 propertyBuilder.Accessibility = Accessibility.Public;
             }
 
             {
-                var propertyBuilder = builder.AdviceFactory.IntroduceEvent(builder.Target, "EventFromAccessors", nameof(AddEventTemplate), nameof(RemoveEventTemplace) );
+                var propertyBuilder = builder.Advices.IntroduceEvent(builder.Target, "EventFromAccessors", nameof(AddEventTemplate), nameof(RemoveEventTemplace) );
                 propertyBuilder.Accessibility = Accessibility.Public;
             }
 

@@ -17,7 +17,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.CSharpSyntax.TypeOf.Ty
             Console.WriteLine("rt=" + rt);
             Console.WriteLine("ct=" + ct);
 
-            if (meta.Target.Parameters[0].ParameterType.Is(typeof(MyClass1)))
+            if (( (IParameter)meta.Target.Parameters[0] ).Type.Is(typeof(MyClass1)))
             {
                 Console.WriteLine("Oops");
             }

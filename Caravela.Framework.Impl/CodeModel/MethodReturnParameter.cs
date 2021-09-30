@@ -25,7 +25,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         protected override RefKind SymbolRefKind => this.DeclaringMethod.MethodSymbol.RefKind;
 
-        public override IType ParameterType => this.DeclaringMethod.ReturnType;
+        public override IType Type => this.DeclaringMethod.ReturnType;
 
         public override bool Equals( IDeclaration other )
             => other is MethodReturnParameter methodReturnParameter &&
@@ -34,6 +34,9 @@ namespace Caravela.Framework.Impl.CodeModel
         public override ISymbol? Symbol => null;
 
         public override DeclarationRef<IDeclaration> ToRef() => DeclarationRef.ReturnParameter( this.DeclaringMethod.MethodSymbol );
+
+        [Memo]
+        public override IDeclaration OriginalDefinition => ((Method) this.DeclaringMember.GetOriginalDefinition()).ReturnParameter;
 
         [Memo]
         public override IAttributeList Attributes

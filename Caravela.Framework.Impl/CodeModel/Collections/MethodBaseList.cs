@@ -299,7 +299,7 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
                     {
                         if ( sourceItem.Parameters[i].IsParams && expandParams && match )
                         {
-                            if ( i != sourceItem.Parameters.Count - 1 || sourceItem.Parameters[i].ParameterType.TypeKind != TypeKind.Array )
+                            if ( i != sourceItem.Parameters.Count - 1 || sourceItem.Parameters[i].Type.TypeKind != TypeKind.Array )
                             {
                                 throw new AssertionFailedException();
                             }
@@ -317,7 +317,7 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
                             break;
                         }
 
-                        if ( !parameterPredicate( payload, i, sourceItem.Parameters[i].ParameterType, sourceItem.Parameters[i].RefKind ) )
+                        if ( !parameterPredicate( payload, i, sourceItem.Parameters[i].Type, sourceItem.Parameters[i].RefKind ) )
                         {
                             match = false;
 
@@ -339,7 +339,7 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
                 else if ( tryMatchParams )
                 {
                     // Attempt to match C# params - all remaining parameter types should be assignable to the array element type.
-                    var elementType = ((IArrayType) sourceItem.Parameters[sourceItem.Parameters.Count - 1].ParameterType).ElementType.AssertNotNull();
+                    var elementType = ((IArrayType) sourceItem.Parameters[sourceItem.Parameters.Count - 1].Type).ElementType.AssertNotNull();
                     var paramsMatch = true;
 
                     for ( var i = sourceItem.Parameters.Count - 1; i < parameterCount; i++ )
@@ -368,7 +368,7 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
             public bool Equals( T x, T y )
             {
                 if ( !StringComparer.Ordinal.Equals( x.Name, y.Name )
-                     || (x is IMethod xm && y is IMethod ym && xm.GenericParameters.Count != ym.GenericParameters.Count)
+                     || (x is IMethod xm && y is IMethod ym && xm.TypeParameters.Count != ym.TypeParameters.Count)
                      || x.Parameters.Count != y.Parameters.Count )
                 {
                     return false;
@@ -376,7 +376,7 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
 
                 for ( var i = 0; i < x.Parameters.Count; i++ )
                 {
-                    if ( !x.Compilation.InvariantComparer.Equals( x.Parameters[i].ParameterType, y.Parameters[i].ParameterType )
+                    if ( !x.Compilation.InvariantComparer.Equals( x.Parameters[i].Type, y.Parameters[i].Type )
                          || x.Parameters[i].RefKind != y.Parameters[i].RefKind )
                     {
                         return false;
@@ -392,14 +392,14 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
 
                 if ( x is IMethod xm )
                 {
-                    hashCode = HashCode.Combine( hashCode, xm.GenericParameters.Count );
+                    hashCode = HashCode.Combine( hashCode, xm.TypeParameters.Count );
                 }
 
                 foreach ( var parameter in x.Parameters )
                 {
                     hashCode = HashCode.Combine(
                         hashCode,
-                        x.Compilation.InvariantComparer.GetHashCode( parameter.ParameterType ),
+                        x.Compilation.InvariantComparer.GetHashCode( parameter.Type ),
                         parameter.RefKind );
                 }
 

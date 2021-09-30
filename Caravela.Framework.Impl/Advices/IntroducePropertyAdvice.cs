@@ -25,19 +25,19 @@ namespace Caravela.Framework.Impl.Advices
             AspectInstance aspect,
             INamedType targetDeclaration,
             string? explicitName,
-            Template<IProperty> templateProperty,
+            Template<IProperty> propertyTemplate,
             Template<IMethod> getTemplate,
             Template<IMethod> setTemplate,
             IntroductionScope scope,
             OverrideStrategy overrideStrategy,
             string? layerName,
             Dictionary<string, object?>? tags )
-            : base( aspect, targetDeclaration, templateProperty, scope, overrideStrategy, layerName, tags )
+            : base( aspect, targetDeclaration, propertyTemplate, scope, overrideStrategy, layerName, tags )
         {
             this._getTemplate = getTemplate;
             this._setTemplate = setTemplate;
 
-            var templatePropertyDeclaration = templateProperty.Declaration;
+            var templatePropertyDeclaration = propertyTemplate.Declaration;
             var name = templatePropertyDeclaration?.Name ?? explicitName ?? throw new AssertionFailedException();
             var hasGet = templatePropertyDeclaration != null ? templatePropertyDeclaration.GetMethod != null : getTemplate.IsNotNull;
             var hasSet = templatePropertyDeclaration != null ? templatePropertyDeclaration.SetMethod != null : setTemplate.IsNotNull;
@@ -48,12 +48,12 @@ namespace Caravela.Framework.Impl.Advices
                 name,
                 hasGet,
                 hasSet,
-                this.TemplateMember != null && this.TemplateMember.IsAutoPropertyOrField,
-                this.TemplateMember != null && this.TemplateMember.Writeability == Writeability.InitOnly );
+                this.TemplateMember is { IsAutoPropertyOrField: true },
+                this.TemplateMember is { Writeability: Writeability.InitOnly } );
 
-            if ( templateProperty.IsNotNull )
+            if ( propertyTemplate.IsNotNull )
             {
-                this.MemberBuilder.ApplyTemplateAttribute( templateProperty.TemplateInfo.Attribute );
+                this.MemberBuilder.ApplyTemplateAttribute( propertyTemplate.TemplateInfo.Attribute );
             }
         }
 

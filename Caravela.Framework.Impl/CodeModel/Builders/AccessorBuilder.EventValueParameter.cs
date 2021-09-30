@@ -12,9 +12,9 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         {
             public EventValueParameter( AccessorBuilder accessor ) : base( accessor, 0 ) { }
 
-            public override IType ParameterType
+            public override IType Type
             {
-                get => ((EventBuilder) this.Accessor._containingDeclaration).EventType;
+                get => ((EventBuilder) this.Accessor._containingDeclaration).Type;
                 set => throw new NotSupportedException( "Cannot directly change accessor's value parameter type." );
             }
 

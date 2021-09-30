@@ -17,7 +17,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.CSharpSyntax.TypeOf.Na
             Console.WriteLine("rt=" + rt);
             Console.WriteLine("ct=" + ct);
 
-            if (meta.Target.Parameters[0].ParameterType is INamedType { Name: nameof(MyClass1) } )
+            if (( (IParameter)meta.Target.Parameters[0] ).Type is INamedType { Name: nameof(MyClass1) } )
             {
                 Console.WriteLine("Oops");
             }

@@ -207,7 +207,8 @@ namespace Caravela.Framework.Impl.CompileTime
         {
             if ( symbol is ITypeParameterSymbol )
             {
-                throw new ArgumentOutOfRangeException( nameof(symbol), "Type parameters are not supported." );
+                // All generic parameters are now run-time only.
+                return TemplatingScope.RunTimeOnly;
             }
 
             if ( recursion > 32 )

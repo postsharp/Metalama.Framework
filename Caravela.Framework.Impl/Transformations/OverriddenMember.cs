@@ -10,6 +10,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
+using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Transformations
@@ -43,6 +44,14 @@ namespace Caravela.Framework.Impl.Transformations
         {
             ExpressionSyntax expression;
 
+            SimpleNameSyntax memberName = IdentifierName( this.OverriddenDeclaration.Name );
+
+            if ( this.OverriddenDeclaration is IGeneric generic && generic.TypeParameters.Count > 0 )
+            {
+                memberName = GenericName( this.OverriddenDeclaration.Name )
+                    .WithTypeArgumentList( TypeArgumentList( SeparatedList( generic.TypeParameters.Select( p => (TypeSyntax) IdentifierName( p.Name ) ) ) ) );
+            }
+
             if ( !this.OverriddenDeclaration.IsStatic )
             {
                 if ( this.OverriddenDeclaration.IsExplicitInterfaceImplementation )
@@ -55,14 +64,14 @@ namespace Caravela.Framework.Impl.Transformations
                             CastExpression(
                                 LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( implementedInterfaceMember.DeclaringType.GetSymbol() ),
                                 ThisExpression() ) ),
-                        IdentifierName( this.OverriddenDeclaration.Name ) );
+                        memberName );
                 }
                 else
                 {
                     expression = MemberAccessExpression(
                         SyntaxKind.SimpleMemberAccessExpression,
                         ThisExpression(),
-                        IdentifierName( this.OverriddenDeclaration.Name ) );
+                        memberName );
                 }
             }
             else
@@ -71,7 +80,7 @@ namespace Caravela.Framework.Impl.Transformations
                     MemberAccessExpression(
                         SyntaxKind.SimpleMemberAccessExpression,
                         LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( this.OverriddenDeclaration.DeclaringType.GetSymbol() ),
-                        IdentifierName( this.OverriddenDeclaration.Name ) );
+                        memberName );
             }
 
             return expression

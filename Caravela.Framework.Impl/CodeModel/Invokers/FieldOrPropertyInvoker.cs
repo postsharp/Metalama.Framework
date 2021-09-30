@@ -4,7 +4,6 @@
 using Caravela.Framework.Code;
 using Caravela.Framework.Code.Invokers;
 using Caravela.Framework.Impl.Aspects;
-using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Templating.MetaModel;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -17,7 +16,7 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
     {
         private readonly InvokerOperator _invokerOperator;
 
-        public IFieldOrProperty Member { get; }
+        protected IFieldOrProperty Member { get; }
 
         public FieldOrPropertyInvoker( IFieldOrProperty member, InvokerOrder linkerOrder, InvokerOperator invokerOperator ) : base( member, linkerOrder )
         {
@@ -31,7 +30,8 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
         {
             if ( this.Member.DeclaringType.IsOpenGeneric )
             {
-                throw GeneralDiagnosticDescriptors.CannotAccessOpenGenericMember.CreateException( this.Member );
+                throw new InvalidOperationException(
+                    $"Cannot invoke '{this.Member.ToDisplayString()}' because the declaring type has unbound type parameters." );
             }
 
             this.AssertNoArgument();
@@ -54,7 +54,7 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
         public object GetValue( object? instance )
             => new DynamicExpression(
                 this.CreatePropertyExpression( RuntimeExpression.FromValue( instance, this.Compilation ), AspectReferenceTargetKind.PropertyGetAccessor ),
-                this._invokerOperator == InvokerOperator.Default ? this.Member.Type : this.Member.Type.MakeNullable(),
+                this._invokerOperator == InvokerOperator.Default ? this.Member.Type : this.Member.Type.ConstructNullable(),
                 this.Member is Field,
                 this.Member.Writeability != Writeability.None );
 

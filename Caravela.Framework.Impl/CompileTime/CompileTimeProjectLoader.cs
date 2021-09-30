@@ -319,7 +319,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
                 var resourceName = metadataReader.GetString( resource.Name );
 
-                if ( resourceName.Contains( CompileTimeCompilationBuilder.ResourceName ) )
+                if ( resourceName.Contains( CompileTimeConstants.ResourceName ) )
                 {
                     unsafe
                     {

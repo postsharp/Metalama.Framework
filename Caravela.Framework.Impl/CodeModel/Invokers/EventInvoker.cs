@@ -4,7 +4,6 @@
 using Caravela.Framework.Code;
 using Caravela.Framework.Code.Invokers;
 using Caravela.Framework.Impl.Aspects;
-using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Templating.MetaModel;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -15,11 +14,11 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
 {
     internal class EventInvoker : Invoker, IEventInvoker
     {
-        public IEvent Member { get; }
+        private readonly IEvent _event;
 
-        public EventInvoker( IEvent member, InvokerOrder order, InvokerOperator invokerOperator ) : base( member, order )
+        public EventInvoker( IEvent @event, InvokerOrder order, InvokerOperator invokerOperator ) : base( @event, order )
         {
-            this.Member = member;
+            this._event = @event;
 
             if ( invokerOperator == InvokerOperator.Conditional )
             {
@@ -31,9 +30,10 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
 
         private ExpressionSyntax CreateEventExpression( RuntimeExpression instance, AspectReferenceTargetKind targetKind )
         {
-            if ( this.Member.DeclaringType.IsOpenGeneric )
+            if ( this._event.DeclaringType.IsOpenGeneric )
             {
-                throw GeneralDiagnosticDescriptors.CannotAccessOpenGenericMember.CreateException( this.Member );
+                throw new InvalidOperationException(
+                    $"Cannot invoke the '{this._event.ToDisplayString()}' event because the declaring type has unbound type parameters." );
             }
 
             this.AssertNoArgument();
@@ -41,8 +41,8 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
             return
                 MemberAccessExpression(
                         SyntaxKind.SimpleMemberAccessExpression,
-                        this.Member.GetReceiverSyntax( instance ),
-                        IdentifierName( this.Member.Name ) )
+                        this._event.GetReceiverSyntax( instance ),
+                        IdentifierName( this._event.Name ) )
                     .WithAspectReferenceAnnotation( this.AspectReference.WithTargetKind( targetKind ) );
         }
 
@@ -57,7 +57,7 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
                 eventAccess,
                 RuntimeExpression.GetSyntaxFromValue( value, this.Compilation ) );
 
-            return new DynamicExpression( expression, this.Member.EventType );
+            return new DynamicExpression( expression, this._event.Type );
         }
 
         public object Remove( object? instance, object? value )
@@ -71,7 +71,7 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
                 eventAccess,
                 RuntimeExpression.GetSyntaxFromValue( value, this.Compilation ) );
 
-            return new DynamicExpression( expression, this.Member.EventType );
+            return new DynamicExpression( expression, this._event.Type );
         }
 
         public object? Raise( object? instance, params object?[] args )
@@ -80,7 +80,7 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
                 RuntimeExpression.FromValue( instance, this.Compilation ),
                 AspectReferenceTargetKind.EventRaiseAccessor );
 
-            var arguments = this.Member.GetArguments( this.Member.Signature.Parameters, RuntimeExpression.FromValue( args, this.Compilation ) );
+            var arguments = this._event.GetArguments( this._event.Signature.Parameters, RuntimeExpression.FromValue( args, this.Compilation ) );
 
             var expression = ConditionalAccessExpression(
                 eventAccess,
@@ -88,7 +88,7 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
 
             return new DynamicExpression(
                 expression,
-                this.Member.Signature.ReturnType );
+                this._event.Signature.ReturnType );
         }
 
         public IEventInvoker Base => throw new NotImplementedException();

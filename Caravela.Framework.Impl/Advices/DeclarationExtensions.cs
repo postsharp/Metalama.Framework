@@ -11,13 +11,13 @@ namespace Caravela.Framework.Impl.Advices
         public static bool SignatureEquals( this IMethod method, IMethod other )
         {
             return method.Name == other.Name
-                   && method.GenericParameters.Count == other.GenericParameters.Count
+                   && method.TypeParameters.Count == other.TypeParameters.Count
                    && method.Parameters.Count == other.Parameters.Count
                    && method.Parameters
                        .Select( ( p, i ) => (p, i) )
                        .All(
                            amp =>
-                               method.Compilation.InvariantComparer.Equals( amp.p.ParameterType, other.Parameters[amp.i].ParameterType )
+                               method.Compilation.InvariantComparer.Equals( amp.p.Type, other.Parameters[amp.i].Type )
                                && amp.p.RefKind == other.Parameters[amp.i].RefKind );
         }
 
@@ -29,7 +29,7 @@ namespace Caravela.Framework.Impl.Advices
                        .Select( ( p, i ) => (p, i) )
                        .All(
                            app =>
-                               property.Compilation.InvariantComparer.Equals( app.p.ParameterType, other.Parameters[app.i].ParameterType )
+                               property.Compilation.InvariantComparer.Equals( app.p.Type, other.Parameters[app.i].Type )
                                && app.p.RefKind == other.Parameters[app.i].RefKind );
         }
     }

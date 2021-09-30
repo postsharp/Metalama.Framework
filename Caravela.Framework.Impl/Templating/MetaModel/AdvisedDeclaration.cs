@@ -11,8 +11,8 @@ using System.Collections.Immutable;
 
 namespace Caravela.Framework.Impl.Templating.MetaModel
 {
-    internal abstract class AdvisedDeclaration<T> : IDeclarationInternal
-        where T : IDeclarationInternal
+    internal abstract class AdvisedDeclaration<T> : IDeclarationImpl
+        where T : IDeclarationImpl
     {
         protected AdvisedDeclaration( T underlying )
         {
@@ -43,5 +43,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
         public ImmutableArray<SyntaxReference> DeclaringSyntaxReferences => this.Underlying.DeclaringSyntaxReferences;
 
         public override string ToString() => this.Underlying.ToString();
+
+        public IDeclaration OriginalDefinition => this.Underlying.OriginalDefinition;
     }
 }
