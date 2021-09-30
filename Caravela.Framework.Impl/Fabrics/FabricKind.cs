@@ -7,8 +7,8 @@ namespace Caravela.Framework.Impl.Fabrics
     {
         // The order is significant because it becomes the execution order.
 
-        Transitive,
         Compilation,
+        Transitive,
         Namespace,
         Type
     }
