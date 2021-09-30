@@ -15,13 +15,13 @@ using TypedConstant = Caravela.Framework.Code.TypedConstant;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    internal abstract class ReturnParameter : IParameter, IHasDiagnosticLocation, IDeclarationInternal
+    internal abstract class ReturnParameter : IParameter, IHasDiagnosticLocation, IDeclarationImpl
     {
         protected abstract RefKind SymbolRefKind { get; }
 
         public Code.RefKind RefKind => this.SymbolRefKind.ToOurRefKind();
 
-        public abstract IType ParameterType { get; }
+        public abstract IType Type { get; }
 
         public string Name => throw new NotSupportedException( "Cannot get the name of a return parameter." );
 
@@ -59,6 +59,8 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public abstract DeclarationRef<IDeclaration> ToRef();
 
-        public ImmutableArray<SyntaxReference> DeclaringSyntaxReferences => ((IDeclarationInternal) this.DeclaringMember).DeclaringSyntaxReferences;
+        public ImmutableArray<SyntaxReference> DeclaringSyntaxReferences => ((IDeclarationImpl) this.DeclaringMember).DeclaringSyntaxReferences;
+
+        public abstract IDeclaration OriginalDefinition { get; }
     }
 }

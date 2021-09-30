@@ -10,12 +10,12 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Field.Progra
         public void BuildAspect(IAspectBuilder<INamedType> builder)
         {
             {
-                var introduced = builder.AdviceFactory.IntroduceField(builder.Target, "IntroducedField");
+                var introduced = builder.Advices.IntroduceField(builder.Target, "IntroducedField");
                 introduced.Type = introduced.Compilation.TypeFactory.GetTypeByReflectionType(typeof(int));
             }
 
             {
-                var introduced = builder.AdviceFactory.IntroduceField(builder.Target, "IntroducedField_Static");
+                var introduced = builder.Advices.IntroduceField(builder.Target, "IntroducedField_Static");
                 introduced.Type = introduced.Compilation.TypeFactory.GetTypeByReflectionType(typeof(int));
                 introduced.IsStatic = true;
             }

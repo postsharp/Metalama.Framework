@@ -8,17 +8,12 @@ namespace Caravela.Framework.Code
     /// <summary>
     /// Represents a parameter of a method or property.
     /// </summary>
-    public interface IParameter : INamedDeclaration
+    public interface IParameter : INamedDeclaration, IHasType
     {
         /// <summary>
         /// Gets the <c>in</c>, <c>out</c>, <c>ref</c> parameter type modifier.
         /// </summary>
         RefKind RefKind { get; }
-
-        /// <summary>
-        /// Gets the parameter type.
-        /// </summary>
-        IType ParameterType { get; }
 
         /// <summary>
         /// Gets the parameter position, or <c>-1</c> for <see cref="IMethod.ReturnParameter"/>.

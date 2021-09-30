@@ -28,9 +28,9 @@ namespace Caravela.Framework.Tests.Integration.Runners
             ITestOutputHelper? logger )
             : base( serviceProvider, projectDirectory, metadataReferences, logger ) { }
 
-        private protected override async Task<TestResult> RunAsync( TestInput testInput, Dictionary<string, object?> state )
+        private protected override async Task RunAsync( TestInput testInput, TestResult testResult, Dictionary<string, object?> state )
         {
-            var testResult = await base.RunAsync( testInput, state );
+            await base.RunAsync( testInput, testResult, state );
 
             using var buildOptions = new TestProjectOptions();
             using var domain = new UnloadableCompileTimeDomain();
@@ -80,8 +80,6 @@ namespace Caravela.Framework.Tests.Integration.Runners
             {
                 testResult.SetFailed( "LiveTemplateAspectPipeline.TryExecute failed." );
             }
-
-            return testResult;
         }
     }
 }

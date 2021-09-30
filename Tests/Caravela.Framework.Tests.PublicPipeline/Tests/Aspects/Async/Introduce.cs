@@ -11,7 +11,7 @@ namespace Caravela.Framework.Tests.Integration.Aspects.Async.Introduce
     {
         public void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.AdviceFactory.IntroduceMethod( builder.Target, nameof(ProgrammaticallyMethodAsync) );
+            builder.Advices.IntroduceMethod( builder.Target, nameof(ProgrammaticallyMethodAsync) );
         }
     
         [Introduce]

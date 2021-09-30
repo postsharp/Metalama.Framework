@@ -12,7 +12,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         {
             public PropertySetValueParameter( AccessorBuilder accessor, int index ) : base( accessor, index ) { }
 
-            public override IType ParameterType
+            public override IType Type
             {
                 get => ((PropertyBuilder) this.Accessor._containingDeclaration).Type;
                 set => throw new NotSupportedException( "Cannot directly change accessor's parameter type." );

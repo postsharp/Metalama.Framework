@@ -19,7 +19,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
         public AdvisedParameterList( IHasParameters method )
         {
             this._method = method;
-            this._parameters = method.Parameters.Select( p => new AdvisedParameter( (IParameterInternal) p ) ).ToArray();
+            this._parameters = method.Parameters.Select( p => new AdvisedParameter( (IParameterImpl) p ) ).ToArray();
         }
 
         public CompilationModel Compilation => (CompilationModel) this._method.Compilation;
@@ -36,7 +36,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
             => this.SingleOrDefault( p => p.Name == name )
                ?? throw new KeyNotFoundException( $"There is no parameter named '{name}' in method '{this._method.ToDisplayString()}" );
 
-        public IEnumerable<IAdvisedParameter> OfType( IType type ) => this.Where( p => p.ParameterType.Is( type ) );
+        public IEnumerable<IAdvisedParameter> OfType( IType type ) => this.Where( p => p.Type.Is( type ) );
 
         public IEnumerable<IAdvisedParameter> OfType( Type type ) => this.OfType( this.Compilation.Factory.GetTypeByReflectionType( type ).AssertNotNull() );
 

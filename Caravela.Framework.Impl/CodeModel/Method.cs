@@ -7,6 +7,7 @@ using Caravela.Framework.Code.Invokers;
 using Caravela.Framework.Impl.CodeModel.Collections;
 using Caravela.Framework.Impl.CodeModel.Invokers;
 using Caravela.Framework.Impl.CodeModel.References;
+using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.ReflectionMocks;
 using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
@@ -19,7 +20,7 @@ using MethodKind = Microsoft.CodeAnalysis.MethodKind;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    internal class Method : MethodBase, IMethodInternal
+    internal class Method : MethodBase, IMethodImpl
     {
         public Method( IMethodSymbol symbol, CompilationModel compilation ) : base( symbol, compilation )
         {
@@ -36,21 +37,30 @@ namespace Caravela.Framework.Impl.CodeModel
         public IType ReturnType => this.Compilation.Factory.GetIType( this.MethodSymbol.ReturnType );
 
         [Memo]
-        public IGenericParameterList GenericParameters
+        public IGenericParameterList TypeParameters
             => new GenericParameterList(
                 this,
                 this.MethodSymbol.TypeParameters.Select( DeclarationRef.FromSymbol<IGenericParameter> ) );
 
+        [Memo]
+        public IReadOnlyList<IType> TypeArguments => this.MethodSymbol.TypeArguments.Select( t => this.Compilation.Factory.GetIType( t ) ).ToImmutableArray();
+
         public override DeclarationKind DeclarationKind => DeclarationKind.Method;
 
-        [Memo]
-        public IReadOnlyList<IType> GenericArguments => this.MethodSymbol.TypeArguments.Select( this.Compilation.Factory.GetIType ).ToImmutableList();
+        public bool IsOpenGeneric => this.MethodSymbol.TypeArguments.Any( ga => ga is ITypeParameterSymbol ) || this.DeclaringType.IsOpenGeneric;
 
-        public bool IsOpenGeneric => this.GenericArguments.Any( ga => ga is IGenericParameter ) || this.DeclaringType.IsOpenGeneric;
+        public bool IsGeneric => this.MethodSymbol.TypeParameters.Length > 0;
 
-        public IMethod WithGenericArguments( params IType[] genericArguments )
+        IGeneric IGenericInternal.ConstructGenericInstance( params IType[] typeArguments )
         {
-            var symbolWithGenericArguments = this.MethodSymbol.Construct( genericArguments.Select( a => a.GetSymbol() ).ToArray() );
+            if ( this.DeclaringType.IsOpenGeneric )
+            {
+                throw new InvalidOperationException(
+                    UserMessageFormatter.Format(
+                        $"Cannot construct a generic instance of this method because the declaring type '{this.DeclaringType}' has unbound type parameters." ) );
+            }
+
+            var symbolWithGenericArguments = this.MethodSymbol.Construct( typeArguments.Select( a => a.GetSymbol() ).ToArray() );
 
             return new Method( symbolWithGenericArguments, this.Compilation );
         }

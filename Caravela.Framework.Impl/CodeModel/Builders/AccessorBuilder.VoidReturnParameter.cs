@@ -14,7 +14,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
             public VoidReturnParameter( AccessorBuilder accessor ) : base( accessor, -1 ) { }
 
             [Memo]
-            public override IType ParameterType
+            public override IType Type
             {
                 get => this.Compilation.Factory.GetTypeByReflectionType( typeof(void) );
                 set => throw new NotSupportedException( "Cannot directly change accessor's parameter type." );

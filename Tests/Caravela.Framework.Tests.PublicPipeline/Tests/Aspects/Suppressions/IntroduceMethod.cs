@@ -30,7 +30,7 @@ namespace Caravela.Framework.Tests.Integration.Aspects.Suppressions.OverrideMeth
         
         public void BuildAspect(IAspectBuilder<INamedType> builder)
         {
-            var introduced = builder.AdviceFactory.IntroduceMethod( builder.Target, nameof(Introduced));
+            var introduced = builder.Advices.IntroduceMethod( builder.Target, nameof(Introduced));
             builder.Diagnostics.Suppress( introduced, _suppression1 );
         }
     }

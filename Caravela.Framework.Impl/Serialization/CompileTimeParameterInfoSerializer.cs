@@ -33,7 +33,7 @@ namespace Caravela.Framework.Impl.Serialization
                 }
             }
 
-            var retrieveMethodBase = this.Service.CompileTimeMethodInfoSerializer.SerializeMethodBase(
+            var retrieveMethodBase = CompileTimeMethodInfoSerializer.SerializeMethodBase(
                 method.GetSymbol().AssertNotNull( Justifications.SerializersNotImplementedForIntroductions ),
                 syntaxFactory );
 

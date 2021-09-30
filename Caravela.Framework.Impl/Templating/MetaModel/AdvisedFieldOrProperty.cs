@@ -11,7 +11,7 @@ using System;
 namespace Caravela.Framework.Impl.Templating.MetaModel
 {
     internal class AdvisedFieldOrProperty<T> : AdvisedMember<T>, IAdvisedFieldOrProperty
-        where T : IFieldOrProperty, IDeclarationInternal
+        where T : IFieldOrProperty, IDeclarationImpl
     {
         public AdvisedFieldOrProperty( T underlying ) : base( underlying ) { }
 

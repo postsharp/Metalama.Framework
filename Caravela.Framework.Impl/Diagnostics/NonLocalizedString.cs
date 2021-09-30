@@ -21,7 +21,7 @@ namespace Caravela.Framework.Impl.Diagnostics
         protected override string GetText( IFormatProvider? formatProvider )
             => this._arguments.Length == 0
                 ? this._message
-                : string.Format( DiagnosticFormatter.Instance, this._message, this._arguments );
+                : string.Format( UserMessageFormatter.Instance, this._message, this._arguments );
 
         protected override int GetHash()
         {

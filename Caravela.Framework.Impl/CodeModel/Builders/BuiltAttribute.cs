@@ -28,5 +28,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public IReadOnlyList<TypedConstant> ConstructorArguments => this.AttributeBuilder.ConstructorArguments;
 
         public INamedArgumentList NamedArguments => this.AttributeBuilder.NamedArguments;
+
+        IType IHasType.Type => this.Type;
     }
 }

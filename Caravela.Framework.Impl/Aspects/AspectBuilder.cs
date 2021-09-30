@@ -40,7 +40,7 @@ namespace Caravela.Framework.Impl.Aspects
 
         IDeclaration IAspectLayerBuilder.Target => this.Target;
 
-        public IAdviceFactory AdviceFactory => this._adviceFactory;
+        public IAdviceFactory Advices => this._adviceFactory;
 
         public void SkipAspect() => this._skipped = true;
 

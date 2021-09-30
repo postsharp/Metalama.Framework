@@ -13,14 +13,14 @@ using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Linq;
 using System.Reflection;
 using Accessibility = Caravela.Framework.Code.Accessibility;
 using MethodKind = Caravela.Framework.Code.MethodKind;
+using SpecialType = Caravela.Framework.Code.SpecialType;
 
 namespace Caravela.Framework.Impl.CodeModel.Pseudo
 {
-    internal abstract class PseudoAccessor<T> : IMethod, IDeclarationInternal
+    internal abstract class PseudoAccessor<T> : IMethodImpl
         where T : IMember
     {
         protected T DeclaringMember { get; }
@@ -34,19 +34,20 @@ namespace Caravela.Framework.Impl.CodeModel.Pseudo
         [Memo]
         public IParameter ReturnParameter => new PseudoParameter( this, -1, this.ReturnType, null );
 
-        [Memo]
         public IType ReturnType
             => this.MethodKind != MethodKind.PropertyGet
-                ? this.DeclaringMember.Compilation.TypeFactory.GetTypeByReflectionType( typeof(void) )
-                : ((IProperty) this.DeclaringMember).Type;
+                ? this.DeclaringMember.Compilation.TypeFactory.GetSpecialType( SpecialType.Void )
+                : ((IFieldOrProperty) this.DeclaringMember).Type;
 
         [Memo]
-        public IGenericParameterList GenericParameters => new GenericParameterList( this, Enumerable.Empty<DeclarationRef<IGenericParameter>>() );
+        public IGenericParameterList TypeParameters => GenericParameterList.Empty;
 
         [Memo]
-        public IReadOnlyList<IType> GenericArguments => ImmutableList<IType>.Empty;
+        public IReadOnlyList<IType> TypeArguments => ImmutableArray<IType>.Empty;
 
         public bool IsOpenGeneric => this.DeclaringMember.DeclaringType.IsOpenGeneric;
+
+        public bool IsGeneric => false;
 
         [Memo]
         public IInvokerFactory<IMethodInvoker> Invokers
@@ -108,12 +109,14 @@ namespace Caravela.Framework.Impl.CodeModel.Pseudo
 
         IMemberWithAccessors? IMethod.DeclaringMember => (IMemberWithAccessors) this.DeclaringMember;
 
-        public IMethod WithGenericArguments( params IType[] genericArguments ) => throw new NotSupportedException();
-
         public ISymbol? Symbol => null;
 
         public DeclarationRef<IDeclaration> ToRef() => throw new NotImplementedException();
 
         public ImmutableArray<SyntaxReference> DeclaringSyntaxReferences => ImmutableArray<SyntaxReference>.Empty;
+
+        public IGeneric ConstructGenericInstance( params IType[] typeArguments ) => throw new NotImplementedException();
+
+        public IDeclaration OriginalDefinition => throw new NotImplementedException();
     }
 }

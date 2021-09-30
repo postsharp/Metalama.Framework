@@ -24,7 +24,7 @@ namespace Caravela.Framework.Code
         /// For generic type definitions, this requires using <c>`</c>, e.g. to get <c>List&lt;T&gt;</c>, use <c>System.Collections.Generic.List`1</c>.
         /// </para>
         /// <para>
-        /// Constructed generic types (e.g. <c>List&lt;int&gt;</c>) are not supported, for those, use <see cref="INamedType.WithGenericArguments(IType[])"/>.
+        /// Constructed generic types (e.g. <c>List&lt;int&gt;</c>) are not supported, for those, use <see cref="GenericExtensions.ConstructGenericInstance(Caravela.Framework.Code.INamedType,Caravela.Framework.Code.IType[])"/>.
         /// </para>
         /// </remarks>
         INamedType GetTypeByReflectionName( string reflectionName );
@@ -42,16 +42,16 @@ namespace Caravela.Framework.Code
         /// <param name="elementType"></param>
         /// <param name="rank"></param>
         /// <returns></returns>
-        IArrayType MakeArrayType( IType elementType, int rank );
+        IArrayType ConstructArrayType( IType elementType, int rank );
 
         /// <summary>
         /// Creates a pointer type.
         /// </summary>
         /// <param name="pointedType"></param>
         /// <returns></returns>
-        IPointerType MakePointerType( IType pointedType );
+        IPointerType ConstructPointerType( IType pointedType );
 
-        T MakeNullable<T>( T type )
+        T ConstructNullable<T>( T type )
             where T : IType;
 
         /// <summary>

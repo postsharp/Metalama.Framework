@@ -57,7 +57,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
             IPathOptions? directoryOptions = null,
             IAssemblyLocator? assemblyLocator = null )
             : this( projectOptions, domain, isTest, directoryOptions, assemblyLocator, null ) { }
-        
+
         internal DesignTimeAspectPipeline(
             IProjectOptions projectOptions,
             CompileTimeDomain domain,

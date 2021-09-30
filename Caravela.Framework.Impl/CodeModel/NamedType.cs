@@ -7,6 +7,7 @@ using Caravela.Framework.Code.DeclarationBuilders;
 using Caravela.Framework.Impl.CodeModel.Collections;
 using Caravela.Framework.Impl.CodeModel.References;
 using Caravela.Framework.Impl.Collections;
+using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.ReflectionMocks;
 using Caravela.Framework.Impl.Transformations;
 using Caravela.Framework.Impl.Utilities;
@@ -27,7 +28,7 @@ using TypeKind = Caravela.Framework.Code.TypeKind;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    internal sealed class NamedType : MemberOrNamedType, ITypeInternal, ISdkNamedType
+    internal sealed class NamedType : MemberOrNamedType, INamedTypeInternal
     {
         private SpecialType? _specialType;
 
@@ -109,11 +110,9 @@ namespace Caravela.Framework.Impl.CodeModel
                (this.TypeSymbol.TypeKind == RoslynTypeKind.Class && !this.TypeSymbol.IsAbstract &&
                 this.TypeSymbol.InstanceConstructors.Any( ctor => ctor.Parameters.Length == 0 ));
 
-        public bool IsOpenGeneric => this.TypeSymbol.TypeArguments.Any( ga => ga is ITypeParameterSymbol );
+        public bool IsOpenGeneric => this.TypeSymbol.TypeArguments.Any( ga => ga is ITypeParameterSymbol ) || this.DeclaringType is { IsOpenGeneric: true };
 
         public bool IsGeneric => this.TypeSymbol.IsGenericType;
-
-        public INamedType OriginalDeclaration => this.IsGeneric ? this.Compilation.Factory.GetNamedType( this.TypeSymbol.OriginalDefinition ) : this;
 
         [Memo]
         public INamedTypeList NestedTypes => new NamedTypeList( this, this.TypeSymbol.GetTypeMembers().Select( t => new MemberRef<INamedType>( t ) ) );
@@ -206,7 +205,7 @@ namespace Caravela.Framework.Impl.CodeModel
         }
 
         [Memo]
-        public IGenericParameterList GenericParameters
+        public IGenericParameterList TypeParameters
             => new GenericParameterList(
                 this,
                 this.TypeSymbol.TypeParameters
@@ -219,7 +218,7 @@ namespace Caravela.Framework.Impl.CodeModel
         public string FullName => this.TypeSymbol.ToDisplayString();
 
         [Memo]
-        public IReadOnlyList<IType> GenericArguments => this.TypeSymbol.TypeArguments.Select( a => this.Compilation.Factory.GetIType( a ) ).ToImmutableList();
+        public IReadOnlyList<IType> TypeArguments => this.TypeSymbol.TypeArguments.Select( a => this.Compilation.Factory.GetIType( a ) ).ToImmutableList();
 
         [Memo]
         public IAssembly DeclaringAssembly => this.Compilation.Factory.GetAssembly( this.TypeSymbol.ContainingAssembly );
@@ -266,8 +265,17 @@ namespace Caravela.Framework.Impl.CodeModel
 
         ICompilation ICompilationElement.Compilation => this.Compilation;
 
-        public INamedType WithGenericArguments( params IType[] genericArguments )
-            => this.Compilation.Factory.GetNamedType( this.TypeSymbol.Construct( genericArguments.Select( a => a.GetSymbol() ).ToArray() ) );
+        IGeneric IGenericInternal.ConstructGenericInstance( params IType[] typeArguments )
+        {
+            if ( this.DeclaringType is { IsOpenGeneric: true } )
+            {
+                throw new InvalidOperationException(
+                    UserMessageFormatter.Format(
+                        $"Cannot construct a generic instance of this nested type because the declaring type '{this.DeclaringType}' has unbound type parameters." ) );
+            }
+
+            return this.Compilation.Factory.GetNamedType( this.TypeSymbol.Construct( typeArguments.Select( a => a.GetSymbol() ).ToArray() ) );
+        }
 
         public bool Equals( IType other ) => this.Compilation.InvariantComparer.Equals( this, other );
 
@@ -318,10 +326,10 @@ namespace Caravela.Framework.Impl.CodeModel
             while ( currentType != null )
             {
                 var introducedInterface =
-                    this.Compilation.GetObservableTransformationsOnElement( currentType )
+                    this.Compilation
+                        .GetObservableTransformationsOnElement( currentType )
                         .OfType<IntroducedInterface>()
-                        .Where( i => this.Compilation.InvariantComparer.Equals( i.InterfaceType, interfaceMember.DeclaringType ) )
-                        .SingleOrDefault();
+                        .SingleOrDefault( i => this.Compilation.InvariantComparer.Equals( i.InterfaceType, interfaceMember.DeclaringType ) );
 
                 if ( introducedInterface != null )
                 {

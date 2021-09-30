@@ -3,6 +3,7 @@
 
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Formatting;
 using Microsoft.CodeAnalysis;
@@ -10,6 +11,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -147,14 +149,13 @@ namespace Caravela.TestFramework
 
             foreach ( var syntaxTree in compilation.SyntaxTrees )
             {
-                i++;
-
-                if ( i >= this.SyntaxTrees.Count )
+                if ( Path.GetFileName( syntaxTree.FilePath ) == CompileTimeConstants.PredefinedTypesFileName )
                 {
                     // This is the "Intrinsics" syntax tree.
                     continue;
                 }
 
+                i++;
                 var syntaxNode = await syntaxTree.GetRootAsync();
 
                 // Format the output code.

@@ -10,13 +10,11 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 {
     internal partial class AccessorBuilder
     {
-        // TODO: Move all types into separate files.
-
         private abstract class ParameterBase : DeclarationBuilder, IParameterBuilder
         {
             protected AccessorBuilder Accessor { get; }
 
-            public ParameterBase( AccessorBuilder accessor, int index ) : base( accessor.ParentAdvice )
+            protected ParameterBase( AccessorBuilder accessor, int index ) : base( accessor.ParentAdvice )
             {
                 this.Accessor = accessor;
                 this.Index = index;
@@ -30,7 +28,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                         "Cannot directly set the default value of indexer accessor parameter, set the value on indexer itself." );
             }
 
-            public abstract IType ParameterType { get; set; }
+            public abstract IType Type { get; set; }
 
             public abstract RefKind RefKind { get; set; }
 
@@ -45,8 +43,6 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
             public override DeclarationKind DeclarationKind => DeclarationKind.Parameter;
 
             public IMemberOrNamedType DeclaringMember => (IMemberOrNamedType) this.Accessor.ContainingDeclaration.AssertNotNull();
-
-            IType IParameter.ParameterType => this.ParameterType;
 
             TypedConstant IParameter.DefaultValue => this.DefaultValue;
 

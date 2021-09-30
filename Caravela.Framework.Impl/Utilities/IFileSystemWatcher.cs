@@ -11,13 +11,13 @@ namespace Caravela.Framework.Impl.Utilities
     internal interface IFileSystemWatcher : IDisposable
     {
         bool EnableRaisingEvents { get; set; }
-        
+
         event FileSystemEventHandler Changed;
 
         string Path { get; set; }
-        
+
         string Filter { get; set; }
-        
+
         public bool IncludeSubdirectories { get; set; }
     }
 }

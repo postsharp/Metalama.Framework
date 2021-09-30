@@ -141,13 +141,13 @@ namespace Caravela.Framework.Impl.CodeModel
                 _ => throw new ArgumentException( nameof(symbol) )
             };
 
-        IArrayType ITypeFactory.MakeArrayType( IType elementType, int rank )
+        IArrayType ITypeFactory.ConstructArrayType( IType elementType, int rank )
             => (IArrayType) this.GetIType( this.RoslynCompilation.CreateArrayTypeSymbol( ((ITypeInternal) elementType).TypeSymbol.AssertNotNull(), rank ) );
 
-        IPointerType ITypeFactory.MakePointerType( IType pointedType )
+        IPointerType ITypeFactory.ConstructPointerType( IType pointedType )
             => (IPointerType) this.GetIType( this.RoslynCompilation.CreatePointerTypeSymbol( ((ITypeInternal) pointedType).TypeSymbol.AssertNotNull() ) );
 
-        public T MakeNullable<T>( T type )
+        public T ConstructNullable<T>( T type )
             where T : IType
             => (T) this.GetIType( ((ITypeInternal) type).TypeSymbol.AssertNotNull().WithNullableAnnotation( NullableAnnotation.Annotated ) );
 

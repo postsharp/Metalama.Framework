@@ -36,19 +36,20 @@ namespace Caravela.Framework.Tests.Integration.Runners
         /// Runs the template test with name and source provided in the <paramref name="testInput"/>.
         /// </summary>
         /// <param name="testInput">Specifies the input test parameters such as the name and the source.</param>
+        /// <param name="testResult"></param>
         /// <param name="state"></param>
         /// <returns>The result of the test execution.</returns>
-        private protected override async Task<TestResult> RunAsync( TestInput testInput, Dictionary<string, object?> state )
+        private protected override async Task RunAsync( TestInput testInput, TestResult testResult, Dictionary<string, object?> state )
         {
             var builder = new LinkerTestInputBuilder();
 
             state["builder"] = builder;
 
-            var testResult = await base.RunAsync( testInput, state );
+            await base.RunAsync( testInput, testResult, state );
 
             if ( !testResult.Success )
             {
-                return testResult;
+                return;
             }
 
             // Create the linker input.
@@ -76,8 +77,6 @@ namespace Caravela.Framework.Tests.Integration.Runners
             {
                 testResult.SetFailed( "Final Compilation.Emit failed." );
             }
-
-            return testResult;
         }
 
         private protected override void ExecuteAssertions( TestInput testInput, TestResult testResult, Dictionary<string, object?> state )

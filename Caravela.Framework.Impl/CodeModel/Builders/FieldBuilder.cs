@@ -17,7 +17,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
-    internal class FieldBuilder : MemberBuilder, IFieldBuilder, IFieldInternal
+    internal class FieldBuilder : MemberBuilder, IFieldBuilder, IFieldImpl
     {
         public override DeclarationKind DeclarationKind => DeclarationKind.Field;
 
@@ -33,8 +33,6 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         [Memo]
         public IInvokerFactory<IFieldOrPropertyInvoker> Invokers
             => new InvokerFactory<IFieldOrPropertyInvoker>( ( order, invokerOperator ) => new FieldOrPropertyInvoker( this, order, invokerOperator ), false );
-
-        IType IFieldOrProperty.Type => this.Type;
 
         public Writeability Writeability { get; set; }
 

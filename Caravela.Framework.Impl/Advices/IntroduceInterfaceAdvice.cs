@@ -191,8 +191,8 @@ namespace Caravela.Framework.Impl.Advices
                         }
                         else if (
                             !compilation.InvariantComparer.Equals(
-                                interfaceMethod.ReturnParameter.ParameterType,
-                                matchingAspectMethod.Method.ReturnParameter.ParameterType )
+                                interfaceMethod.ReturnParameter.Type,
+                                matchingAspectMethod.Method.ReturnParameter.Type )
                             || interfaceMethod.ReturnParameter.RefKind != matchingAspectMethod.Method.ReturnParameter.RefKind )
                         {
                             diagnosticAdder.Report(
@@ -253,7 +253,7 @@ namespace Caravela.Framework.Impl.Advices
                                     this.TargetDeclaration.GetDiagnosticLocation(),
                                     (this.Aspect.AspectClass.DisplayName, this.TargetDeclaration, interfaceType, interfaceEvent) ) );
                         }
-                        else if ( !compilation.InvariantComparer.Equals( interfaceEvent.EventType, matchingAspectEvent.Event.EventType ) )
+                        else if ( !compilation.InvariantComparer.Equals( interfaceEvent.Type, matchingAspectEvent.Event.Type ) )
                         {
                             diagnosticAdder.Report(
                                 AdviceDiagnosticDescriptors.DeclarativeInterfaceMemberDoesNotMatch.CreateDiagnostic(
@@ -317,7 +317,8 @@ namespace Caravela.Framework.Impl.Advices
                             break;
 
                         case IProperty interfaceProperty:
-                            var buildAutoProperty = ((IProperty?) memberSpec.AspectInterfaceMember)?.IsAutoPropertyOrField == true;
+                            var aspectProperty = (IProperty?) memberSpec.AspectInterfaceMember;
+                            var buildAutoProperty = aspectProperty?.IsAutoPropertyOrField == true;
 
                             memberBuilder = this.GetImplPropertyBuilder(
                                 interfaceProperty,
@@ -327,16 +328,19 @@ namespace Caravela.Framework.Impl.Advices
 
                             interfaceMemberMap.Add( interfaceProperty, memberBuilder );
 
-                            if ( ((IProperty?) memberSpec.AspectInterfaceMember)?.IsAutoPropertyOrField != true )
+                            if ( aspectProperty?.IsAutoPropertyOrField != true )
                             {
+                                var propertyTemplate = Template.Create( aspectProperty, memberSpec.TemplateInfo, TemplateKind.Introduction );
+                                var accessorTemplates = propertyTemplate.GetAccessorTemplates();
+
                                 overrides.Add(
                                     memberSpec.AspectInterfaceMember != null
                                         ? new OverriddenProperty(
                                             this,
                                             (IProperty) memberBuilder,
-                                            Template.Create( (IProperty) memberSpec.AspectInterfaceMember, memberSpec.TemplateInfo, TemplateKind.Introduction ),
-                                            default,
-                                            default )
+                                            propertyTemplate,
+                                            accessorTemplates.Get,
+                                            accessorTemplates.Set )
                                         : new RedirectedProperty(
                                             this,
                                             (IProperty) memberBuilder,
@@ -390,31 +394,29 @@ namespace Caravela.Framework.Impl.Advices
         {
             var methodBuilder = new MethodBuilder( this, this.TargetDeclaration, interfaceMethod.Name );
 
-            methodBuilder.ReturnParameter.ParameterType = interfaceMethod.ReturnParameter.ParameterType;
+            methodBuilder.ReturnParameter.Type = interfaceMethod.ReturnParameter.Type;
             methodBuilder.ReturnParameter.RefKind = interfaceMethod.ReturnParameter.RefKind;
 
             foreach ( var interfaceParameter in interfaceMethod.Parameters )
             {
                 _ = methodBuilder.AddParameter(
                     interfaceParameter.Name,
-                    interfaceParameter.ParameterType,
+                    interfaceParameter.Type,
                     interfaceParameter.RefKind,
                     interfaceParameter.DefaultValue );
             }
 
-            foreach ( var interfaceGenericParameter in interfaceMethod.GenericParameters )
+            foreach ( var interfaceGenericParameter in interfaceMethod.TypeParameters )
             {
                 // TODO: Move this initialization into a second overload of add generic parameter.
                 var genericParameterBuilder = methodBuilder.AddGenericParameter( interfaceGenericParameter.Name );
-                genericParameterBuilder.IsContravariant = interfaceGenericParameter.IsContravariant;
-                genericParameterBuilder.IsCovariant = interfaceGenericParameter.IsCovariant;
+                genericParameterBuilder.Variance = interfaceGenericParameter.Variance;
+                genericParameterBuilder.TypeKindConstraint = interfaceGenericParameter.TypeKindConstraint;
                 genericParameterBuilder.HasDefaultConstructorConstraint = interfaceGenericParameter.HasDefaultConstructorConstraint;
-                genericParameterBuilder.HasNonNullableValueTypeConstraint = interfaceGenericParameter.HasNonNullableValueTypeConstraint;
-                genericParameterBuilder.HasReferenceTypeConstraint = interfaceGenericParameter.HasReferenceTypeConstraint;
 
                 foreach ( var templateGenericParameterConstraint in genericParameterBuilder.TypeConstraints )
                 {
-                    genericParameterBuilder.TypeConstraints.Add( templateGenericParameterConstraint );
+                    genericParameterBuilder.AddTypeConstraint( templateGenericParameterConstraint );
                 }
             }
 
@@ -445,6 +447,8 @@ namespace Caravela.Framework.Impl.Advices
 
             foreach ( var interfaceParameter in interfaceProperty.Parameters )
             {
+                _ = interfaceParameter;
+
                 // Property parameters - we will be probably removing them and there will be a special override for indexers.
                 throw new AssertionFailedException( Justifications.CoverageMissing );
 
@@ -499,7 +503,7 @@ namespace Caravela.Framework.Impl.Advices
                 interfaceEvent.Name,
                 isEventField );
 
-            eventBuilder.EventType = interfaceEvent.EventType;
+            eventBuilder.Type = interfaceEvent.Type;
 
             if ( isExplicit )
             {

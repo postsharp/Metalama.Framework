@@ -12,7 +12,7 @@ using TypedConstant = Caravela.Framework.Code.TypedConstant;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    internal class Parameter : Declaration, IParameterInternal
+    internal class Parameter : Declaration, IParameterImpl
     {
         public IParameterSymbol ParameterSymbol { get; }
 
@@ -41,7 +41,7 @@ namespace Caravela.Framework.Impl.CodeModel
             };
 
         [Memo]
-        public IType ParameterType => this.Compilation.Factory.GetIType( this.ParameterSymbol.Type );
+        public IType Type => this.Compilation.Factory.GetIType( this.ParameterSymbol.Type );
 
         public string Name => this.ParameterSymbol.Name;
 
@@ -57,7 +57,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public TypedConstant DefaultValue
             => this.ParameterSymbol.HasExplicitDefaultValue
-                ? new TypedConstant( this.Compilation.Factory.GetIType( this.ParameterType ), this.ParameterSymbol.ExplicitDefaultValue )
+                ? new TypedConstant( this.Compilation.Factory.GetIType( this.Type ), this.ParameterSymbol.ExplicitDefaultValue )
                 : default;
     }
 }

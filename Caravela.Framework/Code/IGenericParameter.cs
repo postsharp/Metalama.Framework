@@ -16,36 +16,23 @@ namespace Caravela.Framework.Code
         int Index { get; }
 
         /// <summary>
-        /// Gets the type constraints of the generic parameter.
+        /// Gets the type (interface) constraints of the generic parameter.
         /// </summary>
         IReadOnlyList<IType> TypeConstraints { get; }
 
         /// <summary>
-        /// Gets a value indicating whether the generic parameter is covariant (i.e., <c>out</c>).
+        /// Gets the constraint on the kind of type, e.g. <see cref="Code.TypeKindConstraint.Class"/> or <see cref="Code.TypeKindConstraint.Struct"/>.
         /// </summary>
-        bool IsCovariant { get; }
+        TypeKindConstraint TypeKindConstraint { get; }
 
         /// <summary>
-        /// Gets a value indicating whether the generic parameter is contravariant (i.e., <c>in</c>).
+        /// Gets the kind variance: <see cref="VarianceKind.In"/>, <see cref="VarianceKind.Out"/> or <see cref="VarianceKind.None"/>.
         /// </summary>
-        bool IsContravariant { get; }
+        VarianceKind Variance { get; }
 
         /// <summary>
         /// Gets a value indicating whether the generic parameter has the <c>new()</c> constraint.
         /// </summary>
         bool HasDefaultConstructorConstraint { get; }
-
-        /// <summary>
-        /// Gets a value indicating whether the generic parameter has the <c>class</c> constraint.
-        /// </summary>
-        bool HasReferenceTypeConstraint { get; }
-
-        /// <summary>
-        /// Gets a value indicating whether the generic parameter has the <c>notnull</c> constraint.
-        /// </summary>
-        bool HasNonNullableValueTypeConstraint { get; }
-
-        // TODO: nullable reference type constraints
-        // TODO: Unmanaged
     }
 }

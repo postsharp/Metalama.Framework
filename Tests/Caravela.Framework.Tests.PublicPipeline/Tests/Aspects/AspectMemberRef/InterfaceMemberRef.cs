@@ -13,7 +13,7 @@ namespace Caravela.Framework.IntegrationTests.Aspects.AspectMemberRef.InterfaceM
     {
         public void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.AdviceFactory.ImplementInterface( builder.Target, typeof(IInterface) );
+            builder.Advices.ImplementInterface( builder.Target, typeof(IInterface) );
         }
 
         [Framework.Aspects.Introduce]
