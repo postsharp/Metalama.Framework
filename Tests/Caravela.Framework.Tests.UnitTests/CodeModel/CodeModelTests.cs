@@ -731,8 +731,8 @@ namespace Ns1
             var ns2 = compilation.GetNamespace( "Ns1.Ns2" ).AssertNotNull();
             Assert.Equal( 3, compilation.GetDepth( ns1 ) );
             Assert.Equal( 4, compilation.GetDepth( ns2 ) );
-            Assert.Equal( 4,  compilation.GetDepth(compilation.Types.OfName( "E" ).Single()) );
-            Assert.Equal( 5,  compilation.GetDepth(compilation.Types.OfName( "F" ).Single()) );
+            Assert.Equal( 4, compilation.GetDepth( compilation.Types.OfName( "E" ).Single() ) );
+            Assert.Equal( 5, compilation.GetDepth( compilation.Types.OfName( "F" ).Single() ) );
         }
 
         [Fact]
