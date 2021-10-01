@@ -33,6 +33,17 @@ private global::System.Int32 AutoProperty_Source
     }
 }
 
+global::System.Int32 IInterface_Property_Introduction
+{get    {
+        global::System.Console.WriteLine("This is introduced interface member.");
+        return default(global::System.Int32);
+    }
+
+set    {
+        global::System.Console.WriteLine("This is introduced interface member.");
+    }
+}
+
 global::System.Int32 global::Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.ExplicitMembers_Override_NotInlineable.IInterface.Property
 {get    {
         global::System.Console.WriteLine("This is overridden method.");
@@ -48,15 +59,10 @@ this.IInterface_Property_Introduction= value;
     }
 }
 
-global::System.Int32 IInterface_Property_Introduction
-{get    {
-        global::System.Console.WriteLine("This is introduced interface member.");
-        return default(global::System.Int32);
-    }
-
-set    {
-        global::System.Console.WriteLine("This is introduced interface member.");
-    }
+global::System.Int32 IInterface_InterfaceMethod_Introduction()
+{
+    global::System.Console.WriteLine("This is introduced interface member.");
+    return default(global::System.Int32);
 }
 
 global::System.Int32 global::Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.ExplicitMembers_Override_NotInlineable.IInterface.InterfaceMethod()
@@ -66,10 +72,14 @@ global::System.Int32 global::Caravela.Framework.Tests.Integration.TestInputs.Asp
     return this.IInterface_InterfaceMethod_Introduction();
 }
 
-global::System.Int32 IInterface_InterfaceMethod_Introduction()
-{
-    global::System.Console.WriteLine("This is introduced interface member.");
-    return default(global::System.Int32);
+event global::System.EventHandler? IInterface_Event_Introduction
+{add    {
+        global::System.Console.WriteLine("This is introduced interface member.");
+    }
+
+remove    {
+        global::System.Console.WriteLine("This is introduced interface member.");
+    }
 }
 
 event global::System.EventHandler? global::Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.ExplicitMembers_Override_NotInlineable.IInterface.Event
@@ -85,16 +95,6 @@ remove    {
 this.IInterface_Event_Introduction-= value;
 this.IInterface_Event_Introduction-= value;
         return;
-    }
-}
-
-event global::System.EventHandler? IInterface_Event_Introduction
-{add    {
-        global::System.Console.WriteLine("This is introduced interface member.");
-    }
-
-remove    {
-        global::System.Console.WriteLine("This is introduced interface member.");
     }
 }
 private global::System.EventHandler? _eventField;

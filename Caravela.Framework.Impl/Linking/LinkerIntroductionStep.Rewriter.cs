@@ -29,18 +29,6 @@ namespace Caravela.Framework.Impl.Linking
             private readonly ImmutableMultiValueDictionary<IDeclaration, ScopedSuppression> _diagnosticSuppressions;
             private readonly SyntaxTransformationCollection _introducedMemberCollection;
 
-            private static readonly ImmutableDictionary<DeclarationKind, int> _orderedDeclarationKinds = new Dictionary<DeclarationKind, int>()
-            {
-                { DeclarationKind.Field, 0 },
-                { DeclarationKind.Constructor, 1 },
-                { DeclarationKind.Property, 2 },
-                { DeclarationKind.Method, 3 },
-                { DeclarationKind.Event, 4 },
-                { DeclarationKind.NamedType, 5 }
-            }.ToImmutableDictionary();
-
-            private static int GetDeclarationOrder( DeclarationKind kind ) => _orderedDeclarationKinds.TryGetValue( kind, out var order ) ? order : 10;
-
             // Maps a diagnostic id to the number of times it has been suppressed.
             private ImmutableHashSet<string> _activeSuppressions = ImmutableHashSet.Create<string>( StringComparer.OrdinalIgnoreCase );
 
@@ -193,8 +181,7 @@ namespace Caravela.Framework.Impl.Linking
                 void AddIntroductionsOnPosition( InsertPosition position )
                 {
                     var membersAtPosition = this._introducedMemberCollection.GetIntroducedMembersOnPosition( position )
-                        .OrderBy( m => GetDeclarationOrder( m.DeclarationKind ) )
-                        .ThenBy( m => m.SortingName )
+                        .OrderBy( m => m )
                         .ThenBy( m => this._orderedAspectLayers[m.Introduction.Advice.AspectLayerId].Order );
 
                     foreach ( var introducedMember in membersAtPosition )

@@ -27,12 +27,12 @@ public new global::System.Int32 BaseClassAbstractSealedMethod()
     return default(global::System.Int32);
 }
 
-public static new global::System.Int32 BaseClassMethod_Static()
+public new global::System.Int32 BaseClassMethod()
 {
     return default(global::System.Int32);
 }
 
-public new global::System.Int32 BaseClassMethod()
+public static new global::System.Int32 BaseClassMethod_Static()
 {
     return default(global::System.Int32);
 }
@@ -52,12 +52,12 @@ public new global::System.Int32 BaseClassVirtualSealedMethod()
     return default(global::System.Int32);
 }
 
-public static new global::System.Int32 DerivedClassMethod_Static()
+public new global::System.Int32 DerivedClassMethod()
 {
     return default(global::System.Int32);
 }
 
-public new global::System.Int32 DerivedClassMethod()
+public static new global::System.Int32 DerivedClassMethod_Static()
 {
     return default(global::System.Int32);
 }
@@ -72,12 +72,12 @@ public new global::System.Int32 DerivedClassVirtualSealedMethod()
     return default(global::System.Int32);
 }
 
-public static new global::System.Int32 HiddenBaseClassMethod_Static()
+public new global::System.Int32 HiddenBaseClassMethod()
 {
     return default(global::System.Int32);
 }
 
-public new global::System.Int32 HiddenBaseClassMethod()
+public static new global::System.Int32 HiddenBaseClassMethod_Static()
 {
     return default(global::System.Int32);
 }
@@ -92,12 +92,12 @@ public new global::System.Int32 HiddenVirtualBaseClassVirtualMethod()
     return default(global::System.Int32);
 }
 
-public static global::System.Int32 NonExistentMethod_Static()
+public global::System.Int32 NonExistentMethod()
 {
     return default(global::System.Int32);
 }
 
-public global::System.Int32 NonExistentMethod()
+public static global::System.Int32 NonExistentMethod_Static()
 {
     return default(global::System.Int32);
 }    }

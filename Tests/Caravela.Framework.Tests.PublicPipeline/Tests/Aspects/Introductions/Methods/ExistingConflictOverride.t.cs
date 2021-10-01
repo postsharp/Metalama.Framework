@@ -20,13 +20,13 @@ public override global::System.Int32 ExistingBaseMethod()
     return base.ExistingBaseMethod();
 }
 
-public static global::System.Int32 NotExistingMethod_Static()
+public global::System.Int32 NotExistingMethod()
 {
     global::System.Console.WriteLine("This is introduced method.");
     return default(global::System.Int32);
 }
 
-public global::System.Int32 NotExistingMethod()
+public static global::System.Int32 NotExistingMethod_Static()
 {
     global::System.Console.WriteLine("This is introduced method.");
     return default(global::System.Int32);
