@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Caravela.Framework;
 using Caravela.TestFramework;
 using Caravela.Framework.Aspects;
+using Caravela.Framework.Code;
 
 namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Lambdas.Bug28768
 {
@@ -12,7 +13,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Lambdas.Bug2876
         [TestTemplate]
         dynamic? Template()
         {
-            var parameterNamesTypes=  meta.RunTime( meta.Target.Parameters.Select(p => p.ParameterType.ToType()).ToArray() );
+            var parameterNamesTypes=  meta.RunTime( meta.Target.Parameters.Select(p => ( (IParameter)p ).Type.ToType()).ToArray() );
             return meta.Proceed();
         }
     }

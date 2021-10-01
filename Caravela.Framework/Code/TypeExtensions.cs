@@ -19,18 +19,18 @@ namespace Caravela.Framework.Code
         /// <param name="elementType">Type of array elements.</param>
         /// <param name="rank">Rank of the array/.</param>
         /// <returns>An array type <c>T[]</c> where <c>T</c> is the current type.</returns>
-        public static IArrayType MakeArrayType( this IType elementType, int rank = 1 )
-            => elementType.Compilation.TypeFactory.MakeArrayType( elementType, rank );
+        public static IArrayType ConstructArrayType( this IType elementType, int rank = 1 )
+            => elementType.Compilation.TypeFactory.ConstructArrayType( elementType, rank );
 
         /// <summary>
         /// Creates an array type from the current type.
         /// </summary>
         /// <returns>An unsafe pointer type <c>*T</c> where <c>T</c> is the current type.</returns>
-        public static IPointerType MakePointerType( this IType pointedType ) => pointedType.Compilation.TypeFactory.MakePointerType( pointedType );
+        public static IPointerType ConstructPointerType( this IType pointedType ) => pointedType.Compilation.TypeFactory.ConstructPointerType( pointedType );
 
-        public static T MakeNullable<T>( this T type )
+        public static T ConstructNullable<T>( this T type )
             where T : IType
-            => type.Compilation.TypeFactory.MakeNullable( type );
+            => type.Compilation.TypeFactory.ConstructNullable( type );
 
         /// <summary>
         /// Equivalent to the <c>is</c> operator in C#. Gets a value indicating whether the current type is assignable to another given type,

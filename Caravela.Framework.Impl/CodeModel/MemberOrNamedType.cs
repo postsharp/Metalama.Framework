@@ -48,7 +48,7 @@ namespace Caravela.Framework.Impl.CodeModel
         public bool IsStatic => this.Symbol.IsStatic;
 
         [Memo]
-        public INamedType DeclaringType => this.Compilation.Factory.GetNamedType( this.Symbol.ContainingType );
+        public INamedType? DeclaringType => this.Symbol.ContainingType != null ? this.Compilation.Factory.GetNamedType( this.Symbol.ContainingType ) : null;
 
         public abstract MemberInfo ToMemberInfo();
 

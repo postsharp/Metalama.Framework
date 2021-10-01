@@ -37,28 +37,12 @@ namespace Caravela.Framework.Impl.Transformations
             Template<IMethod> setTemplate )
             : base( advice, overriddenDeclaration )
         {
-            // We need either property template or (one or more) accessor templates, but never both.
-            Invariant.Assert( propertyTemplate.IsNotNull || getTemplate.IsNotNull || setTemplate.IsNotNull );
-            Invariant.Assert( !(propertyTemplate.IsNotNull && (getTemplate.IsNotNull || setTemplate.IsNotNull)) );
+            // We need the getTemplate and setTemplate to be set by the caller even if propertyTemplate is set.
+            // The caller is responsible for verifying the compatibility of the template with the target.
 
-            if ( propertyTemplate.IsNotNull )
-            {
-                this.PropertyTemplate = propertyTemplate;
-
-                if ( !propertyTemplate.Declaration!.IsAutoPropertyOrField )
-                {
-                    this.GetTemplate = Template.Create( this.PropertyTemplate.Declaration!.GetMethod, this.GetTemplate.TemplateInfo );
-                    this.SetTemplate = Template.Create( this.PropertyTemplate.Declaration!.SetMethod, this.GetTemplate.TemplateInfo );
-                }
-            }
-            else
-            {
-                this.GetTemplate = getTemplate;
-                this.SetTemplate = setTemplate;
-            }
-
-            this.GetTemplate.ValidateTarget( overriddenDeclaration.GetMethod );
-            this.SetTemplate.ValidateTarget( overriddenDeclaration.SetMethod );
+            this.PropertyTemplate = propertyTemplate;
+            this.GetTemplate = getTemplate;
+            this.SetTemplate = setTemplate;
         }
 
         public override IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context )

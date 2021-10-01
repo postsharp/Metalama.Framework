@@ -20,7 +20,7 @@ using System.Linq;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    internal partial class CompilationModel : ICompilationInternal, IDeclarationInternal
+    internal partial class CompilationModel : ICompilationInternal, IDeclarationImpl
     {
         public PartialCompilation PartialCompilation { get; }
 
@@ -266,9 +266,9 @@ namespace Caravela.Framework.Impl.CodeModel
             return depth;
         }
 
-        DeclarationRef<IDeclaration> IDeclarationInternal.ToRef() => DeclarationRef.Compilation();
+        DeclarationRef<IDeclaration> IDeclarationImpl.ToRef() => DeclarationRef.Compilation();
 
-        ImmutableArray<SyntaxReference> IDeclarationInternal.DeclaringSyntaxReferences => ImmutableArray<SyntaxReference>.Empty;
+        ImmutableArray<SyntaxReference> IDeclarationImpl.DeclaringSyntaxReferences => ImmutableArray<SyntaxReference>.Empty;
 
         string IDisplayable.ToDisplayString( CodeDisplayFormat? format, CodeDisplayContext? context )
         {
@@ -293,5 +293,7 @@ namespace Caravela.Framework.Impl.CodeModel
         public override string ToString() => $"{this.RoslynCompilation.AssemblyName}, rev={this.Revision}";
 
         public ICompilationHelpers Helpers { get; } = new CompilationHelpers();
+
+        IDeclaration IDeclarationInternal.OriginalDefinition => this;
     }
 }

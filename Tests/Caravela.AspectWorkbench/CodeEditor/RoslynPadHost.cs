@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+#pragma warning disable IDE0005
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Impl.Sdk;
 using Caravela.Framework.Impl.Templating;
@@ -15,6 +16,8 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+
+#pragma warning restore IDE0005
 
 namespace Caravela.AspectWorkbench.CodeEditor
 {

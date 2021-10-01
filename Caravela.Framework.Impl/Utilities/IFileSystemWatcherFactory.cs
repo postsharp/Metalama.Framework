@@ -6,9 +6,9 @@ namespace Caravela.Framework.Impl.Utilities
     internal interface IFileSystemWatcherFactory
     {
         IFileSystemWatcher Create();
-        
+
         IFileSystemWatcher Create( string path );
-        
+
         IFileSystemWatcher Create( string path, string filter );
     }
 }

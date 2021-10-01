@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using Caravela.Framework.Aspects;
-using Caravela.TestFramework;
 
 namespace Caravela.Framework.IntegrationTests.Aspects.Overrides.Methods.ConditionalAccess
 {
@@ -12,9 +9,10 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Overrides.Methods.Conditio
     {
         public override dynamic? OverrideMethod()
         {
-            Console.WriteLine("This is the overriding method.");
+            Console.WriteLine( "This is the overriding method." );
             var x = meta.This;
-            return meta.Target.Method.Invokers.BaseConditional?.Invoke(x);
+
+            return meta.Target.Method.Invokers.ConditionalBase?.Invoke( x );
         }
     }
 
@@ -24,13 +22,14 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Overrides.Methods.Conditio
         [Override]
         public void TargetMethod_Void()
         {
-            Console.WriteLine("This is the original method.");
+            Console.WriteLine( "This is the original method." );
         }
 
         [Override]
         public int? TargetMethod_Int()
         {
-            Console.WriteLine("This is the original method.");
+            Console.WriteLine( "This is the original method." );
+
             return 42;
         }
     }

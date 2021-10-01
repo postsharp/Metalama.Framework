@@ -19,7 +19,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
-    internal class EventBuilder : MemberBuilder, IEventBuilder, IEventInternal
+    internal class EventBuilder : MemberBuilder, IEventBuilder, IEventImpl
     {
         private readonly bool _isEventField;
 
@@ -31,12 +31,12 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
             : base( parentAdvice, targetType, name )
         {
             this._isEventField = isEventField;
-            this.EventType = (INamedType) targetType.Compilation.TypeFactory.GetTypeByReflectionType( typeof(EventHandler) );
+            this.Type = (INamedType) targetType.Compilation.TypeFactory.GetTypeByReflectionType( typeof(EventHandler) );
         }
 
-        public INamedType EventType { get; set; }
+        public INamedType Type { get; set; }
 
-        public IMethod Signature => this.EventType.Methods.OfName( "Invoke" ).Single();
+        public IMethod Signature => this.Type.Methods.OfName( "Invoke" ).Single();
 
         [Memo]
         public IMethodBuilder AddMethod => new AccessorBuilder( this, MethodKind.EventAdd );
@@ -61,7 +61,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public override DeclarationKind DeclarationKind => DeclarationKind.Event;
 
-        INamedType IEvent.EventType => this.EventType;
+        INamedType IEvent.Type => this.Type;
 
         IMethod IEvent.AddMethod => this.AddMethod;
 
@@ -82,7 +82,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                         List<AttributeListSyntax>(), // TODO: Attributes.
                         this.GetSyntaxModifierList(),
                         VariableDeclaration(
-                            syntaxGenerator.TypeExpression( this.EventType.GetSymbol() ),
+                            syntaxGenerator.TypeExpression( this.Type.GetSymbol() ),
                             SeparatedList(
                                 new[]
                                 {
@@ -91,7 +91,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                     : EventDeclaration(
                         List<AttributeListSyntax>(), // TODO: Attributes.
                         this.GetSyntaxModifierList(),
-                        syntaxGenerator.TypeExpression( this.EventType.GetSymbol() ),
+                        syntaxGenerator.TypeExpression( this.Type.GetSymbol() ),
                         this.ExplicitInterfaceImplementations.Count > 0
                             ? ExplicitInterfaceSpecifier(
                                 (NameSyntax) syntaxGenerator.TypeExpression( this.ExplicitInterfaceImplementations[0].DeclaringType.GetSymbol() ) )
@@ -166,5 +166,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                 }
             }
         }
+
+        IType IHasType.Type => this.Type;
     }
 }

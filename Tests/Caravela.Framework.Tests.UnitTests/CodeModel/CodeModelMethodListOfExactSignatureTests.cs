@@ -253,6 +253,23 @@ class C : B
         }
 
         [Fact]
+        public void DeclaredOnlyFalse_Finds_BaseMethod_GenericDeclaringType()
+        {
+            var code = @"
+class A : System.Collections.Generic.List<int> { }
+";
+
+            var compilation = CreateCompilationModel( code );
+            var typeA = compilation.DeclaredTypes[0];
+            var intType = compilation.Factory.GetTypeByReflectionType( typeof(int) );
+
+            var matchedMethod1 = typeA.Methods.OfExactSignature( "Add", 0, new[] { intType }, declaredOnly: false );
+
+            Assert.NotNull( matchedMethod1 );
+            Assert.Equal( "List", matchedMethod1!.DeclaringType.Name );
+        }
+
+        [Fact]
         public void Matches_IsStatic()
         {
             var code = @"

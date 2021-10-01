@@ -58,9 +58,6 @@ namespace Caravela.Framework.Impl
                 Error,
                 "Has to provide instance for an instance member." );
 
-        public static readonly DiagnosticDefinition<IMemberOrNamedType> CannotAccessOpenGenericMember =
-            new( "CR0016", _category, "Member {0} Cannot be accessed without specifying generic arguments.", Error, "Cannot access an open generic member." );
-
         public static readonly DiagnosticDefinition<IMemberOrNamedType> CannotProvideInstanceForLocalFunction =
             new(
                 "CR0018",

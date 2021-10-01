@@ -2129,9 +2129,20 @@ namespace Caravela.Framework.Impl.Templating
         }
 
         public override SyntaxNode? VisitTypeOfExpression( TypeOfExpressionSyntax node )
+        {
+            // typeof(T) is always compile-time unless T is a run-time generic parameter.
 
-            // typeof(.) is always compile-time.
-            => node.AddScopeAnnotation( TemplatingScope.CompileTimeOnly );
+            var type = (ITypeSymbol?) this._syntaxTreeAnnotationMap.GetSymbol( node.Type );
+
+            if ( type is ITypeParameterSymbol && this._symbolScopeClassifier.GetTemplatingScope( type ) == TemplatingScope.RunTimeOnly )
+            {
+                return node.AddScopeAnnotation( TemplatingScope.RunTimeOnly );
+            }
+            else
+            {
+                return node.AddScopeAnnotation( TemplatingScope.CompileTimeOnly );
+            }
+        }
 
         public override SyntaxNode? VisitArrayRankSpecifier( ArrayRankSpecifierSyntax node )
         {

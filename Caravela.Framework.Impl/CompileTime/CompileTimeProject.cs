@@ -201,7 +201,7 @@ namespace Caravela.Framework.Impl.CompileTime
         /// <returns></returns>
         public ResourceDescription ToResource()
             => new(
-                CompileTimeCompilationBuilder.ResourceName,
+                CompileTimeConstants.ResourceName,
                 () =>
                 {
                     var stream = new MemoryStream();

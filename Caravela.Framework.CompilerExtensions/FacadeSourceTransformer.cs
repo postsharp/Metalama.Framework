@@ -2,7 +2,6 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Compiler;
-using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.CompilerExtensions
 {
@@ -18,6 +17,6 @@ namespace Caravela.Framework.CompilerExtensions
             this._impl = (ISourceTransformer) ResourceExtractor.CreateInstance( "Caravela.Framework.Impl.Pipeline.SourceTransformer" );
         }
 
-        public Compilation Execute( TransformerContext context ) => this._impl.Execute( context );
+        public void Execute( TransformerContext context ) => this._impl.Execute( context );
     }
 }

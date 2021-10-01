@@ -10,7 +10,7 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Even
     {
         void IAspect<IEvent>.BuildAspect(IAspectBuilder<IEvent> builder)
         {
-            builder.AdviceFactory.OverrideEventAccessors(builder.Target, nameof(AccessorTemplate), nameof(AccessorTemplate), null);
+            builder.Advices.OverrideEventAccessors(builder.Target, nameof(AccessorTemplate), nameof(AccessorTemplate), null);
         }
         
         [Template]

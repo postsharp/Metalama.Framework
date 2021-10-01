@@ -12,7 +12,7 @@ namespace Caravela.Framework.Impl.CodeModel.Pseudo
         public PseudoAdder( Event @event ) : base( @event, MethodKind.EventAdd ) { }
 
         [Memo]
-        public override IParameterList Parameters => new PseudoParameterList( new PseudoParameter( this, 0, this.DeclaringMember.EventType, "value" ) );
+        public override IParameterList Parameters => new PseudoParameterList( new PseudoParameter( this, 0, this.DeclaringMember.Type, "value" ) );
 
         public override string Name => "add_" + this.DeclaringMember.Name;
     }

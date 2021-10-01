@@ -15,7 +15,7 @@ using MethodKind = Caravela.Framework.Code.MethodKind;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    internal class Event : Member, IEventInternal
+    internal class Event : Member, IEventImpl
     {
         private readonly IEventSymbol _symbol;
 
@@ -31,9 +31,9 @@ namespace Caravela.Framework.Impl.CodeModel
             => new InvokerFactory<IEventInvoker>( ( order, invokerOperator ) => new EventInvoker( this, order, invokerOperator ) );
 
         [Memo]
-        public INamedType EventType => (INamedType) this.Compilation.Factory.GetIType( this._symbol.Type );
+        public INamedType Type => (INamedType) this.Compilation.Factory.GetIType( this._symbol.Type );
 
-        public IMethod Signature => this.EventType.Methods.OfName( "Invoke" ).Single();
+        public IMethod Signature => this.Type.Methods.OfName( "Invoke" ).Single();
 
         [Memo]
         public IMethod AddMethod => this.Compilation.Factory.GetMethod( this._symbol.AddMethod! );
@@ -94,5 +94,7 @@ namespace Caravela.Framework.Impl.CodeModel
         public override bool IsAsync => false;
 
         public override MemberInfo ToMemberInfo() => this.ToEventInfo();
+
+        IType IHasType.Type => this.Type;
     }
 }

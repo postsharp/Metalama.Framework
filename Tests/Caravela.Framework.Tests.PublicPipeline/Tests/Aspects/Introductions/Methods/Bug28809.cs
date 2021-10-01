@@ -9,11 +9,11 @@ namespace Caravela.Framework.Tests.Integration.Tests.Aspects.Introductions.Metho
     {
         public void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            var eventBuilder = builder.AdviceFactory.IntroduceEvent(
+            var eventBuilder = builder.Advices.IntroduceEvent(
                 builder.Target, 
                 nameof(PropertyChanged));
 
-            builder.AdviceFactory.IntroduceMethod(
+            builder.Advices.IntroduceMethod(
                 builder.Target,
                 nameof(OnPropertyChanged),
                 tags: new(){{"event", eventBuilder}});

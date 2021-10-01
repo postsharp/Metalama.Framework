@@ -6,6 +6,7 @@ using Caravela.Framework.Impl.CodeModel.References;
 using Caravela.Framework.Impl.DesignTime.Pipeline;
 using Caravela.Framework.Impl.DesignTime.Refactoring;
 using Caravela.Framework.Impl.DesignTime.Utilities;
+using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Formatting;
 using Caravela.Framework.Impl.Options;
 using Caravela.Framework.Impl.Utilities;
@@ -19,7 +20,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using DiagnosticFormatter = Caravela.Framework.Impl.Diagnostics.DiagnosticFormatter;
 
 namespace Caravela.Framework.Impl.DesignTime
 {
@@ -171,7 +171,7 @@ namespace Caravela.Framework.Impl.DesignTime
 
                 var commentedNode = targetNode.WithLeadingTrivia(
                     diagnostics.Where( d => d.Severity == DiagnosticSeverity.Error )
-                        .SelectMany( d => new[] { SyntaxFactory.Comment( "// " + d.GetMessage( DiagnosticFormatter.Instance ) ), SyntaxFactory.LineFeed } ) );
+                        .SelectMany( d => new[] { SyntaxFactory.Comment( "// " + d.GetMessage( UserMessageFormatter.Instance ) ), SyntaxFactory.LineFeed } ) );
 
                 var newSyntaxRoot = (await targetDocument.GetSyntaxRootAsync( cancellationToken ))!.ReplaceNode( targetNode, commentedNode );
 

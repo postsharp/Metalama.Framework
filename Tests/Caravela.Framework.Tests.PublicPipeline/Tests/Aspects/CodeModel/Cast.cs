@@ -9,7 +9,7 @@ namespace Caravela.Framework.IntegrationTests.Aspects.CodeModel.Cast
         {
             var castNull = meta.Cast( meta.Target.Method.ReturnType, null );
             var castParam = meta.Cast( meta.Target.Method.ReturnType, (object?) meta.Target.Parameters[0].Value );
-            var castLiteral = meta.Cast( meta.Target.Method.Parameters[1].ParameterType, 1 );
+            var castLiteral = meta.Cast( ( (IParameter)meta.Target.Method.Parameters[1] ).Type, 1 );
             
             return default;
         }

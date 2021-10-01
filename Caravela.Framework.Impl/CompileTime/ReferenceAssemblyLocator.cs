@@ -110,6 +110,25 @@ namespace Caravela.Framework.Impl.CompileTime
 
         private IEnumerable<string> GetSystemAssemblyPaths()
         {
+            var tempProjectDirectory = Path.Combine( this._cacheDirectory, nameof(ReferenceAssemblyLocator) );
+
+            using var mutex = MutexHelper.WithGlobalLock( tempProjectDirectory );
+            var referenceAssemblyListFile = Path.Combine( tempProjectDirectory, "assemblies.txt" );
+
+            if ( File.Exists( referenceAssemblyListFile ) )
+            {
+                var referenceAssemblies = File.ReadAllLines( referenceAssemblyListFile );
+
+                if ( referenceAssemblies.All( File.Exists ) )
+                {
+                    return referenceAssemblies;
+                }
+            }
+
+            Directory.CreateDirectory( tempProjectDirectory );
+
+            GlobalJsonWriter.TryWriteCurrentVersion( tempProjectDirectory );
+
             var metadataReader = AssemblyMetadataReader.GetInstance( typeof(ReferenceAssemblyLocator).Assembly );
 
             // We don't add a reference to Microsoft.CSharp because this package is used to support dynamic code, and we don't want
@@ -129,25 +148,10 @@ namespace Caravela.Framework.Impl.CompileTime
   </Target>
 </Project>";
 
-            var tempProjectDirectory = Path.Combine( this._cacheDirectory, nameof(ReferenceAssemblyLocator) );
-
-            using var mutex = MutexHelper.WithGlobalLock( tempProjectDirectory );
-            var referenceAssemblyListFile = Path.Combine( tempProjectDirectory, "assemblies.txt" );
-
-            if ( File.Exists( referenceAssemblyListFile ) )
-            {
-                var referenceAssemblies = File.ReadAllLines( referenceAssemblyListFile );
-
-                if ( referenceAssemblies.All( File.Exists ) )
-                {
-                    return referenceAssemblies;
-                }
-            }
-
-            Directory.CreateDirectory( tempProjectDirectory );
-
             File.WriteAllText( Path.Combine( tempProjectDirectory, "TempProject.csproj" ), projectText );
 
+            // We may consider executing msbuild.exe instead of dotnet.exe when the build itself runs using msbuild.exe.
+            // This way we wouldn't need to require a .NET SDK to be installed.
             var psi = new ProcessStartInfo( "dotnet", "build -t:WriteReferenceAssemblies" )
             {
                 // We cannot call dotnet.exe with a \\?\-prefixed path because MSBuild would fail.

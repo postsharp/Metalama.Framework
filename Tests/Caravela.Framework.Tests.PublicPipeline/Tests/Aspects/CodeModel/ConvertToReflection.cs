@@ -19,7 +19,7 @@ namespace Caravela.Framework.Tests.PublicPipeline.Aspects.CodeModel.ConvertToRef
             {
                 foreach ( var parameter in method.Parameters )
                 {
-                    var type = meta.RunTime( parameter.ParameterType.ToType() );
+                    var type = meta.RunTime( parameter.Type.ToType() );
                 }
             }
         }

@@ -46,24 +46,24 @@ using Caravela.Framework.Code;
             const string aspectCodeAddition = @"
             Console.WriteLine(""new line"");
 ";
-            
+
             const string aspectCodePart2 = @"
             meta.Proceed();
         }
     }
 ";
-            
+
             Dictionary<string, DateTime> projectFilesTimestamps = new();
 
             var externalBuildStarted = false;
-            
+
             TestFileSystemWatcher buildFileWatcher = new( Path.GetDirectoryName( this.ProjectOptions.BuildTouchFile )!, "*.build" );
             TestFileSystemWatcherFactory fileSystemWatcherFactory = new();
             fileSystemWatcherFactory.Add( buildFileWatcher );
 
             var aspectCodePath = Path.Combine( this.ProjectOptions.ProjectDirectory, "Aspect.cs" );
             var class1CodePath = Path.Combine( this.ProjectOptions.ProjectDirectory, "Class1.cs" );
-            
+
             var code = new Dictionary<string, string>
             {
                 [aspectCodePath] = aspectCodePart1 + aspectCodePart2,
@@ -83,8 +83,9 @@ using Caravela.Framework.Code;
             }
 
             var compilation = CreateCSharpCompilation( code );
-            
+
             using var domain = new UnloadableCompileTimeDomain();
+
             using DesignTimeAspectPipeline pipeline = new(
                 this.ProjectOptions,
                 domain,
@@ -98,7 +99,7 @@ using Caravela.Framework.Code;
                 Assert.False( externalBuildStarted );
                 externalBuildStarted = true;
             };
-            
+
             var syntaxTree = compilation.SyntaxTrees.Single( t => t.FilePath == class1CodePath );
             var result = pipeline.Execute( PartialCompilation.CreatePartial( compilation, syntaxTree ), CancellationToken.None );
 
@@ -120,10 +121,12 @@ using Caravela.Framework.Code;
             Assert.False( externalBuildStarted );
 
             File.Create( this.ProjectOptions.BuildTouchFile! );
-            buildFileWatcher.Notify( new FileSystemEventArgs( WatcherChangeTypes.Created, buildFileWatcher.Path, Path.GetFileName( this.ProjectOptions.BuildTouchFile ) ) );
+
+            buildFileWatcher.Notify(
+                new FileSystemEventArgs( WatcherChangeTypes.Created, buildFileWatcher.Path, Path.GetFileName( this.ProjectOptions.BuildTouchFile ) ) );
 
             Assert.True( externalBuildStarted );
-            
+
             foreach ( var fileName in code.Keys )
             {
                 if ( fileName == aspectCodePath )
@@ -135,7 +138,7 @@ using Caravela.Framework.Code;
                     Assert.False( projectFilesTimestamps[fileName] < File.GetLastWriteTime( fileName ) );
                 }
             }
-            
+
             result = pipeline.Execute( PartialCompilation.CreatePartial( compilation, syntaxTree ), CancellationToken.None );
             Assert.True( result.Success );
         }

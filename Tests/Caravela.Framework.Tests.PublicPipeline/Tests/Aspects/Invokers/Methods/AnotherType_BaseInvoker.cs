@@ -13,13 +13,13 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Invokers.Events.AnotherTyp
     {
         public void BuildAspect(IAspectBuilder<IMethod> aspectBuilder)
         {
-            aspectBuilder.AdviceFactory.OverrideMethod(aspectBuilder.Target, nameof(OverrideMethod));
+            aspectBuilder.Advices.OverrideMethod(aspectBuilder.Target, nameof(OverrideMethod));
         }
 
         [Template]
         public dynamic? OverrideMethod()
         {
-            var parameterType = (INamedType)meta.Target.Method.Parameters[0].Type;
+            var parameterType = (INamedType)( (IExpression)meta.Target.Method.Parameters[0] ).Type;
             var barMethod = parameterType.Methods.OfName("Bar").First();
             return barMethod.Invokers.Base!.Invoke(meta.Target.Method.Parameters[0].Value);
         }

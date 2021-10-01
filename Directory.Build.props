@@ -10,5 +10,9 @@
     <Import Project="eng\shared\style\CodeQuality.props" />
     <Import Project="eng\shared\build\SourceLink.props" />
 
+    <PropertyGroup>
+        <!-- Disabled temporarily due to #29165. -->
+        <TreatWarningsAsErrors>False</TreatWarningsAsErrors>
+    </PropertyGroup>
 
 </Project>

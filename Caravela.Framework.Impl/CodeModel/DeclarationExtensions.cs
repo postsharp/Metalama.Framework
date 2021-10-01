@@ -67,11 +67,11 @@ namespace Caravela.Framework.Impl.CodeModel
                         .Concat( namedType.Fields )
                         .Concat( namedType.Properties )
                         .Concat( namedType.Events )
-                        .Concat( namedType.GenericParameters )
+                        .Concat( namedType.TypeParameters )
                         .ConcatNotNull( namedType.StaticConstructor ),
                     IMethod method => method.LocalFunctions
                         .Concat<IDeclaration>( method.Parameters )
-                        .Concat( method.GenericParameters )
+                        .Concat( method.TypeParameters )
                         .ConcatNotNull( method.ReturnParameter ),
                     IMemberWithAccessors member => member.Accessors,
                     _ => null
@@ -111,11 +111,11 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public static DeclarationRef<T> ToRef<T>( this T declaration )
             where T : class, IDeclaration
-            => ((IDeclarationInternal) declaration).ToRef().Cast<T>();
+            => ((IDeclarationImpl) declaration).ToRef().Cast<T>();
 
         public static MemberRef<T> ToMemberRef<T>( this T member )
             where T : class, IMemberOrNamedType
-            => new( ((IDeclarationInternal) member).ToRef() );
+            => new( ((IDeclarationImpl) member).ToRef() );
 
         public static Location? GetDiagnosticLocation( this IDeclaration declaration )
             => declaration switch
@@ -194,7 +194,7 @@ namespace Caravela.Framework.Impl.CodeModel
                     }
                     else
                     {
-                        argument = SyntaxFactory.Argument( arg.ToTypedExpression( parameter.ParameterType ) );
+                        argument = SyntaxFactory.Argument( arg.ToTypedExpression( parameter.Type ) );
                     }
                 }
 

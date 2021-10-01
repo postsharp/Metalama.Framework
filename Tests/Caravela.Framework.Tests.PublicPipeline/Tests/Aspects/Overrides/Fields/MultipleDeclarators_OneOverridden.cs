@@ -10,7 +10,7 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Overrides.Fields.MultipleD
     {
         public void BuildAspect(IAspectBuilder<INamedType> builder)
         {
-            builder.AdviceFactory.OverrideFieldOrProperty(builder.Target.Fields.OfName("B").Single(), nameof(PropertyTemplate));
+            builder.Advices.OverrideFieldOrProperty(builder.Target.Fields.OfName("B").Single(), nameof(PropertyTemplate));
         }
 
         [Template]

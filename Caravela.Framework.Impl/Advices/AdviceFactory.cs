@@ -13,9 +13,11 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Reflection;
 
 namespace Caravela.Framework.Impl.Advices
 {
+    [Obfuscation( Exclude = true )] // Not obfuscated to have a decent call stack in case of user exception.
     internal class AdviceFactory : IAdviceFactory
     {
         private const string? _layerName = null;
@@ -253,7 +255,8 @@ namespace Caravela.Framework.Impl.Advices
             var diagnosticList = new DiagnosticList();
 
             var template = this.SelectTemplate( targetMethod, templateSelector )
-                .GetTemplate<IMethod>( this._compilation, this._serviceProvider );
+                .GetTemplate<IMethod>( this._compilation, this._serviceProvider )
+                .ValidateTarget( targetMethod );
 
             var advice = new OverrideMethodAdvice( this._aspect, targetMethod, template, _layerName, tags );
             advice.Initialize( this._declarativeAdvices, diagnosticList );
@@ -301,15 +304,19 @@ namespace Caravela.Framework.Impl.Advices
             // Set template represents both set and init accessors.
             var diagnosticList = new DiagnosticList();
 
-            var template = this.ValidateTemplateName( defaultTemplate, TemplateKind.Default, true )
+            var propertyTemplate = this.ValidateTemplateName( defaultTemplate, TemplateKind.Default, true )
                 .GetTemplate<IProperty>( this._compilation, this._serviceProvider );
+
+            var accessorTemplates = propertyTemplate.GetAccessorTemplates();
+            accessorTemplates.Get.ValidateTarget( targetDeclaration.GetMethod );
+            accessorTemplates.Set.ValidateTarget( targetDeclaration.SetMethod );
 
             var advice = new OverrideFieldOrPropertyAdvice(
                 this._aspect,
                 targetDeclaration,
-                template,
-                default,
-                default,
+                propertyTemplate,
+                accessorTemplates.Get,
+                accessorTemplates.Set,
                 _layerName,
                 tags );
 
@@ -330,10 +337,12 @@ namespace Caravela.Framework.Impl.Advices
             var diagnosticList = new DiagnosticList();
 
             var getTemplateRef = this.SelectTemplate( targetDeclaration, getTemplateSelector, setTemplate == null )
-                .GetTemplate<IMethod>( this._compilation, this._serviceProvider );
+                .GetTemplate<IMethod>( this._compilation, this._serviceProvider )
+                .ValidateTarget( targetDeclaration.GetMethod );
 
             var setTemplateRef = this.ValidateTemplateName( setTemplate, TemplateKind.Default, getTemplateSelector.IsNull )
-                .GetTemplate<IMethod>( this._compilation, this._serviceProvider );
+                .GetTemplate<IMethod>( this._compilation, this._serviceProvider )
+                .ValidateTarget( targetDeclaration.SetMethod );
 
             if ( getTemplateRef.IsNull && setTemplateRef.IsNull )
             {
@@ -392,16 +401,18 @@ namespace Caravela.Framework.Impl.Advices
         {
             var diagnosticList = new DiagnosticList();
 
-            var template = this.ValidateTemplateName( defaultTemplate, TemplateKind.Default, true )
+            var propertyTemplate = this.ValidateTemplateName( defaultTemplate, TemplateKind.Default, true )
                 .GetTemplate<IProperty>( this._compilation, this._serviceProvider );
+
+            var accessorTemplates = propertyTemplate.GetAccessorTemplates();
 
             var advice = new IntroducePropertyAdvice(
                 this._aspect,
                 targetType,
                 null,
-                template,
-                default,
-                default,
+                propertyTemplate,
+                accessorTemplates.Get,
+                accessorTemplates.Set,
                 scope,
                 whenExists,
                 _layerName,

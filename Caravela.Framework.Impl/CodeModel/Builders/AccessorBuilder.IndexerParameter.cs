@@ -17,13 +17,13 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
             {
                 this.DefaultValue = TypedConstant.Null;
                 this.Name = name;
-                this.ParameterType = parameterType;
+                this.Type = parameterType;
                 this.RefKind = refKind;
             }
 
             public override TypedConstant DefaultValue { get; set; }
 
-            public override IType ParameterType { get; set; }
+            public override IType Type { get; set; }
 
             public override RefKind RefKind { get; set; }
 

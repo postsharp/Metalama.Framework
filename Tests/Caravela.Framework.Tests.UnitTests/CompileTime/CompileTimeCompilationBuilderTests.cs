@@ -818,7 +818,7 @@ public class MyAspect : OverrideMethodAspect
             // Just test that the output file has gone through formatting (we don't test that the whole formatting is correct). 
             var files = Directory
                 .GetFiles( project.Directory!, "*.cs" )
-                .Where( f => !f.EndsWith( CompileTimeCompilationBuilder.PredefinedTypesFileName, StringComparison.OrdinalIgnoreCase ) );
+                .Where( f => !f.EndsWith( CompileTimeConstants.PredefinedTypesFileName, StringComparison.OrdinalIgnoreCase ) );
 
             return files.ToImmutableDictionary( f => Path.GetFileName( f ), File.ReadAllText );
         }

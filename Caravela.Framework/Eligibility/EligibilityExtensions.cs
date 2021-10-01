@@ -36,7 +36,7 @@ namespace Caravela.Framework.Eligibility
         public static IEligibilityBuilder<IType> Type( this IEligibilityBuilder<IParameter> eligibilityBuilder )
             => new ChildEligibilityBuilder<IParameter, IType>(
                 eligibilityBuilder,
-                declaration => declaration.ParameterType,
+                declaration => declaration.Type,
                 declarationDescription => $"the type of {declarationDescription}" );
 
         public static IEligibilityBuilder<IParameter> Parameter( this IEligibilityBuilder<IMethodBase> eligibilityBuilder, int index )

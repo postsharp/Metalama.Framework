@@ -13,18 +13,18 @@ using System.Threading.Tasks;
 
 namespace Caravela.Framework.Impl.Formatting
 {
-    public partial class FormattedCodeWriter
+    public abstract partial class FormattedCodeWriter
     {
         protected const string CSharpClassTagName = "csharp";
         protected const string DiagnosticTagName = "diagnostic";
         private const string _diagnosticAnnotationName = "caravela-diagnostic";
 
-        public FormattedCodeWriter( IServiceProvider serviceProvider )
+        protected FormattedCodeWriter( IServiceProvider serviceProvider )
         {
             this.ServiceProvider = serviceProvider;
         }
 
-        public IServiceProvider ServiceProvider { get; set; }
+        protected IServiceProvider ServiceProvider { get; set; }
 
         public static T AddDiagnosticAnnotations<T>( T syntaxRoot, string? filePath, IEnumerable<Diagnostic>? diagnostics )
             where T : SyntaxNode

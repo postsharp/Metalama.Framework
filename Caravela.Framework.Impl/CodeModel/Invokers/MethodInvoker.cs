@@ -7,6 +7,7 @@ using Caravela.Framework.Impl.Aspects;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Templating.MetaModel;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Linq;
 
@@ -27,7 +28,8 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
         {
             if ( this._method.IsOpenGeneric )
             {
-                throw GeneralDiagnosticDescriptors.CannotAccessOpenGenericMember.CreateException( this._method );
+                throw new InvalidOperationException(
+                    $"Cannot invoke the '{this._method.ToDisplayString()}' method because the method or its declaring type has unbound type parameters." );
             }
 
             var parametersCount = this._method.Parameters.Count;
@@ -74,11 +76,23 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
 
         private object InvokeDefaultMethod( object? instance, object?[] args )
         {
-            var name = this._method.GenericArguments.Any()
-                ? LanguageServiceFactory.CSharpSyntaxGenerator.GenericName(
-                    this._method.Name,
-                    this._method.GenericArguments.Select( a => a.GetSymbol() ) )
-                : SyntaxFactory.IdentifierName( this._method.Name );
+            SimpleNameSyntax name;
+
+            if ( this._method.IsGeneric )
+            {
+                name = SyntaxFactory.GenericName( this._method.Name )
+                    .WithTypeArgumentList(
+                        SyntaxFactory.TypeArgumentList(
+                            SyntaxFactory.SeparatedList(
+                                this._method.TypeArguments.Select(
+                                        t =>
+                                            LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( t.GetSymbol() ) )
+                                    .ToArray() ) ) );
+            }
+            else
+            {
+                name = SyntaxFactory.IdentifierName( this._method.Name );
+            }
 
             var arguments = this._method.GetArguments( this._method.Parameters, RuntimeExpression.FromValue( args, this.Compilation ) );
 
@@ -118,7 +132,7 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
                             .AddArgumentListArguments( arguments ) )
                     .WithAspectReferenceAnnotation( this.AspectReference );
 
-                return new DynamicExpression( invocationExpression, this._method.ReturnType.MakeNullable() );
+                return new DynamicExpression( invocationExpression, this._method.ReturnType.ConstructNullable() );
             }
         }
     }

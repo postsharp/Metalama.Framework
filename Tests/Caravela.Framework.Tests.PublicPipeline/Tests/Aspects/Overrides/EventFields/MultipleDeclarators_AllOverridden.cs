@@ -13,9 +13,9 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Even
     {
         public void BuildAspect(IAspectBuilder<INamedType> builder)
         {
-            builder.AdviceFactory.OverrideEventAccessors(builder.Target.Events.OfName("A").Single(), nameof(OverrideAdd), nameof(OverrideRemove), null);
-            builder.AdviceFactory.OverrideEventAccessors(builder.Target.Events.OfName("B").Single(), nameof(OverrideAdd), nameof(OverrideRemove), null);
-            builder.AdviceFactory.OverrideEventAccessors(builder.Target.Events.OfName("C").Single(), nameof(OverrideAdd), nameof(OverrideRemove), null);
+            builder.Advices.OverrideEventAccessors(builder.Target.Events.OfName("A").Single(), nameof(OverrideAdd), nameof(OverrideRemove), null);
+            builder.Advices.OverrideEventAccessors(builder.Target.Events.OfName("B").Single(), nameof(OverrideAdd), nameof(OverrideRemove), null);
+            builder.Advices.OverrideEventAccessors(builder.Target.Events.OfName("C").Single(), nameof(OverrideAdd), nameof(OverrideRemove), null);
         }
 
         [Template]
