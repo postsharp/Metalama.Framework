@@ -124,7 +124,7 @@ namespace Caravela.Framework.Impl.CompileTime
                     return referenceAssemblies;
                 }
             }
-            
+
             Directory.CreateDirectory( tempProjectDirectory );
 
             GlobalJsonWriter.TryWriteCurrentVersion( tempProjectDirectory );

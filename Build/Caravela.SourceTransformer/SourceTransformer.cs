@@ -15,7 +15,7 @@ namespace Caravela.SourceTransformer
     [Transformer]
     internal class SourceTransformer : ISourceTransformer
     {
-        public Compilation Execute( TransformerContext context )
+        public void Execute( TransformerContext context )
         {
             var changeDynamicToObject = context.GlobalOptions.TryGetValue( "build_property.ChangeDynamicToObject", out var changeDynamicToObjectStr )
                                         && bool.Parse( changeDynamicToObjectStr );
@@ -35,7 +35,7 @@ namespace Caravela.SourceTransformer
                 context.ReportDiagnostic( diagnostic );
             }
 
-            return compilation;
+            context.Compilation = compilation;
         }
 
         private class Rewriter : CSharpSyntaxRewriter
@@ -211,8 +211,8 @@ namespace Caravela.SourceTransformer
         private static readonly DiagnosticDescriptor _nonExpressionBodyError =
             new(
                 "CMT001",
-                "Only expression-bodied properties are supported.",
-                "Only expression-bodied properties are supported.",
+                "Only expression-bodied properties are supported",
+                "Only expression-bodied properties are supported",
                 "Caravela.SourceTransformer",
                 DiagnosticSeverity.Error,
                 true );
@@ -220,8 +220,8 @@ namespace Caravela.SourceTransformer
         private static readonly DiagnosticDescriptor _staticPropertyError =
             new(
                 "CMT002",
-                "Static properties are not supported.",
-                "Static properties are not supported.",
+                "Static properties are not supported",
+                "Static properties are not supported",
                 "Caravela.SourceTransformer",
                 DiagnosticSeverity.Error,
                 true );
@@ -229,8 +229,8 @@ namespace Caravela.SourceTransformer
         private static readonly DiagnosticDescriptor _dynamicKeywordError =
             new(
                 "CMT004",
-                "Dynamic keyword forbidden.",
-                "The 'dynamic' keyword is forbidden in this project.",
+                "Dynamic keyword forbidden",
+                "The 'dynamic' keyword is forbidden in this project",
                 "Caravela.SourceTransformer",
                 DiagnosticSeverity.Error,
                 true );
