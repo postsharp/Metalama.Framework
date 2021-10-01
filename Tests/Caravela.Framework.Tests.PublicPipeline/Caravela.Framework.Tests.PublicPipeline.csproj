@@ -32,6 +32,12 @@
     <!-- Exclude files that intentionally do not compile -->
     <Compile Remove="Tests\**\__*.cs" />
     </ItemGroup>
+  
+  <ItemGroup>
+    <Compile Remove="Tests\Aspects\Introductions\Methods\Declarative - Copy.t.cs" />
+    <Compile Remove="Tests\Aspects\Introductions\Properties\Declarative - Copy.t.cs" />
+    <Compile Remove="Tests\Aspects\Introductions\Properties\PromoteSource - Copy.t.cs" />
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\Caravela.Framework.Impl\Caravela.Framework.Impl.csproj" />
@@ -41,6 +47,12 @@
 
   <ItemGroup>
     <InternalsVisibleTo Include="Caravela.AspectWorkbench" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="Tests\Aspects\Introductions\Methods\SyntaxOrder.t.cs" />
+    <None Include="Tests\Aspects\Introductions\Properties\PromoteIntroduced.t.cs" />
+    <None Include="Tests\Aspects\Introductions\Properties\PromoteSource.t.cs" />
   </ItemGroup>
 
   <Import Project="..\..\Caravela.TestFramework\Caravela.TestFramework.targets" />

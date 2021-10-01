@@ -1,8 +1,10 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Code;
 using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.CodeModel.Builders;
 using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Transformations;
@@ -94,7 +96,13 @@ namespace Caravela.Framework.Impl.Linking
             {
                 var replacedMember = transformation.ReplacedMember.Resolve( input.CompilationModel );
 
-                switch ( replacedMember )
+                IDeclaration canonicalReplacedMember = replacedMember switch
+                {
+                    BuiltDeclaration declaration => declaration.Builder,
+                    _ => replacedMember,
+                };
+
+                switch ( canonicalReplacedMember )
                 {
                     case Field replacedField:
                         var syntaxReference = replacedField.Symbol.GetPrimarySyntaxReference();
