@@ -1,4 +1,4 @@
-    [Introduction]
+[Introduction]
     internal class TargetClass : BaseClass
     {
         public int ExistingProperty

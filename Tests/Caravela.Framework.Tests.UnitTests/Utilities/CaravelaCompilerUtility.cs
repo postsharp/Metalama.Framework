@@ -20,6 +20,8 @@ namespace Caravela.Framework.Tests.UnitTests.Utilities
 
             void WriteFile( string name, string text ) => File.WriteAllText( Path.Combine( dir, name ), text );
 
+            GlobalJsonWriter.TryWriteCurrentVersion( dir );
+
             var metadataReader = AssemblyMetadataReader.GetInstance( typeof(CaravelaCompilerUtility).Assembly );
 
             var csproj = $@"

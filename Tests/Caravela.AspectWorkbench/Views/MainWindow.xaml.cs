@@ -3,6 +3,7 @@
 
 using Caravela.AspectWorkbench.CodeEditor;
 using Caravela.AspectWorkbench.ViewModels;
+using Microsoft.CodeAnalysis;
 using Microsoft.Win32;
 using PostSharp;
 using RoslynPad.Editor;
@@ -43,7 +44,7 @@ namespace Caravela.AspectWorkbench.Views
             var highlightColors = new ClassificationHighlightColors();
             var workingDirectory = Directory.GetCurrentDirectory();
 
-            this.sourceTextBox.Initialize( roslynHost, highlightColors, workingDirectory, "" );
+            this.sourceTextBox.Initialize( roslynHost, highlightColors, workingDirectory, "", SourceCodeKind.Regular );
         }
 
         private void ViewModel_PropertyChanged( object? sender, PropertyChangedEventArgs e )

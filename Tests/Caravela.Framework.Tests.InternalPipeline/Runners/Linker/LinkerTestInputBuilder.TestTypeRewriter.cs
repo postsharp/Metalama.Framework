@@ -474,7 +474,6 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
                         {
                             new IntroducedMember(
                                 transformation,
-                                introducedElementName,
                                 declarationKind,
                                 introductionSyntax,
                                 new AspectLayerId( aspectName.AssertNotNull(), layerName ),
@@ -679,7 +678,6 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
                         {
                             new IntroducedMember(
                                 transformation,
-                                declarationName,
                                 declarationKind,
                                 overrideSyntax,
                                 new AspectLayerId( aspectName.AssertNotNull(), layerName ),

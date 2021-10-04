@@ -21,7 +21,7 @@ namespace Caravela.Framework.Impl.Pipeline
     [ExcludeFromCodeCoverage]
     public sealed class SourceTransformer : ISourceTransformer
     {
-        public Compilation Execute( TransformerContext context )
+        public void Execute( TransformerContext context )
         {
             var projectOptions = new ProjectOptions( context.GlobalOptions, context.Plugins );
 
@@ -43,12 +43,7 @@ namespace Caravela.Framework.Impl.Pipeline
                     context.ManifestResources.Clear();
                     context.ManifestResources.AddRange( outputResources );
 
-                    return outputCompilation;
-                }
-                else
-                {
-                    // The pipeline failed.
-                    return context.Compilation;
+                    context.Compilation = outputCompilation;
                 }
             }
             catch ( Exception e )
@@ -62,8 +57,6 @@ namespace Caravela.Framework.Impl.Pipeline
                 {
                     throw;
                 }
-
-                return context.Compilation;
             }
         }
     }

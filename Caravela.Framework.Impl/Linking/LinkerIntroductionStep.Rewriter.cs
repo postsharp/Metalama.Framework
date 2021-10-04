@@ -9,6 +9,7 @@ using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Formatting;
 using Caravela.Framework.Impl.Transformations;
+using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -28,18 +29,6 @@ namespace Caravela.Framework.Impl.Linking
             private readonly ImmutableDictionary<AspectLayerId, OrderedAspectLayer> _orderedAspectLayers;
             private readonly ImmutableMultiValueDictionary<IDeclaration, ScopedSuppression> _diagnosticSuppressions;
             private readonly SyntaxTransformationCollection _introducedMemberCollection;
-
-            private static readonly ImmutableDictionary<DeclarationKind, int> _orderedDeclarationKinds = new Dictionary<DeclarationKind, int>()
-            {
-                { DeclarationKind.Field, 0 },
-                { DeclarationKind.Constructor, 1 },
-                { DeclarationKind.Property, 2 },
-                { DeclarationKind.Method, 3 },
-                { DeclarationKind.Event, 4 },
-                { DeclarationKind.NamedType, 5 }
-            }.ToImmutableDictionary();
-
-            private static int GetDeclarationOrder( DeclarationKind kind ) => _orderedDeclarationKinds.TryGetValue( kind, out var order ) ? order : 10;
 
             // Maps a diagnostic id to the number of times it has been suppressed.
             private ImmutableHashSet<string> _activeSuppressions = ImmutableHashSet.Create<string>( StringComparer.OrdinalIgnoreCase );
@@ -193,9 +182,9 @@ namespace Caravela.Framework.Impl.Linking
                 void AddIntroductionsOnPosition( InsertPosition position )
                 {
                     var membersAtPosition = this._introducedMemberCollection.GetIntroducedMembersOnPosition( position )
-                        .OrderBy( m => GetDeclarationOrder( m.DeclarationKind ) )
-                        .ThenBy( m => m.SortingName )
-                        .ThenBy( m => this._orderedAspectLayers[m.Introduction.Advice.AspectLayerId].Order );
+                        .OrderBy( m => m )
+                        .ThenBy( m => this._orderedAspectLayers[m.Introduction.Advice.AspectLayerId].Order )
+                        .ThenBy( m => m, ThrowingComparer<LinkerIntroducedMember>.Instance );
 
                     foreach ( var introducedMember in membersAtPosition )
                     {
