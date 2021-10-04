@@ -7,9 +7,6 @@ namespace Caravela.Framework.Code
     {
         None,
         Class,
-
-        // TODO: Must be handled differently, as in Roslyn.
-        NullableClass,
         Struct,
         Unmanaged,
         NotNull,

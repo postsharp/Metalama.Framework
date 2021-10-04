@@ -42,6 +42,6 @@ goto __aspect_return_1;                }
 goto __aspect_return_1;}result=0;
 goto __aspect_return_1;
 __aspect_return_1:    global::System.Console.WriteLine("End override.");
-    return (global::System.Int32)(result);
+    return (global::System.Int32)result;
 }
     }

@@ -8,6 +8,25 @@ namespace Caravela.Framework.Impl.CodeModel
 {
     internal static class GenericParameterExtensions
     {
+        public static bool? IsReferenceTypeImpl( this IGenericParameter genericParameter )
+            => genericParameter.TypeKindConstraint switch
+            {
+                TypeKindConstraint.Class => true,
+                TypeKindConstraint.Struct => false,
+                TypeKindConstraint.Unmanaged => false,
+                _ => null
+            };
+
+        public static bool? IsNullableImpl( this IGenericParameter genericParameter )
+            => genericParameter.TypeKindConstraint switch
+            {
+                TypeKindConstraint.Class => genericParameter.HasDefaultConstructorConstraint,
+                TypeKindConstraint.Struct => false,
+                TypeKindConstraint.NotNull => false,
+                TypeKindConstraint.Unmanaged => false,
+                _ => null
+            };
+
         public static bool IsCompatibleWith( this IGenericParameter a, IGenericParameter b )
         {
             // Check new() constraint.
@@ -19,8 +38,7 @@ namespace Caravela.Framework.Impl.CodeModel
             // Check type kind.
             switch ( a.TypeKindConstraint )
             {
-                case TypeKindConstraint.Class when b.TypeKindConstraint is not TypeKindConstraint.Class or TypeKindConstraint.NullableClass:
-                case TypeKindConstraint.NullableClass when b.TypeKindConstraint is not TypeKindConstraint.Class or TypeKindConstraint.NullableClass:
+                case TypeKindConstraint.Class when b.TypeKindConstraint is not TypeKindConstraint.Class:
                 case TypeKindConstraint.Struct when b.TypeKindConstraint is not TypeKindConstraint.Struct or TypeKindConstraint.Unmanaged:
                 case TypeKindConstraint.Unmanaged when b.TypeKindConstraint is not TypeKindConstraint.Unmanaged:
                 case TypeKindConstraint.NotNull

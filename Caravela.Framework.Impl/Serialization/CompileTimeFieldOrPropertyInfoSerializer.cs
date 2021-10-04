@@ -21,23 +21,23 @@ namespace Caravela.Framework.Impl.Serialization
         // TODO Add support for private indexers: currently, they're not found because we're only looking for public properties; we'd need to use the overload with both types and
         // binding flags for private indexers, and that overload is complicated.
 
-        public override ExpressionSyntax Serialize( CompileTimeFieldOrPropertyInfo obj, ICompilationElementFactory syntaxFactory )
+        public override ExpressionSyntax Serialize( CompileTimeFieldOrPropertyInfo obj, SyntaxSerializationContext serializationContext )
         {
             ExpressionSyntax propertyInfo;
-            var allBindingFlags = SyntaxUtility.CreateBindingFlags( syntaxFactory );
+            var allBindingFlags = SyntaxUtility.CreateBindingFlags( serializationContext );
 
             switch ( obj.FieldOrProperty )
             {
                 case IProperty property:
                     {
-                        propertyInfo = this.Service.CompileTimePropertyInfoSerializer.SerializeProperty( property, syntaxFactory );
+                        propertyInfo = this.Service.CompileTimePropertyInfoSerializer.SerializeProperty( property, serializationContext );
 
                         break;
                     }
 
                 case Field field:
                     {
-                        var typeCreation = this.Service.Serialize( CompileTimeType.Create( field.DeclaringType ), syntaxFactory );
+                        var typeCreation = this.Service.Serialize( CompileTimeType.Create( field.DeclaringType ), serializationContext );
 
                         propertyInfo = InvocationExpression(
                                 MemberAccessExpression(
@@ -59,7 +59,7 @@ namespace Caravela.Framework.Impl.Serialization
                     throw new NotImplementedException();
             }
 
-            return ObjectCreationExpression( syntaxFactory.GetTypeSyntax( typeof(FieldOrPropertyInfo) ) )
+            return ObjectCreationExpression( serializationContext.GetTypeSyntax( typeof(FieldOrPropertyInfo) ) )
                 .AddArgumentListArguments( Argument( propertyInfo ) )
                 .NormalizeWhitespace();
         }

@@ -23,14 +23,14 @@ private void OverrideVoid_Source()
         }
 
 
-public void IntroduceVoid()
-{
-    global::System.Console.WriteLine("Introduced");
-}
-
 public global::System.Int32 IntroduceInt()
 {
     global::System.Console.WriteLine("Introduced");
-    return 0;
+    return default(global::System.Int32);
+}
+
+public void IntroduceVoid()
+{
+    global::System.Console.WriteLine("Introduced");
 }        
     }

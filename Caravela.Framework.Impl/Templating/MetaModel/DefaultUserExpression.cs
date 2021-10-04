@@ -9,27 +9,29 @@ using System;
 
 namespace Caravela.Framework.Impl.Templating.MetaModel
 {
-    internal class DefaultDynamicExpression : IDynamicExpression
+    internal class DefaultUserExpression : IUserExpression
     {
-        public DefaultDynamicExpression( IType type )
+        public DefaultUserExpression( IType type )
         {
             this.Type = type;
         }
 
-        public RuntimeExpression CreateExpression( string? expressionText = null, Location? location = null )
+        public RuntimeExpression ToRunTimeExpression()
         {
+            var syntaxGenerationContext = TemplateExpansionContext.CurrentSyntaxGenerationContext;
+
             var typeSymbol = this.Type.GetSymbol();
-            var expression = LanguageServiceFactory.CSharpSyntaxGenerator.DefaultExpression( typeSymbol );
+            var expression = syntaxGenerationContext.SyntaxGenerator.DefaultExpression( typeSymbol );
 
             if ( expression is not DefaultExpressionSyntax )
             {
                 // We need to specify the type explicitly to preserve the typing.
-                expression = LanguageServiceFactory.CSharpSyntaxGenerator.CastExpression(
+                expression = syntaxGenerationContext.SyntaxGenerator.CastExpression(
                     typeSymbol.IsReferenceType ? typeSymbol.WithNullableAnnotation( NullableAnnotation.Annotated ) : typeSymbol,
                     expression );
             }
 
-            return new RuntimeExpression( expression, this.Type );
+            return new RuntimeExpression( expression, this.Type, syntaxGenerationContext );
         }
 
         public IType Type { get; }

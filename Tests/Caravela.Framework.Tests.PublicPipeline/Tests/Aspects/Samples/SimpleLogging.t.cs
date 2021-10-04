@@ -12,7 +12,7 @@ global::System.Int32 result;
 result=a + b;
 goto __aspect_return_1;
 __aspect_return_1:        global::System.Console.WriteLine("TargetClass.Add(int, int) succeeded.");
-        return (global::System.Int32)(result);
+        return (global::System.Int32)result;
     }
     catch (global::System.Exception e)
     {

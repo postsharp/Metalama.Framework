@@ -4,7 +4,7 @@ class Targets
         {
             public object Clone()
             {
-                return  new NaturallyCloneable();
+                return new NaturallyCloneable();
             }
         }
     
@@ -21,7 +21,7 @@ public global::Caravela.Framework.Tests.Integration.Tests.Aspects.Introductions.
 
 global::System.Object global::System.ICloneable.Clone()
 {
-    return (global::System.Object)(this.Clone());
+    return (global::System.Object)this.Clone();
 }        }
 
     }

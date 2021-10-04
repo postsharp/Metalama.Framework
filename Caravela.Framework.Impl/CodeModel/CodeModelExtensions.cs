@@ -7,6 +7,7 @@ using Caravela.Framework.Impl.CodeModel.Builders;
 using Caravela.Framework.Impl.Transformations;
 using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using MethodKind = Caravela.Framework.Code.MethodKind;
 
@@ -15,8 +16,6 @@ namespace Caravela.Framework.Impl.CodeModel
     internal static class CodeModelExtensions
     {
         public static CompilationModel GetCompilationModel( this ICompilationElement declaration ) => (CompilationModel) declaration.Compilation;
-
-        public static ISyntaxFactory GetSyntaxFactory( this IDeclaration declaration ) => declaration.GetCompilationModel().ReflectionMapper;
 
         public static AttributeData GetAttributeData( this IAttribute attribute )
         {
@@ -48,11 +47,11 @@ namespace Caravela.Framework.Impl.CodeModel
         {
             switch ( declaration )
             {
-                case BuiltDeclaration builtDeclaration:
-                    return new InsertPosition( InsertPositionRelation.After, builtDeclaration.Builder );
-
-                case IDeclarationBuilder builder:
-                    return new InsertPosition( InsertPositionRelation.After, builder );
+                case BuiltDeclaration:
+                case IDeclarationBuilder:
+                    return new InsertPosition(
+                        InsertPositionRelation.Within,
+                        (MemberDeclarationSyntax) declaration.DeclaringType.GetPrimaryDeclaration().AssertNotNull() );
 
                 default:
                     var symbol = declaration.GetSymbol().AssertNotNull();

@@ -8,11 +8,11 @@ private IGreetingService? _service1;
         var value = this._service_Source;
         if (value == null)
         {
-            value = ((global::Caravela.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug28905.IGreetingService? )(global::Caravela.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug28905.ServiceLocator.ServiceProvider.GetService(typeof(global::Caravela.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug28905.IGreetingService))));
+            value = ((global::Caravela.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug28905.IGreetingService? )global::Caravela.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug28905.ServiceLocator.ServiceProvider.GetService(typeof(global::Caravela.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug28905.IGreetingService)));
             this._service_Source= value ?? throw new global::System.InvalidOperationException($"Cannot get a service of type Caravela.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug28905.IGreetingService?.");
         }
 
-        return (global::Caravela.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug28905.IGreetingService? )(value);
+        return (global::Caravela.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug28905.IGreetingService? )value;
     }
 
 set    {

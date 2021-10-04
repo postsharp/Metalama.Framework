@@ -31,9 +31,12 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
             }
             else
             {
-                return new DynamicExpression(
-                    LanguageServiceFactory.CSharpSyntaxGenerator.DefaultExpression( this.ReturnType.GetSymbol() ),
-                    this.ReturnType );
+                var generationContext = TemplateExpansionContext.CurrentSyntaxGenerationContext;
+
+                return new UserExpression(
+                    generationContext.SyntaxGenerator.DefaultExpression( this.ReturnType.GetSymbol() ),
+                    this.ReturnType,
+                    generationContext );
             }
         }
 

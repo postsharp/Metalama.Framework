@@ -1,7 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.ReflectionMocks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -15,12 +14,12 @@ namespace Caravela.Framework.Impl.Serialization
 {
     internal class CompileTimeEventInfoSerializer : ObjectSerializer<CompileTimeEventInfo>
     {
-        public override ExpressionSyntax Serialize( CompileTimeEventInfo obj, ICompilationElementFactory syntaxFactory )
+        public override ExpressionSyntax Serialize( CompileTimeEventInfo obj, SyntaxSerializationContext serializationContext )
         {
-            var @event = obj.Target.Resolve( syntaxFactory.CompilationModel ).AssertNotNull();
+            var @event = obj.Target.Resolve( serializationContext.CompilationModel ).AssertNotNull();
 
             var eventName = @event.Name;
-            var typeCreation = this.Service.Serialize( CompileTimeType.Create( @event.DeclaringType ), syntaxFactory );
+            var typeCreation = this.Service.Serialize( CompileTimeType.Create( @event.DeclaringType ), serializationContext );
 
             return InvocationExpression(
                     MemberAccessExpression(

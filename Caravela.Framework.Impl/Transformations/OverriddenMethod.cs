@@ -1,7 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.Aspects;
@@ -13,7 +12,6 @@ using Caravela.Framework.Impl.Templating.MetaModel;
 using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
@@ -43,11 +41,10 @@ namespace Caravela.Framework.Impl.Transformations
             using ( context.DiagnosticSink.WithDefaultScope( this.OverriddenDeclaration ) )
             {
                 var proceedExpression = ProceedHelper.CreateProceedDynamicExpression(
-                    this.CreateInvocationExpression(),
+                    context.SyntaxGenerationContext,
+                    this.CreateInvocationExpression( context.SyntaxGenerationContext ),
                     this.Template,
                     this.OverriddenDeclaration );
-
-                var expandYieldProceed = this.CreateYieldProceedStatement( proceedExpression );
 
                 var metaApi = MetaApi.ForMethod(
                     this.OverriddenDeclaration,
@@ -56,6 +53,7 @@ namespace Caravela.Framework.Impl.Transformations
                         this.Template.Cast(),
                         this.Advice.ReadOnlyTags,
                         this.Advice.AspectLayerId,
+                        context.SyntaxGenerationContext,
                         context.ServiceProvider ) );
 
                 var expansionContext = new TemplateExpansionContext(
@@ -64,10 +62,9 @@ namespace Caravela.Framework.Impl.Transformations
                     this.OverriddenDeclaration.Compilation,
                     context.LexicalScopeProvider.GetLexicalScope( this.OverriddenDeclaration ),
                     context.ServiceProvider.GetService<SyntaxSerializationService>(),
-                    (ICompilationElementFactory) this.OverriddenDeclaration.Compilation.TypeFactory,
+                    context.SyntaxGenerationContext,
                     this.Template,
-                    proceedExpression,
-                    expandYieldProceed );
+                    proceedExpression );
 
                 var templateDriver = this.Advice.Aspect.AspectClass.GetTemplateDriver( this.Template.Declaration! );
 
@@ -102,12 +99,12 @@ namespace Caravela.Framework.Impl.Transformations
 
                     if ( TypeExtensions.Equals( this.OverriddenDeclaration.ReturnType, SpecialType.Void ) )
                     {
-                        returnType = LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression(
+                        returnType = context.SyntaxGenerator.Type(
                             this.OverriddenDeclaration.GetCompilationModel().Factory.GetSpecialType( SpecialType.ValueTask ).GetSymbol() );
                     }
                 }
 
-                returnType ??= LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( this.OverriddenDeclaration.ReturnType.GetSymbol() );
+                returnType ??= context.SyntaxGenerator.Type( this.OverriddenDeclaration.ReturnType.GetSymbol() );
 
                 var introducedMethod = MethodDeclaration(
                     List<AttributeListSyntax>(),
@@ -119,9 +116,9 @@ namespace Caravela.Framework.Impl.Transformations
                             this.OverriddenDeclaration.DeclaringType,
                             this.Advice.AspectLayerId,
                             this.OverriddenDeclaration ) ),
-                    SyntaxHelpers.CreateSyntaxForTypeParameterList( this.OverriddenDeclaration ),
-                    SyntaxHelpers.CreateSyntaxForParameterList( this.OverriddenDeclaration ),
-                    SyntaxHelpers.CreateSyntaxForConstraintClauses( this.OverriddenDeclaration ),
+                    context.SyntaxGenerator.TypeParameterList( this.OverriddenDeclaration ),
+                    context.SyntaxGenerator.ParameterList( this.OverriddenDeclaration ),
+                    context.SyntaxGenerator.ConstraintClauses( this.OverriddenDeclaration ),
                     newMethodBody,
                     null );
 
@@ -139,70 +136,9 @@ namespace Caravela.Framework.Impl.Transformations
             }
         }
 
-        private Func<TemplateExpansionContext, StatementSyntax>? CreateYieldProceedStatement( IDynamicExpression proceedExpression )
-        {
-            switch ( this.Template.SelectedKind )
-            {
-                case TemplateKind.IEnumerable:
-                case TemplateKind.IEnumerator:
-                    // Generate: `foreach ( var value in PROCEED() ) {   yield return value; }`
-                    return context =>
-                    {
-                        var varName = context.LexicalScope.GetUniqueIdentifier( "value" );
-
-                        return ForEachStatement(
-                            IdentifierName(
-                                Identifier(
-                                    TriviaList(),
-                                    SyntaxKind.VarKeyword,
-                                    "var",
-                                    "var",
-                                    TriviaList() ) ),
-                            Identifier( varName ),
-                            proceedExpression.CreateExpression(),
-                            Block(
-                                SingletonList<StatementSyntax>(
-                                    YieldStatement(
-                                        SyntaxKind.YieldReturnStatement,
-                                        IdentifierName( varName ) ) ) ) );
-                    };
-
-                case TemplateKind.IAsyncEnumerable:
-                case TemplateKind.IAsyncEnumerator:
-                    // Generate: `await foreach ( var value in PROCEED() ) {   yield return value; }`
-                    return context =>
-                    {
-                        // TODO: Not sure how the CancellationToken is handled.
-
-                        var varName = context.LexicalScope.GetUniqueIdentifier( "value" );
-
-                        return ForEachStatement(
-                                IdentifierName(
-                                    Identifier(
-                                        TriviaList(),
-                                        SyntaxKind.VarKeyword,
-                                        "var",
-                                        "var",
-                                        TriviaList() ) ),
-                                Identifier( varName ),
-                                proceedExpression.CreateExpression(),
-                                Block(
-                                    SingletonList<StatementSyntax>(
-                                        YieldStatement(
-                                            SyntaxKind.YieldReturnStatement,
-                                            IdentifierName( varName ) ) ) ) )
-                            .WithAwaitKeyword( Token( SyntaxKind.AwaitKeyword ) );
-                    };
-
-                default:
-                    // No special
-                    return null;
-            }
-        }
-
-        private ExpressionSyntax CreateInvocationExpression()
+        private ExpressionSyntax CreateInvocationExpression( SyntaxGenerationContext generationContext )
             => InvocationExpression(
-                this.CreateMemberAccessExpression( AspectReferenceTargetKind.Self ),
+                this.CreateMemberAccessExpression( AspectReferenceTargetKind.Self, generationContext ),
                 ArgumentList(
                     SeparatedList(
                         this.OverriddenDeclaration.Parameters.Select(

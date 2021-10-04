@@ -76,7 +76,7 @@ namespace Caravela.Framework.Impl.Transformations
                     }
                     else
                     {
-                        getAccessorBody = this.CreateIdentityAccessorBody( SyntaxKind.GetAccessorDeclaration );
+                        getAccessorBody = this.CreateIdentityAccessorBody( SyntaxKind.GetAccessorDeclaration, context.SyntaxGenerationContext );
                     }
                 }
                 else
@@ -98,7 +98,7 @@ namespace Caravela.Framework.Impl.Transformations
                     }
                     else
                     {
-                        setAccessorBody = this.CreateIdentityAccessorBody( SyntaxKind.SetAccessorDeclaration );
+                        setAccessorBody = this.CreateIdentityAccessorBody( SyntaxKind.SetAccessorDeclaration, context.SyntaxGenerationContext );
                     }
                 }
                 else
@@ -119,7 +119,7 @@ namespace Caravela.Framework.Impl.Transformations
                         PropertyDeclaration(
                             List<AttributeListSyntax>(),
                             this.OverriddenDeclaration.GetSyntaxModifierList(),
-                            SyntaxHelpers.CreateSyntaxForPropertyType( this.OverriddenDeclaration ),
+                            context.SyntaxGenerator.PropertyType( this.OverriddenDeclaration ),
                             null,
                             Identifier( propertyName ),
                             AccessorList(
@@ -165,12 +165,14 @@ namespace Caravela.Framework.Impl.Transformations
                     accessor.MethodKind switch
                     {
                         MethodKind.PropertyGet => ProceedHelper.CreateProceedDynamicExpression(
-                            this.CreateProceedGetExpression(),
+                            context.SyntaxGenerationContext,
+                            this.CreateProceedGetExpression( context.SyntaxGenerationContext ),
                             this.GetTemplate,
                             this.OverriddenDeclaration.GetMethod.AssertNotNull() ),
-                        MethodKind.PropertySet => new DynamicExpression(
-                            this.CreateProceedSetExpression(),
-                            this.OverriddenDeclaration.Compilation.TypeFactory.GetSpecialType( SpecialType.Void ) ),
+                        MethodKind.PropertySet => new UserExpression(
+                            this.CreateProceedSetExpression( context.SyntaxGenerationContext ),
+                            this.OverriddenDeclaration.Compilation.TypeFactory.GetSpecialType( SpecialType.Void ),
+                            context.SyntaxGenerationContext ),
                         _ => throw new AssertionFailedException()
                     };
 
@@ -182,6 +184,7 @@ namespace Caravela.Framework.Impl.Transformations
                         accessorTemplate.Cast(),
                         this.Advice.ReadOnlyTags,
                         this.Advice.AspectLayerId,
+                        context.SyntaxGenerationContext,
                         context.ServiceProvider ) );
 
                 var expansionContext = new TemplateExpansionContext(
@@ -190,7 +193,7 @@ namespace Caravela.Framework.Impl.Transformations
                     this.OverriddenDeclaration.Compilation,
                     context.LexicalScopeProvider.GetLexicalScope( accessor ),
                     context.ServiceProvider.GetService<SyntaxSerializationService>(),
-                    (ICompilationElementFactory) this.OverriddenDeclaration.Compilation.TypeFactory,
+                    context.SyntaxGenerationContext,
                     default,
                     proceedExpression );
 
@@ -205,28 +208,29 @@ namespace Caravela.Framework.Impl.Transformations
         /// </summary>
         /// <param name="accessorDeclarationKind"></param>
         /// <returns></returns>
-        private BlockSyntax? CreateIdentityAccessorBody( SyntaxKind accessorDeclarationKind )
+        private BlockSyntax? CreateIdentityAccessorBody( SyntaxKind accessorDeclarationKind, SyntaxGenerationContext generationContext )
         {
             switch ( accessorDeclarationKind )
             {
                 case SyntaxKind.GetAccessorDeclaration:
-                    return Block( ReturnStatement( this.CreateProceedGetExpression() ) );
+                    return Block( ReturnStatement( this.CreateProceedGetExpression( generationContext ) ) );
 
                 case SyntaxKind.SetAccessorDeclaration:
                 case SyntaxKind.InitAccessorDeclaration:
-                    return Block( ExpressionStatement( this.CreateProceedSetExpression() ) );
+                    return Block( ExpressionStatement( this.CreateProceedSetExpression( generationContext ) ) );
 
                 default:
                     throw new AssertionFailedException();
             }
         }
 
-        private ExpressionSyntax CreateProceedGetExpression() => this.CreateMemberAccessExpression( AspectReferenceTargetKind.PropertyGetAccessor );
+        private ExpressionSyntax CreateProceedGetExpression( SyntaxGenerationContext generationContext )
+            => this.CreateMemberAccessExpression( AspectReferenceTargetKind.PropertyGetAccessor, generationContext );
 
-        private ExpressionSyntax CreateProceedSetExpression()
+        private ExpressionSyntax CreateProceedSetExpression( SyntaxGenerationContext generationContext )
             => AssignmentExpression(
                 SyntaxKind.SimpleAssignmentExpression,
-                this.CreateMemberAccessExpression( AspectReferenceTargetKind.PropertySetAccessor ),
+                this.CreateMemberAccessExpression( AspectReferenceTargetKind.PropertySetAccessor, generationContext ),
                 IdentifierName( "value" ) );
     }
 }

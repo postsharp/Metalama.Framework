@@ -17,32 +17,92 @@ namespace Caravela.Framework.Tests.UnitTests
             this._logger = logger;
         }
 
-        private void AssertType( string type, string expectedTypeOf )
+        [Theory]
+
+        // With nullable context.
+        [InlineData( "int?", "typeof(global::System.Int32?)", true )]
+        [InlineData( "string?", "typeof(global::System.String)", true )]
+        [InlineData( "List<string?>", "typeof(global::System.Collections.Generic.List<global::System.String>)", true )]
+        [InlineData( "List<string>?", "typeof(global::System.Collections.Generic.List<global::System.String>)", true )]
+        [InlineData(
+            "List<List<string?>>",
+            "typeof(global::System.Collections.Generic.List<global::System.Collections.Generic.List<global::System.String>>)",
+            true )]
+        [InlineData( "List<string[]?>", "typeof(global::System.Collections.Generic.List<global::System.String[]>)", true )]
+        [InlineData( "List<string?[]?>?", "typeof(global::System.Collections.Generic.List<global::System.String[]>)", true )]
+        [InlineData( "List<int[]?>", "typeof(global::System.Collections.Generic.List<global::System.Int32[]>)", true )]
+        [InlineData( "List<int?[]>", "typeof(global::System.Collections.Generic.List<global::System.Int32?[]>)", true )]
+
+        // Without nullable context.
+        [InlineData( "int?", "typeof(global::System.Int32?)", false )]
+        [InlineData( "string?", "typeof(global::System.String)", false )]
+        [InlineData( "List<string?>", "typeof(global::System.Collections.Generic.List<global::System.String>)", false )]
+        [InlineData( "List<string>?", "typeof(global::System.Collections.Generic.List<global::System.String>)", false )]
+        [InlineData(
+            "List<List<string?>>",
+            "typeof(global::System.Collections.Generic.List<global::System.Collections.Generic.List<global::System.String>>)",
+            false )]
+        [InlineData( "List<string[]?>", "typeof(global::System.Collections.Generic.List<global::System.String[]>)", false )]
+        [InlineData( "List<string?[]?>?", "typeof(global::System.Collections.Generic.List<global::System.String[]>)", false )]
+        [InlineData( "List<int[]?>", "typeof(global::System.Collections.Generic.List<global::System.Int32[]>)", false )]
+        [InlineData( "List<int?[]>", "typeof(global::System.Collections.Generic.List<global::System.Int32?[]>)", false )]
+        public void TypeOfSyntax( string type, string expectedTypeOf, bool nullable )
         {
             var code = $"using System.Collections.Generic; class T {{ {type} field; }} ";
             var compilation = CreateCompilationModel( code );
             var fieldType = compilation.DeclaredTypes.Single().Fields.Single().Type.GetSymbol();
 
-            var typeOf = LanguageServiceFactory.CSharpSyntaxGenerator.TypeOfExpression( fieldType ).ToString();
+            var defaultSyntaxGenerator = OurSyntaxGenerator.GetInstance( nullable );
+
+            var typeOf = defaultSyntaxGenerator.TypeOfExpression( fieldType ).ToString();
 
             this._logger.WriteLine( "Actual: " + typeOf );
+
             Assert.Equal( expectedTypeOf, typeOf );
         }
 
-        [Fact]
-        public void TypeOfNullable()
+        [Theory]
+
+        // With nullable context.
+        [InlineData( "int?", "global::System.Int32?", true )]
+        [InlineData( "string?", "global::System.String?", true )]
+        [InlineData( "List<string?>", "global::System.Collections.Generic.List<global::System.String?>", true )]
+        [InlineData( "List<string>?", "global::System.Collections.Generic.List<global::System.String>?", true )]
+        [InlineData(
+            "List<List<string?>>",
+            "global::System.Collections.Generic.List<global::System.Collections.Generic.List<global::System.String?>>",
+            true )]
+        [InlineData( "List<string[]?>", "global::System.Collections.Generic.List<global::System.String[]?>", true )]
+        [InlineData( "List<string?[]?>?", "global::System.Collections.Generic.List<global::System.String?[]?>?", true )]
+        [InlineData( "List<int[]?>", "global::System.Collections.Generic.List<global::System.Int32[]?>", true )]
+        [InlineData( "List<int?[]>", "global::System.Collections.Generic.List<global::System.Int32?[]>", true )]
+
+        // Without nullable context.
+        [InlineData( "int?", "global::System.Int32?", false )]
+        [InlineData( "string?", "global::System.String", false )]
+        [InlineData( "List<string?>", "global::System.Collections.Generic.List<global::System.String>", false )]
+        [InlineData( "List<string>?", "global::System.Collections.Generic.List<global::System.String>", false )]
+        [InlineData(
+            "List<List<string?>>",
+            "global::System.Collections.Generic.List<global::System.Collections.Generic.List<global::System.String>>",
+            false )]
+        [InlineData( "List<string[]?>", "global::System.Collections.Generic.List<global::System.String[]>", false )]
+        [InlineData( "List<string?[]?>?", "global::System.Collections.Generic.List<global::System.String[]>", false )]
+        [InlineData( "List<int[]?>", "global::System.Collections.Generic.List<global::System.Int32[]>", false )]
+        [InlineData( "List<int?[]>", "global::System.Collections.Generic.List<global::System.Int32?[]>", false )]
+        public void TypeSyntax( string type, string expectedTypeOf, bool nullable )
         {
-            this.AssertType( "int?", "typeof(global::System.Int32?)" );
-            this.AssertType( "string?", "typeof(global::System.String)" );
-            this.AssertType( "List<string?>", "typeof(global::System.Collections.Generic.List<global::System.String>)" );
+            var code = $"using System.Collections.Generic; class T {{ {type} field; }} ";
+            var compilation = CreateCompilationModel( code );
+            var fieldType = compilation.DeclaredTypes.Single().Fields.Single().Type.GetSymbol();
 
-            this.AssertType(
-                "List<List<string?>>",
-                "typeof(global::System.Collections.Generic.List<global::System.Collections.Generic.List<global::System.String>>)" );
+            var defaultSyntaxGenerator = OurSyntaxGenerator.GetInstance( nullable );
 
-            this.AssertType( "List<string[]?>", "typeof(global::System.Collections.Generic.List<global::System.String[]>)" );
-            this.AssertType( "List<int[]?>", "typeof(global::System.Collections.Generic.List<global::System.Int32[]>)" );
-            this.AssertType( "List<int?[]>", "typeof(global::System.Collections.Generic.List<global::System.Int32?[]>)" );
+            var typeOf = defaultSyntaxGenerator.Type( fieldType ).ToString();
+
+            this._logger.WriteLine( "Actual: " + typeOf );
+
+            Assert.Equal( expectedTypeOf, typeOf );
         }
     }
 }

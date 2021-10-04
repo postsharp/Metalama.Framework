@@ -5,6 +5,7 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Code.Invokers;
 using Caravela.Framework.Impl.Aspects;
 using Caravela.Framework.Impl.Diagnostics;
+using Caravela.Framework.Impl.Templating;
 using Caravela.Framework.Impl.Templating.MetaModel;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -78,6 +79,8 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
         {
             SimpleNameSyntax name;
 
+            var syntaxGenerationContext = TemplateExpansionContext.CurrentSyntaxGenerationContext;
+
             if ( this._method.IsGeneric )
             {
                 name = SyntaxFactory.GenericName( this._method.Name )
@@ -86,7 +89,7 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
                             SyntaxFactory.SeparatedList(
                                 this._method.TypeArguments.Select(
                                         t =>
-                                            LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( t.GetSymbol() ) )
+                                            syntaxGenerationContext.SyntaxGenerator.Type( t.GetSymbol() ) )
                                     .ToArray() ) ) );
             }
             else
@@ -94,26 +97,31 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
                 name = SyntaxFactory.IdentifierName( this._method.Name );
             }
 
-            var arguments = this._method.GetArguments( this._method.Parameters, RuntimeExpression.FromValue( args, this.Compilation ) );
+            var arguments = this._method.GetArguments(
+                this._method.Parameters,
+                RuntimeExpression.FromValue( args, this.Compilation, syntaxGenerationContext ) );
 
             if ( this._method.MethodKind == MethodKind.LocalFunction )
             {
-                var instanceExpression = RuntimeExpression.FromValue( instance, this.Compilation );
+                var instanceExpression = RuntimeExpression.FromValue( instance, this.Compilation, syntaxGenerationContext );
 
                 if ( instanceExpression.Syntax.Kind() != SyntaxKind.NullLiteralExpression )
                 {
                     throw GeneralDiagnosticDescriptors.CannotProvideInstanceForLocalFunction.CreateException( this._method );
                 }
 
-                return new DynamicExpression(
+                return new UserExpression(
                     SyntaxFactory.InvocationExpression(
                             name
                                 .WithAspectReferenceAnnotation( this.AspectReference ) )
                         .AddArgumentListArguments( arguments ),
-                    this._method.ReturnType );
+                    this._method.ReturnType,
+                    syntaxGenerationContext );
             }
 
-            var receiver = this._method.GetReceiverSyntax( RuntimeExpression.FromValue( instance!, this.Compilation ) );
+            var receiver = this._method.GetReceiverSyntax(
+                RuntimeExpression.FromValue( instance!, this.Compilation, syntaxGenerationContext ),
+                syntaxGenerationContext );
 
             if ( this._invokerOperator == InvokerOperator.Default )
             {
@@ -122,7 +130,7 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
                             .WithAspectReferenceAnnotation( this.AspectReference ) )
                     .AddArgumentListArguments( arguments );
 
-                return new DynamicExpression( invocationExpression, this._method.ReturnType );
+                return new UserExpression( invocationExpression, this._method.ReturnType, syntaxGenerationContext );
             }
             else
             {
@@ -132,7 +140,7 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
                             .AddArgumentListArguments( arguments ) )
                     .WithAspectReferenceAnnotation( this.AspectReference );
 
-                return new DynamicExpression( invocationExpression, this._method.ReturnType.ConstructNullable() );
+                return new UserExpression( invocationExpression, this._method.ReturnType.ConstructNullable(), syntaxGenerationContext );
             }
         }
     }

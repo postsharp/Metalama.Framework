@@ -31,5 +31,18 @@ namespace Caravela.Framework.Code
         /// </summary>
         /// <returns>A <see cref="Type"/> that can be used only in run-time code.</returns>
         Type ToType();
+
+        /// <summary>
+        /// Gets a value indicating whether the type is a reference type. If the type is a generic parameter
+        /// without a <c>struct</c>, <c>class</c> or similar constraint, this property evaluates to <c>null</c>.
+        /// </summary>
+        bool? IsReferenceType { get; }
+
+        /// <summary>
+        /// Gets the nullability of the type, or <c>null</c> if the type is a reference type but its nullability has not been analyzed or specified.
+        /// This property returns <c>false</c> for value types, including nullable value types, because a value type <c>T?</c> is represented
+        /// as <c>Nullable&lt;T&gt;</c>.
+        /// </summary>
+        bool? IsNullable { get; }
     }
 }

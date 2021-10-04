@@ -14,7 +14,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 {
     internal partial class AdvisedParameterList
     {
-        private class ToArrayImpl : IDynamicExpression
+        private class ToArrayImpl : IUserExpression
         {
             private readonly AdvisedParameterList _parent;
 
@@ -23,12 +23,13 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
                 this._parent = parent;
             }
 
-            public RuntimeExpression CreateExpression( string? expressionText, Location? location = null )
+            public RuntimeExpression ToRunTimeExpression()
             {
-                var syntaxGenerator = LanguageServiceFactory.CSharpSyntaxGenerator;
+                var syntaxGenerationContext = TemplateExpansionContext.CurrentSyntaxGenerationContext;
+                var syntaxGenerator = syntaxGenerationContext.SyntaxGenerator;
 
                 var array = (ExpressionSyntax) syntaxGenerator.ArrayCreationExpression(
-                    syntaxGenerator.TypeExpression( SpecialType.System_Object ),
+                    syntaxGenerator.Type( SpecialType.System_Object ),
                     this._parent._parameters.Select(
                         p =>
                             p.RefKind.IsReadable()
@@ -37,7 +38,8 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
                 return new RuntimeExpression(
                     array,
-                    this._parent.Compilation.Factory.GetTypeByReflectionType( typeof(object[]) ) );
+                    this._parent.Compilation.Factory.GetTypeByReflectionType( typeof(object[]) ),
+                    syntaxGenerationContext );
             }
 
             public IType Type => this._parent.Compilation.Factory.GetTypeByReflectionType( typeof(object[]) );

@@ -38,6 +38,8 @@ namespace Caravela.Framework.Impl.CompileTime
             private readonly IDiagnosticAdder _diagnosticAdder;
             private readonly TemplateCompiler _templateCompiler;
             private readonly CancellationToken _cancellationToken;
+            private readonly TypeSyntax _compileTimeType;
+            private readonly SyntaxGenerationContext _syntaxGenerationContext;
             private Context _currentContext;
             private HashSet<string>? _currentTypeTemplateNames;
             private string? _currentTypeName;
@@ -60,6 +62,12 @@ namespace Caravela.Framework.Impl.CompileTime
                 this._templateCompiler = templateCompiler;
                 this._cancellationToken = cancellationToken;
                 this._currentContext = new Context( TemplatingScope.Both, this );
+
+                this._syntaxGenerationContext = SyntaxGenerationContext.CreateDefault( compileTimeCompilation );
+
+                this._compileTimeType =
+                    this._syntaxGenerationContext.SyntaxGenerator.Type(
+                        this._syntaxGenerationContext.ReflectionMapper.GetTypeSymbol( typeof(CompileTimeType) ) );
             }
 
             // TODO: assembly and module-level attributes?
@@ -166,7 +174,7 @@ namespace Caravela.Framework.Impl.CompileTime
                     }
 
                     // Add non-implemented members of IAspect and IEligible.
-                    var syntaxGenerator = LanguageServiceFactory.CSharpSyntaxGenerator;
+                    var syntaxGenerator = this._syntaxGenerationContext.SyntaxGenerator;
                     var allImplementedInterfaces = symbol.SelectManyRecursive( i => i.Interfaces, throwOnDuplicate: false );
 
                     foreach ( var implementedInterface in allImplementedInterfaces )
@@ -190,8 +198,8 @@ namespace Caravela.Framework.Impl.CompileTime
                                     var newMethod = MethodDeclaration(
                                             default,
                                             default,
-                                            syntaxGenerator.TypeExpression( method.ReturnType ),
-                                            ExplicitInterfaceSpecifier( (NameSyntax) syntaxGenerator.TypeExpression( implementedInterface ) ),
+                                            syntaxGenerator.Type( method.ReturnType ),
+                                            ExplicitInterfaceSpecifier( (NameSyntax) syntaxGenerator.Type( implementedInterface ) ),
                                             Identifier( method.Name ),
                                             default,
                                             ParameterList(
@@ -200,7 +208,7 @@ namespace Caravela.Framework.Impl.CompileTime
                                                         p => Parameter(
                                                             default,
                                                             default,
-                                                            syntaxGenerator.TypeExpression( p.Type ),
+                                                            syntaxGenerator.Type( p.Type ),
                                                             Identifier( p.Name ),
                                                             default ) ) ) ),
                                             default,
@@ -238,6 +246,34 @@ namespace Caravela.Framework.Impl.CompileTime
                     return false;
                 }
             }
+            
+            private void CheckNullableContext( MemberDeclarationSyntax member, SyntaxToken name )
+            {
+                var nullableContext = this.RunTimeCompilation.GetSemanticModel( member.SyntaxTree ).GetNullableContext( member.SpanStart );
+
+                if ( (nullableContext & NullableContext.Enabled) != NullableContext.Enabled )
+                {
+                    this.Success = false;
+
+                    this._diagnosticAdder.Report(
+                        TemplatingDiagnosticDescriptors.TemplateMustBeInNullableContext.CreateDiagnostic(
+                            name.GetLocation(),
+                            name.Text ) );
+                }
+                
+                foreach ( var trivia in member.DescendantNodes( descendIntoTrivia: true ).Where( t => t.Kind() == SyntaxKind.NullableDirectiveTrivia ) )
+                {
+                    if ( ((NullableDirectiveTriviaSyntax) trivia).SettingToken.Kind() != SyntaxKind.EnableKeyword )
+                    {
+                        this.Success = false;
+
+                        this._diagnosticAdder.Report(
+                            TemplatingDiagnosticDescriptors.TemplateMustBeInNullableContext.CreateDiagnostic(
+                                trivia.GetLocation(),
+                                name.Text ) );
+                    }
+                }
+            }
 
             private new IEnumerable<MethodDeclarationSyntax> VisitMethodDeclaration( MethodDeclarationSyntax node )
             {
@@ -254,6 +290,8 @@ namespace Caravela.Framework.Impl.CompileTime
                 {
                     yield break;
                 }
+                
+                this.CheckNullableContext( node, node.Identifier );
 
                 var success =
                     this._templateCompiler.TryCompile(
@@ -428,6 +466,8 @@ namespace Caravela.Framework.Impl.CompileTime
                 {
                     yield break;
                 }
+                
+                this.CheckNullableContext( node, node.Identifier );
 
                 var success = true;
                 SyntaxNode? transformedAddDeclaration = null;
@@ -543,13 +583,11 @@ namespace Caravela.Framework.Impl.CompileTime
                     {
                         // We are in a compile-time-only block but we have a typeof to a run-time-only block. 
                         // This is a situation we can handle by rewriting the typeof to a call to CompileTimeType.CreateFromDocumentationId.
-                        var compileTimeType =
-                            ReflectionMapper.GetInstance( this._compileTimeCompilation ).GetTypeSyntax( typeof(CompileTimeType) );
 
                         var memberAccess =
                             MemberAccessExpression(
                                 SyntaxKind.SimpleMemberAccessExpression,
-                                compileTimeType,
+                                this._compileTimeType,
                                 IdentifierName( nameof(CompileTimeType.CreateFromDocumentationId) ) );
 
                         var invocation = InvocationExpression(

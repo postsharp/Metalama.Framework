@@ -17,5 +17,5 @@ int Method(int a, int b)
     global::System.Console.WriteLine(x.Count);
     global::System.Console.WriteLine(y.Count);
     var result = this.Method(a, b);
-    return (global::System.Int32)(result);
+    return (global::System.Int32)result;
 }

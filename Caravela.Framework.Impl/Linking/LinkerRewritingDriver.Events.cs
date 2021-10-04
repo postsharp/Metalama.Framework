@@ -18,6 +18,8 @@ namespace Caravela.Framework.Impl.Linking
     {
         private IReadOnlyList<MemberDeclarationSyntax> RewriteEvent( EventDeclarationSyntax eventDeclaration, IEventSymbol symbol )
         {
+            var generationContext = SyntaxGenerationContext.Create( this.IntermediateCompilation, eventDeclaration );
+
             if ( this._introductionRegistry.IsOverrideTarget( symbol ) )
             {
                 var members = new List<MemberDeclarationSyntax>();
@@ -44,7 +46,7 @@ namespace Caravela.Framework.Impl.Linking
                 {
                     if ( eventDeclaration.GetLinkerDeclarationFlags().HasFlag( LinkerDeclarationFlags.EventField ) )
                     {
-                        members.Add( GetOriginalImplEventField( eventDeclaration.Type, symbol ) );
+                        members.Add( GetOriginalImplEventField( eventDeclaration.Type, symbol, generationContext ) );
                     }
                     else
                     {
@@ -93,7 +95,7 @@ namespace Caravela.Framework.Impl.Linking
                         TokenList(),
                         this.GetLinkedBody(
                             symbol.AddMethod.AssertNotNull().ToSemantic( semanticKind ),
-                            InliningContext.Create( this, symbol.AddMethod.AssertNotNull() ) ) );
+                            InliningContext.Create( this, symbol.AddMethod.AssertNotNull(), generationContext ) ) );
 
                 var removeDeclaration = (AccessorDeclarationSyntax) symbol.RemoveMethod.AssertNotNull().GetPrimaryDeclaration().AssertNotNull();
 
@@ -104,7 +106,7 @@ namespace Caravela.Framework.Impl.Linking
                         TokenList(),
                         this.GetLinkedBody(
                             symbol.RemoveMethod.AssertNotNull().ToSemantic( semanticKind ),
-                            InliningContext.Create( this, symbol.RemoveMethod.AssertNotNull() ) ) );
+                            InliningContext.Create( this, symbol.RemoveMethod.AssertNotNull(), generationContext ) ) );
 
                 return eventDeclaration
                     .WithAccessorList( AccessorList( List( new[] { transformedAdd, transformedRemove } ) ) )
@@ -113,7 +115,7 @@ namespace Caravela.Framework.Impl.Linking
             }
         }
 
-        private static BlockSyntax GetImplicitAdderBody( IMethodSymbol symbol )
+        private static BlockSyntax GetImplicitAdderBody( IMethodSymbol symbol, SyntaxGenerationContext generationContext )
             => Block(
                 ExpressionStatement(
                     AssignmentExpression(
@@ -121,12 +123,12 @@ namespace Caravela.Framework.Impl.Linking
                         MemberAccessExpression(
                             SyntaxKind.SimpleMemberAccessExpression,
                             symbol.IsStatic
-                                ? LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( symbol.ContainingType )
+                                ? generationContext.SyntaxGenerator.Type( symbol.ContainingType )
                                 : ThisExpression(),
                             IdentifierName( GetBackingFieldName( (IEventSymbol) symbol.AssociatedSymbol.AssertNotNull() ) ) ),
                         IdentifierName( "value" ) ) ) );
 
-        private static BlockSyntax GetImplicitRemoverBody( IMethodSymbol symbol )
+        private static BlockSyntax GetImplicitRemoverBody( IMethodSymbol symbol, SyntaxGenerationContext generationContext )
             => Block(
                 ExpressionStatement(
                     AssignmentExpression(
@@ -134,7 +136,7 @@ namespace Caravela.Framework.Impl.Linking
                         MemberAccessExpression(
                             SyntaxKind.SimpleMemberAccessExpression,
                             symbol.IsStatic
-                                ? LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( symbol.ContainingType )
+                                ? generationContext.SyntaxGenerator.Type( symbol.ContainingType )
                                 : ThisExpression(),
                             IdentifierName( GetBackingFieldName( (IEventSymbol) symbol.AssociatedSymbol.AssertNotNull() ) ) ),
                         IdentifierName( "value" ) ) ) );

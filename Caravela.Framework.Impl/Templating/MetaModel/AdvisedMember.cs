@@ -37,8 +37,8 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         public MemberInfo ToMemberInfo() => this.Underlying.ToMemberInfo();
 
-        public IDynamicReceiver This
-            => new ThisInstanceDynamicReceiver(
+        public IUserReceiver This
+            => new ThisInstanceUserReceiver(
                 this.DeclaringType,
                 new AspectReferenceSpecification( this.Underlying.GetCompilationModel().AspectLayerId, AspectReferenceOrder.Base ) );
     }

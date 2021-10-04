@@ -5,7 +5,7 @@ int Method(int a)
         global::System.Console.WriteLine("try");
         var result = this.Method(a);
         global::System.Console.WriteLine("success");
-        return (global::System.Int32)(result);
+        return (global::System.Int32)result;
     }
     catch
     {

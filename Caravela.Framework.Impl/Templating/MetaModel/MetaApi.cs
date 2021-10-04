@@ -63,12 +63,12 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         public ICompilation Compilation { get; }
 
-        private ThisInstanceDynamicReceiver GetThisOrBase( string expressionName, AspectReferenceSpecification linkerAnnotation )
+        private ThisInstanceUserReceiver GetThisOrBase( string expressionName, AspectReferenceSpecification linkerAnnotation )
             => this._type switch
             {
                 null => throw this.CreateInvalidOperationException( expressionName ),
                 { IsStatic: false } when this.Declaration is IMemberOrNamedType { IsStatic: false }
-                    => new ThisInstanceDynamicReceiver(
+                    => new ThisInstanceUserReceiver(
                         this.Type,
                         linkerAnnotation ),
 
@@ -85,10 +85,10 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
         public object Base => this.GetThisOrBase( "meta.Base", new AspectReferenceSpecification( this._common.AspectLayerId, AspectReferenceOrder.Base ) );
 
         public object ThisStatic
-            => new ThisTypeDynamicReceiver( this.Type, new AspectReferenceSpecification( this._common.AspectLayerId, AspectReferenceOrder.Final ) );
+            => new ThisTypeUserReceiver( this.Type, new AspectReferenceSpecification( this._common.AspectLayerId, AspectReferenceOrder.Final ) );
 
         public object BaseStatic
-            => new ThisTypeDynamicReceiver( this.Type, new AspectReferenceSpecification( this._common.AspectLayerId, AspectReferenceOrder.Base ) );
+            => new ThisTypeUserReceiver( this.Type, new AspectReferenceSpecification( this._common.AspectLayerId, AspectReferenceOrder.Base ) );
 
         public IReadOnlyDictionary<string, object?> Tags => this._common.Tags;
 
@@ -111,18 +111,19 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
         }
 
         public IExpression Expression( object? expression )
-            => new UserExpression( RuntimeExpression.FromValue( expression, this.Compilation ), this.Compilation );
+            => RuntimeExpression.FromValue( expression, this.Compilation, TemplateExpansionContext.CurrentSyntaxGenerationContext )
+                .ToUserExpression( this.Compilation );
 
-        public IExpression BuildArray( ArrayBuilder arrayBuilder ) => new ArrayDynamicExpression( arrayBuilder );
+        public IExpression BuildArray( ArrayBuilder arrayBuilder ) => new ArrayUserExpression( arrayBuilder );
 
         public IExpression BuildInterpolatedString( InterpolatedStringBuilder interpolatedStringBuilder )
-            => new InterpolatedStringDynamicExpression( interpolatedStringBuilder, this.Compilation );
+            => new InterpolatedStringUserExpression( interpolatedStringBuilder, this.Compilation );
 
         public IExpression ParseExpression( string code )
         {
             var expression = SyntaxFactory.ParseExpression( code ).WithAdditionalAnnotations( Formatter.Annotation );
 
-            return new UserExpression( new RuntimeExpression( expression, this.Compilation ), this.Compilation );
+            return new RuntimeExpression( expression, this.Compilation ).ToUserExpression( this.Compilation );
         }
 
         public IStatement ParseStatement( string code )
@@ -180,7 +181,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         public void AppendTypeName( IType type, StringBuilder stringBuilder )
         {
-            var code = LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( type.GetSymbol().AssertNotNull() ).ToString();
+            var code = this._common.SyntaxGenerationContext.SyntaxGenerator.Type( type.GetSymbol().AssertNotNull() ).ToString();
             stringBuilder.Append( code );
         }
 
@@ -191,11 +192,18 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         public void AppendExpression( IExpression expression, StringBuilder stringBuilder )
         {
-            stringBuilder.Append( ((IDynamicExpression) expression.Value!).CreateExpression().Syntax.NormalizeWhitespace().ToFullString() );
+            stringBuilder.Append(
+                ((IUserExpression) expression.Value!).ToRunTimeExpression()
+                .Syntax
+                .NormalizeWhitespace()
+                .ToFullString() );
         }
 
         public void AppendDynamic( object? expression, StringBuilder stringBuilder )
-            => stringBuilder.Append( expression == null ? "null" : ((RuntimeExpression) expression).Syntax.NormalizeWhitespace().ToFullString() );
+            => stringBuilder.Append(
+                expression == null
+                    ? "null"
+                    : ((RuntimeExpression) expression).Syntax.NormalizeWhitespace().ToFullString() );
 
         public AspectExecutionScenario ExecutionScenario => this._common.PipelineDescription.ExecutionScenario;
 

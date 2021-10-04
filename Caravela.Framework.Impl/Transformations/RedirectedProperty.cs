@@ -39,7 +39,7 @@ namespace Caravela.Framework.Impl.Transformations
                     PropertyDeclaration(
                         List<AttributeListSyntax>(),
                         this.OverriddenDeclaration.GetSyntaxModifierList(),
-                        SyntaxHelpers.CreateSyntaxForPropertyType( this.OverriddenDeclaration ),
+                        context.SyntaxGenerator.PropertyType( this.OverriddenDeclaration ),
                         null,
                         Identifier(
                             context.IntroductionNameProvider.GetOverrideName(

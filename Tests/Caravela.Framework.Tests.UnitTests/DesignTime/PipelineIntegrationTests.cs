@@ -41,7 +41,11 @@ namespace Caravela.Framework.Tests.UnitTests.DesignTime
             CSharpCompilation CreateEmptyCompilation()
             {
                 return CSharpCompilation.Create( assemblyName ?? "test_" + Guid.NewGuid() )
-                    .WithOptions( new CSharpCompilationOptions( OutputKind.DynamicallyLinkedLibrary, allowUnsafe: true ) )
+                    .WithOptions(
+                        new CSharpCompilationOptions(
+                            OutputKind.DynamicallyLinkedLibrary,
+                            allowUnsafe: true,
+                            nullableContextOptions: NullableContextOptions.Enable ) )
                     .AddReferences(
                         new[] { "netstandard", "System.Runtime" }
                             .Select(

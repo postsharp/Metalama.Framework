@@ -6,7 +6,7 @@ class TargetCode
     global::System.Console.WriteLine($"Before Enumerable");
     var result = global::Caravela.Framework.RunTime.RunTimeAspectHelper.Buffer(this.Enumerable_Source(a));
     global::System.Console.WriteLine($"After Enumerable");
-    return (global::System.Collections.Generic.IEnumerable<global::System.Int32>)(result);
+    return (global::System.Collections.Generic.IEnumerable<global::System.Int32>)result;
 }
 
 private IEnumerable<int> Enumerable_Source(int a)
@@ -25,7 +25,7 @@ private IEnumerable<int> Enumerable_Source(int a)
     global::System.Console.WriteLine($"Before Enumerator");
     var result = global::Caravela.Framework.RunTime.RunTimeAspectHelper.Buffer(this.Enumerator_Source(a));
     global::System.Console.WriteLine($"After Enumerator");
-    return (global::System.Collections.Generic.IEnumerator<global::System.Int32>)(result);
+    return (global::System.Collections.Generic.IEnumerator<global::System.Int32>)result;
 }
 
 private IEnumerator<int> Enumerator_Source(int a)
@@ -44,7 +44,7 @@ private IEnumerator<int> Enumerator_Source(int a)
     global::System.Console.WriteLine($"Before OldEnumerable");
     var result = global::Caravela.Framework.RunTime.RunTimeAspectHelper.Buffer(this.OldEnumerable_Source(a));
     global::System.Console.WriteLine($"After OldEnumerable");
-    return (global::System.Collections.IEnumerable)(result);
+    return (global::System.Collections.IEnumerable)result;
 }
 
 private IEnumerable OldEnumerable_Source(int a)
@@ -63,7 +63,7 @@ private IEnumerable OldEnumerable_Source(int a)
     global::System.Console.WriteLine($"Before OldEnumerator");
     var result = global::Caravela.Framework.RunTime.RunTimeAspectHelper.Buffer(this.OldEnumerator_Source(a));
     global::System.Console.WriteLine($"After OldEnumerator");
-    return (global::System.Collections.IEnumerator)(result);
+    return (global::System.Collections.IEnumerator)result;
 }
 
 private IEnumerator OldEnumerator_Source(int a)

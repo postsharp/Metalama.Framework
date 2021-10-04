@@ -1,7 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Impl.CodeModel;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -15,12 +14,12 @@ namespace Caravela.Framework.Impl.Serialization
     {
         private static readonly Type[] _unsignedTypes = { typeof(ushort), typeof(uint), typeof(ulong), typeof(byte) };
 
-        public override ExpressionSyntax Serialize( object obj, ICompilationElementFactory syntaxFactory )
+        public override ExpressionSyntax Serialize( object obj, SyntaxSerializationContext serializationContext )
         {
             var o = (Enum) obj;
 
             var enumType = o.GetType();
-            var typeName = syntaxFactory.GetTypeSyntax( enumType );
+            var typeName = serializationContext.GetTypeSyntax( enumType );
             var name = Enum.GetName( enumType, o );
 
             if ( name != null )

@@ -1,47 +1,39 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
-using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
-using SpecialType = Caravela.Framework.Code.SpecialType;
 
 namespace Caravela.Framework.Impl.Templating.MetaModel
 {
-    internal class UserExpression : IDynamicExpression
+    internal class UserExpression : IUserExpression
     {
-        public IDynamicExpression Underlying { get; }
+        private readonly ExpressionSyntax _expression;
+        private readonly SyntaxGenerationContext _generationContext;
+        private readonly bool _isReferenceable;
 
-        public UserExpression( RuntimeExpression? underlying, ICompilation compilation )
+        public UserExpression(
+            ExpressionSyntax expression,
+            IType type,
+            SyntaxGenerationContext generationContext,
+            bool isReferenceable = false,
+            bool isAssignable = false )
         {
-            if ( underlying == null )
-            {
-                this.Underlying = new DefaultDynamicExpression( compilation.TypeFactory.GetSpecialType( SpecialType.Object ) );
-            }
-            else
-            {
-                var type = underlying.ExpressionType != null
-                    ? compilation.GetCompilationModel().Factory.GetIType( underlying.ExpressionType )
-                    : compilation.TypeFactory.GetSpecialType( SpecialType.Object ).ConstructNullable();
-
-                this.Underlying = new DynamicExpression( underlying.Syntax, type );
-            }
+            this._expression = expression;
+            this._generationContext = generationContext;
+            this.Type = type;
+            this.IsAssignable = isAssignable;
+            this._isReferenceable = isReferenceable;
         }
 
-        public IType Type => this.Underlying.Type;
+        public RuntimeExpression ToRunTimeExpression() => new( this._expression, this.Type, this._generationContext, this._isReferenceable );
 
-        public bool IsAssignable => this.Underlying.IsAssignable;
+        public IType Type { get; }
 
-        public object? Value
-        {
-            get => this.ToExpression();
-            set => throw new NotSupportedException();
-        }
+        public bool IsAssignable { get; }
 
-        RuntimeExpression IDynamicExpression.CreateExpression( string? expressionText, Location? location )
-            => this.Underlying.CreateExpression( expressionText, location );
-
-        private IExpression ToExpression() => this.Underlying;
+        object? IExpression.Value { get => this; set => throw new NotSupportedException(); }
     }
 }

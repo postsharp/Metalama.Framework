@@ -14,18 +14,29 @@ namespace Caravela.Framework.Tests.UnitTests
     {
         public static void DynamicEquals( object expression, string expected )
         {
-            _ = expression;
-            var meta = (IDynamicExpression) expression;
-            var actual = meta.CreateExpression().Syntax.NormalizeWhitespace().ToString();
+            var meta = (IUserExpression) expression;
+            var actual = meta.ToRunTimeExpression().Syntax.NormalizeWhitespace().ToString();
 
             Assert.Equal( expected, actual );
         }
 
-        internal static void ThrowsWithDiagnostic( IDiagnosticDefinition diagnosticDefinition, Action testCode )
+        public static void DynamicThrows<T>( Func<object?> func )
+            where T : Exception
+            => Assert.Throws<T>( () => ((IUserExpression) func()!).ToRunTimeExpression().Syntax );
+
+        public static void DynamicThrows<T>( object expression )
+            where T : Exception
+        {
+            var meta = (IUserExpression) expression;
+            Assert.Throws<T>( () => meta.ToRunTimeExpression().Syntax );
+        }
+
+        internal static void ThrowsWithDiagnostic( IDiagnosticDefinition diagnosticDefinition, Func<object?> testCode )
         {
             try
             {
-                testCode();
+                var runtimeExpression = (IUserExpression) testCode()!;
+                _ = runtimeExpression.ToRunTimeExpression().Syntax;
 
                 Assert.False( true, "Exception InvalidUserCodeException was not received." );
             }

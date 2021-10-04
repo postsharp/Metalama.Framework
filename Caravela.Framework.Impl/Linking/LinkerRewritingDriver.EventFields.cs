@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Linking.Inlining;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -14,6 +15,8 @@ namespace Caravela.Framework.Impl.Linking
     {
         private IReadOnlyList<MemberDeclarationSyntax> RewriteEventField( EventFieldDeclarationSyntax eventFieldDeclaration, IEventSymbol symbol )
         {
+            var generationContext = SyntaxGenerationContext.Create( this.IntermediateCompilation, eventFieldDeclaration );
+
             if ( this._introductionRegistry.IsOverrideTarget( symbol ) )
             {
                 var members = new List<MemberDeclarationSyntax>();
@@ -36,7 +39,7 @@ namespace Caravela.Framework.Impl.Linking
                 if ( this._analysisRegistry.IsReachable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Default ) )
                      && !this._analysisRegistry.IsInlineable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Default ), out _ ) )
                 {
-                    members.Add( GetOriginalImplEventField( eventFieldDeclaration.Declaration.Type, symbol ) );
+                    members.Add( GetOriginalImplEventField( eventFieldDeclaration.Declaration.Type, symbol, generationContext ) );
                 }
 
                 if ( this._analysisRegistry.IsReachable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Base ) )
@@ -61,7 +64,7 @@ namespace Caravela.Framework.Impl.Linking
                         TokenList(),
                         this.GetLinkedBody(
                             symbol.AddMethod.AssertNotNull().ToSemantic( semanticKind ),
-                            InliningContext.Create( this, symbol.AddMethod.AssertNotNull() ) ) );
+                            InliningContext.Create( this, symbol.AddMethod.AssertNotNull(), generationContext ) ) );
 
                 var transformedRemove =
                     AccessorDeclaration(
@@ -70,7 +73,7 @@ namespace Caravela.Framework.Impl.Linking
                         TokenList(),
                         this.GetLinkedBody(
                             symbol.RemoveMethod.AssertNotNull().ToSemantic( semanticKind ),
-                            InliningContext.Create( this, symbol.RemoveMethod.AssertNotNull() ) ) );
+                            InliningContext.Create( this, symbol.RemoveMethod.AssertNotNull(), generationContext ) ) );
 
                 return
                     EventDeclaration(
@@ -90,17 +93,19 @@ namespace Caravela.Framework.Impl.Linking
         private static FieldDeclarationSyntax GetEventBackingField( EventFieldDeclarationSyntax eventFieldDeclaration, IEventSymbol symbol )
             => GetEventBackingField( eventFieldDeclaration.Declaration.Type, symbol );
 
-        private static MemberDeclarationSyntax GetOriginalImplEventField( TypeSyntax eventType, IEventSymbol symbol )
+        private static MemberDeclarationSyntax GetOriginalImplEventField( TypeSyntax eventType, IEventSymbol symbol, SyntaxGenerationContext generationContext )
         {
             var accessorList =
                 AccessorList(
                         List(
                             new[]
                             {
-                                AccessorDeclaration( SyntaxKind.AddAccessorDeclaration, GetImplicitAdderBody( symbol.AddMethod.AssertNotNull() ) ),
+                                AccessorDeclaration(
+                                    SyntaxKind.AddAccessorDeclaration,
+                                    GetImplicitAdderBody( symbol.AddMethod.AssertNotNull(), generationContext ) ),
                                 AccessorDeclaration(
                                     SyntaxKind.RemoveAccessorDeclaration,
-                                    GetImplicitRemoverBody( symbol.RemoveMethod.AssertNotNull() ) )
+                                    GetImplicitRemoverBody( symbol.RemoveMethod.AssertNotNull(), generationContext ) )
                             } ) )
                     .NormalizeWhitespace();
 

@@ -34,6 +34,16 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public Type ToType() => CompileTimeType.Create( this );
 
+        public bool? IsReferenceType => this.Symbol.IsReferenceType;
+
+        public bool? IsNullable
+            => (this.Symbol.IsReferenceType, this.Symbol.NullableAnnotation) switch
+            {
+                (true, NullableAnnotation.Annotated) => true,
+                (true, NullableAnnotation.NotAnnotated) => false,
+                _ => null
+            };
+
         ICompilation ICompilationElement.Compilation => this.Compilation;
 
         ITypeSymbol? ISdkType.TypeSymbol => this.Symbol;

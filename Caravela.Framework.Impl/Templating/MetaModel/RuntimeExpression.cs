@@ -11,6 +11,7 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
+using SpecialType = Caravela.Framework.Code.SpecialType;
 
 namespace Caravela.Framework.Impl.Templating.MetaModel
 {
@@ -20,6 +21,8 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
     public sealed class RuntimeExpression
     {
         private const string _typeIdAnnotationName = "caravela-typeid";
+
+        internal SyntaxGenerationContext SyntaxGenerationContext { get; }
 
         /// <summary>
         /// Gets the expression type, or <c>null</c> if the expression is actually the <c>null</c> or <c>default</c> expression.
@@ -65,33 +68,35 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
             }
         }
 
-        public RuntimeExpression( ExpressionSyntax syntax, Compilation compilation, ITypeSymbol? expressionType, bool isReferenceable )
+        internal RuntimeExpression( ExpressionSyntax syntax, ITypeSymbol? expressionType, SyntaxGenerationContext generationContext, bool isReferenceable )
         {
             if ( expressionType == null )
             {
                 // This should happen only for null and default expressions.
-                TryFindExpressionType( syntax, compilation, out expressionType );
+                TryFindExpressionType( syntax, generationContext.Compilation, out expressionType );
             }
             else
             {
-                syntax = AddTypeAnnotation( syntax, expressionType, compilation );
+                syntax = AddTypeAnnotation( syntax, expressionType, generationContext.Compilation );
             }
 
             this.Syntax = syntax;
             this.ExpressionType = expressionType;
             this.IsReferenceable = isReferenceable;
+            this.SyntaxGenerationContext = generationContext;
         }
 
-        public RuntimeExpression( ExpressionSyntax syntax, IType type, bool isReferenceable = false )
-            : this( syntax, type.GetCompilationModel().RoslynCompilation, type.GetSymbol(), isReferenceable ) { }
+        internal RuntimeExpression( ExpressionSyntax syntax, IType type, SyntaxGenerationContext generationContext, bool isReferenceable = false )
+            : this( syntax, type.GetSymbol(), generationContext, isReferenceable ) { }
 
         // This overload must be used only in tests or when the expression type is really unknown.
-        public RuntimeExpression( ExpressionSyntax syntax, ICompilation compilation )
-            : this( syntax, compilation.GetCompilationModel().RoslynCompilation, null, false ) { }
+        internal RuntimeExpression( ExpressionSyntax syntax, ICompilation compilation )
+            : this( syntax, (ITypeSymbol) null!, SyntaxGenerationContext.CreateDefault( compilation.GetCompilationModel().RoslynCompilation ), false ) { }
 
-        public static ExpressionSyntax GetSyntaxFromValue( object? value, ICompilation compilation ) => FromValue( value, compilation ).Syntax;
+        internal static ExpressionSyntax GetSyntaxFromValue( object? value, ICompilation compilation, SyntaxGenerationContext generationContext )
+            => FromValue( value, compilation, generationContext ).Syntax;
 
-        public static RuntimeExpression FromValue( object? value, ICompilation compilation )
+        internal static RuntimeExpression FromValue( object? value, ICompilation compilation, SyntaxGenerationContext generationContext )
         {
             switch ( value )
             {
@@ -101,8 +106,8 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
                 case RuntimeExpression runtimeExpression:
                     return runtimeExpression;
 
-                case IDynamicExpression dynamicMember:
-                    return dynamicMember.CreateExpression();
+                case IUserExpression dynamicMember:
+                    return dynamicMember.ToRunTimeExpression();
 
                 case ExpressionSyntax syntax:
                     return new RuntimeExpression( syntax, compilation );
@@ -112,7 +117,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
                     if ( expression != null )
                     {
-                        return new RuntimeExpression( expression, compilation.TypeFactory.GetTypeByReflectionType( value.GetType() ) );
+                        return new RuntimeExpression( expression, compilation.TypeFactory.GetTypeByReflectionType( value.GetType() ), generationContext );
                     }
                     else
                     {
@@ -123,31 +128,31 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
             }
         }
 
-        public static RuntimeExpression[]? FromValue( object?[]? array, ICompilation compilation )
+        internal static RuntimeExpression[]? FromValue( object?[]? array, ICompilation compilation, SyntaxGenerationContext generationContext )
         {
-            RuntimeExpression[] ConvertArray()
+            switch ( array )
             {
-                if ( array.Length == 0 )
-                {
-                    return Array.Empty<RuntimeExpression>();
-                }
+                case null:
+                    return null;
 
-                var newArray = new RuntimeExpression[array.Length];
+                case RuntimeExpression[] runtimeExpressions:
+                    return runtimeExpressions;
 
-                for ( var i = 0; i < newArray.Length; i++ )
-                {
-                    newArray[i] = FromValue( array[i], compilation ).AssertNotNull();
-                }
+                default:
+                    if ( array.Length == 0 )
+                    {
+                        return Array.Empty<RuntimeExpression>();
+                    }
 
-                return newArray;
+                    var newArray = new RuntimeExpression[array.Length];
+
+                    for ( var i = 0; i < newArray.Length; i++ )
+                    {
+                        newArray[i] = FromValue( array[i], compilation, generationContext ).AssertNotNull();
+                    }
+
+                    return newArray;
             }
-
-            return array switch
-            {
-                null => null,
-                RuntimeExpression[] runtimeExpressions => runtimeExpressions,
-                _ => ConvertArray()
-            };
         }
 
         public static bool TryFindExpressionType( SyntaxNode node, Compilation compilation, out ITypeSymbol? type )
@@ -200,7 +205,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
             }
 
             // We may need a cast. We are not sure, but we cannot do more. This could be removed later in the simplification step.
-            var cast = (ExpressionSyntax) LanguageServiceFactory.CSharpSyntaxGenerator.CastExpression( targetTypeSymbol, this.Syntax );
+            var cast = (ExpressionSyntax) this.SyntaxGenerationContext.SyntaxGenerator.CastExpression( targetTypeSymbol, this.Syntax );
 
             var expression = (addsParenthesis ? SyntaxFactory.ParenthesizedExpression( cast ) : cast).WithAdditionalAnnotations( Simplifier.Annotation );
 
@@ -208,5 +213,17 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
         }
 
         public override string ToString() => this.Syntax.ToString();
+
+        public IUserExpression ToUserExpression( ICompilation compilation )
+        {
+            var declarationFactory = compilation.GetCompilationModel().Factory;
+
+            return new UserExpression(
+                this.Syntax,
+                this.ExpressionType != null ? declarationFactory.GetIType( this.ExpressionType ) : declarationFactory.GetSpecialType( SpecialType.Object ),
+                this.SyntaxGenerationContext,
+                isReferenceable: this.IsReferenceable,
+                isAssignable: false );
+        }
     }
 }

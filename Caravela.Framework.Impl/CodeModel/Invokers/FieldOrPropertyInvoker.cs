@@ -4,6 +4,7 @@
 using Caravela.Framework.Code;
 using Caravela.Framework.Code.Invokers;
 using Caravela.Framework.Impl.Aspects;
+using Caravela.Framework.Impl.Templating;
 using Caravela.Framework.Impl.Templating.MetaModel;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -26,7 +27,10 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
 
         protected virtual void AssertNoArgument() { }
 
-        private ExpressionSyntax CreatePropertyExpression( RuntimeExpression instance, AspectReferenceTargetKind targetKind )
+        private ExpressionSyntax CreatePropertyExpression(
+            RuntimeExpression instance,
+            AspectReferenceTargetKind targetKind,
+            SyntaxGenerationContext generationContext )
         {
             if ( this.Member.DeclaringType.IsOpenGeneric )
             {
@@ -36,7 +40,7 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
 
             this.AssertNoArgument();
 
-            var receiver = this.Member.GetReceiverSyntax( instance );
+            var receiver = this.Member.GetReceiverSyntax( instance, generationContext );
             var name = IdentifierName( this.Member.Name );
 
             if ( this._invokerOperator == InvokerOperator.Default )
@@ -52,11 +56,19 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
         }
 
         public object GetValue( object? instance )
-            => new DynamicExpression(
-                this.CreatePropertyExpression( RuntimeExpression.FromValue( instance, this.Compilation ), AspectReferenceTargetKind.PropertyGetAccessor ),
+        {
+            var generationContext = TemplateExpansionContext.CurrentSyntaxGenerationContext;
+
+            return new UserExpression(
+                this.CreatePropertyExpression(
+                    RuntimeExpression.FromValue( instance, this.Compilation, generationContext ),
+                    AspectReferenceTargetKind.PropertyGetAccessor,
+                    generationContext ),
                 this._invokerOperator == InvokerOperator.Default ? this.Member.Type : this.Member.Type.ConstructNullable(),
-                this.Member is Field,
-                this.Member.Writeability != Writeability.None );
+                generationContext,
+                isReferenceable: this.Member is Field,
+                isAssignable: this.Member.Writeability != Writeability.None );
+        }
 
         public object SetValue( object? instance, object? value )
         {
@@ -65,16 +77,19 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
                 throw new NotSupportedException( "Conditional access is not supported for SetValue." );
             }
 
+            var generationContext = TemplateExpansionContext.CurrentSyntaxGenerationContext;
+
             var propertyAccess = this.CreatePropertyExpression(
-                RuntimeExpression.FromValue( instance, this.Compilation ),
-                AspectReferenceTargetKind.PropertySetAccessor );
+                RuntimeExpression.FromValue( instance, this.Compilation, generationContext ),
+                AspectReferenceTargetKind.PropertySetAccessor,
+                generationContext );
 
             var expression = AssignmentExpression(
                 SyntaxKind.SimpleAssignmentExpression,
                 propertyAccess,
-                RuntimeExpression.GetSyntaxFromValue( value, this.Compilation ) );
+                RuntimeExpression.GetSyntaxFromValue( value, this.Compilation, generationContext ) );
 
-            return new DynamicExpression( expression, this.Member.Type );
+            return new UserExpression( expression, this.Member.Type, generationContext );
         }
     }
 }

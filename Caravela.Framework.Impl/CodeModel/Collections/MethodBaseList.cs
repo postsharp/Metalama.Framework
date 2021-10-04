@@ -41,7 +41,6 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
         /// <typeparam name="TPayload">Payload type for the <paramref name="argumentGetter"/>.</typeparam>
         /// <param name="payload">Payload object, passed to <paramref name="argumentGetter"/>.</param>
         /// <param name="name">Required name, or <see langword="null"/> if there is no requirement.</param>
-        /// <param name="genericParameterCount">Required number of generic parameters, or <see langword="null"/> if there is no requirement.</param>
         /// <param name="argumentCount">Required number of parameters, or <see langword="null"/> if there is no requirement.</param>
         /// <param name="argumentGetter">Predicate for matching parameters.</param>
         /// <param name="isStatic">Specifies whether the staticity should be matched (it is normally not a part of signature).</param>
@@ -50,7 +49,6 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
         protected IEnumerable<T> OfCompatibleSignature<TPayload>(
             TPayload payload,
             string? name,
-            int? genericParameterCount,
             int? argumentCount,
             Func<TPayload, int, (IType? Type, RefKind? RefKind)> argumentGetter,
             bool? isStatic,
@@ -60,7 +58,7 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
 
             if ( declaredOnly || this.ContainingDeclaration is not NamedType namedType || namedType.BaseType == null )
             {
-                foreach ( var candidate in GetCandidates( this, payload, name, genericParameterCount, argumentCount, argumentGetter, isStatic, compilation ) )
+                foreach ( var candidate in GetCandidates( this, payload, name, argumentCount, argumentGetter, isStatic, compilation ) )
                 {
                     yield return candidate;
                 }
@@ -79,7 +77,6 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
                         this.GetMemberListForType( currentType ),
                         payload,
                         name,
-                        genericParameterCount,
                         argumentCount,
                         argumentGetter,
                         isStatic,
@@ -99,7 +96,6 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
                 MethodBaseList<T> instance,
                 TPayload payload,
                 string? name,
-                int? genericParameterCount,
                 int? argumentCount,
                 Func<TPayload, int, (IType? Type, RefKind? RefKind)>? argumentGetter,
                 bool? isStatic,
@@ -108,7 +104,6 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
                 return instance.OfSignature(
                     (payload, argumentGetter, compilation),
                     name,
-                    genericParameterCount,
                     argumentCount,
                     IsMatchingParameter,
                     isStatic,
@@ -142,7 +137,6 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
         /// <typeparam name="TPayload">Payload type for the <paramref name="parameterGetter"/>.</typeparam>
         /// <param name="payload">Payload object, passed to <paramref name="parameterGetter"/>.</param>
         /// <param name="name">Required name of the method.</param>
-        /// <param name="genericParameterCount">Required number of generic parameters.</param>
         /// <param name="parameterCount">Required number of parameters.</param>
         /// <param name="parameterGetter">Delegate that gets <see cref="IType"/> and <see cref="RefKind"/> or a parameters on the gives index.</param>
         /// <param name="isStatic">Specifies whether the staticity should be matched (it is normally not a part of signature).</param>
@@ -151,7 +145,6 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
         protected T? OfExactSignature<TPayload>(
             TPayload payload,
             string? name,
-            int genericParameterCount,
             int parameterCount,
             Func<TPayload, int, (IType Type, RefKind RefKind)> parameterGetter,
             bool? isStatic,
@@ -161,7 +154,7 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
 
             if ( declaredOnly || this.ContainingDeclaration is not NamedType namedType || namedType.BaseType == null )
             {
-                return Get( this, payload, name, genericParameterCount, parameterCount, parameterGetter, isStatic, compilation );
+                return Get( this, payload, name, parameterCount, parameterGetter, isStatic, compilation );
             }
             else
             {
@@ -176,7 +169,6 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
                         this.GetMemberListForType( currentType ),
                         payload,
                         name,
-                        genericParameterCount,
                         parameterCount,
                         parameterGetter,
                         isStatic,
@@ -197,7 +189,6 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
                 MethodBaseList<T> instance,
                 TPayload payload,
                 string? name,
-                int genericParameterCount,
                 int parameterCount,
                 Func<TPayload, int, (IType Type, RefKind RefKind)> parameterGetter,
                 bool? isStatic,
@@ -206,7 +197,6 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
                 var matching = instance.OfSignature(
                     (payload, parameterGetter, compilation),
                     name,
-                    genericParameterCount,
                     parameterCount,
                     IsMatchingParameter,
                     isStatic );
@@ -234,7 +224,6 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
         /// <typeparam name="TPayload">Payload type for the <paramref name="parameterPredicate"/>.</typeparam>
         /// <param name="payload">Payload object, passed to <paramref name="parameterPredicate"/>.</param>
         /// <param name="name">Required name, or <see langword="null"/> if there is no requirement.</param>
-        /// <param name="genericParameterCount">Required number of generic parameters, or <see langword="null"/> if there is no requirement.</param>
         /// <param name="parameterCount">Required number of parameters, or <see langword="null"/> if there is no requirement.</param>
         /// <param name="parameterPredicate">Predicate for matching parameters.</param>
         /// <param name="isStatic">Required staticity, or <see langword="null"/> if there is no requirement.</param>
@@ -243,7 +232,6 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
         protected IEnumerable<T> OfSignature<TPayload>(
             TPayload payload,
             string? name,
-            int? genericParameterCount,
             int? parameterCount,
             Func<TPayload, int, IType, RefKind, bool> parameterPredicate,
             bool? isStatic,
@@ -276,7 +264,6 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
             foreach ( var sourceItem in candidates )
             {
                 if ( (isStatic != null && isStatic != sourceItem.IsStatic)
-                     || (genericParameterCount != null && this.GetGenericParameterCount( sourceItem ) != genericParameterCount)
                      || (parameterCount != null && !expandParams && sourceItem.Parameters.Count != parameterCount)
                      || (parameterCount != null && expandParams && sourceItem.Parameters.Count > parameterCount + 1) )
                 {

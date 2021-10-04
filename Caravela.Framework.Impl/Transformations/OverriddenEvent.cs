@@ -80,11 +80,12 @@ namespace Caravela.Framework.Impl.Transformations
                         context,
                         addTemplateMethod,
                         this.OverriddenDeclaration.AddMethod,
+                        context.SyntaxGenerationContext,
                         out addAccessorBody );
                 }
                 else
                 {
-                    addAccessorBody = this.CreateIdentityAccessorBody( SyntaxKind.GetAccessorDeclaration );
+                    addAccessorBody = this.CreateIdentityAccessorBody( SyntaxKind.GetAccessorDeclaration, context.SyntaxGenerationContext );
                 }
 
                 BlockSyntax? removeAccessorBody = null;
@@ -95,11 +96,12 @@ namespace Caravela.Framework.Impl.Transformations
                         context,
                         removeTemplateMethod,
                         this.OverriddenDeclaration.RemoveMethod,
+                        context.SyntaxGenerationContext,
                         out removeAccessorBody );
                 }
                 else
                 {
-                    removeAccessorBody = this.CreateIdentityAccessorBody( SyntaxKind.SetAccessorDeclaration );
+                    removeAccessorBody = this.CreateIdentityAccessorBody( SyntaxKind.SetAccessorDeclaration, context.SyntaxGenerationContext );
                 }
 
                 if ( templateExpansionError )
@@ -116,7 +118,7 @@ namespace Caravela.Framework.Impl.Transformations
                         EventDeclaration(
                             List<AttributeListSyntax>(),
                             this.OverriddenDeclaration.GetSyntaxModifierList(),
-                            SyntaxHelpers.CreateSyntaxForEventType( this.OverriddenDeclaration ),
+                            context.SyntaxGenerator.EventType( this.OverriddenDeclaration ),
                             null,
                             Identifier( eventName ),
                             AccessorList(
@@ -147,18 +149,20 @@ namespace Caravela.Framework.Impl.Transformations
             in MemberIntroductionContext context,
             Template<IMethod> accessorTemplate,
             IMethod accessor,
+            SyntaxGenerationContext generationContext,
             [NotNullWhen( true )] out BlockSyntax? body )
         {
             using ( context.DiagnosticSink.WithDefaultScope( accessor ) )
             {
-                var proceedExpression = new DynamicExpression(
+                var proceedExpression = new UserExpression(
                     accessor.MethodKind switch
                     {
-                        MethodKind.EventAdd => this.CreateAddExpression(),
-                        MethodKind.EventRemove => this.CreateRemoveExpression(),
+                        MethodKind.EventAdd => this.CreateAddExpression( generationContext ),
+                        MethodKind.EventRemove => this.CreateRemoveExpression( generationContext ),
                         _ => throw new AssertionFailedException()
                     },
-                    this.OverriddenDeclaration.Compilation.TypeFactory.GetSpecialType( SpecialType.Void ) );
+                    this.OverriddenDeclaration.Compilation.TypeFactory.GetSpecialType( SpecialType.Void ),
+                    context.SyntaxGenerationContext );
 
                 var metaApi = MetaApi.ForEvent(
                     this.OverriddenDeclaration,
@@ -168,6 +172,7 @@ namespace Caravela.Framework.Impl.Transformations
                         accessorTemplate.Cast(),
                         this.Advice.ReadOnlyTags,
                         this.Advice.AspectLayerId,
+                        context.SyntaxGenerationContext,
                         context.ServiceProvider ) );
 
                 var expansionContext = new TemplateExpansionContext(
@@ -176,7 +181,7 @@ namespace Caravela.Framework.Impl.Transformations
                     this.OverriddenDeclaration.Compilation,
                     context.LexicalScopeProvider.GetLexicalScope( accessor ),
                     context.ServiceProvider.GetService<SyntaxSerializationService>(),
-                    (ICompilationElementFactory) this.OverriddenDeclaration.Compilation.TypeFactory,
+                    context.SyntaxGenerationContext,
                     default,
                     proceedExpression );
 
@@ -191,31 +196,31 @@ namespace Caravela.Framework.Impl.Transformations
         /// </summary>
         /// <param name="accessorDeclarationKind"></param>
         /// <returns></returns>
-        private BlockSyntax? CreateIdentityAccessorBody( SyntaxKind accessorDeclarationKind )
+        private BlockSyntax? CreateIdentityAccessorBody( SyntaxKind accessorDeclarationKind, SyntaxGenerationContext generationContext )
         {
             switch ( accessorDeclarationKind )
             {
                 case SyntaxKind.AddAccessorDeclaration:
-                    return Block( ExpressionStatement( this.CreateAddExpression() ) );
+                    return Block( ExpressionStatement( this.CreateAddExpression( generationContext ) ) );
 
                 case SyntaxKind.RemoveAccessorDeclaration:
-                    return Block( ExpressionStatement( this.CreateRemoveExpression() ) );
+                    return Block( ExpressionStatement( this.CreateRemoveExpression( generationContext ) ) );
 
                 default:
                     throw new AssertionFailedException();
             }
         }
 
-        private ExpressionSyntax CreateAddExpression()
+        private ExpressionSyntax CreateAddExpression( SyntaxGenerationContext generationContext )
             => AssignmentExpression(
                 SyntaxKind.AddAssignmentExpression,
-                this.CreateMemberAccessExpression( AspectReferenceTargetKind.EventAddAccessor ),
+                this.CreateMemberAccessExpression( AspectReferenceTargetKind.EventAddAccessor, generationContext ),
                 IdentifierName( "value" ) );
 
-        private ExpressionSyntax CreateRemoveExpression()
+        private ExpressionSyntax CreateRemoveExpression( SyntaxGenerationContext generationContext )
             => AssignmentExpression(
                 SyntaxKind.SubtractAssignmentExpression,
-                this.CreateMemberAccessExpression( AspectReferenceTargetKind.EventRemoveAccessor ),
+                this.CreateMemberAccessExpression( AspectReferenceTargetKind.EventRemoveAccessor, generationContext ),
                 IdentifierName( "value" ) );
     }
 }

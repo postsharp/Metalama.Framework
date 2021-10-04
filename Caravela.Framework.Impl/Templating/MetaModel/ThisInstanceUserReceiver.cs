@@ -3,39 +3,38 @@
 
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Aspects;
-using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
-using TypeKind = Caravela.Framework.Code.TypeKind;
 
 namespace Caravela.Framework.Impl.Templating.MetaModel
 {
     /// <summary>
-    /// An implementation of <see cref="IDynamicExpression"/> that represents <c>this</c> and allows to access its instance members dynamically.
+    /// An implementation of <see cref="IUserExpression"/> that represents <c>this</c> and allows to access its instance members dynamically.
     /// </summary>
-    internal class ThisInstanceDynamicReceiver : IDynamicReceiver
+    internal class ThisInstanceUserReceiver : IUserReceiver
     {
         private readonly INamedType _type;
         private readonly AspectReferenceSpecification _linkerAnnotation;
 
-        public ThisInstanceDynamicReceiver( INamedType type, AspectReferenceSpecification linkerAnnotation )
+        public ThisInstanceUserReceiver( INamedType type, AspectReferenceSpecification linkerAnnotation )
         {
             this._type = type;
             this._linkerAnnotation = linkerAnnotation;
         }
 
-        public RuntimeExpression CreateExpression( string? expressionText, Location? location = null ) => new( ThisExpression(), this._type );
+        public RuntimeExpression ToRunTimeExpression() => new( ThisExpression(), this._type, TemplateExpansionContext.CurrentSyntaxGenerationContext );
 
         public bool IsAssignable => this._type.TypeKind == TypeKind.Struct;
 
         public IType Type => this._type;
 
-        RuntimeExpression IDynamicReceiver.CreateMemberAccessExpression( string member )
+        RuntimeExpression IUserReceiver.CreateMemberAccessExpression( string member )
             => new(
                 MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, ThisExpression(), IdentifierName( Identifier( member ) ) )
                     .WithAspectReferenceAnnotation( this._linkerAnnotation ),
-                this._type );
+                this._type,
+                TemplateExpansionContext.CurrentSyntaxGenerationContext );
 
         object? IExpression.Value { get => this; set => throw new NotSupportedException(); }
 

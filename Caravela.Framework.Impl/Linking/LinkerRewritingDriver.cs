@@ -57,7 +57,7 @@ namespace Caravela.Framework.Impl.Linking
         {
             var replacements = new Dictionary<SyntaxNode, SyntaxNode?>();
             var symbol = this.ResolveBodySource( semantic );
-            var bodyRootNode = this.GetBodyRootNode( symbol, out var isImplicitlyLinked );
+            var bodyRootNode = this.GetBodyRootNode( symbol, inliningContext.SyntaxGenerationContext, out var isImplicitlyLinked );
 
             if ( !isImplicitlyLinked )
             {
@@ -223,7 +223,7 @@ namespace Caravela.Framework.Impl.Linking
             }
         }
 
-        private SyntaxNode GetBodyRootNode( IMethodSymbol symbol, out bool isImplicitlyLinked )
+        private SyntaxNode GetBodyRootNode( IMethodSymbol symbol, SyntaxGenerationContext generationContext, out bool isImplicitlyLinked )
         {
             var declaration = symbol.GetPrimaryDeclaration();
 
@@ -246,7 +246,7 @@ namespace Caravela.Framework.Impl.Linking
                         }
                         else
                         {
-                            return GetImplicitAccessorBody( symbol );
+                            return GetImplicitAccessorBody( symbol, generationContext );
                         }
 
                     case ArrowExpressionClauseSyntax arrowExpressionClause:
@@ -254,7 +254,7 @@ namespace Caravela.Framework.Impl.Linking
                         return arrowExpressionClause;
 
                     case VariableDeclaratorSyntax { Parent: VariableDeclarationSyntax { Parent: EventFieldDeclarationSyntax } }:
-                        return GetImplicitAccessorBody( symbol );
+                        return GetImplicitAccessorBody( symbol, generationContext );
 
                     default:
                         throw new AssertionFailedException();
@@ -282,27 +282,27 @@ namespace Caravela.Framework.Impl.Linking
             {
                 isImplicitlyLinked = true;
 
-                return GetImplicitAccessorBody( symbol );
+                return GetImplicitAccessorBody( symbol, generationContext );
             }
 
             throw new AssertionFailedException();
         }
 
-        private static BlockSyntax GetImplicitAccessorBody( IMethodSymbol symbol )
+        private static BlockSyntax GetImplicitAccessorBody( IMethodSymbol symbol, SyntaxGenerationContext generationContext )
         {
             switch ( symbol )
             {
                 case { MethodKind: MethodKind.PropertyGet }:
-                    return GetImplicitGetterBody( symbol );
+                    return GetImplicitGetterBody( symbol, generationContext );
 
                 case { MethodKind: MethodKind.PropertySet }:
-                    return GetImplicitSetterBody( symbol );
+                    return GetImplicitSetterBody( symbol, generationContext );
 
                 case { MethodKind: MethodKind.EventAdd }:
-                    return GetImplicitAdderBody( symbol );
+                    return GetImplicitAdderBody( symbol, generationContext );
 
                 case { MethodKind: MethodKind.EventRemove }:
-                    return GetImplicitRemoverBody( symbol );
+                    return GetImplicitRemoverBody( symbol, generationContext );
 
                 default:
                     throw new InvalidOperationException();
@@ -427,12 +427,12 @@ namespace Caravela.Framework.Impl.Linking
         /// <param name="syntax"></param>
         /// <param name="symbol"></param>
         /// <returns></returns>
-        public IReadOnlyList<MemberDeclarationSyntax> RewriteMember( MemberDeclarationSyntax syntax, ISymbol symbol )
+        public IReadOnlyList<MemberDeclarationSyntax> RewriteMember( MemberDeclarationSyntax syntax, ISymbol symbol, SyntaxGenerationContext generationContext )
         {
             switch ( symbol )
             {
                 case IMethodSymbol methodSymbol:
-                    return this.RewriteMethod( (MethodDeclarationSyntax) syntax, methodSymbol );
+                    return this.RewriteMethod( (MethodDeclarationSyntax) syntax, methodSymbol, generationContext );
 
                 case IPropertySymbol propertySymbol:
                     return this.RewriteProperty( (PropertyDeclarationSyntax) syntax, propertySymbol );

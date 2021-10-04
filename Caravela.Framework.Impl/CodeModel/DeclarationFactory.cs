@@ -10,7 +10,6 @@ using Caravela.Framework.Impl.Serialization;
 using Caravela.Framework.Impl.Templating.MetaModel;
 using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -23,7 +22,7 @@ namespace Caravela.Framework.Impl.CodeModel
     /// <summary>
     /// Creates instances of <see cref="IDeclaration"/> for a given <see cref="CompilationModel"/>.
     /// </summary>
-    internal class DeclarationFactory : ITypeFactory, ICompilationElementFactory
+    internal class DeclarationFactory : ITypeFactory
     {
         private readonly ConcurrentDictionary<DeclarationRef<IDeclaration>, object> _cache =
             new( DeclarationRefEqualityComparer<DeclarationRef<IDeclaration>>.Instance );
@@ -178,9 +177,9 @@ namespace Caravela.Framework.Impl.CodeModel
             }
         }
 
-        object? ITypeFactory.DefaultValue( IType type ) => new DefaultDynamicExpression( type );
+        object? ITypeFactory.DefaultValue( IType type ) => new DefaultUserExpression( type );
 
-        object? ITypeFactory.Cast( IType type, object? value ) => new CastDynamicExpression( type, value );
+        object? ITypeFactory.Cast( IType type, object? value ) => new CastUserExpression( type, value );
 
         internal IAttribute GetAttribute( AttributeBuilder attributeBuilder )
             => (IAttribute) this._cache.GetOrAdd(
@@ -277,11 +276,5 @@ namespace Caravela.Framework.Impl.CodeModel
         public IParameter GetReturnParameter( IMethodSymbol methodSymbol ) => this.GetMethod( methodSymbol ).ReturnParameter;
 
         private Compilation Compilation => this.CompilationModel.RoslynCompilation;
-
-        Compilation ISyntaxFactory.Compilation => this.CompilationModel.RoslynCompilation;
-
-        TypeSyntax ISyntaxFactory.GetTypeSyntax( Type type ) => this.CompilationModel.ReflectionMapper.GetTypeSyntax( type );
-
-        ITypeSymbol ISyntaxFactory.GetTypeSymbol( Type type ) => this.CompilationModel.ReflectionMapper.GetTypeSymbol( type );
     }
 }

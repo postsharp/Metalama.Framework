@@ -17,7 +17,10 @@ namespace Caravela.Framework.Impl.Linking
 {
     internal partial class LinkerRewritingDriver
     {
-        public IReadOnlyList<MemberDeclarationSyntax> RewriteMethod( MethodDeclarationSyntax methodDeclaration, IMethodSymbol symbol )
+        public IReadOnlyList<MemberDeclarationSyntax> RewriteMethod(
+            MethodDeclarationSyntax methodDeclaration,
+            IMethodSymbol symbol,
+            SyntaxGenerationContext generationContext )
         {
             if ( this._introductionRegistry.IsOverrideTarget( symbol ) )
             {
@@ -36,13 +39,13 @@ namespace Caravela.Framework.Impl.Linking
                 if ( this._analysisRegistry.IsReachable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Default ) )
                      && !this._analysisRegistry.IsInlineable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Default ), out _ ) )
                 {
-                    members.Add( this.GetOriginalImplMethod( methodDeclaration, symbol ) );
+                    members.Add( GetOriginalImplMethod( methodDeclaration, symbol, generationContext ) );
                 }
 
                 if ( this._analysisRegistry.IsReachable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Base ) )
                      && !this._analysisRegistry.IsInlineable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Base ), out _ ) )
                 {
-                    members.Add( this.GetEmptyImplMethod( methodDeclaration, symbol ) );
+                    members.Add( GetEmptyImplMethod( methodDeclaration, symbol, generationContext ) );
                 }
 
                 return members;
@@ -66,7 +69,7 @@ namespace Caravela.Framework.Impl.Linking
             {
                 var linkedBody = this.GetLinkedBody(
                     symbol.ToSemantic( semanticKind ),
-                    InliningContext.Create( this, symbol ) );
+                    InliningContext.Create( this, symbol, generationContext ) );
 
                 var modifiers = methodDeclaration.Modifiers;
 
@@ -88,34 +91,40 @@ namespace Caravela.Framework.Impl.Linking
             }
         }
 
-        private MemberDeclarationSyntax GetOriginalImplMethod( MethodDeclarationSyntax method, IMethodSymbol symbol )
-        {
-            return this.GetSpecialImplMethod(
+        private static MemberDeclarationSyntax GetOriginalImplMethod(
+            MethodDeclarationSyntax method,
+            IMethodSymbol symbol,
+            SyntaxGenerationContext generationContext )
+            => GetSpecialImplMethod(
                 method,
                 method.Body.AddSourceCodeAnnotation(),
                 method.ExpressionBody.AddSourceCodeAnnotation(),
                 symbol,
-                GetOriginalImplMemberName( symbol ) );
-        }
+                GetOriginalImplMemberName( symbol ),
+                generationContext );
 
-        private MemberDeclarationSyntax GetEmptyImplMethod( MethodDeclarationSyntax method, IMethodSymbol symbol )
+        private static MemberDeclarationSyntax GetEmptyImplMethod(
+            MethodDeclarationSyntax method,
+            IMethodSymbol symbol,
+            SyntaxGenerationContext generationContext )
         {
             var emptyBody =
                 symbol.ReturnsVoid
                     ? Block()
                     : Block( ReturnStatement( DefaultExpression( method.ReturnType ) ) ).NormalizeWhitespace();
 
-            return this.GetSpecialImplMethod( method, emptyBody, null, symbol, GetEmptyImplMemberName( symbol ) );
+            return GetSpecialImplMethod( method, emptyBody, null, symbol, GetEmptyImplMemberName( symbol ), generationContext );
         }
 
-        private MemberDeclarationSyntax GetSpecialImplMethod(
+        private static MemberDeclarationSyntax GetSpecialImplMethod(
             MethodDeclarationSyntax method,
             BlockSyntax? body,
             ArrowExpressionClauseSyntax? expressionBody,
             IMethodSymbol symbol,
-            string name )
+            string name,
+            SyntaxGenerationContext generationContext )
         {
-            var returnType = AsyncHelper.GetIntermediateMethodReturnType( this.IntermediateCompilation, symbol, method.ReturnType );
+            var returnType = AsyncHelper.GetIntermediateMethodReturnType( symbol, method.ReturnType, generationContext );
 
             var modifiers = symbol
                 .GetSyntaxModifierList( ModifierCategories.Static | ModifierCategories.Unsafe | ModifierCategories.Async )

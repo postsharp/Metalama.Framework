@@ -18,7 +18,6 @@ using Accessibility = Caravela.Framework.Code.Accessibility;
 using DeclarationKind = Caravela.Framework.Code.DeclarationKind;
 using MethodKind = Microsoft.CodeAnalysis.MethodKind;
 using RefKind = Caravela.Framework.Code.RefKind;
-using TypedConstant = Caravela.Framework.Code.TypedConstant;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
@@ -148,7 +147,10 @@ namespace Caravela.Framework.Impl.CodeModel
             }
         }
 
-        internal static ArgumentSyntax[] GetArguments( this IDeclaration declaration, IReadOnlyList<IParameter> parameters, RuntimeExpression[]? args )
+        internal static ArgumentSyntax[] GetArguments(
+            this IDeclaration declaration,
+            IReadOnlyList<IParameter> parameters,
+            RuntimeExpression[]? args )
         {
             CheckArguments( declaration, parameters, args );
 
@@ -204,12 +206,12 @@ namespace Caravela.Framework.Impl.CodeModel
             return arguments.ToArray();
         }
 
-        internal static ExpressionSyntax GetReceiverSyntax<T>( this T declaration, RuntimeExpression instance )
+        internal static ExpressionSyntax GetReceiverSyntax<T>( this T declaration, RuntimeExpression instance, SyntaxGenerationContext generationContext )
             where T : IMember
         {
             if ( declaration.IsStatic )
             {
-                return LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( declaration.DeclaringType.GetSymbol() );
+                return generationContext.SyntaxGenerator.Type( declaration.DeclaringType.GetSymbol() );
             }
 
             if ( instance.Syntax.Kind() == SyntaxKind.NullLiteralExpression )
@@ -218,16 +220,6 @@ namespace Caravela.Framework.Impl.CodeModel
             }
 
             return instance.ToTypedExpression( declaration.DeclaringType, true );
-        }
-
-        internal static ExpressionSyntax? ToExpressionSyntax( this in TypedConstant value, CompilationModel compilation )
-        {
-            if ( value.IsAssigned )
-            {
-                return compilation.Factory.Serializers.Serialize( value.Value, compilation.Factory );
-            }
-
-            return null;
         }
 
         internal static RefKind ToOurRefKind( this Microsoft.CodeAnalysis.RefKind roslynRefKind )

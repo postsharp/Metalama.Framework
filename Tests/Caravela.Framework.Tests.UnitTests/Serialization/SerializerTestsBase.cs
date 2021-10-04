@@ -12,26 +12,26 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization
 {
     public abstract class SerializerTestsBase : TestBase
     {
-        private protected ICompilationElementFactory SyntaxFactory { get; }
+        private protected SyntaxSerializationContext SerializationContext { get; }
 
         private protected SyntaxSerializationService SerializationService { get; }
 
-        protected ExpressionSyntax Serialize<T>( T o ) => this.SerializationService.Serialize( o, this.SyntaxFactory );
+        protected ExpressionSyntax Serialize<T>( T o ) => this.SerializationService.Serialize( o, this.SerializationContext );
 
         public SerializerTestsBase()
         {
             // We need a syntax factory for an arbitrary compilation, but at least with standard references.
             // Note that we cannot easily get a reference to Caravela.Compiler.Interfaces this way because we have a reference assembly.
 
-            this.SyntaxFactory =
+            this.SerializationContext = new SyntaxSerializationContext(
                 CreateCompilationModel(
-                        "/* No code is necessary, only references */",
-                        additionalReferences: new[]
-                        {
-                            MetadataReference.CreateFromFile( typeof(ICompileTimeReflectionObject<>).Assembly.Location ),
-                            MetadataReference.CreateFromFile( typeof(Queue<>).Assembly.Location )
-                        } )
-                    .Factory;
+                    "/* No code is necessary, only references */",
+                    additionalReferences: new[]
+                    {
+                        MetadataReference.CreateFromFile( typeof(ICompileTimeReflectionObject<>).Assembly.Location ),
+                        MetadataReference.CreateFromFile( typeof(Queue<>).Assembly.Location )
+                    } ),
+                OurSyntaxGenerator.Default );
 
             this.SerializationService = new SyntaxSerializationService();
         }

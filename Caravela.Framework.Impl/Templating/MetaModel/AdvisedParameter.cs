@@ -44,6 +44,12 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
             set => throw new NotSupportedException();
         }
 
-        private IExpression ToExpression() => new DynamicExpression( SyntaxFactory.IdentifierName( this.Underlying.Name ), this.Underlying.Type, true, true );
+        private IExpression ToExpression()
+            => new UserExpression(
+                SyntaxFactory.IdentifierName( this.Underlying.Name ),
+                this.Underlying.Type,
+                TemplateExpansionContext.CurrentSyntaxGenerationContext,
+                isReferenceable: true,
+                isAssignable: true );
     }
 }

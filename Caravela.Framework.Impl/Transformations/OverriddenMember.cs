@@ -9,6 +9,7 @@ using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
@@ -29,7 +30,7 @@ namespace Caravela.Framework.Impl.Transformations
                 ? introduction.TargetSyntaxTree
                 : ((NamedType) this.OverriddenDeclaration.DeclaringType).Symbol.GetPrimarySyntaxReference().AssertNotNull().SyntaxTree;
 
-        public OverriddenMember( Advice advice, IMember overriddenDeclaration )
+        protected OverriddenMember( Advice advice, IMember overriddenDeclaration )
         {
             Invariant.Assert( advice != null! );
             Invariant.Assert( overriddenDeclaration != null! );
@@ -40,7 +41,7 @@ namespace Caravela.Framework.Impl.Transformations
 
         public abstract IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context );
 
-        protected ExpressionSyntax CreateMemberAccessExpression( AspectReferenceTargetKind referenceTargetKind )
+        protected ExpressionSyntax CreateMemberAccessExpression( AspectReferenceTargetKind referenceTargetKind, SyntaxGenerationContext generationContext )
         {
             ExpressionSyntax expression;
 
@@ -62,7 +63,7 @@ namespace Caravela.Framework.Impl.Transformations
                         SyntaxKind.SimpleMemberAccessExpression,
                         ParenthesizedExpression(
                             CastExpression(
-                                LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( implementedInterfaceMember.DeclaringType.GetSymbol() ),
+                                generationContext.SyntaxGenerator.Type( implementedInterfaceMember.DeclaringType.GetSymbol() ),
                                 ThisExpression() ) ),
                         memberName );
                 }
@@ -79,7 +80,7 @@ namespace Caravela.Framework.Impl.Transformations
                 expression =
                     MemberAccessExpression(
                         SyntaxKind.SimpleMemberAccessExpression,
-                        LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( this.OverriddenDeclaration.DeclaringType.GetSymbol() ),
+                        generationContext.SyntaxGenerator.Type( this.OverriddenDeclaration.DeclaringType.GetSymbol() ),
                         memberName );
             }
 
@@ -92,5 +93,7 @@ namespace Caravela.Framework.Impl.Transformations
         }
 
         public InsertPosition InsertPosition => this.OverriddenDeclaration.ToInsertPosition();
+
+        public override string ToString() => $"Override {this.OverriddenDeclaration}";
     }
 }

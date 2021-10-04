@@ -26,7 +26,11 @@ namespace Caravela.TestFramework
 
         public static CSharpCompilation CreateEmptyCSharpCompilation( string? name, IEnumerable<MetadataReference> metadataReferences )
             => CSharpCompilation.Create( name ?? "test_" + Guid.NewGuid() )
-                .WithOptions( new CSharpCompilationOptions( OutputKind.DynamicallyLinkedLibrary, allowUnsafe: true ) )
+                .WithOptions(
+                    new CSharpCompilationOptions(
+                        OutputKind.DynamicallyLinkedLibrary,
+                        allowUnsafe: true,
+                        nullableContextOptions: NullableContextOptions.Enable ) )
                 .AddReferences( metadataReferences );
 
         public static IEnumerable<PortableExecutableReference> GetMetadataReferences(

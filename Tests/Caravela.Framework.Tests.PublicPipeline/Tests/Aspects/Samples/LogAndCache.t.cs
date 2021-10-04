@@ -13,7 +13,7 @@ global::System.Int32 result_1;
     if (global::Caravela.Framework.IntegrationTests.Aspects.Overrides.Composition.LogAndCache.SampleCache.Cache.TryGetValue(cacheKey, out object? value))
     {
         global::System.Console.WriteLine("Cache hit.");
-result_1=(global::System.Int32)(value);
+result_1=(global::System.Int32)value;
 goto __aspect_return_1;    }
     else
     {
@@ -23,11 +23,11 @@ global::System.Int32 result;
 result=a + b;
 goto __aspect_return_2;
 __aspect_return_2:        global::Caravela.Framework.IntegrationTests.Aspects.Overrides.Composition.LogAndCache.SampleCache.Cache.TryAdd(cacheKey, result);
-result_1=(global::System.Int32)(result);
+result_1=(global::System.Int32)result;
 goto __aspect_return_1;    }
 
 __aspect_return_1:        global::System.Console.WriteLine("TargetCode.Add(int, int) succeeded.");
-        return (global::System.Int32)(result_1);
+        return (global::System.Int32)result_1;
     }
     catch (global::System.Exception e)
     {

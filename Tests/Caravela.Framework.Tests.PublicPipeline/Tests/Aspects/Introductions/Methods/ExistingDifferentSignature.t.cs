@@ -10,5 +10,5 @@
 public global::System.Int32 ExistingMethod()
 {
     global::System.Console.WriteLine("This is introduced method.");
-    return (global::System.Int32)(42);
+    return (global::System.Int32)42;
 }    }

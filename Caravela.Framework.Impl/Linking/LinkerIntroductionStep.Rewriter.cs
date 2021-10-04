@@ -2,12 +2,14 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
-using Caravela.Framework.Code.DeclarationBuilders;
+using Caravela.Framework.Impl.AspectOrdering;
+using Caravela.Framework.Impl.Aspects;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Formatting;
 using Caravela.Framework.Impl.Transformations;
+using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -24,6 +26,7 @@ namespace Caravela.Framework.Impl.Linking
         private partial class Rewriter : CSharpSyntaxRewriter
         {
             private readonly CompilationModel _compilation;
+            private readonly ImmutableDictionary<AspectLayerId, OrderedAspectLayer> _orderedAspectLayers;
             private readonly ImmutableMultiValueDictionary<IDeclaration, ScopedSuppression> _diagnosticSuppressions;
             private readonly SyntaxTransformationCollection _introducedMemberCollection;
 
@@ -33,10 +36,12 @@ namespace Caravela.Framework.Impl.Linking
             public Rewriter(
                 SyntaxTransformationCollection introducedMemberCollection,
                 ImmutableMultiValueDictionary<IDeclaration, ScopedSuppression> diagnosticSuppressions,
-                CompilationModel compilation )
+                CompilationModel compilation,
+                IReadOnlyList<OrderedAspectLayer> inputOrderedAspectLayers )
             {
                 this._diagnosticSuppressions = diagnosticSuppressions;
                 this._compilation = compilation;
+                this._orderedAspectLayers = inputOrderedAspectLayers.ToImmutableDictionary( e => e.AspectLayerId, e => e );
                 this._introducedMemberCollection = introducedMemberCollection;
             }
 
@@ -176,12 +181,12 @@ namespace Caravela.Framework.Impl.Linking
                 // TODO: Try to avoid closure allocation.
                 void AddIntroductionsOnPosition( InsertPosition position )
                 {
-                    foreach ( var removedInsertPosition in this._introducedMemberCollection.GetRemovedInsertPositionsOnPosition( position ) )
-                    {
-                        AddIntroductionsOnPosition( removedInsertPosition );
-                    }
+                    var membersAtPosition = this._introducedMemberCollection.GetIntroducedMembersOnPosition( position )
+                        .OrderBy( m => m )
+                        .ThenBy( m => this._orderedAspectLayers[m.Introduction.Advice.AspectLayerId].Order )
+                        .ThenBy( m => m, ThrowingComparer<LinkerIntroducedMember>.Instance );
 
-                    foreach ( var introducedMember in this._introducedMemberCollection.GetIntroducedMembersOnPosition( position ) )
+                    foreach ( var introducedMember in membersAtPosition )
                     {
                         // Allow for tracking of the node inserted.
                         // IMPORTANT: This need to be here and cannot be in introducedMember.Syntax, result of TrackNodes is not trackable!
@@ -200,12 +205,6 @@ namespace Caravela.Framework.Impl.Linking
                         }
 
                         members.Add( introducedNode );
-
-                        if ( introducedMember.Introduction is IDeclarationBuilder builder )
-                        {
-                            // Recursively add members dependent on this introduction
-                            AddIntroductionsOnPosition( new InsertPosition( InsertPositionRelation.After, builder ) );
-                        }
                     }
                 }
             }

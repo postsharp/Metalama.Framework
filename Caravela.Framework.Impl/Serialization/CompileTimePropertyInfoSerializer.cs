@@ -17,16 +17,16 @@ namespace Caravela.Framework.Impl.Serialization
     {
         public CompileTimePropertyInfoSerializer( SyntaxSerializationService service ) : base( service ) { }
 
-        public override ExpressionSyntax Serialize( CompileTimePropertyInfo obj, ICompilationElementFactory syntaxFactory )
+        public override ExpressionSyntax Serialize( CompileTimePropertyInfo obj, SyntaxSerializationContext serializationContext )
         {
-            var property = obj.Target.Resolve( syntaxFactory.CompilationModel ).AssertNotNull();
+            var property = obj.Target.Resolve( serializationContext.CompilationModel ).AssertNotNull();
 
-            return this.SerializeProperty( property, syntaxFactory );
+            return this.SerializeProperty( property, serializationContext );
         }
 
-        public ExpressionSyntax SerializeProperty( IProperty property, ICompilationElementFactory syntaxFactory )
+        public ExpressionSyntax SerializeProperty( IProperty property, SyntaxSerializationContext serializationContext )
         {
-            var typeCreation = this.Service.Serialize( CompileTimeType.Create( property.DeclaringType ), syntaxFactory );
+            var typeCreation = this.Service.Serialize( CompileTimeType.Create( property.DeclaringType ), serializationContext );
 
             if ( property.Parameters.Count == 0 )
             {
@@ -40,16 +40,16 @@ namespace Caravela.Framework.Impl.Serialization
                             SyntaxFactory.LiteralExpression(
                                 SyntaxKind.StringLiteralExpression,
                                 SyntaxFactory.Literal( property.Name ) ) ),
-                        SyntaxFactory.Argument( SyntaxUtility.CreateBindingFlags( syntaxFactory ) ) );
+                        SyntaxFactory.Argument( SyntaxUtility.CreateBindingFlags( serializationContext ) ) );
             }
             else
             {
-                var returnTypeCreation = this.Service.Serialize( CompileTimeType.Create( property.Type ), syntaxFactory );
+                var returnTypeCreation = this.Service.Serialize( CompileTimeType.Create( property.Type ), serializationContext );
                 var parameterTypes = new List<ExpressionSyntax>();
 
                 foreach ( var parameter in property.Parameters )
                 {
-                    parameterTypes.Add( this.Service.Serialize( CompileTimeType.Create( parameter.Type ), syntaxFactory ) );
+                    parameterTypes.Add( this.Service.Serialize( CompileTimeType.Create( parameter.Type ), serializationContext ) );
                 }
 
                 var propertyName = property.GetSymbol().AssertNotNull().MetadataName;
@@ -67,7 +67,7 @@ namespace Caravela.Framework.Impl.Serialization
                             SyntaxFactory.Argument( returnTypeCreation ),
                             SyntaxFactory.Argument(
                                 SyntaxFactory.ArrayCreationExpression(
-                                        SyntaxFactory.ArrayType( syntaxFactory.GetTypeSyntax( typeof(Type) ) )
+                                        SyntaxFactory.ArrayType( serializationContext.GetTypeSyntax( typeof(Type) ) )
                                             .WithRankSpecifiers(
                                                 SyntaxFactory.SingletonList(
                                                     SyntaxFactory.ArrayRankSpecifier(

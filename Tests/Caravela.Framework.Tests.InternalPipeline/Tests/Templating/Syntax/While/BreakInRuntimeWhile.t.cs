@@ -9,5 +9,5 @@ int Method(int a)
 
     global::System.Console.WriteLine("Test result = " + i);
     var result = this.Method(a);
-    return (global::System.Int32)(result);
+    return (global::System.Int32)result;
 }

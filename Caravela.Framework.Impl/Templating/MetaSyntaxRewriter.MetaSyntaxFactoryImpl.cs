@@ -20,18 +20,18 @@ namespace Caravela.Framework.Impl.Templating
                 this._reflectionMapper = ReflectionMapper.GetInstance( compileTimeCompilation );
             }
 
-            public TypeSyntax Type( Type type ) => this._reflectionMapper.GetTypeSyntax( type );
+            public TypeSyntax Type( Type type ) => OurSyntaxGenerator.CompileTime.Type( this._reflectionMapper.GetTypeSymbol( type ) );
 
 #pragma warning disable CA1822 // Mark members as static
             public TypeSyntax Type( ITypeSymbol type )
                 => type switch
                 {
-                    IArrayTypeSymbol arrayType => LanguageServiceFactory.CSharpSyntaxGenerator.ArrayTypeExpression(
-                        LanguageServiceFactory.CSharpSyntaxGenerator.NameExpression( arrayType.ElementType ) ),
-                    _ => (TypeSyntax) LanguageServiceFactory.CSharpSyntaxGenerator.NameExpression( type )
+                    IArrayTypeSymbol arrayType => OurSyntaxGenerator.CompileTime.ArrayTypeExpression(
+                        OurSyntaxGenerator.CompileTime.Type( arrayType.ElementType ) ),
+                    _ => (TypeSyntax) OurSyntaxGenerator.CompileTime.NameExpression( type )
                 };
 
-            public ExpressionSyntax NamespaceOrType( INamespaceOrTypeSymbol type ) => LanguageServiceFactory.CSharpSyntaxGenerator.NameExpression( type );
+            public ExpressionSyntax NamespaceOrType( INamespaceOrTypeSymbol type ) => OurSyntaxGenerator.CompileTime.NameExpression( type );
 #pragma warning restore CA1822 // Mark members as static
 
             public TypeSyntax GenericType( Type type, params TypeSyntax[] genericParameters )

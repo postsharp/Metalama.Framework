@@ -6,25 +6,24 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Templating.MetaModel;
-using Microsoft.CodeAnalysis;
 using System;
 
 namespace Caravela.Framework.Impl.Templating
 {
     internal partial class TemplateExpansionContext
     {
-        private class ProceedExpression : IDynamicExpression
+        private class ProceedUserExpression : IUserExpression
         {
             private readonly TemplateExpansionContext _parent;
             private readonly string _methodName;
 
-            public ProceedExpression( string methodName, TemplateExpansionContext parent )
+            public ProceedUserExpression( string methodName, TemplateExpansionContext parent )
             {
                 this._methodName = methodName;
                 this._parent = parent;
             }
 
-            public RuntimeExpression CreateExpression( string? expressionText = null, Location? location = null )
+            public RuntimeExpression ToRunTimeExpression()
             {
                 var targetMethod = this._parent.MetaApi.Target.Method;
 
@@ -43,12 +42,10 @@ namespace Caravela.Framework.Impl.Templating
 
                 if ( !isValid )
                 {
-                    throw TemplatingDiagnosticDescriptors.CannotUseSpecificProceedInThisContext.CreateException(
-                        location,
-                        (this._methodName, targetMethod) );
+                    throw TemplatingDiagnosticDescriptors.CannotUseSpecificProceedInThisContext.CreateException( (this._methodName, targetMethod) );
                 }
 
-                return this._parent._proceedExpression!.CreateExpression( expressionText, location );
+                return this._parent._proceedExpression!.ToRunTimeExpression();
             }
 
             public bool IsAssignable => false;

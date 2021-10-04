@@ -7,11 +7,13 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    internal partial class AnnotatingSyntaxGenerator
+    internal partial class OurSyntaxGenerator
     {
-        private class TypeOfRewriter : CSharpSyntaxRewriter
+        private class DynamicToVarRewriter : CSharpSyntaxRewriter
         {
-            public static readonly TypeOfRewriter Instance = new();
+            public static readonly CSharpSyntaxRewriter Instance = new DynamicToVarRewriter();
+
+            private DynamicToVarRewriter() { }
 
             public override SyntaxNode? VisitIdentifierName( IdentifierNameSyntax node )
             {

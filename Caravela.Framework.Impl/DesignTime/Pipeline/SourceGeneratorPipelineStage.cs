@@ -40,7 +40,6 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
         {
             var transformations = pipelineStepResult.Compilation.GetAllObservableTransformations();
             UserDiagnosticSink diagnostics = new( this.CompileTimeProject );
-            var syntaxFactory = ReflectionMapper.GetInstance( input.PartialCompilation.Compilation );
 
             var additionalSyntaxTrees = new List<IntroducedSyntaxTree>();
 
@@ -79,16 +78,18 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
                     default );
 
                 // Add members to the class.
+                var syntaxGenerationContext = SyntaxGenerationContext.CreateDefault( input.PartialCompilation.Compilation );
+
                 foreach ( var transformation in transformationGroup.Transformations )
                 {
                     if ( transformation is IMemberIntroduction memberIntroduction )
                     {
-                        // TODO: Provide other implementations or allow nulls (because this pipeline should not execute anything .
+                        // TODO: Provide other implementations or allow nulls (because this pipeline should not execute anything).
                         var introductionContext = new MemberIntroductionContext(
                             diagnostics,
                             introductionNameProvider,
                             lexicalScopeFactory,
-                            syntaxFactory,
+                            syntaxGenerationContext,
                             this.ServiceProvider );
 
                         var introducedMembers = memberIntroduction.GetIntroducedMembers( introductionContext )

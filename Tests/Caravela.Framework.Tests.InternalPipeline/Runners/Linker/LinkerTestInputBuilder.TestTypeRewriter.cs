@@ -410,7 +410,7 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
                         _ = o
                             .Implements<IObservableTransformation>()
                             .Implements<IMemberIntroduction>()
-                            .Implements<IMemberOrNamedTypeBuilder>()
+                            .Implements<IMemberBuilder>()
                             .Implements<IDeclarationImpl>()
                             .Implements<ITestTransformation>();
 
@@ -474,6 +474,7 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
                         {
                             new IntroducedMember(
                                 transformation,
+                                declarationKind,
                                 introductionSyntax,
                                 new AspectLayerId( aspectName.AssertNotNull(), layerName ),
                                 IntroducedMemberSemantic.Introduction,
@@ -490,15 +491,12 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
                 A.CallTo( () => ((ITestTransformation) transformation).InsertPositionNodeId )
                     .Returns( this._currentInsertPosition!.Value.SyntaxNode != null ? GetNodeId( this._currentInsertPosition.Value.SyntaxNode ) : null );
 
-                A.CallTo( () => ((ITestTransformation) transformation).InsertPositionBuilder )
-                    .Returns( this._currentInsertPosition!.Value.Builder );
-
                 A.CallTo( () => ((ITestTransformation) transformation).InsertPositionRelation ).Returns( this._currentInsertPosition.Value.Relation );
 
                 A.CallTo( () => ((ITestTransformation) transformation).IntroducedElementName ).Returns( introducedElementName );
 
                 var symbolHelperId = GetNodeId( symbolHelperDeclaration );
-                this._currentInsertPosition = new InsertPosition( InsertPositionRelation.After, (IDeclarationBuilder) transformation );
+                this._currentInsertPosition = new InsertPosition( InsertPositionRelation.Within, (MemberDeclarationSyntax) introductionSyntax.Parent! );
                 A.CallTo( () => ((ITestTransformation) transformation).SymbolHelperNodeId ).Returns( symbolHelperId );
 
                 if ( replacedAttribute != null )
@@ -571,6 +569,9 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
                         .Implements<IOverriddenDeclaration>()
                         .Implements<ITestTransformation>() );
 
+                string declarationName;
+                DeclarationKind declarationKind;
+
                 var methodBodyRewriter = new TestMethodBodyRewriter( aspectName, layerName );
                 MemberDeclarationSyntax overrideSyntax;
 
@@ -584,6 +585,9 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
                                 .WithAttributeLists( List( newAttributeLists ) )
                                 .WithBody( (BlockSyntax) rewrittenMethodBody.AssertNotNull() );
 
+                        declarationName = method.Identifier.Text;
+                        declarationKind = DeclarationKind.Method;
+
                         break;
 
                     case MethodDeclarationSyntax { ExpressionBody: not null } method:
@@ -593,6 +597,9 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
                             method
                                 .WithAttributeLists( List( newAttributeLists ) )
                                 .WithExpressionBody( (ArrowExpressionClauseSyntax) rewrittenMethodExpressionBody.AssertNotNull() );
+
+                        declarationName = method.Identifier.Text;
+                        declarationKind = DeclarationKind.Method;
 
                         break;
 
@@ -606,6 +613,9 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
                                             property.AccessorList!.Accessors.Select(
                                                 a => a.WithBody( (BlockSyntax) methodBodyRewriter.VisitBlock( a.Body! ).AssertNotNull() ) ) ) ) );
 
+                        declarationName = property.Identifier.Text;
+                        declarationKind = DeclarationKind.Property;
+
                         break;
 
                     case EventDeclarationSyntax @event:
@@ -618,12 +628,18 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
                                             @event.AccessorList!.Accessors.Select(
                                                 a => a.WithBody( (BlockSyntax) methodBodyRewriter.VisitBlock( a.Body! ).AssertNotNull() ) ) ) ) );
 
+                        declarationName = @event.Identifier.Text;
+                        declarationKind = DeclarationKind.Event;
+
                         break;
 
                     case EventFieldDeclarationSyntax eventField:
                         overrideSyntax =
                             eventField
                                 .WithAttributeLists( List( newAttributeLists ) );
+
+                        declarationName = @eventField.Declaration.Variables[0].Identifier.Text;
+                        declarationKind = DeclarationKind.Event;
 
                         break;
 
@@ -662,6 +678,7 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
                         {
                             new IntroducedMember(
                                 transformation,
+                                declarationKind,
                                 overrideSyntax,
                                 new AspectLayerId( aspectName.AssertNotNull(), layerName ),
                                 node switch
@@ -679,9 +696,6 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
 
                 A.CallTo( () => ((ITestTransformation) transformation).InsertPositionNodeId )
                     .Returns( this._currentInsertPosition!.Value.SyntaxNode != null ? GetNodeId( this._currentInsertPosition.Value.SyntaxNode ) : null );
-
-                A.CallTo( () => ((ITestTransformation) transformation).InsertPositionBuilder )
-                    .Returns( this._currentInsertPosition!.Value.Builder );
 
                 A.CallTo( () => ((ITestTransformation) transformation).InsertPositionRelation ).Returns( this._currentInsertPosition.Value.Relation );
 

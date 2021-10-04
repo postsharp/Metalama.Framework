@@ -3,27 +3,26 @@
 
 using Caravela.Framework.Code;
 using Caravela.Framework.Code.SyntaxBuilders;
-using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
-using SpecialType = Caravela.Framework.Code.SpecialType;
 
 namespace Caravela.Framework.Impl.Templating.MetaModel
 {
-    internal class InterpolatedStringDynamicExpression : IDynamicExpression
+    internal class InterpolatedStringUserExpression : IUserExpression
     {
         private readonly InterpolatedStringBuilder _builder;
 
-        public InterpolatedStringDynamicExpression( InterpolatedStringBuilder builder, ICompilation compilation )
+        public InterpolatedStringUserExpression( InterpolatedStringBuilder builder, ICompilation compilation )
         {
             this._builder = builder;
             this.Type = compilation.TypeFactory.GetSpecialType( SpecialType.String );
         }
 
-        public RuntimeExpression CreateExpression( string? expressionText = null, Location? location = null )
+        public RuntimeExpression ToRunTimeExpression()
         {
+            var syntaxGenerationContext = TemplateExpansionContext.CurrentSyntaxGenerationContext;
             List<InterpolatedStringContentSyntax> contents = new( this._builder.Items.Count );
 
             foreach ( var content in this._builder.Items )
@@ -38,7 +37,11 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
                         break;
 
                     case InterpolatedStringBuilder.Token token:
-                        contents.Add( SyntaxFactory.Interpolation( RuntimeExpression.FromValue( token.Expression, this.Type.Compilation ).Syntax ) );
+
+                        contents.Add(
+                            SyntaxFactory.Interpolation(
+                                RuntimeExpression.FromValue( token.Expression, this.Type.Compilation, syntaxGenerationContext )
+                                    .Syntax ) );
 
                         break;
 
@@ -47,13 +50,13 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
                 }
             }
 
-            var expression = TemplateSyntaxFactory.RenderInterpolatedString(
+            var syntax = TemplateSyntaxFactory.RenderInterpolatedString(
                 SyntaxFactory.InterpolatedStringExpression(
                     SyntaxFactory.Token( SyntaxKind.InterpolatedStringStartToken ),
                     SyntaxFactory.List( contents ),
                     SyntaxFactory.Token( SyntaxKind.InterpolatedStringEndToken ) ) );
 
-            return new RuntimeExpression( expression, this.Type );
+            return new RuntimeExpression( syntax, this.Type, syntaxGenerationContext );
         }
 
         public bool IsAssignable => false;

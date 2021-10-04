@@ -5,6 +5,6 @@
 
 public T GenericMethod<T>(T a)
 {
-    return (T)(a);
+    return (T)a;
 }        
     }

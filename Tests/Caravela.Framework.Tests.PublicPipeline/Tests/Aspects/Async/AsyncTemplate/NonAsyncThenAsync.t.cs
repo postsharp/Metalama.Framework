@@ -21,7 +21,7 @@ public async global::System.Threading.Tasks.Task<global::System.Int32> AsyncMeth
     global::System.Console.WriteLine("Async intercept");
     await global::System.Threading.Tasks.Task.Yield();
     var result = await this.AsyncMethod_Source(a);
-    return (global::System.Int32)(result);
+    return (global::System.Int32)result;
 }        
         [Aspect1]
         [Aspect2]
@@ -42,6 +42,6 @@ public async global::System.Threading.Tasks.Task<global::System.Int32> NonAsyncM
     global::System.Console.WriteLine("Async intercept");
     await global::System.Threading.Tasks.Task.Yield();
     var result = await this.NonAsyncMethod_Source(a);
-    return (global::System.Int32)(result);
+    return (global::System.Int32)result;
 }        
     }

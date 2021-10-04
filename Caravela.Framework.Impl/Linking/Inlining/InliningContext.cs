@@ -29,7 +29,9 @@ namespace Caravela.Framework.Impl.Linking.Inlining
 
         public IMethodSymbol CurrentDeclaration { get; }
 
-        private InliningContext( LinkerRewritingDriver rewritingDriver, IMethodSymbol targetDeclaration )
+        public SyntaxGenerationContext SyntaxGenerationContext { get; }
+
+        private InliningContext( LinkerRewritingDriver rewritingDriver, IMethodSymbol targetDeclaration, SyntaxGenerationContext syntaxGenerationContext )
         {
             this._rewritingDriver = rewritingDriver;
             this.HasIndirectReturn = false;
@@ -37,6 +39,7 @@ namespace Caravela.Framework.Impl.Linking.Inlining
             this.ReturnLabelName = null;
             this._depth = 0;
             this.TargetDeclaration = targetDeclaration;
+            this.SyntaxGenerationContext = syntaxGenerationContext;
             this.CurrentDeclaration = targetDeclaration;
         }
 
@@ -45,6 +48,7 @@ namespace Caravela.Framework.Impl.Linking.Inlining
             this._rewritingDriver = parent._rewritingDriver;
             this.HasIndirectReturn = true;
             this.ReturnVariableName = returnVariableName;
+            this.SyntaxGenerationContext = parent.SyntaxGenerationContext;
             this._depth = parent._depth + 1;
             this.ReturnLabelName = $"__aspect_return_{this._depth}";
             this.DeclaresReturnVariable = declaresReturnVariable;
@@ -65,7 +69,7 @@ namespace Caravela.Framework.Impl.Linking.Inlining
                                     this.DeclaresReturnVariable
                                         ? LocalDeclarationStatement(
                                                 VariableDeclaration(
-                                                    LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( semantic.Symbol.ReturnType ),
+                                                    this.SyntaxGenerationContext.SyntaxGenerator.Type( semantic.Symbol.ReturnType ),
                                                     SingletonSeparatedList( VariableDeclarator( this.ReturnVariableName.AssertNotNull() ) ) ) )
                                             .WithLeadingTrivia( ElasticLineFeed )
                                             .AddGeneratedCodeAnnotation()
@@ -89,8 +93,11 @@ namespace Caravela.Framework.Impl.Linking.Inlining
             }
         }
 
-        public static InliningContext Create( LinkerRewritingDriver rewritingDriver, IMethodSymbol targetDeclaration )
-            => new( rewritingDriver, targetDeclaration );
+        public static InliningContext Create(
+            LinkerRewritingDriver rewritingDriver,
+            IMethodSymbol targetDeclaration,
+            SyntaxGenerationContext generationContext )
+            => new( rewritingDriver, targetDeclaration, generationContext );
 
         [ExcludeFromCodeCoverage]
         public InliningContext WithDeclaredReturnLocal( IMethodSymbol currentDeclaration )

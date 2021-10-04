@@ -8,13 +8,13 @@ using System.Linq;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    internal partial class AnnotatingSyntaxGenerator
+    internal partial class OurSyntaxGenerator
     {
-        private class GenericDefinitionTypeOfRewriter : TypeOfRewriter
+        private sealed class RemoveTypeArgumentsRewriter : CSharpSyntaxRewriter
         {
-            public static new readonly GenericDefinitionTypeOfRewriter Instance = new();
+            public static readonly CSharpSyntaxRewriter Instance = new RemoveTypeArgumentsRewriter();
 
-            private GenericDefinitionTypeOfRewriter() { }
+            private RemoveTypeArgumentsRewriter() { }
 
             public override SyntaxNode? VisitGenericName( GenericNameSyntax node )
             {
