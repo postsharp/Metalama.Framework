@@ -26,7 +26,7 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Invokers.Methods.AdvisedIn
     {
         public void BuildAspect(IAspectBuilder<INamedType> builder)
         {
-            builder.AdviceFactory.OverrideMethod(builder.Target.Methods.OfName(nameof(TestIntroductionAttribute.Method)).Single(), nameof(MethodTemplate));
+            builder.Advices.OverrideMethod(builder.Target.Methods.OfName(nameof(TestIntroductionAttribute.Method)).Single(), nameof(MethodTemplate));
         }
 
         [Template]

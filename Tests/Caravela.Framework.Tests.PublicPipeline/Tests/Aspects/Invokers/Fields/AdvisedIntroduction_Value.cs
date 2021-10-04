@@ -23,7 +23,7 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Invokers.Fields.AdvisedInt
     {
         public void BuildAspect(IAspectBuilder<INamedType> builder)
         {
-            builder.AdviceFactory.OverrideFieldOrProperty(builder.Target.Fields.OfName(nameof(TestIntroductionAttribute.Field)).Single(), nameof(PropertyTemplate));
+            builder.Advices.OverrideFieldOrProperty(builder.Target.Fields.OfName(nameof(TestIntroductionAttribute.Field)).Single(), nameof(PropertyTemplate));
         }
 
         [Template]

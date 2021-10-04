@@ -23,7 +23,7 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Invokers.Events.AdvisedInt
     {
         public void BuildAspect(IAspectBuilder<INamedType> builder)
         {
-            builder.AdviceFactory.OverrideEventAccessors(builder.Target.Events.OfName(nameof(TestIntroductionAttribute.Event)).Single(), nameof(AddTemplate), nameof(RemoveTemplate), null);
+            builder.Advices.OverrideEventAccessors(builder.Target.Events.OfName(nameof(TestIntroductionAttribute.Event)).Single(), nameof(AddTemplate), nameof(RemoveTemplate), null);
         }
 
         [Template]
