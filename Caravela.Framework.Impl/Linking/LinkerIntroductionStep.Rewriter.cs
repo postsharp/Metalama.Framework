@@ -9,6 +9,7 @@ using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Formatting;
 using Caravela.Framework.Impl.Transformations;
+using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -182,7 +183,8 @@ namespace Caravela.Framework.Impl.Linking
                 {
                     var membersAtPosition = this._introducedMemberCollection.GetIntroducedMembersOnPosition( position )
                         .OrderBy( m => m )
-                        .ThenBy( m => this._orderedAspectLayers[m.Introduction.Advice.AspectLayerId].Order );
+                        .ThenBy( m => this._orderedAspectLayers[m.Introduction.Advice.AspectLayerId].Order )
+                        .ThenBy( m => m, ThrowingComparer<LinkerIntroducedMember>.Instance );
 
                     foreach ( var introducedMember in membersAtPosition )
                     {
