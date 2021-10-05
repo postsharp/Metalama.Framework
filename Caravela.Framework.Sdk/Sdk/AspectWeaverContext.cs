@@ -59,7 +59,7 @@ namespace Caravela.Framework.Impl.Sdk
                 .SelectMany( s => s!.DeclaringSyntaxReferences )
                 .GroupBy( r => r.SyntaxTree );
 
-            List<ModifiedSyntaxTree> modifiedSyntaxTrees = new();
+            List<SyntaxTreeModification> modifiedSyntaxTrees = new();
 
             foreach ( var group in nodes )
             {
@@ -70,11 +70,11 @@ namespace Caravela.Framework.Impl.Sdk
 
                 if ( oldRoot != newRoot )
                 {
-                    modifiedSyntaxTrees.Add( new ModifiedSyntaxTree( oldTree.WithRootAndOptions( newRoot, oldTree.Options ), oldTree ) );
+                    modifiedSyntaxTrees.Add( new SyntaxTreeModification( oldTree.WithRootAndOptions( newRoot, oldTree.Options ), oldTree ) );
                 }
             }
 
-            this.Compilation = this.Compilation.WithSyntaxTrees( modifiedSyntaxTrees );
+            this.Compilation = this.Compilation.WithSyntaxTreeModifications( modifiedSyntaxTrees );
         }
 
         private class Rewriter : CSharpSyntaxRewriter

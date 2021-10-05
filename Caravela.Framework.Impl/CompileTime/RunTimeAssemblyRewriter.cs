@@ -30,7 +30,7 @@ namespace Caravela.Compiler
     }
 }
 ";
-        
+
         // TODO: We can do more in cleaning the run-time assembly. 
         // Private compile-time code can be stripped, except when they are templates, because their metadata must be preserved.
         // In general, accessible compile-time metadata must remain.
@@ -46,15 +46,15 @@ namespace Caravela.Compiler
             this._aspectDriverSymbol = runTimeCompilation.GetTypeByMetadataName( typeof(IAspectDriver).FullName );
         }
 
-        public static Compilation Rewrite( Compilation runTimeCompilation, IServiceProvider serviceProvider )
+        public static IPartialCompilation Rewrite( IPartialCompilation compilation, IServiceProvider serviceProvider )
         {
-            var rewriter = new RunTimeAssemblyRewriter( runTimeCompilation, serviceProvider );
+            var rewriter = new RunTimeAssemblyRewriter( compilation.Compilation, serviceProvider );
 
-            var transformedCompilation = rewriter.VisitTrees( runTimeCompilation );
+            var transformedCompilation = compilation.RewriteSyntaxTrees( rewriter );
 
-            if ( transformedCompilation.GetTypeByMetadataName( "Caravela.Compiler.Intrinsics" ) == null )
+            if ( transformedCompilation.Compilation.GetTypeByMetadataName( "Caravela.Compiler.Intrinsics" ) == null )
             {
-                transformedCompilation = transformedCompilation.AddSyntaxTrees( _intrinsicsSyntaxTree.Value );
+                transformedCompilation = transformedCompilation.WithSyntaxTreeModifications( null, new[] { _intrinsicsSyntaxTree.Value } );
             }
 
             return transformedCompilation;

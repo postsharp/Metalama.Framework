@@ -27,15 +27,13 @@ namespace Caravela.SourceTransformer
             {
                 var newRoot = rewriter.Visit( tree.GetRoot() );
 
-                compilation = compilation.ReplaceSyntaxTree( tree, tree.WithRootAndOptions( newRoot, tree.Options ) );
+                context.ReplaceSyntaxTree( tree, tree.WithRootAndOptions( newRoot, tree.Options ) );
             }
 
             foreach ( var diagnostic in rewriter.Diagnostics )
             {
                 context.ReportDiagnostic( diagnostic );
             }
-
-            context.Compilation = compilation;
         }
 
         private class Rewriter : CSharpSyntaxRewriter

@@ -305,7 +305,7 @@ Target.cs:
             using UnloadableCompileTimeDomain domain = new();
             var compileTimeAspectPipeline = new CompileTimeAspectPipeline( ServiceProviderFactory.GetServiceProvider( projectOptions ), true, domain );
             DiagnosticList compileDiagnostics = new();
-            Assert.True( compileTimeAspectPipeline.TryExecute( compileDiagnostics, compilation5, default, CancellationToken.None, out _, out _ ) );
+            Assert.True( compileTimeAspectPipeline.TryExecute( compileDiagnostics, compilation5, default, CancellationToken.None, out _, out _, out _ ) );
 
             // Simulate an external build event. This is normally triggered by the build touch file.
             pipeline.OnExternalBuildStarted();

@@ -212,8 +212,9 @@ namespace Caravela.TestFramework
                 (await project.GetCompilationAsync())!,
                 default,
                 CancellationToken.None,
-                out var resultCompilation,
-                out var outputResources ) )
+                out _,
+                out var outputResources,
+                out var resultCompilation ) )
             {
                 testResult.SetFailed( "Transformation of the dependency failed." );
 

@@ -59,14 +59,15 @@ namespace Caravela.TestFramework
 
             var serviceProvider = this.ServiceProvider.WithServices( new Observer( testResult ) );
             var pipeline = new CompileTimeAspectPipeline( serviceProvider, true, domain );
-            
+
             if ( pipeline.TryExecute(
                 testResult.PipelineDiagnostics,
                 testResult.InputCompilation!,
                 default,
                 CancellationToken.None,
-                out var resultCompilation,
-                out _ ) )
+                out _,
+                out _,
+                out var resultCompilation ) )
             {
                 testResult.OutputCompilation = resultCompilation;
                 testResult.HasOutputCode = true;

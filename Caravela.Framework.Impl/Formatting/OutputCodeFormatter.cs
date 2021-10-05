@@ -70,7 +70,7 @@ namespace Caravela.Framework.Impl.Formatting
         {
             var (project, syntaxTreeMap) = await CreateProjectFromCompilation( compilation.Compilation, cancellationToken );
 
-            List<ModifiedSyntaxTree> syntaxTreeReplacements = new( compilation.ModifiedSyntaxTrees.Count );
+            List<SyntaxTreeModification> syntaxTreeReplacements = new( compilation.ModifiedSyntaxTrees.Count );
 
             foreach ( var modifiedSyntaxTree in compilation.ModifiedSyntaxTrees.Values )
             {
@@ -86,7 +86,8 @@ namespace Caravela.Framework.Impl.Formatting
 
                 var formattedSyntaxRoot = await FormatToSyntaxAsync( document, null, false, cancellationToken );
 
-                syntaxTreeReplacements.Add( new ModifiedSyntaxTree( syntaxTree.WithRootAndOptions( formattedSyntaxRoot, syntaxTree.Options ), syntaxTree ) );
+                syntaxTreeReplacements.Add(
+                    new SyntaxTreeModification( syntaxTree.WithRootAndOptions( formattedSyntaxRoot, syntaxTree.Options ), syntaxTree ) );
             }
 
             return compilation.Update( syntaxTreeReplacements, Array.Empty<SyntaxTree>() );
