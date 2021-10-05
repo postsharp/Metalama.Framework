@@ -20,15 +20,15 @@ namespace Caravela.Framework.Impl.CodeModel
         /// a <see cref="SyntaxTree"/> to a transformed <see cref="SyntaxTree"/>.
         /// </summary>
         /// <param name="compilation"></param>
-        /// <param name="getNewTree">A function that maps the old <see cref="SyntaxTree"/> to the new <see cref="SyntaxTree"/>.</param>
+        /// <param name="updateTree">A function that maps the old <see cref="SyntaxTree"/> to the new <see cref="SyntaxTree"/>.</param>
         /// <param name="cancellationToken"></param>
         /// <returns>A new <see cref="IPartialCompilation"/>.</returns>
         public static IPartialCompilation UpdateSyntaxTrees(
             this IPartialCompilation compilation,
-            Func<SyntaxTree, CancellationToken, SyntaxTree> getNewTree,
+            Func<SyntaxTree, CancellationToken, SyntaxTree> updateTree,
             CancellationToken cancellationToken = default )
-            => compilation.WithSyntaxTrees(
-                compilation.SyntaxTrees.Values.Select( t => new ModifiedSyntaxTree( getNewTree( t, cancellationToken ), t ) )
+            => compilation.WithSyntaxTreeModifications(
+                compilation.SyntaxTrees.Values.Select( t => new SyntaxTreeModification( updateTree( t, cancellationToken ), t ) )
                     .Where( t => t.NewTree != t.OldTree )
                     .ToList(),
                 Array.Empty<SyntaxTree>() );
@@ -38,40 +38,40 @@ namespace Caravela.Framework.Impl.CodeModel
         /// a <see cref="SyntaxTree"/> to a transformed <see cref="SyntaxTree"/>.
         /// </summary>
         /// <param name="compilation"></param>
-        /// <param name="getNewSyntaxRoot">A function that maps the old root <see cref="SyntaxNode"/> to the new <see cref="SyntaxNode"/>.</param>
+        /// <param name="updateSyntaxRoot">A function that maps the old root <see cref="SyntaxNode"/> to the new <see cref="SyntaxNode"/>.</param>
         /// <param name="cancellationToken"></param>
         /// <returns>A new <see cref="IPartialCompilation"/>.</returns>
         public static IPartialCompilation UpdateSyntaxTrees(
             this IPartialCompilation compilation,
-            Func<SyntaxNode, CancellationToken, SyntaxNode> getNewSyntaxRoot,
+            Func<SyntaxNode, CancellationToken, SyntaxNode> updateSyntaxRoot,
             CancellationToken cancellationToken = default )
-            => compilation.WithSyntaxTrees(
-                compilation.SyntaxTrees.Values.Select( t => (OldTree: t, NewRoot: getNewSyntaxRoot( t.GetRoot( cancellationToken ), cancellationToken )) )
+            => compilation.WithSyntaxTreeModifications(
+                compilation.SyntaxTrees.Values.Select( t => (OldTree: t, NewRoot: updateSyntaxRoot( t.GetRoot( cancellationToken ), cancellationToken )) )
                     .Where( x => x.OldTree.GetRoot( cancellationToken ) != x.NewRoot )
-                    .Select( x => new ModifiedSyntaxTree( x.OldTree.WithRootAndOptions( x.NewRoot, (CSharpParseOptions) x.OldTree.Options ), x.OldTree ) )
+                    .Select( x => new SyntaxTreeModification( x.OldTree.WithRootAndOptions( x.NewRoot, (CSharpParseOptions) x.OldTree.Options ), x.OldTree ) )
                     .ToList(),
                 Array.Empty<SyntaxTree>() );
 
         public static IPartialCompilation UpdateSyntaxTrees(
             this IPartialCompilation compilation,
-            Func<SyntaxTree, SyntaxTree> replace,
+            Func<SyntaxTree, SyntaxTree> updateTree,
             CancellationToken cancellationToken = default )
         {
-            var modifiedSyntaxTrees = new List<ModifiedSyntaxTree>( compilation.SyntaxTrees.Count );
+            var modifiedSyntaxTrees = new List<SyntaxTreeModification>( compilation.SyntaxTrees.Count );
 
             foreach ( var tree in compilation.SyntaxTrees.Values )
             {
-                var newTree = replace( tree );
+                var newTree = updateTree( tree );
 
                 cancellationToken.ThrowIfCancellationRequested();
 
                 if ( newTree != tree )
                 {
-                    modifiedSyntaxTrees.Add( new ModifiedSyntaxTree( newTree, tree ) );
+                    modifiedSyntaxTrees.Add( new SyntaxTreeModification( newTree, tree ) );
                 }
             }
 
-            return compilation.WithSyntaxTrees( modifiedSyntaxTrees );
+            return compilation.WithSyntaxTreeModifications( modifiedSyntaxTrees );
         }
 
         public static IPartialCompilation RewriteSyntaxTrees(
@@ -79,7 +79,7 @@ namespace Caravela.Framework.Impl.CodeModel
             CSharpSyntaxRewriter rewriter,
             CancellationToken cancellationToken = default )
         {
-            var modifiedSyntaxTrees = new List<ModifiedSyntaxTree>( compilation.SyntaxTrees.Count );
+            var modifiedSyntaxTrees = new List<SyntaxTreeModification>( compilation.SyntaxTrees.Count );
 
             foreach ( var tree in compilation.SyntaxTrees.Values )
             {
@@ -90,11 +90,11 @@ namespace Caravela.Framework.Impl.CodeModel
 
                 if ( newRoot != oldRoot )
                 {
-                    modifiedSyntaxTrees.Add( new ModifiedSyntaxTree( tree.WithRootAndOptions( newRoot, tree.Options ), tree ) );
+                    modifiedSyntaxTrees.Add( new SyntaxTreeModification( tree.WithRootAndOptions( newRoot, tree.Options ), tree ) );
                 }
             }
 
-            return compilation.WithSyntaxTrees( modifiedSyntaxTrees );
+            return compilation.WithSyntaxTreeModifications( modifiedSyntaxTrees );
         }
     }
 }

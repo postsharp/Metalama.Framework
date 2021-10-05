@@ -9,7 +9,7 @@ namespace Caravela.Framework.Impl.CodeModel
     /// <summary>
     /// Maps an old <see cref="SyntaxTree"/> to a new <see cref="SyntaxTree"/> in an <see cref="IPartialCompilation"/>.
     /// </summary>
-    public readonly struct ModifiedSyntaxTree
+    public readonly struct SyntaxTreeModification
     {
         public string FilePath => this.NewTree.FilePath;
 
@@ -24,9 +24,9 @@ namespace Caravela.Framework.Impl.CodeModel
         public SyntaxTree NewTree { get; }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ModifiedSyntaxTree"/> struct.
+        /// Initializes a new instance of the <see cref="SyntaxTreeModification"/> struct.
         /// </summary>
-        public ModifiedSyntaxTree( SyntaxTree newTree, SyntaxTree? oldTree = null )
+        public SyntaxTreeModification( SyntaxTree newTree, SyntaxTree? oldTree = null )
         {
             if ( oldTree != null && !string.Equals( oldTree.FilePath, newTree.FilePath, StringComparison.Ordinal ) )
             {
