@@ -37,11 +37,11 @@ namespace Caravela.Framework.Impl.Templating
             _locationAnnotationKind );
 
         private readonly List<(SyntaxTree Tree, TextSpan Span)> _indexToLocationMap = new();
-        private readonly Dictionary<ISymbol, SyntaxAnnotation> _declaredSymbolToAnnotationMap = new();
+        private readonly Dictionary<ISymbol, SyntaxAnnotation> _declaredSymbolToAnnotationMap = new( SymbolEqualityComparer.Default );
         private readonly Dictionary<SyntaxAnnotation, ISymbol> _annotationToDeclaredSymbolMap = new();
-        private readonly Dictionary<ISymbol, SyntaxAnnotation> _symbolToAnnotationMap = new();
+        private readonly Dictionary<ISymbol, SyntaxAnnotation> _symbolToAnnotationMap = new( SymbolEqualityComparer.Default );
         private readonly Dictionary<SyntaxAnnotation, ISymbol> _annotationToSymbolMap = new();
-        private readonly Dictionary<ITypeSymbol, SyntaxAnnotation> _typeToAnnotationMap = new();
+        private readonly Dictionary<ITypeSymbol, SyntaxAnnotation> _typeToAnnotationMap = new( SymbolEqualityComparer.Default );
         private readonly Dictionary<SyntaxAnnotation, ITypeSymbol> _annotationToTypeMap = new();
 
         public SyntaxTreeAnnotationMap( Compilation compilation )

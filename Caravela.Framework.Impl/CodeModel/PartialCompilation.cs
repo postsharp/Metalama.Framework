@@ -181,8 +181,8 @@ namespace Caravela.Framework.Impl.CodeModel
         {
             var assembly = compilation.Assembly;
 
-            HashSet<ITypeSymbol> types = new();
-            HashSet<SyntaxTree> trees = new();
+            HashSet<ITypeSymbol> types = new( SymbolEqualityComparer.Default );
+            HashSet<SyntaxTree> trees = new( );
 
             void AddTypeRecursive( ITypeSymbol type )
             {
