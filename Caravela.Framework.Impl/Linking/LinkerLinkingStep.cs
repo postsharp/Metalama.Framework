@@ -48,7 +48,7 @@ namespace Caravela.Framework.Impl.Linking
             var linkingRewriter = new LinkingRewriter( input.IntermediateCompilation.Compilation, rewritingDriver );
             var cleanupRewriter = new CleanupRewriter();
 
-            List<ModifiedSyntaxTree> replacedTrees = new();
+            List<SyntaxTreeModification> replacedTrees = new();
 
             foreach ( var modifiedSyntaxTree in input.IntermediateCompilation.ModifiedSyntaxTrees )
             {
@@ -60,7 +60,7 @@ namespace Caravela.Framework.Impl.Linking
 
                 var newSyntaxTree = syntaxTree.WithRootAndOptions( cleanRoot, syntaxTree.Options );
 
-                replacedTrees.Add( new ModifiedSyntaxTree( newSyntaxTree, syntaxTree ) );
+                replacedTrees.Add( new SyntaxTreeModification( newSyntaxTree, syntaxTree ) );
             }
 
             return new AspectLinkerResult( input.IntermediateCompilation.Update( replacedTrees ), input.DiagnosticSink.ToImmutable() );

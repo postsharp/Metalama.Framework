@@ -39,7 +39,7 @@ namespace Caravela.Framework.Impl.Templating
         /// <summary>
         /// Scope of locally-defined symbols (local variables, anonymous types, ....).
         /// </summary>
-        private readonly Dictionary<ISymbol, TemplatingScope> _localScopes = new();
+        private readonly Dictionary<ISymbol, TemplatingScope> _localScopes = new( SymbolEqualityComparer.Default );
 
         private readonly ISymbolClassifier _symbolScopeClassifier;
 

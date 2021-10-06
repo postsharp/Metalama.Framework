@@ -32,14 +32,14 @@ namespace Caravela.Framework.Impl.CodeModel
         /// <summary>
         /// Returns a copy of the current <see cref="IPartialCompilation"/> where the <see cref="SyntaxTrees"/> have been modified.
         /// </summary>
-        public IPartialCompilation WithSyntaxTrees(
-            IReadOnlyList<ModifiedSyntaxTree>? replacements = null,
-            IReadOnlyList<SyntaxTree>? addedTrees = null );
+        public IPartialCompilation WithSyntaxTreeModifications(
+            IReadOnlyList<SyntaxTreeModification>? modifications = null,
+            IReadOnlyList<SyntaxTree>? additions = null );
 
         /// <summary>
         /// Returns a copy of the current <see cref="IPartialCompilation"/> where the <see cref="Resources"/> have been modified.
         /// </summary>
-        public IPartialCompilation WithResources( ImmutableArray<ResourceDescription> resources );
+        public IPartialCompilation WithAdditionalResources( params ResourceDescription[] resources );
 
         /// <summary>
         /// Gets the list of managed resources for the current compilation. This property is not defined at the design time, only at compile time.

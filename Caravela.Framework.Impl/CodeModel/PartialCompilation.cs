@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Compiler;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -27,7 +28,7 @@ namespace Caravela.Framework.Impl.CodeModel
         /// The key of the dictionary is the <see cref="SyntaxTree.FilePath"/> and the value is a <see cref="SyntaxTree"/>
         /// of <see cref="Compilation"/>. 
         /// </summary>
-        public ImmutableDictionary<string, ModifiedSyntaxTree> ModifiedSyntaxTrees { get; }
+        public ImmutableDictionary<string, SyntaxTreeModification> ModifiedSyntaxTrees { get; }
 
         /// <summary>
         /// Gets the Roslyn <see cref="Microsoft.CodeAnalysis.Compilation"/>.
@@ -55,14 +56,14 @@ namespace Caravela.Framework.Impl.CodeModel
         private PartialCompilation( Compilation compilation, ImmutableArray<ResourceDescription> resources )
         {
             this.Compilation = this.InitialCompilation = compilation;
-            this.ModifiedSyntaxTrees = ImmutableDictionary<string, ModifiedSyntaxTree>.Empty;
+            this.ModifiedSyntaxTrees = ImmutableDictionary<string, SyntaxTreeModification>.Empty;
             this.Resources = resources;
         }
 
         // Incremental constructor.
         private PartialCompilation(
             PartialCompilation baseCompilation,
-            IReadOnlyList<ModifiedSyntaxTree>? modifiedSyntaxTrees,
+            IReadOnlyList<SyntaxTreeModification>? modifiedSyntaxTrees,
             IReadOnlyList<SyntaxTree>? addedSyntaxTrees,
             ImmutableArray<ResourceDescription>? newResources )
         {
@@ -76,7 +77,7 @@ namespace Caravela.Framework.Impl.CodeModel
                 compilation = compilation.AddSyntaxTrees( addedSyntaxTrees );
 
                 modifiedTreeBuilder.AddRange(
-                    addedSyntaxTrees.Select( t => new KeyValuePair<string, ModifiedSyntaxTree>( t.FilePath, new ModifiedSyntaxTree( t ) ) ) );
+                    addedSyntaxTrees.Select( t => new KeyValuePair<string, SyntaxTreeModification>( t.FilePath, new SyntaxTreeModification( t ) ) ) );
             }
 
             if ( modifiedSyntaxTrees != null )
@@ -99,7 +100,7 @@ namespace Caravela.Framework.Impl.CodeModel
                         initialTree = replacement.OldTree.AssertNotNull();
                     }
 
-                    modifiedTreeBuilder[replacement.FilePath] = new ModifiedSyntaxTree( replacement.NewTree, initialTree );
+                    modifiedTreeBuilder[replacement.FilePath] = new SyntaxTreeModification( replacement.NewTree, initialTree );
                 }
             }
 
@@ -154,12 +155,13 @@ namespace Caravela.Framework.Impl.CodeModel
                 resources );
         }
 
-        IPartialCompilation IPartialCompilation.WithSyntaxTrees(
-            IReadOnlyList<ModifiedSyntaxTree>? replacedTrees,
-            IReadOnlyList<SyntaxTree>? addedTrees )
-            => this.Update( replacedTrees, addedTrees );
+        IPartialCompilation IPartialCompilation.WithSyntaxTreeModifications(
+            IReadOnlyList<SyntaxTreeModification>? modifications,
+            IReadOnlyList<SyntaxTree>? additions )
+            => this.Update( modifications, additions );
 
-        public IPartialCompilation WithResources( ImmutableArray<ResourceDescription> resources ) => this.Update( null, null, resources );
+        public IPartialCompilation WithAdditionalResources( params ResourceDescription[] resources )
+            => this.Update( null, null, this.Resources.AddRange( resources ) );
 
         public ImmutableArray<ResourceDescription> Resources { get; }
 
@@ -168,7 +170,7 @@ namespace Caravela.Framework.Impl.CodeModel
         /// representing the modified object.
         /// </summary>
         public abstract PartialCompilation Update(
-            IReadOnlyList<ModifiedSyntaxTree>? replacedTrees = null,
+            IReadOnlyList<SyntaxTreeModification>? replacedTrees = null,
             IReadOnlyList<SyntaxTree>? addedTrees = null,
             ImmutableArray<ResourceDescription>? resources = null );
 
@@ -179,8 +181,8 @@ namespace Caravela.Framework.Impl.CodeModel
         {
             var assembly = compilation.Assembly;
 
-            HashSet<ITypeSymbol> types = new();
-            HashSet<SyntaxTree> trees = new();
+            HashSet<ITypeSymbol> types = new( SymbolEqualityComparer.Default );
+            HashSet<SyntaxTree> trees = new( );
 
             void AddTypeRecursive( ITypeSymbol type )
             {
@@ -239,6 +241,9 @@ namespace Caravela.Framework.Impl.CodeModel
 
             return (types, trees);
         }
+
+        public ImmutableArray<SyntaxTreeTransformation> ToTransformations()
+            => this.ModifiedSyntaxTrees.Values.Select( t => new SyntaxTreeTransformation( t.NewTree, t.OldTree ) ).ToImmutableArray();
 
         public override string ToString()
             => $"{{Assembly={this.Compilation.AssemblyName}, SyntaxTrees={this.SyntaxTrees.Count}/{this.Compilation.SyntaxTrees.Count()}}}";
