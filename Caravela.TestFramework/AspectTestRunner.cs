@@ -72,8 +72,9 @@ namespace Caravela.TestFramework
                 testResult.InputCompilation!,
                 default,
                 CancellationToken.None,
-                out var resultCompilation,
-                out _ ) )
+                out _,
+                out _,
+                out var resultCompilation ) )
             {
                 testResult.OutputCompilation = resultCompilation;
                 testResult.HasOutputCode = true;

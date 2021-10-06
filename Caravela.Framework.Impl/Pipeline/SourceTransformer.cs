@@ -2,7 +2,6 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Compiler;
-using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Options;
@@ -34,15 +33,14 @@ namespace Caravela.Framework.Impl.Pipeline
                 if ( pipeline.TryExecute(
                     new DiagnosticAdderAdapter( context.ReportDiagnostic ),
                     context.Compilation,
-                    context.ManifestResources.ToImmutableArray(),
+                    context.Resources.ToImmutableArray(),
                     CancellationToken.None,
-                    out var outputCompilation,
-                    out var outputResources ) )
+                    out var syntaxTreeTransformations,
+                    out var additionalResources,
+                    out _ ) )
                 {
-                    context.ManifestResources.Clear();
-                    context.ManifestResources.AddRange( outputResources );
-
-                    context.Compilation = outputCompilation;
+                    context.AddResources( additionalResources );
+                    context.AddSyntaxTreeTransformations( syntaxTreeTransformations );
                 }
             }
             catch ( Exception e )

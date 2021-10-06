@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Compiler;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.CodeModel;
@@ -14,6 +15,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -51,24 +53,27 @@ namespace Caravela.Framework.Impl.Pipeline
             Compilation compilation,
             ImmutableArray<ResourceDescription> resources,
             CancellationToken cancellationToken,
-            [NotNullWhen( true )] out Compilation? outputCompilation,
-            out ImmutableArray<ResourceDescription> outputResources )
+            out ImmutableArray<SyntaxTreeTransformation> syntaxTreeTransformations,
+            out ImmutableArray<ResourceDescription> additionalResources,
+            [NotNullWhen( true )] out Compilation? resultingCompilation )
         {
             if ( !this.ProjectOptions.IsFrameworkEnabled )
             {
-                outputCompilation = compilation;
-                outputResources = resources;
+                syntaxTreeTransformations = ImmutableArray<SyntaxTreeTransformation>.Empty;
+                additionalResources = ImmutableArray<ResourceDescription>.Empty;
+                resultingCompilation = compilation;
 
                 return true;
             }
+
+            syntaxTreeTransformations = default;
+            additionalResources = default;
+            resultingCompilation = null;
 
             try
             {
                 if ( !TemplatingCodeValidator.Validate( compilation, diagnosticAdder, this.ServiceProvider, cancellationToken ) )
                 {
-                    outputCompilation = null;
-                    outputResources = default;
-
                     return false;
                 }
 
@@ -77,46 +82,45 @@ namespace Caravela.Framework.Impl.Pipeline
                 // Initialize the pipeline and generate the compile-time project.
                 if ( !this.TryInitialize( diagnosticAdder, partialCompilation, null, cancellationToken, out var configuration ) )
                 {
-                    outputCompilation = null;
-                    outputResources = default;
-
                     return false;
                 }
 
                 // Execute the pipeline.
                 if ( !this.TryExecute( partialCompilation, diagnosticAdder, configuration, cancellationToken, out var result ) )
                 {
-                    outputCompilation = null;
-                    outputResources = default;
-
                     return false;
                 }
 
-                var resultCompilation = result.PartialCompilation;
+                var resultPartialCompilation = result.PartialCompilation;
 
                 // Format the output.
                 if ( this.ProjectOptions.FormatOutput && OutputCodeFormatter.CanFormat )
                 {
                     // ReSharper disable once AccessToModifiedClosure
-                    resultCompilation = Task.Run( () => OutputCodeFormatter.FormatToSyntaxAsync( resultCompilation, cancellationToken ), cancellationToken )
+                    resultPartialCompilation = Task.Run(
+                            () => OutputCodeFormatter.FormatToSyntaxAsync( resultPartialCompilation, cancellationToken ),
+                            cancellationToken )
                         .Result;
                 }
 
                 // Add managed resources.
-
-                outputResources = resultCompilation.Resources;
-
-                if ( outputResources.IsDefault )
+                if ( resultPartialCompilation.Resources.IsDefaultOrEmpty )
                 {
-                    outputResources = ImmutableArray<ResourceDescription>.Empty;
+                    additionalResources = ImmutableArray<ResourceDescription>.Empty;
+                }
+                else
+                {
+                    additionalResources = resultPartialCompilation.Resources.Where( r => !resources.Contains( r ) ).ToImmutableArray();
                 }
 
                 if ( configuration.CompileTimeProject != null )
                 {
-                    outputResources = outputResources.Add( configuration.CompileTimeProject.ToResource() );
+                    additionalResources = additionalResources.Add( configuration.CompileTimeProject.ToResource() );
                 }
 
-                outputCompilation = RunTimeAssemblyRewriter.Rewrite( resultCompilation.Compilation, this.ServiceProvider );
+                resultPartialCompilation = (PartialCompilation) RunTimeAssemblyRewriter.Rewrite( resultPartialCompilation, this.ServiceProvider );
+                resultingCompilation = resultPartialCompilation.Compilation;
+                syntaxTreeTransformations = resultPartialCompilation.ToTransformations();
 
                 return true;
             }
@@ -127,7 +131,7 @@ namespace Caravela.Framework.Impl.Pipeline
                     diagnosticAdder.Report( diagnostic );
                 }
 
-                outputCompilation = null;
+                syntaxTreeTransformations = default;
 
                 return false;
             }

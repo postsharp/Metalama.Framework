@@ -20,7 +20,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
             public CompleteImpl(
                 PartialCompilation baseCompilation,
-                IReadOnlyList<ModifiedSyntaxTree>? modifiedSyntaxTrees,
+                IReadOnlyList<SyntaxTreeModification>? modifiedSyntaxTrees,
                 IReadOnlyList<SyntaxTree>? addedTrees,
                 ImmutableArray<ResourceDescription>? resources )
                 : base( baseCompilation, modifiedSyntaxTrees, addedTrees, resources ) { }
@@ -34,7 +34,7 @@ namespace Caravela.Framework.Impl.CodeModel
             public override bool IsPartial => false;
 
             public override PartialCompilation Update(
-                IReadOnlyList<ModifiedSyntaxTree>? replacedTrees = null,
+                IReadOnlyList<SyntaxTreeModification>? replacedTrees = null,
                 IReadOnlyList<SyntaxTree>? addedTrees = null,
                 ImmutableArray<ResourceDescription>? resources = null )
                 => new CompleteImpl( this, replacedTrees, addedTrees, resources );

@@ -171,7 +171,7 @@ namespace Caravela.Framework.Impl.Linking
                 var symbolNode = intermediateNode.AssertNotNull() switch
                 {
                     EventFieldDeclarationSyntax eventFieldNode => (SyntaxNode) eventFieldNode.Declaration.Variables.First(),
-                    _ => intermediateNode
+                    _ => intermediateNode!
                 };
 
                 return intermediateSemanticModel.GetDeclaredSymbol( symbolNode );
@@ -227,7 +227,7 @@ namespace Caravela.Framework.Impl.Linking
         public ISymbol GetSymbolForIntroducedMember( LinkerIntroducedMember introducedMember )
         {
             var intermediateSyntaxTree = this._introducedTreeMap[introducedMember.Introduction.TargetSyntaxTree];
-            var intermediateSyntax = intermediateSyntaxTree.GetRoot().GetCurrentNode( introducedMember.Syntax );
+            var intermediateSyntax = intermediateSyntaxTree.GetRoot().GetCurrentNode( introducedMember.Syntax ).AssertNotNull();
 
             SyntaxNode symbolSyntax;
 

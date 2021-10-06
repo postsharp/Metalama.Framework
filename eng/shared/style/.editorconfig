@@ -571,9 +571,12 @@ dotnet_diagnostic.IDE0052.severity=warning
 dotnet_diagnostic.IDE0043.severity=warning
 dotnet_diagnostic.CA1507.severity=warning
 dotnet_diagnostic.CA1825.severity=warning
-[*.{cs,vb}]
+
 dotnet_diagnostic.CA1018.severity=warning
 dotnet_diagnostic.CA1821.severity=warning
 dotnet_diagnostic.CA1827.severity=warning
 dotnet_diagnostic.CA1836.severity=warning
 dotnet_diagnostic.CA2011.severity=warning
+
+# RS1024 Compare (Roslyn) symbols correctly. There is a bug in the analyzer and it has dozens of false positive.
+dotnet_diagnostic.RS1024.severity=none
