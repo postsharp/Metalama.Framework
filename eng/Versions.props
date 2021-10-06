@@ -19,7 +19,7 @@
     <!-- Versions of dependencies -->
     <PropertyGroup>
         <RoslynVersion>3.11.0</RoslynVersion>
-        <CaravelaCompilerVersion>3.11.1004-preview</CaravelaCompilerVersion>
+        <CaravelaCompilerVersion>3.11.1006-preview</CaravelaCompilerVersion>
         <MicrosoftCSharpVersion>4.7.0</MicrosoftCSharpVersion>
         <NewtonsoftJsonVersion>13.0.1</NewtonsoftJsonVersion>
         <SystemCollectionsImmutableVersion>5.0.0</SystemCollectionsImmutableVersion>
@@ -33,10 +33,16 @@
 
         <!-- this cannot be called just "PostSharpVersion", because that conflicts with a property used by PostSharp -->
         <PostSharpPackageVersion>6.8.7</PostSharpPackageVersion>
+        
+        <!-- If we're using a local build of Caravela.Compiler, add a local source -->
+        <RestoreAdditionalProjectSources Condition="Exists('..\..\Caravela.Compiler\artifacts\packages\Debug\Shipping\Caravela.Compiler.$(CaravelaCompilerVersion).nupkg')">
+            $(RestoreAdditionalProjectSources);$(MSBuildThisFileDirectory)..\..\Caravela.Compiler\artifacts\packages\Debug\Shipping
+         </RestoreAdditionalProjectSources>
+         <RestoreAdditionalProjectSources Condition="Exists('..\..\Caravela.Compiler\artifacts\packages\Release\Shipping\Caravela.Compiler.$(CaravelaCompilerVersion).nupkg')">
+            $(RestoreAdditionalProjectSources);$(MSBuildThisFileDirectory)..\..\Caravela.Compiler\artifacts\packages\Release\Shipping
+         </RestoreAdditionalProjectSources>
     </PropertyGroup>
-
-    <PropertyGroup>
-        <RestoreAdditionalProjectSources>c:\src\Caravela.Compiler\artifacts\packages\Debug\Shipping\</RestoreAdditionalProjectSources>
-    </PropertyGroup>
+    
+    
 
 </Project>

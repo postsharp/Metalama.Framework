@@ -29,7 +29,7 @@ namespace Caravela.Framework.Impl.Linking
 
             public IReadOnlyDictionary<ISymbol, MethodBodyAnalysisResult> GetMethodBodyAnalysisResults()
             {
-                Dictionary<ISymbol, MethodBodyAnalysisResult> bodyAnalysisResults = new();
+                Dictionary<ISymbol, MethodBodyAnalysisResult> bodyAnalysisResults = new( SymbolEqualityComparer.Default );
 
                 // TODO: Do this on demand in analysis registry (provide the implementing class to the registry, let the registry manage the cache).
                 // Analyze introduced method bodies.

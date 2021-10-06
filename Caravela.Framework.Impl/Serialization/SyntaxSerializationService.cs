@@ -122,7 +122,7 @@ namespace Caravela.Framework.Impl.Serialization
         /// </summary>
         public SerializableTypes GetSerializableTypes( ReflectionMapper reflectionMapper )
         {
-            return new SerializableTypes( this._supportedContractTypes.Keys.Distinct().Select( reflectionMapper.GetTypeSymbol ).ToImmutableHashSet() );
+            return new SerializableTypes( this._supportedContractTypes.Keys.Distinct().Select( reflectionMapper.GetTypeSymbol ).ToImmutableHashSet<ITypeSymbol>( SymbolEqualityComparer.Default ) );
         }
 
         public SerializableTypes GetSerializableTypes( Compilation compilation ) => this.GetSerializableTypes( ReflectionMapper.GetInstance( compilation ) );

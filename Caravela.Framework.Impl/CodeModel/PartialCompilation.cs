@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Compiler;
+using Caravela.Compiler;
 using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
@@ -195,7 +196,7 @@ namespace Caravela.Framework.Impl.CodeModel
         {
             var assembly = compilation.Assembly;
 
-            var types = ImmutableHashSet.CreateBuilder<INamedTypeSymbol>();
+            var types = ImmutableHashSet.CreateBuilder<INamedTypeSymbol>( SymbolEqualityComparer.Default );
             var trees = ImmutableHashSet.CreateBuilder<SyntaxTree>();
 
             void AddTypeRecursive( INamedTypeSymbol type )
@@ -255,6 +256,9 @@ namespace Caravela.Framework.Impl.CodeModel
 
             return (types.ToImmutable(), trees.ToImmutable());
         }
+
+        public ImmutableArray<SyntaxTreeTransformation> ToTransformations()
+            => this.ModifiedSyntaxTrees.Values.Select( t => new SyntaxTreeTransformation( t.NewTree, t.OldTree ) ).ToImmutableArray();
 
         public ImmutableArray<SyntaxTreeTransformation> ToTransformations()
             => this.ModifiedSyntaxTrees.Values.Select( t => new SyntaxTreeTransformation( t.NewTree, t.OldTree ) ).ToImmutableArray();
