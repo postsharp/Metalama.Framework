@@ -7,6 +7,9 @@ using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl.Aspects
 {
+    /// <summary>
+    /// An <see cref="IAspectClass"/> for which an <see cref="IAspectDriver"/> has been created.
+    /// </summary>
     internal interface IBoundAspectClass : IAspectClass
     {
         IAspectDriver AspectDriver { get; }

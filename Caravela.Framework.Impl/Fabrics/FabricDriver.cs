@@ -18,6 +18,9 @@ using System.Reflection;
 
 namespace Caravela.Framework.Impl.Fabrics
 {
+    /// <summary>
+    /// The base class for fabric drivers, which are responsible for ordering and executing fabrics.
+    /// </summary>
     internal abstract class FabricDriver : IComparable<FabricDriver>
     {
         protected AspectProjectConfiguration Configuration { get; }
@@ -50,9 +53,7 @@ namespace Caravela.Framework.Impl.Fabrics
 
         public INamedTypeSymbol FabricSymbol { get; }
 
-        public abstract ISymbol TargetSymbol { get; }
-
-        public string OriginalPath { get; }
+        protected string OriginalPath { get; }
 
         public abstract void Execute( IAspectBuilderInternal aspectBuilder, FabricTemplateClass fabricTemplateClass );
 
@@ -86,7 +87,7 @@ namespace Caravela.Framework.Impl.Fabrics
                 return originalPathComparison;
             }
 
-            return this.Kind.CompareTo( other.Kind );
+            return this.CompareToCore( other );
         }
 
         protected virtual int CompareToCore( FabricDriver other )
@@ -118,7 +119,7 @@ namespace Caravela.Framework.Impl.Fabrics
 
             public IDiagnosticSink Diagnostics => this._aspectBuilder.Diagnostics;
 
-            protected void RegisterAspectSource( IAspectSource aspectSource ) => this._aspectBuilder.AddAspectSource( aspectSource );
+            private void RegisterAspectSource( IAspectSource aspectSource ) => this._aspectBuilder.AddAspectSource( aspectSource );
 
             public IDeclarationSelection<TChild> WithMembers<TChild>( Func<T, IEnumerable<TChild>> selector )
                 where TChild : class, IDeclaration

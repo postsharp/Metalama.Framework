@@ -39,7 +39,7 @@ namespace Caravela.Framework.Impl.Aspects
             this.AspectClass = aspectClass;
 
             this.TemplateInstances = ImmutableDictionary.Create<TemplateClass, TemplateClassInstance>()
-                .Add( aspectClass, new TemplateClassInstance( aspect, aspectClass, declaration ) );
+                .Add( aspectClass, new TemplateClassInstance( aspect, aspectClass ) );
         }
 
         internal AspectInstance( IAspect aspect, IDeclaration declaration, IAspectClass aspectClass, IEnumerable<TemplateClassInstance> templateInstances )
@@ -64,7 +64,7 @@ namespace Caravela.Framework.Impl.Aspects
             this.AspectClass = aspectClass;
 
             this.TemplateInstances = ImmutableDictionary.Create<TemplateClass, TemplateClassInstance>()
-                .Add( aspectClass, new TemplateClassInstance( this.Aspect, aspectClass, declaration ) );
+                .Add( aspectClass, new TemplateClassInstance( this.Aspect, aspectClass ) );
         }
 
         public override string ToString() => this.AspectClass.DisplayName + "@" + this.TargetDeclaration;

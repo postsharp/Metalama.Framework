@@ -19,6 +19,9 @@ namespace Caravela.Framework.Project
         /// </summary>
         string? Path { get; }
 
+        /// <summary>
+        /// Gets the list of assembly references of the current project.
+        /// </summary>
         ImmutableArray<IAssemblyIdentity> AssemblyReferences { get; }
 
         /// <summary>

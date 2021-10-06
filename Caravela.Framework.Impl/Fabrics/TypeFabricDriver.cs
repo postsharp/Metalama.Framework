@@ -11,6 +11,9 @@ using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl.Fabrics
 {
+    /// <summary>
+    /// Implementation of <see cref="FabricAspect{T}"/> for type-level fabrics.
+    /// </summary>
     internal class TypeFabricDriver : FabricDriver
     {
         public TypeFabricDriver( AspectProjectConfiguration configuration, IFabric fabric, Compilation runTimeCompilation ) : base(
@@ -18,12 +21,12 @@ namespace Caravela.Framework.Impl.Fabrics
             fabric,
             runTimeCompilation ) { }
 
-        public override ISymbol TargetSymbol => this.FabricSymbol.ContainingType;
+        private ISymbol TargetSymbol => this.FabricSymbol.ContainingType;
 
         public override void Execute( IAspectBuilderInternal aspectBuilder, FabricTemplateClass templateClass )
         {
             // Type fabrics execute as aspects, called from FabricAspectClass.
-            var templateInstance = new TemplateClassInstance( this.Fabric, templateClass, aspectBuilder.Target );
+            var templateInstance = new TemplateClassInstance( this.Fabric, templateClass );
             var builder = new Builder( (INamedType) aspectBuilder.Target, this.Configuration, aspectBuilder, templateInstance );
             ((ITypeFabric) this.Fabric).AmendType( builder );
         }

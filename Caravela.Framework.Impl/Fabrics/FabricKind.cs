@@ -3,6 +3,9 @@
 
 namespace Caravela.Framework.Impl.Fabrics
 {
+    /// <summary>
+    /// Enumerates the kinds of fabrics.
+    /// </summary>
     internal enum FabricKind
     {
         // The order is significant because it becomes the execution order.

@@ -10,12 +10,15 @@ using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl.Fabrics
 {
+    /// <summary>
+    /// Implementation of <see cref="FabricAspect{T}"/> for namespace-level fabrics.
+    /// </summary>
     internal class NamespaceFabricDriver : FabricDriver
     {
         public NamespaceFabricDriver( AspectProjectConfiguration configuration, IFabric fabric, Compilation runTimeCompilation ) :
             base( configuration, fabric, runTimeCompilation ) { }
 
-        public override ISymbol TargetSymbol => this.FabricSymbol.ContainingNamespace;
+        private ISymbol TargetSymbol => this.FabricSymbol.ContainingNamespace;
 
         public override void Execute( IAspectBuilderInternal aspectBuilder, FabricTemplateClass fabricTemplateClass )
         {

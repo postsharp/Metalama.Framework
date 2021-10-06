@@ -115,7 +115,7 @@ namespace Caravela.Framework.Impl.Pipeline
                 var invoker = this.ServiceProvider.GetService<UserCodeInvoker>();
 
                 var additionalPlugIns = compileTimeProject.ClosureProjects
-                    .SelectMany( p => p.CompilerPlugInTypes.Select( t => invoker.Invoke( () => Activator.CreateInstance( p.GetType( t ) ) ) ) )
+                    .SelectMany( p => p.PlugInTypes.Select( t => invoker.Invoke( () => Activator.CreateInstance( p.GetType( t ) ) ) ) )
                     .ToList();
 
                 if ( additionalPlugIns.Count > 0 )
@@ -197,7 +197,7 @@ namespace Caravela.Framework.Impl.Pipeline
                     IAspectWeaver weaver => weaver,
 
                     // AspectDrivers are grouped together
-                    IHighLevelAspectDriver => _highLevelStageGroupingKey,
+                    AspectDriver => _highLevelStageGroupingKey,
 
                     _ => throw new AssertionFailedException()
                 };

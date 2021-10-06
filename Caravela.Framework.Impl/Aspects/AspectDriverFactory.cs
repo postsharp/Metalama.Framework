@@ -12,6 +12,9 @@ using System.Reflection;
 
 namespace Caravela.Framework.Impl.Aspects
 {
+    /// <summary>
+    /// Creates instances of <see cref="IAspectDriver"/> for a given <see cref="AspectClass"/>.
+    /// </summary>
     internal class AspectDriverFactory
     {
         private readonly Compilation _compilation;

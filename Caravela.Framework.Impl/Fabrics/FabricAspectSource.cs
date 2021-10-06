@@ -78,7 +78,7 @@ namespace Caravela.Framework.Impl.Fabrics
                 var aggregateClass = new FabricAggregateAspectClass( compileTimeProject, drivers.As<TemplateClass>() );
 
                 // Create a TemplateInstance for all fabrics.
-                var templateInstances = drivers.Select( d => new TemplateClassInstance( d.Driver.Fabric, d, target ) ).ToImmutableArray();
+                var templateInstances = drivers.Select( d => new TemplateClassInstance( d.Driver.Fabric, d ) ).ToImmutableArray();
 
                 // Create an IAspect.
                 IAspect aspect = target switch

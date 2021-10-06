@@ -27,7 +27,7 @@ namespace Caravela.Framework.Impl.Pipeline
             PipelineStepsState pipelineStepsState,
             CancellationToken cancellationToken )
         {
-            var aspectDriver = (IHighLevelAspectDriver) this.AspectLayer.AspectClass.AspectDriver;
+            var aspectDriver = (AspectDriver) this.AspectLayer.AspectClass.AspectDriver;
 
             var aspectInstanceResults = this._aspectInstances
                 .Select( ai => aspectDriver.ExecuteAspect( ai, compilation, pipelineStepsState.ProjectConfiguration, cancellationToken ) )

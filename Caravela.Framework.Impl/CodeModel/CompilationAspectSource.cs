@@ -14,6 +14,10 @@ using System.Threading;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
+    /// <summary>
+    /// An implementation  of <see cref="IAspectSource"/> that create aspect instances from custom attributes
+    /// found in a compilation.
+    /// </summary>
     internal class CompilationAspectSource : IAspectSource
     {
         private readonly CompileTimeProjectLoader _loader;

@@ -569,7 +569,6 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
                         .Implements<IOverriddenDeclaration>()
                         .Implements<ITestTransformation>() );
 
-                string declarationName;
                 DeclarationKind declarationKind;
 
                 var methodBodyRewriter = new TestMethodBodyRewriter( aspectName, layerName );
@@ -585,7 +584,6 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
                                 .WithAttributeLists( List( newAttributeLists ) )
                                 .WithBody( (BlockSyntax) rewrittenMethodBody.AssertNotNull() );
 
-                        declarationName = method.Identifier.Text;
                         declarationKind = DeclarationKind.Method;
 
                         break;
@@ -598,7 +596,6 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
                                 .WithAttributeLists( List( newAttributeLists ) )
                                 .WithExpressionBody( (ArrowExpressionClauseSyntax) rewrittenMethodExpressionBody.AssertNotNull() );
 
-                        declarationName = method.Identifier.Text;
                         declarationKind = DeclarationKind.Method;
 
                         break;
@@ -613,7 +610,6 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
                                             property.AccessorList!.Accessors.Select(
                                                 a => a.WithBody( (BlockSyntax) methodBodyRewriter.VisitBlock( a.Body! ).AssertNotNull() ) ) ) ) );
 
-                        declarationName = property.Identifier.Text;
                         declarationKind = DeclarationKind.Property;
 
                         break;
@@ -628,7 +624,6 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
                                             @event.AccessorList!.Accessors.Select(
                                                 a => a.WithBody( (BlockSyntax) methodBodyRewriter.VisitBlock( a.Body! ).AssertNotNull() ) ) ) ) );
 
-                        declarationName = @event.Identifier.Text;
                         declarationKind = DeclarationKind.Event;
 
                         break;
@@ -638,7 +633,6 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
                             eventField
                                 .WithAttributeLists( List( newAttributeLists ) );
 
-                        declarationName = @eventField.Declaration.Variables[0].Identifier.Text;
                         declarationKind = DeclarationKind.Event;
 
                         break;

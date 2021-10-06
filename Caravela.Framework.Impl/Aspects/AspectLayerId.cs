@@ -9,6 +9,9 @@ using System.Linq;
 
 namespace Caravela.Framework.Impl.Aspects
 {
+    /// <summary>
+    /// Represents the identity of an aspect layer.
+    /// </summary>
     internal readonly struct AspectLayerId : IEquatable<AspectLayerId>, IEquatable<AspectLayer>
     {
         private static readonly char[] _separators = { ':' };

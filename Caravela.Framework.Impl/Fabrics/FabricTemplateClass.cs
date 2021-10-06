@@ -9,6 +9,9 @@ using System;
 
 namespace Caravela.Framework.Impl.Fabrics
 {
+    /// <summary>
+    /// An implementation of <see cref="TemplateClass"/> that represents a fabric class.
+    /// </summary>
     internal class FabricTemplateClass : TemplateClass
     {
         public FabricDriver Driver { get; }

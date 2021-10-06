@@ -22,7 +22,7 @@ namespace Caravela.Framework.Impl.Aspects
         private readonly IServiceProvider _serviceProvider;
         private readonly AspectDriverFactory _aspectDriverFactory;
 
-        private readonly Dictionary<INamedTypeSymbol, AspectClass> _aspectClasses = new(SymbolEqualityComparer.Default );
+        private readonly Dictionary<INamedTypeSymbol, AspectClass> _aspectClasses = new( SymbolEqualityComparer.Default );
 
         public AspectClassMetadataFactory( IServiceProvider serviceProvider, AspectDriverFactory aspectDriverFactory )
         {

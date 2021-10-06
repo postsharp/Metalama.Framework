@@ -8,22 +8,46 @@ using System.Collections.Immutable;
 
 namespace Caravela.Framework.Code
 {
+    /// <summary>
+    /// Represents an assembly identity, used in project references.
+    /// </summary>
     [InternalImplement]
     [CompileTimeOnly]
     public interface IAssemblyIdentity
     {
+        /// <summary>
+        /// Gets the assembly name.
+        /// </summary>
         string Name { get; }
 
+        /// <summary>
+        /// Gets the assembly version.
+        /// </summary>
         Version Version { get; }
 
+        /// <summary>
+        /// Gets the assembly culture, or an empty string if the culture is neutral.
+        /// </summary>
         string CultureName { get; }
 
+        /// <summary>
+        /// Gets the full public key, or an empty array.
+        /// </summary>
         ImmutableArray<byte> PublicKey { get; }
 
+        /// <summary>
+        /// Gets the public key token, or an empty array.
+        /// </summary>
         ImmutableArray<byte> PublicKeyToken { get; }
 
+        /// <summary>
+        /// Gets a value indicating whether the assembly has either a <see cref="PublicKey"/> or a <see cref="PublicKeyToken"/>.
+        /// </summary>
         bool IsStrongName { get; }
 
+        /// <summary>
+        /// Gets a value indicating whether the assembly has a full <see cref="PublicKey"/>.
+        /// </summary>
         bool HasPublicKey { get; }
     }
 }

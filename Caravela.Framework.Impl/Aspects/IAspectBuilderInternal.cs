@@ -6,6 +6,11 @@ using Caravela.Framework.Impl.Advices;
 
 namespace Caravela.Framework.Impl.Aspects
 {
+    /// <summary>
+    /// Defines the internal semantics of classes implementing <see cref="IAspectBuilder"/>. This interface
+    /// exists because the only implementation <see cref="AspectBuilder{T}"/> is generic, and some parts of the
+    /// code need a common, non-generic interface.
+    /// </summary>
     internal interface IAspectBuilderInternal : IAspectBuilder
     {
         void AddAspectSource( IAspectSource aspectSource );

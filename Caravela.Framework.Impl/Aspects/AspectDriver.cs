@@ -9,6 +9,7 @@ using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Pipeline;
+using Caravela.Framework.Impl.Sdk;
 using Caravela.Framework.Impl.Utilities;
 using Caravela.Framework.Project;
 using Microsoft.CodeAnalysis;
@@ -25,7 +26,7 @@ namespace Caravela.Framework.Impl.Aspects
     /// <summary>
     /// Executes aspects.
     /// </summary>
-    internal class AspectDriver : IHighLevelAspectDriver
+    internal class AspectDriver : IAspectDriver 
     {
         private readonly IServiceProvider _serviceProvider;
         private readonly Compilation _compilation;

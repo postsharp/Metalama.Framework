@@ -16,14 +16,17 @@ using Attribute = System.Attribute;
 
 namespace Caravela.Framework.Impl.Fabrics
 {
+    /// <summary>
+    /// An implementation of <see cref="IDeclarationSelection{TDeclaration}"/>, which offers a fluent
+    /// API to programmatically add children aspects.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     internal class DeclarationSelection<T> : IDeclarationSelection<T>
         where T : class, IDeclaration
     {
         private readonly Action<IAspectSource> _registerAspectSource;
-
-        protected Func<CompilationModel, IEnumerable<T>> Selector { get; }
-
-        protected AspectProjectConfiguration ProjectConfiguration { get; }
+        private readonly Func<CompilationModel, IEnumerable<T>> _selector;
+        private readonly AspectProjectConfiguration _projectConfiguration;
 
         public DeclarationSelection(
             Action<IAspectSource> registerAspectSource,
@@ -31,14 +34,14 @@ namespace Caravela.Framework.Impl.Fabrics
             AspectProjectConfiguration projectConfiguration )
         {
             this._registerAspectSource = registerAspectSource;
-            this.Selector = selectTargets;
-            this.ProjectConfiguration = projectConfiguration;
+            this._selector = selectTargets;
+            this._projectConfiguration = projectConfiguration;
         }
 
         private AspectClass GetAspectClass<TAspect>()
             where TAspect : IAspect
         {
-            var aspectClass = this.ProjectConfiguration.GetAspectClass( typeof(TAspect).FullName );
+            var aspectClass = this._projectConfiguration.GetAspectClass( typeof(TAspect).FullName );
 
             if ( aspectClass.IsAbstract )
             {
@@ -48,7 +51,7 @@ namespace Caravela.Framework.Impl.Fabrics
             return (AspectClass) aspectClass;
         }
 
-        protected void RegisterAspectSource( IAspectSource aspectSource ) => this._registerAspectSource( aspectSource );
+        private void RegisterAspectSource( IAspectSource aspectSource ) => this._registerAspectSource( aspectSource );
 
         public void AddAspect<TAspect>( Func<T, Expression<Func<TAspect>>> createAspect )
             where TAspect : Attribute, IAspect<T>
@@ -58,12 +61,12 @@ namespace Caravela.Framework.Impl.Fabrics
             this.RegisterAspectSource(
                 new ProgrammaticAspectSource<TAspect, T>(
                     aspectClass,
-                    compilation => this.Selector( compilation )
+                    compilation => this._selector( compilation )
                         .Select(
                             t => new AspectInstance(
-                                this.ProjectConfiguration.ServiceProvider,
+                                this._projectConfiguration.ServiceProvider,
                                 Expression.Lambda<Func<IAspect>>(
-                                    this.ProjectConfiguration.UserCodeInvoker.Invoke( () => createAspect( t ) ).Body,
+                                    this._projectConfiguration.UserCodeInvoker.Invoke( () => createAspect( t ) ).Body,
                                     Array.Empty<ParameterExpression>() ),
                                 t,
                                 aspectClass ) ) ) );
@@ -77,10 +80,10 @@ namespace Caravela.Framework.Impl.Fabrics
             this.RegisterAspectSource(
                 new ProgrammaticAspectSource<TAspect, T>(
                     aspectClass,
-                    compilation => this.Selector( compilation )
+                    compilation => this._selector( compilation )
                         .Select(
                             t => new AspectInstance(
-                                this.ProjectConfiguration.UserCodeInvoker.Invoke( () => createAspect( t ) ),
+                                this._projectConfiguration.UserCodeInvoker.Invoke( () => createAspect( t ) ),
                                 t,
                                 aspectClass ) ) ) );
         }
@@ -93,7 +96,7 @@ namespace Caravela.Framework.Impl.Fabrics
             this.RegisterAspectSource(
                 new ProgrammaticAspectSource<TAspect, T>(
                     aspectClass,
-                    compilation => this.Selector( compilation )
+                    compilation => this._selector( compilation )
                         .Select(
                             t => new AspectInstance(
                                 new TAspect(),

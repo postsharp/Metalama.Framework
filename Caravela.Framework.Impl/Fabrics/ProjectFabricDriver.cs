@@ -13,6 +13,9 @@ using System.IO;
 
 namespace Caravela.Framework.Impl.Fabrics
 {
+    /// <summary>
+    /// Implementation of <see cref="FabricAspect{T}"/> for project-level fabrics.
+    /// </summary>
     internal class ProjectFabricDriver : FabricDriver
     {
         private readonly int _depth;
@@ -30,8 +33,6 @@ namespace Caravela.Framework.Impl.Fabrics
 
             this._depth = depth;
         }
-
-        public override ISymbol TargetSymbol => this.FabricSymbol.ContainingAssembly;
 
         public override void Execute( IAspectBuilderInternal aspectBuilder, FabricTemplateClass fabricTemplateClass )
         {
