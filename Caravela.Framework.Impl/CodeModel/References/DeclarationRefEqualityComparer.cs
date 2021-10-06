@@ -49,9 +49,7 @@ namespace Caravela.Framework.Impl.CodeModel.References
                 }
                 else
                 {
-#pragma warning disable RS1024 // Compare symbols correctly (bug in analyzer)
                     return RuntimeHelpers.GetHashCode( obj.Target );
-#pragma warning restore RS1024 // Compare symbols correctly
                 }
             }
         }
