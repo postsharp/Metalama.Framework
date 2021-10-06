@@ -67,7 +67,7 @@ namespace Caravela.Framework.Impl.Fabrics
                 return 0;
             }
 
-            if ( ReferenceEquals( null, other ) )
+            if ( other == null )
             {
                 return 1;
             }
