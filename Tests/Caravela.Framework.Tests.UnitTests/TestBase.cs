@@ -16,35 +16,18 @@ namespace Caravela.Framework.Tests.UnitTests
 {
     public class TestBase
     {
-        private readonly Func<ServiceProvider, ServiceProvider> _addServices;
-
         /// <summary>
         /// A value indicating whether tests that test the serialization of reflection objects like <see cref="Type"/> should use "dotnet build" to see if the
         /// resulting syntax tree actually compiles and results in valid IL. This is slow but necessary during development, at least, since an incorrect syntax tree
         /// can easily be produced.
         /// </summary>
         private const bool _doCodeExecutionTests = false;
-
-        /// <summary>
-        /// Gets the base options, which are being cloned by <see cref="CreateTestContext()"/>.
-        /// </summary>
-        private TestProjectOptions BaseProjectOptions { get; }
-
-        /// <summary>
-        /// Gets the base service provider, without project-scoped services. A test can get a <see cref="ServiceProvider"/> that has
-        /// project-scoped services using <see cref="CreateTestContext()"/>.
-        /// </summary>
-        private ServiceProvider BaseServiceProvider { get; }
+        
+        private readonly Func<ServiceProvider, ServiceProvider> _addServices;
 
         protected TestBase( Func<ServiceProvider, ServiceProvider>? addServices = null )
         {
             this._addServices = addServices ?? new Func<ServiceProvider, ServiceProvider>( p => p );
-            this.BaseServiceProvider = ServiceProviderFactory.GetServiceProvider( this.BaseProjectOptions ).WithMark( ServiceProviderMark.Test );
-
-            if ( addServices != null )
-            {
-                this.BaseServiceProvider = addServices( this.BaseServiceProvider );
-            }
         }
 
         protected static CSharpCompilation CreateCSharpCompilation(

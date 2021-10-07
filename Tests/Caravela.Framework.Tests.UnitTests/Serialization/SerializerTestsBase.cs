@@ -12,7 +12,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization
 {
     public abstract class SerializerTestsBase : TestBase
     {
-        private protected new SerializerTestContext CreateTestContext() => new( this );
+        private protected SerializerTestContext CreateTestContext() => new( this );
 
         private protected class SerializerTestContext : TestContext
         {

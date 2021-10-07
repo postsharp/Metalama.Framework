@@ -220,7 +220,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
 
                 var template = TemplateMember.Create<IMemberOrNamedType>( compilationModel.Factory.GetMethod( templateMethod ), TemplateInfo.None );
 
-                var (expansionContext, targetMethod) = this.CreateTemplateExpansionContext( serviceProvider, assembly, compilationModel, template );
+                var (expansionContext, targetMethod) = CreateTemplateExpansionContext( serviceProvider, assembly, compilationModel, template );
 
                 var expandSuccessful = driver.TryExpandDeclaration( expansionContext, testResult.PipelineDiagnostics, out var output );
 
@@ -245,7 +245,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
             }
         }
 
-        private (TemplateExpansionContext Context, MethodDeclarationSyntax TargetMethod) CreateTemplateExpansionContext(
+        private static (TemplateExpansionContext Context, MethodDeclarationSyntax TargetMethod) CreateTemplateExpansionContext(
             ServiceProvider serviceProvider,
             Assembly assembly,
             CompilationModel compilation,

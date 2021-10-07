@@ -21,26 +21,21 @@ using System.Threading;
 
 namespace Caravela.Framework.Impl.Aspects
 {
-    // TODO: AspectDriver should not store a reference to a Compilation we should not store references to a Roslyn compilation.
-
     /// <summary>
     /// Executes aspects.
     /// </summary>
     internal class AspectDriver : IAspectDriver
     {
         private readonly IServiceProvider _serviceProvider;
-        private readonly Compilation _compilation;
         private readonly List<TemplateClassMember> _declarativeAdviceAttributes;
-        private ReflectionMapper _reflectionMapper;
-
-        public IAspectClassImpl AspectClass { get; }
+        private readonly ReflectionMapper _reflectionMapper;
+        private readonly IAspectClassImpl _aspectClass;
 
         public AspectDriver( IServiceProvider serviceProvider, IAspectClassImpl aspectClass, Compilation compilation )
         {
             this._serviceProvider = serviceProvider;
             this._reflectionMapper = serviceProvider.GetService<ReflectionMapperFactory>().GetInstance( compilation );
-            this._compilation = compilation;
-            this.AspectClass = aspectClass;
+            this._aspectClass = aspectClass;
 
             // Introductions must have a deterministic order because of testing.
             this._declarativeAdviceAttributes = aspectClass
@@ -119,12 +114,12 @@ namespace Caravela.Framework.Impl.Aspects
                 var diagnostic =
                     GeneralDiagnosticDescriptors.AspectAppliedToIncorrectDeclaration.CreateDiagnostic(
                         targetDeclaration.GetDiagnosticLocation(),
-                        (AspectType: this.AspectClass.DisplayName, targetDeclaration.DeclarationKind, targetDeclaration, interfaceType) );
+                        (AspectType: this._aspectClass.DisplayName, targetDeclaration.DeclarationKind, targetDeclaration, interfaceType) );
 
                 return CreateResultForError( diagnostic );
             }
 
-            var diagnosticSink = new UserDiagnosticSink( this.AspectClass.Project, targetDeclaration );
+            var diagnosticSink = new UserDiagnosticSink( this._aspectClass.Project, targetDeclaration );
 
             using ( DiagnosticContext.WithDefaultLocation( diagnosticSink.DefaultScope?.DiagnosticLocation ) )
             {
@@ -176,7 +171,7 @@ namespace Caravela.Framework.Impl.Aspects
                 {
                     var diagnostic = GeneralDiagnosticDescriptors.ExceptionInUserCode.CreateDiagnostic(
                         targetDeclaration.GetDiagnosticLocation(),
-                        (AspectType: this.AspectClass.DisplayName, MethodName: nameof(IAspect<T>.BuildAspect), e.GetType().Name, e.Format( 5 )) );
+                        (AspectType: this._aspectClass.DisplayName, MethodName: nameof(IAspect<T>.BuildAspect), e.GetType().Name, e.Format( 5 )) );
 
                     return CreateResultForError( diagnostic );
                 }

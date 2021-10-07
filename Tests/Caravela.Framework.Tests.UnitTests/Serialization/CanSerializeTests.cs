@@ -12,8 +12,6 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization
 {
     public class CanSerializeTests : SerializerTestsBase
     {
-        public CanSerializeTests() { }
-
         private void AssertCanSerialize( bool expected, Type type )
         {
             using var testContext = this.CreateTestContext();
