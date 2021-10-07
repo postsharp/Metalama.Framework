@@ -15,7 +15,7 @@ namespace Caravela.Framework.Code.Collections
     {
         // TODO: Implement.
         ///// <summary>
-        ///// Gets an enumeration of properties or indexers with signatures compatible with specified constraints.
+        ///// Gets a list of properties or indexers with signatures compatible with specified constraints.
         ///// </summary>
         ///// <param name="name">Name of the property or &quot;Items&quot; in case of indexers.</param>
         ///// <param name="argumentTypes">Constraint on reflection types of arguments of an indexer. <c>Null</c>items in the list signify any type.</param>
@@ -29,7 +29,7 @@ namespace Caravela.Framework.Code.Collections
         //    bool declaredOnly = true );
 
         ///// <summary>
-        ///// Gets an enumeration of properties or indexers with signatures compatible with specified constraints.
+        ///// Gets a list of properties or indexers with signatures compatible with specified constraints.
         ///// </summary>
         ///// <param name="name">Name of the property or &quot;Items&quot; in case of indexers.</param>
         ///// <param name="argumentTypes">Constraint on types of arguments of an indexer. <c>Null</c>items in the list signify any type.</param>

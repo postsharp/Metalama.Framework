@@ -7,6 +7,10 @@ namespace Caravela.Framework.Fabrics
     /// An interface that, when implemented by a type in a project (under any name or namespace), allows that type to analyze and
     /// add aspects to that project.
     /// </summary>
+    /// <remarks>
+    /// When the project contains several project fabrics, the ones whose source file is the closest to the root directory is executed
+    /// first. The project fabrics are then ordered by type name.
+    /// </remarks>
     public interface IProjectFabric : IFabric
     {
         /// <summary>

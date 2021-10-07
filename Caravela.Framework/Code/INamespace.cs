@@ -27,7 +27,7 @@ namespace Caravela.Framework.Code
         INamespace? ParentNamespace { get; }
 
         /// <summary>
-        /// Gets the list of types defined in the current namespace (inside the current assembly).
+        /// Gets the list of types defined in the current namespace inside the current assembly, but not those defined in descendant namespaces.
         /// </summary>
         INamedTypeList Types { get; }
 
@@ -37,7 +37,7 @@ namespace Caravela.Framework.Code
         INamedTypeList AllTypes { get; }
 
         /// <summary>
-        /// Gets the list of children namespaces of the current namespace.
+        /// Gets the list of children namespaces of the current namespace in the current assembly.
         /// </summary>
         INamespaceList Namespaces { get; }
     }

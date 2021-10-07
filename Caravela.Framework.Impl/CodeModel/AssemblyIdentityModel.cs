@@ -27,7 +27,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public ImmutableArray<byte> PublicKeyToken => this._assemblyIdentity.PublicKeyToken;
 
-        public bool IsStrongName => this._assemblyIdentity.IsStrongName;
+        public bool IsStrongNamed => this._assemblyIdentity.IsStrongName;
 
         public bool HasPublicKey => this._assemblyIdentity.HasPublicKey;
     }

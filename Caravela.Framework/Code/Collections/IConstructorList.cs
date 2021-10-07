@@ -15,14 +15,14 @@ namespace Caravela.Framework.Code.Collections
     public interface IConstructorList : IMemberList<IConstructor>
     {
         /// <summary>
-        /// Gets an enumeration of constructors with signatures compatible with specified constraints given using the <c>System.Reflection</c> API.
+        /// Gets a list of constructors with signatures compatible with specified constraints given using the <c>System.Reflection</c> API.
         /// </summary>
         /// <param name="argumentTypes">Constraint on reflection types of arguments. <c>Null</c>items in the list signify any type.</param>
         /// <returns>Enumeration of constructors matching specified constraints.</returns>
         IEnumerable<IConstructor> OfCompatibleSignature( IReadOnlyList<Type?>? argumentTypes );
 
         /// <summary>
-        /// Gets an enumeration of constructors with signatures compatible with specified constraints given using the Caravela API.
+        /// Gets a list of constructors with signatures compatible with specified constraints given using the Caravela API.
         /// </summary>
         /// <param name="argumentTypes">Constraint on types of arguments. <c>Null</c>items in the list signify any type.</param>
         /// <param name="refKinds">Constraint on reference kinds of arguments. <c>Null</c>items in the list signify any reference kind.</param>

@@ -46,7 +46,7 @@ namespace Caravela.Framework.Aspects
         /// </remarks>
         /// <param name="target">The target declaration. It must be contained in the current type.</param>
         /// <typeparam name="TTarget">Type of the target declaration.</typeparam>
-        /// <typeparam name="TAspect">Type of the aspect. The type must be ordered after the current aspect type.</typeparam>
+        /// <typeparam name="TAspect">Type of the aspect. The type must be ordered after the aspect type calling this method.</typeparam>
         [Obsolete( "Not implemented." )]
         void RequireAspect<TTarget, TAspect>( TTarget target )
             where TTarget : class, IDeclaration

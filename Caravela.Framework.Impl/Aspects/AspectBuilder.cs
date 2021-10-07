@@ -60,7 +60,6 @@ namespace Caravela.Framework.Impl.Aspects
 
         public T Target { get; }
 
-        [Obsolete( "Not implemented." )]
         public IDeclarationSelection<TMember> WithMembers<TMember>( Func<T, IEnumerable<TMember>> selector )
             where TMember : class, IDeclaration
             => new DeclarationSelection<TMember>(

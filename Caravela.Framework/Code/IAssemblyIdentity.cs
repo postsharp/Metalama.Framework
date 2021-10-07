@@ -43,7 +43,7 @@ namespace Caravela.Framework.Code
         /// <summary>
         /// Gets a value indicating whether the assembly has either a <see cref="PublicKey"/> or a <see cref="PublicKeyToken"/>.
         /// </summary>
-        bool IsStrongName { get; }
+        bool IsStrongNamed { get; }
 
         /// <summary>
         /// Gets a value indicating whether the assembly has a full <see cref="PublicKey"/>.
