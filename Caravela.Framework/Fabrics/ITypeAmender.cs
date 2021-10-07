@@ -7,7 +7,7 @@ using Caravela.Framework.Code;
 namespace Caravela.Framework.Fabrics
 {
     /// <summary>
-    /// Argument of <see cref="ITypeFabric.AmendType"/>. Allows to report diagnostics and add aspects to the target declaration of the fabric. 
+    /// Argument of <see cref="ITypeFabric.AmendType"/>. Allows reporting diagnostics and adding aspects to the target declaration of the fabric. 
     /// </summary>
     public interface ITypeAmender : IAmender<INamedType>
     {
@@ -17,7 +17,7 @@ namespace Caravela.Framework.Fabrics
         INamedType Type { get; }
 
         /// <summary>
-        /// Gets an object that allows to create advices, e.g. overriding members, introducing members, or implementing new interfaces.
+        /// Gets an object that allows creating advices, e.g. overriding members, introducing members, or implementing new interfaces.
         /// </summary>
         IAdviceFactory Advices { get; }
     }

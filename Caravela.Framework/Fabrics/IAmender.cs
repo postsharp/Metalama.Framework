@@ -31,12 +31,12 @@ namespace Caravela.Framework.Fabrics
         T Target { get; }
 
         /// <summary>
-        /// Gets an object that allows to report or suppress warnings and errors.
+        /// Gets an object that allows reporting or suppressing warnings and errors.
         /// </summary>
         IDiagnosticSink Diagnostics { get; }
 
         /// <summary>
-        /// Creates an object that allows to add aspects to members of the <see cref="Target"/> declaration.
+        /// Creates an object that allows adding aspects to members of the <see cref="Target"/> declaration.
         /// </summary>
         /// <param name="selector"></param>
         /// <typeparam name="TChild"></typeparam>
@@ -57,7 +57,7 @@ namespace Caravela.Framework.Fabrics
         /// <param name="provider">A delegate that returns an annotation instance, or <c>null</c> if no annotation is needed.</param>
         /// <typeparam name="TTarget">The type of the target of the annotation.</typeparam>
         /// <typeparam name="TAspect">The type of the aspect that consumes the annotation. If the annotation targets several
-        /// aspects, then <typeparamref name="TAspect"/> must be the base type or interface.</typeparam>
+        /// aspects, then <typeparamref name="TAspect"/> must be the base type or an interface.</typeparam>
         /// <typeparam name="TAnnotation">The type of the annotation.</typeparam>
         [Obsolete( "Not implemented." )]
         void AddAnnotation<TTarget, TAspect, TAnnotation>( Func<TTarget, TAnnotation?> provider )

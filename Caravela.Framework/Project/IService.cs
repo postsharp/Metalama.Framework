@@ -7,7 +7,7 @@ using System;
 namespace Caravela.Framework.Project
 {
     /// <summary>
-    /// Base interface to be inherited by all interfaces that want to be exposed to <see cref="IServiceProvider"/>.
+    /// Base interface to be inherited by all types that want to be exposed to <see cref="IServiceProvider"/>.
     /// </summary>
     [CompileTimeOnly]
     public interface IService { }

@@ -19,13 +19,13 @@ namespace Caravela.Framework.Aspects
         where TDeclaration : class, IDeclaration
     {
         /// <summary>
-        /// Adds an aspect to the current set of declarations. This overloads allows to add inherited aspects.
+        /// Adds an aspect to the current set of declarations. This overload allows adding inherited aspects.
         /// </summary>
         void AddAspect<TAspect>( Func<TDeclaration, Expression<Func<TAspect>>> createAspect )
             where TAspect : Attribute, IAspect<TDeclaration>;
 
         /// <summary>
-        /// Adds an aspect to the current set of declarations. This overloads does not allow to add inherited aspects.
+        /// Adds an aspect to the current set of declarations. This overload does not allow adding inherited aspects.
         /// </summary>
         void AddAspect<TAspect>( Func<TDeclaration, TAspect> createAspect )
             where TAspect : Attribute, IAspect<TDeclaration>;
