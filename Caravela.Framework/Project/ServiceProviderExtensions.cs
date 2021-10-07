@@ -14,7 +14,7 @@ namespace Caravela.Framework.Project
     public static class ServiceProviderExtensions
     {
         /// <summary>
-        /// Gets a service or throws an <see cref="InvalidOperationException"/> the requested service has not been registered.
+        /// Gets a service or throws an <see cref="InvalidOperationException"/> if the requested service has not been registered.
         /// </summary>
         public static T GetService<T>( this IServiceProvider serviceProvider )
             where T : class, IService
