@@ -9,10 +9,13 @@ namespace Caravela.Framework.Code.Collections
     /// <summary>
     /// Read-only list of <see cref="IMethod"/>.
     /// </summary>
+    /// <remarks>
+    ///  <para>The order of items in this list is undetermined and may change between versions.</para>
+    /// </remarks>
     public interface IMethodList : IMemberList<IMethod>
     {
         /// <summary>
-        /// Gets an enumeration of methods with signatures compatible with specified constraints.
+        /// Gets the list of methods with signatures compatible with specified constraints.
         /// </summary>
         /// <param name="name">Name of the method.</param>
         /// <param name="argumentTypes">Constraint on reflection types of arguments. <c>Null</c>items in the list signify any type.</param>
@@ -26,7 +29,7 @@ namespace Caravela.Framework.Code.Collections
             bool declaredOnly = true );
 
         /// <summary>
-        /// Gets an enumeration of methods with signatures compatible with specified constraints.
+        /// Gets the list of methods with signatures compatible with specified constraints.
         /// </summary>
         /// <param name="name">Name of the method.</param>
         /// <param name="argumentTypes">Constraint on types of arguments. <c>Null</c>items in the list signify any type.</param>
@@ -74,6 +77,9 @@ namespace Caravela.Framework.Code.Collections
         /// <returns>A <see cref="IMethod"/> that matches the given signature. If <paramref name="declaredOnly" /> is set to <c>false</c>, the top-most visible method is shown.</returns>
         IMethod? OfExactSignature( IMethod signatureTemplate, bool matchIsStatic = true, bool declaredOnly = true );
 
+        /// <summary>
+        /// Gets the list of methods of a given <see cref="MethodKind"/> (such as <see cref="MethodKind.ConversionOperator"/> or <see cref="MethodKind.Default"/>.
+        /// </summary>
         IEnumerable<IMethod> OfKind( MethodKind kind );
 
         // TODO: IMethod? OfBestSignature( ... ) - but that would mean recreating C# overload resolution which is hard. Roslyn code is not reusable directly (OverloadResolution.cs works with internal Symbols, not with ISymbols).

@@ -27,7 +27,7 @@ namespace Caravela.TestFramework
         private static readonly SemaphoreSlim _consoleLock = new( 1 );
 
         public AspectTestRunner(
-            IServiceProvider serviceProvider,
+            ServiceProvider serviceProvider,
             string? projectDirectory,
             IEnumerable<MetadataReference> metadataReferences,
             ITestOutputHelper? logger )
@@ -41,7 +41,11 @@ namespace Caravela.TestFramework
         /// Runs the aspect test with the given name and source.
         /// </summary>
         /// <returns>The result of the test execution.</returns>
-        private protected override async Task RunAsync( TestInput testInput, TestResult testResult, Dictionary<string, object?> state )
+        private protected override async Task RunAsync(
+            ServiceProvider serviceProvider,
+            TestInput testInput,
+            TestResult testResult,
+            Dictionary<string, object?> state )
         {
             if ( this._runCount > 0 )
             {
@@ -53,19 +57,13 @@ namespace Caravela.TestFramework
                 this._runCount++;
             }
 
-            await base.RunAsync( testInput, testResult, state );
+            await base.RunAsync( serviceProvider, testInput, testResult, state );
+
+            var serviceProviderWithObserver = serviceProvider.WithServices( new Observer( testResult ) );
 
             using var domain = new UnloadableCompileTimeDomain();
-            var testProjectOptions = (TestProjectOptions?) this.ServiceProvider.GetService( typeof(TestProjectOptions) );
 
-            if ( testProjectOptions == null )
-            {
-                throw new InvalidOperationException( "The service provider does not contain a TestProjectOptions." );
-            }
-
-            var pipeline = new CompileTimeAspectPipeline( testProjectOptions, true, domain, testProjectOptions );
-            var observer = new Observer( testResult );
-            pipeline.ServiceProvider.AddService( observer );
+            var pipeline = new CompileTimeAspectPipeline( serviceProviderWithObserver, true, domain );
 
             if ( pipeline.TryExecute(
                 testResult.PipelineDiagnostics,
@@ -123,7 +121,7 @@ namespace Caravela.TestFramework
 
             if ( testInput.Options.WriteInputHtml.GetValueOrDefault() || testInput.Options.WriteOutputHtml.GetValueOrDefault() )
             {
-                await this.WriteHtmlAsync( testInput, testResult );
+                await this.WriteHtmlAsync( serviceProvider, testInput, testResult );
             }
         }
 
@@ -210,7 +208,7 @@ namespace Caravela.TestFramework
                 return null;
             }
 
-            var programTypes = testResult.InitialCompilationModel!.DeclaredTypes.Where( t => t.Name == "Program" ).ToList();
+            var programTypes = testResult.InitialCompilationModel!.Types.Where( t => t.Name == "Program" ).ToList();
 
             switch ( programTypes.Count )
             {

@@ -9,6 +9,9 @@ namespace Caravela.Framework.Code.Collections
     /// <summary>
     /// List of interfaces implemented by a named type.
     /// </summary>
+    /// <remarks>
+    ///  <para>The order of items in this list is undetermined and may change between versions.</para>
+    /// </remarks>
     public interface IImplementedInterfaceList : IReadOnlyList<INamedType>
     {
         /// <summary>

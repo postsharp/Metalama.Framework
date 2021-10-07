@@ -7,6 +7,7 @@ using Caravela.Framework.Code.DeclarationBuilders;
 using Caravela.Framework.Impl.CodeModel.Collections;
 using Caravela.Framework.Impl.CodeModel.References;
 using Caravela.Framework.Impl.Collections;
+using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.ReflectionMocks;
 using Caravela.Framework.Impl.Transformations;
@@ -127,6 +128,8 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public bool IsReadOnly => this.TypeSymbol.IsReadOnly;
 
+        public bool IsExternal => this.TypeSymbol.ContainingAssembly != this.Compilation.RoslynCompilation.Assembly;
+
         public bool HasDefaultConstructor
             => this.TypeSymbol.TypeKind == RoslynTypeKind.Struct ||
                (this.TypeSymbol.TypeKind == RoslynTypeKind.Class && !this.TypeSymbol.IsAbstract &&
@@ -137,7 +140,12 @@ namespace Caravela.Framework.Impl.CodeModel
         public bool IsGeneric => this.TypeSymbol.IsGenericType;
 
         [Memo]
-        public INamedTypeList NestedTypes => new NamedTypeList( this, this.TypeSymbol.GetTypeMembers().Select( t => new MemberRef<INamedType>( t ) ) );
+        public INamedTypeList NestedTypes
+            => new NamedTypeList(
+                this,
+                this.TypeSymbol.GetTypeMembers()
+                    .Where( t => this.Compilation.SymbolClassifier.GetTemplatingScope( t ) != TemplatingScope.CompileTimeOnly )
+                    .Select( t => new MemberRef<INamedType>( t ) ) );
 
         [Memo]
         public IPropertyList Properties
@@ -251,7 +259,7 @@ namespace Caravela.Framework.Impl.CodeModel
             {
                 INamespaceSymbol => this.Compilation.Factory.GetAssembly( this.TypeSymbol.ContainingAssembly ),
                 INamedTypeSymbol containingType => this.Compilation.Factory.GetNamedType( containingType ),
-                _ => throw new NotImplementedException()
+                _ => throw new AssertionFailedException()
             };
 
         public override DeclarationKind DeclarationKind => DeclarationKind.NamedType;

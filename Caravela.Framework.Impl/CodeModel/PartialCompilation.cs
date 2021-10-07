@@ -2,6 +2,8 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Compiler;
+using Caravela.Framework.Impl.Collections;
+using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -36,14 +38,24 @@ namespace Caravela.Framework.Impl.CodeModel
         public Compilation Compilation { get; }
 
         /// <summary>
-        /// Gets the list of syntax trees in the current subset.
+        /// Gets the list of syntax trees in the current subset indexed by path.
         /// </summary>
         public abstract ImmutableDictionary<string, SyntaxTree> SyntaxTrees { get; }
 
         /// <summary>
         /// Gets the types declared in the current subset.
         /// </summary>
-        public abstract IEnumerable<ITypeSymbol> Types { get; }
+        public abstract ImmutableHashSet<INamedTypeSymbol> Types { get; }
+
+        /// <summary>
+        /// Gets the namespaces that contain types.
+        /// </summary>
+        public abstract ImmutableHashSet<INamespaceSymbol> Namespaces { get; }
+
+        [Memo]
+        public ImmutableHashSet<INamespaceSymbol> ParentNamespaces
+            => this.Namespaces.SelectRecursive( n => n.IsGlobalNamespace ? null : n.ContainingNamespace )
+                .ToImmutableHashSet();
 
         /// <summary>
         /// Gets a value indicating whether the current <see cref="PartialCompilation"/> is actually partial, or represents a complete compilation.
@@ -129,7 +141,7 @@ namespace Caravela.Framework.Impl.CodeModel
             return new PartialImpl(
                 compilation,
                 closure.Trees.ToImmutableDictionary( t => t.FilePath, t => t ),
-                closure.Types.ToImmutableArray(),
+                closure.Types,
                 resources );
         }
 
@@ -151,7 +163,7 @@ namespace Caravela.Framework.Impl.CodeModel
             return new PartialImpl(
                 compilation,
                 closure.Trees.ToImmutableDictionary( t => t.FilePath, t => t ),
-                closure.Types.ToImmutableArray(),
+                closure.Types.ToImmutableHashSet(),
                 resources );
         }
 
@@ -177,14 +189,16 @@ namespace Caravela.Framework.Impl.CodeModel
         /// <summary>
         /// Gets a closure of the syntax trees declaring all base types and interfaces of all types declared in input syntax trees.
         /// </summary>
-        private static (HashSet<ITypeSymbol> Types, HashSet<SyntaxTree> Trees) GetClosure( Compilation compilation, IReadOnlyList<SyntaxTree> syntaxTrees )
+        private static (ImmutableHashSet<INamedTypeSymbol> Types, ImmutableHashSet<SyntaxTree> Trees) GetClosure(
+            Compilation compilation,
+            IReadOnlyList<SyntaxTree> syntaxTrees )
         {
             var assembly = compilation.Assembly;
 
-            HashSet<ITypeSymbol> types = new( SymbolEqualityComparer.Default );
-            HashSet<SyntaxTree> trees = new( );
+            var types = ImmutableHashSet.CreateBuilder<INamedTypeSymbol>( SymbolEqualityComparer.Default );
+            var trees = ImmutableHashSet.CreateBuilder<SyntaxTree>();
 
-            void AddTypeRecursive( ITypeSymbol type )
+            void AddTypeRecursive( INamedTypeSymbol type )
             {
                 if ( type is IErrorTypeSymbol )
                 {
@@ -239,7 +253,7 @@ namespace Caravela.Framework.Impl.CodeModel
                 }
             }
 
-            return (types, trees);
+            return (types.ToImmutable(), trees.ToImmutable());
         }
 
         public ImmutableArray<SyntaxTreeTransformation> ToTransformations()

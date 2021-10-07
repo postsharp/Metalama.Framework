@@ -1,7 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Impl.ServiceProvider;
+using Caravela.Framework.Impl.Pipeline;
 using System;
 using System.IO;
 using System.Linq;
@@ -52,7 +52,7 @@ namespace Caravela.TestFramework
         {
             var directory = this.GetDirectory( callerMemberName! );
             using var testOptions = new TestProjectOptions();
-            using var serviceProvider = ServiceProviderFactory.GetServiceProvider( testOptions );
+            var serviceProvider = ServiceProviderFactory.GetServiceProvider( testOptions );
 
             var directoryOptionsReader = TestDirectoryOptionsReader.GetInstance( this.GetType().Assembly );
 

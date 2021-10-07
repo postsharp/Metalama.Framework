@@ -8,31 +8,36 @@ using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
+    /// <summary>
+    /// An implementation  of <see cref="IAspectSource"/> that creates aspect instances from custom attributes
+    /// found in a compilation.
+    /// </summary>
     internal class CompilationAspectSource : IAspectSource
     {
         private readonly CompileTimeProjectLoader _loader;
 
-        public CompilationAspectSource( IReadOnlyList<AspectClass> aspectTypes, CompileTimeProjectLoader loader )
+        public CompilationAspectSource( ImmutableArray<IAspectClass> aspectTypes, CompileTimeProjectLoader loader )
         {
             this._loader = loader;
-            this.AspectTypes = aspectTypes;
+            this.AspectClasses = aspectTypes;
         }
 
         public AspectSourcePriority Priority => AspectSourcePriority.FromAttribute;
 
-        public IEnumerable<AspectClass> AspectTypes { get; }
+        public ImmutableArray<IAspectClass> AspectClasses { get; }
 
         // TODO: implement aspect exclusion based on ExcludeAspectAttribute
         public IEnumerable<IDeclaration> GetExclusions( INamedType aspectType ) => Enumerable.Empty<IDeclaration>();
 
         public IEnumerable<AspectInstance> GetAspectInstances(
             CompilationModel compilation,
-            AspectClass aspectClass,
+            IAspectClass aspectClass,
             IDiagnosticAdder diagnosticAdder,
             CancellationToken cancellationToken )
         {
@@ -51,7 +56,9 @@ namespace Caravela.Framework.Impl.CodeModel
 
                         if ( this._loader.AttributeDeserializer.TryCreateAttribute( attribute.GetAttributeData(), diagnosticAdder, out var attributeInstance ) )
                         {
-                            return aspectClass.CreateAspectInstance( (IAspect) attributeInstance, attribute.ContainingDeclaration.AssertNotNull() );
+                            return ((AspectClass) aspectClass).CreateAspectInstance(
+                                (IAspect) attributeInstance,
+                                attribute.ContainingDeclaration.AssertNotNull() );
                         }
                         else
                         {

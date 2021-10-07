@@ -156,6 +156,7 @@ namespace Caravela.Framework.Impl.Linking
                     }
 
                     var syntaxGenerationContext = SyntaxGenerationContext.Create(
+                        this._serviceProvider,
                         input.InitialCompilation.Compilation,
                         memberIntroduction.TargetSyntaxTree,
                         positionInSyntaxTree );

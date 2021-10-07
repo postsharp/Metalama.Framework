@@ -21,12 +21,12 @@ namespace Caravela.Framework.Tests.UnitTests
     {
         private bool TryGetOrderedAspectLayers( string code, string[] aspectNames, DiagnosticList diagnostics, [NotNullWhen( true )] out string? sortedAspects )
         {
-            var compilation = CreateCompilationModel( code );
+            using var testContext = this.CreateTestContext();
 
-            using var isolatedTest = this.WithIsolatedTest();
+            var compilation = testContext.CreateCompilationModel( code );
 
             var compileTimeDomain = new UnloadableCompileTimeDomain();
-            var loader = CompileTimeProjectLoader.Create( compileTimeDomain, isolatedTest.ServiceProvider );
+            var loader = CompileTimeProjectLoader.Create( compileTimeDomain, testContext.ServiceProvider );
 
             Assert.True(
                 loader.TryGetCompileTimeProjectFromCompilation(
@@ -38,10 +38,10 @@ namespace Caravela.Framework.Tests.UnitTests
                     out var compileTimeProject ) );
 
             var aspectTypeFactory = new AspectClassMetadataFactory(
-                this.ServiceProvider,
-                new AspectDriverFactory( this.ServiceProvider, compilation.RoslynCompilation, ImmutableArray<object>.Empty ) );
+                testContext.ServiceProvider,
+                new AspectDriverFactory( compilation.RoslynCompilation, ImmutableArray<object>.Empty, testContext.ServiceProvider ) );
 
-            var aspectNamedTypes = aspectNames.Select( name => compilation.DeclaredTypes.OfName( name ).Single().GetSymbol() ).ToReadOnlyList();
+            var aspectNamedTypes = aspectNames.Select( name => compilation.Types.OfName( name ).Single().GetSymbol() ).ToReadOnlyList();
             var aspectTypes = aspectTypeFactory.GetAspectClasses( aspectNamedTypes, compileTimeProject!, diagnostics ).ToImmutableArray();
             var allLayers = aspectTypes.SelectMany( a => a.Layers ).ToImmutableArray();
 

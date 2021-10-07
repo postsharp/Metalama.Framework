@@ -2,7 +2,9 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
+using Caravela.Framework.Tests.UnitTests.Utilities;
 using System;
+using System.Linq;
 using Xunit;
 
 namespace Caravela.Framework.Tests.UnitTests.CodeModel
@@ -12,6 +14,8 @@ namespace Caravela.Framework.Tests.UnitTests.CodeModel
         [Fact]
         public void Matches_ParameterCount()
         {
+            using var testContext = this.CreateTestContext();
+
             var code = @"
 class C
 {
@@ -29,8 +33,8 @@ class C
 }
 ";
 
-            var compilation = CreateCompilationModel( code );
-            var type = compilation.DeclaredTypes[0];
+            var compilation = testContext.CreateCompilationModel( code );
+            var type = compilation.Types[0];
             var intType = compilation.Factory.GetTypeByReflectionType( typeof(int) );
 
             var matchedMethod1 = type.Methods.OfExactSignature( "Foo", Array.Empty<IType>() );
@@ -46,6 +50,8 @@ class C
         [Fact]
         public void Matches_ParameterType()
         {
+            using var testContext = this.CreateTestContext();
+
             var code = @"
 class C
 {
@@ -67,8 +73,8 @@ class C
 }
 ";
 
-            var compilation = CreateCompilationModel( code );
-            var type = compilation.DeclaredTypes[0];
+            var compilation = testContext.CreateCompilationModel( code );
+            var type = compilation.Types[0];
             var objectType = compilation.Factory.GetTypeByReflectionType( typeof(object) );
             var intType = compilation.Factory.GetTypeByReflectionType( typeof(int) );
             var stringType = compilation.Factory.GetTypeByReflectionType( typeof(string) );
@@ -90,6 +96,8 @@ class C
         [Fact]
         public void Matches_RefKind()
         {
+            using var testContext = this.CreateTestContext();
+
             var code = @"
 class C
 {
@@ -112,8 +120,8 @@ class C
 }
 ";
 
-            var compilation = CreateCompilationModel( code );
-            var type = compilation.DeclaredTypes[0];
+            var compilation = testContext.CreateCompilationModel( code );
+            var type = compilation.Types[0];
             var intType = compilation.Factory.GetTypeByReflectionType( typeof(int) );
 
             var matchedMethod1 = type.Methods.OfExactSignature( "Foo", new[] { intType } );
@@ -137,6 +145,8 @@ class C
         [Fact]
         public void DeclaredOnlyTrue_Ignores_BaseMethod()
         {
+            using var testContext = this.CreateTestContext();
+
             var code = @"
 class A
 {
@@ -160,8 +170,9 @@ class C : B
 }
 ";
 
-            var compilation = CreateCompilationModel( code );
-            var type = compilation.DeclaredTypes[2];
+            var compilation = testContext.CreateCompilationModel( code );
+            var types = compilation.Types.OrderBySource();
+            var type = types[2];
             var intType = compilation.Factory.GetTypeByReflectionType( typeof(int) );
 
             var matchedMethod1 = type.Methods.OfExactSignature( "Foo", Array.Empty<IType>() );
@@ -175,6 +186,8 @@ class C : B
         [Fact]
         public void DeclaredOnlyFalse_Finds_BaseMethod()
         {
+            using var testContext = this.CreateTestContext();
+
             var code = @"
 class A
 {
@@ -198,29 +211,32 @@ class C : B
 }
 ";
 
-            var compilation = CreateCompilationModel( code );
-            var typeA = compilation.DeclaredTypes[0];
-            var typeB = compilation.DeclaredTypes[1];
-            var typeC = compilation.DeclaredTypes[2];
+            var compilation = testContext.CreateCompilationModel( code );
+            var types = compilation.Types.OrderBySource();
+            var typeA = types[0];
+            var typeB = types[1];
+            var typeC = types[2];
             var intType = compilation.Factory.GetTypeByReflectionType( typeof(int) );
 
             var matchedMethod1 = typeC.Methods.OfExactSignature( "Foo", Array.Empty<IType>(), declaredOnly: false );
-            Assert.Same( typeA.Methods[0], matchedMethod1 );
+            Assert.Same( typeA.Methods.Single(), matchedMethod1 );
             var matchedMethod2 = typeC.Methods.OfExactSignature( "Foo", new[] { intType }, declaredOnly: false );
-            Assert.Same( typeB.Methods[0], matchedMethod2 );
+            Assert.Same( typeB.Methods.Single(), matchedMethod2 );
             var matchedMethod3 = typeC.Methods.OfExactSignature( "Foo", new[] { intType, intType }, declaredOnly: false );
-            Assert.Same( typeC.Methods[0], matchedMethod3 );
+            Assert.Same( typeC.Methods.Single(), matchedMethod3 );
         }
 
         [Fact]
         public void DeclaredOnlyFalse_Finds_BaseMethod_GenericDeclaringType()
         {
+            using var testContext = this.CreateTestContext();
+
             var code = @"
 class A : System.Collections.Generic.List<int> { }
 ";
 
-            var compilation = CreateCompilationModel( code );
-            var typeA = compilation.DeclaredTypes[0];
+            var compilation = testContext.CreateCompilationModel( code );
+            var typeA = compilation.Types[0];
             var intType = compilation.Factory.GetTypeByReflectionType( typeof(int) );
 
             var matchedMethod1 = typeA.Methods.OfExactSignature( "Add", new[] { intType }, declaredOnly: false );
@@ -232,6 +248,8 @@ class A : System.Collections.Generic.List<int> { }
         [Fact]
         public void Matches_IsStatic()
         {
+            using var testContext = this.CreateTestContext();
+
             var code = @"
 class C
 {
@@ -245,8 +263,8 @@ class C
 }
 ";
 
-            var compilation = CreateCompilationModel( code );
-            var type = compilation.DeclaredTypes[0];
+            var compilation = testContext.CreateCompilationModel( code );
+            var type = compilation.Types[0];
 
             var matchedMethod1 = type.Methods.OfExactSignature( "Foo", Array.Empty<IType>(), isStatic: false );
             Assert.Same( type.Methods[0], matchedMethod1 );

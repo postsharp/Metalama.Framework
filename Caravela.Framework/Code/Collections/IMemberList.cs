@@ -9,6 +9,9 @@ namespace Caravela.Framework.Code.Collections
     /// <summary>
     /// Read-only list of <see cref="IMemberOrNamedType"/>.
     /// </summary>
+    /// <remarks>
+    ///  <para>The order of items in this list is undetermined and may change between versions.</para>
+    /// </remarks>
     [InternalImplement]
     public interface IMemberList<out T> : IReadOnlyList<T>
         where T : IMemberOrNamedType

@@ -17,25 +17,26 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime
 {
     public class AttributeDeserializerTests : TestBase
     {
-        public AttributeDeserializerTests()
+        public AttributeDeserializerTests() : base( p => p.WithService( new HackedSystemTypeResolver( p ) ) )
         {
             // For the ease of testing, we need the custom attributes and helper classes nested here to be considered to 
             // belong to a system library so they can be shared between the compile-time code and the testing code.
-            this.ServiceProvider.AddService( new HackedSystemTypeResolver( this.ServiceProvider ) );
         }
 
         private object? GetDeserializedProperty( string property, string value, string? dependentCode = null, string? additionalCode = "" )
         {
+            using var testContext = this.CreateTestContext();
+
             var code = $@"[assembly: Caravela.Framework.Tests.UnitTests.CompileTime.AttributeDeserializerTests.TestAttribute( {property} = {value} )]"
                        + " enum RunTimeEnum { Value = 1}"
                        + " class GenericRunTimeType<T> {}"
                        + " struct GenericStruct {} "
                        + additionalCode;
 
-            var compilation = CreateCompilationModel( code, dependentCode );
+            var compilation = testContext.CreateCompilationModel( code, dependentCode );
 
             using UnloadableCompileTimeDomain domain = new();
-            var loader = CompileTimeProjectLoader.Create( domain, this.ServiceProvider );
+            var loader = CompileTimeProjectLoader.Create( domain, testContext.ServiceProvider );
 
             var attribute = compilation.Attributes.Single();
             DiagnosticList diagnosticList = new();
@@ -59,11 +60,13 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime
         [Fact]
         public void TestField()
         {
+            using var testContext = this.CreateTestContext();
+
             var code = $@"[assembly: Caravela.Framework.Tests.UnitTests.CompileTime.AttributeDeserializerTests.TestAttribute( Field = 5 )]";
-            var compilation = CreateCompilationModel( code );
+            var compilation = testContext.CreateCompilationModel( code );
 
             using UnloadableCompileTimeDomain domain = new();
-            var loader = CompileTimeProjectLoader.Create( domain, this.ServiceProvider );
+            var loader = CompileTimeProjectLoader.Create( domain, testContext.ServiceProvider );
 
             var attribute = compilation.Attributes.Single();
             DiagnosticList diagnosticList = new();
@@ -243,11 +246,13 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime
         {
             object Deserialize( string args )
             {
+                using var testContext = this.CreateTestContext();
+
                 var code = $@"[assembly: Caravela.Framework.Tests.UnitTests.CompileTime.AttributeDeserializerTests.TestParamsAttribute( {args} )]";
-                var compilation = CreateCompilationModel( code );
+                var compilation = testContext.CreateCompilationModel( code );
 
                 using UnloadableCompileTimeDomain domain = new();
-                var loader = CompileTimeProjectLoader.Create( domain, this.ServiceProvider );
+                var loader = CompileTimeProjectLoader.Create( domain, testContext.ServiceProvider );
 
                 var attribute = compilation.Attributes.Single();
 
@@ -270,21 +275,25 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime
         [Fact]
         public void AttributesOfUnknownTypeAreIgnored()
         {
+            using var testContext = this.CreateTestContext();
+
             var code = @"[assembly: UnknownType] [UnknownType] class C {}";
-            var compilation = CreateCompilationModel( code, ignoreErrors: true );
+            var compilation = testContext.CreateCompilationModel( code, ignoreErrors: true );
 
             Assert.Empty( compilation.Attributes );
-            Assert.Empty( compilation.DeclaredTypes.Single().Attributes );
+            Assert.Empty( compilation.Types.Single().Attributes );
         }
 
         [Fact]
         public void PropertiesOfInvalidNameAreIgnored()
         {
+            using var testContext = this.CreateTestContext();
+
             var code = $@"[assembly: Caravela.Framework.Tests.UnitTests.CompileTime.AttributeDeserializerTests.TestAttribute( InvalidProperty = 0 )]";
-            var compilation = CreateCompilationModel( code, ignoreErrors: true );
+            var compilation = testContext.CreateCompilationModel( code, ignoreErrors: true );
 
             using UnloadableCompileTimeDomain domain = new();
-            var loader = CompileTimeProjectLoader.Create( domain, this.ServiceProvider );
+            var loader = CompileTimeProjectLoader.Create( domain, testContext.ServiceProvider );
 
             var attribute = compilation.Attributes.Single();
             DiagnosticList diagnosticList = new();
@@ -296,23 +305,27 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime
         [Fact]
         public void AttributesWithMissingConstructorAreIgnored()
         {
+            using var testContext = this.CreateTestContext();
+
             var code = $@"[assembly: Caravela.Framework.Tests.UnitTests.CompileTime.AttributeDeserializerTests.TestAttribute( 0 )] "
                        + "[Caravela.Framework.Tests.UnitTests.CompileTime.AttributeDeserializerTests.TestAttribute( 0 )] class C {}";
 
-            var compilation = CreateCompilationModel( code, ignoreErrors: true );
+            var compilation = testContext.CreateCompilationModel( code, ignoreErrors: true );
 
             Assert.Empty( compilation.Attributes );
-            Assert.Empty( compilation.DeclaredTypes.Single().Attributes );
+            Assert.Empty( compilation.Types.Single().Attributes );
         }
 
         [Fact]
         public void PropertiesWithInvalidValueAreIgnored()
         {
+            using var testContext = this.CreateTestContext();
+
             var code = @"[assembly: Caravela.Framework.Tests.UnitTests.CompileTime.AttributeDeserializerTests.TestAttribute( Int32Property = ""a"" )]";
-            var compilation = CreateCompilationModel( code, ignoreErrors: true );
+            var compilation = testContext.CreateCompilationModel( code, ignoreErrors: true );
 
             using UnloadableCompileTimeDomain domain = new();
-            var loader = CompileTimeProjectLoader.Create( domain, this.ServiceProvider );
+            var loader = CompileTimeProjectLoader.Create( domain, testContext.ServiceProvider );
 
             var attribute = compilation.Attributes.Single();
             DiagnosticList diagnosticList = new();
@@ -324,8 +337,10 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime
         [Fact]
         public void AttributesWithInvalidConstructorArgumentsAreIgnored()
         {
+            using var testContext = this.CreateTestContext();
+
             var code = @"[assembly: Caravela.Framework.Tests.UnitTests.CompileTime.AttributeDeserializerTests.TestAttribute( 0 )]";
-            var compilation = CreateCompilationModel( code, ignoreErrors: true );
+            var compilation = testContext.CreateCompilationModel( code, ignoreErrors: true );
 
             Assert.Empty( compilation.Attributes );
         }
@@ -333,12 +348,14 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime
         [Fact]
         public void ThrowingConstructorFailsSafely()
         {
+            using var testContext = this.CreateTestContext();
+
             var code = @"[assembly: Caravela.Framework.Tests.UnitTests.CompileTime.AttributeDeserializerTests.ThrowingAttribute( true )]";
-            var compilation = CreateCompilationModel( code );
+            var compilation = testContext.CreateCompilationModel( code );
             var attribute = compilation.Attributes.Single();
 
             using UnloadableCompileTimeDomain domain = new();
-            var loader = CompileTimeProjectLoader.Create( domain, this.ServiceProvider );
+            var loader = CompileTimeProjectLoader.Create( domain, testContext.ServiceProvider );
 
             DiagnosticList diagnosticList = new();
 
@@ -350,12 +367,14 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime
         [Fact]
         public void ThrowingPropertyFailsSafely()
         {
+            using var testContext = this.CreateTestContext();
+
             var code = @"[assembly: Caravela.Framework.Tests.UnitTests.CompileTime.AttributeDeserializerTests.ThrowingAttribute( false, Property = 0 )]";
-            var compilation = CreateCompilationModel( code );
+            var compilation = testContext.CreateCompilationModel( code );
             var attribute = compilation.Attributes.Single();
 
             using UnloadableCompileTimeDomain domain = new();
-            var loader = CompileTimeProjectLoader.Create( domain, this.ServiceProvider );
+            var loader = CompileTimeProjectLoader.Create( domain, testContext.ServiceProvider );
 
             DiagnosticList diagnosticList = new();
 
@@ -367,13 +386,15 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime
         [Fact]
         public void RunTimeOnlyAttributeType()
         {
+            using var testContext = this.CreateTestContext();
+
             var code = @"[assembly: MyAttribute] class MyAttribute : System.Attribute {}";
 
-            var compilation = CreateCompilationModel( code );
+            var compilation = testContext.CreateCompilationModel( code );
             var attribute = compilation.Attributes.Single();
 
             using UnloadableCompileTimeDomain domain = new();
-            var loader = CompileTimeProjectLoader.Create( domain, this.ServiceProvider );
+            var loader = CompileTimeProjectLoader.Create( domain, testContext.ServiceProvider );
 
             DiagnosticList diagnosticList = new();
 
@@ -433,6 +454,7 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime
 
         public class ThrowingAttribute : Attribute
         {
+            // ReSharper disable once ParameterOnlyUsedForPreconditionCheck.Local
             public ThrowingAttribute( bool throws )
             {
                 if ( throws )

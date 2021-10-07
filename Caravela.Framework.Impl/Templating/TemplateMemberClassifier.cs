@@ -4,8 +4,8 @@
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
-using Caravela.Framework.Impl.ServiceProvider;
 using Caravela.Framework.Impl.Utilities;
+using Caravela.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -30,7 +30,7 @@ namespace Caravela.Framework.Impl.Templating
             this._syntaxTreeAnnotationMap = syntaxTreeAnnotationMap;
             this._symbolClassifier = serviceProvider.GetService<SymbolClassificationService>().GetClassifier( runTimeCompilation );
 
-            var reflectionMapper = ReflectionMapper.GetInstance( runTimeCompilation );
+            var reflectionMapper = serviceProvider.GetService<ReflectionMapperFactory>().GetInstance( runTimeCompilation );
             this._metaType = reflectionMapper.GetTypeSymbol( typeof(meta) );
         }
 

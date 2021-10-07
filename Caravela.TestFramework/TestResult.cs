@@ -325,9 +325,9 @@ namespace Caravela.TestFramework
 
             this._syntaxTrees.Clear();
             this.OutputCompilation = null;
-            this.OutputCompilation = null;
-            this.InputProject = null;
             this.OutputProject = null;
+            this.InputCompilation = null;
+            this.InputProject = null;
             this.IntermediateLinkerCompilation = null;
             this.InitialCompilationModel = null;
         }

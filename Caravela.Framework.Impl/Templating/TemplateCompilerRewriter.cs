@@ -48,7 +48,7 @@ namespace Caravela.Framework.Impl.Templating
             IDiagnosticAdder diagnosticAdder,
             IServiceProvider serviceProvider,
             SerializableTypes serializableTypes,
-            CancellationToken cancellationToken ) : base( compileTimeCompilation )
+            CancellationToken cancellationToken ) : base( serviceProvider, compileTimeCompilation )
         {
             this._templateName = templateName;
             this._syntaxTreeAnnotationMap = syntaxTreeAnnotationMap;

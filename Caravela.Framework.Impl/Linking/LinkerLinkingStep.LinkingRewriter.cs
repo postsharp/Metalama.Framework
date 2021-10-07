@@ -19,13 +19,16 @@ namespace Caravela.Framework.Impl.Linking
         /// </summary>
         private class LinkingRewriter : CSharpSyntaxRewriter
         {
+            private readonly IServiceProvider _serviceProvider;
             private readonly Compilation _intermediateCompilation;
             private readonly LinkerRewritingDriver _rewritingDriver;
 
             public LinkingRewriter(
+                IServiceProvider serviceProvider,
                 Compilation intermediateCompilation,
                 LinkerRewritingDriver rewritingDriver )
             {
+                this._serviceProvider = serviceProvider;
                 this._intermediateCompilation = intermediateCompilation;
                 this._rewritingDriver = rewritingDriver;
             }
@@ -47,7 +50,11 @@ namespace Caravela.Framework.Impl.Linking
 
                     var semanticModel = this._intermediateCompilation.GetSemanticModel( node.SyntaxTree );
 
-                    var generationContext = SyntaxGenerationContext.Create( this._intermediateCompilation, node.SyntaxTree, member.SpanStart );
+                    var generationContext = SyntaxGenerationContext.Create(
+                        this._serviceProvider,
+                        this._intermediateCompilation,
+                        node.SyntaxTree,
+                        member.SpanStart );
 
                     var symbols =
                         member switch

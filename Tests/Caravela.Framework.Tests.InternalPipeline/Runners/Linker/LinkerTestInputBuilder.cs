@@ -11,6 +11,7 @@ using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Linking;
 using Caravela.Framework.Impl.Transformations;
 using Caravela.Framework.Impl.Utilities;
+using Caravela.TestFramework;
 using FakeItEasy;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -56,11 +57,13 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
 
     internal partial class LinkerTestInputBuilder
     {
+        private readonly IServiceProvider _serviceProvider;
         private readonly TestRewriter _rewriter;
 
-        public LinkerTestInputBuilder()
+        public LinkerTestInputBuilder( IServiceProvider serviceProvider )
         {
-            this._rewriter = new TestRewriter();
+            this._serviceProvider = serviceProvider;
+            this._rewriter = new TestRewriter( serviceProvider );
         }
 
         internal SyntaxNode ProcessSyntaxRoot( SyntaxNode syntaxRoot )
@@ -70,7 +73,7 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
 
         public AspectLinkerInput ToAspectLinkerInput( PartialCompilation inputCompilation )
         {
-            var initialCompilationModel = CompilationModel.CreateInitialInstance( inputCompilation );
+            var initialCompilationModel = CompilationModel.CreateInitialInstance( new NullProject( this._serviceProvider ), inputCompilation );
 
             FinalizeTransformationFakes( this._rewriter, (CSharpCompilation) inputCompilation.Compilation, initialCompilationModel );
 

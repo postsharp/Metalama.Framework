@@ -122,7 +122,7 @@ namespace Caravela.Framework.Impl.Formatting
             return formattedCompilation;
         }
 
-        private static async Task<(Project Project, Dictionary<SyntaxTree, DocumentId> SyntaxTreeMap)> CreateProjectFromCompilation(
+        private static async Task<(Microsoft.CodeAnalysis.Project Project, Dictionary<SyntaxTree, DocumentId> SyntaxTreeMap)> CreateProjectFromCompilation(
             Compilation compilation,
             CancellationToken cancellationToken )
         {

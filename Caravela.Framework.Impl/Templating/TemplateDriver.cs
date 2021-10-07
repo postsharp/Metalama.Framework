@@ -5,8 +5,8 @@ using Caravela.Framework.Aspects;
 using Caravela.Framework.Impl.Aspects;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Formatting;
-using Caravela.Framework.Impl.ServiceProvider;
 using Caravela.Framework.Impl.Utilities;
+using Caravela.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -25,9 +25,13 @@ namespace Caravela.Framework.Impl.Templating
         private readonly UserCodeInvoker _userCodeInvoker;
         private readonly ISymbol _sourceTemplateSymbol;
         private readonly MethodInfo _templateMethod;
-        private readonly AspectClass _aspectClass;
+        private readonly TemplateClass _aspectClass;
 
-        public TemplateDriver( IServiceProvider serviceProvider, AspectClass aspectClass, ISymbol sourceTemplateSymbol, MethodInfo compiledTemplateMethodInfo )
+        public TemplateDriver(
+            IServiceProvider serviceProvider,
+            TemplateClass aspectClass,
+            ISymbol sourceTemplateSymbol,
+            MethodInfo compiledTemplateMethodInfo )
         {
             this._userCodeInvoker = serviceProvider.GetService<UserCodeInvoker>();
             this._sourceTemplateSymbol = sourceTemplateSymbol;

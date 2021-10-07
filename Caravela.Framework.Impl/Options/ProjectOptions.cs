@@ -51,6 +51,19 @@ namespace Caravela.Framework.Impl.Options
 
         public bool IsUserCodeTrusted => this.GetBooleanOption( "CaravelaUserCodeTrusted", true );
 
+        public string? ProjectPath => this.GetStringOption( "MSBuildProjectFullPath" );
+
+        public string? TargetFramework => this.GetStringOption( "Configuration" );
+
+        public string? Configuration => this.GetStringOption( "TargetFramework" );
+
+        public bool TryGetProperty( string name, [NotNullWhen( true )] out string? value )
+        {
+            value = this.GetStringOption( name );
+
+            return value != null;
+        }
+
         private bool GetBooleanOption( string name, bool defaultValue = false )
         {
             if ( this._source.TryGetValue( $"build_property.{name}", out var flagString ) && bool.TryParse( flagString, out var flagValue ) )

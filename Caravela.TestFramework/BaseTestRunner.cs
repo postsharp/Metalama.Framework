@@ -3,6 +3,8 @@
 
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Formatting;
+using Caravela.Framework.Impl.Pipeline;
+using Caravela.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
@@ -31,10 +33,10 @@ namespace Caravela.TestFramework
         private readonly MetadataReference[] _metadataReferences;
         private static readonly AsyncLocal<bool> _isTestRunning = new();
 
-        protected IServiceProvider ServiceProvider { get; }
+        protected ServiceProvider BaseServiceProvider { get; }
 
         protected BaseTestRunner(
-            IServiceProvider serviceProvider,
+            ServiceProvider serviceProvider,
             string? projectDirectory,
             IEnumerable<MetadataReference> metadataReferences,
             ITestOutputHelper? logger )
@@ -43,7 +45,7 @@ namespace Caravela.TestFramework
                 .Append( MetadataReference.CreateFromFile( typeof(BaseTestRunner).Assembly.Location ) )
                 .ToArray();
 
-            this.ServiceProvider = serviceProvider;
+            this.BaseServiceProvider = serviceProvider.WithMark( ServiceProviderMark.Test );
             this.ProjectDirectory = projectDirectory;
             this.Logger = logger;
         }
@@ -60,30 +62,45 @@ namespace Caravela.TestFramework
             using ( TestExecutionContext.Open() )
             {
                 await this.RunAndAssertCoreAsync( testInput );
+
+                // This is a trick to make the current task, on the heap, stop having a reference to the previous
+                // task. This allows TestExecutionContext.Dispose to perform a full GC. Without Task.Yield, we will
+                // have references to the objects that are in the scope of the test.
+                await Task.Yield();
             }
         }
 
         private async Task RunAndAssertCoreAsync( TestInput testInput )
         {
+            var serviceProvider = this.BaseServiceProvider.WithProjectScopedServices();
             Dictionary<string, object?> state = new( StringComparer.Ordinal );
             using var testResult = new TestResult();
-            await this.RunAsync( testInput, testResult, state );
+            await this.RunAsync( serviceProvider, testInput, testResult, state );
             this.SaveResults( testInput, testResult, state );
             this.ExecuteAssertions( testInput, testResult, state );
         }
 
         public Task RunAsync( TestInput testInput, TestResult testResult )
-            => this.RunAsync( testInput, testResult, new Dictionary<string, object?>( StringComparer.InvariantCulture ) );
+            => this.RunAsync(
+                this.BaseServiceProvider.WithProjectScopedServices(),
+                testInput,
+                testResult,
+                new Dictionary<string, object?>( StringComparer.InvariantCulture ) );
 
         /// <summary>
-        /// Runs a test.
+        /// Runs a test. The present implementation of this method only prepares an input project and stores it in the <see cref="TestResult"/>.
+        /// Derived classes must call this base method and continue with running the test.
         /// </summary>
+        /// <param name="serviceProvider"></param>
         /// <param name="testInput"></param>
         /// <param name="testResult">The output object must be created by the caller and passed, so that the caller can get
-        /// a partial object in case of exception.</param>
+        ///     a partial object in case of exception.</param>
         /// <param name="state"></param>
-        /// <returns></returns>
-        private protected virtual async Task RunAsync( TestInput testInput, TestResult testResult, Dictionary<string, object?> state )
+        private protected virtual async Task RunAsync(
+            ServiceProvider serviceProvider,
+            TestInput testInput,
+            TestResult testResult,
+            Dictionary<string, object?> state )
         {
             if ( testInput.Options.InvalidSourceOptions.Count > 0 )
             {
@@ -112,7 +129,8 @@ namespace Caravela.TestFramework
                     allowUnsafe: true,
                     nullableContextOptions: NullableContextOptions.Enable );
 
-                var project = this.CreateProject( testInput.Options ).WithParseOptions( parseOptions ).WithCompilationOptions( compilationOptions );
+                var emptyProject = this.CreateProject( testInput.Options ).WithParseOptions( parseOptions ).WithCompilationOptions( compilationOptions );
+                var project = emptyProject;
 
                 Document AddDocument( string fileName, string sourceCode )
                 {
@@ -141,15 +159,31 @@ namespace Caravela.TestFramework
                 foreach ( var includedFile in testInput.Options.IncludedFiles )
                 {
                     var includedFullPath = Path.GetFullPath( Path.Combine( Path.GetDirectoryName( testInput.FullPath )!, includedFile ) );
-                    var includedText = File.ReadAllText( includedFullPath );
-                    var includedFileName = Path.GetFileName( includedFullPath );
+                    var includedText = await File.ReadAllTextAsync( includedFullPath );
 
-                    var includedDocument = AddDocument( includedFileName, includedText );
+                    if ( !includedFile.EndsWith( ".Dependency.cs", StringComparison.OrdinalIgnoreCase ) )
+                    {
+                        var includedFileName = Path.GetFileName( includedFullPath );
 
-                    testResult.AddInputDocument( includedDocument, includedFullPath );
+                        var includedDocument = AddDocument( includedFileName, includedText );
 
-                    var includedSyntaxTree = (await includedDocument.GetSyntaxTreeAsync())!;
-                    initialCompilation = initialCompilation.AddSyntaxTrees( includedSyntaxTree );
+                        testResult.AddInputDocument( includedDocument, includedFullPath );
+
+                        var includedSyntaxTree = (await includedDocument.GetSyntaxTreeAsync())!;
+                        initialCompilation = initialCompilation.AddSyntaxTrees( includedSyntaxTree );
+                    }
+                    else
+                    {
+                        // Dependencies must be compiled separately using Caravela.
+                        var dependency = await this.CompileDependencyAsync( includedText, emptyProject, testResult );
+
+                        if ( dependency == null )
+                        {
+                            return;
+                        }
+
+                        initialCompilation = initialCompilation.AddReferences( dependency );
+                    }
                 }
 
                 ValidateCustomAttributes( initialCompilation );
@@ -174,6 +208,49 @@ namespace Caravela.TestFramework
             {
                 _isTestRunning.Value = false;
             }
+        }
+
+        /// <summary>
+        /// Compiles a dependency using the Caravela pipeline, emits a binary assembly, and returns a reference to it.
+        /// </summary>
+        private async Task<MetadataReference?> CompileDependencyAsync( string code, Project project, TestResult testResult )
+        {
+            project = project.AddDocument( "dependency.cs", code ).Project;
+
+            using var domain = new UnloadableCompileTimeDomain();
+
+            // Transform with Caravela.
+            var pipeline = new CompileTimeAspectPipeline( this.BaseServiceProvider.WithProjectScopedServices(), true, domain );
+
+            if ( !pipeline.TryExecute(
+                testResult.InputCompilationDiagnostics,
+                (await project.GetCompilationAsync())!,
+                default,
+                CancellationToken.None,
+                out _,
+                out var outputResources,
+                out var resultCompilation ) )
+            {
+                testResult.SetFailed( "Transformation of the dependency failed." );
+
+                return null;
+            }
+
+            // Emit the binary assembly.
+            var testOptions = this.BaseServiceProvider.GetService<TestProjectOptions>();
+            var outputPath = Path.Combine( testOptions.BaseDirectory, "dependency.dll" );
+
+            var emitResult = resultCompilation.Emit( outputPath, manifestResources: outputResources );
+
+            if ( !emitResult.Success )
+            {
+                testResult.InputCompilationDiagnostics.Report( emitResult.Diagnostics );
+                testResult.SetFailed( "Compilation of the dependency failed." );
+
+                return null;
+            }
+
+            return MetadataReference.CreateFromFile( outputPath );
         }
 
         /// <summary>
@@ -350,9 +427,9 @@ namespace Caravela.TestFramework
             return project;
         }
 
-        private protected async Task WriteHtmlAsync( TestInput testInput, TestResult testResult )
+        private protected async Task WriteHtmlAsync( IServiceProvider serviceProvider, TestInput testInput, TestResult testResult )
         {
-            var htmlCodeWriter = this.CreateHtmlCodeWriter( this.ServiceProvider, testInput.Options );
+            var htmlCodeWriter = this.CreateHtmlCodeWriter( serviceProvider, testInput.Options );
 
             var htmlDirectory = Path.Combine(
                 this.ProjectDirectory!,

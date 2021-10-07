@@ -252,7 +252,8 @@ namespace Caravela.Framework.Impl.Templating
                         expression.Syntax,
                         SyntaxFactory.IdentifierName( member ) )
                     .WithAdditionalAnnotations( Simplifier.Annotation ),
-                TemplateExpansionContext.Current.Compilation );
+                TemplateExpansionContext.Current.Compilation,
+                TemplateExpansionContext.Current.SyntaxGenerationContext.ServiceProvider );
         }
 
         public static SyntaxToken GetUniqueIdentifier( string hint )

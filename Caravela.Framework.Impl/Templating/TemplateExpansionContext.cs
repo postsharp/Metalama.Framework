@@ -22,7 +22,7 @@ namespace Caravela.Framework.Impl.Templating
 {
     internal partial class TemplateExpansionContext
     {
-        private readonly Template<IMethod> _templateMethod;
+        private readonly TemplateMember<IMethod> _templateMethod;
         private readonly IUserExpression? _proceedExpression;
         private static readonly AsyncLocal<TemplateExpansionContext?> _current = new();
         private static readonly AsyncLocal<SyntaxGenerationContext?> _currentSyntaxGenerationContext = new();
@@ -68,7 +68,7 @@ namespace Caravela.Framework.Impl.Templating
             TemplateLexicalScope lexicalScope,
             SyntaxSerializationService syntaxSerializationService,
             SyntaxGenerationContext syntaxGenerationContext,
-            Template<IMethod> templateMethod,
+            TemplateMember<IMethod> templateMethod,
             IUserExpression? proceedExpression )
         {
             this._templateMethod = templateMethod;

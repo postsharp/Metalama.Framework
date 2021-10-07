@@ -6,7 +6,6 @@ using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.Aspects;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Collections;
-using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Transformations;
 using Microsoft.CodeAnalysis;
@@ -39,14 +38,17 @@ namespace Caravela.Framework.Impl.Pipeline
 
         public IReadOnlyList<IAspectSource> ExternalAspectSources => new[] { this._overflowAspectSource };
 
+        public AspectProjectConfiguration ProjectConfiguration { get; }
+
         public PipelineStepsState(
             IReadOnlyList<OrderedAspectLayer> aspectLayers,
             CompilationModel inputCompilation,
-            CompileTimeProject compileTimeProject,
-            IReadOnlyList<IAspectSource> inputAspectSources )
+            IReadOnlyList<IAspectSource> inputAspectSources,
+            AspectProjectConfiguration projectConfiguration )
         {
-            this._diagnostics = new UserDiagnosticSink( compileTimeProject );
+            this._diagnostics = new UserDiagnosticSink( projectConfiguration.CompileTimeProject );
             this.Compilation = inputCompilation;
+            this.ProjectConfiguration = projectConfiguration;
 
             // Create an empty collection of steps.
             this._comparer = new PipelineStepIdComparer( aspectLayers );
@@ -113,7 +115,7 @@ namespace Caravela.Framework.Impl.Pipeline
 
             foreach ( var aspectSource in aspectSources )
             {
-                foreach ( var aspectType in aspectSource.AspectTypes )
+                foreach ( var aspectType in aspectSource.AspectClasses )
                 {
                     var aspectLayerId = new AspectLayerId( aspectType );
 

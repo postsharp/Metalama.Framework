@@ -6,10 +6,10 @@ using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.Aspects;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Serialization;
-using Caravela.Framework.Impl.ServiceProvider;
 using Caravela.Framework.Impl.Templating;
 using Caravela.Framework.Impl.Templating.MetaModel;
 using Caravela.Framework.Impl.Utilities;
+using Caravela.Framework.Project;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
@@ -25,9 +25,9 @@ namespace Caravela.Framework.Impl.Transformations
     {
         public new IMethod OverriddenDeclaration => (IMethod) base.OverriddenDeclaration;
 
-        public Template<IMethod> Template { get; }
+        public TemplateMember<IMethod> Template { get; }
 
-        public OverriddenMethod( Advice advice, IMethod overriddenDeclaration, Template<IMethod> template )
+        public OverriddenMethod( Advice advice, IMethod overriddenDeclaration, TemplateMember<IMethod> template )
             : base( advice, overriddenDeclaration )
         {
             Invariant.Assert( template.IsNotNull );
@@ -57,7 +57,7 @@ namespace Caravela.Framework.Impl.Transformations
                         context.ServiceProvider ) );
 
                 var expansionContext = new TemplateExpansionContext(
-                    this.Advice.Aspect.Aspect,
+                    this.Advice.TemplateInstance.Instance,
                     metaApi,
                     this.OverriddenDeclaration.Compilation,
                     context.LexicalScopeProvider.GetLexicalScope( this.OverriddenDeclaration ),
@@ -66,7 +66,7 @@ namespace Caravela.Framework.Impl.Transformations
                     this.Template,
                     proceedExpression );
 
-                var templateDriver = this.Advice.Aspect.AspectClass.GetTemplateDriver( this.Template.Declaration! );
+                var templateDriver = this.Advice.TemplateInstance.TemplateClass.GetTemplateDriver( this.Template.Declaration! );
 
                 if ( !templateDriver.TryExpandDeclaration( expansionContext, context.DiagnosticSink, out var newMethodBody ) )
                 {

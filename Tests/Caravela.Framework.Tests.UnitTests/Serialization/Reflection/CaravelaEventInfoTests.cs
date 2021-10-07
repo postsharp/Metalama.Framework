@@ -9,6 +9,8 @@ using System.Reflection;
 using Xunit;
 using Xunit.Abstractions;
 
+// ReSharper disable ParameterOnlyUsedForPreconditionCheck.Local
+
 namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
 {
     public class CaravelaEventInfoTests : ReflectionTestBase
@@ -81,11 +83,13 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
 
         private string SerializeEvent( string code )
         {
-            var compilation = CreateCompilationModel( code );
-            var single = compilation.DeclaredTypes.Single( t => t.Name == "Target" ).Events.Single( m => m.Name == "Activated" );
+            using var testContext = this.CreateTestContext();
+
+            var compilation = testContext.CreateCompilationModel( code );
+            var single = compilation.Types.Single( t => t.Name == "Target" ).Events.Single( m => m.Name == "Activated" );
             var e = (single as Event)!;
 
-            var actual = this
+            var actual = testContext
                 .Serialize( new CompileTimeEventInfo( e ) )
                 .ToString();
 

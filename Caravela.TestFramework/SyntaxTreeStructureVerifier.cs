@@ -4,6 +4,7 @@
 using Caravela.Framework.Impl.Templating;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using System;
 using Xunit;
 
 namespace Caravela.TestFramework
@@ -14,13 +15,15 @@ namespace Caravela.TestFramework
         /// Checks for "hidden" problems in a <see cref="SyntaxTree"/>, i.e. problems where the _text_
         /// of the source code is valid, but the semantic syntax tree is not.
         /// </summary>
-        public static void Verify( Compilation compilation )
+        public static void Verify( Compilation compilation, IServiceProvider serviceProvider )
         {
             foreach ( var syntaxTree in compilation.SyntaxTrees )
             {
-                var actualSyntaxFactory = syntaxTree.GetRoot().ToSyntaxFactoryDebug( compilation );
+                var actualSyntaxFactory = syntaxTree.GetRoot().ToSyntaxFactoryDebug( compilation, serviceProvider );
 
-                var parsedFromText = CSharpSyntaxTree.ParseText( syntaxTree.GetRoot().ToString() ).GetRoot().ToSyntaxFactoryDebug( compilation );
+                var parsedFromText = CSharpSyntaxTree.ParseText( syntaxTree.GetRoot().ToString() )
+                    .GetRoot()
+                    .ToSyntaxFactoryDebug( compilation, serviceProvider );
 
                 Assert.Equal( parsedFromText, actualSyntaxFactory );
             }

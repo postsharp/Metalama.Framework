@@ -7,10 +7,11 @@ using Caravela.Framework.Impl.Aspects;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
+using Caravela.Framework.Impl.Fabrics;
 using Caravela.Framework.Impl.Options;
 using Caravela.Framework.Impl.Sdk;
-using Caravela.Framework.Impl.ServiceProvider;
 using Caravela.Framework.Impl.Utilities;
+using Caravela.Framework.Project;
 using Microsoft.CodeAnalysis;
 using MoreLinq;
 using System;
@@ -27,13 +28,16 @@ namespace Caravela.Framework.Impl.Pipeline
     /// </summary>
     public abstract class AspectPipeline : IDisposable
     {
+        private const string _highLevelStageGroupingKey = nameof(_highLevelStageGroupingKey);
         private readonly bool _ownsDomain;
 
         public IProjectOptions ProjectOptions { get; }
 
         private readonly CompileTimeDomain _domain;
 
-        public ServiceProvider.ServiceProvider ServiceProvider { get; }
+        // This member is intentionally protected because there can be one ServiceProvider per project,
+        // but the pipeline can be used by many projects.
+        protected internal ServiceProvider ServiceProvider { get; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AspectPipeline"/> class.
@@ -45,25 +49,17 @@ namespace Caravela.Framework.Impl.Pipeline
         /// <param name="directoryOptions"></param>
         /// <param name="assemblyLocator"></param>
         protected AspectPipeline(
-            IProjectOptions projectOptions,
+            ServiceProvider serviceProvider,
             AspectExecutionScenario executionScenario,
             bool isTest,
-            CompileTimeDomain? domain,
-            IPathOptions? directoryOptions = null,
-            IAssemblyLocator? assemblyLocator = null )
+            CompileTimeDomain? domain )
         {
-            this.ServiceProvider = ServiceProviderFactory.GetServiceProvider( directoryOptions, assemblyLocator );
+            this.ProjectOptions = serviceProvider.GetService<IProjectOptions>();
 
-            var existingProjectOptions = this.ServiceProvider.GetOptionalService<IProjectOptions>();
-
-            if ( existingProjectOptions != null )
-            {
-                // TryCaravela uses this scenario to define options.
-                projectOptions = existingProjectOptions.Apply( projectOptions );
-            }
-
-            this.ServiceProvider.AddService( projectOptions );
-            this.ProjectOptions = projectOptions;
+            this.ServiceProvider = serviceProvider
+                .WithServices( this.ProjectOptions.PlugIns.OfType<IService>() )
+                .WithServices( new AspectPipelineDescription( executionScenario, isTest ) )
+                .WithMark( ServiceProviderMark.Pipeline );
 
             if ( domain != null )
             {
@@ -75,19 +71,16 @@ namespace Caravela.Framework.Impl.Pipeline
                 this._domain = this.ServiceProvider.GetService<ICompileTimeDomainFactory>().CreateDomain();
                 this._ownsDomain = true;
             }
-
-            // ReSharper disable once VirtualMemberCallInConstructor
-            this.ServiceProvider.AddService( new AspectPipelineDescription( executionScenario, isTest ) );
         }
 
-        internal int PipelineInitializationCount { get; set; }
+        internal int PipelineInitializationCount { get; private set; }
 
         private protected bool TryInitialize(
             IDiagnosticAdder diagnosticAdder,
             PartialCompilation compilation,
             IReadOnlyList<SyntaxTree>? compileTimeTreesHint,
             CancellationToken cancellationToken,
-            [NotNullWhen( true )] out AspectPipelineConfiguration? configuration )
+            [NotNullWhen( true )] out AspectProjectConfiguration? configuration )
         {
             this.PipelineInitializationCount++;
 
@@ -112,6 +105,7 @@ namespace Caravela.Framework.Impl.Pipeline
 
             // Create compiler plug-ins found in compile-time code.
             ImmutableArray<object> compilerPlugIns;
+            var projectServiceProvider = this.ServiceProvider.WithMark( ServiceProviderMark.Project );
 
             if ( compileTimeProject != null )
             {
@@ -120,8 +114,17 @@ namespace Caravela.Framework.Impl.Pipeline
 
                 var invoker = this.ServiceProvider.GetService<UserCodeInvoker>();
 
-                compilerPlugIns = compileTimeProject.ClosureProjects
-                    .SelectMany( p => p.CompilerPlugInTypes.Select( t => invoker.Invoke( () => Activator.CreateInstance( p.GetType( t ) ) ) ) )
+                var additionalPlugIns = compileTimeProject.ClosureProjects
+                    .SelectMany( p => p.PlugInTypes.Select( t => invoker.Invoke( () => Activator.CreateInstance( p.GetType( t ) ) ) ) )
+                    .ToList();
+
+                if ( additionalPlugIns.Count > 0 )
+                {
+                    // If we have plug-in defined in code, we have to fork the service provider for this specific project.
+                    projectServiceProvider = projectServiceProvider.WithServices( additionalPlugIns.OfType<IService>() );
+                }
+
+                compilerPlugIns = additionalPlugIns
                     .Concat( this.ProjectOptions.PlugIns )
                     .ToImmutableArray();
             }
@@ -131,37 +134,58 @@ namespace Caravela.Framework.Impl.Pipeline
             }
 
             // Create aspect types.
-            var driverFactory = new AspectDriverFactory( this.ServiceProvider, compilation.Compilation, compilerPlugIns );
-            var aspectTypeFactory = new AspectClassMetadataFactory( this.ServiceProvider, driverFactory );
+            var driverFactory = new AspectDriverFactory( compilation.Compilation, compilerPlugIns, projectServiceProvider );
+            var aspectTypeFactory = new AspectClassMetadataFactory( projectServiceProvider, driverFactory );
 
-            var aspectTypes = aspectTypeFactory.GetAspectClasses( compilation.Compilation, compileTimeProject, diagnosticAdder ).ToImmutableArray();
+            var aspectClasses = aspectTypeFactory.GetAspectClasses( compilation.Compilation, compileTimeProject, diagnosticAdder ).ToImmutableArray();
 
             // Get aspect parts and sort them.
-            var unsortedAspectLayers = aspectTypes
+            var unsortedAspectLayers = aspectClasses
                 .Where( t => !t.IsAbstract )
                 .SelectMany( at => at.Layers )
                 .ToImmutableArray();
 
             var aspectOrderSources = new IAspectOrderingSource[]
             {
-                new AttributeAspectOrderingSource( compilation.Compilation, loader ), new AspectLayerOrderingSource( aspectTypes )
+                new AttributeAspectOrderingSource( compilation.Compilation, loader ), new AspectLayerOrderingSource( aspectClasses )
             };
 
-            if ( !AspectLayerSorter.TrySort( unsortedAspectLayers, aspectOrderSources, diagnosticAdder, out var sortedAspectLayers ) )
+            if ( !AspectLayerSorter.TrySort( unsortedAspectLayers, aspectOrderSources, diagnosticAdder, out var orderedAspectLayers ) )
             {
                 configuration = null;
 
                 return false;
             }
 
-            var aspectLayers = sortedAspectLayers.ToImmutableArray();
+            ImmutableArray<OrderedAspectLayer> allOrderedAspectLayers;
+            ImmutableArray<IBoundAspectClass> allAspectClasses;
 
-            var stages = aspectLayers
+            if ( compileTimeProject != null )
+            {
+                var fabricTopLevelAspectClass = new FabricTopLevelAspectClass( projectServiceProvider, roslynCompilation, compileTimeProject );
+                var fabricAspectLayer = new OrderedAspectLayer( -1, fabricTopLevelAspectClass.Layer );
+
+                allOrderedAspectLayers = orderedAspectLayers.Insert( 0, fabricAspectLayer );
+                allAspectClasses = aspectClasses.As<IBoundAspectClass>().Add( fabricTopLevelAspectClass );
+            }
+            else
+            {
+                allOrderedAspectLayers = orderedAspectLayers;
+                allAspectClasses = aspectClasses.As<IBoundAspectClass>();
+            }
+
+            var stages = allOrderedAspectLayers
                 .GroupAdjacent( x => GetGroupingKey( x.AspectClass.AspectDriver ) )
-                .Select( g => this.CreateStage( g.Key, g.ToImmutableArray(), loader, compileTimeProject! ) )
+                .Select( g => this.CreateStage( g.Key, g.ToImmutableArray(), compileTimeProject! ) )
                 .ToImmutableArray();
 
-            configuration = new AspectPipelineConfiguration( stages, aspectTypes, sortedAspectLayers, compileTimeProject, loader );
+            configuration = new AspectProjectConfiguration(
+                stages,
+                allAspectClasses,
+                allOrderedAspectLayers,
+                compileTimeProject,
+                loader,
+                projectServiceProvider );
 
             return true;
 
@@ -173,15 +197,29 @@ namespace Caravela.Framework.Impl.Pipeline
                     IAspectWeaver weaver => weaver,
 
                     // AspectDrivers are grouped together
-                    AspectDriver => nameof(AspectDriver),
+                    AspectDriver => _highLevelStageGroupingKey,
 
-                    _ => throw new NotSupportedException()
+                    _ => throw new AssertionFailedException()
                 };
         }
 
-        private protected virtual IReadOnlyList<IAspectSource> CreateAspectSources( AspectPipelineConfiguration configuration )
+        private protected virtual ImmutableArray<IAspectSource> CreateAspectSources(
+            AspectProjectConfiguration configuration,
+            Compilation compilation )
         {
-            return new[] { new CompilationAspectSource( configuration.AspectClasses, configuration.CompileTimeProjectLoader ) };
+            var sources = ImmutableArray.Create<IAspectSource>(
+                new CompilationAspectSource( configuration.AspectClasses.As<IAspectClass>(), configuration.CompileTimeProjectLoader ) );
+
+            if ( configuration.CompileTimeProject != null )
+            {
+                var fabricManager = new FabricManager( configuration );
+
+                fabricManager.ExecuteFabrics( configuration.CompileTimeProject, compilation );
+
+                sources = sources.Add( fabricManager.AspectSource );
+            }
+
+            return sources;
         }
 
         /// <summary>
@@ -191,25 +229,27 @@ namespace Caravela.Framework.Impl.Pipeline
         private protected bool TryExecute(
             PartialCompilation compilation,
             IDiagnosticAdder diagnosticAdder,
-            AspectPipelineConfiguration pipelineConfiguration,
+            AspectProjectConfiguration projectConfiguration,
             CancellationToken cancellationToken,
             [NotNullWhen( true )] out PipelineStageResult? pipelineStageResult )
         {
-            // If there is no aspect in the compilation, don't execute the pipeline.
-            if ( pipelineConfiguration.CompileTimeProject == null || pipelineConfiguration.AspectClasses.Count == 0 )
+            var project = new ProjectModel( compilation.Compilation, projectConfiguration.ServiceProvider );
+
+            if ( projectConfiguration.CompileTimeProject == null || projectConfiguration.AspectClasses.Length == 0 )
             {
-                pipelineStageResult = new PipelineStageResult( compilation, Array.Empty<OrderedAspectLayer>() );
+                // If there is no aspect in the compilation, don't execute the pipeline.
+                pipelineStageResult = new PipelineStageResult( compilation, project, Array.Empty<OrderedAspectLayer>() );
 
                 return true;
             }
 
-            var aspectSources = this.CreateAspectSources( pipelineConfiguration );
+            var aspectSources = this.CreateAspectSources( projectConfiguration, compilation.Compilation );
 
-            pipelineStageResult = new PipelineStageResult( compilation, pipelineConfiguration.Layers, aspectSources: aspectSources );
+            pipelineStageResult = new PipelineStageResult( compilation, project, projectConfiguration.AspectLayers, aspectSources: aspectSources );
 
-            foreach ( var stage in pipelineConfiguration.Stages )
+            foreach ( var stage in projectConfiguration.Stages )
             {
-                if ( !stage.TryExecute( pipelineStageResult, diagnosticAdder, cancellationToken, out var newStageResult ) )
+                if ( !stage.TryExecute( projectConfiguration, pipelineStageResult, diagnosticAdder, cancellationToken, out var newStageResult ) )
                 {
                     return false;
                 }
@@ -235,17 +275,14 @@ namespace Caravela.Framework.Impl.Pipeline
         /// </summary>
         /// <param name="parts"></param>
         /// <param name="compileTimeProject"></param>
-        /// <param name="compileTimeProjectLoader"></param>
         /// <returns></returns>
         private protected abstract HighLevelPipelineStage CreateStage(
-            IReadOnlyList<OrderedAspectLayer> parts,
-            CompileTimeProject compileTimeProject,
-            CompileTimeProjectLoader compileTimeProjectLoader );
+            ImmutableArray<OrderedAspectLayer> parts,
+            CompileTimeProject compileTimeProject );
 
         private PipelineStage CreateStage(
             object groupKey,
-            IReadOnlyList<OrderedAspectLayer> parts,
-            CompileTimeProjectLoader compileTimeProjectLoader,
+            ImmutableArray<OrderedAspectLayer> parts,
             CompileTimeProject compileTimeProject )
         {
             switch ( groupKey )
@@ -256,9 +293,9 @@ namespace Caravela.Framework.Impl.Pipeline
 
                     return new LowLevelPipelineStage( weaver, partData.AspectClass, this.ServiceProvider );
 
-                case nameof(AspectDriver):
+                case _highLevelStageGroupingKey:
 
-                    return this.CreateStage( parts, compileTimeProject, compileTimeProjectLoader );
+                    return this.CreateStage( parts, compileTimeProject );
 
                 default:
 

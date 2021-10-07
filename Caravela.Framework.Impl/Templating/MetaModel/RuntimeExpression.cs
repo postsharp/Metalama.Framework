@@ -90,8 +90,12 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
             : this( syntax, type.GetSymbol(), generationContext, isReferenceable ) { }
 
         // This overload must be used only in tests or when the expression type is really unknown.
-        internal RuntimeExpression( ExpressionSyntax syntax, ICompilation compilation )
-            : this( syntax, (ITypeSymbol) null!, SyntaxGenerationContext.CreateDefault( compilation.GetCompilationModel().RoslynCompilation ), false ) { }
+        internal RuntimeExpression( ExpressionSyntax syntax, ICompilation compilation, IServiceProvider serviceProvider )
+            : this(
+                syntax,
+                (ITypeSymbol) null!,
+                SyntaxGenerationContext.CreateDefault( serviceProvider, compilation.GetCompilationModel().RoslynCompilation ),
+                false ) { }
 
         internal static ExpressionSyntax GetSyntaxFromValue( object? value, ICompilation compilation, SyntaxGenerationContext generationContext )
             => FromValue( value, compilation, generationContext ).Syntax;
@@ -101,7 +105,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
             switch ( value )
             {
                 case null:
-                    return new RuntimeExpression( SyntaxFactoryEx.Null, compilation );
+                    return new RuntimeExpression( SyntaxFactoryEx.Null, compilation, generationContext.ServiceProvider );
 
                 case RuntimeExpression runtimeExpression:
                     return runtimeExpression;
@@ -110,7 +114,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
                     return dynamicMember.ToRunTimeExpression();
 
                 case ExpressionSyntax syntax:
-                    return new RuntimeExpression( syntax, compilation );
+                    return new RuntimeExpression( syntax, compilation, generationContext.ServiceProvider );
 
                 default:
                     var expression = SyntaxFactoryEx.LiteralExpressionOrNull( value );

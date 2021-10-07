@@ -12,21 +12,22 @@ namespace Caravela.Framework.Impl.Advices
 {
     internal class OverrideFieldOrPropertyAdvice : OverrideMemberAdvice<IFieldOrProperty>
     {
-        public Template<IProperty> PropertyTemplate { get; }
+        public TemplateMember<IProperty> PropertyTemplate { get; }
 
-        public Template<IMethod> GetTemplate { get; }
+        public TemplateMember<IMethod> GetTemplate { get; }
 
-        public Template<IMethod> SetTemplate { get; }
+        public TemplateMember<IMethod> SetTemplate { get; }
 
         public OverrideFieldOrPropertyAdvice(
             AspectInstance aspect,
+            TemplateClassInstance templateInstance,
             IFieldOrProperty targetDeclaration,
-            Template<IProperty> propertyTemplate,
-            Template<IMethod> getTemplate,
-            Template<IMethod> setTemplate,
+            TemplateMember<IProperty> propertyTemplate,
+            TemplateMember<IMethod> getTemplate,
+            TemplateMember<IMethod> setTemplate,
             string? layerName,
             Dictionary<string, object?>? tags )
-            : base( aspect, targetDeclaration, layerName, tags )
+            : base( aspect, templateInstance, targetDeclaration, layerName, tags )
         {
             this.PropertyTemplate = propertyTemplate;
             this.GetTemplate = getTemplate;

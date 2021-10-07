@@ -27,6 +27,7 @@ namespace Caravela.Framework.Impl.Linking
     {
         private readonly LinkerIntroductionRegistry _introductionRegistry;
         private readonly LinkerAnalysisRegistry _analysisRegistry;
+        private readonly IServiceProvider _serviceProvider;
 
         public AspectReferenceResolver ReferenceResolver { get; }
 
@@ -39,12 +40,14 @@ namespace Caravela.Framework.Impl.Linking
             LinkerIntroductionRegistry introductionRegistry,
             LinkerAnalysisRegistry analysisRegistry,
             AspectReferenceResolver referenceResolver,
-            UserDiagnosticSink diagnosticSink )
+            UserDiagnosticSink diagnosticSink,
+            IServiceProvider serviceProvider )
         {
             this._introductionRegistry = introductionRegistry;
             this._analysisRegistry = analysisRegistry;
             this.IntermediateCompilation = intermediateCompilation;
             this.DiagnosticSink = diagnosticSink;
+            this._serviceProvider = serviceProvider;
             this.ReferenceResolver = referenceResolver;
         }
 

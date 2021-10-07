@@ -3,6 +3,8 @@
 
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code.Collections;
+using Caravela.Framework.Project;
+using System;
 using System.Collections.Generic;
 
 // TODO: InternalImplement
@@ -14,10 +16,14 @@ namespace Caravela.Framework.Code
     [CompileTimeOnly]
     public interface ICompilation : IAssembly
     {
+        IProject Project { get; }
+
+        string AssemblyName { get; }
+
         /// <summary>
         /// Gets the list of types declared in the current compilation, in all namespaces, but not the nested types.
         /// </summary>
-        INamedTypeList DeclaredTypes { get; }
+        INamedTypeList Types { get; }
 
         /// <summary>
         /// Gets a service that allows to create type instances and compare them.
@@ -27,6 +33,7 @@ namespace Caravela.Framework.Code
         /// <summary>
         /// Gets the list of managed resources in the current compilation.
         /// </summary>
+        [Obsolete( "Not implemented." )]
         IReadOnlyList<IManagedResource> ManagedResources { get; }
 
         /// <summary>
@@ -35,6 +42,22 @@ namespace Caravela.Framework.Code
         /// </summary>
         IDeclarationComparer InvariantComparer { get; }
 
+        /// <summary>
+        /// Gets the global namespace (i.e. the one with an empty name).
+        /// </summary>
+        INamespace GlobalNamespace { get; }
+
+        /// <summary>
+        /// Gets a namespace given its full name.
+        /// </summary>
+        INamespace? GetNamespace( string ns );
+
+        /// <summary>
+        /// Gets the aspects of a given type on a given declaration.
+        /// </summary>
+        /// <param name="declaration">The declaration on which the aspects are requested.</param>
+        /// <typeparam name="T">The type of aspects.</typeparam>
+        /// <returns>The collection of aspects of type <typeparamref name="T"/> on <paramref name="declaration"/>.</returns>
         IEnumerable<T> GetAspectsOf<T>( IDeclaration declaration )
             where T : IAspect;
     }

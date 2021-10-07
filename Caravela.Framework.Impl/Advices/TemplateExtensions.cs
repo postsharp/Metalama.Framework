@@ -8,14 +8,14 @@ namespace Caravela.Framework.Impl.Advices
 {
     internal static class TemplateExtensions
     {
-        public static ( Template<IMethod> Get, Template<IMethod> Set ) GetAccessorTemplates( this in Template<IProperty> propertyTemplate )
+        public static ( TemplateMember<IMethod> Get, TemplateMember<IMethod> Set ) GetAccessorTemplates( this in TemplateMember<IProperty> propertyTemplate )
         {
             if ( propertyTemplate.IsNotNull )
             {
                 if ( !propertyTemplate.Declaration!.IsAutoPropertyOrField )
                 {
-                    return (Template.Create( propertyTemplate.Declaration!.GetMethod, propertyTemplate.TemplateInfo ),
-                            Template.Create( propertyTemplate.Declaration!.SetMethod, propertyTemplate.TemplateInfo ));
+                    return (TemplateMember.Create( propertyTemplate.Declaration!.GetMethod, propertyTemplate.TemplateInfo ),
+                            TemplateMember.Create( propertyTemplate.Declaration!.SetMethod, propertyTemplate.TemplateInfo ));
                 }
             }
 
@@ -39,11 +39,11 @@ namespace Caravela.Framework.Impl.Advices
                 _ => false
             };
 
-        public static bool MustInterpretAsAsync( this in Template<IMethod> template )
+        public static bool MustInterpretAsAsync( this in TemplateMember<IMethod> template )
             => template.Declaration is { IsAsync: true }
                || (template.SelectedKind == TemplateKind.Default && template.InterpretedKind.IsAsync());
 
-        public static bool MustInterpretAsAsyncIterator( this in Template<IMethod> template )
+        public static bool MustInterpretAsAsyncIterator( this in TemplateMember<IMethod> template )
             => template.InterpretedKind.IsAsyncIterator() && (template.Declaration!.IsAsync || template.SelectedKind == TemplateKind.Default);
     }
 }

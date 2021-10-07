@@ -3,9 +3,7 @@
 
 using Caravela.Framework.Impl;
 using Caravela.Framework.Impl.Aspects;
-using Caravela.Framework.Impl.ServiceProvider;
 using Caravela.Framework.Impl.Transformations;
-using Caravela.Framework.Impl.Utilities;
 using Caravela.Framework.Tests.Integration.Tests.Linker;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -107,18 +105,16 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
 
             public IReadOnlyList<AspectLayerId> OrderedAspectLayers => this._orderedAspectLayers;
 
-            public ServiceProvider ServiceProvider { get; }
+            public IServiceProvider ServiceProvider { get; }
 
-            public TestRewriter()
+            public TestRewriter( IServiceProvider serviceProvider )
             {
                 this._orderedAspectLayers = new List<AspectLayerId>();
                 this._observableTransformations = new List<IObservableTransformation>();
                 this._replacedTransformations = new List<IObservableTransformation>();
                 this._nonObservableTransformations = new List<INonObservableTransformation>();
 
-                this.ServiceProvider = new ServiceProvider();
-
-                this.ServiceProvider.AddService( new UserCodeInvoker( this.ServiceProvider ) );
+                this.ServiceProvider = serviceProvider;
             }
 
             public override SyntaxNode? VisitUsingDirective( UsingDirectiveSyntax node )

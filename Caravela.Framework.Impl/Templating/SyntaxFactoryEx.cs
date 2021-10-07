@@ -98,9 +98,9 @@ namespace Caravela.Framework.Impl.Templating
         /// Generates a string that contains C# code that instantiates the given node
         /// using SyntaxFactory. Used for debugging.
         /// </summary>
-        public static string ToSyntaxFactoryDebug( this SyntaxNode node, Compilation compilation )
+        public static string ToSyntaxFactoryDebug( this SyntaxNode node, Compilation compilation, IServiceProvider serviceProvider )
         {
-            MetaSyntaxRewriter rewriter = new( compilation );
+            MetaSyntaxRewriter rewriter = new( serviceProvider, compilation );
             var normalized = NormalizeRewriter.Instance.Visit( node );
             var transformedNode = rewriter.Visit( normalized );
 
@@ -111,7 +111,7 @@ namespace Caravela.Framework.Impl.Templating
         {
             public static readonly NormalizeRewriter Instance = new();
 
-            public NormalizeRewriter() : base( true ) { }
+            private NormalizeRewriter() : base( true ) { }
 
             public override SyntaxNode? VisitQualifiedName( QualifiedNameSyntax node )
             {

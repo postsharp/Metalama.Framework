@@ -8,9 +8,9 @@ namespace Caravela.Framework.Impl.AspectOrdering
 {
     internal class AspectLayer : IEquatable<AspectLayerId>
     {
-        private readonly AspectClass? _aspectClass;
+        private readonly IBoundAspectClass? _aspectClass;
 
-        public AspectLayer( AspectClass aspectClass, string? layerName )
+        public AspectLayer( IBoundAspectClass aspectClass, string? layerName )
         {
             this._aspectClass = aspectClass;
             this.AspectLayerId = new AspectLayerId( aspectClass, layerName );
@@ -22,7 +22,7 @@ namespace Caravela.Framework.Impl.AspectOrdering
             this.AspectLayerId = new AspectLayerId( aspectTypeName, layerName );
         }
 
-        public AspectClass AspectClass => this._aspectClass.AssertNotNull();
+        public IBoundAspectClass AspectClass => this._aspectClass.AssertNotNull();
 
         public AspectLayerId AspectLayerId { get; }
 

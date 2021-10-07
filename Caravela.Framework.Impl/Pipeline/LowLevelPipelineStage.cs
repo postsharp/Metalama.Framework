@@ -23,9 +23,9 @@ namespace Caravela.Framework.Impl.Pipeline
     internal sealed class LowLevelPipelineStage : PipelineStage
     {
         private readonly IAspectWeaver _aspectWeaver;
-        private readonly AspectClass _aspectClass;
+        private readonly IBoundAspectClass _aspectClass;
 
-        public LowLevelPipelineStage( IAspectWeaver aspectWeaver, AspectClass aspectClass, IServiceProvider serviceProvider ) : base( serviceProvider )
+        public LowLevelPipelineStage( IAspectWeaver aspectWeaver, IBoundAspectClass aspectClass, IServiceProvider serviceProvider ) : base( serviceProvider )
         {
             this._aspectWeaver = aspectWeaver;
             this._aspectClass = aspectClass;
@@ -33,13 +33,14 @@ namespace Caravela.Framework.Impl.Pipeline
 
         /// <inheritdoc/>
         public override bool TryExecute(
+            AspectProjectConfiguration projectConfiguration,
             PipelineStageResult input,
             IDiagnosticAdder diagnostics,
             CancellationToken cancellationToken,
             [NotNullWhen( true )] out PipelineStageResult? result )
         {
             // TODO: it is suboptimal to get a CompilationModel here.
-            var compilationModel = CompilationModel.CreateInitialInstance( input.PartialCompilation );
+            var compilationModel = CompilationModel.CreateInitialInstance( input.Project, input.PartialCompilation );
 
             var aspectInstances = input.AspectSources
                 .SelectMany( s => s.GetAspectInstances( compilationModel, this._aspectClass, diagnostics, cancellationToken ) )
@@ -83,6 +84,7 @@ namespace Caravela.Framework.Impl.Pipeline
             // TODO: update AspectCompilation.Aspects
             result = new PipelineStageResult(
                 newCompilation,
+                input.Project,
                 input.AspectLayers,
                 input.Diagnostics,
                 input.AspectSources );

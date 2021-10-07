@@ -59,7 +59,7 @@ namespace Caravela.Framework.Impl.CodeModel
             => declaration.SelectManyRecursive(
                 child => child switch
                 {
-                    ICompilation compilation => compilation.DeclaredTypes,
+                    ICompilation compilation => compilation.Types,
                     INamedType namedType => namedType.NestedTypes
                         .Concat<IDeclaration>( namedType.Methods )
                         .Concat( namedType.Constructors )

@@ -3,6 +3,7 @@
 
 using Caravela.Framework.Code;
 using Caravela.Framework.Diagnostics;
+using Caravela.Framework.Project;
 using Caravela.Framework.Validation;
 using System;
 using System.Collections.Generic;
@@ -17,7 +18,6 @@ namespace Caravela.Framework.Aspects
     [InternalImplement]
     public interface IAspectLayerBuilder : IValidatorAdder
     {
-        [Obsolete( "Not implemented." )]
         IProject Project { get; }
 
         /// <summary>
@@ -46,7 +46,7 @@ namespace Caravela.Framework.Aspects
         IDeclaration Target { get; }
 
         /// <summary>
-        /// Gets an object that exposes methods that allow to create advices.
+        /// Gets an object that allows to create advices, e.g. overriding members, introducing members, or implementing new interfaces.
         /// </summary>
         IAdviceFactory Advices { get; }
 
@@ -67,14 +67,13 @@ namespace Caravela.Framework.Aspects
 
         /// <summary>
         /// Selects members of the current target declaration with the purpose of adding aspects and annotations to them
-        /// using e.g. <see cref="IDeclarationSelection{TDeclaration}.AddAspect{TAspect}(System.Linq.Expressions.Expression{System.Func{TDeclaration,TAspect}})"/>
+        /// using e.g. <see cref="IDeclarationSelection{TDeclaration}.AddAspect{TAspect}(System.Func{TDeclaration,System.Linq.Expressions.Expression{System.Func{TAspect}}})"/>
         /// or <see cref="IDeclarationSelection{TDeclaration}.AddAnnotation{TAspect,TAnnotation}"/>.
         /// </summary>
         /// <param name="selector"></param>
         /// <typeparam name="TMember"></typeparam>
         /// <returns></returns>
-        [Obsolete( "Not implemented." )]
-        IDeclarationSelection<TMember> WithMembers<TMember>( Func<TAspectTarget, TMember> selector )
+        IDeclarationSelection<TMember> WithMembers<TMember>( Func<TAspectTarget, IEnumerable<TMember>> selector )
             where TMember : class, IDeclaration;
     }
 }

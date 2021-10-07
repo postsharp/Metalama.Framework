@@ -6,10 +6,10 @@ using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.Aspects;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Serialization;
-using Caravela.Framework.Impl.ServiceProvider;
 using Caravela.Framework.Impl.Templating;
 using Caravela.Framework.Impl.Templating.MetaModel;
 using Caravela.Framework.Impl.Utilities;
+using Caravela.Framework.Project;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
@@ -23,18 +23,18 @@ namespace Caravela.Framework.Impl.Transformations
     {
         public new IProperty OverriddenDeclaration => (IProperty) base.OverriddenDeclaration;
 
-        public Template<IProperty> PropertyTemplate { get; }
+        public TemplateMember<IProperty> PropertyTemplate { get; }
 
-        public Template<IMethod> GetTemplate { get; }
+        public TemplateMember<IMethod> GetTemplate { get; }
 
-        public Template<IMethod> SetTemplate { get; }
+        public TemplateMember<IMethod> SetTemplate { get; }
 
         public OverriddenProperty(
             Advice advice,
             IProperty overriddenDeclaration,
-            Template<IProperty> propertyTemplate,
-            Template<IMethod> getTemplate,
-            Template<IMethod> setTemplate )
+            TemplateMember<IProperty> propertyTemplate,
+            TemplateMember<IMethod> getTemplate,
+            TemplateMember<IMethod> setTemplate )
             : base( advice, overriddenDeclaration )
         {
             // We need the getTemplate and setTemplate to be set by the caller even if propertyTemplate is set.
@@ -155,7 +155,7 @@ namespace Caravela.Framework.Impl.Transformations
 
         private bool TryExpandAccessorTemplate(
             in MemberIntroductionContext context,
-            Template<IMethod> accessorTemplate,
+            TemplateMember<IMethod> accessorTemplate,
             IMethod accessor,
             [NotNullWhen( true )] out BlockSyntax? body )
         {
@@ -197,7 +197,7 @@ namespace Caravela.Framework.Impl.Transformations
                     default,
                     proceedExpression );
 
-                var templateDriver = this.Advice.Aspect.AspectClass.GetTemplateDriver( accessorTemplate.Declaration! );
+                var templateDriver = this.Advice.TemplateInstance.TemplateClass.GetTemplateDriver( accessorTemplate.Declaration! );
 
                 return templateDriver.TryExpandDeclaration( expansionContext, context.DiagnosticSink, out body );
             }

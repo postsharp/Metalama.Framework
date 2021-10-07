@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
@@ -18,7 +19,7 @@ namespace Caravela.Framework.Impl.CodeModel
             public CompleteImpl( Compilation compilation, ImmutableArray<ResourceDescription> resources )
                 : base( compilation, resources ) { }
 
-            public CompleteImpl(
+            private CompleteImpl(
                 PartialCompilation baseCompilation,
                 IReadOnlyList<SyntaxTreeModification>? modifiedSyntaxTrees,
                 IReadOnlyList<SyntaxTree>? addedTrees,
@@ -29,7 +30,12 @@ namespace Caravela.Framework.Impl.CodeModel
             public override ImmutableDictionary<string, SyntaxTree> SyntaxTrees
                 => this.Compilation.SyntaxTrees.ToImmutableDictionary( s => s.FilePath, s => s );
 
-            public override IEnumerable<ITypeSymbol> Types => this.Compilation.Assembly.GetTypes();
+            [Memo]
+            public override ImmutableHashSet<INamedTypeSymbol> Types => this.Compilation.Assembly.GetTypes().ToImmutableHashSet();
+
+            [Memo]
+            public override ImmutableHashSet<INamespaceSymbol> Namespaces
+                => this.Compilation.Assembly.GlobalNamespace.SelectManyRecursive( n => n.GetNamespaceMembers() ).ToImmutableHashSet();
 
             public override bool IsPartial => false;
 

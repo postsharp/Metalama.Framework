@@ -22,7 +22,9 @@ namespace Caravela.Framework.Tests.UnitTests.CodeModel
         [Fact]
         public void Assigned()
         {
-            var emptyCompilation = CreateCompilationModel( "" );
+            using var testContext = this.CreateTestContext();
+
+            var emptyCompilation = testContext.CreateCompilationModel( "" );
             var c = new TypedConstant( emptyCompilation.Factory.GetSpecialType( SpecialType.Int32 ), 1 );
             Assert.True( c.IsAssigned );
             Assert.NotNull( c.Type );
@@ -33,7 +35,9 @@ namespace Caravela.Framework.Tests.UnitTests.CodeModel
         [Fact]
         public void Null()
         {
-            var emptyCompilation = CreateCompilationModel( "" );
+            using var testContext = this.CreateTestContext();
+
+            var emptyCompilation = testContext.CreateCompilationModel( "" );
             var c = new TypedConstant( emptyCompilation.Factory.GetSpecialType( SpecialType.String ), null );
             Assert.True( c.IsAssigned );
             Assert.NotNull( c.Type );

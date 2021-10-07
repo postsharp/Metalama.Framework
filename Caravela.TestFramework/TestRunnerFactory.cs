@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Impl.Pipeline;
 using System;
 using System.Linq;
 using Xunit.Abstractions;
@@ -12,7 +13,7 @@ namespace Caravela.TestFramework
     /// </summary>
     internal static class TestRunnerFactory
     {
-        public static BaseTestRunner CreateTestRunner( TestInput testInput, IServiceProvider serviceProvider, ITestOutputHelper? logger )
+        public static BaseTestRunner CreateTestRunner( TestInput testInput, ServiceProvider serviceProvider, ITestOutputHelper? logger )
         {
             var metadataReferences = testInput.Options.References.Select( a => a.ToMetadataReference() ).ToArray();
 

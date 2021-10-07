@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Impl;
 using Caravela.Framework.Impl.Utilities;
 using System;
 using System.Collections.Generic;
@@ -13,7 +14,7 @@ namespace Caravela.Framework.Tests.UnitTests.Utilities
 
         public void Add( IFileSystemWatcher watcher )
         {
-            this._watchers.Add( (watcher.Path, watcher.Filter), watcher );
+            this._watchers.Add( (watcher.Path.AssertNotNull(), watcher.Filter), watcher );
         }
 
         public IFileSystemWatcher Create() => throw new NotImplementedException();

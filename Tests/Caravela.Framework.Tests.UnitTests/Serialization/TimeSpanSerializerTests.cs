@@ -11,15 +11,19 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization
         [Fact]
         public void TestTimeSpan()
         {
+            using var testContext = this.CreateTestContext();
+
             var ts = TimeSpan.FromMinutes( 38 );
             var ticks = 38 * TimeSpan.TicksPerMinute;
-            Assert.Equal( "new global::System.TimeSpan(" + ticks + "L)", this.Serialize( ts ).ToString() );
+            Assert.Equal( "new global::System.TimeSpan(" + ticks + "L)", testContext.Serialize( ts ).ToString() );
         }
 
         [Fact]
         public void TestZero()
         {
-            Assert.Equal( "new global::System.TimeSpan(0L)", this.Serialize( TimeSpan.Zero ).ToString() );
+            using var testContext = this.CreateTestContext();
+
+            Assert.Equal( "new global::System.TimeSpan(0L)", testContext.Serialize( TimeSpan.Zero ).ToString() );
         }
     }
 }

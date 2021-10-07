@@ -5,10 +5,10 @@ using Caravela.Framework.Impl;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Linking;
+using Caravela.Framework.Impl.Pipeline;
 using Caravela.Framework.Tests.Integration.Runners.Linker;
 using Caravela.TestFramework;
 using Microsoft.CodeAnalysis;
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
@@ -22,7 +22,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
         /// Initializes a new instance of the <see cref="LinkerTestRunner"/> class.
         /// </summary>
         public LinkerTestRunner(
-            IServiceProvider serviceProvider,
+            ServiceProvider serviceProvider,
             string? projectDirectory,
             IEnumerable<MetadataReference> metadataReferences,
             ITestOutputHelper? logger )
@@ -35,17 +35,22 @@ namespace Caravela.Framework.Tests.Integration.Runners
         /// <summary>
         /// Runs the template test with name and source provided in the <paramref name="testInput"/>.
         /// </summary>
+        /// <param name="serviceProvider"></param>
         /// <param name="testInput">Specifies the input test parameters such as the name and the source.</param>
         /// <param name="testResult"></param>
         /// <param name="state"></param>
         /// <returns>The result of the test execution.</returns>
-        private protected override async Task RunAsync( TestInput testInput, TestResult testResult, Dictionary<string, object?> state )
+        private protected override async Task RunAsync(
+            ServiceProvider serviceProvider,
+            TestInput testInput,
+            TestResult testResult,
+            Dictionary<string, object?> state )
         {
-            var builder = new LinkerTestInputBuilder();
+            var builder = new LinkerTestInputBuilder( serviceProvider );
 
             state["builder"] = builder;
 
-            await base.RunAsync( testInput, testResult, state );
+            await base.RunAsync( serviceProvider, testInput, testResult, state );
 
             if ( !testResult.Success )
             {
@@ -54,7 +59,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
 
             // Create the linker input.
             var linkerInput = builder.ToAspectLinkerInput( PartialCompilation.CreateComplete( testResult.InputCompilation.AssertNotNull() ) );
-            var linker = new AspectLinker( this.ServiceProvider, linkerInput );
+            var linker = new AspectLinker( serviceProvider, linkerInput );
             var result = linker.ToResult();
 
             var linkedCompilation = result.Compilation;

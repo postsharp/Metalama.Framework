@@ -8,10 +8,8 @@ using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Formatting;
-using Caravela.Framework.Impl.Options;
 using Caravela.Framework.Impl.Templating;
 using Microsoft.CodeAnalysis;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
@@ -27,17 +25,13 @@ namespace Caravela.Framework.Impl.Pipeline
     public class CompileTimeAspectPipeline : AspectPipeline
     {
         public CompileTimeAspectPipeline(
-            IProjectOptions projectOptions,
+            ServiceProvider serviceProvider,
             bool isTest,
-            CompileTimeDomain? domain = null,
-            IPathOptions? directoryOptions = null,
-            IAssemblyLocator? assemblyLocator = null ) : base(
-            projectOptions,
+            CompileTimeDomain? domain = null ) : base(
+            serviceProvider,
             AspectExecutionScenario.CompileTime,
             isTest,
-            domain,
-            directoryOptions,
-            assemblyLocator )
+            domain )
         {
             if ( this.ProjectOptions.DebugCompilerProcess )
             {
@@ -138,9 +132,8 @@ namespace Caravela.Framework.Impl.Pipeline
         }
 
         private protected override HighLevelPipelineStage CreateStage(
-            IReadOnlyList<OrderedAspectLayer> parts,
-            CompileTimeProject compileTimeProject,
-            CompileTimeProjectLoader compileTimeProjectLoader )
+            ImmutableArray<OrderedAspectLayer> parts,
+            CompileTimeProject compileTimeProject )
             => new CompileTimePipelineStage( compileTimeProject, parts, this.ServiceProvider );
     }
 }

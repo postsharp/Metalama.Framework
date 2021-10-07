@@ -8,6 +8,8 @@ using System.Reflection;
 using Xunit;
 using Xunit.Abstractions;
 
+// ReSharper disable ParameterOnlyUsedForPreconditionCheck.Local
+
 namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
 {
     public class CaravelaParameterInfoTests : ReflectionTestBase
@@ -161,13 +163,15 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
 
         private string SerializeIndexerParameter( string code )
         {
-            var compilation = CreateCompilationModel( code );
-            var targetType = compilation.DeclaredTypes.Single( t => t.Name == "Target" );
+            using var testContext = this.CreateTestContext();
+
+            var compilation = testContext.CreateCompilationModel( code );
+            var targetType = compilation.Types.Single( t => t.Name == "Target" );
             var single = targetType.Properties.Single( m => m.Name == "this[]" ).Parameters.First( p => p.Name == "target" );
             var parameter = single;
 
             var actual =
-                this.Serialize( CompileTimeParameterInfo.Create( parameter ) )
+                testContext.Serialize( CompileTimeParameterInfo.Create( parameter ) )
                     .ToString();
 
             return actual;
@@ -175,16 +179,18 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
 
         private string SerializeParameter( string code )
         {
-            var compilation = CreateCompilationModel( code );
+            using var testContext = this.CreateTestContext();
 
-            var single = compilation.DeclaredTypes.Single( t => t.Name == "Target" )
+            var compilation = testContext.CreateCompilationModel( code );
+
+            var single = compilation.Types.Single( t => t.Name == "Target" )
                 .Methods.Single( m => m.Name == "Method" )
                 .Parameters.First( p => p.Name == "target" );
 
             var parameter = (Parameter) single;
 
             var actual =
-                this.Serialize( CompileTimeParameterInfo.Create( parameter ) )
+                testContext.Serialize( CompileTimeParameterInfo.Create( parameter ) )
                     .ToString();
 
             return actual;
@@ -192,11 +198,13 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
 
         private string SerializeReturnParameter( string code )
         {
-            var compilation = CreateCompilationModel( code );
-            var single = compilation.DeclaredTypes.Single( t => t.Name == "Target" ).Methods.Single( m => m.Name == "Method" ).ReturnParameter;
+            using var testContext = this.CreateTestContext();
+
+            var compilation = testContext.CreateCompilationModel( code );
+            var single = compilation.Types.Single( t => t.Name == "Target" ).Methods.Single( m => m.Name == "Method" ).ReturnParameter;
             var p = (MethodReturnParameter) single;
 
-            var actual = this.Serialize( CompileTimeReturnParameterInfo.Create( p ) )
+            var actual = testContext.Serialize( CompileTimeReturnParameterInfo.Create( p ) )
                 .ToString();
 
             return actual;
@@ -204,11 +212,13 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
 
         private string SerializeReturnParameterOfProperty( string code )
         {
-            var compilation = CreateCompilationModel( code );
-            var single = compilation.DeclaredTypes.Single( t => t.Name == "Target" ).Properties.Single( m => m.Name == "Property" ).GetMethod!.ReturnParameter;
+            using var testContext = this.CreateTestContext();
+
+            var compilation = testContext.CreateCompilationModel( code );
+            var single = compilation.Types.Single( t => t.Name == "Target" ).Properties.Single( m => m.Name == "Property" ).GetMethod!.ReturnParameter;
             var p = (MethodReturnParameter) single;
 
-            var actual = this.Serialize( CompileTimeReturnParameterInfo.Create( p ) )
+            var actual = testContext.Serialize( CompileTimeReturnParameterInfo.Create( p ) )
                 .ToString();
 
             return actual;
