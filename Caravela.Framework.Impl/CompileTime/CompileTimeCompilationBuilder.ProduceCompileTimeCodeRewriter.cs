@@ -70,7 +70,7 @@ namespace Caravela.Framework.Impl.CompileTime
                 this._cancellationToken = cancellationToken;
                 this._currentContext = new Context( TemplatingScope.Both, this );
 
-                this._syntaxGenerationContext = SyntaxGenerationContext.CreateDefault( compileTimeCompilation );
+                this._syntaxGenerationContext = SyntaxGenerationContext.CreateDefault( serviceProvider, compileTimeCompilation );
 
                 this._compileTimeType = (NameSyntax)
                     this._syntaxGenerationContext.SyntaxGenerator.Type(
@@ -84,8 +84,9 @@ namespace Caravela.Framework.Impl.CompileTime
                     this._syntaxGenerationContext.SyntaxGenerator.Type(
                         this._syntaxGenerationContext.ReflectionMapper.GetTypeSymbol( typeof(OriginalPathAttribute) ) );
 
-                this._fabricType = ReflectionMapper.GetInstance( runTimeCompilation ).GetTypeSymbol( typeof(IFabric) );
-                this._typeFabricType = ReflectionMapper.GetInstance( runTimeCompilation ).GetTypeSymbol( typeof(ITypeFabric) );
+                var reflectionMapper = serviceProvider.GetService<ReflectionMapperFactory>().GetInstance( runTimeCompilation );
+                this._fabricType = reflectionMapper.GetTypeSymbol( typeof(IFabric) );
+                this._typeFabricType = reflectionMapper.GetTypeSymbol( typeof(ITypeFabric) );
             }
 
             // TODO: assembly and module-level attributes?

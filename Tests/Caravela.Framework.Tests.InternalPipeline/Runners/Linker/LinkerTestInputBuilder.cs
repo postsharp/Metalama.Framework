@@ -63,7 +63,7 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
         public LinkerTestInputBuilder( IServiceProvider serviceProvider )
         {
             this._serviceProvider = serviceProvider;
-            this._rewriter = new TestRewriter();
+            this._rewriter = new TestRewriter( serviceProvider );
         }
 
         internal SyntaxNode ProcessSyntaxRoot( SyntaxNode syntaxRoot )

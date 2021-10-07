@@ -41,7 +41,11 @@ namespace Caravela.TestFramework
         /// Runs the aspect test with the given name and source.
         /// </summary>
         /// <returns>The result of the test execution.</returns>
-        private protected override async Task RunAsync( TestInput testInput, TestResult testResult, Dictionary<string, object?> state )
+        private protected override async Task RunAsync(
+            ServiceProvider serviceProvider,
+            TestInput testInput,
+            TestResult testResult,
+            Dictionary<string, object?> state )
         {
             if ( this._runCount > 0 )
             {
@@ -53,12 +57,13 @@ namespace Caravela.TestFramework
                 this._runCount++;
             }
 
-            await base.RunAsync( testInput, testResult, state );
+            await base.RunAsync( serviceProvider, testInput, testResult, state );
+
+            var serviceProviderWithObserver = serviceProvider.WithServices( new Observer( testResult ) );
 
             using var domain = new UnloadableCompileTimeDomain();
 
-            var serviceProvider = this.ServiceProvider.WithServices( new Observer( testResult ) );
-            var pipeline = new CompileTimeAspectPipeline( serviceProvider, true, domain );
+            var pipeline = new CompileTimeAspectPipeline( serviceProviderWithObserver, true, domain );
 
             if ( pipeline.TryExecute(
                 testResult.PipelineDiagnostics,
@@ -116,7 +121,7 @@ namespace Caravela.TestFramework
 
             if ( testInput.Options.WriteInputHtml.GetValueOrDefault() || testInput.Options.WriteOutputHtml.GetValueOrDefault() )
             {
-                await this.WriteHtmlAsync( testInput, testResult );
+                await this.WriteHtmlAsync( serviceProvider, testInput, testResult );
             }
         }
 

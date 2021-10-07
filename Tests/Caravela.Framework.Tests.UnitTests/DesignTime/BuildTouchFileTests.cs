@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Impl;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.DesignTime.Pipeline;
 using Caravela.Framework.Tests.UnitTests.Utilities;
@@ -25,8 +26,6 @@ namespace Caravela.Framework.Tests.UnitTests.DesignTime
                 this.BuildTouchFile = Path.Combine( this.BaseDirectory, "touch.build" );
             }
         }
-
-        public BuildTouchFileTests() : base( new BuildTouchFileTestsProjectOptions() ) { }
 
         [Fact]
         public void TestTouchFile()
@@ -53,16 +52,18 @@ using Caravela.Framework.Code;
     }
 ";
 
+            using var testContext = this.CreateTestContext( new BuildTouchFileTestsProjectOptions() );
+
             Dictionary<string, DateTime> projectFilesTimestamps = new();
 
             var externalBuildStarted = false;
 
-            TestFileSystemWatcher buildFileWatcher = new( Path.GetDirectoryName( this.ProjectOptions.BuildTouchFile )!, "*.build" );
+            TestFileSystemWatcher buildFileWatcher = new( Path.GetDirectoryName( testContext.ProjectOptions.BuildTouchFile ).AssertNotNull(), "*.build" );
             TestFileSystemWatcherFactory fileSystemWatcherFactory = new();
             fileSystemWatcherFactory.Add( buildFileWatcher );
 
-            var aspectCodePath = Path.Combine( this.ProjectOptions.ProjectDirectory, "Aspect.cs" );
-            var class1CodePath = Path.Combine( this.ProjectOptions.ProjectDirectory, "Class1.cs" );
+            var aspectCodePath = Path.Combine( testContext.ProjectOptions.ProjectDirectory, "Aspect.cs" );
+            var class1CodePath = Path.Combine( testContext.ProjectOptions.ProjectDirectory, "Class1.cs" );
 
             var code = new Dictionary<string, string>
             {
@@ -85,7 +86,7 @@ using Caravela.Framework.Code;
             var compilation = CreateCSharpCompilation( code );
 
             using var domain = new UnloadableCompileTimeDomain();
-            var serviceProvider = this.ServiceProvider.WithServices( fileSystemWatcherFactory );
+            var serviceProvider = testContext.ServiceProvider.WithServices( fileSystemWatcherFactory );
 
             using DesignTimeAspectPipeline pipeline = new(
                 serviceProvider,
@@ -118,10 +119,10 @@ using Caravela.Framework.Code;
             Assert.False( result.Success );
             Assert.False( externalBuildStarted );
 
-            File.Create( this.ProjectOptions.BuildTouchFile! );
+            File.Create( testContext.ProjectOptions.BuildTouchFile! );
 
             buildFileWatcher.Notify(
-                new FileSystemEventArgs( WatcherChangeTypes.Created, buildFileWatcher.Path, Path.GetFileName( this.ProjectOptions.BuildTouchFile ) ) );
+                new FileSystemEventArgs( WatcherChangeTypes.Created, buildFileWatcher.Path, Path.GetFileName( testContext.ProjectOptions.BuildTouchFile ) ) );
 
             Assert.True( externalBuildStarted );
 

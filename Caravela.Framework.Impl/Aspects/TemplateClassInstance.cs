@@ -13,7 +13,7 @@ namespace Caravela.Framework.Impl.Aspects
         public object Instance { get; }
 
         public TemplateClass TemplateClass { get; }
-        
+
         public TemplateClassInstance( object instance, TemplateClass templateClass )
         {
             this.Instance = instance;

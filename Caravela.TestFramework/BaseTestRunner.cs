@@ -33,7 +33,7 @@ namespace Caravela.TestFramework
         private readonly MetadataReference[] _metadataReferences;
         private static readonly AsyncLocal<bool> _isTestRunning = new();
 
-        protected ServiceProvider ServiceProvider { get; }
+        protected ServiceProvider BaseServiceProvider { get; }
 
         protected BaseTestRunner(
             ServiceProvider serviceProvider,
@@ -45,7 +45,7 @@ namespace Caravela.TestFramework
                 .Append( MetadataReference.CreateFromFile( typeof(BaseTestRunner).Assembly.Location ) )
                 .ToArray();
 
-            this.ServiceProvider = serviceProvider.WithMark( ServiceProviderMark.Test );
+            this.BaseServiceProvider = serviceProvider.WithMark( ServiceProviderMark.Test );
             this.ProjectDirectory = projectDirectory;
             this.Logger = logger;
         }
@@ -62,30 +62,45 @@ namespace Caravela.TestFramework
             using ( TestExecutionContext.Open() )
             {
                 await this.RunAndAssertCoreAsync( testInput );
+
+                // This is a trick to make the current task, on the heap, stop having a reference to the previous
+                // task. This allows TestExecutionContext.Dispose to perform a full GC. Without Task.Yield, we will
+                // have references to the objects that are in the scope of the test.
+                await Task.Yield();
             }
         }
 
         private async Task RunAndAssertCoreAsync( TestInput testInput )
         {
+            var serviceProvider = this.BaseServiceProvider.WithProjectScopedServices();
             Dictionary<string, object?> state = new( StringComparer.Ordinal );
             using var testResult = new TestResult();
-            await this.RunAsync( testInput, testResult, state );
+            await this.RunAsync( serviceProvider, testInput, testResult, state );
             this.SaveResults( testInput, testResult, state );
             this.ExecuteAssertions( testInput, testResult, state );
         }
 
         public Task RunAsync( TestInput testInput, TestResult testResult )
-            => this.RunAsync( testInput, testResult, new Dictionary<string, object?>( StringComparer.InvariantCulture ) );
+            => this.RunAsync(
+                this.BaseServiceProvider.WithProjectScopedServices(),
+                testInput,
+                testResult,
+                new Dictionary<string, object?>( StringComparer.InvariantCulture ) );
 
         /// <summary>
         /// Runs a test. The present implementation of this method only prepares an input project and stores it in the <see cref="TestResult"/>.
         /// Derived classes must call this base method and continue with running the test.
         /// </summary>
+        /// <param name="serviceProvider"></param>
         /// <param name="testInput"></param>
         /// <param name="testResult">The output object must be created by the caller and passed, so that the caller can get
-        /// a partial object in case of exception.</param>
+        ///     a partial object in case of exception.</param>
         /// <param name="state"></param>
-        private protected virtual async Task RunAsync( TestInput testInput, TestResult testResult, Dictionary<string, object?> state )
+        private protected virtual async Task RunAsync(
+            ServiceProvider serviceProvider,
+            TestInput testInput,
+            TestResult testResult,
+            Dictionary<string, object?> state )
         {
             if ( testInput.Options.InvalidSourceOptions.Count > 0 )
             {
@@ -205,7 +220,7 @@ namespace Caravela.TestFramework
             using var domain = new UnloadableCompileTimeDomain();
 
             // Transform with Caravela.
-            var pipeline = new CompileTimeAspectPipeline( this.ServiceProvider, true, domain );
+            var pipeline = new CompileTimeAspectPipeline( this.BaseServiceProvider.WithProjectScopedServices(), true, domain );
 
             if ( !pipeline.TryExecute(
                 testResult.InputCompilationDiagnostics,
@@ -222,7 +237,7 @@ namespace Caravela.TestFramework
             }
 
             // Emit the binary assembly.
-            var testOptions = this.ServiceProvider.GetService<TestProjectOptions>();
+            var testOptions = this.BaseServiceProvider.GetService<TestProjectOptions>();
             var outputPath = Path.Combine( testOptions.BaseDirectory, "dependency.dll" );
 
             var emitResult = resultCompilation.Emit( outputPath, manifestResources: outputResources );
@@ -412,9 +427,9 @@ namespace Caravela.TestFramework
             return project;
         }
 
-        private protected async Task WriteHtmlAsync( TestInput testInput, TestResult testResult )
+        private protected async Task WriteHtmlAsync( IServiceProvider serviceProvider, TestInput testInput, TestResult testResult )
         {
-            var htmlCodeWriter = this.CreateHtmlCodeWriter( this.ServiceProvider, testInput.Options );
+            var htmlCodeWriter = this.CreateHtmlCodeWriter( serviceProvider, testInput.Options );
 
             var htmlDirectory = Path.Combine(
                 this.ProjectDirectory!,

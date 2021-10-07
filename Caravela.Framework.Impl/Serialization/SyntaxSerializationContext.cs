@@ -13,11 +13,10 @@ namespace Caravela.Framework.Impl.Serialization
         public SyntaxSerializationContext( CompilationModel compilation, OurSyntaxGenerator syntaxGenerator )
         {
             this.CompilationModel = compilation;
-            this.ReflectionMapper = ReflectionMapper.GetInstance( compilation.RoslynCompilation );
             this.SyntaxGenerator = syntaxGenerator;
         }
 
-        public ReflectionMapper ReflectionMapper { get; }
+        private ReflectionMapper ReflectionMapper => this.CompilationModel.ReflectionMapper;
 
         public ITypeSymbol GetTypeSymbol( Type type ) => this.ReflectionMapper.GetTypeSymbol( type );
 

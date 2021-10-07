@@ -13,7 +13,9 @@ namespace Caravela.Framework.Tests.UnitTests.Templating
         [Fact]
         public void Clone()
         {
-            var model = this.CreateCompilationModel( "" );
+            using var testContext = this.CreateTestContext();
+
+            var model = testContext.CreateCompilationModel( "" );
             var builder = new ArrayBuilder( model.Factory.GetSpecialType( SpecialType.Object ) );
 
             // Note that production code always sends an expression (not its value) to the builder.

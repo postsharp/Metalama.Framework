@@ -14,6 +14,8 @@ namespace Caravela.Framework.Tests.UnitTests.CodeModel
         [Fact]
         public void Matches_ParameterCount()
         {
+            using var testContext = this.CreateTestContext();
+
             var code = @"
 class C
 {
@@ -31,7 +33,7 @@ class C
 }
 ";
 
-            var compilation = this.CreateCompilationModel( code );
+            var compilation = testContext.CreateCompilationModel( code );
             var type = compilation.Types[0];
             var intType = compilation.Factory.GetTypeByReflectionType( typeof(int) );
 
@@ -48,6 +50,8 @@ class C
         [Fact]
         public void Matches_ParameterType()
         {
+            using var testContext = this.CreateTestContext();
+
             var code = @"
 class C
 {
@@ -69,7 +73,7 @@ class C
 }
 ";
 
-            var compilation = this.CreateCompilationModel( code );
+            var compilation = testContext.CreateCompilationModel( code );
             var type = compilation.Types[0];
             var objectType = compilation.Factory.GetTypeByReflectionType( typeof(object) );
             var intType = compilation.Factory.GetTypeByReflectionType( typeof(int) );
@@ -92,6 +96,8 @@ class C
         [Fact]
         public void Matches_RefKind()
         {
+            using var testContext = this.CreateTestContext();
+
             var code = @"
 class C
 {
@@ -114,7 +120,7 @@ class C
 }
 ";
 
-            var compilation = this.CreateCompilationModel( code );
+            var compilation = testContext.CreateCompilationModel( code );
             var type = compilation.Types[0];
             var intType = compilation.Factory.GetTypeByReflectionType( typeof(int) );
 
@@ -139,6 +145,8 @@ class C
         [Fact]
         public void DeclaredOnlyTrue_Ignores_BaseMethod()
         {
+            using var testContext = this.CreateTestContext();
+
             var code = @"
 class A
 {
@@ -162,7 +170,7 @@ class C : B
 }
 ";
 
-            var compilation = this.CreateCompilationModel( code );
+            var compilation = testContext.CreateCompilationModel( code );
             var types = compilation.Types.OrderBySource();
             var type = types[2];
             var intType = compilation.Factory.GetTypeByReflectionType( typeof(int) );
@@ -178,6 +186,8 @@ class C : B
         [Fact]
         public void DeclaredOnlyFalse_Finds_BaseMethod()
         {
+            using var testContext = this.CreateTestContext();
+
             var code = @"
 class A
 {
@@ -201,7 +211,7 @@ class C : B
 }
 ";
 
-            var compilation = this.CreateCompilationModel( code );
+            var compilation = testContext.CreateCompilationModel( code );
             var types = compilation.Types.OrderBySource();
             var typeA = types[0];
             var typeB = types[1];
@@ -219,11 +229,13 @@ class C : B
         [Fact]
         public void DeclaredOnlyFalse_Finds_BaseMethod_GenericDeclaringType()
         {
+            using var testContext = this.CreateTestContext();
+
             var code = @"
 class A : System.Collections.Generic.List<int> { }
 ";
 
-            var compilation = this.CreateCompilationModel( code );
+            var compilation = testContext.CreateCompilationModel( code );
             var typeA = compilation.Types[0];
             var intType = compilation.Factory.GetTypeByReflectionType( typeof(int) );
 
@@ -236,6 +248,8 @@ class A : System.Collections.Generic.List<int> { }
         [Fact]
         public void Matches_IsStatic()
         {
+            using var testContext = this.CreateTestContext();
+
             var code = @"
 class C
 {
@@ -249,7 +263,7 @@ class C
 }
 ";
 
-            var compilation = this.CreateCompilationModel( code );
+            var compilation = testContext.CreateCompilationModel( code );
             var type = compilation.Types[0];
 
             var matchedMethod1 = type.Methods.OfExactSignature( "Foo", Array.Empty<IType>(), isStatic: false );

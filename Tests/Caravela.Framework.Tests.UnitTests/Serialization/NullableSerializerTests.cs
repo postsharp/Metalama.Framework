@@ -25,7 +25,8 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization
 
         private void AssertSerialization<T>( string expected, T? o )
         {
-            var creationExpression = this.Serialize( o ).NormalizeWhitespace().ToString();
+            using var testContext = this.CreateTestContext();
+            var creationExpression = testContext.Serialize( o ).NormalizeWhitespace().ToString();
             Assert.Equal( expected, creationExpression );
         }
     }

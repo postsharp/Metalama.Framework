@@ -3,7 +3,6 @@
 
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Options;
-using Caravela.Framework.Impl.Serialization;
 using Caravela.Framework.Impl.Utilities;
 using Caravela.Framework.Project;
 using System.Diagnostics.CodeAnalysis;
@@ -61,7 +60,6 @@ namespace Caravela.Framework.Impl.Pipeline
         {
             var serviceProvider = ServiceProvider.Empty.WithServices(
                 pathOptions,
-                new SyntaxSerializationService(),
                 new DefaultCompileTimeDomainFactory(),
                 new CompileTimeExceptionHandler() );
 
@@ -109,8 +107,8 @@ namespace Caravela.Framework.Impl.Pipeline
                 serviceProvider = serviceProvider.WithService( assemblyLocator );
             }
 
-            // This service must be added last because it depends may depend on a service added previously.
-            // (This is not nice but this is the only case).
+            // This service cannot be added to the global list because it depends on a service (IUserCodeInvokerHook) 
+            // that may be added between the moment the global list is created and the moment GetServiceProvider is invoked.
             serviceProvider = serviceProvider.WithService( new UserCodeInvoker( serviceProvider ) );
 
             return serviceProvider;

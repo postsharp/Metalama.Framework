@@ -14,6 +14,8 @@ namespace Caravela.Framework.Tests.UnitTests.DesignTime
         [Fact]
         public void Bug28733()
         {
+            using var testContext = this.CreateTestContext();
+
             var code = new Dictionary<string, string> { ["Class1.cs"] = "class Class1 { class Nested {} }" };
 
             var compilation = CreateCSharpCompilation( code );
@@ -25,12 +27,14 @@ namespace Caravela.Framework.Tests.UnitTests.DesignTime
 
             // Under bug 28733, the following line would throw
             // `AssertionFailedException: The item Class1.Nested of type NonErrorNamedTypeSymbol has been visited twice.`
-            _ = CompilationModel.CreateInitialInstance( new NullProject( this.ServiceProvider ), partialCompilation );
+            _ = CompilationModel.CreateInitialInstance( new NullProject( testContext.ServiceProvider ), partialCompilation );
         }
 
         [Fact]
         public void TypeClosure()
         {
+            using var testContext = this.CreateTestContext();
+
             var code = new Dictionary<string, string>
             {
                 ["Class1.cs"] = "public class Class1 { }",
@@ -43,7 +47,7 @@ namespace Caravela.Framework.Tests.UnitTests.DesignTime
             };
 
             var compilation = CreateCSharpCompilation( code );
-            var nullProject = new NullProject( this.ServiceProvider );
+            var nullProject = new NullProject( testContext.ServiceProvider );
 
             // Tests for Class1.
             var syntaxTree1 = compilation.SyntaxTrees.Single( t => t.FilePath == "Class1.cs" );
@@ -67,6 +71,8 @@ namespace Caravela.Framework.Tests.UnitTests.DesignTime
         [Fact]
         public void Namespaces()
         {
+            using var testContext = this.CreateTestContext();
+
             var code = new Dictionary<string, string>
             {
                 ["Class1.cs"] = "namespace Ns1 { public class Class1 { } }",
@@ -76,7 +82,7 @@ namespace Caravela.Framework.Tests.UnitTests.DesignTime
             };
 
             var compilation = CreateCSharpCompilation( code );
-            var nullProject = new NullProject( this.ServiceProvider );
+            var nullProject = new NullProject( testContext.ServiceProvider );
 
             var syntaxTree1 = compilation.SyntaxTrees.Single( t => t.FilePath == "Class2.cs" );
             var compilationModel1 = CompilationModel.CreateInitialInstance( nullProject, compilation, syntaxTree1 );

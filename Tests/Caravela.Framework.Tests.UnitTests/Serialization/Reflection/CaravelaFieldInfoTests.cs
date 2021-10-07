@@ -60,9 +60,11 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
 
         private string SerializeField( string code )
         {
-            var compilation = this.CreateCompilationModel( code );
+            using var testContext = this.CreateTestContext();
+
+            var compilation = testContext.CreateCompilationModel( code );
             var single = compilation.Types.Single( t => t.Name == "Target" ).Fields.Single( m => m.Name == "Field" );
-            var actual = this.Serialize( CompileTimeFieldOrPropertyInfo.Create( (Field) single ) ).ToString();
+            var actual = testContext.Serialize( CompileTimeFieldOrPropertyInfo.Create( (Field) single ) ).ToString();
 
             return actual;
         }

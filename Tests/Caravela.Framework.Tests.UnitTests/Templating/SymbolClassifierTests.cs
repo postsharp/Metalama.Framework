@@ -21,7 +21,9 @@ namespace Caravela.Framework.Tests.UnitTests.Templating
 
         private void AssertScope( Compilation compilation, ISymbol symbol, TemplatingScope expectedScope )
         {
-            var classifier = this.ServiceProvider.GetService<SymbolClassificationService>()
+            using var testContext = this.CreateTestContext();
+
+            var classifier = testContext.ServiceProvider.GetService<SymbolClassificationService>()
                 .GetClassifier( compilation );
 
             var actualScope = classifier.GetTemplatingScope( symbol );
@@ -31,6 +33,8 @@ namespace Caravela.Framework.Tests.UnitTests.Templating
         [Fact]
         public void AspectType()
         {
+            using var testContext = this.CreateTestContext();
+
             var code = @"
 using Caravela.Framework.Aspects;
 class C : IAspect 
@@ -43,7 +47,7 @@ class C : IAspect
 }
 ";
 
-            var compilation = this.CreateCompilationModel( code );
+            var compilation = testContext.CreateCompilationModel( code );
             var type = compilation.Types.OfName( "C" ).Single();
             this.AssertScope( type, TemplatingScope.Both );
             this.AssertScope( type.Fields.OfName( "F" ).Single(), TemplatingScope.Both );
@@ -54,6 +58,8 @@ class C : IAspect
         [Fact]
         public void DefaultCode()
         {
+            using var testContext = this.CreateTestContext();
+
             var code = @"
 using Caravela.Framework.Aspects;
 
@@ -69,7 +75,7 @@ class D : System.IDisposable
 }
 ";
 
-            var compilation = this.CreateCompilationModel( code );
+            var compilation = testContext.CreateCompilationModel( code );
             var type = compilation.Types.OfName( "C" ).Single();
             this.AssertScope( type, TemplatingScope.RunTimeOnly );
             this.AssertScope( type.Fields.OfName( "F" ).Single(), TemplatingScope.RunTimeOnly );
@@ -81,6 +87,8 @@ class D : System.IDisposable
         [Fact]
         public void AssemblyAttribute()
         {
+            using var testContext = this.CreateTestContext();
+
             var code = @"
 using Caravela.Framework.Aspects;
 [assembly: CompileTime]
@@ -89,7 +97,7 @@ class C
 }
 ";
 
-            var compilation = this.CreateCompilationModel( code );
+            var compilation = testContext.CreateCompilationModel( code );
             var type = compilation.Types.OfName( "C" ).Single();
             this.AssertScope( type, TemplatingScope.Both );
         }
@@ -118,6 +126,8 @@ class C
         [Fact]
         public void MarkedAsCompileTime()
         {
+            using var testContext = this.CreateTestContext();
+
             // We cannot use CompilationModel for this test because CompileTimeOnly are hidden from the model.
 
             var code = @"
@@ -131,15 +141,17 @@ class C
 }
 ";
 
-            var compilation = this.CreateCompilationModel( code );
+            var compilation = testContext.CreateCompilationModel( code );
             this.AssertScope( compilation.Types.OfName( "C" ).Single(), TemplatingScope.Both );
         }
 
         [Fact]
         public void NoCaravelaReference()
         {
+            using var testContext = this.CreateTestContext();
+
             var code = "class C {}";
-            var compilation = this.CreateCompilationModel( code, addCaravelaReferences: false );
+            var compilation = testContext.CreateCompilationModel( code, addCaravelaReferences: false );
             this.AssertScope( (INamedType) compilation.Factory.GetTypeByReflectionType( typeof(int) ), TemplatingScope.Both );
             this.AssertScope( (INamedType) compilation.Factory.GetTypeByReflectionType( typeof(Console) ), TemplatingScope.RunTimeOnly );
             this.AssertScope( compilation.Types.Single(), TemplatingScope.RunTimeOnly );

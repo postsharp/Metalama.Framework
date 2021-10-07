@@ -26,17 +26,19 @@ namespace Caravela.Framework.Impl.Aspects
     /// <summary>
     /// Executes aspects.
     /// </summary>
-    internal class AspectDriver : IAspectDriver 
+    internal class AspectDriver : IAspectDriver
     {
         private readonly IServiceProvider _serviceProvider;
         private readonly Compilation _compilation;
         private readonly List<TemplateClassMember> _declarativeAdviceAttributes;
+        private ReflectionMapper _reflectionMapper;
 
         public IAspectClassImpl AspectClass { get; }
 
         public AspectDriver( IServiceProvider serviceProvider, IAspectClassImpl aspectClass, Compilation compilation )
         {
             this._serviceProvider = serviceProvider;
+            this._reflectionMapper = serviceProvider.GetService<ReflectionMapperFactory>().GetInstance( compilation );
             this._compilation = compilation;
             this.AspectClass = aspectClass;
 
@@ -112,7 +114,7 @@ namespace Caravela.Framework.Impl.Aspects
                 // TODO: should the diagnostic be applied to the attribute, if one exists?
 
                 // Get the code model type for the reflection type so we have better formatting of the diagnostic.
-                var interfaceType = this._compilation.GetTypeByReflectionType( typeof(IAspect<T>) ).AssertNotNull();
+                var interfaceType = this._reflectionMapper.GetTypeSymbol( typeof(IAspect<T>) ).AssertNotNull();
 
                 var diagnostic =
                     GeneralDiagnosticDescriptors.AspectAppliedToIncorrectDeclaration.CreateDiagnostic(

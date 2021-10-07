@@ -37,7 +37,8 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
                         TemplateExpansionContext.CurrentSyntaxGenerationContext.SyntaxGenerator.Type( this._type.GetSymbol() ),
                         SyntaxFactory.IdentifierName( SyntaxFactory.Identifier( member ) ) )
                     .WithAspectReferenceAnnotation( this._linkerAnnotation ),
-                this._type.Compilation );
+                this._type.Compilation,
+                this._type.GetCompilationModel().Project.ServiceProvider );
 
         object? IExpression.Value { get => this; set => throw new NotSupportedException(); }
     }

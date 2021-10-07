@@ -32,7 +32,9 @@ class C<T> : object
 }
 ";
 
-            var compilation = this.CreateCompilationModel( code );
+            using var testContext = this.CreateTestContext();
+
+            var compilation = testContext.CreateCompilationModel( code );
 
             var type = compilation.Types.Single();
             var method = type.Methods.OfName( "Method" ).Single();

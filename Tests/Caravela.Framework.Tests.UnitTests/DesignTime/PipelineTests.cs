@@ -16,6 +16,8 @@ namespace Caravela.Framework.Tests.UnitTests.DesignTime
         [Fact]
         public void NoAspect()
         {
+            using var testContext = this.CreateTestContext();
+
             // Test that we can initialize the pipeline with a different compilation than the one with which we execute it.
 
             var code = new Dictionary<string, string> { ["Class1.cs"] = "public class Class1 { }", ["Class2.cs"] = "public class Class2 { }" };
@@ -23,7 +25,7 @@ namespace Caravela.Framework.Tests.UnitTests.DesignTime
             var compilation = CreateCSharpCompilation( code );
 
             using var domain = new UnloadableCompileTimeDomain();
-            using DesignTimeAspectPipeline pipeline = new( this.ServiceProvider, domain, true );
+            using DesignTimeAspectPipeline pipeline = new( testContext.ServiceProvider, domain, true );
             var syntaxTree1 = compilation.SyntaxTrees.Single( t => t.FilePath == "Class1.cs" );
             pipeline.Execute( PartialCompilation.CreatePartial( compilation, syntaxTree1 ), CancellationToken.None );
 
@@ -34,6 +36,8 @@ namespace Caravela.Framework.Tests.UnitTests.DesignTime
         [Fact]
         public void InitializePipelineWithDifferentCompilation()
         {
+            using var testContext = this.CreateTestContext();
+
             // Test that we can initialize the pipeline with a different compilation than the one with which we execute it.
 
             var code = new Dictionary<string, string>
@@ -47,7 +51,7 @@ namespace Caravela.Framework.Tests.UnitTests.DesignTime
             var compilation = CreateCSharpCompilation( code );
 
             using var domain = new UnloadableCompileTimeDomain();
-            using DesignTimeAspectPipeline pipeline = new( this.ServiceProvider, domain, true );
+            using DesignTimeAspectPipeline pipeline = new( testContext.ServiceProvider, domain, true );
             var syntaxTree1 = compilation.SyntaxTrees.Single( t => t.FilePath == "Class1.cs" );
             pipeline.Execute( PartialCompilation.CreatePartial( compilation, syntaxTree1 ), CancellationToken.None );
 

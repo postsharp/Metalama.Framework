@@ -47,7 +47,7 @@ namespace Caravela.Framework.Impl.Fabrics
             else
             {
                 this.FabricSymbol = (INamedTypeSymbol)
-                    ReflectionMapper.GetInstance( runTimeCompilation ).GetTypeSymbol( fabric.GetType() );
+                    configuration.ServiceProvider.GetService<ReflectionMapperFactory>().GetInstance( runTimeCompilation ).GetTypeSymbol( fabric.GetType() );
             }
         }
 

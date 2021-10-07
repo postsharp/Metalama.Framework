@@ -2,7 +2,6 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Impl.Diagnostics;
-using Caravela.Framework.Impl.Serialization;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -13,17 +12,15 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization
 {
     public class CanSerializeTests : SerializerTestsBase
     {
-        private readonly SerializableTypes _serializableTypes;
-
-        public CanSerializeTests()
-        {
-            this._serializableTypes = this.SerializationService.GetSerializableTypes( this.SerializationContext.Compilation );
-        }
+        public CanSerializeTests() { }
 
         private void AssertCanSerialize( bool expected, Type type )
         {
+            using var testContext = this.CreateTestContext();
+
+            var serializableTypes = testContext.SerializationService.GetSerializableTypes( testContext.SerializationContext.Compilation );
             var diagnosticList = new DiagnosticList();
-            var result = this._serializableTypes.IsSerializable( this.SerializationContext.GetTypeSymbol( type ), Location.None, diagnosticList );
+            var result = serializableTypes.IsSerializable( testContext.SerializationContext.GetTypeSymbol( type ), Location.None, diagnosticList );
 
             Assert.Equal( expected, result );
 

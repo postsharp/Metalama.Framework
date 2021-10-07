@@ -9,6 +9,7 @@ using Caravela.Framework.Impl.DesignTime.Pipeline;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.TestFramework;
 using Microsoft.CodeAnalysis;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -16,10 +17,9 @@ using Xunit;
 
 namespace Caravela.Framework.Tests.UnitTests.DesignTime
 {
-    public class EligibilityTests : TestBase
+    public class EligibilityTests : TestBase, IDisposable
     {
         private readonly Dictionary<string, INamedDeclaration> _declarations;
-        private readonly TestProjectOptions _buildOptions;
         private readonly UnloadableCompileTimeDomain _domain;
         private readonly Dictionary<string, AspectClass> _aspects;
 
@@ -48,7 +48,8 @@ class Class<T>
 }
 ";
 
-            var compilation = this.CreateCompilationModel( code );
+            using var testContext = this.CreateTestContext();
+            var compilation = testContext.CreateCompilationModel( code );
 
             static string GetName( INamedDeclaration d )
                 => d switch
@@ -68,9 +69,8 @@ class Class<T>
             this._declarations = declarationList
                 .ToDictionary( GetName, d => d );
 
-            this._buildOptions = new TestProjectOptions();
             this._domain = new UnloadableCompileTimeDomain();
-            using DesignTimeAspectPipeline pipeline = new( this.ServiceProvider, this._domain, true );
+            using DesignTimeAspectPipeline pipeline = new( testContext.ServiceProvider, this._domain, true );
 
             pipeline.TryGetConfiguration(
                 PartialCompilation.CreateComplete( compilation.RoslynCompilation ),
@@ -126,12 +126,9 @@ class Class<T>
             Assert.False( this._aspects["MethodAspect"].IsEligibleFast( targetSymbol ) );
         }
 
-        protected override void Dispose( bool disposing )
+        public void Dispose()
         {
-            this._buildOptions.Dispose();
             this._domain.Dispose();
-
-            base.Dispose( disposing );
         }
     }
 }

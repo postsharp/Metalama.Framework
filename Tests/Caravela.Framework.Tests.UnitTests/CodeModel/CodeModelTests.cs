@@ -23,10 +23,12 @@ namespace Caravela.Framework.Tests.UnitTests.CodeModel
         [Fact]
         public void ObjectIdentity()
         {
+            using var testContext = this.CreateTestContext();
+
             // This basically tests that [Memo] works.
 
             var code = "";
-            var compilation = this.CreateCompilationModel( code );
+            var compilation = testContext.CreateCompilationModel( code );
 
             var types1 = compilation.Types;
             var types2 = compilation.Types;
@@ -37,6 +39,8 @@ namespace Caravela.Framework.Tests.UnitTests.CodeModel
         [Fact]
         public void TypeInfos()
         {
+            using var testContext = this.CreateTestContext();
+
             var code = @"
 class C
 {
@@ -48,7 +52,7 @@ namespace NS
     class C {}
 }";
 
-            var compilation = this.CreateCompilationModel( code );
+            var compilation = testContext.CreateCompilationModel( code );
 
             var types = compilation.Types.OrderBySource();
             Assert.Equal( 2, types.Length );
@@ -72,6 +76,8 @@ namespace NS
         [Fact]
         public void LocalFunctions()
         {
+            using var testContext = this.CreateTestContext();
+
             var code = @"
 class C
 {
@@ -84,7 +90,7 @@ class C
     }
 }";
 
-            var compilation = this.CreateCompilationModel( code );
+            var compilation = testContext.CreateCompilationModel( code );
 
             var type = compilation.Types.Single();
             Assert.Equal( "C", type.Name );
@@ -110,6 +116,8 @@ class C
         [Fact]
         public void AttributeData()
         {
+            using var testContext = this.CreateTestContext();
+
             var code = @"
 using System;
 
@@ -127,7 +135,7 @@ class TestAttribute : Attribute
     public Type[] Types { get; set; }
 }";
 
-            var compilation = this.CreateCompilationModel( code );
+            var compilation = testContext.CreateCompilationModel( code );
 
             var attribute = compilation.Types.OrderBySource().ElementAt( 1 ).Attributes.Single();
             Assert.Equal( "TestAttribute", attribute.Type.FullName );
@@ -147,6 +155,8 @@ class TestAttribute : Attribute
         [Fact]
         public void Parameters()
         {
+            using var testContext = this.CreateTestContext();
+
             var code = @"
 using System;
 
@@ -156,7 +166,7 @@ interface I<T>
     ref readonly int M2();
 }";
 
-            var compilation = this.CreateCompilationModel( code );
+            var compilation = testContext.CreateCompilationModel( code );
 
             var methods = compilation.Types.Single().Methods.ToList();
             Assert.Equal( 2, methods.Count );
@@ -206,13 +216,15 @@ interface I<T>
         [Fact]
         public void GenericArguments()
         {
+            using var testContext = this.CreateTestContext();
+
             var code = @"
 class C<T1, T2>
 {
     static C<int, string> GetInstance() => null;
 }";
 
-            var compilation = this.CreateCompilationModel( code );
+            var compilation = testContext.CreateCompilationModel( code );
 
             var type = compilation.Types.Single();
 
@@ -227,6 +239,8 @@ class C<T1, T2>
         [Fact]
         public void GlobalAttributes()
         {
+            using var testContext = this.CreateTestContext();
+
             var code = @"
 using System;
 
@@ -239,7 +253,7 @@ class MyAttribute : Attribute
 }
 ";
 
-            var compilation = this.CreateCompilationModel( code );
+            var compilation = testContext.CreateCompilationModel( code );
 
             var attributes = compilation.Attributes.ToArray();
 
@@ -255,6 +269,8 @@ class MyAttribute : Attribute
         [Fact]
         public void Arrays()
         {
+            using var testContext = this.CreateTestContext();
+
             var code = @"
 class C
 {
@@ -262,7 +278,7 @@ class C
 }
 ";
 
-            var compilation = this.CreateCompilationModel( code );
+            var compilation = testContext.CreateCompilationModel( code );
 
             var parameterTypes = from type in compilation.Types
                                  from method in type.Methods
@@ -285,6 +301,8 @@ class C
         [Fact]
         public void Properties()
         {
+            using var testContext = this.CreateTestContext();
+
             var code = @"
 class C
 {
@@ -296,7 +314,7 @@ class C
     int field;
 }";
 
-            var compilation = this.CreateCompilationModel( code );
+            var compilation = testContext.CreateCompilationModel( code );
 
             var type = Assert.Single( compilation.Types )!;
 
@@ -308,6 +326,8 @@ class C
         [Fact]
         public void Fields()
         {
+            using var testContext = this.CreateTestContext();
+
             var code = @"
 class C
 {
@@ -319,7 +339,7 @@ class C
     delegate void Handler();
 }";
 
-            var compilation = this.CreateCompilationModel( code );
+            var compilation = testContext.CreateCompilationModel( code );
 
             var type = Assert.Single( compilation.Types )!;
 
@@ -331,6 +351,8 @@ class C
         [Fact]
         public void RefProperties()
         {
+            using var testContext = this.CreateTestContext();
+
             var code = @"
 class C
 {
@@ -341,7 +363,7 @@ class C
     ref readonly int RefReadonly => ref field;
 }";
 
-            var compilation = this.CreateCompilationModel( code );
+            var compilation = testContext.CreateCompilationModel( code );
 
             var type = Assert.Single( compilation.Types )!;
 
@@ -353,6 +375,8 @@ class C
         [Fact]
         public void Events()
         {
+            using var testContext = this.CreateTestContext();
+
             var code = @"
 class C
 {
@@ -367,7 +391,7 @@ class C
     delegate void Handler();
 }";
 
-            var compilation = this.CreateCompilationModel( code );
+            var compilation = testContext.CreateCompilationModel( code );
 
             var type = Assert.Single( compilation.Types )!;
 
@@ -379,6 +403,8 @@ class C
         [Fact]
         public void MethodKinds()
         {
+            using var testContext = this.CreateTestContext();
+
             var code = @"
 using System;
 class C : IDisposable
@@ -397,7 +423,7 @@ class C : IDisposable
 	public static C operator -(C c) => c;
 }";
 
-            var compilation = this.CreateCompilationModel( code );
+            var compilation = testContext.CreateCompilationModel( code );
 
             var type = Assert.Single( compilation.Types )!;
 
@@ -416,6 +442,8 @@ class C : IDisposable
         [Fact]
         public void TypeKinds()
         {
+            using var testContext = this.CreateTestContext();
+
             var code = @"
 using System;
 class C<T>
@@ -431,7 +459,7 @@ class C<T>
     int s;
 }";
 
-            var compilation = this.CreateCompilationModel( code );
+            var compilation = testContext.CreateCompilationModel( code );
 
             var type = Assert.Single( compilation.Types )!;
 
@@ -443,6 +471,8 @@ class C<T>
         [Fact]
         public void ParameterKinds()
         {
+            using var testContext = this.CreateTestContext();
+
             var code = @"
 class C
 {
@@ -453,7 +483,7 @@ class C
     ref readonly int M3() => ref i;
 }";
 
-            var compilation = this.CreateCompilationModel( code );
+            var compilation = testContext.CreateCompilationModel( code );
 
             var type = Assert.Single( compilation.Types )!;
 
@@ -464,6 +494,8 @@ class C
         [Fact]
         public void ParameterDefaultValue()
         {
+            using var testContext = this.CreateTestContext();
+
             var code = @"
 using System;
 
@@ -472,7 +504,7 @@ class C
     void M(int i, int j = 42, string s = ""forty two"", decimal d = 3.14m, DateTime dt = default, DateTime? dt2 = null, object o = null) {}
 }";
 
-            var compilation = this.CreateCompilationModel( code );
+            var compilation = testContext.CreateCompilationModel( code );
 
             var type = Assert.Single( compilation.Types )!;
 
@@ -499,7 +531,9 @@ class C
         [Fact]
         public void GetTypeByReflectionType()
         {
-            var compilation = this.CreateCompilationModel( "" );
+            using var testContext = this.CreateTestContext();
+
+            var compilation = testContext.CreateCompilationModel( "" );
 
             Assert.Equal(
                 "System.Collections.Generic.List<T>.Enumerator",
@@ -518,6 +552,8 @@ class C
         [Fact]
         public void TypeName()
         {
+            using var testContext = this.CreateTestContext();
+
             var code = @"
 using System.Collections.Generic;
 
@@ -529,7 +565,7 @@ class C<T>
     (int i, int j) t;
 }";
 
-            var compilation = this.CreateCompilationModel( code );
+            var compilation = testContext.CreateCompilationModel( code );
 
             var type = Assert.Single( compilation.Types )!;
 
@@ -545,6 +581,8 @@ class C<T>
         [Fact]
         public void PartialType()
         {
+            using var testContext = this.CreateTestContext();
+
             var code = @"
 using System.Collections.Generic;
 
@@ -557,7 +595,7 @@ partial class B
 }
 ";
 
-            var compilation = this.CreateCompilationModel( code );
+            var compilation = testContext.CreateCompilationModel( code );
 
             Assert.Equal( 2, compilation.Types.Count );
 
@@ -568,6 +606,8 @@ partial class B
         [Fact]
         public void ConstructGenericInstance()
         {
+            using var testContext = this.CreateTestContext();
+
             var code = @"
 class C<TC>
 {
@@ -575,7 +615,7 @@ class C<TC>
 }
 ";
 
-            var compilation = this.CreateCompilationModel( code );
+            var compilation = testContext.CreateCompilationModel( code );
 
             var type = Assert.Single( compilation.Types )!;
             Assert.True( type.IsOpenGeneric );
@@ -598,6 +638,8 @@ class C<TC>
         [Fact]
         public void WithinGenericTypeInstance()
         {
+            using var testContext = this.CreateTestContext();
+
             var code = @"
 class Class<T>
 {
@@ -610,7 +652,7 @@ class Class<T>
 }
 ";
 
-            var compilation = this.CreateCompilationModel( code );
+            var compilation = testContext.CreateCompilationModel( code );
 
             var openType = compilation.Types.Single();
             var typeInstance = openType.ConstructGenericInstance( typeof(string) );
@@ -626,6 +668,8 @@ class Class<T>
         [Fact]
         public void ConstructGenericInstanceNestedType()
         {
+            using var testContext = this.CreateTestContext();
+
             var code = @"
 class Parent<TParent>
 {
@@ -643,7 +687,7 @@ class Parent<TParent>
 }
 ";
 
-            var compilation = this.CreateCompilationModel( code );
+            var compilation = testContext.CreateCompilationModel( code );
 
             // Find the different types and check the IsGeneric and IsOpenGeneric properties.
             var openParentType = Assert.Single( compilation.Types )!;
@@ -688,6 +732,8 @@ class Parent<TParent>
         [Fact]
         public void Depth()
         {
+            using var testContext = this.CreateTestContext();
+
             var code = @"
 class C 
 {
@@ -714,7 +760,7 @@ namespace Ns1
 }
 ";
 
-            var compilation = this.CreateCompilationModel( code );
+            var compilation = testContext.CreateCompilationModel( code );
 
             var type = compilation.Types.OfName( "C" ).Single();
 
@@ -738,6 +784,8 @@ namespace Ns1
         [Fact]
         public void CompileTimeOnlyTypesAreInvisible()
         {
+            using var testContext = this.CreateTestContext();
+
             var code = @"
 using Caravela.Framework.Aspects;
 
@@ -751,7 +799,7 @@ class D
 }
 ";
 
-            var compilation = this.CreateCompilationModel( code );
+            var compilation = testContext.CreateCompilationModel( code );
             Assert.Single( compilation.Types );
             Assert.Empty( compilation.Types.Single().NestedTypes );
         }
@@ -759,6 +807,8 @@ class D
         [Fact]
         public void Namespaces()
         {
+            using var testContext = this.CreateTestContext();
+
             var code = @"
 namespace Ns1
 {
@@ -782,7 +832,7 @@ namespace Ns1
 class T2 {}
 ";
 
-            var compilation = this.CreateCompilationModel( code );
+            var compilation = testContext.CreateCompilationModel( code );
 
             Assert.True( compilation.GlobalNamespace.IsGlobalNamespace );
             Assert.Equal( "", compilation.GlobalNamespace.Name );

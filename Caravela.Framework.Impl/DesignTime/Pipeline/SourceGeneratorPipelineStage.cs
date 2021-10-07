@@ -79,7 +79,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
                     default );
 
                 // Add members to the class.
-                var syntaxGenerationContext = SyntaxGenerationContext.CreateDefault( input.PartialCompilation.Compilation );
+                var syntaxGenerationContext = SyntaxGenerationContext.CreateDefault( this.ServiceProvider, input.PartialCompilation.Compilation );
 
                 foreach ( var transformation in transformationGroup.Transformations )
                 {

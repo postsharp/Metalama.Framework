@@ -23,6 +23,8 @@ namespace Caravela.Framework.Impl.Serialization
     /// </summary>
     internal class SyntaxSerializationService : IService
     {
+        private readonly IServiceProvider _serviceProvider;
+
         // Set of serializers indexed by the real implementation type they are able to handle (e.g. CompileTimeMethodInfo). 
         private readonly ConcurrentDictionary<Type, ObjectSerializer> _serializerByInputType = new();
 
@@ -34,8 +36,10 @@ namespace Caravela.Framework.Impl.Serialization
         /// <summary>
         /// Initializes a new instance of the <see cref="SyntaxSerializationService"/> class.
         /// </summary>
-        public SyntaxSerializationService()
+        public SyntaxSerializationService( IServiceProvider serviceProvider )
         {
+            this._serviceProvider = serviceProvider;
+
             // Arrays, enums
             this._arraySerializer = new ArraySerializer( this );
             this._enumSerializer = new EnumSerializer( this );
@@ -120,12 +124,16 @@ namespace Caravela.Framework.Impl.Serialization
         /// Returns the set of types that can be serialized by <see cref="SyntaxSerializationService"/>. This result can be used to
         /// determine the possibility to serialize a type when the template is compiled. It may return false positives.
         /// </summary>
-        public SerializableTypes GetSerializableTypes( ReflectionMapper reflectionMapper )
+        private SerializableTypes GetSerializableTypes( ReflectionMapper reflectionMapper )
         {
-            return new SerializableTypes( this._supportedContractTypes.Keys.Distinct().Select( reflectionMapper.GetTypeSymbol ).ToImmutableHashSet<ITypeSymbol>( SymbolEqualityComparer.Default ) );
+            return new SerializableTypes(
+                this._supportedContractTypes.Keys.Distinct()
+                    .Select( reflectionMapper.GetTypeSymbol )
+                    .ToImmutableHashSet<ITypeSymbol>( SymbolEqualityComparer.Default ) );
         }
 
-        public SerializableTypes GetSerializableTypes( Compilation compilation ) => this.GetSerializableTypes( ReflectionMapper.GetInstance( compilation ) );
+        public SerializableTypes GetSerializableTypes( Compilation compilation )
+            => this.GetSerializableTypes( this._serviceProvider.GetService<ReflectionMapperFactory>().GetInstance( compilation ) );
 
         private bool TryGetSerializer<T>( T obj, [NotNullWhen( true )] out ObjectSerializer? serializer )
         {

@@ -8,7 +8,6 @@ using System;
 using System.Collections.Concurrent;
 using System.Globalization;
 using System.Linq;
-using System.Runtime.CompilerServices;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
@@ -17,36 +16,14 @@ namespace Caravela.Framework.Impl.CodeModel
     /// </summary>
     internal class ReflectionMapper
     {
-        private static readonly ConditionalWeakTable<Compilation, ReflectionMapper> _instances = new();
         private readonly ConcurrentDictionary<Type, ITypeSymbol> _symbolCache = new();
 
-        private ReflectionMapper( Compilation compilation )
+        internal ReflectionMapper( Compilation compilation )
         {
             this.Compilation = compilation;
         }
 
         public Compilation Compilation { get; }
-
-        /// <summary>
-        /// Gets a <see cref="ReflectionMapper"/> instance for a given <see cref="Compilation"/>.
-        /// </summary>
-        public static ReflectionMapper GetInstance( Compilation compilation )
-        {
-            // ReSharper disable once InconsistentlySynchronizedField
-            if ( !_instances.TryGetValue( compilation, out var value ) )
-            {
-                lock ( _instances )
-                {
-                    if ( !_instances.TryGetValue( compilation, out value ) )
-                    {
-                        value = new ReflectionMapper( compilation );
-                        _instances.Add( compilation, value );
-                    }
-                }
-            }
-
-            return value;
-        }
 
         /// <summary>
         /// Gets a <see cref="INamedTypeSymbol"/> by metadata name.

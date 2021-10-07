@@ -126,7 +126,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
         {
             var expression = SyntaxFactory.ParseExpression( code ).WithAdditionalAnnotations( Formatter.Annotation );
 
-            return new RuntimeExpression( expression, this.Compilation ).ToUserExpression( this.Compilation );
+            return new RuntimeExpression( expression, this.Compilation, this.Project.ServiceProvider ).ToUserExpression( this.Compilation );
         }
 
         public IStatement ParseStatement( string code )

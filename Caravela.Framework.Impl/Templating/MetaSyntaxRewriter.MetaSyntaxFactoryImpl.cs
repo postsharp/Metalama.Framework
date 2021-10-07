@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -15,9 +16,9 @@ namespace Caravela.Framework.Impl.Templating
         {
             private readonly ReflectionMapper _reflectionMapper;
 
-            public MetaSyntaxFactoryImpl( Compilation compileTimeCompilation )
+            public MetaSyntaxFactoryImpl( IServiceProvider serviceProvider, Compilation compileTimeCompilation )
             {
-                this._reflectionMapper = ReflectionMapper.GetInstance( compileTimeCompilation );
+                this._reflectionMapper = serviceProvider.GetService<ReflectionMapperFactory>().GetInstance( compileTimeCompilation );
             }
 
             public TypeSyntax Type( Type type ) => OurSyntaxGenerator.CompileTime.Type( this._reflectionMapper.GetTypeSymbol( type ) );

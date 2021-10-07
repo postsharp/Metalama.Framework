@@ -12,28 +12,33 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization
 {
     public abstract class SerializerTestsBase : TestBase
     {
-        private protected SyntaxSerializationContext SerializationContext { get; }
+        private protected new SerializerTestContext CreateTestContext() => new( this );
 
-        private protected SyntaxSerializationService SerializationService { get; }
-
-        protected ExpressionSyntax Serialize<T>( T o ) => this.SerializationService.Serialize( o, this.SerializationContext );
-
-        public SerializerTestsBase()
+        private protected class SerializerTestContext : TestContext
         {
-            // We need a syntax factory for an arbitrary compilation, but at least with standard references.
-            // Note that we cannot easily get a reference to Caravela.Compiler.Interfaces this way because we have a reference assembly.
+            public SerializerTestContext( TestBase parent ) : base( parent, null, null )
+            {
+                // We need a syntax factory for an arbitrary compilation, but at least with standard references.
+                // Note that we cannot easily get a reference to Caravela.Compiler.Interfaces this way because we have a reference assembly.
 
-            this.SerializationContext = new SyntaxSerializationContext(
-                this.CreateCompilationModel(
-                    "/* No code is necessary, only references */",
-                    additionalReferences: new[]
-                    {
-                        MetadataReference.CreateFromFile( typeof(ICompileTimeReflectionObject<>).Assembly.Location ),
-                        MetadataReference.CreateFromFile( typeof(Queue<>).Assembly.Location )
-                    } ),
-                OurSyntaxGenerator.Default );
+                this.SerializationContext = new SyntaxSerializationContext(
+                    this.CreateCompilationModel(
+                        "/* No code is necessary, only references */",
+                        additionalReferences: new[]
+                        {
+                            MetadataReference.CreateFromFile( typeof(ICompileTimeReflectionObject<>).Assembly.Location ),
+                            MetadataReference.CreateFromFile( typeof(Queue<>).Assembly.Location )
+                        } ),
+                    OurSyntaxGenerator.Default );
 
-            this.SerializationService = new SyntaxSerializationService();
+                this.SerializationService = new SyntaxSerializationService( this.ServiceProvider );
+            }
+
+            public SyntaxSerializationContext SerializationContext { get; }
+
+            public SyntaxSerializationService SerializationService { get; }
+
+            public ExpressionSyntax Serialize<T>( T o ) => this.SerializationService.Serialize( o, this.SerializationContext );
         }
     }
 }

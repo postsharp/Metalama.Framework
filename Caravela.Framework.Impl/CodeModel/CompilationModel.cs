@@ -64,7 +64,7 @@ namespace Caravela.Framework.Impl.CodeModel
         {
             this.PartialCompilation = partialCompilation;
             this.Project = project;
-            this.ReflectionMapper = ReflectionMapper.GetInstance( this.RoslynCompilation );
+            this.ReflectionMapper = project.ServiceProvider.GetService<ReflectionMapperFactory>().GetInstance( this.RoslynCompilation );
             this.InvariantComparer = new DeclarationEqualityComparer( this.ReflectionMapper, this.RoslynCompilation );
 
             this._transformations = ImmutableMultiValueDictionary<DeclarationRef<IDeclaration>, IObservableTransformation>

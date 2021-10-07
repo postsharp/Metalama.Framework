@@ -56,10 +56,12 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
 
         private string SerializeTargetDotMethod( string code )
         {
-            var compilation = this.CreateCompilationModel( code );
+            using var testContext = this.CreateTestContext();
+
+            var compilation = testContext.CreateCompilationModel( code );
             var single = compilation.Types.Single( t => t.Name == "Target" ).Methods.Single( m => m.Name == "Method" );
             var method = (Method) single;
-            var actual = this.Serialize( CompileTimeMethodInfo.Create( method ) ).ToString();
+            var actual = testContext.Serialize( CompileTimeMethodInfo.Create( method ) ).ToString();
 
             return actual;
         }

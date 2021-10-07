@@ -42,7 +42,6 @@ namespace Caravela.Framework.Tests.Integration.Runners
         private static string GeneratedDirectoryPath => Path.Combine( Environment.CurrentDirectory, "generated" );
 
         private readonly IEnumerable<CSharpSyntaxVisitor> _testAnalyzers;
-        private readonly SyntaxSerializationService _syntaxSerializationService = new();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TemplatingTestRunner"/> class.
@@ -80,13 +79,18 @@ namespace Caravela.Framework.Tests.Integration.Runners
         /// <summary>
         /// Runs the template test with name and source provided in the <paramref name="testInput"/>.
         /// </summary>
+        /// <param name="serviceProvider"></param>
         /// <param name="testInput">Specifies the input test parameters such as the name and the source.</param>
         /// <param name="testResult"></param>
         /// <param name="state"></param>
         /// <returns>The result of the test execution.</returns>
-        private protected override async Task RunAsync( TestInput testInput, TestResult testResult, Dictionary<string, object?> state )
+        private protected override async Task RunAsync(
+            ServiceProvider serviceProvider,
+            TestInput testInput,
+            TestResult testResult,
+            Dictionary<string, object?> state )
         {
-            await base.RunAsync( testInput, testResult, state );
+            await base.RunAsync( serviceProvider, testInput, testResult, state );
 
             if ( !testResult.Success )
             {
@@ -103,7 +107,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
                 testAnalyzer.Visit( templateSyntaxRoot );
             }
 
-            var assemblyLocator = this.ServiceProvider.GetService<ReferenceAssemblyLocator>();
+            var assemblyLocator = serviceProvider.GetService<ReferenceAssemblyLocator>();
 
             // Create an empty compilation (just with references) for the compile-time project.
             var compileTimeCompilation = CSharpCompilation.Create(
@@ -113,7 +117,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
                     (CSharpCompilationOptions) testResult.InputProject!.CompilationOptions! )
                 .AddReferences( MetadataReference.CreateFromFile( typeof(TestTemplateAttribute).Assembly.Location ) );
 
-            var templateCompiler = new TestTemplateCompiler( templateSemanticModel, testResult.PipelineDiagnostics, this.ServiceProvider );
+            var templateCompiler = new TestTemplateCompiler( templateSemanticModel, testResult.PipelineDiagnostics, serviceProvider );
 
             var templateCompilerSuccess = templateCompiler.TryCompile(
                 compileTimeCompilation,
@@ -208,15 +212,15 @@ namespace Caravela.Framework.Tests.Integration.Runners
                 var compiledTemplateMethod = compiledAspectType.GetMethod( compiledTemplateMethodName, BindingFlags.Instance | BindingFlags.Public );
 
                 Invariant.Assert( compiledTemplateMethod != null );
-                var driver = new TemplateDriver( this.ServiceProvider, null!, templateMethod, compiledTemplateMethod );
+                var driver = new TemplateDriver( serviceProvider, null!, templateMethod, compiledTemplateMethod );
 
                 var compilationModel = CompilationModel.CreateInitialInstance(
-                    new NullProject( this.ServiceProvider ),
+                    new NullProject( serviceProvider ),
                     (CSharpCompilation) testResult.InputCompilation );
 
                 var template = TemplateMember.Create<IMemberOrNamedType>( compilationModel.Factory.GetMethod( templateMethod ), TemplateInfo.None );
 
-                var (expansionContext, targetMethod) = this.CreateTemplateExpansionContext( this.ServiceProvider, assembly, compilationModel, template );
+                var (expansionContext, targetMethod) = this.CreateTemplateExpansionContext( serviceProvider, assembly, compilationModel, template );
 
                 var expandSuccessful = driver.TryExpandDeclaration( expansionContext, testResult.PipelineDiagnostics, out var output );
 
@@ -276,7 +280,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
 
             // ReSharper disable once SuspiciousTypeConversion.Global
             var lexicalScope = new TemplateLexicalScope( ((Declaration) targetMethod).LookupSymbols() );
-            var syntaxGenerationContext = SyntaxGenerationContext.CreateDefault( compilation.RoslynCompilation );
+            var syntaxGenerationContext = SyntaxGenerationContext.CreateDefault( serviceProvider, compilation.RoslynCompilation );
 
             var proceedExpression =
                 new UserExpression(
@@ -301,7 +305,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
                         metaApi,
                         compilation,
                         lexicalScope,
-                        this._syntaxSerializationService,
+                        serviceProvider.GetService<SyntaxSerializationService>(),
                         syntaxGenerationContext,
                         default,
                         proceedExpression ), roslynTargetMethod);

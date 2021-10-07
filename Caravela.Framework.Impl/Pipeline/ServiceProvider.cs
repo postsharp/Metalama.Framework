@@ -1,6 +1,8 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.Serialization;
 using Caravela.Framework.Project;
 using System;
 using System.Collections.Generic;
@@ -13,7 +15,7 @@ namespace Caravela.Framework.Impl.Pipeline
     /// When a service is added to a <see cref="ServiceProvider"/>, an mapping is created between the type of this object and the object itself,
     /// but also between the type of any interface derived from <see cref="IService"/> and implemented by this object.
     /// </summary>
-    public class ServiceProvider : IServiceProvider, IDisposable
+    public class ServiceProvider : IServiceProvider
     {
         private ImmutableDictionary<Type, Lazy<IService, Type>> _services;
 
@@ -87,17 +89,6 @@ namespace Caravela.Framework.Impl.Pipeline
             }
         }
 
-        public void Dispose()
-        {
-            foreach ( var o in this._services.Values )
-            {
-                if ( o.IsValueCreated && o.Value is IDisposable disposable )
-                {
-                    disposable.Dispose();
-                }
-            }
-        }
-
         /// <summary>
         /// Returns a new <see cref="ServiceProvider"/> where some given services have been added to the current <see cref="ServiceProvider"/>.
         /// If some of the new services are already present in the current <see cref="ServiceProvider"/>, they are replaced in the new <see cref="ServiceProvider"/>.
@@ -151,6 +142,19 @@ namespace Caravela.Framework.Impl.Pipeline
             serviceProvider._services = servicesBuilder.ToImmutable();
 
             return serviceProvider;
+        }
+
+        /// <summary>
+        /// Adds the services that have the same scope as the project processing itself.
+        /// </summary>
+        /// <returns></returns>
+        public ServiceProvider WithProjectScopedServices()
+        {
+            // ReflectionMapperFactory cannot be a global service because it keeps a reference from compilations to types of the
+            // user assembly. When we need to unload the user assembly, we first need to unload the ReflectionMapperFactory.
+            var serviceProvider = this.WithServices( new ReflectionMapperFactory() );
+
+            return serviceProvider.WithServices( new SyntaxSerializationService( serviceProvider ) );
         }
 
         public override string ToString()

@@ -16,6 +16,8 @@ namespace Caravela.Framework.Tests.UnitTests.CodeModel
         [Fact]
         public void Matches_ParameterTypes()
         {
+            using var testContext = this.CreateTestContext();
+
             var code = @"
 class C
 {
@@ -41,7 +43,7 @@ class C
 }
 ";
 
-            var compilation = this.CreateCompilationModel( code );
+            var compilation = testContext.CreateCompilationModel( code );
             var type = compilation.Types[0];
             var intType = compilation.Factory.GetTypeByReflectionType( typeof(int) );
             var objectType = compilation.Factory.GetTypeByReflectionType( typeof(object) );
@@ -67,6 +69,8 @@ class C
         [Fact]
         public void Matches_ParameterTypeRefKinds()
         {
+            using var testContext = this.CreateTestContext();
+
             var code = @"
 class C
 {
@@ -97,7 +101,7 @@ class C
 }
 ";
 
-            var compilation = this.CreateCompilationModel( code );
+            var compilation = testContext.CreateCompilationModel( code );
             var type = compilation.Types[0];
             var intType = compilation.Factory.GetTypeByReflectionType( typeof(int) );
 
@@ -128,6 +132,8 @@ class C
         [Fact]
         public void Matches_ParameterReflectionTypes()
         {
+            using var testContext = this.CreateTestContext();
+
             var code = @"
 class C
 {
@@ -153,7 +159,7 @@ class C
 }
 ";
 
-            var compilation = this.CreateCompilationModel( code );
+            var compilation = testContext.CreateCompilationModel( code );
             var type = compilation.Types[0];
 
             var matchedMethods1 = type.Methods.OfCompatibleSignature( "Foo", Array.Empty<IType>() ).ToArray();
@@ -171,6 +177,8 @@ class C
         [Fact]
         public void Matches_IsStatic()
         {
+            using var testContext = this.CreateTestContext();
+
             var code = @"
 class C
 {
@@ -184,7 +192,7 @@ class C
 }
 ";
 
-            var compilation = this.CreateCompilationModel( code );
+            var compilation = testContext.CreateCompilationModel( code );
             var type = compilation.Types[0];
 
             var matchedMethods1 = type.Methods.OfCompatibleSignature( "Foo", Array.Empty<IType>(), isStatic: false );
@@ -204,6 +212,8 @@ class C
         [Fact]
         public void Matches_Params()
         {
+            using var testContext = this.CreateTestContext();
+
             var code = @"
 class C
 {
@@ -245,7 +255,7 @@ class C
 }
 ";
 
-            var compilation = this.CreateCompilationModel( code );
+            var compilation = testContext.CreateCompilationModel( code );
             var type = compilation.Types[0];
             var intType = compilation.Factory.GetTypeByReflectionType( typeof(int) );
             var objectType = compilation.Factory.GetTypeByReflectionType( typeof(object) );
@@ -279,6 +289,8 @@ class C
         [Fact]
         public void Matches_InheritanceHierarchy()
         {
+            using var testContext = this.CreateTestContext();
+
             var code = @"
 class A
 {
@@ -305,7 +317,7 @@ class C : B
 }
 ";
 
-            var compilation = this.CreateCompilationModel( code );
+            var compilation = testContext.CreateCompilationModel( code );
             var types = compilation.Types.OrderBySource();
             var typeA = types[0];
             var typeB = types[1];

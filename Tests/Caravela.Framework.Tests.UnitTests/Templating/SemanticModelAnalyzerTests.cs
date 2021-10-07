@@ -14,6 +14,8 @@ namespace Caravela.Framework.Tests.UnitTests.Templating
         [Fact]
         public void RuntimeCodeCallingCompileTimeOnlyMethod()
         {
+            using var testContext = this.CreateTestContext();
+
             var compilation = CreateCSharpCompilation(
                 @"
 using Caravela.Framework.Code;
@@ -27,7 +29,7 @@ class X { void M() { IMethod m; } }
             var semanticModel = compilation.GetSemanticModel( syntaxTree );
 
             TemplatingCodeValidator.Validate(
-                this.ServiceProvider,
+                testContext.ServiceProvider,
                 semanticModel,
                 diagnostics.Add,
                 false,
@@ -40,6 +42,8 @@ class X { void M() { IMethod m; } }
         [Fact]
         public void MustImportNamespace()
         {
+            using var testContext = this.CreateTestContext();
+
             var compilation = CreateCSharpCompilation(
                 @"
 class X : Caravela.Framework.Aspects.OverrideMethodAspect {  public override dynamic? OverrideMethod() { return null; } }
@@ -51,7 +55,7 @@ class X : Caravela.Framework.Aspects.OverrideMethodAspect {  public override dyn
             var semanticModel = compilation.GetSemanticModel( syntaxTree );
 
             TemplatingCodeValidator.Validate(
-                this.ServiceProvider,
+                testContext.ServiceProvider,
                 semanticModel,
                 diagnostics.Add,
                 false,

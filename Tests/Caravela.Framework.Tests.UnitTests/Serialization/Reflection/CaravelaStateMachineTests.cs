@@ -16,10 +16,12 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
         [Fact]
         public void TestEnumerable()
         {
+            using var testContext = this.CreateTestContext();
+
             var code = "class Target { public static System.Collections.Generic.IEnumerable<int> Method() { yield return 2; } }";
 
-            var serialized = this.Serialize(
-                    CompileTimeMethodInfo.Create( this.CreateCompilationModel( code ).Types.Single( t => t.Name == "Target" ).Methods.First() ) )
+            var serialized = testContext.Serialize(
+                    CompileTimeMethodInfo.Create( testContext.CreateCompilationModel( code ).Types.Single( t => t.Name == "Target" ).Methods.First() ) )
                 .ToString();
 
             this.AssertEqual(
@@ -32,10 +34,12 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
         [Fact]
         public void TestAsync()
         {
+            using var testContext = this.CreateTestContext();
+
             var code = "class Target { public static async void Method() { await System.Threading.Tasks.Task.Delay(1); } }";
 
-            var serialized = this.Serialize(
-                    CompileTimeMethodInfo.Create( this.CreateCompilationModel( code ).Types.Single( t => t.Name == "Target" ).Methods.First() ) )
+            var serialized = testContext.Serialize(
+                    CompileTimeMethodInfo.Create( testContext.CreateCompilationModel( code ).Types.Single( t => t.Name == "Target" ).Methods.First() ) )
                 .ToString();
 
             this.AssertEqual(

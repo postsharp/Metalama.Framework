@@ -52,7 +52,7 @@ namespace Caravela.TestFramework
         {
             var directory = this.GetDirectory( callerMemberName! );
             using var testOptions = new TestProjectOptions();
-            using var serviceProvider = ServiceProviderFactory.GetServiceProvider( testOptions );
+            var serviceProvider = ServiceProviderFactory.GetServiceProvider( testOptions );
 
             var directoryOptionsReader = TestDirectoryOptionsReader.GetInstance( this.GetType().Assembly );
 

@@ -82,13 +82,13 @@ class A : Attribute
     public override string ToString() => $""A({constructorArguments}, P={P})"";
 }";
 
-            using var isolatedTest = this.WithIsolatedTest();
+            using var testContext = this.CreateTestContext();
 
             var roslynCompilation = CreateCSharpCompilation( code );
-            var compilation = CompilationModel.CreateInitialInstance( new NullProject( isolatedTest.ServiceProvider ), roslynCompilation );
+            var compilation = CompilationModel.CreateInitialInstance( new NullProject( testContext.ServiceProvider ), roslynCompilation );
 
             var compileTimeDomain = new UnloadableCompileTimeDomain();
-            var loader = CompileTimeProjectLoader.Create( compileTimeDomain, isolatedTest.ServiceProvider );
+            var loader = CompileTimeProjectLoader.Create( compileTimeDomain, testContext.ServiceProvider );
 
             Assert.True(
                 loader.TryGetCompileTimeProjectFromCompilation(
@@ -132,8 +132,8 @@ class ReferencingClass
 
             var roslynCompilation = CreateCSharpCompilation( referencingCode, referencedCode );
 
-            using var isolatedTest = this.WithIsolatedTest();
-            var loader = CompileTimeProjectLoader.Create( new CompileTimeDomain(), isolatedTest.ServiceProvider );
+            using var testContext = this.CreateTestContext();
+            var loader = CompileTimeProjectLoader.Create( new CompileTimeDomain(), testContext.ServiceProvider );
 
             DiagnosticList diagnosticList = new();
             Assert.True( loader.TryGetCompileTimeProjectFromCompilation( roslynCompilation, null, diagnosticList, false, CancellationToken.None, out _ ) );
@@ -176,13 +176,13 @@ class ReferencingClass
             try
             {
                 var testAssemblyLocator = new TestAssemblyLocator();
-                using var isolatedTest = this.WithIsolatedTest( testAssemblyLocator );
+                using var testContext = this.CreateTestContext( p => p.WithService( testAssemblyLocator ) );
 
                 PortableExecutableReference CompileProject( string code, params MetadataReference[] references )
                 {
                     // For this test, we need a different loader every time, because we simulate a series command-line calls,
                     // one for each project.
-                    var loader = CompileTimeProjectLoader.Create( new CompileTimeDomain(), isolatedTest.ServiceProvider );
+                    var loader = CompileTimeProjectLoader.Create( new CompileTimeDomain(), testContext.ServiceProvider );
 
                     var compilation = CreateCSharpCompilation( code, additionalReferences: references );
                     DiagnosticList diagnostics = new();
@@ -290,9 +290,9 @@ class B
                 name: "test_B_" + guid );
 
             using var domain = new UnloadableCompileTimeDomain();
-            using var isolatedTest1 = this.WithIsolatedTest();
+            using var testContext1 = this.CreateTestContext();
 
-            var loaderV1 = CompileTimeProjectLoader.Create( domain, isolatedTest1.ServiceProvider );
+            var loaderV1 = CompileTimeProjectLoader.Create( domain, testContext1.ServiceProvider );
             DiagnosticList diagnosticList = new();
 
             Assert.True(
@@ -300,8 +300,8 @@ class B
 
             ExecuteAssertions( project1!, 1 );
 
-            using var isolatedTest2 = this.WithIsolatedTest();
-            var loader2 = CompileTimeProjectLoader.Create( domain, isolatedTest2.ServiceProvider );
+            using var testContext2 = this.CreateTestContext();
+            var loader2 = CompileTimeProjectLoader.Create( domain, testContext2.ServiceProvider );
 
             Assert.True(
                 loader2.TryGetCompileTimeProjectFromCompilation( compilationB2, null, diagnosticList, false, CancellationToken.None, out var project2 ) );
@@ -350,8 +350,8 @@ class C
 
             var domain = new CompileTimeDomain();
             var compilation = CreateCSharpCompilation( code, ignoreErrors: true );
-            using var isolatedTest = this.WithIsolatedTest();
-            var loader = CompileTimeProjectLoader.Create( domain, isolatedTest.ServiceProvider );
+            using var testContext = this.CreateTestContext();
+            var loader = CompileTimeProjectLoader.Create( domain, testContext.ServiceProvider );
             DiagnosticList diagnosticList = new();
             Assert.True( loader.TryGetCompileTimeProjectFromCompilation( compilation, null, diagnosticList, false, CancellationToken.None, out _ ) );
         }
@@ -369,8 +369,8 @@ public class ReferencedClass
 
             var roslynCompilation = CreateCSharpCompilation( code );
 
-            using var isolatedTest = this.WithIsolatedTest();
-            var loader = CompileTimeProjectLoader.Create( new CompileTimeDomain(), isolatedTest.ServiceProvider );
+            using var testContext = this.CreateTestContext();
+            var loader = CompileTimeProjectLoader.Create( new CompileTimeDomain(), testContext.ServiceProvider );
 
             DiagnosticList diagnosticList = new();
 
@@ -411,8 +411,8 @@ public class ReferencedClass
 }
 ";
 
-            using var isolatedTest = this.WithIsolatedTest();
-            var loader = CompileTimeProjectLoader.Create( new CompileTimeDomain(), isolatedTest.ServiceProvider );
+            using var testContext = this.CreateTestContext();
+            var loader = CompileTimeProjectLoader.Create( new CompileTimeDomain(), testContext.ServiceProvider );
 
             DiagnosticList diagnosticList = new();
 
@@ -452,8 +452,8 @@ public class ReferencedClass
 
             DiagnosticList diagnosticList = new();
 
-            using var isolatedTest = this.WithIsolatedTest();
-            var loader1 = CompileTimeProjectLoader.Create( new CompileTimeDomain(), isolatedTest.ServiceProvider );
+            using var testContext = this.CreateTestContext();
+            var loader1 = CompileTimeProjectLoader.Create( new CompileTimeDomain(), testContext.ServiceProvider );
 
             // Building the project should succeed.
             Assert.True(
@@ -466,7 +466,7 @@ public class ReferencedClass
                     out _ ) );
 
             // After building, getting from cache should fail because the memory cache is empty and the disk cache checks the assembly name.
-            var loader2 = CompileTimeProjectLoader.Create( new CompileTimeDomain(), isolatedTest.ServiceProvider );
+            var loader2 = CompileTimeProjectLoader.Create( new CompileTimeDomain(), testContext.ServiceProvider );
 
             Assert.False(
                 loader2.TryGetCompileTimeProjectFromCompilation(
@@ -493,21 +493,21 @@ public class ReferencedClass
 
             DiagnosticList diagnosticList = new();
 
-            // We create a single isolatedTest.ServiceProvider because we need to share the filesystem cache, and there is one per isolatedTest.ServiceProvider
+            // We create a single testContext.ServiceProvider because we need to share the filesystem cache, and there is one per testContext.ServiceProvider
             // in test projects.
-            using var isolatedTest = this.WithIsolatedTest();
+            using var testContext = this.CreateTestContext();
 
             // Getting from cache should fail.
 
-            var loader1 = CompileTimeProjectLoader.Create( new CompileTimeDomain(), isolatedTest.ServiceProvider );
+            var loader1 = CompileTimeProjectLoader.Create( new CompileTimeDomain(), testContext.ServiceProvider );
             Assert.False( loader1.TryGetCompileTimeProjectFromCompilation( roslynCompilation, null, diagnosticList, true, CancellationToken.None, out _ ) );
 
             // Building the project should succeed.
-            var loader2 = CompileTimeProjectLoader.Create( new CompileTimeDomain(), isolatedTest.ServiceProvider );
+            var loader2 = CompileTimeProjectLoader.Create( new CompileTimeDomain(), testContext.ServiceProvider );
             Assert.True( loader2.TryGetCompileTimeProjectFromCompilation( roslynCompilation, null, diagnosticList, false, CancellationToken.None, out _ ) );
 
             // After building, getting from cache should succeed.
-            var loader3 = CompileTimeProjectLoader.Create( new CompileTimeDomain(), isolatedTest.ServiceProvider );
+            var loader3 = CompileTimeProjectLoader.Create( new CompileTimeDomain(), testContext.ServiceProvider );
             Assert.True( loader3.TryGetCompileTimeProjectFromCompilation( roslynCompilation, null, diagnosticList, true, CancellationToken.None, out _ ) );
         }
 
@@ -534,13 +534,13 @@ class ReferencingClass
 
             var referencedCompilation = CreateCSharpCompilation( referencedCode );
 
-            var isolatedTest2 = this.WithIsolatedTest();
+            var testContext2 = this.CreateTestContext();
 
-            var referencedPath = Path.Combine( isolatedTest2.ProjectOptions.CompileTimeProjectCacheDirectory, "referenced.dll" );
+            var referencedPath = Path.Combine( testContext2.ProjectOptions.CompileTimeProjectCacheDirectory, "referenced.dll" );
 
-            using ( var isolatedTest = this.WithIsolatedTest() )
+            using ( var testContext = this.CreateTestContext() )
             {
-                var loader = CompileTimeProjectLoader.Create( new CompileTimeDomain(), isolatedTest.ServiceProvider );
+                var loader = CompileTimeProjectLoader.Create( new CompileTimeDomain(), testContext.ServiceProvider );
 
                 DiagnosticList diagnosticList = new();
 
@@ -566,9 +566,9 @@ class ReferencingClass
                 referencingCode,
                 additionalReferences: new[] { MetadataReference.CreateFromFile( referencedPath ) } );
 
-            using ( isolatedTest2 )
+            using ( testContext2 )
             {
-                var loader = CompileTimeProjectLoader.Create( new CompileTimeDomain(), isolatedTest2.ServiceProvider );
+                var loader = CompileTimeProjectLoader.Create( new CompileTimeDomain(), testContext2.ServiceProvider );
 
                 DiagnosticList diagnosticList = new();
 
@@ -586,9 +586,9 @@ class ReferencingClass
         [Fact]
         public void EmptyProjectWithReference()
         {
-            using var isolatedTest = this.WithIsolatedTest();
+            using var testContext = this.CreateTestContext();
 
-            var loader = CompileTimeProjectLoader.Create( new CompileTimeDomain(), isolatedTest.ServiceProvider );
+            var loader = CompileTimeProjectLoader.Create( new CompileTimeDomain(), testContext.ServiceProvider );
 
             var referencedCode = @"
 using Caravela.Framework.Aspects;
@@ -601,7 +601,7 @@ public class ReferencedClass
 
             // Emit the referenced assembly.
             var referencedCompilation = CreateCSharpCompilation( referencedCode );
-            var referencedPath = Path.Combine( isolatedTest.ProjectOptions.CompileTimeProjectCacheDirectory, "referenced.dll" );
+            var referencedPath = Path.Combine( testContext.ProjectOptions.CompileTimeProjectCacheDirectory, "referenced.dll" );
 
             DiagnosticList diagnosticList = new();
 
@@ -640,10 +640,10 @@ public class ReferencedClass
         [Fact]
         public void EmptyProjectWithoutReference()
         {
-            using var isolatedTest = this.WithIsolatedTest();
+            using var testContext = this.CreateTestContext();
             DiagnosticList diagnosticList = new();
 
-            var loader = CompileTimeProjectLoader.Create( new CompileTimeDomain(), isolatedTest.ServiceProvider );
+            var loader = CompileTimeProjectLoader.Create( new CompileTimeDomain(), testContext.ServiceProvider );
 
             // Create the referencing compile-time project.
             Assert.True(
@@ -704,7 +704,8 @@ public class CompileTimeOnlyClass
 
             var compilation = CreateCSharpCompilation( code );
 
-            var loader = CompileTimeProjectLoader.Create( new CompileTimeDomain(), this.ServiceProvider );
+            using var testContext = this.CreateTestContext();
+            var loader = CompileTimeProjectLoader.Create( new CompileTimeDomain(), testContext.ServiceProvider );
 
             DiagnosticList diagnosticList = new();
 
@@ -728,7 +729,7 @@ public class CompileTimeOnlyClass
         public void CompileTimeAssemblyBinaryRewriter()
         {
             var rewriter = new Rewriter();
-            using var isolatedTest = this.WithIsolatedTest( rewriter );
+            using var testContext = this.CreateTestContext( p => p.WithService( rewriter ) );
 
             var code = @"
 using System;
@@ -741,7 +742,7 @@ public class Anything
 ";
 
             var roslynCompilation = CreateCSharpCompilation( code );
-            var loader1 = CompileTimeProjectLoader.Create( new CompileTimeDomain(), isolatedTest.ServiceProvider );
+            var loader1 = CompileTimeProjectLoader.Create( new CompileTimeDomain(), testContext.ServiceProvider );
             DiagnosticList diagnosticList = new();
             Assert.True( loader1.TryGetCompileTimeProjectFromCompilation( roslynCompilation, null, diagnosticList, false, CancellationToken.None, out _ ) );
 
@@ -751,7 +752,7 @@ public class Anything
         [Fact]
         public void NoBuildTimeCodeNoDependency()
         {
-            using var isolatedTest = this.WithIsolatedTest();
+            using var testContext = this.CreateTestContext();
 
             var code = @"
 using System;
@@ -764,7 +765,7 @@ public class SomeRunTimeClass
 ";
 
             var roslynCompilation = CreateCSharpCompilation( code );
-            var loader1 = CompileTimeProjectLoader.Create( new CompileTimeDomain(), isolatedTest.ServiceProvider );
+            var loader1 = CompileTimeProjectLoader.Create( new CompileTimeDomain(), testContext.ServiceProvider );
             DiagnosticList diagnosticList = new();
 
             Assert.True(
@@ -776,8 +777,8 @@ public class SomeRunTimeClass
         [Fact]
         public void FormatCompileTimeCode()
         {
-            using var isolatedTest = this.WithIsolatedTest();
-            isolatedTest.ProjectOptions.FormatCompileTimeCode = true;
+            using var testContext = this.CreateTestContext();
+            testContext.ProjectOptions.FormatCompileTimeCode = true;
 
             var code = @"
 using System;
@@ -793,18 +794,18 @@ public class MyAspect : OverrideMethodAspect
 
 ";
 
-            var compileTimeCode = GetCompileTimeCode( isolatedTest, code );
+            var compileTimeCode = GetCompileTimeCode( testContext, code );
 
             Assert.Contains( "using Microsoft.CodeAnalysis", compileTimeCode, StringComparison.Ordinal );
         }
 
-        private static string GetCompileTimeCode( IsolatedTest test, string code )
-            => GetCompileTimeCode( test, new Dictionary<string, string> { { "main.cs", code } } ).Values.Single();
+        private static string GetCompileTimeCode( TestContext testContext, string code )
+            => GetCompileTimeCode( testContext, new Dictionary<string, string> { { "main.cs", code } } ).Values.Single();
 
-        private static IReadOnlyDictionary<string, string> GetCompileTimeCode( IsolatedTest test, IReadOnlyDictionary<string, string> code )
+        private static IReadOnlyDictionary<string, string> GetCompileTimeCode( TestContext testContext, IReadOnlyDictionary<string, string> code )
         {
             var roslynCompilation = CreateCSharpCompilation( code );
-            var loader1 = CompileTimeProjectLoader.Create( new CompileTimeDomain(), test.ServiceProvider );
+            var loader1 = CompileTimeProjectLoader.Create( new CompileTimeDomain(), testContext.ServiceProvider );
             DiagnosticList diagnosticList = new();
 
             Assert.True(
@@ -824,11 +825,11 @@ public class MyAspect : OverrideMethodAspect
         [Fact]
         public void EmptyNamespacesAreRemovedFromCompileTimeAssembly()
         {
-            using var isolatedTest = this.WithIsolatedTest();
+            using var testContext = this.CreateTestContext();
 
             // The namespace Ns should be removed because it does not contain any build-time code.
             var compileTimeCode = GetCompileTimeCode(
-                isolatedTest,
+                testContext,
                 new Dictionary<string, string>
                 {
                     ["BuildTime.cs"] = "class Aspect : Caravela.Framework.Aspects.IAspect<Caravela.Framework.Code.IMethod> {}",
@@ -850,8 +851,8 @@ public class MyAspect : OverrideMethodAspect
         [Fact]
         public void FabricClassesAreUnNested()
         {
-            using var isolatedTest = this.WithIsolatedTest();
-            isolatedTest.ProjectOptions.FormatCompileTimeCode = true;
+            using var testContext = this.CreateTestContext();
+            testContext.ProjectOptions.FormatCompileTimeCode = true;
 
             var code = @"
 using System;
@@ -874,7 +875,7 @@ namespace SomeNamespace
 }
 ";
 
-            var compileTimeCode = GetCompileTimeCode( isolatedTest, code );
+            var compileTimeCode = GetCompileTimeCode( testContext, code );
 
             var expected = @"
 using System;

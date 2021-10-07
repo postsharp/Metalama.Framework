@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Impl.CodeModel;
+using System;
 using System.Collections.Generic;
 
 namespace Caravela.Framework.Impl.Linking
@@ -32,9 +33,12 @@ namespace Caravela.Framework.Impl.Linking
     /// </summary>
     internal partial class LinkerLinkingStep : AspectLinkerPipelineStep<LinkerAnalysisStepOutput, AspectLinkerResult>
     {
-        public static LinkerLinkingStep Instance { get; } = new();
+        private readonly IServiceProvider _serviceProvider;
 
-        private LinkerLinkingStep() { }
+        public LinkerLinkingStep( IServiceProvider serviceProvider )
+        {
+            this._serviceProvider = serviceProvider;
+        }
 
         public override AspectLinkerResult Execute( LinkerAnalysisStepOutput input )
         {
@@ -43,9 +47,10 @@ namespace Caravela.Framework.Impl.Linking
                 input.IntroductionRegistry,
                 input.AnalysisRegistry,
                 input.ReferenceResolver,
-                input.DiagnosticSink );
+                input.DiagnosticSink,
+                this._serviceProvider );
 
-            var linkingRewriter = new LinkingRewriter( input.IntermediateCompilation.Compilation, rewritingDriver );
+            var linkingRewriter = new LinkingRewriter( this._serviceProvider, input.IntermediateCompilation.Compilation, rewritingDriver );
             var cleanupRewriter = new CleanupRewriter();
 
             List<SyntaxTreeModification> replacedTrees = new();

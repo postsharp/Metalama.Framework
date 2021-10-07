@@ -27,10 +27,12 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
 
         private string SerializeType( string code )
         {
-            var compilation = this.CreateCompilationModel( code );
+            using var testContext = this.CreateTestContext();
+
+            var compilation = testContext.CreateCompilationModel( code );
             IType single = compilation.Types.Single( t => t.Name == "Target" ).NestedTypes.Single( nt => nt.Name == "Sub" );
 
-            return this.Serialize( CompileTimeType.Create( single ) ).ToString();
+            return testContext.Serialize( CompileTimeType.Create( single ) ).ToString();
         }
 
         public CaravelaNestedTests( ITestOutputHelper helper ) : base( helper ) { }

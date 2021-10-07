@@ -30,7 +30,7 @@ namespace Caravela.Framework.Impl.Templating
             this._syntaxTreeAnnotationMap = syntaxTreeAnnotationMap;
             this._symbolClassifier = serviceProvider.GetService<SymbolClassificationService>().GetClassifier( runTimeCompilation );
 
-            var reflectionMapper = ReflectionMapper.GetInstance( runTimeCompilation );
+            var reflectionMapper = serviceProvider.GetService<ReflectionMapperFactory>().GetInstance( runTimeCompilation );
             this._metaType = reflectionMapper.GetTypeSymbol( typeof(meta) );
         }
 

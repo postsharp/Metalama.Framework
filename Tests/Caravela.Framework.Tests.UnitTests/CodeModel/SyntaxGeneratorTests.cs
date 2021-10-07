@@ -48,8 +48,10 @@ namespace Caravela.Framework.Tests.UnitTests.CodeModel
         [InlineData( "List<int?[]>", "typeof(global::System.Collections.Generic.List<global::System.Int32?[]>)", false )]
         public void TypeOfSyntax( string type, string expectedTypeOf, bool nullable )
         {
+            using var testContext = this.CreateTestContext();
+
             var code = $"using System.Collections.Generic; class T {{ {type} field; }} ";
-            var compilation = this.CreateCompilationModel( code );
+            var compilation = testContext.CreateCompilationModel( code );
             var fieldType = compilation.Types.Single().Fields.Single().Type.GetSymbol();
 
             var defaultSyntaxGenerator = OurSyntaxGenerator.GetInstance( nullable );
@@ -92,8 +94,10 @@ namespace Caravela.Framework.Tests.UnitTests.CodeModel
         [InlineData( "List<int?[]>", "global::System.Collections.Generic.List<global::System.Int32?[]>", false )]
         public void TypeSyntax( string type, string expectedTypeOf, bool nullable )
         {
+            using var testContext = this.CreateTestContext();
+
             var code = $"using System.Collections.Generic; class T {{ {type} field; }} ";
-            var compilation = this.CreateCompilationModel( code );
+            var compilation = testContext.CreateCompilationModel( code );
             var fieldType = compilation.Types.Single().Fields.Single().Type.GetSymbol();
 
             var defaultSyntaxGenerator = OurSyntaxGenerator.GetInstance( nullable );

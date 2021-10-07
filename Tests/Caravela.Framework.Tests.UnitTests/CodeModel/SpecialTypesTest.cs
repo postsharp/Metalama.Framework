@@ -30,7 +30,9 @@ namespace Caravela.Framework.Tests.UnitTests.CodeModel
         [InlineData( SpecialType.IAsyncEnumerator_T )]
         public void TestType( SpecialType type )
         {
-            var emptyModel = this.CreateCompilationModel( "" );
+            using var testContext = this.CreateTestContext();
+
+            var emptyModel = testContext.CreateCompilationModel( "" );
             var namedType = emptyModel.Factory.GetSpecialType( type );
             Assert.Equal( type, namedType.SpecialType );
             Assert.True( namedType.Is( type ) );

@@ -93,7 +93,7 @@ namespace Caravela.AspectWorkbench.ViewModels
             }
 
             using var testProjectOptions = new TestProjectOptions() { FormatCompileTimeCode = true };
-            using var serviceProvider = ServiceProviderFactory.GetServiceProvider( testProjectOptions );
+            var serviceProvider = ServiceProviderFactory.GetServiceProvider( testProjectOptions ).WithProjectScopedServices();
             var syntaxColorizer = new SyntaxColorizer( serviceProvider );
 
             var testRunner = TestRunnerFactory.CreateTestRunner( testInput, serviceProvider, null );
@@ -136,7 +136,7 @@ namespace Caravela.AspectWorkbench.ViewModels
             {
                 if ( testResult.CompileTimeCompilation != null )
                 {
-                    SyntaxTreeStructureVerifier.Verify( testResult.CompileTimeCompilation );
+                    SyntaxTreeStructureVerifier.Verify( testResult.CompileTimeCompilation, serviceProvider );
                 }
 
                 // Render the transformed tree.

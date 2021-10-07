@@ -29,14 +29,18 @@ namespace Caravela.Framework.Tests.Integration.Runners
             ITestOutputHelper? logger )
             : base( serviceProvider, projectDirectory, metadataReferences, logger ) { }
 
-        private protected override async Task RunAsync( TestInput testInput, TestResult testResult, Dictionary<string, object?> state )
+        private protected override async Task RunAsync(
+            ServiceProvider serviceProvider,
+            TestInput testInput,
+            TestResult testResult,
+            Dictionary<string, object?> state )
         {
-            await base.RunAsync( testInput, testResult, state );
+            await base.RunAsync( serviceProvider, testInput, testResult, state );
 
             using var domain = new UnloadableCompileTimeDomain();
-            var compilation = CompilationModel.CreateInitialInstance( new NullProject( this.ServiceProvider ), testResult.InputCompilation! );
+            var compilation = CompilationModel.CreateInitialInstance( new NullProject( serviceProvider ), testResult.InputCompilation! );
 
-            using var designTimePipeline = new DesignTimeAspectPipeline( this.ServiceProvider, domain, true );
+            using var designTimePipeline = new DesignTimeAspectPipeline( serviceProvider, domain, true );
 
             Assert.True(
                 designTimePipeline.TryGetConfiguration(

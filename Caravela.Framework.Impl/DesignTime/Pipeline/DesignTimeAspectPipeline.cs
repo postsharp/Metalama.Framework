@@ -56,8 +56,11 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
             ServiceProvider serviceProvider,
             CompileTimeDomain domain,
             bool isTest )
-            : base( serviceProvider, AspectExecutionScenario.DesignTime, isTest, domain )
+            : base( serviceProvider.WithProjectScopedServices(), AspectExecutionScenario.DesignTime, isTest, domain )
         {
+            // The design-time pipeline contains project-scoped services for performance reasons: the pipeline may be called several
+            // times with the same compilation.
+
             if ( this.ProjectOptions.BuildTouchFile == null )
             {
                 return;
