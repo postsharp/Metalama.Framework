@@ -24,7 +24,8 @@ namespace Caravela.Framework.Impl.Pipeline
             var projectOptions = new ProjectOptions( context.GlobalOptions, context.Plugins );
 
             var serviceProvider = ServiceProviderFactory.GetServiceProvider( assemblyLocator: new CompilationAssemblyLocator( context.Compilation ) )
-                .WithService( projectOptions );
+                .WithService( projectOptions )
+                .WithProjectScopedServices();
 
             try
             {
