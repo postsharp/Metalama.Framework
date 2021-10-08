@@ -16,14 +16,13 @@ namespace Caravela.Framework.Impl.CodeModel
     /// </summary>
     internal class ReflectionMapper
     {
+        private readonly Compilation _compilation;
         private readonly ConcurrentDictionary<Type, ITypeSymbol> _symbolCache = new();
 
         internal ReflectionMapper( Compilation compilation )
         {
-            this.Compilation = compilation;
+            this._compilation = compilation;
         }
-
-        public Compilation Compilation { get; }
 
         /// <summary>
         /// Gets a <see cref="INamedTypeSymbol"/> by metadata name.
@@ -31,7 +30,7 @@ namespace Caravela.Framework.Impl.CodeModel
         /// <param name="metadataName"></param>
         public INamedTypeSymbol GetNamedTypeSymbolByMetadataName( string metadataName )
         {
-            var symbol = this.Compilation.GetTypeByMetadataName( metadataName );
+            var symbol = this._compilation.GetTypeByMetadataName( metadataName );
 
             if ( symbol == null )
             {
@@ -51,7 +50,7 @@ namespace Caravela.Framework.Impl.CodeModel
             switch ( type )
             {
                 case CompileTimeType compileTimeType:
-                    return (ITypeSymbol) compileTimeType.Target.GetSymbol( this.Compilation )
+                    return (ITypeSymbol) compileTimeType.Target.GetSymbol( this._compilation )
                         .AssertNotNull( Justifications.SerializersNotImplementedForIntroductions );
 
                 default:
@@ -68,7 +67,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
             if ( type is CompileTimeType compileTimeType )
             {
-                return (ITypeSymbol) compileTimeType.Target.GetSymbol( this.Compilation ).AssertNotNull( Justifications.TypesAlwaysHaveSymbol );
+                return (ITypeSymbol) compileTimeType.Target.GetSymbol( this._compilation ).AssertNotNull( Justifications.TypesAlwaysHaveSymbol );
             }
 
             if ( type.IsByRef )
@@ -80,14 +79,14 @@ namespace Caravela.Framework.Impl.CodeModel
             {
                 var elementType = this.GetTypeSymbol( type.GetElementType()! );
 
-                return this.Compilation.CreateArrayTypeSymbol( elementType, type.GetArrayRank() );
+                return this._compilation.CreateArrayTypeSymbol( elementType, type.GetArrayRank() );
             }
 
             if ( type.IsPointer )
             {
                 var pointedToType = this.GetTypeSymbol( type.GetElementType()! );
 
-                return this.Compilation.CreatePointerTypeSymbol( pointedToType );
+                return this._compilation.CreatePointerTypeSymbol( pointedToType );
             }
 
             return this.GetNamedTypeSymbol( type, type.GenericTypeArguments );

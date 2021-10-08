@@ -9,5 +9,7 @@ namespace Caravela.Framework.Code.SyntaxBuilders
     public static class ExpressionBuilderExtensions
     {
         public static dynamic? ToValue( this IExpressionBuilder builder ) => builder.ToExpression().Value;
+
+        public static dynamic ToValue( this INotNullExpressionBuilder builder ) => builder.ToExpression().Value!;
     }
 }

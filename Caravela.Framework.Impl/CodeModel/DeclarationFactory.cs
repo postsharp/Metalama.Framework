@@ -8,6 +8,7 @@ using Caravela.Framework.Impl.CodeModel.Builders;
 using Caravela.Framework.Impl.CodeModel.References;
 using Caravela.Framework.Impl.Templating.MetaModel;
 using Caravela.Framework.Impl.Utilities;
+using Caravela.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Concurrent;
@@ -124,12 +125,12 @@ namespace Caravela.Framework.Impl.CodeModel
         public IEvent GetEvent( IEventSymbol @event )
             => (IEvent) this._cache.GetOrAdd( @event.ToRef(), ms => new Event( (IEventSymbol) ms.GetSymbol( this.Compilation ), this._compilationModel ) );
 
-        internal IDeclaration GetDeclaration( ISymbol? symbol, DeclarationSpecialKind kind = DeclarationSpecialKind.Default )
+        internal IDeclaration GetDeclaration( ISymbol? symbol, DeclarationRefTargetKind kind = DeclarationRefTargetKind.Default )
             => symbol switch
             {
                 INamedTypeSymbol namedType => this.GetNamedType( namedType ),
                 IMethodSymbol method =>
-                    kind == DeclarationSpecialKind.ReturnParameter
+                    kind == DeclarationRefTargetKind.Return
                         ? this.GetReturnParameter( method )
                         : method.GetDeclarationKind() == DeclarationKind.Method
                             ? this.GetMethod( method )
@@ -281,5 +282,8 @@ namespace Caravela.Framework.Impl.CodeModel
         public IParameter GetReturnParameter( IMethodSymbol methodSymbol ) => this.GetMethod( methodSymbol ).ReturnParameter;
 
         private Compilation Compilation => this._compilationModel.RoslynCompilation;
+
+        public Type GetReflectionType( ITypeSymbol typeSymbol )
+            => this._compilationModel.Project.ServiceProvider.GetService<CompileTimeTypeFactory>().Get( typeSymbol );
     }
 }

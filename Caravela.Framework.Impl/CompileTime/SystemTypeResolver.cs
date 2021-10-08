@@ -16,7 +16,7 @@ namespace Caravela.Framework.Impl.CompileTime
     {
         private readonly ReferenceAssemblyLocator _referenceAssemblyLocator;
 
-        public SystemTypeResolver( IServiceProvider serviceProvider )
+        public SystemTypeResolver( IServiceProvider serviceProvider ) : base( serviceProvider )
         {
             this._referenceAssemblyLocator = serviceProvider.GetService<ReferenceAssemblyLocator>();
         }

@@ -20,54 +20,24 @@ namespace Caravela.Framework.Impl.CodeModel.References
 
         private ( AttributeData? Attribute, ISymbol? Parent ) ResolveAttributeData( AttributeSyntax attributeSyntax, Compilation compilation )
         {
-            // Find the parent declaration of the custom attribute.
-            var declaration = attributeSyntax.Parent?.Parent;
-
-            if ( declaration == null )
-            {
-                return (null, null);
-            }
-
-            ISymbol? parent;
-
             // Find the parent declaration.
-            switch ( declaration )
+            var resolved =
+                this._declaringDeclaration.GetAttributeData( compilation );
+
+            // In the parent, find the AttributeData corresponding to the current item.
+
+            var attributeData = resolved.Attributes.SingleOrDefault(
+                a => a.ApplicationSyntaxReference != null && a.ApplicationSyntaxReference.Span == attributeSyntax.Span );
+
+            if ( attributeData == null )
             {
-                case BaseFieldDeclarationSyntax field:
-                    {
-                        var semanticModel = compilation.GetSemanticModel( attributeSyntax.SyntaxTree );
-                        parent = semanticModel.GetDeclaredSymbol( field.Declaration.Variables.First() );
-
-                        break;
-                    }
-
-                case MemberDeclarationSyntax or TypeParameterSyntax or ParameterSyntax:
-                    {
-                        var semanticModel = compilation.GetSemanticModel( attributeSyntax.SyntaxTree );
-                        parent = semanticModel.GetDeclaredSymbol( declaration );
-
-                        break;
-                    }
-
-                case CompilationUnitSyntax:
-                    // This is an assembly-level attribute.
-                    parent = compilation.Assembly;
-
-                    break;
-
-                default:
-                    throw new AssertionFailedException();
+                // This should not happen in a valid compilation and it's a good place to add a breakpoint.
             }
-
-            var attributes = parent?.GetAttributes();
-
-            var attributeData = attributes?.SingleOrDefault(
-                a => a.ApplicationSyntaxReference != null && a.ApplicationSyntaxReference.GetSyntax() == attributeSyntax );
 
             // Save the resolved AttributeData.
             this.Target = attributeData;
 
-            return (attributeData, parent);
+            return (attributeData, resolved.Symbol);
         }
 
         public AttributeRef( AttributeData attributeData, DeclarationRef<IDeclaration> declaringDeclaration )
@@ -76,10 +46,10 @@ namespace Caravela.Framework.Impl.CodeModel.References
             this._declaringDeclaration = declaringDeclaration;
         }
 
-        public AttributeRef( AttributeSyntax attributeSyntax )
+        public AttributeRef( AttributeSyntax attributeSyntax, SyntaxNode? declaration, DeclarationRefTargetKind targetKind, Compilation compilation )
         {
             this.Target = attributeSyntax;
-            this._declaringDeclaration = new DeclarationRef<IDeclaration>( attributeSyntax.Parent! );
+            this._declaringDeclaration = new DeclarationRef<IDeclaration>( declaration, targetKind, compilation );
         }
 
         public AttributeRef( AttributeBuilder builder )
@@ -107,6 +77,10 @@ namespace Caravela.Framework.Impl.CodeModel.References
         {
             switch ( this.Target )
             {
+                case null:
+                    // This happens when ResolveAttributeData was already called but was unsuccessful.
+                    return null;
+
                 case AttributeSyntax attributeSyntax:
                     {
                         var resolved = this.ResolveAttributeData( attributeSyntax, compilation.PartialCompilation.Compilation );
@@ -116,7 +90,10 @@ namespace Caravela.Framework.Impl.CodeModel.References
                             return null;
                         }
 
-                        return new Attribute( resolved.Attribute, compilation, compilation.Factory.GetDeclaration( resolved.Parent ) );
+                        return new Attribute(
+                            resolved.Attribute,
+                            compilation,
+                            compilation.Factory.GetDeclaration( resolved.Parent, this._declaringDeclaration.TargetKind ) );
                     }
 
                 case AttributeData attributeData:
@@ -126,7 +103,7 @@ namespace Caravela.Framework.Impl.CodeModel.References
                     return new BuiltAttribute( builder, compilation );
 
                 default:
-                    throw new AssertionFailedException();
+                    throw new AssertionFailedException( $"Don't know how to resolve a {this.Target.GetType().Name}.'" );
             }
         }
 

@@ -1,8 +1,9 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Impl.ReflectionMocks;
+using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Utilities;
+using Caravela.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -16,6 +17,13 @@ namespace Caravela.Framework.Impl.CompileTime
     /// </summary>
     internal abstract class CompileTimeTypeResolver
     {
+        private readonly CompileTimeTypeFactory _compileTimeTypeFactory;
+
+        protected CompileTimeTypeResolver( IServiceProvider serviceProvider )
+        {
+            this._compileTimeTypeFactory = serviceProvider.GetService<CompileTimeTypeFactory>();
+        }
+
         /// <summary>
         /// Maps a Roslyn <see cref="!:ITypeSymbol" /> to a reflection <see cref="!:Type" />. 
         /// </summary>
@@ -23,7 +31,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
         public Type? GetCompileTimeType( ITypeSymbol typeSymbol, bool fallbackToMock, CancellationToken cancellationToken = default )
         {
-            Type? NullOrMock() => fallbackToMock ? CompileTimeType.Create( typeSymbol ) : null;
+            Type? NullOrMock() => fallbackToMock ? this._compileTimeTypeFactory.Get( typeSymbol ) : null;
 
             switch ( typeSymbol )
             {

@@ -3,7 +3,6 @@
 
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Options;
-using Caravela.Framework.Impl.Utilities;
 using Caravela.Framework.Project;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
@@ -65,8 +64,7 @@ namespace Caravela.Framework.Impl.Pipeline
 
             serviceProvider = serviceProvider.WithLateBoundServices(
                 LateBoundService.Create( s => new ReferenceAssemblyLocator( s ) ),
-                LateBoundService.Create( s => new SymbolClassificationService( s ) ),
-                LateBoundService.Create( s => new SystemTypeResolver( s ) ) );
+                LateBoundService.Create( s => new SymbolClassificationService( s ) ) );
 
             return serviceProvider;
         }
@@ -106,10 +104,6 @@ namespace Caravela.Framework.Impl.Pipeline
             {
                 serviceProvider = serviceProvider.WithService( assemblyLocator );
             }
-
-            // This service cannot be added to the global list because it depends on a service (IUserCodeInvokerHook) 
-            // that may be added between the moment the global list is created and the moment GetServiceProvider is invoked.
-            serviceProvider = serviceProvider.WithService( new UserCodeInvoker( serviceProvider ) );
 
             return serviceProvider;
         }

@@ -41,7 +41,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
         public AttributeDeserializer AttributeDeserializer { get; }
 
-        private CompileTimeProjectLoader( CompileTimeDomain domain, IServiceProvider serviceProvider )
+        private CompileTimeProjectLoader( CompileTimeDomain domain, IServiceProvider serviceProvider ) : base( serviceProvider )
         {
             this._domain = domain;
             this._serviceProvider = serviceProvider;

@@ -3,10 +3,16 @@
 
 namespace Caravela.Framework.Impl.CodeModel.References
 {
-    internal enum DeclarationSpecialKind
+    internal enum DeclarationRefTargetKind
     {
         Default,
-        ReturnParameter,
-        Compilation
+        Return,
+        Assembly,
+        Module,
+        Field,
+        Parameter,
+        Method,
+        Property,
+        Event
     }
 }

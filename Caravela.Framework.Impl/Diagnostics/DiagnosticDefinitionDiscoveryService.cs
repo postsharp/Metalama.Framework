@@ -13,11 +13,12 @@ namespace Caravela.Framework.Impl.Diagnostics
 {
     internal class DiagnosticDefinitionDiscoveryService : IService
     {
-        private readonly UserCodeInvoker _userCodeInvoker;
+        private readonly CodeInvoker _userCodeInvoker;
 
+        // This constructor is called in a path where no user code is involved
         public DiagnosticDefinitionDiscoveryService()
         {
-            this._userCodeInvoker = new UserCodeInvoker( null );
+            this._userCodeInvoker = new CodeInvoker();
         }
 
         public DiagnosticDefinitionDiscoveryService( IServiceProvider serviceProvider )
