@@ -6,7 +6,6 @@ using Caravela.Framework.Code.SyntaxBuilders;
 using Caravela.Framework.Diagnostics;
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using System.Threading.Tasks;

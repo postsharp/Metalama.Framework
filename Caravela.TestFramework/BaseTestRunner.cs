@@ -1,7 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Formatting;
 using Caravela.Framework.Impl.Pipeline;
@@ -462,7 +461,7 @@ namespace Caravela.TestFramework
                 var outputHtmlPath = Path.Combine( htmlDirectory, testInput.TestName + FileExtensions.OutputHtml );
                 var formattedOutputDocument = testResult.InputProject.AddDocument( "ConsolidatedFormatted.cs", formattedOutput );
 
-                using ( var outputHtml = File.CreateText( outputHtmlPath ) )
+                await using ( var outputHtml = File.CreateText( outputHtmlPath ) )
                 {
                     await htmlCodeWriter.WriteAsync( formattedOutputDocument, outputHtml );
                 }
@@ -485,7 +484,7 @@ namespace Caravela.TestFramework
             this.Logger?.WriteLine( "HTML of input: " + inputHtmlPath );
 
             // Write the input document.
-            using ( var inputTextWriter = File.CreateText( inputHtmlPath ) )
+            await using ( var inputTextWriter = File.CreateText( inputHtmlPath ) )
             {
                 await htmlCodeWriter.WriteAsync(
                     testSyntaxTree.InputDocument,

@@ -27,7 +27,5 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
         IServiceProvider ServiceProvider )
     {
         public AspectPipelineDescription PipelineDescription { get; } = ServiceProvider.GetService<AspectPipelineDescription>();
-
-      
     }
 }

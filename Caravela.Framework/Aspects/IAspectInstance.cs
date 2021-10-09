@@ -35,7 +35,7 @@ namespace Caravela.Framework.Aspects
         /// <see cref="IAspectBuilder.SkipAspect"/>.
         /// </summary>
         bool IsSkipped { get; }
-        
+
         ImmutableArray<IAspect> OtherInstances { get; }
     }
 }

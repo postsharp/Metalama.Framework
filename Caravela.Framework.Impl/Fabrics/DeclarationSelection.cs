@@ -70,7 +70,7 @@ namespace Caravela.Framework.Impl.Fabrics
                                     Array.Empty<ParameterExpression>() ),
                                 t,
                                 aspectClass,
-                                source) ) ) );
+                                source ) ) ) );
         }
 
         public void AddAspect<TAspect>( Func<T, TAspect> createAspect )
@@ -104,7 +104,7 @@ namespace Caravela.Framework.Impl.Fabrics
                                 new TAspect(),
                                 t,
                                 aspectClass,
-                                source) ) ) );
+                                source ) ) ) );
         }
 
         [Obsolete( "Not implemented." )]

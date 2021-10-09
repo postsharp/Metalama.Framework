@@ -25,7 +25,7 @@ namespace Caravela.Framework.Aspects
         IMetaTarget Target { get; }
 
         IMetaCodeBuilder CodeBuilder { get; }
-        
+
         IAspectInstance Aspect { get; }
 
         /// <summary>

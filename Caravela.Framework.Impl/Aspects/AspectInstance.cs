@@ -33,7 +33,7 @@ namespace Caravela.Framework.Impl.Aspects
         public void Skip() { this.IsSkipped = true; }
 
         public ImmutableDictionary<TemplateClass, TemplateClassInstance> TemplateInstances { get; }
-        
+
         public IAspectSource Source { get; }
 
         internal AspectInstance( IAspect aspect, IDeclaration declaration, AspectClass aspectClass, IAspectSource source )
@@ -47,7 +47,12 @@ namespace Caravela.Framework.Impl.Aspects
                 .Add( aspectClass, new TemplateClassInstance( aspect, aspectClass ) );
         }
 
-        internal AspectInstance( IAspect aspect, IDeclaration declaration, IAspectClass aspectClass, IEnumerable<TemplateClassInstance> templateInstances, IAspectSource source )
+        internal AspectInstance(
+            IAspect aspect,
+            IDeclaration declaration,
+            IAspectClass aspectClass,
+            IEnumerable<TemplateClassInstance> templateInstances,
+            IAspectSource source )
         {
             this.Aspect = aspect;
             this.TargetDeclaration = declaration;
@@ -78,7 +83,5 @@ namespace Caravela.Framework.Impl.Aspects
         public override string ToString() => this.AspectClass.DisplayName + "@" + this.TargetDeclaration;
 
         public int CompareTo( AspectInstance? other ) => this.Source.Priority.CompareTo( other.AssertNotNull().Source.Priority );
-
-        
     }
 }

@@ -28,7 +28,7 @@ namespace Caravela.Framework.Impl.CompileTime
             if ( !this.Cache.TryGetValue( typeSymbol, out var type ) )
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                
+
                 type = this.GetCompileTimeNamedTypeCore( typeSymbol );
 
                 this.Cache.Add( typeSymbol, type );
