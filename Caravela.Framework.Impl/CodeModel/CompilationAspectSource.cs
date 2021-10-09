@@ -28,7 +28,7 @@ namespace Caravela.Framework.Impl.CodeModel
             this.AspectClasses = aspectTypes;
         }
 
-        public AspectSourcePriority Priority => AspectSourcePriority.FromAttribute;
+        public AspectPredecessorKind Kind => AspectPredecessorKind.Attribute;
 
         public ImmutableArray<IAspectClass> AspectClasses { get; }
 
@@ -59,7 +59,7 @@ namespace Caravela.Framework.Impl.CodeModel
                             return ((AspectClass) aspectClass).CreateAspectInstance(
                                 (IAspect) attributeInstance,
                                 attribute.ContainingDeclaration.AssertNotNull(),
-                                this );
+                                new AspectPredecessor(AspectPredecessorKind.Attribute, attribute) );
                         }
                         else
                         {

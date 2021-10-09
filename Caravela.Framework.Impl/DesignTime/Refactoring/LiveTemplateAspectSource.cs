@@ -22,8 +22,6 @@ namespace Caravela.Framework.Impl.DesignTime.Refactoring
 
         private LiveTemplateAspectSource() { }
 
-        public AspectSourcePriority Priority => AspectSourcePriority.Programmatic;
-
         public ImmutableArray<IAspectClass> AspectClasses => ImmutableArray<IAspectClass>.Empty;
 
         public IEnumerable<IDeclaration> GetExclusions( INamedType aspectType ) => Array.Empty<IDeclaration>();

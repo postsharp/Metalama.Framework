@@ -11,14 +11,14 @@ using System.Threading;
 
 namespace Caravela.Framework.Impl.Aspects
 {
+
+    
     /// <summary>
     /// Defines the semantics of an object that can return a set of <see cref="AspectInstance"/>
     /// for a given <see cref="IAspectClass"/>.
     /// </summary>
-    internal interface IAspectSource
+    internal interface IAspectSource 
     {
-        AspectSourcePriority Priority { get; }
-
         ImmutableArray<IAspectClass> AspectClasses { get; }
 
         IEnumerable<IDeclaration> GetExclusions( INamedType aspectType );

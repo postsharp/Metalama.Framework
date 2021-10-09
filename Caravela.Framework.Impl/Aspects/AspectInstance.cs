@@ -12,6 +12,7 @@ using System.Linq.Expressions;
 
 namespace Caravela.Framework.Impl.Aspects
 {
+    
     /// <summary>
     /// Represents an instance of an aspect and its target declaration.
     /// </summary>
@@ -28,20 +29,22 @@ namespace Caravela.Framework.Impl.Aspects
 
         public bool IsSkipped { get; private set; }
 
-        public ImmutableArray<IAspect> OtherInstances => ImmutableArray<IAspect>.Empty;
+        public ImmutableArray<IAspectInstance> OtherInstances => ImmutableArray<IAspectInstance>.Empty;
 
         public void Skip() { this.IsSkipped = true; }
 
         public ImmutableDictionary<TemplateClass, TemplateClassInstance> TemplateInstances { get; }
 
-        public IAspectSource Source { get; }
+        public AspectPredecessor Predecessor { get; }
 
-        internal AspectInstance( IAspect aspect, IDeclaration declaration, AspectClass aspectClass, IAspectSource source )
+        ImmutableArray<AspectPredecessor> IAspectInstance.Predecessors => ImmutableArray.Create( this.Predecessor );
+
+        internal AspectInstance( IAspect aspect, IDeclaration declaration, AspectClass aspectClass,in AspectPredecessor predecessor )
         {
             this.Aspect = aspect;
             this.TargetDeclaration = declaration;
             this.AspectClass = aspectClass;
-            this.Source = source;
+            this.Predecessor = predecessor;
 
             this.TemplateInstances = ImmutableDictionary.Create<TemplateClass, TemplateClassInstance>()
                 .Add( aspectClass, new TemplateClassInstance( aspect, aspectClass ) );
@@ -52,12 +55,12 @@ namespace Caravela.Framework.Impl.Aspects
             IDeclaration declaration,
             IAspectClass aspectClass,
             IEnumerable<TemplateClassInstance> templateInstances,
-            IAspectSource source )
+            AspectPredecessor predecessor )
         {
             this.Aspect = aspect;
             this.TargetDeclaration = declaration;
             this.AspectClass = aspectClass;
-            this.Source = source;
+            this.Predecessor = predecessor;
             this.TemplateInstances = templateInstances.ToImmutableDictionary( t => t.TemplateClass, t => t );
         }
 
@@ -66,7 +69,7 @@ namespace Caravela.Framework.Impl.Aspects
             Expression<Func<IAspect>> aspectExpression,
             IDeclaration declaration,
             AspectClass aspectClass,
-            IAspectSource source )
+            AspectPredecessor predecessor )
         {
             var userCodeInvoker = serviceProvider.GetService<UserCodeInvoker>();
 
@@ -74,7 +77,7 @@ namespace Caravela.Framework.Impl.Aspects
             this.Aspect = userCodeInvoker.Invoke( () => aspectFunc() );
             this.TargetDeclaration = declaration;
             this.AspectClass = aspectClass;
-            this.Source = source;
+            this.Predecessor = predecessor;
 
             this.TemplateInstances = ImmutableDictionary.Create<TemplateClass, TemplateClassInstance>()
                 .Add( aspectClass, new TemplateClassInstance( this.Aspect, aspectClass ) );
@@ -82,6 +85,6 @@ namespace Caravela.Framework.Impl.Aspects
 
         public override string ToString() => this.AspectClass.DisplayName + "@" + this.TargetDeclaration;
 
-        public int CompareTo( AspectInstance? other ) => this.Source.Priority.CompareTo( other.AssertNotNull().Source.Priority );
+        public int CompareTo( AspectInstance? other ) => this.Predecessor.Kind.CompareTo( other.AssertNotNull().Predecessor.Kind );
     }
 }

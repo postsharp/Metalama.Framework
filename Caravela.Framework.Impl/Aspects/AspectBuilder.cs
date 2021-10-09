@@ -8,6 +8,7 @@ using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Fabrics;
 using Caravela.Framework.Impl.Pipeline;
+using Caravela.Framework.Impl.Utilities;
 using Caravela.Framework.Project;
 using Caravela.Framework.Validation;
 using System;
@@ -20,10 +21,12 @@ namespace Caravela.Framework.Impl.Aspects
     internal class AspectBuilder<T> : IAspectBuilder<T>, IAspectBuilderInternal
         where T : class, IDeclaration
     {
+        
         private readonly UserDiagnosticSink _diagnosticSink;
         private readonly AspectProjectConfiguration _configuration;
         private readonly IImmutableList<Advice> _declarativeAdvices;
         private bool _skipped;
+        private AspectPredecessor _predecessor;
 
         public AspectBuilder(
             T target,
@@ -31,19 +34,26 @@ namespace Caravela.Framework.Impl.Aspects
             IEnumerable<Advice> declarativeAdvices,
             AdviceFactory adviceFactory,
             AspectProjectConfiguration configuration,
-            CancellationToken cancellationToken )
+            IAspectInstance aspectInstance,
+            CancellationToken cancellationToken
+             )
         {
             this.Target = target;
             this._declarativeAdvices = declarativeAdvices.ToImmutableArray();
             this._diagnosticSink = diagnosticSink;
             this._configuration = configuration;
+            this.AspectInstance = aspectInstance;
             this.AdviceFactory = adviceFactory;
             this.CancellationToken = cancellationToken;
+            this._predecessor = new AspectPredecessor( AspectPredecessorKind.ChildAspect, aspectInstance.Aspect );
         }
 
         public IProject Project => this.Target.Compilation.Project;
 
+        public IAspectInstance AspectInstance { get; }
+
         public ImmutableArray<IAspectSource> AspectSources { get; private set; } = ImmutableArray<IAspectSource>.Empty;
+
 
         public void AddAspectSource( IAspectSource aspectSource )
         {
@@ -52,9 +62,13 @@ namespace Caravela.Framework.Impl.Aspects
 
         public AdviceFactory AdviceFactory { get; }
 
-        IReadOnlyList<IAspectInstance> IAspectLayerBuilder.UpstreamAspects => throw new NotImplementedException();
+        public DisposeAction WithPredecessor( in AspectPredecessor predecessor )
+        {
+            var oldPredecessor = this._predecessor;
+            this._predecessor = predecessor;
 
-        IReadOnlyList<IAspectInstance> IAspectLayerBuilder.OtherInstances => throw new NotImplementedException();
+            return new DisposeAction( () => this._predecessor = oldPredecessor );
+        }
 
         public IDiagnosticSink Diagnostics => this._diagnosticSink;
 
@@ -63,6 +77,7 @@ namespace Caravela.Framework.Impl.Aspects
         public IDeclarationSelection<TMember> WithMembers<TMember>( Func<T, IEnumerable<TMember>> selector )
             where TMember : class, IDeclaration
             => new DeclarationSelection<TMember>(
+                this._predecessor,
                 this.AddAspectSource,
                 compilation =>
                 {

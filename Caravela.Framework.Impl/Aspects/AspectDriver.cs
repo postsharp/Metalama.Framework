@@ -150,6 +150,7 @@ namespace Caravela.Framework.Impl.Aspects
                     declarativeAdvices,
                     adviceFactory,
                     projectConfiguration,
+                    aspectInstance,
                     cancellationToken );
 
                 try

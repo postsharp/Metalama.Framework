@@ -3,6 +3,7 @@
 
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
+using Caravela.Framework.Impl.Utilities;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -12,11 +13,12 @@ namespace Caravela.Framework.Impl.Aspects
     internal sealed class AggregateAspectInstance : IAspectInstanceInternal
     {
         private readonly AspectInstance _primaryInstance;
+        private readonly IReadOnlyList<AspectInstance> _otherInstances;
 
         private AggregateAspectInstance( List<AspectInstance> aspectInstances )
         {
             this._primaryInstance = aspectInstances.First();
-            this.OtherInstances = aspectInstances.Skip( 1 ).Select( a => a.Aspect ).ToImmutableArray();
+            this._otherInstances = aspectInstances;
         }
 
         public static IAspectInstanceInternal GetInstance( IEnumerable<AspectInstance> aspectInstances )
@@ -43,7 +45,9 @@ namespace Caravela.Framework.Impl.Aspects
 
         public bool IsSkipped => this._primaryInstance.IsSkipped;
 
-        public ImmutableArray<IAspect> OtherInstances { get; }
+        public ImmutableArray<IAspectInstance> OtherInstances => this._otherInstances.Cast<IAspectInstance>().ToImmutableArray();
+
+        public ImmutableArray<AspectPredecessor> Predecessors => ImmutableArray.Create( this._primaryInstance.Predecessor );
 
         public void Skip() => this._primaryInstance.Skip();
 

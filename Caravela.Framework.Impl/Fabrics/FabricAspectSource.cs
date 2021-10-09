@@ -36,8 +36,6 @@ namespace Caravela.Framework.Impl.Fabrics
             this._drivers.Add( driver );
         }
 
-        AspectSourcePriority IAspectSource.Priority => AspectSourcePriority.Programmatic;
-
         ImmutableArray<IAspectClass> IAspectSource.AspectClasses => this._aspectClasses;
 
         IEnumerable<IDeclaration> IAspectSource.GetExclusions( INamedType aspectType ) => Array.Empty<IDeclaration>();
@@ -90,7 +88,7 @@ namespace Caravela.Framework.Impl.Fabrics
                 };
 
                 // Creates the aggregate AspectInstance for the target declaration.
-                var aggregateInstance = new AspectInstance( aspect, target, aggregateClass, templateInstances, this );
+                var aggregateInstance = new AspectInstance( aspect, target, aggregateClass, templateInstances, default );
 
                 yield return aggregateInstance;
             }

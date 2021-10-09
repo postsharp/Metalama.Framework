@@ -12,4 +12,5 @@ namespace Caravela.Framework.Fabrics
     /// </summary>
     [CompileTimeOnly]
     public interface IFabric { }
+
 }

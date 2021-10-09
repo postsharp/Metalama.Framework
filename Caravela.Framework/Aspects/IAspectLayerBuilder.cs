@@ -20,20 +20,7 @@ namespace Caravela.Framework.Aspects
     {
         IProject Project { get; }
 
-        /// <summary>
-        /// Gets the list of aspects that have required this aspect to be created.
-        /// </summary>
-        [Obsolete( "Not implemented." )]
-        IReadOnlyList<IAspectInstance> UpstreamAspects { get; }
-
-        /// <summary>
-        /// Gets the list of other instances of the same type on <see cref="Target"/>. When several instances
-        /// of the same aspect class are added to the same declaration, only the instance with the highest priority got initialized
-        /// using <see cref="IAspect{T}.BuildAspect"/>. The other instances can are exposed in this property and are sorted
-        /// by order of decreasing priority.
-        /// </summary>
-        [Obsolete( "Not implemented." )]
-        IReadOnlyList<IAspectInstance> OtherInstances { get; }
+        IAspectInstance AspectInstance { get; }
 
         /// <summary>
         /// Gets a service that allows to report or suppress diagnostics.

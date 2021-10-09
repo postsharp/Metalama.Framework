@@ -8,7 +8,7 @@ using System.Collections.Immutable;
 namespace Caravela.Framework.Aspects
 {
     /// <summary>
-    /// Represents an instance of an aspect (the CLR instance itself is in the <see cref="Aspect"/> property.
+    /// Represents an instance of an aspect. The instance of the <see cref="IAspect"/> itself is in the <see cref="Aspect"/> property.
     /// </summary>
     [InternalImplement]
     [CompileTimeOnly]
@@ -36,6 +36,17 @@ namespace Caravela.Framework.Aspects
         /// </summary>
         bool IsSkipped { get; }
 
-        ImmutableArray<IAspect> OtherInstances { get; }
+        /// <summary>
+        /// Gets the other instances of the same <see cref="AspectClass"/> on the same <see cref="TargetDeclaration"/>.
+        /// When several instances of the same <see cref="AspectClass"/> are found on the same <see cref="TargetDeclaration"/>,
+        /// they are ordered by priority, and only the first one gets executed. The other instances are exposed on this property.
+        /// </summary>
+        ImmutableArray<IAspectInstance> OtherInstances { get; }
+        
+        /// <summary>
+        /// Gets the list of objects that have caused the current aspect instance (but not any instance in the <see cref="OtherInstances"/> list)
+        /// to be created.
+        /// </summary>
+        ImmutableArray<AspectPredecessor> Predecessors { get; }
     }
 }

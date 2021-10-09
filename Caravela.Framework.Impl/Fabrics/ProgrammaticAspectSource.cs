@@ -20,9 +20,9 @@ namespace Caravela.Framework.Impl.Fabrics
         where TDeclaration : class, IDeclaration
         where TAspect : IAspect<TDeclaration>
     {
-        private readonly Func<CompilationModel, IAspectSource, IEnumerable<AspectInstance>> _getInstances;
+        private readonly Func<CompilationModel, IEnumerable<AspectInstance>> _getInstances;
 
-        public ProgrammaticAspectSource( IAspectClass aspectClass, Func<CompilationModel, IAspectSource, IEnumerable<AspectInstance>> getInstances )
+        public ProgrammaticAspectSource( IAspectClass aspectClass, Func<CompilationModel, IEnumerable<AspectInstance>> getInstances )
         {
             if ( aspectClass.FullName != typeof(TAspect).FullName )
             {
@@ -32,8 +32,6 @@ namespace Caravela.Framework.Impl.Fabrics
             this._getInstances = getInstances;
             this.AspectClasses = ImmutableArray.Create( aspectClass );
         }
-
-        public AspectSourcePriority Priority => AspectSourcePriority.Programmatic;
 
         public ImmutableArray<IAspectClass> AspectClasses { get; }
 
@@ -45,7 +43,7 @@ namespace Caravela.Framework.Impl.Fabrics
             IDiagnosticAdder diagnosticAdder,
             CancellationToken cancellationToken )
         {
-            return this._getInstances( compilation, this );
+            return this._getInstances( compilation );
         }
     }
 }

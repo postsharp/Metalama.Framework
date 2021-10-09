@@ -106,7 +106,7 @@ namespace Caravela.Framework.Impl.DesignTime.Refactoring
                 this.AspectClasses = ImmutableArray.Create<IAspectClass>( aspectClass );
             }
 
-            public AspectSourcePriority Priority => AspectSourcePriority.FromAttribute;
+            public AspectPredecessorKind Kind => AspectPredecessorKind.Attribute;
 
             public ImmutableArray<IAspectClass> AspectClasses { get; }
 
@@ -120,7 +120,7 @@ namespace Caravela.Framework.Impl.DesignTime.Refactoring
             {
                 var targetDeclaration = compilation.Factory.GetDeclaration( this._targetSymbol );
 
-                return new[] { ((AspectClass) aspectClass).CreateDefaultAspectInstance( targetDeclaration, LiveTemplateAspectSource.Instance ) };
+                return new[] { ((AspectClass) aspectClass).CreateDefaultAspectInstance( targetDeclaration, default ) };
             }
         }
     }
