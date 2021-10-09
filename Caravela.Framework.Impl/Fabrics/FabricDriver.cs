@@ -126,7 +126,7 @@ namespace Caravela.Framework.Impl.Fabrics
             public IDeclarationSelection<TChild> WithMembers<TChild>( Func<T, IEnumerable<TChild>> selector )
                 where TChild : class, IDeclaration
                 => new DeclarationSelection<TChild>(
-                    new AspectPredecessor(AspectPredecessorKind.Fabric, this._parent.Fabric),
+                    new AspectPredecessor( AspectPredecessorKind.Fabric, this._parent.Fabric ),
                     this.RegisterAspectSource,
                     compilation =>
                     {
@@ -146,7 +146,5 @@ namespace Caravela.Framework.Impl.Fabrics
                 where TAnnotation : IAnnotation<TTarget, TAspect>
                 => throw new NotImplementedException();
         }
-
-        
     }
 }

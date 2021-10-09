@@ -3,7 +3,6 @@
 
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
-using Caravela.Framework.Impl.Utilities;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -18,6 +17,7 @@ namespace Caravela.Framework.Impl.Aspects
         private AggregateAspectInstance( List<AspectInstance> aspectInstances )
         {
             this._primaryInstance = aspectInstances.First();
+            aspectInstances.RemoveAt( 0 );
             this._otherInstances = aspectInstances;
         }
 

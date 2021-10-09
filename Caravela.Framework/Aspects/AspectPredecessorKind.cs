@@ -1,3 +1,6 @@
+// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+
 using Caravela.Framework.Code;
 using Caravela.Framework.Fabrics;
 using System;
@@ -5,8 +8,9 @@ using System;
 namespace Caravela.Framework.Aspects
 {
     /// <summary>
-    /// Kinds of <see cref="AspectPredecessor"/>
+    /// Kinds of <see cref="AspectPredecessor"/>.
     /// </summary>
+    [CompileTimeOnly]
     public enum AspectPredecessorKind
     {
         // First (lower) priorities are evaluated first. Order matters.
@@ -24,13 +28,13 @@ namespace Caravela.Framework.Aspects
         /// <summary>
         /// Provided implicitly by <see cref="IAspectDependencyBuilder.RequiresAspect{TAspect}"/>.
         /// </summary>
-        [Obsolete("Not implemented.")]
+        [Obsolete( "Not implemented." )]
         RequiredAspect,
-        
+
         /// <summary>
         /// Aspects added because of aspect inheritance.
         /// </summary>
-        [Obsolete("Not implemented.")]
+        [Obsolete( "Not implemented." )]
         Inherited,
 
         /// <summary>

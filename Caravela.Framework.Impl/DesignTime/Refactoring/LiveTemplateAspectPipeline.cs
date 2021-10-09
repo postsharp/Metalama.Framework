@@ -106,8 +106,6 @@ namespace Caravela.Framework.Impl.DesignTime.Refactoring
                 this.AspectClasses = ImmutableArray.Create<IAspectClass>( aspectClass );
             }
 
-            public AspectPredecessorKind Kind => AspectPredecessorKind.Attribute;
-
             public ImmutableArray<IAspectClass> AspectClasses { get; }
 
             public IEnumerable<IDeclaration> GetExclusions( INamedType aspectType ) => Enumerable.Empty<IDeclaration>();

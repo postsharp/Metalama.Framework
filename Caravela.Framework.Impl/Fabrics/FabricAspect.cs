@@ -42,6 +42,6 @@ namespace Caravela.Framework.Impl.Fabrics
 
         void IEligible<T>.BuildEligibility( IEligibilityBuilder<T> builder ) { }
 
-        public IEnumerable<IFabric> Fabrics => this._templateClasses.Select( t=>t.Driver.Fabric );
+        public IEnumerable<IFabric> Fabrics => this._templateClasses.Select( t => t.Driver.Fabric );
     }
 }

@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Aspects;
 using Caravela.Framework.Code.Collections;
 using System.Collections.Generic;
 
@@ -18,7 +19,7 @@ namespace Caravela.Framework.Code
     /// <item>Arrays as <c>IReadOnlyList&lt;object&gt;</c>.</item>
     /// </list>
     /// </remarks>
-    public interface IAttribute : IDeclaration, IHasType
+    public interface IAttribute : IDeclaration, IHasType, IAspectPredecessor
     {
         /// <summary>
         /// Gets the custom attribute type.

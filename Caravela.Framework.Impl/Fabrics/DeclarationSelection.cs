@@ -92,8 +92,8 @@ namespace Caravela.Framework.Impl.Fabrics
                                 this._projectConfiguration.UserCodeInvoker.Invoke( () => createAspect( t ) ),
                                 t,
                                 aspectClass,
-                                _predecessor ) ) ) );
-            
+                                this._predecessor ) ) ) );
+
             return this;
         }
 
@@ -111,8 +111,8 @@ namespace Caravela.Framework.Impl.Fabrics
                                 new TAspect(),
                                 t,
                                 aspectClass,
-                                _predecessor ) ) ) );
-            
+                                this._predecessor ) ) ) );
+
             return this;
         }
 

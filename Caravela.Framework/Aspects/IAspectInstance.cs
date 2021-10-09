@@ -12,7 +12,7 @@ namespace Caravela.Framework.Aspects
     /// </summary>
     [InternalImplement]
     [CompileTimeOnly]
-    public interface IAspectInstance
+    public interface IAspectInstance : IAspectPredecessor
     {
         /// <summary>
         /// Gets the aspect instance.
@@ -42,7 +42,7 @@ namespace Caravela.Framework.Aspects
         /// they are ordered by priority, and only the first one gets executed. The other instances are exposed on this property.
         /// </summary>
         ImmutableArray<IAspectInstance> OtherInstances { get; }
-        
+
         /// <summary>
         /// Gets the list of objects that have caused the current aspect instance (but not any instance in the <see cref="OtherInstances"/> list)
         /// to be created.

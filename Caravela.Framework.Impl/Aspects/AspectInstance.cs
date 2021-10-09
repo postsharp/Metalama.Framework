@@ -12,7 +12,6 @@ using System.Linq.Expressions;
 
 namespace Caravela.Framework.Impl.Aspects
 {
-    
     /// <summary>
     /// Represents an instance of an aspect and its target declaration.
     /// </summary>
@@ -39,7 +38,7 @@ namespace Caravela.Framework.Impl.Aspects
 
         ImmutableArray<AspectPredecessor> IAspectInstance.Predecessors => ImmutableArray.Create( this.Predecessor );
 
-        internal AspectInstance( IAspect aspect, IDeclaration declaration, AspectClass aspectClass,in AspectPredecessor predecessor )
+        internal AspectInstance( IAspect aspect, IDeclaration declaration, AspectClass aspectClass, in AspectPredecessor predecessor )
         {
             this.Aspect = aspect;
             this.TargetDeclaration = declaration;

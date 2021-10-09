@@ -27,9 +27,7 @@ namespace Caravela.Framework.Impl.CodeModel
             this._loader = loader;
             this.AspectClasses = aspectTypes;
         }
-
-        public AspectPredecessorKind Kind => AspectPredecessorKind.Attribute;
-
+        
         public ImmutableArray<IAspectClass> AspectClasses { get; }
 
         // TODO: implement aspect exclusion based on ExcludeAspectAttribute
@@ -59,7 +57,7 @@ namespace Caravela.Framework.Impl.CodeModel
                             return ((AspectClass) aspectClass).CreateAspectInstance(
                                 (IAspect) attributeInstance,
                                 attribute.ContainingDeclaration.AssertNotNull(),
-                                new AspectPredecessor(AspectPredecessorKind.Attribute, attribute) );
+                                new AspectPredecessor( AspectPredecessorKind.Attribute, attribute ) );
                         }
                         else
                         {

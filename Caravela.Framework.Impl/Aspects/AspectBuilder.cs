@@ -21,7 +21,6 @@ namespace Caravela.Framework.Impl.Aspects
     internal class AspectBuilder<T> : IAspectBuilder<T>, IAspectBuilderInternal
         where T : class, IDeclaration
     {
-        
         private readonly UserDiagnosticSink _diagnosticSink;
         private readonly AspectProjectConfiguration _configuration;
         private readonly IImmutableList<Advice> _declarativeAdvices;
@@ -35,8 +34,7 @@ namespace Caravela.Framework.Impl.Aspects
             AdviceFactory adviceFactory,
             AspectProjectConfiguration configuration,
             IAspectInstance aspectInstance,
-            CancellationToken cancellationToken
-             )
+            CancellationToken cancellationToken )
         {
             this.Target = target;
             this._declarativeAdvices = declarativeAdvices.ToImmutableArray();
@@ -45,7 +43,7 @@ namespace Caravela.Framework.Impl.Aspects
             this.AspectInstance = aspectInstance;
             this.AdviceFactory = adviceFactory;
             this.CancellationToken = cancellationToken;
-            this._predecessor = new AspectPredecessor( AspectPredecessorKind.ChildAspect, aspectInstance.Aspect );
+            this._predecessor = new AspectPredecessor( AspectPredecessorKind.ChildAspect, aspectInstance );
         }
 
         public IProject Project => this.Target.Compilation.Project;
@@ -53,7 +51,6 @@ namespace Caravela.Framework.Impl.Aspects
         public IAspectInstance AspectInstance { get; }
 
         public ImmutableArray<IAspectSource> AspectSources { get; private set; } = ImmutableArray<IAspectSource>.Empty;
-
 
         public void AddAspectSource( IAspectSource aspectSource )
         {
