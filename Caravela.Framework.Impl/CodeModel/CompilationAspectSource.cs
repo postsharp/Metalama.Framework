@@ -59,7 +59,7 @@ namespace Caravela.Framework.Impl.CodeModel
                             return ((AspectClass) aspectClass).CreateAspectInstance(
                                 (IAspect) attributeInstance,
                                 attribute.ContainingDeclaration.AssertNotNull(),
-                                this);
+                                this );
                         }
                         else
                         {
