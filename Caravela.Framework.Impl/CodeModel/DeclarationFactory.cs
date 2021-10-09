@@ -6,6 +6,7 @@ using Caravela.Framework.Code.DeclarationBuilders;
 using Caravela.Framework.Code.Types;
 using Caravela.Framework.Impl.CodeModel.Builders;
 using Caravela.Framework.Impl.CodeModel.References;
+using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Templating.MetaModel;
 using Caravela.Framework.Impl.Utilities;
 using Caravela.Framework.Project;
@@ -284,6 +285,6 @@ namespace Caravela.Framework.Impl.CodeModel
         private Compilation Compilation => this._compilationModel.RoslynCompilation;
 
         public Type GetReflectionType( ITypeSymbol typeSymbol )
-            => this._compilationModel.Project.ServiceProvider.GetService<CompileTimeTypeFactory>().Get( typeSymbol );
+            => this._compilationModel.Project.ServiceProvider.GetService<SystemTypeResolver>().GetCompileTimeType( typeSymbol, true ).AssertNotNull();
     }
 }

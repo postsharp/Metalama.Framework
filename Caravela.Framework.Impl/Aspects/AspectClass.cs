@@ -135,9 +135,9 @@ namespace Caravela.Framework.Impl.Aspects
         /// <param name="aspect">The instance of the aspect class.</param>
         /// <param name="target">The declaration on which the aspect was applied.</param>
         /// <returns></returns>
-        public AspectInstance CreateAspectInstance( IAspect aspect, IDeclaration target ) => new( aspect, target, this );
+        public AspectInstance CreateAspectInstance( IAspect aspect, IDeclaration target, IAspectSource source ) => new( aspect, target, this, source );
 
-        public AspectInstance CreateDefaultAspectInstance( IDeclaration target ) => new( (IAspect) Activator.CreateInstance( this.AspectType ), target, this );
+        public AspectInstance CreateDefaultAspectInstance( IDeclaration target, IAspectSource source ) => new( (IAspect) Activator.CreateInstance( this.AspectType ), target, this, source );
 
         /// <summary>
         /// Creates an instance of the <see cref="AspectClass"/> class.

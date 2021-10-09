@@ -80,12 +80,18 @@ namespace Caravela.Framework.Impl.CompileTime
             }
 
             // The type is not a system one. Check if it is a compile-time one.
+            if ( !this.Cache.TryGetValue( typeSymbol, out var type ) )
+            {
+                var assemblySymbol = typeSymbol.ContainingAssembly;
 
-            var assemblySymbol = typeSymbol.ContainingAssembly;
+                var compileTimeProject = this.GetCompileTimeProject( assemblySymbol.Identity, cancellationToken );
 
-            var compileTimeProject = this.GetCompileTimeProject( assemblySymbol.Identity, cancellationToken );
+                type = compileTimeProject?.GetTypeOrNull( typeSymbol.GetReflectionName() );
 
-            return compileTimeProject?.GetTypeOrNull( typeSymbol.GetReflectionName() );
+                this.Cache.Add( typeSymbol, type );
+            }
+
+            return type;
         }
 
         /// <summary>

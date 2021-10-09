@@ -18,7 +18,7 @@ namespace Caravela.Framework.Impl.Advices
         public TemplateMember<IMethod> RemoveTemplate { get; }
 
         public OverrideEventAdvice(
-            AspectInstance aspect,
+            IAspectInstanceInternal aspect,
             TemplateClassInstance templateInstance,
             IEvent targetDeclaration,
             TemplateMember<IEvent> eventTemplate,

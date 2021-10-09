@@ -28,7 +28,7 @@ namespace Caravela.Framework.Impl.Advices
         public new INamedType TargetDeclaration => (INamedType) base.TargetDeclaration;
 
         public ImplementInterfaceAdvice(
-            AspectInstance aspect,
+            IAspectInstanceInternal aspect,
             TemplateClassInstance template,
             INamedType targetType,
             string? layerName ) : base( aspect, template, targetType, layerName, null )

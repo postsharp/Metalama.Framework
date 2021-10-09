@@ -6,6 +6,7 @@ using Caravela.Framework.Code.SyntaxBuilders;
 using Caravela.Framework.Diagnostics;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using System.Threading.Tasks;
@@ -199,6 +200,8 @@ namespace Caravela.Framework.Aspects
         /// </summary>
         [Obsolete( "Not implemented." )]
         public static IReadOnlyList<IAspectInstance> UpstreamAspects => throw new NotImplementedException();
+
+        public static IAspectInstance AspectInstance => CurrentContext.Aspect;
 
         /// <summary>
         /// Generates the cast syntax for the specified type.  

@@ -23,7 +23,7 @@ namespace Caravela.Framework.Impl.Advices
         public new INamedType TargetDeclaration => base.TargetDeclaration;
 
         public IntroduceFieldAdvice(
-            AspectInstance aspect,
+            IAspectInstanceInternal aspect,
             TemplateClassInstance templateInstance,
             INamedType targetDeclaration,
             string? explicitName,

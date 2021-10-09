@@ -9,6 +9,7 @@ using System.Collections.Concurrent;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
+    // The only class that should use this factory is SystemTypeResolver.
     internal class CompileTimeTypeFactory : IService
     {
         private readonly ConcurrentDictionary<string, Type> _instances = new( StringComparer.Ordinal );
@@ -16,12 +17,20 @@ namespace Caravela.Framework.Impl.CodeModel
         public Type Get( ITypeSymbol symbol )
             => symbol switch
             {
-                IDynamicTypeSymbol => typeof(object),
-                IArrayTypeSymbol { ElementType: IDynamicTypeSymbol } => typeof(object[]),
+                IDynamicTypeSymbol => throw new AssertionFailedException(),
+                IArrayTypeSymbol { ElementType: IDynamicTypeSymbol } => throw new AssertionFailedException(),
                 _ => this.Get( DocumentationCommentId.CreateReferenceId( symbol ), symbol.ToDisplayString() )
             };
 
         public Type Get( string documentationId, string fullName )
-            => this._instances.GetOrAdd( documentationId, id => CompileTimeType.CreateFromDocumentationId( id, fullName ) );
+        {
+            Invariant.Assert( !documentationId.StartsWith( "T:", StringComparison.OrdinalIgnoreCase ) );
+
+            // This method should not be called to get types that could be represented with a run-time type, otherwise
+            // equality comparison of types will not work.
+            Invariant.Assert( !documentationId.StartsWith( "System", StringComparison.Ordinal ) || documentationId.Contains( "{" ) );
+
+            return this._instances.GetOrAdd( documentationId, id => CompileTimeType.CreateFromDocumentationId( id, fullName ) );
+        }
     }
 }

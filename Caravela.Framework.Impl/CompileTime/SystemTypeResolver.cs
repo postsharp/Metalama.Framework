@@ -25,6 +25,20 @@ namespace Caravela.Framework.Impl.CompileTime
 
         protected override Type? GetCompileTimeNamedType( INamedTypeSymbol typeSymbol, CancellationToken cancellationToken = default )
         {
+            if ( !this.Cache.TryGetValue( typeSymbol, out var type ) )
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                
+                type = this.GetCompileTimeNamedTypeCore( typeSymbol );
+
+                this.Cache.Add( typeSymbol, type );
+            }
+
+            return type;
+        }
+
+        private Type? GetCompileTimeNamedTypeCore( INamedTypeSymbol typeSymbol )
+        {
             var typeName = typeSymbol.GetReflectionName();
 
             if ( typeSymbol.ContainingAssembly != null )
@@ -37,11 +51,18 @@ namespace Caravela.Framework.Impl.CompileTime
                     return null;
                 }
 
-                // We don't allow loading new assemblies to the AppDomain.
+                // We don't allow loading new assemblies to the AppDomain except.
                 if ( AppDomain.CurrentDomain.GetAssemblies().All( a => a.GetName().Name != assemblyName ) )
                 {
-                    // Coverage: ignore
-                    return null;
+                    if ( assemblyName == "System.Runtime" )
+                    {
+                        assemblyName = "mscorlib";
+                    }
+                    else
+                    {
+                        // Coverage: ignore
+                        return null;
+                    }
                 }
 
                 typeName += ", " + assemblyName;

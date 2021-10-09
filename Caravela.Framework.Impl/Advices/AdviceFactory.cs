@@ -23,7 +23,7 @@ namespace Caravela.Framework.Impl.Advices
         private const string? _layerName = null;
 
         private readonly CompilationModel _compilation;
-        private readonly AspectInstance _aspect;
+        private readonly IAspectInstanceInternal _aspect;
         private readonly TemplateClassInstance? _templateInstance;
         private readonly IServiceProvider _serviceProvider;
         private readonly IDiagnosticAdder _diagnosticAdder;
@@ -38,7 +38,7 @@ namespace Caravela.Framework.Impl.Advices
             CompilationModel compilation,
             IDiagnosticAdder diagnosticAdder,
             IReadOnlyList<Advice> declarativeAdvices,
-            AspectInstance aspect,
+            IAspectInstanceInternal aspect,
             TemplateClassInstance? templateInstance, // null if the aspect has several template classes.
             IServiceProvider serviceProvider )
         {

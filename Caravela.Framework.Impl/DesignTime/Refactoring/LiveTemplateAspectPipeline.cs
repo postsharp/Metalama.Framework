@@ -120,7 +120,7 @@ namespace Caravela.Framework.Impl.DesignTime.Refactoring
             {
                 var targetDeclaration = compilation.Factory.GetDeclaration( this._targetSymbol );
 
-                return new[] { ((AspectClass) aspectClass).CreateDefaultAspectInstance( targetDeclaration ) };
+                return new[] { ((AspectClass) aspectClass).CreateDefaultAspectInstance( targetDeclaration, LiveTemplateAspectSource.Instance ) };
             }
         }
     }

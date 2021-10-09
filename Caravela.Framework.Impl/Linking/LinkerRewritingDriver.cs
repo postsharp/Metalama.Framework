@@ -653,7 +653,7 @@ namespace Caravela.Framework.Impl.Linking
             }
         }
 
-        private AspectInstance ResolveAspectInstance( ResolvedAspectReference aspectReference )
+        private IAspectInstanceInternal ResolveAspectInstance( ResolvedAspectReference aspectReference )
         {
             var introducedMember = this._introductionRegistry.GetIntroducedMemberForSymbol( aspectReference.ContainingSymbol );
 

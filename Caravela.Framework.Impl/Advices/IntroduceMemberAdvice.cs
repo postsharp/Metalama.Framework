@@ -30,7 +30,7 @@ namespace Caravela.Framework.Impl.Advices
         protected TMember? TemplateMember => this.Template.Declaration;
 
         public IntroduceMemberAdvice(
-            AspectInstance aspect,
+            IAspectInstanceInternal aspect,
             TemplateClassInstance templateInstance,
             INamedType targetDeclaration,
             TemplateMember<TMember> template,

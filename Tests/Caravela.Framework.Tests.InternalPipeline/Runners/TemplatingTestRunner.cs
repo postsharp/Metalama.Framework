@@ -298,6 +298,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
                     ImmutableDictionary.Create<string, object?>().Add( "TestKey", "TestValue" ),
                     default,
                     syntaxGenerationContext,
+                    null!,
                     augmentedServiceProvider ) );
 
             return (new TemplateExpansionContext(

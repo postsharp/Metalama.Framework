@@ -4,9 +4,11 @@
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Impl.Aspects;
 using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Sdk;
 using Caravela.Framework.Impl.Utilities;
+using Caravela.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -44,9 +46,8 @@ namespace Caravela.Framework.Impl.Pipeline
 
             var aspectInstances = input.AspectSources
                 .SelectMany( s => s.GetAspectInstances( compilationModel, this._aspectClass, diagnostics, cancellationToken ) )
-                .ToImmutableDictionary(
-                    i => i.TargetDeclaration.GetSymbol().AssertNotNull( "The Roslyn compilation should include all introduced declarations." ),
-                    i => (IAspectInstance) i );
+                .GroupBy( i => i.TargetDeclaration.GetSymbol().AssertNotNull( "The Roslyn compilation should include all introduced declarations." ) )
+                .ToImmutableDictionary( g => g.Key, g => (IAspectInstance) AggregateAspectInstance.GetInstance( g ) );
 
             if ( !aspectInstances.Any() )
             {
@@ -68,7 +69,7 @@ namespace Caravela.Framework.Impl.Pipeline
 
             try
             {
-                this._aspectWeaver.Transform( context );
+                this.ServiceProvider.GetService<UserCodeInvoker>().Invoke( () => this._aspectWeaver.Transform( context ) );
                 newCompilation = (PartialCompilation) context.Compilation;
             }
             catch ( Exception ex )

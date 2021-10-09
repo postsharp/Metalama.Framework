@@ -61,7 +61,7 @@ namespace Caravela.Framework.Impl.Fabrics
             this.RegisterAspectSource(
                 new ProgrammaticAspectSource<TAspect, T>(
                     aspectClass,
-                    compilation => this._selector( compilation )
+                    ( compilation, source ) => this._selector( compilation )
                         .Select(
                             t => new AspectInstance(
                                 this._projectConfiguration.ServiceProvider,
@@ -69,7 +69,8 @@ namespace Caravela.Framework.Impl.Fabrics
                                     this._projectConfiguration.UserCodeInvoker.Invoke( () => createAspect( t ) ).Body,
                                     Array.Empty<ParameterExpression>() ),
                                 t,
-                                aspectClass ) ) ) );
+                                aspectClass,
+                                source) ) ) );
         }
 
         public void AddAspect<TAspect>( Func<T, TAspect> createAspect )
@@ -80,12 +81,13 @@ namespace Caravela.Framework.Impl.Fabrics
             this.RegisterAspectSource(
                 new ProgrammaticAspectSource<TAspect, T>(
                     aspectClass,
-                    compilation => this._selector( compilation )
+                    ( compilation, source ) => this._selector( compilation )
                         .Select(
                             t => new AspectInstance(
                                 this._projectConfiguration.UserCodeInvoker.Invoke( () => createAspect( t ) ),
                                 t,
-                                aspectClass ) ) ) );
+                                aspectClass,
+                                source ) ) ) );
         }
 
         public void AddAspect<TAspect>()
@@ -96,12 +98,13 @@ namespace Caravela.Framework.Impl.Fabrics
             this.RegisterAspectSource(
                 new ProgrammaticAspectSource<TAspect, T>(
                     aspectClass,
-                    compilation => this._selector( compilation )
+                    ( compilation, source ) => this._selector( compilation )
                         .Select(
                             t => new AspectInstance(
                                 new TAspect(),
                                 t,
-                                aspectClass ) ) ) );
+                                aspectClass,
+                                source) ) ) );
         }
 
         [Obsolete( "Not implemented." )]

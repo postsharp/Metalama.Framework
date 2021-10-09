@@ -3,6 +3,7 @@
 
 using Caravela.Framework.Code;
 using Caravela.Framework.Validation;
+using System.Collections.Immutable;
 
 namespace Caravela.Framework.Aspects
 {
@@ -34,5 +35,7 @@ namespace Caravela.Framework.Aspects
         /// <see cref="IAspectBuilder.SkipAspect"/>.
         /// </summary>
         bool IsSkipped { get; }
+        
+        ImmutableArray<IAspect> OtherInstances { get; }
     }
 }
