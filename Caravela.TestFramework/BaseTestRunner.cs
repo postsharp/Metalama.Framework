@@ -284,7 +284,7 @@ namespace Caravela.TestFramework
         {
             if ( preserveFormatting )
             {
-                return syntaxNode.ToFullString().Replace( "\r\n", "\n" );
+                return syntaxNode.ToFullString().Replace( "\r\n", "\n", StringComparison.Ordinal );
             }
             else
             {
@@ -511,8 +511,8 @@ namespace Caravela.TestFramework
                 var ns = metadataReader.GetString( typeRef.Namespace );
                 var typeName = metadataReader.GetString( typeRef.Name );
 
-                if ( ns.Contains( "Microsoft.CSharp.RuntimeBinder" ) &&
-                     string.Equals( typeName, "CSharpArgumentInfo" ) )
+                if ( ns.Contains( "Microsoft.CSharp.RuntimeBinder", StringComparison.Ordinal ) &&
+                     string.Equals( typeName, "CSharpArgumentInfo", StringComparison.Ordinal ) )
                 {
                     var directory = Path.Combine( Path.GetTempPath(), "Caravela", "InvalidAssemblies" );
 
