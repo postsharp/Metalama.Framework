@@ -1,18 +1,17 @@
 ﻿using System;
 using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
-using Caravela.TestFramework;
 
 namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Properties.ExistingDifferentStaticity
 {
-    public class IntroductionAttribute : Attribute, IAspect<INamedType>
+    public class IntroductionAttribute : TypeAspect
     {
         [Introduce]
         public static int ExistingProperty
         {
             get
             {
-                Console.WriteLine("This is introduced property.");
+                Console.WriteLine( "This is introduced property." );
+
                 return 42;
             }
         }
@@ -22,7 +21,8 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Properties.E
         {
             get
             {
-                Console.WriteLine("This is introduced property.");
+                Console.WriteLine( "This is introduced property." );
+
                 return 42;
             }
         }

@@ -94,8 +94,8 @@ namespace Caravela.Framework.Impl.Advices
 
         private static bool VerifyTemplateType( IType fromType, IType toType )
         {
-            if ( fromType is IGenericParameter fromGenericParameter && toType is IGenericParameter toGenericParameter
-                                                                    && fromGenericParameter.Name == toGenericParameter.Name )
+            if ( fromType is ITypeParameter fromGenericParameter && toType is ITypeParameter toGenericParameter
+                                                                 && fromGenericParameter.Name == toGenericParameter.Name )
             {
                 // If we are comparing two generic parameters, we only compare the name here. The caller will then check
                 // the compatibility of constraints, so we don't have to do it here.

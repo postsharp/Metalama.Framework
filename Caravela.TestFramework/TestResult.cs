@@ -6,6 +6,7 @@ using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Formatting;
+using Caravela.TestFramework.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -256,8 +257,8 @@ namespace Caravela.TestFramework
                         .DescendantNodesAndSelf( _ => true )
                         .OfType<MemberDeclarationSyntax>()
                         .Where(
-                            m => m.GetLeadingTrivia().ToString().Contains( "<target>", StringComparison.Ordinal ) ||
-                                 m.AttributeLists.Any( a => a.GetLeadingTrivia().ToString().Contains( "<target>", StringComparison.Ordinal ) ) )
+                            m => m.GetLeadingTrivia().ToString().ContainsOrdinal( "<target>" ) ||
+                                 m.AttributeLists.Any( a => a.GetLeadingTrivia().ToString().ContainsOrdinal( "<target>" ) ) )
                         .ToList();
 
                 var outputNode = outputNodes.FirstOrDefault() ?? (SyntaxNode) outputSyntaxRoot;

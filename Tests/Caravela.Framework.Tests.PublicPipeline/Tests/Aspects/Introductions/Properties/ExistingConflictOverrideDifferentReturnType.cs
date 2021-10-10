@@ -1,13 +1,10 @@
-﻿using System;
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
-using Caravela.TestFramework;
+﻿using Caravela.Framework.Aspects;
 
 namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Properties.ExistingConflictOverrideDifferentReturnType
 {
-    public class IntroductionAttribute : Attribute, IAspect<INamedType>
+    public class IntroductionAttribute : TypeAspect
     {
-        [Introduce(WhenExists = OverrideStrategy.Override)]
+        [Introduce( WhenExists = OverrideStrategy.Override )]
         public int ExistingProperty
         {
             get => meta.Proceed();
@@ -24,7 +21,5 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Properties.E
 
     // <target>
     [Introduction]
-    internal class TargetClass : BaseClass
-    {
-    }
+    internal class TargetClass : BaseClass { }
 }

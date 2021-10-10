@@ -1,13 +1,11 @@
 ﻿using System;
 using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
-using Caravela.TestFramework;
 
 #pragma warning disable CS0067
 
 namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Events.ExistingDifferentStaticity_EventField
 {
-    public class IntroductionAttribute : Attribute, IAspect<INamedType>
+    public class IntroductionAttribute : TypeAspect
     {
         [Introduce]
         public static event EventHandler? ExistingEvent;
@@ -24,12 +22,12 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Events.Exist
         {
             add
             {
-                Console.WriteLine("This is original event.");
+                Console.WriteLine( "This is original event." );
             }
 
             remove
             {
-                Console.WriteLine("This is original event.");
+                Console.WriteLine( "This is original event." );
             }
         }
 
@@ -37,12 +35,12 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Events.Exist
         {
             add
             {
-                Console.WriteLine("This is original event.");
+                Console.WriteLine( "This is original event." );
             }
 
             remove
             {
-                Console.WriteLine("This is original event.");
+                Console.WriteLine( "This is original event." );
             }
         }
     }

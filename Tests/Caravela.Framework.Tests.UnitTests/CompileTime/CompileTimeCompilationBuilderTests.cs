@@ -6,6 +6,7 @@ using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.TestFramework;
+using Caravela.TestFramework.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -248,7 +249,7 @@ public class VersionedClass
 {
     public static int Version => $version;
 }
-".Replace( "$version", version.ToString( CultureInfo.InvariantCulture ), StringComparison.Ordinal );
+".ReplaceOrdinal( "$version", version.ToString( CultureInfo.InvariantCulture ) );
 
             var classA = @"
 

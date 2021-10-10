@@ -12,6 +12,7 @@ using Caravela.Framework.Impl.Linking;
 using Caravela.Framework.Impl.Transformations;
 using Caravela.Framework.Impl.Utilities;
 using Caravela.TestFramework;
+using Caravela.TestFramework.Utilities;
 using FakeItEasy;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -94,7 +95,7 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
                 inputCompilationModel,
                 this._rewriter.NonObservableTransformations.OrderBy( x => layerOrderLookup[x.Advice.AspectLayerId] ).ToList(),
                 orderedLayers,
-                ArraySegment<ScopedSuppression>.Empty,
+                new ArraySegment<ScopedSuppression>( Array.Empty<ScopedSuppression>() ),
                 null! );
 
             return linkerInput;
@@ -192,7 +193,7 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
                         .Where(
                             x =>
                                 StringComparer.Ordinal.Equals( x.Name, overriddenDeclarationName )
-                                || (overriddenDeclarationName.Contains( '.', StringComparison.Ordinal ) && x.Name.EndsWith(
+                                || (overriddenDeclarationName.ContainsOrdinal( '.' ) && x.Name.EndsWith(
                                     overriddenDeclarationName,
                                     StringComparison.Ordinal )) )
                         .Where( x => nameObliviousSignatureComparer.Equals( x, symbolHelperSymbol ) )

@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.TestFramework.Utilities;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
@@ -51,7 +52,7 @@ namespace Caravela.TestFramework
                 {
                     if ( !companionFile.EndsWith( ".t.cs", StringComparison.OrdinalIgnoreCase ) )
                     {
-                        this.Options.IncludedFiles.Add( Path.GetRelativePath( directory, companionFile ) );
+                        this.Options.IncludedFiles.Add( PathUtil.GetRelativePath( directory, companionFile ) );
                     }
                 }
             }
@@ -70,7 +71,7 @@ namespace Caravela.TestFramework
                     Path.GetFileNameWithoutExtension( path ),
                     sourceCode,
                     directoryOptionsReader,
-                    Path.GetRelativePath( projectDirectory, path ),
+                    PathUtil.GetRelativePath( projectDirectory, path ),
                     path );
             }
             else

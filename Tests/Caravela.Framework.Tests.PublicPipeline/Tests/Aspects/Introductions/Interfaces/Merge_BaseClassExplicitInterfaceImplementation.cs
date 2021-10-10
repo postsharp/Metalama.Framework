@@ -1,12 +1,6 @@
-﻿// @Skipped(Case for interface merge conflict resolution, not implemented.)
-
+﻿using System;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
-using Caravela.Framework.Eligibility;
-using Caravela.TestFramework;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.BaseClassExplicitInterfaceImplementation
 {
@@ -20,21 +14,20 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
         int InterfaceMethod();
     }
 
-    public class IntroductionAttribute : Attribute, IAspect<INamedType>
+    public class IntroductionAttribute : TypeAspect
     {
-        public void BuildAspect(IAspectBuilder<INamedType> aspectBuilder)
+        public override void BuildAspect( IAspectBuilder<INamedType> aspectBuilder )
         {
-            aspectBuilder.Advices.ImplementInterface(aspectBuilder.Target, (INamedType)aspectBuilder.Target.Compilation.TypeFactory.GetTypeByReflectionType(typeof(IInterface)));
-        }
-
-        public void BuildEligibility(IEligibilityBuilder<INamedType> builder)
-        {
+            aspectBuilder.Advices.ImplementInterface(
+                aspectBuilder.Target,
+                (INamedType)aspectBuilder.Target.Compilation.TypeFactory.GetTypeByReflectionType( typeof(IInterface) ) );
         }
 
         [Introduce]
         public int InterfaceMethod()
         {
-            Console.WriteLine("This is introduced interface method.");
+            Console.WriteLine( "This is introduced interface method." );
+
             return meta.Proceed();
         }
     }
@@ -43,14 +36,13 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
     {
         int IInterface.InterfaceMethod()
         {
-            Console.WriteLine("This is original interface method.");
+            Console.WriteLine( "This is original interface method." );
+
             return 27;
         }
     }
 
     // <target>
     [Introduction]
-    public class TargetClass : BaseClass
-    {
-    }
+    public class TargetClass : BaseClass { }
 }

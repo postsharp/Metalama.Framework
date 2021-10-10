@@ -1,6 +1,4 @@
-﻿// @Skipped(#28907 Linker: conditional access expression)
-
-using System;
+﻿using System;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 
@@ -9,9 +7,9 @@ using Caravela.Framework.Code;
 namespace Caravela.Framework.IntegrationTests.Aspects.Invokers.Events.AnotherInstance_FinalConditionalInvoker
 {
     [AttributeUsage( AttributeTargets.Class )]
-    public class TestAttribute : Attribute, IAspect<INamedType>
+    public class TestAttribute : TypeAspect
     {
-        public void BuildAspect( IAspectBuilder<INamedType> aspectBuilder )
+        public override void BuildAspect( IAspectBuilder<INamedType> aspectBuilder )
         {
             var overrideBuilder = aspectBuilder.Advices.IntroduceMethod(
                 aspectBuilder.Target,

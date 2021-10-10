@@ -1,7 +1,5 @@
 ﻿using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
-using Caravela.TestFramework;
-using System;
 
 #pragma warning disable CS0067
 
@@ -11,25 +9,20 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
      * Simple case with implicit interface members.
      */
 
-    public interface IInterface1
-    {
-    }
-    public interface IInterface2
-    {
-    }
+    public interface IInterface1 { }
 
-    public class IntroductionAttribute : Attribute, IAspect<INamedType>
+    public interface IInterface2 { }
+
+    public class IntroductionAttribute : TypeAspect
     {
-        public void BuildAspect(IAspectBuilder<INamedType> aspectBuilder)
+        public override void BuildAspect( IAspectBuilder<INamedType> aspectBuilder )
         {
-            aspectBuilder.Advices.ImplementInterface(aspectBuilder.Target, typeof(IInterface1));
-            aspectBuilder.Advices.ImplementInterface(aspectBuilder.Target, typeof(IInterface2));
+            aspectBuilder.Advices.ImplementInterface( aspectBuilder.Target, typeof(IInterface1) );
+            aspectBuilder.Advices.ImplementInterface( aspectBuilder.Target, typeof(IInterface2) );
         }
     }
 
     // <target>
     [Introduction]
-    public class TargetClass
-    {
-    }
+    public class TargetClass { }
 }

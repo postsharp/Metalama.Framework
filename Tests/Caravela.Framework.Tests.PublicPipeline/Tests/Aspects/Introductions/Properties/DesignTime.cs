@@ -1,24 +1,14 @@
-// @DesignTime
-
 using System;
 using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
-using Caravela.TestFramework;
 
 namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Properties.DesignTime
 {
-    public class IntroductionAttribute : Attribute, IAspect<INamedType>
+    public class IntroductionAttribute : TypeAspect
     {
-       
-        
-        
-       
-
         // TODO: Indexers.    
 
         //[IntroduceProperty]
         //public int IntroducedProperty_Auto { get; set; }
-
 
         // TODO: Introduction of auto properties.
         //[IntroduceProperty]
@@ -27,22 +17,21 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Properties.D
         [Introduce]
         public int IntroducedProperty_Accessors
         {
-            get 
-            { 
-                Console.WriteLine("Get"); 
-                return 42; 
+            get
+            {
+                Console.WriteLine( "Get" );
+
+                return 42;
             }
 
-            set 
-            { 
-                Console.WriteLine(value); 
+            set
+            {
+                Console.WriteLine( value );
             }
         }
     }
 
     // <target>
     [Introduction]
-    internal partial class TargetClass
-    {
-    }
+    internal partial class TargetClass { }
 }

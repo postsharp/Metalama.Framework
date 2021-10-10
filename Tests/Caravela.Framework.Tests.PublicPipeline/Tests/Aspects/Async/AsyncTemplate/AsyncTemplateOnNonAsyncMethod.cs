@@ -1,22 +1,19 @@
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
-using Caravela.Framework;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 
 namespace Caravela.Framework.Tests.Integration.Aspects.Async.AsyncTemplate.AsyncTemplateOnNonAsyncMethod
 {
-    class Aspect : Attribute, IAspect<IMethod>
+    internal class Aspect : MethodAspect
     {
-    
-        public void BuildAspect( IAspectBuilder<IMethod> builder )
+        public override void BuildAspect( IAspectBuilder<IMethod> builder )
         {
-            builder.Advices.OverrideMethod( builder.Target, 
-            new( nameof(this.OverrideMethod), asyncTemplate: nameof(this.OverrideAsyncMethod), useAsyncTemplateForAnyAwaitable: true ) );
+            builder.Advices.OverrideMethod(
+                builder.Target,
+                new MethodTemplateSelector( nameof(OverrideMethod), asyncTemplate: nameof(OverrideAsyncMethod), useAsyncTemplateForAnyAwaitable: true ) );
         }
-    
-    
+
         [Template]
         public dynamic? OverrideMethod()
         {
@@ -28,20 +25,19 @@ namespace Caravela.Framework.Tests.Integration.Aspects.Async.AsyncTemplate.Async
         {
             await Task.Yield();
             var result = await meta.ProceedAsync();
-            Console.WriteLine($"result={result}");
+            Console.WriteLine( $"result={result}" );
+
             return result;
-            
         }
     }
 
     // <target>
-    class TargetCode
+    internal class TargetCode
     {
-        
         [Aspect]
-        public ValueTask<int> AsyncMethod(int a)
+        public ValueTask<int> AsyncMethod( int a )
         {
-            return ValueTask.FromResult(a);
+            return new ValueTask<int>( Task.FromResult( a ) );
         }
     }
 }

@@ -1,15 +1,11 @@
-using System;
-using System.Collections.Generic;
-using Caravela.Framework;
 using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
 
 namespace Caravela.Framework.Tests.PublicPipeline.Aspects.Generic.IntroduceGenericMethod
 {
-    class Aspect : Attribute, IAspect<INamedType>
+    internal class Aspect : TypeAspect
     {
         [Introduce]
-        public T GenericMethod<T>(T a )
+        public T GenericMethod<T>( T a )
         {
             return a;
         }
@@ -17,8 +13,5 @@ namespace Caravela.Framework.Tests.PublicPipeline.Aspects.Generic.IntroduceGener
 
     // <target>
     [Aspect]
-    class TargetCode
-    {
-        
-    }
+    internal class TargetCode { }
 }

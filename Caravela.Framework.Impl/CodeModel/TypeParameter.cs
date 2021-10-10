@@ -14,13 +14,13 @@ using VarianceKind = Caravela.Framework.Code.VarianceKind;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    internal class GenericParameter : Declaration, IGenericParameter, ITypeInternal
+    internal class TypeParameter : Declaration, ITypeParameter, ITypeInternal
     {
         private readonly ITypeParameterSymbol _typeSymbol;
 
         ITypeSymbol? ISdkType.TypeSymbol => this._typeSymbol;
 
-        internal GenericParameter( ITypeParameterSymbol typeSymbol, CompilationModel compilation ) : base( compilation )
+        internal TypeParameter( ITypeParameterSymbol typeSymbol, CompilationModel compilation ) : base( compilation )
         {
             this._typeSymbol = typeSymbol;
         }

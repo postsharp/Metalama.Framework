@@ -1,32 +1,29 @@
-﻿using Caravela.Framework.Aspects;
+﻿using System;
+using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
-using Caravela.TestFramework;
-using System;
 
 namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.SimpleMethodTemplates
 {
-    [AttributeUsage(AttributeTargets.Property)]
-    public class OverrideAttribute : Attribute, IAspect<IProperty>
+    [AttributeUsage( AttributeTargets.Property )]
+    public class OverrideAttribute : PropertyAspect
     {
-        void IAspect<IProperty>.BuildAspect(IAspectBuilder<IProperty> builder)
+        public override void BuildAspect( IAspectBuilder<IProperty> builder )
         {
-            builder.Advices.OverrideFieldOrPropertyAccessors(builder.Target, nameof(GetTemplate), nameof(SetTemplate));
+            builder.Advices.OverrideFieldOrPropertyAccessors( builder.Target, nameof(GetTemplate), nameof(SetTemplate) );
         }
 
-       
-        
-        
         [Template]
         public dynamic? GetTemplate()
         {
-            Console.WriteLine("This is the overridden getter.");
+            Console.WriteLine( "This is the overridden getter." );
+
             return meta.Proceed();
         }
 
         [Template]
         public void SetTemplate()
         {
-            Console.WriteLine("This is the overridden setter.");
+            Console.WriteLine( "This is the overridden setter." );
             meta.Proceed();
         }
     }
@@ -41,12 +38,12 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
         {
             get
             {
-                return this._field;
+                return _field;
             }
 
             set
             {
-                this._field = value;
+                _field = value;
             }
         }
     }

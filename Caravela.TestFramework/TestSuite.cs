@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Impl.Pipeline;
+using Caravela.TestFramework.Utilities;
 using System;
 using System.IO;
 using System.Linq;
@@ -59,7 +60,7 @@ namespace Caravela.TestFramework
             var fullPath = Path.Combine( directory, relativePath );
 
             this.Logger.WriteLine( "Test input file: " + fullPath );
-            var projectRelativePath = Path.GetRelativePath( directoryOptionsReader.ProjectDirectory, fullPath );
+            var projectRelativePath = PathUtil.GetRelativePath( directoryOptionsReader.ProjectDirectory, fullPath );
 
             var testInput = TestInput.FromFile( directoryOptionsReader, projectRelativePath );
             testInput.Options.References.AddRange( TestAssemblyReferenceReader.GetAssemblyReferences( new ReflectionAssemblyInfo( this.GetType().Assembly ) ) );

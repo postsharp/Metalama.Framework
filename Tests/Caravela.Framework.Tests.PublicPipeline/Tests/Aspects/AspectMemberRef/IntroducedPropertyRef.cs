@@ -1,28 +1,27 @@
-using System;
 using Caravela.Framework.Aspects;
-using Caravela.TestFramework;
-using Caravela.Framework.Code;
 
 namespace Caravela.Framework.IntegrationTests.Aspects.AspectMemberRef.IntroducedPropertyRef
 {
-
-    public class RetryAttribute : Attribute, IAspect<INamedType>
+    public class RetryAttribute : TypeAspect
     {
         [Introduce]
-        void IntroducedMethod1( string name ) 
+        private void IntroducedMethod1( string name )
         {
-            this.IntroducedProperty = name;
+            IntroducedProperty = name;
         }
-        
+
         [Introduce]
-        string IntroducedProperty { get { return meta.Target.Property.DeclaringType.Name; } set {} }
-        
+        private string IntroducedProperty
+        {
+            get
+            {
+                return meta.Target.Property.DeclaringType.Name;
+            }
+            set { }
+        }
     }
-    
+
     // <target>
     [Retry]
-    class Program
-    {
-
-    }
+    internal class Program { }
 }

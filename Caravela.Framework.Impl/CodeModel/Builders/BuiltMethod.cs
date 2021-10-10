@@ -62,7 +62,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public IGenericParameterList TypeParameters
             => new GenericParameterList(
                 this,
-                this.MethodBuilder.GenericParameters.AsBuilderList.Select( DeclarationRef.FromBuilder<IGenericParameter, GenericParameterBuilder> ) );
+                this.MethodBuilder.GenericParameters.AsBuilderList.Select( DeclarationRef.FromBuilder<ITypeParameter, TypeParameterBuilder> ) );
 
         public IReadOnlyList<IType> TypeArguments => throw new NotImplementedException();
 

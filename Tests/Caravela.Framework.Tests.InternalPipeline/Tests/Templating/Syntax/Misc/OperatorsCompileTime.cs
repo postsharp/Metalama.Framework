@@ -1,25 +1,32 @@
-// @Skipped
-
 #pragma warning disable CS8600, CS8603
 using System;
-using Caravela.TestFramework;
 using Caravela.Framework.Aspects;
+using Caravela.TestFramework;
 
 namespace Caravela.Framework.Tests.Integration.Templating.CSharpSyntax.OperatorsCompileTime
 {
     [CompileTime]
-    class Aspect
+    internal class Aspect
     {
         [TestTemplate]
-        dynamic Template()
+        private dynamic Template()
         {
-            int i = meta.Target.Parameters.Count;
+            var i = meta.Target.Parameters.Count;
 
             i = +-i;
             i = unchecked(i + 1);
             i = checked(i - 1);
-            unchecked { i++; }
-            checked { i--; }
+
+            unchecked
+            {
+                i++;
+            }
+
+            checked
+            {
+                i--;
+            }
+
             ++i;
             --i;
             i += 1;
@@ -40,39 +47,44 @@ namespace Caravela.Framework.Tests.Integration.Templating.CSharpSyntax.Operators
             i >>= 1;
             i = i << 1;
             i = i >> 1;
-            i = ~(~i);
+            i = ~( ~i );
 
-            bool x = i switch
+            var x = i switch
             {
                 1 => true,
                 _ => false
             };
-            bool y = (i >= 2);
 
-            var t = (x, y);
-            (x, y) = t;
+            var y = ( i >= 2 );
 
-            bool? z = ((x ^ y) && y) || !x;
+            var t = ( x, y );
+            ( x, y ) = t;
 
-            string s = default(string);
+            bool? z = ( ( x ^ y ) && y ) || !x;
+
+            string s = default;
             s ??= "42";
-            s = s[0..2];
 
-            Console.WriteLine(i);
-            Console.WriteLine(t);
-            Console.WriteLine(z.Value);
-            Console.WriteLine(s);
-            Console.WriteLine(sizeof(bool));
-            Console.WriteLine(typeof(int));
+#if NET5_0
+            s = s[0..2];
+#endif
+
+            Console.WriteLine( i );
+            Console.WriteLine( t );
+            Console.WriteLine( z.Value );
+            Console.WriteLine( s );
+            Console.WriteLine( sizeof(bool) );
+            Console.WriteLine( typeof(int) );
 
             dynamic result = meta.Proceed();
+
             return result;
         }
     }
 
-    class TargetCode
+    internal class TargetCode
     {
-        object Method(int a, int b)
+        private object Method( int a, int b )
         {
             return a + b;
         }

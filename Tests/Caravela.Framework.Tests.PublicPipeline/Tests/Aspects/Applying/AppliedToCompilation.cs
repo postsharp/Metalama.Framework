@@ -1,23 +1,20 @@
 using System;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
-using Caravela.TestFramework;
+using Caravela.Framework.IntegrationTests.Aspects.Applying.AppliedToCompilation;
 
-[assembly: Caravela.Framework.IntegrationTests.Aspects.Applying.AppliedToCompilation.MyAspect]
+[assembly: MyAspect]
 
 namespace Caravela.Framework.IntegrationTests.Aspects.Applying.AppliedToCompilation
 {
-    public class MyAspect : Attribute, IAspect<ICompilation> 
-    { 
-        public void BuildAspect( IAspectBuilder<ICompilation> builder )
+    public class MyAspect : CompilationAspect
+    {
+        public override void BuildAspect( IAspectBuilder<ICompilation> builder )
         {
-            throw new Exception("Oops");
+            throw new Exception( "Oops" );
         }
     }
 
-
     // <target>
-    internal class TargetClass
-    {
-    }
+    internal class TargetClass { }
 }

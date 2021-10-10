@@ -1,12 +1,6 @@
-﻿// @Skipped(Case for interface merge conflict resolution, not implemented.)
-
+﻿using System;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
-using Caravela.Framework.Eligibility;
-using Caravela.TestFramework;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.ExistingImplicitInterfaceImplementation
 {
@@ -24,32 +18,31 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
         int SuperInterfaceMethod();
     }
 
-    public class IntroductionAttribute : Attribute, IAspect<INamedType>
+    public class IntroductionAttribute : TypeAspect
     {
-        public void BuildAspect(IAspectBuilder<INamedType> aspectBuilder)
+        public override void BuildAspect( IAspectBuilder<INamedType> aspectBuilder )
         {
-            aspectBuilder.Advices.ImplementInterface(aspectBuilder.Target, (INamedType)aspectBuilder.Target.Compilation.TypeFactory.GetTypeByReflectionType(typeof(ISuperInterface)));
-        }
-
-        public void BuildEligibility(IEligibilityBuilder<INamedType> builder)
-        {
+            aspectBuilder.Advices.ImplementInterface(
+                aspectBuilder.Target,
+                (INamedType)aspectBuilder.Target.Compilation.TypeFactory.GetTypeByReflectionType( typeof(ISuperInterface) ) );
         }
 
         [Introduce]
         public int SubInterfaceMethod()
         {
-            Console.WriteLine("This is introduced interface method.");
+            Console.WriteLine( "This is introduced interface method." );
+
             return meta.Proceed();
         }
 
         [Introduce]
         public int SuperInterfaceMethod()
         {
-            Console.WriteLine("This is introduced interface method.");
+            Console.WriteLine( "This is introduced interface method." );
+
             return meta.Proceed();
         }
     }
-
 
     // <target>
     [Introduction]
@@ -57,7 +50,8 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
     {
         public int SubInterfaceMethod()
         {
-            Console.WriteLine("This is original interface method.");
+            Console.WriteLine( "This is original interface method." );
+
             return 27;
         }
     }

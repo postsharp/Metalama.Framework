@@ -1,10 +1,10 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.TestFramework.Utilities;
 using Caravela.TestFramework.XunitFramework;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.IO;
 using System.Reflection;
 using Xunit.Sdk;
 
@@ -27,7 +27,7 @@ namespace Caravela.TestFramework
             {
                 if ( testCase.SkipReason == null )
                 {
-                    var relativePath = Path.GetRelativePath( projectDirectory, testCase.FullPath );
+                    var relativePath = PathUtil.GetRelativePath( projectDirectory, testCase.FullPath );
 
                     yield return new object[] { relativePath };
                 }

@@ -1,70 +1,64 @@
 using System;
-using System.Collections.Generic;
-using Caravela.Framework.Code;
-using Caravela.Framework;
-using Caravela.TestFramework;
 using Caravela.Framework.Aspects;
-using  Caravela.Framework.Tests.Integration.Aspects.Bugs.Bug28880;
+using Caravela.Framework.Code;
+using Caravela.Framework.Tests.Integration.Aspects.Bugs.Bug28880;
 
 #pragma warning disable CS0169
 
 // This checks that throw expressions in expression bodies work properly.
 
-[assembly: AspectOrder(typeof(MethodAspect), typeof(PropertyAspect), typeof(PropertyAspect2), typeof(EventAspect))]
+[assembly: AspectOrder( typeof(TestMethodAspect), typeof(TestPropertyAspect), typeof(TestPropertyAspect2), typeof(TestEventAspect) )]
 
 namespace Caravela.Framework.Tests.Integration.Aspects.Bugs.Bug28880
 {
-    class MethodAspect : OverrideMethodAspect
+    internal class TestMethodAspect : OverrideMethodAspect
     {
         public override dynamic? OverrideMethod() => throw new NotSupportedException();
     }
-    
-    class PropertyAspect : OverrideFieldOrPropertyAspect
+
+    internal class TestPropertyAspect : OverrideFieldOrPropertyAspect
     {
-        public override dynamic? OverrideProperty 
-        { 
-            get => throw new NotSupportedException(); 
-            set => throw new NotSupportedException(); 
-       }
-    }
-    
-    class PropertyAspect2 : Attribute, IAspect<IFieldOrProperty>
-    {
-        [Template]
-        public dynamic OverrideProperty => throw new NotSupportedException(); 
-        
-        public void BuildAspect( IAspectBuilder<IFieldOrProperty> builder )
+        public override dynamic? OverrideProperty
         {
-            builder.Advices.OverrideFieldOrProperty( builder.Target, nameof(OverrideProperty));
+            get => throw new NotSupportedException();
+            set => throw new NotSupportedException();
         }
     }
-    
-    class EventAspect : OverrideEventAspect
-    {
-        public override void OverrideAdd(dynamic value)
-         => throw new NotImplementedException();
 
-        public override void OverrideRemove(dynamic value)
-         => throw new NotImplementedException();
-        
+    internal class TestPropertyAspect2 : FieldOrPropertyAspect
+    {
+        [Template]
+        public dynamic OverrideProperty => throw new NotSupportedException();
+
+        public override void BuildAspect( IAspectBuilder<IFieldOrProperty> builder )
+        {
+            builder.Advices.OverrideFieldOrProperty( builder.Target, nameof(OverrideProperty) );
+        }
+    }
+
+    internal class TestEventAspect : OverrideEventAspect
+    {
+        public override void OverrideAdd( dynamic value ) => throw new NotImplementedException();
+
+        public override void OverrideRemove( dynamic value ) => throw new NotImplementedException();
     }
 
     // <target>
-    class TargetCode
+    internal class TargetCode
     {
-        [MethodAspect]
-        int Method(int a)
+        [TestMethodAspect]
+        private int Method( int a )
         {
             return a;
         }
 
-        [PropertyAspect]
-        int field;
+        [TestPropertyAspect]
+        private int field;
 
-        [PropertyAspect]
-        int Property { get; set; }
-        
-        [PropertyAspect2]
-        int Property2 { get; set; }
+        [TestPropertyAspect]
+        private int Property { get; set; }
+
+        [TestPropertyAspect2]
+        private int Property2 { get; set; }
     }
 }

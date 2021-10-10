@@ -40,7 +40,7 @@ namespace Caravela.Framework.Impl.CodeModel
         public IGenericParameterList TypeParameters
             => new GenericParameterList(
                 this,
-                this.MethodSymbol.TypeParameters.Select( DeclarationRef.FromSymbol<IGenericParameter> ) );
+                this.MethodSymbol.TypeParameters.Select( DeclarationRef.FromSymbol<ITypeParameter> ) );
 
         [Memo]
         public IReadOnlyList<IType> TypeArguments => this.MethodSymbol.TypeArguments.Select( t => this.Compilation.Factory.GetIType( t ) ).ToImmutableArray();

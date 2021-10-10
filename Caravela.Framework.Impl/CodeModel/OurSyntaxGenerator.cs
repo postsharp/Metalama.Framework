@@ -169,6 +169,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public TypeSyntax EventType( IEvent property ) => this.Type( property.Type.GetSymbol() );
 
+#pragma warning disable CA1822 // Can be made static
         public TypeParameterListSyntax? TypeParameterList( IMethod method )
         {
             if ( method.TypeParameters.Count == 0 )
@@ -177,30 +178,31 @@ namespace Caravela.Framework.Impl.CodeModel
             }
             else
             {
-                var list = SyntaxFactory.TypeParameterList( SeparatedList( method.TypeParameters.Select( this.TypeParameter ).ToArray() ) );
+                var list = SyntaxFactory.TypeParameterList( SeparatedList( method.TypeParameters.Select( TypeParameter ).ToArray() ) );
 
                 return list;
             }
         }
+#pragma warning restore CA1822 // Can be made static
 
-        private TypeParameterSyntax TypeParameter( IGenericParameter genericParameter )
+        private static TypeParameterSyntax TypeParameter( ITypeParameter typeParameter )
         {
-            var typeParameter = SyntaxFactory.TypeParameter( genericParameter.Name );
+            var syntax = SyntaxFactory.TypeParameter( typeParameter.Name );
 
-            switch ( genericParameter.Variance )
+            switch ( typeParameter.Variance )
             {
                 case VarianceKind.In:
-                    typeParameter = typeParameter.WithVarianceKeyword( Token( SyntaxKind.InKeyword ) );
+                    syntax = syntax.WithVarianceKeyword( Token( SyntaxKind.InKeyword ) );
 
                     break;
 
                 case VarianceKind.Out:
-                    typeParameter = typeParameter.WithVarianceKeyword( Token( SyntaxKind.OutKeyword ) );
+                    syntax = syntax.WithVarianceKeyword( Token( SyntaxKind.OutKeyword ) );
 
                     break;
             }
 
-            return typeParameter;
+            return syntax;
         }
 
         public ParameterListSyntax ParameterList( IMethodBase method )

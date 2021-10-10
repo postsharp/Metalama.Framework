@@ -37,7 +37,7 @@ namespace Caravela.Framework.Code.DeclarationBuilders
         /// </summary>
         /// <param name="name"></param>
         /// <returns>A <see cref="IParameterBuilder"/> that allows you to further build the new parameter.</returns>
-        IGenericParameterBuilder AddGenericParameter( string name );
+        ITypeParameterBuilder AddGenericParameter( string name );
 
         /// <remarks>
         /// Gets an object allowing to read and modify the method return type and custom attributes,

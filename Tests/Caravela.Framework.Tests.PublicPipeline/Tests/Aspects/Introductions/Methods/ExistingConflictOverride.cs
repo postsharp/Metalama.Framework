@@ -1,44 +1,47 @@
 ﻿using System;
 using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
-using Caravela.TestFramework;
 
 namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Methods.ExistingConflictOverride
 {
-    public class IntroductionAttribute : Attribute, IAspect<INamedType>
+    public class IntroductionAttribute : TypeAspect
     {
-        [Introduce(WhenExists = OverrideStrategy.Override)]
+        [Introduce( WhenExists = OverrideStrategy.Override )]
         public int ExistingBaseMethod()
         {
-            Console.WriteLine("This is introduced method.");
+            Console.WriteLine( "This is introduced method." );
+
             return meta.Proceed();
         }
 
-        [Introduce(WhenExists = OverrideStrategy.Override)]
+        [Introduce( WhenExists = OverrideStrategy.Override )]
         public int ExistingMethod()
         {
-            Console.WriteLine("This is introduced method.");
+            Console.WriteLine( "This is introduced method." );
+
             return meta.Proceed();
         }
 
-        [Introduce(WhenExists = OverrideStrategy.Override)]
+        [Introduce( WhenExists = OverrideStrategy.Override )]
         public static int ExistingMethod_Static()
         {
-            Console.WriteLine("This is introduced method.");
+            Console.WriteLine( "This is introduced method." );
+
             return meta.Proceed();
         }
 
-        [Introduce(WhenExists = OverrideStrategy.Override)]
+        [Introduce( WhenExists = OverrideStrategy.Override )]
         public int NotExistingMethod()
         {
-            Console.WriteLine("This is introduced method.");
+            Console.WriteLine( "This is introduced method." );
+
             return meta.Proceed();
         }
 
-        [Introduce(WhenExists = OverrideStrategy.Override)]
+        [Introduce( WhenExists = OverrideStrategy.Override )]
         public static int NotExistingMethod_Static()
         {
-            Console.WriteLine("This is introduced method.");
+            Console.WriteLine( "This is introduced method." );
+
             return meta.Proceed();
         }
     }

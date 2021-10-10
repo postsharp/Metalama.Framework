@@ -1,19 +1,16 @@
-﻿using System;
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
-using Caravela.TestFramework;
+﻿using Caravela.Framework.Aspects;
 
 namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Properties.ExistingConflictIgnore
 {
-    public class IntroductionAttribute : Attribute, IAspect<INamedType>
+    public class IntroductionAttribute : TypeAspect
     {
-        [Introduce(WhenExists = OverrideStrategy.Ignore)]
+        [Introduce( WhenExists = OverrideStrategy.Ignore )]
         public int ExistingProperty
         {
             get => 42;
         }
 
-        [Introduce(WhenExists = OverrideStrategy.Ignore)]
+        [Introduce( WhenExists = OverrideStrategy.Ignore )]
         public static int ExistingProperty_Static
         {
             get => 42;

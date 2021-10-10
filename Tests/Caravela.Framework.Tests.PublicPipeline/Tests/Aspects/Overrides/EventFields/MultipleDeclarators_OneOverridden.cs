@@ -1,32 +1,30 @@
-﻿using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
-using Caravela.TestFramework;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Linq;
+using Caravela.Framework.Aspects;
+using Caravela.Framework.Code;
 
 #pragma warning disable CS0067
 
 namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Overrides.EventFields.MultipleDeclarators_OneOverridden
 {
-    public class TestAttribute : Attribute, IAspect<INamedType>
+    public class TestAttribute : TypeAspect
     {
-        public void BuildAspect(IAspectBuilder<INamedType> builder)
+        public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advices.OverrideEventAccessors(builder.Target.Events.OfName("B").Single(), nameof(OverrideAdd), nameof(OverrideRemove), null);
+            builder.Advices.OverrideEventAccessors( builder.Target.Events.OfName( "B" ).Single(), nameof(OverrideAdd), nameof(OverrideRemove), null );
         }
 
         [Template]
-        public void OverrideAdd(dynamic value)
+        public void OverrideAdd( dynamic value )
         {
-            Console.WriteLine("This is the add template.");
+            Console.WriteLine( "This is the add template." );
             meta.Proceed();
         }
 
         [Template]
-        public void OverrideRemove(dynamic value)
+        public void OverrideRemove( dynamic value )
         {
-            Console.WriteLine("This is the remove template.");
+            Console.WriteLine( "This is the remove template." );
             meta.Proceed();
         }
     }

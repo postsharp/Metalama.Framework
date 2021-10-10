@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Pipeline;
 using Microsoft.CodeAnalysis;
@@ -9,12 +8,15 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection;
-using System.Runtime.Loader;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
+#if NET5_0
+using Caravela.Framework.Code;
+using System.Reflection;
+using System.Runtime.Loader;
+#endif
 
 namespace Caravela.TestFramework
 {
@@ -24,7 +26,10 @@ namespace Caravela.TestFramework
     public class AspectTestRunner : BaseTestRunner
     {
         private int _runCount;
+        
+#if NET5_0
         private static readonly SemaphoreSlim _consoleLock = new( 1 );
+#endif
 
         public AspectTestRunner(
             ServiceProvider serviceProvider,
@@ -106,7 +111,9 @@ namespace Caravela.TestFramework
                             return;
                         }
 
+#if NET5_0
                         await ExecuteTestProgramAsync( testInput, testResult, peStream );
+#endif
                     }
                 }
                 else
@@ -125,6 +132,7 @@ namespace Caravela.TestFramework
             }
         }
 
+#if NET5_0
         private static async Task ExecuteTestProgramAsync( TestInput testInput, TestResult testResult, MemoryStream peStream, MemoryStream? pdbStream = null )
         {
             if ( !testInput.Options.ExecuteProgram.GetValueOrDefault( true ) )
@@ -267,6 +275,7 @@ namespace Caravela.TestFramework
 
             return mainMethod;
         }
+#endif
 
         private protected override void SaveResults( TestInput testInput, TestResult testResult, Dictionary<string, object?> state )
         {

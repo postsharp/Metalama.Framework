@@ -1,12 +1,11 @@
 using System;
 using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
 
 #pragma warning disable CS8618, CS0067, CS0168
 
 namespace Caravela.Framework.Tests.Integration.Tests.Formatting.Introduce
 {
-    public class IntroduceAspect : Attribute, IAspect<INamedType>
+    public class IntroduceAspect : TypeAspect
     {
         [Introduce]
         public void Method()

@@ -7,13 +7,13 @@ using System.Collections.Generic;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
-    internal class GenericParameterBuilderList : List<GenericParameterBuilder>, IGenericParameterList
+    internal class GenericParameterBuilderList : List<TypeParameterBuilder>, IGenericParameterList
     {
-        IEnumerator<IGenericParameter> IEnumerable<IGenericParameter>.GetEnumerator() => this.GetEnumerator();
+        IEnumerator<ITypeParameter> IEnumerable<ITypeParameter>.GetEnumerator() => this.GetEnumerator();
 
-        IGenericParameter IReadOnlyList<IGenericParameter>.this[ int index ] => this[index];
+        ITypeParameter IReadOnlyList<ITypeParameter>.this[ int index ] => this[index];
 
         // This is to avoid ambiguities in extension methods because this class implements several IEnumerable<>
-        public IList<GenericParameterBuilder> AsBuilderList => this;
+        public IList<TypeParameterBuilder> AsBuilderList => this;
     }
 }

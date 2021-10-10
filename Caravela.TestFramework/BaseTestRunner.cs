@@ -5,6 +5,7 @@ using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Formatting;
 using Caravela.Framework.Impl.Pipeline;
 using Caravela.Framework.Project;
+using Caravela.TestFramework.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
@@ -277,14 +278,14 @@ namespace Caravela.TestFramework
 
         private protected static string NormalizeEndOfLines( string? s ) => string.IsNullOrWhiteSpace( s ) ? "" : _newLineRegex.Replace( s, "\n" ).Trim();
 
-        internal static string? NormalizeTestOutput( string? s, bool preserveFormatting )
+        public static string? NormalizeTestOutput( string? s, bool preserveFormatting )
             => s == null ? null : NormalizeTestOutput( CSharpSyntaxTree.ParseText( s ).GetRoot(), preserveFormatting );
 
         private static string? NormalizeTestOutput( SyntaxNode syntaxNode, bool preserveFormatting )
         {
             if ( preserveFormatting )
             {
-                return syntaxNode.ToFullString().Replace( "\r\n", "\n", StringComparison.Ordinal );
+                return syntaxNode.ToFullString().ReplaceOrdinal( "\r\n", "\n" );
             }
             else
             {
@@ -461,7 +462,9 @@ namespace Caravela.TestFramework
                 var outputHtmlPath = Path.Combine( htmlDirectory, testInput.TestName + FileExtensions.OutputHtml );
                 var formattedOutputDocument = testResult.InputProject.AddDocument( "ConsolidatedFormatted.cs", formattedOutput );
 
-                await using ( var outputHtml = File.CreateText( outputHtmlPath ) )
+                var outputHtml = File.CreateText( outputHtmlPath );
+
+                using ( outputHtml.IgnoreAsyncDisposable() )
                 {
                     await htmlCodeWriter.WriteAsync( formattedOutputDocument, outputHtml );
                 }
@@ -484,7 +487,9 @@ namespace Caravela.TestFramework
             this.Logger?.WriteLine( "HTML of input: " + inputHtmlPath );
 
             // Write the input document.
-            await using ( var inputTextWriter = File.CreateText( inputHtmlPath ) )
+            var inputTextWriter = File.CreateText( inputHtmlPath );
+
+            using ( inputTextWriter.IgnoreAsyncDisposable() )
             {
                 await htmlCodeWriter.WriteAsync(
                     testSyntaxTree.InputDocument,
@@ -511,7 +516,7 @@ namespace Caravela.TestFramework
                 var ns = metadataReader.GetString( typeRef.Namespace );
                 var typeName = metadataReader.GetString( typeRef.Name );
 
-                if ( ns.Contains( "Microsoft.CSharp.RuntimeBinder", StringComparison.Ordinal ) &&
+                if ( ns.ContainsOrdinal( "Microsoft.CSharp.RuntimeBinder" ) &&
                      string.Equals( typeName, "CSharpArgumentInfo", StringComparison.Ordinal ) )
                 {
                     var directory = Path.Combine( Path.GetTempPath(), "Caravela", "InvalidAssemblies" );

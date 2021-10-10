@@ -37,7 +37,7 @@ namespace Caravela.Framework.Tests.UnitTests.Templating
 
             var code = @"
 using Caravela.Framework.Aspects;
-class C : IAspect 
+class C : TypeAspect 
 {
    void M() {}
   int F;

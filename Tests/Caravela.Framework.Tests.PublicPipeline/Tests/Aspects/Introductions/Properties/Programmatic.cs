@@ -1,26 +1,30 @@
 ﻿using System;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
-using Caravela.TestFramework;
 
 namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Properties.Programmatic
 {
-    public class IntroductionAttribute : Attribute, IAspect<INamedType>
+    public class IntroductionAttribute : TypeAspect
     {
-        public void BuildAspect(IAspectBuilder<INamedType> builder)
+        public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
             {
-                var propertyBuilder = builder.Advices.IntroduceProperty(builder.Target, nameof(AutoProperty));
+                var propertyBuilder = builder.Advices.IntroduceProperty( builder.Target, nameof(AutoProperty) );
                 propertyBuilder.Accessibility = Accessibility.Public;
             }
 
             {
-                var propertyBuilder = builder.Advices.IntroduceProperty(builder.Target, nameof(Property));
+                var propertyBuilder = builder.Advices.IntroduceProperty( builder.Target, nameof(Property) );
                 propertyBuilder.Accessibility = Accessibility.Public;
             }
 
             {
-                var propertyBuilder = builder.Advices.IntroduceProperty(builder.Target, "PropertyFromAccessors", nameof(GetPropertyTemplate), nameof(SetPropertyTemplate) );
+                var propertyBuilder = builder.Advices.IntroduceProperty(
+                    builder.Target,
+                    "PropertyFromAccessors",
+                    nameof(GetPropertyTemplate),
+                    nameof(SetPropertyTemplate) );
+
                 propertyBuilder.Accessibility = Accessibility.Public;
             }
 
@@ -35,13 +39,14 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Properties.P
         {
             get
             {
-                Console.WriteLine("Get");
+                Console.WriteLine( "Get" );
+
                 return meta.Proceed();
             }
 
             set
             {
-                Console.WriteLine("Set");
+                Console.WriteLine( "Set" );
                 meta.Proceed();
             }
         }
@@ -49,21 +54,20 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Properties.P
         [Template]
         public int GetPropertyTemplate()
         {
-            Console.WriteLine("Get");
+            Console.WriteLine( "Get" );
+
             return meta.Proceed();
         }
 
         [Template]
-        public void SetPropertyTemplate(int value)
+        public void SetPropertyTemplate( int value )
         {
-            Console.WriteLine("Set");
+            Console.WriteLine( "Set" );
             meta.Proceed();
         }
     }
 
     // <target>
     [Introduction]
-    internal class TargetClass
-    {
-    }
+    internal class TargetClass { }
 }

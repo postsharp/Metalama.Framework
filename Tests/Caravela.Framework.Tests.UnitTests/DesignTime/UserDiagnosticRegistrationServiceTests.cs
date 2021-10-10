@@ -26,14 +26,14 @@ using Caravela.Framework.Diagnostics;
 
 namespace Caravela.Framework.Tests.UnitTests.DesignTime.TestCode
 {
-    internal class ReportErrorAttribute : Attribute, IAspect<IMethod>
+    internal class ReportErrorAttribute : MethodLevelAspect
     {
         private static readonly DiagnosticDefinition<IMethod> _userError = new(
              ""MY001"",
              Severity.Error,
              ""User error description."");
 
-        public void BuildAspect(IAspectBuilder<IMethod> builder)
+        public override void BuildAspect(IAspectBuilder<IMethod> builder)
         {
             builder.Diagnostics.Report(_userError, builder.Target);
         }
@@ -79,7 +79,7 @@ using Caravela.Framework.Diagnostics;
 
 namespace Caravela.Framework.Tests.UnitTests.DesignTime.TestCode
 {
-    internal class SuppressWarningAttribute : Attribute, IAspect<IMethod>
+    internal class SuppressWarningAttribute : MethodLevelAspect
     {
         private static readonly DiagnosticDefinition<IMethod> _userWarning = new(
              ""MY001"",
@@ -88,7 +88,7 @@ namespace Caravela.Framework.Tests.UnitTests.DesignTime.TestCode
 
         private static readonly SuppressionDefinition _suppressionDefinition = new(""MY001"");
 
-        public void BuildAspect(IAspectBuilder<IMethod> builder)
+        public override void BuildAspect(IAspectBuilder<IMethod> builder)
         {
             builder.Diagnostics.Suppress(builder.Target, _suppressionDefinition);
             builder.Diagnostics.Report(_userWarning, builder.Target);

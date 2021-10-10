@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.TestFramework.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -62,7 +63,7 @@ namespace Caravela.TestFramework.XunitFramework
                     + " The project directory is stored as a value of the AssemblyMetadataAttribute with Key = \"ProjectDirectory\"." );
             }
 
-            return value;
+            return value.NotNull();
         }
 
         public List<TestCase> Discover( string subDirectory, ImmutableHashSet<string> excludedDirectories )
@@ -111,7 +112,7 @@ namespace Caravela.TestFramework.XunitFramework
                 foreach ( var testPath in Directory.EnumerateFiles( directory, "*.cs" ) )
                 {
                     var fileName = Path.GetFileName( testPath );
-                    var firstDotPosition = fileName.IndexOf( '.', StringComparison.Ordinal );
+                    var firstDotPosition = fileName.IndexOfOrdinal( '.' );
                     var extension = fileName.Substring( firstDotPosition );
 
                     if ( !string.Equals( extension, ".cs", StringComparison.Ordinal ) )
@@ -128,7 +129,7 @@ namespace Caravela.TestFramework.XunitFramework
 
                     this._messageSink?.Trace( $"Including the file '{testPath}'" );
 
-                    var testCase = new TestCase( factory, Path.GetRelativePath( baseDirectory, testPath ) );
+                    var testCase = new TestCase( factory, PathUtil.GetRelativePath( baseDirectory, testPath ) );
                     onTestCaseDiscovered( testCase );
                 }
 

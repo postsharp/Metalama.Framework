@@ -206,7 +206,7 @@ namespace Caravela.Framework.Impl.Aspects
                 IPropertySymbol => typeof(IProperty),
                 IEventSymbol => typeof(IEvent),
                 IFieldSymbol => typeof(IField),
-                ITypeSymbol { TypeKind: TypeKind.TypeParameter } => typeof(IGenericParameter),
+                ITypeSymbol { TypeKind: TypeKind.TypeParameter } => typeof(ITypeParameter),
                 INamedTypeSymbol => typeof(INamedType),
                 IParameterSymbol => typeof(IParameter),
                 _ => null

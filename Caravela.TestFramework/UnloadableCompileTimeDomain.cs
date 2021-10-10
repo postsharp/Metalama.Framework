@@ -2,24 +2,27 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Impl.CompileTime;
+using System.Diagnostics.CodeAnalysis;
+#if NET5_0
 using Caravela.Framework.Impl.Utilities;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Loader;
 using System.Threading;
+#endif
 
 namespace Caravela.TestFramework
 {
     /// <summary>
-    /// An implementation of <see cref="CompileTimeDomain"/> base on <see cref="AssemblyLoadContext"/> and able to unload
-    /// itself. Not compatible with .NET Framework.
+    /// An implementation of <see cref="CompileTimeDomain"/> base on <c>AssemblyLoadContext</c> and able to unload
+    /// itself. When compiled with .NET Standard (instead of .NET 5.0), the class has no unloading effect.
     /// </summary>
     internal class UnloadableCompileTimeDomain : CompileTimeDomain
     {
+#if NET5_0
         private readonly AssemblyLoadContext _assemblyLoadContext;
         private readonly List<WeakReference> _loadedAssemblies = new();
 
@@ -42,6 +45,7 @@ namespace Caravela.TestFramework
 
             return assembly;
         }
+#endif
 
         [ExcludeFromCodeCoverage]
         public void UnloadAndWait()
@@ -52,9 +56,13 @@ namespace Caravela.TestFramework
             this.WaitForDisposal();
         }
 
+#if !NET5_0
+#pragma warning disable CA1822 // Can be made static
+#endif
         [ExcludeFromCodeCoverage]
         public void WaitForDisposal()
         {
+#if NET5_0
             var waits = 0;
 
             while ( this._loadedAssemblies.Any( r => r.IsAlive ) )
@@ -73,14 +81,20 @@ namespace Caravela.TestFramework
                         "The following assemblies are still loaded: " + assemblies + "." );
                 }
             }
+#endif
         }
+#if !NET5_0
+#pragma warning restore CA1822 // Can be made static
+#endif
 
         public override void Dispose( bool disposing )
         {
             base.Dispose( disposing );
 
+#if NET5_0
             this._assemblyLoadContext.Unload();
             TestExecutionContext.RegisterDisposeAction( this.WaitForDisposal );
+#endif
 
             // We cannot wait for complete disposal here because the TestResult object, lower in the stack, typically contains
             // a reference to a build-time assembly. So, we need to put the test out of the stack before the domain

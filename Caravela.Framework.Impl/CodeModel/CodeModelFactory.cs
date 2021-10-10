@@ -15,7 +15,7 @@ namespace Caravela.Framework.Impl.CodeModel
                 INamedTypeSymbol namedType => compilation.Factory.GetNamedType( namedType ),
                 IArrayTypeSymbol arrayType => new ArrayType( arrayType, compilation ),
                 IPointerTypeSymbol pointerType => new PointerType( pointerType, compilation ),
-                ITypeParameterSymbol typeParameter => new GenericParameter( typeParameter, compilation ),
+                ITypeParameterSymbol typeParameter => new TypeParameter( typeParameter, compilation ),
                 IDynamicTypeSymbol dynamicType => new DynamicType( dynamicType, compilation ),
                 _ => throw new NotImplementedException()
             };

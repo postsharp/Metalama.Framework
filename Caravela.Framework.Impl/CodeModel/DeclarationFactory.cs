@@ -95,10 +95,10 @@ namespace Caravela.Framework.Impl.CodeModel
                 typeSymbol.ToRef(),
                 s => new NamedType( (INamedTypeSymbol) s.GetSymbol( this.Compilation ), this._compilationModel ) );
 
-        public IGenericParameter GetGenericParameter( ITypeParameterSymbol typeParameterSymbol )
-            => (GenericParameter) this._cache.GetOrAdd(
+        public ITypeParameter GetGenericParameter( ITypeParameterSymbol typeParameterSymbol )
+            => (TypeParameter) this._cache.GetOrAdd(
                 typeParameterSymbol.ToRef(),
-                tp => new GenericParameter( (ITypeParameterSymbol) tp.GetSymbol( this.Compilation ), this._compilationModel ) );
+                tp => new TypeParameter( (ITypeParameterSymbol) tp.GetSymbol( this.Compilation ), this._compilationModel ) );
 
         public IMethod GetMethod( IMethodSymbol methodSymbol )
             => (IMethod) this._cache.GetOrAdd(
@@ -198,10 +198,10 @@ namespace Caravela.Framework.Impl.CodeModel
                 DeclarationRef.FromBuilder( parameterBuilder ),
                 l => new BuiltParameter( (ParameterBuilder) l.Target!, this._compilationModel ) );
 
-        internal IGenericParameter GetGenericParameter( GenericParameterBuilder genericParameterBuilder )
-            => (IGenericParameter) this._cache.GetOrAdd(
-                DeclarationRef.FromBuilder( genericParameterBuilder ),
-                l => new BuiltGenericParameter( (GenericParameterBuilder) l.Target!, this._compilationModel ) );
+        internal ITypeParameter GetGenericParameter( TypeParameterBuilder typeParameterBuilder )
+            => (ITypeParameter) this._cache.GetOrAdd(
+                DeclarationRef.FromBuilder( typeParameterBuilder ),
+                l => new BuiltTypeParameter( (TypeParameterBuilder) l.Target!, this._compilationModel ) );
 
         internal IMethod GetMethod( MethodBuilder methodBuilder )
             => (IMethod) this._cache.GetOrAdd(
@@ -226,7 +226,7 @@ namespace Caravela.Framework.Impl.CodeModel
                 EventBuilder eventBuilder => this.GetEvent( eventBuilder ),
                 ParameterBuilder parameterBuilder => this.GetParameter( parameterBuilder ),
                 AttributeBuilder attributeBuilder => this.GetAttribute( attributeBuilder ),
-                GenericParameterBuilder genericParameterBuilder => this.GetGenericParameter( genericParameterBuilder ),
+                TypeParameterBuilder genericParameterBuilder => this.GetGenericParameter( genericParameterBuilder ),
 
                 // This is for linker tests (fake builders), which resolve to themselves.
                 // ReSharper disable once SuspiciousTypeConversion.Global
