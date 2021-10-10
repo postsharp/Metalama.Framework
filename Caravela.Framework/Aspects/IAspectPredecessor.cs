@@ -4,7 +4,8 @@
 namespace Caravela.Framework.Aspects
 {
     /// <summary>
-    /// Base interface for objects that can cause aspects to be added to a compilation.
+    /// Base interface for objects that can cause aspects to be added to a compilation. Predecessors are exposed on
+    /// the <see cref="IAspectInstance.Predecessors"/> property.
     /// </summary>
     [CompileTimeOnly]
     public interface IAspectPredecessor { }
