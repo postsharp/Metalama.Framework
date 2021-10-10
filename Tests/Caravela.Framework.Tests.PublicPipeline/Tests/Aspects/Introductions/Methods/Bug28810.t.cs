@@ -1,17 +1,17 @@
-class Targets
-    {    
-        class NaturallyCloneable : ICloneable
+internal class Targets
+    {
+        private class NaturallyCloneable : ICloneable
         {
             public object Clone()
             {
                 return new NaturallyCloneable();
             }
         }
-    
+
         [DeepClone]
-        class BaseClass:global::System.ICloneable        {
-            int a;
-            NaturallyCloneable b;
+        private class BaseClass:global::System.ICloneable        {
+            private int a;
+            private NaturallyCloneable b;
 
 
 public global::Caravela.Framework.Tests.Integration.Tests.Aspects.Introductions.Methods.Bug28810.Targets.BaseClass Clone()
@@ -23,5 +23,4 @@ global::System.Object global::System.ICloneable.Clone()
 {
     return (global::System.Object)this.Clone();
 }        }
-
     }

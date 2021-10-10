@@ -193,11 +193,11 @@ namespace Caravela.Framework.Impl.CodeModel
                 DeclarationRef.FromBuilder( attributeBuilder ),
                 l => new BuiltAttribute( (AttributeBuilder) l.Target!, this._compilationModel ) );
 
-        internal IParameter GetParameter( ParameterBuilder parameterBuilder )
+        internal IParameter GetParameter( IParameterBuilder parameterBuilder )
             => (IParameter) this._cache.GetOrAdd(
                 DeclarationRef.FromBuilder( parameterBuilder ),
-                l => new BuiltParameter( (ParameterBuilder) l.Target!, this._compilationModel ) );
-
+                l => new BuiltParameter( (IParameterBuilder) l.Target!, this._compilationModel ) );
+        
         internal ITypeParameter GetGenericParameter( TypeParameterBuilder typeParameterBuilder )
             => (ITypeParameter) this._cache.GetOrAdd(
                 DeclarationRef.FromBuilder( typeParameterBuilder ),
@@ -207,6 +207,16 @@ namespace Caravela.Framework.Impl.CodeModel
             => (IMethod) this._cache.GetOrAdd(
                 DeclarationRef.FromBuilder( methodBuilder ),
                 l => new BuiltMethod( (MethodBuilder) l.Target!, this._compilationModel ) );
+
+        internal IMethod GetMethod( AccessorBuilder methodBuilder )
+            => (IMethod) this._cache.GetOrAdd(
+                DeclarationRef.FromBuilder( methodBuilder ),
+                valueFactory: l =>
+                {
+                    var builder = (AccessorBuilder) l.Target!;
+
+                    return ((IMemberWithAccessors) this.GetDeclaration( builder.ContainingMember )).GetAccessor( builder.MethodKind )!;
+                } );
 
         internal IProperty GetProperty( PropertyBuilder propertyBuilder )
             => (IProperty) this._cache.GetOrAdd(
@@ -227,6 +237,10 @@ namespace Caravela.Framework.Impl.CodeModel
                 ParameterBuilder parameterBuilder => this.GetParameter( parameterBuilder ),
                 AttributeBuilder attributeBuilder => this.GetAttribute( attributeBuilder ),
                 TypeParameterBuilder genericParameterBuilder => this.GetGenericParameter( genericParameterBuilder ),
+                AccessorBuilder accessorBuilder => this.GetMethod( accessorBuilder ),
+                AccessorBuilder.ParameterBase parameterBuilder => this.GetParameter( parameterBuilder ),
+                
+
 
                 // This is for linker tests (fake builders), which resolve to themselves.
                 // ReSharper disable once SuspiciousTypeConversion.Global

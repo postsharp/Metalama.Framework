@@ -1,3 +1,5 @@
+// @DesignTime
+
 using System;
 using Caravela.Framework.Aspects;
 

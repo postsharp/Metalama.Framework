@@ -166,7 +166,7 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Eligibility;
 
-class MyAspect : System.MethodLevelAspect
+class MyAspect : MethodAspect
 {
    private static readonly DiagnosticDefinition<int> _description = new(""MY001"", Severity.Warning, ""My Message $version$,{0}"" );
    public int Version;
@@ -175,8 +175,6 @@ class MyAspect : System.MethodLevelAspect
    {
         aspectBuilder.Diagnostics.Report( _description, this.Version );
    }
-
-public void BuildEligibility( IEligibilityBuilder<IMethod> builder ) { }
 }
 ";
 

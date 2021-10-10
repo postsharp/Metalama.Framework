@@ -26,7 +26,7 @@ using Caravela.Framework.Diagnostics;
 
 namespace Caravela.Framework.Tests.UnitTests.DesignTime.TestCode
 {
-    internal class ReportErrorAttribute : MethodLevelAspect
+    internal class ReportErrorAttribute : MethodAspect
     {
         private static readonly DiagnosticDefinition<IMethod> _userError = new(
              ""MY001"",
@@ -79,7 +79,7 @@ using Caravela.Framework.Diagnostics;
 
 namespace Caravela.Framework.Tests.UnitTests.DesignTime.TestCode
 {
-    internal class SuppressWarningAttribute : MethodLevelAspect
+    internal class SuppressWarningAttribute : MethodAspect
     {
         private static readonly DiagnosticDefinition<IMethod> _userWarning = new(
              ""MY001"",

@@ -1,3 +1,5 @@
+// @IgnoredDiagnostic(CS1998)
+
 #if NET5_0
 using System;
 using System.Threading.Tasks;

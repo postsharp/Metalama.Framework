@@ -1,4 +1,6 @@
-﻿using System;
+﻿// @Skipped(#29134 - Invokers.Base is null for an override aspect applied to a field)
+
+using System;
 using System.Linq;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
@@ -28,15 +30,15 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Invokers.Events.AdvisedInt
         }
 
         [Template]
-        public void AddTemplate( dynamic handler )
+        public void AddTemplate( dynamic value )
         {
-            meta.Target.Event.Invokers.Base!.Add( meta.This, handler );
+            meta.Target.Event.Invokers.Base!.Add( meta.This, value );
         }
 
         [Template]
-        public void RemoveTemplate( dynamic handler )
+        public void RemoveTemplate( dynamic value )
         {
-            meta.Target.Event.Invokers.Base!.Remove( meta.This, handler );
+            meta.Target.Event.Invokers.Base!.Remove( meta.This, value );
         }
     }
 

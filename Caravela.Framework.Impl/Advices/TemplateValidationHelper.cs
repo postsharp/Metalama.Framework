@@ -36,9 +36,11 @@ namespace Caravela.Framework.Impl.Advices
 
                 if ( methodParameter == null )
                 {
+                    var parameterNames = string.Join( ", ", targetMethod.Parameters.Select( p => "'" + p.Name + "'" ) );
+
                     throw new InvalidAdviceTargetException(
                         UserMessageFormatter.Format(
-                            $"Cannot use the template '{template.Declaration}' on method '{targetMethod}': the target method does not contain a parameter '{templateParameter.Name}'." ) );
+                            $"Cannot use the template '{template.Declaration}' on method '{targetMethod}': the target method does not contain a parameter '{templateParameter.Name}'. Available parameters are: {parameterNames}." ) );
                 }
 
                 if ( !VerifyTemplateType( templateParameter.Type, methodParameter.Type ) )

@@ -1,4 +1,7 @@
-﻿using System;
+﻿// @AddHtmlTitles
+
+using System;
+using Caravela.TestFramework;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Eligibility;

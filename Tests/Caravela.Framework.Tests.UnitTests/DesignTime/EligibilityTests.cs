@@ -35,7 +35,7 @@ class ConstructorAspect : IAspect<IConstructor> { }
 class MethodBaseAspect : IAspect<IMethodBase> { }
 class DeclarationAspect : IAspect<IDeclaration> { }
 class ParameterAspect : IAspect<IParameter> { }
-class GenericParameterAspect : IAspect<IGenericParameter> { }
+class GenericParameterAspect : IAspect<ITypeParameter> { }
 
 class Class<T>
 {

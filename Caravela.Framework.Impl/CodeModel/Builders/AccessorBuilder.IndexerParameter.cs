@@ -27,7 +27,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
             public override RefKind RefKind { get; set; }
 
-            public override bool IsParams => ((PropertyBuilder) this.Accessor._containingDeclaration).Parameters[this.Index].IsParams;
+            public override bool IsParams => ((PropertyBuilder) this.Accessor.ContainingMember).Parameters[this.Index].IsParams;
 
             public override string Name { get; set; }
 

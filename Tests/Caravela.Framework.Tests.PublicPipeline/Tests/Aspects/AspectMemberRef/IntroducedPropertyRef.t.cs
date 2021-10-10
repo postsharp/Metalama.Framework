@@ -1,7 +1,5 @@
 [Retry]
-    class Program
-    {
-
+    internal class Program { 
 
 private global::System.String IntroducedProperty
 {get    {
@@ -14,6 +12,5 @@ set    {
 
 private void IntroducedMethod1(global::System.String name)
 {
-    this.IntroducedProperty = name;
-}
-    }
+    IntroducedProperty = name;
+}}
