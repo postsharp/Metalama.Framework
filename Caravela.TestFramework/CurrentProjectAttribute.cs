@@ -21,7 +21,7 @@ namespace Caravela.TestFramework
         {
             var discoverer = new TestDiscoverer( new ReflectionAssemblyInfo( testMethod.DeclaringType!.Assembly ) );
 
-            var projectDirectory = discoverer.FindProjectDirectory();
+            var projectDirectory = discoverer.GetTestProjectProperties().ProjectDirectory;
 
             foreach ( var testCase in discoverer.Discover( projectDirectory, ImmutableHashSet<string>.Empty ) )
             {

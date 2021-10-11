@@ -19,24 +19,25 @@ namespace Caravela.TestFramework.XunitFramework
             this._relativePath = relativePath;
         }
 
-        public string FullPath => Path.Combine( this._factory.ProjectDirectory, this._relativePath );
+        public string FullPath => Path.Combine( this._factory.ProjectProperties.ProjectDirectory, this._relativePath );
 
         void IXunitSerializable.Deserialize( IXunitSerializationInfo info )
         {
-            this._factory = new TestFactory( info.GetValue<string>( "basePath" ), info.GetValue<string>( "assemblyName" ) );
+            this._factory = new TestFactory( this._factory.ProjectProperties, info.GetValue<string>( "basePath" ), info.GetValue<string>( "assemblyName" ) );
             this._relativePath = info.GetValue<string>( "relativePath" );
         }
 
         void IXunitSerializable.Serialize( IXunitSerializationInfo info )
         {
-            info.AddValue( "basePath", this._factory.ProjectDirectory );
+            info.AddValue( "basePath", this._factory.ProjectProperties );
             info.AddValue( "relativePath", this._relativePath );
             info.AddValue( "assemblyName", this._factory.AssemblyInfo.Name );
         }
 
         string ITestCase.DisplayName => Path.GetFileNameWithoutExtension( this._relativePath );
 
-        public string? SkipReason => TestInput.FromFile( this._factory.DirectoryOptionsReader, this._relativePath ).Options.SkipReason!;
+        public string? SkipReason
+            => TestInput.FromFile( this._factory.ProjectProperties, this._factory.DirectoryOptionsReader, this._relativePath ).Options.SkipReason!;
 
         ISourceInformation ITestCase.SourceInformation
         {
@@ -54,7 +55,7 @@ namespace Caravela.TestFramework.XunitFramework
 
         string ISourceInformation.FileName
         {
-            get => Path.Combine( this._factory.ProjectDirectory, this._relativePath );
+            get => Path.Combine( this._factory.ProjectProperties.ProjectDirectory, this._relativePath );
             set => throw new NotSupportedException();
         }
 

@@ -6,7 +6,6 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using Xunit;
-
 #if NET5_0
 using System.Threading.Tasks;
 #endif
@@ -47,7 +46,7 @@ namespace Caravela.Framework.Tests.UnitTests.Utilities
                 WriteFile( $"file{i}.cs", sourceFiles[i] );
             }
 
-            var psi = new ProcessStartInfo( "dotnet", "build" ) { WorkingDirectory = dir, RedirectStandardOutput = true };
+            var psi = new ProcessStartInfo( "dotnet", "build" ) { WorkingDirectory = dir, RedirectStandardOutput = true, UseShellExecute = false };
             var process = Process.Start( psi )!;
             var outputPromise = process.StandardOutput.ReadToEndAsync();
 

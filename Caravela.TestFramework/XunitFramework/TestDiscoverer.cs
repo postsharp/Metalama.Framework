@@ -39,31 +39,52 @@ namespace Caravela.TestFramework.XunitFramework
 
         void IDisposable.Dispose() { }
 
-        public string FindProjectDirectory()
+        public TestProjectProperties GetTestProjectProperties()
         {
-            var projectDirectoryAttributes = this._assembly
+            var customAttributes = this._assembly
                 .GetCustomAttributes( typeof(AssemblyMetadataAttribute) )
-                .Where( a => string.Equals( (string) a.GetConstructorArguments().First(), "ProjectDirectory", StringComparison.Ordinal ) )
                 .ToList();
 
-            var projectDirectoryAttribute = projectDirectoryAttributes.FirstOrDefault();
-
-            if ( projectDirectoryAttribute == null )
+            string? GetValue( string key, bool required, string? defaultValue = null )
             {
-                throw new InvalidOperationException(
-                    $"The assembly '{this._assembly.AssemblyPath}' must have a single AssemblyMetadataAttribute with Key = \"ProjectDirectory\"." );
+                var attributes = customAttributes
+                    .Where( a => string.Equals( (string) a.GetConstructorArguments().First(), key, StringComparison.Ordinal ) )
+                    .ToList();
+
+                if ( attributes.Count == 0 && !required )
+                {
+                    return defaultValue;
+                }
+
+                if ( attributes.Count != 1 )
+                {
+                    throw new InvalidOperationException(
+                        $"The assembly '{this._assembly.AssemblyPath}' must have a single AssemblyMetadataAttribute with Key = \"{key}\"." );
+                }
+
+                var value = (string?) attributes[0].GetConstructorArguments().ElementAt( 1 );
+
+                if ( string.IsNullOrEmpty( value ) )
+                {
+                    if ( required )
+                    {
+                        throw new InvalidOperationException(
+                            $"The assembly '{this._assembly.AssemblyPath}' must have a single AssemblyMetadataAttribute with Key = \"{key}\"." );
+                    }
+                    else
+                    {
+                        return defaultValue;
+                    }
+                }
+
+                return value;
             }
 
-            var value = (string?) projectDirectoryAttribute.GetConstructorArguments().ElementAt( 1 );
+            var projectDirectory = GetValue( "ProjectDirectory", true ).NotNull();
+            var parserSymbols = GetValue( "DefineConstants", false, "" ).NotNull().Split( ';' ).Select( s => s.Trim() ).Where( s => !string.IsNullOrEmpty(s) ).ToImmutableArray();
+            var targetFramework = GetValue( "TargetFramework", true ).NotNull();
 
-            if ( string.IsNullOrEmpty( value ) )
-            {
-                throw new InvalidOperationException(
-                    "The project directory cannot be null or empty."
-                    + " The project directory is stored as a value of the AssemblyMetadataAttribute with Key = \"ProjectDirectory\"." );
-            }
-
-            return value.NotNull();
+            return new TestProjectProperties( projectDirectory, parserSymbols, targetFramework );
         }
 
         public List<TestCase> Discover( string subDirectory, ImmutableHashSet<string> excludedDirectories )
@@ -82,9 +103,9 @@ namespace Caravela.TestFramework.XunitFramework
         {
             this._messageSink?.Trace( $"Discovering tests in directory '{subDirectory}'." );
 
-            var baseDirectory = this.FindProjectDirectory();
-            TestDirectoryOptionsReader reader = new( baseDirectory );
-            TestFactory factory = new( reader, this._assembly );
+            var projectProperties = this.GetTestProjectProperties();
+            TestDirectoryOptionsReader reader = new( projectProperties.ProjectDirectory );
+            TestFactory factory = new( projectProperties, reader, this._assembly );
 
             void AddTestsInDirectory( string directory )
             {
@@ -129,7 +150,7 @@ namespace Caravela.TestFramework.XunitFramework
 
                     this._messageSink?.Trace( $"Including the file '{testPath}'" );
 
-                    var testCase = new TestCase( factory, PathUtil.GetRelativePath( baseDirectory, testPath ) );
+                    var testCase = new TestCase( factory, PathUtil.GetRelativePath( projectProperties.ProjectDirectory, testPath ) );
                     onTestCaseDiscovered( testCase );
                 }
 

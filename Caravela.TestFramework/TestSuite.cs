@@ -3,6 +3,7 @@
 
 using Caravela.Framework.Impl.Pipeline;
 using Caravela.TestFramework.Utilities;
+using Caravela.TestFramework.XunitFramework;
 using System;
 using System.IO;
 using System.Linq;
@@ -21,6 +22,23 @@ namespace Caravela.TestFramework
     /// </summary>
     public abstract class TestSuite
     {
+        private record AssemblyAssets( TestProjectProperties ProjectProperties, TestDirectoryOptionsReader OptionsReader );
+
+        private static readonly ConditionalWeakTable<Assembly, AssemblyAssets> _cache = new();
+
+        private static AssemblyAssets GetAssemblyAssets( Assembly assembly )
+            => _cache.GetValue(
+                assembly,
+                a =>
+                {
+                    var assemblyInfo = new ReflectionAssemblyInfo( a );
+                    var discoverer = new TestDiscoverer( assemblyInfo );
+
+                    var projectProperties = discoverer.GetTestProjectProperties();
+
+                    return new AssemblyAssets( projectProperties, new TestDirectoryOptionsReader( projectProperties.ProjectDirectory ) );
+                } );
+
         protected ITestOutputHelper Logger { get; }
 
         protected TestSuite( ITestOutputHelper logger )
@@ -55,14 +73,14 @@ namespace Caravela.TestFramework
             using var testOptions = new TestProjectOptions();
             var serviceProvider = ServiceProviderFactory.GetServiceProvider( testOptions );
 
-            var directoryOptionsReader = TestDirectoryOptionsReader.GetInstance( this.GetType().Assembly );
+            var assemblyAssets = GetAssemblyAssets( this.GetType().Assembly );
 
             var fullPath = Path.Combine( directory, relativePath );
 
             this.Logger.WriteLine( "Test input file: " + fullPath );
-            var projectRelativePath = PathUtil.GetRelativePath( directoryOptionsReader.ProjectDirectory, fullPath );
+            var projectRelativePath = PathUtil.GetRelativePath( assemblyAssets.ProjectProperties.ProjectDirectory, fullPath );
 
-            var testInput = TestInput.FromFile( directoryOptionsReader, projectRelativePath );
+            var testInput = TestInput.FromFile( assemblyAssets.ProjectProperties, assemblyAssets.OptionsReader, projectRelativePath );
             testInput.Options.References.AddRange( TestAssemblyReferenceReader.GetAssemblyReferences( new ReflectionAssemblyInfo( this.GetType().Assembly ) ) );
             var testRunner = TestRunnerFactory.CreateTestRunner( testInput, serviceProvider, this.Logger );
             await testRunner.RunAndAssertAsync( testInput );

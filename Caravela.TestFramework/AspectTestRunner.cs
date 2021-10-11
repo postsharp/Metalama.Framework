@@ -89,7 +89,15 @@ namespace Caravela.TestFramework
                 // Emit binary and report diagnostics.
                 bool MustBeReported( Diagnostic d )
                 {
-                    return d.Severity >= minimalVerbosity && !testInput.Options.IgnoredDiagnostics.Contains( d.Id );
+                    if ( d.Id == "CS1701" )
+                    {
+                        // Ignore warning CS1701: Assuming assembly reference "Assembly Name #1" matches "Assembly Name #2", you may need to supply runtime policy.
+                        // This warning is ignored by MSBuild anyway.
+                        return false;
+                    }
+                    
+                    return d.Severity >= minimalVerbosity 
+                           && !testInput.Options.IgnoredDiagnostics.Contains( d.Id );
                 }
 
                 if ( !testInput.Options.OutputCompilationDisabled.GetValueOrDefault() )
@@ -295,6 +303,7 @@ namespace Caravela.TestFramework
                 this.ProjectDirectory!,
                 "obj",
                 "transformed",
+                testInput.ProjectProperties.TargetFramework,
                 Path.GetDirectoryName( testInput.RelativePath ) ?? "",
                 Path.GetFileNameWithoutExtension( testInput.RelativePath ) + FileExtensions.ProgramOutput );
 

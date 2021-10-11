@@ -24,7 +24,8 @@ namespace Caravela.TestFramework.XunitFramework
             var assembly = Assembly.Load( assemblyName );
             var assemblyInfo = new ReflectionAssemblyInfo( assembly );
             TestDiscoverer discoverer = new( assemblyInfo );
-            this._factory = new TestFactory( new TestDirectoryOptionsReader( discoverer.FindProjectDirectory() ), assemblyInfo );
+            var projectProperties = discoverer.GetTestProjectProperties();
+            this._factory = new TestFactory( projectProperties, new TestDirectoryOptionsReader( projectProperties.ProjectDirectory ), assemblyInfo );
         }
 
         void IDisposable.Dispose() { }
@@ -42,7 +43,7 @@ namespace Caravela.TestFramework.XunitFramework
             IMessageSink executionMessageSink,
             ITestFrameworkExecutionOptions executionOptions )
         {
-            var directoryOptionsReader = new TestDirectoryOptionsReader( this._factory.ProjectDirectory );
+            var directoryOptionsReader = new TestDirectoryOptionsReader( this._factory.ProjectProperties.ProjectDirectory );
 
             var collections = testCases.GroupBy( t => t.TestMethod.TestClass.TestCollection );
 
@@ -92,7 +93,7 @@ namespace Caravela.TestFramework.XunitFramework
                                 {
                                     using var testOptions = new TestProjectOptions();
                                     var serviceProvider = ServiceProviderFactory.GetServiceProvider( testOptions );
-                                    var testInput = TestInput.FromFile( directoryOptionsReader, testCase.UniqueID );
+                                    var testInput = TestInput.FromFile( this._factory.ProjectProperties, directoryOptionsReader, testCase.UniqueID );
                                     testInput.Options.References.AddRange( references );
 
                                     if ( testInput.Options.IsSkipped )

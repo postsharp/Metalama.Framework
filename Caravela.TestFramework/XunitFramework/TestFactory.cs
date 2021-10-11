@@ -11,7 +11,7 @@ namespace Caravela.TestFramework.XunitFramework
 {
     internal class TestFactory
     {
-        public string ProjectDirectory { get; }
+        public TestProjectProperties ProjectProperties { get; }
 
         public string ProjectName { get; }
 
@@ -20,8 +20,8 @@ namespace Caravela.TestFramework.XunitFramework
 
         public TestDirectoryOptionsReader DirectoryOptionsReader { get; }
 
-        public TestFactory( string baseDirectory, string assemblyName )
-            : this( new TestDirectoryOptionsReader( baseDirectory ), LoadAssembly( assemblyName ) ) { }
+        public TestFactory( TestProjectProperties projectProperties, string directory, string assemblyName )
+            : this( projectProperties, new TestDirectoryOptionsReader( directory ), LoadAssembly( assemblyName ) ) { }
 
         private static ReflectionAssemblyInfo LoadAssembly( string assemblyName )
         {
@@ -30,12 +30,12 @@ namespace Caravela.TestFramework.XunitFramework
             return new ReflectionAssemblyInfo( assembly );
         }
 
-        public TestFactory( TestDirectoryOptionsReader directoryOptionsReader, IAssemblyInfo assemblyInfo )
+        public TestFactory( TestProjectProperties projectProperties, TestDirectoryOptionsReader directoryOptionsReader, IAssemblyInfo assemblyInfo )
         {
             this.DirectoryOptionsReader = directoryOptionsReader;
 
-            this.ProjectDirectory = directoryOptionsReader.ProjectDirectory;
-            this.ProjectName = Path.GetFileName( this.ProjectDirectory );
+            this.ProjectProperties = projectProperties;
+            this.ProjectName = Path.GetFileName( this.ProjectProperties.ProjectDirectory );
             this.Collection = new TestCollection( this );
             this.AssemblyInfo = assemblyInfo;
         }

@@ -19,7 +19,7 @@ namespace Caravela.TestFramework
             var assemblyInfo = new ReflectionAssemblyInfo( this.GetType().Assembly );
             var discoverer = new TestDiscoverer( assemblyInfo );
 
-            return discoverer.FindProjectDirectory();
+            return discoverer.GetTestProjectProperties().ProjectDirectory;
         }
     }
 }

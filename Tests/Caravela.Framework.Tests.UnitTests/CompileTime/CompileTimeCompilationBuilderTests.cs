@@ -833,10 +833,10 @@ public class MyAspect : OverrideMethodAspect
                 testContext,
                 new Dictionary<string, string>
                 {
-                    ["BuildTime.cs"] = "class Aspect : Caravela.Framework.Aspects.IAspect<Caravela.Framework.Code.IMethod> {}",
+                    ["BuildTime.cs"] = "class Aspect : Caravela.Framework.Aspects.MethodAspect {}",
                     ["RunTime.cs"] = @"namespace Ns { class C {} } ",
                     ["Both.cs"] =
-                        "namespace Ns1 { class Aspect : Caravela.Framework.Aspects.IAspect<Caravela.Framework.Code.IMethod> {} } namespace Ns2 { class C {} }"
+                        "namespace Ns1 { class Aspect : Caravela.Framework.Aspects.MethodAspect {} } namespace Ns2 { class C {} }"
                 } );
 
             // Test that run-time-only trees are removed from the build-time compilation.

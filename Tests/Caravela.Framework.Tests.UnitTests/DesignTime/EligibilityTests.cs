@@ -82,7 +82,13 @@ class Class<T>
             this._aspects = configuration!.AspectClasses.OfType<AspectClass>().ToDictionary( a => a.DisplayName, a => a );
         }
 
+#if NET5_0
         [Theory]
+#else
+        [Theory(Skip = "Skipped in .NET Framework (low value)")]
+        
+        // We would need to implement all interface methods.
+#endif
         [InlineData( "MethodAspect", "Class", false )]
         [InlineData( "MethodAspect", "Class.new", false )]
         [InlineData( "MethodAspect", "Class.static", false )]

@@ -197,7 +197,7 @@ namespace Caravela.Framework.Impl.CodeModel
             => (IParameter) this._cache.GetOrAdd(
                 DeclarationRef.FromBuilder( parameterBuilder ),
                 l => new BuiltParameter( (IParameterBuilder) l.Target!, this._compilationModel ) );
-        
+
         internal ITypeParameter GetGenericParameter( TypeParameterBuilder typeParameterBuilder )
             => (ITypeParameter) this._cache.GetOrAdd(
                 DeclarationRef.FromBuilder( typeParameterBuilder ),
@@ -239,8 +239,6 @@ namespace Caravela.Framework.Impl.CodeModel
                 TypeParameterBuilder genericParameterBuilder => this.GetGenericParameter( genericParameterBuilder ),
                 AccessorBuilder accessorBuilder => this.GetMethod( accessorBuilder ),
                 AccessorBuilder.ParameterBase parameterBuilder => this.GetParameter( parameterBuilder ),
-                
-
 
                 // This is for linker tests (fake builders), which resolve to themselves.
                 // ReSharper disable once SuspiciousTypeConversion.Global

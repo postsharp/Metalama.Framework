@@ -28,6 +28,12 @@
   </ItemGroup>
   
   <ItemGroup>
+      <Compile Include="..\IsExternalInit.cs">
+             <Link>SystemTypes\IsExternalInit.cs</Link>
+       </Compile>
+    </ItemGroup>
+  
+  <ItemGroup>
     <None Update="Caravela.TestFramework.props">
           <Pack>true</Pack>
           <PackagePath>build</PackagePath>

@@ -7,9 +7,11 @@ using Caravela.Framework.Impl.Formatting;
 using Caravela.Framework.Impl.Pipeline;
 using Caravela.Framework.Tests.Integration.Runners;
 using Caravela.TestFramework;
+using Caravela.TestFramework.XunitFramework;
 using Microsoft.CodeAnalysis;
 using PostSharp.Patterns.Model;
 using System;
+using System.Collections.Immutable;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -25,6 +27,7 @@ namespace Caravela.AspectWorkbench.ViewModels
     [NotifyPropertyChanged]
     public class MainViewModel
     {
+        private static readonly TestProjectProperties _projectProperties = new( "", ImmutableArray.Create( "NET5_0" ), "net5.0" );
         private TemplateTest? _currentTest;
 
         public string Title => this.CurrentPath == null ? "Aspect Workbench" : $"Aspect Workbench - {this.CurrentPath}";
@@ -80,7 +83,7 @@ namespace Caravela.AspectWorkbench.ViewModels
             this.ErrorsDocument = new FlowDocument();
             this.TransformedCodeDocument = null;
 
-            var testInput = TestInput.FromSource( this.SourceCode, this.CurrentPath );
+            var testInput = TestInput.FromSource( _projectProperties, this.SourceCode, this.CurrentPath );
 
             testInput.Options.References.AddRange(
                 TestCompilationFactory.GetMetadataReferences()
@@ -230,7 +233,7 @@ namespace Caravela.AspectWorkbench.ViewModels
 
         public void NewTest( string path )
         {
-            var projectDirectory = TestInput.FromSource( "", path ).ProjectDirectory!;
+            var projectDirectory = TestInput.FromSource( _projectProperties, "", path ).ProjectDirectory!;
             var pathParts = Path.GetRelativePath( projectDirectory, path ).Split( "\\" ).Select( p => Path.GetFileNameWithoutExtension( p ) ).Skip( 1 );
             var ns = Path.GetFileName( projectDirectory ) + "." + string.Join( ".", pathParts );
             this.SourceCode = NewTestDefaults.TemplateSource.Replace( "$ns", ns, StringComparison.OrdinalIgnoreCase );
@@ -244,7 +247,7 @@ namespace Caravela.AspectWorkbench.ViewModels
 
         public async Task LoadTestAsync( string filePath )
         {
-            this._currentTest = await TestSerializer.LoadFromFileAsync( filePath );
+            this._currentTest = await TestSerializer.LoadFromFileAsync( _projectProperties, filePath );
 
             var input = this._currentTest.Input ?? throw new InvalidOperationException( $"The {nameof(this._currentTest.Input)} property cannot be null." );
 
@@ -276,7 +279,7 @@ namespace Caravela.AspectWorkbench.ViewModels
                 this._currentTest = new TemplateTest();
             }
 
-            this._currentTest.Input = TestInput.FromSource( this.SourceCode, filePath );
+            this._currentTest.Input = TestInput.FromSource( _projectProperties, this.SourceCode, filePath );
             this._currentTest.ExpectedTransformedCode = this.ExpectedTransformedCode ?? string.Empty;
             this._currentTest.ExpectedProgramOutput = this.ExpectedProgramOutput ?? string.Empty;
 

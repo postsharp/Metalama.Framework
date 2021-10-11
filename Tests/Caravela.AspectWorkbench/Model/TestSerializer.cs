@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.TestFramework;
+using Caravela.TestFramework.XunitFramework;
 using System;
 using System.IO;
 using System.Threading.Tasks;
@@ -14,7 +15,7 @@ namespace Caravela.AspectWorkbench.Model
 
         private static string GetExpectedProgramOutputFilePath( string testFilePath ) => Path.ChangeExtension( testFilePath, FileExtensions.ProgramOutput );
 
-        public static async Task<TemplateTest> LoadFromFileAsync( string filePath )
+        public static async Task<TemplateTest> LoadFromFileAsync( TestProjectProperties projectProperties, string filePath )
         {
             var testSource = await File.ReadAllTextAsync( filePath );
 
@@ -36,7 +37,7 @@ namespace Caravela.AspectWorkbench.Model
 
             return new TemplateTest
             {
-                Input = TestInput.FromSource( testSource, filePath ),
+                Input = TestInput.FromSource( projectProperties, testSource, filePath ),
                 ExpectedTransformedCode = expectedTransformedCode,
                 ExpectedProgramOutput = expectedProgramOutput
             };

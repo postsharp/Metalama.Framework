@@ -1,3 +1,4 @@
+#if NET5_0
 #pragma warning disable CS8600, CS8603
 using System;
 using Caravela.Framework.Aspects;
@@ -65,9 +66,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.CSharpSyntax.Operators
             string s = default;
             s ??= "42";
 
-#if NET5_0
             s = s[0..2];
-#endif
 
             Console.WriteLine( i );
             Console.WriteLine( t );
@@ -90,3 +89,4 @@ namespace Caravela.Framework.Tests.Integration.Templating.CSharpSyntax.Operators
         }
     }
 }
+#endif

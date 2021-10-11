@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.TestFramework.Utilities;
+using Caravela.TestFramework.XunitFramework;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
@@ -19,15 +20,16 @@ namespace Caravela.TestFramework
         /// <param name="testName">Short name of the test. Typically a relative path.</param>
         /// <param name="sourceCode">Full source of the input code.</param>
         private TestInput(
+            TestProjectProperties projectProperties,
             string testName,
             string sourceCode,
             TestDirectoryOptionsReader? directoryOptionsReader = null,
             string? relativePath = null,
             string? fullPath = null )
         {
+            this.ProjectProperties = projectProperties;
             this.TestName = testName;
             this.SourceCode = sourceCode;
-            this.ProjectDirectory = directoryOptionsReader?.ProjectDirectory;
             this.RelativePath = relativePath;
             this.FullPath = fullPath;
 
@@ -59,7 +61,7 @@ namespace Caravela.TestFramework
         }
 
         [ExcludeFromCodeCoverage]
-        public static TestInput FromSource( string sourceCode, string path )
+        public static TestInput FromSource( TestProjectProperties projectProperties, string sourceCode, string path )
         {
             var projectDirectory = FindProjectDirectory( Path.GetDirectoryName( path ) );
 
@@ -68,6 +70,7 @@ namespace Caravela.TestFramework
                 var directoryOptionsReader = new TestDirectoryOptionsReader( projectDirectory );
 
                 return new TestInput(
+                    projectProperties,
                     Path.GetFileNameWithoutExtension( path ),
                     sourceCode,
                     directoryOptionsReader,
@@ -79,7 +82,7 @@ namespace Caravela.TestFramework
                 // Coverage: ignore
                 // The project could not be found. Continue without reading directory options.
 
-                return new TestInput( "interactive", sourceCode );
+                return new TestInput( projectProperties, "interactive", sourceCode );
             }
 
             static string? FindProjectDirectory( string? directory )
@@ -102,13 +105,21 @@ namespace Caravela.TestFramework
             }
         }
 
-        internal static TestInput FromFile( TestDirectoryOptionsReader directoryOptionsReader, string relativePath )
+        internal static TestInput FromFile( TestProjectProperties projectProperties, TestDirectoryOptionsReader directoryOptionsReader, string relativePath )
         {
             var fullPath = Path.Combine( directoryOptionsReader.ProjectDirectory, relativePath );
             var sourceCode = File.ReadAllText( fullPath );
 
-            return new TestInput( Path.GetFileNameWithoutExtension( relativePath ), sourceCode, directoryOptionsReader, relativePath, fullPath );
+            return new TestInput(
+                projectProperties,
+                Path.GetFileNameWithoutExtension( relativePath ),
+                sourceCode,
+                directoryOptionsReader,
+                relativePath,
+                fullPath );
         }
+
+        public TestProjectProperties ProjectProperties { get; }
 
         /// <summary>
         /// Gets the name of the test. Usually equals the relative path of the test source.
@@ -123,7 +134,7 @@ namespace Caravela.TestFramework
         /// <summary>
         /// Gets the directory containing the project (<c>csproj</c>) file.
         /// </summary>
-        public string? ProjectDirectory { get; }
+        public string ProjectDirectory => this.ProjectProperties.ProjectDirectory;
 
         /// <summary>
         /// Gets the path of the current test file relatively to <see cref="ProjectDirectory"/>.
