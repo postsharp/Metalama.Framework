@@ -46,7 +46,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public override IDeclaration? ContainingDeclaration { get; }
 
-        public override DeclarationKind DeclarationKind => DeclarationKind.GenericParameter;
+        public override DeclarationKind DeclarationKind => DeclarationKind.TypeParameter;
 
         public TypeParameterBuilder( MethodBuilder containingMethod, int index, string name ) : base( containingMethod.ParentAdvice )
         {

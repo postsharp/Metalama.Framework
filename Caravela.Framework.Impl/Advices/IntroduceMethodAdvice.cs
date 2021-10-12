@@ -69,7 +69,7 @@ namespace Caravela.Framework.Impl.Advices
 
             foreach ( var templateGenericParameter in this.TemplateMember.TypeParameters )
             {
-                var genericParameterBuilder = this.MemberBuilder.AddGenericParameter( templateGenericParameter.Name );
+                var genericParameterBuilder = this.MemberBuilder.AddTypeParameter( templateGenericParameter.Name );
                 genericParameterBuilder.Variance = templateGenericParameter.Variance;
                 genericParameterBuilder.HasDefaultConstructorConstraint = templateGenericParameter.HasDefaultConstructorConstraint;
                 genericParameterBuilder.TypeKindConstraint = templateGenericParameter.TypeKindConstraint;

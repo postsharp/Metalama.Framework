@@ -91,11 +91,11 @@ namespace Caravela.Framework.Impl.CodeModel
         [Memo]
         public override IDeclaration ContainingDeclaration => this.Compilation.Factory.GetDeclaration( this._typeSymbol.ContainingSymbol );
 
-        public override DeclarationKind DeclarationKind => DeclarationKind.GenericParameter;
+        public override DeclarationKind DeclarationKind => DeclarationKind.TypeParameter;
 
         public override ISymbol Symbol => this._typeSymbol;
 
-        DeclarationKind IDeclaration.DeclarationKind => DeclarationKind.GenericParameter;
+        DeclarationKind IDeclaration.DeclarationKind => DeclarationKind.TypeParameter;
 
         ICompilation ICompilationElement.Compilation => this.Compilation;
 

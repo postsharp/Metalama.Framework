@@ -193,7 +193,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         bool IMemberOrNamedType.IsSealed => this.IsSealed;
 
-        public ITypeParameterBuilder AddGenericParameter( string name ) => throw new NotSupportedException( "Cannot add generic parameters to accessors." );
+        public ITypeParameterBuilder AddTypeParameter( string name ) => throw new NotSupportedException( "Cannot add generic parameters to accessors." );
 
         public IParameterBuilder AddParameter( string name, IType type, RefKind refKind = RefKind.None, TypedConstant defaultValue = default )
             => throw new NotSupportedException( "Cannot directly add parameters to accessors." );

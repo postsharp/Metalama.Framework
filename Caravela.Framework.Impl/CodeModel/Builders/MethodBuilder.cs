@@ -59,7 +59,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
             return this.AddParameter( name, iType, refKind, typeConstant );
         }
 
-        public ITypeParameterBuilder AddGenericParameter( string name )
+        public ITypeParameterBuilder AddTypeParameter( string name )
         {
             var builder = new TypeParameterBuilder( this, this.GenericParameters.Count, name );
             this.GenericParameters.Add( builder );
