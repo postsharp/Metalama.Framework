@@ -195,12 +195,10 @@ namespace Caravela.Framework.Aspects
         public static IReadOnlyDictionary<string, object?> Tags => CurrentContext.Tags;
 
         /// <summary>
-        /// Gets the list of aspect aspects that have required the current aspect. (Not implemented.)
+        /// Gets the current <see cref="IAspectInstance"/>, which gives access to the <see cref="IAspectInstance.Predecessors"/>
+        /// and the <see cref="IAspectInstance.OtherInstances"/> of the current aspect.
         /// </summary>
-        [Obsolete( "Not implemented." )]
-        public static IReadOnlyList<IAspectInstance> UpstreamAspects => throw new NotImplementedException();
-
-        public static IAspectInstance AspectInstance => CurrentContext.Aspect;
+        public static IAspectInstance AspectInstance => CurrentContext.AspectInstance;
 
         /// <summary>
         /// Generates the cast syntax for the specified type.  

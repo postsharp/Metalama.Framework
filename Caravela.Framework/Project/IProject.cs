@@ -25,7 +25,7 @@ namespace Caravela.Framework.Project
         ImmutableArray<IAssemblyIdentity> AssemblyReferences { get; }
 
         /// <summary>
-        /// Gets the list of defined symbols like <c>DEBUG</c>, <c>TRACE</c> (also named constants).
+        /// Gets the list of defined preprocessor symbols like <c>DEBUG</c>, <c>TRACE</c>, <c>NET5_0</c> and so on.
         /// </summary>
         ImmutableHashSet<string> PreprocessorSymbols { get; }
 

@@ -18,8 +18,14 @@ namespace Caravela.Framework.Aspects
     [InternalImplement]
     public interface IAspectLayerBuilder : IValidatorAdder
     {
+        /// <summary>
+        /// Gets the current <see cref="IProject"/>, which represents the <c>csproj</c> file and allows to share project-local data.
+        /// </summary>
         IProject Project { get; }
 
+        /// <summary>
+        /// Gets the current
+        /// </summary>
         IAspectInstance AspectInstance { get; }
 
         /// <summary>
@@ -37,6 +43,9 @@ namespace Caravela.Framework.Aspects
         /// </summary>
         IAdviceFactory Advices { get; }
 
+        /// <summary>
+        /// Gets the cancellation token for the current operation.
+        /// </summary>
         CancellationToken CancellationToken { get; }
     }
 
