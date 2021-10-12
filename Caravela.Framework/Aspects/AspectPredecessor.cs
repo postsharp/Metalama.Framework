@@ -13,6 +13,10 @@ namespace Caravela.Framework.Aspects
     [CompileTimeOnly]
     public readonly struct AspectPredecessor
     {
+        /// <summary>
+        /// Gets the kind of relationship represented by the current <see cref="AspectPredecessor"/>, and the kind of object
+        /// present in the <see cref="Instance"/> property. 
+        /// </summary>
         public AspectPredecessorKind Kind { get; }
 
         /// <summary>
