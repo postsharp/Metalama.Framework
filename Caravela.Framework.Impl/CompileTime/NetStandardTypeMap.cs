@@ -8,11 +8,13 @@ namespace Caravela.Framework.Impl.CompileTime
 {
     internal static class NetStandardTypeMap
     {
-        private static ImmutableHashSet<Type> Types { get; }
+        public static ImmutableDictionary<string, Type> Types { get; }
 
         static NetStandardTypeMap()
         {
-            AppDomain.CurrentDomain.Load( "netstandard" ).GetExportedTypes().ToImmutableHashSet();
+            Types = AppDomain.CurrentDomain.Load( "netstandard" )
+                .GetExportedTypes()
+                .ToImmutableDictionary( t => t.FullName, t => t, StringComparer.Ordinal );
         }
     }
 }
