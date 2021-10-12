@@ -16,8 +16,10 @@ namespace Caravela.Framework.Aspects
     [AttributeUsage( AttributeTargets.Assembly )]
     public abstract class CompilationAspect : Aspect, IAspect<ICompilation>
     {
+        /// <inheritdoc />
         public virtual void BuildAspect( IAspectBuilder<ICompilation> builder ) { }
 
+        /// <inheritdoc />
         public virtual void BuildEligibility( IEligibilityBuilder<ICompilation> builder ) { }
     }
 }
