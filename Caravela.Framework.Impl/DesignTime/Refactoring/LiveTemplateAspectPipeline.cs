@@ -9,10 +9,8 @@ using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.DesignTime.Pipeline;
 using Caravela.Framework.Impl.Diagnostics;
-using Caravela.Framework.Impl.Options;
 using Caravela.Framework.Impl.Pipeline;
 using Microsoft.CodeAnalysis;
-using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
@@ -29,20 +27,23 @@ namespace Caravela.Framework.Impl.DesignTime.Refactoring
         private readonly InteractiveAspectSource _source;
 
         private LiveTemplateAspectPipeline(
-            IProjectOptions projectOptions,
+            ServiceProvider serviceProvider,
             CompileTimeDomain domain,
             AspectClass aspectClass,
-            ISymbol targetSymbol ) : base( projectOptions, AspectExecutionScenario.LiveTemplate, false, domain )
+            ISymbol targetSymbol ) : base( serviceProvider, AspectExecutionScenario.LiveTemplate, false, domain )
         {
             this._source = new InteractiveAspectSource( aspectClass, targetSymbol );
         }
 
-        private protected override IReadOnlyList<IAspectSource> CreateAspectSources( AspectPipelineConfiguration configuration ) => new[] { this._source };
+        private protected override ImmutableArray<IAspectSource> CreateAspectSources(
+            AspectProjectConfiguration configuration,
+            Compilation compilation )
+            => ImmutableArray.Create<IAspectSource>( this._source );
 
         public static bool TryExecute(
-            IProjectOptions projectOptions,
+            ServiceProvider serviceProvider,
             CompileTimeDomain domain,
-            AspectPipelineConfiguration configuration,
+            AspectProjectConfiguration configuration,
             AspectClass aspectClass,
             PartialCompilation inputCompilation,
             ISymbol targetSymbol,
@@ -50,19 +51,19 @@ namespace Caravela.Framework.Impl.DesignTime.Refactoring
             [NotNullWhen( true )] out PartialCompilation? outputCompilation,
             out ImmutableArray<Diagnostic> diagnostics )
         {
-            LiveTemplateAspectPipeline pipeline = new( projectOptions, domain, aspectClass, targetSymbol );
+            LiveTemplateAspectPipeline pipeline = new( serviceProvider, domain, aspectClass, targetSymbol );
 
             return pipeline.TryExecute( configuration, inputCompilation, cancellationToken, out outputCompilation, out diagnostics );
         }
 
         private bool TryExecute(
-            AspectPipelineConfiguration designTimePipelineConfiguration,
+            AspectProjectConfiguration designTimeProjectConfiguration,
             PartialCompilation compilation,
             CancellationToken cancellationToken,
             [NotNullWhen( true )] out PartialCompilation? outputCompilation,
             out ImmutableArray<Diagnostic> diagnostics )
         {
-            var pipelineConfiguration = designTimePipelineConfiguration.WithStages( s => MapPipelineStage( designTimePipelineConfiguration, s ) );
+            var pipelineConfiguration = designTimeProjectConfiguration.WithStages( s => MapPipelineStage( designTimeProjectConfiguration, s ) );
 
             DiagnosticList diagnosticList = new();
 
@@ -80,49 +81,46 @@ namespace Caravela.Framework.Impl.DesignTime.Refactoring
             return true;
         }
 
-        private static PipelineStage MapPipelineStage( AspectPipelineConfiguration configuration, PipelineStage stage )
+        private static PipelineStage MapPipelineStage( AspectProjectConfiguration configuration, PipelineStage stage )
             => stage switch
             {
                 SourceGeneratorPipelineStage => new CompileTimePipelineStage(
                     configuration.CompileTimeProject!,
-                    configuration.Layers,
+                    configuration.AspectLayers,
                     stage.ServiceProvider ),
                 _ => stage
             };
 
         private protected override HighLevelPipelineStage CreateStage(
-            IReadOnlyList<OrderedAspectLayer> parts,
-            CompileTimeProject compileTimeProject,
-            CompileTimeProjectLoader compileTimeProjectLoader )
+            ImmutableArray<OrderedAspectLayer> parts,
+            CompileTimeProject compileTimeProject )
             => new CompileTimePipelineStage( compileTimeProject, parts, this.ServiceProvider );
 
         private class InteractiveAspectSource : IAspectSource
         {
-            private readonly AspectClass _aspectClass;
             private readonly ISymbol _targetSymbol;
 
             public InteractiveAspectSource( AspectClass aspectClass, ISymbol targetSymbol )
             {
-                this._aspectClass = aspectClass;
                 this._targetSymbol = targetSymbol;
+                this.AspectClasses = ImmutableArray.Create<IAspectClass>( aspectClass );
             }
 
             public AspectSourcePriority Priority => AspectSourcePriority.FromAttribute;
 
-            public IEnumerable<AspectClass> AspectTypes => new[] { this._aspectClass };
+            public ImmutableArray<IAspectClass> AspectClasses { get; }
 
             public IEnumerable<IDeclaration> GetExclusions( INamedType aspectType ) => Enumerable.Empty<IDeclaration>();
 
             public IEnumerable<AspectInstance> GetAspectInstances(
                 CompilationModel compilation,
-                AspectClass aspectClass,
+                IAspectClass aspectClass,
                 IDiagnosticAdder diagnosticAdder,
                 CancellationToken cancellationToken )
             {
                 var targetDeclaration = compilation.Factory.GetDeclaration( this._targetSymbol );
-                var aspectInstance = (IAspect) Activator.CreateInstance( aspectClass.AspectType ).AssertNotNull();
 
-                return new[] { aspectClass.CreateAspectInstance( aspectInstance, targetDeclaration ) };
+                return new[] { ((AspectClass) aspectClass).CreateDefaultAspectInstance( targetDeclaration ) };
             }
         }
     }

@@ -57,7 +57,7 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
                 return base.VisitElementAccessExpression( node );
             }
 
-            public bool TransformInvocationOrElementAccess(
+            private bool TransformInvocationOrElementAccess(
                 SyntaxNode originalNode,
                 ExpressionSyntax expression,
                 SeparatedSyntaxList<ArgumentSyntax> arguments,

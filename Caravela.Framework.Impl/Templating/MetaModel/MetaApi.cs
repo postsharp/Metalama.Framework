@@ -10,7 +10,8 @@ using Caravela.Framework.Impl.Aspects;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Options;
-using Caravela.Framework.Impl.ServiceProvider;
+using Caravela.Framework.Impl.Pipeline;
+using Caravela.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Formatting;
@@ -62,6 +63,8 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
         public INamedType Type => this._type ?? throw this.CreateInvalidOperationException( nameof(this.Type) );
 
         public ICompilation Compilation { get; }
+
+        public IProject Project => this.Compilation.Project;
 
         private ThisInstanceUserReceiver GetThisOrBase( string expressionName, AspectReferenceSpecification linkerAnnotation )
             => this._type switch
@@ -123,7 +126,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
         {
             var expression = SyntaxFactory.ParseExpression( code ).WithAdditionalAnnotations( Formatter.Annotation );
 
-            return new RuntimeExpression( expression, this.Compilation ).ToUserExpression( this.Compilation );
+            return new RuntimeExpression( expression, this.Compilation, this.Project.ServiceProvider ).ToUserExpression( this.Compilation );
         }
 
         public IStatement ParseStatement( string code )
@@ -214,6 +217,14 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
             this.Declaration = declaration;
             this.Compilation = declaration.Compilation;
             this._common = common;
+
+            var serviceProviderMark = this._common.ServiceProvider.GetService<ServiceProviderMark>();
+
+            if ( serviceProviderMark != ServiceProviderMark.Project && serviceProviderMark != ServiceProviderMark.Test )
+            {
+                // We should get a project-specific service provider here.
+                throw new AssertionFailedException();
+            }
         }
 
         private MetaApi( IMethod method, MetaApiProperties common ) : this(

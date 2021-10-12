@@ -4,8 +4,8 @@
 using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.Options;
 using Caravela.Framework.Impl.Sdk;
-using Caravela.Framework.Impl.ServiceProvider;
 using Caravela.Framework.Impl.Utilities;
+using Caravela.Framework.Project;
 using Caravela.Framework.RunTime;
 using Microsoft.CodeAnalysis;
 using System;

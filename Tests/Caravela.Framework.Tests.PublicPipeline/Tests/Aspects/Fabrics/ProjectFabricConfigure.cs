@@ -1,0 +1,40 @@
+using System;
+using System.Linq;
+using Caravela.Framework.Aspects;
+using Caravela.Framework.Code;
+using Caravela.Framework.Fabrics;
+using Caravela.Framework.Project;
+
+namespace Caravela.Framework.Tests.PublicPipeline.Aspects.Fabrics.ProjectFabricConfigure
+{
+    internal class Fabric : IProjectFabric
+    {
+        public void AmendProject( IProjectAmender builder )
+        {
+            builder.Project.Data<Configuration>().Message = "Hello, world.";
+        }
+    }
+    
+    
+    internal class Configuration : IProjectData
+    {
+        public string? Message {get; set; }
+    }
+
+    internal class Aspect : OverrideMethodAspect
+    {
+        public override dynamic? OverrideMethod()
+        {
+            Console.WriteLine( meta.Target.Project.Data<Configuration>().Message );
+
+            return meta.Proceed();
+        }
+    }
+
+    // <target>
+    internal class TargetCode
+    {
+        [Aspect]
+        private string Method2( string s ) => s;
+    }
+}

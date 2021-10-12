@@ -10,8 +10,10 @@ using Caravela.Framework.Impl.CodeModel.Builders;
 using Caravela.Framework.Impl.CodeModel.Collections;
 using Caravela.Framework.Impl.CodeModel.References;
 using Caravela.Framework.Impl.Collections;
+using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Transformations;
 using Caravela.Framework.Impl.Utilities;
+using Caravela.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -22,38 +24,20 @@ namespace Caravela.Framework.Impl.CodeModel
 {
     internal partial class CompilationModel : ICompilationInternal, IDeclarationImpl
     {
-        public PartialCompilation PartialCompilation { get; }
-
-        public static CompilationModel CreateInitialInstance( PartialCompilation compilation ) => new( compilation );
-
-        public static CompilationModel CreateInitialInstance( Compilation compilation, ImmutableArray<ResourceDescription> resources = default )
-            => new( PartialCompilation.CreateComplete( compilation, resources ) );
+        public static CompilationModel CreateInitialInstance( IProject project, PartialCompilation compilation ) => new( project, compilation );
 
         public static CompilationModel CreateInitialInstance(
+            IProject project,
+            Compilation compilation,
+            ImmutableArray<ResourceDescription> resources = default )
+            => new( project, PartialCompilation.CreateComplete( compilation, resources ) );
+
+        public static CompilationModel CreateInitialInstance(
+            IProject project,
             Compilation compilation,
             SyntaxTree syntaxTree,
             ImmutableArray<ResourceDescription> resources = default )
-            => new( PartialCompilation.CreatePartial( compilation, syntaxTree, resources ) );
-
-        internal CompilationModel WithTransformations( IReadOnlyList<IObservableTransformation> introducedDeclarations )
-        {
-            if ( !introducedDeclarations.Any() )
-            {
-                return this;
-            }
-
-            return new CompilationModel( this, introducedDeclarations );
-        }
-
-        /// <summary>
-        /// Returns a shallow clone of the current compilation, but annotated with a given <see cref="AspectLayerId"/>.
-        /// </summary>
-        internal CompilationModel WithAspectLayer( AspectLayerId aspectLayerId ) => new( this, aspectLayerId );
-
-        public CompilationModel WithAspectInstances( IReadOnlyList<AspectInstance> aspectInstances )
-            => aspectInstances.Count == 0 ? this : new CompilationModel( this, aspectInstances );
-
-        internal ReflectionMapper ReflectionMapper { get; }
+            => new( project, PartialCompilation.CreatePartial( compilation, syntaxTree, resources ) );
 
         private readonly ImmutableMultiValueDictionary<DeclarationRef<IDeclaration>, IObservableTransformation> _transformations;
 
@@ -62,14 +46,25 @@ namespace Caravela.Framework.Impl.CodeModel
 
         private readonly ImmutableMultiValueDictionary<DeclarationRef<IDeclaration>, IAspectInstance> _aspects;
 
+        private readonly int _revision;
+
         private ImmutableDictionary<DeclarationRef<IDeclaration>, int> _depthsCache = ImmutableDictionary.Create<DeclarationRef<IDeclaration>, int>();
 
         public DeclarationFactory Factory { get; }
 
-        private CompilationModel( PartialCompilation partialCompilation )
+        public IProject Project { get; }
+
+        public PartialCompilation PartialCompilation { get; }
+
+        public ReflectionMapper ReflectionMapper { get; }
+
+        public ISymbolClassifier SymbolClassifier { get; }
+
+        private CompilationModel( IProject project, PartialCompilation partialCompilation )
         {
             this.PartialCompilation = partialCompilation;
-            this.ReflectionMapper = ReflectionMapper.GetInstance( this.RoslynCompilation );
+            this.Project = project;
+            this.ReflectionMapper = project.ServiceProvider.GetService<ReflectionMapperFactory>().GetInstance( this.RoslynCompilation );
             this.InvariantComparer = new DeclarationEqualityComparer( this.ReflectionMapper, this.RoslynCompilation );
 
             this._transformations = ImmutableMultiValueDictionary<DeclarationRef<IDeclaration>, IObservableTransformation>
@@ -88,6 +83,7 @@ namespace Caravela.Framework.Impl.CodeModel
             this._allMemberAttributesByTypeName = attributeDiscoveryVisitor.GetDiscoveredAttributes();
 
             this._aspects = ImmutableMultiValueDictionary<DeclarationRef<IDeclaration>, IAspectInstance>.Empty;
+            this.SymbolClassifier = project.ServiceProvider.GetService<SymbolClassificationService>().GetClassifier( this.RoslynCompilation );
         }
 
         /// <summary>
@@ -123,7 +119,8 @@ namespace Caravela.Framework.Impl.CodeModel
 
         private CompilationModel( CompilationModel prototype )
         {
-            this.Revision = prototype.Revision + 1;
+            this.Project = prototype.Project;
+            this._revision = prototype._revision + 1;
 
             this.AspectLayerId = prototype.AspectLayerId;
             this.PartialCompilation = prototype.PartialCompilation;
@@ -134,6 +131,7 @@ namespace Caravela.Framework.Impl.CodeModel
             this._depthsCache = prototype._depthsCache;
             this._allMemberAttributesByTypeName = prototype._allMemberAttributesByTypeName;
             this._aspects = prototype._aspects;
+            this.SymbolClassifier = prototype.SymbolClassifier;
         }
 
         private CompilationModel( CompilationModel prototype, AspectLayerId aspectLayerId ) : this( prototype )
@@ -146,13 +144,32 @@ namespace Caravela.Framework.Impl.CodeModel
             this._aspects = this._aspects.AddRange( aspectInstances, a => a.TargetDeclaration.ToRef() );
         }
 
-        public int Revision { get; }
+        internal CompilationModel WithTransformations( IReadOnlyList<IObservableTransformation> introducedDeclarations )
+        {
+            if ( !introducedDeclarations.Any() )
+            {
+                return this;
+            }
+
+            return new CompilationModel( this, introducedDeclarations );
+        }
+
+        /// <summary>
+        /// Returns a shallow clone of the current compilation, but annotated with a given <see cref="AspectLayerId"/>.
+        /// </summary>
+        internal CompilationModel WithAspectLayer( AspectLayerId aspectLayerId ) => new( this, aspectLayerId );
+
+        public CompilationModel WithAspectInstances( IReadOnlyList<AspectInstance> aspectInstances )
+            => aspectInstances.Count == 0 ? this : new CompilationModel( this, aspectInstances );
+
+        public string AssemblyName => this.RoslynCompilation.AssemblyName ?? "";
 
         [Memo]
-        public INamedTypeList DeclaredTypes
+        public INamedTypeList Types
             => new NamedTypeList(
                 this,
                 this.PartialCompilation.Types
+                    .Where( t => this.SymbolClassifier.GetTemplatingScope( t ) != TemplatingScope.CompileTimeOnly )
                     .Select( t => new MemberRef<INamedType>( t ) ) );
 
         [Memo]
@@ -175,6 +192,32 @@ namespace Caravela.Framework.Impl.CodeModel
         public IReadOnlyList<IManagedResource> ManagedResources => throw new NotImplementedException();
 
         public IDeclarationComparer InvariantComparer { get; }
+
+        public INamespace GlobalNamespace => this.Factory.GetNamespace( this.RoslynCompilation.Assembly.GlobalNamespace );
+
+        public INamespace? GetNamespace( string ns )
+        {
+            if ( string.IsNullOrEmpty( ns ) )
+            {
+                return this.GlobalNamespace;
+            }
+            else
+            {
+                var namespaceCursor = this.RoslynCompilation.Assembly.GlobalNamespace;
+
+                foreach ( var part in ns.Split( '.' ) )
+                {
+                    namespaceCursor = namespaceCursor.GetMembers( part ).OfType<INamespaceSymbol>().SingleOrDefault();
+
+                    if ( namespaceCursor == null )
+                    {
+                        return null;
+                    }
+                }
+
+                return this.Factory.GetNamespace( namespaceCursor );
+            }
+        }
 
         public IEnumerable<T> GetAspectsOf<T>( IDeclaration declaration )
             where T : IAspect
@@ -228,6 +271,10 @@ namespace Caravela.Framework.Impl.CodeModel
                     // Order with Compilation matters. We want the root compilation to be ordered first.
                     return 1;
 
+                case INamespace { IsGlobalNamespace: true }:
+                    // We want the global namespace to be processed after all assembly references
+                    return 2;
+
                 default:
                     {
                         var depth = this.GetDepth( declaration.ContainingDeclaration! ) + 1;
@@ -247,16 +294,19 @@ namespace Caravela.Framework.Impl.CodeModel
                 return depth;
             }
 
-            depth = this.GetDepth( namedType.ContainingDeclaration! );
+            depth = this.GetDepth( namedType.Namespace );
 
-            if ( namedType.BaseType != null )
+            if ( namedType.BaseType is { IsExternal: false } baseType )
             {
-                depth = Math.Max( depth, this.GetDepth( namedType.BaseType ) );
+                depth = Math.Max( depth, this.GetDepth( baseType ) );
             }
 
             foreach ( var interfaceImplementation in namedType.ImplementedInterfaces )
             {
-                depth = Math.Max( depth, this.GetDepth( interfaceImplementation ) );
+                if ( !interfaceImplementation.IsExternal )
+                {
+                    depth = Math.Max( depth, this.GetDepth( interfaceImplementation ) );
+                }
             }
 
             depth++;
@@ -270,10 +320,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         ImmutableArray<SyntaxReference> IDeclarationImpl.DeclaringSyntaxReferences => ImmutableArray<SyntaxReference>.Empty;
 
-        string IDisplayable.ToDisplayString( CodeDisplayFormat? format, CodeDisplayContext? context )
-        {
-            throw new NotImplementedException();
-        }
+        string IDisplayable.ToDisplayString( CodeDisplayFormat? format, CodeDisplayContext? context ) => this.RoslynCompilation.AssemblyName ?? "";
 
         DeclarationOrigin IDeclaration.Origin => DeclarationOrigin.Source;
 
@@ -285,15 +332,22 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public string? Name => this.RoslynCompilation.AssemblyName;
 
-        public AspectLayerId AspectLayerId
-        {
-            get;
-        }
+        public AspectLayerId AspectLayerId { get; }
 
-        public override string ToString() => $"{this.RoslynCompilation.AssemblyName}, rev={this.Revision}";
+        public override string ToString() => $"{this.RoslynCompilation.AssemblyName}, rev={this._revision}";
 
         public ICompilationHelpers Helpers { get; } = new CompilationHelpers();
 
         IDeclaration IDeclarationInternal.OriginalDefinition => this;
+
+        public bool ContainsType( INamedTypeSymbol type )
+        {
+            if ( this.PartialCompilation.IsPartial && !this.PartialCompilation.Types.Contains( type ) )
+            {
+                return false;
+            }
+
+            return this.SymbolClassifier.GetTemplatingScope( type ) != TemplatingScope.CompileTimeOnly;
+        }
     }
 }

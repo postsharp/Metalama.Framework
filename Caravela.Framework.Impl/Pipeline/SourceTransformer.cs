@@ -5,7 +5,7 @@ using Caravela.Compiler;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Options;
-using Caravela.Framework.Impl.ServiceProvider;
+using Caravela.Framework.Project;
 using System;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
@@ -23,12 +23,13 @@ namespace Caravela.Framework.Impl.Pipeline
         {
             var projectOptions = new ProjectOptions( context.GlobalOptions, context.Plugins );
 
+            var serviceProvider = ServiceProviderFactory.GetServiceProvider( assemblyLocator: new CompilationAssemblyLocator( context.Compilation ) )
+                .WithService( projectOptions )
+                .WithProjectScopedServices();
+
             try
             {
-                using CompileTimeAspectPipeline pipeline = new(
-                    projectOptions,
-                    false,
-                    assemblyLocator: new CompilationAssemblyLocator( context.Compilation ) );
+                using CompileTimeAspectPipeline pipeline = new( serviceProvider, false );
 
                 if ( pipeline.TryExecute(
                     new DiagnosticAdderAdapter( context.ReportDiagnostic ),

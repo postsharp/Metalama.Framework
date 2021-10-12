@@ -2,7 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Impl.Observers;
-using Caravela.Framework.Impl.ServiceProvider;
+using Caravela.Framework.Project;
 using System;
 
 namespace Caravela.Framework.Impl.Linking
@@ -35,7 +35,7 @@ namespace Caravela.Framework.Impl.Linking
             var analysisStepOutput = LinkerAnalysisStep.Instance.Execute( introductionStepOutput );
 
             // Third step. Link, inline and prune intermediate compilation. This results in the final compilation.
-            var linkingStepOutput = LinkerLinkingStep.Instance.Execute( analysisStepOutput );
+            var linkingStepOutput = new LinkerLinkingStep( this._serviceProvider ).Execute( analysisStepOutput );
 
             // Return the final compilation and all diagnostics from all linking steps.
             return linkingStepOutput;

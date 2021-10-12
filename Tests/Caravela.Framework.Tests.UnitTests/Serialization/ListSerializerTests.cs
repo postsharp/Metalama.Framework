@@ -37,12 +37,15 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization
             var l = new List<IList>();
             l.Add( l );
 
-            Assert.Throws<InvalidUserCodeException>( () => this.Serialize( l ) );
+            using var testContext = this.CreateTestContext();
+
+            Assert.Throws<InvalidUserCodeException>( () => testContext.Serialize( l ) );
         }
 
         private void AssertSerialization<T>( string expected, List<T> o )
         {
-            var creationExpression = this.Serialize( o ).NormalizeWhitespace().ToString();
+            using var testContext = this.CreateTestContext();
+            var creationExpression = testContext.Serialize( o ).NormalizeWhitespace().ToString();
             Assert.Equal( expected, creationExpression );
         }
     }

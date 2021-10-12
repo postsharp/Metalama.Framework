@@ -9,6 +9,8 @@ using System.Reflection;
 using Xunit;
 using Xunit.Abstractions;
 
+// ReSharper disable ParameterOnlyUsedForPreconditionCheck.Local
+
 namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
 {
     public class CaravelaPropertyInfoTests : ReflectionTestBase
@@ -107,12 +109,14 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
         [Fact]
         public void TestIndexerOnString()
         {
+            using var testContext = this.CreateTestContext();
+
             var code = "class Target { public string this[int target] {get{return default;}} }";
-            var compilation = CreateCompilationModel( code );
+            var compilation = testContext.CreateCompilationModel( code );
             var stringType = (INamedType) compilation.Factory.GetTypeByReflectionType( typeof(string) );
             var properties = stringType.Properties;
             var property = properties.Single( p => p.Name == "this[]" );
-            var serialized = this.Serialize( CompileTimeFieldOrPropertyInfo.Create( (Property) property ) ).ToString();
+            var serialized = testContext.Serialize( CompileTimeFieldOrPropertyInfo.Create( (Property) property ) ).ToString();
 
             this.AssertEqual(
                 @"new global::Caravela.Framework.RunTime.FieldOrPropertyInfo(typeof(global::System.String).GetProperty(""Chars"", typeof(global::System.Char), new global::System.Type[]{typeof(global::System.Int32)}))",
@@ -133,10 +137,12 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
 
         private string SerializeIndexerWithTarget( string code )
         {
-            var compilation = CreateCompilationModel( code );
-            var single = compilation.DeclaredTypes.Single( t => t.Name == "Target" ).Properties.Single( p => p.Parameters.Any( pp => pp.Name == "target" ) );
+            using var testContext = this.CreateTestContext();
+
+            var compilation = testContext.CreateCompilationModel( code );
+            var single = compilation.Types.Single( t => t.Name == "Target" ).Properties.Single( p => p.Parameters.Any( pp => pp.Name == "target" ) );
             var property = (Property) single;
-            var actual = this.Serialize( CompileTimeFieldOrPropertyInfo.Create( property ) ).ToString();
+            var actual = testContext.Serialize( CompileTimeFieldOrPropertyInfo.Create( property ) ).ToString();
 
             return actual;
         }
@@ -150,10 +156,12 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
 
         private string SerializeProperty( string code )
         {
-            var compilation = CreateCompilationModel( code );
-            var single = compilation.DeclaredTypes.Single( t => t.Name == "Target" ).Properties.Single( p => p.Name == "Property" );
+            using var testContext = this.CreateTestContext();
+
+            var compilation = testContext.CreateCompilationModel( code );
+            var single = compilation.Types.Single( t => t.Name == "Target" ).Properties.Single( p => p.Name == "Property" );
             var property = (Property) single;
-            var actual = this.Serialize( CompileTimeFieldOrPropertyInfo.Create( property ) ).ToString();
+            var actual = testContext.Serialize( CompileTimeFieldOrPropertyInfo.Create( property ) ).ToString();
 
             return actual;
         }

@@ -2,15 +2,16 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Aspects;
+using Caravela.Framework.Fabrics;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Formatting;
 using Caravela.Framework.Impl.Observers;
 using Caravela.Framework.Impl.Options;
 using Caravela.Framework.Impl.Sdk;
-using Caravela.Framework.Impl.ServiceProvider;
 using Caravela.Framework.Impl.Templating;
 using Caravela.Framework.Impl.Templating.Mapping;
 using Caravela.Framework.Impl.Utilities;
+using Caravela.Framework.Project;
 using K4os.Hash.xxHash;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -128,7 +129,7 @@ namespace Caravela.Framework.Impl.CompileTime
             foreach ( var syntaxTree in treesWithCompileTimeCode )
             {
                 var semanticModel = runTimeCompilation.GetSemanticModel( syntaxTree );
-                TemplatingCodeValidator.Validate( semanticModel, diagnosticSink.Report, this._serviceProvider, false, false, cancellationToken );
+                TemplatingCodeValidator.Validate( this._serviceProvider, semanticModel, diagnosticSink.Report, false, false, cancellationToken );
             }
 
             var assemblyName = GetCompileTimeAssemblyName( runTimeCompilation.AssemblyName!, hash );
@@ -166,8 +167,12 @@ namespace Caravela.Framework.Impl.CompileTime
 
             if ( !produceCompileTimeCodeRewriter.FoundCompileTimeCode )
             {
-                // This should not happen because we handle this condition before calling this method.
-                throw new AssertionFailedException( "No compile-time code was found." );
+                // This happens if all compile-time code is illegitimate, i.e. was reported as an error and stripped.
+
+                compileTimeCompilation = null;
+                syntaxTreeMap = null;
+
+                return true;
             }
 
             compileTimeCompilation = compileTimeCompilation.AddSyntaxTrees( syntaxTrees.Select( t => t.TransformedTree ) );
@@ -613,10 +618,26 @@ namespace Caravela.Framework.Impl.CompileTime
                         textMapDirectory.Write( outputPaths.Directory );
 
                         var aspectType = compileTimeCompilation.GetTypeByMetadataName( typeof(IAspect).FullName );
+                        var fabricType = compileTimeCompilation.GetTypeByMetadataName( typeof(IFabric).FullName );
+                        var transitiveFabricType = compileTimeCompilation.GetTypeByMetadataName( typeof(ITransitiveProjectFabric).FullName );
 
                         var aspectTypes = compileTimeCompilation.Assembly
                             .GetTypes()
                             .Where( t => compileTimeCompilation.HasImplicitConversion( t, aspectType ) )
+                            .Select( t => t.GetReflectionName() )
+                            .ToList();
+
+                        var fabricTypes = compileTimeCompilation.Assembly
+                            .GetTypes()
+                            .Where(
+                                t => compileTimeCompilation.HasImplicitConversion( t, fabricType ) &&
+                                     !compileTimeCompilation.HasImplicitConversion( t, transitiveFabricType ) )
+                            .Select( t => t.GetReflectionName() )
+                            .ToList();
+
+                        var transitiveFabricTypes = compileTimeCompilation.Assembly
+                            .GetTypes()
+                            .Where( t => compileTimeCompilation.HasImplicitConversion( t, transitiveFabricType ) )
                             .Select( t => t.GetReflectionName() )
                             .ToList();
 
@@ -630,6 +651,8 @@ namespace Caravela.Framework.Impl.CompileTime
                             compileTimeCompilation.AssemblyName!,
                             aspectTypes,
                             compilerPlugInTypes,
+                            fabricTypes,
+                            transitiveFabricTypes,
                             referencedProjects.Select( r => r.RunTimeIdentity.GetDisplayName() ).ToList(),
                             sourceHash,
                             textMapDirectory.FilesByTargetPath.Values.Select( f => new CompileTimeFile( f ) ).ToImmutableList() );

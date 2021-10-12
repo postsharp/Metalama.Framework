@@ -2,7 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.DesignTime.Contracts;
-using Caravela.Framework.Impl.ServiceProvider;
+using Caravela.Framework.Impl.Pipeline;
 using Caravela.Framework.Impl.Utilities;
 using System;
 using System.Diagnostics;

@@ -29,12 +29,13 @@ namespace Caravela.Framework.Impl.Pipeline
 
         /// <inheritdoc/>
         protected override PipelineStageResult GenerateCode(
+            AspectProjectConfiguration projectConfiguration,
             PipelineStageResult input,
             IPipelineStepsResult pipelineStepResult,
             CancellationToken cancellationToken )
         {
             var linker = new AspectLinker(
-                this.ServiceProvider,
+                projectConfiguration.ServiceProvider,
                 new AspectLinkerInput(
                     input.PartialCompilation,
                     pipelineStepResult.Compilation,
@@ -47,6 +48,7 @@ namespace Caravela.Framework.Impl.Pipeline
 
             return new PipelineStageResult(
                 linkerResult.Compilation,
+                input.Project,
                 input.AspectLayers,
                 pipelineStepResult.Diagnostics.Concat( linkerResult.Diagnostics ),
                 pipelineStepResult.ExternalAspectSources );

@@ -39,11 +39,15 @@ class TargetCode
 
             var generator = OurSyntaxGenerator.Default;
 
-            var compilation = CreateCompilationModel( code );
+            using var testContext = this.CreateTestContext();
+            var serviceProvider = testContext.ServiceProvider;
 
-            using ( TemplateExpansionContext.WithSyntaxGenerationContext( SyntaxGenerationContext.CreateDefault( compilation.RoslynCompilation ) ) )
+            var compilation = testContext.CreateCompilationModel( code );
+
+            using ( TemplateExpansionContext.WithSyntaxGenerationContext(
+                SyntaxGenerationContext.CreateDefault( serviceProvider, compilation.RoslynCompilation ) ) )
             {
-                var type = compilation.DeclaredTypes[0];
+                var type = compilation.Types[0];
                 var toString = type.Methods.OfName( "ToString" ).Single();
                 var fooMethod = type.Methods.OfName( "Foo" ).Single();
                 var byRefMethod = type.Methods.OfName( "ByRef" ).Single();
@@ -51,20 +55,20 @@ class TargetCode
                 // Test normal case.
                 AssertEx.DynamicEquals(
                     toString.Invokers.Final.Invoke(
-                        new RuntimeExpression( generator.ThisExpression(), compilation ),
-                        new RuntimeExpression( generator.LiteralExpression( "x" ), compilation ) ),
+                        new RuntimeExpression( generator.ThisExpression(), compilation, serviceProvider ),
+                        new RuntimeExpression( generator.LiteralExpression( "x" ), compilation, serviceProvider ) ),
                     @"((global::TargetCode)this).ToString((global::System.String)""x"")" );
 
                 AssertEx.DynamicEquals(
                     toString.Invokers.ConditionalFinal.Invoke(
-                        new RuntimeExpression( generator.IdentifierName( "a" ), compilation ),
-                        new RuntimeExpression( generator.LiteralExpression( "x" ), compilation ) ),
+                        new RuntimeExpression( generator.IdentifierName( "a" ), compilation, serviceProvider ),
+                        new RuntimeExpression( generator.LiteralExpression( "x" ), compilation, serviceProvider ) ),
                     @"((global::TargetCode)a)?.ToString((global::System.String)""x"")" );
 
                 AssertEx.DynamicEquals(
                     toString.Invokers.Final.Invoke(
-                        new RuntimeExpression( generator.LiteralExpression( 42 ), compilation ),
-                        new RuntimeExpression( generator.LiteralExpression( 43 ), compilation ) ),
+                        new RuntimeExpression( generator.LiteralExpression( 42 ), compilation, serviceProvider ),
+                        new RuntimeExpression( generator.LiteralExpression( 43 ), compilation, serviceProvider ) ),
                     @"((global::TargetCode)42).ToString((global::System.String)43)" );
 
                 // Test static call.
@@ -74,14 +78,14 @@ class TargetCode
 
                 // Test exception related to the 'instance' parameter.
                 AssertEx.DynamicEquals(
-                    fooMethod.Invokers.Final.Invoke( new RuntimeExpression( SyntaxFactoryEx.Null, compilation ) ),
+                    fooMethod.Invokers.Final.Invoke( new RuntimeExpression( SyntaxFactoryEx.Null, compilation, serviceProvider ) ),
                     @"global::TargetCode.Foo()" );
 
                 AssertEx.ThrowsWithDiagnostic(
                     GeneralDiagnosticDescriptors.MustProvideInstanceForInstanceMember,
                     () => toString.Invokers.Final.Invoke(
                         null,
-                        new RuntimeExpression( generator.LiteralExpression( "x" ), compilation ) ) );
+                        new RuntimeExpression( generator.LiteralExpression( "x" ), compilation, serviceProvider ) ) );
 
                 // Test in/out.
                 var intType = compilation.Factory.GetTypeByReflectionType( typeof(int) );
@@ -89,16 +93,16 @@ class TargetCode
                 AssertEx.DynamicEquals(
                     byRefMethod.Invokers.Final.Invoke(
                         null,
-                        new RuntimeExpression( generator.IdentifierName( "x" ), intType, SyntaxGenerationContext.Default, true ),
-                        new RuntimeExpression( generator.IdentifierName( "y" ), intType, SyntaxGenerationContext.Default, true ) ),
+                        new RuntimeExpression( generator.IdentifierName( "x" ), intType, SyntaxGenerationContext.CreateDefault( serviceProvider ), true ),
+                        new RuntimeExpression( generator.IdentifierName( "y" ), intType, SyntaxGenerationContext.CreateDefault( serviceProvider ), true ) ),
                     @"global::TargetCode.ByRef(out x, ref y)" );
 
                 AssertEx.ThrowsWithDiagnostic(
                     GeneralDiagnosticDescriptors.CannotPassExpressionToByRefParameter,
                     () => byRefMethod.Invokers.Final.Invoke(
                         null,
-                        new RuntimeExpression( generator.IdentifierName( "x" ), compilation ),
-                        new RuntimeExpression( generator.IdentifierName( "y" ), compilation ) ) );
+                        new RuntimeExpression( generator.IdentifierName( "x" ), compilation, serviceProvider ),
+                        new RuntimeExpression( generator.IdentifierName( "y" ), compilation, serviceProvider ) ) );
             }
         }
 
@@ -126,11 +130,15 @@ class TargetCode
     }
 }";
 
-            var compilation = CreateCompilationModel( code );
+            using var testContext = this.CreateTestContext();
+            var serviceProvider = testContext.ServiceProvider;
 
-            using ( TemplateExpansionContext.WithSyntaxGenerationContext( SyntaxGenerationContext.CreateDefault( compilation.RoslynCompilation ) ) )
+            var compilation = testContext.CreateCompilationModel( code );
+
+            using ( TemplateExpansionContext.WithSyntaxGenerationContext(
+                SyntaxGenerationContext.CreateDefault( serviceProvider, compilation.RoslynCompilation ) ) )
             {
-                var type = compilation.DeclaredTypes.OfName( "TargetCode" ).Single();
+                var type = compilation.Types.OfName( "TargetCode" ).Single();
                 var nestedType = type.NestedTypes.Single();
 
                 // Testing static members.
@@ -149,7 +157,7 @@ class TargetCode
                 AssertEx.DynamicThrows<InvalidOperationException>( () => staticEvent.Invokers.Final.Add( null, null ) );
 
                 // Testing instance members on a generic type.
-                var instance = new RuntimeExpression( SyntaxFactory.ParseExpression( "abc" ), compilation );
+                var instance = new RuntimeExpression( SyntaxFactory.ParseExpression( "abc" ), compilation, serviceProvider );
                 var instanceGenericMethod = nestedType.Methods.OfName( "InstanceGenericMethod" ).Single();
                 var instanceNonGenericMethod = nestedType.Methods.OfName( "InstanceNonGenericMethod" ).Single();
                 var instanceField = nestedType.Fields.OfName( "InstanceField" ).Single();
@@ -190,11 +198,15 @@ class TargetCode
     }
 }";
 
-            var compilation = CreateCompilationModel( code );
+            using var testContext = this.CreateTestContext();
+            var serviceProvider = testContext.ServiceProvider;
 
-            using ( TemplateExpansionContext.WithSyntaxGenerationContext( SyntaxGenerationContext.CreateDefault( compilation.RoslynCompilation ) ) )
+            var compilation = testContext.CreateCompilationModel( code );
+
+            using ( TemplateExpansionContext.WithSyntaxGenerationContext(
+                SyntaxGenerationContext.CreateDefault( serviceProvider, compilation.RoslynCompilation ) ) )
             {
-                var type = compilation.DeclaredTypes.OfName( "TargetCode" ).Single();
+                var type = compilation.Types.OfName( "TargetCode" ).Single();
                 var nestedType = type.NestedTypes.Single().ConstructGenericInstance( compilation.Factory.GetTypeByReflectionType( typeof(string) ) );
 
                 // Testing static members.
@@ -220,7 +232,7 @@ class TargetCode
                 AssertEx.DynamicEquals( staticEvent.Invokers.Final.Add( null, null ), "global::TargetCode.Nested<global::System.String>.StaticEvent += null" );
 
                 // Testing instance members on a generic type.
-                var instance = new RuntimeExpression( SyntaxFactory.ParseExpression( "abc" ), compilation );
+                var instance = new RuntimeExpression( SyntaxFactory.ParseExpression( "abc" ), compilation, serviceProvider );
 
                 var instanceGenericMethod = nestedType.Methods.OfName( "InstanceGenericMethod" )
                     .Single()
@@ -265,11 +277,15 @@ class TargetCode
     }
 }";
 
-            var compilation = CreateCompilationModel( code );
+            using var testContext = this.CreateTestContext();
+            var serviceProvider = testContext.ServiceProvider;
 
-            using ( TemplateExpansionContext.WithSyntaxGenerationContext( SyntaxGenerationContext.CreateDefault( compilation.RoslynCompilation ) ) )
+            var compilation = testContext.CreateCompilationModel( code );
+
+            using ( TemplateExpansionContext.WithSyntaxGenerationContext(
+                SyntaxGenerationContext.CreateDefault( serviceProvider, compilation.RoslynCompilation ) ) )
             {
-                var localFunction = compilation.DeclaredTypes.OfName( "TargetCode" ).Single().Methods.Single().LocalFunctions.Single();
+                var localFunction = compilation.Types.OfName( "TargetCode" ).Single().Methods.Single().LocalFunctions.Single();
 
                 AssertEx.DynamicEquals(
                     localFunction.Invokers.Final.Invoke( null ),
@@ -277,7 +293,7 @@ class TargetCode
 
                 AssertEx.ThrowsWithDiagnostic(
                     GeneralDiagnosticDescriptors.CannotProvideInstanceForLocalFunction,
-                    () => localFunction.Invokers.Final.Invoke( new RuntimeExpression( SyntaxFactory.ThisExpression(), compilation ) ) );
+                    () => localFunction.Invokers.Final.Invoke( new RuntimeExpression( SyntaxFactory.ThisExpression(), compilation, serviceProvider ) ) );
             }
         }
 
@@ -292,11 +308,15 @@ class TargetCode
     }
 }";
 
-            var compilation = CreateCompilationModel( code );
+            using var testContext = this.CreateTestContext();
+            var serviceProvider = testContext.ServiceProvider;
 
-            using ( TemplateExpansionContext.WithSyntaxGenerationContext( SyntaxGenerationContext.CreateDefault( compilation.RoslynCompilation ) ) )
+            var compilation = testContext.CreateCompilationModel( code );
+
+            using ( TemplateExpansionContext.WithSyntaxGenerationContext(
+                SyntaxGenerationContext.CreateDefault( serviceProvider, compilation.RoslynCompilation ) ) )
             {
-                var method = compilation.DeclaredTypes.Single().Methods.Single();
+                var method = compilation.Types.Single().Methods.Single();
 
                 AdvisedParameterList advisedParameterList = new( method );
 
@@ -323,13 +343,17 @@ class TargetCode
     int this[int index] => 42;
 }";
 
-            var compilation = CreateCompilationModel( code );
+            using var testContext = this.CreateTestContext();
+            var serviceProvider = testContext.ServiceProvider;
 
-            using ( TemplateExpansionContext.WithSyntaxGenerationContext( SyntaxGenerationContext.CreateDefault( compilation.RoslynCompilation ) ) )
+            var compilation = testContext.CreateCompilationModel( code );
+
+            using ( TemplateExpansionContext.WithSyntaxGenerationContext(
+                SyntaxGenerationContext.CreateDefault( serviceProvider, compilation.RoslynCompilation ) ) )
             {
-                var type = compilation.DeclaredTypes.Single();
+                var type = compilation.Types.Single();
                 var property = type.Properties.OfName( "P" ).Single();
-                RuntimeExpression thisExpression = new( SyntaxFactory.ThisExpression(), compilation );
+                RuntimeExpression thisExpression = new( SyntaxFactory.ThisExpression(), compilation, serviceProvider );
 
                 AssertEx.DynamicEquals( property.Invokers.Final.GetValue( thisExpression ), @"((global::TargetCode)this).P" );
 
@@ -357,13 +381,17 @@ class TargetCode
     int this[int index] => 42;
 }";
 
-            var compilation = CreateCompilationModel( code );
+            using var testContext = this.CreateTestContext();
+            var serviceProvider = testContext.ServiceProvider;
 
-            using ( TemplateExpansionContext.WithSyntaxGenerationContext( SyntaxGenerationContext.CreateDefault( compilation.RoslynCompilation ) ) )
+            var compilation = testContext.CreateCompilationModel( code );
+
+            using ( TemplateExpansionContext.WithSyntaxGenerationContext(
+                SyntaxGenerationContext.CreateDefault( serviceProvider, compilation.RoslynCompilation ) ) )
             {
-                var type = compilation.DeclaredTypes.Single();
+                var type = compilation.Types.Single();
                 var property = type.Properties.OfName( "P" ).Single();
-                RuntimeExpression thisExpression = new( SyntaxFactory.ThisExpression(), compilation );
+                RuntimeExpression thisExpression = new( SyntaxFactory.ThisExpression(), compilation, serviceProvider );
 
                 AssertEx.DynamicEquals( property.Invokers.Final.GetValue( thisExpression ), @"((global::TargetCode)this).P" );
 
@@ -386,15 +414,19 @@ class TargetCode
     event System.EventHandler MyEvent;
 }";
 
-            var compilation = CreateCompilationModel( code );
+            using var testContext = this.CreateTestContext();
+            var serviceProvider = testContext.ServiceProvider;
 
-            using ( TemplateExpansionContext.WithSyntaxGenerationContext( SyntaxGenerationContext.CreateDefault( compilation.RoslynCompilation ) ) )
+            var compilation = testContext.CreateCompilationModel( code );
+
+            using ( TemplateExpansionContext.WithSyntaxGenerationContext(
+                SyntaxGenerationContext.CreateDefault( serviceProvider, compilation.RoslynCompilation ) ) )
             {
-                var type = compilation.DeclaredTypes.Single();
+                var type = compilation.Types.Single();
                 var @event = type.Events.Single();
 
-                RuntimeExpression thisExpression = new( SyntaxFactory.ThisExpression(), compilation );
-                RuntimeExpression parameterExpression = new( SyntaxFactory.IdentifierName( "value" ), compilation );
+                RuntimeExpression thisExpression = new( SyntaxFactory.ThisExpression(), compilation, serviceProvider );
+                RuntimeExpression parameterExpression = new( SyntaxFactory.IdentifierName( "value" ), compilation, serviceProvider );
 
                 AssertEx.DynamicEquals( @event.Invokers.Final.Add( thisExpression, parameterExpression ), @"((global::TargetCode)this).MyEvent += value" );
                 AssertEx.DynamicEquals( @event.Invokers.Final.Remove( thisExpression, parameterExpression ), @"((global::TargetCode)this).MyEvent -= value" );
@@ -414,15 +446,19 @@ class TargetCode
     event System.EventHandler MyEvent;
 }";
 
-            var compilation = CreateCompilationModel( code );
+            using var testContext = this.CreateTestContext();
+            var serviceProvider = testContext.ServiceProvider;
 
-            using ( TemplateExpansionContext.WithSyntaxGenerationContext( SyntaxGenerationContext.CreateDefault( compilation.RoslynCompilation ) ) )
+            var compilation = testContext.CreateCompilationModel( code );
+
+            using ( TemplateExpansionContext.WithSyntaxGenerationContext(
+                SyntaxGenerationContext.CreateDefault( serviceProvider, compilation.RoslynCompilation ) ) )
             {
-                var type = compilation.DeclaredTypes.Single();
+                var type = compilation.Types.Single();
                 var @event = type.Events.Single();
 
-                RuntimeExpression thisExpression = new( SyntaxFactory.ThisExpression(), compilation );
-                RuntimeExpression parameterExpression = new( SyntaxFactory.IdentifierName( "value" ), compilation );
+                RuntimeExpression thisExpression = new( SyntaxFactory.ThisExpression(), compilation, serviceProvider );
+                RuntimeExpression parameterExpression = new( SyntaxFactory.IdentifierName( "value" ), compilation, serviceProvider );
 
                 AssertEx.DynamicEquals(
                     @event.AddMethod.Invokers.Final.Invoke( thisExpression, parameterExpression ),
@@ -458,11 +494,15 @@ class TargetCode
     }
 }";
 
-            var compilation = CreateCompilationModel( code );
+            using var testContext = this.CreateTestContext();
+            var serviceProvider = testContext.ServiceProvider;
 
-            using ( TemplateExpansionContext.WithSyntaxGenerationContext( SyntaxGenerationContext.CreateDefault( compilation.RoslynCompilation ) ) )
+            var compilation = testContext.CreateCompilationModel( code );
+
+            using ( TemplateExpansionContext.WithSyntaxGenerationContext(
+                SyntaxGenerationContext.CreateDefault( serviceProvider, compilation.RoslynCompilation ) ) )
             {
-                var type = compilation.DeclaredTypes.Single();
+                var type = compilation.Types.Single();
                 var method = type.Methods.OfName( "A" ).Single();
                 var longMethod = type.Methods.OfName( "B" ).Single();
                 var noParameterMethod = type.Methods.OfName( "C" ).Single();

@@ -25,18 +25,19 @@ namespace Caravela.Framework.Impl.Advices
 
         protected TBuilder MemberBuilder { get; init; }
 
-        protected Template<TMember> Template { get; }
+        protected TemplateMember<TMember> Template { get; }
 
         protected TMember? TemplateMember => this.Template.Declaration;
 
         public IntroduceMemberAdvice(
             AspectInstance aspect,
+            TemplateClassInstance templateInstance,
             INamedType targetDeclaration,
-            Template<TMember> template,
+            TemplateMember<TMember> template,
             IntroductionScope scope,
             OverrideStrategy overrideStrategy,
             string? layerName,
-            Dictionary<string, object?>? tags ) : base( aspect, targetDeclaration, layerName, tags )
+            Dictionary<string, object?>? tags ) : base( aspect, templateInstance, targetDeclaration, layerName, tags )
         {
             this.Template = template;
             this.Scope = scope;

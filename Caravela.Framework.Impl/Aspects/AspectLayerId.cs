@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Aspects;
 using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.Utilities;
 using System;
@@ -8,6 +9,9 @@ using System.Linq;
 
 namespace Caravela.Framework.Impl.Aspects
 {
+    /// <summary>
+    /// Represents the identity of an aspect layer.
+    /// </summary>
     internal readonly struct AspectLayerId : IEquatable<AspectLayerId>, IEquatable<AspectLayer>
     {
         private static readonly char[] _separators = { ':' };
@@ -18,7 +22,7 @@ namespace Caravela.Framework.Impl.Aspects
 
         public static bool operator !=( AspectLayerId left, AspectLayerId right ) => !left.Equals( right );
 
-        public AspectLayerId( AspectClass aspectClass, string? layerName = null ) : this( aspectClass.FullName, layerName ) { }
+        public AspectLayerId( IAspectClass aspectClass, string? layerName = null ) : this( aspectClass.FullName, layerName ) { }
 
         public AspectLayerId( string aspectName, string? layerName = null )
         {

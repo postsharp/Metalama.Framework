@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Fabrics;
 using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Templating.Mapping;
@@ -55,7 +56,20 @@ namespace Caravela.Framework.Impl.CompileTime
         /// </summary>
         public IReadOnlyList<string> AspectTypes => this._manifest?.AspectTypes ?? Array.Empty<string>();
 
-        public IReadOnlyList<string> CompilerPlugInTypes => this._manifest?.CompilerPlugIns ?? Array.Empty<string>();
+        /// <summary>
+        /// Gets the list of types that are exported using the <c>CompilerPlugin</c> attribute.
+        /// </summary>
+        public IReadOnlyList<string> PlugInTypes => this._manifest?.PlugInTypes ?? Array.Empty<string>();
+
+        /// <summary>
+        /// Gets the list of types that implement the <see cref="IFabric"/> interface, but the <see cref="ITransitiveProjectFabric"/>.
+        /// </summary>
+        public IReadOnlyList<string> FabricTypes => this._manifest?.FabricTypes ?? Array.Empty<string>();
+
+        /// <summary>
+        /// Gets the list of types that implement the <see cref="ITransitiveProjectFabric"/> interface.
+        /// </summary>
+        public IReadOnlyList<string> TransitiveFabricTypes => this._manifest?.TransitiveFabricTypes ?? Array.Empty<string>();
 
         /// <summary>
         /// Gets the list of compile-time projects referenced by the current project.
@@ -265,7 +279,12 @@ namespace Caravela.Framework.Impl.CompileTime
 
         private DiagnosticManifest GetDiagnosticManifest( IServiceProvider serviceProvider )
         {
-            var aspectTypes = this.AspectTypes.Select( this.GetTypeOrNull ).WhereNotNull().ToArray();
+            var aspectTypes = this.AspectTypes.Concat( this.FabricTypes )
+                .Concat( this.TransitiveFabricTypes )
+                .Select( this.GetTypeOrNull )
+                .WhereNotNull()
+                .ToArray();
+
             var service = new DiagnosticDefinitionDiscoveryService( serviceProvider );
             var diagnostics = service.GetDiagnosticDefinitions( aspectTypes ).ToImmutableArray();
             var suppressions = service.GetSuppressionDefinitions( aspectTypes ).ToImmutableArray();

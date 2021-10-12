@@ -2,7 +2,8 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Impl.CodeModel;
-using Caravela.Framework.Impl.ServiceProvider;
+using Caravela.Framework.Impl.Pipeline;
+using Caravela.Framework.Tests.UnitTests.Utilities;
 using Caravela.TestFramework;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -13,7 +14,7 @@ using System.Reflection;
 
 namespace Caravela.Framework.Tests.UnitTests
 {
-    public class TestBase : IDisposable
+    public class TestBase
     {
         /// <summary>
         /// A value indicating whether tests that test the serialization of reflection objects like <see cref="Type"/> should use "dotnet build" to see if the
@@ -21,18 +22,13 @@ namespace Caravela.Framework.Tests.UnitTests
         /// can easily be produced.
         /// </summary>
         private const bool _doCodeExecutionTests = false;
+        
+        private readonly Func<ServiceProvider, ServiceProvider> _addServices;
 
-        protected TestProjectOptions ProjectOptions { get; private set; }
-
-        protected ServiceProvider ServiceProvider { get; private set; }
-
-        protected TestBase( TestProjectOptions options )
+        protected TestBase( Func<ServiceProvider, ServiceProvider>? addServices = null )
         {
-            this.ProjectOptions = options;
-            this.ServiceProvider = ServiceProviderFactory.GetServiceProvider( this.ProjectOptions );
+            this._addServices = addServices ?? new Func<ServiceProvider, ServiceProvider>( p => p );
         }
-
-        protected TestBase() : this( new TestProjectOptions() ) { }
 
         protected static CSharpCompilation CreateCSharpCompilation(
             string code,
@@ -97,19 +93,6 @@ namespace Caravela.Framework.Tests.UnitTests
             }
         }
 
-        internal static CompilationModel CreateCompilationModel(
-            string code,
-            string? dependentCode = null,
-            bool ignoreErrors = false,
-            IEnumerable<MetadataReference>? additionalReferences = null,
-            string? name = null,
-            bool addCaravelaReferences = true )
-        {
-            var roslynCompilation = CreateCSharpCompilation( code, dependentCode, ignoreErrors, additionalReferences, name, addCaravelaReferences );
-
-            return CompilationModel.CreateInitialInstance( roslynCompilation );
-        }
-
         protected static object? ExecuteExpression( string context, string expression )
         {
             var expressionContainer = $@"
@@ -147,40 +130,51 @@ class Expression
 #pragma warning restore CS0162 // Unreachable code detected
         }
 
-        protected virtual void Dispose( bool disposing )
+        protected TestContext CreateTestContext( TestProjectOptions? projectOptions = null ) => this.CreateTestContext( null, projectOptions );
+
+        protected TestContext CreateTestContext( Func<ServiceProvider, ServiceProvider>? addServices, TestProjectOptions? projectOptions = null )
+            => new( this, projectOptions, addServices );
+
+        protected class TestContext : IDisposable
         {
-            this.ProjectOptions.Dispose();
-            this.ServiceProvider.Dispose();
-        }
-
-        public void Dispose() => this.Dispose( true );
-
-        protected IsolatedTest WithIsolatedTest() => new( this );
-
-        protected class IsolatedTest : IDisposable
-        {
-            private readonly TestBase _parent;
-            private readonly ServiceProvider _oldServiceProvider;
-            private readonly TestProjectOptions _oldProjectOptions;
-
-            public TestProjectOptions ProjectOptions { get; } = new();
+            public TestProjectOptions ProjectOptions { get; }
 
             public ServiceProvider ServiceProvider { get; }
 
-            public IsolatedTest( TestBase parent )
+            public TestContext( TestBase parent, TestProjectOptions? projectOptions, Func<ServiceProvider, ServiceProvider>? addServices )
             {
-                this._parent = parent;
-                this._oldServiceProvider = parent.ServiceProvider;
-                this._oldProjectOptions = parent.ProjectOptions;
-                this.ServiceProvider = ServiceProviderFactory.GetServiceProvider( this.ProjectOptions );
+                this.ProjectOptions = projectOptions ?? new TestProjectOptions();
+
+                this.ServiceProvider = ServiceProviderFactory.GetServiceProvider( this.ProjectOptions )
+                    .WithProjectScopedServices()
+                    .WithMark( ServiceProviderMark.Test );
+
+                this.ServiceProvider = parent._addServices( this.ServiceProvider );
+
+                if ( addServices != null )
+                {
+                    this.ServiceProvider = addServices( this.ServiceProvider );
+                }
+            }
+
+            internal CompilationModel CreateCompilationModel(
+                string code,
+                string? dependentCode = null,
+                bool ignoreErrors = false,
+                IEnumerable<MetadataReference>? additionalReferences = null,
+                string? name = null,
+                bool addCaravelaReferences = true )
+            {
+                var roslynCompilation = CreateCSharpCompilation( code, dependentCode, ignoreErrors, additionalReferences, name, addCaravelaReferences );
+
+                return CompilationModel.CreateInitialInstance(
+                    new ProjectModel( roslynCompilation, this.ServiceProvider ),
+                    roslynCompilation );
             }
 
             public void Dispose()
             {
                 this.ProjectOptions.Dispose();
-                this.ServiceProvider.Dispose();
-                this._parent.ServiceProvider = this._oldServiceProvider;
-                this._parent.ProjectOptions = this._oldProjectOptions;
             }
         }
     }

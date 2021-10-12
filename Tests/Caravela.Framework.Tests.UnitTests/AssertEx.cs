@@ -42,6 +42,7 @@ namespace Caravela.Framework.Tests.UnitTests
             }
             catch ( InvalidUserCodeException e )
             {
+                // ReSharper disable once ParameterOnlyUsedForPreconditionCheck.Local
                 Assert.Contains( e.Diagnostics, d => d.Id == diagnosticDefinition.Id );
             }
         }

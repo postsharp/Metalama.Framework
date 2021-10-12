@@ -11,14 +11,15 @@ namespace Caravela.Framework.Impl.Advices
 {
     internal class OverrideMethodAdvice : OverrideMemberAdvice<IMethod>
     {
-        public Template<IMethod> Template { get; }
+        public TemplateMember<IMethod> Template { get; }
 
         public OverrideMethodAdvice(
             AspectInstance aspect,
+            TemplateClassInstance templateInstance,
             IMethod targetDeclaration,
-            Template<IMethod> template,
+            TemplateMember<IMethod> template,
             string? layerName,
-            Dictionary<string, object?>? tags ) : base( aspect, targetDeclaration, layerName, tags )
+            Dictionary<string, object?>? tags ) : base( aspect, templateInstance, targetDeclaration, layerName, tags )
         {
             this.Template = template;
         }

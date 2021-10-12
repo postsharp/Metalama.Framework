@@ -31,6 +31,10 @@ namespace Caravela.Compiler
 }
 ";
 
+        // TODO: We can do more in cleaning the run-time assembly. 
+        // Private compile-time code can be stripped, except when they are templates, because their metadata must be preserved.
+        // In general, accessible compile-time metadata must remain.
+
         private static readonly Lazy<SyntaxTree> _intrinsicsSyntaxTree =
             new( () => CSharpSyntaxTree.ParseText( _intrinsics, CSharpParseOptions.Default ) );
 

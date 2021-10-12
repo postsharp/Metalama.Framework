@@ -127,16 +127,18 @@ namespace Caravela.Framework.Tests.UnitTests.DesignTime.TestCode
 
         private void TestUserDiagnosticsFileContent( string aspectCode, string targetCode, bool expectedSuccess, string expectedUserDiagnosticsFileContent )
         {
+            using var testContext = this.CreateTestContext();
+
             var code = new Dictionary<string, string> { ["Aspect.cs"] = aspectCode, ["Class1.cs"] = targetCode };
 
             var compilation = CreateCSharpCompilation( code );
 
             using var domain = new UnloadableCompileTimeDomain();
-            using DesignTimeAspectPipeline pipeline = new( this.ProjectOptions, domain, true, directoryOptions: this.ProjectOptions );
+            using DesignTimeAspectPipeline pipeline = new( testContext.ServiceProvider, domain, true );
 
             var syntaxTree = compilation.SyntaxTrees.Single( t => t.FilePath == "Class1.cs" );
 
-            var diagnosticsFileName = Path.Combine( this.ProjectOptions.SettingsDirectory, "userDiagnostics.json" );
+            var diagnosticsFileName = Path.Combine( testContext.ProjectOptions.SettingsDirectory, "userDiagnostics.json" );
 
             Assert.False( File.Exists( diagnosticsFileName ) );
             var result = pipeline.Execute( PartialCompilation.CreatePartial( compilation, syntaxTree ), CancellationToken.None );

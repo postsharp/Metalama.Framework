@@ -11,6 +11,7 @@ using Xunit;
 using Xunit.Abstractions;
 
 // ReSharper disable RedundantTypeArgumentsOfMethod
+// ReSharper disable ParameterOnlyUsedForPreconditionCheck.Local
 
 namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
 {
@@ -44,8 +45,9 @@ class User {
     public Descendant<float> FullyInstantiated;
 }";
 
-            var compilation = CreateCompilationModel( this._code );
-            this._topLevelTypes = compilation.DeclaredTypes;
+            using var testContext = this.CreateTestContext();
+            var compilation = testContext.CreateCompilationModel( this._code );
+            this._topLevelTypes = compilation.Types;
         }
 
         [Fact]
@@ -166,45 +168,55 @@ class User {
 
         private void TestSerializable( string context, IType type, Action<Type> withResult, string expectedCode )
         {
+            using var testContext = this.CreateTestContext();
+
             this.TestExpression<Type>(
                 context,
-                this.Serialize( CompileTimeType.Create( type ) ).ToString(),
+                testContext.Serialize( CompileTimeType.Create( type ) ).ToString(),
                 withResult,
                 expectedCode );
         }
 
         private void TestSerializable( string context, IMethod method, Action<MethodInfo> withResult, string expectedCode )
         {
+            using var testContext = this.CreateTestContext();
+
             this.TestExpression<MethodInfo>(
                 context,
-                this.Serialize( CompileTimeMethodInfo.Create( method ) ).ToString(),
+                testContext.Serialize( CompileTimeMethodInfo.Create( method ) ).ToString(),
                 withResult,
                 expectedCode );
         }
 
         private void TestSerializable( string context, IConstructor method, Action<ConstructorInfo> withResult, string expectedCode )
         {
+            using var testContext = this.CreateTestContext();
+
             this.TestExpression<ConstructorInfo>(
                 context,
-                this.Serialize( CompileTimeConstructorInfo.Create( method ) ).ToString(),
+                testContext.Serialize( CompileTimeConstructorInfo.Create( method ) ).ToString(),
                 withResult,
                 expectedCode );
         }
 
         private void TestSerializable<T>( string context, IFieldOrProperty property, Action<T> withResult, string expectedCode )
         {
+            using var testContext = this.CreateTestContext();
+
             this.TestExpression<T>(
                 context,
-                CaravelaPropertyInfoTests.StripLocationInfo( this.Serialize( CompileTimeFieldOrPropertyInfo.Create( property ) ).ToString() ),
+                CaravelaPropertyInfoTests.StripLocationInfo( testContext.Serialize( CompileTimeFieldOrPropertyInfo.Create( property ) ).ToString() ),
                 withResult,
                 expectedCode );
         }
 
         private void TestSerializable( string context, IEvent @event, Action<EventInfo> withResult, string expectedCode )
         {
+            using var testContext = this.CreateTestContext();
+
             this.TestExpression<EventInfo>(
                 context,
-                this.Serialize( CompileTimeEventInfo.Create( @event ) ).ToString(),
+                testContext.Serialize( CompileTimeEventInfo.Create( @event ) ).ToString(),
                 withResult,
                 expectedCode );
         }

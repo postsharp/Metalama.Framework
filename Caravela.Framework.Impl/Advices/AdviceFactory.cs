@@ -24,10 +24,11 @@ namespace Caravela.Framework.Impl.Advices
 
         private readonly CompilationModel _compilation;
         private readonly AspectInstance _aspect;
+        private readonly TemplateClassInstance? _templateInstance;
         private readonly IServiceProvider _serviceProvider;
         private readonly IDiagnosticAdder _diagnosticAdder;
         private readonly IReadOnlyList<Advice> _declarativeAdvices;
-        private readonly List<Advice> _advices = new();
+        private readonly List<Advice> _advices;
 
         private readonly Dictionary<INamedType, ImplementInterfaceAdvice> _implementInterfaceAdvices;
 
@@ -38,18 +39,46 @@ namespace Caravela.Framework.Impl.Advices
             IDiagnosticAdder diagnosticAdder,
             IReadOnlyList<Advice> declarativeAdvices,
             AspectInstance aspect,
+            TemplateClassInstance? templateInstance, // null if the aspect has several template classes.
             IServiceProvider serviceProvider )
         {
             this._aspect = aspect;
+            this._templateInstance = templateInstance;
             this._serviceProvider = serviceProvider;
             this._compilation = compilation;
             this._diagnosticAdder = diagnosticAdder;
             this._declarativeAdvices = declarativeAdvices;
             this._implementInterfaceAdvices = new Dictionary<INamedType, ImplementInterfaceAdvice>( compilation.InvariantComparer );
+            this._advices = new List<Advice>();
         }
 
-        private TemplateRef ValidateTemplateName( string? templateName, TemplateKind templateKind, bool required = false )
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AdviceFactory"/> class.
+        /// that has a different <see cref="TemplateClassInstance"/> but shares the same mutable state as the parent.
+        /// </summary>
+        /// <param name="parent"></param>
+        /// <param name="templateClassInstance"></param>
+        private AdviceFactory( AdviceFactory parent, TemplateClassInstance templateClassInstance )
         {
+            this._aspect = parent._aspect;
+            this._templateInstance = templateClassInstance;
+            this._serviceProvider = parent._serviceProvider;
+            this._compilation = parent._compilation;
+            this._diagnosticAdder = parent._diagnosticAdder;
+            this._declarativeAdvices = parent._declarativeAdvices;
+            this._implementInterfaceAdvices = parent._implementInterfaceAdvices;
+            this._advices = parent._advices;
+        }
+
+        public AdviceFactory WithTemplateClassInstance( TemplateClassInstance templateClassInstance ) => new( this, templateClassInstance );
+
+        private TemplateMemberRef ValidateTemplateName( string? templateName, TemplateKind templateKind, bool required = false )
+        {
+            if ( this._templateInstance == null )
+            {
+                throw new AssertionFailedException();
+            }
+
             if ( templateName == null )
             {
                 if ( required )
@@ -63,7 +92,7 @@ namespace Caravela.Framework.Impl.Advices
                     return default;
                 }
             }
-            else if ( this._aspect.AspectClass.Members.TryGetValue( templateName, out var template ) )
+            else if ( this._templateInstance.TemplateClass.Members.TryGetValue( templateName, out var template ) )
             {
                 if ( template.TemplateInfo.IsNone )
                 {
@@ -71,7 +100,7 @@ namespace Caravela.Framework.Impl.Advices
                     // we want a proper error message.
 
                     throw GeneralDiagnosticDescriptors.MemberDoesNotHaveTemplateAttribute.CreateException(
-                        (template.AspectClass.FullName, templateName,
+                        (template.TemplateClass.FullName, templateName,
                          templateKind == TemplateKind.Introduction ? nameof(IntroduceAttribute) : nameof(TemplateAttribute)) );
                 }
 
@@ -102,10 +131,10 @@ namespace Caravela.Framework.Impl.Advices
                         : nameof(TemplateAttribute);
 
                     throw GeneralDiagnosticDescriptors.TemplateIsOfTheWrongType.CreateException(
-                        (template.AspectClass.FullName, templateName, expectedAttribute, actualAttribute) );
+                        (template.TemplateClass.FullName, templateName, expectedAttribute, actualAttribute) );
                 }
 
-                return new TemplateRef( template, templateKind );
+                return new TemplateMemberRef( template, templateKind );
             }
             else
             {
@@ -114,7 +143,7 @@ namespace Caravela.Framework.Impl.Advices
             }
         }
 
-        private TemplateRef SelectTemplate( IMethod targetMethod, in MethodTemplateSelector templateSelector )
+        private TemplateMemberRef SelectTemplate( IMethod targetMethod, in MethodTemplateSelector templateSelector )
         {
             var defaultTemplate = this.ValidateTemplateName( templateSelector.DefaultTemplate, TemplateKind.Default, true );
             var asyncTemplate = this.ValidateTemplateName( templateSelector.AsyncTemplate, TemplateKind.Async );
@@ -217,7 +246,7 @@ namespace Caravela.Framework.Impl.Advices
             return selectedTemplate.InterpretedAs( interpretedKind );
         }
 
-        private TemplateRef SelectTemplate( IFieldOrProperty targetFieldOrProperty, in GetterTemplateSelector templateSelector, bool required )
+        private TemplateMemberRef SelectTemplate( IFieldOrProperty targetFieldOrProperty, in GetterTemplateSelector templateSelector, bool required )
         {
             var getter = targetFieldOrProperty.GetMethod;
 
@@ -252,13 +281,18 @@ namespace Caravela.Framework.Impl.Advices
 
         public void OverrideMethod( IMethod targetMethod, in MethodTemplateSelector templateSelector, Dictionary<string, object?>? tags = null )
         {
+            if ( this._templateInstance == null )
+            {
+                throw new InvalidOperationException();
+            }
+
             var diagnosticList = new DiagnosticList();
 
             var template = this.SelectTemplate( targetMethod, templateSelector )
-                .GetTemplate<IMethod>( this._compilation, this._serviceProvider )
+                .GetTemplateMember<IMethod>( this._compilation, this._serviceProvider )
                 .ValidateTarget( targetMethod );
 
-            var advice = new OverrideMethodAdvice( this._aspect, targetMethod, template, _layerName, tags );
+            var advice = new OverrideMethodAdvice( this._aspect, this._templateInstance, targetMethod, template, _layerName, tags );
             advice.Initialize( this._declarativeAdvices, diagnosticList );
             ThrowOnErrors( diagnosticList );
             this._advices.Add( advice );
@@ -273,13 +307,19 @@ namespace Caravela.Framework.Impl.Advices
             OverrideStrategy whenExists = OverrideStrategy.Default,
             Dictionary<string, object?>? tags = null )
         {
+            if ( this._templateInstance == null )
+            {
+                throw new InvalidOperationException();
+            }
+
             var diagnosticList = new DiagnosticList();
 
             var template = this.ValidateTemplateName( defaultTemplate, TemplateKind.Default, true )
-                .GetTemplate<IMethod>( this._compilation, this._serviceProvider );
+                .GetTemplateMember<IMethod>( this._compilation, this._serviceProvider );
 
             var advice = new IntroduceMethodAdvice(
                 this._aspect,
+                this._templateInstance,
                 targetType,
                 template,
                 scope,
@@ -301,11 +341,16 @@ namespace Caravela.Framework.Impl.Advices
             string defaultTemplate,
             Dictionary<string, object?>? tags = null )
         {
+            if ( this._templateInstance == null )
+            {
+                throw new InvalidOperationException();
+            }
+
             // Set template represents both set and init accessors.
             var diagnosticList = new DiagnosticList();
 
             var propertyTemplate = this.ValidateTemplateName( defaultTemplate, TemplateKind.Default, true )
-                .GetTemplate<IProperty>( this._compilation, this._serviceProvider );
+                .GetTemplateMember<IProperty>( this._compilation, this._serviceProvider );
 
             var accessorTemplates = propertyTemplate.GetAccessorTemplates();
             accessorTemplates.Get.ValidateTarget( targetDeclaration.GetMethod );
@@ -313,6 +358,7 @@ namespace Caravela.Framework.Impl.Advices
 
             var advice = new OverrideFieldOrPropertyAdvice(
                 this._aspect,
+                this._templateInstance,
                 targetDeclaration,
                 propertyTemplate,
                 accessorTemplates.Get,
@@ -333,15 +379,20 @@ namespace Caravela.Framework.Impl.Advices
             string? setTemplate,
             Dictionary<string, object?>? tags = null )
         {
+            if ( this._templateInstance == null )
+            {
+                throw new InvalidOperationException();
+            }
+
             // Set template represents both set and init accessors.
             var diagnosticList = new DiagnosticList();
 
             var getTemplateRef = this.SelectTemplate( targetDeclaration, getTemplateSelector, setTemplate == null )
-                .GetTemplate<IMethod>( this._compilation, this._serviceProvider )
+                .GetTemplateMember<IMethod>( this._compilation, this._serviceProvider )
                 .ValidateTarget( targetDeclaration.GetMethod );
 
             var setTemplateRef = this.ValidateTemplateName( setTemplate, TemplateKind.Default, getTemplateSelector.IsNull )
-                .GetTemplate<IMethod>( this._compilation, this._serviceProvider )
+                .GetTemplateMember<IMethod>( this._compilation, this._serviceProvider )
                 .ValidateTarget( targetDeclaration.SetMethod );
 
             if ( getTemplateRef.IsNull && setTemplateRef.IsNull )
@@ -352,6 +403,7 @@ namespace Caravela.Framework.Impl.Advices
 
             var advice = new OverrideFieldOrPropertyAdvice(
                 this._aspect,
+                this._templateInstance,
                 targetDeclaration,
                 default,
                 getTemplateRef,
@@ -372,10 +424,16 @@ namespace Caravela.Framework.Impl.Advices
             IntroductionScope scope = IntroductionScope.Default,
             OverrideStrategy whenExists = OverrideStrategy.Default )
         {
+            if ( this._templateInstance == null )
+            {
+                throw new InvalidOperationException();
+            }
+
             var diagnosticList = new DiagnosticList();
 
             var advice = new IntroduceFieldAdvice(
                 this._aspect,
+                this._templateInstance,
                 targetType,
                 name,
                 default,
@@ -399,15 +457,21 @@ namespace Caravela.Framework.Impl.Advices
             OverrideStrategy whenExists = OverrideStrategy.Default,
             Dictionary<string, object?>? tags = null )
         {
+            if ( this._templateInstance == null )
+            {
+                throw new InvalidOperationException();
+            }
+
             var diagnosticList = new DiagnosticList();
 
             var propertyTemplate = this.ValidateTemplateName( defaultTemplate, TemplateKind.Default, true )
-                .GetTemplate<IProperty>( this._compilation, this._serviceProvider );
+                .GetTemplateMember<IProperty>( this._compilation, this._serviceProvider );
 
             var accessorTemplates = propertyTemplate.GetAccessorTemplates();
 
             var advice = new IntroducePropertyAdvice(
                 this._aspect,
+                this._templateInstance,
                 targetType,
                 null,
                 propertyTemplate,
@@ -436,16 +500,22 @@ namespace Caravela.Framework.Impl.Advices
             OverrideStrategy whenExists = OverrideStrategy.Default,
             Dictionary<string, object?>? tags = null )
         {
+            if ( this._templateInstance == null )
+            {
+                throw new InvalidOperationException();
+            }
+
             var diagnosticList = new DiagnosticList();
 
             var getTemplateRef = this.ValidateTemplateName( getTemplate, TemplateKind.Default, true )
-                .GetTemplate<IMethod>( this._compilation, this._serviceProvider );
+                .GetTemplateMember<IMethod>( this._compilation, this._serviceProvider );
 
             var setTemplateRef = this.ValidateTemplateName( setTemplate, TemplateKind.Default, true )
-                .GetTemplate<IMethod>( this._compilation, this._serviceProvider );
+                .GetTemplateMember<IMethod>( this._compilation, this._serviceProvider );
 
             var advice = new IntroducePropertyAdvice(
                 this._aspect,
+                this._templateInstance,
                 targetType,
                 name,
                 default,
@@ -472,6 +542,11 @@ namespace Caravela.Framework.Impl.Advices
             string? invokeTemplate,
             Dictionary<string, object?>? tags = null )
         {
+            if ( this._templateInstance == null )
+            {
+                throw new InvalidOperationException();
+            }
+
             if ( invokeTemplate != null )
             {
                 throw GeneralDiagnosticDescriptors.UnsupportedFeature.CreateException( $"Invoker overrides." );
@@ -480,10 +555,10 @@ namespace Caravela.Framework.Impl.Advices
             var diagnosticList = new DiagnosticList();
 
             var addTemplateRef = this.ValidateTemplateName( addTemplate, TemplateKind.Default, true )
-                .GetTemplate<IMethod>( this._compilation, this._serviceProvider );
+                .GetTemplateMember<IMethod>( this._compilation, this._serviceProvider );
 
             var removeTemplateRef = this.ValidateTemplateName( removeTemplate, TemplateKind.Default, true )
-                .GetTemplate<IMethod>( this._compilation, this._serviceProvider );
+                .GetTemplateMember<IMethod>( this._compilation, this._serviceProvider );
 
             if ( invokeTemplate != null )
             {
@@ -492,6 +567,7 @@ namespace Caravela.Framework.Impl.Advices
 
             var advice = new OverrideEventAdvice(
                 this._aspect,
+                this._templateInstance,
                 targetDeclaration,
                 default,
                 addTemplateRef,
@@ -513,13 +589,19 @@ namespace Caravela.Framework.Impl.Advices
             OverrideStrategy whenExists = OverrideStrategy.Default,
             Dictionary<string, object?>? tags = null )
         {
+            if ( this._templateInstance == null )
+            {
+                throw new InvalidOperationException();
+            }
+
             var diagnosticList = new DiagnosticList();
 
             var template = this.ValidateTemplateName( eventTemplate, TemplateKind.Default, true )
-                .GetTemplate<IEvent>( this._compilation, this._serviceProvider );
+                .GetTemplateMember<IEvent>( this._compilation, this._serviceProvider );
 
             var advice = new IntroduceEventAdvice(
                 this._aspect,
+                this._templateInstance,
                 targetType,
                 null,
                 template,
@@ -549,16 +631,22 @@ namespace Caravela.Framework.Impl.Advices
             OverrideStrategy whenExists = OverrideStrategy.Default,
             Dictionary<string, object?>? tags = null )
         {
+            if ( this._templateInstance == null )
+            {
+                throw new InvalidOperationException();
+            }
+
             var diagnosticList = new DiagnosticList();
 
             var addTemplateRef = this.ValidateTemplateName( addTemplate, TemplateKind.Default, true )
-                .GetTemplate<IMethod>( this._compilation, this._serviceProvider );
+                .GetTemplateMember<IMethod>( this._compilation, this._serviceProvider );
 
             var removeTemplateRef = this.ValidateTemplateName( removeTemplate, TemplateKind.Default, true )
-                .GetTemplate<IMethod>( this._compilation, this._serviceProvider );
+                .GetTemplateMember<IMethod>( this._compilation, this._serviceProvider );
 
             var advice = new IntroduceEventAdvice(
                 this._aspect,
+                this._templateInstance,
                 targetType,
                 name,
                 default,
@@ -584,11 +672,18 @@ namespace Caravela.Framework.Impl.Advices
             OverrideStrategy whenExists = OverrideStrategy.Default,
             Dictionary<string, object?>? tags = null )
         {
+            if ( this._templateInstance == null )
+            {
+                throw new InvalidOperationException();
+            }
+
             var diagnosticList = new DiagnosticList();
 
             if ( !this._implementInterfaceAdvices.TryGetValue( targetType, out var advice ) )
             {
-                this._implementInterfaceAdvices[targetType] = advice = new ImplementInterfaceAdvice( this._aspect, targetType, _layerName );
+                this._implementInterfaceAdvices[targetType] =
+                    advice = new ImplementInterfaceAdvice( this._aspect, this._templateInstance, targetType, _layerName );
+
                 advice.Initialize( this._declarativeAdvices, diagnosticList );
                 this._advices.Add( advice );
             }
@@ -619,11 +714,18 @@ namespace Caravela.Framework.Impl.Advices
             OverrideStrategy whenExists = OverrideStrategy.Default,
             Dictionary<string, object?>? tags = null )
         {
+            if ( this._templateInstance == null )
+            {
+                throw new InvalidOperationException();
+            }
+
             var diagnosticList = new DiagnosticList();
 
             if ( !this._implementInterfaceAdvices.TryGetValue( targetType, out var advice ) )
             {
-                this._implementInterfaceAdvices[targetType] = advice = new ImplementInterfaceAdvice( this._aspect, targetType, _layerName );
+                this._implementInterfaceAdvices[targetType] =
+                    advice = new ImplementInterfaceAdvice( this._aspect, this._templateInstance, targetType, _layerName );
+
                 advice.Initialize( this._declarativeAdvices, diagnosticList );
                 this._advices.Add( advice );
             }

@@ -16,6 +16,8 @@ namespace Caravela.Framework.Impl.Pipeline
     /// </summary>
     internal sealed class PipelineStageResult
     {
+        public ProjectModel Project { get; }
+
         /// <summary>
         /// Gets the Roslyn compilation.
         /// </summary>
@@ -44,6 +46,7 @@ namespace Caravela.Framework.Impl.Pipeline
 
         public PipelineStageResult(
             PartialCompilation compilation,
+            ProjectModel project,
             IReadOnlyList<OrderedAspectLayer> aspectLayers,
             ImmutableUserDiagnosticList? diagnostics = null,
             IReadOnlyList<IAspectSource>? aspectSources = null,
@@ -53,6 +56,7 @@ namespace Caravela.Framework.Impl.Pipeline
             this.Diagnostics = diagnostics ?? ImmutableUserDiagnosticList.Empty;
             this.AspectSources = aspectSources ?? Array.Empty<IAspectSource>();
             this.AspectLayers = aspectLayers;
+            this.Project = project;
             this.AdditionalSyntaxTrees = additionalSyntaxTrees ?? ImmutableArray<IntroducedSyntaxTree>.Empty;
         }
     }

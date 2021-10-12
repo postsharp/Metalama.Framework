@@ -40,7 +40,7 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime
         [Fact]
         public void TopLevelUsingCaravelaFrameworkProjects()
         {
-            var compilation = CreateCSharpCompilation( @"using Caravela.Framework.Policies; namespace X {class Y {} }" );
+            var compilation = CreateCSharpCompilation( @"using Caravela.Framework.Fabrics; namespace X {class Y {} }" );
             Assert.True( CompileTimeCodeDetector.HasCompileTimeCode( compilation.SyntaxTrees.Single().GetRoot() ) );
         }
 

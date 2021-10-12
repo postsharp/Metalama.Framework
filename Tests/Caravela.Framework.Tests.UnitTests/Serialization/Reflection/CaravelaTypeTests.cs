@@ -8,6 +8,8 @@ using System.Linq;
 using Xunit;
 using Xunit.Abstractions;
 
+// ReSharper disable ParameterOnlyUsedForPreconditionCheck.Local
+
 namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
 {
     public class CaravelaTypeTests : ReflectionTestBase
@@ -83,18 +85,22 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
 
         private string SerializeType( string code )
         {
-            var compilation = CreateCompilationModel( code );
-            IType single = compilation.DeclaredTypes.Single( t => t.Name == "Target" );
-            var actual = this.Serialize( CompileTimeType.Create( single ) ).ToString();
+            using var testContext = this.CreateTestContext();
+
+            var compilation = testContext.CreateCompilationModel( code );
+            IType single = compilation.Types.Single( t => t.Name == "Target" );
+            var actual = testContext.Serialize( CompileTimeType.Create( single ) ).ToString();
 
             return actual;
         }
 
         private string SerializeTypeOfProperty( string code )
         {
-            var compilation = CreateCompilationModel( code );
-            var single = compilation.DeclaredTypes.Single( t => t.Name == "Target" ).Properties.Single( p => p.Name == "Property" ).Type;
-            var actual = this.Serialize( CompileTimeType.Create( single ) ).ToString();
+            using var testContext = this.CreateTestContext();
+
+            var compilation = testContext.CreateCompilationModel( code );
+            var single = compilation.Types.Single( t => t.Name == "Target" ).Properties.Single( p => p.Name == "Property" ).Type;
+            var actual = testContext.Serialize( CompileTimeType.Create( single ) ).ToString();
 
             return actual;
         }

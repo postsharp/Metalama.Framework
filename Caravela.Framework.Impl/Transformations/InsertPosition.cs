@@ -26,8 +26,7 @@ namespace Caravela.Framework.Impl.Transformations
 
         public override bool Equals( object? obj ) => obj is InsertPosition position && this.Equals( position );
 
-        public bool Equals( InsertPosition other ) 
-            => this.Relation == other.Relation && this.SyntaxNode == other.SyntaxNode;
+        public bool Equals( InsertPosition other ) => this.Relation == other.Relation && this.SyntaxNode == other.SyntaxNode;
 
         public override int GetHashCode() => HashCode.Combine( this.Relation, this.SyntaxNode );
 

@@ -52,6 +52,10 @@
        <Link>SystemTypes\IsExternalInit.cs</Link>
      </Compile>
    </ItemGroup>
+    
+   <ItemGroup>
+     <Folder Include="ServiceProvider" />
+   </ItemGroup>
   
   <!-- Obfuscation -->
   <PropertyGroup>

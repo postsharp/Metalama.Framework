@@ -4,6 +4,7 @@
 using Caravela.Framework.Code;
 using Caravela.Framework.Code.Advised;
 using Caravela.Framework.Code.Invokers;
+using Caravela.Framework.Project;
 using Caravela.Framework.Validation;
 using System;
 
@@ -75,5 +76,7 @@ namespace Caravela.Framework.Aspects
         /// Gets the code model of the whole compilation.
         /// </summary>
         ICompilation Compilation { get; }
+
+        IProject Project { get; }
     }
 }

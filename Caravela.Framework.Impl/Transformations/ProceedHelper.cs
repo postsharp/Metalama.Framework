@@ -22,7 +22,7 @@ namespace Caravela.Framework.Impl.Transformations
         public static UserExpression CreateProceedDynamicExpression(
             SyntaxGenerationContext generationContext,
             ExpressionSyntax invocationExpression,
-            Template<IMethod> template,
+            TemplateMember<IMethod> template,
             IMethod overriddenMethod )
         {
             var runtimeAspectHelperType =

@@ -2,9 +2,13 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
+using Caravela.Framework.Code.Collections;
+using Caravela.Framework.Impl.CodeModel.Collections;
+using Caravela.Framework.Impl.CodeModel.References;
+using Caravela.Framework.Impl.Collections;
+using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
-using System;
-using System.Collections.Generic;
+using System.Linq;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
@@ -27,10 +31,33 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public bool IsGlobalNamespace => this._symbol.IsGlobalNamespace;
 
-        public INamespace? ParentNamespace => throw new NotImplementedException();
+        [Memo]
+        public INamespace? ParentNamespace => this.IsGlobalNamespace ? null : this.Compilation.Factory.GetNamespace( this._symbol.ContainingNamespace );
 
-        public IReadOnlyList<INamedType> Types => throw new NotImplementedException();
+        [Memo]
+        public INamedTypeList Types
+            => new NamedTypeList(
+                this,
+                this._symbol.GetTypeMembers()
+                    .Where( t => this.Compilation.ContainsType( t ) )
+                    .Select( n => new MemberRef<INamedType>( n ) ) );
 
-        public IReadOnlyList<INamespace> ChildrenNamespaces => throw new NotImplementedException();
+        [Memo]
+        public INamedTypeList AllTypes
+            => new NamedTypeList(
+                this,
+                this._symbol.SelectManyRecursive( ns => ns.GetNamespaceMembers(), includeThis: true )
+                    .SelectMany( ns => ns.GetTypeMembers() )
+                    .Where( t => this.Compilation.ContainsType( t ) )
+                    .Select( n => new MemberRef<INamedType>( n ) ) );
+
+        public INamespaceList Namespaces
+            => new NamespaceList(
+                this,
+                this._symbol.GetNamespaceMembers()
+                    .Where( n => this.Compilation.PartialCompilation.ParentNamespaces.Contains( n ) )
+                    .Select( n => new DeclarationRef<INamespace>( n ) ) );
+
+        public override string ToString() => this.IsGlobalNamespace ? "<Global Namespace>" : this.FullName;
     }
 }

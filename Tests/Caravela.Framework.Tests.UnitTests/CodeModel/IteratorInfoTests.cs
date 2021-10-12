@@ -12,6 +12,8 @@ namespace Caravela.Framework.Tests.UnitTests.CodeModel
         [Fact]
         public void GenericEnumerableYield()
         {
+            using var testContext = this.CreateTestContext();
+
             var code = @"
 using System.Collections.Generic;
 class C
@@ -20,8 +22,8 @@ class C
 }
 ";
 
-            var compilation = CreateCompilationModel( code );
-            var iteratorInfo = compilation.DeclaredTypes.Single().Methods.Single().GetIteratorInfo();
+            var compilation = testContext.CreateCompilationModel( code );
+            var iteratorInfo = compilation.Types.Single().Methods.Single().GetIteratorInfo();
 
             Assert.True( iteratorInfo.IsIterator );
             Assert.Equal( EnumerableKind.IEnumerable, iteratorInfo.EnumerableKind );
@@ -31,6 +33,8 @@ class C
         [Fact]
         public void GenericEnumeratorYield()
         {
+            using var testContext = this.CreateTestContext();
+
             var code = @"
 using System.Collections.Generic;
 class C
@@ -39,8 +43,8 @@ class C
 }
 ";
 
-            var compilation = CreateCompilationModel( code );
-            var iteratorInfo = compilation.DeclaredTypes.Single().Methods.Single().GetIteratorInfo();
+            var compilation = testContext.CreateCompilationModel( code );
+            var iteratorInfo = compilation.Types.Single().Methods.Single().GetIteratorInfo();
 
             Assert.True( iteratorInfo.IsIterator );
             Assert.Equal( EnumerableKind.IEnumerator, iteratorInfo.EnumerableKind );
@@ -50,6 +54,8 @@ class C
         [Fact]
         public void AsyncEnumerableYield()
         {
+            using var testContext = this.CreateTestContext();
+
             var code = @"
 using System.Collections.Generic;
 class C
@@ -58,8 +64,8 @@ class C
 }
 ";
 
-            var compilation = CreateCompilationModel( code );
-            var iteratorInfo = compilation.DeclaredTypes.Single().Methods.Single().GetIteratorInfo();
+            var compilation = testContext.CreateCompilationModel( code );
+            var iteratorInfo = compilation.Types.Single().Methods.Single().GetIteratorInfo();
 
             Assert.True( iteratorInfo.IsIterator );
             Assert.Equal( EnumerableKind.IAsyncEnumerable, iteratorInfo.EnumerableKind );
@@ -69,6 +75,8 @@ class C
         [Fact]
         public void AsyncEnumeratorYield()
         {
+            using var testContext = this.CreateTestContext();
+
             var code = @"
 using System.Collections.Generic;
 class C
@@ -77,8 +85,8 @@ class C
 }
 ";
 
-            var compilation = CreateCompilationModel( code );
-            var iteratorInfo = compilation.DeclaredTypes.Single().Methods.Single().GetIteratorInfo();
+            var compilation = testContext.CreateCompilationModel( code );
+            var iteratorInfo = compilation.Types.Single().Methods.Single().GetIteratorInfo();
 
             Assert.True( iteratorInfo.IsIterator );
             Assert.Equal( EnumerableKind.IAsyncEnumerator, iteratorInfo.EnumerableKind );
@@ -88,6 +96,8 @@ class C
         [Fact]
         public void NonGenericEnumeratorYield()
         {
+            using var testContext = this.CreateTestContext();
+
             var code = @"
 using System.Collections;
 class C
@@ -96,8 +106,8 @@ class C
 }
 ";
 
-            var compilation = CreateCompilationModel( code );
-            var iteratorInfo = compilation.DeclaredTypes.Single().Methods.Single().GetIteratorInfo();
+            var compilation = testContext.CreateCompilationModel( code );
+            var iteratorInfo = compilation.Types.Single().Methods.Single().GetIteratorInfo();
 
             Assert.True( iteratorInfo.IsIterator );
             Assert.Equal( EnumerableKind.UntypedIEnumerator, iteratorInfo.EnumerableKind );
@@ -107,6 +117,8 @@ class C
         [Fact]
         public void NonGenericEnumerableYield()
         {
+            using var testContext = this.CreateTestContext();
+
             var code = @"
 using System.Collections;
 class C
@@ -115,8 +127,8 @@ class C
 }
 ";
 
-            var compilation = CreateCompilationModel( code );
-            var iteratorInfo = compilation.DeclaredTypes.Single().Methods.Single().GetIteratorInfo();
+            var compilation = testContext.CreateCompilationModel( code );
+            var iteratorInfo = compilation.Types.Single().Methods.Single().GetIteratorInfo();
 
             Assert.True( iteratorInfo.IsIterator );
             Assert.Equal( EnumerableKind.UntypedIEnumerable, iteratorInfo.EnumerableKind );
@@ -126,6 +138,8 @@ class C
         [Fact]
         public void GenericEnumerableNonYield()
         {
+            using var testContext = this.CreateTestContext();
+
             var code = @"
 using System.Collections.Generic;
 class C
@@ -134,8 +148,8 @@ class C
 }
 ";
 
-            var compilation = CreateCompilationModel( code );
-            var iteratorInfo = compilation.DeclaredTypes.Single().Methods.Single().GetIteratorInfo();
+            var compilation = testContext.CreateCompilationModel( code );
+            var iteratorInfo = compilation.Types.Single().Methods.Single().GetIteratorInfo();
 
             Assert.False( iteratorInfo.IsIterator );
             Assert.Equal( EnumerableKind.IEnumerable, iteratorInfo.EnumerableKind );
@@ -145,6 +159,8 @@ class C
         [Fact]
         public void GenericEnumeratorNonYield()
         {
+            using var testContext = this.CreateTestContext();
+
             var code = @"
 using System.Collections.Generic;
 class C
@@ -153,8 +169,8 @@ class C
 }
 ";
 
-            var compilation = CreateCompilationModel( code );
-            var iteratorInfo = compilation.DeclaredTypes.Single().Methods.Single().GetIteratorInfo();
+            var compilation = testContext.CreateCompilationModel( code );
+            var iteratorInfo = compilation.Types.Single().Methods.Single().GetIteratorInfo();
 
             Assert.False( iteratorInfo.IsIterator );
             Assert.Equal( EnumerableKind.IEnumerator, iteratorInfo.EnumerableKind );
@@ -164,6 +180,8 @@ class C
         [Fact]
         public void AsyncEnumerableNonYield()
         {
+            using var testContext = this.CreateTestContext();
+
             var code = @"
 using System.Collections.Generic;
 class C
@@ -172,8 +190,8 @@ class C
 }
 ";
 
-            var compilation = CreateCompilationModel( code );
-            var iteratorInfo = compilation.DeclaredTypes.Single().Methods.Single().GetIteratorInfo();
+            var compilation = testContext.CreateCompilationModel( code );
+            var iteratorInfo = compilation.Types.Single().Methods.Single().GetIteratorInfo();
 
             Assert.False( iteratorInfo.IsIterator );
             Assert.Equal( EnumerableKind.IAsyncEnumerable, iteratorInfo.EnumerableKind );
@@ -183,6 +201,8 @@ class C
         [Fact]
         public void AsyncEnumeratorNonYield()
         {
+            using var testContext = this.CreateTestContext();
+
             var code = @"
 using System.Collections.Generic;
 class C
@@ -191,8 +211,8 @@ class C
 }
 ";
 
-            var compilation = CreateCompilationModel( code );
-            var iteratorInfo = compilation.DeclaredTypes.Single().Methods.Single().GetIteratorInfo();
+            var compilation = testContext.CreateCompilationModel( code );
+            var iteratorInfo = compilation.Types.Single().Methods.Single().GetIteratorInfo();
 
             Assert.False( iteratorInfo.IsIterator );
             Assert.Equal( EnumerableKind.IAsyncEnumerator, iteratorInfo.EnumerableKind );
@@ -202,6 +222,8 @@ class C
         [Fact]
         public void NonGenericEnumeratorNonYield()
         {
+            using var testContext = this.CreateTestContext();
+
             var code = @"
 using System.Collections;
 class C
@@ -210,8 +232,8 @@ class C
 }
 ";
 
-            var compilation = CreateCompilationModel( code );
-            var iteratorInfo = compilation.DeclaredTypes.Single().Methods.Single().GetIteratorInfo();
+            var compilation = testContext.CreateCompilationModel( code );
+            var iteratorInfo = compilation.Types.Single().Methods.Single().GetIteratorInfo();
 
             Assert.False( iteratorInfo.IsIterator );
             Assert.Equal( EnumerableKind.UntypedIEnumerator, iteratorInfo.EnumerableKind );
@@ -221,6 +243,8 @@ class C
         [Fact]
         public void NonGenericEnumerableNonYield()
         {
+            using var testContext = this.CreateTestContext();
+
             var code = @"
 using System.Collections;
 class C
@@ -229,8 +253,8 @@ class C
 }
 ";
 
-            var compilation = CreateCompilationModel( code );
-            var iteratorInfo = compilation.DeclaredTypes.Single().Methods.Single().GetIteratorInfo();
+            var compilation = testContext.CreateCompilationModel( code );
+            var iteratorInfo = compilation.Types.Single().Methods.Single().GetIteratorInfo();
 
             Assert.False( iteratorInfo.IsIterator );
             Assert.Equal( EnumerableKind.UntypedIEnumerable, iteratorInfo.EnumerableKind );

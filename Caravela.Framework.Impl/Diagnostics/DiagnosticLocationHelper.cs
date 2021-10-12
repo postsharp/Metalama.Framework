@@ -76,6 +76,9 @@ namespace Caravela.Framework.Impl.Diagnostics
                 case VariableDeclaratorSyntax variable:
                     return variable.Identifier.GetLocation();
 
+                case DelegateDeclarationSyntax @delegate:
+                    return @delegate.Identifier.GetLocation();
+
                 default:
                     return syntax.GetLocation();
             }

@@ -4,6 +4,7 @@
 using Caravela.Framework.Impl.Options;
 using System;
 using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 
 namespace Caravela.TestFramework
@@ -13,24 +14,27 @@ namespace Caravela.TestFramework
     /// </summary>
     public class TestProjectOptions : DefaultPathOptions, IProjectOptions, IDisposable
     {
-        public TestProjectOptions()
-        {
-            this.BaseTestDirectory = Path.Combine( Path.GetTempPath(), "Caravela", "Tests", Guid.NewGuid().ToString() );
+        private readonly ImmutableDictionary<string, string> _properties;
 
-            var compileTimeProjectCacheDirectory = Path.Combine( this.BaseTestDirectory, "Cache" );
+        public TestProjectOptions( ImmutableDictionary<string, string>? properties = null )
+        {
+            this._properties = properties ?? ImmutableDictionary<string, string>.Empty;
+            this.BaseDirectory = Path.Combine( Path.GetTempPath(), "Caravela", "Tests", Guid.NewGuid().ToString() );
+
+            var compileTimeProjectCacheDirectory = Path.Combine( this.BaseDirectory, "Cache" );
             this.CompileTimeProjectCacheDirectory = compileTimeProjectCacheDirectory;
             Directory.CreateDirectory( compileTimeProjectCacheDirectory );
 
-            var settingsDirectory = Path.Combine( this.BaseTestDirectory, "Settings" );
+            var settingsDirectory = Path.Combine( this.BaseDirectory, "Settings" );
             this.SettingsDirectory = settingsDirectory;
             Directory.CreateDirectory( settingsDirectory );
 
-            var projectDirectory = Path.Combine( this.BaseTestDirectory, "Project" );
+            var projectDirectory = Path.Combine( this.BaseDirectory, "Project" );
             this.ProjectDirectory = projectDirectory;
             Directory.CreateDirectory( projectDirectory );
         }
 
-        protected string BaseTestDirectory { get; }
+        public string BaseDirectory { get; }
 
         public bool DebugCompilerProcess => false;
 
@@ -58,15 +62,23 @@ namespace Caravela.TestFramework
 
         public bool IsUserCodeTrusted => true;
 
+        public string? ProjectPath => null;
+
+        public string? TargetFramework => "net5.0";
+
+        public string? Configuration => "Debug";
+
         public string ProjectDirectory { get; }
 
         public IProjectOptions Apply( IProjectOptions options ) => options;
 
+        public bool TryGetProperty( string name, [NotNullWhen( true )] out string? value ) => this._properties.TryGetValue( name, out value );
+
         public void Dispose()
         {
-            if ( Directory.Exists( this.BaseTestDirectory ) )
+            if ( Directory.Exists( this.BaseDirectory ) )
             {
-                TestExecutionContext.RegisterDisposeAction( () => Directory.Delete( this.BaseTestDirectory, true ) );
+                TestExecutionContext.RegisterDisposeAction( () => Directory.Delete( this.BaseDirectory, true ) );
             }
         }
     }

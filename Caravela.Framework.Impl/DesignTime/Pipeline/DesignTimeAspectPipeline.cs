@@ -11,14 +11,15 @@ using Caravela.Framework.Impl.DesignTime.Diff;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Options;
 using Caravela.Framework.Impl.Pipeline;
-using Caravela.Framework.Impl.ServiceProvider;
 using Caravela.Framework.Impl.Utilities;
+using Caravela.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Linq;
 using System.Threading;
 
 namespace Caravela.Framework.Impl.DesignTime.Pipeline
@@ -37,7 +38,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
         // that this specific tree is outdated, which then allows us to display a warning.
         private ImmutableDictionary<string, SyntaxTree?>? _compileTimeSyntaxTrees;
 
-        private AspectPipelineConfiguration? _lastKnownConfiguration;
+        private AspectProjectConfiguration? _lastKnownConfiguration;
 
         /// <summary>
         /// Gets an object that can be locked to get exclusive access to
@@ -48,39 +49,32 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
         internal DesignTimeAspectPipelineStatus Status { get; private set; }
 
         // It's ok if we return an obsolete project in this case.
-        internal IReadOnlyList<AspectClass>? AspectClasses => this._lastKnownConfiguration?.AspectClasses;
+        [Memo]
+        internal IReadOnlyList<AspectClass>? AspectClasses => this._lastKnownConfiguration?.AspectClasses.OfType<AspectClass>().ToList();
 
         public DesignTimeAspectPipeline(
-            IProjectOptions projectOptions,
+            ServiceProvider serviceProvider,
             CompileTimeDomain domain,
-            bool isTest,
-            IPathOptions? directoryOptions = null,
-            IAssemblyLocator? assemblyLocator = null )
-            : this( projectOptions, domain, isTest, directoryOptions, assemblyLocator, null ) { }
-
-        internal DesignTimeAspectPipeline(
-            IProjectOptions projectOptions,
-            CompileTimeDomain domain,
-            bool isTest,
-            IPathOptions? directoryOptions,
-            IAssemblyLocator? assemblyLocator,
-            IFileSystemWatcherFactory? fileSystemWatcherFactory )
-            : base( projectOptions, AspectExecutionScenario.DesignTime, isTest, domain, directoryOptions, assemblyLocator )
+            bool isTest )
+            : base( serviceProvider.WithProjectScopedServices(), AspectExecutionScenario.DesignTime, isTest, domain )
         {
-            if ( projectOptions.BuildTouchFile == null )
+            // The design-time pipeline contains project-scoped services for performance reasons: the pipeline may be called several
+            // times with the same compilation.
+
+            if ( this.ProjectOptions.BuildTouchFile == null )
             {
                 return;
             }
 
-            var watchedFilter = "*" + Path.GetExtension( projectOptions.BuildTouchFile );
-            var watchedDirectory = Path.GetDirectoryName( projectOptions.BuildTouchFile );
+            var watchedFilter = "*" + Path.GetExtension( this.ProjectOptions.BuildTouchFile );
+            var watchedDirectory = Path.GetDirectoryName( this.ProjectOptions.BuildTouchFile );
 
             if ( watchedDirectory == null )
             {
                 return;
             }
 
-            fileSystemWatcherFactory ??= new FileSystemWatcherFactory();
+            var fileSystemWatcherFactory = this.ServiceProvider.GetOptionalService<IFileSystemWatcherFactory>() ?? new FileSystemWatcherFactory();
             this._fileSystemWatcher = fileSystemWatcherFactory.Create( watchedDirectory, watchedFilter );
             this._fileSystemWatcher.IncludeSubdirectories = false;
 
@@ -287,7 +281,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
             IDiagnosticAdder diagnosticAdder,
             bool ignoreStatus,
             CancellationToken cancellationToken,
-            [NotNullWhen( true )] out AspectPipelineConfiguration? configuration )
+            [NotNullWhen( true )] out AspectProjectConfiguration? configuration )
         {
             lock ( this._configureSync )
             {
@@ -392,9 +386,8 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
 
         /// <inheritdoc/>
         private protected override HighLevelPipelineStage CreateStage(
-            IReadOnlyList<OrderedAspectLayer> parts,
-            CompileTimeProject compileTimeProject,
-            CompileTimeProjectLoader compileTimeProjectLoader )
+            ImmutableArray<OrderedAspectLayer> parts,
+            CompileTimeProject compileTimeProject )
             => new SourceGeneratorPipelineStage( compileTimeProject, parts, this.ServiceProvider );
 
         protected override void Dispose( bool disposing )

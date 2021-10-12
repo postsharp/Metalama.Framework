@@ -8,6 +8,7 @@ using Caravela.Framework.Impl.DesignTime.Diff;
 using Caravela.Framework.Impl.DesignTime.Refactoring;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Options;
+using Caravela.Framework.Impl.Pipeline;
 using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
@@ -81,7 +82,8 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
                         return pipeline;
                     }
 
-                    pipeline = new DesignTimeAspectPipeline( projectOptions, this._domain, this._isTest );
+                    var serviceProvider = ServiceProviderFactory.GetServiceProvider().WithService( projectOptions );
+                    pipeline = new DesignTimeAspectPipeline( serviceProvider, this._domain, this._isTest );
                     pipeline.ExternalBuildStarted += this.OnExternalBuildStarted;
 
                     if ( !this._isTest )
@@ -283,7 +285,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
             }
 
             return LiveTemplateAspectPipeline.TryExecute(
-                projectOptions,
+                configuration.ServiceProvider,
                 this._domain,
                 configuration,
                 aspectClass,

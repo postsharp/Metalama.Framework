@@ -48,6 +48,7 @@ namespace Caravela.Framework.Impl.Transformations
                 var targetSyntax = this.TargetType.GetSymbol().GetPrimarySyntaxReference().AssertNotNull();
 
                 var generationContext = SyntaxGenerationContext.Create(
+                    this.TargetType.Compilation.Project.ServiceProvider,
                     this.TargetType.GetCompilationModel().RoslynCompilation,
                     targetSyntax.SyntaxTree,
                     targetSyntax.Span.Start );

@@ -12,16 +12,19 @@ using System.Reflection;
 
 namespace Caravela.Framework.Impl.Aspects
 {
+    /// <summary>
+    /// Creates instances of <see cref="IAspectDriver"/> for a given <see cref="AspectClass"/>.
+    /// </summary>
     internal class AspectDriverFactory
     {
-        private readonly IServiceProvider _serviceProvider;
         private readonly Compilation _compilation;
+        private readonly IServiceProvider _serviceProvider;
         private readonly ILookup<string, IAspectWeaver> _weaverTypes;
 
-        public AspectDriverFactory( IServiceProvider serviceProvider, Compilation compilation, ImmutableArray<object> plugins )
+        public AspectDriverFactory( Compilation compilation, ImmutableArray<object> plugins, IServiceProvider serviceProvider )
         {
-            this._serviceProvider = serviceProvider;
             this._compilation = compilation;
+            this._serviceProvider = serviceProvider;
 
             this._weaverTypes = plugins.OfType<IAspectWeaver>()
                 .ToLookup( weaver => weaver.GetType().GetCustomAttribute<AspectWeaverAttribute>().AspectType.FullName );

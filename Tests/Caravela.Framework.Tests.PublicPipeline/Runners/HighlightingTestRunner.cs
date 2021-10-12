@@ -4,6 +4,7 @@
 #pragma warning disable IDE0005
 using Caravela.Framework.DesignTime.Contracts;
 using Caravela.Framework.Impl.Formatting;
+using Caravela.Framework.Impl.Pipeline;
 using Caravela.TestFramework;
 using Microsoft.CodeAnalysis;
 using System;
@@ -72,7 +73,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
         private readonly string _htmlEpilogue;
 
         public HighlightingTestRunner(
-            IServiceProvider serviceProvider,
+            ServiceProvider serviceProvider,
             string? projectDirectory,
             IEnumerable<MetadataReference> metadataReferences,
             ITestOutputHelper? logger )

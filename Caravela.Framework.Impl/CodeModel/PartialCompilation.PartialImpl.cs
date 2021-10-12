@@ -5,6 +5,7 @@ using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
@@ -15,13 +16,13 @@ namespace Caravela.Framework.Impl.CodeModel
         /// </summary>
         private class PartialImpl : PartialCompilation
         {
-            private readonly ImmutableArray<ITypeSymbol>? _types;
+            private readonly ImmutableHashSet<INamedTypeSymbol>? _types;
             private readonly ImmutableDictionary<string, SyntaxTree> _syntaxTrees;
 
             public PartialImpl(
                 Compilation compilation,
                 ImmutableDictionary<string, SyntaxTree> syntaxTrees,
-                ImmutableArray<ITypeSymbol>? types,
+                ImmutableHashSet<INamedTypeSymbol>? types,
                 ImmutableArray<ResourceDescription> resources )
                 : base( compilation, resources )
             {
@@ -29,9 +30,9 @@ namespace Caravela.Framework.Impl.CodeModel
                 this._syntaxTrees = syntaxTrees;
             }
 
-            public PartialImpl(
+            private PartialImpl(
                 ImmutableDictionary<string, SyntaxTree> syntaxTrees,
-                ImmutableArray<ITypeSymbol>? types,
+                ImmutableHashSet<INamedTypeSymbol>? types,
                 PartialCompilation baseCompilation,
                 IReadOnlyList<SyntaxTreeModification>? modifiedSyntaxTrees,
                 IReadOnlyList<SyntaxTree>? addedTrees,
@@ -44,9 +45,11 @@ namespace Caravela.Framework.Impl.CodeModel
 
             public override ImmutableDictionary<string, SyntaxTree> SyntaxTrees => this._syntaxTrees;
 
-            public override IEnumerable<ITypeSymbol> Types => this._types ?? throw new NotImplementedException();
+            public override ImmutableHashSet<INamedTypeSymbol> Types => this._types ?? throw new NotImplementedException();
 
-            public override bool IsPartial => false;
+            public override ImmutableHashSet<INamespaceSymbol> Namespaces => this.Types.Select( t => t.ContainingNamespace ).ToImmutableHashSet();
+
+            public override bool IsPartial => true;
 
             public override PartialCompilation Update(
                 IReadOnlyList<SyntaxTreeModification>? replacedTrees = null,

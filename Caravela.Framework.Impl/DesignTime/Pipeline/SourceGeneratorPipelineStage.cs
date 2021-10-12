@@ -34,6 +34,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
 
         /// <inheritdoc/>
         protected override PipelineStageResult GenerateCode(
+            AspectProjectConfiguration projectConfiguration,
             PipelineStageResult input,
             IPipelineStepsResult pipelineStepResult,
             CancellationToken cancellationToken )
@@ -78,7 +79,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
                     default );
 
                 // Add members to the class.
-                var syntaxGenerationContext = SyntaxGenerationContext.CreateDefault( input.PartialCompilation.Compilation );
+                var syntaxGenerationContext = SyntaxGenerationContext.CreateDefault( this.ServiceProvider, input.PartialCompilation.Compilation );
 
                 foreach ( var transformation in transformationGroup.Transformations )
                 {
@@ -130,6 +131,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
 
             return new PipelineStageResult(
                 input.PartialCompilation,
+                input.Project,
                 input.AspectLayers,
                 input.Diagnostics.Concat( pipelineStepResult.Diagnostics ).Concat( diagnostics.ToImmutable() ),
                 input.AspectSources.Concat( pipelineStepResult.ExternalAspectSources ),

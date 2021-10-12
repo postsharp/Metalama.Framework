@@ -303,7 +303,8 @@ Target.cs:
 
             // Build the project from the compile-time pipeline.
             using UnloadableCompileTimeDomain domain = new();
-            var compileTimeAspectPipeline = new CompileTimeAspectPipeline( projectOptions, true, domain );
+            var serviceProvider = ServiceProviderFactory.GetServiceProvider( projectOptions ).WithProjectScopedServices();
+            var compileTimeAspectPipeline = new CompileTimeAspectPipeline( serviceProvider, true, domain );
             DiagnosticList compileDiagnostics = new();
             Assert.True( compileTimeAspectPipeline.TryExecute( compileDiagnostics, compilation5, default, CancellationToken.None, out _, out _, out _ ) );
 

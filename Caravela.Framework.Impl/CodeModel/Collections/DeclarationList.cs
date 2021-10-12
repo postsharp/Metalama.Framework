@@ -94,5 +94,7 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
                 return targetItem;
             }
         }
+
+        public override string ToString() => $"DeclarationList<{typeof(TDeclaration).Name}> Count={this.Count}";
     }
 }

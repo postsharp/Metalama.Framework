@@ -17,8 +17,8 @@ namespace Caravela.Framework.Impl.Advices
 {
     internal class IntroduceEventAdvice : IntroduceMemberAdvice<IEvent, EventBuilder>
     {
-        private readonly Template<IMethod> _addTemplate;
-        private readonly Template<IMethod> _removeTemplate;
+        private readonly TemplateMember<IMethod> _addTemplate;
+        private readonly TemplateMember<IMethod> _removeTemplate;
 
         // ReSharper disable once MemberCanBePrivate.Global
 
@@ -26,16 +26,17 @@ namespace Caravela.Framework.Impl.Advices
 
         public IntroduceEventAdvice(
             AspectInstance aspect,
+            TemplateClassInstance templateInstance,
             INamedType targetDeclaration,
             string? explicitName,
-            Template<IEvent> eventTemplate,
-            Template<IMethod> addTemplate,
-            Template<IMethod> removeTemplate,
+            TemplateMember<IEvent> eventTemplate,
+            TemplateMember<IMethod> addTemplate,
+            TemplateMember<IMethod> removeTemplate,
             IntroductionScope scope,
             OverrideStrategy overrideStrategy,
             string? layerName,
             Dictionary<string, object?>? tags )
-            : base( aspect, targetDeclaration, eventTemplate, scope, overrideStrategy, layerName, tags )
+            : base( aspect, templateInstance, targetDeclaration, eventTemplate, scope, overrideStrategy, layerName, tags )
         {
             this._addTemplate = addTemplate;
             this._removeTemplate = removeTemplate;

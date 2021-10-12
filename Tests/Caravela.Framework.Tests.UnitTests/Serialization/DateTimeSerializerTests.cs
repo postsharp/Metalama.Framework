@@ -20,8 +20,10 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization
 
         private void AssertDateTimeSerialization( DateTime dateTime )
         {
+            using var testContext = this.CreateTestContext();
+
             var dt = dateTime;
-            Assert.Equal( "global::System.DateTime.FromBinary(" + dt.ToBinary() + "L)", this.Serialize( dt ).ToString() );
+            Assert.Equal( "global::System.DateTime.FromBinary(" + dt.ToBinary() + "L)", testContext.Serialize( dt ).ToString() );
         }
     }
 }
