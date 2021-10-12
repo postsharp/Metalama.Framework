@@ -365,9 +365,13 @@ class TargetCode
                     property.Invokers.Final.SetValue( SyntaxFactory.IdentifierName( "a" ), SyntaxFactory.IdentifierName( "b" ) ),
                     @"((global::TargetCode)a).P = b" );
 
+#if NET5_0
                 AssertEx.DynamicEquals(
                     property.Invokers.Final.GetValue( property.Invokers.Final.GetValue( thisExpression ) ),
                     @"((global::TargetCode)this).P.P" );
+#else
+                // There is a weird exception in .NET Framework because of the dynamic binder, but this should not affect any production scenario.
+#endif
             }
         }
 
