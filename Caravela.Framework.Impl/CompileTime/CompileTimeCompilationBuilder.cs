@@ -261,7 +261,7 @@ namespace Caravela.Framework.Impl.CompileTime
                 // Write the generated files to disk if we should.
                 if ( !Directory.Exists( outputInfo.Directory ) )
                 {
-                    Logger.Instance?.Write( $"Creating directory ( '{outputInfo.Directory}'." );
+                    Logger.Instance?.Write( $"Creating directory '{outputInfo.Directory}'." );
                     Directory.CreateDirectory( outputInfo.Directory );
                 }
 
