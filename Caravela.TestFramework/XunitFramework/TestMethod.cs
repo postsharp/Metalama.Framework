@@ -5,12 +5,13 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Xunit;
 using Xunit.Abstractions;
 using Xunit.Sdk;
 
 namespace Caravela.TestFramework.XunitFramework
 {
-    internal class TestMethod : ITestMethod, IMethodInfo
+    internal class TestMethod : LongLivedMarshalByRefObject, ITestMethod, IMethodInfo
     {
         private readonly TestFactory _factory;
         private readonly string _relativePath;

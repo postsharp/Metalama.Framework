@@ -19,14 +19,9 @@
         </AssemblyAttribute>
     </ItemGroup>
 
-    <Target Name='WriteReferenceAssemblies' DependsOnTargets='FindReferenceAssembliesForReferences'
-            AfterTargets="Build">
+    <Target Name='WriteReferenceAssemblies' AfterTargets="Build">
         <WriteLinesToFile File='$(IntermediateOutputPath)assemblies.txt' Overwrite='true'
                           Lines='@(ReferencePathWithRefAssemblies)' />
-        <!--
-        <WriteLinesToFile File='$(IntermediateOutputPath)assemblies.txt' Overwrite='false'
-                          Lines='$(OutputPath)\$(AssemblyName).dll' />
-                          -->
     </Target>
 
     <Target Name="GenerateCaravelaTestDefaultRunner" BeforeTargets="CoreCompile"

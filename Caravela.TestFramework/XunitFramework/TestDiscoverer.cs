@@ -9,12 +9,14 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Versioning;
+using Xunit;
 using Xunit.Abstractions;
 using Xunit.Sdk;
 
 namespace Caravela.TestFramework.XunitFramework
 {
-    internal class TestDiscoverer : ITestFrameworkDiscoverer
+    [Serializable]
+    internal class TestDiscoverer : LongLivedMarshalByRefObject, ITestFrameworkDiscoverer
     {
         private static readonly HashSet<string> _excludedDirectoryNames = new( StringComparer.OrdinalIgnoreCase ) { "bin", "obj" };
         private readonly IAssemblyInfo _assembly;

@@ -4,11 +4,12 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using Xunit;
 using Xunit.Abstractions;
 
 namespace Caravela.TestFramework.XunitFramework
 {
-    internal class TestCase : ITestCase, ISourceInformation
+    internal class TestCase : LongLivedMarshalByRefObject, ITestCase, ISourceInformation
     {
         private TestFactory _factory;
         private string _relativePath;

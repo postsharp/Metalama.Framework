@@ -7,7 +7,6 @@ using Caravela.Framework.Impl.Formatting;
 using Caravela.Framework.Impl.Pipeline;
 using Caravela.Framework.Tests.Integration.Runners;
 using Caravela.TestFramework;
-using Caravela.TestFramework.XunitFramework;
 using Microsoft.CodeAnalysis;
 using PostSharp.Patterns.Model;
 using System;

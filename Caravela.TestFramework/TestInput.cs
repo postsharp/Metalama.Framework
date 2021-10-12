@@ -2,7 +2,6 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.TestFramework.Utilities;
-using Caravela.TestFramework.XunitFramework;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;

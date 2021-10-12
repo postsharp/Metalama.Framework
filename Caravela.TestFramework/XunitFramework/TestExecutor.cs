@@ -8,12 +8,13 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using Xunit;
 using Xunit.Abstractions;
 using Xunit.Sdk;
 
 namespace Caravela.TestFramework.XunitFramework
 {
-    internal class TestExecutor : ITestFrameworkExecutor
+    internal class TestExecutor : LongLivedMarshalByRefObject, ITestFrameworkExecutor
     {
         private readonly TestFactory _factory;
 

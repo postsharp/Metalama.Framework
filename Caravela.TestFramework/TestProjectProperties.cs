@@ -3,7 +3,7 @@
 
 using System.Collections.Immutable;
 
-namespace Caravela.TestFramework.XunitFramework
+namespace Caravela.TestFramework
 {
     // ReSharper disable once CommentTypo
 
