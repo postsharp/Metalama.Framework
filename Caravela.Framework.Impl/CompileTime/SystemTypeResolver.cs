@@ -53,22 +53,20 @@ namespace Caravela.Framework.Impl.CompileTime
                 {
                     return null;
                 }
+                
+                // Check if this is a system type. If yes, it does not need to be in the same assembly.
+                var systemType = this._netStandardAssembly.GetType( typeName, false );
+                    
+                if ( systemType != null )
+                {
+                    return systemType;
+                }
 
                 // We don't allow loading new assemblies to the AppDomain.
                 if ( AppDomain.CurrentDomain.GetAssemblies().All( a => a.GetName().Name != assemblyName ) )
                 {
-                    // Somehow this path never executes in unit tests.
-                    var systemType = _netStandardAssembly.GetType( typeName, false );
-                    
-                    if ( systemType != null )
-                    {
-                        return systemType;
-                    }
-                    else
-                    {
-                        // Coverage: ignore
-                        return null;
-                    }
+                    // Coverage: ignore
+                    return null;
                 }
 
                 typeName += ", " + assemblyName;
