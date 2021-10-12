@@ -26,6 +26,7 @@ namespace Caravela.Framework.Aspects
             builder.Advices.OverrideFieldOrPropertyAccessors( builder.Target, getterTemplateSelector, "set_" + nameof(this.OverrideProperty) );
         }
 
+        /// <inheritdoc />
         public override void BuildEligibility( IEligibilityBuilder<IFieldOrProperty> builder ) => builder.ExceptForInheritance().MustBeNonAbstract();
 
         [Template]
