@@ -6,6 +6,7 @@ using Caravela.TestFramework.XunitFramework;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Linq;
 
 namespace Caravela.TestFramework
 {
@@ -32,7 +33,7 @@ namespace Caravela.TestFramework
             this.SourceCode = sourceCode;
             this.RelativePath = relativePath;
             this.FullPath = fullPath;
-
+            
             if ( directoryOptionsReader != null )
             {
                 this.Options.ApplyOptions(
@@ -58,6 +59,20 @@ namespace Caravela.TestFramework
                     }
                 }
             }
+
+            this.SkipReason = this.Options.SkipReason;
+
+            if ( !this.IsSkipped  )
+            {
+                var missingConstants = this.Options.RequiredConstants.Where( c => !this.ProjectProperties.PreprocessorSymbols.Contains( c ) ).ToList();
+
+                if ( missingConstants.Count > 0 )
+                {
+                    this.SkipReason = $"The following constant(s) are not defined: {string.Join( ", ", missingConstants.Select( c => "'" + c + "'" ) )}.";
+                }
+            }
+            
+
         }
 
         [ExcludeFromCodeCoverage]
@@ -150,5 +165,9 @@ namespace Caravela.TestFramework
         /// Gets the options of the current test.
         /// </summary>
         public TestOptions Options { get; } = new();
+        
+        public string? SkipReason { get; }
+
+        public bool IsSkipped => this.SkipReason != null;
     }
 }

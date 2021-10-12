@@ -41,25 +41,39 @@ namespace Caravela.Framework.Impl.Serialization
             var documentationId = DocumentationCommentId.CreateDeclarationId( methodSymbol );
             var methodToken = IntrinsicsCaller.CreateLdTokenExpression( nameof(Intrinsics.GetRuntimeMethodHandle), documentationId );
 
+            ExpressionSyntax invokeGetMethodFromHandle;
+
             if ( declaringGenericTypeSymbol is INamedTypeSymbol namedType && namedType.IsGenericType )
             {
                 var typeHandle = CreateTypeHandleExpression( declaringGenericTypeSymbol, serializationContext );
 
-                return SyntaxFactory.InvocationExpression(
+                invokeGetMethodFromHandle = SyntaxFactory.InvocationExpression(
                         SyntaxFactory.MemberAccessExpression(
                             SyntaxKind.SimpleMemberAccessExpression,
                             serializationContext.GetTypeSyntax( typeof(MethodBase) ),
                             SyntaxFactory.IdentifierName( "GetMethodFromHandle" ) ) )
-                    .AddArgumentListArguments( SyntaxFactory.Argument( methodToken ), SyntaxFactory.Argument( typeHandle ) )
-                    .NormalizeWhitespace();
+                    .AddArgumentListArguments( SyntaxFactory.Argument( methodToken ), SyntaxFactory.Argument( typeHandle ) );
+
+             
+            }
+            else
+            {
+
+                invokeGetMethodFromHandle = SyntaxFactory.InvocationExpression(
+                        SyntaxFactory.MemberAccessExpression(
+                            SyntaxKind.SimpleMemberAccessExpression,
+                            serializationContext.GetTypeSyntax( typeof(MethodBase) ),
+                            SyntaxFactory.IdentifierName( "GetMethodFromHandle" ) ) )
+                    .AddArgumentListArguments( SyntaxFactory.Argument( methodToken ) );
             }
 
-            return SyntaxFactory.InvocationExpression(
-                    SyntaxFactory.MemberAccessExpression(
-                        SyntaxKind.SimpleMemberAccessExpression,
-                        serializationContext.GetTypeSyntax( typeof(MethodBase) ),
-                        SyntaxFactory.IdentifierName( "GetMethodFromHandle" ) ) )
-                .AddArgumentListArguments( SyntaxFactory.Argument( methodToken ) )
+            if ( serializationContext.CompilationModel.Project.PreprocessorSymbols.Contains( "NET" ) )
+            {
+                // In the new .NET, the API is marked for nullability, so we have to suppress the warning.
+                invokeGetMethodFromHandle = SyntaxFactory.PostfixUnaryExpression( SyntaxKind.SuppressNullableWarningExpression, invokeGetMethodFromHandle );
+            }
+
+            return invokeGetMethodFromHandle
                 .NormalizeWhitespace();
         }
 

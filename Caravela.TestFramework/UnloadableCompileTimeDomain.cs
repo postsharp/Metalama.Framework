@@ -87,7 +87,7 @@ namespace Caravela.TestFramework
 #pragma warning restore CA1822 // Can be made static
 #endif
 
-        public override void Dispose( bool disposing )
+        protected override void Dispose( bool disposing )
         {
             base.Dispose( disposing );
 

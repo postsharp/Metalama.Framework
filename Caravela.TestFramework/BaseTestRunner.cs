@@ -124,7 +124,6 @@ namespace Caravela.TestFramework
                 // Create parse options.
                 var preprocessorSymbols = testInput.ProjectProperties.PreprocessorSymbols.Add( "TESTRUNNER" ).Add( "CARAVELA" );
 
-
                 var parseOptions = CSharpParseOptions.Default.WithPreprocessorSymbols( preprocessorSymbols );
 
                 var compilationOptions = new CSharpCompilationOptions(
@@ -172,6 +171,11 @@ namespace Caravela.TestFramework
                     new[] { syntaxTree },
                     project.MetadataReferences,
                     (CSharpCompilationOptions?) project.CompilationOptions );
+                
+#if NETFRAMEWORK
+                var platformDocument = AddDocument("Platform.cs", "namespace System.Runtime.CompilerServices { internal static class IsExternalInit {}}");
+                initialCompilation = initialCompilation.AddSyntaxTrees((await platformDocument!.GetSyntaxTreeAsync())! );
+#endif
 
                 foreach ( var includedFile in testInput.Options.IncludedFiles )
                 {

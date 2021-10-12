@@ -9,7 +9,6 @@ using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Formatting;
 using Caravela.Framework.Impl.Transformations;
-using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -181,10 +180,12 @@ namespace Caravela.Framework.Impl.Linking
                 // TODO: Try to avoid closure allocation.
                 void AddIntroductionsOnPosition( InsertPosition position )
                 {
+                    var comparer = new LinkerIntroducedMemberComparer( this._orderedAspectLayers );
+                    
                     var membersAtPosition = this._introducedMemberCollection.GetIntroducedMembersOnPosition( position )
-                        .OrderBy( m => m )
-                        .ThenBy( m => this._orderedAspectLayers[m.Introduction.Advice.AspectLayerId].Order )
-                        .ThenBy( m => m, ThrowingComparer<LinkerIntroducedMember>.Instance );
+                        .ToList();
+                    
+                    membersAtPosition.Sort(comparer);
 
                     foreach ( var introducedMember in membersAtPosition )
                     {

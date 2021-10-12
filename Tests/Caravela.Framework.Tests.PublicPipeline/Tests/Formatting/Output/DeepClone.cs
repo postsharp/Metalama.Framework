@@ -1,3 +1,5 @@
+// @RequiredConstant(NET5_0) - Return type covariance not supported in .NET Framework
+
 using System;
 using System.Linq;
 using Caravela.Framework.Aspects;

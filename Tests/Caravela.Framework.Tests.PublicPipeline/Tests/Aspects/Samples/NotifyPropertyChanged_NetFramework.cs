@@ -1,4 +1,4 @@
-// @RequiredConstant(NET5_0)
+// @RequiredConstant(NETFRAMEWORK)
 // In .NET Framework, INotifyPropertyChanged.PropertyChanged is not marked as nullable, so the output is slightly different.
 
 using System;
@@ -9,7 +9,7 @@ using Caravela.Framework.Code;
 
 #pragma warning disable CS0067
 
-namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Samples.NotifyPropertyChanged
+namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Samples.NotifyPropertyChanged_NetFramework
 {
     [AttributeUsage( AttributeTargets.Class )]
     public class NotifyPropertyChangedAttribute : TypeAspect

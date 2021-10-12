@@ -96,9 +96,9 @@ namespace Caravela.TestFramework.XunitFramework
                                     var testInput = TestInput.FromFile( this._factory.ProjectProperties, directoryOptionsReader, testCase.UniqueID );
                                     testInput.Options.References.AddRange( references );
 
-                                    if ( testInput.Options.IsSkipped )
+                                    if ( testInput.IsSkipped )
                                     {
-                                        executionMessageSink.OnMessage( new TestSkipped( test, testInput.Options.SkipReason ) );
+                                        executionMessageSink.OnMessage( new TestSkipped( test, testInput.SkipReason ) );
 
                                         testSkipped++;
                                         typeTestSkipped++;

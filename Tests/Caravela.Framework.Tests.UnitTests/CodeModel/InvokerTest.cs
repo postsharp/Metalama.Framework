@@ -431,9 +431,15 @@ class TargetCode
                 AssertEx.DynamicEquals( @event.Invokers.Final.Add( thisExpression, parameterExpression ), @"((global::TargetCode)this).MyEvent += value" );
                 AssertEx.DynamicEquals( @event.Invokers.Final.Remove( thisExpression, parameterExpression ), @"((global::TargetCode)this).MyEvent -= value" );
 
+#if NET5_0
                 AssertEx.DynamicEquals(
                     @event.Invokers.Final.Raise( thisExpression, parameterExpression, parameterExpression ),
                     @"((global::TargetCode)this).MyEvent?.Invoke((global::System.Object? )value, (global::System.EventArgs)value)" );
+#else
+                AssertEx.DynamicEquals(
+                    @event.Invokers.Final.Raise( thisExpression, parameterExpression, parameterExpression ),
+                    @"((global::TargetCode)this).MyEvent?.Invoke((global::System.Object)value, (global::System.EventArgs)value)" );
+#endif
             }
         }
 
@@ -468,9 +474,15 @@ class TargetCode
                     @event.RemoveMethod.Invokers.Final.Invoke( thisExpression, parameterExpression ),
                     @"((global::TargetCode)this).MyEvent -= value" );
 
+#if NET5_0
                 AssertEx.DynamicEquals(
                     @event.RaiseMethod?.Invokers.Final.Invoke( thisExpression, parameterExpression, parameterExpression ),
                     @"((global::TargetCode)this).MyEvent?.Invoke((global::System.Object? )value, (global::System.EventArgs)value)" );
+#else
+                AssertEx.DynamicEquals(
+                    @event.RaiseMethod?.Invokers.Final.Invoke( thisExpression, parameterExpression, parameterExpression ),
+                    @"((global::TargetCode)this).MyEvent?.Invoke((global::System.Object)value, (global::System.EventArgs)value)" );
+                #endif
             }
         }
 

@@ -125,7 +125,13 @@ class Class<T>
             Assert.Equal( isEligible, this._aspects[aspect].IsEligibleFast( targetSymbol ) );
         }
 
+#if NET5_0
         [Fact]
+#else
+        [Fact(Skip = "Skipped in .NET Framework (low value)")]
+        
+        // We would need to implement all interface methods.
+#endif
         public void NamespaceNotEligible()
         {
             var targetSymbol = ((INamedTypeSymbol) this._declarations["Class"].GetSymbol().AssertNotNull()).ContainingNamespace;

@@ -64,6 +64,13 @@ namespace Caravela.TestFramework
 
             await base.RunAsync( serviceProvider, testInput, testResult, state );
 
+            if ( testResult.InputCompilation == null )
+            {
+                // The test was skipped.
+                
+                return;
+            }
+
             var serviceProviderWithObserver = serviceProvider.WithServices( new Observer( testResult ) );
 
             using var domain = new UnloadableCompileTimeDomain();

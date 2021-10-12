@@ -109,6 +109,11 @@ namespace Caravela.TestFramework
         public bool? AcceptInvalidInput { get; set; }
 
         /// <summary>
+        /// Gets the set of preprocessor symbols that are required for this test, otherwise the test would be skipped.
+        /// </summary>
+        public List<string> RequiredConstants = new List<string>();
+
+        /// <summary>
         /// Applies <see cref="TestDirectoryOptions"/> to the current object by overriding any property
         /// that is not defined in the current object but defined in the argument.
         /// </summary>
@@ -148,6 +153,8 @@ namespace Caravela.TestFramework
             {
                 this.IgnoredDiagnostics.AddRange( baseOptions.IgnoredDiagnostics );
             }
+
+           this.RequiredConstants.AddRange( baseOptions.RequiredConstants );
         }
 
         public IReadOnlyList<string> InvalidSourceOptions => this._invalidSourceOptions;
@@ -235,6 +242,11 @@ namespace Caravela.TestFramework
                     case "IgnoredDiagnostic":
                         this.IgnoredDiagnostics.Add( optionArg );
 
+                        break;
+                    
+                    case "RequiredConstant":
+                        this.RequiredConstants.Add( optionArg );
+                        
                         break;
 
                     case "ClearIgnoredDiagnostics":

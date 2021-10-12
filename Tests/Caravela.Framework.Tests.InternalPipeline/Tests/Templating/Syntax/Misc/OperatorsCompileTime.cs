@@ -1,3 +1,5 @@
+// @RequiredConstant(NET5_0) - Array slices are not supported in .NET Framework
+
 #if NET5_0
 #pragma warning disable CS8600, CS8603
 using System;

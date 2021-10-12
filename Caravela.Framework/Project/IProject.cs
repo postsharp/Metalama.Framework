@@ -27,7 +27,7 @@ namespace Caravela.Framework.Project
         /// <summary>
         /// Gets the list of defined symbols like <c>DEBUG</c>, <c>TRACE</c> (also named constants).
         /// </summary>
-        ImmutableHashSet<string> DefinedSymbols { get; }
+        ImmutableHashSet<string> PreprocessorSymbols { get; }
 
         /// <summary>
         /// Gets the name of the build configuration, for instance <c>Debug</c> or <c>Release</c>.
