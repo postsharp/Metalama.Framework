@@ -38,7 +38,6 @@ namespace Caravela.Framework.Impl.Serialization
 
         public sealed override Type OutputType => this.ValueTupleType;
 
-
         internal class Size1 : ValueTupleSerializer
         {
             public Size1( SyntaxSerializationService service ) : base( service ) { }
@@ -95,5 +94,4 @@ namespace Caravela.Framework.Impl.Serialization
             protected override Type ValueTupleType => typeof(ValueTuple<,,,,,,,>);
         }
     }
-
 }

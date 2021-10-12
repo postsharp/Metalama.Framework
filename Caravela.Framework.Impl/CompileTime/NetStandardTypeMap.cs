@@ -10,9 +10,9 @@ namespace Caravela.Framework.Impl.CompileTime
     {
         private static ImmutableHashSet<Type> Types { get; }
 
-         static NetStandardTypeMap()
-         {
-             AppDomain.CurrentDomain.Load( "netstandard" ).GetExportedTypes().ToImmutableHashSet();
-         }
+        static NetStandardTypeMap()
+        {
+            AppDomain.CurrentDomain.Load( "netstandard" ).GetExportedTypes().ToImmutableHashSet();
+        }
     }
 }

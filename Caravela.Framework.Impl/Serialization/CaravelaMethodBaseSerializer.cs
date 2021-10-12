@@ -53,12 +53,9 @@ namespace Caravela.Framework.Impl.Serialization
                             serializationContext.GetTypeSyntax( typeof(MethodBase) ),
                             SyntaxFactory.IdentifierName( "GetMethodFromHandle" ) ) )
                     .AddArgumentListArguments( SyntaxFactory.Argument( methodToken ), SyntaxFactory.Argument( typeHandle ) );
-
-             
             }
             else
             {
-
                 invokeGetMethodFromHandle = SyntaxFactory.InvocationExpression(
                         SyntaxFactory.MemberAccessExpression(
                             SyntaxKind.SimpleMemberAccessExpression,

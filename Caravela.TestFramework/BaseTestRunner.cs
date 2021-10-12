@@ -171,10 +171,10 @@ namespace Caravela.TestFramework
                     new[] { syntaxTree },
                     project.MetadataReferences,
                     (CSharpCompilationOptions?) project.CompilationOptions );
-                
+
 #if NETFRAMEWORK
-                var platformDocument = AddDocument("Platform.cs", "namespace System.Runtime.CompilerServices { internal static class IsExternalInit {}}");
-                initialCompilation = initialCompilation.AddSyntaxTrees((await platformDocument!.GetSyntaxTreeAsync())! );
+                var platformDocument = AddDocument( "Platform.cs", "namespace System.Runtime.CompilerServices { internal static class IsExternalInit {}}" );
+                initialCompilation = initialCompilation.AddSyntaxTrees( (await platformDocument!.GetSyntaxTreeAsync())! );
 #endif
 
                 foreach ( var includedFile in testInput.Options.IncludedFiles )

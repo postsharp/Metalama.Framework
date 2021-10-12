@@ -249,7 +249,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
             {
                 testResult.SetFailed( "Exception during template expansion: " + e.Message, e );
             }
-#if NET5_0            
+#if NET5_0
             finally
             {
                 assemblyLoadContext.Unload();

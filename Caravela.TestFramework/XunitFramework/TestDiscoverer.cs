@@ -81,7 +81,14 @@ namespace Caravela.TestFramework.XunitFramework
             }
 
             var projectDirectory = GetValue( "ProjectDirectory", true ).NotNull();
-            var parserSymbols = GetValue( "DefineConstants", false, "" ).NotNull().Split( ';' ).Select( s => s.Trim() ).Where( s => !string.IsNullOrEmpty(s) ).ToImmutableArray();
+
+            var parserSymbols = GetValue( "DefineConstants", false, "" )
+                .NotNull()
+                .Split( ';' )
+                .Select( s => s.Trim() )
+                .Where( s => !string.IsNullOrEmpty( s ) )
+                .ToImmutableArray();
+
             var targetFramework = GetValue( "TargetFramework", true ).NotNull();
 
             return new TestProjectProperties( projectDirectory, parserSymbols, targetFramework );

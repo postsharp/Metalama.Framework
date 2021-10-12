@@ -9,15 +9,12 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Caravela.Framework.Impl.CompileTime
 {
-    
     /// <summary>
     /// The main implementation of <see cref="ISymbolClassifier"/>.
     /// </summary>
@@ -97,7 +94,7 @@ namespace Caravela.Framework.Impl.CompileTime
             {
                 return TemplateInfo.None;
             }
-            
+
             // Look for a [Template] attribute on the symbol.
             var templateAttribute = symbol
                 .GetAttributes()
@@ -163,7 +160,7 @@ namespace Caravela.Framework.Impl.CompileTime
             {
                 return null;
             }
-            
+
             if ( this._compilation.HasImplicitConversion( attribute.AttributeClass, this._compileTimeOnlyAttribute ) )
             {
                 return TemplatingScope.CompileTimeOnly;
@@ -513,9 +510,8 @@ namespace Caravela.Framework.Impl.CompileTime
 
                         return true;
                     }
-                    
+
                     return false;
-                    
 
                 case { ContainingType: { } namedType }:
                     return this.TryGetWellKnownScope( namedType, true, out scope );

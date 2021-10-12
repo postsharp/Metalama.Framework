@@ -26,7 +26,7 @@ namespace Caravela.TestFramework
     public class AspectTestRunner : BaseTestRunner
     {
         private int _runCount;
-        
+
 #if NET5_0
         private static readonly SemaphoreSlim _consoleLock = new( 1 );
 #endif
@@ -67,7 +67,7 @@ namespace Caravela.TestFramework
             if ( testResult.InputCompilation == null )
             {
                 // The test was skipped.
-                
+
                 return;
             }
 
@@ -102,8 +102,8 @@ namespace Caravela.TestFramework
                         // This warning is ignored by MSBuild anyway.
                         return false;
                     }
-                    
-                    return d.Severity >= minimalVerbosity 
+
+                    return d.Severity >= minimalVerbosity
                            && !testInput.Options.IgnoredDiagnostics.Contains( d.Id );
                 }
 

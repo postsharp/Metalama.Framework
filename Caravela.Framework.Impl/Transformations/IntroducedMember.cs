@@ -98,6 +98,5 @@ namespace Caravela.Framework.Impl.Transformations
         }
 
         public override string ToString() => this.Introduction.ToString();
-
     }
 }

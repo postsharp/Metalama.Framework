@@ -39,6 +39,7 @@ namespace Caravela.Framework.Impl.CompileTime
         }
 
         public string RunTimeAssemblyIdentity { get; }
+
         public string CompileTimeAssemblyName { get; }
 
         /// <summary>

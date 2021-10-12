@@ -9,7 +9,7 @@ using System.Runtime.CompilerServices;
 
 namespace Caravela.Framework.Impl.CompileTime
 {
-    internal partial class SymbolClassificationService : IService
+    internal class SymbolClassificationService : IService
     {
         private readonly IServiceProvider _serviceProvider;
         private readonly ConditionalWeakTable<Compilation, ISymbolClassifier> _instances = new();

@@ -486,7 +486,7 @@ class TargetCode
                 AssertEx.DynamicEquals(
                     @event.RaiseMethod?.Invokers.Final.Invoke( thisExpression, parameterExpression, parameterExpression ),
                     @"((global::TargetCode)this).MyEvent?.Invoke((global::System.Object)value, (global::System.EventArgs)value)" );
-                #endif
+#endif
             }
         }
 

@@ -181,11 +181,11 @@ namespace Caravela.Framework.Impl.Linking
                 void AddIntroductionsOnPosition( InsertPosition position )
                 {
                     var comparer = new LinkerIntroducedMemberComparer( this._orderedAspectLayers );
-                    
+
                     var membersAtPosition = this._introducedMemberCollection.GetIntroducedMembersOnPosition( position )
                         .ToList();
-                    
-                    membersAtPosition.Sort(comparer);
+
+                    membersAtPosition.Sort( comparer );
 
                     foreach ( var introducedMember in membersAtPosition )
                     {

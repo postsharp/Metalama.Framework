@@ -85,8 +85,8 @@ class Class<T>
 #if NET5_0
         [Theory]
 #else
-        [Theory(Skip = "Skipped in .NET Framework (low value)")]
-        
+        [Theory( Skip = "Skipped in .NET Framework (low value)" )]
+
         // We would need to implement all interface methods.
 #endif
         [InlineData( "MethodAspect", "Class", false )]
@@ -128,8 +128,8 @@ class Class<T>
 #if NET5_0
         [Fact]
 #else
-        [Fact(Skip = "Skipped in .NET Framework (low value)")]
-        
+        [Fact( Skip = "Skipped in .NET Framework (low value)" )]
+
         // We would need to implement all interface methods.
 #endif
         public void NamespaceNotEligible()

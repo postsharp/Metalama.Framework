@@ -233,8 +233,8 @@ namespace Caravela.AspectWorkbench.ViewModels
 
         public void NewTest( string path )
         {
-            var projectDirectory = TestInput.FromSource( _projectProperties, "", path ).ProjectDirectory!;
-            var pathParts = Path.GetRelativePath( projectDirectory, path ).Split( "\\" ).Select( p => Path.GetFileNameWithoutExtension( p ) ).Skip( 1 );
+            var projectDirectory = TestInput.FromSource( _projectProperties, "", path ).ProjectDirectory;
+            var pathParts = Path.GetRelativePath( projectDirectory, path ).Split( "\\" ).Select( Path.GetFileNameWithoutExtension ).Skip( 1 );
             var ns = Path.GetFileName( projectDirectory ) + "." + string.Join( ".", pathParts );
             this.SourceCode = NewTestDefaults.TemplateSource.Replace( "$ns", ns, StringComparison.OrdinalIgnoreCase );
             this.ExpectedTransformedCode = null;

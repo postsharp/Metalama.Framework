@@ -33,7 +33,7 @@ namespace Caravela.TestFramework
             this.SourceCode = sourceCode;
             this.RelativePath = relativePath;
             this.FullPath = fullPath;
-            
+
             if ( directoryOptionsReader != null )
             {
                 this.Options.ApplyOptions(
@@ -62,7 +62,7 @@ namespace Caravela.TestFramework
 
             this.SkipReason = this.Options.SkipReason;
 
-            if ( !this.IsSkipped  )
+            if ( !this.IsSkipped )
             {
                 var missingConstants = this.Options.RequiredConstants.Where( c => !this.ProjectProperties.PreprocessorSymbols.Contains( c ) ).ToList();
 
@@ -71,8 +71,6 @@ namespace Caravela.TestFramework
                     this.SkipReason = $"The following constant(s) are not defined: {string.Join( ", ", missingConstants.Select( c => "'" + c + "'" ) )}.";
                 }
             }
-            
-
         }
 
         [ExcludeFromCodeCoverage]
@@ -134,6 +132,9 @@ namespace Caravela.TestFramework
                 fullPath );
         }
 
+        /// <summary>
+        /// Gets the project properties for the current test.
+        /// </summary>
         public TestProjectProperties ProjectProperties { get; }
 
         /// <summary>
@@ -165,9 +166,15 @@ namespace Caravela.TestFramework
         /// Gets the options of the current test.
         /// </summary>
         public TestOptions Options { get; } = new();
-        
+
+        /// <summary>
+        /// Gets the reason why the current test must be skipped, or <c>null</c> if it must not be skipped.
+        /// </summary>
         public string? SkipReason { get; }
 
+        /// <summary>
+        /// Gets a value indicating whether the current test must be skipped.
+        /// </summary>
         public bool IsSkipped => this.SkipReason != null;
     }
 }

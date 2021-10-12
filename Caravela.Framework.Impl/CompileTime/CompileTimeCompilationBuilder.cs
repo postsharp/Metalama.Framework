@@ -221,7 +221,7 @@ namespace Caravela.Framework.Impl.CompileTime
             {
                 throw new ArgumentOutOfRangeException( nameof(runTimeAssemblyName) );
             }
-            
+
             return $"{prefix}{runTimeAssemblyName}_{projectHash:x16}";
         }
 

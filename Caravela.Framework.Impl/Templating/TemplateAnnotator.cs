@@ -269,14 +269,14 @@ namespace Caravela.Framework.Impl.Templating
         private TemplatingScope GetAssignmentScope( SyntaxNode node )
         {
             var scope = this.GetNodeScope( node );
-            
-            if ( scope == TemplatingScope.CompileTimeOnlyReturningBoth && node is TupleExpressionSyntax tuple )
+
+            if ( scope == TemplatingScope.CompileTimeOnlyReturningBoth && node is TupleExpressionSyntax )
             {
                 return TemplatingScope.CompileTimeOnly;
             }
             else
             {
-                return scope.GetExpressionValueScope(  );
+                return scope.GetExpressionValueScope();
             }
         }
 
@@ -2194,15 +2194,14 @@ namespace Caravela.Framework.Impl.Templating
             var transformedElements = node.Arguments.Select( a => this.Visit( a.Expression ) ).ToList();
             var tupleScope = this.GetExpressionScope( transformedElements, node );
             var transformedArguments = new ArgumentSyntax[transformedElements.Count];
-            
 
             for ( var i = 0; i < transformedElements.Count; i++ )
             {
-                transformedArguments[i] = node.Arguments[i].WithExpression( transformedElements[i]  );
+                transformedArguments[i] = node.Arguments[i].WithExpression( transformedElements[i] );
             }
 
-            return node.Update( node.OpenParenToken, SeparatedList( transformedArguments, node.Arguments.GetSeparators() ), node.CloseParenToken ).AddScopeAnnotation( tupleScope );
-
-        } 
+            return node.Update( node.OpenParenToken, SeparatedList( transformedArguments, node.Arguments.GetSeparators() ), node.CloseParenToken )
+                .AddScopeAnnotation( tupleScope );
+        }
     }
 }

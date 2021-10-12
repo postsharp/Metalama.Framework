@@ -36,8 +36,7 @@ namespace Caravela.TestFramework.XunitFramework
 
         string ITestCase.DisplayName => Path.GetFileNameWithoutExtension( this._relativePath );
 
-        public string? SkipReason
-            => TestInput.FromFile( this._factory.ProjectProperties, this._factory.DirectoryOptionsReader, this._relativePath ).SkipReason;
+        public string? SkipReason => TestInput.FromFile( this._factory.ProjectProperties, this._factory.DirectoryOptionsReader, this._relativePath ).SkipReason;
 
         ISourceInformation ITestCase.SourceInformation
         {
