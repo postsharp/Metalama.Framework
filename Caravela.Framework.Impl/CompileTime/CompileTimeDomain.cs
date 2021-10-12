@@ -8,9 +8,6 @@ using System.Globalization;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading;
-#if NETFRAMEWORK
-using System.Linq;
-#endif
 
 namespace Caravela.Framework.Impl.CompileTime
 {
