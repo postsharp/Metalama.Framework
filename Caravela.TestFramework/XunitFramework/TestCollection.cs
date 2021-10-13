@@ -2,11 +2,12 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using System;
+using Xunit;
 using Xunit.Abstractions;
 
 namespace Caravela.TestFramework.XunitFramework
 {
-    internal class TestCollection : ITestCollection, ITestAssembly
+    internal class TestCollection : LongLivedMarshalByRefObject, ITestCollection, ITestAssembly
     {
         private readonly TestFactory _factory;
 

@@ -8,7 +8,7 @@ using System.Collections.Generic;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
-    internal sealed class GenericParameterBuilder : DeclarationBuilder, IGenericParameterBuilder
+    internal sealed class TypeParameterBuilder : DeclarationBuilder, ITypeParameterBuilder
     {
         private readonly List<IType> _typeConstraints = new();
 
@@ -16,7 +16,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public int Index { get; }
 
-        IReadOnlyList<IType> IGenericParameter.TypeConstraints => this._typeConstraints;
+        IReadOnlyList<IType> ITypeParameter.TypeConstraints => this._typeConstraints;
 
         public IReadOnlyList<IType> ReadOnlyTypeConstraints => this._typeConstraints;
 
@@ -46,9 +46,9 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public override IDeclaration? ContainingDeclaration { get; }
 
-        public override DeclarationKind DeclarationKind => DeclarationKind.GenericParameter;
+        public override DeclarationKind DeclarationKind => DeclarationKind.TypeParameter;
 
-        public GenericParameterBuilder( MethodBuilder containingMethod, int index, string name ) : base( containingMethod.ParentAdvice )
+        public TypeParameterBuilder( MethodBuilder containingMethod, int index, string name ) : base( containingMethod.ParentAdvice )
         {
             this.ContainingDeclaration = containingMethod;
             this.Index = index;

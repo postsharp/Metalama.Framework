@@ -11,16 +11,18 @@ namespace Caravela.Framework.Tests.Integration.Tests.Aspects.Fabrics.TransitiveP
         public void AmendProject( IProjectAmender builder )
         {
             var configuration = builder.Project.Data<Configuration>();
-            
+
             // Capture the message outside of the lambda otherwise it gets evaluated later.
             var message = configuration.Message;
-            builder.WithMembers( c => c.Types.SelectMany( t => t.Methods ) ).AddAspect( m => new Aspect(message) );
+            builder.WithMembers( c => c.Types.SelectMany( t => t.Methods ) ).AddAspect( m => new Aspect( message ) );
         }
     }
 
     public class Configuration : IProjectData
     {
         public string Message { get; set; } = "Not Configured";
+
+        public void Initialize( IProject project ) { }
     }
 
     public class Aspect : OverrideMethodAspect
@@ -29,13 +31,12 @@ namespace Caravela.Framework.Tests.Integration.Tests.Aspects.Fabrics.TransitiveP
 
         public Aspect( string message )
         {
-            this._message = message;
+            _message = message;
         }
-        
 
         public override dynamic? OverrideMethod()
         {
-            Console.WriteLine(_message);
+            Console.WriteLine( _message );
 
             return meta.Proceed();
         }

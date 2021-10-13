@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFrameworks>net5.0;netframework4.8</TargetFrameworks>
     <Description>Provides a base class AspectUnitTestBase that allows you to unit test Caravela aspects with xUnit.</Description>
   </PropertyGroup>
 
@@ -26,6 +26,12 @@
     <InternalsVisibleTo Include="Caravela.Framework.Tests.UnitTests" />
     <InternalsVisibleTo Include="Caravela.AspectWorkbench" />
   </ItemGroup>
+  
+  <ItemGroup>
+      <Compile Include="..\IsExternalInit.cs">
+             <Link>SystemTypes\IsExternalInit.cs</Link>
+       </Compile>
+    </ItemGroup>
   
   <ItemGroup>
     <None Update="Caravela.TestFramework.props">

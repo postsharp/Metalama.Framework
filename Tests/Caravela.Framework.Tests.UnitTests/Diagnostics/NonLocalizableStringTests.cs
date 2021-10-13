@@ -23,7 +23,7 @@ namespace Caravela.Framework.Tests.UnitTests.Diagnostics
         public void NotEqual()
         {
             var s1 = new NonLocalizedString( "{0} {1}", new object[] { 1, Math.E } );
-            var s2 = new NonLocalizedString( "{0} {1}", new object[] { 1, Math.Tau } );
+            var s2 = new NonLocalizedString( "{0} {1}", new object[] { 1, Math.PI } );
 
             Assert.NotEqual( s1.GetHashCode(), s2.GetHashCode() );
             Assert.NotEqual( s1, s2 );

@@ -27,7 +27,7 @@ namespace Caravela.Framework.Impl.CodeModel
             this._loader = loader;
             this.AspectClasses = aspectTypes;
         }
-        
+
         public ImmutableArray<IAspectClass> AspectClasses { get; }
 
         // TODO: implement aspect exclusion based on ExcludeAspectAttribute

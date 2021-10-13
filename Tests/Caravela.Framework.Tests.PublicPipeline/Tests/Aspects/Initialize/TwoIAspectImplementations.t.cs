@@ -1,7 +1,7 @@
-class TargetCode 
+internal class TargetCode
     {
         [Log]
-        public int Method(int a, int b)
+        public int Method( int a, int b )
 {
     global::System.Console.WriteLine("Entering TargetCode.Method(int, int)");
     try

@@ -1,72 +1,76 @@
 ﻿using System;
 using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
-using Caravela.TestFramework;
 
 namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Methods.Scope
 {
-    public class IntroductionAttribute : Attribute, IAspect<INamedType>
+    public class IntroductionAttribute : TypeAspect
     {
-        [Introduce(Scope = IntroductionScope.Default)]
+        [Introduce( Scope = IntroductionScope.Default )]
         public int DefaultScope()
         {
-            Console.WriteLine("This is introduced method.");
+            Console.WriteLine( "This is introduced method." );
+
             return 42;
         }
 
-        [Introduce(Scope = IntroductionScope.Default)]
+        [Introduce( Scope = IntroductionScope.Default )]
         public static int DefaultScopeStatic()
         {
-            Console.WriteLine("This is introduced method.");
+            Console.WriteLine( "This is introduced method." );
+
             return 42;
         }
 
-        [Introduce(Scope = IntroductionScope.Instance)]
+        [Introduce( Scope = IntroductionScope.Instance )]
         public int InstanceScope()
         {
-            Console.WriteLine("This is introduced method.");
+            Console.WriteLine( "This is introduced method." );
+
             return 42;
         }
 
-        [Introduce(Scope = IntroductionScope.Instance)]
+        [Introduce( Scope = IntroductionScope.Instance )]
         public static int InstanceScopeStatic()
         {
-            Console.WriteLine("This is introduced method.");
+            Console.WriteLine( "This is introduced method." );
+
             return 42;
         }
 
-        [Introduce(Scope = IntroductionScope.Static)]
+        [Introduce( Scope = IntroductionScope.Static )]
         public int StaticScope()
         {
-            Console.WriteLine("This is introduced method.");
+            Console.WriteLine( "This is introduced method." );
+
             return 42;
         }
 
-        [Introduce(Scope = IntroductionScope.Static)]
+        [Introduce( Scope = IntroductionScope.Static )]
         public static int StaticScopeStatic()
         {
-            Console.WriteLine("This is introduced method.");
+            Console.WriteLine( "This is introduced method." );
+
             return 42;
         }
 
-        [Introduce(Scope = IntroductionScope.Target)]
+        [Introduce( Scope = IntroductionScope.Target )]
         public int TargetScope()
         {
-            Console.WriteLine("This is introduced method.");
+            Console.WriteLine( "This is introduced method." );
+
             return 42;
         }
 
-        [Introduce(Scope = IntroductionScope.Target)]
+        [Introduce( Scope = IntroductionScope.Target )]
         public static int TargetScopeStatic()
         {
-            Console.WriteLine("This is introduced method.");
+            Console.WriteLine( "This is introduced method." );
+
             return 42;
         }
     }
 
     // <target>
     [Introduction]
-    internal class TargetClass
-    {
-    }
+    internal class TargetClass { }
 }

@@ -64,14 +64,14 @@ private void Bar_Source()
         }
 
 
-void Bar_Override5()
+void Bar_Override1()
 {
     // Should invoke source code.
     this.Bar_Source();
-    // Should invoke override 3.
-    this.Bar_Override3();
-    // Should invoke the final declaration.
-    this.Bar();
+    // Should invoke source code.
+    this.Bar_Source();
+    // Should invoke override 1.
+    this.Bar_Override1();
     // Should invoke the final declaration.
     this.Bar();
 }
@@ -88,14 +88,14 @@ void Bar_Override3()
     this.Bar();
 }
 
-void Bar_Override1()
+void Bar_Override5()
 {
     // Should invoke source code.
     this.Bar_Source();
-    // Should invoke source code.
-    this.Bar_Source();
-    // Should invoke override 1.
-    this.Bar_Override1();
+    // Should invoke override 3.
+    this.Bar_Override3();
+    // Should invoke the final declaration.
+    this.Bar();
     // Should invoke the final declaration.
     this.Bar();
 }    }

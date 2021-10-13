@@ -26,7 +26,8 @@ namespace Caravela.Framework.Impl.Utilities
 
             foreach ( var attribute in assembly.GetCustomAttributes( typeof(AssemblyMetadataAttribute) ).Cast<AssemblyMetadataAttribute>() )
             {
-                this._metadata.Add( attribute.Key, attribute.Value );
+                // In case of duplicates, we just ignore the first one. This happens with attributes describing package versions.
+                this._metadata[attribute.Key] = attribute.Value;
             }
         }
 

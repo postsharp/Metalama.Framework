@@ -8,9 +8,9 @@ using Caravela.Framework.Tests.Integration.Aspects.Initialize.AddChildAspect;
 
 namespace Caravela.Framework.Tests.Integration.Aspects.Initialize.AddChildAspect
 {
-    internal class Aspect1 : Attribute, IAspect<INamedType>
+    internal class Aspect1 : TypeAspect
     {
-        public void BuildAspect( IAspectBuilder<INamedType> builder )
+        public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
             builder.WithMembers( t => t.Methods ).AddAspect( _ => new Aspect2( "Hello, world." ) );
         }

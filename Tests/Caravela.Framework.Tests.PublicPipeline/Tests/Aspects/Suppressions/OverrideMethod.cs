@@ -1,55 +1,49 @@
-// @ReportOutputWarnings
-// @ClearIgnoredDiagnostics
-
 #if !TESTRUNNER
+
 // Disable the warning in the main build, not during tests.
 #pragma warning disable CS0219
 #endif
 
-
-using System;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
-using Caravela.TestFramework;
 using Caravela.Framework.Diagnostics;
 
 namespace Caravela.Framework.Tests.Integration.Aspects.Suppressions.IntroduceMethod
 {
-    public class SuppressWarningAttribute : Attribute, IAspect<IMethod>
+    public class SuppressWarningAttribute : MethodAspect
     {
         private static readonly SuppressionDefinition _suppression = new( "CS0219" );
-        
-        public SuppressWarningAttribute()
-        {
-        }
-        
+
+        public SuppressWarningAttribute() { }
+
         [Template]
         public dynamic? Override()
         {
-            int a = 0;
+            var a = 0;
+
             return meta.Proceed();
         }
-        
-        public void BuildAspect(IAspectBuilder<IMethod> builder)
+
+        public override void BuildAspect( IAspectBuilder<IMethod> builder )
         {
             builder.Advices.OverrideMethod( builder.Target, nameof(Override) );
             builder.Diagnostics.Suppress( null, _suppression );
         }
     }
-    
+
     // <target>
     internal class TargetClass
     {
         [SuppressWarning]
-        private void M2( string m ) 
+        private void M2( string m )
         {
-           int x = 0;
+            var x = 0;
         }
-        
+
         // CS0219 expected 
-        private void M1( string m ) 
+        private void M1( string m )
         {
-           int x = 0;
+            var x = 0;
         }
     }
 }

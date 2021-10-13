@@ -1,23 +1,18 @@
-using System;
 using System.Collections.Generic;
-using Caravela.Framework;
 using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
 
 namespace Caravela.Framework.Tests.PublicPipeline.Aspects.CodeModel.ConvertToReflection
 {
-
     // This tests serialization to reflection with types that cannot be constructed using a typeof.
 
-    class Aspect : Attribute, IAspect<INamedType>
+    internal class Aspect : TypeAspect
     {
-    
         [Introduce]
         public void Run()
         {
-         foreach ( var method in meta.Target.Type.Methods )
+            foreach (var method in meta.Target.Type.Methods)
             {
-                foreach ( var parameter in method.Parameters )
+                foreach (var parameter in method.Parameters)
                 {
                     var type = meta.RunTime( parameter.Type.ToType() );
                 }
@@ -27,8 +22,8 @@ namespace Caravela.Framework.Tests.PublicPipeline.Aspects.CodeModel.ConvertToRef
 
     // <target>
     [Aspect]
-    unsafe class TargetCode
+    internal unsafe class TargetCode
     {
-        void SystemTypesOnly( dynamic dyn, dynamic[] dynArray, List<dynamic> dynGeneric ) {}
+        private void SystemTypesOnly( dynamic dyn, dynamic[] dynArray, List<dynamic> dynGeneric ) { }
     }
 }

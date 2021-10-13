@@ -1,24 +1,22 @@
 ﻿using System;
 using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
-using Caravela.TestFramework;
 
 namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Events.ExistingConflictOverrideDifferentEventType
 {
-    public class IntroductionAttribute : Attribute, IAspect<INamedType>
+    public class IntroductionAttribute : TypeAspect
     {
-        [Introduce(WhenExists = OverrideStrategy.Override)]
+        [Introduce( WhenExists = OverrideStrategy.Override )]
         public event EventHandler ExistingEvent
         {
             add
             {
-                Console.WriteLine("This is introduced event.");
+                Console.WriteLine( "This is introduced event." );
                 meta.Proceed();
             }
 
             remove
             {
-                Console.WriteLine("This is introduced event.");
+                Console.WriteLine( "This is introduced event." );
                 meta.Proceed();
             }
         }
@@ -30,19 +28,17 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Events.Exist
         {
             add
             {
-                Console.WriteLine("This is original event.");
+                Console.WriteLine( "This is original event." );
             }
 
             remove
             {
-                Console.WriteLine("This is original event.");
+                Console.WriteLine( "This is original event." );
             }
         }
     }
 
     // <target>
     [Introduction]
-    internal class TargetClass : BaseClass
-    {
-    }
+    internal class TargetClass : BaseClass { }
 }

@@ -51,6 +51,7 @@ class C
             Assert.Equal( compilation.Factory.GetTypeByReflectionType( typeof(int) ), iteratorInfo.ItemType );
         }
 
+#if NET5_0
         [Fact]
         public void AsyncEnumerableYield()
         {
@@ -92,6 +93,7 @@ class C
             Assert.Equal( EnumerableKind.IAsyncEnumerator, iteratorInfo.EnumerableKind );
             Assert.Equal( compilation.Factory.GetTypeByReflectionType( typeof(int) ), iteratorInfo.ItemType );
         }
+#endif
 
         [Fact]
         public void NonGenericEnumeratorYield()
@@ -177,6 +179,7 @@ class C
             Assert.Equal( compilation.Factory.GetTypeByReflectionType( typeof(int) ), iteratorInfo.ItemType );
         }
 
+#if NET5_0
         [Fact]
         public void AsyncEnumerableNonYield()
         {
@@ -218,6 +221,7 @@ class C
             Assert.Equal( EnumerableKind.IAsyncEnumerator, iteratorInfo.EnumerableKind );
             Assert.Equal( compilation.Factory.GetTypeByReflectionType( typeof(int) ), iteratorInfo.ItemType );
         }
+#endif
 
         [Fact]
         public void NonGenericEnumeratorNonYield()

@@ -1,7 +1,6 @@
-﻿using Caravela.Framework.Aspects;
+﻿using System;
+using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
-using Caravela.TestFramework;
-using System;
 
 #pragma warning disable CS0067
 
@@ -21,24 +20,26 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
         int Bar();
     }
 
-    public class IntroductionAttribute : Attribute, IAspect<INamedType>
+    public class IntroductionAttribute : TypeAspect
     {
-        public void BuildAspect(IAspectBuilder<INamedType> aspectBuilder)
+        public override void BuildAspect( IAspectBuilder<INamedType> aspectBuilder )
         {
-            aspectBuilder.Advices.ImplementInterface(aspectBuilder.Target, typeof(IDerivedInterface), whenExists: OverrideStrategy.Ignore);
+            aspectBuilder.Advices.ImplementInterface( aspectBuilder.Target, typeof(IDerivedInterface), whenExists: OverrideStrategy.Ignore );
         }
 
         [InterfaceMember]
         public int Foo()
         {
-            Console.WriteLine("This is introduced interface member.");
+            Console.WriteLine( "This is introduced interface member." );
+
             return meta.Proceed();
         }
 
         [InterfaceMember]
         public int Bar()
         {
-            Console.WriteLine("This is introduced interface member.");
+            Console.WriteLine( "This is introduced interface member." );
+
             return meta.Proceed();
         }
     }
@@ -49,7 +50,8 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
     {
         public int Foo()
         {
-            Console.WriteLine("This is original interface member.");
+            Console.WriteLine( "This is original interface member." );
+
             return 13;
         }
     }

@@ -1,10 +1,8 @@
-using System;
 using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
 
 namespace Caravela.Framework.Tests.PublicPipeline.Aspects.Nullable.QuestionMark
 {
-    internal class Aspect : Attribute, IAspect<INamedType>
+    internal class Aspect : TypeAspect
     {
         [Introduce]
         private string? Introduced( string? a ) => a?.ToString();

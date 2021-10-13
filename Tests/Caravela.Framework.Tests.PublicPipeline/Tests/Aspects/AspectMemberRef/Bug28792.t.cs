@@ -1,5 +1,5 @@
-[RegistryStorage("Animals")]
-    class Animals
+[RegistryStorage( "Animals" )]
+    internal class Animals
     {
 
 
@@ -19,5 +19,4 @@ private int _turtles;
 set    {
 this._turtles=value;    }
 }
-
     }

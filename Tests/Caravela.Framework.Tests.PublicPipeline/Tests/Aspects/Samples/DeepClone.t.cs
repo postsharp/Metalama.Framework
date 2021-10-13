@@ -1,12 +1,12 @@
-class Targets
+internal class Targets
     {
         [DeepClone]
-        class AutomaticallyCloneable:global::System.ICloneable        {
-            int a;
+        private class AutomaticallyCloneable:global::System.ICloneable        {
+            private int a;
 
-            ManuallyCloneable? b;
+            private ManuallyCloneable? b;
 
-            AutomaticallyCloneable? c;
+            private AutomaticallyCloneable? c;
 
 
 public virtual global::Caravela.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty.Targets.AutomaticallyCloneable Clone()
@@ -27,7 +27,7 @@ global::System.Object global::System.ICloneable.Clone()
 }        }
 
         [DeepClone]
-        class Derived : AutomaticallyCloneable
+        private class Derived : AutomaticallyCloneable
         {
             private string d;
 

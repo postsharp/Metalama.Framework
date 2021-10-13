@@ -2,35 +2,33 @@ using System;
 using System.Linq;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
-using Caravela.TestFramework;
 
 namespace Caravela.Framework.IntegrationTests.Aspects.Overrides.Fields.MultipleDeclarators_AllOverridden
 {
-    public class TestAttribute : Attribute, IAspect<INamedType>
+    public class TestAttribute : TypeAspect
     {
-        public void BuildAspect(IAspectBuilder<INamedType> builder)
+        public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advices.OverrideFieldOrProperty(builder.Target.Fields.OfName("A").Single(), nameof(PropertyTemplate));
-            builder.Advices.OverrideFieldOrProperty(builder.Target.Fields.OfName("B").Single(), nameof(PropertyTemplate));
-            builder.Advices.OverrideFieldOrProperty(builder.Target.Fields.OfName("C").Single(), nameof(PropertyTemplate));
+            builder.Advices.OverrideFieldOrProperty( builder.Target.Fields.OfName( "A" ).Single(), nameof(PropertyTemplate) );
+            builder.Advices.OverrideFieldOrProperty( builder.Target.Fields.OfName( "B" ).Single(), nameof(PropertyTemplate) );
+            builder.Advices.OverrideFieldOrProperty( builder.Target.Fields.OfName( "C" ).Single(), nameof(PropertyTemplate) );
         }
 
         [Template]
-        public dynamic? PropertyTemplate 
+        public dynamic? PropertyTemplate
         {
             get
             {
-                Console.WriteLine("This is aspect code.");
+                Console.WriteLine( "This is aspect code." );
+
                 return meta.Proceed();
             }
             set
             {
-                Console.WriteLine("This is aspect code.");
+                Console.WriteLine( "This is aspect code." );
                 meta.Proceed();
             }
         }
-        
-
     }
 
     // <target>
@@ -39,6 +37,7 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Overrides.Fields.MultipleD
     {
         // Comment before.
         public int A, B, C;
+
         // Comment after.
     }
 }

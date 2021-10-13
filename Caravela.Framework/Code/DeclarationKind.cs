@@ -52,9 +52,9 @@ namespace Caravela.Framework.Code
         Parameter,
 
         /// <summary>
-        /// <see cref="IGenericParameter"/>.
+        /// <see cref="ITypeParameter"/>.
         /// </summary>
-        GenericParameter,
+        TypeParameter,
 
         /// <summary>
         /// <see cref="IAttribute"/>.

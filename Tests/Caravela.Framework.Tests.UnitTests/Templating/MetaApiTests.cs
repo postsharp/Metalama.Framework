@@ -24,14 +24,18 @@ namespace Caravela.Framework.Tests.UnitTests.Templating
             await Assert.ThrowsAsync<InvalidOperationException>( meta.ProceedAsync );
             Assert.Throws<InvalidOperationException>( meta.ProceedEnumerable );
             Assert.Throws<InvalidOperationException>( meta.ProceedEnumerator );
-            Assert.Throws<InvalidOperationException>( meta.ProceedAsyncEnumerable );
-            Assert.Throws<InvalidOperationException>( meta.ProceedAsyncEnumerator );
+
             Assert.Throws<InvalidOperationException>( () => meta.CompileTime( 0 ) );
             Assert.Throws<InvalidOperationException>( () => meta.RunTime( 0 ) );
             Assert.Throws<InvalidOperationException>( meta.DebugBreak );
             Assert.Throws<InvalidOperationException>( () => meta.InsertComment( "" ) );
             Assert.Throws<InvalidOperationException>( () => meta.DefineExpression( "", out _ ) );
             Assert.Throws<InvalidOperationException>( () => meta.ParseExpression( "" ) );
+
+#if NET5_0
+            Assert.Throws<InvalidOperationException>( meta.ProceedAsyncEnumerable );
+            Assert.Throws<InvalidOperationException>( meta.ProceedAsyncEnumerator );
+#endif
         }
     }
 }

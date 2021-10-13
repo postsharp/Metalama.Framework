@@ -412,7 +412,7 @@ namespace Caravela.Framework.Impl.Advices
             foreach ( var interfaceGenericParameter in interfaceMethod.TypeParameters )
             {
                 // TODO: Move this initialization into a second overload of add generic parameter.
-                var genericParameterBuilder = methodBuilder.AddGenericParameter( interfaceGenericParameter.Name );
+                var genericParameterBuilder = methodBuilder.AddTypeParameter( interfaceGenericParameter.Name );
                 genericParameterBuilder.Variance = interfaceGenericParameter.Variance;
                 genericParameterBuilder.TypeKindConstraint = interfaceGenericParameter.TypeKindConstraint;
                 genericParameterBuilder.HasDefaultConstructorConstraint = interfaceGenericParameter.HasDefaultConstructorConstraint;

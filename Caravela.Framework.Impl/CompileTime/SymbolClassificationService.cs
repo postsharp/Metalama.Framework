@@ -9,16 +9,16 @@ using System.Runtime.CompilerServices;
 
 namespace Caravela.Framework.Impl.CompileTime
 {
-    internal partial class SymbolClassificationService : IService
+    internal class SymbolClassificationService : IService
     {
         private readonly IServiceProvider _serviceProvider;
         private readonly ConditionalWeakTable<Compilation, ISymbolClassifier> _instances = new();
-        private readonly NoCaravelaReferenceClassifier _noCaravelaReferenceClassifier;
+        private readonly SymbolClassifier _noCaravelaReferenceClassifier;
 
         public SymbolClassificationService( IServiceProvider serviceProvider )
         {
             this._serviceProvider = serviceProvider;
-            this._noCaravelaReferenceClassifier = new NoCaravelaReferenceClassifier( serviceProvider );
+            this._noCaravelaReferenceClassifier = new SymbolClassifier( serviceProvider, null );
         }
 
         /// <summary>
@@ -31,7 +31,7 @@ namespace Caravela.Framework.Impl.CompileTime
                 {
                     var hasCaravelaReference = compilation.GetTypeByMetadataName( typeof(CompileTimeAttribute).FullName ) != null;
 
-                    return hasCaravelaReference ? new SymbolClassifier( c, this._serviceProvider ) : this._noCaravelaReferenceClassifier;
+                    return hasCaravelaReference ? new SymbolClassifier( this._serviceProvider, c ) : this._noCaravelaReferenceClassifier;
                 } );
     }
 }

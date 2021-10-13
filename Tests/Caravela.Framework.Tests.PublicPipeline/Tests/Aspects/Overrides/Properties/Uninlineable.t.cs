@@ -22,12 +22,12 @@ private int Property_Source
         {
             get
             {
-                return this._field;
+                return _field;
             }
 
             set
             {
-                this._field = value;
+                _field = value;
             }
         }
 

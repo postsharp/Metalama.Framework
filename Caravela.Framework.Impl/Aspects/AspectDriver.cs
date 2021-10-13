@@ -71,7 +71,7 @@ namespace Caravela.Framework.Impl.Aspects
                     projectConfiguration,
                     cancellationToken ),
                 IParameter parameter => this.EvaluateAspect( parameter, aspectInstance, compilationModelRevision, projectConfiguration, cancellationToken ),
-                IGenericParameter genericParameter => this.EvaluateAspect(
+                ITypeParameter genericParameter => this.EvaluateAspect(
                     genericParameter,
                     aspectInstance,
                     compilationModelRevision,

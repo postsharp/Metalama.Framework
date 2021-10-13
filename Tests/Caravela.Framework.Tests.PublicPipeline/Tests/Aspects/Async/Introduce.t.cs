@@ -1,7 +1,5 @@
 [Aspect]
-    class TargetCode
-    {
-
+    internal class TargetCode { 
 
 public async global::System.Threading.Tasks.Task DeclarativelyMethodAsync()
 {
@@ -11,4 +9,4 @@ public async global::System.Threading.Tasks.Task DeclarativelyMethodAsync()
 public async global::System.Threading.Tasks.Task ProgrammaticallyMethodAsync()
 {
     await global::System.Threading.Tasks.Task.Yield();
-}    }
+}}

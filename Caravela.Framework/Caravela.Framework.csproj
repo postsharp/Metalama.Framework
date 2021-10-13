@@ -9,14 +9,11 @@
     </PackageDescription>
 
   </PropertyGroup>
-  
-  <PropertyGroup Condition="'$(TargetFramework)'=='netstandard2.0'">
-    <GenerateDocumentationFile>False</GenerateDocumentationFile>
-    <NoWarn>$(NoWarn);SA0001</NoWarn>  
-   </PropertyGroup>
+
 
    <ItemGroup>
     <Compile Include="..\NullableAttributes.cs" Link="NullableAttributes.cs" />
+
   </ItemGroup>
 
   <ItemGroup>

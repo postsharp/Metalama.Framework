@@ -1,7 +1,7 @@
-class TargetCode
+internal class TargetCode
     {
         [Aspect]
-        public  async IAsyncEnumerable<int> AsyncEnumerable(int a)
+        public  async IAsyncEnumerable<int> AsyncEnumerable( int a )
 {
     await global::System.Threading.Tasks.Task.Yield();
     global::System.Console.WriteLine("Before AsyncEnumerable");
@@ -18,19 +18,25 @@ class TargetCode
 
 private IAsyncEnumerable<int> AsyncEnumerable_Source(int a)
         {
-            Console.WriteLine("Not Async");
-            return this.AsyncEnumerableImpl(a);
+            Console.WriteLine( "Not Async" );
+
+            return AsyncEnumerableImpl( a );
         }
-        
-        private async IAsyncEnumerable<int> AsyncEnumerableImpl(int a)
+
+        private async IAsyncEnumerable<int> AsyncEnumerableImpl( int a )
         {
-            Console.WriteLine("Yield 1");
+            Console.WriteLine( "Yield 1" );
+
             yield return 1;
+
             await Task.Yield();
-            Console.WriteLine("Yield 2");
+            Console.WriteLine( "Yield 2" );
+
             yield return 2;
+
             await Task.Yield();
-            Console.WriteLine("Yield 3");
+            Console.WriteLine( "Yield 3" );
+
             yield return 3;
         }
     }

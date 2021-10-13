@@ -14,11 +14,10 @@ namespace Caravela.Framework.Impl.Aspects
         private readonly AspectInstance _primaryInstance;
         private readonly IReadOnlyList<AspectInstance> _otherInstances;
 
-        private AggregateAspectInstance( List<AspectInstance> aspectInstances )
+        private AggregateAspectInstance( AspectInstance firstInstance, List<AspectInstance> otherInstances )
         {
-            this._primaryInstance = aspectInstances.First();
-            aspectInstances.RemoveAt( 0 );
-            this._otherInstances = aspectInstances;
+            this._primaryInstance = firstInstance;
+            this._otherInstances = otherInstances;
         }
 
         public static IAspectInstanceInternal GetInstance( IEnumerable<AspectInstance> aspectInstances )
@@ -33,7 +32,10 @@ namespace Caravela.Framework.Impl.Aspects
             {
                 instancesList.Sort();
 
-                return new AggregateAspectInstance( instancesList );
+                var firstInstance = instancesList[0];
+                instancesList.RemoveAt( 0 );
+
+                return new AggregateAspectInstance( firstInstance, instancesList );
             }
         }
 

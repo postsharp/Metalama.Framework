@@ -5,8 +5,10 @@ using Caravela.Framework.Impl.Utilities;
 using System;
 using System.Diagnostics;
 using System.IO;
-using System.Threading.Tasks;
 using Xunit;
+#if NET5_0
+using System.Threading.Tasks;
+#endif
 
 namespace Caravela.Framework.Tests.UnitTests.Utilities
 {
@@ -44,12 +46,17 @@ namespace Caravela.Framework.Tests.UnitTests.Utilities
                 WriteFile( $"file{i}.cs", sourceFiles[i] );
             }
 
-            var psi = new ProcessStartInfo( "dotnet", "build" ) { WorkingDirectory = dir, RedirectStandardOutput = true };
+            var psi = new ProcessStartInfo( "dotnet", "build" ) { WorkingDirectory = dir, RedirectStandardOutput = true, UseShellExecute = false };
             var process = Process.Start( psi )!;
-            var completion = process.WaitForExitAsync();
             var outputPromise = process.StandardOutput.ReadToEndAsync();
 
+#if NET5_0
+            var completion = process.WaitForExitAsync();
             Task.WhenAll( completion, outputPromise ).Wait();
+#else
+            process.WaitForExit();
+            outputPromise.Wait();
+#endif
 
             Assert.True( process.ExitCode == 0, outputPromise.Result );
 

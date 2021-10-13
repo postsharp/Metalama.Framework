@@ -1,14 +1,11 @@
 ﻿#pragma warning disable CS0067
 
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
-using Caravela.Framework.Eligibility;
-using Caravela.TestFramework;
 using System;
+using Caravela.Framework.Aspects;
 
 namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Events.Declarative
 {
-    public class IntroductionAttribute : Attribute, IAspect<INamedType>
+    public class IntroductionAttribute : TypeAspect
     {
         [Introduce]
         public event EventHandler? Event;
@@ -16,7 +13,5 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
 
     // <target>
     [Introduction]
-    internal class TargetClass
-    {
-    }
+    internal class TargetClass { }
 }

@@ -1,53 +1,48 @@
 ﻿// @AddHtmlTitles
 
+using System;
 using Caravela.TestFramework;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
+using Caravela.Framework.Eligibility;
 
 namespace Caravela.Framework.Tests.Integration.TestInputs.Highlighting.IfStatements.HtmlTitles
 {
-    class RunTimeClass
+    internal class RunTimeClass
     {
-        public void RunTimeMethod()
-        {
-        }
+        public void RunTimeMethod() { }
     }
 
     [CompileTimeOnly]
-    class CompileTimeClass
+    internal class CompileTimeClass
     {
-        public void CompileTimeMethod()
-        {
-        }
+        public void CompileTimeMethod() { }
     }
-    
 
     // Base list should be documented.
     [CompileTime]
-    class Aspect : OverrideMethodAspect, IAspect<INamedType>
+    internal class Aspect : OverrideMethodAspect, IAspect<INamedType>
     {
-        
         // Override should be documented.
         public override dynamic? OverrideMethod()
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
-        public override void BuildAspect( IAspectBuilder<IMethod> builder )
-        {
-            
-        }
+        public override void BuildAspect( IAspectBuilder<IMethod> builder ) { }
 
         // Explicit interface implementation should be documented.
         void IAspect<INamedType>.BuildAspect( IAspectBuilder<INamedType> builder ) { }
 
         [Template]
-        dynamic? Template()
+        private dynamic? Template()
         {
             var m = meta.Target.Method;
             var p = meta.Target.Method.Parameters[0].Value;
-            
+
             return meta.Proceed();
         }
+
+        void IEligible<INamedType>.BuildEligibility( IEligibilityBuilder<INamedType> builder ) { }
     }
 }

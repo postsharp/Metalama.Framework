@@ -228,7 +228,7 @@ class C<T1, T2>
 
             var type = compilation.Types.Single();
 
-            Assert.Equal( new[] { "T1", "T2" }, type.TypeArguments.Select<IType, string>( t => t.ToString()! ) );
+            Assert.Equal( new[] { "T1", "T2" }, type.TypeArguments.Select( t => t.ToString().AssertNotNull() ) );
 
             var method = type.Methods.First();
 

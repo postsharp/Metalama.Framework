@@ -1,12 +1,11 @@
-using System;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 
 namespace Caravela.Framework.Tests.PublicPipeline.Aspects.Misc.CompileTimeRecord
 {
-    internal class Aspect : Attribute, IAspect<IMethod>
+    internal class Aspect : MethodAspect
     {
-        public void BuildAspect( IAspectBuilder<IMethod> builder )
+        public override void BuildAspect( IAspectBuilder<IMethod> builder )
         {
             // This is just to test that it builds.
             CompileTimeRecord r = new( 0, "" );
