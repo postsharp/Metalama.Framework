@@ -73,7 +73,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
 
                 var formattedOutputCompilation = await OutputCodeFormatter.FormatToSyntaxAsync( outputCompilation!, CancellationToken.None );
 
-                var transformedSyntaxTree = formattedOutputCompilation.Compilation.SyntaxTrees.SingleOrDefault();
+                var transformedSyntaxTree = formattedOutputCompilation.Compilation.SyntaxTrees.FirstOrDefault();
 
                 var transformedSyntaxRoot = transformedSyntaxTree == null
                     ? SyntaxFactory.GlobalStatement( SyntaxFactoryEx.EmptyStatement )

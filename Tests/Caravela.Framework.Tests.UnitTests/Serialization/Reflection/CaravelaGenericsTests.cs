@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Impl;
 using Caravela.Framework.Impl.ReflectionMocks;
 using System;
 using System.Linq;
@@ -62,7 +63,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
                 info =>
                 {
                     Assert.Equal( "ReturnSelf", info.Name );
-                    Assert.Equal( "TKey", info.ReturnParameter.ParameterType.Name );
+                    Assert.Equal( "TKey", info.ReturnParameter.AssertNotNull().ParameterType.Name );
                 } );
         }
 

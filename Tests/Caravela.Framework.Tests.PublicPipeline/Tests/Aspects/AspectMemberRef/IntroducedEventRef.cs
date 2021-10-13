@@ -1,30 +1,22 @@
-using System;
 using System.ComponentModel;
 using Caravela.Framework.Aspects;
-using Caravela.TestFramework;
-using Caravela.Framework.Code;
 
 namespace Caravela.Framework.IntegrationTests.Aspects.AspectMemberRef.IntroducedEventRef
 {
-
-    public class RetryAttribute : Attribute, IAspect<INamedType>
+    public class RetryAttribute : TypeAspect
     {
         [Introduce]
-        void IntroducedMethod1( string name ) 
+        private void IntroducedMethod1( string name )
         {
-            this.MyEvent?.Invoke( meta.This, new PropertyChangedEventArgs( name ) );
-            this.MyEvent( meta.This, new PropertyChangedEventArgs( name ) );
+            MyEvent?.Invoke( meta.This, new PropertyChangedEventArgs( name ) );
+            MyEvent( meta.This, new PropertyChangedEventArgs( name ) );
         }
-        
+
         [Introduce]
-        event PropertyChangedEventHandler? MyEvent;
-        
+        private event PropertyChangedEventHandler? MyEvent;
     }
-    
+
     // <target>
     [Retry]
-    class Program
-    {
-
-    }
+    internal class Program { }
 }

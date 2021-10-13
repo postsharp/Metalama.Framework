@@ -14,7 +14,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
             public override IType Type
             {
-                get => ((EventBuilder) this.Accessor._containingDeclaration).Type;
+                get => ((EventBuilder) this.Accessor.ContainingMember).Type;
                 set => throw new NotSupportedException( "Cannot directly change accessor's value parameter type." );
             }
 

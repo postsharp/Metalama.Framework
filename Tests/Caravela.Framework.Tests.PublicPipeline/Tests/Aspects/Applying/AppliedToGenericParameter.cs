@@ -1,22 +1,20 @@
 using System;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
-using Caravela.TestFramework;
 
 namespace Caravela.Framework.IntegrationTests.Aspects.Applying.AppliedToGenericParameter
 {
-    public class MyAspect : Attribute, IAspect<IGenericParameter> 
-    { 
-        public void BuildAspect( IAspectBuilder<IGenericParameter> builder )
+    public class MyAspect : TypeParameterAspect
+    {
+        public override void BuildAspect( IAspectBuilder<ITypeParameter> builder )
         {
-            throw new Exception("Oops");
+            throw new Exception( "Oops" );
         }
     }
-
 
     // <target>
     internal class TargetClass
     {
-        void M<[MyAspect] T>(int a ) {}
+        private void M<[MyAspect] T>( int a ) { }
     }
 }

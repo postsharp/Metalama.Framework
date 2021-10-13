@@ -4,16 +4,24 @@
         <Compile Remove="$(MSBuildProjectDirectory)\**\*.t.cs" />
         <None Include="$(MSBuildProjectDirectory)\**\*.t.cs" />
         <None Remove="$(MSBuildProjectDirectory)\obj\**\*.cs" />
+
+
     </ItemGroup>
 
-    <Target Name='WriteReferenceAssemblies' DependsOnTargets='FindReferenceAssembliesForReferences'
-            AfterTargets="Build">
+    <ItemGroup>
+        <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+            <_Parameter1>TargetFramework</_Parameter1>
+            <_Parameter2>$(TargetFramework)</_Parameter2>
+        </AssemblyAttribute>
+        <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+            <_Parameter1>DefineConstants</_Parameter1>
+            <_Parameter2>$(DefineConstants)</_Parameter2>
+        </AssemblyAttribute>
+    </ItemGroup>
+
+    <Target Name='WriteReferenceAssemblies' AfterTargets="Build">
         <WriteLinesToFile File='$(IntermediateOutputPath)assemblies.txt' Overwrite='true'
                           Lines='@(ReferencePathWithRefAssemblies)' />
-        <!--
-        <WriteLinesToFile File='$(IntermediateOutputPath)assemblies.txt' Overwrite='false'
-                          Lines='$(OutputPath)\$(AssemblyName).dll' />
-                          -->
     </Target>
 
     <Target Name="GenerateCaravelaTestDefaultRunner" BeforeTargets="CoreCompile"
@@ -72,8 +80,8 @@ namespace $(RootNamespace)
 
     <Target Name="AcceptTestOutput">
         <ItemGroup>
-            <_AcceptTestOutput Include="obj\\transformed\**\*.cs" />
-            <_AcceptTestOutput Include="obj\\transformed\**\*.txt" />
+            <_AcceptTestOutput Include="obj\\transformed\$(TargetFramework)\**\*.cs" />
+            <_AcceptTestOutput Include="obj\\transformed\$(TargetFramework)\**\*.txt" />
         </ItemGroup>
         <Copy
             SourceFiles="@(_AcceptTestOutput)"
@@ -82,7 +90,7 @@ namespace $(RootNamespace)
 
     <Target Name="AcceptTestHtml">
         <ItemGroup>
-            <_AcceptTestOutput Include="obj\\html\**\*.cs.html" />
+            <_AcceptTestOutput Include="obj\\html\$(TargetFramework)\**\*.cs.html" />
         </ItemGroup>
         <Copy
             SourceFiles="@(_AcceptTestOutput)"

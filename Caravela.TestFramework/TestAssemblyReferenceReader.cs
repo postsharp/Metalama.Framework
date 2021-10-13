@@ -37,7 +37,7 @@ namespace Caravela.TestFramework
             }
 
             TestDiscoverer testDiscoverer = new( assembly );
-            var projectDirectory = testDiscoverer.FindProjectDirectory();
+            var projectDirectory = testDiscoverer.GetTestProjectProperties().ProjectDirectory;
 
             var path = (string) attribute.GetConstructorArguments().ElementAt( 1 )!;
 

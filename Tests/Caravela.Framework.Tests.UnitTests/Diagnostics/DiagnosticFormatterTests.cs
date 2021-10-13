@@ -12,7 +12,7 @@ namespace Caravela.Framework.Tests.UnitTests.Diagnostics
         [Theory]
         [InlineData( 1, "1" )]
         [InlineData( DeclarationKind.Attribute, "attribute" )]
-        [InlineData( DeclarationKind.GenericParameter, "generic parameter" )]
+        [InlineData( DeclarationKind.TypeParameter, "generic parameter" )]
         [InlineData( DeclarationKind.ManagedResource, "managed resource" )]
         [InlineData( DeclarationKind.AssemblyReference, "assembly reference" )]
         [InlineData( Accessibility.Private, "private" )]

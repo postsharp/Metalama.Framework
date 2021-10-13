@@ -15,6 +15,7 @@ using Caravela.Framework.Impl.Templating.MetaModel;
 using Caravela.Framework.Impl.Utilities;
 using Caravela.Framework.Project;
 using Caravela.TestFramework;
+using Caravela.TestFramework.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -25,12 +26,14 @@ using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.Loader;
 using System.Text;
 using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
 using RefKind = Caravela.Framework.Code.RefKind;
+#if NET5_0
+using System.Runtime.Loader;
+#endif
 
 namespace Caravela.Framework.Tests.Integration.Runners
 {
@@ -39,8 +42,6 @@ namespace Caravela.Framework.Tests.Integration.Runners
     /// </summary>
     internal class TemplatingTestRunner : BaseTestRunner
     {
-        private static string GeneratedDirectoryPath => Path.Combine( Environment.CurrentDirectory, "generated" );
-
         private readonly IEnumerable<CSharpSyntaxVisitor> _testAnalyzers;
 
         /// <summary>
@@ -135,11 +136,14 @@ namespace Caravela.Framework.Tests.Integration.Runners
             testSyntaxTree.AnnotatedSyntaxRoot = annotatedTemplateSyntax;
 
             // Write the transformed code to disk.
-            var transformedTemplatePath = Path.Combine( GeneratedDirectoryPath, Path.ChangeExtension( testInput.TestName, ".cs" ) );
+            var generatedDirectoryPath = Path.Combine( testInput.ProjectDirectory, "obj", testInput.ProjectProperties.TargetFramework, "generated" );
+            var transformedTemplatePath = Path.Combine( generatedDirectoryPath, Path.ChangeExtension( testInput.TestName, ".cs" ) );
             var transformedTemplateText = await transformedTemplateSyntax!.SyntaxTree.GetTextAsync();
             Directory.CreateDirectory( Path.GetDirectoryName( transformedTemplatePath )! );
 
-            await using ( var textWriter = new StreamWriter( transformedTemplatePath, false, Encoding.UTF8 ) )
+            var textWriter = new StreamWriter( transformedTemplatePath, false, Encoding.UTF8 );
+
+            using ( textWriter.IgnoreAsyncDisposable() )
             {
                 transformedTemplateText.Write( textWriter );
             }
@@ -195,8 +199,13 @@ namespace Caravela.Framework.Tests.Integration.Runners
 
             buildTimeAssemblyStream.Seek( 0, SeekOrigin.Begin );
             buildTimeDebugStream.Seek( 0, SeekOrigin.Begin );
+#if NET5_0
             var assemblyLoadContext = new AssemblyLoadContext( null, true );
+
             var assembly = assemblyLoadContext.LoadFromStream( buildTimeAssemblyStream, buildTimeDebugStream );
+#else
+            var assembly = Assembly.Load( buildTimeAssemblyStream.GetBuffer(), buildTimeDebugStream.GetBuffer() );
+#endif
 
             try
             {
@@ -239,10 +248,12 @@ namespace Caravela.Framework.Tests.Integration.Runners
             {
                 testResult.SetFailed( "Exception during template expansion: " + e.Message, e );
             }
+#if NET5_0
             finally
             {
                 assemblyLoadContext.Unload();
             }
+#endif
         }
 
         private static (TemplateExpansionContext Context, MethodDeclarationSyntax TargetMethod) CreateTemplateExpansionContext(

@@ -13,10 +13,10 @@ namespace Caravela.Framework.Aspects
     /// </summary>
     /// <seealso href="@overriding-fields-or-properties"/>
     [AttributeUsage( AttributeTargets.Property | AttributeTargets.Field )]
-    public abstract class OverrideFieldOrPropertyAspect : Attribute, IAspect<IFieldOrProperty>
+    public abstract class OverrideFieldOrPropertyAspect : FieldOrPropertyAspect
     {
         /// <inheritdoc />
-        public virtual void BuildAspect( IAspectBuilder<IFieldOrProperty> builder )
+        public override void BuildAspect( IAspectBuilder<IFieldOrProperty> builder )
         {
             var getterTemplateSelector = new GetterTemplateSelector(
                 "get_" + nameof(this.OverrideProperty),
@@ -26,9 +26,8 @@ namespace Caravela.Framework.Aspects
             builder.Advices.OverrideFieldOrPropertyAccessors( builder.Target, getterTemplateSelector, "set_" + nameof(this.OverrideProperty) );
         }
 
-        public virtual void BuildEligibility( IEligibilityBuilder<IFieldOrProperty> builder ) => builder.ExceptForInheritance().MustBeNonAbstract();
-
-        public virtual void BuildAspectClass( IAspectClassBuilder builder ) { }
+        /// <inheritdoc />
+        public override void BuildEligibility( IEligibilityBuilder<IFieldOrProperty> builder ) => builder.ExceptForInheritance().MustBeNonAbstract();
 
         [Template]
         public abstract dynamic? OverrideProperty

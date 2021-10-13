@@ -1,10 +1,12 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.TestFramework.Utilities;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Xunit;
 using Xunit.Abstractions;
 
 namespace Caravela.TestFramework.XunitFramework
@@ -20,11 +22,16 @@ namespace Caravela.TestFramework.XunitFramework
 
             // If the directory contains both files and subdirectories, we have to generate a class name with a "Tests" suffix.
 
-            var directory = factory.ProjectDirectory;
+            var directory = factory.ProjectProperties.ProjectDirectory;
 
             if ( !string.IsNullOrEmpty( relativePath ) )
             {
                 directory = Path.Combine( directory, relativePath );
+            }
+            else
+            {
+                // When compiling with the .NET Framework, 'relativePath' is not recognized as not null.
+                Assert.NotNull( relativePath );
             }
 
             if ( Directory.GetDirectories( directory ).Length > 0 && Directory.GetFiles( directory ).Length > 0 )
@@ -35,7 +42,7 @@ namespace Caravela.TestFramework.XunitFramework
                 }
                 else
                 {
-                    this._name = relativePath.Replace( Path.DirectorySeparatorChar, '.' ) + ".Tests";
+                    this._name = relativePath.NotNull().Replace( Path.DirectorySeparatorChar, '.' ) + ".Tests";
                 }
             }
             else

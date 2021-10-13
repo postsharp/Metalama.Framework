@@ -1,31 +1,23 @@
-using System;
 using Caravela.Framework.Aspects;
-using Caravela.TestFramework;
-using Caravela.Framework.Code;
 
 namespace Caravela.Framework.IntegrationTests.Aspects.AspectMemberRef.IntroducedMethodRef
 {
-
-    public class RetryAttribute : Attribute, IAspect<INamedType>
+    public class RetryAttribute : TypeAspect
     {
         [Introduce]
-        void IntroducedMethod1( string name ) 
+        private void IntroducedMethod1( string name )
         {
-            this.IntroducedMethod2( meta.Target.Method.Name);
+            IntroducedMethod2( meta.Target.Method.Name );
         }
-        
+
         [Introduce]
-        void IntroducedMethod2( string name ) 
+        private void IntroducedMethod2( string name )
         {
-            this.IntroducedMethod1( meta.Target.Method.Name);
+            IntroducedMethod1( meta.Target.Method.Name );
         }
-        
     }
-    
+
     // <target>
     [Retry]
-    class Program
-    {
-
-    }
+    internal class Program { }
 }

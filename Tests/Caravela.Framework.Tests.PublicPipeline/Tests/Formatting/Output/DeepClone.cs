@@ -1,24 +1,22 @@
+// @RequiredConstant(NET5_0) - Return type covariance not supported in .NET Framework
+
+using System;
+using System.Linq;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
-using Caravela.Framework.Diagnostics;
-using Caravela.TestFramework;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 #pragma warning disable CS0067, CS8618, CS8602, CS8603, CS0169
 
 namespace Caravela.Framework.Tests.Integration.Tests.Formatting.Output
 {
-    class DeepCloneAttribute : Attribute, IAspect<INamedType>
+    internal class DeepCloneAttribute : TypeAspect
     {
-        public void BuildAspect(IAspectBuilder<INamedType> builder)
+        public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
             var typedMethod = builder.Advices.IntroduceMethod(
                 builder.Target,
                 nameof(CloneImpl),
-                whenExists: OverrideStrategy.Override);
+                whenExists: OverrideStrategy.Override );
 
             typedMethod.Name = "Clone";
             typedMethod.ReturnType = builder.Target;
@@ -26,51 +24,50 @@ namespace Caravela.Framework.Tests.Integration.Tests.Formatting.Output
             builder.Advices.ImplementInterface(
                 builder.Target,
                 typeof(ICloneable),
-                whenExists: OverrideStrategy.Ignore);
+                whenExists: OverrideStrategy.Ignore );
         }
 
-        [Template(IsVirtual = true)]
+        [Template( IsVirtual = true )]
         public virtual dynamic CloneImpl()
         {
             IExpression baseCall;
-          
+
             if (!meta.Target.Method.IsOverride)
             {
-                meta.DefineExpression( meta.Base.MemberwiseClone(), out baseCall);
+                meta.DefineExpression( meta.Base.MemberwiseClone(), out baseCall );
             }
             else
             {
-                meta.DefineExpression( meta.Target.Method.Invokers.Base.Invoke(meta.This), out baseCall);
+                meta.DefineExpression( meta.Target.Method.Invokers.Base.Invoke( meta.This ), out baseCall );
             }
-            
-            var clone = meta.Cast(meta.Target.Type, baseCall);
+
+            var clone = meta.Cast( meta.Target.Type, baseCall );
 
             // Select clonable fields.
             var clonableFields =
                 meta.Target.Type.FieldsAndProperties.Where(
                     f => f.IsAutoPropertyOrField &&
-                    (f.Type.Is(typeof(ICloneable)) ||
-                    (f.Type is INamedType fieldNamedType && fieldNamedType.Aspects<DeepCloneAttribute>().Any())));
+                         ( f.Type.Is( typeof(ICloneable) ) ||
+                           ( f.Type is INamedType fieldNamedType && fieldNamedType.Aspects<DeepCloneAttribute>().Any() ) ) );
 
             foreach (var field in clonableFields)
             {
                 field.Invokers.Final.SetValue(
                     clone,
-                    meta.Cast(field.Type, ((ICloneable)field.Invokers.Final.GetValue(meta.This)).Clone()));
+                    meta.Cast( field.Type, ( (ICloneable)field.Invokers.Final.GetValue( meta.This ) ).Clone() ) );
             }
 
             return clone;
         }
 
-        [InterfaceMember(IsExplicit = true)]
-        object Clone()
+        [InterfaceMember( IsExplicit = true )]
+        private object Clone()
         {
             return meta.This.Clone();
         }
     }
 
-    
-    class ManuallyCloneable : ICloneable
+    internal class ManuallyCloneable : ICloneable
     {
         public object Clone()
         {
@@ -79,20 +76,20 @@ namespace Caravela.Framework.Tests.Integration.Tests.Formatting.Output
     }
 
     // <target>
-    class Targets
+    internal class Targets
     {
         [DeepClone]
-        class AutomaticallyCloneable
+        private class AutomaticallyCloneable
         {
-            int a;
+            private int a;
 
-            ManuallyCloneable? b;
+            private ManuallyCloneable? b;
 
-            AutomaticallyCloneable? c;
+            private AutomaticallyCloneable? c;
         }
 
         [DeepClone]
-        class Derived : AutomaticallyCloneable
+        private class Derived : AutomaticallyCloneable
         {
             private string d;
         }

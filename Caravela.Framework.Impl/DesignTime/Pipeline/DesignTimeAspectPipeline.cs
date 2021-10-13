@@ -100,7 +100,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
                     {
                         hasRelevantChange = true;
                         Logger.Instance?.Write( $"Touching file '{file.Key}'." );
-                        File.SetLastWriteTimeUtc( file.Key, DateTime.UtcNow );
+                        RetryHelper.Retry( () => File.SetLastWriteTimeUtc( file.Key, DateTime.UtcNow ) );
                     }
                 }
 

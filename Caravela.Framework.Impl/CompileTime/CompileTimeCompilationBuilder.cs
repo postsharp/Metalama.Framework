@@ -214,7 +214,16 @@ namespace Caravela.Framework.Impl.CompileTime
         }
 
         private static string GetCompileTimeAssemblyName( string runTimeAssemblyName, ulong projectHash )
-            => $"Caravela_{runTimeAssemblyName}_{projectHash:x16}";
+        {
+            const string prefix = "CaravelaCompileTime_";
+
+            if ( runTimeAssemblyName.StartsWith( prefix, StringComparison.Ordinal ) )
+            {
+                throw new ArgumentOutOfRangeException( nameof(runTimeAssemblyName) );
+            }
+
+            return $"{prefix}{runTimeAssemblyName}_{projectHash:x16}";
+        }
 
         private CSharpCompilation CreateEmptyCompileTimeCompilation(
             string assemblyName,
@@ -648,6 +657,7 @@ namespace Caravela.Framework.Impl.CompileTime
                             .ToList();
 
                         var manifest = new CompileTimeProjectManifest(
+                            runTimeCompilation.Assembly.Identity.ToString(),
                             compileTimeCompilation.AssemblyName!,
                             aspectTypes,
                             compilerPlugInTypes,

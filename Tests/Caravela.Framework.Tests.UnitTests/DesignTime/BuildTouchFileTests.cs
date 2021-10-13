@@ -35,7 +35,7 @@ using System;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 
-    public class IntroductionAttribute : Attribute, IAspect<INamedType>
+    public class IntroductionAttribute : TypeAspect
     {
         [Introduce]
         public void IntroducedMethod_Void()

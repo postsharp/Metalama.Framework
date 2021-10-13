@@ -1,7 +1,6 @@
-﻿using Caravela.Framework.Aspects;
+﻿using System;
+using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
-using Caravela.TestFramework;
-using System;
 
 #pragma warning disable CS0067
 
@@ -24,17 +23,18 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
         int AutoProperty { get; set; }
     }
 
-    public class IntroductionAttribute : Attribute, IAspect<INamedType>
+    public class IntroductionAttribute : TypeAspect
     {
-        public void BuildAspect(IAspectBuilder<INamedType> aspectBuilder)
+        public override void BuildAspect( IAspectBuilder<INamedType> aspectBuilder )
         {
-            aspectBuilder.Advices.ImplementInterface(aspectBuilder.Target, typeof(IInterface));
+            aspectBuilder.Advices.ImplementInterface( aspectBuilder.Target, typeof(IInterface) );
         }
 
         [InterfaceMember]
         public int InterfaceMethod()
         {
-            Console.WriteLine("This is introduced interface member.");
+            Console.WriteLine( "This is introduced interface member." );
+
             return meta.Proceed();
         }
 
@@ -43,12 +43,12 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
         {
             add
             {
-                Console.WriteLine("This is introduced interface member.");
+                Console.WriteLine( "This is introduced interface member." );
             }
 
             remove
             {
-                Console.WriteLine("This is introduced interface member.");
+                Console.WriteLine( "This is introduced interface member." );
             }
         }
 
@@ -60,13 +60,14 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
         {
             get
             {
-                Console.WriteLine("This is introduced interface member.");
+                Console.WriteLine( "This is introduced interface member." );
+
                 return 42;
             }
 
             set
             {
-                Console.WriteLine("This is introduced interface member.");
+                Console.WriteLine( "This is introduced interface member." );
             }
         }
 
@@ -76,7 +77,5 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
 
     // <target>
     [Introduction]
-    public class TargetClass
-    {
-    }
+    public class TargetClass { }
 }

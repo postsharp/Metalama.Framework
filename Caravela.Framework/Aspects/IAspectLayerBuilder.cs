@@ -24,7 +24,8 @@ namespace Caravela.Framework.Aspects
         IProject Project { get; }
 
         /// <summary>
-        /// Gets the current
+        /// Gets the current <see cref="IAspectInstance"/>, which gives access to the <see cref="IAspectInstance.Predecessors"/>
+        /// and the <see cref="IAspectInstance.OtherInstances"/> of the current aspect.
         /// </summary>
         IAspectInstance AspectInstance { get; }
 

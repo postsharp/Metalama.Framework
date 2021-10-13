@@ -1,35 +1,37 @@
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
-using Caravela.TestFramework;
+// @RequiredConstant(NET5_0)
+// In .NET Framework, INotifyPropertyChanged.PropertyChanged is not marked as nullable, so the output is slightly different.
+
 using System;
 using System.ComponentModel;
 using System.Linq;
+using Caravela.Framework.Aspects;
+using Caravela.Framework.Code;
 
 #pragma warning disable CS0067
 
 namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Samples.NotifyPropertyChanged
 {
-    [AttributeUsage(AttributeTargets.Class)]
-    public class NotifyPropertyChangedAttribute : Attribute, IAspect<INamedType>
+    [AttributeUsage( AttributeTargets.Class )]
+    public class NotifyPropertyChangedAttribute : TypeAspect
     {
-        public void BuildAspect(IAspectBuilder<INamedType> builder)
+        public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advices.ImplementInterface(builder.Target, typeof(INotifyPropertyChanged));
+            builder.Advices.ImplementInterface( builder.Target, typeof(INotifyPropertyChanged) );
 
-            foreach(var property in builder.Target.Properties
-                .Where(p => p.Accessibility == Accessibility.Public && p.Writeability == Writeability.All))
+            foreach (var property in builder.Target.Properties
+                .Where( p => p.Accessibility == Accessibility.Public && p.Writeability == Writeability.All ))
             {
-                builder.Advices.OverrideFieldOrPropertyAccessors(property, null, nameof(SetPropertyTemplate));
+                builder.Advices.OverrideFieldOrPropertyAccessors( property, null, nameof(SetPropertyTemplate) );
             }
         }
 
         [InterfaceMember]
         public event PropertyChangedEventHandler? PropertyChanged;
-        
+
         [Introduce]
         protected virtual void OnPropertyChanged( string name )
         {
-            meta.This.PropertyChanged?.Invoke(meta.This, new PropertyChangedEventArgs(meta.Target.Parameters[0].Value));
+            meta.This.PropertyChanged?.Invoke( meta.This, new PropertyChangedEventArgs( meta.Target.Parameters[0].Value ) );
         }
 
         [Template]
@@ -39,7 +41,7 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Samples.Notify
 
             if (value != meta.Target.Property.Value)
             {
-                meta.This.OnPropertyChanged(meta.Target.Property.Name);
+                meta.This.OnPropertyChanged( meta.Target.Property.Name );
 
                 // TODO: Fix after Proceed refactoring (28573).
                 meta.Proceed();
@@ -51,10 +53,10 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Samples.Notify
 
     // <target>
     [NotifyPropertyChanged]
-    class Car
+    internal class Car
     {
         public string? Make { get; set; }
-        public double Power { get; set; }
 
+        public double Power { get; set; }
     }
 }

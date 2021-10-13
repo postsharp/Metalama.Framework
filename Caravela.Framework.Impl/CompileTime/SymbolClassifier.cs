@@ -8,10 +8,9 @@ using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Reflection;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Caravela.Framework.Impl.CompileTime
@@ -25,38 +24,60 @@ namespace Caravela.Framework.Impl.CompileTime
         /// List of well-known types, for which the scope is overriden (i.e. this list takes precedence over any other rule).
         /// 'MembersOnly' means that the rule applies to the members of the type, but not to the type itself.
         /// </summary>
-        private static readonly Dictionary<string, (string Namespace, TemplatingScope Scope, bool MembersOnly)> _wellKnownRunTimeTypes =
+        private static readonly ImmutableDictionary<string, (string Namespace, TemplatingScope Scope, bool MembersOnly)> _wellKnownTypes =
             new (Type ReflectionType, TemplatingScope Scope, bool MembersOnly)[]
             {
                 (typeof(Console), Scope: TemplatingScope.RunTimeOnly, false),
-                (typeof(Process), Scope: TemplatingScope.RunTimeOnly, false),
-                (typeof(Thread), Scope: TemplatingScope.RunTimeOnly, false),
+                (typeof(GC), Scope: TemplatingScope.RunTimeOnly, false),
+                (typeof(GCCollectionMode), Scope: TemplatingScope.RunTimeOnly, false),
+                (typeof(GCNotificationStatus), Scope: TemplatingScope.RunTimeOnly, false),
+                (typeof(RuntimeArgumentHandle), Scope: TemplatingScope.RunTimeOnly, false),
+                (typeof(RuntimeFieldHandle), Scope: TemplatingScope.RunTimeOnly, false),
+                (typeof(RuntimeMethodHandle), Scope: TemplatingScope.RunTimeOnly, false),
+                (typeof(RuntimeTypeHandle), Scope: TemplatingScope.RunTimeOnly, false),
+                (typeof(STAThreadAttribute), Scope: TemplatingScope.RunTimeOnly, false),
                 (typeof(AppDomain), Scope: TemplatingScope.RunTimeOnly, false),
                 (typeof(MemberInfo), Scope: TemplatingScope.RunTimeOnly, true),
-                (typeof(ParameterInfo), Scope: TemplatingScope.RunTimeOnly, true),
-                (typeof(Task), Scope: TemplatingScope.RunTimeOnly, false),
-                (typeof(Task<>), Scope: TemplatingScope.RunTimeOnly, false),
-                (typeof(ValueTask), Scope: TemplatingScope.RunTimeOnly, false),
-                (typeof(ValueTask<>), Scope: TemplatingScope.RunTimeOnly, false)
-            }.ToDictionary( t => t.ReflectionType.Name, t => (t.ReflectionType.Namespace, t.Scope, t.MembersOnly) );
+                (typeof(ParameterInfo), Scope: TemplatingScope.RunTimeOnly, true)
+            }.ToImmutableDictionary( t => t.ReflectionType.Name, t => (t.ReflectionType.Namespace, t.Scope, t.MembersOnly) );
 
-        private readonly Compilation _compilation;
-        private readonly INamedTypeSymbol _compileTimeAttribute;
-        private readonly INamedTypeSymbol _compileTimeOnlyAttribute;
-        private readonly INamedTypeSymbol _templateAttribute;
-        private readonly INamedTypeSymbol _ignoreUnlessOverriddenAttribute;
+        private static readonly ImmutableDictionary<string, (TemplatingScope Scope, bool IncludeDescendants)> _wellKnownNamespaces =
+            new ( string Namespace, TemplatingScope Scope, bool IncludeDescendants)[]
+            {
+                ("System", TemplatingScope.Both, false),
+                ("System.Reflection", TemplatingScope.Both, true),
+                ("System.Text", TemplatingScope.Both, true),
+                ("System.Collections", TemplatingScope.Both, true),
+                ("System.Linq", TemplatingScope.Both, true),
+                ("Microsoft.CodeAnalysis", TemplatingScope.RunTimeOnly, true)
+            }.ToImmutableDictionary( t => t.Namespace, t => (t.Scope, t.IncludeDescendants), StringComparer.Ordinal );
+
+        private readonly Compilation? _compilation;
+        private readonly INamedTypeSymbol? _compileTimeAttribute;
+        private readonly INamedTypeSymbol? _compileTimeOnlyAttribute;
+        private readonly INamedTypeSymbol? _templateAttribute;
+        private readonly INamedTypeSymbol? _ignoreUnlessOverriddenAttribute;
         private readonly ConcurrentDictionary<ISymbol, TemplatingScope?> _cacheScopeFromAttributes = new( SymbolEqualityComparer.Default );
         private readonly ConcurrentDictionary<ISymbol, TemplateInfo> _cacheInheritedTemplateInfo = new( SymbolEqualityComparer.Default );
         private readonly ConcurrentDictionary<ISymbol, TemplateInfo> _cacheNonInheritedTemplateInfo = new( SymbolEqualityComparer.Default );
         private readonly ReferenceAssemblyLocator _referenceAssemblyLocator;
 
-        public SymbolClassifier( Compilation compilation, IServiceProvider serviceProvider )
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SymbolClassifier"/> class.
+        /// </summary>
+        /// <param name="serviceProvider">Service provider.</param>
+        /// <param name="compilation">The compilation, or null if the compilation has no reference to Caravela.</param>
+        public SymbolClassifier( IServiceProvider serviceProvider, Compilation? compilation )
         {
-            this._compilation = compilation;
-            this._compileTimeAttribute = this._compilation.GetTypeByMetadataName( typeof(CompileTimeAttribute).FullName ).AssertNotNull();
-            this._compileTimeOnlyAttribute = this._compilation.GetTypeByMetadataName( typeof(CompileTimeOnlyAttribute).FullName ).AssertNotNull();
-            this._templateAttribute = this._compilation.GetTypeByMetadataName( typeof(TemplateAttribute).FullName ).AssertNotNull();
-            this._ignoreUnlessOverriddenAttribute = this._compilation.GetTypeByMetadataName( typeof(AbstractAttribute).FullName ).AssertNotNull();
+            if ( compilation != null )
+            {
+                this._compilation = compilation;
+                this._compileTimeAttribute = this._compilation.GetTypeByMetadataName( typeof(CompileTimeAttribute).FullName ).AssertNotNull();
+                this._compileTimeOnlyAttribute = this._compilation.GetTypeByMetadataName( typeof(CompileTimeOnlyAttribute).FullName ).AssertNotNull();
+                this._templateAttribute = this._compilation.GetTypeByMetadataName( typeof(TemplateAttribute).FullName ).AssertNotNull();
+                this._ignoreUnlessOverriddenAttribute = this._compilation.GetTypeByMetadataName( typeof(AbstractAttribute).FullName ).AssertNotNull();
+            }
+
             this._referenceAssemblyLocator = serviceProvider.GetService<ReferenceAssemblyLocator>();
         }
 
@@ -69,6 +90,11 @@ namespace Caravela.Framework.Impl.CompileTime
 
         private TemplateInfo GetTemplateInfoCore( ISymbol symbol, bool isInherited )
         {
+            if ( this._templateAttribute == null )
+            {
+                return TemplateInfo.None;
+            }
+
             // Look for a [Template] attribute on the symbol.
             var templateAttribute = symbol
                 .GetAttributes()
@@ -82,7 +108,7 @@ namespace Caravela.Framework.Impl.CompileTime
                 {
                     // Ignore any abstract member.
                     if ( !isInherited && (symbol.IsAbstract
-                                          || symbol.GetAttributes().Any( a => this.IsAttributeOfType( a, this._ignoreUnlessOverriddenAttribute ) )) )
+                                          || symbol.GetAttributes().Any( a => this.IsAttributeOfType( a, this._ignoreUnlessOverriddenAttribute! ) )) )
                     {
                         return templateInfo.AsAbstract();
                     }
@@ -111,7 +137,7 @@ namespace Caravela.Framework.Impl.CompileTime
             }
         }
 
-        private bool IsAttributeOfType( AttributeData a, ITypeSymbol type ) => this._compilation.HasImplicitConversion( a.AttributeClass, type );
+        private bool IsAttributeOfType( AttributeData a, ITypeSymbol type ) => this._compilation!.HasImplicitConversion( a.AttributeClass, type );
 
         private static TemplateInfo GetTemplateInfo( AttributeData templateAttribute )
         {
@@ -128,8 +154,13 @@ namespace Caravela.Framework.Impl.CompileTime
             }
         }
 
-        public TemplatingScope? GetTemplatingScope( AttributeData attribute )
+        private TemplatingScope? GetTemplatingScope( AttributeData attribute )
         {
+            if ( this._compilation == null )
+            {
+                return null;
+            }
+
             if ( this._compilation.HasImplicitConversion( attribute.AttributeClass, this._compileTimeOnlyAttribute ) )
             {
                 return TemplatingScope.CompileTimeOnly;
@@ -149,12 +180,6 @@ namespace Caravela.Framework.Impl.CompileTime
             if ( assembly == null )
             {
                 return null;
-            }
-
-            if ( this._referenceAssemblyLocator.IsSystemAssemblyName( assembly.Name ) )
-            {
-                // .NET Standard, Roslyn, ...
-                return TemplatingScope.Both;
             }
 
             var scopeFromAttributes = assembly.GetAttributes()
@@ -315,7 +340,7 @@ namespace Caravela.Framework.Impl.CompileTime
             }
 
             // From well-known types.
-            if ( TryGetWellKnownScope( symbol, false, out var scopeFromWellKnown ) )
+            if ( this.TryGetWellKnownScope( symbol, false, out var scopeFromWellKnown ) )
             {
                 return scopeFromWellKnown;
             }
@@ -436,7 +461,7 @@ namespace Caravela.Framework.Impl.CompileTime
             return AddToCache( null );
         }
 
-        internal static bool TryGetWellKnownScope( ISymbol symbol, bool isMember, out TemplatingScope scope )
+        internal bool TryGetWellKnownScope( ISymbol symbol, bool isMember, out TemplatingScope scope )
         {
             scope = TemplatingScope.Unknown;
 
@@ -447,26 +472,49 @@ namespace Caravela.Framework.Impl.CompileTime
                     return false;
 
                 case INamedTypeSymbol namedType:
-                    if ( namedType.MetadataName is { } name &&
-                         _wellKnownRunTimeTypes.TryGetValue( name, out var config ) &&
-                         config.Namespace == namedType.ContainingNamespace.ToDisplayString() &&
-                         (!config.MembersOnly || isMember) )
+                    // Check well-known types and ancestors.
+                    for ( var t = namedType; t != null && t.SpecialType != SpecialType.System_Object; t = t.BaseType )
                     {
-                        scope = config.Scope;
+                        if ( t.MetadataName is { } name &&
+                             _wellKnownTypes.TryGetValue( name, out var config ) &&
+                             config.Namespace == namedType.ContainingNamespace.ToDisplayString() &&
+                             (!config.MembersOnly || isMember) )
+                        {
+                            scope = config.Scope;
+
+                            return true;
+                        }
+                    }
+
+                    // Check well-known namespaces.
+                    if ( this._referenceAssemblyLocator.IsSystemAssemblyName( namedType.ContainingAssembly.Name ) )
+                    {
+                        // Some namespaces inside system assemblies have a well-known scope.
+                        for ( var ns = namedType.ContainingNamespace; ns != null; ns = ns.ContainingNamespace )
+                        {
+                            var nsString = ns.ToDisplayString();
+
+                            if ( _wellKnownNamespaces.TryGetValue( nsString, out var wellKnownNamespace ) )
+                            {
+                                if ( wellKnownNamespace.IncludeDescendants || ns == namedType.ContainingNamespace )
+                                {
+                                    scope = wellKnownNamespace.Scope;
+
+                                    return true;
+                                }
+                            }
+                        }
+
+                        // The default scope in system assemblies is run-time-only.
+                        scope = TemplatingScope.RunTimeOnly;
 
                         return true;
                     }
-                    else if ( namedType.BaseType != null )
-                    {
-                        return TryGetWellKnownScope( namedType.BaseType, isMember, out scope );
-                    }
-                    else
-                    {
-                        return false;
-                    }
+
+                    return false;
 
                 case { ContainingType: { } namedType }:
-                    return TryGetWellKnownScope( namedType, true, out scope );
+                    return this.TryGetWellKnownScope( namedType, true, out scope );
 
                 default:
                     return false;

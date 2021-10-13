@@ -4,8 +4,10 @@
 using Caravela.Framework.RunTime;
 using System.Collections;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using Xunit;
+#if NET5_0
+using System.Threading.Tasks;
+#endif
 
 namespace Caravela.Framework.Tests.UnitTests.RunTime
 {
@@ -97,6 +99,7 @@ namespace Caravela.Framework.Tests.UnitTests.RunTime
             CompareGenericEnumerators( list.GetEnumerator(), buffered );
         }
 
+#if NET5_0
         [Fact]
         public async Task BufferAsyncEnumerable()
         {
@@ -139,6 +142,8 @@ namespace Caravela.Framework.Tests.UnitTests.RunTime
             await CompareAsyncEnumerators( list.GetAsyncEnumerator(), buffered );
         }
 
+#endif
+
         private static void CompareEnumerators( IEnumerator a, IEnumerator b )
         {
             while ( a.MoveNext() )
@@ -161,17 +166,6 @@ namespace Caravela.Framework.Tests.UnitTests.RunTime
             Assert.False( b.MoveNext() );
         }
 
-        private static async Task CompareAsyncEnumerators<T>( IAsyncEnumerator<T> a, IAsyncEnumerator<T> b )
-        {
-            while ( await a.MoveNextAsync() )
-            {
-                Assert.True( await b.MoveNextAsync() );
-                Assert.Equal( a.Current, b.Current );
-            }
-
-            Assert.False( await b.MoveNextAsync() );
-        }
-
         private static IEnumerable ReturnsEnumerable()
         {
             yield return 1;
@@ -185,6 +179,18 @@ namespace Caravela.Framework.Tests.UnitTests.RunTime
             yield return 3;
         }
 
+#if NET5_0
+        private static async Task CompareAsyncEnumerators<T>( IAsyncEnumerator<T> a, IAsyncEnumerator<T> b )
+        {
+            while ( await a.MoveNextAsync() )
+            {
+                Assert.True( await b.MoveNextAsync() );
+                Assert.Equal( a.Current, b.Current );
+            }
+
+            Assert.False( await b.MoveNextAsync() );
+        }
+
         private static async IAsyncEnumerable<int> ReturnsAsyncEnumerable()
         {
             await Task.Yield();
@@ -195,5 +201,6 @@ namespace Caravela.Framework.Tests.UnitTests.RunTime
 
             yield return 2;
         }
+#endif
     }
 }

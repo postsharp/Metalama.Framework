@@ -40,7 +40,7 @@ namespace Caravela.Framework.Impl.Diagnostics
                     case DeclarationKind declarationKind:
                         switch ( declarationKind )
                         {
-                            case DeclarationKind.GenericParameter:
+                            case DeclarationKind.TypeParameter:
                                 return "generic parameter";
 
                             case DeclarationKind.ManagedResource:

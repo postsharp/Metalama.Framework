@@ -4,9 +4,9 @@ using Caravela.Framework.Code;
 
 namespace Caravela.Framework.Tests.PublicPipeline.Aspects.Generic.ProgrammaticOverrideGenericTemplateConstraintMismatch2
 {
-    internal class Aspect : Attribute, IAspect<IMethod>
+    internal class Aspect : MethodAspect
     {
-        public void BuildAspect( IAspectBuilder<IMethod> builder )
+        public override void BuildAspect( IAspectBuilder<IMethod> builder )
         {
             builder.Advices.OverrideMethod( builder.Target, nameof(OverrideMethod) );
         }

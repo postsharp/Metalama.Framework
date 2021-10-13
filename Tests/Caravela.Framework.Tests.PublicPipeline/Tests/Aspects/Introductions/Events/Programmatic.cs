@@ -1,26 +1,30 @@
 ﻿using System;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
-using Caravela.TestFramework;
 
 namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Events.Programmatic
 {
-    public class IntroductionAttribute : Attribute, IAspect<INamedType>
+    public class IntroductionAttribute : TypeAspect
     {
-        public void BuildAspect(IAspectBuilder<INamedType> builder)
+        public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
             {
-                var propertyBuilder = builder.Advices.IntroduceEvent(builder.Target, nameof(EventField));
+                var propertyBuilder = builder.Advices.IntroduceEvent( builder.Target, nameof(EventField) );
                 propertyBuilder.Accessibility = Accessibility.Public;
             }
 
             {
-                var propertyBuilder = builder.Advices.IntroduceEvent(builder.Target, nameof(Event));
+                var propertyBuilder = builder.Advices.IntroduceEvent( builder.Target, nameof(Event) );
                 propertyBuilder.Accessibility = Accessibility.Public;
             }
 
             {
-                var propertyBuilder = builder.Advices.IntroduceEvent(builder.Target, "EventFromAccessors", nameof(AddEventTemplate), nameof(RemoveEventTemplace) );
+                var propertyBuilder = builder.Advices.IntroduceEvent(
+                    builder.Target,
+                    "EventFromAccessors",
+                    nameof(AddEventTemplate),
+                    nameof(RemoveEventTemplace) );
+
                 propertyBuilder.Accessibility = Accessibility.Public;
             }
 
@@ -35,35 +39,33 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Events.Progr
         {
             add
             {
-                Console.WriteLine("Get");
+                Console.WriteLine( "Get" );
                 meta.Proceed();
             }
 
             remove
             {
-                Console.WriteLine("Set");
+                Console.WriteLine( "Set" );
                 meta.Proceed();
             }
         }
 
         [Template]
-        public void AddEventTemplate(EventHandler value)
+        public void AddEventTemplate( EventHandler value )
         {
-            Console.WriteLine("Add");
+            Console.WriteLine( "Add" );
             meta.Proceed();
         }
 
         [Template]
-        public void RemoveEventTemplace(EventHandler value)
+        public void RemoveEventTemplace( EventHandler value )
         {
-            Console.WriteLine("Remove");
+            Console.WriteLine( "Remove" );
             meta.Proceed();
         }
     }
 
     // <target>
     [Introduction]
-    internal class TargetClass
-    {
-    }
+    internal class TargetClass { }
 }

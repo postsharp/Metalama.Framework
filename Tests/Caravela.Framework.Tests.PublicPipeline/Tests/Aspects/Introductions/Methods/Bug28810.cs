@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 
@@ -7,50 +6,50 @@ using Caravela.Framework.Code;
 
 namespace Caravela.Framework.Tests.Integration.Tests.Aspects.Introductions.Methods.Bug28810
 {
-    class DeepCloneAttribute : Attribute, IAspect<INamedType>
+    internal class DeepCloneAttribute : TypeAspect
     {
-        public void BuildAspect( IAspectBuilder<INamedType> builder )
+        public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            var typedMethod = builder.Advices.IntroduceMethod(builder.Target, nameof(CloneImpl));
+            var typedMethod = builder.Advices.IntroduceMethod( builder.Target, nameof(CloneImpl) );
             typedMethod.Name = "Clone";
             typedMethod.ReturnType = builder.Target;
 
-            builder.Advices.ImplementInterface(builder.Target, typeof(ICloneable), whenExists: OverrideStrategy.Ignore);
+            builder.Advices.ImplementInterface( builder.Target, typeof(ICloneable), whenExists: OverrideStrategy.Ignore );
         }
 
         [Template]
         public virtual dynamic? CloneImpl()
         {
             // This method does not do anything.
-            var baseMethod = meta.Target.Type.Methods.OfExactSignature("Clone", Array.Empty<IType>());
+            var baseMethod = meta.Target.Type.Methods.OfExactSignature( "Clone", Array.Empty<IType>() );
+
             return null;
         }
 
-        [InterfaceMember( IsExplicit = true)]
-        object Clone()
+        [InterfaceMember( IsExplicit = true )]
+        private object Clone()
         {
             // This should call final version of introduced Clone method.
             return meta.This.Clone();
         }
     }
-    
+
     // <target>
-    class Targets
-    {    
-        class NaturallyCloneable : ICloneable
+    internal class Targets
+    {
+        private class NaturallyCloneable : ICloneable
         {
             public object Clone()
             {
                 return new NaturallyCloneable();
             }
         }
-    
-        [DeepClone]
-        class BaseClass
-        {
-            int a;
-            NaturallyCloneable b;
-        }
 
+        [DeepClone]
+        private class BaseClass
+        {
+            private int a;
+            private NaturallyCloneable b;
+        }
     }
 }

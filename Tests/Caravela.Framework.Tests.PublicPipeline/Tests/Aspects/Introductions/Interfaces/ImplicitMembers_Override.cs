@@ -1,11 +1,10 @@
-﻿using Caravela.Framework.Aspects;
+﻿using System;
+using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
-using Caravela.TestFramework;
-using System;
 using Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.ImplicitMembers_Override;
 
-[assembly:AspectOrder(typeof(OverrideAttribute), typeof(IntroductionAttribute))]
-    
+[assembly: AspectOrder( typeof(OverrideAttribute), typeof(IntroductionAttribute) )]
+
 #pragma warning disable CS0067
 
 namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.ImplicitMembers_Override
@@ -27,17 +26,18 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
         int AutoProperty { get; set; }
     }
 
-    public class IntroductionAttribute : Attribute, IAspect<INamedType>
+    public class IntroductionAttribute : TypeAspect
     {
-        public void BuildAspect(IAspectBuilder<INamedType> aspectBuilder)
+        public override void BuildAspect( IAspectBuilder<INamedType> aspectBuilder )
         {
-            aspectBuilder.Advices.ImplementInterface(aspectBuilder.Target, typeof(IInterface));
+            aspectBuilder.Advices.ImplementInterface( aspectBuilder.Target, typeof(IInterface) );
         }
 
         [InterfaceMember]
         public int InterfaceMethod()
         {
-            Console.WriteLine("This is introduced interface member.");
+            Console.WriteLine( "This is introduced interface member." );
+
             return meta.Proceed();
         }
 
@@ -46,12 +46,12 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
         {
             add
             {
-                Console.WriteLine("This is introduced interface member.");
+                Console.WriteLine( "This is introduced interface member." );
             }
 
             remove
             {
-                Console.WriteLine("This is introduced interface member.");
+                Console.WriteLine( "This is introduced interface member." );
             }
         }
 
@@ -63,13 +63,14 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
         {
             get
             {
-                Console.WriteLine("This is introduced interface member.");
+                Console.WriteLine( "This is introduced interface member." );
+
                 return 42;
             }
 
             set
             {
-                Console.WriteLine("This is introduced interface member.");
+                Console.WriteLine( "This is introduced interface member." );
             }
         }
 
@@ -77,15 +78,15 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
         public int AutoProperty { get; set; }
     }
 
-    public class OverrideAttribute : Attribute, IAspect<INamedType>
+    public class OverrideAttribute : TypeAspect
     {
-        public void BuildAspect(IAspectBuilder<INamedType> aspectBuilder)
+        public override void BuildAspect( IAspectBuilder<INamedType> aspectBuilder )
         {
             foreach (var method in aspectBuilder.Target.Methods)
             {
                 if (!method.IsExplicitInterfaceImplementation)
                 {
-                    aspectBuilder.Advices.OverrideMethod(method, nameof(Template));
+                    aspectBuilder.Advices.OverrideMethod( method, nameof(Template) );
                 }
             }
 
@@ -93,7 +94,7 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
             {
                 if (!property.IsExplicitInterfaceImplementation)
                 {
-                    aspectBuilder.Advices.OverrideFieldOrPropertyAccessors(property, nameof(Template), nameof(Template));
+                    aspectBuilder.Advices.OverrideFieldOrPropertyAccessors( property, nameof(Template), nameof(Template) );
                 }
             }
 
@@ -101,7 +102,7 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
             {
                 if (!method.IsExplicitInterfaceImplementation)
                 {
-                    aspectBuilder.Advices.OverrideEventAccessors(method, nameof(Template), nameof(Template), null);
+                    aspectBuilder.Advices.OverrideEventAccessors( method, nameof(Template), nameof(Template), null );
                 }
             }
         }
@@ -109,7 +110,8 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
         [Template]
         public dynamic? Template()
         {
-            Console.WriteLine("This is overridden method.");
+            Console.WriteLine( "This is overridden method." );
+
             return meta.Proceed();
         }
     }
@@ -117,7 +119,5 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
     // <target>
     [Introduction]
     [Override]
-    public class TargetClass
-    {
-    }
+    public class TargetClass { }
 }

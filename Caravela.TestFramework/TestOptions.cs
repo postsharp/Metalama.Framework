@@ -16,8 +16,14 @@ namespace Caravela.TestFramework
         private static readonly Regex _optionRegex = new( @"^\s*//\s*@(?<name>\w+)\s*(\((?<arg>[^\)]*)\))?", RegexOptions.Multiline );
         private readonly List<string> _invalidSourceOptions = new();
 
+        /// <summary>
+        /// Gets or sets the reason for which the test must be skipped, or <c>null</c> if the test must not be skipped. 
+        /// </summary>
         public string? SkipReason { get; set; }
 
+        /// <summary>
+        /// Gets a value indicating whether the current test must be skipped.
+        /// </summary>
         public bool IsSkipped => this.SkipReason != null;
 
         /// <summary>
@@ -106,7 +112,15 @@ namespace Caravela.TestFramework
         /// </summary>
         public bool? ExecuteProgram { get; set; }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether the test should be executed even if the input compilation has errors.
+        /// </summary>
         public bool? AcceptInvalidInput { get; set; }
+
+        /// <summary>
+        /// Gets the set of preprocessor symbols that are required for this test, otherwise the test would be skipped.
+        /// </summary>
+        public List<string> RequiredConstants { get; } = new();
 
         /// <summary>
         /// Applies <see cref="TestDirectoryOptions"/> to the current object by overriding any property
@@ -148,6 +162,8 @@ namespace Caravela.TestFramework
             {
                 this.IgnoredDiagnostics.AddRange( baseOptions.IgnoredDiagnostics );
             }
+
+            this.RequiredConstants.AddRange( baseOptions.RequiredConstants );
         }
 
         public IReadOnlyList<string> InvalidSourceOptions => this._invalidSourceOptions;
@@ -235,6 +251,11 @@ namespace Caravela.TestFramework
                     case "IgnoredDiagnostic":
                         this.IgnoredDiagnostics.Add( optionArg );
 
+                        break;
+                    
+                    case "RequiredConstant":
+                        this.RequiredConstants.Add( optionArg );
+                        
                         break;
 
                     case "ClearIgnoredDiagnostics":

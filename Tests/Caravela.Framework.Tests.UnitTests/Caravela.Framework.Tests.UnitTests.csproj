@@ -4,7 +4,7 @@
 
 
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFrameworks>net5.0;netframework4.8</TargetFrameworks>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <RootNamespace>Caravela.Framework.Tests.UnitTests</RootNamespace>
     <UseCaravelaCompiler>Private</UseCaravelaCompiler>
@@ -30,15 +30,13 @@
     <PackageReference Include="Caravela.Compiler.Sdk" Version="$(CaravelaCompilerVersion)" />
   </ItemGroup>
   
-    <ItemGroup>
-      <Compile Include="..\..\NullableAttributes.cs" Link="NullableAttributes.cs" />
-    </ItemGroup>
-
+   
 
 
   <!-- Ignore project if the build is obfuscated because this project relies on obfuscated internals -->
   <ItemGroup Condition="'$(Obfuscate)'=='True'">
     <Compile Remove="**\*" />
+    <Compile Remove="CodeModel\SpecialTypesTest.cs" />
   </ItemGroup>
 
 </Project>

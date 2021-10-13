@@ -33,7 +33,7 @@ namespace Caravela.Framework.Impl.CodeModel
                     : DeclarationKind.Method,
                 IPropertySymbol => DeclarationKind.Property,
                 IFieldSymbol => DeclarationKind.Field,
-                ITypeParameterSymbol => DeclarationKind.GenericParameter,
+                ITypeParameterSymbol => DeclarationKind.TypeParameter,
                 IAssemblySymbol => DeclarationKind.Compilation,
                 IParameterSymbol => DeclarationKind.Parameter,
                 IEventSymbol => DeclarationKind.Event,
@@ -315,7 +315,7 @@ namespace Caravela.Framework.Impl.CodeModel
         internal static string ToDisplayString( this DeclarationKind kind )
             => kind switch
             {
-                DeclarationKind.GenericParameter => "generic parameter",
+                DeclarationKind.TypeParameter => "generic parameter",
                 _ => kind.ToString().ToLowerInvariant()
             };
 

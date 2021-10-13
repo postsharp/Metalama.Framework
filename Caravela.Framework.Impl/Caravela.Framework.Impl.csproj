@@ -53,6 +53,7 @@
        <Link>SystemTypes\IsExternalInit.cs</Link>
      </Compile>
      <Compile Remove="ServiceProvider\**" />
+     <Compile Remove="CodeModel\Builders\BuiltGenericParameter.cs" />
    </ItemGroup>
     
    <ItemGroup>

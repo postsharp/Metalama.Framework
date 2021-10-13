@@ -1,23 +1,23 @@
 ﻿using System;
 using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
-using Caravela.TestFramework;
 
 namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Methods.ExistingConflictFail
 {
-    public class IntroductionAttribute : Attribute, IAspect<INamedType>
+    public class IntroductionAttribute : TypeAspect
     {
-        [Introduce(WhenExists = OverrideStrategy.Fail)]
+        [Introduce( WhenExists = OverrideStrategy.Fail )]
         public int ExistingMethod()
         {
-            Console.WriteLine("This is introduced method.");
+            Console.WriteLine( "This is introduced method." );
+
             return 42;
         }
 
-        [Introduce(WhenExists = OverrideStrategy.Fail)]
+        [Introduce( WhenExists = OverrideStrategy.Fail )]
         public static int ExistingMethod_Static()
         {
-            Console.WriteLine("This is introduced method.");
+            Console.WriteLine( "This is introduced method." );
+
             return 42;
         }
     }

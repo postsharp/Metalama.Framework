@@ -21,6 +21,9 @@ namespace Caravela.Framework.Impl.Collections
 
         public static ImmutableMultiValueDictionary<TKey, TValue> Empty => new( ImmutableDictionary<TKey, Group>.Empty );
 
+        public static ImmutableMultiValueDictionary<TKey, TValue> Create( IEqualityComparer<TKey> comparer )
+            => new( ImmutableDictionary.Create<TKey, Group>( comparer ) );
+
         // Coverage: ignore
         public static ImmutableMultiValueDictionary<TKey, TValue> Create(
             IEnumerable<TValue> source,

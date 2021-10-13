@@ -26,10 +26,6 @@ namespace Caravela.Framework.Impl.CodeModel
         {
             Invariant.Assert( !documentationId.StartsWith( "T:", StringComparison.OrdinalIgnoreCase ) );
 
-            // This method should not be called to get types that could be represented with a run-time type, otherwise
-            // equality comparison of types will not work.
-            Invariant.Assert( !documentationId.StartsWith( "System", StringComparison.Ordinal ) || documentationId.Contains( "{" ) );
-
             return this._instances.GetOrAdd( documentationId, id => CompileTimeType.CreateFromDocumentationId( id, fullName ) );
         }
     }

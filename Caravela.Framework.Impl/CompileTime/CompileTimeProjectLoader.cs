@@ -412,14 +412,12 @@ namespace Caravela.Framework.Impl.CompileTime
             }
 
             // Compute the new hash.
-            var compileTimeAssemblyName =
-                CompileTimeCompilationBuilder.GetCompileTimeAssemblyName( manifest.AssemblyName, referenceProjects, manifest.SourceHash );
 
             project = CompileTimeProject.Create(
                 this._serviceProvider,
                 this._domain,
                 runTimeAssemblyIdentity,
-                new AssemblyIdentity( compileTimeAssemblyName ),
+                new AssemblyIdentity( manifest.CompileTimeAssemblyName ),
                 referenceProjects,
                 manifest,
                 assemblyPath,

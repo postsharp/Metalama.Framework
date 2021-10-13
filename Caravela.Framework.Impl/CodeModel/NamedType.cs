@@ -238,7 +238,7 @@ namespace Caravela.Framework.Impl.CodeModel
             => new GenericParameterList(
                 this,
                 this.TypeSymbol.TypeParameters
-                    .Select( DeclarationRef.FromSymbol<IGenericParameter> ) );
+                    .Select( DeclarationRef.FromSymbol<ITypeParameter> ) );
 
         [Memo]
         public INamespace Namespace => this.Compilation.Factory.GetNamespace( this.TypeSymbol.ContainingNamespace );

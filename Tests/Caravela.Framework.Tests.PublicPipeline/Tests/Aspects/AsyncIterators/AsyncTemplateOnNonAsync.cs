@@ -1,79 +1,77 @@
-// @IgnoredDiagnostic(CS1998)
-
 using System;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Collections;
 using System.Collections.Generic;
-using Caravela.Framework;
-using Caravela.TestFramework;
+using System.Threading.Tasks;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
-using System.Runtime.CompilerServices;
 
 namespace Caravela.Framework.Tests.Integration.Templating.Aspects.AsyncIterators.AsyncTemplateOnNonAsync
 {
-    class Aspect : Attribute, IAspect<IMethod>
+    internal class Aspect : MethodAspect
     {
-        public void BuildAspect( IAspectBuilder<IMethod> builder )
+        public override void BuildAspect( IAspectBuilder<IMethod> builder )
         {
-            builder.Advices.OverrideMethod( builder.Target, 
-            new( nameof(this.OverrideMethod), nameof(this.OverrideAsyncMethod), useAsyncTemplateForAnyAwaitable: true ) );
+            builder.Advices.OverrideMethod(
+                builder.Target,
+                new MethodTemplateSelector( nameof(OverrideMethod), nameof(OverrideAsyncMethod), useAsyncTemplateForAnyAwaitable: true ) );
         }
-    
+
         [Template]
         public dynamic? OverrideMethod()
         {
-            throw new NotSupportedException("Should not be selected");
+            throw new NotSupportedException( "Should not be selected" );
         }
 
         [Template]
         public async Task<dynamic?> OverrideAsyncMethod()
         {
             await Task.Yield();
-            Console.WriteLine("Before " + meta.Target.Method.Name);
+            Console.WriteLine( "Before " + meta.Target.Method.Name );
             var result = meta.Proceed();
-            Console.WriteLine("After " + meta.Target.Method.Name);
+            Console.WriteLine( "After " + meta.Target.Method.Name );
             await Task.Yield();
-            return result;
-            
-        }
 
+            return result;
+        }
     }
-    
-    class Program
+
+    internal class Program
     {
         public static async Task Main()
         {
             TargetCode t = new();
-            
-            await foreach ( var i in t.AsyncEnumerable(0) ) 
+
+            await foreach (var i in t.AsyncEnumerable( 0 ))
             {
-                Console.WriteLine($"  Received {i}");
+                Console.WriteLine( $"  Received {i}" );
             }
-       
         }
     }
 
     // <target>
-    class TargetCode
+    internal class TargetCode
     {
         [Aspect]
-        public IAsyncEnumerable<int> AsyncEnumerable(int a)
+        public IAsyncEnumerable<int> AsyncEnumerable( int a )
         {
-            Console.WriteLine("Not Async");
-            return this.AsyncEnumerableImpl(a);
+            Console.WriteLine( "Not Async" );
+
+            return AsyncEnumerableImpl( a );
         }
-        
-        private async IAsyncEnumerable<int> AsyncEnumerableImpl(int a)
+
+        private async IAsyncEnumerable<int> AsyncEnumerableImpl( int a )
         {
-            Console.WriteLine("Yield 1");
+            Console.WriteLine( "Yield 1" );
+
             yield return 1;
+
             await Task.Yield();
-            Console.WriteLine("Yield 2");
+            Console.WriteLine( "Yield 2" );
+
             yield return 2;
+
             await Task.Yield();
-            Console.WriteLine("Yield 3");
+            Console.WriteLine( "Yield 3" );
+
             yield return 3;
         }
     }

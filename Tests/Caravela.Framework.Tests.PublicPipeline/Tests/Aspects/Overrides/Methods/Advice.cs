@@ -2,24 +2,21 @@
 using System.Linq;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
-using Caravela.TestFramework;
 
 namespace Caravela.Framework.IntegrationTests.Aspects.Overrides.Methods.Advice
 {
-    public class OverrideAttribute : Attribute, IAspect<INamedType>
+    public class OverrideAttribute : TypeAspect
     {
-        public void BuildAspect(IAspectBuilder<INamedType> builder)
+        public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advices.OverrideMethod(builder.Target.Methods.OfName("TargetMethod").Single(), nameof(Template));
+            builder.Advices.OverrideMethod( builder.Target.Methods.OfName( "TargetMethod" ).Single(), nameof(Template) );
         }
-        
-        
-       
 
         [Template]
         public dynamic? Template()
         {
-            Console.WriteLine("This is the overriding method.");
+            Console.WriteLine( "This is the overriding method." );
+
             return meta.Proceed();
         }
     }
@@ -30,7 +27,7 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Overrides.Methods.Advice
     {
         public void TargetMethod()
         {
-            Console.WriteLine("This is the original method.");
+            Console.WriteLine( "This is the original method." );
         }
     }
 }

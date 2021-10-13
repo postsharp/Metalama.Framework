@@ -51,12 +51,12 @@ namespace Caravela.Framework.Impl.CompileTime
                     return null;
                 }
 
-                // We don't allow loading new assemblies to the AppDomain except.
+                // We don't allow loading new assemblies to the AppDomain.
                 if ( AppDomain.CurrentDomain.GetAssemblies().All( a => a.GetName().Name != assemblyName ) )
                 {
-                    if ( assemblyName == "System.Runtime" )
+                    if ( NetStandardTypeMap.Types.TryGetValue( typeName, out var standardType ) )
                     {
-                        assemblyName = "mscorlib";
+                        return standardType;
                     }
                     else
                     {
