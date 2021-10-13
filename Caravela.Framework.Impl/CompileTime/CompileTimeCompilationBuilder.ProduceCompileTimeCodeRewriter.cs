@@ -34,7 +34,6 @@ namespace Caravela.Framework.Impl.CompileTime
         /// </summary>
         private sealed class ProduceCompileTimeCodeRewriter : CompileTimeBaseRewriter
         {
-            private static readonly string? _frameworkAssemblyName = typeof(OverrideMethodAspect).Assembly.GetName().Name;
             private static readonly SyntaxAnnotation _hasCompileTimeCodeAnnotation = new( "Caravela_HasCompileTimeCode" );
             private readonly Compilation _compileTimeCompilation;
             private readonly IDiagnosticAdder _diagnosticAdder;
@@ -576,10 +575,9 @@ namespace Caravela.Framework.Impl.CompileTime
                     {
                         yield return (BasePropertyDeclarationSyntax) this.Visit( node ).AssertNotNull();
                     }
-                    else if ( propertySymbol.IsOverride && propertySymbol.OverriddenProperty!.IsAbstract
-                                                        && propertySymbol.OverriddenProperty.ContainingAssembly.Name == _frameworkAssemblyName )
+                    else if ( propertySymbol.IsOverride && propertySymbol.OverriddenProperty!.IsAbstract )
                     {
-                        // If the property implements an abstract property of the framework, it cannot be removed.
+                        // If the property implements an abstract property, it cannot be removed.
 
                         yield return WithThrowNotSupportedExceptionBody( node, "Template code cannot be directly executed." );
                     }
@@ -801,6 +799,18 @@ namespace Caravela.Framework.Impl.CompileTime
             public override SyntaxNode? Visit( SyntaxNode? node ) => this.AddLocationAnnotation( node, base.Visit( node ) );
 
             public override SyntaxToken VisitToken( SyntaxToken token ) => this._templateCompiler.LocationAnnotationMap.AddLocationAnnotation( token );
+            
+            public override SyntaxNode? VisitIdentifierName( IdentifierNameSyntax node )
+            {
+                if ( node.Identifier.Text == "dynamic" )
+                {
+                    return PredefinedType( Token( SyntaxKind.ObjectKeyword ) ).WithTriviaFrom( node );
+                }
+                else
+                {
+                    return base.VisitIdentifierName( node );
+                }
+            }
 
             private Context WithScope( TemplatingScope scope )
             {
