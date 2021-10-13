@@ -5,6 +5,7 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Code.Advised;
 using Caravela.Framework.Code.Invokers;
 using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.RunTime;
 using System;
 
@@ -41,7 +42,8 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
         {
             if ( this.Invokers.Base == null )
             {
-                throw new InvalidOperationException( "Cannot get or set the base value because there is no base property or field." );
+                throw new InvalidOperationException( 
+                    UserMessageFormatter.Format( $"Cannot get or set the base value of '{this}' because there is no base property or field." ) );
             }
 
             return this.Invokers.Base.GetValue( this.This );

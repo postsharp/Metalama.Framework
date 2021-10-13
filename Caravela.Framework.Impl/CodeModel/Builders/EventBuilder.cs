@@ -48,7 +48,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         [Memo]
         public IInvokerFactory<IEventInvoker> Invokers
-            => new InvokerFactory<IEventInvoker>( ( order, invokerOperator ) => new EventInvoker( this, order, invokerOperator ), false );
+            => new InvokerFactory<IEventInvoker>( ( order, invokerOperator ) => new EventInvoker( this, order, invokerOperator ), this.OverriddenEvent != null );
 
         public IEvent? OverriddenEvent { get; set; }
 

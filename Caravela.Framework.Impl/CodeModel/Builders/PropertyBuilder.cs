@@ -56,11 +56,13 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public IMethodBuilder? SetMethod { get; }
 
+        protected virtual bool HasBaseInvoker => this.OverriddenProperty != null;
+
         IInvokerFactory<IFieldOrPropertyInvoker> IFieldOrProperty.Invokers => this.Invokers;
 
         [Memo]
         public IInvokerFactory<IPropertyInvoker> Invokers
-            => new InvokerFactory<IPropertyInvoker>( ( order, invokerOperator ) => new PropertyInvoker( this, order, invokerOperator ), false );
+            => new InvokerFactory<IPropertyInvoker>( ( order, invokerOperator ) => new PropertyInvoker( this, order, invokerOperator ), this.HasBaseInvoker );
 
         public IProperty? OverriddenProperty { get; set; }
 
