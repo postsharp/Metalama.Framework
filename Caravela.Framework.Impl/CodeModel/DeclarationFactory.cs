@@ -191,10 +191,10 @@ namespace Caravela.Framework.Impl.CodeModel
                 DeclarationRef.FromBuilder( attributeBuilder ),
                 l => new BuiltAttribute( (AttributeBuilder) l.Target!, this._compilationModel ) );
 
-        internal IParameter GetParameter( ParameterBuilder parameterBuilder )
+        internal IParameter GetParameter( IParameterBuilder parameterBuilder )
             => (IParameter) this._cache.GetOrAdd(
                 DeclarationRef.FromBuilder( parameterBuilder ),
-                l => new BuiltParameter( (ParameterBuilder) l.Target!, this._compilationModel ) );
+                l => new BuiltParameter( (IParameterBuilder) l.Target!, this._compilationModel ) );
 
         internal IGenericParameter GetGenericParameter( GenericParameterBuilder genericParameterBuilder )
             => (IGenericParameter) this._cache.GetOrAdd(
@@ -205,6 +205,11 @@ namespace Caravela.Framework.Impl.CodeModel
             => (IMethod) this._cache.GetOrAdd(
                 DeclarationRef.FromBuilder( methodBuilder ),
                 l => new BuiltMethod( (MethodBuilder) l.Target!, this._compilationModel ) );
+
+        internal IField GetField( IFieldBuilder fieldBuilder )
+            => (IField) this._cache.GetOrAdd(
+                DeclarationRef.FromBuilder( fieldBuilder ),
+                l => new BuiltField( (FieldBuilder) l.Target!, this._compilationModel ) );
 
         internal IProperty GetProperty( PropertyBuilder propertyBuilder )
             => (IProperty) this._cache.GetOrAdd(
@@ -220,9 +225,10 @@ namespace Caravela.Framework.Impl.CodeModel
             => builder switch
             {
                 MethodBuilder methodBuilder => this.GetMethod( methodBuilder ),
+                FieldBuilder fieldBuilder => this.GetField( fieldBuilder ),
                 PropertyBuilder propertyBuilder => this.GetProperty( propertyBuilder ),
                 EventBuilder eventBuilder => this.GetEvent( eventBuilder ),
-                ParameterBuilder parameterBuilder => this.GetParameter( parameterBuilder ),
+                IParameterBuilder parameterBuilder => this.GetParameter( parameterBuilder ),
                 AttributeBuilder attributeBuilder => this.GetAttribute( attributeBuilder ),
                 GenericParameterBuilder genericParameterBuilder => this.GetGenericParameter( genericParameterBuilder ),
 

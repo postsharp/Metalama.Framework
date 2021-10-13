@@ -31,7 +31,7 @@
     <Compile Include="..\..\IsExternalInit.cs" Link="IsExternalInit.cs" />
     <!-- Exclude files that intentionally do not compile -->
     <Compile Remove="Tests\**\__*.cs" />
-  </ItemGroup>
+    </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\Caravela.Framework.Impl\Caravela.Framework.Impl.csproj" />
@@ -42,6 +42,7 @@
   <ItemGroup>
     <InternalsVisibleTo Include="Caravela.AspectWorkbench" />
   </ItemGroup>
+
 
   <Import Project="..\..\Caravela.TestFramework\Caravela.TestFramework.targets" />
   

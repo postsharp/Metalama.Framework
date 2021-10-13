@@ -16,11 +16,11 @@ namespace Caravela.Framework.Impl.CodeModel
                 _ => null
             };
 
-        public static IMethod? GetAccessorImpl( this IProperty property, MethodKind kind )
+        public static IMethod? GetAccessorImpl( this IFieldOrProperty fieldOrProperty, MethodKind kind )
             => kind switch
             {
-                MethodKind.PropertyGet => property.GetMethod,
-                MethodKind.PropertySet => property.SetMethod,
+                MethodKind.PropertyGet => fieldOrProperty.GetMethod,
+                MethodKind.PropertySet => fieldOrProperty.SetMethod,
                 _ => null
             };
     }
