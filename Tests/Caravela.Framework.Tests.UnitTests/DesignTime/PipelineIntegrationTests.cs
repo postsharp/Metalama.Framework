@@ -168,7 +168,7 @@ using Caravela.Framework.Eligibility;
 
 class MyAspect : MethodAspect
 {
-   private static readonly DiagnosticDefinition<int> _description = new(""MY001"", Severity.Warning, ""My Message $version$,{0}"" );
+   private static readonly DiagnosticDefinition<int> _description = new(""MY001"", Severity.Warning, ""AspectVersion=$version$,TargetVersion={0}"" );
    public int Version;
 
    public override void BuildAspect( IAspectBuilder<IMethod> aspectBuilder )
@@ -194,7 +194,7 @@ Aspect.cs:
 ----------------------------------------------------------
 Target.cs:
 1 diagnostic(s):
-   Warning MY001 on `M`: `My Message $AspectVersion$,$TargetVersion$`
+   Warning MY001 on `M`: `AspectVersion=$AspectVersion$,TargetVersion=$TargetVersion$`
 0 suppression(s):
 0 introductions(s):
 ";

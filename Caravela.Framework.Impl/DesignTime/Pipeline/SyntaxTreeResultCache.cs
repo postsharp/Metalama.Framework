@@ -136,19 +136,19 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
             return this._syntaxTreeCache.TryGetValue( syntaxTree.FilePath, out result );
         }
 
-        public void InvalidateCache( CompilationChange compilationChange )
+        public void InvalidateCache( CompilationChanges compilationChanges )
         {
-            if ( !compilationChange.HasChange )
+            if ( !compilationChanges.HasChange )
             {
                 // Nothing to do.
             }
-            else if ( compilationChange.HasCompileTimeCodeChange )
+            else if ( compilationChanges.HasCompileTimeCodeChange )
             {
                 this._syntaxTreeCache.Clear();
             }
             else
             {
-                foreach ( var change in compilationChange.SyntaxTreeChanges )
+                foreach ( var change in compilationChanges.SyntaxTreeChanges )
                 {
                     switch ( change.SyntaxTreeChangeKind )
                     {

@@ -144,14 +144,14 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
             Compilation compilation,
             IProjectOptions projectOptions,
             CancellationToken cancellationToken = default )
-            => this.GetSyntaxTreeResults( compilation, compilation.SyntaxTrees.ToImmutableArray(), projectOptions, cancellationToken );
+            => this.GetSyntaxTreeResults( compilation, compilation.SyntaxTrees, projectOptions, cancellationToken );
 
         /// <summary>
         /// Gets the design-time results for a set of syntax trees.
         /// </summary>
         public ImmutableArray<SyntaxTreeResult> GetSyntaxTreeResults(
             Compilation compilation,
-            IReadOnlyList<SyntaxTree> syntaxTrees,
+            IEnumerable<SyntaxTree> syntaxTrees,
             IProjectOptions projectOptions,
             CancellationToken cancellationToken )
         {
@@ -169,6 +169,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
 
                 if ( pipeline.Status != DesignTimeAspectPipelineStatus.NeedsExternalBuild )
                 {
+                    // No cancellation between invalidating the pipeline and invalidating the cache!
                     this._syntaxTreeResultCache.InvalidateCache( changes );
                 }
                 else
@@ -206,7 +207,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
                 }
 
                 // Get the results from the cache. We don't need to check dependencies
-                var resultArrayBuilder = ImmutableArray.CreateBuilder<SyntaxTreeResult>( syntaxTrees.Count );
+                var resultArrayBuilder = ImmutableArray.CreateBuilder<SyntaxTreeResult>();
 
                 // Create the result.
                 foreach ( var syntaxTree in syntaxTrees )

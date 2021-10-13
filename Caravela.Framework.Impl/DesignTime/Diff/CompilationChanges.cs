@@ -9,7 +9,7 @@ namespace Caravela.Framework.Impl.DesignTime.Diff
     /// <summary>
     /// Represents changes between two instances of the <see cref="Microsoft.CodeAnalysis.Compilation"/> class.
     /// </summary>
-    internal sealed class CompilationChange
+    internal sealed class CompilationChanges
     {
         /// <summary>
         /// Gets the set of syntax tree changes.
@@ -22,9 +22,9 @@ namespace Caravela.Framework.Impl.DesignTime.Diff
         public bool HasCompileTimeCodeChange { get; }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CompilationChange"/> class.
+        /// Initializes a new instance of the <see cref="CompilationChanges"/> class.
         /// </summary>
-        public CompilationChange(
+        public CompilationChanges(
             ImmutableArray<SyntaxTreeChange> syntaxTreeChanges,
             bool hasCompileTimeCodeChange,
             Compilation compilationToAnalyze,
@@ -36,7 +36,7 @@ namespace Caravela.Framework.Impl.DesignTime.Diff
             this.IsIncremental = isIncremental;
         }
 
-        public static CompilationChange Empty( Compilation compilation ) => new( ImmutableArray<SyntaxTreeChange>.Empty, false, compilation, true );
+        public static CompilationChanges Empty( Compilation compilation ) => new( ImmutableArray<SyntaxTreeChange>.Empty, false, compilation, true );
 
         public bool HasChange => this.SyntaxTreeChanges.Length > 0 || this.HasCompileTimeCodeChange;
 
@@ -47,6 +47,26 @@ namespace Caravela.Framework.Impl.DesignTime.Diff
         /// this is the last compilation of <see cref="CompilationChangeTracker"/>. Otherwise, this is the new compilation. 
         /// </summary>
         public Compilation CompilationToAnalyze { get; }
+
+        public CompilationChanges Merge( CompilationChanges newChanges )
+        {
+            if ( !this.HasChange || !newChanges.IsIncremental )
+            {
+                return newChanges;
+            }
+            else if ( !newChanges.HasChange )
+            {
+                return this;
+            }
+            else
+            {
+                return new CompilationChanges(
+                    this.SyntaxTreeChanges.AddRange( newChanges.SyntaxTreeChanges ),
+                    this.HasCompileTimeCodeChange | newChanges.HasCompileTimeCodeChange,
+                    newChanges.CompilationToAnalyze,
+                    this.IsIncremental );
+            }
+        }
 
         public override string ToString() => $"HasCompileTimeCodeChange={this.HasCompileTimeCodeChange}, SyntaxTreeChanges={this.SyntaxTreeChanges.Length}";
     }
