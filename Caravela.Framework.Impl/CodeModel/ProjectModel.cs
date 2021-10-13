@@ -46,7 +46,7 @@ namespace Caravela.Framework.Impl.CodeModel
         public ImmutableArray<IAssemblyIdentity> AssemblyReferences => this._projectReferences.Value;
 
         [Memo]
-        public ImmutableHashSet<string> DefinedSymbols
+        public ImmutableHashSet<string> PreprocessorSymbols
             => this._anySyntaxTree != null ? this._anySyntaxTree.Options.PreprocessorSymbolNames.ToImmutableHashSet() : ImmutableHashSet<string>.Empty;
 
         public string? Configuration => this._projectOptions.Configuration;

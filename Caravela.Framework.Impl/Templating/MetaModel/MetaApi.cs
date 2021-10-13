@@ -83,6 +83,8 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         public IMetaCodeBuilder CodeBuilder => this;
 
+        public IAspectInstance AspectInstance => this._common.AspectInstance;
+
         public IAspectInstance Aspect => this._common.AspectInstance;
 
         public object This => this.GetThisOrBase( "meta.This", new AspectReferenceSpecification( this._common.AspectLayerId, AspectReferenceOrder.Final ) );
