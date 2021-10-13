@@ -24,6 +24,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public bool IsOverride { get; set; }
 
+        public override bool IsDesignTime => !this.IsOverride;
+
         public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
             => this.DeclaringType.ToDisplayString( format, context ) + "." + this.Name;
 

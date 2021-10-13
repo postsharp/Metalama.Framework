@@ -39,7 +39,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
             IPipelineStepsResult pipelineStepResult,
             CancellationToken cancellationToken )
         {
-            var transformations = pipelineStepResult.Compilation.GetAllObservableTransformations();
+            var transformations = pipelineStepResult.Compilation.GetAllObservableTransformations( true );
             UserDiagnosticSink diagnostics = new( this.CompileTimeProject );
 
             var additionalSyntaxTrees = new List<IntroducedSyntaxTree>();

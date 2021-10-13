@@ -84,7 +84,7 @@ namespace Caravela.Framework.Impl.Linking
             var allTransformations =
                 MergeOrderedTransformations(
                         input.OrderedAspectLayers,
-                        input.CompilationModel.GetAllObservableTransformations().Select( x => x.Transformations.OfType<ISyntaxTreeTransformation>() ),
+                        input.CompilationModel.GetAllObservableTransformations( false ).Select( x => x.Transformations.OfType<ISyntaxTreeTransformation>() ),
                         input.NonObservableTransformations.OfType<ISyntaxTreeTransformation>() )
                     .ToList();
 

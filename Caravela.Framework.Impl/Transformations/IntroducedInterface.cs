@@ -17,6 +17,8 @@ namespace Caravela.Framework.Impl.Transformations
     {
         public IDeclaration ContainingDeclaration => this.TargetType;
 
+        public bool IsDesignTime => true;
+
         public INamedType InterfaceType { get; }
 
         public ImplementInterfaceAdvice Advice { get; }

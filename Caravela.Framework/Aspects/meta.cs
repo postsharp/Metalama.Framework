@@ -3,7 +3,6 @@
 
 using Caravela.Framework.Code;
 using Caravela.Framework.Code.SyntaxBuilders;
-using Caravela.Framework.Diagnostics;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;

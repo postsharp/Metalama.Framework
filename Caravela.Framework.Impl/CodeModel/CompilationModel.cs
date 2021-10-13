@@ -242,11 +242,19 @@ namespace Caravela.Framework.Impl.CodeModel
         internal ImmutableArray<IObservableTransformation> GetObservableTransformationsOnElement( IDeclaration declaration )
             => this._transformations[declaration.ToRef()];
 
-        internal IEnumerable<(IDeclaration DeclaringDeclaration, IEnumerable<IObservableTransformation> Transformations)> GetAllObservableTransformations()
+        internal IEnumerable<(IDeclaration DeclaringDeclaration, ImmutableArray<IObservableTransformation> Transformations)> GetAllObservableTransformations(
+            bool designTimeOnly )
         {
             foreach ( var group in this._transformations )
             {
-                yield return (group.Key.Resolve( this ), group);
+                var filteredGroup = designTimeOnly
+                    ? group.Where( t => t.IsDesignTime ).ToImmutableArray()
+                    : group.ToImmutableArray();
+
+                if ( !filteredGroup.IsEmpty )
+                {
+                    yield return (group.Key.Resolve( this ), filteredGroup);
+                }
             }
         }
 
