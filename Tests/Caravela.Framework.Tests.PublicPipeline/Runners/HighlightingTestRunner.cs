@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-#pragma warning disable IDE0005
 using Caravela.Framework.DesignTime.Contracts;
 using Caravela.Framework.Impl.Formatting;
 using Caravela.Framework.Impl.Pipeline;
@@ -13,8 +12,6 @@ using System.IO;
 using System.Text;
 using Xunit;
 using Xunit.Abstractions;
-
-#pragma warning restore IDE0005
 
 // ReSharper disable StringLiteralTypo
 

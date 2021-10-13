@@ -1,5 +1,7 @@
 // @DesignTime
 
+#pragma warning disable CS0169
+
 using System;
 using Caravela.Framework.Aspects;
 

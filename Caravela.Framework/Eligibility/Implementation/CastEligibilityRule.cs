@@ -3,8 +3,6 @@
 
 using System;
 
-#pragma warning disable 618
-
 namespace Caravela.Framework.Eligibility.Implementation
 {
     [Obsolete( "Not implemented." )]
