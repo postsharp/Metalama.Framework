@@ -3,6 +3,8 @@ using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.TestFramework;
 
+#pragma warning disable CS0169
+
 namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Properties.PromoteSource
 {
     [AttributeUsage(AttributeTargets.Field)]

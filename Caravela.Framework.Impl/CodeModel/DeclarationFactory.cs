@@ -209,7 +209,7 @@ namespace Caravela.Framework.Impl.CodeModel
         internal IField GetField( IFieldBuilder fieldBuilder )
             => (IField) this._cache.GetOrAdd(
                 DeclarationRef.FromBuilder( fieldBuilder ),
-                l => new BuiltField( (FieldBuilder) l.Target!, this.CompilationModel ) );
+                l => new BuiltField( (FieldBuilder) l.Target!, this._compilationModel ) );
 
         internal IProperty GetProperty( PropertyBuilder propertyBuilder )
             => (IProperty) this._cache.GetOrAdd(
