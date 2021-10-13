@@ -124,8 +124,8 @@ namespace Caravela.Compiler
         }
 
         private bool MustReplaceByThrow( ISymbol symbol )
-            => this.SymbolClassifier.GetTemplatingScope( symbol ) == TemplatingScope.CompileTimeOnly ||
-               !this.SymbolClassifier.GetTemplateInfo( symbol ).IsNone;
+            => !symbol.IsAbstract && (this.SymbolClassifier.GetTemplatingScope( symbol ) == TemplatingScope.CompileTimeOnly ||
+                                      !this.SymbolClassifier.GetTemplateInfo( symbol ).IsNone);
 
         public override SyntaxNode? VisitIndexerDeclaration( IndexerDeclarationSyntax node )
         {

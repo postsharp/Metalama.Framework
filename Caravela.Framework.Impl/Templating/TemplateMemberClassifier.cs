@@ -49,7 +49,7 @@ namespace Caravela.Framework.Impl.Templating
                 _ => false
             };
 
-        public bool IsRunTimeMethod( ISymbol symbol )
+        public bool IsRunTimeMethod( IMethodSymbol symbol )
             => symbol.Name == nameof(meta.RunTime) &&
                symbol.ContainingType.GetDocumentationCommentId() == this._metaType.GetDocumentationCommentId();
 

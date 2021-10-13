@@ -460,8 +460,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
                 if ( success )
                 {
-                    if ( methodSymbol.IsOverride && methodSymbol.OverriddenMethod!.IsAbstract
-                                                 && methodSymbol.OverriddenMethod.ContainingAssembly.Name == _frameworkAssemblyName )
+                    if ( methodSymbol.IsOverride && methodSymbol.OverriddenMethod!.IsAbstract )
                     {
                         yield return WithThrowNotSupportedExceptionBody( node, "Template code cannot be directly executed." );
                     }
