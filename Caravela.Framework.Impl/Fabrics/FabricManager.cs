@@ -14,7 +14,7 @@ using System.Linq;
 namespace Caravela.Framework.Impl.Fabrics
 {
     /// <summary>
-    /// The top-level class that discovers, instantiates and executes fabric. It exposes an <see cref="AspectSource"/>
+    /// The top-level class that discovers, instantiates and executes fabrics. It exposes an <see cref="AspectSource"/>
     /// property, which must be included in the list of aspect sources of the pipeline.
     /// </summary>
     internal sealed class FabricManager
