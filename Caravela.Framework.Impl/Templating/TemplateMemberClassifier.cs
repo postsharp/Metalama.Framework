@@ -14,7 +14,7 @@ using System.Linq;
 namespace Caravela.Framework.Impl.Templating
 {
     /// <summary>
-    /// Provides methods that tests for classifications of template members, for instance <see cref="IsRunTimeMethod(ISymbol)"/>.
+    /// Provides methods that tests for classifications of template members, for instance <see cref="IsRunTimeMethod(Microsoft.CodeAnalysis.IMethodSymbol)"/>.
     /// </summary>
     internal class TemplateMemberClassifier
     {

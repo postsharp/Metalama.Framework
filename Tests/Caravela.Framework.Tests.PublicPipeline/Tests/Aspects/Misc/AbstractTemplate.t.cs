@@ -1,7 +1,7 @@
-class TargetCode
+internal class TargetCode
     {
         [ConcreteAspect]
-        int M() {
+        private int M() {
     global::System.Console.WriteLine("Override");
 return 0;};
     }
