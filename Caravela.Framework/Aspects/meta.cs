@@ -183,12 +183,6 @@ namespace Caravela.Framework.Aspects
         public static dynamic BaseStatic => CurrentContext.BaseStatic;
 
         /// <summary>
-        /// Gets a service allowing to report and suppress diagnostics.
-        /// </summary>
-        /// <seealso href="@diagnostics"/>
-        public static IDiagnosticSink Diagnostics => CurrentContext.Diagnostics;
-
-        /// <summary>
         /// Gets the dictionary of tags that were passed to the <see cref="IAdviceFactory"/> method by the <see cref="IAspect{T}.BuildAspect"/> method.
         /// </summary>
         /// <seealso href="sharing-state-with-advices"/>
