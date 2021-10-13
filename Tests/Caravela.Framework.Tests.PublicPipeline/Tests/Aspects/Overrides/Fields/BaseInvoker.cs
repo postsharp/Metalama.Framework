@@ -17,10 +17,9 @@ namespace Caravela.Framework.Tests.PublicPipeline.Aspects.Overrides.Fields.BaseI
         }
     }
 
+    // <target>
     class TargetCode
     {
-
-      
         [Aspect]
         int field;
         

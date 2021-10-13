@@ -16,6 +16,7 @@ namespace Caravela.Framework.Tests.PublicPipeline.Aspects.Initialize.TwoAspectsO
         }
     }
 
+    // <target>
     class TargetCode
     {
         [Aspect, Aspect]

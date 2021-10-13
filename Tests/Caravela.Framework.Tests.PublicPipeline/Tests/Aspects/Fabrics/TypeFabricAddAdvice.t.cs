@@ -6,6 +6,7 @@ return a;};
         string Method2(string s) {
     global::System.Console.WriteLine("overridden");
 return s;};
+#pragma warning disable CS0067
         
         
         class Fabric : ITypeFabric
@@ -18,5 +19,6 @@ dynamic? Template() => throw new System.NotSupportedException("Compile-time only
 
         
         }
+#pragma warning restore CS0067
         
     }
