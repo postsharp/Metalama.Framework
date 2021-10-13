@@ -3,11 +3,8 @@
     <!-- Exclude *.t.cs from the main compilation, display them as text files instead. -->
     <ItemGroup>
         <Compile Remove="$(MSBuildProjectDirectory)\**\*.t.cs" />
-        <Compile Remove="$(MSBuildProjectDirectory)\*.t.cs" />
         <None Include="$(MSBuildProjectDirectory)\**\*.t.cs" />
-        <None Include="$(MSBuildProjectDirectory)\*.t.cs" />
         <None Remove="$(MSBuildProjectDirectory)\obj\**\*.t.cs" />
-        <None Remove="$(MSBuildProjectDirectory)\obj\*.t.cs" />
     </ItemGroup>
 
     <ItemGroup>

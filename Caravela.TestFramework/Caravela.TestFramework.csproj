@@ -35,11 +35,11 @@
     </ItemGroup>
   
   <ItemGroup>
-    <None Update="Caravela.TestFramework.props">
+    <None Include="Caravela.TestFramework.props">
           <Pack>true</Pack>
           <PackagePath>build</PackagePath>
     </None>
-    <None Update="Caravela.TestFramework.targets">
+    <None Include="Caravela.TestFramework.targets">
       <Pack>true</Pack>
       <PackagePath>build</PackagePath>
     </None>
