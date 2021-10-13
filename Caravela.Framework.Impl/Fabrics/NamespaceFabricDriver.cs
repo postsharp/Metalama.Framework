@@ -22,7 +22,7 @@ namespace Caravela.Framework.Impl.Fabrics
 
         public override void Execute( IAspectBuilderInternal aspectBuilder, FabricTemplateClass fabricTemplateClass )
         {
-            var builder = new Builder( (INamespace) aspectBuilder.Target, this.Configuration, aspectBuilder );
+            var builder = new Builder( this, (INamespace) aspectBuilder.Target, this.Configuration, aspectBuilder );
             ((INamespaceFabric) this.Fabric).AmendNamespace( builder );
         }
 
@@ -32,7 +32,11 @@ namespace Caravela.Framework.Impl.Fabrics
 
         private class Builder : BaseBuilder<INamespace>, INamespaceAmender
         {
-            public Builder( INamespace ns, AspectProjectConfiguration context, IAspectBuilderInternal aspectBuilder ) : base( ns, context, aspectBuilder ) { }
+            public Builder( FabricDriver parent, INamespace ns, AspectProjectConfiguration context, IAspectBuilderInternal aspectBuilder ) : base(
+                parent,
+                ns,
+                context,
+                aspectBuilder ) { }
 
             public INamespace Namespace => this.Target;
         }

@@ -22,8 +22,6 @@ namespace Caravela.Framework.Impl.Pipeline
     {
         private readonly List<(IAspectSource Source, IAspectClass AspectClass)> _aspectSources = new();
 
-        public AspectSourcePriority Priority => AspectSourcePriority.Aggregate;
-
         public ImmutableArray<IAspectClass> AspectClasses => this._aspectSources.Select( a => a.AspectClass ).Distinct().ToImmutableArray();
 
         public IEnumerable<IDeclaration> GetExclusions( INamedType aspectType ) => Enumerable.Empty<IDeclaration>();

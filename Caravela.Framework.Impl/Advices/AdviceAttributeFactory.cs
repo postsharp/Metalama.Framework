@@ -18,7 +18,7 @@ namespace Caravela.Framework.Impl.Advices
     {
         public static bool TryCreateAdvice<T>(
             this TemplateInfo template,
-            AspectInstance aspect,
+            IAspectInstanceInternal aspect,
             TemplateClassInstance templateInstance,
             IDiagnosticAdder diagnosticAdder,
             T aspectTargetDeclaration,

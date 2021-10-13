@@ -20,7 +20,7 @@ namespace Caravela.Framework.Impl.Advices
         public IMethodBuilder Builder => this.MemberBuilder;
 
         public IntroduceMethodAdvice(
-            AspectInstance aspect,
+            IAspectInstanceInternal aspect,
             TemplateClassInstance templateInstance,
             INamedType targetDeclaration,
             TemplateMember<IMethod> templateMethod,

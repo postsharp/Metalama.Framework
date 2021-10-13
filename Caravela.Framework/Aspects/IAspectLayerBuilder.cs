@@ -18,22 +18,15 @@ namespace Caravela.Framework.Aspects
     [InternalImplement]
     public interface IAspectLayerBuilder : IValidatorAdder
     {
+        /// <summary>
+        /// Gets the current <see cref="IProject"/>, which represents the <c>csproj</c> file and allows to share project-local data.
+        /// </summary>
         IProject Project { get; }
 
         /// <summary>
-        /// Gets the list of aspects that have required this aspect to be created.
+        /// Gets the current
         /// </summary>
-        [Obsolete( "Not implemented." )]
-        IReadOnlyList<IAspectInstance> UpstreamAspects { get; }
-
-        /// <summary>
-        /// Gets the list of other instances of the same type on <see cref="Target"/>. When several instances
-        /// of the same aspect class are added to the same declaration, only the instance with the highest priority got initialized
-        /// using <see cref="IAspect{T}.BuildAspect"/>. The other instances can are exposed in this property and are sorted
-        /// by order of decreasing priority.
-        /// </summary>
-        [Obsolete( "Not implemented." )]
-        IReadOnlyList<IAspectInstance> OtherInstances { get; }
+        IAspectInstance AspectInstance { get; }
 
         /// <summary>
         /// Gets a service that allows to report or suppress diagnostics.
@@ -50,6 +43,9 @@ namespace Caravela.Framework.Aspects
         /// </summary>
         IAdviceFactory Advices { get; }
 
+        /// <summary>
+        /// Gets the cancellation token for the current operation.
+        /// </summary>
         CancellationToken CancellationToken { get; }
     }
 

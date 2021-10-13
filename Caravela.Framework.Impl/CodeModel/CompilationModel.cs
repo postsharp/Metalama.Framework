@@ -73,7 +73,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
             this.Factory = new DeclarationFactory( this );
 
-            AttributeDiscoveryVisitor attributeDiscoveryVisitor = new();
+            AttributeDiscoveryVisitor attributeDiscoveryVisitor = new( this.RoslynCompilation );
 
             foreach ( var tree in partialCompilation.SyntaxTrees )
             {
@@ -316,7 +316,7 @@ namespace Caravela.Framework.Impl.CodeModel
             return depth;
         }
 
-        DeclarationRef<IDeclaration> IDeclarationImpl.ToRef() => DeclarationRef.Compilation();
+        DeclarationRef<IDeclaration> IDeclarationImpl.ToRef() => DeclarationRef.Assembly();
 
         ImmutableArray<SyntaxReference> IDeclarationImpl.DeclaringSyntaxReferences => ImmutableArray<SyntaxReference>.Empty;
 

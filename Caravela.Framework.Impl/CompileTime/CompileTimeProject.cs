@@ -214,7 +214,10 @@ namespace Caravela.Framework.Impl.CompileTime
         /// </summary>
         /// <returns></returns>
         public ResourceDescription ToResource()
-            => new(
+        {
+            this.AssertNotEmpty();
+
+            return new ResourceDescription(
                 CompileTimeConstants.ResourceName,
                 () =>
                 {
@@ -225,6 +228,7 @@ namespace Caravela.Framework.Impl.CompileTime
                     return stream;
                 },
                 true );
+        }
 
         /// <summary>
         /// Gets a compile-time reflection <see cref="Type"/> defined in the current project.

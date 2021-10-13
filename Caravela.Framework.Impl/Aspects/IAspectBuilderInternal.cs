@@ -3,6 +3,7 @@
 
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Impl.Advices;
+using Caravela.Framework.Impl.Utilities;
 
 namespace Caravela.Framework.Impl.Aspects
 {
@@ -16,5 +17,7 @@ namespace Caravela.Framework.Impl.Aspects
         void AddAspectSource( IAspectSource aspectSource );
 
         AdviceFactory AdviceFactory { get; }
+
+        DisposeAction WithPredecessor( in AspectPredecessor predecessor );
     }
 }

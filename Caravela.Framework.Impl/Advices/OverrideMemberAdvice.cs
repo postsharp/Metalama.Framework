@@ -14,7 +14,7 @@ namespace Caravela.Framework.Impl.Advices
         public new TMember TargetDeclaration => (TMember) base.TargetDeclaration;
 
         public OverrideMemberAdvice(
-            AspectInstance aspect,
+            IAspectInstanceInternal aspect,
             TemplateClassInstance templateInstance,
             TMember targetDeclaration,
             string? layerName,

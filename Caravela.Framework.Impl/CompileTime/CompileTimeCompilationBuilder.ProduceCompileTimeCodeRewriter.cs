@@ -8,7 +8,6 @@ using Caravela.Framework.Fabrics;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.Diagnostics;
-using Caravela.Framework.Impl.ReflectionMocks;
 using Caravela.Framework.Impl.Templating;
 using Caravela.Framework.Impl.Utilities;
 using Caravela.Framework.Project;
@@ -41,7 +40,7 @@ namespace Caravela.Framework.Impl.CompileTime
             private readonly IDiagnosticAdder _diagnosticAdder;
             private readonly TemplateCompiler _templateCompiler;
             private readonly CancellationToken _cancellationToken;
-            private readonly NameSyntax _compileTimeType;
+            private readonly NameSyntax _userCodeExecutionContextType;
             private readonly SyntaxGenerationContext _syntaxGenerationContext;
             private readonly NameSyntax _originalNameTypeSyntax;
             private readonly NameSyntax _originalPathTypeSyntax;
@@ -72,9 +71,9 @@ namespace Caravela.Framework.Impl.CompileTime
 
                 this._syntaxGenerationContext = SyntaxGenerationContext.CreateDefault( serviceProvider, compileTimeCompilation );
 
-                this._compileTimeType = (NameSyntax)
+                this._userCodeExecutionContextType = (NameSyntax)
                     this._syntaxGenerationContext.SyntaxGenerator.Type(
-                        this._syntaxGenerationContext.ReflectionMapper.GetTypeSymbol( typeof(CompileTimeType) ) );
+                        this._syntaxGenerationContext.ReflectionMapper.GetTypeSymbol( typeof(UserCodeExecutionContext) ) );
 
                 this._originalNameTypeSyntax = (NameSyntax)
                     this._syntaxGenerationContext.SyntaxGenerator.Type(
@@ -767,13 +766,13 @@ namespace Caravela.Framework.Impl.CompileTime
                     if ( typeSymbol != null && this.SymbolClassifier.GetTemplatingScope( typeSymbol ) == TemplatingScope.RunTimeOnly )
                     {
                         // We are in a compile-time-only block but we have a typeof to a run-time-only block. 
-                        // This is a situation we can handle by rewriting the typeof to a call to CompileTimeType.CreateFromDocumentationId.
+                        // This is a situation we can handle by rewriting the typeof to a call to UserCodeContext.GetCompileTimeType.
 
                         var memberAccess =
                             MemberAccessExpression(
                                 SyntaxKind.SimpleMemberAccessExpression,
-                                this._compileTimeType,
-                                IdentifierName( nameof(CompileTimeType.CreateFromDocumentationId) ) );
+                                this._userCodeExecutionContextType,
+                                IdentifierName( nameof(UserCodeExecutionContext.GetCompileTimeType) ) );
 
                         var invocation = InvocationExpression(
                             memberAccess,
@@ -781,7 +780,7 @@ namespace Caravela.Framework.Impl.CompileTime
                                 SeparatedList(
                                     new[]
                                     {
-                                        Argument( SyntaxFactoryEx.LiteralExpression( typeSymbol.GetDocumentationCommentId() ) ),
+                                        Argument( SyntaxFactoryEx.LiteralExpression( DocumentationCommentId.CreateReferenceId( typeSymbol ) ) ),
                                         Argument( SyntaxFactoryEx.LiteralExpression( typeSymbol.ToDisplayString() ) )
                                     } ) ) );
 

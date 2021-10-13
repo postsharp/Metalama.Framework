@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Tests.Integration.Aspects.Initialize.AddChildAspect;
@@ -27,6 +28,7 @@ namespace Caravela.Framework.Tests.Integration.Aspects.Initialize.AddChildAspect
         public override dynamic? OverrideMethod()
         {
             Console.WriteLine( _value );
+            Console.WriteLine( meta.AspectInstance.Predecessors.Single().Instance.ToString() );
 
             return meta.Proceed();
         }

@@ -48,7 +48,7 @@ namespace Caravela.Framework.Impl.Aspects
         }
 
         public AspectInstanceResult ExecuteAspect(
-            AspectInstance aspectInstance,
+            IAspectInstanceInternal aspectInstance,
             CompilationModel compilationModelRevision,
             AspectProjectConfiguration projectConfiguration,
             CancellationToken cancellationToken )
@@ -84,7 +84,7 @@ namespace Caravela.Framework.Impl.Aspects
 
         private AspectInstanceResult EvaluateAspect<T>(
             T targetDeclaration,
-            AspectInstance aspectInstance,
+            IAspectInstanceInternal aspectInstance,
             CompilationModel compilationModelRevision,
             AspectProjectConfiguration projectConfiguration,
             CancellationToken cancellationToken )
@@ -150,6 +150,7 @@ namespace Caravela.Framework.Impl.Aspects
                     declarativeAdvices,
                     adviceFactory,
                     projectConfiguration,
+                    aspectInstance,
                     cancellationToken );
 
                 try
@@ -188,7 +189,7 @@ namespace Caravela.Framework.Impl.Aspects
         }
 
         private static Advice? CreateDeclarativeAdvice<T>(
-            AspectInstance aspect,
+            IAspectInstanceInternal aspect,
             TemplateClassInstance templateInstance,
             IDiagnosticAdder diagnosticAdder,
             T aspectTarget,

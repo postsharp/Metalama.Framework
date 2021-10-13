@@ -2,7 +2,6 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
-using Caravela.Framework.Impl.ReflectionMocks;
 using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
@@ -30,7 +29,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public SpecialType SpecialType => SpecialType.None;
 
-        public Type ToType() => CompileTimeType.Create( this );
+        public Type ToType() => this.GetCompilationModel().Factory.GetReflectionType( this._typeSymbol );
 
         public bool? IsReferenceType => this.IsReferenceTypeImpl();
 

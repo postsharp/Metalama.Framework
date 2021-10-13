@@ -24,15 +24,18 @@ namespace Caravela.Framework.Impl.Fabrics
     internal class DeclarationSelection<T> : IDeclarationSelection<T>
         where T : class, IDeclaration
     {
+        private readonly AspectPredecessor _predecessor;
         private readonly Action<IAspectSource> _registerAspectSource;
         private readonly Func<CompilationModel, IEnumerable<T>> _selector;
         private readonly AspectProjectConfiguration _projectConfiguration;
 
         public DeclarationSelection(
+            AspectPredecessor predecessor,
             Action<IAspectSource> registerAspectSource,
             Func<CompilationModel, IEnumerable<T>> selectTargets,
             AspectProjectConfiguration projectConfiguration )
         {
+            this._predecessor = predecessor;
             this._registerAspectSource = registerAspectSource;
             this._selector = selectTargets;
             this._projectConfiguration = projectConfiguration;
@@ -53,7 +56,7 @@ namespace Caravela.Framework.Impl.Fabrics
 
         private void RegisterAspectSource( IAspectSource aspectSource ) => this._registerAspectSource( aspectSource );
 
-        public void AddAspect<TAspect>( Func<T, Expression<Func<TAspect>>> createAspect )
+        public IDeclarationSelection<T> AddAspect<TAspect>( Func<T, Expression<Func<TAspect>>> createAspect )
             where TAspect : Attribute, IAspect<T>
         {
             var aspectClass = this.GetAspectClass<TAspect>();
@@ -61,7 +64,7 @@ namespace Caravela.Framework.Impl.Fabrics
             this.RegisterAspectSource(
                 new ProgrammaticAspectSource<TAspect, T>(
                     aspectClass,
-                    compilation => this._selector( compilation )
+                    ( compilation ) => this._selector( compilation )
                         .Select(
                             t => new AspectInstance(
                                 this._projectConfiguration.ServiceProvider,
@@ -69,10 +72,13 @@ namespace Caravela.Framework.Impl.Fabrics
                                     this._projectConfiguration.UserCodeInvoker.Invoke( () => createAspect( t ) ).Body,
                                     Array.Empty<ParameterExpression>() ),
                                 t,
-                                aspectClass ) ) ) );
+                                aspectClass,
+                                this._predecessor ) ) ) );
+
+            return this;
         }
 
-        public void AddAspect<TAspect>( Func<T, TAspect> createAspect )
+        public IDeclarationSelection<T> AddAspect<TAspect>( Func<T, TAspect> createAspect )
             where TAspect : Attribute, IAspect<T>
         {
             var aspectClass = this.GetAspectClass<TAspect>();
@@ -80,15 +86,18 @@ namespace Caravela.Framework.Impl.Fabrics
             this.RegisterAspectSource(
                 new ProgrammaticAspectSource<TAspect, T>(
                     aspectClass,
-                    compilation => this._selector( compilation )
+                    ( compilation ) => this._selector( compilation )
                         .Select(
                             t => new AspectInstance(
                                 this._projectConfiguration.UserCodeInvoker.Invoke( () => createAspect( t ) ),
                                 t,
-                                aspectClass ) ) ) );
+                                aspectClass,
+                                this._predecessor ) ) ) );
+
+            return this;
         }
 
-        public void AddAspect<TAspect>()
+        public IDeclarationSelection<T> AddAspect<TAspect>()
             where TAspect : Attribute, IAspect<T>, new()
         {
             var aspectClass = this.GetAspectClass<TAspect>();
@@ -96,22 +105,25 @@ namespace Caravela.Framework.Impl.Fabrics
             this.RegisterAspectSource(
                 new ProgrammaticAspectSource<TAspect, T>(
                     aspectClass,
-                    compilation => this._selector( compilation )
+                    ( compilation ) => this._selector( compilation )
                         .Select(
                             t => new AspectInstance(
                                 new TAspect(),
                                 t,
-                                aspectClass ) ) ) );
+                                aspectClass,
+                                this._predecessor ) ) ) );
+
+            return this;
         }
 
         [Obsolete( "Not implemented." )]
-        public void RequireAspect<TTarget, TAspect>( TTarget target )
+        public IDeclarationSelection<T> RequireAspect<TTarget, TAspect>( TTarget target )
             where TTarget : class, IDeclaration
             where TAspect : IAspect<TTarget>, new()
             => throw new NotImplementedException();
 
         [Obsolete( "Not implemented." )]
-        public void AddAnnotation<TAspect, TAnnotation>( Func<T, TAnnotation> getAnnotation )
+        public IDeclarationSelection<T> AddAnnotation<TAspect, TAnnotation>( Func<T, TAnnotation> getAnnotation )
             where TAspect : IAspect
             where TAnnotation : IAnnotation<T, TAspect>, IEligible<T>
             => throw new NotImplementedException();

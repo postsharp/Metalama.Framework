@@ -10,7 +10,7 @@ namespace Caravela.Framework.Code.SyntaxBuilders
     /// Compile-time object that allows to build a run-time interpolated string.
     /// </summary>
     [CompileTimeOnly]
-    public sealed partial class InterpolatedStringBuilder : IExpressionBuilder
+    public sealed partial class InterpolatedStringBuilder : INotNullExpressionBuilder
     {
         private readonly List<object?> _items = new();
 
@@ -27,7 +27,13 @@ namespace Caravela.Framework.Code.SyntaxBuilders
         /// Adds a fixed text to the interpolated string.
         /// </summary>
         /// <param name="text"></param>
-        public void AddText( string text ) => this._items.Add( text );
+        public void AddText( string? text )
+        {
+            if ( !string.IsNullOrEmpty( text ) )
+            {
+                this._items.Add( text );
+            }
+        }
 
         /// <summary>
         /// Adds an expression to the interpolated string.

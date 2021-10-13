@@ -159,7 +159,7 @@ namespace Caravela.TestFramework
                 foreach ( var includedFile in testInput.Options.IncludedFiles )
                 {
                     var includedFullPath = Path.GetFullPath( Path.Combine( Path.GetDirectoryName( testInput.FullPath )!, includedFile ) );
-                    var includedText = await File.ReadAllTextAsync( includedFullPath );
+                    var includedText = File.ReadAllText( includedFullPath );
 
                     if ( !includedFile.EndsWith( ".Dependency.cs", StringComparison.OrdinalIgnoreCase ) )
                     {

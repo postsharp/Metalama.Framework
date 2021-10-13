@@ -47,7 +47,8 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public ICompilation Compilation => this.ContainingDeclaration?.Compilation ?? throw new AssertionFailedException();
 
-        public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => throw new NotImplementedException();
+        public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
+            => this.ContainingDeclaration!.ToDisplayString() + "@return";
 
         public abstract bool Equals( IDeclaration other );
 

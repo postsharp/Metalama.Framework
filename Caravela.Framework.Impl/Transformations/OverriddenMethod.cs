@@ -54,6 +54,7 @@ namespace Caravela.Framework.Impl.Transformations
                         this.Advice.ReadOnlyTags,
                         this.Advice.AspectLayerId,
                         context.SyntaxGenerationContext,
+                        this.Advice.Aspect,
                         context.ServiceProvider ) );
 
                 var expansionContext = new TemplateExpansionContext(

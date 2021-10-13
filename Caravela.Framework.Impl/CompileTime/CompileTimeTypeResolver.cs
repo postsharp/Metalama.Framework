@@ -1,12 +1,14 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Impl.ReflectionMocks;
+using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Utilities;
+using Caravela.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading;
 
 namespace Caravela.Framework.Impl.CompileTime
@@ -16,6 +18,15 @@ namespace Caravela.Framework.Impl.CompileTime
     /// </summary>
     internal abstract class CompileTimeTypeResolver
     {
+        private readonly CompileTimeTypeFactory _compileTimeTypeFactory;
+
+        protected ConditionalWeakTable<ITypeSymbol, Type?> Cache { get; } = new();
+
+        protected CompileTimeTypeResolver( IServiceProvider serviceProvider )
+        {
+            this._compileTimeTypeFactory = serviceProvider.GetService<CompileTimeTypeFactory>();
+        }
+
         /// <summary>
         /// Maps a Roslyn <see cref="!:ITypeSymbol" /> to a reflection <see cref="!:Type" />. 
         /// </summary>
@@ -23,8 +34,27 @@ namespace Caravela.Framework.Impl.CompileTime
 
         public Type? GetCompileTimeType( ITypeSymbol typeSymbol, bool fallbackToMock, CancellationToken cancellationToken = default )
         {
-            Type? NullOrMock() => fallbackToMock ? CompileTimeType.Create( typeSymbol ) : null;
+            if ( !this.Cache.TryGetValue( typeSymbol, out var type ) )
+            {
+                type = this.GetCompileTimeTypeCore( typeSymbol, cancellationToken );
 
+                // The implementation may have added to the cache so we need a double check.
+                if ( !this.Cache.TryGetValue( typeSymbol, out _ ) )
+                {
+                    this.Cache.Add( typeSymbol, type );
+                }
+            }
+
+            if ( type == null && fallbackToMock )
+            {
+                type = this._compileTimeTypeFactory.Get( typeSymbol );
+            }
+
+            return type;
+        }
+
+        private Type? GetCompileTimeTypeCore( ITypeSymbol typeSymbol, CancellationToken cancellationToken = default )
+        {
             switch ( typeSymbol )
             {
                 case IArrayTypeSymbol arrayType:
@@ -33,7 +63,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
                         if ( elementType == null )
                         {
-                            return NullOrMock();
+                            return null;
                         }
 
                         if ( arrayType.IsSZArray )
@@ -52,7 +82,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
                         if ( typeDefinition == null )
                         {
-                            return NullOrMock();
+                            return null;
                         }
 
                         var typeArguments = CollectTypeArguments( genericType )
@@ -61,18 +91,17 @@ namespace Caravela.Framework.Impl.CompileTime
 
                         if ( typeArguments.Contains( null ) )
                         {
-                            return NullOrMock();
+                            return null;
                         }
 
                         return typeDefinition.MakeGenericType( typeArguments );
                     }
 
                 case INamedTypeSymbol namedType:
-                    return this.GetCompileTimeNamedType( namedType, cancellationToken ) ?? NullOrMock();
+                    return this.GetCompileTimeNamedType( namedType, cancellationToken ) ?? null;
 
                 case IDynamicTypeSymbol:
-                    // This cannot happen because the method is called only for types constructed with typeof, and typeof(dynamic) is forbidden.
-                    throw new AssertionFailedException();
+                    return typeof(object);
 
                 case IPointerTypeSymbol pointerType:
                     {
@@ -80,7 +109,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
                         if ( elementType == null )
                         {
-                            return NullOrMock();
+                            return null;
                         }
                         else
                         {
@@ -90,8 +119,9 @@ namespace Caravela.Framework.Impl.CompileTime
 
                 case ITypeParameterSymbol:
                     {
-                        // It is not possible to get this symbol using a typeof expression on a custom attribute.
-                        throw new AssertionFailedException();
+                        // It would be complex to properly map a type parameter, so we will use a mock. It works in most cases, and if we
+                        // need it (because of type equality issues), we can implement the logic.
+                        return null;
                     }
 
                 default:

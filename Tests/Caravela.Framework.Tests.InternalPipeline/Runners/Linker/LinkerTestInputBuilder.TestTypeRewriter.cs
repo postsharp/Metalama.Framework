@@ -831,7 +831,7 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
                         null!,
                         new AspectDriverFactory( fakeCompilation, ImmutableArray<object>.Empty, this._owner.ServiceProvider ) );
 
-                var fakeAspectInstance = new AspectInstance( A.Fake<IAspect>(), A.Fake<IDeclaration>(), aspectClass );
+                var fakeAspectInstance = new AspectInstance( A.Fake<IAspect>(), A.Fake<IDeclaration>(), aspectClass, default );
 
                 return A.Fake<Advice>(
                     i => i.WithArgumentsForConstructor(
