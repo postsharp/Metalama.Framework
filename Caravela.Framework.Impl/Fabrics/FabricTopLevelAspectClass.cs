@@ -50,6 +50,9 @@ namespace Caravela.Framework.Impl.Fabrics
 
         ImmutableArray<TemplateClass> IAspectClassImpl.TemplateClasses => ImmutableArray<TemplateClass>.Empty;
 
-        public EligibleScenarios GetEligibility( IDeclaration targetDeclaration ) => EligibleScenarios.Aspect;
+        
+        public EligibleScenarios GetEligibility( IDeclaration obj ) => EligibleScenarios.Aspect;
+
+        FormattableString? IEligibilityRule<IDeclaration>.GetIneligibilityJustification( EligibleScenarios requestedEligibility, IDescribedObject<IDeclaration> describedObject ) => throw new AssertionFailedException();
     }
 }

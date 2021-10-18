@@ -48,7 +48,7 @@ namespace Caravela.Framework.Impl.Collections
                     this.Add( key, value );
                 }
             }
-            
+
             public void AddRange<TItem>( IEnumerable<TItem> source, Func<TItem, TKey> getKey, Func<TItem, IEnumerable<TValue>> getValues )
             {
                 foreach ( var item in source )
@@ -59,7 +59,6 @@ namespace Caravela.Framework.Impl.Collections
                     this.AddRange( key, values );
                 }
             }
-
 
             public void AddRange( TKey key, IEnumerable<TValue> values )
             {

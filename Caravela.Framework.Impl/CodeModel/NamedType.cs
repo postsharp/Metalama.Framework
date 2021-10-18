@@ -312,7 +312,7 @@ namespace Caravela.Framework.Impl.CodeModel
         {
             var isInterfaceMember = member.DeclaringType.TypeKind == TypeKind.Interface;
 
-            if ( member.IsStatic || ( !isInterfaceMember && (!member.IsVirtual || member.IsSealed) ) )
+            if ( member.IsStatic || (!isInterfaceMember && (!member.IsVirtual || member.IsSealed)) )
             {
                 return Enumerable.Empty<IMember>();
             }
@@ -348,7 +348,7 @@ namespace Caravela.Framework.Impl.CodeModel
             {
                 if ( isInterfaceMember )
                 {
-                    if ( ((INamedTypeInternal) candidate.DeclaringType).IsImplementationOfInterfaceMember(candidate, member) )
+                    if ( ((INamedTypeInternal) candidate.DeclaringType).IsImplementationOfInterfaceMember( candidate, member ) )
                     {
                         overridingMembers.Add( candidate );
                     }
@@ -372,9 +372,9 @@ namespace Caravela.Framework.Impl.CodeModel
         public bool IsImplementationOfInterfaceMember( IMember typeMember, IMember interfaceMember )
         {
             // Some trivial checks first.
-            if ( typeMember.Name != interfaceMember.Name 
-                 || typeMember.DeclarationKind != interfaceMember.DeclarationKind 
-                 || !(typeMember.Accessibility == Accessibility.Public || typeMember.IsExplicitInterfaceImplementation ))
+            if ( typeMember.Name != interfaceMember.Name
+                 || typeMember.DeclarationKind != interfaceMember.DeclarationKind
+                 || !(typeMember.Accessibility == Accessibility.Public || typeMember.IsExplicitInterfaceImplementation) )
             {
                 return false;
             }
@@ -382,7 +382,6 @@ namespace Caravela.Framework.Impl.CodeModel
             var interfaceType = interfaceMember.DeclaringType.GetSymbol();
             var relevantInterfaces = this.GetAllInterfaces().Where( t => t.ConstructedFrom.Equals( interfaceType ) );
 
-            
             foreach ( var implementedInterface in relevantInterfaces )
             {
                 foreach ( var candidateSymbol in implementedInterface.GetMembers( typeMember.Name ) )
@@ -594,12 +593,11 @@ namespace Caravela.Framework.Impl.CodeModel
             if ( this.TypeSymbol.BaseType != null )
             {
                 var newGenericMap = genericMap.CreateBaseMap( this.TypeSymbol.BaseType.TypeArguments );
-                ((NamedType) this.BaseType!).PopulateAllInterfaces(builder, newGenericMap );
+                ((NamedType) this.BaseType!).PopulateAllInterfaces( builder, newGenericMap );
             }
-            
+
             // TODO: process introductions.
         }
-
 
         [Memo]
         public ImmutableHashSet<INamedTypeSymbol> AllInterfaces => this.GetAllInterfaces();
@@ -611,8 +609,5 @@ namespace Caravela.Framework.Impl.CodeModel
 
             return builder.ToImmutable();
         }
-
-
-
     }
 }

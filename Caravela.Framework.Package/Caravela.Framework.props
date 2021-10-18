@@ -5,7 +5,7 @@
         <PackageReference Update="Caravela.Framework.Sdk" PrivateAssets="none" />
     </ItemGroup>
 
-    
+
     <Import Project="Caravela.CompilerVisibleProperties.props"
             Condition="'$(CaravelaCompilerVisiblePropertiesProjectImported)'==''" />
 </Project>

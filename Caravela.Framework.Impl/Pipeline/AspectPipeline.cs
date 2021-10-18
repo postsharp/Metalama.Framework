@@ -217,7 +217,7 @@ namespace Caravela.Framework.Impl.Pipeline
 
             var sources = ImmutableArray.Create<IAspectSource>(
                 new CompilationAspectSource( aspectClasses, configuration.CompileTimeProjectLoader ),
-                new ExternalInheritedAspectSource( compilation, aspectClasses, configuration.CompileTimeProjectLoader ));
+                new ExternalInheritedAspectSource( compilation, aspectClasses, configuration.CompileTimeProjectLoader ) );
 
             if ( configuration.CompileTimeProject != null )
             {

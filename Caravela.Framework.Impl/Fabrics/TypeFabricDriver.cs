@@ -24,11 +24,11 @@ namespace Caravela.Framework.Impl.Fabrics
 
         private ISymbol TargetSymbol => this.FabricSymbol.ContainingType;
 
-        public override void Execute( IAspectBuilderInternal aspectBuilder, FabricTemplateClass templateClass )
+        public override void Execute( IAspectBuilderInternal aspectBuilder, FabricTemplateClass templateClass, FabricInstance fabricInstance )
         {
             // Type fabrics execute as aspects, called from FabricAspectClass.
             var templateInstance = new TemplateClassInstance( this.Fabric, templateClass );
-            var builder = new Builder( this, (INamedType) aspectBuilder.Target, this.Configuration, aspectBuilder, templateInstance );
+            var builder = new Builder( this, (INamedType) aspectBuilder.Target, this.Configuration, aspectBuilder, templateInstance, fabricInstance );
             ((ITypeFabric) this.Fabric).AmendType( builder );
         }
 
@@ -45,7 +45,8 @@ namespace Caravela.Framework.Impl.Fabrics
                 INamedType namedType,
                 AspectProjectConfiguration context,
                 IAspectBuilderInternal aspectBuilder,
-                TemplateClassInstance templateClassInstance ) : base( parent, namedType, context, aspectBuilder )
+                TemplateClassInstance templateClassInstance,
+                FabricInstance fabricInstance ) : base( parent, namedType, context, aspectBuilder, fabricInstance )
             {
                 this.Advices = aspectBuilder.AdviceFactory.WithTemplateClassInstance( templateClassInstance );
             }

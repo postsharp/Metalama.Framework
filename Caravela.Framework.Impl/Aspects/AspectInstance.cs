@@ -5,10 +5,9 @@ using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Eligibility;
 using Caravela.Framework.Impl.CodeModel;
-using Caravela.Framework.Impl.Diagnostics;
-using Caravela.Framework.Impl.Pipeline;
 using Caravela.Framework.Impl.Utilities;
 using Caravela.Framework.Project;
+using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -39,9 +38,8 @@ namespace Caravela.Framework.Impl.Aspects
         public ImmutableDictionary<TemplateClass, TemplateClassInstance> TemplateInstances { get; }
 
         public AspectPredecessor Predecessor { get; }
-        
+
         public EligibleScenarios Eligibility { get; }
-        
 
         ImmutableArray<AspectPredecessor> IAspectInstance.Predecessors => ImmutableArray.Create( this.Predecessor );
 
@@ -80,10 +78,9 @@ namespace Caravela.Framework.Impl.Aspects
             this.TargetDeclaration = declaration;
             this.AspectClass = aspectClass;
             this.Predecessor = predecessor;
-            this.Eligibility = ComputeEligibility( (IAspectClassImpl)aspectClass, declaration );
-            
+            this.Eligibility = ComputeEligibility( (IAspectClassImpl) aspectClass, declaration );
+
             this.TemplateInstances = templateInstances.ToImmutableDictionary( t => t.TemplateClass, t => t );
-            
         }
 
         internal AspectInstance(
@@ -110,6 +107,8 @@ namespace Caravela.Framework.Impl.Aspects
 
         public FormattableString FormatPredecessor() => $"aspect '{this.AspectClass.DisplayName}' applied to '{this.TargetDeclaration}'";
 
+        public Location? GetDiagnosticLocation( Compilation compilation ) => throw new NotImplementedException();
+
         public int CompareTo( AspectInstance? other ) => this.Predecessor.Kind.CompareTo( other.AssertNotNull().Predecessor.Kind );
 
         public virtual AttributeAspectInstance CreateDerivedInstance( IDeclaration target )
@@ -117,8 +116,5 @@ namespace Caravela.Framework.Impl.Aspects
             // Inherited aspects should not be created with a method that accepts an IAspect, but should provide a way to replicate the aspect.
             throw new AssertionFailedException();
         }
-
-        
-        
     }
 }

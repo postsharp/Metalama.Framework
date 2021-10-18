@@ -29,21 +29,15 @@ namespace Caravela.Framework.Eligibility
         /// Means that the aspect can be applied to the target declaration.
         /// </summary>
         Aspect = 2,
-        
+
         /// <summary>
         /// Means that the aspect can be used as a live template on the target declaration.
         /// </summary>
         LiveTemplate = 4,
-        
+
         /// <summary>
         /// Means that the aspect can be used in any scenario.
         /// </summary>
         All = Inheritance | Aspect | LiveTemplate
-    }
-
-    internal static class EligibleScenariosExtensions
-    {
-        public static bool IncludesAll( this EligibleScenarios scenarios, EligibleScenarios subset ) => (scenarios & subset) == subset;
-        public static bool IncludesAny( this EligibleScenarios scenarios, EligibleScenarios subset ) => (scenarios & subset) != 0;
     }
 }

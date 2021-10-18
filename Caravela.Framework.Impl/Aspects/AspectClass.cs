@@ -154,7 +154,7 @@ namespace Caravela.Framework.Impl.Aspects
             {
                 // Abstract aspect classes don't have any layer.
                 this._layers = Array.Empty<AspectLayer>();
-                
+
                 // Abstract aspect classes don't have eligibility because they cannot be applied.
                 this._eligibilityRules = ImmutableArray<KeyValuePair<Type, IEligibilityRule<IDeclaration>>>.Empty;
             }
@@ -300,7 +300,7 @@ namespace Caravela.Framework.Impl.Aspects
                 // Linker tests do not set this member but don't need to test eligibility.
                 return EligibleScenarios.Aspect;
             }
-            
+
             var declarationType = targetDeclaration.GetType();
             var eligibility = EligibleScenarios.All;
 
@@ -320,8 +320,9 @@ namespace Caravela.Framework.Impl.Aspects
             return eligibility;
         }
 
-        public string? GetIneligibilityJustification( IDeclaration targetDeclaration, EligibleScenarios requestedEligibility )
+        public FormattableString? GetIneligibilityJustification( EligibleScenarios requestedEligibility, IDescribedObject<IDeclaration> target ) 
         {
+            var targetDeclaration = target.Object;
             var declarationType = targetDeclaration.GetType();
 
             var group = new AndEligibilityRule<IDeclaration>(
@@ -331,8 +332,7 @@ namespace Caravela.Framework.Impl.Aspects
 
             return group.GetIneligibilityJustification(
                     requestedEligibility,
-                    new DescribedObject<IDeclaration>( targetDeclaration, $"'{targetDeclaration}'") )
-                ?.ToString( UserMessageFormatter.Instance );
+                    new DescribedObject<IDeclaration>( targetDeclaration, $"'{targetDeclaration}'" ) );
         }
 
         public override string ToString() => this.FullName;

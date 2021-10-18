@@ -108,11 +108,6 @@ namespace Caravela.Framework.Code
         bool IsReadOnly { get; }
 
         /// <summary>
-        /// Gets the assembly that declared this type.
-        /// </summary>
-        IAssembly DeclaringAssembly { get; }
-
-        /// <summary>
         /// Determines whether the type if subclass of the given class or interface.
         /// </summary>
         /// <param name="type"></param>

@@ -43,7 +43,9 @@ namespace Caravela.Framework.Impl.CodeModel
                 }
             }
         }
-        
-        public override bool CanBeInherited => this.DeclaringType.TypeKind == TypeKind.Interface || (this.IsVirtual && !this.IsSealed && ((IDeclarationImpl) this.DeclaringType).CanBeInherited);
+
+        public override bool CanBeInherited
+            => this.DeclaringType.TypeKind == TypeKind.Interface
+               || (this.IsVirtual && !this.IsSealed && ((IDeclarationImpl) this.DeclaringType).CanBeInherited);
     }
 }

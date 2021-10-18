@@ -12,12 +12,11 @@ namespace Caravela.Framework.Impl.Aspects
     /// <summary>
     /// Exposes the semantics of an aspect class used by the implementation of the aspect.
     /// </summary>
-    internal interface IAspectClassImpl : IAspectClass
+    internal interface IAspectClassImpl : IAspectClass, IEligibilityRule<IDeclaration>
     {
         CompileTimeProject? Project { get; }
 
         ImmutableArray<TemplateClass> TemplateClasses { get; }
 
-        EligibleScenarios GetEligibility( IDeclaration targetDeclaration );
     }
 }

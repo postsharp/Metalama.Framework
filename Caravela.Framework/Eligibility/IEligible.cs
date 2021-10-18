@@ -3,7 +3,6 @@
 
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
-using System;
 
 namespace Caravela.Framework.Eligibility
 {

@@ -232,7 +232,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
             => this.ContainingMember.ToDisplayString( this.MethodKind, format, context );
 
         public IMember? OverriddenMember => (IMemberImpl?) this.OverriddenMethod;
-        
+
         public override bool CanBeInherited => this.IsVirtual && !this.IsSealed && ((IDeclarationImpl) this.DeclaringType).CanBeInherited;
     }
 }

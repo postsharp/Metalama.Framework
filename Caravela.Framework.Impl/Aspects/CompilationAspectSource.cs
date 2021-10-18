@@ -65,7 +65,9 @@ namespace Caravela.Framework.Impl.Aspects
 
                             if ( aspectInstance.Eligibility == EligibleScenarios.None )
                             {
-                                var reason = ((AspectClass) aspectClass).GetIneligibilityJustification( aspectInstance.TargetDeclaration, EligibleScenarios.Inheritance )!;
+                                var reason = ((AspectClass) aspectClass).GetIneligibilityJustification(
+                                    EligibleScenarios.Inheritance,
+                                    new DescribedObject<IDeclaration>( aspectInstance.TargetDeclaration ))!;
 
                                 diagnosticAdder.Report(
                                     GeneralDiagnosticDescriptors.AspectNotEligibleOnAspect.CreateDiagnostic(

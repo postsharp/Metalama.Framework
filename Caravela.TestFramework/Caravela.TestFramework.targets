@@ -1,5 +1,5 @@
 <Project>
-    
+
     <!-- Exclude *.t.cs from the main compilation, display them as text files instead. -->
     <ItemGroup>
         <Compile Remove="$(MSBuildProjectDirectory)\**\*.t.cs" />

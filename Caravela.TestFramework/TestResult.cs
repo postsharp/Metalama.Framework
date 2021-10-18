@@ -292,7 +292,8 @@ namespace Caravela.TestFramework
             // Adding the diagnostics as trivia.
             List<SyntaxTrivia> comments = new();
 
-            if ( !this.Success && ( this.TestInput!.Options.ReportErrorMessage.GetValueOrDefault() || this.Diagnostics.All( c => c.Severity != DiagnosticSeverity.Error )) )
+            if ( !this.Success && (this.TestInput!.Options.ReportErrorMessage.GetValueOrDefault()
+                                   || this.Diagnostics.All( c => c.Severity != DiagnosticSeverity.Error )) )
             {
                 comments.Add( SyntaxFactory.Comment( $"// {this.ErrorMessage} \n" ) );
             }

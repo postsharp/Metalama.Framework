@@ -31,7 +31,5 @@ namespace Caravela.Framework.Impl.CodeModel
     internal interface IMemberImpl : IDeclarationImpl, IMember
     {
         IMember? OverriddenMember { get; }
-
-        
     }
 }

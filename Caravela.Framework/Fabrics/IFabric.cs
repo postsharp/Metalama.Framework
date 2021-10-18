@@ -12,12 +12,13 @@ namespace Caravela.Framework.Fabrics
     /// or <see cref="ITypeFabric"/>. 
     /// </summary>
     [CompileTimeOnly]
-    public interface IFabric  { }
+    public interface IFabric { }
 
     [CompileTimeOnly]
     public interface IFabricInstance : IAspectPredecessor
     {
         IFabric Fabric { get; }
+
         IDeclaration? TargetDeclaration { get; }
     }
 }

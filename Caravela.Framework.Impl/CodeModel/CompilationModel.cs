@@ -29,7 +29,7 @@ namespace Caravela.Framework.Impl.CodeModel
         {
             CaravelaServices.Initialize( UserMessageFormatter.Instance );
         }
-        
+
         public static CompilationModel CreateInitialInstance( IProject project, PartialCompilation compilation ) => new( project, compilation );
 
         public static CompilationModel CreateInitialInstance(
@@ -53,11 +53,11 @@ namespace Caravela.Framework.Impl.CodeModel
         private readonly ImmutableMultiValueDictionary<DeclarationRef<IDeclaration>, IAspectInstance> _aspects;
 
         private readonly int _revision;
-        
+
         private readonly DerivedTypeIndex _derivedTypes;
 
         private ImmutableDictionary<DeclarationRef<IDeclaration>, int> _depthsCache = ImmutableDictionary.Create<DeclarationRef<IDeclaration>, int>();
-        
+
         public DeclarationFactory Factory { get; }
 
         public IProject Project { get; }
@@ -374,7 +374,6 @@ namespace Caravela.Framework.Impl.CodeModel
         IDeclaration IDeclarationInternal.OriginalDefinition => this;
 
         public GenericMap EmptyGenericMap { get; }
-        
 
         public bool ContainsType( INamedTypeSymbol type )
         {

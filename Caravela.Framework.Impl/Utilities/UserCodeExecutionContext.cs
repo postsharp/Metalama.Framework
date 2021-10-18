@@ -34,15 +34,14 @@ namespace Caravela.Framework.Impl.Utilities
             var oldCulture = CultureInfo.CurrentCulture;
             CultureInfo.CurrentCulture = UserMessageFormatter.Instance;
 
-            return new DisposeAction( () =>
-            {
-                _current.Value = oldContext;
-                CultureInfo.CurrentCulture = oldCulture;
-            } );
+            return new DisposeAction(
+                () =>
+                {
+                    _current.Value = oldContext;
+                    CultureInfo.CurrentCulture = oldCulture;
+                } );
         }
 
         public static Type GetCompileTimeType( string id, string name ) => Current._serviceProvider.GetService<CompileTimeTypeFactory>().Get( id, name );
     }
-
-
 }

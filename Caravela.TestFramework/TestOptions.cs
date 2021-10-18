@@ -252,10 +252,10 @@ namespace Caravela.TestFramework
                         this.IgnoredDiagnostics.Add( optionArg );
 
                         break;
-                    
+
                     case "RequiredConstant":
                         this.RequiredConstants.Add( optionArg );
-                        
+
                         break;
 
                     case "ClearIgnoredDiagnostics":

@@ -5,12 +5,11 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
 using Microsoft.CodeAnalysis;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 
 namespace Caravela.Framework.Impl.Utilities
 {
-    internal  class SignatureComparer : IEqualityComparer<IMember>
+    internal class SignatureComparer : IEqualityComparer<IMember>
     {
         private SignatureComparer() { }
 

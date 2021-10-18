@@ -1,5 +1,5 @@
 ﻿<Project>
-    
+
     <PropertyGroup>
         <!-- This must be in .targets, not in .props, because it relies on other properties and
               is not meant to be overwritten -->
@@ -9,7 +9,7 @@
     <PropertyGroup Condition="'$(CaravelaEnabled)'!='False'">
         <DefineConstants>$(DefineConstants);CARAVELA</DefineConstants>
     </PropertyGroup>
-    
+
 
     <Target Name="ExportCaravelaFrameworkProperties" BeforeTargets="PrepareForBuild">
         <Error Text="The IntermediateOutputPath property is not defined." Condition="'$(IntermediateOutputPath)'==''" />

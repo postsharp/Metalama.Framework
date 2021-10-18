@@ -63,7 +63,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         INamedArgumentList IAttribute.NamedArguments => this.NamedArguments;
 
         IType IHasType.Type => this.Type;
-        
+
         public FormattableString FormatPredecessor() => $"attribute of type '{this.Type}' on '{this.ContainingDeclaration}'";
     }
 }

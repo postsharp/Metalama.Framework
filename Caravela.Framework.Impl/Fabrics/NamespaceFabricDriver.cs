@@ -21,9 +21,9 @@ namespace Caravela.Framework.Impl.Fabrics
 
         private ISymbol TargetSymbol => this.FabricSymbol.ContainingNamespace;
 
-        public override void Execute( IAspectBuilderInternal aspectBuilder, FabricTemplateClass fabricTemplateClass )
+        public override void Execute( IAspectBuilderInternal aspectBuilder, FabricTemplateClass fabricTemplateClass, FabricInstance fabricInstance )
         {
-            var builder = new Builder( this, (INamespace) aspectBuilder.Target, this.Configuration, aspectBuilder );
+            var builder = new Builder( this, (INamespace) aspectBuilder.Target, this.Configuration, aspectBuilder, fabricInstance );
             ((INamespaceFabric) this.Fabric).AmendNamespace( builder );
         }
 
@@ -32,14 +32,20 @@ namespace Caravela.Framework.Impl.Fabrics
         public override IDeclaration GetTarget( CompilationModel compilation ) => compilation.Factory.GetNamespace( (INamespaceSymbol) this.TargetSymbol );
 
         public override FormattableString FormatPredecessor() => $"namespace fabric '{this.Fabric.GetType()}' on '{this.TargetSymbol}'";
-        
+
         private class Builder : BaseBuilder<INamespace>, INamespaceAmender
         {
-            public Builder( FabricDriver parent, INamespace ns, AspectProjectConfiguration context, IAspectBuilderInternal aspectBuilder ) : base(
+            public Builder(
+                FabricDriver parent,
+                INamespace ns,
+                AspectProjectConfiguration context,
+                IAspectBuilderInternal aspectBuilder,
+                FabricInstance fabricInstance ) : base(
                 parent,
                 ns,
                 context,
-                aspectBuilder ) { }
+                aspectBuilder,
+                fabricInstance ) { }
 
             public INamespace Namespace => this.Target;
         }

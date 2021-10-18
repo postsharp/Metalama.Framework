@@ -12,6 +12,6 @@ namespace Caravela.Framework.Aspects
     [CompileTimeOnly]
     public interface IAspectPredecessor
     {
-        FormattableString FormatPredecessor();
+        
     }
 }

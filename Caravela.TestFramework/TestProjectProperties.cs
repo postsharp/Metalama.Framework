@@ -17,13 +17,13 @@ namespace Caravela.TestFramework
     public class TestProjectProperties
     {
         private readonly string? _projectDirectory;
-        
+
         public bool HasProjectDirectory => this._projectDirectory != null;
 
         public string ProjectDirectory => this._projectDirectory ?? throw new InvalidOperationException();
 
         public ImmutableArray<string> PreprocessorSymbols { get; }
-        
+
         public string TargetFramework { get; }
 
         public TestProjectProperties( string? projectDirectory, ImmutableArray<string> preprocessorSymbols, string targetFramework )

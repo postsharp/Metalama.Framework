@@ -18,7 +18,6 @@ namespace Caravela.Framework.Eligibility.Implementation
         }
 
         public EligibleScenarios IneligibleScenarios { get; }
-    
 
         public void AddRule( IEligibilityRule<T> rule ) => this._inner.AddRule( rule );
 

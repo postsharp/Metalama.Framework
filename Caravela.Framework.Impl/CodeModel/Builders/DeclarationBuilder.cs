@@ -96,6 +96,5 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public IDeclaration OriginalDefinition => this;
 
         public IAssembly DeclaringAssembly => this.Compilation.DeclaringAssembly;
-
     }
 }

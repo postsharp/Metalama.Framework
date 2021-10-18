@@ -68,36 +68,45 @@ namespace Caravela.Framework.Impl.Fabrics
             this.RegisterAspectSource(
                 new ProgrammaticAspectSource<TAspect, T>(
                     aspectClass,
-                    ( compilation ) => this.SelectAndValidateTargets( compilation, aspectClass, createAspect ) ) );
+                    ( compilation, diagnostics ) => this.SelectAndValidateTargets( compilation, diagnostics, aspectClass, createAspect ) ) );
 
             return this;
         }
 
-        private IEnumerable<AspectInstance> SelectAndValidateTargets<TAspect>( CompilationModel compilation, AspectClass aspectClass, Func<T, Expression<Func<TAspect>>> createAspect )
+        private IEnumerable<AspectInstance> SelectAndValidateTargets<TAspect>(
+            CompilationModel compilation,
+            IDiagnosticAdder diagnosticAdder,
+            AspectClass aspectClass,
+            Func<T, Expression<Func<TAspect>>> createAspect )
         {
             foreach ( var item in this._selector( compilation ) )
             {
-                if ( !item.IsContainedIn( this._containingDeclaration ) )
+                var predecessorInstance = (IAspectPredecessorImpl) this._predecessor.Instance;
+
+                if ( !item.IsContainedIn( this._containingDeclaration ) || item.DeclaringAssembly.IsExternal )
                 {
-                    throw new InvalidOperationException(
-                        UserMessageFormatter.Format(
-                            $"The {this._predecessor.Instance.FormatPredecessor()} cannot add a child aspect of type '{aspectClass.FullName}' to '{this._containingDeclaration}' because it is not contained in '{this._containingDeclaration}'." ) );
+                    diagnosticAdder.Report(
+                        GeneralDiagnosticDescriptors.CanAddChildAspectOnlyUnderParent.CreateDiagnostic(
+                            predecessorInstance.GetDiagnosticLocation( compilation.RoslynCompilation ),
+                            (predecessorInstance.FormatPredecessor(), aspectClass.FullName, this._containingDeclaration, item) ) );
+
+                    continue;
                 }
 
-                if ( item.DeclaringAssembly.IsExternal )
-                {
-                    throw new InvalidOperationException(
-                        UserMessageFormatter.Format(
-                            $"The {this._predecessor.Instance.FormatPredecessor()} cannot add a child aspect of type '{aspectClass.FullName}' to '{this._containingDeclaration}' because it is in the current project." ) );
-                }
+                var eligibility = aspectClass.GetEligibility( item );
+                var canBeInherited = ((IDeclarationImpl) item).CanBeInherited;
+                var requiredEligibility = canBeInherited ? (EligibleScenarios.Aspect | EligibleScenarios.Inheritance) : EligibleScenarios.Aspect; 
 
-                var eligibility = ((IAspectClassImpl) aspectClass).GetEligibility( item );
-
-                if ( !eligibility.IncludesAny( EligibleScenarios.Aspect | EligibleScenarios.Inheritance ) )
+                if ( !eligibility.IncludesAny( requiredEligibility ) )
                 {
-                    throw new InvalidOperationException(
-                        UserMessageFormatter.Format(
-                            $"The {this._predecessor.Instance.FormatPredecessor()} cannot add a child aspect of type '{aspectClass.FullName}' to '{this._containingDeclaration}' because the declaration is not eligible for the aspect." ) );
+                    var reason = aspectClass.GetIneligibilityJustification( requiredEligibility, new DescribedObject<IDeclaration>( item ) )!;
+                    
+                    diagnosticAdder.Report(
+                        GeneralDiagnosticDescriptors.IneligibleChildAspect.CreateDiagnostic(
+                            predecessorInstance.GetDiagnosticLocation( compilation.RoslynCompilation ),
+                            (predecessorInstance.FormatPredecessor(), aspectClass.FullName, item, reason) ) );
+
+                    continue;
                 }
 
                 var lambda = Expression.Lambda<Func<IAspect>>(
@@ -121,7 +130,7 @@ namespace Caravela.Framework.Impl.Fabrics
             this.RegisterAspectSource(
                 new ProgrammaticAspectSource<TAspect, T>(
                     aspectClass,
-                    ( compilation ) => this._selector( compilation )
+                    ( compilation, _ ) => this._selector( compilation )
                         .Select(
                             t => new AspectInstance(
                                 this._projectConfiguration.UserCodeInvoker.Invoke( () => createAspect( t ) ),
@@ -140,7 +149,7 @@ namespace Caravela.Framework.Impl.Fabrics
             this.RegisterAspectSource(
                 new ProgrammaticAspectSource<TAspect, T>(
                     aspectClass,
-                    ( compilation ) => this._selector( compilation )
+                    ( compilation, _ ) => this._selector( compilation )
                         .Select(
                             t => new AspectInstance(
                                 new TAspect(),

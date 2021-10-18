@@ -35,7 +35,7 @@ namespace Caravela.Framework.Impl.CompileTime
                 throw new ArgumentOutOfRangeException( nameof(method) );
             }
 
-            return ReplaceDynamicToObjectRewriter.Rewrite( 
+            return ReplaceDynamicToObjectRewriter.Rewrite(
                 method
                     .WithBody( null )
                     .WithExpressionBody( ArrowExpressionClause( GetNotSupportedExceptionExpression( message ) ) )

@@ -53,10 +53,10 @@ namespace Caravela.Framework.Impl.CompileTime
                 {
                     return null;
                 }
-                
+
                 // Check if this is a system type. If yes, it does not need to be in the same assembly.
                 var systemType = this._netStandardAssembly.GetType( typeName, false );
-                    
+
                 if ( systemType != null )
                 {
                     return systemType;

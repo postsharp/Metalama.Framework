@@ -34,9 +34,9 @@ namespace Caravela.Framework.Impl.Fabrics
             this._depth = depth;
         }
 
-        public override void Execute( IAspectBuilderInternal aspectBuilder, FabricTemplateClass fabricTemplateClass )
+        public override void Execute( IAspectBuilderInternal aspectBuilder, FabricTemplateClass fabricTemplateClass, FabricInstance fabricInstance )
         {
-            var builder = new Builder( this, (ICompilation) aspectBuilder.Target, this.Configuration, aspectBuilder );
+            var builder = new Builder( this, (ICompilation) aspectBuilder.Target, this.Configuration, aspectBuilder, fabricInstance );
             ((IProjectFabric) this.Fabric).AmendProject( builder );
         }
 
@@ -84,16 +84,22 @@ namespace Caravela.Framework.Impl.Fabrics
         }
 
         public override IDeclaration GetTarget( CompilationModel compilation ) => compilation;
-        
+
         public override FormattableString FormatPredecessor() => $"project fabric '{this.Fabric.GetType()}'";
 
         private class Builder : BaseBuilder<ICompilation>, IProjectAmender
         {
-            public Builder( FabricDriver parent, ICompilation compilation, AspectProjectConfiguration context, IAspectBuilderInternal aspectBuilder ) : base(
+            public Builder(
+                FabricDriver parent,
+                ICompilation compilation,
+                AspectProjectConfiguration context,
+                IAspectBuilderInternal aspectBuilder,
+                FabricInstance fabricInstance ) : base(
                 parent,
                 compilation,
                 context,
-                aspectBuilder ) { }
+                aspectBuilder,
+                fabricInstance ) { }
         }
     }
 }

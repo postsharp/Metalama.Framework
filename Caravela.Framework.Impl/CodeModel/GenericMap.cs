@@ -1,3 +1,6 @@
+// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Immutable;
@@ -54,17 +57,15 @@ namespace Caravela.Framework.Impl.CodeModel
             else
             {
                 var mappedTypeArgumentsBuilder = ImmutableArray.CreateBuilder<ITypeSymbol>( this.TypeArguments.Length );
-                
+
                 foreach ( var typeArgument in this.TypeArguments )
                 {
                     mappedTypeArgumentsBuilder.Add( this.Map( typeArgument ) );
                 }
 
                 return new GenericMap( mappedTypeArgumentsBuilder.MoveToImmutable(), this._compilation );
-
             }
         }
-
 
         private class Mapper : SymbolVisitor<ITypeSymbol>
         {
@@ -73,7 +74,6 @@ namespace Caravela.Framework.Impl.CodeModel
             public Mapper( GenericMap parent )
             {
                 this._parent = parent;
-                
             }
 
             private Compilation Compilation => this._parent._compilation;

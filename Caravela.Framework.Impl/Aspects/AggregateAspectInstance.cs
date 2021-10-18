@@ -3,6 +3,7 @@
 
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
+using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -57,5 +58,7 @@ namespace Caravela.Framework.Impl.Aspects
         public ImmutableDictionary<TemplateClass, TemplateClassInstance> TemplateInstances => this._primaryInstance.TemplateInstances;
 
         public FormattableString FormatPredecessor() => this._primaryInstance.FormatPredecessor();
+
+        public Location? GetDiagnosticLocation( Compilation compilation ) => this._primaryInstance.GetDiagnosticLocation( compilation );
     }
 }

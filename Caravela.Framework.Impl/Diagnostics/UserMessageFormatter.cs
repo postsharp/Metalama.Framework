@@ -17,9 +17,7 @@ namespace Caravela.Framework.Impl.Diagnostics
     {
         public static readonly UserMessageFormatter Instance = new();
 
-        private UserMessageFormatter() : base( CultureInfo.InvariantCulture.Name )
-        {
-        }
+        private UserMessageFormatter() : base( InvariantCulture.Name ) { }
 
         public override object? GetFormat( Type formatType ) => formatType == typeof(ICustomFormatter) ? this : base.GetFormat( formatType );
 
@@ -72,15 +70,17 @@ namespace Caravela.Framework.Impl.Diagnostics
 
                     case ISymbol symbol:
                         return symbol.ToDisplayString( SymbolDisplayFormat.CSharpShortErrorMessageFormat );
-
+                    
                     case IFormattable formattable:
-                        return formattable.ToString( format, CultureInfo.CurrentCulture );
+                        return formattable.ToString( format, this );
 
                     case string[] strings:
                         return string.Join( ", ", strings.Select( s => s == null ? null : "'" + s + "'" ) );
 
                     case Array array:
                         return string.Join( ", ", array.Cast<object>().Select( i => this.Format( "", i, formatProvider ) ) );
+                    
+                    
                 }
             }
             catch

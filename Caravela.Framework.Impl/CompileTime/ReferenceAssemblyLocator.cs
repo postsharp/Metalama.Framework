@@ -82,7 +82,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
             // Get our public API assembly in its .NET Standard 2.0 build.
             var frameworkAssemblyReference = (MetadataReference)
-                MetadataReference.CreateFromStream( 
+                MetadataReference.CreateFromStream(
                     this.GetType().Assembly.GetManifestResourceStream( _compileTimeFrameworkAssemblyName + ".dll" ),
                     filePath: _compileTimeFrameworkAssemblyName + ".dll" );
 

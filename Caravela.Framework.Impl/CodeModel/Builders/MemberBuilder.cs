@@ -5,7 +5,6 @@ using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Code.DeclarationBuilders;
 using Caravela.Framework.Impl.Advices;
-using System;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {

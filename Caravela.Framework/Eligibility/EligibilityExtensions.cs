@@ -53,7 +53,7 @@ namespace Caravela.Framework.Eligibility
                 method => $"parameter '{name}' of {method}",
                 method => method.Parameters.All( p => p.Name != name ),
                 method => $"{method} has no parameter named '{name}'" );
-        
+
         public static IEligibilityBuilder<IType> Type( this IEligibilityBuilder<IHasType> eligibilityBuilder )
             => new ChildEligibilityBuilder<IHasType, IType>(
                 eligibilityBuilder,
@@ -100,7 +100,7 @@ namespace Caravela.Framework.Eligibility
                 new EligibilityRule<IMethod>(
                     eligibilityBuilder.IneligibleScenarios,
                     m => !m.Parameters.Any( p => p.RefKind is RefKind.Out or RefKind.Ref ),
-                    d => $"{d} cannot have any ref or out parameter") );
+                    d => $"{d} cannot have any ref or out parameter" ) );
 
         public static void MustHaveAccessibility(
             this IEligibilityBuilder<IMemberOrNamedType> eligibilityBuilder,
@@ -134,11 +134,12 @@ namespace Caravela.Framework.Eligibility
                 member => !member.IsAbstract,
                 member => $"{member} must be non-abstract" );
 
-        public static void MustBe( this IEligibilityBuilder<IType> eligibilityBuilder, Type type, ConversionKind conversionKind = ConversionKind.Default)
+        public static void MustBe( this IEligibilityBuilder<IType> eligibilityBuilder, Type type, ConversionKind conversionKind = ConversionKind.Default )
             => eligibilityBuilder.MustSatisfy(
                 t => t.Is( type, conversionKind ),
                 member => $"{member} must be of type '{type}'" );
 
-        public static void MustBe<T>( this IEligibilityBuilder<IType> eligibilityBuilder, ConversionKind conversionKind = ConversionKind.Default ) => eligibilityBuilder.MustBe( typeof(T), conversionKind );
+        public static void MustBe<T>( this IEligibilityBuilder<IType> eligibilityBuilder, ConversionKind conversionKind = ConversionKind.Default )
+            => eligibilityBuilder.MustBe( typeof(T), conversionKind );
     }
 }

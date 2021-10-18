@@ -5,6 +5,7 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Eligibility;
 using Caravela.Framework.Impl.Aspects;
 using Caravela.Framework.Impl.CompileTime;
+using System;
 using System.Collections.Immutable;
 
 namespace Caravela.Framework.Impl.Fabrics
@@ -34,6 +35,8 @@ namespace Caravela.Framework.Impl.Fabrics
 
         public ImmutableArray<TemplateClass> TemplateClasses { get; }
 
-        public EligibleScenarios GetEligibility( IDeclaration targetDeclaration ) => EligibleScenarios.Aspect;
+        public EligibleScenarios GetEligibility( IDeclaration obj ) => EligibleScenarios.Aspect;
+
+        public FormattableString? GetIneligibilityJustification( EligibleScenarios requestedEligibility, IDescribedObject<IDeclaration> describedObject ) => throw new AssertionFailedException();
     }
 }

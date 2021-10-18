@@ -802,7 +802,7 @@ namespace Caravela.Framework.Impl.CompileTime
             public override SyntaxNode? Visit( SyntaxNode? node ) => this.AddLocationAnnotation( node, base.Visit( node ) );
 
             public override SyntaxToken VisitToken( SyntaxToken token ) => this._templateCompiler.LocationAnnotationMap.AddLocationAnnotation( token );
-            
+
             public override SyntaxNode? VisitIdentifierName( IdentifierNameSyntax node )
             {
                 if ( node.Identifier.Text == "dynamic" )
