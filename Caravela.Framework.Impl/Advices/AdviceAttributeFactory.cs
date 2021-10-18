@@ -50,7 +50,7 @@ namespace Caravela.Framework.Impl.Advices
                                 diagnosticAdder.Report(
                                     AdviceDiagnosticDescriptors.CannotUseIntroduceWithoutDeclaringType.CreateDiagnostic(
                                         aspectTargetDeclaration.GetDiagnosticLocation(),
-                                        (aspect.AspectClass.DisplayName, templateDeclaration.DeclarationKind, aspectTargetDeclaration.DeclarationKind) ) );
+                                        (aspect.AspectClass.ShortName, templateDeclaration.DeclarationKind, aspectTargetDeclaration.DeclarationKind) ) );
 
                                 advice = null;
 

@@ -34,7 +34,6 @@ namespace Caravela.Framework.Impl.Aspects
             IAttribute attribute,
             in AspectPredecessor aspectPredecessor,
             CompileTimeProjectLoader loader ) : base( aspect, target, aspectClass, aspectPredecessor )
-
         {
             this._attribute = attribute;
             this._loader = loader;

@@ -17,11 +17,6 @@ using TypedConstant = Caravela.Framework.Code.TypedConstant;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    internal interface IAttributeImpl : IAttribute, IAspectPredecessorImpl
-    {
-        
-    }
-    
     internal class Attribute : IAttributeImpl, IHasDiagnosticLocation
     {
         private readonly CompilationModel _compilation;

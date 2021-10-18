@@ -34,7 +34,6 @@ namespace Caravela.Framework.Impl.CodeModel
             private PartialImpl(
                 ImmutableDictionary<string, SyntaxTree> syntaxTrees,
                 ImmutableHashSet<INamedTypeSymbol>? types,
-                DerivedTypeIndex? derivedTypeIndex,
                 PartialCompilation baseCompilation,
                 IReadOnlyList<SyntaxTreeModification>? modifiedSyntaxTrees,
                 IReadOnlyList<SyntaxTree>? addedTrees,
@@ -82,7 +81,7 @@ namespace Caravela.Framework.Impl.CodeModel
                 }
 
                 // TODO: when the compilation is modified, we should update the set of types and derived types.
-                return new PartialImpl( syntaxTrees.ToImmutable(), null, null, this, replacedTrees, addedTrees, resources );
+                return new PartialImpl( syntaxTrees.ToImmutable(), null, this, replacedTrees, addedTrees, resources );
             }
         }
     }

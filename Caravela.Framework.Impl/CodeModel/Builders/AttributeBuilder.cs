@@ -36,7 +36,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
             }
         }
 
-        string IDisplayable.ToDisplayString( CodeDisplayFormat? format, CodeDisplayContext? context = null ) => throw new NotImplementedException();
+        string IDisplayable.ToDisplayString( CodeDisplayFormat? format, CodeDisplayContext? context ) => throw new NotImplementedException();
 
         public override bool CanBeInherited => false;
 

@@ -139,7 +139,7 @@ namespace Caravela.Framework.Impl.Advices
             else
             {
                 throw GeneralDiagnosticDescriptors.AspectMustHaveExactlyOneTemplateMember.CreateException(
-                    (this._aspect.AspectClass.DisplayName, templateName) );
+                    (this._aspect.AspectClass.ShortName, templateName) );
             }
         }
 

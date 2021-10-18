@@ -59,8 +59,8 @@ namespace Caravela.Framework.Eligibility
                 eligibilityBuilder,
                 declaration => declaration.Type,
                 declaration => $"the type of {declaration}",
-                method => true,
-                method => $"" );
+                _ => true,
+                _ => $"" );
 
         public static IEligibilityBuilder<T> ExceptForScenarios<T>( this IEligibilityBuilder<T> eligibilityBuilder, EligibleScenarios excludedScenarios )
             => new ExcludedScenarioEligibilityBuilder<T>( eligibilityBuilder, excludedScenarios );

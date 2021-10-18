@@ -27,6 +27,8 @@ namespace Caravela.Framework.Impl.Fabrics
 
         string IAspectClass.FullName => FabricAspectName;
 
+        public string ShortName => FabricAspectName;
+
         string IAspectClass.DisplayName => FabricAspectName;
 
         string? IAspectClass.Description => null;
@@ -50,9 +52,11 @@ namespace Caravela.Framework.Impl.Fabrics
 
         ImmutableArray<TemplateClass> IAspectClassImpl.TemplateClasses => ImmutableArray<TemplateClass>.Empty;
 
-        
         public EligibleScenarios GetEligibility( IDeclaration obj ) => EligibleScenarios.Aspect;
 
-        FormattableString? IEligibilityRule<IDeclaration>.GetIneligibilityJustification( EligibleScenarios requestedEligibility, IDescribedObject<IDeclaration> describedObject ) => throw new AssertionFailedException();
+        FormattableString? IEligibilityRule<IDeclaration>.GetIneligibilityJustification(
+            EligibleScenarios requestedEligibility,
+            IDescribedObject<IDeclaration> describedObject )
+            => throw new AssertionFailedException();
     }
 }

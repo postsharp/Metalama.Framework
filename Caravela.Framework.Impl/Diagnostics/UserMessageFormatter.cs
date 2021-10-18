@@ -70,7 +70,7 @@ namespace Caravela.Framework.Impl.Diagnostics
 
                     case ISymbol symbol:
                         return symbol.ToDisplayString( SymbolDisplayFormat.CSharpShortErrorMessageFormat );
-                    
+
                     case IFormattable formattable:
                         return formattable.ToString( format, this );
 
@@ -79,8 +79,6 @@ namespace Caravela.Framework.Impl.Diagnostics
 
                     case Array array:
                         return string.Join( ", ", array.Cast<object>().Select( i => this.Format( "", i, formatProvider ) ) );
-                    
-                    
                 }
             }
             catch

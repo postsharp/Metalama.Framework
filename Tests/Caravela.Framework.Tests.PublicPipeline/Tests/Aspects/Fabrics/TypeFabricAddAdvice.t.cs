@@ -15,7 +15,7 @@ return s;};
 
             
             [Template]
-dynamic? Template() => throw new System.NotSupportedException("Compile-time only code cannot be called at run-time.");
+object? Template() => throw new System.NotSupportedException("Compile-time only code cannot be called at run-time.");
 
         
         }

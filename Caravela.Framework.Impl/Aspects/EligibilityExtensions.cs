@@ -3,31 +3,15 @@
 
 using Caravela.Framework.Eligibility;
 using Caravela.Framework.Impl.Diagnostics;
-using System;
 
 namespace Caravela.Framework.Impl.Aspects
 {
-    public readonly struct Eligibility
-    {
-        public bool IsEligible { get; }
-        public EligibleScenarios EligibleScenarios { get; }
-        public string? Reason { get; }
-
-        internal Eligibility( bool isEligible, EligibleScenarios eligibleScenarios, string? reason )
-        {
-            this.IsEligible = isEligible;
-            this.EligibleScenarios = eligibleScenarios;
-            this.Reason = reason;
-        }
-    }
-
-    
     internal static class EligibilityExtensions
     {
         public static bool IncludesAll( this EligibleScenarios scenarios, EligibleScenarios subset ) => (scenarios & subset) == subset;
 
         public static bool IncludesAny( this EligibleScenarios scenarios, EligibleScenarios subset ) => (scenarios & subset) != 0;
-        
+
         internal static Eligibility GetEligibility<T>(
             this IEligibilityRule<T> rule,
             T obj,
@@ -46,13 +30,12 @@ namespace Caravela.Framework.Impl.Aspects
                     justification = rule.GetIneligibilityJustification( requiredEligibility, describedObject )?.ToString( UserMessageFormatter.Instance );
                 }
 
-                return new Eligibility(false, eligibility, justification);
+                return new Eligibility( false, eligibility, justification );
             }
             else
             {
-                return new  Eligibility(true, eligibility, null);
+                return new Eligibility( true, eligibility, null );
             }
         }
-
     }
 }

@@ -35,7 +35,7 @@ namespace Caravela.Framework.Impl.CodeModel
         public override bool CanBeInherited => false;
 
         public override IEnumerable<IDeclaration> GetDerivedDeclarations() => Enumerable.Empty<IDeclaration>();
-
+        
         [Memo]
         public INamespace? ParentNamespace => this.IsGlobalNamespace ? null : this.Compilation.Factory.GetNamespace( this._symbol.ContainingNamespace );
 
@@ -64,5 +64,11 @@ namespace Caravela.Framework.Impl.CodeModel
                     .Select( n => new DeclarationRef<INamespace>( n ) ) );
 
         public override string ToString() => this.IsGlobalNamespace ? "<Global Namespace>" : this.FullName;
+
+        public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
+        {
+            // Always write in full.
+            return this._symbol.ToDisplayString();
+        }
     }
 }

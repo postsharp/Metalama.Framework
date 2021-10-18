@@ -67,12 +67,12 @@ namespace Caravela.Framework.Impl.Aspects
                             {
                                 var reason = ((AspectClass) aspectClass).GetIneligibilityJustification(
                                     EligibleScenarios.Inheritance,
-                                    new DescribedObject<IDeclaration>( aspectInstance.TargetDeclaration ))!;
+                                    new DescribedObject<IDeclaration>( aspectInstance.TargetDeclaration ) )!;
 
                                 diagnosticAdder.Report(
                                     GeneralDiagnosticDescriptors.AspectNotEligibleOnAspect.CreateDiagnostic(
                                         attribute.GetDiagnosticLocation(),
-                                        (aspectClass.DisplayName, aspectInstance.TargetDeclaration, reason) ) );
+                                        (aspectClass.ShortName, aspectInstance.TargetDeclaration, reason) ) );
 
                                 return null;
                             }

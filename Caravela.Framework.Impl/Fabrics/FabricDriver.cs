@@ -19,26 +19,6 @@ using System.Reflection;
 
 namespace Caravela.Framework.Impl.Fabrics
 {
-
-    internal class FabricInstance : IFabricInstance, IAspectPredecessorImpl
-    {
-        private FabricDriver _driver;
-        public IDeclaration? TargetDeclaration { get; }
-
-        public FabricInstance( FabricDriver driver, IDeclaration? targetDeclaration )
-        {
-            this._driver = driver;
-            this.TargetDeclaration = targetDeclaration;
-        }
-
-        public IFabric Fabric => this._driver.Fabric;
-
-        
-        public FormattableString FormatPredecessor() => this._driver.FormatPredecessor();
-
-        public Location? GetDiagnosticLocation( Compilation compilation ) => this._driver.GetDiagnosticLocation();
-    }
-    
     /// <summary>
     /// The base class for fabric drivers, which are responsible for ordering and executing fabrics.
     /// </summary>
@@ -124,14 +104,16 @@ namespace Caravela.Framework.Impl.Fabrics
         protected abstract class BaseBuilder<T> : IAmender<T>
             where T : class, IDeclaration
         {
-            private readonly FabricDriver _parent;
             private readonly IAspectBuilderInternal _aspectBuilder;
             private readonly FabricInstance _fabricInstance;
             private readonly AspectProjectConfiguration _context;
 
-            protected BaseBuilder( FabricDriver parent, T target, AspectProjectConfiguration context, IAspectBuilderInternal aspectBuilder, FabricInstance fabricInstance )
+            protected BaseBuilder(
+                T target,
+                AspectProjectConfiguration context,
+                IAspectBuilderInternal aspectBuilder,
+                FabricInstance fabricInstance )
             {
-                this._parent = parent;
                 this._aspectBuilder = aspectBuilder;
                 this._fabricInstance = fabricInstance;
                 this._context = context;
@@ -159,7 +141,7 @@ namespace Caravela.Framework.Impl.Fabrics
                         return this._context.UserCodeInvoker.Wrap( this._context.UserCodeInvoker.Invoke( () => selector( targetDeclaration ) ) );
                     },
                     this._context );
-            
+
             [Obsolete( "Not implemented." )]
             public void AddValidator( Action<ValidateDeclarationContext<T>> validator ) => throw new NotImplementedException();
 
@@ -174,6 +156,5 @@ namespace Caravela.Framework.Impl.Fabrics
         public abstract FormattableString FormatPredecessor();
 
         public Location? GetDiagnosticLocation() => this.FabricSymbol.GetDiagnosticLocation();
-
     }
 }

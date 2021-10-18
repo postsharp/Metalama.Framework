@@ -79,7 +79,7 @@ class Class<T>
                 CancellationToken.None,
                 out var configuration );
 
-            this._aspects = configuration!.AspectClasses.OfType<AspectClass>().ToDictionary( a => a.DisplayName, a => a );
+            this._aspects = configuration!.AspectClasses.OfType<AspectClass>().ToDictionary( a => a.ShortName, a => a );
         }
 
 #if NET5_0

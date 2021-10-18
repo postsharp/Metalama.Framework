@@ -28,11 +28,11 @@ namespace Caravela.Framework.Impl.Fabrics
         public void BuildAspect( IAspectBuilder<T> builder )
         {
             var internalBuilder = (IAspectBuilderInternal) builder;
-            
+
             foreach ( var templateClass in this._templateClasses )
             {
                 var fabricInstance = new FabricInstance( templateClass.Driver, builder.Target );
-                
+
                 using ( internalBuilder.WithPredecessor( new AspectPredecessor( AspectPredecessorKind.Fabric, fabricInstance ) ) )
                 {
                     templateClass.Driver.Execute( internalBuilder, templateClass, fabricInstance );

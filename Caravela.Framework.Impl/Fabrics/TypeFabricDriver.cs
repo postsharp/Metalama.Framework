@@ -28,7 +28,7 @@ namespace Caravela.Framework.Impl.Fabrics
         {
             // Type fabrics execute as aspects, called from FabricAspectClass.
             var templateInstance = new TemplateClassInstance( this.Fabric, templateClass );
-            var builder = new Builder( this, (INamedType) aspectBuilder.Target, this.Configuration, aspectBuilder, templateInstance, fabricInstance );
+            var builder = new Builder( (INamedType) aspectBuilder.Target, this.Configuration, aspectBuilder, templateInstance, fabricInstance );
             ((ITypeFabric) this.Fabric).AmendType( builder );
         }
 
@@ -41,12 +41,11 @@ namespace Caravela.Framework.Impl.Fabrics
         private class Builder : BaseBuilder<INamedType>, ITypeAmender
         {
             public Builder(
-                FabricDriver parent,
                 INamedType namedType,
                 AspectProjectConfiguration context,
                 IAspectBuilderInternal aspectBuilder,
                 TemplateClassInstance templateClassInstance,
-                FabricInstance fabricInstance ) : base( parent, namedType, context, aspectBuilder, fabricInstance )
+                FabricInstance fabricInstance ) : base( namedType, context, aspectBuilder, fabricInstance )
             {
                 this.Advices = aspectBuilder.AdviceFactory.WithTemplateClassInstance( templateClassInstance );
             }

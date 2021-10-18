@@ -5,6 +5,7 @@ using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Eligibility;
 using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Utilities;
 using Caravela.Framework.Project;
 using Microsoft.CodeAnalysis;
@@ -61,7 +62,7 @@ namespace Caravela.Framework.Impl.Aspects
 
             if ( (eligibility & EligibleScenarios.Inheritance) != 0 && !((IDeclarationImpl) declaration).CanBeInherited )
             {
-                eligibility = eligibility & ~EligibleScenarios.Inheritance;
+                eligibility &= ~EligibleScenarios.Inheritance;
             }
 
             return eligibility;
@@ -103,11 +104,12 @@ namespace Caravela.Framework.Impl.Aspects
                 .Add( aspectClass, new TemplateClassInstance( this.Aspect, aspectClass ) );
         }
 
-        public override string ToString() => this.AspectClass.DisplayName + "@" + this.TargetDeclaration;
+        public override string ToString() => this.AspectClass.ShortName + "@" + this.TargetDeclaration;
 
-        public FormattableString FormatPredecessor() => $"aspect '{this.AspectClass.DisplayName}' applied to '{this.TargetDeclaration}'";
+        public FormattableString FormatPredecessor() => $"aspect '{this.AspectClass.ShortName}' applied to '{this.TargetDeclaration}'";
 
-        public Location? GetDiagnosticLocation( Compilation compilation ) => throw new NotImplementedException();
+        public Location? GetDiagnosticLocation( Compilation compilation )
+            => compilation.GetTypeByMetadataName( this.AspectClass.FullName )?.GetDiagnosticLocation();
 
         public int CompareTo( AspectInstance? other ) => this.Predecessor.Kind.CompareTo( other.AssertNotNull().Predecessor.Kind );
 

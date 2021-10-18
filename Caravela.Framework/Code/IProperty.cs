@@ -10,7 +10,7 @@ namespace Caravela.Framework.Code
     /// <summary>
     /// Represents a property.
     /// </summary>
-    public interface IProperty : IFieldOrProperty, IHasParameters, IMemberWithAccessors
+    public interface IProperty : IFieldOrProperty, IHasParameters
     {
         /// <summary>
         /// Gets the <c>in</c>, <c>ref</c>, <c>ref readonly</c> property type modifier.

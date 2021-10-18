@@ -23,6 +23,8 @@ namespace Caravela.Framework.Impl.Fabrics
 
         public string FullName => FabricTopLevelAspectClass.FabricAspectName;
 
+        public string ShortName => FabricTopLevelAspectClass.FabricAspectName;
+
         public string DisplayName => FabricTopLevelAspectClass.FabricAspectName;
 
         public string? Description => null;
@@ -37,6 +39,7 @@ namespace Caravela.Framework.Impl.Fabrics
 
         public EligibleScenarios GetEligibility( IDeclaration obj ) => EligibleScenarios.Aspect;
 
-        public FormattableString? GetIneligibilityJustification( EligibleScenarios requestedEligibility, IDescribedObject<IDeclaration> describedObject ) => throw new AssertionFailedException();
+        public FormattableString? GetIneligibilityJustification( EligibleScenarios requestedEligibility, IDescribedObject<IDeclaration> describedObject )
+            => throw new AssertionFailedException();
     }
 }

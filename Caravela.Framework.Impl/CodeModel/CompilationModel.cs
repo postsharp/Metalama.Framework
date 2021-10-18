@@ -350,7 +350,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         IEnumerable<IDeclaration> IDeclarationImpl.GetDerivedDeclarations() => Enumerable.Empty<IDeclaration>();
 
-        string IDisplayable.ToDisplayString( CodeDisplayFormat? format, CodeDisplayContext? context = null ) => this.RoslynCompilation.AssemblyName ?? "";
+        string IDisplayable.ToDisplayString( CodeDisplayFormat? format, CodeDisplayContext? context ) => this.RoslynCompilation.AssemblyName ?? "";
 
         [Memo]
         public IAssembly DeclaringAssembly => this.Factory.GetAssembly( this.RoslynCompilation.Assembly );

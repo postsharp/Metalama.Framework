@@ -52,7 +52,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
 
             var partialCompilation = PartialCompilation.CreateComplete( testResult.InputCompilation! );
             var target = compilation.Types.OfName( "TargetClass" ).Single().Methods.OfName( "TargetMethod" ).Single().GetSymbol();
-            var aspectClass = designTimePipeline.AspectClasses!.Single( a => a.DisplayName == "TestAspect" );
+            var aspectClass = designTimePipeline.AspectClasses!.Single( a => a.ShortName == "TestAspect" );
 
             var success = LiveTemplateAspectPipeline.TryExecute(
                 configuration!.ServiceProvider,

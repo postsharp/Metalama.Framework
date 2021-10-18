@@ -200,7 +200,7 @@ namespace Caravela.Framework.Impl
                 "The aspect '{0}' cannot be applied to '{1}' because {2}.",
                 Error,
                 "The aspect cannot be applied to a declaration because eligibility conditions are not met." );
-        
+
         public static readonly DiagnosticDefinition<(FormattableString Predecessor, string AspectType, IDeclaration Child, IDeclaration Parent)>
             CanAddChildAspectOnlyUnderParent = new(
                 "CR0038",
@@ -208,7 +208,7 @@ namespace Caravela.Framework.Impl
                 "The {0} cannot add a child aspect of type '{1}' to '{2}' because it is not contained in '{3}'.",
                 Error,
                 "A parent aspect or fabric can add child aspects only under its target declaration." );
-        
+
         public static readonly DiagnosticDefinition<(FormattableString Predecessor, string AspectType, IDeclaration Child, FormattableString Reason)>
             IneligibleChildAspect = new(
                 "CR0039",

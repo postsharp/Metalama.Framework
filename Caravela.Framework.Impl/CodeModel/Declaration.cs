@@ -50,7 +50,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public virtual DeclarationRef<IDeclaration> ToRef() => DeclarationRef.FromSymbol( this.Symbol );
 
-        public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
+        public virtual string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
             => this.Symbol.ToDisplayString( format.ToRoslyn() );
 
         public Location? DiagnosticLocation => this.Symbol.GetDiagnosticLocation();

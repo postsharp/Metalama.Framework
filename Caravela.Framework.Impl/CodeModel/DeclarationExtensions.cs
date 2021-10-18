@@ -331,15 +331,6 @@ namespace Caravela.Framework.Impl.CodeModel
             => !symbol.IsAbstract
                && symbol.DeclaringSyntaxReferences.All( sr => sr.GetSyntax() is VariableDeclaratorSyntax );
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="member"></param>
-        /// <param name="interfaceType">Generic type definition of the interface</param>
-        /// <returns></returns>
-        internal static IEnumerable<IMember> GetInterfaceImplementations( this IMember member, INamedType interfaceType )
-            => throw new NotImplementedException();
-
         internal static IMember GetExplicitInterfaceImplementation( this IMember member )
         {
             switch ( member )

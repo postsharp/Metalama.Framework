@@ -65,7 +65,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
             if ( ctor == null )
             {
                 throw GeneralDiagnosticDescriptors.CompatibleAttributeConstructorDoesNotExist.CreateException(
-                    (this.ParentAdvice.Aspect.AspectClass.DisplayName, this, type) );
+                    (this.ParentAdvice.Aspect.AspectClass.ShortName, this, type) );
             }
 
             var ctorArguments = constructorArguments.Select( ( _, i ) => new TypedConstant( ctor.Parameters[i].Type, constructorArguments[i] ) )

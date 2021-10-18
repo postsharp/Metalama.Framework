@@ -10,9 +10,6 @@ namespace Caravela.Framework
     {
         public static IFormatProvider FormatProvider { get; private set; } = CultureInfo.InvariantCulture;
 
-        internal static void Initialize( IFormatProvider formatProvider )
-        {
-            FormatProvider = formatProvider;
-        }
+        internal static void Initialize( IFormatProvider formatProvider ) => FormatProvider = formatProvider;
     }
 }

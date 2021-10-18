@@ -17,6 +17,5 @@ namespace Caravela.Framework.Impl.Aspects
         CompileTimeProject? Project { get; }
 
         ImmutableArray<TemplateClass> TemplateClasses { get; }
-
     }
 }

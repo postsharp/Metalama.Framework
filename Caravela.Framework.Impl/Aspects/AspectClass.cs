@@ -47,6 +47,8 @@ namespace Caravela.Framework.Impl.Aspects
 
         public override string FullName { get; }
 
+        public string ShortName { get; }
+
         /// <inheritdoc />
         public string DisplayName { get; private set; }
 
@@ -92,7 +94,7 @@ namespace Caravela.Framework.Impl.Aspects
             AspectDriverFactory aspectDriverFactory ) : base( serviceProvider, compilation, aspectTypeSymbol, diagnosticAdder, baseClass )
         {
             this.FullName = aspectTypeSymbol.GetReflectionName();
-            this.DisplayName = AttributeRef.GetShortName( aspectTypeSymbol.Name );
+            this.DisplayName = this.ShortName = AttributeRef.GetShortName( aspectTypeSymbol.Name );
             this.IsAbstract = aspectTypeSymbol.IsAbstract;
             this.Project = project;
             this._userCodeInvoker = serviceProvider.GetService<UserCodeInvoker>();
@@ -121,7 +123,7 @@ namespace Caravela.Framework.Impl.Aspects
                 {
                     var diagnostic = GeneralDiagnosticDescriptors.ExceptionInUserCode.CreateDiagnostic(
                         null,
-                        (AspectType: this.DisplayName, MethodName: nameof(IAspect.BuildAspectClass), e.GetType().Name, e.Format( 5 )) );
+                        (AspectType: this.ShortName, MethodName: nameof(IAspect.BuildAspectClass), e.GetType().Name, e.Format( 5 )) );
 
                     diagnosticAdder.Report( diagnostic );
 
@@ -180,7 +182,7 @@ namespace Caravela.Framework.Impl.Aspects
                 {
                     var diagnostic = GeneralDiagnosticDescriptors.ExceptionInUserCode.CreateDiagnostic(
                         null,
-                        (AspectType: this.DisplayName, MethodName: nameof(IAspect.BuildAspectClass), e.GetType().Name, e.Format( 5 )) );
+                        (AspectType: this.ShortName, MethodName: nameof(IAspect.BuildAspectClass), e.GetType().Name, e.Format( 5 )) );
 
                     diagnosticAdder.Report( diagnostic );
 
@@ -320,7 +322,7 @@ namespace Caravela.Framework.Impl.Aspects
             return eligibility;
         }
 
-        public FormattableString? GetIneligibilityJustification( EligibleScenarios requestedEligibility, IDescribedObject<IDeclaration> target ) 
+        public FormattableString? GetIneligibilityJustification( EligibleScenarios requestedEligibility, IDescribedObject<IDeclaration> target )
         {
             var targetDeclaration = target.Object;
             var declarationType = targetDeclaration.GetType();
@@ -331,8 +333,8 @@ namespace Caravela.Framework.Impl.Aspects
                     .ToImmutableArray() );
 
             return group.GetIneligibilityJustification(
-                    requestedEligibility,
-                    new DescribedObject<IDeclaration>( targetDeclaration, $"'{targetDeclaration}'" ) );
+                requestedEligibility,
+                new DescribedObject<IDeclaration>( targetDeclaration, $"'{targetDeclaration}'" ) );
         }
 
         public override string ToString() => this.FullName;
