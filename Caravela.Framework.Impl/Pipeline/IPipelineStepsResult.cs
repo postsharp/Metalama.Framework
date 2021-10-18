@@ -18,7 +18,7 @@ namespace Caravela.Framework.Impl.Pipeline
 
         IReadOnlyList<INonObservableTransformation> NonObservableTransformations { get; }
 
-        IReadOnlyList<AttributeAspectInstance> InheritedAspectInstances { get; }
+        IReadOnlyList<AttributeAspectInstance> InheritableAspectInstances { get; }
 
         ImmutableUserDiagnosticList Diagnostics { get; }
 

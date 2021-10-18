@@ -261,7 +261,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
             if ( !this.TryDeserializeCompileTimeProject(
                 assemblyName.ToAssemblyIdentity(),
-                new MemoryStream( resourceBytes.ToArray() ),
+                new MemoryStream( resourceBytes ),
                 diagnosticSink,
                 cancellationToken,
                 out compileTimeProject ) )

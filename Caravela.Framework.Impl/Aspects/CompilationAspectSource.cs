@@ -65,8 +65,10 @@ namespace Caravela.Framework.Impl.Aspects
 
                             if ( aspectInstance.Eligibility == EligibleScenarios.None )
                             {
+                                var requestedEligibility = aspectClass.IsInherited ? EligibleScenarios.Inheritance : EligibleScenarios.Aspect;
+
                                 var reason = ((AspectClass) aspectClass).GetIneligibilityJustification(
-                                    EligibleScenarios.Inheritance,
+                                    requestedEligibility,
                                     new DescribedObject<IDeclaration>( aspectInstance.TargetDeclaration ) )!;
 
                                 diagnosticAdder.Report(

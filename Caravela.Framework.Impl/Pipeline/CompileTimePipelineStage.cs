@@ -52,7 +52,7 @@ namespace Caravela.Framework.Impl.Pipeline
                 input.AspectLayers,
                 pipelineStepResult.Diagnostics.Concat( linkerResult.Diagnostics ),
                 pipelineStepResult.ExternalAspectSources,
-                pipelineStepResult.InheritedAspectInstances );
+                pipelineStepResult.InheritableAspectInstances );
         }
     }
 }

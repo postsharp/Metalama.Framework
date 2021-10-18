@@ -14,6 +14,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Reflection;
+using TypeKind = Caravela.Framework.Code.TypeKind;
 
 namespace Caravela.Framework.Impl.Advices
 {
@@ -317,6 +318,12 @@ namespace Caravela.Framework.Impl.Advices
             {
                 throw new InvalidOperationException();
             }
+            
+            if ( targetType.TypeKind == TypeKind.Interface )
+            {
+                throw new InvalidOperationException(
+                    UserMessageFormatter.Format( $"Cannot add an IntroduceMethod advice to '{targetType}' because it is an interface." ) );
+            }
 
             var diagnosticList = new DiagnosticList();
 
@@ -480,6 +487,12 @@ namespace Caravela.Framework.Impl.Advices
             {
                 throw new InvalidOperationException();
             }
+            
+            if ( targetType.TypeKind == TypeKind.Interface )
+            {
+                throw new InvalidOperationException(
+                    UserMessageFormatter.Format( $"Cannot add an IntroduceMethod advice to '{targetType}' because it is an interface." ) );
+            }
 
             var diagnosticList = new DiagnosticList();
 
@@ -522,6 +535,12 @@ namespace Caravela.Framework.Impl.Advices
             if ( this._templateInstance == null )
             {
                 throw new InvalidOperationException();
+            }
+            
+            if ( targetType.TypeKind == TypeKind.Interface )
+            {
+                throw new InvalidOperationException(
+                    UserMessageFormatter.Format( $"Cannot add an IntroduceMethod advice to '{targetType}' because it is an interface." ) );
             }
 
             var diagnosticList = new DiagnosticList();
@@ -618,6 +637,12 @@ namespace Caravela.Framework.Impl.Advices
             {
                 throw new InvalidOperationException();
             }
+            
+            if ( targetType.TypeKind == TypeKind.Interface )
+            {
+                throw new InvalidOperationException(
+                    UserMessageFormatter.Format( $"Cannot add an IntroduceMethod advice to '{targetType}' because it is an interface." ) );
+            }
 
             var diagnosticList = new DiagnosticList();
 
@@ -659,6 +684,12 @@ namespace Caravela.Framework.Impl.Advices
             if ( this._templateInstance == null )
             {
                 throw new InvalidOperationException();
+            }
+            
+            if ( targetType.TypeKind == TypeKind.Interface )
+            {
+                throw new InvalidOperationException(
+                    UserMessageFormatter.Format( $"Cannot add an IntroduceMethod advice to '{targetType}' because it is an interface." ) );
             }
 
             var diagnosticList = new DiagnosticList();

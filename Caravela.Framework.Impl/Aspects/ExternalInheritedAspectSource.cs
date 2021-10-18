@@ -34,16 +34,16 @@ namespace Caravela.Framework.Impl.Aspects
 
             foreach ( var reference in compilation.References )
             {
-                InheritedAspectsManifest? manifest = null;
+                InheritableAspectsManifest? manifest = null;
 
                 switch ( reference )
                 {
                     case PortableExecutableReference { FilePath: { } filePath }:
                         if ( ManagedResourceReader.TryGetCompileTimeResource( filePath, out var resources ) )
                         {
-                            if ( resources.TryGetValue( CompileTimeConstants.InheritedAspectManifestResourceName, out var bytes ) )
+                            if ( resources.TryGetValue( CompileTimeConstants.InheritableAspectManifestResourceName, out var bytes ) )
                             {
-                                manifest = InheritedAspectsManifest.Deserialize( new MemoryStream( bytes.ToArray() ) );
+                                manifest = InheritableAspectsManifest.Deserialize( new MemoryStream( bytes ) );
                             }
                         }
 
@@ -60,7 +60,7 @@ namespace Caravela.Framework.Impl.Aspects
                 if ( manifest != null )
                 {
                     inheritedAspectsBuilder.AddRange(
-                        manifest.InheritedAspects,
+                        manifest.InheritableAspects,
                         x => aspectTypesByName[x.Key],
                         x => x.Value.Select( id => DocumentationCommentId.GetFirstSymbolForReferenceId( id, compilation ).AssertNotNull() ) );
                 }

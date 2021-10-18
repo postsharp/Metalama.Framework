@@ -36,12 +36,18 @@ namespace Caravela.Framework.Impl.Pipeline
 
             var concreteAspectInstances = aspectInstances.Where( a => a.Eligibility.IncludesAll( EligibleScenarios.Aspect ) ).ToList();
 
-            var inheritedAspectInstances = aspectInstances.Where( a => a.Eligibility.IncludesAll( EligibleScenarios.Inheritance ) && a.AspectClass.IsInherited )
+            var inheritableAspectInstances = aspectInstances
+                .Where( a => a.Eligibility.IncludesAll( EligibleScenarios.Inheritance ) && a.AspectClass.IsInherited )
+                .Cast<AttributeAspectInstance>()
+                .ToList();
+
+            var inheritedAspectInstancesInProject = inheritableAspectInstances
                 .SelectMany( a => ((IDeclarationImpl) a.TargetDeclaration).GetDerivedDeclarations().Select( a.CreateDerivedInstance ) )
                 .ToList();
 
             pipelineStepsState.AddAspectInstances( concreteAspectInstances );
-            pipelineStepsState.AddInheritedAspectInstances( inheritedAspectInstances );
+            pipelineStepsState.AddAspectInstances( inheritedAspectInstancesInProject );
+            pipelineStepsState.AddInheritableAspectInstances( inheritableAspectInstances );
 
             return compilation.WithAspectInstances( concreteAspectInstances );
         }

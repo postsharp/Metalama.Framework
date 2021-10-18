@@ -27,7 +27,7 @@ namespace Caravela.Framework.Impl.Pipeline
         private readonly PipelineStepIdComparer _comparer;
         private readonly UserDiagnosticSink _diagnostics;
         private readonly List<INonObservableTransformation> _nonObservableTransformations = new();
-        private readonly List<AttributeAspectInstance> _inheritedAspectInstances = new();
+        private readonly List<AttributeAspectInstance> _inheritableAspectInstances = new();
         private readonly OverflowAspectSource _overflowAspectSource = new();
         private PipelineStep? _currentStep;
 
@@ -35,7 +35,7 @@ namespace Caravela.Framework.Impl.Pipeline
 
         public IReadOnlyList<INonObservableTransformation> NonObservableTransformations => this._nonObservableTransformations;
 
-        public IReadOnlyList<AttributeAspectInstance> InheritedAspectInstances => this._inheritedAspectInstances;
+        public IReadOnlyList<AttributeAspectInstance> InheritableAspectInstances => this._inheritableAspectInstances;
 
         public ImmutableUserDiagnosticList Diagnostics => this._diagnostics.ToImmutable();
 
@@ -230,10 +230,9 @@ namespace Caravela.Framework.Impl.Pipeline
             }
         }
 
-        public void AddInheritedAspectInstances( IReadOnlyList<AttributeAspectInstance> inheritedAspectInstances )
+        public void AddInheritableAspectInstances( IReadOnlyList<AttributeAspectInstance> inheritedAspectInstances )
         {
-            this.AddAspectInstances( inheritedAspectInstances );
-            this._inheritedAspectInstances.AddRange( inheritedAspectInstances );
+            this._inheritableAspectInstances.AddRange( inheritedAspectInstances );
         }
 
         public void AddDiagnostics( IEnumerable<Diagnostic> diagnostics, IEnumerable<ScopedSuppression> suppressions )

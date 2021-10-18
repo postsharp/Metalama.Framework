@@ -16,10 +16,21 @@ namespace Caravela.Framework.Impl.Utilities
     {
         private static readonly ConcurrentDictionary<string, CacheEntry> _resourceCache = new();
 
-        private record CacheEntry( DateTime LastFileWrite, ImmutableDictionary<string, ImmutableArray<byte>>? Resources );
+        private record CacheEntry( DateTime LastFileWrite, ImmutableDictionary<string, byte[]>? Resources );
 
-        public static bool TryGetCompileTimeResource( string path, [NotNullWhen( true )] out ImmutableDictionary<string, ImmutableArray<byte>>? resources )
+        public static bool TryGetCompileTimeResource( string path, [NotNullWhen( true )] out ImmutableDictionary<string, byte[]>? resources )
         {
+            var assemblyName = Path.GetFileNameWithoutExtension( path );
+
+            if ( assemblyName.Equals( "System", StringComparison.OrdinalIgnoreCase ) ||
+                 assemblyName.StartsWith( "System.", StringComparison.OrdinalIgnoreCase ) ||
+                 assemblyName.StartsWith( "Microsoft.CodeAnalysis", StringComparison.OrdinalIgnoreCase ) )
+            {
+                resources = null;
+                
+                return false;
+            }
+            
             if ( !(_resourceCache.TryGetValue( path, out var result ) && result.LastFileWrite == File.GetLastWriteTime( path )) )
             {
                 result = GetCompileTimeResourceCore( path );
@@ -48,8 +59,9 @@ namespace Caravela.Framework.Impl.Utilities
             using var peReader = new PEReader( stream );
 
             var metadataReader = peReader.GetMetadataReader();
-            ImmutableDictionary<string, ImmutableArray<byte>>.Builder? resourceBuilder = null;
-
+            
+            ImmutableDictionary<string, byte[]>.Builder? dictionaryBuilder = null;
+            
             foreach ( var resourceHandle in metadataReader.ManifestResources )
             {
                 var resource = metadataReader.GetManifestResource( resourceHandle );
@@ -65,21 +77,26 @@ namespace Caravela.Framework.Impl.Utilities
 
                 var resourceName = metadataReader.GetString( resource.Name );
 
-                if ( resourceName.Contains( CompileTimeConstants.CompileTimeProjectResourceName ) )
+                if ( resourceName is CompileTimeConstants.CompileTimeProjectResourceName or CompileTimeConstants.InheritableAspectManifestResourceName )
                 {
                     unsafe
                     {
-                        resourceBuilder ??= ImmutableDictionary.CreateBuilder<string, ImmutableArray<byte>>();
+                        dictionaryBuilder ??= ImmutableDictionary.CreateBuilder<string, byte[]>();
                         var resourcesSection = peReader.GetSectionData( peReader.PEHeaders.CorHeader!.ResourcesDirectory.RelativeVirtualAddress );
                         var size = *(int*) (resourcesSection.Pointer + resource.Offset);
-                        var resourceBytes = resourcesSection.GetContent( sizeof(int), size );
+                        var resourceBytes = new byte[size];
 
-                        resourceBuilder.Add( resourceName, resourceBytes );
+                        fixed ( byte* fixedResourceBytes = resourceBytes )
+                        {
+                            Buffer.MemoryCopy( resourcesSection.Pointer + resource.Offset + 4, fixedResourceBytes, size, size );
+                        }
+
+                        dictionaryBuilder.Add( resourceName, resourceBytes );
                     }
                 }
             }
 
-            return new CacheEntry( timestamp, resourceBuilder?.ToImmutable() );
+            return new CacheEntry( timestamp, dictionaryBuilder?.ToImmutable() );
         }
     }
 }

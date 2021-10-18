@@ -17,54 +17,56 @@ using System.Text;
 namespace Caravela.Framework.Impl.Aspects
 {
     [Obfuscation( Exclude = true /* JSON */ )]
-    internal class InheritedAspectsManifest
+    internal class InheritableAspectsManifest
     {
-        public IReadOnlyDictionary<string, IReadOnlyList<string>> InheritedAspects { get; }
+        public IReadOnlyDictionary<string, IReadOnlyList<string>> InheritableAspects { get; }
 
-        public InheritedAspectsManifest( IReadOnlyDictionary<string, IReadOnlyList<string>> inheritedAspects )
+        public InheritableAspectsManifest( IReadOnlyDictionary<string, IReadOnlyList<string>> inheritableAspects )
         {
-            this.InheritedAspects = inheritedAspects;
+            this.InheritableAspects = inheritableAspects;
         }
 
-        public static InheritedAspectsManifest Create( IEnumerable<IAspectInstance> inheritedAspect )
+        public static InheritableAspectsManifest Create( IEnumerable<IAspectInstance> inheritedAspect )
             => new(
                 inheritedAspect.GroupBy( a => a.AspectClass )
                     .ToDictionary(
                         g => g.Key.FullName,
                         g => (IReadOnlyList<string>) g.Select(
-                                i => DocumentationCommentId.CreateReferenceId( i.TargetDeclaration.GetSymbol().AssertNotNull( "TODO" ) ) )
+                                i => DocumentationCommentId.CreateDeclarationId( i.TargetDeclaration.GetSymbol().AssertNotNull( "TODO" ) ) )
                             .ToList(),
                         StringComparer.Ordinal ) );
 
         private void Serialize( Stream stream )
         {
-            var deflate = new DeflateStream( stream, CompressionLevel.Optimal );
+            using var deflate = new DeflateStream( stream, CompressionLevel.Optimal, true );
             var manifestJson = JsonConvert.SerializeObject( this, Newtonsoft.Json.Formatting.Indented );
-            using var manifestWriter = new StreamWriter( deflate, Encoding.UTF8 );
+            using var manifestWriter = new StreamWriter( deflate, Encoding.UTF8, 8196, true );
             manifestWriter.Write( manifestJson );
+            manifestWriter.Flush();
+            deflate.Flush();
+            stream.Flush();
         }
 
         public ResourceDescription ToResource()
-            => new(
-                CompileTimeConstants.InheritedAspectManifestResourceName,
-                () =>
-                {
-                    var stream = new MemoryStream();
-                    this.Serialize( stream );
-                    _ = stream.Seek( 0, SeekOrigin.Begin );
+        {
+            var stream = new MemoryStream();
+            this.Serialize( stream );
+            _ = stream.Seek( 0, SeekOrigin.Begin );
 
-                    return stream;
-                },
+            return new(
+                CompileTimeConstants.InheritableAspectManifestResourceName,
+                () => stream,
                 true );
+        }
 
-        public static InheritedAspectsManifest Deserialize( Stream stream )
+        public static InheritableAspectsManifest Deserialize( Stream stream )
         {
             using var deflate = new DeflateStream( stream, CompressionMode.Decompress );
             using var manifestReader = new StreamReader( deflate, Encoding.UTF8 );
             var manifestJson = manifestReader.ReadToEnd();
             stream.Close();
 
-            return JsonConvert.DeserializeObject<InheritedAspectsManifest>( manifestJson ).AssertNotNull();
+            return JsonConvert.DeserializeObject<InheritableAspectsManifest>( manifestJson ).AssertNotNull();
         }
     }
 }

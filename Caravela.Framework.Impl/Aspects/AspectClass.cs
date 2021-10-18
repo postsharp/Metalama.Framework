@@ -133,7 +133,14 @@ namespace Caravela.Framework.Impl.Aspects
                 this._layers = classBuilder.Layers.As<string?>().Prepend( null ).Select( l => new AspectLayer( this, l ) ).ToImmutableArray();
 
                 // Call BuildEligibility for all relevant interface implementations.
-                Dictionary<Type, IEligibilityRule<IDeclaration>> eligibilityRules = new();
+                List<KeyValuePair<Type, IEligibilityRule<IDeclaration>>> eligibilityRules = new();
+
+                // Add additional rules defined by the driver.
+                if ( this._aspectDriver is AspectDriver { EligibilityRule: { } eligibilityRule } )
+                {
+                    eligibilityRules.Add( new KeyValuePair<Type, IEligibilityRule<IDeclaration>>( typeof(IDeclaration), eligibilityRule ) );
+                }
+
                 var eligibilitySuccess = true;
 
                 foreach ( var implementedInterface in this._prototypeAspectInstance.GetType()
@@ -167,7 +174,7 @@ namespace Caravela.Framework.Impl.Aspects
         }
 
         [Obfuscation( Exclude = true /* Reflection */ )]
-        private bool TryInitializeEligibility<T>( IDiagnosticAdder diagnosticAdder, Dictionary<Type, IEligibilityRule<IDeclaration>> rules )
+        private bool TryInitializeEligibility<T>( IDiagnosticAdder diagnosticAdder, List<KeyValuePair<Type, IEligibilityRule<IDeclaration>>> rules )
             where T : class, IDeclaration
         {
             if ( this._prototypeAspectInstance is IEligible<T> eligible )
@@ -189,7 +196,7 @@ namespace Caravela.Framework.Impl.Aspects
                     return false;
                 }
 
-                rules.Add( typeof(T), ((IEligibilityBuilder<T>) builder).Build() );
+                rules.Add( new KeyValuePair<Type, IEligibilityRule<IDeclaration>>( typeof(T), ((IEligibilityBuilder<T>) builder).Build() ) );
             }
 
             return true;
@@ -305,7 +312,14 @@ namespace Caravela.Framework.Impl.Aspects
 
             var declarationType = targetDeclaration.GetType();
             var eligibility = EligibleScenarios.All;
+            
+            // If the aspect cannot be inherited, remove the inheritance eligibility.
+            if ( !this.IsInherited )
+            {
+                eligibility &= ~EligibleScenarios.Inheritance;
+            }
 
+            // Evaluate all eligibility rules that apply to the target declaration type.
             foreach ( var rule in this._eligibilityRules )
             {
                 if ( rule.Key.IsAssignableFrom( declarationType ) )

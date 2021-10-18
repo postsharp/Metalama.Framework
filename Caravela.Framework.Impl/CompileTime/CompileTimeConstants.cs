@@ -9,6 +9,6 @@ namespace Caravela.Framework.Impl.CompileTime
 
         public const string CompileTimeProjectResourceName = "Caravela.CompileTimeProject";
 
-        public const string InheritedAspectManifestResourceName = "Caravela.InheritedAspects";
+        public const string InheritableAspectManifestResourceName = "Caravela.InheritableAspects";
     }
 }
