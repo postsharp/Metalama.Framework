@@ -36,7 +36,9 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
             }
         }
 
-        string IDisplayable.ToDisplayString( CodeDisplayFormat? format, CodeDisplayContext? context ) => throw new NotImplementedException();
+        string IDisplayable.ToDisplayString( CodeDisplayFormat? format, CodeDisplayContext? context = null ) => throw new NotImplementedException();
+
+        public override bool CanBeInherited => false;
 
         public override IDeclaration ContainingDeclaration { get; }
 
@@ -61,5 +63,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         INamedArgumentList IAttribute.NamedArguments => this.NamedArguments;
 
         IType IHasType.Type => this.Type;
+        
+        public FormattableString FormatPredecessor() => $"attribute of type '{this.Type}' on '{this.ContainingDeclaration}'";
     }
 }

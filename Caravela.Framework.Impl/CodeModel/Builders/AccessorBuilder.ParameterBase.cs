@@ -52,6 +52,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
             }
 
             public bool IsReturnParameter => this.Index < 0;
+            
+            public override bool CanBeInherited => ((IDeclarationImpl) this.DeclaringMember).CanBeInherited;
         }
     }
 }

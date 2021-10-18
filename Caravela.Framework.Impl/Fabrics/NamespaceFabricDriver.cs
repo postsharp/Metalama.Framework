@@ -7,6 +7,7 @@ using Caravela.Framework.Impl.Aspects;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Pipeline;
 using Microsoft.CodeAnalysis;
+using System;
 
 namespace Caravela.Framework.Impl.Fabrics
 {
@@ -30,6 +31,8 @@ namespace Caravela.Framework.Impl.Fabrics
 
         public override IDeclaration GetTarget( CompilationModel compilation ) => compilation.Factory.GetNamespace( (INamespaceSymbol) this.TargetSymbol );
 
+        public override FormattableString FormatPredecessor() => $"namespace fabric '{this.Fabric.GetType()}' on '{this.TargetSymbol}'";
+        
         private class Builder : BaseBuilder<INamespace>, INamespaceAmender
         {
             public Builder( FabricDriver parent, INamespace ns, AspectProjectConfiguration context, IAspectBuilderInternal aspectBuilder ) : base(

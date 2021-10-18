@@ -286,6 +286,13 @@ namespace Caravela.Framework.Impl.Advices
                 throw new InvalidOperationException();
             }
 
+            if ( targetMethod.IsAbstract )
+            {
+                throw new InvalidOperationException(
+                    UserMessageFormatter.Format( 
+                    $"Cannot add an OverrideMethod advice to '{targetMethod}' because it is an abstract." ) );
+            }
+
             var diagnosticList = new DiagnosticList();
 
             var template = this.SelectTemplate( targetMethod, templateSelector )
@@ -345,6 +352,14 @@ namespace Caravela.Framework.Impl.Advices
             {
                 throw new InvalidOperationException();
             }
+            
+            if ( targetDeclaration.IsAbstract )
+            {
+                throw new InvalidOperationException(
+                    UserMessageFormatter.Format( 
+                        $"Cannot add an OverrideFieldOrProperty advice to '{targetDeclaration}' because it is an abstract." ) );
+            }
+
 
             // Set template represents both set and init accessors.
             var diagnosticList = new DiagnosticList();
@@ -382,6 +397,13 @@ namespace Caravela.Framework.Impl.Advices
             if ( this._templateInstance == null )
             {
                 throw new InvalidOperationException();
+            }
+            
+            if ( targetDeclaration.IsAbstract )
+            {
+                throw new InvalidOperationException(
+                    UserMessageFormatter.Format( 
+                        $"Cannot add an OverrideFieldOrPropertyAccessors advice to '{targetDeclaration}' because it is an abstract." ) );
             }
 
             // Set template represents both set and init accessors.
@@ -551,6 +573,14 @@ namespace Caravela.Framework.Impl.Advices
             {
                 throw GeneralDiagnosticDescriptors.UnsupportedFeature.CreateException( $"Invoker overrides." );
             }
+            
+            if ( targetDeclaration.IsAbstract )
+            {
+                throw new InvalidOperationException(
+                    UserMessageFormatter.Format( 
+                        $"Cannot add an OverrideEventAccessors advice to '{targetDeclaration}' because it is an abstract." ) );
+            }
+
 
             var diagnosticList = new DiagnosticList();
 

@@ -11,6 +11,7 @@ using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Transformations;
 using Microsoft.CodeAnalysis;
 using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using TypedConstant = Caravela.Framework.Code.TypedConstant;
@@ -86,8 +87,15 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public ImmutableArray<SyntaxReference> DeclaringSyntaxReferences
             => ((IDeclarationImpl?) this.ContainingDeclaration)?.DeclaringSyntaxReferences ?? ImmutableArray<SyntaxReference>.Empty;
 
+        public abstract bool CanBeInherited { get; }
+
+        public IEnumerable<IDeclaration> GetDerivedDeclarations() => throw new NotImplementedException();
+
         public override string ToString() => this.ToDisplayString( CodeDisplayFormat.MinimallyQualified );
 
         public IDeclaration OriginalDefinition => this;
+
+        public IAssembly DeclaringAssembly => this.Compilation.DeclaringAssembly;
+
     }
 }

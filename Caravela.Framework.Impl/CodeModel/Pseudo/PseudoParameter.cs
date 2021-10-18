@@ -8,6 +8,7 @@ using Caravela.Framework.Impl.CodeModel.Collections;
 using Caravela.Framework.Impl.CodeModel.References;
 using Microsoft.CodeAnalysis;
 using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Reflection;
 using RefKind = Caravela.Framework.Code.RefKind;
@@ -74,6 +75,12 @@ namespace Caravela.Framework.Impl.CodeModel.Pseudo
 
         ImmutableArray<SyntaxReference> IDeclarationImpl.DeclaringSyntaxReferences => ImmutableArray<SyntaxReference>.Empty;
 
+        public bool CanBeInherited => ((IDeclarationImpl)this.DeclaringMember).CanBeInherited;
+
+        public IEnumerable<IDeclaration> GetDerivedDeclarations() => throw new NotImplementedException();
+
         public IDeclaration OriginalDefinition => throw new NotImplementedException();
+        
+        public IAssembly DeclaringAssembly => this.DeclaringMember.DeclaringAssembly;
     }
 }

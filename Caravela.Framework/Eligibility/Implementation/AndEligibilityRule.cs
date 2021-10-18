@@ -17,17 +17,17 @@ namespace Caravela.Framework.Eligibility.Implementation
             this._rules = rules;
         }
 
-        public EligibilityValue GetEligibility( T obj )
+        public EligibleScenarios GetEligibility( T obj )
         {
-            var eligibility = EligibilityValue.Eligible;
+            var eligibility = EligibleScenarios.All;
 
             foreach ( var predicate in this._rules )
             {
-                var thisEligibility = predicate.GetEligibility( obj );
+                eligibility &= predicate.GetEligibility( obj );
 
-                if ( thisEligibility < eligibility )
+                if ( eligibility == EligibleScenarios.None )
                 {
-                    eligibility = thisEligibility;
+                    return EligibleScenarios.None;
                 }
             }
 
@@ -35,14 +35,14 @@ namespace Caravela.Framework.Eligibility.Implementation
         }
 
         public FormattableString? GetIneligibilityJustification(
-            EligibilityValue requestedEligibility,
+            EligibleScenarios requestedEligibility,
             IDescribedObject<T> describedObject )
         {
             foreach ( var predicate in this._rules )
             {
                 var eligibility = predicate.GetEligibility( describedObject.Object );
 
-                if ( eligibility < requestedEligibility )
+                if ( (eligibility & requestedEligibility) != requestedEligibility )
                 {
                     return predicate.GetIneligibilityJustification( requestedEligibility, describedObject );
                 }

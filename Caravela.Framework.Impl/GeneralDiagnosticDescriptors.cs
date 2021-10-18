@@ -191,6 +191,16 @@ namespace Caravela.Framework.Impl
                 "The class '{1}' defines a new template named '{0}', but the base class '{2}' already defines a template of the same name. Template names must be unique.",
                 Error,
                 "The class already defines a template of the same name." );
+        
+        public static readonly DiagnosticDefinition<(string AspectName, IDeclaration Target, string Reason)>
+            AspectNotEligibleOnAspect = new(
+                "CR0037",
+                _category,
+                "The aspect '{0}' cannot be applied to '{1}' because {2}.",
+                Error,
+                "The aspect cannot be applied to a declaration because eligibility conditions are not met." );
+
+
 
         // TODO: Use formattable string (C# does not seem to find extension methods).
         public static readonly DiagnosticDefinition<string>

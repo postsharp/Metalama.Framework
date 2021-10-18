@@ -8,7 +8,7 @@ using System;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
-    internal abstract class BuiltMember : BuiltMemberOrNamedType, IMember, IMemberRef<IMember>
+    internal abstract class BuiltMember : BuiltMemberOrNamedType, IMemberImpl, IMemberRef<IMember>
     {
         protected BuiltMember( CompilationModel compilation ) : base( compilation ) { }
 
@@ -29,5 +29,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public bool IsAsync => this.MemberBuilder.IsAsync;
 
         public bool IsOverride => this.MemberBuilder.IsOverride;
+
+        public IMember? OverriddenMember => this.Compilation.Factory.GetDeclaration( this.MemberBuilder.OverriddenMember );
     }
 }

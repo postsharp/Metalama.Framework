@@ -84,6 +84,8 @@ namespace Caravela.Framework.Impl.Fabrics
         }
 
         public override IDeclaration GetTarget( CompilationModel compilation ) => compilation;
+        
+        public override FormattableString FormatPredecessor() => $"project fabric '{this.Fabric.GetType()}'";
 
         private class Builder : BaseBuilder<ICompilation>, IProjectAmender
         {

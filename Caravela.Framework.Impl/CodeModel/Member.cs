@@ -2,6 +2,8 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
@@ -18,5 +20,30 @@ namespace Caravela.Framework.Impl.CodeModel
         public bool IsVirtual => this.Symbol.IsVirtual;
 
         public bool IsOverride => this.Symbol.IsOverride;
+
+        public override IEnumerable<IDeclaration> GetDerivedDeclarations()
+        {
+            if ( !this.CanBeInherited )
+            {
+                return Enumerable.Empty<IDeclaration>();
+            }
+            else
+            {
+                return this.GetDerivedDeclarationsCore();
+            }
+        }
+
+        private IEnumerable<IDeclaration> GetDerivedDeclarationsCore()
+        {
+            foreach ( var derivedType in this.Compilation.GetDerivedTypes( this.DeclaringType ) )
+            {
+                foreach ( var member in ((INamedTypeInternal) derivedType).GetOverridingMembers( this ) )
+                {
+                    yield return member;
+                }
+            }
+        }
+        
+        public override bool CanBeInherited => this.DeclaringType.TypeKind == TypeKind.Interface || (this.IsVirtual && !this.IsSealed && ((IDeclarationImpl) this.DeclaringType).CanBeInherited);
     }
 }

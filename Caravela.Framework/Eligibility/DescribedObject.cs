@@ -6,27 +6,26 @@ using System;
 namespace Caravela.Framework.Eligibility
 {
     /// <summary>
-    /// (Not implemented.)
+    /// Encapsulates an object and a human-readable description.
     /// </summary>
-    [Obsolete( "Not implemented." )]
+    /// <typeparam name="T"></typeparam>
     public sealed class DescribedObject<T> : IDescribedObject<T>
     {
+        /// <inheritdoc />
         public T Object { get; }
 
+        /// <inheritdoc />
         public FormattableString? Description { get; }
 
-        public IFormatProvider FormatProvider { get; }
-
-        public DescribedObject( T o, IFormatProvider formatProvider, FormattableString? description = null )
+        public DescribedObject( T o, FormattableString? description = null )
         {
             this.Object = o;
-            this.FormatProvider = formatProvider;
             this.Description = description;
         }
 
-        public string ToString( string? format, IFormatProvider? formatProvider )
+        string IFormattable.ToString( string? format, IFormatProvider? formatProvider )
 
             // ReSharper disable FormatStringProblem
-            => this.Description?.ToString( this.FormatProvider ) ?? string.Format( this.FormatProvider, "{0:" + format + "}", this.Object );
+            => this.Description?.ToString(CaravelaServices.FormatProvider) ?? string.Format( CaravelaServices.FormatProvider, "{0:" + format + "}", this.Object );
     }
 }

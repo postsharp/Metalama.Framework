@@ -3,6 +3,10 @@
 
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
+using Caravela.Framework.Eligibility;
+using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.Diagnostics;
+using Caravela.Framework.Impl.Pipeline;
 using Caravela.Framework.Impl.Utilities;
 using Caravela.Framework.Project;
 using System;
@@ -15,7 +19,7 @@ namespace Caravela.Framework.Impl.Aspects
     /// <summary>
     /// Represents an instance of an aspect and its target declaration.
     /// </summary>
-    internal sealed class AspectInstance : IAspectInstanceInternal, IComparable<AspectInstance>
+    internal class AspectInstance : IAspectInstanceInternal, IComparable<AspectInstance>
     {
         /// <summary>
         /// Gets the aspect instance.
@@ -35,6 +39,9 @@ namespace Caravela.Framework.Impl.Aspects
         public ImmutableDictionary<TemplateClass, TemplateClassInstance> TemplateInstances { get; }
 
         public AspectPredecessor Predecessor { get; }
+        
+        public EligibleScenarios Eligibility { get; }
+        
 
         ImmutableArray<AspectPredecessor> IAspectInstance.Predecessors => ImmutableArray.Create( this.Predecessor );
 
@@ -44,9 +51,22 @@ namespace Caravela.Framework.Impl.Aspects
             this.TargetDeclaration = declaration;
             this.AspectClass = aspectClass;
             this.Predecessor = predecessor;
+            this.Eligibility = ComputeEligibility( aspectClass, declaration );
 
             this.TemplateInstances = ImmutableDictionary.Create<TemplateClass, TemplateClassInstance>()
                 .Add( aspectClass, new TemplateClassInstance( aspect, aspectClass ) );
+        }
+
+        private static EligibleScenarios ComputeEligibility( IAspectClassImpl aspectClass, IDeclaration declaration )
+        {
+            var eligibility = aspectClass.GetEligibility( declaration );
+
+            if ( (eligibility & EligibleScenarios.Inheritance) != 0 && !((IDeclarationImpl) declaration).CanBeInherited )
+            {
+                eligibility = eligibility & ~EligibleScenarios.Inheritance;
+            }
+
+            return eligibility;
         }
 
         internal AspectInstance(
@@ -60,7 +80,10 @@ namespace Caravela.Framework.Impl.Aspects
             this.TargetDeclaration = declaration;
             this.AspectClass = aspectClass;
             this.Predecessor = predecessor;
+            this.Eligibility = ComputeEligibility( (IAspectClassImpl)aspectClass, declaration );
+            
             this.TemplateInstances = templateInstances.ToImmutableDictionary( t => t.TemplateClass, t => t );
+            
         }
 
         internal AspectInstance(
@@ -77,6 +100,7 @@ namespace Caravela.Framework.Impl.Aspects
             this.TargetDeclaration = declaration;
             this.AspectClass = aspectClass;
             this.Predecessor = predecessor;
+            this.Eligibility = ComputeEligibility( aspectClass, declaration );
 
             this.TemplateInstances = ImmutableDictionary.Create<TemplateClass, TemplateClassInstance>()
                 .Add( aspectClass, new TemplateClassInstance( this.Aspect, aspectClass ) );
@@ -84,6 +108,17 @@ namespace Caravela.Framework.Impl.Aspects
 
         public override string ToString() => this.AspectClass.DisplayName + "@" + this.TargetDeclaration;
 
+        public FormattableString FormatPredecessor() => $"aspect '{this.AspectClass.DisplayName}' applied to '{this.TargetDeclaration}'";
+
         public int CompareTo( AspectInstance? other ) => this.Predecessor.Kind.CompareTo( other.AssertNotNull().Predecessor.Kind );
+
+        public virtual AttributeAspectInstance CreateDerivedInstance( IDeclaration target )
+        {
+            // Inherited aspects should not be created with a method that accepts an IAspect, but should provide a way to replicate the aspect.
+            throw new AssertionFailedException();
+        }
+
+        
+        
     }
 }

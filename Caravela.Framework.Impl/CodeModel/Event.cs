@@ -96,5 +96,7 @@ namespace Caravela.Framework.Impl.CodeModel
         public override MemberInfo ToMemberInfo() => this.ToEventInfo();
 
         IType IHasType.Type => this.Type;
+
+        public IMember? OverriddenMember => this.OverriddenEvent;
     }
 }

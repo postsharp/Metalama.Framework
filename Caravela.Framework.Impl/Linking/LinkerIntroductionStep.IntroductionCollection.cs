@@ -63,7 +63,7 @@ namespace Caravela.Framework.Impl.Linking
                 }
             }
 
-            public void Add( IIntroducedInterface interfaceImplementationIntroduction, IEnumerable<BaseTypeSyntax> introducedInterfaces )
+            public void Add( IIntroducedInterface interfaceImplementationIntroduction, BaseTypeSyntax introducedInterface )
             {
                 var targetTypeSymbol = ((INamedType) interfaceImplementationIntroduction.ContainingDeclaration).GetSymbol();
 
@@ -75,7 +75,7 @@ namespace Caravela.Framework.Impl.Linking
                     this._introducedInterfacesByTargetTypeDecl[targetTypeDecl] = interfaceList = new List<BaseTypeSyntax>();
                 }
 
-                interfaceList.AddRange( introducedInterfaces );
+                interfaceList.Add( introducedInterface );
             }
 
             internal void AddRemovedSyntax( SyntaxNode removedSyntax )

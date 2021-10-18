@@ -3,7 +3,8 @@
 
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
-using Caravela.Framework.Impl.Aspects;
+using Caravela.Framework.Eligibility;
+using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
@@ -12,7 +13,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
 
-namespace Caravela.Framework.Impl.CodeModel
+namespace Caravela.Framework.Impl.Aspects
 {
     /// <summary>
     /// An implementation  of <see cref="IAspectSource"/> that creates aspect instances from custom attributes
@@ -52,12 +53,29 @@ namespace Caravela.Framework.Impl.CodeModel
                     {
                         cancellationToken.ThrowIfCancellationRequested();
 
-                        if ( this._loader.AttributeDeserializer.TryCreateAttribute( attribute.GetAttributeData(), diagnosticAdder, out var attributeInstance ) )
+                        var attributeData = attribute.GetAttributeData();
+
+                        if ( this._loader.AttributeDeserializer.TryCreateAttribute( attributeData, diagnosticAdder, out var attributeInstance ) )
                         {
-                            return ((AspectClass) aspectClass).CreateAspectInstance(
+                            var aspectInstance = ((AspectClass) aspectClass).CreateAspectInstanceFromAttribute(
                                 (IAspect) attributeInstance,
                                 attribute.ContainingDeclaration.AssertNotNull(),
-                                new AspectPredecessor( AspectPredecessorKind.Attribute, attribute ) );
+                                attribute,
+                                this._loader );
+
+                            if ( aspectInstance.Eligibility == EligibleScenarios.None )
+                            {
+                                var reason = ((AspectClass) aspectClass).GetIneligibilityJustification( aspectInstance.TargetDeclaration, EligibleScenarios.Inheritance )!;
+
+                                diagnosticAdder.Report(
+                                    GeneralDiagnosticDescriptors.AspectNotEligibleOnAspect.CreateDiagnostic(
+                                        attribute.GetDiagnosticLocation(),
+                                        (aspectClass.DisplayName, aspectInstance.TargetDeclaration, reason) ) );
+
+                                return null;
+                            }
+
+                            return aspectInstance;
                         }
                         else
                         {

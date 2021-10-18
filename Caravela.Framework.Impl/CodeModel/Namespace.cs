@@ -8,6 +8,7 @@ using Caravela.Framework.Impl.CodeModel.References;
 using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Caravela.Framework.Impl.CodeModel
@@ -30,6 +31,10 @@ namespace Caravela.Framework.Impl.CodeModel
         public string FullName => this._symbol.IsGlobalNamespace ? "" : this._symbol.ToDisplayString();
 
         public bool IsGlobalNamespace => this._symbol.IsGlobalNamespace;
+
+        public override bool CanBeInherited => false;
+
+        public override IEnumerable<IDeclaration> GetDerivedDeclarations() => Enumerable.Empty<IDeclaration>();
 
         [Memo]
         public INamespace? ParentNamespace => this.IsGlobalNamespace ? null : this.Compilation.Factory.GetNamespace( this._symbol.ContainingNamespace );

@@ -10,7 +10,7 @@ namespace Caravela.Framework.Impl.CodeModel
     /// <summary>
     /// Exposes the <see cref="ISymbol"/> from <see cref="IDeclaration"/>.
     /// </summary>
-    public static class CodeModelExtensions
+    public static class SymbolExtensions
     {
         public static ISymbol? GetSymbol( this IDeclaration declaration ) => ((ISdkDeclaration) declaration).Symbol;
 

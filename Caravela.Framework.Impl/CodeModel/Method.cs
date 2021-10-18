@@ -104,5 +104,7 @@ namespace Caravela.Framework.Impl.CodeModel
                 : null;
 
         public override System.Reflection.MethodBase ToMethodBase() => this.ToMethodInfo();
+
+        public IMember? OverriddenMember => this.OverriddenMethod;
     }
 }

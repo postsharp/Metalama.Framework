@@ -3,6 +3,7 @@
 
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -54,5 +55,7 @@ namespace Caravela.Framework.Impl.Aspects
         public void Skip() => this._primaryInstance.Skip();
 
         public ImmutableDictionary<TemplateClass, TemplateClassInstance> TemplateInstances => this._primaryInstance.TemplateInstances;
+
+        public FormattableString FormatPredecessor() => this._primaryInstance.FormatPredecessor();
     }
 }

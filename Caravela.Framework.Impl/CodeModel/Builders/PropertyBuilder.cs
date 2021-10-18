@@ -77,6 +77,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public override bool IsExplicitInterfaceImplementation => this.ExplicitInterfaceImplementations.Count > 0;
 
+        public override IMember? OverriddenMember => this.OverriddenProperty;
+
         public bool IsIndexer => string.Equals( this.Name, "Items", StringComparison.Ordinal );
 
         public ExpressionSyntax? InitializerSyntax { get; set; }

@@ -28,5 +28,7 @@ namespace Caravela.Framework.Aspects
         /// Gets a value indicating whether the aspect class is an abstract class.
         /// </summary>
         bool IsAbstract { get; }
+
+        bool IsInherited { get; }
     }
 }

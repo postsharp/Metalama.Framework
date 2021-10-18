@@ -121,5 +121,7 @@ namespace Caravela.Framework.Impl.CodeModel
                 }
             }
         }
+
+        public IMember? OverriddenMember => this.OverriddenProperty;
     }
 }

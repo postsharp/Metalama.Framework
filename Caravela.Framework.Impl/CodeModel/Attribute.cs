@@ -29,6 +29,8 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public AttributeData AttributeData { get; }
 
+        public IAssembly DeclaringAssembly => this.ContainingDeclaration.DeclaringAssembly;
+
         DeclarationOrigin IDeclaration.Origin => DeclarationOrigin.Source;
 
         public IDeclaration ContainingDeclaration { get; }
@@ -72,6 +74,8 @@ namespace Caravela.Framework.Impl.CodeModel
         public bool Equals( IDeclaration other ) => throw new NotImplementedException();
 
         public override string ToString() => this.AttributeData.ToString();
+
+        public FormattableString FormatPredecessor() => $"the attribute of type '{this.Type}' on '{this.ContainingDeclaration}'";
 
         public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => throw new NotImplementedException();
 

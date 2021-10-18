@@ -5,10 +5,11 @@ using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Code.DeclarationBuilders;
 using Caravela.Framework.Impl.Advices;
+using System;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
-    internal abstract class MemberBuilder : MemberOrNamedTypeBuilder, IMemberBuilder
+    internal abstract class MemberBuilder : MemberOrNamedTypeBuilder, IMemberBuilder, IMemberImpl
     {
         protected MemberBuilder( Advice parentAdvice, INamedType declaringType, string name ) : base( parentAdvice, declaringType, name ) { }
 
@@ -51,5 +52,9 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                 this.IsVirtual = templateAttribute.GetIsVirtual().HasValue;
             }
         }
+
+        public abstract IMember? OverriddenMember { get; }
+
+        public override bool CanBeInherited => this.IsVirtual && !this.IsSealed && ((IDeclarationImpl) this.DeclaringType).CanBeInherited;
     }
 }

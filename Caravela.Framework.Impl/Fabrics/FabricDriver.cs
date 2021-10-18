@@ -21,11 +21,13 @@ namespace Caravela.Framework.Impl.Fabrics
     /// <summary>
     /// The base class for fabric drivers, which are responsible for ordering and executing fabrics.
     /// </summary>
-    internal abstract class FabricDriver : IComparable<FabricDriver>
+    internal abstract class FabricDriver : IComparable<FabricDriver>, IFabricInstance
     {
         protected AspectProjectConfiguration Configuration { get; }
 
         public IFabric Fabric { get; }
+
+        public IDeclaration? TargetDeclaration => throw new NotImplementedException();
 
         public Compilation Compilation { get; }
 
@@ -126,7 +128,8 @@ namespace Caravela.Framework.Impl.Fabrics
             public IDeclarationSelection<TChild> WithMembers<TChild>( Func<T, IEnumerable<TChild>> selector )
                 where TChild : class, IDeclaration
                 => new DeclarationSelection<TChild>(
-                    new AspectPredecessor( AspectPredecessorKind.Fabric, this._parent.Fabric ),
+                    this.Target,
+                    new AspectPredecessor( AspectPredecessorKind.Fabric, this._parent ),
                     this.RegisterAspectSource,
                     compilation =>
                     {
@@ -146,5 +149,7 @@ namespace Caravela.Framework.Impl.Fabrics
                 where TAnnotation : IAnnotation<TTarget, TAspect>
                 => throw new NotImplementedException();
         }
+
+        public abstract FormattableString FormatPredecessor();
     }
 }

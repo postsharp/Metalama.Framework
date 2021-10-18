@@ -74,5 +74,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
         public MethodInfo ToMethodInfo() => this.Underlying.ToMethodInfo();
 
         public IMemberWithAccessors? DeclaringMember => this.Underlying.DeclaringMember;
+
+        public IMember? OverriddenMember => this.OverriddenMethod;
     }
 }

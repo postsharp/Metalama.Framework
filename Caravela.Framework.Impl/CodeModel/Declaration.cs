@@ -10,6 +10,7 @@ using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -40,6 +41,9 @@ namespace Caravela.Framework.Impl.CodeModel
                 this.Symbol.GetAttributes()
                     .Where( a => a.AttributeConstructor != null )
                     .Select( a => new AttributeRef( a, DeclarationRef.FromSymbol<IDeclaration>( this.Symbol ) ) ) );
+
+        [Memo]
+        public IAssembly DeclaringAssembly => this.Compilation.Factory.GetAssembly( this.Symbol.ContainingAssembly );
 
         public abstract DeclarationKind DeclarationKind { get; }
 
@@ -110,6 +114,10 @@ namespace Caravela.Framework.Impl.CodeModel
         IDiagnosticLocation? IDiagnosticScope.DiagnosticLocation => this.DiagnosticLocation?.ToDiagnosticLocation();
 
         ImmutableArray<SyntaxReference> IDeclarationImpl.DeclaringSyntaxReferences => this.Symbol.DeclaringSyntaxReferences;
+
+        public abstract bool CanBeInherited { get; }
+
+        public abstract IEnumerable<IDeclaration> GetDerivedDeclarations();
 
         [Memo]
         public IDeclaration OriginalDefinition => this.Compilation.Factory.GetDeclaration( this.Symbol.OriginalDefinition );

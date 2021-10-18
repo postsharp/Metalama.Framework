@@ -17,7 +17,7 @@ namespace Caravela.Framework.Tests.PublicPipeline.Aspects.Misc.AbstractTemplate
 
         public virtual void BuildEligibility( IEligibilityBuilder<IMethod> builder )
         {
-            builder.ExceptForInheritance().MustBeNonAbstract();
+            builder.ExceptForScenarios(EligibleScenarios.Inheritance).MustBeNonAbstract();
         }
 
         public virtual void BuildAspectClass( IAspectClassBuilder builder ) { }

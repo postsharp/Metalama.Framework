@@ -61,5 +61,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         // TODO: How to implement this?
         public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => this.Name;
+
+        public override bool CanBeInherited => ((IDeclarationImpl) this.DeclaringMember).CanBeInherited;
     }
 }

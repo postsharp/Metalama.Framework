@@ -3,6 +3,7 @@
 
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.AspectOrdering;
+using Caravela.Framework.Impl.Aspects;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.CompileTime;
@@ -102,7 +103,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
 
                     if ( transformation is IIntroducedInterface interfaceImplementation )
                     {
-                        classDeclaration = classDeclaration.AddBaseListTypes( interfaceImplementation.GetIntroducedInterfaceImplementations().ToArray() );
+                        classDeclaration = classDeclaration.AddBaseListTypes( interfaceImplementation.GetSyntax() );
                     }
                 }
 
@@ -135,6 +136,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
                 input.AspectLayers,
                 input.Diagnostics.Concat( pipelineStepResult.Diagnostics ).Concat( diagnostics.ToImmutable() ),
                 input.AspectSources.Concat( pipelineStepResult.ExternalAspectSources ),
+                Array.Empty<AttributeAspectInstance>(),
                 input.AdditionalSyntaxTrees.Concat( additionalSyntaxTrees ) );
         }
     }

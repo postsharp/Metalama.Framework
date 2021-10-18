@@ -9,9 +9,8 @@ using System.Linq;
 namespace Caravela.Framework.Eligibility
 {
     /// <summary>
-    /// (Not implemented.)
+    /// Extension methods for <see cref="IEligibilityBuilder"/>.
     /// </summary>
-    [Obsolete( "Not implemented." )]
     public static class EligibilityExtensions
     {
         public static IEligibilityBuilder<INamedType> DeclaringType<T>( this IEligibilityBuilder<T> eligibilityBuilder )
@@ -19,7 +18,7 @@ namespace Caravela.Framework.Eligibility
             => new ChildEligibilityBuilder<T, INamedType>(
                 eligibilityBuilder,
                 declaration => declaration.DeclaringType,
-                declarationDescription => $"the declaring type of {declarationDescription}" );
+                declarationDescription => $"the declaring type '{declarationDescription.Object.DeclaringType}'" );
 
         public static IEligibilityBuilder<IType> ReturnType( this IEligibilityBuilder<IMethod> eligibilityBuilder )
             => new ChildEligibilityBuilder<IMethod, IType>(
@@ -39,24 +38,32 @@ namespace Caravela.Framework.Eligibility
                 declaration => declaration.Type,
                 declarationDescription => $"the type of {declarationDescription}" );
 
-        public static IEligibilityBuilder<IParameter> Parameter( this IEligibilityBuilder<IMethodBase> eligibilityBuilder, int index )
-            => new ChildEligibilityBuilder<IMethodBase, IParameter>(
+        public static IEligibilityBuilder<IParameter> Parameter( this IEligibilityBuilder<IHasParameters> eligibilityBuilder, int index )
+            => new ChildEligibilityBuilder<IHasParameters, IParameter>(
                 eligibilityBuilder,
                 declaration => declaration.Parameters[index],
                 method => $"the {index + 1}-th parameter of {method}",
                 method => index < method.Parameters.Count,
                 method => $"{method} has fewer than {index + 1} parameter(s)" );
 
-        public static IEligibilityBuilder<IParameter> Parameter( this IEligibilityBuilder<IMethodBase> eligibilityBuilder, string name )
-            => new ChildEligibilityBuilder<IMethodBase, IParameter>(
+        public static IEligibilityBuilder<IParameter> Parameter( this IEligibilityBuilder<IHasParameters> eligibilityBuilder, string name )
+            => new ChildEligibilityBuilder<IHasParameters, IParameter>(
                 eligibilityBuilder,
                 declaration => declaration.Parameters[name],
                 method => $"parameter '{name}' of {method}",
-                method => !method.Parameters.Any( p => p.Name == name ),
+                method => method.Parameters.All( p => p.Name != name ),
                 method => $"{method} has no parameter named '{name}'" );
+        
+        public static IEligibilityBuilder<IType> Type( this IEligibilityBuilder<IHasType> eligibilityBuilder )
+            => new ChildEligibilityBuilder<IHasType, IType>(
+                eligibilityBuilder,
+                declaration => declaration.Type,
+                declaration => $"the type of {declaration}",
+                method => true,
+                method => $"" );
 
-        public static IEligibilityBuilder<T> ExceptForInheritance<T>( this IEligibilityBuilder<T> eligibilityBuilder )
-            => new InheritanceOnlyEligibilityBuilder<T>( eligibilityBuilder );
+        public static IEligibilityBuilder<T> ExceptForScenarios<T>( this IEligibilityBuilder<T> eligibilityBuilder, EligibleScenarios excludedScenarios )
+            => new ExcludedScenarioEligibilityBuilder<T>( eligibilityBuilder, excludedScenarios );
 
         public static void MustSatisfyAny<T>( this IEligibilityBuilder<T> eligibilityBuilder, params Action<IEligibilityBuilder<T>>[] requirements )
             where T : class
@@ -82,17 +89,24 @@ namespace Caravela.Framework.Eligibility
             eligibilityBuilder.AddRule( orBuilder.Build() );
         }
 
-        public static void Require<T>(
+        public static void MustSatisfy<T>(
             this IEligibilityBuilder<T> eligibilityBuilder,
             Predicate<T> predicate,
             Func<IDescribedObject<T>, FormattableString> getJustification )
-            => eligibilityBuilder.AddRule( new EligibilityRule<T>( eligibilityBuilder.Ineligibility, predicate, getJustification ) );
+            => eligibilityBuilder.AddRule( new EligibilityRule<T>( eligibilityBuilder.IneligibleScenarios, predicate, getJustification ) );
+
+        public static void MustNotHaveRefOrOutParameter( this IEligibilityBuilder<IMethod> eligibilityBuilder )
+            => eligibilityBuilder.AddRule(
+                new EligibilityRule<IMethod>(
+                    eligibilityBuilder.IneligibleScenarios,
+                    m => !m.Parameters.Any( p => p.RefKind is RefKind.Out or RefKind.Ref ),
+                    d => $"{d} cannot have any ref or out parameter") );
 
         public static void MustHaveAccessibility(
             this IEligibilityBuilder<IMemberOrNamedType> eligibilityBuilder,
             Accessibility accessibility,
             params Accessibility[] otherAccessibilities )
-            => eligibilityBuilder.Require(
+            => eligibilityBuilder.MustSatisfy(
                 member => member.Accessibility == accessibility || otherAccessibilities.Contains( member.Accessibility ),
                 member =>
                 {
@@ -100,56 +114,31 @@ namespace Caravela.Framework.Eligibility
 
                     var formattedAccessibilities = string.Join(
                         " or ",
-                        accessibilities.Select( a => string.Format( member.FormatProvider, "{0}", a ) ) );
+                        accessibilities.Select( a => string.Format( CaravelaServices.FormatProvider, "{0}", a ) ) );
 
                     return $"{member} must be {formattedAccessibilities}";
                 } );
 
         public static void MustBeStatic( this IEligibilityBuilder<IMemberOrNamedType> eligibilityBuilder )
-            => eligibilityBuilder.Require(
+            => eligibilityBuilder.MustSatisfy(
                 member => member.IsStatic,
                 member => $"{member} must be static" );
 
         public static void MustBeNonStatic( this IEligibilityBuilder<IMemberOrNamedType> eligibilityBuilder )
-            => eligibilityBuilder.Require(
+            => eligibilityBuilder.MustSatisfy(
                 member => !member.IsStatic,
                 member => $"{member} must be non-static" );
 
         public static void MustBeNonAbstract( this IEligibilityBuilder<IMemberOrNamedType> eligibilityBuilder )
-            => eligibilityBuilder.Require(
-                member => !member.IsStatic,
-                member => $"{member} must be non-static" );
+            => eligibilityBuilder.MustSatisfy(
+                member => !member.IsAbstract,
+                member => $"{member} must be non-abstract" );
 
-        public static void MustBe( this IEligibilityBuilder<IType> eligibilityBuilder, Type type )
-            => eligibilityBuilder.Require(
-                t => t.Is( type ),
-                member => $"{member} must be {type}" );
+        public static void MustBe( this IEligibilityBuilder<IType> eligibilityBuilder, Type type, ConversionKind conversionKind = ConversionKind.Default)
+            => eligibilityBuilder.MustSatisfy(
+                t => t.Is( type, conversionKind ),
+                member => $"{member} must be of type '{type}'" );
 
-        internal static ( bool IsEligible, string? Justification ) IsEligible<T>(
-            this IEligibilityRule<T> rule,
-            T obj,
-            EligibilityValue requiredEligibility,
-            bool requiresJustification,
-            IFormatProvider formatProvider )
-            where T : class
-        {
-            var eligibility = rule.GetEligibility( obj );
-            string? justification = null;
-
-            if ( eligibility < requiredEligibility )
-            {
-                if ( requiresJustification )
-                {
-                    var describedObject = new DescribedObject<T>( obj, formatProvider );
-                    justification = rule.GetIneligibilityJustification( requiredEligibility, describedObject )?.ToString( formatProvider );
-                }
-
-                return (false, justification);
-            }
-            else
-            {
-                return (true, null);
-            }
-        }
+        public static void MustBe<T>( this IEligibilityBuilder<IType> eligibilityBuilder, ConversionKind conversionKind = ConversionKind.Default ) => eligibilityBuilder.MustBe( typeof(T), conversionKind );
     }
 }

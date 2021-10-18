@@ -48,6 +48,29 @@ namespace Caravela.Framework.Impl.Collections
                     this.Add( key, value );
                 }
             }
+            
+            public void AddRange<TItem>( IEnumerable<TItem> source, Func<TItem, TKey> getKey, Func<TItem, IEnumerable<TValue>> getValues )
+            {
+                foreach ( var item in source )
+                {
+                    var key = getKey( item );
+                    var values = getValues( item );
+
+                    this.AddRange( key, values );
+                }
+            }
+
+
+            public void AddRange( TKey key, IEnumerable<TValue> values )
+            {
+                if ( !this._newValuesBuilder.TryGetValue( key, out var arrayBuilder ) )
+                {
+                    arrayBuilder = ImmutableArray.CreateBuilder<TValue>();
+                    this._newValuesBuilder[key] = arrayBuilder;
+                }
+
+                arrayBuilder.AddRange( values );
+            }
 
             public ImmutableMultiValueDictionary<TKey, TValue> ToImmutable()
             {

@@ -8,6 +8,7 @@ using Caravela.Framework.Impl.Aspects;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Pipeline;
 using Microsoft.CodeAnalysis;
+using System;
 
 namespace Caravela.Framework.Impl.Fabrics
 {
@@ -34,6 +35,8 @@ namespace Caravela.Framework.Impl.Fabrics
         public override FabricKind Kind => FabricKind.Type;
 
         public override IDeclaration GetTarget( CompilationModel compilation ) => compilation.Factory.GetNamedType( (INamedTypeSymbol) this.TargetSymbol );
+
+        public override FormattableString FormatPredecessor() => $"type fabric on '{this.TargetSymbol}'";
 
         private class Builder : BaseBuilder<INamedType>, ITypeAmender
         {

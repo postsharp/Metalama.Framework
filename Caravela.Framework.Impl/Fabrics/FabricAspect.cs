@@ -31,7 +31,7 @@ namespace Caravela.Framework.Impl.Fabrics
 
             foreach ( var templateClass in this._templateClasses )
             {
-                using ( internalBuilder.WithPredecessor( new AspectPredecessor( AspectPredecessorKind.Fabric, templateClass.Driver.Fabric ) ) )
+                using ( internalBuilder.WithPredecessor( new AspectPredecessor( AspectPredecessorKind.Fabric, templateClass.Driver ) ) )
                 {
                     templateClass.Driver.Execute( internalBuilder, templateClass );
                 }

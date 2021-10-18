@@ -5,6 +5,8 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Impl.ReflectionMocks;
 using Microsoft.CodeAnalysis;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using MethodKind = Microsoft.CodeAnalysis.MethodKind;
 
@@ -21,6 +23,8 @@ namespace Caravela.Framework.Impl.CodeModel
         }
 
         public override DeclarationKind DeclarationKind => DeclarationKind.Constructor;
+
+        public override IEnumerable<IDeclaration> GetDerivedDeclarations() => Enumerable.Empty<IDeclaration>();
 
         public override bool IsExplicitInterfaceImplementation => false;
 

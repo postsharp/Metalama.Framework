@@ -27,5 +27,9 @@ namespace Caravela.Framework.Impl.Utilities
 
             return false;
         }
+
+        public static bool IsContainedIn( this IDeclaration declaration, IDeclaration containingDeclaration )
+            => declaration == containingDeclaration
+               || (declaration.ContainingDeclaration != null && declaration.ContainingDeclaration.IsContainedIn( containingDeclaration ));
     }
 }

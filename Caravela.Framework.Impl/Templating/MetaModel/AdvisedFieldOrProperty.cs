@@ -8,6 +8,7 @@ using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.RunTime;
 using System;
+using System.Collections.Generic;
 
 namespace Caravela.Framework.Impl.Templating.MetaModel
 {
@@ -42,11 +43,15 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
         {
             if ( this.Invokers.Base == null )
             {
-                throw new InvalidOperationException( 
+                throw new InvalidOperationException(
                     UserMessageFormatter.Format( $"Cannot get or set the base value of '{this}' because there is no base property or field." ) );
             }
 
             return this.Invokers.Base.GetValue( this.This );
         }
+
+        public IMethod? GetAccessor( MethodKind methodKind ) => this.Underlying.GetAccessor( methodKind );
+
+        public IEnumerable<IMethod> Accessors => this.Underlying.Accessors;
     }
 }

@@ -21,7 +21,7 @@ namespace Caravela.Framework.Tests.PublicPipeline.Aspects.Fabrics.ProjectFabricA
         public override dynamic? OverrideMethod()
         {
             Console.WriteLine( "overridden" );
-            Console.WriteLine( meta.AspectInstance.Predecessors.Single().Instance.ToString() );
+            Console.WriteLine( ((IFabricInstance) meta.AspectInstance.Predecessors.Single().Instance).Fabric.ToString() );
 
             return meta.Proceed();
         }

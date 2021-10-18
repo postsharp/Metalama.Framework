@@ -229,10 +229,13 @@ namespace Caravela.Framework.Impl.CompileTime
                         case BaseTypeDeclarationSyntax or DelegateDeclarationSyntax:
                             Invariant.Assert( childSymbol != null );
 
-                            this._diagnosticAdder.Report(
-                                TemplatingDiagnosticDescriptors.RunTimeTypesCannotHaveCompileTimeTypesExceptClasses.CreateDiagnostic(
-                                    childSymbol.GetDiagnosticLocation(),
-                                    (childSymbol, typeof(ITypeFabric)) ) );
+                            if ( this.SymbolClassifier.GetTemplatingScope( childSymbol ) == TemplatingScope.CompileTimeOnly )
+                            {
+                                this._diagnosticAdder.Report(
+                                    TemplatingDiagnosticDescriptors.RunTimeTypesCannotHaveCompileTimeTypesExceptClasses.CreateDiagnostic(
+                                        childSymbol.GetDiagnosticLocation(),
+                                        (childSymbol, typeof(ITypeFabric)) ) );
+                            }
 
                             break;
 

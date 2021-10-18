@@ -37,7 +37,7 @@ namespace Caravela.Framework.Aspects
 
         public override void BuildEligibility( IEligibilityBuilder<IEvent> builder )
         {
-            builder.ExceptForInheritance().MustBeNonAbstract();
+            builder.ExceptForScenarios(EligibleScenarios.Inheritance).MustBeNonAbstract();
         }
     }
 }

@@ -176,8 +176,8 @@ namespace Caravela.Framework.Impl.Linking
 
                 if ( transformation is IIntroducedInterface interfaceIntroduction )
                 {
-                    var introducedInterfaces = interfaceIntroduction.GetIntroducedInterfaceImplementations();
-                    syntaxTransformationCollection.Add( interfaceIntroduction, introducedInterfaces );
+                    var introducedInterface = interfaceIntroduction.GetSyntax();
+                    syntaxTransformationCollection.Add( interfaceIntroduction, introducedInterface );
                 }
             }
 

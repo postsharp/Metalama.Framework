@@ -218,7 +218,7 @@ namespace Caravela.Framework.Impl.CompileTime
             this.AssertNotEmpty();
 
             return new ResourceDescription(
-                CompileTimeConstants.ResourceName,
+                CompileTimeConstants.CompileTimeProjectResourceName,
                 () =>
                 {
                     var stream = new MemoryStream();

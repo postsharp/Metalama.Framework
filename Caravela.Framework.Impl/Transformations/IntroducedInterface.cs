@@ -21,7 +21,7 @@ namespace Caravela.Framework.Impl.Transformations
 
         public INamedType InterfaceType { get; }
 
-        public ImplementInterfaceAdvice Advice { get; }
+        private ImplementInterfaceAdvice Advice { get; }
 
         Advice ITransformation.Advice => this.Advice;
 
@@ -43,7 +43,7 @@ namespace Caravela.Framework.Impl.Transformations
             this.MemberMap = memberMap;
         }
 
-        public IEnumerable<BaseTypeSyntax> GetIntroducedInterfaceImplementations()
+        public BaseTypeSyntax GetSyntax()
         {
             if ( !this.TargetType.ImplementedInterfaces.Contains( this.InterfaceType ) )
             {
@@ -55,8 +55,8 @@ namespace Caravela.Framework.Impl.Transformations
                     targetSyntax.SyntaxTree,
                     targetSyntax.Span.Start );
 
-                // The type already implements the interface itself.
-                return new[] { (BaseTypeSyntax) SimpleBaseType( generationContext.SyntaxGenerator.Type( this.InterfaceType.GetSymbol() ) ) };
+                // The type already implements the interface members itself.
+                return SimpleBaseType( generationContext.SyntaxGenerator.Type( this.InterfaceType.GetSymbol() ) );
             }
             else
             {

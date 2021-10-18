@@ -13,6 +13,7 @@ using RoslynPad.Roslyn;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -25,17 +26,21 @@ namespace Caravela.AspectWorkbench.CodeEditor
     {
         public static RoslynPadHost Create()
         {
+            var dotnetDirectory = Path.GetDirectoryName( typeof(object).Assembly.Location )!;
+            var dotNetAssemblies = new[] { "System.Runtime", "System.Linq", "System.Console", "System.Collections" };
+
             var host = new RoslynPadHost(
                 ImmutableArray.Create( "IDE0051" /* Private member is unused. */ ),
                 new[] { Assembly.Load( "RoslynPad.Roslyn.Windows" ), Assembly.Load( "RoslynPad.Editor.Windows" ) },
                 RoslynHostReferences.Empty
                     .With(
+                        references: dotNetAssemblies.Select( a => MetadataReference.CreateFromFile( Path.Combine( dotnetDirectory, a + ".dll" ) ) ),
                         assemblyReferences: new[]
                         {
                             typeof(object).Assembly,
-                            typeof(DateTime).Assembly,
-                            typeof(Enumerable).Assembly,
                             typeof(Console).Assembly,
+                            typeof(Enumerable).Assembly,
+                            typeof(Dictionary<,>).Assembly,
                             typeof(DynamicAttribute).Assembly,
                             typeof(SyntaxFactory).Assembly,
                             typeof(meta).Assembly,

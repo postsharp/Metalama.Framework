@@ -22,7 +22,7 @@ namespace Caravela.Framework.Impl.Fabrics
     {
         private readonly Func<CompilationModel, IEnumerable<AspectInstance>> _getInstances;
 
-        public ProgrammaticAspectSource( IAspectClass aspectClass, Func<CompilationModel, IEnumerable<AspectInstance>> getInstances )
+        public ProgrammaticAspectSource( IAspectClass aspectClass,  Func<CompilationModel, IEnumerable<AspectInstance>> getInstances )
         {
             if ( aspectClass.FullName != typeof(TAspect).FullName )
             {
@@ -42,8 +42,6 @@ namespace Caravela.Framework.Impl.Fabrics
             IAspectClass aspectClass,
             IDiagnosticAdder diagnosticAdder,
             CancellationToken cancellationToken )
-        {
-            return this._getInstances( compilation );
-        }
+            => this._getInstances( compilation );
     }
 }

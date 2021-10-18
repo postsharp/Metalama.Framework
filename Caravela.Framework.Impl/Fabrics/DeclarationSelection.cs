@@ -8,6 +8,7 @@ using Caravela.Framework.Impl.Aspects;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Pipeline;
+using Caravela.Framework.Impl.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,17 +25,20 @@ namespace Caravela.Framework.Impl.Fabrics
     internal class DeclarationSelection<T> : IDeclarationSelection<T>
         where T : class, IDeclaration
     {
+        private readonly IDeclaration _containingDeclaration;
         private readonly AspectPredecessor _predecessor;
         private readonly Action<IAspectSource> _registerAspectSource;
         private readonly Func<CompilationModel, IEnumerable<T>> _selector;
         private readonly AspectProjectConfiguration _projectConfiguration;
 
         public DeclarationSelection(
+            IDeclaration containingDeclaration,
             AspectPredecessor predecessor,
             Action<IAspectSource> registerAspectSource,
             Func<CompilationModel, IEnumerable<T>> selectTargets,
             AspectProjectConfiguration projectConfiguration )
         {
+            this._containingDeclaration = containingDeclaration;
             this._predecessor = predecessor;
             this._registerAspectSource = registerAspectSource;
             this._selector = selectTargets;
@@ -64,18 +68,49 @@ namespace Caravela.Framework.Impl.Fabrics
             this.RegisterAspectSource(
                 new ProgrammaticAspectSource<TAspect, T>(
                     aspectClass,
-                    ( compilation ) => this._selector( compilation )
-                        .Select(
-                            t => new AspectInstance(
-                                this._projectConfiguration.ServiceProvider,
-                                Expression.Lambda<Func<IAspect>>(
-                                    this._projectConfiguration.UserCodeInvoker.Invoke( () => createAspect( t ) ).Body,
-                                    Array.Empty<ParameterExpression>() ),
-                                t,
-                                aspectClass,
-                                this._predecessor ) ) ) );
+                    ( compilation ) => this.SelectAndValidateTargets( compilation, aspectClass, createAspect ) ) );
 
             return this;
+        }
+
+        private IEnumerable<AspectInstance> SelectAndValidateTargets<TAspect>( CompilationModel compilation, AspectClass aspectClass, Func<T, Expression<Func<TAspect>>> createAspect )
+        {
+            foreach ( var item in this._selector( compilation ) )
+            {
+                if ( !item.IsContainedIn( this._containingDeclaration ) )
+                {
+                    throw new InvalidOperationException(
+                        UserMessageFormatter.Format(
+                            $"The {this._predecessor.Instance.FormatPredecessor()} cannot add a child aspect of type '{aspectClass.FullName}' to '{this._containingDeclaration}' because it is not contained in '{this._containingDeclaration}'." ) );
+                }
+
+                if ( item.DeclaringAssembly.IsExternal )
+                {
+                    throw new InvalidOperationException(
+                        UserMessageFormatter.Format(
+                            $"The {this._predecessor.Instance.FormatPredecessor()} cannot add a child aspect of type '{aspectClass.FullName}' to '{this._containingDeclaration}' because it is in the current project." ) );
+                }
+
+                var eligibility = ((IAspectClassImpl) aspectClass).GetEligibility( item );
+
+                if ( !eligibility.IncludesAny( EligibleScenarios.Aspect | EligibleScenarios.Inheritance ) )
+                {
+                    throw new InvalidOperationException(
+                        UserMessageFormatter.Format(
+                            $"The {this._predecessor.Instance.FormatPredecessor()} cannot add a child aspect of type '{aspectClass.FullName}' to '{this._containingDeclaration}' because the declaration is not eligible for the aspect." ) );
+                }
+
+                var lambda = Expression.Lambda<Func<IAspect>>(
+                    this._projectConfiguration.UserCodeInvoker.Invoke( () => createAspect( item ) ).Body,
+                    Array.Empty<ParameterExpression>() );
+
+                yield return new AspectInstance(
+                    this._projectConfiguration.ServiceProvider,
+                    lambda,
+                    item,
+                    aspectClass,
+                    this._predecessor );
+            }
         }
 
         public IDeclarationSelection<T> AddAspect<TAspect>( Func<T, TAspect> createAspect )

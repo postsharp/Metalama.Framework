@@ -4,6 +4,7 @@
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel.References;
 using Microsoft.CodeAnalysis;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 
 namespace Caravela.Framework.Impl.CodeModel
@@ -18,5 +19,19 @@ namespace Caravela.Framework.Impl.CodeModel
         /// In case of a type introduction, this returns an empty list.
         /// </summary>
         ImmutableArray<SyntaxReference> DeclaringSyntaxReferences { get; }
+
+        /// <summary>
+        /// Gets a value indicating whether a declaration can be inherited or overridden.
+        /// </summary>
+        bool CanBeInherited { get; }
+
+        IEnumerable<IDeclaration> GetDerivedDeclarations();
+    }
+
+    internal interface IMemberImpl : IDeclarationImpl, IMember
+    {
+        IMember? OverriddenMember { get; }
+
+        
     }
 }

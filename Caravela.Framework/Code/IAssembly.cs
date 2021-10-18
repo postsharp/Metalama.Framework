@@ -8,6 +8,14 @@ namespace Caravela.Framework.Code
     /// </summary>
     public interface IAssembly : IDeclaration
     {
-        string? Name { get; }
+        /// <summary>
+        /// Gets a value indicating whether the assembly represents a reference (<c>true</c>), or a project reference (<c>false</c>).
+        /// </summary>
+        bool IsExternal { get; }
+        
+        /// <summary>
+        /// Gets the assembly identity.
+        /// </summary>
+        IAssemblyIdentity Identity { get; }
     }
 }

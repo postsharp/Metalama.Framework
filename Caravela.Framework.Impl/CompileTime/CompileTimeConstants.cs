@@ -7,6 +7,8 @@ namespace Caravela.Framework.Impl.CompileTime
     {
         public const string PredefinedTypesFileName = "__CaravelaPredefinedTypes.cs";
 
-        public const string ResourceName = "Caravela.CompileTimeAssembly";
+        public const string CompileTimeProjectResourceName = "Caravela.CompileTimeProject";
+
+        public const string InheritedAspectManifestResourceName = "Caravela.InheritedAspects";
     }
 }
