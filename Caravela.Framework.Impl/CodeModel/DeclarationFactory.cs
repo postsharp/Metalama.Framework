@@ -218,6 +218,11 @@ namespace Caravela.Framework.Impl.CodeModel
                     return ((IMemberWithAccessors) this.GetDeclaration( builder.ContainingMember )).GetAccessor( builder.MethodKind )!;
                 } );
 
+        internal IField GetField( IFieldBuilder fieldBuilder )
+            => (IField) this._cache.GetOrAdd(
+                DeclarationRef.FromBuilder( fieldBuilder ),
+                l => new BuiltField( (FieldBuilder) l.Target!, this._compilationModel ) );
+
         internal IProperty GetProperty( PropertyBuilder propertyBuilder )
             => (IProperty) this._cache.GetOrAdd(
                 DeclarationRef.FromBuilder( propertyBuilder ),
@@ -232,9 +237,10 @@ namespace Caravela.Framework.Impl.CodeModel
             => builder switch
             {
                 MethodBuilder methodBuilder => this.GetMethod( methodBuilder ),
+                FieldBuilder fieldBuilder => this.GetField( fieldBuilder ),
                 PropertyBuilder propertyBuilder => this.GetProperty( propertyBuilder ),
                 EventBuilder eventBuilder => this.GetEvent( eventBuilder ),
-                ParameterBuilder parameterBuilder => this.GetParameter( parameterBuilder ),
+                IParameterBuilder parameterBuilder => this.GetParameter( parameterBuilder ),
                 AttributeBuilder attributeBuilder => this.GetAttribute( attributeBuilder ),
                 TypeParameterBuilder genericParameterBuilder => this.GetGenericParameter( genericParameterBuilder ),
                 AccessorBuilder accessorBuilder => this.GetMethod( accessorBuilder ),
