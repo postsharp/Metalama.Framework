@@ -24,10 +24,11 @@
     <InternalsVisibleTo Include="Caravela.TestFramework" />
     <InternalsVisibleTo Include="Caravela.Framework.Tests.UnitTests" />
     <InternalsVisibleTo Include="Caravela.Framework.Tests.Integration" />
-    <InternalsVisibleTo Include="DynamicProxyGenAssembly2" />
     <PackageReference Include="Microsoft.CSharp" Version="$(MicrosoftCSharpVersion)" />
     <PackageReference Include="System.Collections.Immutable" Version="$(SystemCollectionsImmutableVersion)" />
   </ItemGroup>
+
+  <Import Project="..\Build\FakeItEasyInternalsVisibleTo.props" />
 
   <!-- based on https://stackoverflow.com/a/56018426/41071 -->
   <PropertyGroup>

@@ -10,11 +10,7 @@
     <UseCaravelaCompiler>Private</UseCaravelaCompiler>
   </PropertyGroup>
 
-  <ItemGroup>
-	<AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
-		<_Parameter1>DynamicProxyGenAssembly2</_Parameter1>
-	</AssemblyAttribute>
-  </ItemGroup>
+  <Import Project="..\..\Build\FakeItEasyInternalsVisibleTo.props" />
 
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftNETTestSdkVersion)" />

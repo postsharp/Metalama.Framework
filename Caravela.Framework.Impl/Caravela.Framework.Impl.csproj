@@ -46,6 +46,8 @@
     <ProjectReference Include="..\Build\Caravela.SourceTransformer\Caravela.SourceTransformer.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
     
   </ItemGroup>
+
+  <Import Project="..\Build\FakeItEasyInternalsVisibleTo.props" />
     
    <ItemGroup>
      <Compile Include="..\IsExternalInit.cs">

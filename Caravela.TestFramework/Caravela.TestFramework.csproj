@@ -26,6 +26,8 @@
     <InternalsVisibleTo Include="Caravela.Framework.Tests.UnitTests" />
     <InternalsVisibleTo Include="Caravela.AspectWorkbench" />
   </ItemGroup>
+
+  <Import Project="..\Build\FakeItEasyInternalsVisibleTo.props" />
   
   <ItemGroup>
     <None Update="Caravela.TestFramework.props">
