@@ -110,17 +110,9 @@ function CheckPrerequisities() {
 
 function Clean() {
 
-    if ( $UseMsbuild ) {
-        & msbuild /t:Clean /p:Configuration=$configuration /m /v:$Verbosity
-    } else {
-        & dotnet clean -p:Configuration=$configuration -v:$Verbosity
-    }
-
-    if ($LASTEXITCODE -ne 0 ) { throw "Clean failed." }
-
-    if (Test-Path "artifacts\bin\$configuration" -PathType Container ) {
-        Remove-Item "artifacts\bin\$configuration\*.nupkg"
-    }
+    dir obj -Recurse | rd -Recurse -Force
+    dir bin -Recurse | rd -Recurse -Force
+    rd artifacts -Recurse -Force
 
     if ( Test-Path $PropsFilePath ) {
         Remove-Item $PropsFilePath
