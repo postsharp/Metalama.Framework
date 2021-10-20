@@ -6,7 +6,7 @@ using System.Globalization;
 
 namespace Caravela.Framework
 {
-    public static class CaravelaServices
+    internal static class CaravelaStaticServices
     {
         public static IFormatProvider FormatProvider { get; private set; } = CultureInfo.InvariantCulture;
 

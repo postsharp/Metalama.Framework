@@ -4,6 +4,7 @@
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Eligibility;
+using Caravela.Framework.Fabrics;
 using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.Aspects;
 using Caravela.Framework.Impl.CompileTime;
@@ -36,6 +37,10 @@ namespace Caravela.Framework.Impl.Fabrics
         bool IAspectClass.IsAbstract => false;
 
         public bool IsInherited => false;
+
+        public bool IsAttribute => false;
+
+        public Type Type => typeof(IFabric);
 
         public FabricTopLevelAspectClass( IServiceProvider serviceProvider, Compilation compilation, CompileTimeProject project )
         {

@@ -4,8 +4,6 @@
 using Caravela.Framework.Code;
 using System;
 
-#pragma warning disable 618 // Not implemented.
-
 namespace Caravela.Framework.Eligibility.Implementation
 {
     internal class ChildEligibilityBuilder<TParent, TChild> : IEligibilityBuilder<TChild>

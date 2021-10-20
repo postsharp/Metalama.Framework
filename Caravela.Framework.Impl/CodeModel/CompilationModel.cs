@@ -27,7 +27,7 @@ namespace Caravela.Framework.Impl.CodeModel
     {
         static CompilationModel()
         {
-            CaravelaServices.Initialize( UserMessageFormatter.Instance );
+            CaravelaStaticServices.Initialize( UserMessageFormatter.Instance );
         }
 
         public static CompilationModel CreateInitialInstance( IProject project, PartialCompilation compilation ) => new( project, compilation );

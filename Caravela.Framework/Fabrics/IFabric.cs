@@ -2,7 +2,6 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
 
 namespace Caravela.Framework.Fabrics
 {
@@ -13,12 +12,4 @@ namespace Caravela.Framework.Fabrics
     /// </summary>
     [CompileTimeOnly]
     public interface IFabric { }
-
-    [CompileTimeOnly]
-    public interface IFabricInstance : IAspectPredecessor
-    {
-        IFabric Fabric { get; }
-
-        IDeclaration? TargetDeclaration { get; }
-    }
 }

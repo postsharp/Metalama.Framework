@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Validation;
+using System;
 
 namespace Caravela.Framework.Aspects
 {
@@ -46,5 +47,15 @@ namespace Caravela.Framework.Aspects
         /// method by setting the <see cref="IAspectClassBuilder.IsInherited"/> property. By default, it is <c>false</c>.
         /// </summary>
         bool IsInherited { get; }
+        
+        /// <summary>
+        /// Gets a value indicating whether the aspect class derives from <c>System.Attribute</c>.
+        /// </summary>
+        bool IsAttribute { get; }
+        
+        /// <summary>
+        /// Gets the type of the aspect. 
+        /// </summary>
+        Type Type { get; }
     }
 }

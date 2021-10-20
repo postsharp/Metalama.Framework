@@ -3,6 +3,7 @@
 
 using Caravela.Framework.Code;
 using Caravela.Framework.Eligibility;
+using Caravela.Framework.Fabrics;
 using Caravela.Framework.Impl.Aspects;
 using Caravela.Framework.Impl.CompileTime;
 using System;
@@ -32,6 +33,10 @@ namespace Caravela.Framework.Impl.Fabrics
         public bool IsAbstract => false;
 
         public bool IsInherited => false;
+
+        public bool IsAttribute => false;
+
+        public Type Type => typeof(IFabric);
 
         public CompileTimeProject Project { get; }
 

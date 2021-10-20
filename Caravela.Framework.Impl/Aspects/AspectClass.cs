@@ -21,6 +21,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Serialization;
+using Attribute = System.Attribute;
 using MethodKind = Microsoft.CodeAnalysis.MethodKind;
 using TypeKind = Microsoft.CodeAnalysis.TypeKind;
 
@@ -75,6 +76,10 @@ namespace Caravela.Framework.Impl.Aspects
 
         public bool IsInherited { get; private set; }
 
+        public bool IsAttribute => typeof(Attribute).IsAssignableFrom( this.AspectType );
+
+        Type IAspectClass.Type => this.AspectType;
+
         public bool IsLiveTemplate { get; private set; }
 
         /// <summary>
@@ -103,7 +108,7 @@ namespace Caravela.Framework.Impl.Aspects
             this._prototypeAspectInstance = prototype;
 
             this.TemplateClasses = ImmutableArray.Create<TemplateClass>( this );
-
+            
             // This must be called after Members is built and assigned.
             this._aspectDriver = aspectDriverFactory.GetAspectDriver( this, aspectTypeSymbol );
         }

@@ -3,8 +3,6 @@
 
 using System;
 
-#pragma warning disable 618 // Not implemented.
-
 namespace Caravela.Framework.Eligibility.Implementation
 {
     internal class EligibilityRule<T> : IEligibilityRule<T>

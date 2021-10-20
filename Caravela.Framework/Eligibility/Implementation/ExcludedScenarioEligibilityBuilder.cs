@@ -5,8 +5,6 @@ using Caravela.Framework.Code;
 
 namespace Caravela.Framework.Eligibility.Implementation
 {
-#pragma warning disable 618 // Not implemented.
-
     internal class ExcludedScenarioEligibilityBuilder<T> : IEligibilityBuilder<T>
     {
         private readonly IEligibilityBuilder<T> _inner;
