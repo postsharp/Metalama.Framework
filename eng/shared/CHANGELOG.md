@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## 2021-10-20
+### Added
+- `eng\shared\Build.ps1` has additional optional parameters `Verbosity` and `TestSolutions`.
+- Nuget restore warnings NU1603 and NU1605 (fallback to other version) are treated as errors
+
+### Changed
+- test coverage warning tool improved.
+- `PushEngineering.ps1` pushes to the `develop` branch.
+
 ## 2021-09-01
 ### Added
 - `.eng\build\TeamCity.targets` added. Import this file in `Directory.Build.targets` for proper TeamCity integration.
