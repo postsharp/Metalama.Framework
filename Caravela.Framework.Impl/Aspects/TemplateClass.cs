@@ -14,6 +14,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
 
 namespace Caravela.Framework.Impl.Aspects
 {
@@ -73,6 +74,7 @@ namespace Caravela.Framework.Impl.Aspects
 
         public abstract CompileTimeProject? Project { get; }
 
+        [Obfuscation( Exclude = true )] // Working around an obfuscator bug.
         public abstract string FullName { get; }
 
         public bool TryGetInterfaceMember( ISymbol symbol, [NotNullWhen( true )] out TemplateClassMember? member )

@@ -8,7 +8,7 @@ using System.Reflection;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
-    internal sealed class ParameterBuilder : DeclarationBuilder, IParameterBuilder, IParameterImpl
+    internal class ParameterBuilder : DeclarationBuilder, IParameterBuilder, IParameterImpl
     {
         private string? _name;
         private TypedConstant _defaultValue;

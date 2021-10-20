@@ -26,6 +26,7 @@
     <InternalsVisibleTo Include="Caravela.Framework.Tests.PublicPipeline" />
     <InternalsVisibleTo Include="Caravela.Framework.Tests.UnitTests" />
     <InternalsVisibleTo Include="Caravela.AspectWorkbench" />
+    <InternalsVisibleTo Include="DynamicProxyGenAssembly2" Key="$(FakeItEasyKey)" LoadsWithinVisualStudio="false" />
   </ItemGroup>
   
   <ItemGroup>

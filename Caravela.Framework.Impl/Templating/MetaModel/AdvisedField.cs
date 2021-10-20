@@ -4,11 +4,14 @@
 using Caravela.Framework.Code;
 using Caravela.Framework.Code.Advised;
 using Caravela.Framework.Impl.CodeModel;
+using System.Reflection;
 
 namespace Caravela.Framework.Impl.Templating.MetaModel
 {
     internal class AdvisedField : AdvisedFieldOrProperty<IFieldImpl>, IAdvisedField
     {
         public AdvisedField( IField underlying ) : base( (IFieldImpl) underlying ) { }
+
+        public FieldInfo ToFieldInfo() => this.Underlying.ToFieldInfo();
     }
 }

@@ -6,13 +6,13 @@ using Caravela.Framework.Code.DeclarationBuilders;
 using Caravela.Framework.Code.Invokers;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.CodeModel.Invokers;
-using Caravela.Framework.Impl.CodeModel.Pseudo;
 using Caravela.Framework.Impl.Transformations;
 using Caravela.Framework.Impl.Utilities;
 using Caravela.Framework.RunTime;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
@@ -24,9 +24,10 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public IType Type { get; set; }
 
         [Memo]
-        public IMethod? GetMethod => new PseudoGetter( this );
+        public IMethod? GetMethod => new AccessorBuilder( this, MethodKind.PropertyGet );
 
-        public IMethod? SetMethod => new PseudoSetter( this );
+        [Memo]
+        public IMethod? SetMethod => new AccessorBuilder( this, MethodKind.PropertySet );
 
         public override bool IsExplicitInterfaceImplementation => false;
 
@@ -75,6 +76,32 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
             return new[] { new IntroducedMember( this, field, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, this ) };
         }
+
+        public IMethod? GetAccessor( MethodKind methodKind )
+            => methodKind switch
+            {
+                MethodKind.PropertyGet => this.GetMethod,
+                MethodKind.PropertySet => this.SetMethod,
+                _ => null
+            };
+
+        public IEnumerable<IMethod> Accessors
+        {
+            get
+            {
+                if ( this.GetMethod != null )
+                {
+                    yield return this.GetMethod;
+                }
+
+                if ( this.SetMethod != null )
+                {
+                    yield return this.SetMethod;
+                }
+            }
+        }
+
+        public FieldInfo ToFieldInfo() => throw new NotImplementedException();
 
         public FieldOrPropertyInfo ToFieldOrPropertyInfo() => throw new NotImplementedException();
 

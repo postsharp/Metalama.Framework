@@ -23,6 +23,7 @@
     <InternalsVisibleTo Include="Caravela.Framework.Tests.InternalPipeline" />
     <InternalsVisibleTo Include="Caravela.Framework.Tests.PublicPipeline" />
     <InternalsVisibleTo Include="Caravela.Framework.CompilerAddIn" />
+    <InternalsVisibleTo Include="DynamicProxyGenAssembly2" Key="$(FakeItEasyKey)" LoadsWithinVisualStudio="false" />
     </ItemGroup>
     
    <ItemGroup>
@@ -37,7 +38,6 @@
     <ProjectReference Include="..\Caravela.Framework.DesignTime.Contracts\Caravela.Framework.DesignTime.Contracts.csproj" />
     <ProjectReference Include="..\Caravela.Framework\Caravela.Framework.csproj" />
     <ProjectReference Include="..\Caravela.Framework.Sdk\Caravela.Framework.Sdk.csproj" />
-    
     
     <!-- Reference PostSharp for obfuscation -->
     <PackageReference Include="PostSharp" Version="$(PostSharpPackageVersion)" PrivateAssets="all" Condition="'$(Obfuscate)' == 'True'" />
