@@ -111,7 +111,8 @@ namespace Caravela.Framework.Eligibility
         /// <param name="eligibilityBuilder"></param>
         /// <param name="predicate">A predicate that returns <c>true</c> if the declaration is eligible for the aspect.</param>
         /// <param name="getJustification">A delegate called in case <paramref name="predicate"/> returns <c>false</c> and when
-        /// the justification of the non-ineligibility is required.</param>
+        /// the justification of the non-ineligibility is required. This delegate must return a <see cref="FormattableString"/>, i.e. a C#
+        /// interpolated string (<c>$"like {this}"</c>).</param>
         public static void MustSatisfy<T>(
             this IEligibilityBuilder<T> eligibilityBuilder,
             Predicate<T> predicate,
