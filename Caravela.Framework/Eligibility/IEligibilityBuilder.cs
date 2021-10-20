@@ -10,6 +10,7 @@ namespace Caravela.Framework.Eligibility
     /// <summary>
     /// The non-generic base interface for <see cref="IEligibilityBuilder{T}"/>.
     /// </summary>
+    /// <seealso href="@eligibility"/> 
     [InternalImplement]
     [CompileTimeOnly]
     public interface IEligibilityBuilder
@@ -33,6 +34,8 @@ namespace Caravela.Framework.Eligibility
     /// using methods of <see cref="EligibilityExtensions"/>.
     /// </summary>
     /// <typeparam name="T">Type of declaration.</typeparam>
+    /// <seealso href="@eligibility"/>
+    /// <seealso cref="EligibilityExtensions"/> 
     public interface IEligibilityBuilder<out T> : IEligibilityBuilder
     {
         /// <summary>

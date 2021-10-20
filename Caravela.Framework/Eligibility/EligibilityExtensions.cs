@@ -11,6 +11,7 @@ namespace Caravela.Framework.Eligibility
     /// <summary>
     /// Extension methods for <see cref="IEligibilityBuilder"/>.
     /// </summary>
+    /// <seealso href="@eligibility"/>
     public static class EligibilityExtensions
     {
         /// <summary>

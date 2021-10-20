@@ -26,7 +26,8 @@ namespace Caravela.Framework.Eligibility
         /// Do not reference instance class members in your implementation of  <see cref="BuildEligibility"/>.
         /// Indeed, this method is called on an instance obtained using <see cref="FormatterServices.GetUninitializedObject"/>, that is,
         /// <i>without invoking the class constructor</i>.
-        /// </remarks> 
+        /// </remarks>
+        /// <seealso href="@eligibility"/>
         void BuildEligibility( IEligibilityBuilder<T> builder )
 #if NET5_0
         { }
