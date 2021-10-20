@@ -68,9 +68,8 @@
 
   <ItemGroup>
     <InternalsVisibleTo Include="Caravela.AspectWorkbench" />
+    <InternalsVisibleTo Include="DynamicProxyGenAssembly2" Key="$(FakeItEasyKey)" LoadsWithinVisualStudio="false" />
   </ItemGroup>
-
-  <Import Project="..\..\Build\FakeItEasyInternalsVisibleTo.props" />
 
   <Import Project="..\..\Caravela.TestFramework\Caravela.TestFramework.targets" />
 
