@@ -244,7 +244,6 @@ namespace Caravela.Framework.Impl.CodeModel
                 AttributeBuilder attributeBuilder => this.GetAttribute( attributeBuilder ),
                 TypeParameterBuilder genericParameterBuilder => this.GetGenericParameter( genericParameterBuilder ),
                 AccessorBuilder accessorBuilder => this.GetMethod( accessorBuilder ),
-                AccessorBuilder.ParameterBase parameterBuilder => this.GetParameter( parameterBuilder ),
 
                 // This is for linker tests (fake builders), which resolve to themselves.
                 // ReSharper disable once SuspiciousTypeConversion.Global

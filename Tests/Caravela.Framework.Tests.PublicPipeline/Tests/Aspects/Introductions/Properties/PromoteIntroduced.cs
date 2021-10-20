@@ -10,9 +10,9 @@ using Caravela.TestFramework;
 namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Properties.PromoteIntroduced
 {
     [AttributeUsage(AttributeTargets.Class)]
-    public class PromoteAttribute : Attribute, IAspect<INamedType>
+    public class PromoteAttribute : TypeAspect
     {
-        public void BuildAspect(IAspectBuilder<INamedType> builder)
+        public override void BuildAspect(IAspectBuilder<INamedType> builder)
         {
             builder.Advices.OverrideFieldOrProperty(builder.Target.Fields.Single(), nameof(Template));
         }
@@ -33,7 +33,7 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Properties.P
     }
 
     [AttributeUsage(AttributeTargets.Class)]
-    public class IntroductionAttribute : Attribute, IAspect<INamedType>
+    public class IntroductionAttribute : TypeAspect
     {
         [Introduce]
         public int _field;

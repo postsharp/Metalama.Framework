@@ -165,6 +165,7 @@ namespace Caravela.Framework.Impl.Linking
                 if ( introducedMember.Introduction is IReplaceMember replaceMember )
                 {
                     var replacedMember = replaceMember.ReplacedMember.Resolve( this._finalCompilationModel );
+
                     IDeclaration canonicalReplacedMember = replacedMember switch
                     {
                         BuiltDeclaration builtDeclaration => builtDeclaration.Builder,
@@ -497,6 +498,7 @@ namespace Caravela.Framework.Impl.Linking
                 case (IEventSymbol, IEventSymbol):
                 case (IFieldSymbol, IFieldSymbol):
                     return resolvedSymbol;
+
                 case (IMethodSymbol { MethodKind: MethodKind.PropertyGet }, IPropertySymbol):
                     // This seems to happen only in invalid compilations.
                     throw new AssertionFailedException( Justifications.CoverageMissing );

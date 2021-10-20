@@ -9,7 +9,7 @@ using Caravela.TestFramework;
 
 namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Methods.SyntaxOrder
 {
-    public class Introduction1Attribute : Attribute, IAspect<INamedType>
+    public class Introduction1Attribute : TypeAspect
     {
         [Introduce]
         public void Foo()
@@ -20,9 +20,9 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Methods.Synt
         }
     }
 
-    public class Override1Attribute : Attribute, IAspect<INamedType>
+    public class Override1Attribute : TypeAspect
     {
-        public void BuildAspect(IAspectBuilder<INamedType> builder)
+        public override void BuildAspect(IAspectBuilder<INamedType> builder)
         {
             builder.Advices.OverrideMethod(builder.Target.Methods.OfName("Foo").Single(), nameof(Template));
         }
@@ -36,7 +36,7 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Methods.Synt
         }
     }
 
-    public class Introduction2Attribute : Attribute, IAspect<INamedType>
+    public class Introduction2Attribute : TypeAspect
     {
         [Introduce]
         public void Bar()
@@ -47,9 +47,9 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Methods.Synt
         }
     }
 
-    public class Override2Attribute : Attribute, IAspect<INamedType>
+    public class Override2Attribute : TypeAspect
     {
-        public void BuildAspect(IAspectBuilder<INamedType> builder)
+        public override void BuildAspect(IAspectBuilder<INamedType> builder)
         {
             builder.Advices.OverrideMethod(builder.Target.Methods.OfName("Foo").Single(), nameof(Template));
         }
@@ -63,9 +63,9 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Methods.Synt
         }
     }
 
-    public class Override3Attribute : Attribute, IAspect<INamedType>
+    public class Override3Attribute : TypeAspect
     {
-        public void BuildAspect(IAspectBuilder<INamedType> builder)
+        public override void BuildAspect(IAspectBuilder<INamedType> builder)
         {
             builder.Advices.OverrideMethod(builder.Target.Methods.OfName("Bar").Single(), nameof(Template));
         }
@@ -79,9 +79,9 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Methods.Synt
         }
     }
 
-    public class Override4Attribute : Attribute, IAspect<INamedType>
+    public class Override4Attribute : TypeAspect
     {
-        public void BuildAspect(IAspectBuilder<INamedType> builder)
+        public override void BuildAspect(IAspectBuilder<INamedType> builder)
         {
             builder.Advices.OverrideMethod(builder.Target.Methods.OfName("Foo").Single(), nameof(Template));
         }
