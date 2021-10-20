@@ -12,16 +12,18 @@ namespace Caravela.Framework.TestApp
     internal class PrintDebugInfoAspect : OverrideMethodAspect
     {
         static DiagnosticDefinition<IDeclaration> myWarning = new( "MY001", Severity.Warning, "Hello, {0} v23." );
+
         public override void BuildAspect(IAspectBuilder<IMethod> aspectBuilder )
         {
             base.BuildAspect( aspectBuilder );
 
             aspectBuilder.Diagnostics.Report( myWarning, aspectBuilder.Target );
         }
-        public override dynamic OverrideMethod()
+
+        public override dynamic? OverrideMethod()
         {
             Console.WriteLine( DebugInfo.GetInfo() );
-            return Caravela.Framework.Aspects.meta.Proceed();
+            return meta.Proceed();
         }
     }
 }

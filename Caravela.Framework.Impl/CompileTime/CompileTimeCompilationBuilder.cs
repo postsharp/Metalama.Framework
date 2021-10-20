@@ -491,12 +491,12 @@ namespace Caravela.Framework.Impl.CompileTime
             ulong projectHash,
             out CompileTimeProject? project )
         {
-            Logger.Instance?.Write( $"TryGetCompileTimeProjectFromCache( '{runTimeCompilation}' )" );
+            Logger.Instance?.Write( $"TryGetCompileTimeProjectFromCache( '{runTimeCompilation.AssemblyName}' )" );
 
             // Look in in-memory cache.
             if ( this._cache.TryGetValue( projectHash, out project ) )
             {
-                Logger.Instance?.Write( $"TryGetCompileTimeProjectFromCache( '{runTimeCompilation}' ): found in memory cache." );
+                Logger.Instance?.Write( $"TryGetCompileTimeProjectFromCache( '{runTimeCompilation.AssemblyName}' ): found in memory cache." );
 
                 return true;
             }
@@ -504,14 +504,14 @@ namespace Caravela.Framework.Impl.CompileTime
             // Look on disk.
             if ( !File.Exists( outputPaths.Pe ) || !File.Exists( outputPaths.Manifest ) )
             {
-                Logger.Instance?.Write( $"TryGetCompileTimeProjectFromCache( '{runTimeCompilation}' ): not found." );
+                Logger.Instance?.Write( $"TryGetCompileTimeProjectFromCache( '{runTimeCompilation.AssemblyName}' ): not found." );
 
                 project = null;
 
                 return false;
             }
 
-            Logger.Instance?.Write( $"TryGetCompileTimeProjectFromCache( '{runTimeCompilation}' ): found on disk. Deserializing." );
+            Logger.Instance?.Write( $"TryGetCompileTimeProjectFromCache( '{runTimeCompilation.AssemblyName}' ): found on disk. Deserializing." );
 
             // Deserialize the manifest.
             var manifest = CompileTimeProjectManifest.Deserialize( RetryHelper.Retry( () => File.OpenRead( outputPaths.Manifest ) ) );

@@ -4,7 +4,6 @@
 using System;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
-using Caravela.Framework.Eligibility;
 
 namespace Caravela.Framework.TestApp
 {
