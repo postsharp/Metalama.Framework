@@ -61,14 +61,14 @@ public static void Foo_Override6()
     Target.Bar();
 }
 
-private static void Bar_Override5()
+private static void Bar_Override1()
 {
     // Should invoke empty code.
     Target.Bar_Empty();
-    // Should invoke override 3.
-    Target.Bar_Override3();
-    // Should invoke the final declaration.
-    Target.Bar();
+    // Should invoke empty code.
+    Target.Bar_Empty();
+    // Should invoke override 1.
+    Target.Bar_Override1();
     // Should invoke the final declaration.
     Target.Bar();
 }
@@ -85,14 +85,14 @@ private static void Bar_Override3()
     Target.Bar();
 }
 
-private static void Bar_Override1()
+private static void Bar_Override5()
 {
     // Should invoke empty code.
     Target.Bar_Empty();
-    // Should invoke empty code.
-    Target.Bar_Empty();
-    // Should invoke override 1.
-    Target.Bar_Override1();
+    // Should invoke override 3.
+    Target.Bar_Override3();
+    // Should invoke the final declaration.
+    Target.Bar();
     // Should invoke the final declaration.
     Target.Bar();
 }    }

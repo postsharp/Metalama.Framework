@@ -35,7 +35,7 @@ class ConstructorAspect : IAspect<IConstructor> { }
 class MethodBaseAspect : IAspect<IMethodBase> { }
 class DeclarationAspect : IAspect<IDeclaration> { }
 class ParameterAspect : IAspect<IParameter> { }
-class GenericParameterAspect : IAspect<IGenericParameter> { }
+class GenericParameterAspect : IAspect<ITypeParameter> { }
 
 class Class<T>
 {
@@ -82,7 +82,13 @@ class Class<T>
             this._aspects = configuration!.AspectClasses.OfType<AspectClass>().ToDictionary( a => a.DisplayName, a => a );
         }
 
+#if NET5_0
         [Theory]
+#else
+        [Theory( Skip = "Skipped in .NET Framework (low value)" )]
+
+        // We would need to implement all interface methods.
+#endif
         [InlineData( "MethodAspect", "Class", false )]
         [InlineData( "MethodAspect", "Class.new", false )]
         [InlineData( "MethodAspect", "Class.static", false )]
@@ -119,7 +125,13 @@ class Class<T>
             Assert.Equal( isEligible, this._aspects[aspect].IsEligibleFast( targetSymbol ) );
         }
 
+#if NET5_0
         [Fact]
+#else
+        [Fact( Skip = "Skipped in .NET Framework (low value)" )]
+
+        // We would need to implement all interface methods.
+#endif
         public void NamespaceNotEligible()
         {
             var targetSymbol = ((INamedTypeSymbol) this._declarations["Class"].GetSymbol().AssertNotNull()).ContainingNamespace;

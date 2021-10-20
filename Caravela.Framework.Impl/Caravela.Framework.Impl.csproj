@@ -14,6 +14,7 @@
     <EmbeddedResource Include="..\Caravela.Framework.CompileTime\bin\$(Configuration)\netstandard2.0\Caravela.Framework.dll">
         <LogicalName>Caravela.Framework.dll</LogicalName>
     </EmbeddedResource>
+    <EmbeddedResource Remove="ServiceProvider\**" />
   </ItemGroup>
 
   <ItemGroup>
@@ -51,10 +52,12 @@
      <Compile Include="..\IsExternalInit.cs">
        <Link>SystemTypes\IsExternalInit.cs</Link>
      </Compile>
+     <Compile Remove="ServiceProvider\**" />
+     <Compile Remove="CodeModel\Builders\BuiltGenericParameter.cs" />
    </ItemGroup>
     
    <ItemGroup>
-     <Folder Include="ServiceProvider" />
+     <None Remove="ServiceProvider\**" />
    </ItemGroup>
   
   <!-- Obfuscation -->

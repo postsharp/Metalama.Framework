@@ -17,7 +17,7 @@ namespace Caravela.TestFramework
 
         public ImmutableArray<IAssemblyIdentity> AssemblyReferences => throw new NotImplementedException();
 
-        public ImmutableHashSet<string> DefinedSymbols => throw new NotImplementedException();
+        public ImmutableHashSet<string> PreprocessorSymbols => throw new NotImplementedException();
 
         public string? Configuration => throw new NotImplementedException();
 

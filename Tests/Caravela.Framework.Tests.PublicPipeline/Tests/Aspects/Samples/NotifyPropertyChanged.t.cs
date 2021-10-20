@@ -1,5 +1,5 @@
 [NotifyPropertyChanged]
-    class Car:global::System.ComponentModel.INotifyPropertyChanged    {
+    internal class Car:global::System.ComponentModel.INotifyPropertyChanged    {
 
 
 private string? _make;
@@ -33,6 +33,7 @@ private string? Make_Source
 }
 
 private double _power;
+
         public double Power {get    {
         return this.Power_Source;
     }
@@ -67,5 +68,4 @@ protected void OnPropertyChanged(global::System.String name)
     this.PropertyChanged?.Invoke(this, new global::System.ComponentModel.PropertyChangedEventArgs(name));
 }
 
-public event global::System.ComponentModel.PropertyChangedEventHandler? PropertyChanged;
-    }
+public event global::System.ComponentModel.PropertyChangedEventHandler? PropertyChanged;    }

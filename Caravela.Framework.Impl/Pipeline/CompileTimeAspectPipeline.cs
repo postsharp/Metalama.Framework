@@ -107,7 +107,7 @@ namespace Caravela.Framework.Impl.Pipeline
                     additionalResources = resultPartialCompilation.Resources.Where( r => !resources.Contains( r ) ).ToImmutableArray();
                 }
 
-                if ( configuration.CompileTimeProject != null )
+                if ( configuration.CompileTimeProject is { IsEmpty: false } )
                 {
                     additionalResources = additionalResources.Add( configuration.CompileTimeProject.ToResource() );
                 }

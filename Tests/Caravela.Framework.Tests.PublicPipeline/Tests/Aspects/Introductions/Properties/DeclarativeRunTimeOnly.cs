@@ -1,38 +1,32 @@
 using System;
 using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
-using Caravela.TestFramework;
 
 namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Properties.DeclarativeRunTimeOnly
 {
-    public class IntroductionAttribute : Attribute, IAspect<INamedType>
+    public class IntroductionAttribute : TypeAspect
     {
-       
         // TODO: Indexers.    
 
         [Introduce]
         public RunTimeOnlyClass? IntroducedProperty_Accessors
         {
-            get 
-            { 
-                Console.WriteLine("Get"); 
-                return null; 
+            get
+            {
+                Console.WriteLine( "Get" );
+
+                return null;
             }
 
-            set 
-            { 
-                Console.WriteLine(value); 
+            set
+            {
+                Console.WriteLine( value );
             }
         }
-        
-        
     }
-    
-    public class RunTimeOnlyClass {}
+
+    public class RunTimeOnlyClass { }
 
     // <target>
     [Introduction]
-    internal class TargetClass
-    {
-    }
+    internal class TargetClass { }
 }

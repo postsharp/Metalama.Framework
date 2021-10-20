@@ -1,9 +1,11 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.TestFramework.Utilities;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Linq;
 
 namespace Caravela.TestFramework
 {
@@ -18,15 +20,16 @@ namespace Caravela.TestFramework
         /// <param name="testName">Short name of the test. Typically a relative path.</param>
         /// <param name="sourceCode">Full source of the input code.</param>
         private TestInput(
+            TestProjectProperties projectProperties,
             string testName,
             string sourceCode,
             TestDirectoryOptionsReader? directoryOptionsReader = null,
             string? relativePath = null,
             string? fullPath = null )
         {
+            this.ProjectProperties = projectProperties;
             this.TestName = testName;
             this.SourceCode = sourceCode;
-            this.ProjectDirectory = directoryOptionsReader?.ProjectDirectory;
             this.RelativePath = relativePath;
             this.FullPath = fullPath;
 
@@ -51,14 +54,26 @@ namespace Caravela.TestFramework
                 {
                     if ( !companionFile.EndsWith( ".t.cs", StringComparison.OrdinalIgnoreCase ) )
                     {
-                        this.Options.IncludedFiles.Add( Path.GetRelativePath( directory, companionFile ) );
+                        this.Options.IncludedFiles.Add( PathUtil.GetRelativePath( directory, companionFile ) );
                     }
+                }
+            }
+
+            this.SkipReason = this.Options.SkipReason;
+
+            if ( !this.IsSkipped )
+            {
+                var missingConstants = this.Options.RequiredConstants.Where( c => !this.ProjectProperties.PreprocessorSymbols.Contains( c ) ).ToList();
+
+                if ( missingConstants.Count > 0 )
+                {
+                    this.SkipReason = $"The following constant(s) are not defined: {string.Join( ", ", missingConstants.Select( c => "'" + c + "'" ) )}.";
                 }
             }
         }
 
         [ExcludeFromCodeCoverage]
-        public static TestInput FromSource( string sourceCode, string path )
+        public static TestInput FromSource( TestProjectProperties projectProperties, string sourceCode, string path )
         {
             var projectDirectory = FindProjectDirectory( Path.GetDirectoryName( path ) );
 
@@ -67,10 +82,11 @@ namespace Caravela.TestFramework
                 var directoryOptionsReader = new TestDirectoryOptionsReader( projectDirectory );
 
                 return new TestInput(
+                    projectProperties,
                     Path.GetFileNameWithoutExtension( path ),
                     sourceCode,
                     directoryOptionsReader,
-                    Path.GetRelativePath( projectDirectory, path ),
+                    PathUtil.GetRelativePath( projectDirectory, path ),
                     path );
             }
             else
@@ -78,7 +94,7 @@ namespace Caravela.TestFramework
                 // Coverage: ignore
                 // The project could not be found. Continue without reading directory options.
 
-                return new TestInput( "interactive", sourceCode );
+                return new TestInput( projectProperties, "interactive", sourceCode );
             }
 
             static string? FindProjectDirectory( string? directory )
@@ -101,13 +117,24 @@ namespace Caravela.TestFramework
             }
         }
 
-        internal static TestInput FromFile( TestDirectoryOptionsReader directoryOptionsReader, string relativePath )
+        internal static TestInput FromFile( TestProjectProperties projectProperties, TestDirectoryOptionsReader directoryOptionsReader, string relativePath )
         {
             var fullPath = Path.Combine( directoryOptionsReader.ProjectDirectory, relativePath );
             var sourceCode = File.ReadAllText( fullPath );
 
-            return new TestInput( Path.GetFileNameWithoutExtension( relativePath ), sourceCode, directoryOptionsReader, relativePath, fullPath );
+            return new TestInput(
+                projectProperties,
+                Path.GetFileNameWithoutExtension( relativePath ),
+                sourceCode,
+                directoryOptionsReader,
+                relativePath,
+                fullPath );
         }
+
+        /// <summary>
+        /// Gets the project properties for the current test.
+        /// </summary>
+        public TestProjectProperties ProjectProperties { get; }
 
         /// <summary>
         /// Gets the name of the test. Usually equals the relative path of the test source.
@@ -122,7 +149,7 @@ namespace Caravela.TestFramework
         /// <summary>
         /// Gets the directory containing the project (<c>csproj</c>) file.
         /// </summary>
-        public string? ProjectDirectory { get; }
+        public string ProjectDirectory => this.ProjectProperties.ProjectDirectory;
 
         /// <summary>
         /// Gets the path of the current test file relatively to <see cref="ProjectDirectory"/>.
@@ -138,5 +165,15 @@ namespace Caravela.TestFramework
         /// Gets the options of the current test.
         /// </summary>
         public TestOptions Options { get; } = new();
+
+        /// <summary>
+        /// Gets the reason why the current test must be skipped, or <c>null</c> if it must not be skipped.
+        /// </summary>
+        public string? SkipReason { get; }
+
+        /// <summary>
+        /// Gets a value indicating whether the current test must be skipped.
+        /// </summary>
+        public bool IsSkipped => this.SkipReason != null;
     }
 }

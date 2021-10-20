@@ -1,8 +1,7 @@
-class TargetCode
+internal class TargetCode
     {
-        
         [Aspect]
-        public ValueTask<int> AsyncMethod(int a)
+        public ValueTask<int> AsyncMethod( int a )
 {
     global::System.Console.WriteLine("Getting task");
     var task = this.AsyncMethod_Source(a);
@@ -13,6 +12,7 @@ class TargetCode
 private async ValueTask<int> AsyncMethod_Source(int a)
         {
             await Task.Yield();
+
             return a;
         }
     }

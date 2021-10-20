@@ -36,7 +36,7 @@ namespace Caravela.Framework.Impl.Fabrics
 
         public override void Execute( IAspectBuilderInternal aspectBuilder, FabricTemplateClass fabricTemplateClass )
         {
-            var builder = new Builder( (ICompilation) aspectBuilder.Target, this.Configuration, aspectBuilder );
+            var builder = new Builder( this, (ICompilation) aspectBuilder.Target, this.Configuration, aspectBuilder );
             ((IProjectFabric) this.Fabric).AmendProject( builder );
         }
 
@@ -87,7 +87,8 @@ namespace Caravela.Framework.Impl.Fabrics
 
         private class Builder : BaseBuilder<ICompilation>, IProjectAmender
         {
-            public Builder( ICompilation compilation, AspectProjectConfiguration context, IAspectBuilderInternal aspectBuilder ) : base(
+            public Builder( FabricDriver parent, ICompilation compilation, AspectProjectConfiguration context, IAspectBuilderInternal aspectBuilder ) : base(
+                parent,
                 compilation,
                 context,
                 aspectBuilder ) { }

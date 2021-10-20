@@ -8,8 +8,8 @@ namespace Caravela.Framework.Impl.CodeModel
 {
     internal static class GenericParameterExtensions
     {
-        public static bool? IsReferenceTypeImpl( this IGenericParameter genericParameter )
-            => genericParameter.TypeKindConstraint switch
+        public static bool? IsReferenceTypeImpl( this ITypeParameter typeParameter )
+            => typeParameter.TypeKindConstraint switch
             {
                 TypeKindConstraint.Class => true,
                 TypeKindConstraint.Struct => false,
@@ -17,17 +17,17 @@ namespace Caravela.Framework.Impl.CodeModel
                 _ => null
             };
 
-        public static bool? IsNullableImpl( this IGenericParameter genericParameter )
-            => genericParameter.TypeKindConstraint switch
+        public static bool? IsNullableImpl( this ITypeParameter typeParameter )
+            => typeParameter.TypeKindConstraint switch
             {
-                TypeKindConstraint.Class => genericParameter.HasDefaultConstructorConstraint,
+                TypeKindConstraint.Class => typeParameter.HasDefaultConstructorConstraint,
                 TypeKindConstraint.Struct => false,
                 TypeKindConstraint.NotNull => false,
                 TypeKindConstraint.Unmanaged => false,
                 _ => null
             };
 
-        public static bool IsCompatibleWith( this IGenericParameter a, IGenericParameter b )
+        public static bool IsCompatibleWith( this ITypeParameter a, ITypeParameter b )
         {
             // Check new() constraint.
             if ( a.HasDefaultConstructorConstraint && !b.HasDefaultConstructorConstraint )

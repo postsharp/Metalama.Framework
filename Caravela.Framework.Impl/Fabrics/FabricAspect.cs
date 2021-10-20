@@ -4,8 +4,11 @@
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Eligibility;
+using Caravela.Framework.Fabrics;
 using Caravela.Framework.Impl.Aspects;
+using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
 
 namespace Caravela.Framework.Impl.Fabrics
 {
@@ -28,12 +31,17 @@ namespace Caravela.Framework.Impl.Fabrics
 
             foreach ( var templateClass in this._templateClasses )
             {
-                templateClass.Driver.Execute( internalBuilder, templateClass );
+                using ( internalBuilder.WithPredecessor( new AspectPredecessor( AspectPredecessorKind.Fabric, templateClass.Driver.Fabric ) ) )
+                {
+                    templateClass.Driver.Execute( internalBuilder, templateClass );
+                }
             }
         }
 
         void IAspect.BuildAspectClass( IAspectClassBuilder builder ) { }
 
         void IEligible<T>.BuildEligibility( IEligibilityBuilder<T> builder ) { }
+
+        public IEnumerable<IFabric> Fabrics => this._templateClasses.Select( t => t.Driver.Fabric );
     }
 }

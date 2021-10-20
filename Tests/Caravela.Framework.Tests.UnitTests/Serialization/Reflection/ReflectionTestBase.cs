@@ -1,7 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System;
+using Caravela.TestFramework.Utilities;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -32,7 +32,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
             {
                 this.Logger.WriteLine( "Actual result to compare against:" );
                 this.Logger.WriteLine( "----" );
-                this.Logger.WriteLine( "@\"" + actual.Replace( "\"", "\"\"", StringComparison.Ordinal ) + '\"' );
+                this.Logger.WriteLine( "@\"" + actual.ReplaceOrdinal( "\"", "\"\"" ) + '\"' );
                 this.Logger.WriteLine( "----" );
                 Assert.Equal( expected, actual );
             }

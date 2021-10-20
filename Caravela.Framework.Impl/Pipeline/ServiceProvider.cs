@@ -2,7 +2,9 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Serialization;
+using Caravela.Framework.Impl.Utilities;
 using Caravela.Framework.Project;
 using System;
 using System.Collections.Generic;
@@ -17,6 +19,7 @@ namespace Caravela.Framework.Impl.Pipeline
     /// </summary>
     public class ServiceProvider : IServiceProvider
     {
+        // This field is not readonly because we use two-phase initialization to resolve the problem of cyclic dependencies.
         private ImmutableDictionary<Type, Lazy<IService, Type>> _services;
 
         public static ServiceProvider Empty { get; } =
@@ -154,7 +157,11 @@ namespace Caravela.Framework.Impl.Pipeline
             // user assembly. When we need to unload the user assembly, we first need to unload the ReflectionMapperFactory.
             var serviceProvider = this.WithServices( new ReflectionMapperFactory() );
 
-            return serviceProvider.WithServices( new SyntaxSerializationService( serviceProvider ) );
+            serviceProvider = serviceProvider.WithServices( new SyntaxSerializationService( serviceProvider ), new CompileTimeTypeFactory() );
+            serviceProvider = serviceProvider.WithServices( new UserCodeExecutionContext( serviceProvider ), new SystemTypeResolver( serviceProvider ) );
+            serviceProvider = serviceProvider.WithService( new UserCodeInvoker( serviceProvider ) );
+
+            return serviceProvider;
         }
 
         public override string ToString()

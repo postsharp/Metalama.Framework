@@ -1,18 +1,17 @@
-﻿using Caravela.Framework.Aspects;
+﻿using System;
+using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
-using Caravela.TestFramework;
-using System;
 
 namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.PropertySetTemplate
 {
     // Tests get-only property template.
 
-    [AttributeUsage(AttributeTargets.Property)]
-    public class OverrideAttribute : Attribute, IAspect<IFieldOrProperty>
+    [AttributeUsage( AttributeTargets.Property )]
+    public class OverrideAttribute : FieldOrPropertyAspect
     {
-        public void BuildAspect(IAspectBuilder<IFieldOrProperty> builder)
+        public override void BuildAspect( IAspectBuilder<IFieldOrProperty> builder )
         {
-            builder.Advices.OverrideFieldOrProperty(builder.Target, nameof(OverrideProperty));
+            builder.Advices.OverrideFieldOrProperty( builder.Target, nameof(OverrideProperty) );
         }
 
         [Template]
@@ -20,7 +19,7 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
         {
             set
             {
-                Console.WriteLine($"This is the overridden setter.");
+                Console.WriteLine( $"This is the overridden setter." );
                 meta.Proceed();
             }
         }
@@ -46,13 +45,14 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
         {
             get
             {
-                Console.WriteLine("This is the original getter.");
+                Console.WriteLine( "This is the original getter." );
+
                 return 42;
             }
 
             set
             {
-                Console.WriteLine($"This is the original setter, setting {value}.");
+                Console.WriteLine( $"This is the original setter, setting {value}." );
             }
         }
 
@@ -61,13 +61,14 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
         {
             get
             {
-                Console.WriteLine("This is the original getter.");
+                Console.WriteLine( "This is the original getter." );
+
                 return 42;
             }
 
             set
             {
-                Console.WriteLine($"This is the original setter, setting {value}.");
+                Console.WriteLine( $"This is the original setter, setting {value}." );
             }
         }
 
@@ -76,13 +77,14 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
         {
             get
             {
-                Console.WriteLine("This is the original getter.");
+                Console.WriteLine( "This is the original getter." );
+
                 return 42;
             }
 
             init
             {
-                Console.WriteLine($"This is the original setter, setting {value}.");
+                Console.WriteLine( $"This is the original setter, setting {value}." );
             }
         }
 
@@ -91,7 +93,8 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
         {
             get
             {
-                Console.WriteLine("This is the original getter.");
+                Console.WriteLine( "This is the original getter." );
+
                 return 42;
             }
         }
@@ -101,7 +104,7 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
         {
             set
             {
-                Console.WriteLine($"This is the original setter, setting {value}.");
+                Console.WriteLine( $"This is the original setter, setting {value}." );
             }
         }
 
@@ -110,7 +113,7 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
         {
             init
             {
-                Console.WriteLine($"This is the original setter, setting {value}.");
+                Console.WriteLine( $"This is the original setter, setting {value}." );
             }
         }
     }

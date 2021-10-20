@@ -110,12 +110,18 @@ namespace Caravela.Framework.Impl.Pipeline
             if ( compileTimeProject != null )
             {
                 // The instantiation of compiler plug-ins defined in the current compilation is a bit rough here, but it is supposed to be used
-                // by our internal tests only.
+                // by our internal tests only. However, the logic will interfere with production scenario, where a plug-in will be both
+                // in ProjectOptions.PlugIns and in CompileTimeProjects.PlugInTypes. So, we do not load the plug ins found by CompileTimeProjects.PlugInTypes
+                // if they are already provided by ProjectOptions.PlugIns.
 
                 var invoker = this.ServiceProvider.GetService<UserCodeInvoker>();
 
+                var loadedPlugInsTypes = this.ProjectOptions.PlugIns.Select( t => t.GetType().FullName ).ToImmutableArray();
+
                 var additionalPlugIns = compileTimeProject.ClosureProjects
-                    .SelectMany( p => p.PlugInTypes.Select( t => invoker.Invoke( () => Activator.CreateInstance( p.GetType( t ) ) ) ) )
+                    .SelectMany( p => p.PlugInTypes.Select( t => (Project: p, TypeName: t) ) )
+                    .Where( t => !loadedPlugInsTypes.Contains( t.TypeName ) )
+                    .Select( t => invoker.Invoke( () => Activator.CreateInstance( t.Project.GetType( t.TypeName ) ) ) )
                     .ToList();
 
                 if ( additionalPlugIns.Count > 0 )

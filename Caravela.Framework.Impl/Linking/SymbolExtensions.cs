@@ -4,6 +4,7 @@
 using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Linq;
 
 namespace Caravela.Framework.Impl.Linking
 {
@@ -44,5 +45,11 @@ namespace Caravela.Framework.Impl.Linking
 
             return false;
         }
+
+        public static IFieldSymbol? GetBackingField( this IPropertySymbol property )
+            => (IFieldSymbol?) property.ContainingType.GetMembers( $"<{property.Name}>k__BackingField" ).SingleOrDefault();
+
+        public static IFieldSymbol? GetBackingField( this IEventSymbol property )
+            => (IFieldSymbol?) property.ContainingType.GetMembers( $"<{property.Name}>k__BackingField" ).SingleOrDefault();
     }
 }

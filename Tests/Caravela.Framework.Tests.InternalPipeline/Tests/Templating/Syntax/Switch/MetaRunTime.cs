@@ -16,7 +16,7 @@ namespace Caravela.Framework.Tests.InternalPipeline.Templating.Syntax.Switch.Met
             var x2= meta.RunTime(1+1);
             var x3= meta.RunTime(default(int));
             var x4= meta.RunTime(meta.CompileTime(default(int)));
-            var x5= meta.RunTime(meta.CompileTime(Math.PI));
+            var x5= meta.RunTime(meta.CompileTime(int.MaxValue));
             
             
             return default;

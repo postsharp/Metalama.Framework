@@ -1,33 +1,28 @@
 ﻿#pragma warning disable CS0067
 
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
-using Caravela.Framework.Eligibility;
-using Caravela.TestFramework;
 using System;
+using Caravela.Framework.Aspects;
 
 namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Events.DeclarativeEvent
 {
-    public class IntroductionAttribute : Attribute, IAspect<INamedType>
+    public class IntroductionAttribute : TypeAspect
     {
         [Introduce]
         public event EventHandler? Event
         {
-            add 
-            { 
-                Console.WriteLine("Original add accessor."); 
+            add
+            {
+                Console.WriteLine( "Original add accessor." );
             }
 
-            remove 
-            { 
-                Console.WriteLine("Original remove accessor."); 
+            remove
+            {
+                Console.WriteLine( "Original remove accessor." );
             }
         }
     }
 
     // <target>
     [Introduction]
-    internal class TargetClass
-    {
-    }
+    internal class TargetClass { }
 }

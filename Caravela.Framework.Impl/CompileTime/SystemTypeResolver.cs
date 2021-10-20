@@ -16,7 +16,7 @@ namespace Caravela.Framework.Impl.CompileTime
     {
         private readonly ReferenceAssemblyLocator _referenceAssemblyLocator;
 
-        public SystemTypeResolver( IServiceProvider serviceProvider )
+        public SystemTypeResolver( IServiceProvider serviceProvider ) : base( serviceProvider )
         {
             this._referenceAssemblyLocator = serviceProvider.GetService<ReferenceAssemblyLocator>();
         }
@@ -24,6 +24,20 @@ namespace Caravela.Framework.Impl.CompileTime
         protected virtual bool IsStandardAssemblyName( string assemblyName ) => this._referenceAssemblyLocator.IsStandardAssemblyName( assemblyName );
 
         protected override Type? GetCompileTimeNamedType( INamedTypeSymbol typeSymbol, CancellationToken cancellationToken = default )
+        {
+            if ( !this.Cache.TryGetValue( typeSymbol, out var type ) )
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+
+                type = this.GetCompileTimeNamedTypeCore( typeSymbol );
+
+                this.Cache.Add( typeSymbol, type );
+            }
+
+            return type;
+        }
+
+        private Type? GetCompileTimeNamedTypeCore( INamedTypeSymbol typeSymbol )
         {
             var typeName = typeSymbol.GetReflectionName();
 
@@ -40,8 +54,15 @@ namespace Caravela.Framework.Impl.CompileTime
                 // We don't allow loading new assemblies to the AppDomain.
                 if ( AppDomain.CurrentDomain.GetAssemblies().All( a => a.GetName().Name != assemblyName ) )
                 {
-                    // Coverage: ignore
-                    return null;
+                    if ( NetStandardTypeMap.Types.TryGetValue( typeName, out var standardType ) )
+                    {
+                        return standardType;
+                    }
+                    else
+                    {
+                        // Coverage: ignore
+                        return null;
+                    }
                 }
 
                 typeName += ", " + assemblyName;

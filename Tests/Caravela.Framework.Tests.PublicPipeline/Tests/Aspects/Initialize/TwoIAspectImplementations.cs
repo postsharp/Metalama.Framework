@@ -1,32 +1,34 @@
 using System;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
+using Caravela.Framework.Eligibility;
 
 namespace Caravela.Framework.Tests.Integration.Aspects.Initialize.TwoIAspectImplementations
 {
-    public class LogAttribute : Attribute, IAspect<IMethod>, IAspect<IFieldOrProperty>
+    public class LogAttribute : Aspect, IAspect<IMethod>, IAspect<IFieldOrProperty>
     {
-        public void BuildAspect(IAspectBuilder<IMethod> builder ) 
+        public void BuildAspect( IAspectBuilder<IMethod> builder )
         {
-            builder.Advices.OverrideMethod(builder.Target, nameof(this.OverrideMethod));
+            builder.Advices.OverrideMethod( builder.Target, nameof(OverrideMethod) );
         }
 
-        public void BuildAspect(IAspectBuilder<IFieldOrProperty> builder) 
+        public void BuildAspect( IAspectBuilder<IFieldOrProperty> builder )
         {
-            builder.Advices.OverrideFieldOrProperty(builder.Target, nameof(this.OverrideProperty));
+            builder.Advices.OverrideFieldOrProperty( builder.Target, nameof(OverrideProperty) );
         }
 
         [Template]
         private dynamic? OverrideMethod()
         {
-            Console.WriteLine("Entering " + meta.Target.Method.ToDisplayString());
+            Console.WriteLine( "Entering " + meta.Target.Method.ToDisplayString() );
+
             try
             {
                 return meta.Proceed();
             }
             finally
             {
-                Console.WriteLine("Leaving " + meta.Target.Method.ToDisplayString());
+                Console.WriteLine( "Leaving " + meta.Target.Method.ToDisplayString() );
             }
         }
 
@@ -37,17 +39,21 @@ namespace Caravela.Framework.Tests.Integration.Aspects.Initialize.TwoIAspectImpl
 
             set
             {
-                Console.WriteLine("Assigning " + meta.Target.Method.ToDisplayString());
+                Console.WriteLine( "Assigning " + meta.Target.Method.ToDisplayString() );
                 meta.Proceed();
             }
         }
+
+        public void BuildEligibility( IEligibilityBuilder<IMethod> builder ) { }
+
+        public void BuildEligibility( IEligibilityBuilder<IFieldOrProperty> builder ) { }
     }
-    
+
     // <target>
-    class TargetCode 
+    internal class TargetCode
     {
         [Log]
-        public int Method(int a, int b)
+        public int Method( int a, int b )
         {
             return a + b;
         }

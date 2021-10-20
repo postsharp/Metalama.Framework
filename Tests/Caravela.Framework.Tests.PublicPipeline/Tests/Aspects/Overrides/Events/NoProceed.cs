@@ -1,22 +1,21 @@
-﻿using Caravela.Framework.Aspects;
+﻿using System;
+using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
-using Caravela.TestFramework;
-using System;
 
 namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Events.NoProceed
 {
-    [AttributeUsage(AttributeTargets.Event, AllowMultiple = true)]
-    public class OverrideAttribute : Attribute, IAspect<IEvent>
+    [AttributeUsage( AttributeTargets.Event, AllowMultiple = true )]
+    public class OverrideAttribute : EventAspect
     {
-        void IAspect<IEvent>.BuildAspect(IAspectBuilder<IEvent> builder)
+        public override void BuildAspect( IAspectBuilder<IEvent> builder )
         {
-            builder.Advices.OverrideEventAccessors(builder.Target, nameof(AccessorTemplate), nameof(AccessorTemplate), null);
+            builder.Advices.OverrideEventAccessors( builder.Target, nameof(AccessorTemplate), nameof(AccessorTemplate), null );
         }
-        
+
         [Template]
         public void AccessorTemplate()
         {
-            Console.WriteLine("This is the overridden accessor.");
+            Console.WriteLine( "This is the overridden accessor." );
         }
     }
 
@@ -28,12 +27,12 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Even
         {
             add
             {
-                Console.WriteLine("This is the original accessor.");
+                Console.WriteLine( "This is the original accessor." );
             }
 
             remove
             {
-                Console.WriteLine("This is the original accessor.");
+                Console.WriteLine( "This is the original accessor." );
             }
         }
     }

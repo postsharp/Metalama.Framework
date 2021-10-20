@@ -11,7 +11,7 @@ namespace Caravela.Framework.Impl.Advices
 {
     internal abstract class Advice
     {
-        public AspectInstance Aspect { get; }
+        public IAspectInstanceInternal Aspect { get; }
 
         public TemplateClassInstance TemplateInstance { get; }
 
@@ -33,7 +33,7 @@ namespace Caravela.Framework.Impl.Advices
         }
 
         protected Advice(
-            AspectInstance aspect,
+            IAspectInstanceInternal aspect,
             TemplateClassInstance template,
             IDeclaration targetDeclaration,
             string? layerName,

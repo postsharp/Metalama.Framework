@@ -5,7 +5,7 @@ using System;
 
 namespace Caravela.Framework.Code.DeclarationBuilders
 {
-    public interface IGenericParameterBuilder : IDeclarationBuilder, IGenericParameter
+    public interface ITypeParameterBuilder : IDeclarationBuilder, ITypeParameter
     {
         new bool? IsConstraintNullable { get; set; }
 

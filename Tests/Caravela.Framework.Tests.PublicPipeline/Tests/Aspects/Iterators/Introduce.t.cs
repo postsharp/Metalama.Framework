@@ -1,7 +1,5 @@
 [Aspect]
-    class TargetCode
-    {
-
+    internal class TargetCode { 
 
 public global::System.Collections.Generic.IEnumerable<global::System.Int32> DeclarativelyMethodAsync()
 {
@@ -11,4 +9,4 @@ public global::System.Collections.Generic.IEnumerable<global::System.Int32> Decl
 public global::System.Collections.Generic.IEnumerable<global::System.Int32> ProgrammaticallyMethodAsync()
 {
     yield return 1;
-}    }
+}}

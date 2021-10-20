@@ -22,7 +22,7 @@ namespace Caravela.Framework.Impl.Advices
         public IPropertyBuilder Builder => this.MemberBuilder;
 
         public IntroducePropertyAdvice(
-            AspectInstance aspect,
+            IAspectInstanceInternal aspect,
             TemplateClassInstance templateInstance,
             INamedType targetDeclaration,
             string? explicitName,

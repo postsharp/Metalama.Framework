@@ -6,8 +6,10 @@ using Caravela.Framework.Code.DeclarationBuilders;
 using Caravela.Framework.Code.Types;
 using Caravela.Framework.Impl.CodeModel.Builders;
 using Caravela.Framework.Impl.CodeModel.References;
+using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Templating.MetaModel;
 using Caravela.Framework.Impl.Utilities;
+using Caravela.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Concurrent;
@@ -93,10 +95,10 @@ namespace Caravela.Framework.Impl.CodeModel
                 typeSymbol.ToRef(),
                 s => new NamedType( (INamedTypeSymbol) s.GetSymbol( this.Compilation ), this._compilationModel ) );
 
-        public IGenericParameter GetGenericParameter( ITypeParameterSymbol typeParameterSymbol )
-            => (GenericParameter) this._cache.GetOrAdd(
+        public ITypeParameter GetGenericParameter( ITypeParameterSymbol typeParameterSymbol )
+            => (TypeParameter) this._cache.GetOrAdd(
                 typeParameterSymbol.ToRef(),
-                tp => new GenericParameter( (ITypeParameterSymbol) tp.GetSymbol( this.Compilation ), this._compilationModel ) );
+                tp => new TypeParameter( (ITypeParameterSymbol) tp.GetSymbol( this.Compilation ), this._compilationModel ) );
 
         public IMethod GetMethod( IMethodSymbol methodSymbol )
             => (IMethod) this._cache.GetOrAdd(
@@ -124,12 +126,12 @@ namespace Caravela.Framework.Impl.CodeModel
         public IEvent GetEvent( IEventSymbol @event )
             => (IEvent) this._cache.GetOrAdd( @event.ToRef(), ms => new Event( (IEventSymbol) ms.GetSymbol( this.Compilation ), this._compilationModel ) );
 
-        internal IDeclaration GetDeclaration( ISymbol? symbol, DeclarationSpecialKind kind = DeclarationSpecialKind.Default )
+        internal IDeclaration GetDeclaration( ISymbol? symbol, DeclarationRefTargetKind kind = DeclarationRefTargetKind.Default )
             => symbol switch
             {
                 INamedTypeSymbol namedType => this.GetNamedType( namedType ),
                 IMethodSymbol method =>
-                    kind == DeclarationSpecialKind.ReturnParameter
+                    kind == DeclarationRefTargetKind.Return
                         ? this.GetReturnParameter( method )
                         : method.GetDeclarationKind() == DeclarationKind.Method
                             ? this.GetMethod( method )
@@ -196,15 +198,25 @@ namespace Caravela.Framework.Impl.CodeModel
                 DeclarationRef.FromBuilder( parameterBuilder ),
                 l => new BuiltParameter( (IParameterBuilder) l.Target!, this._compilationModel ) );
 
-        internal IGenericParameter GetGenericParameter( GenericParameterBuilder genericParameterBuilder )
-            => (IGenericParameter) this._cache.GetOrAdd(
-                DeclarationRef.FromBuilder( genericParameterBuilder ),
-                l => new BuiltGenericParameter( (GenericParameterBuilder) l.Target!, this._compilationModel ) );
+        internal ITypeParameter GetGenericParameter( TypeParameterBuilder typeParameterBuilder )
+            => (ITypeParameter) this._cache.GetOrAdd(
+                DeclarationRef.FromBuilder( typeParameterBuilder ),
+                l => new BuiltTypeParameter( (TypeParameterBuilder) l.Target!, this._compilationModel ) );
 
         internal IMethod GetMethod( MethodBuilder methodBuilder )
             => (IMethod) this._cache.GetOrAdd(
                 DeclarationRef.FromBuilder( methodBuilder ),
                 l => new BuiltMethod( (MethodBuilder) l.Target!, this._compilationModel ) );
+
+        internal IMethod GetMethod( AccessorBuilder methodBuilder )
+            => (IMethod) this._cache.GetOrAdd(
+                DeclarationRef.FromBuilder( methodBuilder ),
+                valueFactory: l =>
+                {
+                    var builder = (AccessorBuilder) l.Target!;
+
+                    return ((IMemberWithAccessors) this.GetDeclaration( builder.ContainingMember )).GetAccessor( builder.MethodKind )!;
+                } );
 
         internal IField GetField( IFieldBuilder fieldBuilder )
             => (IField) this._cache.GetOrAdd(
@@ -230,7 +242,8 @@ namespace Caravela.Framework.Impl.CodeModel
                 EventBuilder eventBuilder => this.GetEvent( eventBuilder ),
                 IParameterBuilder parameterBuilder => this.GetParameter( parameterBuilder ),
                 AttributeBuilder attributeBuilder => this.GetAttribute( attributeBuilder ),
-                GenericParameterBuilder genericParameterBuilder => this.GetGenericParameter( genericParameterBuilder ),
+                TypeParameterBuilder genericParameterBuilder => this.GetGenericParameter( genericParameterBuilder ),
+                AccessorBuilder accessorBuilder => this.GetMethod( accessorBuilder ),
 
                 // This is for linker tests (fake builders), which resolve to themselves.
                 // ReSharper disable once SuspiciousTypeConversion.Global
@@ -287,5 +300,8 @@ namespace Caravela.Framework.Impl.CodeModel
         public IParameter GetReturnParameter( IMethodSymbol methodSymbol ) => this.GetMethod( methodSymbol ).ReturnParameter;
 
         private Compilation Compilation => this._compilationModel.RoslynCompilation;
+
+        public Type GetReflectionType( ITypeSymbol typeSymbol )
+            => this._compilationModel.Project.ServiceProvider.GetService<SystemTypeResolver>().GetCompileTimeType( typeSymbol, true ).AssertNotNull();
     }
 }

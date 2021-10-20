@@ -11,7 +11,7 @@ namespace Caravela.Framework.Code.SyntaxBuilders
     /// Compile-time object that allows to build a run-time array. Items of the array are run-time expressions.
     /// </summary>
     [CompileTimeOnly]
-    public sealed class ArrayBuilder : IExpressionBuilder
+    public sealed class ArrayBuilder : INotNullExpressionBuilder
     {
         private readonly List<object?> _items = new();
 

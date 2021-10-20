@@ -103,11 +103,13 @@ namespace Caravela.Framework.Impl.Fabrics
         protected abstract class BaseBuilder<T> : IAmender<T>
             where T : class, IDeclaration
         {
+            private readonly FabricDriver _parent;
             private readonly IAspectBuilderInternal _aspectBuilder;
             private readonly AspectProjectConfiguration _context;
 
-            protected BaseBuilder( T target, AspectProjectConfiguration context, IAspectBuilderInternal aspectBuilder )
+            protected BaseBuilder( FabricDriver parent, T target, AspectProjectConfiguration context, IAspectBuilderInternal aspectBuilder )
             {
+                this._parent = parent;
                 this._aspectBuilder = aspectBuilder;
                 this._context = context;
                 this.Target = target;
@@ -124,6 +126,7 @@ namespace Caravela.Framework.Impl.Fabrics
             public IDeclarationSelection<TChild> WithMembers<TChild>( Func<T, IEnumerable<TChild>> selector )
                 where TChild : class, IDeclaration
                 => new DeclarationSelection<TChild>(
+                    new AspectPredecessor( AspectPredecessorKind.Fabric, this._parent.Fabric ),
                     this.RegisterAspectSource,
                     compilation =>
                     {

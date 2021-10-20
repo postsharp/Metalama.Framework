@@ -33,8 +33,6 @@ namespace Caravela.Framework.Impl.Fabrics
             this.AspectClasses = ImmutableArray.Create( aspectClass );
         }
 
-        public AspectSourcePriority Priority => AspectSourcePriority.Programmatic;
-
         public ImmutableArray<IAspectClass> AspectClasses { get; }
 
         public IEnumerable<IDeclaration> GetExclusions( INamedType aspectType ) => Array.Empty<IDeclaration>();

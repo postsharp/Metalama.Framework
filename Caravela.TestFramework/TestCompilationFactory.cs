@@ -37,7 +37,13 @@ namespace Caravela.TestFramework
             IEnumerable<Assembly>? additionalAssemblies = null,
             bool addCaravelaReferences = true )
         {
-            var standardLibraries = new[] { "netstandard" }
+#if NET5_0
+            var standardLibrariesNames = new[] { "netstandard" };
+#else
+            var standardLibrariesNames = new[] { "netstandard", "mscorlib" };
+#endif
+
+            var standardLibraries = standardLibrariesNames
                 .Select( r => MetadataReference.CreateFromFile( Path.Combine( Path.GetDirectoryName( typeof(object).Assembly.Location )!, r + ".dll" ) ) )
                 .ToList();
 

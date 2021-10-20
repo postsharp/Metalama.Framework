@@ -10,7 +10,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 {
     internal partial class AccessorBuilder
     {
-        private abstract class ParameterBase : DeclarationBuilder, IParameterBuilder
+        internal abstract class ParameterBase : DeclarationBuilder, IParameterBuilder
         {
             protected AccessorBuilder Accessor { get; }
 

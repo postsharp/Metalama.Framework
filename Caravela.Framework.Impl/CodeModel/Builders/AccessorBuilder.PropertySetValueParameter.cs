@@ -14,25 +14,18 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
             public override IType Type
             {
-                get =>
-                    this.Accessor._containingDeclaration switch
-                    {
-                        PropertyBuilder propertyBuilder => propertyBuilder.Type,
-                        FieldBuilder fieldBuilder => fieldBuilder.Type,
-                        _ => throw new AssertionFailedException(),
-                    };
-
+                get => ((IHasType) this.Accessor.ContainingMember).Type;
                 set => throw new NotSupportedException( "Cannot directly change accessor's parameter type." );
             }
 
             public override RefKind RefKind
             {
-                get =>
-                    this.Accessor._containingDeclaration switch
+                get
+                    => this.Accessor.ContainingMember switch
                     {
                         PropertyBuilder propertyBuilder => propertyBuilder.RefKind,
                         FieldBuilder => RefKind.None,
-                        _ => throw new AssertionFailedException(),
+                        _ => throw new AssertionFailedException()
                     };
 
                 set => throw new NotSupportedException( "Cannot directly change accessor's parameter reference kind." );

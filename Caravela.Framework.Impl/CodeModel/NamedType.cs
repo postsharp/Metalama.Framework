@@ -9,7 +9,6 @@ using Caravela.Framework.Impl.CodeModel.References;
 using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
-using Caravela.Framework.Impl.ReflectionMocks;
 using Caravela.Framework.Impl.Transformations;
 using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
@@ -100,7 +99,7 @@ namespace Caravela.Framework.Impl.CodeModel
             }
         }
 
-        public Type ToType() => CompileTimeType.Create( this );
+        public Type ToType() => this.GetCompilationModel().Factory.GetReflectionType( this.TypeSymbol );
 
         public bool? IsReferenceType => this.TypeSymbol.IsReferenceType;
 
@@ -239,7 +238,7 @@ namespace Caravela.Framework.Impl.CodeModel
             => new GenericParameterList(
                 this,
                 this.TypeSymbol.TypeParameters
-                    .Select( DeclarationRef.FromSymbol<IGenericParameter> ) );
+                    .Select( DeclarationRef.FromSymbol<ITypeParameter> ) );
 
         [Memo]
         public INamespace Namespace => this.Compilation.Factory.GetNamespace( this.TypeSymbol.ContainingNamespace );

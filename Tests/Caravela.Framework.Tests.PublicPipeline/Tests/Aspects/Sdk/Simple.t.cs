@@ -1,8 +1,8 @@
-class TargetCode
+internal class TargetCode
 {
 // Rewritten.
     [Aspect]
-    int TransformedMethod( int a ) => 0;
+    private int TransformedMethod( int a ) => 0;
         
-    int NotTransformedMethod( int a ) => 0;
+    private int NotTransformedMethod( int a ) => 0;
 }

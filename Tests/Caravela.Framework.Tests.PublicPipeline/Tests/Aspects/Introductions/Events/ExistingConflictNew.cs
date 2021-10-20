@@ -1,328 +1,326 @@
 ﻿using System;
 using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
-using Caravela.TestFramework;
 
 namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Events.ExistingConflictNew
 {
-    public class IntroductionAttribute : Attribute, IAspect<INamedType>
+    public class IntroductionAttribute : TypeAspect
     {
-        [Introduce(WhenExists = OverrideStrategy.New)]
+        [Introduce( WhenExists = OverrideStrategy.New )]
         public event EventHandler BaseClassEvent
         {
             add
             {
-                Console.WriteLine("This is introduced event.");
+                Console.WriteLine( "This is introduced event." );
                 meta.Proceed();
             }
 
             remove
             {
-                Console.WriteLine("This is introduced event.");
+                Console.WriteLine( "This is introduced event." );
                 meta.Proceed();
             }
         }
 
-        [Introduce(WhenExists = OverrideStrategy.New)]
+        [Introduce( WhenExists = OverrideStrategy.New )]
         public static event EventHandler BaseClassEvent_Static
         {
             add
             {
-                Console.WriteLine("This is introduced event.");
+                Console.WriteLine( "This is introduced event." );
                 meta.Proceed();
             }
 
             remove
             {
-                Console.WriteLine("This is introduced event.");
+                Console.WriteLine( "This is introduced event." );
                 meta.Proceed();
             }
         }
 
-        [Introduce(WhenExists = OverrideStrategy.New)]
+        [Introduce( WhenExists = OverrideStrategy.New )]
         public event EventHandler HiddenBaseClassEvent
         {
             add
             {
-                Console.WriteLine("This is introduced event.");
+                Console.WriteLine( "This is introduced event." );
                 meta.Proceed();
             }
 
             remove
             {
-                Console.WriteLine("This is introduced event.");
+                Console.WriteLine( "This is introduced event." );
                 meta.Proceed();
             }
         }
 
-        [Introduce(WhenExists = OverrideStrategy.New)]
+        [Introduce( WhenExists = OverrideStrategy.New )]
         public static event EventHandler HiddenBaseClassEvent_Static
         {
             add
             {
-                Console.WriteLine("This is introduced event.");
+                Console.WriteLine( "This is introduced event." );
                 meta.Proceed();
             }
 
             remove
             {
-                Console.WriteLine("This is introduced event.");
+                Console.WriteLine( "This is introduced event." );
                 meta.Proceed();
             }
         }
 
-        [Introduce(WhenExists = OverrideStrategy.New)]
+        [Introduce( WhenExists = OverrideStrategy.New )]
         public event EventHandler HiddenBaseClassVirtualEvent
         {
             add
             {
-                Console.WriteLine("This is introduced event.");
+                Console.WriteLine( "This is introduced event." );
                 meta.Proceed();
             }
 
             remove
             {
-                Console.WriteLine("This is introduced event.");
+                Console.WriteLine( "This is introduced event." );
                 meta.Proceed();
             }
         }
 
-        [Introduce(WhenExists = OverrideStrategy.New)]
+        [Introduce( WhenExists = OverrideStrategy.New )]
         public event EventHandler HiddenVirtualBaseClassVirtualEvent
         {
             add
             {
-                Console.WriteLine("This is introduced event.");
+                Console.WriteLine( "This is introduced event." );
                 meta.Proceed();
             }
 
             remove
             {
-                Console.WriteLine("This is introduced event.");
+                Console.WriteLine( "This is introduced event." );
                 meta.Proceed();
             }
         }
 
-        [Introduce(WhenExists = OverrideStrategy.New)]
+        [Introduce( WhenExists = OverrideStrategy.New )]
         public event EventHandler BaseClassVirtualEvent
         {
             add
             {
-                Console.WriteLine("This is introduced event.");
+                Console.WriteLine( "This is introduced event." );
                 meta.Proceed();
             }
 
             remove
             {
-                Console.WriteLine("This is introduced event.");
+                Console.WriteLine( "This is introduced event." );
                 meta.Proceed();
             }
         }
 
-        [Introduce(WhenExists = OverrideStrategy.New)]
+        [Introduce( WhenExists = OverrideStrategy.New )]
         public event EventHandler BaseClassVirtualSealedEvent
         {
             add
             {
-                Console.WriteLine("This is introduced event.");
+                Console.WriteLine( "This is introduced event." );
                 meta.Proceed();
             }
 
             remove
             {
-                Console.WriteLine("This is introduced event.");
+                Console.WriteLine( "This is introduced event." );
                 meta.Proceed();
             }
         }
 
-        [Introduce(WhenExists = OverrideStrategy.New)]
+        [Introduce( WhenExists = OverrideStrategy.New )]
         public event EventHandler BaseClassVirtualOverridenEvent
         {
             add
             {
-                Console.WriteLine("This is introduced event.");
+                Console.WriteLine( "This is introduced event." );
                 meta.Proceed();
             }
 
             remove
             {
-                Console.WriteLine("This is introduced event.");
+                Console.WriteLine( "This is introduced event." );
                 meta.Proceed();
             }
         }
 
-        [Introduce(WhenExists = OverrideStrategy.New)]
+        [Introduce( WhenExists = OverrideStrategy.New )]
         public event EventHandler BaseClassAbstractEvent
         {
             add
             {
-                Console.WriteLine("This is introduced event.");
+                Console.WriteLine( "This is introduced event." );
                 meta.Proceed();
             }
 
             remove
             {
-                Console.WriteLine("This is introduced event.");
+                Console.WriteLine( "This is introduced event." );
                 meta.Proceed();
             }
         }
 
-        [Introduce(WhenExists = OverrideStrategy.New)]
+        [Introduce( WhenExists = OverrideStrategy.New )]
         public event EventHandler BaseClassAbstractSealedEvent
         {
             add
             {
-                Console.WriteLine("This is introduced event.");
+                Console.WriteLine( "This is introduced event." );
                 meta.Proceed();
             }
 
             remove
             {
-                Console.WriteLine("This is introduced event.");
+                Console.WriteLine( "This is introduced event." );
                 meta.Proceed();
             }
         }
 
-        [Introduce(WhenExists = OverrideStrategy.New)]
+        [Introduce( WhenExists = OverrideStrategy.New )]
         public event EventHandler DerivedClassEvent
         {
             add
             {
-                Console.WriteLine("This is introduced event.");
+                Console.WriteLine( "This is introduced event." );
                 meta.Proceed();
             }
 
             remove
             {
-                Console.WriteLine("This is introduced event.");
+                Console.WriteLine( "This is introduced event." );
                 meta.Proceed();
             }
         }
 
-        [Introduce(WhenExists = OverrideStrategy.New)]
+        [Introduce( WhenExists = OverrideStrategy.New )]
         public static event EventHandler DerivedClassEvent_Static
         {
             add
             {
-                Console.WriteLine("This is introduced event.");
+                Console.WriteLine( "This is introduced event." );
                 meta.Proceed();
             }
 
             remove
             {
-                Console.WriteLine("This is introduced event.");
+                Console.WriteLine( "This is introduced event." );
                 meta.Proceed();
             }
         }
 
-        [Introduce(WhenExists = OverrideStrategy.New)]
+        [Introduce( WhenExists = OverrideStrategy.New )]
         public event EventHandler DerivedClassVirtualEvent
         {
             add
             {
-                Console.WriteLine("This is introduced event.");
+                Console.WriteLine( "This is introduced event." );
                 meta.Proceed();
             }
 
             remove
             {
-                Console.WriteLine("This is introduced event.");
+                Console.WriteLine( "This is introduced event." );
                 meta.Proceed();
             }
         }
 
-        [Introduce(WhenExists = OverrideStrategy.New)]
+        [Introduce( WhenExists = OverrideStrategy.New )]
         public event EventHandler DerivedClassVirtualSealedEvent
         {
             add
             {
-                Console.WriteLine("This is introduced event.");
+                Console.WriteLine( "This is introduced event." );
                 meta.Proceed();
             }
 
             remove
             {
-                Console.WriteLine("This is introduced event.");
+                Console.WriteLine( "This is introduced event." );
                 meta.Proceed();
             }
         }
 
-        [Introduce(WhenExists = OverrideStrategy.New)]
+        [Introduce( WhenExists = OverrideStrategy.New )]
         public event EventHandler ExistingEvent
         {
             add
             {
-                Console.WriteLine("This is introduced event.");
+                Console.WriteLine( "This is introduced event." );
                 meta.Proceed();
             }
 
             remove
             {
-                Console.WriteLine("This is introduced event.");
+                Console.WriteLine( "This is introduced event." );
                 meta.Proceed();
             }
         }
 
-        [Introduce(WhenExists = OverrideStrategy.New)]
+        [Introduce( WhenExists = OverrideStrategy.New )]
         public static event EventHandler ExistingEvent_Static
         {
             add
             {
-                Console.WriteLine("This is introduced event.");
+                Console.WriteLine( "This is introduced event." );
                 meta.Proceed();
             }
 
             remove
             {
-                Console.WriteLine("This is introduced event.");
+                Console.WriteLine( "This is introduced event." );
                 meta.Proceed();
             }
         }
 
-        [Introduce(WhenExists = OverrideStrategy.New)]
+        [Introduce( WhenExists = OverrideStrategy.New )]
         public event EventHandler ExistingVirtualEvent
         {
             add
             {
-                Console.WriteLine("This is introduced event.");
+                Console.WriteLine( "This is introduced event." );
                 meta.Proceed();
             }
 
             remove
             {
-                Console.WriteLine("This is introduced event.");
+                Console.WriteLine( "This is introduced event." );
                 meta.Proceed();
             }
         }
 
-        [Introduce(WhenExists = OverrideStrategy.New)]
+        [Introduce( WhenExists = OverrideStrategy.New )]
         public event EventHandler NonExistentEvent
         {
             add
             {
-                Console.WriteLine("This is introduced event.");
+                Console.WriteLine( "This is introduced event." );
                 meta.Proceed();
             }
 
             remove
             {
-                Console.WriteLine("This is introduced event.");
+                Console.WriteLine( "This is introduced event." );
                 meta.Proceed();
             }
         }
 
-        [Introduce(WhenExists = OverrideStrategy.New)]
+        [Introduce( WhenExists = OverrideStrategy.New )]
         public static event EventHandler NonExistentEvent_Static
         {
             add
             {
-                Console.WriteLine("This is introduced event.");
+                Console.WriteLine( "This is introduced event." );
                 meta.Proceed();
             }
 
             remove
             {
-                Console.WriteLine("This is introduced event.");
+                Console.WriteLine( "This is introduced event." );
                 meta.Proceed();
             }
         }
@@ -334,12 +332,12 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Events.Exist
         {
             add
             {
-                Console.WriteLine("This is original event.");
+                Console.WriteLine( "This is original event." );
             }
 
             remove
             {
-                Console.WriteLine("This is original event.");
+                Console.WriteLine( "This is original event." );
             }
         }
 
@@ -347,12 +345,12 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Events.Exist
         {
             add
             {
-                Console.WriteLine("This is original event.");
+                Console.WriteLine( "This is original event." );
             }
 
             remove
             {
-                Console.WriteLine("This is original event.");
+                Console.WriteLine( "This is original event." );
             }
         }
 
@@ -360,12 +358,12 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Events.Exist
         {
             add
             {
-                Console.WriteLine("This is original event.");
+                Console.WriteLine( "This is original event." );
             }
 
             remove
             {
-                Console.WriteLine("This is original event.");
+                Console.WriteLine( "This is original event." );
             }
         }
 
@@ -373,12 +371,12 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Events.Exist
         {
             add
             {
-                Console.WriteLine("This is original event.");
+                Console.WriteLine( "This is original event." );
             }
 
             remove
             {
-                Console.WriteLine("This is original event.");
+                Console.WriteLine( "This is original event." );
             }
         }
 
@@ -386,12 +384,12 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Events.Exist
         {
             add
             {
-                Console.WriteLine("This is original event.");
+                Console.WriteLine( "This is original event." );
             }
 
             remove
             {
-                Console.WriteLine("This is original event.");
+                Console.WriteLine( "This is original event." );
             }
         }
 
@@ -399,12 +397,12 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Events.Exist
         {
             add
             {
-                Console.WriteLine("This is original event.");
+                Console.WriteLine( "This is original event." );
             }
 
             remove
             {
-                Console.WriteLine("This is original event.");
+                Console.WriteLine( "This is original event." );
             }
         }
 
@@ -412,12 +410,12 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Events.Exist
         {
             add
             {
-                Console.WriteLine("This is original event.");
+                Console.WriteLine( "This is original event." );
             }
 
             remove
             {
-                Console.WriteLine("This is original event.");
+                Console.WriteLine( "This is original event." );
             }
         }
 
@@ -425,12 +423,12 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Events.Exist
         {
             add
             {
-                Console.WriteLine("This is original event.");
+                Console.WriteLine( "This is original event." );
             }
 
             remove
             {
-                Console.WriteLine("This is original event.");
+                Console.WriteLine( "This is original event." );
             }
         }
 
@@ -438,12 +436,12 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Events.Exist
         {
             add
             {
-                Console.WriteLine("This is original event.");
+                Console.WriteLine( "This is original event." );
             }
 
             remove
             {
-                Console.WriteLine("This is original event.");
+                Console.WriteLine( "This is original event." );
             }
         }
 
@@ -458,12 +456,12 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Events.Exist
         {
             add
             {
-                Console.WriteLine("This is original event.");
+                Console.WriteLine( "This is original event." );
             }
 
             remove
             {
-                Console.WriteLine("This is original event.");
+                Console.WriteLine( "This is original event." );
             }
         }
 
@@ -471,12 +469,12 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Events.Exist
         {
             add
             {
-                Console.WriteLine("This is original event.");
+                Console.WriteLine( "This is original event." );
             }
 
             remove
             {
-                Console.WriteLine("This is original event.");
+                Console.WriteLine( "This is original event." );
             }
         }
 
@@ -484,12 +482,12 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Events.Exist
         {
             add
             {
-                Console.WriteLine("This is original event.");
+                Console.WriteLine( "This is original event." );
             }
 
             remove
             {
-                Console.WriteLine("This is original event.");
+                Console.WriteLine( "This is original event." );
             }
         }
 
@@ -497,12 +495,12 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Events.Exist
         {
             add
             {
-                Console.WriteLine("This is original event.");
+                Console.WriteLine( "This is original event." );
             }
 
             remove
             {
-                Console.WriteLine("This is original event.");
+                Console.WriteLine( "This is original event." );
             }
         }
 
@@ -510,12 +508,12 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Events.Exist
         {
             add
             {
-                Console.WriteLine("This is original event.");
+                Console.WriteLine( "This is original event." );
             }
 
             remove
             {
-                Console.WriteLine("This is original event.");
+                Console.WriteLine( "This is original event." );
             }
         }
 
@@ -523,12 +521,12 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Events.Exist
         {
             add
             {
-                Console.WriteLine("This is original event.");
+                Console.WriteLine( "This is original event." );
             }
 
             remove
             {
-                Console.WriteLine("This is original event.");
+                Console.WriteLine( "This is original event." );
             }
         }
 
@@ -536,12 +534,12 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Events.Exist
         {
             add
             {
-                Console.WriteLine("This is original event.");
+                Console.WriteLine( "This is original event." );
             }
 
             remove
             {
-                Console.WriteLine("This is original event.");
+                Console.WriteLine( "This is original event." );
             }
         }
 
@@ -549,12 +547,12 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Events.Exist
         {
             add
             {
-                Console.WriteLine("This is original event.");
+                Console.WriteLine( "This is original event." );
             }
 
             remove
             {
-                Console.WriteLine("This is original event.");
+                Console.WriteLine( "This is original event." );
             }
         }
 
@@ -562,12 +560,12 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Events.Exist
         {
             add
             {
-                Console.WriteLine("This is original event.");
+                Console.WriteLine( "This is original event." );
             }
 
             remove
             {
-                Console.WriteLine("This is original event.");
+                Console.WriteLine( "This is original event." );
             }
         }
 
@@ -575,12 +573,12 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Events.Exist
         {
             add
             {
-                Console.WriteLine("This is original event.");
+                Console.WriteLine( "This is original event." );
             }
 
             remove
             {
-                Console.WriteLine("This is original event.");
+                Console.WriteLine( "This is original event." );
             }
         }
 
@@ -588,12 +586,12 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Events.Exist
         {
             add
             {
-                Console.WriteLine("This is original event.");
+                Console.WriteLine( "This is original event." );
             }
 
             remove
             {
-                Console.WriteLine("This is original event.");
+                Console.WriteLine( "This is original event." );
             }
         }
 
@@ -601,12 +599,12 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Events.Exist
         {
             add
             {
-                Console.WriteLine("This is original event.");
+                Console.WriteLine( "This is original event." );
             }
 
             remove
             {
-                Console.WriteLine("This is original event.");
+                Console.WriteLine( "This is original event." );
             }
         }
     }
@@ -619,12 +617,12 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Events.Exist
         {
             add
             {
-                Console.WriteLine("This is original event.");
+                Console.WriteLine( "This is original event." );
             }
 
             remove
             {
-                Console.WriteLine("This is original event.");
+                Console.WriteLine( "This is original event." );
             }
         }
 
@@ -632,12 +630,12 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Events.Exist
         {
             add
             {
-                Console.WriteLine("This is original event.");
+                Console.WriteLine( "This is original event." );
             }
 
             remove
             {
-                Console.WriteLine("This is original event.");
+                Console.WriteLine( "This is original event." );
             }
         }
 
@@ -645,12 +643,12 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Events.Exist
         {
             add
             {
-                Console.WriteLine("This is original event.");
+                Console.WriteLine( "This is original event." );
             }
 
             remove
             {
-                Console.WriteLine("This is original event.");
+                Console.WriteLine( "This is original event." );
             }
         }
     }

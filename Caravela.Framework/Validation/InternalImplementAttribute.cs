@@ -16,15 +16,15 @@ namespace Caravela.Framework.Validation
     /// (The enforcement of this attribute is not implemented.) 
     /// </summary>
     [AttributeUsage( AttributeTargets.Interface )]
-    public class InternalImplementAttribute : Attribute, IAspect<INamedType>
+    public class InternalImplementAttribute : TypeAspect
     {
-        public void BuildEligibility( IEligibilityBuilder<INamedType> builder )
+        public override void BuildEligibility( IEligibilityBuilder<INamedType> builder )
             =>
 
                 // Coverage: Ignore
                 builder.MustHaveAccessibility( Accessibility.Public );
 
-        public void BuildAspect( IAspectBuilder<INamedType> builder )
+        public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
             /*
             builder.AddReferenceValidator<INamedType, Validator>( builder.Target, new[] { DeclarationReferenceKind.ImplementsInterface } );
@@ -47,6 +47,6 @@ namespace Caravela.Framework.Validation
         
         */
 
-        public void BuildAspectClass( IAspectClassBuilder builder ) { }
+        public override void BuildAspectClass( IAspectClassBuilder builder ) { }
     }
 }

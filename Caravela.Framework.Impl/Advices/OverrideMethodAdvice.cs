@@ -14,7 +14,7 @@ namespace Caravela.Framework.Impl.Advices
         public TemplateMember<IMethod> Template { get; }
 
         public OverrideMethodAdvice(
-            AspectInstance aspect,
+            IAspectInstanceInternal aspect,
             TemplateClassInstance templateInstance,
             IMethod targetDeclaration,
             TemplateMember<IMethod> template,

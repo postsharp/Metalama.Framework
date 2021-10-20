@@ -42,7 +42,7 @@
             $(RestoreAdditionalProjectSources);$(MSBuildThisFileDirectory)..\..\Caravela.Compiler\artifacts\packages\Release\Shipping
          </RestoreAdditionalProjectSources>
     </PropertyGroup>
-
+    
     <!-- Public strong name keys used by InternalsVisibleTo. -->
 
     <PropertyGroup>

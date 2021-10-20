@@ -1,58 +1,61 @@
 ﻿using System;
 using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
-using Caravela.TestFramework;
 
 namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Properties.ExistingConflictOverride
 {
-    public class IntroductionAttribute : Attribute, IAspect<INamedType>
+    public class IntroductionAttribute : TypeAspect
     {
-        [Introduce(WhenExists = OverrideStrategy.Override)]
+        [Introduce( WhenExists = OverrideStrategy.Override )]
         public int ExistingBaseProperty
         {
             get
             {
-                Console.WriteLine("This is introduced property.");
+                Console.WriteLine( "This is introduced property." );
+
                 return meta.Proceed();
             }
         }
 
-        [Introduce(WhenExists = OverrideStrategy.Override)]
+        [Introduce( WhenExists = OverrideStrategy.Override )]
         public int ExistingProperty
         {
             get
             {
-                Console.WriteLine("This is introduced property.");
+                Console.WriteLine( "This is introduced property." );
+
                 return meta.Proceed();
             }
         }
 
-        [Introduce(WhenExists = OverrideStrategy.Override)]
+        [Introduce( WhenExists = OverrideStrategy.Override )]
         public static int ExistingProperty_Static
         {
             get
             {
-                Console.WriteLine("This is introduced property.");
+                Console.WriteLine( "This is introduced property." );
+
                 return meta.Proceed();
             }
         }
 
-        [Introduce(WhenExists = OverrideStrategy.Override)]
+        [Introduce( WhenExists = OverrideStrategy.Override )]
         public int NotExistingProperty
         {
             get
             {
-                Console.WriteLine("This is introduced property.");
+                Console.WriteLine( "This is introduced property." );
+
                 return meta.Proceed();
             }
         }
 
-        [Introduce(WhenExists = OverrideStrategy.Override)]
+        [Introduce( WhenExists = OverrideStrategy.Override )]
         public static int NotExistingProperty_Static
         {
             get
             {
-                Console.WriteLine("This is introduced property.");
+                Console.WriteLine( "This is introduced property." );
+
                 return meta.Proceed();
             }
         }

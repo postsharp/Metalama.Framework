@@ -1,30 +1,35 @@
-﻿using Caravela.Framework.Aspects;
+﻿using System;
+using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
-using Caravela.TestFramework;
-using System;
+using Caravela.Framework.Eligibility;
 
 namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.NoProceed
 {
-    [AttributeUsage(AttributeTargets.Property, AllowMultiple = true)]
+    [AttributeUsage( AttributeTargets.Property, AllowMultiple = true )]
     public class OverrideAttribute : Attribute, IAspect<IProperty>
     {
-        void IAspect<IProperty>.BuildAspect(IAspectBuilder<IProperty> builder)
+        void IAspect<IProperty>.BuildAspect( IAspectBuilder<IProperty> builder )
         {
-            builder.Advices.OverrideFieldOrPropertyAccessors(builder.Target, nameof(GetTemplate), nameof(SetTemplate));
+            builder.Advices.OverrideFieldOrPropertyAccessors( builder.Target, nameof(GetTemplate), nameof(SetTemplate) );
         }
-        
+
         [Template]
         public dynamic? GetTemplate()
         {
-            Console.WriteLine("This is the overridden getter.");
+            Console.WriteLine( "This is the overridden getter." );
+
             return default;
         }
 
         [Template]
         public void SetTemplate()
         {
-            Console.WriteLine("This is the overridden setter.");
+            Console.WriteLine( "This is the overridden setter." );
         }
+
+        public void BuildAspectClass( IAspectClassBuilder builder ) { }
+
+        public void BuildEligibility( IEligibilityBuilder<IProperty> builder ) { }
     }
 
     // <target>
@@ -37,12 +42,12 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
         {
             get
             {
-                return this._field;
+                return _field;
             }
 
             set
             {
-                this._field = value;
+                _field = value;
             }
         }
     }

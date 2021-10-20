@@ -25,7 +25,7 @@ namespace Caravela.Framework.Impl.Advices
         public IEventBuilder Builder => this.MemberBuilder;
 
         public IntroduceEventAdvice(
-            AspectInstance aspect,
+            IAspectInstanceInternal aspect,
             TemplateClassInstance templateInstance,
             INamedType targetDeclaration,
             string? explicitName,

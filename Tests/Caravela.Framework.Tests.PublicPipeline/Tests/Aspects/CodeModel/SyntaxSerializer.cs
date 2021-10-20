@@ -1,3 +1,5 @@
+// @RequiredConstant(NET5_0) - Slight differences in .NET Framework due to nullability annotations 
+
 using System.Linq;
 using System.Reflection;
 using Caravela.Framework.Aspects;

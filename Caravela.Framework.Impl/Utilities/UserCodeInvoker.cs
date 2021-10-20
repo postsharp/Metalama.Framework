@@ -3,48 +3,37 @@
 
 using Caravela.Framework.Project;
 using System;
-using System.Collections.Generic;
 
 namespace Caravela.Framework.Impl.Utilities
 {
-    internal class UserCodeInvoker : IService
+    /// <summary>
+    /// An implementation of <see cref="CodeInvoker"/> that switches the <see cref="UserCodeExecutionContext"/>
+    /// and optionally invokes an <see cref="IUserCodeInvokerHook"/> (this hook is used by Try Caravela).
+    /// </summary>
+    internal class UserCodeInvoker : CodeInvoker, IService
     {
         private readonly IUserCodeInvokerHook? _hook;
+        private readonly UserCodeExecutionContext _executionContext;
 
-        public UserCodeInvoker( IServiceProvider? serviceProvider )
+        public UserCodeInvoker( IServiceProvider serviceProvider )
         {
-            this._hook = serviceProvider?.GetOptionalService<IUserCodeInvokerHook>();
+            this._hook = serviceProvider.GetOptionalService<IUserCodeInvokerHook>();
+            this._executionContext = serviceProvider.GetService<UserCodeExecutionContext>();
         }
 
-        public IEnumerable<T> Wrap<T>( IEnumerable<T> enumerable )
+        public override T Invoke<T>( Func<T> func )
         {
-            var enumerator = this.Invoke( enumerable.GetEnumerator );
-
-            while ( this.Invoke( enumerator.MoveNext ) )
+            using ( UserCodeExecutionContext.EnterContext( this._executionContext ) )
             {
-                yield return this.Invoke( () => enumerator.Current );
-            }
-        }
-
-        public T Invoke<T>( Func<T> func )
-        {
-            if ( this._hook != null )
-            {
-                return this._hook.Invoke( func );
-            }
-            else
-            {
-                return func();
-            }
-        }
-
-        public void Invoke( Action action )
-            => this.Invoke(
-                () =>
+                if ( this._hook != null )
                 {
-                    action();
-
-                    return true;
-                } );
+                    return this._hook.Invoke( func );
+                }
+                else
+                {
+                    return func();
+                }
+            }
+        }
     }
 }

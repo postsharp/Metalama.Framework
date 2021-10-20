@@ -135,9 +135,11 @@ namespace Caravela.Framework.Impl.Aspects
         /// <param name="aspect">The instance of the aspect class.</param>
         /// <param name="target">The declaration on which the aspect was applied.</param>
         /// <returns></returns>
-        public AspectInstance CreateAspectInstance( IAspect aspect, IDeclaration target ) => new( aspect, target, this );
+        public AspectInstance CreateAspectInstance( IAspect aspect, IDeclaration target, in AspectPredecessor predecessor )
+            => new( aspect, target, this, predecessor );
 
-        public AspectInstance CreateDefaultAspectInstance( IDeclaration target ) => new( (IAspect) Activator.CreateInstance( this.AspectType ), target, this );
+        public AspectInstance CreateDefaultAspectInstance( IDeclaration target, in AspectPredecessor predecessor )
+            => new( (IAspect) Activator.CreateInstance( this.AspectType ), target, this, predecessor );
 
         /// <summary>
         /// Creates an instance of the <see cref="AspectClass"/> class.
@@ -204,7 +206,7 @@ namespace Caravela.Framework.Impl.Aspects
                 IPropertySymbol => typeof(IProperty),
                 IEventSymbol => typeof(IEvent),
                 IFieldSymbol => typeof(IField),
-                ITypeSymbol { TypeKind: TypeKind.TypeParameter } => typeof(IGenericParameter),
+                ITypeSymbol { TypeKind: TypeKind.TypeParameter } => typeof(ITypeParameter),
                 INamedTypeSymbol => typeof(INamedType),
                 IParameterSymbol => typeof(IParameter),
                 _ => null

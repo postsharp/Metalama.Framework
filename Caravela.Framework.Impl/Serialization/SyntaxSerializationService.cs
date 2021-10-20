@@ -88,6 +88,16 @@ namespace Caravela.Framework.Impl.Serialization
             this.RegisterSerializer( new CompileTimeReturnParameterInfoSerializer( this ) );
             this.RegisterSerializer( new CompileTimeFieldOrPropertyInfoSerializer( this ) );
 
+            // Tuples.
+            this.RegisterSerializer( new ValueTupleSerializer.Size1( this ) );
+            this.RegisterSerializer( new ValueTupleSerializer.Size2( this ) );
+            this.RegisterSerializer( new ValueTupleSerializer.Size3( this ) );
+            this.RegisterSerializer( new ValueTupleSerializer.Size4( this ) );
+            this.RegisterSerializer( new ValueTupleSerializer.Size5( this ) );
+            this.RegisterSerializer( new ValueTupleSerializer.Size6( this ) );
+            this.RegisterSerializer( new ValueTupleSerializer.Size7( this ) );
+            this.RegisterSerializer( new ValueTupleSerializer.Size8( this ) );
+
             // Dynamic syntax
             this.RegisterSerializer( new ExpressionBuilderSerializer( this ) );
             this.RegisterSerializer( new ExpressionSerializer( this ) );

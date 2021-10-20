@@ -15,14 +15,14 @@ namespace Caravela.Framework.Aspects
     /// </summary>
     /// <seealso href="@overriding-methods"/>
     [AttributeUsage( AttributeTargets.Method )]
-    public abstract class OverrideMethodAspect : Attribute, IAspect<IMethod>
+    public abstract class OverrideMethodAspect : MethodAspect
     {
         private bool _useEnumerableTemplateForAnyEnumerable;
         private bool _useAsyncTemplateForAnyAwaitable;
         private bool _buildAspectCalled;
 
         /// <inheritdoc />
-        public virtual void BuildAspect( IAspectBuilder<IMethod> builder )
+        public override void BuildAspect( IAspectBuilder<IMethod> builder )
         {
             this.EnsureBuildAspectNotCalled();
 
@@ -89,7 +89,7 @@ namespace Caravela.Framework.Aspects
             }
         }
 
-        public virtual void BuildEligibility( IEligibilityBuilder<IMethod> builder ) => builder.ExceptForInheritance().MustBeNonAbstract();
+        public override void BuildEligibility( IEligibilityBuilder<IMethod> builder ) => builder.ExceptForInheritance().MustBeNonAbstract();
 
         [Template]
         [Abstract]
@@ -112,8 +112,6 @@ namespace Caravela.Framework.Aspects
         [Abstract]
         public virtual IAsyncEnumerator<dynamic?> OverrideAsyncEnumeratorMethod() => throw new NotSupportedException();
 #endif
-
-        public virtual void BuildAspectClass( IAspectClassBuilder builder ) { }
 
         /// <summary>
         /// Default template of the new method implementation.

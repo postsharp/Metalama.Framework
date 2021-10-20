@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Tests.Integration.Aspects.Initialize.AddChildAspect;
@@ -7,9 +8,9 @@ using Caravela.Framework.Tests.Integration.Aspects.Initialize.AddChildAspect;
 
 namespace Caravela.Framework.Tests.Integration.Aspects.Initialize.AddChildAspect
 {
-    internal class Aspect1 : Attribute, IAspect<INamedType>
+    internal class Aspect1 : TypeAspect
     {
-        public void BuildAspect( IAspectBuilder<INamedType> builder )
+        public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
             builder.WithMembers( t => t.Methods ).AddAspect( _ => new Aspect2( "Hello, world." ) );
         }
@@ -27,6 +28,7 @@ namespace Caravela.Framework.Tests.Integration.Aspects.Initialize.AddChildAspect
         public override dynamic? OverrideMethod()
         {
             Console.WriteLine( _value );
+            Console.WriteLine( meta.AspectInstance.Predecessors.Single().Instance.ToString() );
 
             return meta.Proceed();
         }

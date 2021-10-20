@@ -8,9 +8,9 @@ using Caravela.TestFramework;
 namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Properties.PromoteSource
 {
     [AttributeUsage(AttributeTargets.Field)]
-    public class PromoteAttribute : Attribute, IAspect<IFieldOrProperty>
+    public class PromoteAttribute : FieldOrPropertyAspect
     {
-        public void BuildAspect(IAspectBuilder<IFieldOrProperty> builder)
+        public override void BuildAspect(IAspectBuilder<IFieldOrProperty> builder)
         {
             builder.Advices.OverrideFieldOrProperty(builder.Target, nameof(Template));
         }

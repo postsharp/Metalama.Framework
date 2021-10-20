@@ -4,5 +4,6 @@ internal class TargetCode
 
         private string Method2( string s ) {
     global::System.Console.WriteLine("overridden");
+    global::System.Console.WriteLine("Caravela.Framework.Tests.PublicPipeline.Aspects.Fabrics.ProjectFabricAddAspects.Fabric");
 return s;};
     }

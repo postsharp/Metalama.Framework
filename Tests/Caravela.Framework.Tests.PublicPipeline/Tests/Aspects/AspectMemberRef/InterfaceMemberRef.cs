@@ -1,17 +1,14 @@
 using System;
-using System.ComponentModel;
 using Caravela.Framework.Aspects;
-using Caravela.TestFramework;
 using Caravela.Framework.Code;
 
 #pragma warning disable CS0067
 
 namespace Caravela.Framework.IntegrationTests.Aspects.AspectMemberRef.InterfaceMemberRef
 {
-
-    public class IntroduceAttribute : Attribute, IAspect<INamedType>
+    public class IntroduceAttribute : TypeAspect
     {
-        public void BuildAspect( IAspectBuilder<INamedType> builder )
+        public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
             builder.Advices.ImplementInterface( builder.Target, typeof(IInterface) );
         }
@@ -19,40 +16,34 @@ namespace Caravela.Framework.IntegrationTests.Aspects.AspectMemberRef.InterfaceM
         [Framework.Aspects.Introduce]
         public void SomeMethod()
         {
-            this.Method();
-            this.Property = this.Property + 1;
-            this.Event += this.EventHandler;
+            Method();
+            Property = Property + 1;
+            Event += EventHandler;
         }
 
         [Framework.Aspects.Introduce]
-        void EventHandler( object? sender, EventArgs a ) { }
+        private void EventHandler( object? sender, EventArgs a ) { }
 
         [InterfaceMember]
-        void Method()
-        {
-            
-        }
+        private void Method() { }
 
         [InterfaceMember]
         private int Property { get; set; }
 
         [InterfaceMember]
         private event EventHandler? Event;
-
     }
 
-    interface IInterface
+    internal interface IInterface
     {
         void Method();
+
         int Property { get; set; }
 
         event EventHandler Event;
     }
-    
+
     // <target>
     [Introduce]
-    class Program
-    {
-
-    }
+    internal class Program { }
 }

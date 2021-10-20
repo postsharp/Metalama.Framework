@@ -17,7 +17,8 @@ namespace Caravela.Framework.Impl.CompileTime
     internal class CompileTimeProjectManifest
     {
         public CompileTimeProjectManifest(
-            string assemblyName,
+            string runTimeAssemblyIdentity,
+            string compileTimeAssemblyName,
             IReadOnlyList<string> aspectTypes,
             IReadOnlyList<string> plugInTypes,
             IReadOnlyList<string> fabricTypes,
@@ -26,7 +27,8 @@ namespace Caravela.Framework.Impl.CompileTime
             ulong sourceHash,
             IReadOnlyList<CompileTimeFile> files )
         {
-            this.AssemblyName = assemblyName;
+            this.RunTimeAssemblyIdentity = runTimeAssemblyIdentity;
+            this.CompileTimeAssemblyName = compileTimeAssemblyName;
             this.AspectTypes = aspectTypes;
             this.PlugInTypes = plugInTypes;
             this.FabricTypes = fabricTypes;
@@ -36,7 +38,9 @@ namespace Caravela.Framework.Impl.CompileTime
             this.Files = files;
         }
 
-        public string AssemblyName { get; }
+        public string RunTimeAssemblyIdentity { get; }
+
+        public string CompileTimeAssemblyName { get; }
 
         /// <summary>
         /// Gets the list of all aspect types (specified by fully qualified name) of the aspect library.

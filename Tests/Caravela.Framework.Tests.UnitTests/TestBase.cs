@@ -22,7 +22,7 @@ namespace Caravela.Framework.Tests.UnitTests
         /// can easily be produced.
         /// </summary>
         private const bool _doCodeExecutionTests = false;
-        
+
         private readonly Func<ServiceProvider, ServiceProvider> _addServices;
 
         protected TestBase( Func<ServiceProvider, ServiceProvider>? addServices = null )

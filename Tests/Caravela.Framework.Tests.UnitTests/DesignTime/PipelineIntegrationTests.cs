@@ -166,17 +166,15 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Eligibility;
 
-class MyAspect : System.Attribute, IAspect<IMethod>
+class MyAspect : MethodAspect
 {
    private static readonly DiagnosticDefinition<int> _description = new(""MY001"", Severity.Warning, ""My Message $version$,{0}"" );
    public int Version;
 
-   public void BuildAspect( IAspectBuilder<IMethod> aspectBuilder )
+   public override void BuildAspect( IAspectBuilder<IMethod> aspectBuilder )
    {
         aspectBuilder.Diagnostics.Report( _description, this.Version );
    }
-
-public void BuildEligibility( IEligibilityBuilder<IMethod> builder ) { }
 }
 ";
 
@@ -340,7 +338,7 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Eligibility;
 
-class MyAspect : System.Attribute, IAspect<INamedType>
+class MyAspect : TypeAspect
 {
    [Introduce]
    public void NewProperty() { }

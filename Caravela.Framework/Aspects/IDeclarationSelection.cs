@@ -21,19 +21,19 @@ namespace Caravela.Framework.Aspects
         /// <summary>
         /// Adds an aspect to the current set of declarations. This overload allows adding inherited aspects.
         /// </summary>
-        void AddAspect<TAspect>( Func<TDeclaration, Expression<Func<TAspect>>> createAspect )
+        IDeclarationSelection<TDeclaration> AddAspect<TAspect>( Func<TDeclaration, Expression<Func<TAspect>>> createAspect )
             where TAspect : Attribute, IAspect<TDeclaration>;
 
         /// <summary>
         /// Adds an aspect to the current set of declarations. This overload does not allow adding inherited aspects.
         /// </summary>
-        void AddAspect<TAspect>( Func<TDeclaration, TAspect> createAspect )
+        IDeclarationSelection<TDeclaration> AddAspect<TAspect>( Func<TDeclaration, TAspect> createAspect )
             where TAspect : Attribute, IAspect<TDeclaration>;
 
         /// <summary>
         /// Adds an aspect to the current set of declarations using the default constructor of the aspect type.
         /// </summary>
-        void AddAspect<TAspect>()
+        IDeclarationSelection<TDeclaration> AddAspect<TAspect>()
             where TAspect : Attribute, IAspect<TDeclaration>, new();
 
         /// <summary>
@@ -41,14 +41,14 @@ namespace Caravela.Framework.Aspects
         /// is not present, this method adds a new instance of the aspect (if any) by using the default aspect constructor.
         /// </summary>
         /// <remarks>
-        /// <para>Calling this method causes the current aspect to be present in the <see cref="IAspectLayerBuilder.UpstreamAspects"/> list
+        /// <para>Calling this method causes the current aspect to be present in the <see cref="IAspectInstance.Predecessors"/> list
         /// even if the required aspect was already present on the target declaration.</para>
         /// </remarks>
         /// <param name="target">The target declaration. It must be contained in the current type.</param>
         /// <typeparam name="TTarget">Type of the target declaration.</typeparam>
         /// <typeparam name="TAspect">Type of the aspect. The type must be ordered after the aspect type calling this method.</typeparam>
         [Obsolete( "Not implemented." )]
-        void RequireAspect<TTarget, TAspect>( TTarget target )
+        IDeclarationSelection<TDeclaration> RequireAspect<TTarget, TAspect>( TTarget target )
             where TTarget : class, IDeclaration
             where TAspect : IAspect<TTarget>, new();
 
@@ -59,7 +59,7 @@ namespace Caravela.Framework.Aspects
         /// <typeparam name="TAspect">The type of the aspect for which the annotation is meant.</typeparam>
         /// <typeparam name="TAnnotation">The type of the annotation.</typeparam>
         [Obsolete( "Not implemented." )]
-        void AddAnnotation<TAspect, TAnnotation>( Func<TDeclaration, TAnnotation> getAnnotation )
+        IDeclarationSelection<TDeclaration> AddAnnotation<TAspect, TAnnotation>( Func<TDeclaration, TAnnotation> getAnnotation )
             where TAspect : IAspect
             where TAnnotation : IAnnotation<TDeclaration, TAspect>, IEligible<TDeclaration>;
     }

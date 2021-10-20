@@ -4,8 +4,10 @@
 using Caravela.Framework.Code;
 using Caravela.Framework.Code.DeclarationBuilders;
 using Caravela.Framework.Impl.CodeModel.Builders;
+using Caravela.Framework.Impl.Linking;
 using Microsoft.CodeAnalysis;
 using System;
+using System.Collections.Immutable;
 
 namespace Caravela.Framework.Impl.CodeModel.References
 {
@@ -74,9 +76,9 @@ namespace Caravela.Framework.Impl.CodeModel.References
             where T : class, ICompilationElement
             => new( symbol );
 
-        public static DeclarationRef<IDeclaration> ReturnParameter( IMethodSymbol methodSymbol ) => new( methodSymbol, DeclarationSpecialKind.ReturnParameter );
+        public static DeclarationRef<IDeclaration> ReturnParameter( IMethodSymbol methodSymbol ) => new( methodSymbol, DeclarationRefTargetKind.Return );
 
-        internal static DeclarationRef<IDeclaration> Compilation() => new( null, DeclarationSpecialKind.Compilation );
+        internal static DeclarationRef<IDeclaration> Assembly() => new( null, DeclarationRefTargetKind.Assembly );
     }
 
     /// <summary>
@@ -86,11 +88,9 @@ namespace Caravela.Framework.Impl.CodeModel.References
     internal readonly struct DeclarationRef<T> : IDeclarationRef<T>
         where T : class, ICompilationElement
     {
-        private readonly DeclarationSpecialKind _kind;
-
-        internal DeclarationRef( ISymbol? symbol, DeclarationSpecialKind kind = DeclarationSpecialKind.Default )
+        internal DeclarationRef( ISymbol? symbol, DeclarationRefTargetKind targetKind = DeclarationRefTargetKind.Default )
         {
-            this._kind = kind;
+            this.TargetKind = targetKind;
 
             if ( symbol != null )
             {
@@ -103,41 +103,91 @@ namespace Caravela.Framework.Impl.CodeModel.References
         internal DeclarationRef( IDeclarationBuilder builder )
         {
             this.Target = builder;
-            this._kind = DeclarationSpecialKind.Default;
+            this.TargetKind = DeclarationRefTargetKind.Default;
         }
 
-        private DeclarationRef( object? target, DeclarationSpecialKind kind )
+        private DeclarationRef( object? target, DeclarationRefTargetKind targetKind )
         {
             this.Target = target;
-            this._kind = kind;
+            this.TargetKind = targetKind;
         }
 
         internal DeclarationRef( string documentationId )
         {
             this.Target = documentationId;
-            this._kind = DeclarationSpecialKind.Default;
+            this.TargetKind = DeclarationRefTargetKind.Default;
         }
 
-        public DeclarationRef( SyntaxNode declaration )
+        public DeclarationRef( SyntaxNode? declaration, DeclarationRefTargetKind targetKind, Compilation compilation )
         {
+#if DEBUG
+            if ( declaration != null )
+            {
+                // Check that we have received a node that we can resolve to a symbol
+                var semanticModel = compilation.GetSemanticModel( declaration.SyntaxTree );
+                semanticModel.GetDeclaredSymbol( declaration ).AssertNotNull();
+            }
+#endif
+
             this.Target = declaration;
-            this._kind = DeclarationSpecialKind.Default;
+            this.TargetKind = targetKind;
         }
 
         public object? Target { get; }
 
-        public T Resolve( CompilationModel compilation ) => Resolve( this.Target, compilation, this._kind );
+        public DeclarationRefTargetKind TargetKind { get; }
 
-        public ISymbol GetSymbol( Compilation compilation )
+        public T Resolve( CompilationModel compilation ) => Resolve( this.Target, compilation, this.TargetKind );
+
+        public ( ImmutableArray<AttributeData> Attributes, ISymbol Symbol ) GetAttributeData( Compilation compilation )
+        {
+            if ( this.TargetKind == DeclarationRefTargetKind.Return )
+            {
+                var method = (IMethodSymbol) this.GetSymbolIgnoringKind( compilation );
+
+                return (method.GetReturnTypeAttributes(), method);
+            }
+            else if ( this.TargetKind == DeclarationRefTargetKind.Field )
+            {
+                var target = this.GetSymbolIgnoringKind( compilation );
+
+                if ( target is IEventSymbol )
+                {
+                    // Roslyn does not expose the backing field of an event, so we don't have access to its attributes.
+                    return (ImmutableArray<AttributeData>.Empty, target);
+                }
+            }
+
+            var symbol = this.GetSymbol( compilation );
+
+            return (symbol.GetAttributes(), symbol);
+        }
+
+        public ISymbol GetSymbol( Compilation compilation ) => this.GetSymbolWithKind( this.GetSymbolIgnoringKind( compilation ) );
+
+        private ISymbol GetSymbolIgnoringKind( Compilation compilation )
         {
             switch ( this.Target )
             {
+                case null:
+                    switch ( this.TargetKind )
+                    {
+                        case DeclarationRefTargetKind.Assembly:
+                            return compilation.Assembly;
+
+                        case DeclarationRefTargetKind.Module:
+                            return compilation.SourceModule;
+
+                        default:
+                            throw new AssertionFailedException();
+                    }
+
                 case ISymbol symbol:
                     return symbol;
 
                 case string documentationId:
                     {
-                        var symbol = DocumentationCommentId.GetFirstSymbolForDeclarationId( documentationId, compilation );
+                        var symbol = DocumentationCommentId.GetFirstSymbolForReferenceId( documentationId, compilation );
 
                         if ( symbol == null )
                         {
@@ -154,6 +204,35 @@ namespace Caravela.Framework.Impl.CodeModel.References
 
                 default:
                     throw new InvalidOperationException();
+            }
+        }
+
+        private ISymbol GetSymbolWithKind( ISymbol symbol )
+        {
+            switch ( this.TargetKind )
+            {
+                case DeclarationRefTargetKind.Assembly when symbol is IAssemblySymbol:
+                case DeclarationRefTargetKind.Module when symbol is IModuleSymbol:
+                case DeclarationRefTargetKind.Default:
+                    return symbol;
+
+                case DeclarationRefTargetKind.Return:
+                    throw new InvalidOperationException( "Cannot get a symbol for the method return parameter." );
+
+                case DeclarationRefTargetKind.Field when symbol is IPropertySymbol property:
+                    return property.GetBackingField().AssertNotNull();
+
+                case DeclarationRefTargetKind.Field when symbol is IEventSymbol:
+                    throw new InvalidOperationException( "Cannot get the underlying field of an event." );
+
+                case DeclarationRefTargetKind.Parameter when symbol is IPropertySymbol property:
+                    return property.SetMethod.AssertNotNull().Parameters[0];
+
+                case DeclarationRefTargetKind.Parameter when symbol is IMethodSymbol method:
+                    return method.Parameters[0];
+
+                default:
+                    throw new AssertionFailedException( $"Don't know how to get the symbol kind {this.TargetKind} for a {symbol.Kind}." );
             }
         }
 
@@ -176,12 +255,14 @@ namespace Caravela.Framework.Impl.CodeModel.References
             return symbol;
         }
 
-        internal static T Resolve( object? reference, CompilationModel compilation, DeclarationSpecialKind kind = DeclarationSpecialKind.Default )
+        internal static T Resolve( object? reference, CompilationModel compilation, DeclarationRefTargetKind kind = DeclarationRefTargetKind.Default )
         {
             switch ( reference )
             {
                 case null:
-                    return kind == DeclarationSpecialKind.Compilation ? (T) (object) compilation : throw new AssertionFailedException();
+                    return kind is DeclarationRefTargetKind.Assembly or DeclarationRefTargetKind.Module
+                        ? (T) (object) compilation
+                        : throw new AssertionFailedException();
 
                 case ISymbol symbol:
                     return (T) compilation.Factory.GetDeclaration( symbol.AssertValidType<T>(), kind );
@@ -215,6 +296,8 @@ namespace Caravela.Framework.Impl.CodeModel.References
 
         public DeclarationRef<TOut> Cast<TOut>()
             where TOut : class, ICompilationElement
-            => new( this.Target, this._kind );
+            => new( this.Target, this.TargetKind );
+
+        public override int GetHashCode() => this.Target?.GetHashCode() ?? 0;
     }
 }

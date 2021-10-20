@@ -3,7 +3,6 @@
 
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Diagnostics;
-using Caravela.Framework.Impl.ReflectionMocks;
 using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
@@ -32,7 +31,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public SpecialType SpecialType => this.Symbol.SpecialType.ToOurSpecialType();
 
-        public Type ToType() => CompileTimeType.Create( this );
+        public Type ToType() => this.GetCompilationModel().Factory.GetReflectionType( this.Symbol );
 
         public bool? IsReferenceType => this.Symbol.IsReferenceType;
 

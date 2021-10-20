@@ -1,15 +1,13 @@
 ﻿using System;
 using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
-using Caravela.TestFramework;
 
 #pragma warning disable CS0067
 
 namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Events.ExistingConflictOverrideBaseSealed_EventField
 {
-    public class IntroductionAttribute : Attribute, IAspect<INamedType>
+    public class IntroductionAttribute : TypeAspect
     {
-        [Introduce(WhenExists = OverrideStrategy.Override)]
+        [Introduce( WhenExists = OverrideStrategy.Override )]
         public event EventHandler? ExistingEvent;
     }
 
@@ -19,12 +17,12 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Events.Exist
         {
             add
             {
-                Console.WriteLine("This is original event.");
+                Console.WriteLine( "This is original event." );
             }
 
             remove
             {
-                Console.WriteLine("This is original event.");
+                Console.WriteLine( "This is original event." );
             }
         }
     }
@@ -35,19 +33,17 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Events.Exist
         {
             add
             {
-                Console.WriteLine("This is original event.");
+                Console.WriteLine( "This is original event." );
             }
 
             remove
             {
-                Console.WriteLine("This is original event.");
+                Console.WriteLine( "This is original event." );
             }
         }
     }
 
     // <target>
     [Introduction]
-    internal class TargetClass : DerivedClass
-    {
-    }
+    internal class TargetClass : DerivedClass { }
 }

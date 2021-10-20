@@ -26,6 +26,8 @@ namespace Caravela.Framework.Aspects
 
         IMetaCodeBuilder CodeBuilder { get; }
 
+        IAspectInstance AspectInstance { get; }
+
         /// <summary>
         /// Gets an object that gives <c>dynamic</c> access to the instance members of the type. Equivalent to the <c>this</c> C# keyword.
         /// </summary>

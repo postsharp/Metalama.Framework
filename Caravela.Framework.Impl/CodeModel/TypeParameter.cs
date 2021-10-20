@@ -2,7 +2,6 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
-using Caravela.Framework.Impl.ReflectionMocks;
 using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
@@ -15,13 +14,13 @@ using VarianceKind = Caravela.Framework.Code.VarianceKind;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    internal class GenericParameter : Declaration, IGenericParameter, ITypeInternal
+    internal class TypeParameter : Declaration, ITypeParameter, ITypeInternal
     {
         private readonly ITypeParameterSymbol _typeSymbol;
 
         ITypeSymbol? ISdkType.TypeSymbol => this._typeSymbol;
 
-        internal GenericParameter( ITypeParameterSymbol typeSymbol, CompilationModel compilation ) : base( compilation )
+        internal TypeParameter( ITypeParameterSymbol typeSymbol, CompilationModel compilation ) : base( compilation )
         {
             this._typeSymbol = typeSymbol;
         }
@@ -30,7 +29,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public SpecialType SpecialType => SpecialType.None;
 
-        public Type ToType() => CompileTimeType.Create( this );
+        public Type ToType() => this.GetCompilationModel().Factory.GetReflectionType( this._typeSymbol );
 
         public bool? IsReferenceType => this.IsReferenceTypeImpl();
 
@@ -92,11 +91,11 @@ namespace Caravela.Framework.Impl.CodeModel
         [Memo]
         public override IDeclaration ContainingDeclaration => this.Compilation.Factory.GetDeclaration( this._typeSymbol.ContainingSymbol );
 
-        public override DeclarationKind DeclarationKind => DeclarationKind.GenericParameter;
+        public override DeclarationKind DeclarationKind => DeclarationKind.TypeParameter;
 
         public override ISymbol Symbol => this._typeSymbol;
 
-        DeclarationKind IDeclaration.DeclarationKind => DeclarationKind.GenericParameter;
+        DeclarationKind IDeclaration.DeclarationKind => DeclarationKind.TypeParameter;
 
         ICompilation ICompilationElement.Compilation => this.Compilation;
 

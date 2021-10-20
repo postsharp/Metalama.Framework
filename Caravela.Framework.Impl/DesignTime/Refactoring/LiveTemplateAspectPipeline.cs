@@ -106,8 +106,6 @@ namespace Caravela.Framework.Impl.DesignTime.Refactoring
                 this.AspectClasses = ImmutableArray.Create<IAspectClass>( aspectClass );
             }
 
-            public AspectSourcePriority Priority => AspectSourcePriority.FromAttribute;
-
             public ImmutableArray<IAspectClass> AspectClasses { get; }
 
             public IEnumerable<IDeclaration> GetExclusions( INamedType aspectType ) => Enumerable.Empty<IDeclaration>();
@@ -120,7 +118,7 @@ namespace Caravela.Framework.Impl.DesignTime.Refactoring
             {
                 var targetDeclaration = compilation.Factory.GetDeclaration( this._targetSymbol );
 
-                return new[] { ((AspectClass) aspectClass).CreateDefaultAspectInstance( targetDeclaration ) };
+                return new[] { ((AspectClass) aspectClass).CreateDefaultAspectInstance( targetDeclaration, default ) };
             }
         }
     }

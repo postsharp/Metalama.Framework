@@ -5,8 +5,10 @@ using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Formatting;
 using Caravela.Framework.Impl.Pipeline;
 using Caravela.Framework.Project;
+using Caravela.TestFramework.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -30,10 +32,9 @@ namespace Caravela.TestFramework
     {
         private static readonly Regex _spaceRegex = new( " +", RegexOptions.Compiled );
         private static readonly Regex _newLineRegex = new( "( *[\n|\r])+", RegexOptions.Compiled );
-        private readonly MetadataReference[] _metadataReferences;
         private static readonly AsyncLocal<bool> _isTestRunning = new();
-
-        protected ServiceProvider BaseServiceProvider { get; }
+        private readonly ServiceProvider _baseServiceProvider;
+        private readonly MetadataReference[] _metadataReferences;
 
         protected BaseTestRunner(
             ServiceProvider serviceProvider,
@@ -45,7 +46,7 @@ namespace Caravela.TestFramework
                 .Append( MetadataReference.CreateFromFile( typeof(BaseTestRunner).Assembly.Location ) )
                 .ToArray();
 
-            this.BaseServiceProvider = serviceProvider.WithMark( ServiceProviderMark.Test );
+            this._baseServiceProvider = serviceProvider.WithMark( ServiceProviderMark.Test );
             this.ProjectDirectory = projectDirectory;
             this.Logger = logger;
         }
@@ -72,7 +73,7 @@ namespace Caravela.TestFramework
 
         private async Task RunAndAssertCoreAsync( TestInput testInput )
         {
-            var serviceProvider = this.BaseServiceProvider.WithProjectScopedServices();
+            var serviceProvider = this._baseServiceProvider.WithProjectScopedServices();
             Dictionary<string, object?> state = new( StringComparer.Ordinal );
             using var testResult = new TestResult();
             await this.RunAsync( serviceProvider, testInput, testResult, state );
@@ -82,7 +83,7 @@ namespace Caravela.TestFramework
 
         public Task RunAsync( TestInput testInput, TestResult testResult )
             => this.RunAsync(
-                this.BaseServiceProvider.WithProjectScopedServices(),
+                this._baseServiceProvider.WithProjectScopedServices(),
                 testInput,
                 testResult,
                 new Dictionary<string, object?>( StringComparer.InvariantCulture ) );
@@ -120,9 +121,10 @@ namespace Caravela.TestFramework
 
             try
             {
-                // Source. Note that we don't pass the full path to the Document because it causes call stacks of exceptions to have full paths,
-                // which is more difficult to test.
-                var parseOptions = CSharpParseOptions.Default.WithPreprocessorSymbols( "TESTRUNNER", "CARAVELA" );
+                // Create parse options.
+                var preprocessorSymbols = testInput.ProjectProperties.PreprocessorSymbols.Add( "TESTRUNNER" ).Add( "CARAVELA" );
+
+                var parseOptions = CSharpParseOptions.Default.WithPreprocessorSymbols( preprocessorSymbols );
 
                 var compilationOptions = new CSharpCompilationOptions(
                     OutputKind.DynamicallyLinkedLibrary,
@@ -132,10 +134,18 @@ namespace Caravela.TestFramework
                 var emptyProject = this.CreateProject( testInput.Options ).WithParseOptions( parseOptions ).WithCompilationOptions( compilationOptions );
                 var project = emptyProject;
 
-                Document AddDocument( string fileName, string sourceCode )
+                Document? AddDocument( string fileName, string sourceCode )
                 {
+                    // Note that we don't pass the full path to the Document because it causes call stacks of exceptions to have full paths,
+                    // which is more difficult to test.
                     var parsedSyntaxTree = CSharpSyntaxTree.ParseText( sourceCode, parseOptions, fileName, Encoding.UTF8 );
                     var prunedSyntaxRoot = new InactiveCodeRemover().Visit( parsedSyntaxTree.GetRoot() );
+
+                    if ( prunedSyntaxRoot is CompilationUnitSyntax { Members: { Count: 0 } } )
+                    {
+                        return null;
+                    }
+
                     var transformedSyntaxRoot = this.PreprocessSyntaxRoot( testInput, prunedSyntaxRoot, state );
                     var document = project.AddDocument( fileName, transformedSyntaxRoot, filePath: fileName );
                     project = document.Project;
@@ -145,6 +155,12 @@ namespace Caravela.TestFramework
 
                 var sourceFileName = testInput.TestName + ".cs";
                 var mainDocument = AddDocument( sourceFileName, testInput.SourceCode );
+
+                if ( mainDocument == null )
+                {
+                    // Skip the test.
+                    return;
+                }
 
                 var syntaxTree = (await mainDocument.GetSyntaxTreeAsync())!;
 
@@ -156,16 +172,26 @@ namespace Caravela.TestFramework
                     project.MetadataReferences,
                     (CSharpCompilationOptions?) project.CompilationOptions );
 
+#if NETFRAMEWORK
+                var platformDocument = AddDocument( "Platform.cs", "namespace System.Runtime.CompilerServices { internal static class IsExternalInit {}}" );
+                initialCompilation = initialCompilation.AddSyntaxTrees( (await platformDocument!.GetSyntaxTreeAsync())! );
+#endif
+
                 foreach ( var includedFile in testInput.Options.IncludedFiles )
                 {
                     var includedFullPath = Path.GetFullPath( Path.Combine( Path.GetDirectoryName( testInput.FullPath )!, includedFile ) );
-                    var includedText = await File.ReadAllTextAsync( includedFullPath );
+                    var includedText = File.ReadAllText( includedFullPath );
 
                     if ( !includedFile.EndsWith( ".Dependency.cs", StringComparison.OrdinalIgnoreCase ) )
                     {
                         var includedFileName = Path.GetFileName( includedFullPath );
 
                         var includedDocument = AddDocument( includedFileName, includedText );
+
+                        if ( includedDocument == null )
+                        {
+                            continue;
+                        }
 
                         testResult.AddInputDocument( includedDocument, includedFullPath );
 
@@ -220,7 +246,7 @@ namespace Caravela.TestFramework
             using var domain = new UnloadableCompileTimeDomain();
 
             // Transform with Caravela.
-            var pipeline = new CompileTimeAspectPipeline( this.BaseServiceProvider.WithProjectScopedServices(), true, domain );
+            var pipeline = new CompileTimeAspectPipeline( this._baseServiceProvider.WithProjectScopedServices(), true, domain );
 
             if ( !pipeline.TryExecute(
                 testResult.InputCompilationDiagnostics,
@@ -237,7 +263,7 @@ namespace Caravela.TestFramework
             }
 
             // Emit the binary assembly.
-            var testOptions = this.BaseServiceProvider.GetService<TestProjectOptions>();
+            var testOptions = this._baseServiceProvider.GetService<TestProjectOptions>();
             var outputPath = Path.Combine( testOptions.BaseDirectory, "dependency.dll" );
 
             var emitResult = resultCompilation.Emit( outputPath, manifestResources: outputResources );
@@ -284,7 +310,7 @@ namespace Caravela.TestFramework
         {
             if ( preserveFormatting )
             {
-                return syntaxNode.ToFullString().Replace( "\r\n", "\n", StringComparison.Ordinal );
+                return syntaxNode.ToFullString().ReplaceOrdinal( "\r\n", "\n" );
             }
             else
             {
@@ -344,6 +370,7 @@ namespace Caravela.TestFramework
                 this.ProjectDirectory,
                 "obj",
                 "transformed",
+                testInput.ProjectProperties.TargetFramework,
                 Path.GetDirectoryName( testInput.RelativePath ) ?? "",
                 Path.GetFileNameWithoutExtension( testInput.RelativePath ) + FileExtensions.TransformedCode );
 
@@ -435,6 +462,7 @@ namespace Caravela.TestFramework
                 this.ProjectDirectory!,
                 "obj",
                 "html",
+                testInput.ProjectProperties.TargetFramework,
                 Path.GetDirectoryName( testInput.RelativePath ) ?? "" );
 
             if ( !Directory.Exists( htmlDirectory ) )
@@ -461,7 +489,9 @@ namespace Caravela.TestFramework
                 var outputHtmlPath = Path.Combine( htmlDirectory, testInput.TestName + FileExtensions.OutputHtml );
                 var formattedOutputDocument = testResult.InputProject.AddDocument( "ConsolidatedFormatted.cs", formattedOutput );
 
-                await using ( var outputHtml = File.CreateText( outputHtmlPath ) )
+                var outputHtml = File.CreateText( outputHtmlPath );
+
+                using ( outputHtml.IgnoreAsyncDisposable() )
                 {
                     await htmlCodeWriter.WriteAsync( formattedOutputDocument, outputHtml );
                 }
@@ -484,7 +514,9 @@ namespace Caravela.TestFramework
             this.Logger?.WriteLine( "HTML of input: " + inputHtmlPath );
 
             // Write the input document.
-            await using ( var inputTextWriter = File.CreateText( inputHtmlPath ) )
+            var inputTextWriter = File.CreateText( inputHtmlPath );
+
+            using ( inputTextWriter.IgnoreAsyncDisposable() )
             {
                 await htmlCodeWriter.WriteAsync(
                     testSyntaxTree.InputDocument,
@@ -511,7 +543,7 @@ namespace Caravela.TestFramework
                 var ns = metadataReader.GetString( typeRef.Namespace );
                 var typeName = metadataReader.GetString( typeRef.Name );
 
-                if ( ns.Contains( "Microsoft.CSharp.RuntimeBinder", StringComparison.Ordinal ) &&
+                if ( ns.ContainsOrdinal( "Microsoft.CSharp.RuntimeBinder" ) &&
                      string.Equals( typeName, "CSharpArgumentInfo", StringComparison.Ordinal ) )
                 {
                     var directory = Path.Combine( Path.GetTempPath(), "Caravela", "InvalidAssemblies" );

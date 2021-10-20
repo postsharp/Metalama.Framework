@@ -9,6 +9,7 @@ using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.Formatting;
 using Caravela.Framework.Impl.Serialization;
 using Caravela.Framework.Impl.Templating.MetaModel;
+using Caravela.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -371,5 +372,8 @@ namespace Caravela.Framework.Impl.Templating
                 return operand;
             }
         }
+
+        public static Type GetCompileTimeType( string documentationId, string name )
+            => TemplateExpansionContext.Current.SyntaxGenerationContext.ServiceProvider.GetService<CompileTimeTypeFactory>().Get( documentationId, name );
     }
 }

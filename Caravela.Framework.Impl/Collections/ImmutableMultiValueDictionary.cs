@@ -9,7 +9,7 @@ using System.Linq;
 
 namespace Caravela.Framework.Impl.Collections
 {
-    internal partial class ImmutableMultiValueDictionary<TKey, TValue> : IEnumerable<IGrouping<TKey, TValue>>
+    internal partial class ImmutableMultiValueDictionary<TKey, TValue> : IReadOnlyMultiValueDictionary<TKey, TValue>
         where TKey : notnull
     {
         private readonly ImmutableDictionary<TKey, Group> _dictionary;
@@ -20,6 +20,9 @@ namespace Caravela.Framework.Impl.Collections
         }
 
         public static ImmutableMultiValueDictionary<TKey, TValue> Empty => new( ImmutableDictionary<TKey, Group>.Empty );
+
+        public static ImmutableMultiValueDictionary<TKey, TValue> Create( IEqualityComparer<TKey> comparer )
+            => new( ImmutableDictionary.Create<TKey, Group>( comparer ) );
 
         // Coverage: ignore
         public static ImmutableMultiValueDictionary<TKey, TValue> Create(

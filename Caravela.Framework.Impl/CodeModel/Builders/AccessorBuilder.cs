@@ -18,14 +18,14 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 {
     internal partial class AccessorBuilder : DeclarationBuilder, IMethodBuilder, IMethodImpl
     {
-        private readonly MemberBuilder _containingDeclaration;
+        public MemberBuilder ContainingMember { get; }
 
         private Accessibility? _accessibility;
 
         public AccessorBuilder( MemberBuilder containingDeclaration, MethodKind methodKind )
             : base( containingDeclaration.ParentAdvice )
         {
-            this._containingDeclaration = containingDeclaration;
+            this.ContainingMember = containingDeclaration;
             this._accessibility = null;
             this.MethodKind = methodKind;
         }
@@ -36,8 +36,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
             {
                 (PropertyBuilder _, MethodKind.PropertyGet) => new PropertyGetReturnParameter( this ),
                 (PropertyBuilder _, MethodKind.PropertySet) => new VoidReturnParameter( this ),
-                (FieldBuilder _, MethodKind.PropertyGet ) => new PropertyGetReturnParameter( this ),
-                (FieldBuilder _, MethodKind.PropertySet ) => new VoidReturnParameter( this ),
+                (FieldBuilder _, MethodKind.PropertyGet) => new PropertyGetReturnParameter( this ),
+                (FieldBuilder _, MethodKind.PropertySet) => new VoidReturnParameter( this ),
                 (EventBuilder _, _) => new EventReturnParameter( this ),
                 _ => throw new AssertionFailedException()
             };
@@ -69,7 +69,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
             {
                 (PropertyBuilder propertyBuilder, MethodKind.PropertyGet) => propertyBuilder.OverriddenProperty?.GetMethod.AssertNotNull(),
                 (PropertyBuilder propertyBuilder, MethodKind.PropertySet) => propertyBuilder.OverriddenProperty?.SetMethod.AssertNotNull(),
-                (FieldBuilder _, _ ) => null,
+                (FieldBuilder _, _) => null,
                 (EventBuilder eventBuilder, MethodKind.EventAdd) => eventBuilder.OverriddenEvent?.AddMethod.AssertNotNull(),
                 (EventBuilder eventBuilder, MethodKind.EventRemove) => eventBuilder.OverriddenEvent?.RemoveMethod.AssertNotNull(),
                 _ => throw new AssertionFailedException()
@@ -82,14 +82,14 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         [Memo]
         public ParameterBuilderList Parameters
-            => (this._containingDeclaration, this.MethodKind) switch
+            => (this.ContainingMember, this.MethodKind) switch
             {
                 // TODO: Indexer parameters (need to have special IParameterList implementation that would mirror adding parameters to the indexer property).
                 (IProperty property, MethodKind.PropertyGet) when property.Parameters.Count == 0 => new ParameterBuilderList(),
                 (IProperty property, MethodKind.PropertySet) when property.Parameters.Count == 0 =>
                     new ParameterBuilderList( new[] { new PropertySetValueParameter( this, 0 ) } ),
-                (FieldBuilder _, MethodKind.PropertyGet ) => new ParameterBuilderList(),
-                (FieldBuilder _, MethodKind.PropertySet ) => new ParameterBuilderList( new[] { new PropertySetValueParameter( this, 0 ) } ),
+                (FieldBuilder _, MethodKind.PropertyGet) => new ParameterBuilderList(),
+                (FieldBuilder _, MethodKind.PropertySet) => new ParameterBuilderList( new[] { new PropertySetValueParameter( this, 0 ) } ),
                 (IEvent _, _) =>
                     new ParameterBuilderList( new[] { new EventValueParameter( this ) } ),
                 _ => throw new AssertionFailedException()
@@ -99,7 +99,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public Accessibility Accessibility
         {
-            get => this._accessibility ?? this._containingDeclaration.Accessibility;
+            get => this._accessibility ?? this.ContainingMember.Accessibility;
 
             set
             {
@@ -146,10 +146,10 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
             get
                 => this.MethodKind switch
                 {
-                    MethodKind.PropertyGet => $"get_{this._containingDeclaration.Name}",
-                    MethodKind.PropertySet => $"set_{this._containingDeclaration.Name}",
-                    MethodKind.EventAdd => $"add_{this._containingDeclaration.Name}",
-                    MethodKind.EventRemove => $"remove_{this._containingDeclaration.Name}",
+                    MethodKind.PropertyGet => $"get_{this.ContainingMember.Name}",
+                    MethodKind.PropertySet => $"set_{this.ContainingMember.Name}",
+                    MethodKind.EventAdd => $"add_{this.ContainingMember.Name}",
+                    MethodKind.EventRemove => $"remove_{this.ContainingMember.Name}",
                     _ => throw new AssertionFailedException()
                 };
             set => throw new NotSupportedException();
@@ -157,35 +157,35 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public bool IsStatic
         {
-            get => this._containingDeclaration.IsStatic;
+            get => this.ContainingMember.IsStatic;
             set => throw new NotSupportedException( "Cannot directly change staticity of an accessor." );
         }
 
         public bool IsVirtual
         {
-            get => this._containingDeclaration.IsVirtual;
+            get => this.ContainingMember.IsVirtual;
             set => throw new NotSupportedException( "Cannot directly change the IsVirtual property of an accessor." );
         }
 
         public bool IsSealed
         {
-            get => this._containingDeclaration.IsSealed;
+            get => this.ContainingMember.IsSealed;
             set => throw new NotSupportedException( "Cannot directly change the IsSealed property of an accessor." );
         }
 
-        public bool IsAbstract => this._containingDeclaration.IsAbstract;
+        public bool IsAbstract => this.ContainingMember.IsAbstract;
 
         public bool IsReadOnly => false;
 
-        public bool IsOverride => this._containingDeclaration.IsOverride;
+        public bool IsOverride => this.ContainingMember.IsOverride;
 
-        public bool IsNew => this._containingDeclaration.IsNew;
+        public bool IsNew => this.ContainingMember.IsNew;
 
         public bool IsAsync => false;
 
-        public INamedType DeclaringType => this._containingDeclaration.DeclaringType;
+        public INamedType DeclaringType => this.ContainingMember.DeclaringType;
 
-        public override IDeclaration? ContainingDeclaration => this._containingDeclaration;
+        public override IDeclaration? ContainingDeclaration => this.ContainingMember;
 
         public override DeclarationKind DeclarationKind => DeclarationKind.Method;
 
@@ -203,7 +203,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         bool IMemberOrNamedType.IsSealed => this.IsSealed;
 
-        public IGenericParameterBuilder AddGenericParameter( string name ) => throw new NotSupportedException( "Cannot add generic parameters to accessors." );
+        public ITypeParameterBuilder AddTypeParameter( string name ) => throw new NotSupportedException( "Cannot add generic parameters to accessors." );
 
         public IParameterBuilder AddParameter( string name, IType type, RefKind refKind = RefKind.None, TypedConstant defaultValue = default )
             => throw new NotSupportedException( "Cannot directly add parameters to accessors." );
@@ -221,7 +221,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                     => propertyBuilder.ExplicitInterfaceImplementations.Select( p => p.GetMethod ).AssertNoneNull().ToArray(),
                 (PropertyBuilder propertyBuilder, MethodKind.PropertySet)
                     => propertyBuilder.ExplicitInterfaceImplementations.Select( p => p.SetMethod ).AssertNoneNull().ToArray(),
-                (FieldBuilder _, _ ) => Array.Empty<IMethod>(),
+                (FieldBuilder _, _) => Array.Empty<IMethod>(),
                 (EventBuilder eventBuilder, MethodKind.EventAdd)
                     => eventBuilder.ExplicitInterfaceImplementations.Select( p => p.AddMethod ).AssertNoneNull().ToArray(),
                 (EventBuilder eventBuilder, MethodKind.EventRemove)
@@ -233,13 +233,13 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public MethodInfo ToMethodInfo() => throw new NotImplementedException();
 
-        IMemberWithAccessors? IMethod.DeclaringMember => (IMemberWithAccessors) this._containingDeclaration;
+        IMemberWithAccessors? IMethod.DeclaringMember => (IMemberWithAccessors) this.ContainingMember;
 
         public System.Reflection.MethodBase ToMethodBase() => throw new NotImplementedException();
 
         public MemberInfo ToMemberInfo() => throw new NotImplementedException();
 
         public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
-            => this._containingDeclaration.ToDisplayString( this.MethodKind, format, context );
+            => this.ContainingMember.ToDisplayString( this.MethodKind, format, context );
     }
 }

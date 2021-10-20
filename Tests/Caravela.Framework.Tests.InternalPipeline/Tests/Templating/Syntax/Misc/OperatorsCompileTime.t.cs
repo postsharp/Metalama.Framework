@@ -1,12 +1,22 @@
-
+private object Method( int a, int b )
 {
-    Console.WriteLine(2);
-    Console.WriteLine((false, true));
-    Console.WriteLine(true);
-    Console.WriteLine("42");
-    Console.WriteLine(sizeof(bool));
-    Console.WriteLine(typeof(int));
-    object result;
-    result = a + b;
-    return result;
+    unchecked
+    {
+    }
+
+    checked
+    {
+    }
+
+    string s = default;
+    s ??= "42";
+    s = s[0..2];
+    global::System.Console.WriteLine(2);
+    global::System.Console.WriteLine((false, true));
+    global::System.Console.WriteLine(true);
+    global::System.Console.WriteLine(s);
+    global::System.Console.WriteLine(sizeof(bool));
+    global::System.Console.WriteLine(typeof(global::System.Int32));
+    var result = this.Method(a, b);
+    return (global::System.Object)result;
 }

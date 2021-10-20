@@ -12,12 +12,10 @@ namespace Caravela.Framework.Aspects
     /// </summary>
     /// <seealso href="@overriding-events"/>
     [AttributeUsage( AttributeTargets.Event )]
-    public abstract class OverrideEventAspect : Attribute, IAspect<IEvent>
+    public abstract class OverrideEventAspect : EventAspect
     {
-        public virtual void BuildAspectClass( IAspectClassBuilder builder ) { }
-
         /// <inheritdoc />
-        public virtual void BuildAspect( IAspectBuilder<IEvent> builder )
+        public override void BuildAspect( IAspectBuilder<IEvent> builder )
         {
             builder.Advices.OverrideEventAccessors(
                 builder.Target,
@@ -37,7 +35,7 @@ namespace Caravela.Framework.Aspects
         // [Template]
         // public abstract void OverrideInvoke( dynamic handler );
 
-        public virtual void BuildEligibility( IEligibilityBuilder<IEvent> builder )
+        public override void BuildEligibility( IEligibilityBuilder<IEvent> builder )
         {
             builder.ExceptForInheritance().MustBeNonAbstract();
         }

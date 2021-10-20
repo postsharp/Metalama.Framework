@@ -19,7 +19,7 @@ namespace Caravela.Framework.Impl.Advices
         public TemplateMember<IMethod> SetTemplate { get; }
 
         public OverrideFieldOrPropertyAdvice(
-            AspectInstance aspect,
+            IAspectInstanceInternal aspect,
             TemplateClassInstance templateInstance,
             IFieldOrProperty targetDeclaration,
             TemplateMember<IProperty> propertyTemplate,
