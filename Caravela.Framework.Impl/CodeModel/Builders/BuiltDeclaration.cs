@@ -63,7 +63,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public bool CanBeInherited => this.Builder.CanBeInherited;
 
-        public IEnumerable<IDeclaration> GetDerivedDeclarations() => throw new NotImplementedException();
+        public IEnumerable<IDeclaration> GetDerivedDeclarations( bool deep = true ) => throw new NotImplementedException();
 
         public override string ToString() => this.Builder.ToString();
 

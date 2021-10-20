@@ -116,7 +116,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public abstract bool CanBeInherited { get; }
 
-        public abstract IEnumerable<IDeclaration> GetDerivedDeclarations();
+        public abstract IEnumerable<IDeclaration> GetDerivedDeclarations( bool deep = true );
 
         [Memo]
         public IDeclaration OriginalDefinition => this.Compilation.Factory.GetDeclaration( this.Symbol.OriginalDefinition );

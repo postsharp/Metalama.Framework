@@ -45,12 +45,12 @@ namespace Caravela.Framework.Impl.CodeModel
             ImmutableArray<ResourceDescription> resources = default )
             => new( project, PartialCompilation.CreatePartial( compilation, syntaxTree, resources ) );
 
-        private readonly ImmutableMultiValueDictionary<DeclarationRef<IDeclaration>, IObservableTransformation> _transformations;
+        private readonly ImmutableDictionaryOfArray<DeclarationRef<IDeclaration>, IObservableTransformation> _transformations;
 
         // This collection index all attributes on types and members, but not attributes on the assembly and the module.
-        private readonly ImmutableMultiValueDictionary<string, AttributeRef> _allMemberAttributesByTypeName;
+        private readonly ImmutableDictionaryOfArray<string, AttributeRef> _allMemberAttributesByTypeName;
 
-        private readonly ImmutableMultiValueDictionary<DeclarationRef<IDeclaration>, IAspectInstance> _aspects;
+        private readonly ImmutableDictionaryOfArray<DeclarationRef<IDeclaration>, IAspectInstance> _aspects;
 
         private readonly int _revision;
 
@@ -76,7 +76,7 @@ namespace Caravela.Framework.Impl.CodeModel
             this.InvariantComparer = new DeclarationEqualityComparer( this.ReflectionMapper, this.RoslynCompilation );
             this._derivedTypes = partialCompilation.DerivedTypes;
 
-            this._transformations = ImmutableMultiValueDictionary<DeclarationRef<IDeclaration>, IObservableTransformation>
+            this._transformations = ImmutableDictionaryOfArray<DeclarationRef<IDeclaration>, IObservableTransformation>
                 .Empty
                 .WithKeyComparer( DeclarationRefEqualityComparer<DeclarationRef<IDeclaration>>.Instance );
 
@@ -91,7 +91,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
             this._allMemberAttributesByTypeName = attributeDiscoveryVisitor.GetDiscoveredAttributes();
 
-            this._aspects = ImmutableMultiValueDictionary<DeclarationRef<IDeclaration>, IAspectInstance>.Empty;
+            this._aspects = ImmutableDictionaryOfArray<DeclarationRef<IDeclaration>, IAspectInstance>.Empty;
             this.SymbolClassifier = project.ServiceProvider.GetService<SymbolClassificationService>().GetClassifier( this.RoslynCompilation );
             this.EmptyGenericMap = new GenericMap( partialCompilation.Compilation );
         }
@@ -237,11 +237,11 @@ namespace Caravela.Framework.Impl.CodeModel
             where T : IAspect
             => this._aspects[declaration.ToRef()].Select( a => a.Aspect ).OfType<T>();
 
-        public IEnumerable<INamedType> GetDerivedTypes( INamedType baseType )
-            => this._derivedTypes.GetDerivedTypes( baseType.GetSymbol() ).Select( t => this.Factory.GetNamedType( t ) );
+        public IEnumerable<INamedType> GetDerivedTypes( INamedType baseType, bool deep )
+            => this._derivedTypes.GetDerivedTypes( baseType.GetSymbol(), deep ).Select( t => this.Factory.GetNamedType( t ) );
 
-        public IEnumerable<INamedType> GetDerivedTypes( Type baseType )
-            => this.GetDerivedTypes( (INamedType) this.Factory.GetTypeByReflectionType( baseType ) );
+        public IEnumerable<INamedType> GetDerivedTypes( Type baseType, bool deep )
+            => this.GetDerivedTypes( (INamedType) this.Factory.GetTypeByReflectionType( baseType ), deep );
 
         // TODO: throw an exception when the caller tries to get aspects that have not been initialized yet.
 
@@ -348,7 +348,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         ImmutableArray<SyntaxReference> IDeclarationImpl.DeclaringSyntaxReferences => ImmutableArray<SyntaxReference>.Empty;
 
-        IEnumerable<IDeclaration> IDeclarationImpl.GetDerivedDeclarations() => Enumerable.Empty<IDeclaration>();
+        IEnumerable<IDeclaration> IDeclarationImpl.GetDerivedDeclarations( bool deep ) => Enumerable.Empty<IDeclaration>();
 
         string IDisplayable.ToDisplayString( CodeDisplayFormat? format, CodeDisplayContext? context ) => this.RoslynCompilation.AssemblyName ?? "";
 

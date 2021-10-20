@@ -34,8 +34,8 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public override bool CanBeInherited => false;
 
-        public override IEnumerable<IDeclaration> GetDerivedDeclarations() => Enumerable.Empty<IDeclaration>();
-        
+        public override IEnumerable<IDeclaration> GetDerivedDeclarations( bool deep = true ) => Enumerable.Empty<IDeclaration>();
+
         [Memo]
         public INamespace? ParentNamespace => this.IsGlobalNamespace ? null : this.Compilation.Factory.GetNamespace( this._symbol.ContainingNamespace );
 

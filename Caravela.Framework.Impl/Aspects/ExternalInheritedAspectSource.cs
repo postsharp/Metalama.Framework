@@ -8,6 +8,7 @@ using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Utilities;
+using Caravela.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -23,18 +24,24 @@ namespace Caravela.Framework.Impl.Aspects
     /// </summary>
     internal class ExternalInheritedAspectSource : IAspectSource
     {
-        private readonly ImmutableMultiValueDictionary<IAspectClass, ISymbol> _inheritedAspects;
+        private readonly ImmutableDictionaryOfArray<IAspectClass, ISymbol> _inheritedAspects;
         private readonly CompileTimeProjectLoader _loader;
 
-        public ExternalInheritedAspectSource( Compilation compilation, ImmutableArray<IAspectClass> aspectTypes, CompileTimeProjectLoader loader )
+        public ExternalInheritedAspectSource(
+            Compilation compilation,
+            ImmutableArray<IAspectClass> aspectClasses,
+            IServiceProvider serviceProvider,
+            CancellationToken cancellationToken )
         {
-            this._loader = loader;
-            var inheritedAspectsBuilder = ImmutableMultiValueDictionary<IAspectClass, ISymbol>.CreateBuilder();
-            var aspectTypesByName = aspectTypes.ToDictionary( t => t.FullName, t => t );
+            this._loader = serviceProvider.GetService<CompileTimeProjectLoader>();
+            var inheritableAspectProvider = serviceProvider.GetOptionalService<IInheritableAspectManifestProvider>();
+
+            var inheritedAspectsBuilder = ImmutableDictionaryOfArray<IAspectClass, ISymbol>.CreateBuilder();
+            var aspectClassesByName = aspectClasses.ToDictionary( t => t.FullName, t => t );
 
             foreach ( var reference in compilation.References )
             {
-                InheritableAspectsManifest? manifest = null;
+                IInheritableAspectsManifest? manifest = null;
 
                 switch ( reference )
                 {
@@ -49,9 +56,10 @@ namespace Caravela.Framework.Impl.Aspects
 
                         break;
 
-                    case CompilationReference:
-                        // This is the design-time scenario.
-                        throw new NotImplementedException();
+                    case CompilationReference compilationReference:
+                        manifest = inheritableAspectProvider?.GetInheritableAspectsManifest( compilationReference.Compilation, cancellationToken );
+
+                        break;
 
                     default:
                         throw new AssertionFailedException( $"Unexpected reference kind: {reference}." );
@@ -59,10 +67,16 @@ namespace Caravela.Framework.Impl.Aspects
 
                 if ( manifest != null )
                 {
-                    inheritedAspectsBuilder.AddRange(
-                        manifest.InheritableAspects,
-                        x => aspectTypesByName[x.Key],
-                        x => x.Value.Select( id => DocumentationCommentId.GetFirstSymbolForReferenceId( id, compilation ).AssertNotNull() ) );
+                    foreach ( var aspectClassName in manifest.InheritableAspectTypes )
+                    {
+                        var aspectClass = aspectClassesByName[aspectClassName];
+
+                        var targets = manifest.GetInheritableAspectTargets( aspectClassName )
+                            .Select( x => DocumentationCommentId.GetFirstSymbolForDeclarationId( x, compilation ) )
+                            .WhereNotNull();
+
+                        inheritedAspectsBuilder.AddRange( aspectClass, targets );
+                    }
                 }
             }
 
@@ -85,7 +99,9 @@ namespace Caravela.Framework.Impl.Aspects
                 var attributeData = baseSymbol.GetAttributes().Single( a => a.AttributeClass?.GetReflectionName() == aspectClass.FullName );
                 var attribute = baseDeclaration.Attributes.Single( a => a.Type.FullName == aspectClass.FullName );
 
-                foreach ( var derived in ((IDeclarationImpl) baseDeclaration).GetDerivedDeclarations() )
+                // We need to provide instances on the first level of derivation only because the caller will add to the next levels.
+
+                foreach ( var derived in ((IDeclarationImpl) baseDeclaration).GetDerivedDeclarations( false ) )
                 {
                     if ( !this._loader.AttributeDeserializer.TryCreateAttribute( attributeData, diagnosticAdder, out var attributeInstance ) )
                     {

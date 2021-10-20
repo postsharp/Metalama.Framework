@@ -30,14 +30,18 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
         /// </summary>
         public ImmutableArray<string> Dependencies { get; }
 
+        public ImmutableArray<(string AspectType, string TargetDeclaration)> InheritableAspects { get; }
+
         public SyntaxTreeResult(
             SyntaxTree syntaxTree,
             ImmutableArray<Diagnostic>? diagnostics,
             ImmutableArray<CacheableScopedSuppression>? suppressions,
             ImmutableArray<IntroducedSyntaxTree>? introductions,
-            ImmutableArray<string>? dependencies )
+            ImmutableArray<string>? dependencies,
+            ImmutableArray<(string AspectType, string TargetDeclaration)>? inheritableAspects )
         {
             this.SyntaxTree = syntaxTree;
+            this.InheritableAspects = inheritableAspects ?? ImmutableArray<(string AspectType, string TargetDeclaration)>.Empty;
             this.Diagnostics = diagnostics ?? ImmutableArray<Diagnostic>.Empty;
             this.Suppressions = suppressions ?? ImmutableArray<CacheableScopedSuppression>.Empty;
             this.Introductions = introductions ?? ImmutableArray<IntroducedSyntaxTree>.Empty;
@@ -45,6 +49,6 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
         }
 
         public override string ToString()
-            => $"FilePath='{this.SyntaxTree.FilePath}, Diagnostics={this.Diagnostics.Length}, Suppressions={this.Suppressions.Length}, Introductions={this.Introductions.Length}";
+            => $"FilePath='{this.SyntaxTree.FilePath}, Diagnostics={this.Diagnostics.Length}, Suppressions={this.Suppressions.Length}, Introductions={this.Introductions.Length}, InheritableAspects={this.InheritableAspects.Length}";
     }
 }

@@ -5,7 +5,6 @@ using Caravela.Compiler;
 using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
-using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -163,11 +162,6 @@ namespace Caravela.Framework.Impl.CodeModel
             IReadOnlyList<SyntaxTree> syntaxTrees,
             ImmutableArray<ResourceDescription> resources = default )
         {
-            if ( syntaxTrees.Count == 0 )
-            {
-                throw new ArgumentOutOfRangeException();
-            }
-
             var closure = GetClosure( compilation, syntaxTrees );
 
             return new PartialImpl(
@@ -236,11 +230,13 @@ namespace Caravela.Framework.Impl.CodeModel
                     // Add base types recursively.
                     if ( type.BaseType != null )
                     {
+                        derivedTypesBuilder.AddDerivedType( type.BaseType.OriginalDefinition, type );
                         AddTypeRecursive( type.BaseType.OriginalDefinition );
                     }
 
                     foreach ( var interfaceImpl in type.Interfaces )
                     {
+                        derivedTypesBuilder.AddDerivedType( interfaceImpl.OriginalDefinition, type );
                         AddTypeRecursive( interfaceImpl.OriginalDefinition );
                     }
                 }

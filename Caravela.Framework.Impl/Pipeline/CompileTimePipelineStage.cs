@@ -28,7 +28,7 @@ namespace Caravela.Framework.Impl.Pipeline
         }
 
         /// <inheritdoc/>
-        protected override PipelineStageResult GenerateCode(
+        protected override PipelineStageResult GetStageResult(
             AspectProjectConfiguration projectConfiguration,
             PipelineStageResult input,
             IPipelineStepsResult pipelineStepResult,
@@ -52,7 +52,7 @@ namespace Caravela.Framework.Impl.Pipeline
                 input.AspectLayers,
                 pipelineStepResult.Diagnostics.Concat( linkerResult.Diagnostics ),
                 pipelineStepResult.ExternalAspectSources,
-                pipelineStepResult.InheritableAspectInstances );
+                input.ExternallyInheritableAspects.AddRange( pipelineStepResult.InheritableAspectInstances ) );
         }
     }
 }

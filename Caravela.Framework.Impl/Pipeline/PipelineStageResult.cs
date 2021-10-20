@@ -42,24 +42,24 @@ namespace Caravela.Framework.Impl.Pipeline
         /// <summary>
         /// Gets the list of ordered aspect parts.
         /// </summary>
-        public IReadOnlyList<OrderedAspectLayer> AspectLayers { get; }
+        public ImmutableArray<OrderedAspectLayer> AspectLayers { get; }
 
-        public IReadOnlyList<AttributeAspectInstance> ExternallyInheritableAspects { get; }
+        public ImmutableArray<AttributeAspectInstance> ExternallyInheritableAspects { get; }
 
         public PipelineStageResult(
             PartialCompilation compilation,
             ProjectModel project,
-            IReadOnlyList<OrderedAspectLayer> aspectLayers,
+            ImmutableArray<OrderedAspectLayer> aspectLayers,
             ImmutableUserDiagnosticList? diagnostics = null,
             IReadOnlyList<IAspectSource>? aspectSources = null,
-            IReadOnlyList<AttributeAspectInstance>? inheritedAspectInstances = null,
+            ImmutableArray<AttributeAspectInstance>? inheritableAspectInstances = null,
             IReadOnlyList<IntroducedSyntaxTree>? additionalSyntaxTrees = null )
         {
             this.PartialCompilation = compilation;
             this.Diagnostics = diagnostics ?? ImmutableUserDiagnosticList.Empty;
             this.AspectSources = aspectSources ?? Array.Empty<IAspectSource>();
             this.AspectLayers = aspectLayers;
-            this.ExternallyInheritableAspects = inheritedAspectInstances ?? Array.Empty<AttributeAspectInstance>();
+            this.ExternallyInheritableAspects = inheritableAspectInstances ?? ImmutableArray<AttributeAspectInstance>.Empty;
             this.Project = project;
             this.AdditionalSyntaxTrees = additionalSyntaxTrees ?? ImmutableArray<IntroducedSyntaxTree>.Empty;
         }

@@ -10,7 +10,7 @@ namespace Caravela.Framework.Tests.PublicPipeline.Aspects.Inheritance.InheritedM
             builder.IsInherited = true;
         }
 
-        public override dynamic OverrideMethod()
+        public override dynamic? OverrideMethod()
         {
             Console.WriteLine( "Overridden!" );
 

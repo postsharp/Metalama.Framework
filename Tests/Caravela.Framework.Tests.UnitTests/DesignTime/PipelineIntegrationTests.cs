@@ -11,7 +11,6 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -107,18 +106,21 @@ namespace Caravela.Framework.Tests.UnitTests.DesignTime
             }
         }
 
-        private static string DumpResults( ImmutableArray<SyntaxTreeResult> results )
+        private static string DumpResults( CompilationResult results )
         {
             StringBuilder stringBuilder = new();
 
-            for ( var i = 0; i < results.Length; i++ )
+            var i = 0;
+
+            foreach ( var result in results.SyntaxTreeResults.OrderBy( t => t.SyntaxTree.FilePath ) )
             {
                 if ( i > 0 )
                 {
                     stringBuilder.AppendLine( "----------------------------------------------------------" );
                 }
 
-                var result = results[i];
+                i++;
+
                 DumpSyntaxTreeResult( result, stringBuilder );
             }
 
@@ -130,11 +132,12 @@ namespace Caravela.Framework.Tests.UnitTests.DesignTime
         {
             using TestProjectOptions testProjectOptions = new();
             var compilation = CreateCSharpCompilation( new Dictionary<string, string>() { { "F1.cs", "public class X {}" } } );
-            using DesignTimeAspectPipelineCache cache = new( new UnloadableCompileTimeDomain() );
+            using DesignTimeAspectPipelineFactory factory = new( new UnloadableCompileTimeDomain() );
+            var pipeline = factory.GetOrCreatePipeline( testProjectOptions, CancellationToken.None )!;
 
             // First execution of the pipeline.
-            var results = cache.GetSyntaxTreeResults( compilation, testProjectOptions );
-            var dumpedResults = DumpResults( results );
+            Assert.True( factory.TryExecute( testProjectOptions, compilation, CancellationToken.None, out var results ) );
+            var dumpedResults = DumpResults( results! );
             this.Logger.WriteLine( dumpedResults );
 
             var expectedResult = @"
@@ -146,13 +149,13 @@ F1.cs:
 
             Assert.Equal( expectedResult.Trim(), dumpedResults );
 
-            Assert.Equal( 1, cache.PipelineExecutionCount );
+            Assert.Equal( 1, pipeline.PipelineExecutionCount );
 
             // Second execution. The result should be the same, and the number of executions should not change.
-            var results2 = cache.GetSyntaxTreeResults( compilation, testProjectOptions );
-            var dumpedResults2 = DumpResults( results2 );
+            Assert.True( factory.TryExecute( testProjectOptions, compilation, CancellationToken.None, out var results2 ) );
+            var dumpedResults2 = DumpResults( results2! );
             Assert.Equal( expectedResult.Trim(), dumpedResults2 );
-            Assert.Equal( 1, cache.PipelineExecutionCount );
+            Assert.Equal( 1, pipeline.PipelineExecutionCount );
         }
 
         [Fact]
@@ -208,23 +211,23 @@ Target.cs:
                 },
                 assemblyName );
 
-            using DesignTimeAspectPipelineCache cache = new( new UnloadableCompileTimeDomain() );
-            var pipeline = cache.GetOrCreatePipeline( projectOptions, CancellationToken.None )!;
+            using DesignTimeAspectPipelineFactory factory = new( new UnloadableCompileTimeDomain() );
+            var pipeline = factory.GetOrCreatePipeline( projectOptions, CancellationToken.None )!;
 
             // First execution of the pipeline.
-            var results = cache.GetSyntaxTreeResults( compilation, projectOptions );
-            var dumpedResults = DumpResults( results );
+            Assert.True( factory.TryExecute( projectOptions, compilation, CancellationToken.None, out var results ) );
+            var dumpedResults = DumpResults( results! );
 
             Assert.Equal( expectedResult.Replace( "$AspectVersion$", "1" ).Replace( "$TargetVersion$", "1" ).Trim(), dumpedResults );
-            Assert.Equal( 1, cache.PipelineExecutionCount );
+            Assert.Equal( 1, pipeline.PipelineExecutionCount );
 
-            // Second execution. The result should be the same, and the number of executions should not change.
-            var results2 = cache.GetSyntaxTreeResults( compilation, projectOptions );
-            var dumpedResults2 = DumpResults( results2 );
+            // Second execution with the same compilation. The result should be the same, and the number of executions should not change because the result is cached.
+            Assert.True( factory.TryExecute( projectOptions, compilation, CancellationToken.None, out var results2 ) );
+            var dumpedResults2 = DumpResults( results2! );
             Assert.Equal( expectedResult.Replace( "$AspectVersion$", "1" ).Replace( "$TargetVersion$", "1" ).Trim(), dumpedResults2 );
-            Assert.Equal( 1, cache.PipelineExecutionCount );
+            Assert.Equal( 1, pipeline.PipelineExecutionCount );
 
-            // Third execution, this time with modified target.
+            // Third execution, this time with modified target but same aspect code.
             var compilation3 = CreateCSharpCompilation(
                 new Dictionary<string, string>()
                 {
@@ -232,15 +235,14 @@ Target.cs:
                 },
                 assemblyName );
 
-            var results3 = cache.GetSyntaxTreeResults( compilation3, projectOptions );
-            var dumpedResults3 = DumpResults( results3 );
+            Assert.True( factory.TryExecute( projectOptions, compilation3, CancellationToken.None, out var results3 ) );
+            var dumpedResults3 = DumpResults( results3! );
 
             this.Logger.WriteLine( dumpedResults3 );
 
-            Assert.Equal( expectedResult.Replace( "$AspectVersion$", "1" ).Replace( "$TargetVersion$", "2" ).Trim(), dumpedResults3 );
-            Assert.Equal( 2, cache.PipelineExecutionCount );
-
+            Assert.Equal( 2, pipeline.PipelineExecutionCount );
             Assert.Equal( 1, pipeline.PipelineInitializationCount );
+            Assert.Equal( expectedResult.Replace( "$AspectVersion$", "1" ).Replace( "$TargetVersion$", "2" ).Trim(), dumpedResults3 );
 
             // Forth execution, with modified aspect but not target code. We don't trigger a build, so we should get the old result.
             var compilation4 = CreateCSharpCompilation(
@@ -252,15 +254,15 @@ Target.cs:
 
             var aspect4 = compilation4.SyntaxTrees.Single( t => t.FilePath == "Aspect.cs" );
 
-            var results4 = cache.GetSyntaxTreeResults( compilation4, projectOptions );
+            Assert.True( factory.TryExecute( projectOptions, compilation4, CancellationToken.None, out var results4 ) );
 
             Assert.Equal( DesignTimeAspectPipelineStatus.NeedsExternalBuild, pipeline.Status );
             Assert.True( pipeline.IsCompileTimeSyntaxTreeOutdated( "Aspect.cs" ) );
 
-            var dumpedResults4 = DumpResults( results4 );
+            var dumpedResults4 = DumpResults( results4! );
 
             Assert.Equal( expectedResult.Replace( "$AspectVersion$", "1" ).Replace( "$TargetVersion$", "2" ).Trim(), dumpedResults4 );
-            Assert.Equal( 2, cache.PipelineExecutionCount );
+            Assert.Equal( 2, pipeline.PipelineExecutionCount );
             Assert.Equal( 1, pipeline.PipelineInitializationCount );
 
             // There must be an error on the aspect.
@@ -284,11 +286,11 @@ Target.cs:
 
             Assert.Equal( DesignTimeAspectPipelineStatus.NeedsExternalBuild, pipeline.Status );
 
-            var results5 = cache.GetSyntaxTreeResults( compilation5, projectOptions );
-            var dumpedResults5 = DumpResults( results5 );
+            Assert.True( factory.TryExecute( projectOptions, compilation5, CancellationToken.None, out var results5 ) );
+            var dumpedResults5 = DumpResults( results5! );
 
             Assert.Equal( expectedResult.Replace( "$AspectVersion$", "1" ).Replace( "$TargetVersion$", "2" ).Trim(), dumpedResults5 );
-            Assert.Equal( 2, cache.PipelineExecutionCount );
+            Assert.Equal( 2, pipeline.PipelineExecutionCount );
             Assert.Equal( 1, pipeline.PipelineInitializationCount );
 
             List<Diagnostic> diagnostics5 = new();
@@ -310,11 +312,11 @@ Target.cs:
             pipeline.OnExternalBuildStarted();
 
             // A new evaluation of the design-time pipeline should now give the new results.
-            var results6 = cache.GetSyntaxTreeResults( compilation5, projectOptions );
-            var dumpedResults6 = DumpResults( results6 );
+            Assert.True( factory.TryExecute( projectOptions, compilation5, CancellationToken.None, out var results6 ) );
+            var dumpedResults6 = DumpResults( results6! );
 
             Assert.Equal( expectedResult.Replace( "$AspectVersion$", "3" ).Replace( "$TargetVersion$", "2" ).Trim(), dumpedResults6 );
-            Assert.Equal( 3, cache.PipelineExecutionCount );
+            Assert.Equal( 3, pipeline.PipelineExecutionCount );
             Assert.Equal( 2, pipeline.PipelineInitializationCount );
             Assert.False( pipeline.IsCompileTimeSyntaxTreeOutdated( "Aspect.cs" ) );
 
@@ -365,7 +367,7 @@ partial class C
 
             using TestProjectOptions projectOptions = new();
 
-            using DesignTimeAspectPipelineCache cache = new( new UnloadableCompileTimeDomain() );
+            using DesignTimeAspectPipelineFactory factory = new( new UnloadableCompileTimeDomain() );
 
             void TestWithTargetCode( string targetCode )
             {
@@ -374,9 +376,9 @@ partial class C
                     assemblyName,
                     true );
 
-                var results = cache.GetSyntaxTreeResults( compilation1, projectOptions );
+                Assert.True( factory.TryExecute( projectOptions, compilation1, CancellationToken.None, out var results ) );
 
-                var dumpedResults = DumpResults( results );
+                var dumpedResults = DumpResults( results! );
 
                 this.Logger.WriteLine( "-----------------" );
                 this.Logger.WriteLine( dumpedResults );

@@ -2,6 +2,8 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Aspects;
+using Caravela.Framework.Code;
+using Caravela.Framework.Eligibility;
 using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.Aspects;
 using Caravela.Framework.Impl.CodeModel;
@@ -17,6 +19,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Threading;
 
 namespace Caravela.Framework.Impl.DesignTime.Pipeline
@@ -24,21 +27,32 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
     /// <summary>
     /// The design-time implementation of <see cref="AspectPipeline"/>.
     /// </summary>
-    public partial class DesignTimeAspectPipeline : AspectPipeline
+    internal partial class DesignTimeAspectPipeline : AspectPipeline
     {
+        private readonly ConditionalWeakTable<Compilation, CompilationResult> _compilationResultCache = new();
+        private static readonly string _sourceGeneratorAssemblyName = typeof(DesignTimeAspectPipelineFactory).Assembly.GetName().Name;
+
         private readonly IFileSystemWatcher? _fileSystemWatcher;
 
         private PipelineState _currentState;
+        private int _pipelineExecutionCount;
+
+        /// <summary>
+        /// Gets the number of times the pipeline has been executed. Useful for testing purposes.
+        /// </summary>
+        public int PipelineExecutionCount => this._pipelineExecutionCount;
 
         /// <summary>
         /// Gets an object that can be locked to get exclusive access to
         /// the current instance.
         /// </summary>
-        public object Sync { get; } = new();
+        private readonly object _sync = new();
 
+        // ReSharper disable once InconsistentlySynchronizedField
         internal DesignTimeAspectPipelineStatus Status => this._currentState.Status;
 
         // It's ok if we return an obsolete project in the use cases of this property.
+        // ReSharper disable once InconsistentlySynchronizedField
         internal IEnumerable<AspectClass>? AspectClasses => this._currentState.Configuration?.AspectClasses.OfType<AspectClass>();
 
         public DesignTimeAspectPipeline(
@@ -77,8 +91,12 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
 
         private void OnOutputDirectoryChanged( object sender, FileSystemEventArgs e )
         {
-            if ( e.FullPath == this.ProjectOptions.BuildTouchFile &&
-                 this.Status == DesignTimeAspectPipelineStatus.NeedsExternalBuild )
+            if ( e.FullPath != this.ProjectOptions.BuildTouchFile || this.Status != DesignTimeAspectPipelineStatus.NeedsExternalBuild )
+            {
+                return;
+            }
+
+            lock ( this._sync )
             {
                 // There was an external build. Touch the files to re-run the analyzer.
                 Logger.Instance?.Write( $"Detected an external build for project '{this.ProjectOptions.AssemblyName}'." );
@@ -106,8 +124,11 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
 
         public void OnExternalBuildStarted()
         {
-            this._currentState = new PipelineState( this );
-            this.ExternalBuildStarted?.Invoke( this, EventArgs.Empty );
+            lock ( this._sync )
+            {
+                this._currentState = new PipelineState( this );
+                this.ExternalBuildStarted?.Invoke( this, EventArgs.Empty );
+            }
         }
 
         internal bool TryGetConfiguration(
@@ -117,7 +138,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
             CancellationToken cancellationToken,
             [NotNullWhen( true )] out AspectProjectConfiguration? configuration )
         {
-            lock ( this.Sync )
+            lock ( this._sync )
             {
                 var state = this._currentState;
                 var success = PipelineState.TryGetConfiguration( ref state, compilation, diagnosticAdder, ignoreStatus, cancellationToken, out configuration );
@@ -140,26 +161,117 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
             this._fileSystemWatcher?.Dispose();
         }
 
-        internal CompilationChanges InvalidateCache( Compilation compilation, CancellationToken cancellationToken )
+        private CompilationChanges InvalidateCache( Compilation compilation, bool invalidateCompilationResult, CancellationToken cancellationToken )
         {
-            lock ( this.Sync )
-            {
-                this._currentState = this._currentState.InvalidateCache( compilation, cancellationToken );
+            this._currentState = this._currentState.InvalidateCacheForNewCompilation( compilation, invalidateCompilationResult, cancellationToken );
 
-                return this._currentState.UnprocessedChanges.AssertNotNull();
+            return this._currentState.UnprocessedChanges.AssertNotNull();
+        }
+
+        public void InvalidateCache()
+        {
+            lock ( this._sync )
+            {
+                this._currentState = this._currentState.Reset();
             }
         }
 
-        public DesignTimeAspectPipelineResult Execute( PartialCompilation partialCompilation, CancellationToken cancellationToken )
+        private bool TryExecutePartial( PartialCompilation partialCompilation, CancellationToken cancellationToken, out CompilationResult? compilationResult )
         {
             var state = this._currentState;
-            var result = PipelineState.Execute( ref state, partialCompilation, cancellationToken );
+
+            if ( !PipelineState.TryExecute( ref state, partialCompilation, cancellationToken, out compilationResult ) )
+            {
+                return false;
+            }
 
             // Intentionally updating the state atomically after successful execution of the method, so the state is
             // not affected by a cancellation.
             this._currentState = state;
 
-            return result;
+            return true;
+        }
+
+        public bool TryExecute( Compilation compilation, CancellationToken cancellationToken, [NotNullWhen( true )] out CompilationResult? compilationResult )
+        {
+            if ( this._compilationResultCache.TryGetValue( compilation, out compilationResult ) )
+            {
+                return true;
+            }
+
+            lock ( this._sync )
+            {
+                if ( this._compilationResultCache.TryGetValue( compilation, out compilationResult ) )
+                {
+                    return true;
+                }
+
+                // Invalidate the cache for the new compilation.
+                var changes = this.InvalidateCache( compilation, this.Status != DesignTimeAspectPipelineStatus.NeedsExternalBuild, cancellationToken );
+
+                var compilationToAnalyze = changes.CompilationToAnalyze;
+
+                if ( this.Status != DesignTimeAspectPipelineStatus.NeedsExternalBuild )
+                {
+                    var dirtySyntaxTrees = this.GetDirtySyntaxTrees( compilationToAnalyze );
+
+                    // Execute the pipeline if required, and update the cache.
+                    if ( dirtySyntaxTrees.Count > 0 )
+                    {
+                        var partialCompilation = PartialCompilation.CreatePartial( compilationToAnalyze, dirtySyntaxTrees );
+
+                        if ( !partialCompilation.IsEmpty )
+                        {
+                            Interlocked.Increment( ref this._pipelineExecutionCount );
+
+                            if ( !this.TryExecutePartial( partialCompilation, cancellationToken, out compilationResult ) )
+                            {
+                                return false;
+                            }
+                        }
+                    }
+
+                    compilationResult = this._currentState.CompilationResult;
+
+                    this._compilationResultCache.Add( compilation, compilationResult );
+
+                    return true;
+                }
+                else
+                {
+                    // If we need a build, we only serve results from the cache.
+                    Logger.Instance?.Write(
+                        $"DesignTimeAspectPipelineCache.TryExecute('{compilation.AssemblyName}'): build required," +
+                        $" returning from cache only." );
+
+                    compilationResult = this._currentState.CompilationResult;
+
+                    return true;
+                }
+            }
+        }
+
+        private List<SyntaxTree> GetDirtySyntaxTrees( Compilation compilation )
+        {
+            // Computes the set of semantic models that need to be processed.
+
+            List<SyntaxTree> uncachedSyntaxTrees = new();
+
+            foreach ( var syntaxTree in compilation.SyntaxTrees )
+            {
+                if ( syntaxTree.FilePath.StartsWith( _sourceGeneratorAssemblyName, StringComparison.Ordinal ) )
+                {
+                    // This is our own generated file. Don't include.
+                    continue;
+                }
+
+                if ( this._currentState.CompilationResult.IsSyntaxTreeDirty( syntaxTree ) )
+                {
+                    uncachedSyntaxTrees.Add( syntaxTree );
+                }
+            }
+
+            return uncachedSyntaxTrees;
         }
 
         /// <summary>
@@ -169,5 +281,44 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
         /// </summary>
         public bool IsCompileTimeSyntaxTreeOutdated( string name )
             => this._currentState.CompileTimeSyntaxTrees.AssertNotNull().TryGetValue( name, out var syntaxTree ) && syntaxTree == null;
+
+        public IEnumerable<AspectClass> GetEligibleAspects( Compilation compilation, ISymbol symbol, CancellationToken cancellationToken )
+        {
+            var classes = this.AspectClasses;
+
+            if ( classes == null )
+            {
+                yield break;
+            }
+
+            IDeclaration? declaration = null;
+
+            foreach ( var aspectClass in classes )
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+
+                if ( !aspectClass.IsAbstract && aspectClass.IsEligibleFast( symbol ) )
+                {
+                    // We have a candidate. Create an IDeclaration if we haven't done it yet.
+                    if ( declaration == null )
+                    {
+                        var projectModel = new ProjectModel( compilation, this.ServiceProvider.WithMark( ServiceProviderMark.Project ) );
+
+                        var compilationModel = CompilationModel.CreateInitialInstance(
+                            projectModel,
+                            PartialCompilation.CreatePartial( compilation, Array.Empty<SyntaxTree>() ) );
+
+                        declaration = compilationModel.Factory.GetDeclaration( symbol );
+                    }
+
+                    var eligibleScenarios = aspectClass.GetEligibility( declaration );
+
+                    if ( eligibleScenarios.IncludesAny( EligibleScenarios.All ) )
+                    {
+                        yield return aspectClass;
+                    }
+                }
+            }
+        }
     }
 }

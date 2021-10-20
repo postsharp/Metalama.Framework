@@ -119,7 +119,7 @@ namespace Caravela.Framework.Impl.CodeModel.Pseudo
 
         bool IDeclarationImpl.CanBeInherited => false;
 
-        public IEnumerable<IDeclaration> GetDerivedDeclarations() => throw new NotImplementedException();
+        public IEnumerable<IDeclaration> GetDerivedDeclarations( bool deep = true ) => throw new NotImplementedException();
 
         public IGeneric ConstructGenericInstance( params IType[] typeArguments ) => throw new NotImplementedException();
 

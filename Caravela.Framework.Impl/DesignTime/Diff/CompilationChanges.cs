@@ -2,7 +2,10 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Microsoft.CodeAnalysis;
+using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
 
 namespace Caravela.Framework.Impl.DesignTime.Diff
 {
@@ -11,34 +14,46 @@ namespace Caravela.Framework.Impl.DesignTime.Diff
     /// </summary>
     internal sealed class CompilationChanges
     {
+        private readonly ImmutableDictionary<string, SyntaxTreeChange> _syntaxTreeChanges;
+
         /// <summary>
         /// Gets the set of syntax tree changes.
         /// </summary>
-        public ImmutableArray<SyntaxTreeChange> SyntaxTreeChanges { get; }
+        public IEnumerable<SyntaxTreeChange> SyntaxTreeChanges => this._syntaxTreeChanges.Values;
 
         /// <summary>
         /// Gets a value indicating whether the changes affects the compile-time subproject.
         /// </summary>
         public bool HasCompileTimeCodeChange { get; }
 
+        public CompilationChanges(
+            IEnumerable<SyntaxTreeChange> syntaxTreeChanges,
+            bool hasCompileTimeCodeChange,
+            Compilation compilationToAnalyze,
+            bool isIncremental ) : this(
+            syntaxTreeChanges.ToImmutableDictionary( t => t.FilePath, t => t, StringComparer.Ordinal ),
+            hasCompileTimeCodeChange,
+            compilationToAnalyze,
+            isIncremental ) { }
+
         /// <summary>
         /// Initializes a new instance of the <see cref="CompilationChanges"/> class.
         /// </summary>
-        public CompilationChanges(
-            ImmutableArray<SyntaxTreeChange> syntaxTreeChanges,
+        private CompilationChanges(
+            ImmutableDictionary<string, SyntaxTreeChange> syntaxTreeChanges,
             bool hasCompileTimeCodeChange,
             Compilation compilationToAnalyze,
             bool isIncremental )
         {
-            this.SyntaxTreeChanges = syntaxTreeChanges;
+            this._syntaxTreeChanges = syntaxTreeChanges;
             this.HasCompileTimeCodeChange = hasCompileTimeCodeChange;
             this.CompilationToAnalyze = compilationToAnalyze;
             this.IsIncremental = isIncremental;
         }
 
-        public static CompilationChanges Empty( Compilation compilation ) => new( ImmutableArray<SyntaxTreeChange>.Empty, false, compilation, true );
+        public static CompilationChanges Empty( Compilation compilation ) => new( Enumerable.Empty<SyntaxTreeChange>(), false, compilation, true );
 
-        public bool HasChange => this.SyntaxTreeChanges.Length > 0 || this.HasCompileTimeCodeChange;
+        public bool HasChange => this._syntaxTreeChanges.Count > 0 || this.HasCompileTimeCodeChange;
 
         public bool IsIncremental { get; }
 
@@ -60,14 +75,37 @@ namespace Caravela.Framework.Impl.DesignTime.Diff
             }
             else
             {
+                var mergedSyntaxTreeBuilder = this._syntaxTreeChanges.ToBuilder();
+
+                foreach ( var newChange in newChanges._syntaxTreeChanges )
+                {
+                    if ( !mergedSyntaxTreeBuilder.TryGetValue( newChange.Key, out var oldChange ) )
+                    {
+                        mergedSyntaxTreeBuilder.Add( newChange.Key, newChange.Value );
+                    }
+                    else
+                    {
+                        var merged = oldChange.Merge( newChange.Value );
+
+                        if ( merged.SyntaxTreeChangeKind == SyntaxTreeChangeKind.None )
+                        {
+                            mergedSyntaxTreeBuilder.Remove( newChange.Key );
+                        }
+                        else
+                        {
+                            mergedSyntaxTreeBuilder[newChange.Key] = merged;
+                        }
+                    }
+                }
+
                 return new CompilationChanges(
-                    this.SyntaxTreeChanges.AddRange( newChanges.SyntaxTreeChanges ),
+                    mergedSyntaxTreeBuilder.ToImmutable(),
                     this.HasCompileTimeCodeChange | newChanges.HasCompileTimeCodeChange,
                     newChanges.CompilationToAnalyze,
                     this.IsIncremental );
             }
         }
 
-        public override string ToString() => $"HasCompileTimeCodeChange={this.HasCompileTimeCodeChange}, SyntaxTreeChanges={this.SyntaxTreeChanges.Length}";
+        public override string ToString() => $"HasCompileTimeCodeChange={this.HasCompileTimeCodeChange}, SyntaxTreeChanges={this._syntaxTreeChanges.Count}";
     }
 }

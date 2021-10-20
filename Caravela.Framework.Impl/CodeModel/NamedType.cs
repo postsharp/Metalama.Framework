@@ -41,7 +41,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public override bool CanBeInherited => this.IsReferenceType.GetValueOrDefault() && !this.IsSealed;
 
-        public override IEnumerable<IDeclaration> GetDerivedDeclarations() => this.Compilation.GetDerivedTypes( this );
+        public override IEnumerable<IDeclaration> GetDerivedDeclarations( bool deep = true ) => this.Compilation.GetDerivedTypes( this, deep );
 
         internal NamedType( INamedTypeSymbol typeSymbol, CompilationModel compilation ) : base( compilation )
         {
@@ -132,7 +132,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public bool IsReadOnly => this.TypeSymbol.IsReadOnly;
 
-        public bool IsExternal => this.TypeSymbol.ContainingAssembly != this.Compilation.RoslynCompilation.Assembly;
+        public bool IsExternal => !SymbolEqualityComparer.Default.Equals( this.TypeSymbol.ContainingAssembly, this.Compilation.RoslynCompilation.Assembly );
 
         public bool HasDefaultConstructor
             => this.TypeSymbol.TypeKind == RoslynTypeKind.Struct ||

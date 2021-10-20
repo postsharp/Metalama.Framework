@@ -10,7 +10,7 @@ namespace Caravela.Framework.Tests.PublicPipeline.Aspects.Inheritance.Implemente
             builder.IsInherited = true;
         }
 
-        public override dynamic OverrideMethod()
+        public override dynamic? OverrideMethod()
         {
             Console.WriteLine( "Overridden!" );
 
@@ -24,15 +24,15 @@ namespace Caravela.Framework.Tests.PublicPipeline.Aspects.Inheritance.Implemente
         private interface I<T>
         {
             [Aspect]
-            void M(T x);
+            void M( T x );
         }
 
-        private class C: I<int>
+        private class C : I<int>
         {
-            public void M(int x) { }
-            
+            public void M( int x ) { }
+
             // This one should not be transformed.
-            public void M(string x) { }
+            public void M( string x ) { }
         }
     }
 }

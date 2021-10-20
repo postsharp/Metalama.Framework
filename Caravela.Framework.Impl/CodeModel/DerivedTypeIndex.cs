@@ -14,13 +14,13 @@ namespace Caravela.Framework.Impl.CodeModel
     {
         private readonly Compilation _compilation;
 
-        public ImmutableMultiValueDictionary<INamedTypeSymbol, INamedTypeSymbol> Relationships { get; }
+        public ImmutableDictionaryOfArray<INamedTypeSymbol, INamedTypeSymbol> Relationships { get; }
 
         public ImmutableHashSet<INamedTypeSymbol> ExternalBaseTypes { get; }
 
         private DerivedTypeIndex(
             Compilation compilation,
-            ImmutableMultiValueDictionary<INamedTypeSymbol, INamedTypeSymbol> relationships,
+            ImmutableDictionaryOfArray<INamedTypeSymbol, INamedTypeSymbol> relationships,
             ImmutableHashSet<INamedTypeSymbol> externalBaseTypes )
         {
             this.Relationships = relationships;
@@ -28,8 +28,10 @@ namespace Caravela.Framework.Impl.CodeModel
             this._compilation = compilation;
         }
 
-        public ImmutableArray<INamedTypeSymbol> GetDerivedTypes( INamedTypeSymbol baseType )
-            => this.Relationships[baseType].SelectManyRecursive( t => this.Relationships[t] ).ToImmutableArray();
+        public ImmutableArray<INamedTypeSymbol> GetDerivedTypes( INamedTypeSymbol baseType, bool deep )
+            => deep
+                ? this.Relationships[baseType].SelectManyRecursive( t => this.Relationships[t] ).ToImmutableArray()
+                : this.Relationships[baseType];
 
         public DerivedTypeIndex WithIntroducedInterfaces( IEnumerable<IIntroducedInterface> introducedInterfaces )
         {
@@ -63,20 +65,20 @@ namespace Caravela.Framework.Impl.CodeModel
         public class Builder
         {
             private readonly Compilation _compilation;
-            private readonly ImmutableMultiValueDictionary<INamedTypeSymbol, INamedTypeSymbol>.Builder _relationships;
+            private readonly ImmutableDictionaryOfArray<INamedTypeSymbol, INamedTypeSymbol>.Builder _relationships;
 
             private readonly ImmutableHashSet<INamedTypeSymbol>.Builder _processedTypes;
 
             public Builder( Compilation compilation )
             {
                 this._compilation = compilation;
-                this._relationships = new ImmutableMultiValueDictionary<INamedTypeSymbol, INamedTypeSymbol>.Builder( SymbolEqualityComparer.Default );
+                this._relationships = new ImmutableDictionaryOfArray<INamedTypeSymbol, INamedTypeSymbol>.Builder( SymbolEqualityComparer.Default );
                 this._processedTypes = ImmutableHashSet.CreateBuilder<INamedTypeSymbol>( SymbolEqualityComparer.Default );
             }
 
             internal Builder(
                 Compilation compilation,
-                ImmutableMultiValueDictionary<INamedTypeSymbol, INamedTypeSymbol>.Builder relationships,
+                ImmutableDictionaryOfArray<INamedTypeSymbol, INamedTypeSymbol>.Builder relationships,
                 ImmutableHashSet<INamedTypeSymbol>.Builder processedTypes )
             {
                 this._compilation = compilation;

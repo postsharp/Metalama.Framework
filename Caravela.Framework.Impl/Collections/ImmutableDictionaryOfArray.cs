@@ -9,29 +9,29 @@ using System.Linq;
 
 namespace Caravela.Framework.Impl.Collections
 {
-    internal partial class ImmutableMultiValueDictionary<TKey, TValue> : IReadOnlyMultiValueDictionary<TKey, TValue>
+    internal partial class ImmutableDictionaryOfArray<TKey, TValue> : IReadOnlyMultiValueDictionary<TKey, TValue>
         where TKey : notnull
     {
         private readonly ImmutableDictionary<TKey, Group> _dictionary;
 
-        private ImmutableMultiValueDictionary( ImmutableDictionary<TKey, Group> dictionary )
+        private ImmutableDictionaryOfArray( ImmutableDictionary<TKey, Group> dictionary )
         {
             this._dictionary = dictionary;
         }
 
-        public static ImmutableMultiValueDictionary<TKey, TValue> Empty => new( ImmutableDictionary<TKey, Group>.Empty );
+        public static ImmutableDictionaryOfArray<TKey, TValue> Empty => new( ImmutableDictionary<TKey, Group>.Empty );
 
-        public static ImmutableMultiValueDictionary<TKey, TValue> Create( IEqualityComparer<TKey> comparer )
+        public static ImmutableDictionaryOfArray<TKey, TValue> Create( IEqualityComparer<TKey> comparer )
             => new( ImmutableDictionary.Create<TKey, Group>( comparer ) );
 
         // Coverage: ignore
-        public static ImmutableMultiValueDictionary<TKey, TValue> Create(
+        public static ImmutableDictionaryOfArray<TKey, TValue> Create(
             IEnumerable<TValue> source,
             Func<TValue, TKey> getKey,
             IEqualityComparer<TKey>? comparer = null )
             => Create( source, getKey, v => v, comparer );
 
-        public static ImmutableMultiValueDictionary<TKey, TValue> Create<TItem>(
+        public static ImmutableDictionaryOfArray<TKey, TValue> Create<TItem>(
             IEnumerable<TItem> source,
             Func<TItem, TKey> getKey,
             Func<TItem, TValue> getValue,
@@ -45,16 +45,18 @@ namespace Caravela.Framework.Impl.Collections
 
         public static Builder CreateBuilder( IEqualityComparer<TKey>? comparer = null ) => new( comparer );
 
-        public ImmutableMultiValueDictionary<TKey, TValue> AddRange( IEnumerable<TValue> source, Func<TValue, TKey> getKey )
+        public ImmutableDictionaryOfArray<TKey, TValue> AddRange( IEnumerable<TValue> source, Func<TValue, TKey> getKey )
             => this.AddRange( source, getKey, v => v );
 
-        public ImmutableMultiValueDictionary<TKey, TValue> AddRange<TItem>( IEnumerable<TItem> source, Func<TItem, TKey> getKey, Func<TItem, TValue> getValue )
+        public ImmutableDictionaryOfArray<TKey, TValue> AddRange<TItem>( IEnumerable<TItem> source, Func<TItem, TKey> getKey, Func<TItem, TValue> getValue )
         {
             var builder = this.ToBuilder();
             builder.AddRange( source, getKey, getValue );
 
             return builder.ToImmutable();
         }
+
+        IReadOnlyCollection<TValue> IReadOnlyMultiValueDictionary<TKey, TValue>.this[ TKey key ] => this[key];
 
         public ImmutableArray<TValue> this[ TKey key ]
         {
@@ -77,13 +79,13 @@ namespace Caravela.Framework.Impl.Collections
 
         public Builder ToBuilder() => new( this );
 
-        public ImmutableMultiValueDictionary<TKey, TValue> WithKeyComparer( IEqualityComparer<TKey> keyComparer )
+        public ImmutableDictionaryOfArray<TKey, TValue> WithKeyComparer( IEqualityComparer<TKey> keyComparer )
         {
             var dictionaryBuilder = ImmutableDictionary.CreateBuilder<TKey, Group>( keyComparer );
 
             dictionaryBuilder.AddRange( this._dictionary );
 
-            return new ImmutableMultiValueDictionary<TKey, TValue>( dictionaryBuilder.ToImmutable() );
+            return new ImmutableDictionaryOfArray<TKey, TValue>( dictionaryBuilder.ToImmutable() );
         }
     }
 }

@@ -312,7 +312,7 @@ namespace Caravela.Framework.Impl.Aspects
 
             var declarationType = targetDeclaration.GetType();
             var eligibility = EligibleScenarios.All;
-            
+
             // If the aspect cannot be inherited, remove the inheritance eligibility.
             if ( !this.IsInherited )
             {

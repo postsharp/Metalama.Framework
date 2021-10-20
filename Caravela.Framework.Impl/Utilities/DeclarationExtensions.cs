@@ -40,12 +40,12 @@ namespace Caravela.Framework.Impl.Utilities
             {
                 return true;
             }
-            
+
             if ( declaration is INamedType { ContainingDeclaration: not INamedType } namedType && containingDeclaration is INamespace containingNamespace )
             {
                 return namedType.Namespace.IsContainedIn( containingNamespace );
             }
-            
+
             return declaration.ContainingDeclaration != null && declaration.ContainingDeclaration.IsContainedIn( containingDeclaration );
         }
     }

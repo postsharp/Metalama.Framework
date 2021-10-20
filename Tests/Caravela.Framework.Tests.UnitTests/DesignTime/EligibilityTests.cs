@@ -3,12 +3,10 @@
 
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl;
-using Caravela.Framework.Impl.Aspects;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.DesignTime.Pipeline;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.TestFramework;
-using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,7 +19,8 @@ namespace Caravela.Framework.Tests.UnitTests.DesignTime
     {
         private readonly Dictionary<string, INamedDeclaration> _declarations;
         private readonly UnloadableCompileTimeDomain _domain;
-        private readonly Dictionary<string, AspectClass> _aspects;
+        private readonly DesignTimeAspectPipeline _pipeline;
+        private readonly CompilationModel _compilation;
 
         public EligibilityTests()
         {
@@ -29,27 +28,33 @@ namespace Caravela.Framework.Tests.UnitTests.DesignTime
 using System;
 using Caravela.Framework.Code;
 using Caravela.Framework.Aspects;
+using Caravela.Framework.Eligibility;
 
 class MethodAspect : IAspect<IMethod> { }
+class StaticMethodAspect : IAspect<IMethod> { public void BuildEligibility( IEligibilityBuilder<IMethod> builder ) => builder.MustBeStatic(); }
 class ConstructorAspect : IAspect<IConstructor> { }
 class MethodBaseAspect : IAspect<IMethodBase> { }
 class DeclarationAspect : IAspect<IDeclaration> { }
 class ParameterAspect : IAspect<IParameter> { }
 class GenericParameterAspect : IAspect<ITypeParameter> { }
+class MyTypeAspect : TypeAspect {}
 
 class Class<T>
 {
   public Class() {}
   static Class() {}
   void Method( int p ) {}
+  static void StaticMethod( int p ) {}
   int Field;
   string Property { get; set; }
   event EventHandler Event;
 }
+
+namespace Ns { class C {} }
 ";
 
             using var testContext = this.CreateTestContext();
-            var compilation = testContext.CreateCompilationModel( code );
+            this._compilation = testContext.CreateCompilationModel( code );
 
             static string GetName( INamedDeclaration d )
                 => d switch
@@ -61,25 +66,18 @@ class Class<T>
                     _ => d.Name
                 };
 
-            var declarationList = compilation
+            var declarationList = this._compilation
                 .GetContainedDeclarations()
                 .OfType<INamedDeclaration>()
+                .Concat( this._compilation.GlobalNamespace.Namespaces )
                 .ToList();
 
             this._declarations = declarationList
                 .ToDictionary( GetName, d => d );
 
             this._domain = new UnloadableCompileTimeDomain();
-            using DesignTimeAspectPipeline pipeline = new( testContext.ServiceProvider, this._domain, true );
-
-            pipeline.TryGetConfiguration(
-                PartialCompilation.CreateComplete( compilation.RoslynCompilation ),
-                NullDiagnosticAdder.Instance,
-                true,
-                CancellationToken.None,
-                out var configuration );
-
-            this._aspects = configuration!.AspectClasses.OfType<AspectClass>().ToDictionary( a => a.ShortName, a => a );
+            this._pipeline = new DesignTimeAspectPipeline( testContext.ServiceProvider, this._domain, true );
+            this._pipeline.TryGetConfiguration( this._compilation.PartialCompilation, NullDiagnosticAdder.Instance, true, CancellationToken.None, out _ );
         }
 
 #if NET5_0
@@ -89,57 +87,27 @@ class Class<T>
 
         // We would need to implement all interface methods.
 #endif
-        [InlineData( "MethodAspect", "Class", false )]
-        [InlineData( "MethodAspect", "Class.new", false )]
-        [InlineData( "MethodAspect", "Class.static", false )]
-        [InlineData( "MethodAspect", "Method", true )]
-        [InlineData( "MethodAspect", "Method.p", false )]
-        [InlineData( "MethodAspect", "Field", false )]
-        [InlineData( "MethodAspect", "Property", false )]
-        [InlineData( "MethodAspect", "Event", false )]
-        [InlineData( "MethodAspect", "T", false )]
-        [InlineData( "MethodBaseAspect", "Class", false )]
-        [InlineData( "MethodBaseAspect", "Class.new", true )]
-        [InlineData( "MethodBaseAspect", "Class.static", true )]
-        [InlineData( "MethodBaseAspect", "Method", true )]
-        [InlineData( "MethodBaseAspect", "Method.p", false )]
-        [InlineData( "MethodBaseAspect", "Field", false )]
-        [InlineData( "MethodBaseAspect", "Property", false )]
-        [InlineData( "MethodBaseAspect", "Event", false )]
-        [InlineData( "DeclarationAspect", "Class", true )]
-        [InlineData( "DeclarationAspect", "Class.new", true )]
-        [InlineData( "DeclarationAspect", "Method", true )]
-        [InlineData( "DeclarationAspect", "Method.p", true )]
-        [InlineData( "DeclarationAspect", "Field", true )]
-        [InlineData( "DeclarationAspect", "Property", true )]
-        [InlineData( "DeclarationAspect", "Event", true )]
-        [InlineData( "ConstructorAspect", "Class.new", true )]
-        [InlineData( "ConstructorAspect", "Class.static", true )]
-        [InlineData( "ConstructorAspect", "Method", false )]
-        [InlineData( "ParameterAspect", "Method.p", true )]
-        [InlineData( "GenericParameterAspect", "T", true )]
-        public void IsEligible( string aspect, string target, bool isEligible )
+        [InlineData( "Class", "DeclarationAspect,MyTypeAspect" )]
+        [InlineData( "Class.new", "ConstructorAspect,DeclarationAspect,MethodBaseAspect" )]
+        [InlineData( "Class.static", "ConstructorAspect,DeclarationAspect,MethodBaseAspect" )]
+        [InlineData( "Method", "DeclarationAspect,MethodAspect,MethodBaseAspect" )]
+        [InlineData( "StaticMethod", "DeclarationAspect,MethodAspect,MethodBaseAspect,StaticMethodAspect" )]
+        [InlineData( "Method.p", "DeclarationAspect,ParameterAspect" )]
+        [InlineData( "Field", "DeclarationAspect" )]
+        [InlineData( "Property", "DeclarationAspect" )]
+        [InlineData( "Event", "DeclarationAspect" )]
+        public void IsEligible( string target, string aspects )
         {
             var targetSymbol = this._declarations[target].GetSymbol().AssertNotNull();
+            var eligibleAspects = this._pipeline.GetEligibleAspects( this._compilation.RoslynCompilation, targetSymbol, CancellationToken.None );
+            var eligibleAspectsString = string.Join( ",", eligibleAspects.OrderBy( a => a.ShortName ) );
 
-            Assert.Equal( isEligible, this._aspects[aspect].IsEligibleFast( targetSymbol ) );
-        }
-
-#if NET5_0
-        [Fact]
-#else
-        [Fact( Skip = "Skipped in .NET Framework (low value)" )]
-
-        // We would need to implement all interface methods.
-#endif
-        public void NamespaceNotEligible()
-        {
-            var targetSymbol = ((INamedTypeSymbol) this._declarations["Class"].GetSymbol().AssertNotNull()).ContainingNamespace;
-            Assert.False( this._aspects["MethodAspect"].IsEligibleFast( targetSymbol ) );
+            Assert.Equal( aspects, eligibleAspectsString );
         }
 
         public void Dispose()
         {
+            this._pipeline.Dispose();
             this._domain.Dispose();
         }
     }

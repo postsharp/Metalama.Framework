@@ -25,7 +25,7 @@ namespace Caravela.Framework.Impl.CompileTime
     /// The generation of compile-time compilations itself is delegated to the <see cref="CompileTimeCompilationBuilder"/>
     /// class.
     /// </summary>
-    internal sealed class CompileTimeProjectLoader : CompileTimeTypeResolver
+    internal sealed class CompileTimeProjectLoader : CompileTimeTypeResolver, IService
     {
         private readonly CompileTimeDomain _domain;
         private readonly IServiceProvider _serviceProvider;

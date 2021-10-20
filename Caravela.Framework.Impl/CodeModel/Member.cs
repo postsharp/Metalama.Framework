@@ -21,7 +21,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public bool IsOverride => this.Symbol.IsOverride;
 
-        public override IEnumerable<IDeclaration> GetDerivedDeclarations()
+        public override IEnumerable<IDeclaration> GetDerivedDeclarations( bool deep = true )
         {
             if ( !this.CanBeInherited )
             {
@@ -35,7 +35,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         private IEnumerable<IDeclaration> GetDerivedDeclarationsCore()
         {
-            foreach ( var derivedType in this.Compilation.GetDerivedTypes( this.DeclaringType ) )
+            foreach ( var derivedType in this.Compilation.GetDerivedTypes( this.DeclaringType, true ) )
             {
                 foreach ( var member in ((INamedTypeInternal) derivedType).GetOverridingMembers( this ) )
                 {

@@ -3,7 +3,6 @@
 
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.AspectOrdering;
-using Caravela.Framework.Impl.Aspects;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.CompileTime;
@@ -34,7 +33,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
             : base( compileTimeProject, aspectLayers, serviceProvider ) { }
 
         /// <inheritdoc/>
-        protected override PipelineStageResult GenerateCode(
+        protected override PipelineStageResult GetStageResult(
             AspectProjectConfiguration projectConfiguration,
             PipelineStageResult input,
             IPipelineStepsResult pipelineStepResult,
@@ -136,7 +135,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
                 input.AspectLayers,
                 input.Diagnostics.Concat( pipelineStepResult.Diagnostics ).Concat( diagnostics.ToImmutable() ),
                 input.AspectSources.Concat( pipelineStepResult.ExternalAspectSources ),
-                Array.Empty<AttributeAspectInstance>(),
+                pipelineStepResult.InheritableAspectInstances,
                 input.AdditionalSyntaxTrees.Concat( additionalSyntaxTrees ) );
         }
     }

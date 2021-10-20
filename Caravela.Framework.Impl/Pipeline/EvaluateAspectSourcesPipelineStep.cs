@@ -34,17 +34,21 @@ namespace Caravela.Framework.Impl.Pipeline
 
             // We assume that all aspect instances are eligible, but some are eligible only for inheritance.
 
+            // Get the aspects that can be processed, i.e. they are not abstract-only.
             var concreteAspectInstances = aspectInstances.Where( a => a.Eligibility.IncludesAll( EligibleScenarios.Aspect ) ).ToList();
 
+            // Gets aspects that can be inherited.
             var inheritableAspectInstances = aspectInstances
                 .Where( a => a.Eligibility.IncludesAll( EligibleScenarios.Inheritance ) && a.AspectClass.IsInherited )
                 .Cast<AttributeAspectInstance>()
                 .ToList();
 
+            // Gets aspects that have been inherited by the source. 
             var inheritedAspectInstancesInProject = inheritableAspectInstances
                 .SelectMany( a => ((IDeclarationImpl) a.TargetDeclaration).GetDerivedDeclarations().Select( a.CreateDerivedInstance ) )
                 .ToList();
 
+            // Index these aspects. 
             pipelineStepsState.AddAspectInstances( concreteAspectInstances );
             pipelineStepsState.AddAspectInstances( inheritedAspectInstancesInProject );
             pipelineStepsState.AddInheritableAspectInstances( inheritableAspectInstances );

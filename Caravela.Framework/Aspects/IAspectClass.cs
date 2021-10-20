@@ -16,7 +16,7 @@ namespace Caravela.Framework.Aspects
         /// Gets the fully qualified type of the aspect.
         /// </summary>
         string FullName { get; }
-        
+
         /// <summary>
         /// Gets the name of the aspect type without the namespace and without the <c>Attribute</c> suffix.
         /// </summary>

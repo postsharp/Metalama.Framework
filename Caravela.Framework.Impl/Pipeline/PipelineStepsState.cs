@@ -10,6 +10,7 @@ using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Transformations;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 
@@ -35,7 +36,7 @@ namespace Caravela.Framework.Impl.Pipeline
 
         public IReadOnlyList<INonObservableTransformation> NonObservableTransformations => this._nonObservableTransformations;
 
-        public IReadOnlyList<AttributeAspectInstance> InheritableAspectInstances => this._inheritableAspectInstances;
+        public ImmutableArray<AttributeAspectInstance> InheritableAspectInstances => this._inheritableAspectInstances.ToImmutableArray();
 
         public ImmutableUserDiagnosticList Diagnostics => this._diagnostics.ToImmutable();
 

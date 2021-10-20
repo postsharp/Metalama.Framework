@@ -47,7 +47,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         public bool CanBeInherited => this.Underlying.CanBeInherited;
 
-        public IEnumerable<IDeclaration> GetDerivedDeclarations() => this.Underlying.GetDerivedDeclarations();
+        public IEnumerable<IDeclaration> GetDerivedDeclarations( bool deep = true ) => this.Underlying.GetDerivedDeclarations();
 
         public override string ToString() => this.Underlying.ToString();
 

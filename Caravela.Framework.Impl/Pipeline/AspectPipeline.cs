@@ -105,7 +105,7 @@ namespace Caravela.Framework.Impl.Pipeline
 
             // Create compiler plug-ins found in compile-time code.
             ImmutableArray<object> compilerPlugIns;
-            var projectServiceProvider = this.ServiceProvider.WithMark( ServiceProviderMark.Project );
+            var projectServiceProvider = this.ServiceProvider.WithService( loader ).WithMark( ServiceProviderMark.Project );
 
             if ( compileTimeProject != null )
             {
@@ -211,13 +211,14 @@ namespace Caravela.Framework.Impl.Pipeline
 
         private protected virtual ImmutableArray<IAspectSource> CreateAspectSources(
             AspectProjectConfiguration configuration,
-            Compilation compilation )
+            Compilation compilation,
+            CancellationToken cancellationToken )
         {
             var aspectClasses = configuration.AspectClasses.As<IAspectClass>();
 
             var sources = ImmutableArray.Create<IAspectSource>(
                 new CompilationAspectSource( aspectClasses, configuration.CompileTimeProjectLoader ),
-                new ExternalInheritedAspectSource( compilation, aspectClasses, configuration.CompileTimeProjectLoader ) );
+                new ExternalInheritedAspectSource( compilation, aspectClasses, configuration.ServiceProvider, cancellationToken ) );
 
             if ( configuration.CompileTimeProject != null )
             {
@@ -247,12 +248,12 @@ namespace Caravela.Framework.Impl.Pipeline
             if ( projectConfiguration.CompileTimeProject == null || projectConfiguration.AspectClasses.Length == 0 )
             {
                 // If there is no aspect in the compilation, don't execute the pipeline.
-                pipelineStageResult = new PipelineStageResult( compilation, project, Array.Empty<OrderedAspectLayer>() );
+                pipelineStageResult = new PipelineStageResult( compilation, project, ImmutableArray<OrderedAspectLayer>.Empty );
 
                 return true;
             }
 
-            var aspectSources = this.CreateAspectSources( projectConfiguration, compilation.Compilation );
+            var aspectSources = this.CreateAspectSources( projectConfiguration, compilation.Compilation, cancellationToken );
 
             pipelineStageResult = new PipelineStageResult( compilation, project, projectConfiguration.AspectLayers, aspectSources: aspectSources );
 

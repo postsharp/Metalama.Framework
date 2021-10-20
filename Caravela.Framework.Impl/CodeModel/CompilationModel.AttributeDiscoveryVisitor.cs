@@ -18,8 +18,8 @@ namespace Caravela.Framework.Impl.CodeModel
         /// </summary>
         private class AttributeDiscoveryVisitor : CSharpSyntaxWalker
         {
-            private readonly ImmutableMultiValueDictionary<string, AttributeRef>.Builder _builder =
-                ImmutableMultiValueDictionary<string, AttributeRef>.CreateBuilder( StringComparer.Ordinal );
+            private readonly ImmutableDictionaryOfArray<string, AttributeRef>.Builder _builder =
+                ImmutableDictionaryOfArray<string, AttributeRef>.CreateBuilder( StringComparer.Ordinal );
 
             private readonly Compilation _compilation;
 
@@ -139,7 +139,7 @@ namespace Caravela.Framework.Impl.CodeModel
                 }
             }
 
-            public ImmutableMultiValueDictionary<string, AttributeRef> GetDiscoveredAttributes() => this._builder.ToImmutable();
+            public ImmutableDictionaryOfArray<string, AttributeRef> GetDiscoveredAttributes() => this._builder.ToImmutable();
         }
 
         bool IDeclarationImpl.CanBeInherited => false;

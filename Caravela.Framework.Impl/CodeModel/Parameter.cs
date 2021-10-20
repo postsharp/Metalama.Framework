@@ -59,7 +59,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public override bool CanBeInherited => this.DeclaringMember.CanBeInherited;
 
-        public override IEnumerable<IDeclaration> GetDerivedDeclarations()
+        public override IEnumerable<IDeclaration> GetDerivedDeclarations( bool deep = true )
             => this.DeclaringMember.GetDerivedDeclarations().Select( d => ((IHasParameters) d).Parameters[this.Index] );
 
         public TypedConstant DefaultValue

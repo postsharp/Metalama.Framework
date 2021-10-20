@@ -61,7 +61,7 @@ namespace Caravela.Framework.Impl.DesignTime.Diff
             var newTrees = ImmutableDictionary.CreateBuilder<string, (SyntaxTree Tree, bool HasCompileTimeCode)>( StringComparer.Ordinal );
             var generatedTrees = new List<SyntaxTree>();
 
-            var syntaxTreeChanges = ImmutableArray.CreateBuilder<SyntaxTreeChange>();
+            var syntaxTreeChanges = new List<SyntaxTreeChange>();
             var hasCompileTimeChange = false;
 
             // Process new trees.
@@ -156,7 +156,7 @@ namespace Caravela.Framework.Impl.DesignTime.Diff
                 var compilationToAnalyze = newCompilation.RemoveSyntaxTrees( generatedTrees );
 
                 compilationChanges = new CompilationChanges(
-                    syntaxTreeChanges.ToImmutable(),
+                    syntaxTreeChanges,
                     hasCompileTimeChange,
                     compilationToAnalyze,
                     this.LastCompilation != null );
@@ -250,7 +250,7 @@ namespace Caravela.Framework.Impl.DesignTime.Diff
                                     }
 
                                 case SyntaxKind.WhitespaceTrivia:
-                                    if ( changedTrivia.Span.Length == changedSpan.Length && (change.NewText == null || change.NewText.Length == 0) )
+                                    if ( changedTrivia.Span.Length == changedSpan.Length && string.IsNullOrEmpty( change.NewText ) )
                                     {
                                         // Removing all spaces of a trivia is potentially breaking.
                                         break;

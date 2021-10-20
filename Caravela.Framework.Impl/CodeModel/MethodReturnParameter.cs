@@ -36,7 +36,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public override DeclarationRef<IDeclaration> ToRef() => DeclarationRef.ReturnParameter( this.DeclaringMethod.MethodSymbol );
 
-        public override IEnumerable<IDeclaration> GetDerivedDeclarations()
+        public override IEnumerable<IDeclaration> GetDerivedDeclarations( bool deep = true )
             => this.DeclaringMember.GetContainedDeclarations().Select( d => ((IMethod) d).ReturnParameter );
 
         [Memo]

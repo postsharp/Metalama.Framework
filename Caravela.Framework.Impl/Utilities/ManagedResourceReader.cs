@@ -27,10 +27,10 @@ namespace Caravela.Framework.Impl.Utilities
                  assemblyName.StartsWith( "Microsoft.CodeAnalysis", StringComparison.OrdinalIgnoreCase ) )
             {
                 resources = null;
-                
+
                 return false;
             }
-            
+
             if ( !(_resourceCache.TryGetValue( path, out var result ) && result.LastFileWrite == File.GetLastWriteTime( path )) )
             {
                 result = GetCompileTimeResourceCore( path );
@@ -59,9 +59,9 @@ namespace Caravela.Framework.Impl.Utilities
             using var peReader = new PEReader( stream );
 
             var metadataReader = peReader.GetMetadataReader();
-            
+
             ImmutableDictionary<string, byte[]>.Builder? dictionaryBuilder = null;
-            
+
             foreach ( var resourceHandle in metadataReader.ManifestResources )
             {
                 var resource = metadataReader.GetManifestResource( resourceHandle );

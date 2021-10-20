@@ -9,7 +9,6 @@ using Caravela.Framework.Impl.DesignTime.Refactoring;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Options;
 using Caravela.Framework.Impl.Pipeline;
-using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Concurrent;
@@ -26,17 +25,16 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
     /// returns produced by <see cref="DesignTimeAspectPipeline"/>. This class is also responsible for invoking
     /// cache invalidation methods as appropriate.
     /// </summary>
-    internal class DesignTimeAspectPipelineCache : IDisposable
+    internal class DesignTimeAspectPipelineFactory : IDisposable, IInheritableAspectManifestProvider
     {
-        private static readonly string _sourceGeneratorAssemblyName = typeof(DesignTimeAspectPipelineCache).Assembly.GetName().Name;
+        // The project id is passed to a constant, because that's the only public way to push a property to a compilation.
+        public const string ProjectIdPreprocessorSymbolPrefix = "CaravelaProjectId_";
 
         private readonly ConcurrentDictionary<string, DesignTimeAspectPipeline> _pipelinesByProjectId = new();
-        private readonly SyntaxTreeResultCache _syntaxTreeResultCache = new();
         private readonly CompileTimeDomain _domain;
         private readonly bool _isTest;
-        private int _pipelineExecutionCount;
 
-        public DesignTimeAspectPipelineCache( CompileTimeDomain domain, bool isTest = false )
+        public DesignTimeAspectPipelineFactory( CompileTimeDomain domain, bool isTest = false )
         {
             this._domain = domain;
             this._isTest = isTest;
@@ -45,12 +43,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
         /// <summary>
         /// Gets the singleton instance of this class (other instances can be used in tests).
         /// </summary>
-        public static DesignTimeAspectPipelineCache Instance { get; } = new( new CompileTimeDomain() );
-
-        /// <summary>
-        /// Gets the number of times the pipeline has been executed. Useful for testing purposes.
-        /// </summary>
-        public int PipelineExecutionCount => this._pipelineExecutionCount;
+        public static DesignTimeAspectPipelineFactory Instance { get; } = new( new CompileTimeDomain() );
 
         /// <summary>
         /// Gets the pipeline for a given project, and creates it if necessary.
@@ -82,7 +75,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
                         return pipeline;
                     }
 
-                    var serviceProvider = ServiceProviderFactory.GetServiceProvider().WithService( projectOptions );
+                    var serviceProvider = ServiceProviderFactory.GetServiceProvider().WithServices( projectOptions, this );
                     pipeline = new DesignTimeAspectPipeline( serviceProvider, this._domain, this._isTest );
                     pipeline.ExternalBuildStarted += this.OnExternalBuildStarted;
 
@@ -109,49 +102,15 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
         {
             // If a build has started, we have to invalidate the whole cache because we have allowed
             // our cache to become inconsistent when we started to have an outdated pipeline configuration.
-            this._syntaxTreeResultCache.Clear();
-        }
-
-        public IEnumerable<AspectClass> GetEligibleAspects( ISymbol symbol, IProjectOptions projectOptions, CancellationToken cancellationToken )
-        {
-            var pipeline = this.GetOrCreatePipeline( projectOptions, cancellationToken );
-
-            if ( pipeline == null )
+            foreach ( var pipeline in this._pipelinesByProjectId.Values )
             {
-                yield break;
-            }
-
-            var classes = pipeline.AspectClasses;
-
-            if ( classes != null )
-            {
-                foreach ( var aspectClass in classes )
-                {
-                    cancellationToken.ThrowIfCancellationRequested();
-
-                    if ( aspectClass.IsEligibleFast( symbol ) )
-                    {
-                        yield return aspectClass;
-                    }
-                }
+                pipeline.InvalidateCache();
             }
         }
 
-        /// <summary>
-        /// Gets the design-time results for a whole compilation.
-        /// </summary>
-        public ImmutableArray<SyntaxTreeResult> GetSyntaxTreeResults(
+        public IEnumerable<AspectClass> GetEligibleAspects(
             Compilation compilation,
-            IProjectOptions projectOptions,
-            CancellationToken cancellationToken = default )
-            => this.GetSyntaxTreeResults( compilation, compilation.SyntaxTrees, projectOptions, cancellationToken );
-
-        /// <summary>
-        /// Gets the design-time results for a set of syntax trees.
-        /// </summary>
-        public ImmutableArray<SyntaxTreeResult> GetSyntaxTreeResults(
-            Compilation compilation,
-            IEnumerable<SyntaxTree> syntaxTrees,
+            ISymbol symbol,
             IProjectOptions projectOptions,
             CancellationToken cancellationToken )
         {
@@ -159,90 +118,28 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
 
             if ( pipeline == null )
             {
-                return ImmutableArray<SyntaxTreeResult>.Empty;
+                return Enumerable.Empty<AspectClass>();
             }
 
-            lock ( pipeline.Sync )
-            {
-                // Update the cache.
-                var changes = pipeline.InvalidateCache( compilation, cancellationToken );
-
-                if ( pipeline.Status != DesignTimeAspectPipelineStatus.NeedsExternalBuild )
-                {
-                    // No cancellation between invalidating the pipeline and invalidating the cache!
-                    this._syntaxTreeResultCache.InvalidateCache( changes );
-                }
-                else
-                {
-                    // We don't invalidate the syntax tree results cache if the pipeline is broken, so we can serve old (outdated) results
-                    // instead of nothing.
-                }
-
-                var compilationToAnalyze = changes.CompilationToAnalyze;
-
-                if ( pipeline.Status != DesignTimeAspectPipelineStatus.NeedsExternalBuild )
-                {
-                    var dirtySyntaxTrees = this.GetDirtySyntaxTrees( compilationToAnalyze );
-
-                    // Execute the pipeline if required, and update the cache.
-                    if ( dirtySyntaxTrees.Count > 0 )
-                    {
-                        var partialCompilation = PartialCompilation.CreatePartial( compilationToAnalyze, dirtySyntaxTrees );
-
-                        if ( !partialCompilation.IsEmpty )
-                        {
-                            Interlocked.Increment( ref this._pipelineExecutionCount );
-                            var result = pipeline.Execute( partialCompilation, cancellationToken );
-
-                            this._syntaxTreeResultCache.SetResults( partialCompilation, result );
-                        }
-                    }
-                }
-                else
-                {
-                    // If we need a build, we only serve results from the cache.
-                    Logger.Instance?.Write(
-                        $"DesignTimeAspectPipelineCache.GetDesignTimeResults('{compilation.AssemblyName}'): build required," +
-                        $" returning from cache only. Cache size is {this._syntaxTreeResultCache.Count}" );
-                }
-
-                // Get the results from the cache. We don't need to check dependencies
-                var resultArrayBuilder = ImmutableArray.CreateBuilder<SyntaxTreeResult>();
-
-                // Create the result.
-                foreach ( var syntaxTree in syntaxTrees )
-                {
-                    if ( this._syntaxTreeResultCache.TryGetResult( syntaxTree, out var syntaxTreeResult ) )
-                    {
-                        resultArrayBuilder.Add( syntaxTreeResult );
-                    }
-                }
-
-                return resultArrayBuilder.ToImmutable();
-            }
+            return pipeline.GetEligibleAspects( compilation, symbol, cancellationToken );
         }
 
-        private List<SyntaxTree> GetDirtySyntaxTrees( Compilation compilation )
+        public bool TryExecute(
+            IProjectOptions projectOptions,
+            Compilation compilation,
+            CancellationToken cancellationToken,
+            [NotNullWhen( true )] out CompilationResult? compilationResult )
         {
-            // Computes the set of semantic models that need to be processed.
+            var designTimePipeline = this.GetOrCreatePipeline( projectOptions, cancellationToken );
 
-            List<SyntaxTree> uncachedSyntaxTrees = new();
-
-            foreach ( var syntaxTree in compilation.SyntaxTrees )
+            if ( designTimePipeline == null )
             {
-                if ( syntaxTree.FilePath.StartsWith( _sourceGeneratorAssemblyName, StringComparison.Ordinal ) )
-                {
-                    // This is our own generated file. Don't include.
-                    continue;
-                }
+                compilationResult = null;
 
-                if ( !this._syntaxTreeResultCache.TryGetResult( syntaxTree, out _ ) )
-                {
-                    uncachedSyntaxTrees.Add( syntaxTree );
-                }
+                return false;
             }
 
-            return uncachedSyntaxTrees;
+            return designTimePipeline.TryExecute( compilation, cancellationToken, out compilationResult );
         }
 
         public bool TryApplyAspectToCode(
@@ -306,6 +203,35 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
 
             this._pipelinesByProjectId.Clear();
             this._domain.Dispose();
+        }
+
+        public IInheritableAspectsManifest? GetInheritableAspectsManifest( Compilation compilation, CancellationToken cancellationToken )
+        {
+            var projectIdConstant = compilation.SyntaxTrees.First()
+                .Options.PreprocessorSymbolNames.FirstOrDefault( x => x.StartsWith( ProjectIdPreprocessorSymbolPrefix, StringComparison.OrdinalIgnoreCase ) );
+
+            var projectId = projectIdConstant?.Substring( ProjectIdPreprocessorSymbolPrefix.Length );
+
+            if ( projectId == null )
+            {
+                // The compilation does not reference our package.
+                return null;
+            }
+
+            if ( !this._pipelinesByProjectId.TryGetValue( projectId, out var pipeline ) )
+            {
+                // We cannot create the pipeline because we don't have all options.
+                // If this is a problem, we will need to pass all options as AssemblyMetadataAttribute.
+
+                return null;
+            }
+
+            if ( !pipeline.TryExecute( compilation, cancellationToken, out var compilationResult ) )
+            {
+                return null;
+            }
+
+            return compilationResult;
         }
     }
 }

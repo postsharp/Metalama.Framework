@@ -3,7 +3,10 @@
     <PropertyGroup>
         <!-- This must be in .targets, not in .props, because it relies on other properties and
               is not meant to be overwritten -->
-        <CaravelaProjectId>$(AssemblyName)_$(Configuration)_$(TargetFramework)</CaravelaProjectId>
+        <CaravelaProjectId>$(AssemblyName.Replace(".",""))_$(CaravelaProjectIdSuffix)_$(Configuration.Replace(".",""))_$(TargetFramework.Replace(".",""))</CaravelaProjectId>
+
+        <!-- This constant is used to identify the pipeline when we have only a compilation but no analyzer options -->
+        <DefineConstants>$(DefinedConstants);CaravelaProjectId_$(CaravelaProjectId)</DefineConstants>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(CaravelaEnabled)'!='False'">

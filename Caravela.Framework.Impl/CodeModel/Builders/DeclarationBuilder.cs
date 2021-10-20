@@ -89,7 +89,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public abstract bool CanBeInherited { get; }
 
-        public IEnumerable<IDeclaration> GetDerivedDeclarations() => throw new NotImplementedException();
+        public IEnumerable<IDeclaration> GetDerivedDeclarations( bool deep = true ) => throw new NotImplementedException();
 
         public override string ToString() => this.ToDisplayString( CodeDisplayFormat.MinimallyQualified );
 

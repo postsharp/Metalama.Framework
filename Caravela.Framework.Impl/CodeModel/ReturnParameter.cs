@@ -67,7 +67,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public bool CanBeInherited => ((IDeclarationImpl) this.DeclaringMember).CanBeInherited;
 
-        public abstract IEnumerable<IDeclaration> GetDerivedDeclarations();
+        public abstract IEnumerable<IDeclaration> GetDerivedDeclarations( bool deep = true );
 
         public abstract IDeclaration OriginalDefinition { get; }
     }

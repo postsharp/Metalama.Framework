@@ -61,8 +61,8 @@ namespace Caravela.Framework.Code
         IEnumerable<T> GetAspectsOf<T>( IDeclaration declaration )
             where T : IAspect;
 
-        IEnumerable<INamedType> GetDerivedTypes( INamedType baseType );
+        IEnumerable<INamedType> GetDerivedTypes( INamedType baseType, bool deep = true );
 
-        IEnumerable<INamedType> GetDerivedTypes( Type baseType );
+        IEnumerable<INamedType> GetDerivedTypes( Type baseType, bool deep = true );
     }
 }

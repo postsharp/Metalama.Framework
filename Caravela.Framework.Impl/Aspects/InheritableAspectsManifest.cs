@@ -8,6 +8,7 @@ using Microsoft.CodeAnalysis;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
@@ -17,8 +18,11 @@ using System.Text;
 namespace Caravela.Framework.Impl.Aspects
 {
     [Obfuscation( Exclude = true /* JSON */ )]
-    internal class InheritableAspectsManifest
+    internal class InheritableAspectsManifest : IInheritableAspectsManifest
     {
+        public static InheritableAspectsManifest Empty { get; } =
+            new( ImmutableDictionary<string, IReadOnlyList<string>>.Empty );
+
         public IReadOnlyDictionary<string, IReadOnlyList<string>> InheritableAspects { get; }
 
         public InheritableAspectsManifest( IReadOnlyDictionary<string, IReadOnlyList<string>> inheritableAspects )
@@ -53,7 +57,7 @@ namespace Caravela.Framework.Impl.Aspects
             this.Serialize( stream );
             _ = stream.Seek( 0, SeekOrigin.Begin );
 
-            return new(
+            return new ResourceDescription(
                 CompileTimeConstants.InheritableAspectManifestResourceName,
                 () => stream,
                 true );
@@ -68,5 +72,9 @@ namespace Caravela.Framework.Impl.Aspects
 
             return JsonConvert.DeserializeObject<InheritableAspectsManifest>( manifestJson ).AssertNotNull();
         }
+
+        public IEnumerable<string> InheritableAspectTypes => this.InheritableAspects.Keys;
+
+        public IEnumerable<string> GetInheritableAspectTargets( string aspectType ) => this.InheritableAspects[aspectType];
     }
 }

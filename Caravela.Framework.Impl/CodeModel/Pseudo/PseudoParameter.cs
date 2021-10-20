@@ -77,7 +77,7 @@ namespace Caravela.Framework.Impl.CodeModel.Pseudo
 
         public bool CanBeInherited => ((IDeclarationImpl) this.DeclaringMember).CanBeInherited;
 
-        public IEnumerable<IDeclaration> GetDerivedDeclarations() => throw new NotImplementedException();
+        public IEnumerable<IDeclaration> GetDerivedDeclarations( bool deep = true ) => throw new NotImplementedException();
 
         public IDeclaration OriginalDefinition => throw new NotImplementedException();
 

@@ -114,7 +114,7 @@ namespace Caravela.Framework.Impl.Pipeline
                 }
 
                 // Add the index of inherited aspects.
-                if ( result.ExternallyInheritableAspects.Count > 0 )
+                if ( result.ExternallyInheritableAspects.Length > 0 )
                 {
                     var inheritedAspectsManifest = InheritableAspectsManifest.Create( result.ExternallyInheritableAspects );
                     var resource = inheritedAspectsManifest.ToResource();

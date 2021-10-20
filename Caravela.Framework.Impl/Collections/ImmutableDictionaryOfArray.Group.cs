@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace Caravela.Framework.Impl.Collections
 {
-    internal partial class ImmutableMultiValueDictionary<TKey, TValue>
+    internal partial class ImmutableDictionaryOfArray<TKey, TValue>
     {
         internal readonly struct Group : IGrouping<TKey, TValue>
         {

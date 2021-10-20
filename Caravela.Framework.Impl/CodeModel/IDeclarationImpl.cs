@@ -25,7 +25,7 @@ namespace Caravela.Framework.Impl.CodeModel
         /// </summary>
         bool CanBeInherited { get; }
 
-        IEnumerable<IDeclaration> GetDerivedDeclarations();
+        IEnumerable<IDeclaration> GetDerivedDeclarations( bool deep = true );
     }
 
     internal interface IMemberImpl : IDeclarationImpl, IMember

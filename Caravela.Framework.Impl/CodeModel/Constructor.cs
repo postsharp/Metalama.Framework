@@ -24,7 +24,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public override DeclarationKind DeclarationKind => DeclarationKind.Constructor;
 
-        public override IEnumerable<IDeclaration> GetDerivedDeclarations() => Enumerable.Empty<IDeclaration>();
+        public override IEnumerable<IDeclaration> GetDerivedDeclarations( bool deep = true ) => Enumerable.Empty<IDeclaration>();
 
         public override bool IsExplicitInterfaceImplementation => false;
 

@@ -139,8 +139,7 @@ namespace Caravela.Framework.Impl.Advices
             }
             else
             {
-                throw GeneralDiagnosticDescriptors.AspectMustHaveExactlyOneTemplateMember.CreateException(
-                    (this._aspect.AspectClass.ShortName, templateName) );
+                throw GeneralDiagnosticDescriptors.AspectMustHaveExactlyOneTemplateMember.CreateException( (this._aspect.AspectClass.ShortName, templateName) );
             }
         }
 
@@ -318,7 +317,7 @@ namespace Caravela.Framework.Impl.Advices
             {
                 throw new InvalidOperationException();
             }
-            
+
             if ( targetType.TypeKind == TypeKind.Interface )
             {
                 throw new InvalidOperationException(
@@ -487,7 +486,7 @@ namespace Caravela.Framework.Impl.Advices
             {
                 throw new InvalidOperationException();
             }
-            
+
             if ( targetType.TypeKind == TypeKind.Interface )
             {
                 throw new InvalidOperationException(
@@ -536,7 +535,7 @@ namespace Caravela.Framework.Impl.Advices
             {
                 throw new InvalidOperationException();
             }
-            
+
             if ( targetType.TypeKind == TypeKind.Interface )
             {
                 throw new InvalidOperationException(
@@ -637,7 +636,7 @@ namespace Caravela.Framework.Impl.Advices
             {
                 throw new InvalidOperationException();
             }
-            
+
             if ( targetType.TypeKind == TypeKind.Interface )
             {
                 throw new InvalidOperationException(
@@ -685,7 +684,7 @@ namespace Caravela.Framework.Impl.Advices
             {
                 throw new InvalidOperationException();
             }
-            
+
             if ( targetType.TypeKind == TypeKind.Interface )
             {
                 throw new InvalidOperationException(

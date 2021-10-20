@@ -7,11 +7,11 @@ using System.Collections.Immutable;
 
 namespace Caravela.Framework.Impl.Collections
 {
-    internal partial class ImmutableMultiValueDictionary<TKey, TValue>
+    internal partial class ImmutableDictionaryOfArray<TKey, TValue>
     {
         public class Builder
         {
-            private readonly ImmutableMultiValueDictionary<TKey, TValue>? _initialValues;
+            private readonly ImmutableDictionaryOfArray<TKey, TValue>? _initialValues;
 
             private readonly ImmutableDictionary<TKey, ImmutableArray<TValue>.Builder>.Builder _newValuesBuilder;
 
@@ -21,7 +21,7 @@ namespace Caravela.Framework.Impl.Collections
                 this._newValuesBuilder = ImmutableDictionary.CreateBuilder<TKey, ImmutableArray<TValue>.Builder>( comparer );
             }
 
-            internal Builder( ImmutableMultiValueDictionary<TKey, TValue> initialValues )
+            internal Builder( ImmutableDictionaryOfArray<TKey, TValue> initialValues )
             {
                 this._initialValues = initialValues;
                 this._newValuesBuilder = ImmutableDictionary.CreateBuilder<TKey, ImmutableArray<TValue>.Builder>( initialValues._dictionary.KeyComparer );
@@ -71,7 +71,7 @@ namespace Caravela.Framework.Impl.Collections
                 arrayBuilder.AddRange( values );
             }
 
-            public ImmutableMultiValueDictionary<TKey, TValue> ToImmutable()
+            public ImmutableDictionaryOfArray<TKey, TValue> ToImmutable()
             {
                 if ( this._newValuesBuilder.Count == 0 )
                 {
@@ -99,7 +99,7 @@ namespace Caravela.Framework.Impl.Collections
                         dictionaryBuilder[group.Key] = group;
                     }
 
-                    return new ImmutableMultiValueDictionary<TKey, TValue>( dictionaryBuilder.ToImmutable() );
+                    return new ImmutableDictionaryOfArray<TKey, TValue>( dictionaryBuilder.ToImmutable() );
                 }
             }
         }
