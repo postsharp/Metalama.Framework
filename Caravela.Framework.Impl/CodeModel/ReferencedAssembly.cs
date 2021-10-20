@@ -28,7 +28,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public override IEnumerable<IDeclaration> GetDerivedDeclarations( bool deep = true ) => Enumerable.Empty<IDeclaration>();
 
-        public bool IsExternal => true;
+        bool IAssembly.IsExternal => true;
 
         [Memo]
         public IAssemblyIdentity Identity => new AssemblyIdentityModel( this.AssemblySymbol.Identity );
