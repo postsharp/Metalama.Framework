@@ -60,5 +60,9 @@ namespace Caravela.Framework.Code
         /// <returns>The collection of aspects of type <typeparamref name="T"/> on <paramref name="declaration"/>.</returns>
         IEnumerable<T> GetAspectsOf<T>( IDeclaration declaration )
             where T : IAspect;
+
+        IEnumerable<INamedType> GetDerivedTypes( INamedType baseType, bool deep = true );
+
+        IEnumerable<INamedType> GetDerivedTypes( Type baseType, bool deep = true );
     }
 }

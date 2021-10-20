@@ -1,11 +1,9 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.DesignTime.Pipeline;
 using Caravela.TestFramework;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using Xunit;
 
@@ -14,11 +12,9 @@ namespace Caravela.Framework.Tests.UnitTests.DesignTime
     public class PipelineTests : TestBase
     {
         [Fact]
-        public void NoAspect()
+        public void WithoutAspect()
         {
             using var testContext = this.CreateTestContext();
-
-            // Test that we can initialize the pipeline with a different compilation than the one with which we execute it.
 
             var code = new Dictionary<string, string> { ["Class1.cs"] = "public class Class1 { }", ["Class2.cs"] = "public class Class2 { }" };
 
@@ -26,15 +22,11 @@ namespace Caravela.Framework.Tests.UnitTests.DesignTime
 
             using var domain = new UnloadableCompileTimeDomain();
             using DesignTimeAspectPipeline pipeline = new( testContext.ServiceProvider, domain, true );
-            var syntaxTree1 = compilation.SyntaxTrees.Single( t => t.FilePath == "Class1.cs" );
-            pipeline.Execute( PartialCompilation.CreatePartial( compilation, syntaxTree1 ), CancellationToken.None );
-
-            var syntaxTree2 = compilation.SyntaxTrees.Single( t => t.FilePath == "Class2.cs" );
-            pipeline.Execute( PartialCompilation.CreatePartial( compilation, syntaxTree2 ), CancellationToken.None );
+            Assert.True( pipeline.TryExecute( compilation, CancellationToken.None, out _ ) );
         }
 
         [Fact]
-        public void InitializePipelineWithDifferentCompilation()
+        public void WithAspect()
         {
             using var testContext = this.CreateTestContext();
 
@@ -52,11 +44,7 @@ namespace Caravela.Framework.Tests.UnitTests.DesignTime
 
             using var domain = new UnloadableCompileTimeDomain();
             using DesignTimeAspectPipeline pipeline = new( testContext.ServiceProvider, domain, true );
-            var syntaxTree1 = compilation.SyntaxTrees.Single( t => t.FilePath == "Class1.cs" );
-            pipeline.Execute( PartialCompilation.CreatePartial( compilation, syntaxTree1 ), CancellationToken.None );
-
-            var syntaxTree2 = compilation.SyntaxTrees.Single( t => t.FilePath == "Class2.cs" );
-            pipeline.Execute( PartialCompilation.CreatePartial( compilation, syntaxTree2 ), CancellationToken.None );
+            Assert.True( pipeline.TryExecute( compilation, CancellationToken.None, out _ ) );
         }
     }
 }

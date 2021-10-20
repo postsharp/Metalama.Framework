@@ -21,6 +21,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using Accessibility = Caravela.Framework.Code.Accessibility;
 using MethodKind = Microsoft.CodeAnalysis.MethodKind;
 using RoslynTypeKind = Microsoft.CodeAnalysis.TypeKind;
 using SpecialType = Caravela.Framework.Code.SpecialType;
@@ -37,6 +38,10 @@ namespace Caravela.Framework.Impl.CodeModel
         ITypeSymbol? ISdkType.TypeSymbol => this.TypeSymbol;
 
         public override ISymbol Symbol => this.TypeSymbol;
+
+        public override bool CanBeInherited => this.IsReferenceType.GetValueOrDefault() && !this.IsSealed;
+
+        public override IEnumerable<IDeclaration> GetDerivedDeclarations( bool deep = true ) => this.Compilation.GetDerivedTypes( this, deep );
 
         internal NamedType( INamedTypeSymbol typeSymbol, CompilationModel compilation ) : base( compilation )
         {
@@ -127,7 +132,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public bool IsReadOnly => this.TypeSymbol.IsReadOnly;
 
-        public bool IsExternal => this.TypeSymbol.ContainingAssembly != this.Compilation.RoslynCompilation.Assembly;
+        public bool IsExternal => !SymbolEqualityComparer.Default.Equals( this.TypeSymbol.ContainingAssembly, this.Compilation.RoslynCompilation.Assembly );
 
         public bool HasDefaultConstructor
             => this.TypeSymbol.TypeKind == RoslynTypeKind.Struct ||
@@ -250,9 +255,6 @@ namespace Caravela.Framework.Impl.CodeModel
         public IReadOnlyList<IType> TypeArguments => this.TypeSymbol.TypeArguments.Select( a => this.Compilation.Factory.GetIType( a ) ).ToImmutableList();
 
         [Memo]
-        public IAssembly DeclaringAssembly => this.Compilation.Factory.GetAssembly( this.TypeSymbol.ContainingAssembly );
-
-        [Memo]
         public override IDeclaration? ContainingDeclaration
             => this.TypeSymbol.ContainingSymbol switch
             {
@@ -306,6 +308,96 @@ namespace Caravela.Framework.Impl.CodeModel
             return this.Compilation.Factory.GetNamedType( this.TypeSymbol.Construct( typeArguments.Select( a => a.GetSymbol() ).ToArray() ) );
         }
 
+        public IEnumerable<IMember> GetOverridingMembers( IMember member )
+        {
+            var isInterfaceMember = member.DeclaringType.TypeKind == TypeKind.Interface;
+
+            if ( member.IsStatic || (!isInterfaceMember && (!member.IsVirtual || member.IsSealed)) )
+            {
+                return Enumerable.Empty<IMember>();
+            }
+
+            IMemberList<IMember> members;
+
+            switch ( member.DeclarationKind )
+            {
+                case DeclarationKind.Method:
+                    members = this.Methods;
+
+                    break;
+
+                case DeclarationKind.Property:
+                    members = this.Properties;
+
+                    break;
+
+                case DeclarationKind.Event:
+                    members = this.Events;
+
+                    break;
+
+                default:
+                    return Enumerable.Empty<IMember>();
+            }
+
+            var candidates = members.OfName( member.Name );
+
+            var overridingMembers = new List<IMember>();
+
+            foreach ( var candidate in candidates )
+            {
+                if ( isInterfaceMember )
+                {
+                    if ( ((INamedTypeInternal) candidate.DeclaringType).IsImplementationOfInterfaceMember( candidate, member ) )
+                    {
+                        overridingMembers.Add( candidate );
+                    }
+                }
+                else
+                {
+                    // Override. Look for overrides.
+                    for ( var c = (IMemberImpl) candidate; c != null; c = (IMemberImpl?) c.OverriddenMember )
+                    {
+                        if ( c.OverriddenMember?.GetOriginalDefinition() == member )
+                        {
+                            overridingMembers.Add( candidate );
+                        }
+                    }
+                }
+            }
+
+            return overridingMembers.ToList();
+        }
+
+        public bool IsImplementationOfInterfaceMember( IMember typeMember, IMember interfaceMember )
+        {
+            // Some trivial checks first.
+            if ( typeMember.Name != interfaceMember.Name
+                 || typeMember.DeclarationKind != interfaceMember.DeclarationKind
+                 || !(typeMember.Accessibility == Accessibility.Public || typeMember.IsExplicitInterfaceImplementation) )
+            {
+                return false;
+            }
+
+            var interfaceType = interfaceMember.DeclaringType.GetSymbol();
+            var relevantInterfaces = this.GetAllInterfaces().Where( t => t.ConstructedFrom.Equals( interfaceType ) );
+
+            foreach ( var implementedInterface in relevantInterfaces )
+            {
+                foreach ( var candidateSymbol in implementedInterface.GetMembers( typeMember.Name ) )
+                {
+                    var candidateMember = (IMember) this.Compilation.Factory.GetDeclaration( candidateSymbol );
+
+                    if ( SignatureComparer.Instance.Equals( candidateMember, typeMember ) )
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
         public bool Equals( IType other ) => this.Compilation.InvariantComparer.Equals( this, other );
 
         public override string ToString() => this.TypeSymbol.ToString();
@@ -350,7 +442,7 @@ namespace Caravela.Framework.Impl.CodeModel
                     : null;
 
             // Introduced implementation can be implementing the interface member in a subtype.
-            INamedType currentType = this;
+            INamedType? currentType = this;
 
             while ( currentType != null )
             {
@@ -382,6 +474,8 @@ namespace Caravela.Framework.Impl.CodeModel
                         return true;
                     }
                 }
+
+                currentType = currentType.BaseType?.GetOriginalDefinition();
             }
 
             if ( symbolInterfaceMemberImplementation != null )
@@ -486,6 +580,34 @@ namespace Caravela.Framework.Impl.CodeModel
             }
 
             return members;
+        }
+
+        private void PopulateAllInterfaces( ImmutableHashSet<INamedTypeSymbol>.Builder builder, GenericMap genericMap )
+        {
+            // Process the Roslyn type system.
+            foreach ( var type in this.TypeSymbol.Interfaces )
+            {
+                builder.Add( (INamedTypeSymbol) genericMap.Map( type ) );
+            }
+
+            if ( this.TypeSymbol.BaseType != null )
+            {
+                var newGenericMap = genericMap.CreateBaseMap( this.TypeSymbol.BaseType.TypeArguments );
+                ((NamedType) this.BaseType!).PopulateAllInterfaces( builder, newGenericMap );
+            }
+
+            // TODO: process introductions.
+        }
+
+        [Memo]
+        public ImmutableHashSet<INamedTypeSymbol> AllInterfaces => this.GetAllInterfaces();
+
+        private ImmutableHashSet<INamedTypeSymbol> GetAllInterfaces()
+        {
+            var builder = ImmutableHashSet.CreateBuilder<INamedTypeSymbol>( SymbolEqualityComparer.Default );
+            this.PopulateAllInterfaces( builder, this.Compilation.EmptyGenericMap );
+
+            return builder.ToImmutable();
         }
     }
 }

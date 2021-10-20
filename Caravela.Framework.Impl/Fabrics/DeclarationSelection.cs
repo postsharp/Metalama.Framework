@@ -8,9 +8,9 @@ using Caravela.Framework.Impl.Aspects;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Pipeline;
+using Caravela.Framework.Impl.Utilities;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
 using Attribute = System.Attribute;
 
@@ -24,17 +24,20 @@ namespace Caravela.Framework.Impl.Fabrics
     internal class DeclarationSelection<T> : IDeclarationSelection<T>
         where T : class, IDeclaration
     {
+        private readonly IDeclaration _containingDeclaration;
         private readonly AspectPredecessor _predecessor;
         private readonly Action<IAspectSource> _registerAspectSource;
         private readonly Func<CompilationModel, IEnumerable<T>> _selector;
         private readonly AspectProjectConfiguration _projectConfiguration;
 
         public DeclarationSelection(
+            IDeclaration containingDeclaration,
             AspectPredecessor predecessor,
             Action<IAspectSource> registerAspectSource,
             Func<CompilationModel, IEnumerable<T>> selectTargets,
             AspectProjectConfiguration projectConfiguration )
         {
+            this._containingDeclaration = containingDeclaration;
             this._predecessor = predecessor;
             this._registerAspectSource = registerAspectSource;
             this._selector = selectTargets;
@@ -64,16 +67,23 @@ namespace Caravela.Framework.Impl.Fabrics
             this.RegisterAspectSource(
                 new ProgrammaticAspectSource<TAspect, T>(
                     aspectClass,
-                    ( compilation ) => this._selector( compilation )
-                        .Select(
-                            t => new AspectInstance(
+                    ( compilation, diagnostics ) => this.SelectAndValidateTargets(
+                        compilation,
+                        diagnostics,
+                        aspectClass,
+                        item =>
+                        {
+                            var lambda = Expression.Lambda<Func<IAspect>>(
+                                this._projectConfiguration.UserCodeInvoker.Invoke( () => createAspect( item ) ).Body,
+                                Array.Empty<ParameterExpression>() );
+
+                            return new AspectInstance(
                                 this._projectConfiguration.ServiceProvider,
-                                Expression.Lambda<Func<IAspect>>(
-                                    this._projectConfiguration.UserCodeInvoker.Invoke( () => createAspect( t ) ).Body,
-                                    Array.Empty<ParameterExpression>() ),
-                                t,
+                                lambda,
+                                item,
                                 aspectClass,
-                                this._predecessor ) ) ) );
+                                this._predecessor );
+                        } ) ) );
 
             return this;
         }
@@ -86,13 +96,15 @@ namespace Caravela.Framework.Impl.Fabrics
             this.RegisterAspectSource(
                 new ProgrammaticAspectSource<TAspect, T>(
                     aspectClass,
-                    ( compilation ) => this._selector( compilation )
-                        .Select(
-                            t => new AspectInstance(
-                                this._projectConfiguration.UserCodeInvoker.Invoke( () => createAspect( t ) ),
-                                t,
-                                aspectClass,
-                                this._predecessor ) ) ) );
+                    ( compilation, diagnosticAdder ) => this.SelectAndValidateTargets(
+                        compilation,
+                        diagnosticAdder,
+                        aspectClass,
+                        t => new AspectInstance(
+                            this._projectConfiguration.UserCodeInvoker.Invoke( () => createAspect( t ) ),
+                            t,
+                            aspectClass,
+                            this._predecessor ) ) ) );
 
             return this;
         }
@@ -105,15 +117,57 @@ namespace Caravela.Framework.Impl.Fabrics
             this.RegisterAspectSource(
                 new ProgrammaticAspectSource<TAspect, T>(
                     aspectClass,
-                    ( compilation ) => this._selector( compilation )
-                        .Select(
-                            t => new AspectInstance(
-                                new TAspect(),
-                                t,
-                                aspectClass,
-                                this._predecessor ) ) ) );
+                    ( compilation, diagnosticAdder ) => this.SelectAndValidateTargets(
+                        compilation,
+                        diagnosticAdder,
+                        aspectClass,
+                        t => new AspectInstance(
+                            new TAspect(),
+                            t,
+                            aspectClass,
+                            this._predecessor ) ) ) );
 
             return this;
+        }
+
+        private IEnumerable<AspectInstance> SelectAndValidateTargets(
+            CompilationModel compilation,
+            IDiagnosticAdder diagnosticAdder,
+            AspectClass aspectClass,
+            Func<T, AspectInstance> createAspectInstance )
+        {
+            foreach ( var item in this._selector( compilation ) )
+            {
+                var predecessorInstance = (IAspectPredecessorImpl) this._predecessor.Instance;
+
+                if ( !item.IsContainedIn( this._containingDeclaration ) || item.DeclaringAssembly.IsExternal )
+                {
+                    diagnosticAdder.Report(
+                        GeneralDiagnosticDescriptors.CanAddChildAspectOnlyUnderParent.CreateDiagnostic(
+                            predecessorInstance.GetDiagnosticLocation( compilation.RoslynCompilation ),
+                            (predecessorInstance.FormatPredecessor(), aspectClass.ShortName, item, this._containingDeclaration) ) );
+
+                    continue;
+                }
+
+                var eligibility = aspectClass.GetEligibility( item );
+                var canBeInherited = ((IDeclarationImpl) item).CanBeInherited;
+                var requiredEligibility = canBeInherited ? EligibleScenarios.Aspect | EligibleScenarios.Inheritance : EligibleScenarios.Aspect;
+
+                if ( !eligibility.IncludesAny( requiredEligibility ) )
+                {
+                    var reason = aspectClass.GetIneligibilityJustification( requiredEligibility, new DescribedObject<IDeclaration>( item ) )!;
+
+                    diagnosticAdder.Report(
+                        GeneralDiagnosticDescriptors.IneligibleChildAspect.CreateDiagnostic(
+                            predecessorInstance.GetDiagnosticLocation( compilation.RoslynCompilation ),
+                            (predecessorInstance.FormatPredecessor(), aspectClass.ShortName, item, reason) ) );
+
+                    continue;
+                }
+
+                yield return createAspectInstance( item );
+            }
         }
 
         [Obsolete( "Not implemented." )]

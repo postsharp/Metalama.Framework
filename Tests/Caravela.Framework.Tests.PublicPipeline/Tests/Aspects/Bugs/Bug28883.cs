@@ -27,11 +27,10 @@ namespace Caravela.Framework.Tests.Integration.Aspects.Bugs.Bug28883
         }
     }
 
+    // <target>
     class TargetCode
     {
         [TestAttribute]
         int Property { get; set; }
-        
-      
     }
 }

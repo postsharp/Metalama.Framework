@@ -8,6 +8,7 @@ using Caravela.Framework.Impl.CodeModel.References;
 using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Caravela.Framework.Impl.CodeModel
@@ -30,6 +31,10 @@ namespace Caravela.Framework.Impl.CodeModel
         public string FullName => this._symbol.IsGlobalNamespace ? "" : this._symbol.ToDisplayString();
 
         public bool IsGlobalNamespace => this._symbol.IsGlobalNamespace;
+
+        public override bool CanBeInherited => false;
+
+        public override IEnumerable<IDeclaration> GetDerivedDeclarations( bool deep = true ) => Enumerable.Empty<IDeclaration>();
 
         [Memo]
         public INamespace? ParentNamespace => this.IsGlobalNamespace ? null : this.Compilation.Factory.GetNamespace( this._symbol.ContainingNamespace );
@@ -59,5 +64,11 @@ namespace Caravela.Framework.Impl.CodeModel
                     .Select( n => new DeclarationRef<INamespace>( n ) ) );
 
         public override string ToString() => this.IsGlobalNamespace ? "<Global Namespace>" : this.FullName;
+
+        public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
+        {
+            // Always write in full.
+            return this._symbol.ToDisplayString();
+        }
     }
 }

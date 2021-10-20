@@ -17,7 +17,7 @@ namespace Caravela.Framework.Impl.CodeModel
         private class CompleteImpl : PartialCompilation
         {
             public CompleteImpl( Compilation compilation, ImmutableArray<ResourceDescription> resources )
-                : base( compilation, resources ) { }
+                : base( compilation, GetDerivedTypeIndex( compilation ), resources ) { }
 
             private CompleteImpl(
                 PartialCompilation baseCompilation,
@@ -29,6 +29,18 @@ namespace Caravela.Framework.Impl.CodeModel
             [Memo]
             public override ImmutableDictionary<string, SyntaxTree> SyntaxTrees
                 => this.Compilation.SyntaxTrees.ToImmutableDictionary( s => s.FilePath, s => s );
+
+            private static DerivedTypeIndex GetDerivedTypeIndex( Compilation compilation )
+            {
+                DerivedTypeIndex.Builder builder = new( compilation );
+
+                foreach ( var type in compilation.Assembly.GetTypes() )
+                {
+                    builder.AnalyzeType( type );
+                }
+
+                return builder.ToImmutable();
+            }
 
             [Memo]
             public override ImmutableHashSet<INamedTypeSymbol> Types => this.Compilation.Assembly.GetTypes().ToImmutableHashSet();

@@ -5,6 +5,7 @@ namespace Caravela.Framework.Impl.DesignTime.Diff
 {
     internal enum SyntaxTreeChangeKind
     {
+        None,
         Added,
         Changed,
         Deleted

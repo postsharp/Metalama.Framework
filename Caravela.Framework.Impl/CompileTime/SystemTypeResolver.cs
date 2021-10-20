@@ -5,6 +5,7 @@ using Caravela.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Linq;
+using System.Reflection;
 using System.Threading;
 
 namespace Caravela.Framework.Impl.CompileTime
@@ -14,6 +15,8 @@ namespace Caravela.Framework.Impl.CompileTime
     /// </summary>
     internal class SystemTypeResolver : CompileTimeTypeResolver, IService
     {
+        // Avoid initializing from a static member because it is more difficult to debug.
+        private readonly Assembly _netStandardAssembly = Assembly.Load( "netstandard, Version=2.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51" );
         private readonly ReferenceAssemblyLocator _referenceAssemblyLocator;
 
         public SystemTypeResolver( IServiceProvider serviceProvider ) : base( serviceProvider )
@@ -51,18 +54,19 @@ namespace Caravela.Framework.Impl.CompileTime
                     return null;
                 }
 
+                // Check if this is a system type. If yes, it does not need to be in the same assembly.
+                var systemType = this._netStandardAssembly.GetType( typeName, false );
+
+                if ( systemType != null )
+                {
+                    return systemType;
+                }
+
                 // We don't allow loading new assemblies to the AppDomain.
                 if ( AppDomain.CurrentDomain.GetAssemblies().All( a => a.GetName().Name != assemblyName ) )
                 {
-                    if ( NetStandardTypeMap.Types.TryGetValue( typeName, out var standardType ) )
-                    {
-                        return standardType;
-                    }
-                    else
-                    {
-                        // Coverage: ignore
-                        return null;
-                    }
+                    // Coverage: ignore
+                    return null;
                 }
 
                 typeName += ", " + assemblyName;

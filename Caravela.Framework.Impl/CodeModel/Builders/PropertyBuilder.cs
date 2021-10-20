@@ -56,11 +56,13 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public IMethodBuilder? SetMethod { get; }
 
+        protected virtual bool HasBaseInvoker => this.OverriddenProperty != null;
+
         IInvokerFactory<IFieldOrPropertyInvoker> IFieldOrProperty.Invokers => this.Invokers;
 
         [Memo]
         public IInvokerFactory<IPropertyInvoker> Invokers
-            => new InvokerFactory<IPropertyInvoker>( ( order, invokerOperator ) => new PropertyInvoker( this, order, invokerOperator ), false );
+            => new InvokerFactory<IPropertyInvoker>( ( order, invokerOperator ) => new PropertyInvoker( this, order, invokerOperator ), this.HasBaseInvoker );
 
         public IProperty? OverriddenProperty { get; set; }
 
@@ -74,6 +76,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public IReadOnlyList<IProperty> ExplicitInterfaceImplementations { get; set; } = Array.Empty<IProperty>();
 
         public override bool IsExplicitInterfaceImplementation => this.ExplicitInterfaceImplementations.Count > 0;
+
+        public override IMember? OverriddenMember => this.OverriddenProperty;
 
         public bool IsIndexer => string.Equals( this.Name, "Items", StringComparison.Ordinal );
 

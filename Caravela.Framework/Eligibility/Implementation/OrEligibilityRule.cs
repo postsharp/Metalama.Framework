@@ -18,17 +18,17 @@ namespace Caravela.Framework.Eligibility.Implementation
             this._predicates = predicates;
         }
 
-        public EligibilityValue GetEligibility( T obj )
+        public EligibleScenarios GetEligibility( T obj )
         {
-            var eligibility = EligibilityValue.Ineligible;
+            var eligibility = EligibleScenarios.None;
 
             foreach ( var predicate in this._predicates )
             {
-                var thisEligibility = predicate.GetEligibility( obj );
+                eligibility |= predicate.GetEligibility( obj );
 
-                if ( thisEligibility > eligibility )
+                if ( eligibility == EligibleScenarios.All )
                 {
-                    eligibility = thisEligibility;
+                    return EligibleScenarios.All;
                 }
             }
 
@@ -36,7 +36,7 @@ namespace Caravela.Framework.Eligibility.Implementation
         }
 
         public FormattableString? GetIneligibilityJustification(
-            EligibilityValue requestedEligibility,
+            EligibleScenarios requestedEligibility,
             IDescribedObject<T> describedObject )
         {
             StringBuilder stringBuilder = new();
@@ -51,17 +51,10 @@ namespace Caravela.Framework.Eligibility.Implementation
                 {
                     if ( i > 0 )
                     {
-                        if ( i == this._predicates.Length - 1 )
-                        {
-                            stringBuilder.Append( ", or " );
-                        }
-                        else
-                        {
-                            stringBuilder.Append( ", " );
-                        }
+                        stringBuilder.Append( " or " );
                     }
 
-                    stringBuilder.Append( justification.ToString( describedObject.FormatProvider ) );
+                    stringBuilder.Append( justification.ToString( CaravelaServices.FormatProvider ) );
                 }
             }
 

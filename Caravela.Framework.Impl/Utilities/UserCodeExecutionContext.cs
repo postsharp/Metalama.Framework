@@ -2,8 +2,10 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Project;
 using System;
+using System.Globalization;
 using System.Threading;
 
 namespace Caravela.Framework.Impl.Utilities
@@ -29,8 +31,15 @@ namespace Caravela.Framework.Impl.Utilities
         {
             var oldContext = _current.Value;
             _current.Value = context;
+            var oldCulture = CultureInfo.CurrentCulture;
+            CultureInfo.CurrentCulture = UserMessageFormatter.Instance;
 
-            return new DisposeAction( () => _current.Value = oldContext );
+            return new DisposeAction(
+                () =>
+                {
+                    _current.Value = oldContext;
+                    CultureInfo.CurrentCulture = oldCulture;
+                } );
         }
 
         public static Type GetCompileTimeType( string id, string name ) => Current._serviceProvider.GetService<CompileTimeTypeFactory>().Get( id, name );

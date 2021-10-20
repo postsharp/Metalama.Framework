@@ -4,6 +4,7 @@
 using Caravela.Framework.Code;
 using Caravela.Framework.Code.Collections;
 using Caravela.Framework.Diagnostics;
+using Caravela.Framework.Impl.Aspects;
 using Caravela.Framework.Impl.CodeModel.Collections;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Utilities;
@@ -16,7 +17,7 @@ using TypedConstant = Caravela.Framework.Code.TypedConstant;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    internal class Attribute : IAttribute, IHasDiagnosticLocation
+    internal class Attribute : IAttributeImpl, IHasDiagnosticLocation
     {
         private readonly CompilationModel _compilation;
 
@@ -28,6 +29,8 @@ namespace Caravela.Framework.Impl.CodeModel
         }
 
         public AttributeData AttributeData { get; }
+
+        public IAssembly DeclaringAssembly => this.ContainingDeclaration.DeclaringAssembly;
 
         DeclarationOrigin IDeclaration.Origin => DeclarationOrigin.Source;
 
@@ -73,14 +76,18 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public override string ToString() => this.AttributeData.ToString();
 
+        public FormattableString FormatPredecessor() => $"the attribute of type '{this.Type}' on '{this.ContainingDeclaration}'";
+
         public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => throw new NotImplementedException();
 
         IDeclaration? IDeclaration.ContainingDeclaration => this.ContainingDeclaration;
 
         IDiagnosticLocation? IDiagnosticScope.DiagnosticLocation => this.DiagnosticLocation.ToDiagnosticLocation();
 
-        public Location? DiagnosticLocation => DiagnosticLocationHelper.GetDiagnosticLocation( this.AttributeData );
+        Location? IAspectPredecessorImpl.GetDiagnosticLocation( Compilation compilation ) => this.DiagnosticLocation;
 
         IType IHasType.Type => this.Type;
+
+        public Location? DiagnosticLocation => DiagnosticLocationHelper.GetDiagnosticLocation( this.AttributeData );
     }
 }

@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Eligibility;
 using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.Aspects;
 using Caravela.Framework.Impl.CodeModel;
@@ -31,9 +32,28 @@ namespace Caravela.Framework.Impl.Pipeline
                     s => s.GetAspectInstances( compilation, this.AspectLayer.AspectClass, pipelineStepsState, cancellationToken ) )
                 .ToList();
 
-            pipelineStepsState.AddAspectInstances( aspectInstances );
+            // We assume that all aspect instances are eligible, but some are eligible only for inheritance.
 
-            return compilation.WithAspectInstances( aspectInstances );
+            // Get the aspects that can be processed, i.e. they are not abstract-only.
+            var concreteAspectInstances = aspectInstances.Where( a => a.Eligibility.IncludesAll( EligibleScenarios.Aspect ) ).ToList();
+
+            // Gets aspects that can be inherited.
+            var inheritableAspectInstances = aspectInstances
+                .Where( a => a.Eligibility.IncludesAll( EligibleScenarios.Inheritance ) && a.AspectClass.IsInherited )
+                .Cast<AttributeAspectInstance>()
+                .ToList();
+
+            // Gets aspects that have been inherited by the source. 
+            var inheritedAspectInstancesInProject = inheritableAspectInstances
+                .SelectMany( a => ((IDeclarationImpl) a.TargetDeclaration).GetDerivedDeclarations().Select( a.CreateDerivedInstance ) )
+                .ToList();
+
+            // Index these aspects. 
+            pipelineStepsState.AddAspectInstances( concreteAspectInstances );
+            pipelineStepsState.AddAspectInstances( inheritedAspectInstancesInProject );
+            pipelineStepsState.AddInheritableAspectInstances( inheritableAspectInstances );
+
+            return compilation.WithAspectInstances( concreteAspectInstances );
         }
 
         public void AddAspectSource( IAspectSource aspectSource ) => this._aspectSources.Add( aspectSource );

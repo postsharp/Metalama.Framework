@@ -8,22 +8,22 @@ using System;
 namespace Caravela.Framework.Eligibility
 {
     /// <summary>
-    /// Encapsulates an arbitrary object and its optional human-readable description, as well as an <see cref="IFormatProvider"/>.
-    /// (Not implemented.)
+    /// Encapsulates an arbitrary object and its optional human-readable description.
+    /// Implemented by <see cref="DescribedObject{T}"/>.
     /// </summary>
     /// <typeparam name="T"></typeparam>
     [InternalImplement]
-    [Obsolete( "Not implemented." )]
     [CompileTimeOnly]
     public interface IDescribedObject<out T> : IFormattable
     {
+        /// <summary>
+        /// Gets the described object.
+        /// </summary>
         T Object { get; }
 
+        /// <summary>
+        /// Gets the optional human-readable description of <see cref="Object"/>.
+        /// </summary>
         FormattableString? Description { get; }
-
-        // The reason to include an IFormatProvider here is opportunistic: some implementations of IEligibilityRule need
-        // to format substrings and require our custom formatter, so it is easy to pass it as a part of this object.
-
-        IFormatProvider FormatProvider { get; }
     }
 }

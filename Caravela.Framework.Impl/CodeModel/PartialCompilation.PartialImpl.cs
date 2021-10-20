@@ -23,8 +23,9 @@ namespace Caravela.Framework.Impl.CodeModel
                 Compilation compilation,
                 ImmutableDictionary<string, SyntaxTree> syntaxTrees,
                 ImmutableHashSet<INamedTypeSymbol>? types,
+                DerivedTypeIndex derivedTypeIndex,
                 ImmutableArray<ResourceDescription> resources )
-                : base( compilation, resources )
+                : base( compilation, derivedTypeIndex, resources )
             {
                 this._types = types;
                 this._syntaxTrees = syntaxTrees;
@@ -79,6 +80,7 @@ namespace Caravela.Framework.Impl.CodeModel
                     }
                 }
 
+                // TODO: when the compilation is modified, we should update the set of types and derived types.
                 return new PartialImpl( syntaxTrees.ToImmutable(), null, this, replacedTrees, addedTrees, resources );
             }
         }

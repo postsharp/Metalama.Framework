@@ -37,7 +37,8 @@ namespace Caravela.Framework.Impl.DesignTime.Refactoring
 
         private protected override ImmutableArray<IAspectSource> CreateAspectSources(
             AspectProjectConfiguration configuration,
-            Compilation compilation )
+            Compilation compilation,
+            CancellationToken cancellationToken )
             => ImmutableArray.Create<IAspectSource>( this._source );
 
         public static bool TryExecute(

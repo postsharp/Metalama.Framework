@@ -8,6 +8,7 @@ using Caravela.Framework.Impl.CodeModel.References;
 using Caravela.Framework.Impl.ReflectionMocks;
 using Microsoft.CodeAnalysis;
 using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Reflection;
 using RefKind = Microsoft.CodeAnalysis.RefKind;
@@ -37,6 +38,8 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public virtual bool IsReturnParameter => true;
 
+        public IAssembly DeclaringAssembly => this.DeclaringMember.DeclaringAssembly;
+
         DeclarationOrigin IDeclaration.Origin => DeclarationOrigin.Source;
 
         public IDeclaration? ContainingDeclaration => this.DeclaringMember;
@@ -61,6 +64,10 @@ namespace Caravela.Framework.Impl.CodeModel
         public abstract DeclarationRef<IDeclaration> ToRef();
 
         public ImmutableArray<SyntaxReference> DeclaringSyntaxReferences => ((IDeclarationImpl) this.DeclaringMember).DeclaringSyntaxReferences;
+
+        public bool CanBeInherited => ((IDeclarationImpl) this.DeclaringMember).CanBeInherited;
+
+        public abstract IEnumerable<IDeclaration> GetDerivedDeclarations( bool deep = true );
 
         public abstract IDeclaration OriginalDefinition { get; }
     }

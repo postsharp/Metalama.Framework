@@ -10,14 +10,13 @@ namespace Caravela.Framework.TestApp
 {
     internal class CancelAspect : OverrideMethodAspect
     {
-        public override dynamic OverrideMethod()
+        public override dynamic? OverrideMethod()
         {
-            
-             var parameter = meta.Target.Parameters.LastOrDefault( p => p.Type.Is( typeof( CancellationToken ) ) );
+            var parameter = meta.Target.Parameters.LastOrDefault( p => p.Type.Is( typeof( CancellationToken ) ) );
 
             if ( parameter != null )
             {
-                parameter.Value.ThrowIfCancellationRequested();
+                parameter.Value!.ThrowIfCancellationRequested();
             }
 
             return meta.Proceed();

@@ -11,6 +11,7 @@ using Caravela.Framework.Impl.CodeModel.Collections;
 using Caravela.Framework.Impl.CodeModel.References;
 using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.CompileTime;
+using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Transformations;
 using Caravela.Framework.Impl.Utilities;
 using Caravela.Framework.Project;
@@ -24,6 +25,11 @@ namespace Caravela.Framework.Impl.CodeModel
 {
     internal partial class CompilationModel : ICompilationInternal, IDeclarationImpl
     {
+        static CompilationModel()
+        {
+            CaravelaServices.Initialize( UserMessageFormatter.Instance );
+        }
+
         public static CompilationModel CreateInitialInstance( IProject project, PartialCompilation compilation ) => new( project, compilation );
 
         public static CompilationModel CreateInitialInstance(
@@ -39,14 +45,16 @@ namespace Caravela.Framework.Impl.CodeModel
             ImmutableArray<ResourceDescription> resources = default )
             => new( project, PartialCompilation.CreatePartial( compilation, syntaxTree, resources ) );
 
-        private readonly ImmutableMultiValueDictionary<DeclarationRef<IDeclaration>, IObservableTransformation> _transformations;
+        private readonly ImmutableDictionaryOfArray<DeclarationRef<IDeclaration>, IObservableTransformation> _transformations;
 
         // This collection index all attributes on types and members, but not attributes on the assembly and the module.
-        private readonly ImmutableMultiValueDictionary<string, AttributeRef> _allMemberAttributesByTypeName;
+        private readonly ImmutableDictionaryOfArray<string, AttributeRef> _allMemberAttributesByTypeName;
 
-        private readonly ImmutableMultiValueDictionary<DeclarationRef<IDeclaration>, IAspectInstance> _aspects;
+        private readonly ImmutableDictionaryOfArray<DeclarationRef<IDeclaration>, IAspectInstance> _aspects;
 
         private readonly int _revision;
+
+        private readonly DerivedTypeIndex _derivedTypes;
 
         private ImmutableDictionary<DeclarationRef<IDeclaration>, int> _depthsCache = ImmutableDictionary.Create<DeclarationRef<IDeclaration>, int>();
 
@@ -66,8 +74,9 @@ namespace Caravela.Framework.Impl.CodeModel
             this.Project = project;
             this.ReflectionMapper = project.ServiceProvider.GetService<ReflectionMapperFactory>().GetInstance( this.RoslynCompilation );
             this.InvariantComparer = new DeclarationEqualityComparer( this.ReflectionMapper, this.RoslynCompilation );
+            this._derivedTypes = partialCompilation.DerivedTypes;
 
-            this._transformations = ImmutableMultiValueDictionary<DeclarationRef<IDeclaration>, IObservableTransformation>
+            this._transformations = ImmutableDictionaryOfArray<DeclarationRef<IDeclaration>, IObservableTransformation>
                 .Empty
                 .WithKeyComparer( DeclarationRefEqualityComparer<DeclarationRef<IDeclaration>>.Instance );
 
@@ -82,8 +91,9 @@ namespace Caravela.Framework.Impl.CodeModel
 
             this._allMemberAttributesByTypeName = attributeDiscoveryVisitor.GetDiscoveredAttributes();
 
-            this._aspects = ImmutableMultiValueDictionary<DeclarationRef<IDeclaration>, IAspectInstance>.Empty;
+            this._aspects = ImmutableDictionaryOfArray<DeclarationRef<IDeclaration>, IAspectInstance>.Empty;
             this.SymbolClassifier = project.ServiceProvider.GetService<SymbolClassificationService>().GetClassifier( this.RoslynCompilation );
+            this.EmptyGenericMap = new GenericMap( partialCompilation.Compilation );
         }
 
         /// <summary>
@@ -110,6 +120,8 @@ namespace Caravela.Framework.Impl.CodeModel
                     .Concat( observableTransformations.OfType<AttributeBuilder>() )
                     .Select( a => new AttributeRef( a ) );
 
+            this._derivedTypes = prototype._derivedTypes.WithIntroducedInterfaces( observableTransformations.OfType<IIntroducedInterface>() );
+
             // TODO: Process IRemoveMember.
 
             // TODO: this cache may need to be smartly invalidated when we have interface introductions.
@@ -122,6 +134,7 @@ namespace Caravela.Framework.Impl.CodeModel
             this.Project = prototype.Project;
             this._revision = prototype._revision + 1;
 
+            this._derivedTypes = prototype._derivedTypes;
             this.AspectLayerId = prototype.AspectLayerId;
             this.PartialCompilation = prototype.PartialCompilation;
             this.ReflectionMapper = prototype.ReflectionMapper;
@@ -132,6 +145,7 @@ namespace Caravela.Framework.Impl.CodeModel
             this._allMemberAttributesByTypeName = prototype._allMemberAttributesByTypeName;
             this._aspects = prototype._aspects;
             this.SymbolClassifier = prototype.SymbolClassifier;
+            this.EmptyGenericMap = prototype.EmptyGenericMap;
         }
 
         private CompilationModel( CompilationModel prototype, AspectLayerId aspectLayerId ) : this( prototype )
@@ -223,13 +237,19 @@ namespace Caravela.Framework.Impl.CodeModel
             where T : IAspect
             => this._aspects[declaration.ToRef()].Select( a => a.Aspect ).OfType<T>();
 
+        public IEnumerable<INamedType> GetDerivedTypes( INamedType baseType, bool deep )
+            => this._derivedTypes.GetDerivedTypes( baseType.GetSymbol(), deep ).Select( t => this.Factory.GetNamedType( t ) );
+
+        public IEnumerable<INamedType> GetDerivedTypes( Type baseType, bool deep )
+            => this.GetDerivedTypes( (INamedType) this.Factory.GetTypeByReflectionType( baseType ), deep );
+
         // TODO: throw an exception when the caller tries to get aspects that have not been initialized yet.
 
         IDeclaration? IDeclaration.ContainingDeclaration => null;
 
         DeclarationKind IDeclaration.DeclarationKind => DeclarationKind.Compilation;
 
-        public bool Equals( IDeclaration other ) => throw new NotImplementedException();
+        public bool Equals( IDeclaration other ) => ReferenceEquals( this, other );
 
         ICompilation ICompilationElement.Compilation => this;
 
@@ -242,11 +262,19 @@ namespace Caravela.Framework.Impl.CodeModel
         internal ImmutableArray<IObservableTransformation> GetObservableTransformationsOnElement( IDeclaration declaration )
             => this._transformations[declaration.ToRef()];
 
-        internal IEnumerable<(IDeclaration DeclaringDeclaration, IEnumerable<IObservableTransformation> Transformations)> GetAllObservableTransformations()
+        internal IEnumerable<(IDeclaration DeclaringDeclaration, ImmutableArray<IObservableTransformation> Transformations)> GetAllObservableTransformations(
+            bool designTimeOnly )
         {
             foreach ( var group in this._transformations )
             {
-                yield return (group.Key.Resolve( this ), group);
+                var filteredGroup = designTimeOnly
+                    ? group.Where( t => t.IsDesignTime ).ToImmutableArray()
+                    : group.ToImmutableArray();
+
+                if ( !filteredGroup.IsEmpty )
+                {
+                    yield return (group.Key.Resolve( this ), filteredGroup);
+                }
             }
         }
 
@@ -320,7 +348,12 @@ namespace Caravela.Framework.Impl.CodeModel
 
         ImmutableArray<SyntaxReference> IDeclarationImpl.DeclaringSyntaxReferences => ImmutableArray<SyntaxReference>.Empty;
 
+        IEnumerable<IDeclaration> IDeclarationImpl.GetDerivedDeclarations( bool deep ) => Enumerable.Empty<IDeclaration>();
+
         string IDisplayable.ToDisplayString( CodeDisplayFormat? format, CodeDisplayContext? context ) => this.RoslynCompilation.AssemblyName ?? "";
+
+        [Memo]
+        public IAssembly DeclaringAssembly => this.Factory.GetAssembly( this.RoslynCompilation.Assembly );
 
         DeclarationOrigin IDeclaration.Origin => DeclarationOrigin.Source;
 
@@ -340,6 +373,8 @@ namespace Caravela.Framework.Impl.CodeModel
 
         IDeclaration IDeclarationInternal.OriginalDefinition => this;
 
+        public GenericMap EmptyGenericMap { get; }
+
         public bool ContainsType( INamedTypeSymbol type )
         {
             if ( this.PartialCompilation.IsPartial && !this.PartialCompilation.Types.Contains( type ) )
@@ -349,5 +384,10 @@ namespace Caravela.Framework.Impl.CodeModel
 
             return this.SymbolClassifier.GetTemplatingScope( type ) != TemplatingScope.CompileTimeOnly;
         }
+
+        bool IAssembly.IsExternal => false;
+
+        [Memo]
+        public IAssemblyIdentity Identity => new AssemblyIdentityModel( this.RoslynCompilation.Assembly.Identity );
     }
 }

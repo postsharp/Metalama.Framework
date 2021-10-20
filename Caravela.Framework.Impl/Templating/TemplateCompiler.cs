@@ -4,6 +4,7 @@
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Observers;
 using Caravela.Framework.Impl.Serialization;
+using Caravela.Framework.Impl.Utilities;
 using Caravela.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -111,6 +112,9 @@ namespace Caravela.Framework.Impl.Templating
 
                 annotatedSyntaxRoot = null;
                 transformedSyntaxRoot = null;
+
+                Logger.Instance?.Write(
+                    $"Cannot create a compile-time assembly for '{semanticModel.SyntaxTree.FilePath}' because there are diagnostics in the source code." );
 
                 return false;
             }

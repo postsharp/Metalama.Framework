@@ -45,7 +45,7 @@ namespace Caravela.Framework.Impl.AspectOrdering
                     .Select( ( t, i ) => (t.AspectName, Index: i) )
                     .ToMultiValueDictionary( p => p.AspectName, p => p.Index );
 
-            var aspectLayerNameToLocationsMappingBuilder = ImmutableMultiValueDictionary<string, AspectOrderSpecification>.CreateBuilder();
+            var aspectLayerNameToLocationsMappingBuilder = ImmutableDictionaryOfArray<string, AspectOrderSpecification>.CreateBuilder();
 
             DirectedGraph directedGraph = new( n );
             var hasPredecessor = new bool[n];

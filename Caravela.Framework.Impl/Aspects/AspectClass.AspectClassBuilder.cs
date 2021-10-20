@@ -18,6 +18,12 @@ namespace Caravela.Framework.Impl.Aspects
                 this._parent = parent;
             }
 
+            public bool IsInherited
+            {
+                get => this._parent.IsInherited;
+                set => this._parent.IsInherited = value;
+            }
+
             public bool IsLiveTemplate
             {
                 get => this._parent.IsLiveTemplate;

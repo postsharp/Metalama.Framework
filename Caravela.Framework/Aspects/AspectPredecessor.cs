@@ -20,7 +20,7 @@ namespace Caravela.Framework.Aspects
         public AspectPredecessorKind Kind { get; }
 
         /// <summary>
-        /// Gets the object that created the aspect instance. It can be an <see cref="IAspectInstance"/>, an <see cref="IFabric"/>, or an <see cref="IAttribute"/>.
+        /// Gets the object that created the aspect instance. It can be an <see cref="IAspectInstance"/>, an <see cref="IFabricInstance"/>, or an <see cref="IAttribute"/>.
         /// </summary>
         public IAspectPredecessor Instance { get; }
 

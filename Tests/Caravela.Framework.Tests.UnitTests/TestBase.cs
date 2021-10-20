@@ -36,14 +36,16 @@ namespace Caravela.Framework.Tests.UnitTests
             bool ignoreErrors = false,
             IEnumerable<MetadataReference>? additionalReferences = null,
             string? name = null,
-            bool addCaravelaReferences = true )
+            bool addCaravelaReferences = true,
+            IEnumerable<string>? preprocessorSymbols = null )
             => CreateCSharpCompilation(
                 new Dictionary<string, string> { { Guid.NewGuid() + ".cs", code } },
                 dependentCode,
                 ignoreErrors,
                 additionalReferences,
                 name,
-                addCaravelaReferences );
+                addCaravelaReferences,
+                preprocessorSymbols );
 
         protected static CSharpCompilation CreateCSharpCompilation(
             IReadOnlyDictionary<string, string> code,
@@ -51,19 +53,22 @@ namespace Caravela.Framework.Tests.UnitTests
             bool ignoreErrors = false,
             IEnumerable<MetadataReference>? additionalReferences = null,
             string? name = null,
-            bool addCaravelaReferences = true )
+            bool addCaravelaReferences = true,
+            IEnumerable<string>? preprocessorSymbols = null )
         {
             var additionalAssemblies = new[] { typeof(TestBase).Assembly };
 
+            var parseOptions = new CSharpParseOptions( preprocessorSymbols: preprocessorSymbols );
+
             var mainRoslynCompilation = TestCompilationFactory
                 .CreateEmptyCSharpCompilation( name, additionalAssemblies, addCaravelaReferences )
-                .AddSyntaxTrees( code.Select( c => SyntaxFactory.ParseSyntaxTree( c.Value, path: c.Key ) ) );
+                .AddSyntaxTrees( code.Select( c => SyntaxFactory.ParseSyntaxTree( c.Value, path: c.Key, options: parseOptions ) ) );
 
             if ( dependentCode != null )
             {
                 var dependentCompilation = TestCompilationFactory
                     .CreateEmptyCSharpCompilation( name == null ? null : null + ".Dependency", additionalAssemblies )
-                    .AddSyntaxTrees( SyntaxFactory.ParseSyntaxTree( dependentCode ) );
+                    .AddSyntaxTrees( SyntaxFactory.ParseSyntaxTree( dependentCode, parseOptions ) );
 
                 mainRoslynCompilation = mainRoslynCompilation.AddReferences( dependentCompilation.ToMetadataReference() );
             }
@@ -164,6 +169,21 @@ class Expression
                 IEnumerable<MetadataReference>? additionalReferences = null,
                 string? name = null,
                 bool addCaravelaReferences = true )
+                => this.CreateCompilationModel(
+                    new Dictionary<string, string> { { "test.cs", code } },
+                    dependentCode,
+                    ignoreErrors,
+                    additionalReferences,
+                    name,
+                    addCaravelaReferences );
+
+            internal CompilationModel CreateCompilationModel(
+                IReadOnlyDictionary<string, string> code,
+                string? dependentCode = null,
+                bool ignoreErrors = false,
+                IEnumerable<MetadataReference>? additionalReferences = null,
+                string? name = null,
+                bool addCaravelaReferences = true )
             {
                 var roslynCompilation = CreateCSharpCompilation( code, dependentCode, ignoreErrors, additionalReferences, name, addCaravelaReferences );
 
@@ -171,6 +191,11 @@ class Expression
                     new ProjectModel( roslynCompilation, this.ServiceProvider ),
                     roslynCompilation );
             }
+
+            internal CompilationModel CreateCompilationModel( Compilation compilation )
+                => CompilationModel.CreateInitialInstance(
+                    new ProjectModel( compilation, this.ServiceProvider ),
+                    compilation );
 
             public void Dispose()
             {

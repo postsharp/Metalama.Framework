@@ -20,6 +20,8 @@ namespace Caravela.Framework.Aspects
         /// </summary>
         bool IsLiveTemplate { get; set; }
 
+        bool IsInherited { get; set; }
+
         /// <summary>
         /// Gets or sets the name of the aspect as shown to the user at design time.
         /// </summary>

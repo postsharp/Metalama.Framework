@@ -11,5 +11,10 @@ namespace Caravela.Framework.Impl.Transformations
     internal interface IObservableTransformation : ITransformation
     {
         IDeclaration ContainingDeclaration { get; }
+
+        /// <summary>
+        /// Gets a value indicating whether the transformation should be included in the design-time generated code.
+        /// </summary>
+        bool IsDesignTime { get; }
     }
 }

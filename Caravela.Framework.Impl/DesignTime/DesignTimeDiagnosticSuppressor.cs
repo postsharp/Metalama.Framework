@@ -11,7 +11,6 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Diagnostics;
 using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -44,18 +43,12 @@ namespace Caravela.Framework.Impl.DesignTime
             {
                 Logger.Instance?.Write( $"DesignTimeDiagnosticSuppressor.ReportSuppressions('{context.Compilation.AssemblyName}')." );
 
-                var syntaxTrees = context.ReportedDiagnostics
-                    .Select( d => d.Location.SourceTree )
-                    .WhereNotNull()
-                    .ToList();
-
                 var buildOptions = new ProjectOptions( context.Options.AnalyzerConfigOptionsProvider );
 
                 DebuggingHelper.AttachDebugger( buildOptions );
 
                 this.ReportSuppressions(
                     compilation,
-                    syntaxTrees,
                     context.ReportedDiagnostics,
                     context.ReportSuppression,
                     buildOptions,
@@ -72,83 +65,88 @@ namespace Caravela.Framework.Impl.DesignTime
         /// </summary>
         private void ReportSuppressions(
             Compilation compilation,
-            IReadOnlyList<SyntaxTree> syntaxTrees,
             ImmutableArray<Diagnostic> reportedDiagnostics,
             Action<Suppression> reportSuppression,
             ProjectOptions options,
             CancellationToken cancellationToken )
         {
             // Execute the pipeline.
-            var results = DesignTimeAspectPipelineCache.Instance.GetSyntaxTreeResults(
-                compilation,
-                syntaxTrees,
+            if ( !DesignTimeAspectPipelineFactory.Instance.TryExecute(
                 options,
-                cancellationToken );
+                compilation,
+                cancellationToken,
+                out var compilationResult ) )
+            {
+                Logger.Instance?.Write( $"DesignTimeDiagnosticSuppressor.ReportSuppressions('{compilation.AssemblyName}'): the pipeline failed." );
+
+                return;
+            }
 
             var suppressionsCount = 0;
 
-            foreach ( var syntaxTreeResult in results )
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var diagnosticsBySyntaxTree =
+                reportedDiagnostics.Where( d => d.Location.SourceTree != null )
+                    .GroupBy( d => d.Location.SourceTree! );
+
+            foreach ( var diagnosticGroup in diagnosticsBySyntaxTree )
             {
-                if ( syntaxTreeResult == null )
+                var syntaxTree = diagnosticGroup.Key;
+
+                var suppressions = compilationResult.GetDiagnosticsOnSyntaxTree( syntaxTree.FilePath ).Suppressions;
+
+                var designTimeSuppressions = suppressions.Where(
+                        s => this._designTimeDiagnosticDefinitions.SupportedSuppressionDescriptors.ContainsKey( s.Definition.SuppressedDiagnosticId ) )
+                    .ToList();
+
+                if ( designTimeSuppressions.Count == 0 )
                 {
                     continue;
                 }
 
-                cancellationToken.ThrowIfCancellationRequested();
+#pragma warning disable RS1030 // Do not invoke Compilation.GetSemanticModel() method within a diagnostic analyzer
+                var semanticModel = compilation.GetSemanticModel( syntaxTree );
+#pragma warning restore RS1030 // Do not invoke Compilation.GetSemanticModel() method within a diagnostic analyzer
 
-                // Report suppressions.
-                if ( !syntaxTreeResult.Suppressions.IsDefaultOrEmpty )
-                {
-                    var designTimeSuppressions = syntaxTreeResult.Suppressions.Where(
-                        s => this._designTimeDiagnosticDefinitions.SupportedSuppressionDescriptors.ContainsKey( s.Definition.SuppressedDiagnosticId ) );
-
-                    var groupedSuppressions = ImmutableMultiValueDictionary<string, CacheableScopedSuppression>.Create(
+                var suppressionsBySymbol =
+                    ImmutableDictionaryOfArray<string, CacheableScopedSuppression>.Create(
                         designTimeSuppressions,
                         s => s.SymbolId );
 
-                    foreach ( var diagnostic in reportedDiagnostics )
+                foreach ( var diagnostic in diagnosticGroup )
+                {
+                    var diagnosticNode = syntaxTree.GetRoot().FindNode( diagnostic.Location.SourceSpan );
+                    var symbol = semanticModel.GetDeclaredSymbol( diagnosticNode );
+
+                    if ( symbol == null )
                     {
-                        if ( diagnostic.Location.SourceTree == null )
+                        continue;
+                    }
+
+                    var symbolId = symbol.GetDocumentationCommentId().AssertNotNull();
+
+                    foreach ( var suppression in suppressionsBySymbol[symbolId]
+                        .Where( s => string.Equals( s.Definition.SuppressedDiagnosticId, diagnostic.Id, StringComparison.OrdinalIgnoreCase ) ) )
+                    {
+                        suppressionsCount++;
+
+                        if ( this._designTimeDiagnosticDefinitions.SupportedSuppressionDescriptors.TryGetValue(
+                            suppression.Definition.SuppressedDiagnosticId,
+                            out var suppressionDescriptor ) )
                         {
-                            continue;
+                            reportSuppression( Suppression.Create( suppressionDescriptor, diagnostic ) );
                         }
-
-#pragma warning disable RS1030 // Do not invoke Compilation.GetSemanticModel() method within a diagnostic analyzer
-                        var semanticModel = compilation.GetSemanticModel( diagnostic.Location.SourceTree );
-#pragma warning restore RS1030 // Do not invoke Compilation.GetSemanticModel() method within a diagnostic analyzer
-
-                        var diagnosticNode = diagnostic.Location.SourceTree.GetRoot().FindNode( diagnostic.Location.SourceSpan );
-                        var symbol = semanticModel.GetDeclaredSymbol( diagnosticNode );
-
-                        if ( symbol == null )
+                        else
                         {
-                            continue;
-                        }
-
-                        var symbolId = symbol.GetDocumentationCommentId().AssertNotNull();
-
-                        foreach ( var suppression in groupedSuppressions[symbolId]
-                            .Where( s => string.Equals( s.Definition.SuppressedDiagnosticId, diagnostic.Id, StringComparison.OrdinalIgnoreCase ) ) )
-                        {
-                            suppressionsCount++;
-
-                            if ( this._designTimeDiagnosticDefinitions.SupportedSuppressionDescriptors.TryGetValue(
-                                suppression.Definition.SuppressedDiagnosticId,
-                                out var suppressionDescriptor ) )
-                            {
-                                reportSuppression( Suppression.Create( suppressionDescriptor, diagnostic ) );
-                            }
-                            else
-                            {
-                                // We can't report a warning here, but DesignTimeAnalyzer should.
-                            }
+                            // We can't report a warning here, but DesignTimeAnalyzer does it.
                         }
                     }
                 }
-
-                Logger.Instance?.Write(
-                    $"DesignTimeDiagnosticSuppressor.ReportSuppressions('{compilation.AssemblyName}'): {suppressionsCount} suppressions reported." );
             }
+
+            Logger.Instance?.Write(
+                $"DesignTimeDiagnosticSuppressor.ReportSuppressions('{compilation.AssemblyName}'): {suppressionsCount} suppressions reported." );
         }
 
         public override ImmutableArray<SuppressionDescriptor> SupportedSuppressions

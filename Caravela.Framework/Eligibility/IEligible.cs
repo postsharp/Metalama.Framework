@@ -3,14 +3,13 @@
 
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
-using System;
 
 namespace Caravela.Framework.Eligibility
 {
     /// <summary>
-    /// (Not implemented.)
+    /// An interface that allows aspect to specify to which declarations they are allowed to be applied.
     /// </summary>
-    [Obsolete( "Not implemented." )]
+    /// <typeparam name="T"></typeparam>
     [CompileTimeOnly]
     public interface IEligible<in T>
         where T : class, IDeclaration

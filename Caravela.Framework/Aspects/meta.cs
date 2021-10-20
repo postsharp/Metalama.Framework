@@ -3,7 +3,6 @@
 
 using Caravela.Framework.Code;
 using Caravela.Framework.Code.SyntaxBuilders;
-using Caravela.Framework.Diagnostics;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -181,12 +180,6 @@ namespace Caravela.Framework.Aspects
         /// <seealso href="@templates"/>
         [TemplateKeyword]
         public static dynamic BaseStatic => CurrentContext.BaseStatic;
-
-        /// <summary>
-        /// Gets a service allowing to report and suppress diagnostics.
-        /// </summary>
-        /// <seealso href="@diagnostics"/>
-        public static IDiagnosticSink Diagnostics => CurrentContext.Diagnostics;
 
         /// <summary>
         /// Gets the dictionary of tags that were passed to the <see cref="IAdviceFactory"/> method by the <see cref="IAspect{T}.BuildAspect"/> method.

@@ -31,6 +31,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public override bool IsExplicitInterfaceImplementation => false;
 
+        public override IMember? OverriddenMember => null;
+
         [Memo]
         public IInvokerFactory<IFieldOrPropertyInvoker> Invokers
             => new InvokerFactory<IFieldOrPropertyInvoker>( ( order, invokerOperator ) => new FieldOrPropertyInvoker( this, order, invokerOperator ), false );
@@ -102,5 +104,29 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public FieldInfo ToFieldInfo() => throw new NotImplementedException();
 
         public FieldOrPropertyInfo ToFieldOrPropertyInfo() => throw new NotImplementedException();
+
+        public IMethod? GetAccessor( MethodKind methodKind )
+            => methodKind switch
+            {
+                MethodKind.PropertyGet => this.GetMethod,
+                MethodKind.PropertySet => this.SetMethod,
+                _ => throw new ArgumentOutOfRangeException()
+            };
+
+        public IEnumerable<IMethod> Accessors
+        {
+            get
+            {
+                if ( this.GetMethod != null )
+                {
+                    yield return this.GetMethod;
+                }
+
+                if ( this.SetMethod != null )
+                {
+                    yield return this.SetMethod;
+                }
+            }
+        }
     }
 }

@@ -33,13 +33,13 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
             : base( compileTimeProject, aspectLayers, serviceProvider ) { }
 
         /// <inheritdoc/>
-        protected override PipelineStageResult GenerateCode(
+        protected override PipelineStageResult GetStageResult(
             AspectProjectConfiguration projectConfiguration,
             PipelineStageResult input,
             IPipelineStepsResult pipelineStepResult,
             CancellationToken cancellationToken )
         {
-            var transformations = pipelineStepResult.Compilation.GetAllObservableTransformations();
+            var transformations = pipelineStepResult.Compilation.GetAllObservableTransformations( true );
             UserDiagnosticSink diagnostics = new( this.CompileTimeProject );
 
             var additionalSyntaxTrees = new List<IntroducedSyntaxTree>();
@@ -102,7 +102,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
 
                     if ( transformation is IIntroducedInterface interfaceImplementation )
                     {
-                        classDeclaration = classDeclaration.AddBaseListTypes( interfaceImplementation.GetIntroducedInterfaceImplementations().ToArray() );
+                        classDeclaration = classDeclaration.AddBaseListTypes( interfaceImplementation.GetSyntax() );
                     }
                 }
 
@@ -135,6 +135,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
                 input.AspectLayers,
                 input.Diagnostics.Concat( pipelineStepResult.Diagnostics ).Concat( diagnostics.ToImmutable() ),
                 input.AspectSources.Concat( pipelineStepResult.ExternalAspectSources ),
+                pipelineStepResult.InheritableAspectInstances,
                 input.AdditionalSyntaxTrees.Concat( additionalSyntaxTrees ) );
         }
     }

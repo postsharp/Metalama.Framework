@@ -119,6 +119,8 @@ namespace Caravela.TestFramework
                 _isTestRunning.Value = true;
             }
 
+            testResult.TestInput = testInput;
+
             try
             {
                 // Create parse options.
@@ -215,7 +217,6 @@ namespace Caravela.TestFramework
                 ValidateCustomAttributes( initialCompilation );
 
                 testResult.InputProject = project;
-                testResult.TestInput = testInput;
                 testResult.InputCompilation = initialCompilation;
 
                 if ( this.ShouldStopOnInvalidInput( testInput.Options ) )

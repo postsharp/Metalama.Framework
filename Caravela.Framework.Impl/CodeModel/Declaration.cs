@@ -41,13 +41,16 @@ namespace Caravela.Framework.Impl.CodeModel
                     .Where( a => a.AttributeConstructor != null )
                     .Select( a => new AttributeRef( a, DeclarationRef.FromSymbol<IDeclaration>( this.Symbol ) ) ) );
 
+        [Memo]
+        public IAssembly DeclaringAssembly => this.Compilation.Factory.GetAssembly( this.Symbol.ContainingAssembly );
+
         public abstract DeclarationKind DeclarationKind { get; }
 
         public abstract ISymbol Symbol { get; }
 
         public virtual DeclarationRef<IDeclaration> ToRef() => DeclarationRef.FromSymbol( this.Symbol );
 
-        public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
+        public virtual string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
             => this.Symbol.ToDisplayString( format.ToRoslyn() );
 
         public Location? DiagnosticLocation => this.Symbol.GetDiagnosticLocation();
@@ -110,6 +113,10 @@ namespace Caravela.Framework.Impl.CodeModel
         IDiagnosticLocation? IDiagnosticScope.DiagnosticLocation => this.DiagnosticLocation?.ToDiagnosticLocation();
 
         ImmutableArray<SyntaxReference> IDeclarationImpl.DeclaringSyntaxReferences => this.Symbol.DeclaringSyntaxReferences;
+
+        public abstract bool CanBeInherited { get; }
+
+        public abstract IEnumerable<IDeclaration> GetDerivedDeclarations( bool deep = true );
 
         [Memo]
         public IDeclaration OriginalDefinition => this.Compilation.Factory.GetDeclaration( this.Symbol.OriginalDefinition );

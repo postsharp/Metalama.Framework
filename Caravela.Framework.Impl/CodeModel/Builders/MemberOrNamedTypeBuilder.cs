@@ -34,6 +34,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public sealed override IDeclaration ContainingDeclaration => this.DeclaringType;
 
+        public abstract bool IsDesignTime { get; }
+
         public MemberOrNamedTypeBuilder( Advice parentAdvice, INamedType declaringType, string name ) : base( parentAdvice )
         {
             this.DeclaringType = declaringType;

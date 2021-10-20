@@ -5,5 +5,5 @@ using Caravela.Framework.Code;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    internal interface IMethodImpl : IMethod, IDeclarationImpl, IGenericInternal { }
+    internal interface IMethodImpl : IMethod, IMemberImpl, IGenericInternal { }
 }

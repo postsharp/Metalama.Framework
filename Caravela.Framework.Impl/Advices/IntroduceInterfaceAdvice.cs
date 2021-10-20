@@ -111,7 +111,7 @@ namespace Caravela.Framework.Impl.Advices
                 diagnosticAdder.Report(
                     AdviceDiagnosticDescriptors.InterfaceIsAlreadyIntroducedByTheAspect.CreateDiagnostic(
                         this.TargetDeclaration.GetDiagnosticLocation(),
-                        (this.Aspect.AspectClass.DisplayName, interfaceType, this.TargetDeclaration) ) );
+                        (this.Aspect.AspectClass.ShortName, interfaceType, this.TargetDeclaration) ) );
             }
 
             if ( this._introducedAndImplementedInterfaces.ContainsKey( interfaceType ) )
@@ -124,7 +124,7 @@ namespace Caravela.Framework.Impl.Advices
                         diagnosticAdder.Report(
                             AdviceDiagnosticDescriptors.InterfaceIsAlreadyImplemented.CreateDiagnostic(
                                 this.TargetDeclaration.GetDiagnosticLocation(),
-                                (this.Aspect.AspectClass.DisplayName, interfaceType, this.TargetDeclaration) ) );
+                                (this.Aspect.AspectClass.ShortName, interfaceType, this.TargetDeclaration) ) );
 
                         return;
 
@@ -150,7 +150,7 @@ namespace Caravela.Framework.Impl.Advices
                             diagnosticAdder.Report(
                                 AdviceDiagnosticDescriptors.InterfaceIsAlreadyImplemented.CreateDiagnostic(
                                     this.TargetDeclaration.GetDiagnosticLocation(),
-                                    (this.Aspect.AspectClass.DisplayName, conflictingInterface, this.TargetDeclaration) ) );
+                                    (this.Aspect.AspectClass.ShortName, conflictingInterface, this.TargetDeclaration) ) );
                         }
 
                         return;
@@ -188,7 +188,7 @@ namespace Caravela.Framework.Impl.Advices
                             diagnosticAdder.Report(
                                 AdviceDiagnosticDescriptors.MissingDeclarativeInterfaceMember.CreateDiagnostic(
                                     this.TargetDeclaration.GetDiagnosticLocation(),
-                                    (this.Aspect.AspectClass.DisplayName, this.TargetDeclaration, interfaceType, interfaceMethod) ) );
+                                    (this.Aspect.AspectClass.ShortName, this.TargetDeclaration, interfaceType, interfaceMethod) ) );
                         }
                         else if (
                             !compilation.InvariantComparer.Equals(
@@ -199,7 +199,7 @@ namespace Caravela.Framework.Impl.Advices
                             diagnosticAdder.Report(
                                 AdviceDiagnosticDescriptors.DeclarativeInterfaceMemberDoesNotMatch.CreateDiagnostic(
                                     this.TargetDeclaration.GetDiagnosticLocation(),
-                                    (this.Aspect.AspectClass.DisplayName, this.TargetDeclaration, interfaceType, matchingAspectMethod.Method,
+                                    (this.Aspect.AspectClass.ShortName, this.TargetDeclaration, interfaceType, matchingAspectMethod.Method,
                                      interfaceMethod) ) );
                         }
                         else
@@ -220,7 +220,7 @@ namespace Caravela.Framework.Impl.Advices
                             diagnosticAdder.Report(
                                 AdviceDiagnosticDescriptors.MissingDeclarativeInterfaceMember.CreateDiagnostic(
                                     this.TargetDeclaration.GetDiagnosticLocation(),
-                                    (this.Aspect.AspectClass.DisplayName, this.TargetDeclaration, interfaceType, interfaceProperty) ) );
+                                    (this.Aspect.AspectClass.ShortName, this.TargetDeclaration, interfaceType, interfaceProperty) ) );
                         }
                         else if (
                             !compilation.InvariantComparer.Equals( interfaceProperty.Type, matchingAspectProperty.Property.Type )
@@ -229,7 +229,7 @@ namespace Caravela.Framework.Impl.Advices
                             diagnosticAdder.Report(
                                 AdviceDiagnosticDescriptors.DeclarativeInterfaceMemberDoesNotMatch.CreateDiagnostic(
                                     this.TargetDeclaration.GetDiagnosticLocation(),
-                                    (this.Aspect.AspectClass.DisplayName, this.TargetDeclaration, interfaceType, matchingAspectProperty.Property,
+                                    (this.Aspect.AspectClass.ShortName, this.TargetDeclaration, interfaceType, matchingAspectProperty.Property,
                                      interfaceProperty) ) );
                         }
                         else
@@ -252,14 +252,14 @@ namespace Caravela.Framework.Impl.Advices
                             diagnosticAdder.Report(
                                 AdviceDiagnosticDescriptors.MissingDeclarativeInterfaceMember.CreateDiagnostic(
                                     this.TargetDeclaration.GetDiagnosticLocation(),
-                                    (this.Aspect.AspectClass.DisplayName, this.TargetDeclaration, interfaceType, interfaceEvent) ) );
+                                    (this.Aspect.AspectClass.ShortName, this.TargetDeclaration, interfaceType, interfaceEvent) ) );
                         }
                         else if ( !compilation.InvariantComparer.Equals( interfaceEvent.Type, matchingAspectEvent.Event.Type ) )
                         {
                             diagnosticAdder.Report(
                                 AdviceDiagnosticDescriptors.DeclarativeInterfaceMemberDoesNotMatch.CreateDiagnostic(
                                     this.TargetDeclaration.GetDiagnosticLocation(),
-                                    (this.Aspect.AspectClass.DisplayName, this.TargetDeclaration, interfaceType, matchingAspectEvent.Event,
+                                    (this.Aspect.AspectClass.ShortName, this.TargetDeclaration, interfaceType, matchingAspectEvent.Event,
                                      interfaceEvent) ) );
                         }
                         else

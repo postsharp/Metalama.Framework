@@ -15,7 +15,6 @@ namespace Caravela.Framework.Tests.UnitTests.Templating
         {
             Assert.Throws<InvalidOperationException>( () => meta.Base );
             Assert.Throws<InvalidOperationException>( () => meta.Tags );
-            Assert.Throws<InvalidOperationException>( () => meta.Diagnostics );
             Assert.Throws<InvalidOperationException>( () => meta.Target );
             Assert.Throws<InvalidOperationException>( () => meta.This );
             Assert.Throws<InvalidOperationException>( () => meta.BaseStatic );

@@ -34,7 +34,6 @@ namespace Caravela.Framework.Aspects
         /// <summary>
         /// Aspects added because of aspect inheritance.
         /// </summary>
-        [Obsolete( "Not implemented." )]
         Inherited,
 
         /// <summary>

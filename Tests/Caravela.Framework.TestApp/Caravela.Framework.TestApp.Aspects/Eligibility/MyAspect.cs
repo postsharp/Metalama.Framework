@@ -24,7 +24,7 @@ namespace Caravela.Framework.TestApp.Aspects.Eligibility
                     });
 
             builder.ReturnType().MustBe(typeof(void));
-            builder.ExceptForInheritance().MustBeNonAbstract();
+            builder.ExceptForScenarios(EligibleScenarios.Inheritance).MustBeNonAbstract();
 
             builder.Parameter(0)
                 .Type()
@@ -35,7 +35,7 @@ namespace Caravela.Framework.TestApp.Aspects.Eligibility
                         or.MustBe(typeof(string));
                     });
 
-            builder.Require(m => m.IsAbstract ? m.Parameters.Count > 1 : m.IsSealed, m => $"{m} must be magic");
+            builder.MustSatisfy(m => m.IsAbstract ? m.Parameters.Count > 1 : m.IsSealed, m => $"{m} must be magic");
         }
     }
 }

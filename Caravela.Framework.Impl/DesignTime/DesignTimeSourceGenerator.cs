@@ -36,24 +36,24 @@ namespace Caravela.Framework.Impl.DesignTime
                 DebuggingHelper.AttachDebugger( buildOptions );
 
                 // Execute the pipeline.
-                var results = DesignTimeAspectPipelineCache.Instance.GetSyntaxTreeResults(
-                    compilation,
+                if ( !DesignTimeAspectPipelineFactory.Instance.TryExecute(
                     buildOptions,
-                    context.CancellationToken );
+                    compilation,
+                    context.CancellationToken,
+                    out var compilationResult ) )
+                {
+                    Logger.Instance?.Write( $"DesignTimeSourceGenerator.Execute('{compilation.AssemblyName}'): the pipeline failed." );
+
+                    return;
+                }
 
                 // Add introduced syntax trees.
                 var sourcesCount = 0;
 
-                foreach ( var syntaxTreeResult in results )
+                foreach ( var introducedSyntaxTree in compilationResult.IntroducedSyntaxTrees )
                 {
-                    if ( syntaxTreeResult != null )
-                    {
-                        foreach ( var additionalSyntaxTree in syntaxTreeResult.Introductions )
-                        {
-                            sourcesCount++;
-                            context.AddSource( additionalSyntaxTree.Name, additionalSyntaxTree.GeneratedSyntaxTree.GetText() );
-                        }
-                    }
+                    sourcesCount++;
+                    context.AddSource( introducedSyntaxTree.Name, introducedSyntaxTree.GeneratedSyntaxTree.GetText() );
                 }
 
                 Logger.Instance?.Write( $"DesignTimeSourceGenerator.Execute('{compilation.AssemblyName}'): {sourcesCount} sources generated." );

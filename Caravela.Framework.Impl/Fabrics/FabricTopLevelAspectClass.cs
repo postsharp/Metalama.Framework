@@ -2,6 +2,8 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Aspects;
+using Caravela.Framework.Code;
+using Caravela.Framework.Eligibility;
 using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.Aspects;
 using Caravela.Framework.Impl.CompileTime;
@@ -25,11 +27,15 @@ namespace Caravela.Framework.Impl.Fabrics
 
         string IAspectClass.FullName => FabricAspectName;
 
+        public string ShortName => FabricAspectName;
+
         string IAspectClass.DisplayName => FabricAspectName;
 
         string? IAspectClass.Description => null;
 
         bool IAspectClass.IsAbstract => false;
+
+        public bool IsInherited => false;
 
         public FabricTopLevelAspectClass( IServiceProvider serviceProvider, Compilation compilation, CompileTimeProject project )
         {
@@ -45,5 +51,12 @@ namespace Caravela.Framework.Impl.Fabrics
         public CompileTimeProject? Project { get; }
 
         ImmutableArray<TemplateClass> IAspectClassImpl.TemplateClasses => ImmutableArray<TemplateClass>.Empty;
+
+        public EligibleScenarios GetEligibility( IDeclaration obj ) => EligibleScenarios.Aspect;
+
+        FormattableString? IEligibilityRule<IDeclaration>.GetIneligibilityJustification(
+            EligibleScenarios requestedEligibility,
+            IDescribedObject<IDeclaration> describedObject )
+            => throw new AssertionFailedException();
     }
 }

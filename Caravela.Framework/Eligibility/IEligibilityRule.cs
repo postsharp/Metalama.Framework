@@ -7,11 +7,9 @@ using System;
 namespace Caravela.Framework.Eligibility
 {
     /// <summary>
-    /// Encapsulates a predicate determining the eligibility of an object (typically a declaration or a type) for an
-    /// object extension (typically an aspect or aspect marker). (Not implemented.)
+    /// Encapsulates a predicate determining the eligibility of an object (typically a declaration or a type).
     /// </summary>
     /// <typeparam name="T">The type of object that the extension can be applied to.</typeparam>
-    [Obsolete( "Not implemented." )]
     [CompileTimeOnly]
     public interface IEligibilityRule<in T>
     {
@@ -20,14 +18,14 @@ namespace Caravela.Framework.Eligibility
         /// </summary>
         /// <param name="obj"></param>
         /// <returns></returns>
-        EligibilityValue GetEligibility( T obj );
+        EligibleScenarios GetEligibility( T obj );
 
         /// <summary>
-        /// Gets the justification for which the <see cref="GetEligibility"/> method returned anything else than <see cref="EligibilityValue.Eligible"/>. 
+        /// Gets the justification for which the <see cref="GetEligibility"/> method returned anything else than <see cref="EligibleScenarios.All"/>. 
         /// </summary>
         /// <param name="requestedEligibility">The eligibility that was requested by the user, but denied.</param>
         /// <param name="describedObject">The object for which the eligibility was denied, plus its description.</param>
         /// <returns></returns>
-        FormattableString? GetIneligibilityJustification( EligibilityValue requestedEligibility, IDescribedObject<T> describedObject );
+        FormattableString? GetIneligibilityJustification( EligibleScenarios requestedEligibility, IDescribedObject<T> describedObject );
     }
 }

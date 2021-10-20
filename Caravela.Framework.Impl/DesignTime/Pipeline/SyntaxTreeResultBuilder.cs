@@ -21,6 +21,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
         public ImmutableArray<Diagnostic>.Builder? Diagnostics;
         public ImmutableArray<CacheableScopedSuppression>.Builder? Suppressions;
         public ImmutableArray<IntroducedSyntaxTree>.Builder? Introductions;
+        public ImmutableArray<(string AspectType, string TargetDeclaration)>.Builder? InheritableAspects;
 #pragma warning restore SA1401 // Fields should be private
 
         public SyntaxTreeResultBuilder( SyntaxTree syntaxTree )
@@ -49,7 +50,8 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
                 this.Diagnostics?.ToImmutable(),
                 this.Suppressions?.ToImmutable(),
                 this.Introductions?.ToImmutable(),
-                dependencies );
+                dependencies,
+                this.InheritableAspects?.ToImmutable() );
         }
     }
 }

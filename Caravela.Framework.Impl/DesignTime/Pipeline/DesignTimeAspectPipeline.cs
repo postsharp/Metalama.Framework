@@ -2,14 +2,14 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Aspects;
+using Caravela.Framework.Code;
+using Caravela.Framework.Eligibility;
 using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.Aspects;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
-using Caravela.Framework.Impl.DesignTime.Diagnostics;
 using Caravela.Framework.Impl.DesignTime.Diff;
 using Caravela.Framework.Impl.Diagnostics;
-using Caravela.Framework.Impl.Options;
 using Caravela.Framework.Impl.Pipeline;
 using Caravela.Framework.Impl.Utilities;
 using Caravela.Framework.Project;
@@ -19,7 +19,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
-using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading;
 
 namespace Caravela.Framework.Impl.DesignTime.Pipeline
@@ -27,30 +27,33 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
     /// <summary>
     /// The design-time implementation of <see cref="AspectPipeline"/>.
     /// </summary>
-    public class DesignTimeAspectPipeline : AspectPipeline
+    internal partial class DesignTimeAspectPipeline : AspectPipeline
     {
-        private readonly object _configureSync = new();
-        private readonly CompilationChangeTracker _compilationChangeTracker = new();
+        private readonly ConditionalWeakTable<Compilation, CompilationResult> _compilationResultCache = new();
+        private static readonly string _sourceGeneratorAssemblyName = typeof(DesignTimeAspectPipelineFactory).Assembly.GetName().Name;
+
         private readonly IFileSystemWatcher? _fileSystemWatcher;
 
-        // Syntax trees that may have compile time code based on namespaces. When a syntax tree is known to be compile-time but
-        // has been invalidated, we don't remove it from the dictionary, but we set its value to null. It allows to know
-        // that this specific tree is outdated, which then allows us to display a warning.
-        private ImmutableDictionary<string, SyntaxTree?>? _compileTimeSyntaxTrees;
+        private PipelineState _currentState;
+        private int _pipelineExecutionCount;
 
-        private AspectProjectConfiguration? _lastKnownConfiguration;
+        /// <summary>
+        /// Gets the number of times the pipeline has been executed. Useful for testing purposes.
+        /// </summary>
+        public int PipelineExecutionCount => this._pipelineExecutionCount;
 
         /// <summary>
         /// Gets an object that can be locked to get exclusive access to
         /// the current instance.
         /// </summary>
-        public object Sync { get; } = new();
+        private readonly object _sync = new();
 
-        internal DesignTimeAspectPipelineStatus Status { get; private set; }
+        // ReSharper disable once InconsistentlySynchronizedField
+        internal DesignTimeAspectPipelineStatus Status => this._currentState.Status;
 
-        // It's ok if we return an obsolete project in this case.
-        [Memo]
-        internal IReadOnlyList<AspectClass>? AspectClasses => this._lastKnownConfiguration?.AspectClasses.OfType<AspectClass>().ToList();
+        // It's ok if we return an obsolete project in the use cases of this property.
+        // ReSharper disable once InconsistentlySynchronizedField
+        internal IEnumerable<AspectClass>? AspectClasses => this._currentState.Configuration?.AspectClasses.OfType<AspectClass>();
 
         public DesignTimeAspectPipeline(
             ServiceProvider serviceProvider,
@@ -58,6 +61,8 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
             bool isTest )
             : base( serviceProvider.WithProjectScopedServices(), AspectExecutionScenario.DesignTime, isTest, domain )
         {
+            this._currentState = new PipelineState( this );
+
             // The design-time pipeline contains project-scoped services for performance reasons: the pipeline may be called several
             // times with the same compilation.
 
@@ -86,15 +91,19 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
 
         private void OnOutputDirectoryChanged( object sender, FileSystemEventArgs e )
         {
-            if ( e.FullPath == this.ProjectOptions.BuildTouchFile &&
-                 this.Status == DesignTimeAspectPipelineStatus.NeedsExternalBuild )
+            if ( e.FullPath != this.ProjectOptions.BuildTouchFile || this.Status != DesignTimeAspectPipelineStatus.NeedsExternalBuild )
+            {
+                return;
+            }
+
+            lock ( this._sync )
             {
                 // There was an external build. Touch the files to re-run the analyzer.
                 Logger.Instance?.Write( $"Detected an external build for project '{this.ProjectOptions.AssemblyName}'." );
 
                 var hasRelevantChange = false;
 
-                foreach ( var file in this._compileTimeSyntaxTrees.AssertNotNull() )
+                foreach ( var file in this._currentState.CompileTimeSyntaxTrees.AssertNotNull() )
                 {
                     if ( file.Value == null )
                     {
@@ -106,173 +115,19 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
 
                 if ( hasRelevantChange )
                 {
-                    this.OnExternalBuildStarted();
+                    this.ExternalBuildStarted?.Invoke( this, EventArgs.Empty );
+
+                    this._currentState = new PipelineState( this );
                 }
             }
         }
 
-        internal void OnExternalBuildStarted()
+        public void OnExternalBuildStarted()
         {
-            this._compilationChangeTracker.Reset();
-            this.Reset();
-            this.ExternalBuildStarted?.Invoke( this, EventArgs.Empty );
-        }
-
-        private IReadOnlyList<SyntaxTree> GetCompileTimeSyntaxTrees( Compilation compilation, CancellationToken cancellationToken )
-        {
-            List<SyntaxTree> trees = new( this._compileTimeSyntaxTrees?.Count ?? 8 );
-
-            if ( this._compileTimeSyntaxTrees == null )
+            lock ( this._sync )
             {
-                // The cache has not been set yet, so we need to compute the value from zero.
-
-                if ( this._compilationChangeTracker.LastCompilation != null && this._compilationChangeTracker.LastCompilation != compilation )
-                {
-                    throw new AssertionFailedException();
-                }
-
-                var newCompileTimeSyntaxTrees = ImmutableDictionary<string, SyntaxTree?>.Empty;
-
-                foreach ( var syntaxTree in compilation.SyntaxTrees )
-                {
-                    cancellationToken.ThrowIfCancellationRequested();
-
-                    if ( CompileTimeCodeDetector.HasCompileTimeCode( syntaxTree.GetRoot() ) )
-                    {
-                        newCompileTimeSyntaxTrees = newCompileTimeSyntaxTrees.Add( syntaxTree.FilePath, syntaxTree );
-                        trees.Add( syntaxTree );
-                    }
-                }
-
-                this._compileTimeSyntaxTrees = newCompileTimeSyntaxTrees;
-            }
-            else
-            {
-                foreach ( var syntaxTree in compilation.SyntaxTrees )
-                {
-                    cancellationToken.ThrowIfCancellationRequested();
-
-                    if ( this._compileTimeSyntaxTrees.ContainsKey( syntaxTree.FilePath ) )
-                    {
-                        trees.Add( syntaxTree );
-                    }
-                }
-            }
-
-            return trees;
-        }
-
-        /// <summary>
-        /// Determines whether a compile-time syntax tree is outdated. This happens when the syntax
-        /// tree has changed compared to the cached configuration of this pipeline. This method is used to
-        /// determine whether an error must displayed in the editor.  
-        /// </summary>
-        public bool IsCompileTimeSyntaxTreeOutdated( string name )
-            => this._compileTimeSyntaxTrees.AssertNotNull().TryGetValue( name, out var syntaxTree ) && syntaxTree == null;
-
-        /// <summary>
-        /// Invalidates the cache given a new <see cref="Compilation"/> and returns the set of changes between
-        /// the previous compilation and the new one.
-        /// </summary>
-        internal CompilationChange InvalidateCache( Compilation newCompilation, CancellationToken cancellationToken )
-        {
-            lock ( this._configureSync )
-            {
-                var compilationChange = this._compilationChangeTracker.Update( newCompilation, cancellationToken );
-
-                // Do not cancel in the middle of cache invalidation!
-
-                if ( compilationChange.HasCompileTimeCodeChange )
-                {
-                    var newCompileTimeSyntaxTrees = this._compileTimeSyntaxTrees;
-
-                    if ( newCompileTimeSyntaxTrees == null )
-                    {
-                        if ( compilationChange.IsIncremental )
-                        {
-                            throw new AssertionFailedException( "Got an incremental compilation change, but _compileTimeSyntaxTrees is null." );
-                        }
-                        else
-                        {
-                            newCompileTimeSyntaxTrees = ImmutableDictionary<string, SyntaxTree?>.Empty;
-                        }
-                    }
-
-                    foreach ( var change in compilationChange.SyntaxTreeChanges )
-                    {
-                        switch ( change.CompileTimeChangeKind )
-                        {
-                            case CompileTimeChangeKind.None:
-                                if ( change.HasCompileTimeCode )
-                                {
-                                    newCompileTimeSyntaxTrees = newCompileTimeSyntaxTrees.SetItem( change.FilePath, null );
-
-                                    // We require an external build because we don't want to invalidate the pipeline configuration at
-                                    // each keystroke.
-                                    OnCompileTimeChange( true );
-                                }
-
-                                break;
-
-                            case CompileTimeChangeKind.NewlyCompileTime:
-                                newCompileTimeSyntaxTrees = newCompileTimeSyntaxTrees.SetItem( change.FilePath, change.NewTree );
-                                OnCompileTimeChange( false );
-
-                                break;
-
-                            case CompileTimeChangeKind.NoLongerCompileTime:
-                                newCompileTimeSyntaxTrees = newCompileTimeSyntaxTrees.Remove( change.FilePath );
-                                OnCompileTimeChange( false );
-
-                                break;
-                        }
-                    }
-
-                    this._compileTimeSyntaxTrees = newCompileTimeSyntaxTrees;
-                }
-
-                return compilationChange;
-            }
-
-            void OnCompileTimeChange( bool requireExternalBuild )
-            {
-                if ( this.Status == DesignTimeAspectPipelineStatus.Ready )
-                {
-                    Logger.Instance?.Write( $"DesignTimeAspectPipeline.InvalidateCache('{newCompilation.AssemblyName}'): compile-time change detected." );
-
-                    if ( requireExternalBuild )
-                    {
-                        this.Status = DesignTimeAspectPipelineStatus.NeedsExternalBuild;
-
-                        if ( this.ProjectOptions.BuildTouchFile != null && File.Exists( this.ProjectOptions.BuildTouchFile ) )
-                        {
-                            using var mutex = MutexHelper.WithGlobalLock( this.ProjectOptions.BuildTouchFile );
-                            File.Delete( this.ProjectOptions.BuildTouchFile );
-                        }
-                    }
-                    else
-                    {
-                        this.Reset();
-                    }
-                }
-            }
-        }
-
-        /// <summary>
-        /// Resets the current pipeline, including all caches and statuses.
-        /// </summary>
-        private void Reset()
-        {
-            lock ( this._configureSync )
-            {
-                Logger.Instance?.Write( $"DesignTimeAspectPipeline.Reset('{this.ProjectOptions.AssemblyName}')." );
-
-                this._lastKnownConfiguration = null;
-                this.Status = DesignTimeAspectPipelineStatus.Default;
-                this._compileTimeSyntaxTrees = null;
-
-                // We don't reset the change tracker from here because the current method is called as a result of a change detected by the change tracker.
-                // If we call Reset here, we would never get a stable cached configuration, it would always be invalidated.
+                this._currentState = new PipelineState( this );
+                this.ExternalBuildStarted?.Invoke( this, EventArgs.Empty );
             }
         }
 
@@ -283,105 +138,15 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
             CancellationToken cancellationToken,
             [NotNullWhen( true )] out AspectProjectConfiguration? configuration )
         {
-            lock ( this._configureSync )
+            lock ( this._sync )
             {
-                if ( this.Status == DesignTimeAspectPipelineStatus.NeedsExternalBuild && ignoreStatus )
-                {
-                    this.Status = DesignTimeAspectPipelineStatus.Default;
-                }
+                var state = this._currentState;
+                var success = PipelineState.TryGetConfiguration( ref state, compilation, diagnosticAdder, ignoreStatus, cancellationToken, out configuration );
 
-                if ( this._lastKnownConfiguration == null )
-                {
-                    // If we don't have any configuration, we will build one, because this is the first time we are called.
+                this._currentState = state;
 
-                    var compileTimeTrees = this.GetCompileTimeSyntaxTrees( compilation.Compilation, cancellationToken );
-
-                    if ( !this.TryInitialize(
-                        diagnosticAdder,
-                        compilation,
-                        compileTimeTrees,
-                        cancellationToken,
-                        out configuration ) )
-                    {
-                        // A failure here means an error or a cache miss.
-
-                        Logger.Instance?.Write( $"DesignTimeAspectPipeline.TryGetConfiguration('{compilation.Compilation.AssemblyName}') failed." );
-
-                        configuration = null;
-
-                        return false;
-                    }
-                    else
-                    {
-                        Logger.Instance?.Write(
-                            $"DesignTimeAspectPipeline.TryGetConfiguration('{compilation.Compilation.AssemblyName}') succeeded with a new configuration." );
-
-                        this._lastKnownConfiguration = configuration;
-                        this.Status = DesignTimeAspectPipelineStatus.Ready;
-
-                        return true;
-                    }
-                }
-                else
-                {
-                    if ( this.Status == DesignTimeAspectPipelineStatus.NeedsExternalBuild )
-                    {
-                        configuration = null;
-
-                        return false;
-                    }
-
-                    // We have a valid configuration and it is not outdated.
-
-                    Logger.Instance?.Write(
-                        $"DesignTimeAspectPipeline.TryGetConfiguration('{compilation.Compilation.AssemblyName}') returned existing configuration." );
-
-                    configuration = this._lastKnownConfiguration;
-
-                    return true;
-                }
+                return success;
             }
-        }
-
-        /// <summary>
-        /// Executes the pipeline.
-        /// </summary>
-        public DesignTimeAspectPipelineResult Execute( PartialCompilation compilation, CancellationToken cancellationToken )
-        {
-            DiagnosticList diagnosticList = new();
-
-            if ( this.Status == DesignTimeAspectPipelineStatus.NeedsExternalBuild )
-            {
-                throw new InvalidOperationException();
-            }
-
-            // The production use case should call UpdateCompilation before calling Execute, so a call to UpdateCompilation is redundant,
-            // but some tests don't. Redundant calls to UpdateCompilation have no adverse side effect.
-            this.InvalidateCache( compilation.Compilation, cancellationToken );
-
-            if ( !this.TryGetConfiguration( compilation, diagnosticList, false, cancellationToken, out var configuration ) )
-            {
-                return new DesignTimeAspectPipelineResult(
-                    false,
-                    compilation.SyntaxTrees,
-                    ImmutableArray<IntroducedSyntaxTree>.Empty,
-                    new ImmutableUserDiagnosticList( diagnosticList ) );
-            }
-
-            var success = this.TryExecute( compilation, diagnosticList, configuration, cancellationToken, out var pipelineResult );
-
-            var result = new DesignTimeAspectPipelineResult(
-                success,
-                compilation.SyntaxTrees,
-                pipelineResult?.AdditionalSyntaxTrees ?? Array.Empty<IntroducedSyntaxTree>(),
-                new ImmutableUserDiagnosticList(
-                    diagnosticList.ToImmutableArray(),
-                    pipelineResult?.Diagnostics.DiagnosticSuppressions ) );
-
-            var directoryOptions = this.ServiceProvider.GetService<IPathOptions>();
-            UserDiagnosticRegistrationService.GetInstance( directoryOptions ).RegisterDescriptors( result );
-
-            return result;
         }
 
         /// <inheritdoc/>
@@ -394,6 +159,166 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
         {
             base.Dispose( disposing );
             this._fileSystemWatcher?.Dispose();
+        }
+
+        private CompilationChanges InvalidateCache( Compilation compilation, bool invalidateCompilationResult, CancellationToken cancellationToken )
+        {
+            this._currentState = this._currentState.InvalidateCacheForNewCompilation( compilation, invalidateCompilationResult, cancellationToken );
+
+            return this._currentState.UnprocessedChanges.AssertNotNull();
+        }
+
+        public void InvalidateCache()
+        {
+            lock ( this._sync )
+            {
+                this._currentState = this._currentState.Reset();
+            }
+        }
+
+        private bool TryExecutePartial( PartialCompilation partialCompilation, CancellationToken cancellationToken, out CompilationResult? compilationResult )
+        {
+            var state = this._currentState;
+
+            if ( !PipelineState.TryExecute( ref state, partialCompilation, cancellationToken, out compilationResult ) )
+            {
+                return false;
+            }
+
+            // Intentionally updating the state atomically after successful execution of the method, so the state is
+            // not affected by a cancellation.
+            this._currentState = state;
+
+            return true;
+        }
+
+        public bool TryExecute( Compilation compilation, CancellationToken cancellationToken, [NotNullWhen( true )] out CompilationResult? compilationResult )
+        {
+            if ( this._compilationResultCache.TryGetValue( compilation, out compilationResult ) )
+            {
+                return true;
+            }
+
+            lock ( this._sync )
+            {
+                if ( this._compilationResultCache.TryGetValue( compilation, out compilationResult ) )
+                {
+                    return true;
+                }
+
+                // Invalidate the cache for the new compilation.
+                var changes = this.InvalidateCache( compilation, this.Status != DesignTimeAspectPipelineStatus.NeedsExternalBuild, cancellationToken );
+
+                var compilationToAnalyze = changes.CompilationToAnalyze;
+
+                if ( this.Status != DesignTimeAspectPipelineStatus.NeedsExternalBuild )
+                {
+                    var dirtySyntaxTrees = this.GetDirtySyntaxTrees( compilationToAnalyze );
+
+                    // Execute the pipeline if required, and update the cache.
+                    if ( dirtySyntaxTrees.Count > 0 )
+                    {
+                        var partialCompilation = PartialCompilation.CreatePartial( compilationToAnalyze, dirtySyntaxTrees );
+
+                        if ( !partialCompilation.IsEmpty )
+                        {
+                            Interlocked.Increment( ref this._pipelineExecutionCount );
+
+                            if ( !this.TryExecutePartial( partialCompilation, cancellationToken, out compilationResult ) )
+                            {
+                                return false;
+                            }
+                        }
+                    }
+
+                    compilationResult = this._currentState.CompilationResult;
+
+                    this._compilationResultCache.Add( compilation, compilationResult );
+
+                    return true;
+                }
+                else
+                {
+                    // If we need a build, we only serve results from the cache.
+                    Logger.Instance?.Write(
+                        $"DesignTimeAspectPipelineCache.TryExecute('{compilation.AssemblyName}'): build required," +
+                        $" returning from cache only." );
+
+                    compilationResult = this._currentState.CompilationResult;
+
+                    return true;
+                }
+            }
+        }
+
+        private List<SyntaxTree> GetDirtySyntaxTrees( Compilation compilation )
+        {
+            // Computes the set of semantic models that need to be processed.
+
+            List<SyntaxTree> uncachedSyntaxTrees = new();
+
+            foreach ( var syntaxTree in compilation.SyntaxTrees )
+            {
+                if ( syntaxTree.FilePath.StartsWith( _sourceGeneratorAssemblyName, StringComparison.Ordinal ) )
+                {
+                    // This is our own generated file. Don't include.
+                    continue;
+                }
+
+                if ( this._currentState.CompilationResult.IsSyntaxTreeDirty( syntaxTree ) )
+                {
+                    uncachedSyntaxTrees.Add( syntaxTree );
+                }
+            }
+
+            return uncachedSyntaxTrees;
+        }
+
+        /// <summary>
+        /// Determines whether a compile-time syntax tree is outdated. This happens when the syntax
+        /// tree has changed compared to the cached configuration of this pipeline. This method is used to
+        /// determine whether an error must displayed in the editor.  
+        /// </summary>
+        public bool IsCompileTimeSyntaxTreeOutdated( string name )
+            => this._currentState.CompileTimeSyntaxTrees.AssertNotNull().TryGetValue( name, out var syntaxTree ) && syntaxTree == null;
+
+        public IEnumerable<AspectClass> GetEligibleAspects( Compilation compilation, ISymbol symbol, CancellationToken cancellationToken )
+        {
+            var classes = this.AspectClasses;
+
+            if ( classes == null )
+            {
+                yield break;
+            }
+
+            IDeclaration? declaration = null;
+
+            foreach ( var aspectClass in classes )
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+
+                if ( !aspectClass.IsAbstract && aspectClass.IsEligibleFast( symbol ) )
+                {
+                    // We have a candidate. Create an IDeclaration if we haven't done it yet.
+                    if ( declaration == null )
+                    {
+                        var projectModel = new ProjectModel( compilation, this.ServiceProvider.WithMark( ServiceProviderMark.Project ) );
+
+                        var compilationModel = CompilationModel.CreateInitialInstance(
+                            projectModel,
+                            PartialCompilation.CreatePartial( compilation, Array.Empty<SyntaxTree>() ) );
+
+                        declaration = compilationModel.Factory.GetDeclaration( symbol );
+                    }
+
+                    var eligibleScenarios = aspectClass.GetEligibility( declaration );
+
+                    if ( eligibleScenarios.IncludesAny( EligibleScenarios.All ) )
+                    {
+                        yield return aspectClass;
+                    }
+                }
+            }
         }
     }
 }

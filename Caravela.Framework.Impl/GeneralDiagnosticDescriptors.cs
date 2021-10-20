@@ -6,6 +6,7 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Code.DeclarationBuilders;
 using Caravela.Framework.Diagnostics;
 using Microsoft.CodeAnalysis;
+using System;
 using static Caravela.Framework.Diagnostics.Severity;
 
 #pragma warning disable SA1118
@@ -191,6 +192,30 @@ namespace Caravela.Framework.Impl
                 "The class '{1}' defines a new template named '{0}', but the base class '{2}' already defines a template of the same name. Template names must be unique.",
                 Error,
                 "The class already defines a template of the same name." );
+
+        public static readonly DiagnosticDefinition<(string AspectName, IDeclaration Target, FormattableString Reason)>
+            AspectNotEligibleOnAspect = new(
+                "CR0037",
+                _category,
+                "The aspect '{0}' cannot be applied to '{1}' because {2}.",
+                Error,
+                "The aspect cannot be applied to a declaration because eligibility conditions are not met." );
+
+        public static readonly DiagnosticDefinition<(FormattableString Predecessor, string AspectType, IDeclaration Child, IDeclaration Parent)>
+            CanAddChildAspectOnlyUnderParent = new(
+                "CR0038",
+                _category,
+                "The {0} cannot add a child aspect of type '{1}' to '{2}' because it is not contained in '{3}'.",
+                Error,
+                "A parent aspect or fabric can add child aspects only under its target declaration." );
+
+        public static readonly DiagnosticDefinition<(FormattableString Predecessor, string AspectType, IDeclaration Child, FormattableString Reason)>
+            IneligibleChildAspect = new(
+                "CR0039",
+                _category,
+                "The {0} cannot add a child aspect of type '{1}' to '{2}' because {3}.",
+                Error,
+                "A parent aspect or fabric can add child aspects only under its target declaration." );
 
         // TODO: Use formattable string (C# does not seem to find extension methods).
         public static readonly DiagnosticDefinition<string>

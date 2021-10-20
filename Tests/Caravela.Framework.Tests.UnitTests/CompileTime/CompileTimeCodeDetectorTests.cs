@@ -26,7 +26,7 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime
         [Fact]
         public void InvalidFile()
         {
-            var compilation = CreateCSharpCompilation( @"using Caravela.Framework; namespace X class Y {} ", ignoreErrors: true );
+            var compilation = CreateCSharpCompilation( @"using Caravela.Framework.Aspects; namespace X class Y {} ", ignoreErrors: true );
             Assert.True( CompileTimeCodeDetector.HasCompileTimeCode( compilation.SyntaxTrees.Single().GetRoot() ) );
         }
 

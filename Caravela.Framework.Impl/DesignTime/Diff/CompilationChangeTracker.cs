@@ -15,141 +15,159 @@ namespace Caravela.Framework.Impl.DesignTime.Diff
     /// <summary>
     /// Computes the changes between the last <see cref="Compilation"/> and a new one.
     /// </summary>
-    internal class CompilationChangeTracker
+    internal readonly struct CompilationChangeTracker
     {
-        private readonly object _sync = new();
-
-        private ImmutableDictionary<string, (SyntaxTree Tree, bool HasCompileTimeCode)>? _lastTrees;
+        private readonly ImmutableDictionary<string, (SyntaxTree Tree, bool HasCompileTimeCode)>? _lastTrees;
 
         /// <summary>
         /// Gets the last <see cref="Compilation"/>, or <c>null</c> if the <see cref="Update"/> method
         /// has not been invoked yet.
         /// </summary>
-        public Compilation? LastCompilation { get; private set; }
+        public Compilation? LastCompilation { get; }
+
+        public CompilationChanges? UnprocessedChanges { get; }
+
+        private CompilationChangeTracker(
+            ImmutableDictionary<string, (SyntaxTree Tree, bool HasCompileTimeCode)>? lastTrees,
+            Compilation? lastCompilation,
+            CompilationChanges? unprocessedChanges )
+        {
+            this._lastTrees = lastTrees;
+            this.LastCompilation = lastCompilation;
+            this.UnprocessedChanges = unprocessedChanges;
+        }
+
+        public CompilationChangeTracker ResetUnprocessedChanges()
+        {
+            if ( this.LastCompilation == null || this.UnprocessedChanges == null )
+            {
+                throw new InvalidOperationException();
+            }
+
+            return new CompilationChangeTracker( this._lastTrees, this.LastCompilation, CompilationChanges.Empty( this.LastCompilation ) );
+        }
 
         /// <summary>
         /// Updates the <see cref="LastCompilation"/> property and returns the set of changes between the
         /// old value of <see cref="LastCompilation"/> and the newly provided <see cref="Compilation"/>.
         /// </summary>
-        public CompilationChange Update( Compilation newCompilation, CancellationToken cancellationToken )
+        public CompilationChangeTracker Update( Compilation newCompilation, CancellationToken cancellationToken )
         {
             if ( newCompilation == this.LastCompilation )
             {
-                return CompilationChange.Empty( newCompilation );
+                return this;
             }
 
-            lock ( this._sync )
+            var newTrees = ImmutableDictionary.CreateBuilder<string, (SyntaxTree Tree, bool HasCompileTimeCode)>( StringComparer.Ordinal );
+            var generatedTrees = new List<SyntaxTree>();
+
+            var syntaxTreeChanges = new List<SyntaxTreeChange>();
+            var hasCompileTimeChange = false;
+
+            // Process new trees.
+            var lastTrees = this._lastTrees;
+
+            foreach ( var newSyntaxTree in newCompilation.SyntaxTrees )
             {
-                var newTrees = ImmutableDictionary.CreateBuilder<string, (SyntaxTree Tree, bool HasCompileTimeCode)>( StringComparer.Ordinal );
-                var generatedTrees = new List<SyntaxTree>();
+                cancellationToken.ThrowIfCancellationRequested();
 
-                var syntaxTreeChanges = ImmutableArray.CreateBuilder<SyntaxTreeChange>();
-                var hasCompileTimeChange = false;
+                bool hasCompileTimeCode;
+                CompileTimeChangeKind compileTimeChangeKind;
 
-                // Process new trees.
-                var lastTrees = this._lastTrees;
-
-                foreach ( var newSyntaxTree in newCompilation.SyntaxTrees )
+                // Generated files are ignored during the comparison.
+                if ( IsGeneratedFile( newSyntaxTree ) )
                 {
-                    cancellationToken.ThrowIfCancellationRequested();
+                    generatedTrees.Add( newSyntaxTree );
 
-                    bool hasCompileTimeCode;
-                    CompileTimeChangeKind compileTimeChangeKind;
+                    continue;
+                }
 
-                    // Generated files are ignored during the comparison.
-                    if ( IsGeneratedFile( newSyntaxTree ) )
+                if ( lastTrees != null && lastTrees.TryGetValue( newSyntaxTree.FilePath, out var oldEntry ) )
+                {
+                    if ( IsDifferent( oldEntry.Tree, newSyntaxTree, out var newHasCompileTimeCode ) )
                     {
-                        generatedTrees.Add( newSyntaxTree );
-
-                        continue;
-                    }
-
-                    if ( lastTrees != null && lastTrees.TryGetValue( newSyntaxTree.FilePath, out var oldEntry ) )
-                    {
-                        if ( IsDifferent( oldEntry.Tree, newSyntaxTree, out var newHasCompileTimeCode ) )
-                        {
-                            hasCompileTimeCode = newHasCompileTimeCode ?? CompileTimeCodeDetector.HasCompileTimeCode( newSyntaxTree.GetRoot() );
-                            compileTimeChangeKind = GetCompileTimeChangeKind( oldEntry.HasCompileTimeCode, hasCompileTimeCode );
-
-                            syntaxTreeChanges.Add(
-                                new SyntaxTreeChange(
-                                    newSyntaxTree.FilePath,
-                                    SyntaxTreeChangeKind.Changed,
-                                    hasCompileTimeCode,
-                                    compileTimeChangeKind,
-                                    newSyntaxTree ) );
-
-                            hasCompileTimeChange |= hasCompileTimeCode || oldEntry.HasCompileTimeCode;
-                        }
-                        else
-                        {
-                            hasCompileTimeCode = oldEntry.HasCompileTimeCode;
-                        }
-                    }
-                    else
-                    {
-                        // This is a new tree.
-
-                        hasCompileTimeCode = CompileTimeCodeDetector.HasCompileTimeCode( newSyntaxTree.GetRoot() );
-                        compileTimeChangeKind = GetCompileTimeChangeKind( false, hasCompileTimeCode );
+                        hasCompileTimeCode = newHasCompileTimeCode ?? CompileTimeCodeDetector.HasCompileTimeCode( newSyntaxTree.GetRoot() );
+                        compileTimeChangeKind = GetCompileTimeChangeKind( oldEntry.HasCompileTimeCode, hasCompileTimeCode );
 
                         syntaxTreeChanges.Add(
                             new SyntaxTreeChange(
                                 newSyntaxTree.FilePath,
-                                SyntaxTreeChangeKind.Added,
+                                SyntaxTreeChangeKind.Changed,
                                 hasCompileTimeCode,
                                 compileTimeChangeKind,
                                 newSyntaxTree ) );
 
-                        hasCompileTimeChange |= hasCompileTimeCode;
+                        hasCompileTimeChange |= hasCompileTimeCode || oldEntry.HasCompileTimeCode;
                     }
-
-                    newTrees.Add( newSyntaxTree.FilePath, (newSyntaxTree, hasCompileTimeCode) );
-                    lastTrees = lastTrees?.Remove( newSyntaxTree.FilePath );
-                }
-
-                // Process old trees.
-                if ( lastTrees != null )
-                {
-                    foreach ( var oldSyntaxTree in lastTrees )
+                    else
                     {
-                        syntaxTreeChanges.Add(
-                            new SyntaxTreeChange(
-                                oldSyntaxTree.Key,
-                                SyntaxTreeChangeKind.Deleted,
-                                false,
-                                GetCompileTimeChangeKind( oldSyntaxTree.Value.HasCompileTimeCode, false ),
-                                null ) );
+                        hasCompileTimeCode = oldEntry.HasCompileTimeCode;
                     }
-                }
-
-                // Determine which compilation should be analyzed.
-                CompilationChange compilationChange;
-
-                if ( !hasCompileTimeChange && syntaxTreeChanges.Count == 0 )
-                {
-                    // There is no change, so we can analyze the previous compilation.
-                    compilationChange = CompilationChange.Empty( this.LastCompilation! );
                 }
                 else
                 {
-                    // We have to analyze a new compilation, however we need to remove generated trees.
-                    cancellationToken.ThrowIfCancellationRequested();
-                    var compilationToAnalyze = newCompilation.RemoveSyntaxTrees( generatedTrees );
+                    // This is a new tree.
 
-                    compilationChange = new CompilationChange(
-                        syntaxTreeChanges.ToImmutable(),
-                        hasCompileTimeChange,
-                        compilationToAnalyze,
-                        this.LastCompilation != null );
+                    hasCompileTimeCode = CompileTimeCodeDetector.HasCompileTimeCode( newSyntaxTree.GetRoot() );
+                    compileTimeChangeKind = GetCompileTimeChangeKind( false, hasCompileTimeCode );
+
+                    syntaxTreeChanges.Add(
+                        new SyntaxTreeChange(
+                            newSyntaxTree.FilePath,
+                            SyntaxTreeChangeKind.Added,
+                            hasCompileTimeCode,
+                            compileTimeChangeKind,
+                            newSyntaxTree ) );
+
+                    hasCompileTimeChange |= hasCompileTimeCode;
                 }
 
-                // Swap.
-                this._lastTrees = newTrees.ToImmutable();
-                this.LastCompilation = compilationChange.CompilationToAnalyze;
-
-                return compilationChange;
+                newTrees.Add( newSyntaxTree.FilePath, (newSyntaxTree, hasCompileTimeCode) );
+                lastTrees = lastTrees?.Remove( newSyntaxTree.FilePath );
             }
+
+            // Process old trees.
+            if ( lastTrees != null )
+            {
+                foreach ( var oldSyntaxTree in lastTrees )
+                {
+                    syntaxTreeChanges.Add(
+                        new SyntaxTreeChange(
+                            oldSyntaxTree.Key,
+                            SyntaxTreeChangeKind.Deleted,
+                            false,
+                            GetCompileTimeChangeKind( oldSyntaxTree.Value.HasCompileTimeCode, false ),
+                            null ) );
+                }
+            }
+
+            // Determine which compilation should be analyzed.
+            CompilationChanges compilationChanges;
+
+            if ( !hasCompileTimeChange && syntaxTreeChanges.Count == 0 )
+            {
+                // There is no change, so we can analyze the previous compilation.
+                compilationChanges = CompilationChanges.Empty( this.LastCompilation! );
+            }
+            else
+            {
+                // We have to analyze a new compilation, however we need to remove generated trees.
+                cancellationToken.ThrowIfCancellationRequested();
+                var compilationToAnalyze = newCompilation.RemoveSyntaxTrees( generatedTrees );
+
+                compilationChanges = new CompilationChanges(
+                    syntaxTreeChanges,
+                    hasCompileTimeChange,
+                    compilationToAnalyze,
+                    this.LastCompilation != null );
+            }
+
+            if ( this.UnprocessedChanges != null )
+            {
+                compilationChanges = this.UnprocessedChanges.Merge( compilationChanges );
+            }
+
+            return new CompilationChangeTracker( newTrees.ToImmutable(), compilationChanges.CompilationToAnalyze, compilationChanges );
         }
 
         internal static bool IsGeneratedFile( SyntaxTree syntaxTree )
@@ -232,7 +250,7 @@ namespace Caravela.Framework.Impl.DesignTime.Diff
                                     }
 
                                 case SyntaxKind.WhitespaceTrivia:
-                                    if ( changedTrivia.Span.Length == changedSpan.Length && (change.NewText == null || change.NewText.Length == 0) )
+                                    if ( changedTrivia.Span.Length == changedSpan.Length && string.IsNullOrEmpty( change.NewText ) )
                                     {
                                         // Removing all spaces of a trivia is potentially breaking.
                                         break;
@@ -286,18 +304,6 @@ namespace Caravela.Framework.Impl.DesignTime.Diff
                     PropertyDeclarationSyntax property => node == property.ExpressionBody || node == property.Initializer,
                     _ => node.Parent != null && IsChangeIrrelevantToSymbol( node.Parent )
                 };
-            }
-        }
-
-        /// <summary>
-        /// Resets the current <see cref="CompilationChangeTracker"/> to its initial empty state.
-        /// </summary>
-        public void Reset()
-        {
-            lock ( this._sync )
-            {
-                this.LastCompilation = null;
-                this._lastTrees = null;
             }
         }
     }

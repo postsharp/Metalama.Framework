@@ -72,52 +72,57 @@ namespace Caravela.Framework.Impl.DesignTime
                 // Execute the analysis that are not performed in the pipeline.
                 var buildOptions = new ProjectOptions( context.Options.AnalyzerConfigOptionsProvider );
 
-                Logger.Instance?.Write( $"DesignTimeAnalyzer.AnalyzeSemanticModel('{context.SemanticModel.SyntaxTree.FilePath}')" );
+                var syntaxTreeFilePath = context.SemanticModel.SyntaxTree.FilePath;
+                Logger.Instance?.Write( $"DesignTimeAnalyzer.AnalyzeSemanticModel('{syntaxTreeFilePath}')" );
 
                 DebuggingHelper.AttachDebugger( buildOptions );
 
                 // Execute the pipeline.
                 var compilation = context.SemanticModel.Compilation;
 
-                var syntaxTreeResults = DesignTimeAspectPipelineCache.Instance.GetSyntaxTreeResults(
-                    compilation,
-                    new[] { context.SemanticModel.SyntaxTree },
+                if ( !DesignTimeAspectPipelineFactory.Instance.TryExecute(
                     buildOptions,
-                    context.CancellationToken );
+                    compilation,
+                    context.CancellationToken,
+                    out var compilationResult ) )
+                {
+                    Logger.Instance?.Write( $"DesignTimeAnalyzer.AnalyzeSemanticModel('{syntaxTreeFilePath}'): the pipeline failed." );
+
+                    return;
+                }
+
+                var result = compilationResult.GetDiagnosticsOnSyntaxTree( syntaxTreeFilePath );
 
                 // Report diagnostics from the pipeline.
-                foreach ( var result in syntaxTreeResults )
+                Logger.Instance?.Write(
+                    $"DesignTimeAnalyzer.AnalyzeSemanticModel('{syntaxTreeFilePath}'): {result.Diagnostics.Length} diagnostics and {result.Suppressions.Length} suppressions reported on '{syntaxTreeFilePath}'." );
+
+                DesignTimeDiagnosticHelper.ReportDiagnostics(
+                    result.Diagnostics,
+                    compilation,
+                    context.ReportDiagnostic,
+                    true );
+
+                // If we have unsupported suppressions, a diagnostic here because a Suppressor cannot report.
+                foreach ( var suppression in result.Suppressions.Where(
+                    s => !this._designTimeDiagnosticDefinitions.SupportedSuppressionDescriptors.ContainsKey( s.Definition.SuppressedDiagnosticId ) ) )
                 {
-                    Logger.Instance?.Write(
-                        $"DesignTimeAnalyzer.AnalyzeSemanticModel('{context.SemanticModel.SyntaxTree.FilePath}'): {result.Diagnostics.Length} diagnostics reported on '{result.SyntaxTree.FilePath}'." );
-
-                    DesignTimeDiagnosticHelper.ReportDiagnostics(
-                        result.Diagnostics,
-                        compilation,
-                        context.ReportDiagnostic,
-                        true );
-
-                    // If we have unsupported suppressions, a diagnostic here because a Suppressor cannot report.
-                    foreach ( var suppression in result.Suppressions.Where(
-                        s => !this._designTimeDiagnosticDefinitions.SupportedSuppressionDescriptors.ContainsKey( s.Definition.SuppressedDiagnosticId ) ) )
+                    foreach ( var symbol in DocumentationCommentId.GetSymbolsForDeclarationId( suppression.SymbolId, compilation ) )
                     {
-                        foreach ( var symbol in DocumentationCommentId.GetSymbolsForDeclarationId( suppression.SymbolId, compilation ) )
-                        {
-                            var location = symbol.GetDiagnosticLocation();
+                        var location = symbol.GetDiagnosticLocation();
 
-                            if ( location is not null )
-                            {
-                                context.ReportDiagnostic(
-                                    DesignTimeDiagnosticDescriptors.UnregisteredSuppression.CreateDiagnostic(
-                                        location,
-                                        (Id: suppression.Definition.SuppressedDiagnosticId, symbol) ) );
-                            }
+                        if ( location is not null )
+                        {
+                            context.ReportDiagnostic(
+                                DesignTimeDiagnosticDescriptors.UnregisteredSuppression.CreateDiagnostic(
+                                    location,
+                                    (Id: suppression.Definition.SuppressedDiagnosticId, symbol) ) );
                         }
                     }
                 }
 
                 // Perform additional analysis not done by the design-time pipeline.
-                var pipeline = DesignTimeAspectPipelineCache.Instance.GetOrCreatePipeline( buildOptions, context.CancellationToken );
+                var pipeline = DesignTimeAspectPipelineFactory.Instance.GetOrCreatePipeline( buildOptions, context.CancellationToken );
 
                 if ( pipeline != null )
                 {

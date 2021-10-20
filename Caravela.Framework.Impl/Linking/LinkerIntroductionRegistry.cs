@@ -229,20 +229,12 @@ namespace Caravela.Framework.Impl.Linking
             var intermediateSyntaxTree = this._introducedTreeMap[introducedMember.Introduction.TargetSyntaxTree];
             var intermediateSyntax = intermediateSyntaxTree.GetRoot().GetCurrentNode( introducedMember.Syntax ).AssertNotNull();
 
-            SyntaxNode symbolSyntax;
-
-            if ( intermediateSyntax is EventFieldDeclarationSyntax eventFieldSyntax )
+            SyntaxNode symbolSyntax = intermediateSyntax switch
             {
-                symbolSyntax = eventFieldSyntax.Declaration.Variables.First();
-            }
-            else if ( intermediateSyntax is FieldDeclarationSyntax fieldSyntax )
-            {
-                symbolSyntax = fieldSyntax.Declaration.Variables.First();
-            }
-            else
-            {
-                symbolSyntax = intermediateSyntax;
-            }
+                EventFieldDeclarationSyntax eventFieldSyntax => eventFieldSyntax.Declaration.Variables.First(),
+                FieldDeclarationSyntax fieldSyntax => fieldSyntax.Declaration.Variables.First(),
+                _ => intermediateSyntax
+            };
 
             return this._intermediateCompilation.GetSemanticModel( intermediateSyntaxTree ).GetDeclaredSymbol( symbolSyntax ).AssertNotNull();
         }

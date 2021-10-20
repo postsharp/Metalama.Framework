@@ -3,19 +3,17 @@
 
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Templating.Mapping;
+using Caravela.Framework.Impl.Utilities;
 using Caravela.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Reflection;
-using System.Reflection.Metadata;
-using System.Reflection.PortableExecutable;
 using System.Text;
 using System.Threading;
 
@@ -27,9 +25,8 @@ namespace Caravela.Framework.Impl.CompileTime
     /// The generation of compile-time compilations itself is delegated to the <see cref="CompileTimeCompilationBuilder"/>
     /// class.
     /// </summary>
-    internal sealed class CompileTimeProjectLoader : CompileTimeTypeResolver
+    internal sealed class CompileTimeProjectLoader : CompileTimeTypeResolver, IService
     {
-        private static readonly ConcurrentDictionary<string, (byte[]? Resource, DateTime LastFileWrite)> _resourceCache = new();
         private readonly CompileTimeDomain _domain;
         private readonly IServiceProvider _serviceProvider;
         private readonly CompileTimeCompilationBuilder _builder;
@@ -254,7 +251,8 @@ namespace Caravela.Framework.Impl.CompileTime
                 goto finish;
             }
 
-            if ( !TryGetCompileTimeResource( assemblyPath, out var resourceStream ) )
+            if ( !ManagedResourceReader.TryGetCompileTimeResource( assemblyPath, out var resources )
+                 || !resources.TryGetValue( CompileTimeConstants.CompileTimeProjectResourceName, out var resourceBytes ) )
             {
                 goto finish;
             }
@@ -263,7 +261,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
             if ( !this.TryDeserializeCompileTimeProject(
                 assemblyName.ToAssemblyIdentity(),
-                resourceStream,
+                new MemoryStream( resourceBytes ),
                 diagnosticSink,
                 cancellationToken,
                 out compileTimeProject ) )
@@ -277,68 +275,6 @@ namespace Caravela.Framework.Impl.CompileTime
             this._projects.Add( assemblyIdentity, compileTimeProject );
 
             return true;
-        }
-
-        private static bool TryGetCompileTimeResource( string path, [NotNullWhen( true )] out MemoryStream? resourceStream )
-        {
-            if ( !(_resourceCache.TryGetValue( path, out var result ) && result.LastFileWrite == File.GetLastWriteTime( path )) )
-            {
-                result = GetCompileTimeResourceCore( path );
-                _resourceCache.TryAdd( path, result );
-            }
-
-            if ( result.Resource != null )
-            {
-                resourceStream = new MemoryStream( result.Resource );
-
-                return true;
-            }
-            else
-            {
-                resourceStream = null;
-
-                return false;
-            }
-        }
-
-        private static (byte[]? Resource, DateTime LastFileWrite) GetCompileTimeResourceCore( string path )
-        {
-            var timestamp = File.GetLastWriteTime( path );
-
-            using var stream = new FileStream( path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite );
-            using var peReader = new PEReader( stream );
-
-            var metadataReader = peReader.GetMetadataReader();
-
-            foreach ( var resourceHandle in metadataReader.ManifestResources )
-            {
-                var resource = metadataReader.GetManifestResource( resourceHandle );
-
-                if ( !resource.Implementation.IsNil )
-                {
-                    // Coverage: ignore
-                    // (This happens in the case that the resource is stored in a different module of the assembly, but this is a very rare
-                    // case that cannot be easily tested without creating custom IL.)
-
-                    continue;
-                }
-
-                var resourceName = metadataReader.GetString( resource.Name );
-
-                if ( resourceName.Contains( CompileTimeConstants.ResourceName ) )
-                {
-                    unsafe
-                    {
-                        var resourcesSection = peReader.GetSectionData( peReader.PEHeaders.CorHeader!.ResourcesDirectory.RelativeVirtualAddress );
-                        var size = *(int*) (resourcesSection.Pointer + resource.Offset);
-                        var resourceBytes = resourcesSection.GetContent( sizeof(int), size );
-
-                        return (resourceBytes.ToArray(), timestamp);
-                    }
-                }
-            }
-
-            return (null, timestamp);
         }
 
         private bool TryDeserializeCompileTimeProject(

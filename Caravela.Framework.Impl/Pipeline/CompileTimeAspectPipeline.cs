@@ -4,6 +4,7 @@
 using Caravela.Compiler;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Impl.AspectOrdering;
+using Caravela.Framework.Impl.Aspects;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
@@ -110,6 +111,14 @@ namespace Caravela.Framework.Impl.Pipeline
                 if ( configuration.CompileTimeProject is { IsEmpty: false } )
                 {
                     additionalResources = additionalResources.Add( configuration.CompileTimeProject.ToResource() );
+                }
+
+                // Add the index of inherited aspects.
+                if ( result.ExternallyInheritableAspects.Length > 0 )
+                {
+                    var inheritedAspectsManifest = InheritableAspectsManifest.Create( result.ExternallyInheritableAspects );
+                    var resource = inheritedAspectsManifest.ToResource();
+                    additionalResources = additionalResources.Add( resource );
                 }
 
                 resultPartialCompilation = (PartialCompilation) RunTimeAssemblyRewriter.Rewrite( resultPartialCompilation, this.ServiceProvider );

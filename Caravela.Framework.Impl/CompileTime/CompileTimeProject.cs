@@ -217,16 +217,13 @@ namespace Caravela.Framework.Impl.CompileTime
         {
             this.AssertNotEmpty();
 
-            return new ResourceDescription(
-                CompileTimeConstants.ResourceName,
-                () =>
-                {
-                    var stream = new MemoryStream();
-                    this.Serialize( stream );
-                    _ = stream.Seek( 0, SeekOrigin.Begin );
+            var stream = new MemoryStream();
+            this.Serialize( stream );
+            _ = stream.Seek( 0, SeekOrigin.Begin );
 
-                    return stream;
-                },
+            return new ResourceDescription(
+                CompileTimeConstants.CompileTimeProjectResourceName,
+                () => stream,
                 true );
         }
 

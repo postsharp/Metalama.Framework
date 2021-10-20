@@ -180,5 +180,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
             return stringBuilder.ToString();
         }
+
+        public override IMember? OverriddenMember => (IMemberImpl?) this.OverriddenMethod;
     }
 }

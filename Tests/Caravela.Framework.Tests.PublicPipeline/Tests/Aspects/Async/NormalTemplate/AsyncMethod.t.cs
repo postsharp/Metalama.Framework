@@ -1,20 +1,4 @@
-using System;
-using System.Threading.Tasks;
-using System.Collections.Generic;
-using Caravela.Framework;
-using Caravela.TestFramework;
-using Caravela.Framework.Aspects;
-
-namespace Caravela.Framework.Tests.Integration.Templating.Aspects.Async.NormalTemplateOnAsyncMethod
-{
-    class Aspect : OverrideMethodAspect
-    {
-        public override dynamic? OverrideMethod() => throw new System.NotSupportedException("Compile-time only code cannot be called at run-time.");
-
-        
-    }
-
-    class TargetCode
+class TargetCode
     {
         [Aspect]
         async Task<int> MethodReturningTaskOfInt(int a)
@@ -62,4 +46,3 @@ private async ValueTask<int> MethodReturningValueTaskOfInt_Source(int a)
             return a;
         }
     }
-}
