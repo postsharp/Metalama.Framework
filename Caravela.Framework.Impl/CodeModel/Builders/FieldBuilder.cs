@@ -104,29 +104,5 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public FieldInfo ToFieldInfo() => throw new NotImplementedException();
 
         public FieldOrPropertyInfo ToFieldOrPropertyInfo() => throw new NotImplementedException();
-
-        public IMethod? GetAccessor( MethodKind methodKind )
-            => methodKind switch
-            {
-                MethodKind.PropertyGet => this.GetMethod,
-                MethodKind.PropertySet => this.SetMethod,
-                _ => throw new ArgumentOutOfRangeException()
-            };
-
-        public IEnumerable<IMethod> Accessors
-        {
-            get
-            {
-                if ( this.GetMethod != null )
-                {
-                    yield return this.GetMethod;
-                }
-
-                if ( this.SetMethod != null )
-                {
-                    yield return this.SetMethod;
-                }
-            }
-        }
     }
 }

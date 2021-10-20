@@ -42,7 +42,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public override IDeclaration ContainingDeclaration { get; }
 
-        public bool IsDesignTime => false;
+        bool IObservableTransformation.IsDesignTime => false;
 
         DeclarationOrigin IDeclaration.Origin => DeclarationOrigin.Aspect;
 
