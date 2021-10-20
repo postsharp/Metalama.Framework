@@ -11,7 +11,7 @@ namespace Caravela.Framework.Tests.PublicPipeline.Aspects.Initialize.TwoAspectsO
     {
         public override dynamic? OverrideMethod()
         {
-            Console.WriteLine($"{meta.AspectInstance.OtherInstances.Length} other instance(s)");
+            Console.WriteLine($"{meta.AspectInstance.SecondaryInstances.Length} other instance(s)");
             return meta.Proceed();
         }
     }

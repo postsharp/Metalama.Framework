@@ -32,7 +32,7 @@ namespace Caravela.Framework.Impl.Aspects
 
         public bool IsSkipped { get; private set; }
 
-        public ImmutableArray<IAspectInstance> OtherInstances => ImmutableArray<IAspectInstance>.Empty;
+        public ImmutableArray<IAspectInstance> SecondaryInstances => ImmutableArray<IAspectInstance>.Empty;
 
         public void Skip() { this.IsSkipped = true; }
 
@@ -111,7 +111,24 @@ namespace Caravela.Framework.Impl.Aspects
         public Location? GetDiagnosticLocation( Compilation compilation )
             => compilation.GetTypeByMetadataName( this.AspectClass.FullName )?.GetDiagnosticLocation();
 
-        public int CompareTo( AspectInstance? other ) => this.Predecessor.Kind.CompareTo( other.AssertNotNull().Predecessor.Kind );
+        public int CompareTo( AspectInstance? other )
+        {
+            if ( other == null )
+            {
+                return 1;
+            }
+            
+            var predecessorKindComparison = this.Predecessor.Kind.CompareTo( other.AssertNotNull().Predecessor.Kind );
+
+            if ( predecessorKindComparison != 0 )
+            {
+                return predecessorKindComparison;
+            }
+
+            // TODO: implement ordering within individual categories.
+
+            return 0;
+        }
 
         public virtual AttributeAspectInstance CreateDerivedInstance( IDeclaration target )
         {

@@ -252,6 +252,8 @@ function Test() {
         if ($LASTEXITCODE -ne 0 ) { throw "Tests failed." }
     }
 
+
+    Write-Host "Tests successful" -ForegroundColor Green
 }
 
 CheckPrerequisities

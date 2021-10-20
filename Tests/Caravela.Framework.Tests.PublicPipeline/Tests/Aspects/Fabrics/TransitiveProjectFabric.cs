@@ -4,9 +4,9 @@ namespace Caravela.Framework.Tests.Integration.Tests.Aspects.Fabrics.TransitiveP
 {
     public class Fabric : IProjectFabric
     {
-        public void AmendProject( IProjectAmender builder )
+        public void AmendProject( IProjectAmender amender )
         {
-            builder.Project.Data<Configuration>().Message = "Configured";
+            amender.Project.Data<Configuration>().Message = "Configured";
         }
     }
 

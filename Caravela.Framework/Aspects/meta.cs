@@ -189,7 +189,7 @@ namespace Caravela.Framework.Aspects
 
         /// <summary>
         /// Gets the current <see cref="IAspectInstance"/>, which gives access to the <see cref="IAspectInstance.Predecessors"/>
-        /// and the <see cref="IAspectInstance.OtherInstances"/> of the current aspect.
+        /// and the <see cref="IAspectInstance.SecondaryInstances"/> of the current aspect.
         /// </summary>
         public static IAspectInstance AspectInstance => CurrentContext.AspectInstance;
 

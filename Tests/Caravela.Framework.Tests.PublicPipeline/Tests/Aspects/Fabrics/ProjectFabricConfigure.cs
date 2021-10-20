@@ -7,9 +7,9 @@ namespace Caravela.Framework.Tests.PublicPipeline.Aspects.Fabrics.ProjectFabricC
 {
     internal class Fabric : IProjectFabric
     {
-        public void AmendProject( IProjectAmender builder )
+        public void AmendProject( IProjectAmender amender )
         {
-            builder.Project.Data<Configuration>().Message = "Hello, world.";
+            amender.Project.Data<Configuration>().Message = "Hello, world.";
         }
     }
 

@@ -10,9 +10,9 @@ namespace Caravela.Framework.Tests.PublicPipeline.Aspects.Fabrics.NamespaceFabri
 {
     internal class Fabric : INamespaceFabric
     {
-        public void AmendNamespace( INamespaceAmender builder )
+        public void AmendNamespace( INamespaceAmender amender )
         {
-            builder
+            amender
                 .WithMembers<INamedType>( c => new[] { (INamedType) c.Compilation.TypeFactory.GetTypeByReflectionType( typeof(C2) ) } )
                 .AddAspect<Aspect>();
         }

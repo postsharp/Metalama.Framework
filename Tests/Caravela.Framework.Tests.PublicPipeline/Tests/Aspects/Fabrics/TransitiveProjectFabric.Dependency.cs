@@ -8,13 +8,13 @@ namespace Caravela.Framework.Tests.Integration.Tests.Aspects.Fabrics.TransitiveP
 {
     public class TransitiveFabric : ITransitiveProjectFabric
     {
-        public void AmendProject( IProjectAmender builder )
+        public void AmendProject( IProjectAmender amender )
         {
-            var configuration = builder.Project.Data<Configuration>();
+            var configuration = amender.Project.Data<Configuration>();
 
             // Capture the message outside of the lambda otherwise it gets evaluated later.
             var message = configuration.Message;
-            builder.WithMembers( c => c.Types.SelectMany( t => t.Methods ) ).AddAspect( m => new Aspect( message ) );
+            amender.WithMembers( c => c.Types.SelectMany( t => t.Methods ) ).AddAspect( m => new Aspect( message ) );
         }
     }
 

@@ -49,7 +49,7 @@ namespace Caravela.Framework.Impl.Aspects
 
         public bool IsSkipped => this._primaryInstance.IsSkipped;
 
-        public ImmutableArray<IAspectInstance> OtherInstances => this._otherInstances.Cast<IAspectInstance>().ToImmutableArray();
+        public ImmutableArray<IAspectInstance> SecondaryInstances => this._otherInstances.Cast<IAspectInstance>().ToImmutableArray();
 
         public ImmutableArray<AspectPredecessor> Predecessors => ImmutableArray.Create( this._primaryInstance.Predecessor );
 

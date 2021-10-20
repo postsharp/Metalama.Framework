@@ -12,6 +12,6 @@ namespace Caravela.Framework.Fabrics
         /// <summary>
         /// The user can implement this method to analyze types in the declaring type, add aspects, and report or suppress diagnostics.
         /// </summary>
-        void AmendType( ITypeAmender builder );
+        void AmendType( ITypeAmender amender );
     }
 }
