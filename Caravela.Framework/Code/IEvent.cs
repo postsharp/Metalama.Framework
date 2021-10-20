@@ -10,7 +10,7 @@ namespace Caravela.Framework.Code
     /// <summary>
     /// Represent an event.
     /// </summary>
-    public interface IEvent : IMemberWithAccessors, IHasType
+    public interface IEvent : IMemberWithAccessors
     {
         /// <summary>
         /// Gets the type of the event, i.e. the type of the delegate.

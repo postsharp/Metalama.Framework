@@ -1,9 +1,11 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Code;
 using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.Aspects;
 using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.CodeModel.Builders;
 using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.Transformations;
 using Caravela.Framework.Impl.Utilities;
@@ -12,6 +14,8 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using MethodKind = Microsoft.CodeAnalysis.MethodKind;
+using TypeKind = Microsoft.CodeAnalysis.TypeKind;
 
 // Ordered declaration versions (intermediate compilation):
 //  * Overridden declaration (base class declaration)
@@ -160,7 +164,15 @@ namespace Caravela.Framework.Impl.Linking
 
                 if ( introducedMember.Introduction is IReplaceMember replaceMember )
                 {
-                    if ( replaceMember.ReplacedMember.Resolve( this._finalCompilationModel ) is ITransformation replacedTransformation )
+                    var replacedMember = replaceMember.ReplacedMember.Resolve( this._finalCompilationModel );
+
+                    IDeclaration canonicalReplacedMember = replacedMember switch
+                    {
+                        BuiltDeclaration builtDeclaration => builtDeclaration.Builder,
+                        _ => replacedMember,
+                    };
+
+                    if ( canonicalReplacedMember is ITransformation replacedTransformation )
                     {
                         // This is introduced field, which is then promoted. Semantics of the field and of the property are the same.
                         return new MemberLayerIndex( this._layerIndex[replacedTransformation.Advice.AspectLayerId], 0 );
@@ -486,7 +498,7 @@ namespace Caravela.Framework.Impl.Linking
                 case (IEventSymbol, IEventSymbol):
                 case (IFieldSymbol, IFieldSymbol):
                     return resolvedSymbol;
-#pragma warning disable IDE0059
+
                 case (IMethodSymbol { MethodKind: MethodKind.PropertyGet }, IPropertySymbol):
                     // This seems to happen only in invalid compilations.
                     throw new AssertionFailedException( Justifications.CoverageMissing );
@@ -513,7 +525,6 @@ namespace Caravela.Framework.Impl.Linking
 
                 default:
                     throw new AssertionFailedException();
-#pragma warning restore IDE0059
             }
         }
 
