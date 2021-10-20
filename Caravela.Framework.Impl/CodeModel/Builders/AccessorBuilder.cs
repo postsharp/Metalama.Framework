@@ -36,6 +36,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
             {
                 (PropertyBuilder _, MethodKind.PropertyGet) => new PropertyGetReturnParameter( this ),
                 (PropertyBuilder _, MethodKind.PropertySet) => new VoidReturnParameter( this ),
+                (FieldBuilder _, MethodKind.PropertyGet) => new PropertyGetReturnParameter( this ),
+                (FieldBuilder _, MethodKind.PropertySet) => new VoidReturnParameter( this ),
                 (EventBuilder _, _) => new EventReturnParameter( this ),
                 _ => throw new AssertionFailedException()
             };
@@ -67,6 +69,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
             {
                 (PropertyBuilder propertyBuilder, MethodKind.PropertyGet) => propertyBuilder.OverriddenProperty?.GetMethod.AssertNotNull(),
                 (PropertyBuilder propertyBuilder, MethodKind.PropertySet) => propertyBuilder.OverriddenProperty?.SetMethod.AssertNotNull(),
+                (FieldBuilder _, _) => null,
                 (EventBuilder eventBuilder, MethodKind.EventAdd) => eventBuilder.OverriddenEvent?.AddMethod.AssertNotNull(),
                 (EventBuilder eventBuilder, MethodKind.EventRemove) => eventBuilder.OverriddenEvent?.RemoveMethod.AssertNotNull(),
                 _ => throw new AssertionFailedException()
@@ -85,6 +88,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                 (IProperty property, MethodKind.PropertyGet) when property.Parameters.Count == 0 => new ParameterBuilderList(),
                 (IProperty property, MethodKind.PropertySet) when property.Parameters.Count == 0 =>
                     new ParameterBuilderList( new[] { new PropertySetValueParameter( this, 0 ) } ),
+                (FieldBuilder _, MethodKind.PropertyGet) => new ParameterBuilderList(),
+                (FieldBuilder _, MethodKind.PropertySet) => new ParameterBuilderList( new[] { new PropertySetValueParameter( this, 0 ) } ),
                 (IEvent _, _) =>
                     new ParameterBuilderList( new[] { new EventValueParameter( this ) } ),
                 _ => throw new AssertionFailedException()
@@ -98,6 +103,11 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
             set
             {
+                if ( this.ContainingDeclaration is FieldBuilder )
+                {
+                    throw new InvalidOperationException( "Cannot change field pseudo accessor accessibility." );
+                }
+
                 if ( this.ContainingDeclaration is not PropertyBuilder propertyBuilder )
                 {
                     throw new InvalidOperationException( $"Cannot change event accessor accessibility." );
@@ -211,6 +221,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                     => propertyBuilder.ExplicitInterfaceImplementations.Select( p => p.GetMethod ).AssertNoneNull().ToArray(),
                 (PropertyBuilder propertyBuilder, MethodKind.PropertySet)
                     => propertyBuilder.ExplicitInterfaceImplementations.Select( p => p.SetMethod ).AssertNoneNull().ToArray(),
+                (FieldBuilder _, _) => Array.Empty<IMethod>(),
                 (EventBuilder eventBuilder, MethodKind.EventAdd)
                     => eventBuilder.ExplicitInterfaceImplementations.Select( p => p.AddMethod ).AssertNoneNull().ToArray(),
                 (EventBuilder eventBuilder, MethodKind.EventRemove)

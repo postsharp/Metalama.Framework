@@ -19,7 +19,13 @@ namespace Caravela.Framework.Impl.Formatting
     /// </summary>
     public sealed partial class TextSpanClassifier : CSharpSyntaxWalker
     {
+#if !DEBUG
+#pragma warning disable IDE0052 // Remove unread private members
+#endif
         private readonly SourceText _sourceText;
+#if !DEBUG
+#pragma warning restore IDE0052 // Remove unread private members
+#endif
         private readonly string _sourceString;
         private readonly MarkAllChildrenWalker _markAllChildrenWalker;
         private bool _isInTemplate;

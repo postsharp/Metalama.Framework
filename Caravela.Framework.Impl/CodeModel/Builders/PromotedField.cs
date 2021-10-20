@@ -30,11 +30,18 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
             this.IsStatic = this._field.IsStatic;
 
             // Copy the initializer.
-            var fieldDeclaration = (VariableDeclaratorSyntax) this._field.GetPrimaryDeclaration().AssertNotNull();
-
-            if ( fieldDeclaration.Initializer != null )
+            if ( this._field is BuiltField builtField )
             {
-                this.InitializerSyntax = fieldDeclaration.Initializer.Value;
+                this.InitializerSyntax = builtField.FieldBuilder.InitializerSyntax;
+            }
+            else
+            {
+                var fieldDeclaration = (VariableDeclaratorSyntax) this._field.GetPrimaryDeclaration().AssertNotNull();
+
+                if ( fieldDeclaration.Initializer != null )
+                {
+                    this.InitializerSyntax = fieldDeclaration.Initializer.Value;
+                }
             }
 
             // TODO: Attributes etc.
