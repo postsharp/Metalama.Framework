@@ -6,6 +6,8 @@ using Caravela.Framework.Impl.ReflectionMocks;
 using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using RefKind = Caravela.Framework.Code.RefKind;
 using TypedConstant = Caravela.Framework.Code.TypedConstant;
@@ -54,6 +56,11 @@ namespace Caravela.Framework.Impl.CodeModel
         public override DeclarationKind DeclarationKind => DeclarationKind.Parameter;
 
         public override ISymbol Symbol => this.ParameterSymbol;
+
+        public override bool CanBeInherited => this.DeclaringMember.CanBeInherited;
+
+        public override IEnumerable<IDeclaration> GetDerivedDeclarations( bool deep = true )
+            => this.DeclaringMember.GetDerivedDeclarations().Select( d => ((IHasParameters) d).Parameters[this.Index] );
 
         public TypedConstant DefaultValue
             => this.ParameterSymbol.HasExplicitDefaultValue

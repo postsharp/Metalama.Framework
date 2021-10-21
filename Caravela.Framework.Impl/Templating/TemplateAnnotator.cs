@@ -144,13 +144,12 @@ namespace Caravela.Framework.Impl.Templating
                     // parameters map to run-time parameters of the same name.
 
                     return TemplatingScope.RunTimeOnly;
-            }
 
-            // The TemplateContext.runTime method must be processed separately. It is a compile-time-only method whose
-            // return is run-time-only.
-            if ( this._templateMemberClassifier.IsRunTimeMethod( symbol ) )
-            {
-                return TemplatingScope.RunTimeOnly;
+                case IMethodSymbol method when this._templateMemberClassifier.IsRunTimeMethod( method ):
+                    // The TemplateContext.runTime method must be processed separately. It is a compile-time-only method whose
+                    // return is run-time-only.
+
+                    return TemplatingScope.RunTimeOnly;
             }
 
             if ( symbol is IParameterSymbol )

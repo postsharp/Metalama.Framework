@@ -18,11 +18,11 @@ namespace Caravela.Framework.Tests.PublicPipeline.Aspects.Fabrics.TypeFabricAddA
         
         class Fabric : ITypeFabric
         {
-            public void AmendType( ITypeAmender builder )
+            public void AmendType( ITypeAmender amender )
             {
-                foreach ( var method in builder.Target.Methods )
+                foreach ( var method in amender.Target.Methods )
                 {
-                    builder.Advices.OverrideMethod( method, nameof(Template) );
+                    amender.Advices.OverrideMethod( method, nameof(Template) );
                 }
             }
             

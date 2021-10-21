@@ -1,7 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.DesignTime.Pipeline;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Pipeline;
@@ -27,36 +26,34 @@ namespace Caravela.Framework.Tests.Integration.Runners
             : base( serviceProvider, projectDirectory, metadataReferences, logger ) { }
 
         private protected override async Task RunAsync(
-            ServiceProvider serviceProvider,
             TestInput testInput,
             TestResult testResult,
             Dictionary<string, object?> state )
         {
-            await base.RunAsync( serviceProvider, testInput, testResult, state );
+            await base.RunAsync( testInput, testResult, state );
 
             using var domain = new UnloadableCompileTimeDomain();
 
-            using var pipeline = new DesignTimeAspectPipeline( serviceProvider, domain, true );
-            var pipelineResult = pipeline.Execute( PartialCompilation.CreateComplete( testResult.InputCompilation! ), CancellationToken.None );
+            using var pipeline = new DesignTimeAspectPipeline( testResult.ProjectScopedServiceProvider, domain, this.MetadataReferences, true );
 
-            testResult.PipelineDiagnostics.Report( pipelineResult.Diagnostics.ReportedDiagnostics );
-
-            if ( pipelineResult.Success )
+            if ( !pipeline.TryExecute( testResult.InputCompilation!, CancellationToken.None, out var compilationResult ) )
             {
-                testResult.HasOutputCode = true;
+                testResult.SetFailed( "DesignTimeAspectPipeline.TryExecute failed" );
 
-                var introducedSyntaxTree = pipelineResult.IntroducedSyntaxTrees.SingleOrDefault();
-
-                var introducedSyntaxRoot = introducedSyntaxTree == null
-                    ? SyntaxFactory.GlobalStatement( SyntaxFactoryEx.EmptyStatement )
-                    : await introducedSyntaxTree.GeneratedSyntaxTree.GetRootAsync();
-
-                await testResult.SyntaxTrees.Single().SetRunTimeCodeAsync( introducedSyntaxRoot );
+                return;
             }
-            else
-            {
-                testResult.SetFailed( "DesignTimeAspectPipeline.Execute failed." );
-            }
+
+            testResult.InputCompilationDiagnostics.Report( compilationResult.SyntaxTreeResults.SelectMany( t => t.Diagnostics ) );
+
+            testResult.HasOutputCode = true;
+
+            var introducedSyntaxTree = compilationResult.IntroducedSyntaxTrees.SingleOrDefault();
+
+            var introducedSyntaxRoot = introducedSyntaxTree == null
+                ? SyntaxFactory.GlobalStatement( SyntaxFactoryEx.EmptyStatement )
+                : await introducedSyntaxTree.GeneratedSyntaxTree.GetRootAsync();
+
+            await testResult.SyntaxTrees.Single().SetRunTimeCodeAsync( introducedSyntaxRoot );
         }
     }
 }

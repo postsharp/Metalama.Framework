@@ -7,6 +7,7 @@ using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CodeModel.References;
 using Microsoft.CodeAnalysis;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 
 namespace Caravela.Framework.Impl.Templating.MetaModel
@@ -28,6 +29,8 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         public ICompilation Compilation => this.Underlying.Compilation;
 
+        public IAssembly DeclaringAssembly => this.Underlying.DeclaringAssembly;
+
         public DeclarationOrigin Origin => this.Underlying.Origin;
 
         public IDeclaration? ContainingDeclaration => this.Underlying.ContainingDeclaration;
@@ -41,6 +44,10 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
         public DeclarationRef<IDeclaration> ToRef() => this.Underlying.ToRef();
 
         public ImmutableArray<SyntaxReference> DeclaringSyntaxReferences => this.Underlying.DeclaringSyntaxReferences;
+
+        public bool CanBeInherited => this.Underlying.CanBeInherited;
+
+        public IEnumerable<IDeclaration> GetDerivedDeclarations( bool deep = true ) => this.Underlying.GetDerivedDeclarations();
 
         public override string ToString() => this.Underlying.ToString();
 

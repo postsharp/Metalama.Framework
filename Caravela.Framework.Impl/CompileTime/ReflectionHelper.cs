@@ -3,6 +3,7 @@
 
 using Microsoft.CodeAnalysis;
 using System;
+using System.Collections.Immutable;
 using System.Reflection;
 using System.Text;
 
@@ -10,7 +11,35 @@ namespace Caravela.Framework.Impl.CompileTime
 {
     internal static class ReflectionHelper
     {
-        public static AssemblyIdentity ToAssemblyIdentity( this AssemblyName assemblyName ) => new( assemblyName.Name, assemblyName.Version );
+        public static AssemblyIdentity ToAssemblyIdentity( this AssemblyName assemblyName )
+        {
+            ImmutableArray<byte> publicKeyOrToken = default;
+            var hasPublicKey = false;
+
+            var publicKey = assemblyName.GetPublicKey();
+
+            if ( publicKey != null )
+            {
+                publicKeyOrToken = publicKey.ToImmutableArray();
+                hasPublicKey = true;
+            }
+            else
+            {
+                var publicKeyToken = assemblyName.GetPublicKeyToken();
+
+                if ( publicKeyToken != null )
+                {
+                    publicKeyOrToken = publicKeyToken.ToImmutableArray();
+                }
+            }
+
+            return new AssemblyIdentity(
+                assemblyName.Name,
+                assemblyName.Version,
+                assemblyName.CultureName,
+                publicKeyOrToken,
+                hasPublicKey );
+        }
 
         public static INamedTypeSymbol GetTypeByMetadataNameSafe( this Compilation compilation, string name )
             => compilation.GetTypeByMetadataName( name ) ?? throw new ArgumentOutOfRangeException(

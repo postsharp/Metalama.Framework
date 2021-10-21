@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Code;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 
@@ -19,11 +20,11 @@ namespace Caravela.Framework.Eligibility.Implementation
             this._combinationOperator = combinationOperator;
         }
 
-        public EligibilityValue Ineligibility => EligibilityValue.Ineligible;
+        public EligibleScenarios IneligibleScenarios => EligibleScenarios.None;
 
         public void AddRule( IEligibilityRule<T> rule ) => this._predicates.Add( rule );
 
-        IEligibilityRule<object> IEligibilityBuilder.Build() => new CastEligibilityRule<T, object>( this.Build() );
+        IEligibilityRule<IDeclaration> IEligibilityBuilder.Build() => new CastEligibilityRule<T, object>( this.Build() );
 
         public IEligibilityRule<T> Build()
         {

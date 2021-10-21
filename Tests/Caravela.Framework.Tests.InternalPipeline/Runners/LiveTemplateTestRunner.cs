@@ -30,17 +30,17 @@ namespace Caravela.Framework.Tests.Integration.Runners
             : base( serviceProvider, projectDirectory, metadataReferences, logger ) { }
 
         private protected override async Task RunAsync(
-            ServiceProvider serviceProvider,
             TestInput testInput,
             TestResult testResult,
             Dictionary<string, object?> state )
         {
-            await base.RunAsync( serviceProvider, testInput, testResult, state );
+            await base.RunAsync( testInput, testResult, state );
 
             using var domain = new UnloadableCompileTimeDomain();
+            var serviceProvider = testResult.ProjectScopedServiceProvider;
             var compilation = CompilationModel.CreateInitialInstance( new NullProject( serviceProvider ), testResult.InputCompilation! );
 
-            using var designTimePipeline = new DesignTimeAspectPipeline( serviceProvider, domain, true );
+            using var designTimePipeline = new DesignTimeAspectPipeline( serviceProvider, domain, this.MetadataReferences, true );
 
             Assert.True(
                 designTimePipeline.TryGetConfiguration(
@@ -52,7 +52,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
 
             var partialCompilation = PartialCompilation.CreateComplete( testResult.InputCompilation! );
             var target = compilation.Types.OfName( "TargetClass" ).Single().Methods.OfName( "TargetMethod" ).Single().GetSymbol();
-            var aspectClass = designTimePipeline.AspectClasses!.Single( a => a.DisplayName == "TestAspect" );
+            var aspectClass = designTimePipeline.AspectClasses!.Single( a => a.ShortName == "TestAspect" );
 
             var success = LiveTemplateAspectPipeline.TryExecute(
                 configuration!.ServiceProvider,

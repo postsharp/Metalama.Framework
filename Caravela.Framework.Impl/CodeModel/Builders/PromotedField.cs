@@ -48,5 +48,9 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         }
 
         public override InsertPosition InsertPosition => this._field.ToInsertPosition();
+
+        public override bool IsDesignTime => false;
+
+        protected override bool HasBaseInvoker => true;
     }
 }

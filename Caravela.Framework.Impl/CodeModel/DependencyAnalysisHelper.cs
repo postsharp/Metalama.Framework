@@ -39,6 +39,8 @@ namespace Caravela.Framework.Impl.CodeModel
                 }
             }
 
+            public override void VisitInterfaceDeclaration( InterfaceDeclarationSyntax node ) => this.VisitType( node );
+
             public override void VisitClassDeclaration( ClassDeclarationSyntax node ) => this.VisitType( node );
 
             public override void VisitStructDeclaration( StructDeclarationSyntax node ) => this.VisitType( node );

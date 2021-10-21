@@ -6,7 +6,7 @@ using System.Collections.Immutable;
 
 namespace Caravela.Framework.Impl.Aspects
 {
-    internal interface IAspectInstanceInternal : IAspectInstance
+    internal interface IAspectInstanceInternal : IAspectInstance, IAspectPredecessorImpl
     {
         void Skip();
 

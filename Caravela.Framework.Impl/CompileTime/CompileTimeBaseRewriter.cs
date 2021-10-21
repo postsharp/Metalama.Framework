@@ -14,9 +14,9 @@ namespace Caravela.Framework.Impl.CompileTime
     /// <summary>
     /// A base <see cref="CSharpSyntaxRewriter"/> that stores the <see cref="RunTimeCompilation"/> and the <see cref="SymbolClassifier"/>.
     /// </summary>
-    internal abstract class CompileTimeBaseRewriter : CSharpSyntaxRewriter
+    internal abstract partial class CompileTimeBaseRewriter : CSharpSyntaxRewriter
     {
-        public ISymbolClassifier SymbolClassifier { get; }
+        protected ISymbolClassifier SymbolClassifier { get; }
 
         protected CompileTimeBaseRewriter( Compilation runTimeCompilation, IServiceProvider serviceProvider )
         {
@@ -26,7 +26,11 @@ namespace Caravela.Framework.Impl.CompileTime
 
         protected Compilation RunTimeCompilation { get; }
 
-        protected static MethodDeclarationSyntax WithThrowNotSupportedExceptionBody( MethodDeclarationSyntax method, string message )
+        protected virtual T RewriteThrowNotSupported<T>( T node )
+            where T : SyntaxNode
+            => node;
+
+        protected MethodDeclarationSyntax WithThrowNotSupportedExceptionBody( MethodDeclarationSyntax method, string message )
         {
             // Method does not have a body (e.g. because it's abstract) , so there is nothing to replace.
             if ( method.Body == null && method.ExpressionBody == null )
@@ -35,17 +39,18 @@ namespace Caravela.Framework.Impl.CompileTime
                 throw new ArgumentOutOfRangeException( nameof(method) );
             }
 
-            return method
-                .WithBody( null )
-                .WithExpressionBody( ArrowExpressionClause( GetNotSupportedExceptionExpression( message ) ) )
-                .WithSemicolonToken( Token( SyntaxKind.SemicolonToken ) )
-                .WithModifiers( TokenList( method.Modifiers.Where( m => m.Kind() != SyntaxKind.AsyncKeyword ) ) )
-                .NormalizeWhitespace()
-                .WithLeadingTrivia( method.GetLeadingTrivia() )
-                .WithTrailingTrivia( LineFeed, LineFeed );
+            return this.RewriteThrowNotSupported(
+                method
+                    .WithBody( null )
+                    .WithExpressionBody( ArrowExpressionClause( GetNotSupportedExceptionExpression( message ) ) )
+                    .WithSemicolonToken( Token( SyntaxKind.SemicolonToken ) )
+                    .WithModifiers( TokenList( method.Modifiers.Where( m => m.Kind() != SyntaxKind.AsyncKeyword ) ) )
+                    .NormalizeWhitespace()
+                    .WithLeadingTrivia( method.GetLeadingTrivia() )
+                    .WithTrailingTrivia( LineFeed, LineFeed ) );
         }
 
-        protected static BasePropertyDeclarationSyntax WithThrowNotSupportedExceptionBody( BasePropertyDeclarationSyntax memberDeclaration, string message )
+        protected BasePropertyDeclarationSyntax WithThrowNotSupportedExceptionBody( BasePropertyDeclarationSyntax memberDeclaration, string message )
         {
             if ( memberDeclaration.Modifiers.Any( x => x.Kind() == SyntaxKind.AbstractKeyword ) )
             {
@@ -57,28 +62,30 @@ namespace Caravela.Framework.Impl.CompileTime
             {
                 case PropertyDeclarationSyntax { ExpressionBody: { } } property:
                     // Expression bodied property - change the expression to throw exception.
-                    return property
-                        .WithExpressionBody( property.ExpressionBody?.WithExpression( GetNotSupportedExceptionExpression( message ) ) )
-                        .NormalizeWhitespace()
-                        .WithLeadingTrivia( property.GetLeadingTrivia() )
-                        .WithTrailingTrivia( LineFeed, LineFeed );
+                    return this.RewriteThrowNotSupported(
+                        property
+                            .WithExpressionBody( property.ExpressionBody?.WithExpression( GetNotSupportedExceptionExpression( message ) ) )
+                            .NormalizeWhitespace()
+                            .WithLeadingTrivia( property.GetLeadingTrivia() )
+                            .WithTrailingTrivia( LineFeed, LineFeed ) );
 
                 case PropertyDeclarationSyntax { AccessorList: { } } property:
                     // Property with accessor list - change all accessors to expression bodied which do throw exception, remove initializer.
 
-                    return property
-                        .WithAccessorList(
-                            property.AccessorList!.WithAccessors(
-                                List(
-                                    property.AccessorList.Accessors.Select(
-                                        x => x
-                                            .WithBody( null )
-                                            .WithExpressionBody( ArrowExpressionClause( GetNotSupportedExceptionExpression( message ) ) )
-                                            .WithSemicolonToken( Token( SyntaxKind.SemicolonToken ) ) ) ) ) )
-                        .WithInitializer( null )
-                        .NormalizeWhitespace()
-                        .WithLeadingTrivia( property.GetLeadingTrivia() )
-                        .WithTrailingTrivia( LineFeed, LineFeed );
+                    return this.RewriteThrowNotSupported(
+                        property
+                            .WithAccessorList(
+                                property.AccessorList!.WithAccessors(
+                                    List(
+                                        property.AccessorList.Accessors.Select(
+                                            x => x
+                                                .WithBody( null )
+                                                .WithExpressionBody( ArrowExpressionClause( GetNotSupportedExceptionExpression( message ) ) )
+                                                .WithSemicolonToken( Token( SyntaxKind.SemicolonToken ) ) ) ) ) )
+                            .WithInitializer( null )
+                            .NormalizeWhitespace()
+                            .WithLeadingTrivia( property.GetLeadingTrivia() )
+                            .WithTrailingTrivia( LineFeed, LineFeed ) );
 
                 case IndexerDeclarationSyntax { AccessorList: { } }:
                     throw new AssertionFailedException( "Build-time indexers are not supported." );
@@ -102,20 +109,21 @@ namespace Caravela.Framework.Impl.CompileTime
                 case EventDeclarationSyntax @event:
                     // Event with accessor list.
 
-                    return @event
-                        .WithAccessorList(
-                            @event.AccessorList.AssertNotNull()
-                                .WithAccessors(
-                                    List(
-                                        @event.AccessorList.AssertNotNull()
-                                            .Accessors.Select(
-                                                x => x
-                                                    .WithBody( null )
-                                                    .WithExpressionBody( ArrowExpressionClause( GetNotSupportedExceptionExpression( message ) ) )
-                                                    .WithSemicolonToken( Token( SyntaxKind.SemicolonToken ) ) ) ) ) )
-                        .NormalizeWhitespace()
-                        .WithLeadingTrivia( @event.GetLeadingTrivia() )
-                        .WithTrailingTrivia( LineFeed, LineFeed );
+                    return this.RewriteThrowNotSupported(
+                        @event
+                            .WithAccessorList(
+                                @event.AccessorList.AssertNotNull()
+                                    .WithAccessors(
+                                        List(
+                                            @event.AccessorList.AssertNotNull()
+                                                .Accessors.Select(
+                                                    x => x
+                                                        .WithBody( null )
+                                                        .WithExpressionBody( ArrowExpressionClause( GetNotSupportedExceptionExpression( message ) ) )
+                                                        .WithSemicolonToken( Token( SyntaxKind.SemicolonToken ) ) ) ) ) )
+                            .NormalizeWhitespace()
+                            .WithLeadingTrivia( @event.GetLeadingTrivia() )
+                            .WithTrailingTrivia( LineFeed, LineFeed ) );
 
                 default:
                     throw new AssertionFailedException();

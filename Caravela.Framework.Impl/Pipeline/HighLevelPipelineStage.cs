@@ -54,7 +54,7 @@ namespace Caravela.Framework.Impl.Pipeline
 
             pipelineStepsState.Execute( cancellationToken );
 
-            result = this.GenerateCode( projectConfiguration, input, pipelineStepsState, cancellationToken );
+            result = this.GetStageResult( projectConfiguration, input, pipelineStepsState, cancellationToken );
 
             return true;
         }
@@ -68,7 +68,7 @@ namespace Caravela.Framework.Impl.Pipeline
         /// <param name="pipelineStepResult"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        protected abstract PipelineStageResult GenerateCode(
+        protected abstract PipelineStageResult GetStageResult(
             AspectProjectConfiguration projectConfiguration,
             PipelineStageResult input,
             IPipelineStepsResult pipelineStepResult,

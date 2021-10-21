@@ -48,7 +48,9 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         [Memo]
         public IInvokerFactory<IEventInvoker> Invokers
-            => new InvokerFactory<IEventInvoker>( ( order, invokerOperator ) => new EventInvoker( this, order, invokerOperator ), false );
+            => new InvokerFactory<IEventInvoker>(
+                ( order, invokerOperator ) => new EventInvoker( this, order, invokerOperator ),
+                this.OverriddenEvent != null );
 
         public IEvent? OverriddenEvent { get; set; }
 
@@ -143,6 +145,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public void SetExplicitInterfaceImplementation( IEvent interfaceEvent ) => this.ExplicitInterfaceImplementations = new[] { interfaceEvent };
 
         public override bool IsExplicitInterfaceImplementation => this.ExplicitInterfaceImplementations.Count > 0;
+
+        public override IMember? OverriddenMember => (IMemberImpl?) this.OverriddenEvent;
 
         public IMethod? GetAccessor( MethodKind methodKind )
             => methodKind switch

@@ -9,7 +9,10 @@ using Caravela.Framework.Impl.ReflectionMocks;
 using Caravela.Framework.Impl.Utilities;
 using Caravela.Framework.RunTime;
 using Microsoft.CodeAnalysis;
+using System;
+using System.Collections.Generic;
 using System.Reflection;
+using MethodKind = Caravela.Framework.Code.MethodKind;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
@@ -58,5 +61,29 @@ namespace Caravela.Framework.Impl.CodeModel
         public override bool IsAsync => false;
 
         public override MemberInfo ToMemberInfo() => this.ToFieldOrPropertyInfo();
+
+        public IMethod? GetAccessor( MethodKind methodKind )
+            => methodKind switch
+            {
+                MethodKind.PropertyGet => this.GetMethod,
+                MethodKind.PropertySet => this.SetMethod,
+                _ => throw new ArgumentOutOfRangeException()
+            };
+
+        public IEnumerable<IMethod> Accessors
+        {
+            get
+            {
+                if ( this.GetMethod != null )
+                {
+                    yield return this.GetMethod;
+                }
+
+                if ( this.SetMethod != null )
+                {
+                    yield return this.SetMethod;
+                }
+            }
+        }
     }
 }

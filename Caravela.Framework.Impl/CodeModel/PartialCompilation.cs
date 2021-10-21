@@ -5,7 +5,6 @@ using Caravela.Compiler;
 using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
-using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -19,14 +18,16 @@ namespace Caravela.Framework.Impl.CodeModel
     public abstract partial class PartialCompilation : IPartialCompilation
     {
         /// <summary>
-        /// Gets the compilation with respect to which the <see cref="ModifiedSyntaxTrees"/> has been constructed.
-        /// Typically, this is the argument of the <see cref="CreateComplete"/> or <see cref="CreatePartial(Microsoft.CodeAnalysis.Compilation,Microsoft.CodeAnalysis.SyntaxTree,System.Collections.Immutable.ImmutableArray{Microsoft.CodeAnalysis.ResourceDescription})"/>
+        /// The compilation with respect to which the <see cref="ModifiedSyntaxTrees"/> collection has been constructed.
+        /// Typically, this is the argument of the <see cref="CreateComplete"/> or <see cref="CreatePartial(Microsoft.CodeAnalysis.Compilation,Microsoft.CodeAnalysis.SyntaxTree,System.Collections.Immutable.ImmutableArray{Caravela.Compiler.ManagedResource})"/>
         /// method, ignoring any modification done by <see cref="Update"/>.
         /// </summary>
-        public Compilation InitialCompilation { get; }
+        private readonly Compilation _initialCompilation;
+
+        internal DerivedTypeIndex DerivedTypes { get; }
 
         /// <summary>
-        /// Gets the set of modifications present in the current compilation compared to the <see cref="InitialCompilation"/>.
+        /// Gets the set of modifications present in the current compilation compared to the <see cref="_initialCompilation"/>.
         /// The key of the dictionary is the <see cref="SyntaxTree.FilePath"/> and the value is a <see cref="SyntaxTree"/>
         /// of <see cref="Compilation"/>. 
         /// </summary>
@@ -41,6 +42,8 @@ namespace Caravela.Framework.Impl.CodeModel
         /// Gets the list of syntax trees in the current subset indexed by path.
         /// </summary>
         public abstract ImmutableDictionary<string, SyntaxTree> SyntaxTrees { get; }
+
+        public ImmutableHashSet<INamedTypeSymbol> BaseExternalTypes => this.DerivedTypes.ExternalBaseTypes;
 
         /// <summary>
         /// Gets the types declared in the current subset.
@@ -65,11 +68,12 @@ namespace Caravela.Framework.Impl.CodeModel
         public bool IsEmpty => this.SyntaxTrees.Count == 0;
 
         // Initial constructor.
-        private PartialCompilation( Compilation compilation, ImmutableArray<ResourceDescription> resources )
+        private PartialCompilation( Compilation compilation, DerivedTypeIndex derivedTypeIndex, ImmutableArray<ManagedResource> resources )
         {
-            this.Compilation = this.InitialCompilation = compilation;
+            this.Compilation = this._initialCompilation = compilation;
             this.ModifiedSyntaxTrees = ImmutableDictionary<string, SyntaxTreeModification>.Empty;
             this.Resources = resources;
+            this.DerivedTypes = derivedTypeIndex;
         }
 
         // Incremental constructor.
@@ -77,10 +81,14 @@ namespace Caravela.Framework.Impl.CodeModel
             PartialCompilation baseCompilation,
             IReadOnlyList<SyntaxTreeModification>? modifiedSyntaxTrees,
             IReadOnlyList<SyntaxTree>? addedSyntaxTrees,
-            ImmutableArray<ResourceDescription>? newResources )
+            ImmutableArray<ManagedResource>? newResources )
         {
-            this.InitialCompilation = baseCompilation.InitialCompilation;
+            this._initialCompilation = baseCompilation._initialCompilation;
             var compilation = baseCompilation.Compilation;
+
+            this.DerivedTypes = baseCompilation.DerivedTypes;
+
+            // TODO: accept new relationships to the type index.
 
             var modifiedTreeBuilder = baseCompilation.ModifiedSyntaxTrees.ToBuilder();
 
@@ -124,7 +132,7 @@ namespace Caravela.Framework.Impl.CodeModel
         /// <summary>
         /// Creates a <see cref="PartialCompilation"/> that represents a complete compilation.
         /// </summary>
-        public static PartialCompilation CreateComplete( Compilation compilation, ImmutableArray<ResourceDescription> resources = default )
+        public static PartialCompilation CreateComplete( Compilation compilation, ImmutableArray<ManagedResource> resources = default )
             => new CompleteImpl( compilation, resources );
 
         /// <summary>
@@ -133,7 +141,7 @@ namespace Caravela.Framework.Impl.CodeModel
         public static PartialCompilation CreatePartial(
             Compilation compilation,
             SyntaxTree syntaxTree,
-            ImmutableArray<ResourceDescription> resources = default )
+            ImmutableArray<ManagedResource> resources = default )
         {
             var syntaxTrees = new[] { syntaxTree };
             var closure = GetClosure( compilation, syntaxTrees );
@@ -142,6 +150,7 @@ namespace Caravela.Framework.Impl.CodeModel
                 compilation,
                 closure.Trees.ToImmutableDictionary( t => t.FilePath, t => t ),
                 closure.Types,
+                closure.DerivedTypes,
                 resources );
         }
 
@@ -151,19 +160,15 @@ namespace Caravela.Framework.Impl.CodeModel
         public static PartialCompilation CreatePartial(
             Compilation compilation,
             IReadOnlyList<SyntaxTree> syntaxTrees,
-            ImmutableArray<ResourceDescription> resources = default )
+            ImmutableArray<ManagedResource> resources = default )
         {
-            if ( syntaxTrees.Count == 0 )
-            {
-                throw new ArgumentOutOfRangeException();
-            }
-
             var closure = GetClosure( compilation, syntaxTrees );
 
             return new PartialImpl(
                 compilation,
                 closure.Trees.ToImmutableDictionary( t => t.FilePath, t => t ),
                 closure.Types.ToImmutableHashSet(),
+                closure.DerivedTypes,
                 resources );
         }
 
@@ -172,10 +177,10 @@ namespace Caravela.Framework.Impl.CodeModel
             IReadOnlyList<SyntaxTree>? additions )
             => this.Update( modifications, additions );
 
-        public IPartialCompilation WithAdditionalResources( params ResourceDescription[] resources )
+        public IPartialCompilation WithAdditionalResources( params ManagedResource[] resources )
             => this.Update( null, null, this.Resources.AddRange( resources ) );
 
-        public ImmutableArray<ResourceDescription> Resources { get; }
+        public ImmutableArray<ManagedResource> Resources { get; }
 
         /// <summary>
         ///  Adds and replaces syntax trees of the current <see cref="PartialCompilation"/> and returns a new <see cref="PartialCompilation"/>
@@ -184,19 +189,20 @@ namespace Caravela.Framework.Impl.CodeModel
         public abstract PartialCompilation Update(
             IReadOnlyList<SyntaxTreeModification>? replacedTrees = null,
             IReadOnlyList<SyntaxTree>? addedTrees = null,
-            ImmutableArray<ResourceDescription>? resources = null );
+            ImmutableArray<ManagedResource>? resources = null );
 
         /// <summary>
         /// Gets a closure of the syntax trees declaring all base types and interfaces of all types declared in input syntax trees.
         /// </summary>
-        private static (ImmutableHashSet<INamedTypeSymbol> Types, ImmutableHashSet<SyntaxTree> Trees) GetClosure(
-            Compilation compilation,
-            IReadOnlyList<SyntaxTree> syntaxTrees )
+        private static (ImmutableHashSet<INamedTypeSymbol> Types, ImmutableHashSet<SyntaxTree> Trees,
+            DerivedTypeIndex DerivedTypes )
+            GetClosure( Compilation compilation, IReadOnlyList<SyntaxTree> syntaxTrees )
         {
             var assembly = compilation.Assembly;
 
             var types = ImmutableHashSet.CreateBuilder<INamedTypeSymbol>( SymbolEqualityComparer.Default );
             var trees = ImmutableHashSet.CreateBuilder<SyntaxTree>();
+            var derivedTypesBuilder = new DerivedTypeIndex.Builder( compilation );
 
             void AddTypeRecursive( INamedTypeSymbol type )
             {
@@ -205,13 +211,15 @@ namespace Caravela.Framework.Impl.CodeModel
                     return;
                 }
 
-                if ( !SymbolEqualityComparer.Default.Equals( type.ContainingAssembly, assembly ) )
-                {
-                    // The type is defined in a different assembly.
-                    return;
-                }
+                var isExternal = !SymbolEqualityComparer.Default.Equals( type.ContainingAssembly, assembly );
 
-                if ( types.Add( type ) )
+                if ( isExternal )
+                {
+                    // If the type is not defined in the current assembly, analyze it using the DerivedTypeIndexBuilder so that
+                    // it does not get included in the set of types in the current partial compilation.
+                    derivedTypesBuilder.AnalyzeType( type );
+                }
+                else if ( types.Add( type ) )
                 {
                     // Find relevant syntax trees
                     foreach ( var syntaxReference in type.DeclaringSyntaxReferences )
@@ -220,14 +228,16 @@ namespace Caravela.Framework.Impl.CodeModel
                     }
 
                     // Add base types recursively.
-                    if ( type.BaseType != null && SymbolEqualityComparer.Default.Equals( type.ContainingAssembly, type.BaseType.ContainingAssembly ) )
+                    if ( type.BaseType != null )
                     {
-                        AddTypeRecursive( type.BaseType );
+                        derivedTypesBuilder.AddDerivedType( type.BaseType.OriginalDefinition, type );
+                        AddTypeRecursive( type.BaseType.OriginalDefinition );
                     }
 
                     foreach ( var interfaceImpl in type.Interfaces )
                     {
-                        AddTypeRecursive( interfaceImpl );
+                        derivedTypesBuilder.AddDerivedType( interfaceImpl.OriginalDefinition, type );
+                        AddTypeRecursive( interfaceImpl.OriginalDefinition );
                     }
                 }
                 else
@@ -253,7 +263,7 @@ namespace Caravela.Framework.Impl.CodeModel
                 }
             }
 
-            return (types.ToImmutable(), trees.ToImmutable());
+            return (types.ToImmutable(), trees.ToImmutable(), derivedTypesBuilder.ToImmutable());
         }
 
         public ImmutableArray<SyntaxTreeTransformation> ToTransformations()

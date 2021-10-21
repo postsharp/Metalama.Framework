@@ -8,21 +8,20 @@ namespace Caravela.Framework.Tests.Integration.Tests.Aspects.Fabrics.TransitiveP
 {
     public class TransitiveFabric : ITransitiveProjectFabric
     {
-        public void AmendProject( IProjectAmender builder )
+        public void AmendProject( IProjectAmender amender )
         {
-            var configuration = builder.Project.Data<Configuration>();
+            var configuration = amender.Project.Data<Configuration>();
 
-            // Capture the message outside of the lambda otherwise it gets evaluated later.
+            // Capture the message outside of the lambda otherwise it gets evaluated later and we don't test that the transitive fabric runs
+            // after the non-transitive one.
             var message = configuration.Message;
-            builder.WithMembers( c => c.Types.SelectMany( t => t.Methods ) ).AddAspect( m => new Aspect( message ) );
+            amender.WithMembers( c => c.Types.SelectMany( t => t.Methods ) ).AddAspect( m => new Aspect( message ) );
         }
     }
 
-    public class Configuration : IProjectData
+    public class Configuration : ProjectData
     {
         public string Message { get; set; } = "Not Configured";
-
-        public void Initialize( IProject project ) { }
     }
 
     public class Aspect : OverrideMethodAspect

@@ -7,6 +7,7 @@ using Caravela.Framework.Impl.CodeModel.Collections;
 using Caravela.Framework.Impl.CodeModel.References;
 using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
+using System.Collections.Generic;
 using System.Linq;
 using RefKind = Microsoft.CodeAnalysis.RefKind;
 
@@ -34,6 +35,9 @@ namespace Caravela.Framework.Impl.CodeModel
         public override ISymbol? Symbol => null;
 
         public override DeclarationRef<IDeclaration> ToRef() => DeclarationRef.ReturnParameter( this.DeclaringMethod.MethodSymbol );
+
+        public override IEnumerable<IDeclaration> GetDerivedDeclarations( bool deep = true )
+            => this.DeclaringMember.GetContainedDeclarations().Select( d => ((IMethod) d).ReturnParameter );
 
         [Memo]
         public override IDeclaration OriginalDefinition => ((Method) this.DeclaringMember.GetOriginalDefinition()).ReturnParameter;

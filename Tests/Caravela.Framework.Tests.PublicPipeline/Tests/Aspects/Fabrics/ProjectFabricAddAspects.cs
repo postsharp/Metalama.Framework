@@ -8,9 +8,9 @@ namespace Caravela.Framework.Tests.PublicPipeline.Aspects.Fabrics.ProjectFabricA
 {
     internal class Fabric : IProjectFabric
     {
-        public void AmendProject( IProjectAmender builder )
+        public void AmendProject( IProjectAmender amender )
         {
-            builder
+            amender
                 .WithMembers( c => c.Types.SelectMany( t => t.Methods ).Where( m => m.ReturnType.Is( typeof(string) ) ) )
                 .AddAspect<Aspect>();
         }
@@ -21,7 +21,7 @@ namespace Caravela.Framework.Tests.PublicPipeline.Aspects.Fabrics.ProjectFabricA
         public override dynamic? OverrideMethod()
         {
             Console.WriteLine( "overridden" );
-            Console.WriteLine( meta.AspectInstance.Predecessors.Single().Instance.ToString() );
+            Console.WriteLine( ((IFabricInstance) meta.AspectInstance.Predecessors.Single().Instance).Fabric.ToString() );
 
             return meta.Proceed();
         }

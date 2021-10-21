@@ -8,6 +8,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Linq;
+using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.CompileTime
 {
@@ -72,14 +73,44 @@ namespace Caravela.Compiler
                 return node;
             }
 
-            return base.VisitClassDeclaration( node );
+            // In classes that contain compile-time-only code, we should disable a few warnings:
+            // - warning CS0067: X is never used (because method bodies have been replaced by 'throw')
+
+            var leadingTrivia = node.GetLeadingTrivia();
+            var trailingTrivia = node.GetTrailingTrivia();
+
+            if ( symbol.GetMembers().Any( this.MustReplaceByThrow ) )
+            {
+                var errorCodes = SingletonSeparatedList<ExpressionSyntax>( IdentifierName( "CS0067" ) );
+
+                leadingTrivia = leadingTrivia.Insert(
+                    0,
+                    Trivia(
+                        PragmaWarningDirectiveTrivia(
+                                Token( SyntaxKind.DisableKeyword ),
+                                true )
+                            .WithErrorCodes( errorCodes )
+                            .NormalizeWhitespace() ) );
+
+                trailingTrivia = trailingTrivia.Add(
+                    Trivia(
+                        PragmaWarningDirectiveTrivia(
+                                Token( SyntaxKind.RestoreKeyword ),
+                                true )
+                            .WithErrorCodes( errorCodes )
+                            .NormalizeWhitespace() ) );
+            }
+
+            return base.VisitClassDeclaration( node )!
+                .WithLeadingTrivia( leadingTrivia )
+                .WithTrailingTrivia( trailingTrivia );
         }
 
         public override SyntaxNode VisitMethodDeclaration( MethodDeclarationSyntax node )
         {
             if ( this.MustReplaceByThrow( node ) )
             {
-                return WithThrowNotSupportedExceptionBody( node, "Compile-time only code cannot be called at run-time." );
+                return this.WithThrowNotSupportedExceptionBody( node, "Compile-time only code cannot be called at run-time." );
             }
 
             return node;
@@ -93,8 +124,8 @@ namespace Caravela.Compiler
         }
 
         private bool MustReplaceByThrow( ISymbol symbol )
-            => this.SymbolClassifier.GetTemplatingScope( symbol ) == TemplatingScope.CompileTimeOnly ||
-               !this.SymbolClassifier.GetTemplateInfo( symbol ).IsNone;
+            => !symbol.IsAbstract && (this.SymbolClassifier.GetTemplatingScope( symbol ) == TemplatingScope.CompileTimeOnly ||
+                                      !this.SymbolClassifier.GetTemplateInfo( symbol ).IsNone);
 
         public override SyntaxNode? VisitIndexerDeclaration( IndexerDeclarationSyntax node )
         {
@@ -128,7 +159,7 @@ namespace Caravela.Compiler
                     return node;
                 }
 
-                return WithThrowNotSupportedExceptionBody( node, "Compile-time only code cannot be called at run-time." );
+                return this.WithThrowNotSupportedExceptionBody( node, "Compile-time only code cannot be called at run-time." );
             }
 
             return node;
@@ -138,7 +169,7 @@ namespace Caravela.Compiler
         {
             if ( this.MustReplaceByThrow( node ) )
             {
-                return WithThrowNotSupportedExceptionBody( node, "Compile-time only code cannot be called at run-time." );
+                return this.WithThrowNotSupportedExceptionBody( node, "Compile-time only code cannot be called at run-time." );
             }
 
             return node;

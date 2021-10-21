@@ -74,6 +74,7 @@ namespace Caravela.Framework.Impl.Aspects
         public IDeclarationSelection<TMember> WithMembers<TMember>( Func<T, IEnumerable<TMember>> selector )
             where TMember : class, IDeclaration
             => new DeclarationSelection<TMember>(
+                this.Target,
                 this._predecessor,
                 this.AddAspectSource,
                 compilation =>

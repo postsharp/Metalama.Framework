@@ -6,6 +6,7 @@ using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Serialization;
 using Caravela.Framework.Impl.Utilities;
 using Caravela.Framework.Project;
+using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -150,12 +151,13 @@ namespace Caravela.Framework.Impl.Pipeline
         /// <summary>
         /// Adds the services that have the same scope as the project processing itself.
         /// </summary>
-        /// <returns></returns>
-        public ServiceProvider WithProjectScopedServices()
+        /// <param name="metadataReferences"></param>
+        /// <returns>A list of resolved metadata references for the current project.</returns>
+        public ServiceProvider WithProjectScopedServices( IEnumerable<MetadataReference> metadataReferences )
         {
             // ReflectionMapperFactory cannot be a global service because it keeps a reference from compilations to types of the
             // user assembly. When we need to unload the user assembly, we first need to unload the ReflectionMapperFactory.
-            var serviceProvider = this.WithServices( new ReflectionMapperFactory() );
+            var serviceProvider = this.WithServices( new ReflectionMapperFactory(), new AssemblyLocator( metadataReferences ) );
 
             serviceProvider = serviceProvider.WithServices( new SyntaxSerializationService( serviceProvider ), new CompileTimeTypeFactory() );
             serviceProvider = serviceProvider.WithServices( new UserCodeExecutionContext( serviceProvider ), new SystemTypeResolver( serviceProvider ) );

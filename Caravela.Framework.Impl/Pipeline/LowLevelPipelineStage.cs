@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Compiler;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Impl.Aspects;
 using Caravela.Framework.Impl.CodeModel;
@@ -8,7 +9,6 @@ using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Sdk;
 using Caravela.Framework.Impl.Utilities;
 using Caravela.Framework.Project;
-using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -55,7 +55,7 @@ namespace Caravela.Framework.Impl.Pipeline
                 return true;
             }
 
-            var resources = new List<ResourceDescription>();
+            var resources = new List<ManagedResource>();
 
             var context = new AspectWeaverContext(
                 this._aspectClass,
@@ -74,7 +74,7 @@ namespace Caravela.Framework.Impl.Pipeline
             catch ( Exception ex )
             {
                 diagnostics.Report(
-                    GeneralDiagnosticDescriptors.ExceptionInWeaver.CreateDiagnostic( null, (this._aspectClass.DisplayName, ex.ToDiagnosticString()) ) );
+                    GeneralDiagnosticDescriptors.ExceptionInWeaver.CreateDiagnostic( null, (this._aspectClass.ShortName, ex.ToDiagnosticString()) ) );
 
                 result = null;
 

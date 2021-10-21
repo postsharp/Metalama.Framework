@@ -4,6 +4,7 @@
 using Caravela.Compiler;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Impl.AspectOrdering;
+using Caravela.Framework.Impl.Aspects;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
@@ -45,16 +46,16 @@ namespace Caravela.Framework.Impl.Pipeline
         public bool TryExecute(
             IDiagnosticAdder diagnosticAdder,
             Compilation compilation,
-            ImmutableArray<ResourceDescription> resources,
+            ImmutableArray<ManagedResource> resources,
             CancellationToken cancellationToken,
             out ImmutableArray<SyntaxTreeTransformation> syntaxTreeTransformations,
-            out ImmutableArray<ResourceDescription> additionalResources,
+            out ImmutableArray<ManagedResource> additionalResources,
             [NotNullWhen( true )] out Compilation? resultingCompilation )
         {
             if ( !this.ProjectOptions.IsFrameworkEnabled )
             {
                 syntaxTreeTransformations = ImmutableArray<SyntaxTreeTransformation>.Empty;
-                additionalResources = ImmutableArray<ResourceDescription>.Empty;
+                additionalResources = ImmutableArray<ManagedResource>.Empty;
                 resultingCompilation = compilation;
 
                 return true;
@@ -100,7 +101,7 @@ namespace Caravela.Framework.Impl.Pipeline
                 // Add managed resources.
                 if ( resultPartialCompilation.Resources.IsDefaultOrEmpty )
                 {
-                    additionalResources = ImmutableArray<ResourceDescription>.Empty;
+                    additionalResources = ImmutableArray<ManagedResource>.Empty;
                 }
                 else
                 {
@@ -110,6 +111,14 @@ namespace Caravela.Framework.Impl.Pipeline
                 if ( configuration.CompileTimeProject is { IsEmpty: false } )
                 {
                     additionalResources = additionalResources.Add( configuration.CompileTimeProject.ToResource() );
+                }
+
+                // Add the index of inherited aspects.
+                if ( result.ExternallyInheritableAspects.Length > 0 )
+                {
+                    var inheritedAspectsManifest = InheritableAspectsManifest.Create( result.ExternallyInheritableAspects );
+                    var resource = inheritedAspectsManifest.ToResource();
+                    additionalResources = additionalResources.Add( resource );
                 }
 
                 resultPartialCompilation = (PartialCompilation) RunTimeAssemblyRewriter.Rewrite( resultPartialCompilation, this.ServiceProvider );

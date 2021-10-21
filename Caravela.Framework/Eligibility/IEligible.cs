@@ -3,14 +3,14 @@
 
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
-using System;
+using System.Runtime.Serialization;
 
 namespace Caravela.Framework.Eligibility
 {
     /// <summary>
-    /// (Not implemented.)
+    /// An interface that allows aspect to specify to which declarations they are allowed to be applied.
     /// </summary>
-    [Obsolete( "Not implemented." )]
+    /// <typeparam name="T"></typeparam>
     [CompileTimeOnly]
     public interface IEligible<in T>
         where T : class, IDeclaration
@@ -22,6 +22,12 @@ namespace Caravela.Framework.Eligibility
         /// </summary>
         /// <param name="builder">An object that allows the aspect to configure characteristics like
         /// description, dependencies, or layers.</param>
+        /// <remarks>
+        /// Do not reference instance class members in your implementation of  <see cref="BuildEligibility"/>.
+        /// Indeed, this method is called on an instance obtained using <see cref="FormatterServices.GetUninitializedObject"/>, that is,
+        /// <i>without invoking the class constructor</i>.
+        /// </remarks>
+        /// <seealso href="@eligibility"/>
         void BuildEligibility( IEligibilityBuilder<T> builder )
 #if NET5_0
         { }

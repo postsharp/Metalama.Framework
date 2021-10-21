@@ -68,7 +68,8 @@ namespace Caravela.Framework.Impl.DesignTime
 
                 // Execute the pipeline.
 
-                var eligibleAspects = DesignTimeAspectPipelineCache.Instance.GetEligibleAspects( symbol, buildOptions, cancellationToken );
+                var compilation = await context.Document.Project.GetCompilationAsync( cancellationToken );
+                var eligibleAspects = DesignTimeAspectPipelineFactory.Instance.GetEligibleAspects( compilation!, symbol, buildOptions, cancellationToken );
 
                 var aspectActions = ImmutableArray.CreateBuilder<CodeAction>();
                 var liveTemplatesActions = ImmutableArray.CreateBuilder<CodeAction>();
@@ -129,7 +130,7 @@ namespace Caravela.Framework.Impl.DesignTime
                 return targetDocument.Project.Solution;
             }
 
-            if ( DesignTimeAspectPipelineCache.Instance.TryApplyAspectToCode(
+            if ( DesignTimeAspectPipelineFactory.Instance.TryApplyAspectToCode(
                 projectOptions,
                 aspect,
                 compilation,

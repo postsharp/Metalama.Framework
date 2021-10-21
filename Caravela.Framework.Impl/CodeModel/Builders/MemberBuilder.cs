@@ -8,7 +8,7 @@ using Caravela.Framework.Impl.Advices;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
-    internal abstract class MemberBuilder : MemberOrNamedTypeBuilder, IMemberBuilder
+    internal abstract class MemberBuilder : MemberOrNamedTypeBuilder, IMemberBuilder, IMemberImpl
     {
         protected MemberBuilder( Advice parentAdvice, INamedType declaringType, string name ) : base( parentAdvice, declaringType, name ) { }
 
@@ -23,6 +23,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public bool IsAsync { get; set; }
 
         public bool IsOverride { get; set; }
+
+        public override bool IsDesignTime => !this.IsOverride;
 
         public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
             => this.DeclaringType.ToDisplayString( format, context ) + "." + this.Name;
@@ -49,5 +51,9 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                 this.IsVirtual = templateAttribute.GetIsVirtual().HasValue;
             }
         }
+
+        public abstract IMember? OverriddenMember { get; }
+
+        public override bool CanBeInherited => this.IsVirtual && !this.IsSealed && ((IDeclarationImpl) this.DeclaringType).CanBeInherited;
     }
 }

@@ -44,7 +44,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         ICompilation ICompilationElement.Compilation => this.Compilation;
 
-        public override IDeclaration? ContainingDeclaration { get; }
+        public override IDeclaration ContainingDeclaration { get; }
 
         public override DeclarationKind DeclarationKind => DeclarationKind.TypeParameter;
 
@@ -60,5 +60,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         {
             return this.Name;
         }
+
+        public override bool CanBeInherited => ((IDeclarationImpl) this.ContainingDeclaration).CanBeInherited;
     }
 }

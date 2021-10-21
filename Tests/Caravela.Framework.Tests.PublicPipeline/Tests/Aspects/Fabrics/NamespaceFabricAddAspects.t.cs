@@ -6,17 +6,21 @@ using Caravela.Framework.Fabrics;
 
 namespace Caravela.Framework.Tests.PublicPipeline.Aspects.Fabrics.NamespaceFabricAddAspects
 {
+#pragma warning disable CS0067
     internal class Fabric : INamespaceFabric
     {
-        public void AmendNamespace(INamespaceAmender builder) => throw new System.NotSupportedException("Compile-time only code cannot be called at run-time.");
+        public void AmendNamespace(INamespaceAmender amender) => throw new System.NotSupportedException("Compile-time only code cannot be called at run-time.");
 
     }
+#pragma warning restore CS0067
+#pragma warning disable CS0067
 
     internal class Aspect : OverrideMethodAspect
     {
         public override dynamic? OverrideMethod() => throw new System.NotSupportedException("Compile-time only code cannot be called at run-time.");
 
     }
+#pragma warning restore CS0067
 
     internal class TargetCode
     {

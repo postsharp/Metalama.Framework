@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Compiler;
 using Caravela.Framework.Fabrics;
 using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.Diagnostics;
@@ -213,20 +214,17 @@ namespace Caravela.Framework.Impl.CompileTime
         /// Returns a managed resource that contains the serialized project.
         /// </summary>
         /// <returns></returns>
-        public ResourceDescription ToResource()
+        public ManagedResource ToResource()
         {
             this.AssertNotEmpty();
 
-            return new ResourceDescription(
-                CompileTimeConstants.ResourceName,
-                () =>
-                {
-                    var stream = new MemoryStream();
-                    this.Serialize( stream );
-                    _ = stream.Seek( 0, SeekOrigin.Begin );
+            var stream = new MemoryStream();
+            this.Serialize( stream );
+            var bytes = stream.ToArray();
 
-                    return stream;
-                },
+            return new ManagedResource(
+                CompileTimeConstants.CompileTimeProjectResourceName,
+                bytes,
                 true );
         }
 

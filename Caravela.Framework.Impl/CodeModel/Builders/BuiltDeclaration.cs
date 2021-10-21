@@ -8,6 +8,8 @@ using Caravela.Framework.Impl.CodeModel.Collections;
 using Caravela.Framework.Impl.CodeModel.References;
 using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
+using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 
@@ -33,6 +35,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public IDiagnosticLocation? DiagnosticLocation => this.Builder.DiagnosticLocation;
 
+        public IAssembly DeclaringAssembly => this.Builder.DeclaringAssembly;
+
         DeclarationOrigin IDeclaration.Origin => DeclarationOrigin.Aspect;
 
         public IDeclaration? ContainingDeclaration => this.Builder.ContainingDeclaration;
@@ -56,6 +60,10 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public DeclarationRef<IDeclaration> ToRef() => DeclarationRef.FromBuilder( this.Builder );
 
         public ImmutableArray<SyntaxReference> DeclaringSyntaxReferences => this.Builder.DeclaringSyntaxReferences;
+
+        public bool CanBeInherited => this.Builder.CanBeInherited;
+
+        public IEnumerable<IDeclaration> GetDerivedDeclarations( bool deep = true ) => throw new NotImplementedException();
 
         public override string ToString() => this.Builder.ToString();
 

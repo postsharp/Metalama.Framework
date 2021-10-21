@@ -3,8 +3,6 @@
 
 using System;
 
-#pragma warning disable 618
-
 namespace Caravela.Framework.Eligibility.Implementation
 {
     [Obsolete( "Not implemented." )]
@@ -19,7 +17,7 @@ namespace Caravela.Framework.Eligibility.Implementation
             this._inner = inner;
         }
 
-        public EligibilityValue GetEligibility( TOut obj )
+        public EligibleScenarios GetEligibility( TOut obj )
         {
             if ( obj is TIn convertedMember )
             {
@@ -27,12 +25,12 @@ namespace Caravela.Framework.Eligibility.Implementation
             }
             else
             {
-                return EligibilityValue.Ineligible;
+                return EligibleScenarios.None;
             }
         }
 
         public FormattableString? GetIneligibilityJustification(
-            EligibilityValue requestedEligibility,
+            EligibleScenarios requestedEligibility,
             IDescribedObject<TOut> describedObject )
         {
             if ( describedObject.Object is TIn )

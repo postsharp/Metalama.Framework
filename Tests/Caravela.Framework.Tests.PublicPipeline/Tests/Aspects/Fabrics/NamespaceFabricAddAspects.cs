@@ -8,9 +8,9 @@ namespace Caravela.Framework.Tests.PublicPipeline.Aspects.Fabrics.NamespaceFabri
 {
     internal class Fabric : INamespaceFabric
     {
-        public void AmendNamespace( INamespaceAmender builder )
+        public void AmendNamespace( INamespaceAmender amender )
         {
-            builder
+            amender
                 .WithMembers( c => c.AllTypes
                     .SelectMany( t => t.Methods )
                     .Where( m => m.ReturnType.Is( typeof(string) ) ) )

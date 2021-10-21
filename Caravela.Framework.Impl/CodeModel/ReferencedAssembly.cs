@@ -2,7 +2,10 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
+using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
@@ -21,6 +24,13 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public override ISymbol Symbol => this.AssemblySymbol;
 
-        public string? Name => this.AssemblySymbol.Name;
+        public override bool CanBeInherited => false;
+
+        public override IEnumerable<IDeclaration> GetDerivedDeclarations( bool deep = true ) => Enumerable.Empty<IDeclaration>();
+
+        bool IAssembly.IsExternal => true;
+
+        [Memo]
+        public IAssemblyIdentity Identity => new AssemblyIdentityModel( this.AssemblySymbol.Identity );
     }
 }

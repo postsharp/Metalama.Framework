@@ -1,9 +1,8 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Code;
 using System;
-
-#pragma warning disable 618 // Not implemented.
 
 namespace Caravela.Framework.Eligibility.Implementation
 {
@@ -34,7 +33,7 @@ namespace Caravela.Framework.Eligibility.Implementation
             }
         }
 
-        public EligibilityValue Ineligibility => this._parent.Ineligibility;
+        public EligibleScenarios IneligibleScenarios => this._parent.IneligibleScenarios;
 
         public void AddRule( IEligibilityRule<TChild> rule )
         {
@@ -42,7 +41,7 @@ namespace Caravela.Framework.Eligibility.Implementation
         }
 
         // This method is not supported because the predicates are added to the parent. This class is never used alone. 
-        IEligibilityRule<object> IEligibilityBuilder.Build() => throw new NotSupportedException();
+        IEligibilityRule<IDeclaration> IEligibilityBuilder.Build() => throw new NotSupportedException();
 
         private class ChildRule : IEligibilityRule<TParent>
         {
@@ -55,18 +54,18 @@ namespace Caravela.Framework.Eligibility.Implementation
                 this._childRule = childRule;
             }
 
-            public EligibilityValue GetEligibility( TParent obj )
+            public EligibleScenarios GetEligibility( TParent obj )
             {
                 if ( this._parent._canGetChild != null && !this._parent._canGetChild( obj ) )
                 {
-                    return this._parent.Ineligibility;
+                    return this._parent.IneligibleScenarios;
                 }
 
                 return this._childRule.GetEligibility( this._parent._getChild( obj ) );
             }
 
             public FormattableString? GetIneligibilityJustification(
-                EligibilityValue requestedEligibility,
+                EligibleScenarios requestedEligibility,
                 IDescribedObject<TParent> describedObject )
             {
                 if ( this._parent._canGetChild != null && !this._parent._canGetChild( describedObject.Object ) )
@@ -74,11 +73,12 @@ namespace Caravela.Framework.Eligibility.Implementation
                     return this._parent._cannotGetChildJustification!( describedObject );
                 }
 
+                var child = this._parent._getChild( describedObject.Object );
+
                 return this._childRule.GetIneligibilityJustification(
                     requestedEligibility,
                     new DescribedObject<TChild>(
-                        this._parent._getChild( describedObject.Object ),
-                        describedObject.FormatProvider,
+                        child,
                         this._parent._getChildDescription( describedObject ) ) );
             }
         }

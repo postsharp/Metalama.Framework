@@ -31,6 +31,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public override bool IsExplicitInterfaceImplementation => false;
 
+        public override IMember? OverriddenMember => null;
+
         [Memo]
         public IInvokerFactory<IFieldOrPropertyInvoker> Invokers
             => new InvokerFactory<IFieldOrPropertyInvoker>( ( order, invokerOperator ) => new FieldOrPropertyInvoker( this, order, invokerOperator ), false );

@@ -39,9 +39,7 @@ namespace Caravela.Framework.Aspects
     /// of declarations the aspect can be added.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-#pragma warning disable 618
     public interface IAspect<in T> : IAspect, IEligible<T>
-#pragma warning restore 618
         where T : class, IDeclaration
     {
         /// <summary>

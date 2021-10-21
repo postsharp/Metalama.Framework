@@ -6,11 +6,12 @@ return a;};
         string Method2(string s) {
     global::System.Console.WriteLine("overridden");
 return s;};
+#pragma warning disable CS0067
         
         
         class Fabric : ITypeFabric
         {
-            public void AmendType(ITypeAmender builder) => throw new System.NotSupportedException("Compile-time only code cannot be called at run-time.");
+            public void AmendType(ITypeAmender amender) => throw new System.NotSupportedException("Compile-time only code cannot be called at run-time.");
 
             
             [Template]
@@ -18,5 +19,6 @@ dynamic? Template() => throw new System.NotSupportedException("Compile-time only
 
         
         }
+#pragma warning restore CS0067
         
     }

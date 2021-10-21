@@ -6,8 +6,6 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Eligibility;
 using System;
 
-#pragma warning disable 618 // Not implemented
-
 namespace Caravela.Framework.Validation
 {
     /// <summary>

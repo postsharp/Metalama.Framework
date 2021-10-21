@@ -10,6 +10,7 @@ using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Transformations;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 
@@ -27,12 +28,15 @@ namespace Caravela.Framework.Impl.Pipeline
         private readonly PipelineStepIdComparer _comparer;
         private readonly UserDiagnosticSink _diagnostics;
         private readonly List<INonObservableTransformation> _nonObservableTransformations = new();
+        private readonly List<AttributeAspectInstance> _inheritableAspectInstances = new();
         private readonly OverflowAspectSource _overflowAspectSource = new();
         private PipelineStep? _currentStep;
 
         public CompilationModel Compilation { get; private set; }
 
         public IReadOnlyList<INonObservableTransformation> NonObservableTransformations => this._nonObservableTransformations;
+
+        public ImmutableArray<AttributeAspectInstance> InheritableAspectInstances => this._inheritableAspectInstances.ToImmutableArray();
 
         public ImmutableUserDiagnosticList Diagnostics => this._diagnostics.ToImmutable();
 
@@ -131,7 +135,7 @@ namespace Caravela.Framework.Impl.Pipeline
                             this._diagnostics.Report(
                                 GeneralDiagnosticDescriptors.CannotAddChildAspectToPreviousPipelineStep.CreateDiagnostic(
                                     this._currentStep!.AspectLayer.AspectClass.DiagnosticLocation,
-                                    (this._currentStep.AspectLayer.AspectClass.DisplayName, aspectType.DisplayName) ) );
+                                    (this._currentStep.AspectLayer.AspectClass.ShortName, aspectType.ShortName) ) );
 
                             success = false;
 
@@ -198,7 +202,7 @@ namespace Caravela.Framework.Impl.Pipeline
                     this._diagnostics.Report(
                         GeneralDiagnosticDescriptors.CannotAddAdviceToPreviousPipelineStep.CreateDiagnostic(
                             this._currentStep.AspectLayer.AspectClass.DiagnosticLocation,
-                            (this._currentStep.AspectLayer.AspectClass.DisplayName, advice.TargetDeclaration) ) );
+                            (this._currentStep.AspectLayer.AspectClass.ShortName, advice.TargetDeclaration) ) );
 
                     success = false;
 
@@ -225,6 +229,11 @@ namespace Caravela.Framework.Impl.Pipeline
 
                 ((InitializeAspectInstancesPipelineStep) step).AddAspectInstance( aspectInstance );
             }
+        }
+
+        public void AddInheritableAspectInstances( IReadOnlyList<AttributeAspectInstance> inheritedAspectInstances )
+        {
+            this._inheritableAspectInstances.AddRange( inheritedAspectInstances );
         }
 
         public void AddDiagnostics( IEnumerable<Diagnostic> diagnostics, IEnumerable<ScopedSuppression> suppressions )

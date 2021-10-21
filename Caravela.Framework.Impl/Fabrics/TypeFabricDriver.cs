@@ -8,6 +8,7 @@ using Caravela.Framework.Impl.Aspects;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Pipeline;
 using Microsoft.CodeAnalysis;
+using System;
 
 namespace Caravela.Framework.Impl.Fabrics
 {
@@ -23,11 +24,11 @@ namespace Caravela.Framework.Impl.Fabrics
 
         private ISymbol TargetSymbol => this.FabricSymbol.ContainingType;
 
-        public override void Execute( IAspectBuilderInternal aspectBuilder, FabricTemplateClass templateClass )
+        public override void Execute( IAspectBuilderInternal aspectBuilder, FabricTemplateClass templateClass, FabricInstance fabricInstance )
         {
             // Type fabrics execute as aspects, called from FabricAspectClass.
             var templateInstance = new TemplateClassInstance( this.Fabric, templateClass );
-            var builder = new Builder( this, (INamedType) aspectBuilder.Target, this.Configuration, aspectBuilder, templateInstance );
+            var builder = new Builder( (INamedType) aspectBuilder.Target, this.Configuration, aspectBuilder, templateInstance, fabricInstance );
             ((ITypeFabric) this.Fabric).AmendType( builder );
         }
 
@@ -35,14 +36,16 @@ namespace Caravela.Framework.Impl.Fabrics
 
         public override IDeclaration GetTarget( CompilationModel compilation ) => compilation.Factory.GetNamedType( (INamedTypeSymbol) this.TargetSymbol );
 
+        public override FormattableString FormatPredecessor() => $"type fabric on '{this.TargetSymbol}'";
+
         private class Builder : BaseBuilder<INamedType>, ITypeAmender
         {
             public Builder(
-                FabricDriver parent,
                 INamedType namedType,
                 AspectProjectConfiguration context,
                 IAspectBuilderInternal aspectBuilder,
-                TemplateClassInstance templateClassInstance ) : base( parent, namedType, context, aspectBuilder )
+                TemplateClassInstance templateClassInstance,
+                FabricInstance fabricInstance ) : base( namedType, context, aspectBuilder, fabricInstance )
             {
                 this.Advices = aspectBuilder.AdviceFactory.WithTemplateClassInstance( templateClassInstance );
             }

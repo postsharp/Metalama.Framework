@@ -26,7 +26,7 @@ namespace Caravela.Framework.Impl.Linking
         {
             private readonly CompilationModel _compilation;
             private readonly ImmutableDictionary<AspectLayerId, OrderedAspectLayer> _orderedAspectLayers;
-            private readonly ImmutableMultiValueDictionary<IDeclaration, ScopedSuppression> _diagnosticSuppressions;
+            private readonly ImmutableDictionaryOfArray<IDeclaration, ScopedSuppression> _diagnosticSuppressions;
             private readonly SyntaxTransformationCollection _introducedMemberCollection;
 
             // Maps a diagnostic id to the number of times it has been suppressed.
@@ -34,7 +34,7 @@ namespace Caravela.Framework.Impl.Linking
 
             public Rewriter(
                 SyntaxTransformationCollection introducedMemberCollection,
-                ImmutableMultiValueDictionary<IDeclaration, ScopedSuppression> diagnosticSuppressions,
+                ImmutableDictionaryOfArray<IDeclaration, ScopedSuppression> diagnosticSuppressions,
                 CompilationModel compilation,
                 IReadOnlyList<OrderedAspectLayer> inputOrderedAspectLayers )
             {

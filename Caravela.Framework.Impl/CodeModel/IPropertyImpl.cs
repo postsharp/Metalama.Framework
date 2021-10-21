@@ -5,5 +5,5 @@ using Caravela.Framework.Code;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    internal interface IPropertyImpl : IProperty, IDeclarationImpl { }
+    internal interface IPropertyImpl : IProperty, IMemberImpl { }
 }

@@ -106,7 +106,7 @@ namespace Caravela.Framework.Impl.Advices
                         AdviceResult.Create(
                             AdviceDiagnosticDescriptors.CannotIntroduceWithDifferentStaticity.CreateDiagnostic(
                                 this.TargetDeclaration.GetDiagnosticLocation(),
-                                (this.Aspect.AspectClass.DisplayName, this.MemberBuilder, this.TargetDeclaration, existingDeclaration.DeclaringType) ) );
+                                (this.Aspect.AspectClass.ShortName, this.MemberBuilder, this.TargetDeclaration, existingDeclaration.DeclaringType) ) );
                 }
 
                 switch ( this.OverrideStrategy )
@@ -117,7 +117,7 @@ namespace Caravela.Framework.Impl.Advices
                             AdviceResult.Create(
                                 AdviceDiagnosticDescriptors.CannotIntroduceMemberAlreadyExists.CreateDiagnostic(
                                     this.TargetDeclaration.GetDiagnosticLocation(),
-                                    (this.Aspect.AspectClass.DisplayName, this.MemberBuilder, this.TargetDeclaration, existingDeclaration.DeclaringType) ) );
+                                    (this.Aspect.AspectClass.ShortName, this.MemberBuilder, this.TargetDeclaration, existingDeclaration.DeclaringType) ) );
 
                     case OverrideStrategy.Ignore:
                         // Do nothing.
@@ -154,7 +154,7 @@ namespace Caravela.Framework.Impl.Advices
                                 AdviceResult.Create(
                                     AdviceDiagnosticDescriptors.CannotIntroduceOverrideOfSealed.CreateDiagnostic(
                                         this.TargetDeclaration.GetDiagnosticLocation(),
-                                        (this.Aspect.AspectClass.DisplayName, this.MemberBuilder, this.TargetDeclaration,
+                                        (this.Aspect.AspectClass.ShortName, this.MemberBuilder, this.TargetDeclaration,
                                          existingDeclaration.DeclaringType) ) );
                         }
                         else if ( !compilation.InvariantComparer.Is(
@@ -166,7 +166,7 @@ namespace Caravela.Framework.Impl.Advices
                                 AdviceResult.Create(
                                     AdviceDiagnosticDescriptors.CannotIntroduceDifferentExistingReturnType.CreateDiagnostic(
                                         this.TargetDeclaration.GetDiagnosticLocation(),
-                                        (this.Aspect.AspectClass.DisplayName, this.MemberBuilder, this.TargetDeclaration,
+                                        (this.Aspect.AspectClass.ShortName, this.MemberBuilder, this.TargetDeclaration,
                                          existingDeclaration.DeclaringType, existingDeclaration.ReturnType) ) );
                         }
                         else

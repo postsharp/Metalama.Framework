@@ -23,7 +23,7 @@ namespace Caravela.Framework.Impl.CompileTime
         private readonly ConcurrentDictionary<AssemblyIdentity, Assembly> _assemblyCache = new();
         private readonly int _domainId = Interlocked.Increment( ref _nextDomainId );
 
-        private readonly ConcurrentDictionary<string, Assembly> _loadedAssemblies = new();
+        private readonly ConcurrentDictionary<string, (Assembly Assembly, AssemblyIdentity Identity)> _assembliesByName = new();
 
         public CompileTimeDomain()
         {
@@ -37,10 +37,10 @@ namespace Caravela.Framework.Impl.CompileTime
         {
             var assemblyName = new AssemblyName( args.Name );
 
-            if ( this._loadedAssemblies.TryGetValue( assemblyName.Name, out var candidateAssembly )
-                 && AssemblyName.ReferenceMatchesDefinition( assemblyName, candidateAssembly.GetName() ) )
+            if ( this._assembliesByName.TryGetValue( assemblyName.Name, out var candidateAssembly )
+                 && AssemblyName.ReferenceMatchesDefinition( assemblyName, candidateAssembly.Assembly.GetName() ) )
             {
-                return candidateAssembly;
+                return candidateAssembly.Assembly;
             }
             else
             {
@@ -63,10 +63,18 @@ namespace Caravela.Framework.Impl.CompileTime
 
             // CompileTimeDomain is used only for compile-time assemblies, which always have a unique name, so we can have safely
             // index assemblies by name only.
-            if ( !this._loadedAssemblies.TryAdd( compileTimeIdentity.Name, assembly ) )
-            {
-                throw new AssertionFailedException( "Cannot load two assemblies of the same name (not implemented)." );
-            }
+            this._assembliesByName.AddOrUpdate(
+                compileTimeIdentity.Name,
+                _ => (assembly, compileTimeIdentity),
+                ( name, value ) =>
+                {
+                    if ( !value.Identity.Equals( compileTimeIdentity ) )
+                    {
+                        throw new AssertionFailedException( $"Cannot load two assemblies of the same name '{name}'." );
+                    }
+
+                    return value;
+                } );
 
             return assembly;
         }
@@ -77,7 +85,7 @@ namespace Caravela.Framework.Impl.CompileTime
         {
             this._assemblyCache.Clear();
 
-            this._loadedAssemblies.Clear();
+            this._assembliesByName.Clear();
 
             AppDomain.CurrentDomain.AssemblyResolve -= this.OnAssemblyResolve;
         }

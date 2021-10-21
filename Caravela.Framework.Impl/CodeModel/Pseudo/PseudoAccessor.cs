@@ -21,7 +21,7 @@ using SpecialType = Caravela.Framework.Code.SpecialType;
 namespace Caravela.Framework.Impl.CodeModel.Pseudo
 {
     internal abstract class PseudoAccessor<T> : IMethodImpl
-        where T : IMember
+        where T : IMemberWithAccessors
     {
         protected T DeclaringMember { get; }
 
@@ -85,6 +85,8 @@ namespace Caravela.Framework.Impl.CodeModel.Pseudo
 
         public INamedType DeclaringType => this.DeclaringMember.DeclaringType;
 
+        public IAssembly DeclaringAssembly => this.DeclaringMember.DeclaringAssembly;
+
         public DeclarationOrigin Origin => DeclarationOrigin.Source;
 
         public IDeclaration? ContainingDeclaration => this.DeclaringMember;
@@ -107,7 +109,7 @@ namespace Caravela.Framework.Impl.CodeModel.Pseudo
 
         public MethodInfo ToMethodInfo() => throw new NotImplementedException();
 
-        IMemberWithAccessors? IMethod.DeclaringMember => (IMemberWithAccessors) this.DeclaringMember;
+        IMemberWithAccessors? IMethod.DeclaringMember => this.DeclaringMember;
 
         public ISymbol? Symbol => null;
 
@@ -115,8 +117,14 @@ namespace Caravela.Framework.Impl.CodeModel.Pseudo
 
         public ImmutableArray<SyntaxReference> DeclaringSyntaxReferences => ImmutableArray<SyntaxReference>.Empty;
 
+        bool IDeclarationImpl.CanBeInherited => false;
+
+        public IEnumerable<IDeclaration> GetDerivedDeclarations( bool deep = true ) => throw new NotImplementedException();
+
         public IGeneric ConstructGenericInstance( params IType[] typeArguments ) => throw new NotImplementedException();
 
         public IDeclaration OriginalDefinition => throw new NotImplementedException();
+
+        public IMember? OverriddenMember => ((IMemberWithAccessors?) ((IMemberImpl) this.DeclaringMember).OverriddenMember)?.GetAccessor( this.MethodKind );
     }
 }

@@ -12,6 +12,6 @@ namespace Caravela.Framework.Fabrics
         /// <summary>
         /// The user can implement this method to analyze types in the current namespace, add aspects, and report or suppress diagnostics.
         /// </summary>
-        void AmendNamespace( INamespaceAmender builder );
+        void AmendNamespace( INamespaceAmender amender );
     }
 }

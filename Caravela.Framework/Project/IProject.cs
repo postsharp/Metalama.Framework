@@ -46,12 +46,12 @@ namespace Caravela.Framework.Project
         bool TryGetProperty( string name, [NotNullWhen( true )] out string? value );
 
         /// <summary>
-        /// Gets a project data extension or creates a new instance if none has been created before. If the type may implement <see cref="IProjectData"/>,
-        /// new instances will be initialized using <see cref="IProjectData.Initialize"/>.
+        /// Gets a project data extension or creates a new instance if none has been created before. If the type may implement <see cref="ProjectData"/>,
+        /// new instances will be initialized using <see cref="ProjectData.Initialize"/>.
         /// </summary>
-        /// <typeparam name="T">The data type, which may implement <see cref="IProjectData"/>.</typeparam>
+        /// <typeparam name="T">The data type, which may implement <see cref="ProjectData"/>.</typeparam>
         T Data<T>()
-            where T : class, IProjectData, new();
+            where T : ProjectData, new();
 
         /// <summary>
         /// Gets an <see cref="IServiceProvider"/> that gives access to the compiler services exposed using the <c>[CompileTimePlugIn]</c> facility.

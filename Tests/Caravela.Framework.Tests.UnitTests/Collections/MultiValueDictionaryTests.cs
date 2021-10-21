@@ -12,7 +12,7 @@ namespace Caravela.Framework.Tests.UnitTests.Collections
         [Fact]
         public void Basics()
         {
-            var builder = ImmutableMultiValueDictionary<int, string>.CreateBuilder();
+            var builder = ImmutableDictionaryOfArray<int, string>.CreateBuilder();
             builder.Add( 1, "1.1" );
             builder.Add( 1, "1.2" );
             builder.Add( 1, "1.3" );

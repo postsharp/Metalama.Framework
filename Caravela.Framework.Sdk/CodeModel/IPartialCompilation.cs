@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Compiler;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -32,18 +33,28 @@ namespace Caravela.Framework.Impl.CodeModel
         /// <summary>
         /// Returns a copy of the current <see cref="IPartialCompilation"/> where the <see cref="SyntaxTrees"/> have been modified.
         /// </summary>
-        public IPartialCompilation WithSyntaxTreeModifications(
+        IPartialCompilation WithSyntaxTreeModifications(
             IReadOnlyList<SyntaxTreeModification>? modifications = null,
             IReadOnlyList<SyntaxTree>? additions = null );
 
         /// <summary>
         /// Returns a copy of the current <see cref="IPartialCompilation"/> where the <see cref="Resources"/> have been modified.
         /// </summary>
-        public IPartialCompilation WithAdditionalResources( params ResourceDescription[] resources );
+        IPartialCompilation WithAdditionalResources( params ManagedResource[] resources );
 
         /// <summary>
         /// Gets the list of managed resources for the current compilation. This property is not defined at the design time, only at compile time.
         /// </summary>
-        public ImmutableArray<ResourceDescription> Resources { get; }
+        ImmutableArray<ManagedResource> Resources { get; }
+
+        /// <summary>
+        /// Gets the types declared in the current subset.
+        /// </summary>
+        ImmutableHashSet<INamedTypeSymbol> Types { get; }
+
+        /// <summary>
+        /// Gets the namespaces that contain types.
+        /// </summary>
+        ImmutableHashSet<INamespaceSymbol> Namespaces { get; }
     }
 }

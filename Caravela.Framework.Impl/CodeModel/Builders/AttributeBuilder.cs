@@ -38,7 +38,11 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         string IDisplayable.ToDisplayString( CodeDisplayFormat? format, CodeDisplayContext? context ) => throw new NotImplementedException();
 
+        public override bool CanBeInherited => false;
+
         public override IDeclaration ContainingDeclaration { get; }
+
+        bool IObservableTransformation.IsDesignTime => false;
 
         DeclarationOrigin IDeclaration.Origin => DeclarationOrigin.Aspect;
 
@@ -59,5 +63,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         INamedArgumentList IAttribute.NamedArguments => this.NamedArguments;
 
         IType IHasType.Type => this.Type;
+
+        public FormattableString FormatPredecessor() => $"attribute of type '{this.Type}' on '{this.ContainingDeclaration}'";
     }
 }

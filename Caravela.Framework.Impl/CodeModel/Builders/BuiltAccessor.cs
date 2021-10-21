@@ -105,5 +105,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public System.Reflection.MethodBase ToMethodBase() => this.AccessorBuilder.ToMethodBase();
 
         public MemberInfo ToMemberInfo() => this.AccessorBuilder.ToMemberInfo();
+
+        public IMember? OverriddenMember => this.Compilation.Factory.GetDeclaration( this.AccessorBuilder.OverriddenMember );
     }
 }

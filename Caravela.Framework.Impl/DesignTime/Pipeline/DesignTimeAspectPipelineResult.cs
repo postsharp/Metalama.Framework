@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Impl.Aspects;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Pipeline;
 using Microsoft.CodeAnalysis;
@@ -16,9 +17,10 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
     /// <param name="InputSyntaxTrees">The syntax trees for which the pipeline was executed.</param>
     /// <param name="IntroducedSyntaxTrees">The syntax trees introduced by the pipeline (for source generators).</param>
     /// <param name="Diagnostics">The list of diagnostics and suppressions.</param>
-    public record DesignTimeAspectPipelineResult(
+    internal record DesignTimeAspectPipelineResult(
         bool Success,
         ImmutableDictionary<string, SyntaxTree> InputSyntaxTrees,
         IReadOnlyList<IntroducedSyntaxTree> IntroducedSyntaxTrees,
-        ImmutableUserDiagnosticList Diagnostics );
+        ImmutableUserDiagnosticList Diagnostics,
+        IReadOnlyList<AttributeAspectInstance> InheritableAspects );
 }

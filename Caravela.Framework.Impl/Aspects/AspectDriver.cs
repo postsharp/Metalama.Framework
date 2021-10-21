@@ -3,6 +3,8 @@
 
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
+using Caravela.Framework.Eligibility;
+using Caravela.Framework.Eligibility.Implementation;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Collections;
@@ -14,10 +16,10 @@ using Caravela.Framework.Impl.Utilities;
 using Caravela.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
+using TypeKind = Caravela.Framework.Code.TypeKind;
 
 namespace Caravela.Framework.Impl.Aspects
 {
@@ -27,9 +29,11 @@ namespace Caravela.Framework.Impl.Aspects
     internal class AspectDriver : IAspectDriver
     {
         private readonly IServiceProvider _serviceProvider;
-        private readonly List<TemplateClassMember> _declarativeAdviceAttributes;
+        private readonly ImmutableArray<TemplateClassMember> _declarativeAdviceAttributes;
         private readonly ReflectionMapper _reflectionMapper;
         private readonly IAspectClassImpl _aspectClass;
+
+        public IEligibilityRule<IDeclaration>? EligibilityRule { get; }
 
         public AspectDriver( IServiceProvider serviceProvider, IAspectClassImpl aspectClass, Compilation compilation )
         {
@@ -44,7 +48,16 @@ namespace Caravela.Framework.Impl.Aspects
                 .Select( m => m.Value )
                 .OrderBy( m => m.Symbol.GetPrimarySyntaxReference()?.SyntaxTree.FilePath )
                 .ThenBy( m => m.Symbol.GetPrimarySyntaxReference()?.Span.Start )
-                .ToList();
+                .ToImmutableArray();
+
+            // If we have any declarative introduction, the aspect cannot be added to an interface.
+            if ( this._declarativeAdviceAttributes.Any( a => a.TemplateInfo.AttributeType is TemplateAttributeType.Introduction ) )
+            {
+                this.EligibilityRule = new EligibilityRule<IDeclaration>(
+                    EligibleScenarios.Inheritance,
+                    x => x is INamedType t && t.TypeKind != TypeKind.Interface,
+                    _ => $"the aspect {this._aspectClass.ShortName} cannot be added to an interface (because the aspect contains a declarative introduction)" );
+            }
         }
 
         public AspectInstanceResult ExecuteAspect(
@@ -114,7 +127,7 @@ namespace Caravela.Framework.Impl.Aspects
                 var diagnostic =
                     GeneralDiagnosticDescriptors.AspectAppliedToIncorrectDeclaration.CreateDiagnostic(
                         targetDeclaration.GetDiagnosticLocation(),
-                        (AspectType: this._aspectClass.DisplayName, targetDeclaration.DeclarationKind, targetDeclaration, interfaceType) );
+                        (AspectType: this._aspectClass.ShortName, targetDeclaration.DeclarationKind, targetDeclaration, interfaceType) );
 
                 return CreateResultForError( diagnostic );
             }
@@ -172,7 +185,7 @@ namespace Caravela.Framework.Impl.Aspects
                 {
                     var diagnostic = GeneralDiagnosticDescriptors.ExceptionInUserCode.CreateDiagnostic(
                         targetDeclaration.GetDiagnosticLocation(),
-                        (AspectType: this._aspectClass.DisplayName, MethodName: nameof(IAspect<T>.BuildAspect), e.GetType().Name, e.Format( 5 )) );
+                        (AspectType: this._aspectClass.ShortName, MethodName: nameof(IAspect<T>.BuildAspect), e.GetType().Name, e.Format( 5 )) );
 
                     return CreateResultForError( diagnostic );
                 }

@@ -6,6 +6,7 @@ using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Transformations;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 
 namespace Caravela.Framework.Impl.Pipeline
 {
@@ -17,6 +18,8 @@ namespace Caravela.Framework.Impl.Pipeline
         CompilationModel Compilation { get; }
 
         IReadOnlyList<INonObservableTransformation> NonObservableTransformations { get; }
+
+        ImmutableArray<AttributeAspectInstance> InheritableAspectInstances { get; }
 
         ImmutableUserDiagnosticList Diagnostics { get; }
 

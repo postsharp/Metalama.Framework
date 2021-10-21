@@ -165,23 +165,23 @@ namespace Caravela.Framework.Impl.Collections
         }
 
         /// <summary>
-        /// Builds an <see cref="ImmutableMultiValueDictionary{TKey,TValue}"/> from a collection, with a different value type than the input item type.
+        /// Builds an <see cref="ImmutableDictionaryOfArray{TKey,TValue}"/> from a collection, with a different value type than the input item type.
         /// </summary>
-        public static ImmutableMultiValueDictionary<TKey, TValue> ToMultiValueDictionary<TItem, TKey, TValue>(
+        public static ImmutableDictionaryOfArray<TKey, TValue> ToMultiValueDictionary<TItem, TKey, TValue>(
             this IEnumerable<TItem> enumerable,
             Func<TItem, TKey> getKey,
             Func<TItem, TValue> getValue,
             IEqualityComparer<TKey>? keyComparer = null )
             where TKey : notnull
-            => ImmutableMultiValueDictionary<TKey, TValue>.Create( enumerable, getKey, getValue, keyComparer );
+            => ImmutableDictionaryOfArray<TKey, TValue>.Create( enumerable, getKey, getValue, keyComparer );
 
         /// <summary>
-        /// Builds an <see cref="ImmutableMultiValueDictionary{TKey,TValue}"/> from a collection, with the same value type than the input item type.
+        /// Builds an <see cref="ImmutableDictionaryOfArray{TKey,TValue}"/> from a collection, with the same value type than the input item type.
         /// </summary>
         /// <summary>
-        /// Builds an <see cref="ImmutableMultiValueDictionary{TKey,TValue}"/> from a collection.
+        /// Builds an <see cref="ImmutableDictionaryOfArray{TKey,TValue}"/> from a collection.
         /// </summary>
-        public static ImmutableMultiValueDictionary<TKey, TItem> ToMultiValueDictionary<TItem, TKey>(
+        public static ImmutableDictionaryOfArray<TKey, TItem> ToMultiValueDictionary<TItem, TKey>(
             this IEnumerable<TItem> enumerable,
             Func<TItem, TKey> getKey,
             IEqualityComparer<TKey>? keyComparer = null )

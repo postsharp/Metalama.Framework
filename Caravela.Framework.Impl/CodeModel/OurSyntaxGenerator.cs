@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
+using Caravela.Framework.Impl.Templating;
 using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -10,6 +11,7 @@ using Microsoft.CodeAnalysis.Editing;
 using Microsoft.CodeAnalysis.Simplification;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
@@ -302,6 +304,50 @@ namespace Caravela.Framework.Impl.CodeModel
             {
                 return List( clauses );
             }
+        }
+
+        public ExpressionSyntax AttributeValueExpression( object? value, ReflectionMapper reflectionMapper )
+        {
+            if ( value == null )
+            {
+                return SyntaxFactoryEx.Null;
+            }
+
+            var literalExpression = SyntaxFactoryEx.LiteralExpressionOrNull( value );
+
+            if ( literalExpression != null )
+            {
+                return literalExpression;
+            }
+
+            if ( value is Type type )
+            {
+                return this.TypeOfExpression( reflectionMapper.GetTypeSymbol( type ) );
+            }
+
+            var valueType = value.GetType();
+
+            if ( valueType.IsEnum )
+            {
+                var name = Enum.GetName( valueType, value );
+                var enumType = reflectionMapper.GetTypeSymbol( valueType );
+
+                if ( name != null )
+                {
+                    return MemberAccessExpression(
+                        SyntaxKind.SimpleMemberAccessExpression,
+                        this.Type( enumType ),
+                        SyntaxFactory.IdentifierName( name ) );
+                }
+                else
+                {
+                    var underlyingValue = Convert.ChangeType( value, Enum.GetUnderlyingType( valueType ), CultureInfo.InvariantCulture )!;
+
+                    return this.CastExpression( enumType, this.LiteralExpression( underlyingValue ) );
+                }
+            }
+
+            throw new ArgumentOutOfRangeException( nameof(value), $"The value '{value}' cannot be converted to a custom attribute argument value." );
         }
     }
 }

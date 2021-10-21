@@ -15,6 +15,12 @@ namespace Caravela.Framework.Code
     public interface IDeclaration : IDisplayable, IDiagnosticScope, ICompilationElement
     {
         /// <summary>
+        /// Gets the declaring assembly, which can be the current <see cref="ICompilationElement.Compilation"/>
+        /// or a reference assembly.
+        /// </summary>
+        IAssembly DeclaringAssembly { get; }
+
+        /// <summary>
         /// Gets the origin (<see cref="DeclarationOrigin.Source"/>, <see cref="DeclarationOrigin.Generator"/> or <see cref="DeclarationOrigin.Aspect"/>
         /// of the current declaration.
         /// </summary>

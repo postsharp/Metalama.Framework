@@ -41,10 +41,10 @@ namespace Caravela.Framework.Aspects
         /// When several instances of the same <see cref="AspectClass"/> are found on the same <see cref="TargetDeclaration"/>,
         /// they are ordered by priority, and only the first one gets executed. The other instances are exposed on this property.
         /// </summary>
-        ImmutableArray<IAspectInstance> OtherInstances { get; }
+        ImmutableArray<IAspectInstance> SecondaryInstances { get; }
 
         /// <summary>
-        /// Gets the list of objects that have caused the current aspect instance (but not any instance in the <see cref="OtherInstances"/> list)
+        /// Gets the list of objects that have caused the current aspect instance (but not any instance in the <see cref="SecondaryInstances"/> list)
         /// to be created.
         /// </summary>
         ImmutableArray<AspectPredecessor> Predecessors { get; }

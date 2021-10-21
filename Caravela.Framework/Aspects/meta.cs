@@ -3,7 +3,6 @@
 
 using Caravela.Framework.Code;
 using Caravela.Framework.Code.SyntaxBuilders;
-using Caravela.Framework.Diagnostics;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -183,12 +182,6 @@ namespace Caravela.Framework.Aspects
         public static dynamic BaseStatic => CurrentContext.BaseStatic;
 
         /// <summary>
-        /// Gets a service allowing to report and suppress diagnostics.
-        /// </summary>
-        /// <seealso href="@diagnostics"/>
-        public static IDiagnosticSink Diagnostics => CurrentContext.Diagnostics;
-
-        /// <summary>
         /// Gets the dictionary of tags that were passed to the <see cref="IAdviceFactory"/> method by the <see cref="IAspect{T}.BuildAspect"/> method.
         /// </summary>
         /// <seealso href="sharing-state-with-advices"/>
@@ -196,7 +189,7 @@ namespace Caravela.Framework.Aspects
 
         /// <summary>
         /// Gets the current <see cref="IAspectInstance"/>, which gives access to the <see cref="IAspectInstance.Predecessors"/>
-        /// and the <see cref="IAspectInstance.OtherInstances"/> of the current aspect.
+        /// and the <see cref="IAspectInstance.SecondaryInstances"/> of the current aspect.
         /// </summary>
         public static IAspectInstance AspectInstance => CurrentContext.AspectInstance;
 

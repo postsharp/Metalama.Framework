@@ -3,6 +3,8 @@
 
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
+using Microsoft.CodeAnalysis;
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -47,12 +49,16 @@ namespace Caravela.Framework.Impl.Aspects
 
         public bool IsSkipped => this._primaryInstance.IsSkipped;
 
-        public ImmutableArray<IAspectInstance> OtherInstances => this._otherInstances.Cast<IAspectInstance>().ToImmutableArray();
+        public ImmutableArray<IAspectInstance> SecondaryInstances => this._otherInstances.Cast<IAspectInstance>().ToImmutableArray();
 
         public ImmutableArray<AspectPredecessor> Predecessors => ImmutableArray.Create( this._primaryInstance.Predecessor );
 
         public void Skip() => this._primaryInstance.Skip();
 
         public ImmutableDictionary<TemplateClass, TemplateClassInstance> TemplateInstances => this._primaryInstance.TemplateInstances;
+
+        public FormattableString FormatPredecessor() => this._primaryInstance.FormatPredecessor();
+
+        public Location? GetDiagnosticLocation( Compilation compilation ) => this._primaryInstance.GetDiagnosticLocation( compilation );
     }
 }

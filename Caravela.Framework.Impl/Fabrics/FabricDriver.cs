@@ -8,6 +8,7 @@ using Caravela.Framework.Fabrics;
 using Caravela.Framework.Impl.Aspects;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
+using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Pipeline;
 using Caravela.Framework.Project;
 using Caravela.Framework.Validation;
@@ -55,7 +56,7 @@ namespace Caravela.Framework.Impl.Fabrics
 
         protected string OriginalPath { get; }
 
-        public abstract void Execute( IAspectBuilderInternal aspectBuilder, FabricTemplateClass fabricTemplateClass );
+        public abstract void Execute( IAspectBuilderInternal aspectBuilder, FabricTemplateClass fabricTemplateClass, FabricInstance fabricInstance );
 
         public abstract FabricKind Kind { get; }
 
@@ -103,14 +104,18 @@ namespace Caravela.Framework.Impl.Fabrics
         protected abstract class BaseBuilder<T> : IAmender<T>
             where T : class, IDeclaration
         {
-            private readonly FabricDriver _parent;
             private readonly IAspectBuilderInternal _aspectBuilder;
+            private readonly FabricInstance _fabricInstance;
             private readonly AspectProjectConfiguration _context;
 
-            protected BaseBuilder( FabricDriver parent, T target, AspectProjectConfiguration context, IAspectBuilderInternal aspectBuilder )
+            protected BaseBuilder(
+                T target,
+                AspectProjectConfiguration context,
+                IAspectBuilderInternal aspectBuilder,
+                FabricInstance fabricInstance )
             {
-                this._parent = parent;
                 this._aspectBuilder = aspectBuilder;
+                this._fabricInstance = fabricInstance;
                 this._context = context;
                 this.Target = target;
             }
@@ -126,7 +131,8 @@ namespace Caravela.Framework.Impl.Fabrics
             public IDeclarationSelection<TChild> WithMembers<TChild>( Func<T, IEnumerable<TChild>> selector )
                 where TChild : class, IDeclaration
                 => new DeclarationSelection<TChild>(
-                    new AspectPredecessor( AspectPredecessorKind.Fabric, this._parent.Fabric ),
+                    this.Target,
+                    new AspectPredecessor( AspectPredecessorKind.Fabric, this._fabricInstance ),
                     this.RegisterAspectSource,
                     compilation =>
                     {
@@ -146,5 +152,9 @@ namespace Caravela.Framework.Impl.Fabrics
                 where TAnnotation : IAnnotation<TTarget, TAspect>
                 => throw new NotImplementedException();
         }
+
+        public abstract FormattableString FormatPredecessor();
+
+        public Location? GetDiagnosticLocation() => this.FabricSymbol.GetDiagnosticLocation();
     }
 }

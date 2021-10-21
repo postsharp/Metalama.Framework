@@ -14,6 +14,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Reflection;
+using TypeKind = Caravela.Framework.Code.TypeKind;
 
 namespace Caravela.Framework.Impl.Advices
 {
@@ -138,8 +139,7 @@ namespace Caravela.Framework.Impl.Advices
             }
             else
             {
-                throw GeneralDiagnosticDescriptors.AspectMustHaveExactlyOneTemplateMember.CreateException(
-                    (this._aspect.AspectClass.DisplayName, templateName) );
+                throw GeneralDiagnosticDescriptors.AspectMustHaveExactlyOneTemplateMember.CreateException( (this._aspect.AspectClass.ShortName, templateName) );
             }
         }
 
@@ -286,6 +286,12 @@ namespace Caravela.Framework.Impl.Advices
                 throw new InvalidOperationException();
             }
 
+            if ( targetMethod.IsAbstract )
+            {
+                throw new InvalidOperationException(
+                    UserMessageFormatter.Format( $"Cannot add an OverrideMethod advice to '{targetMethod}' because it is an abstract." ) );
+            }
+
             var diagnosticList = new DiagnosticList();
 
             var template = this.SelectTemplate( targetMethod, templateSelector )
@@ -310,6 +316,12 @@ namespace Caravela.Framework.Impl.Advices
             if ( this._templateInstance == null )
             {
                 throw new InvalidOperationException();
+            }
+
+            if ( targetType.TypeKind == TypeKind.Interface )
+            {
+                throw new InvalidOperationException(
+                    UserMessageFormatter.Format( $"Cannot add an IntroduceMethod advice to '{targetType}' because it is an interface." ) );
             }
 
             var diagnosticList = new DiagnosticList();
@@ -344,6 +356,12 @@ namespace Caravela.Framework.Impl.Advices
             if ( this._templateInstance == null )
             {
                 throw new InvalidOperationException();
+            }
+
+            if ( targetDeclaration.IsAbstract )
+            {
+                throw new InvalidOperationException(
+                    UserMessageFormatter.Format( $"Cannot add an OverrideFieldOrProperty advice to '{targetDeclaration}' because it is an abstract." ) );
             }
 
             // Set template represents both set and init accessors.
@@ -382,6 +400,13 @@ namespace Caravela.Framework.Impl.Advices
             if ( this._templateInstance == null )
             {
                 throw new InvalidOperationException();
+            }
+
+            if ( targetDeclaration.IsAbstract )
+            {
+                throw new InvalidOperationException(
+                    UserMessageFormatter.Format(
+                        $"Cannot add an OverrideFieldOrPropertyAccessors advice to '{targetDeclaration}' because it is an abstract." ) );
             }
 
             // Set template represents both set and init accessors.
@@ -462,6 +487,12 @@ namespace Caravela.Framework.Impl.Advices
                 throw new InvalidOperationException();
             }
 
+            if ( targetType.TypeKind == TypeKind.Interface )
+            {
+                throw new InvalidOperationException(
+                    UserMessageFormatter.Format( $"Cannot add an IntroduceMethod advice to '{targetType}' because it is an interface." ) );
+            }
+
             var diagnosticList = new DiagnosticList();
 
             var propertyTemplate = this.ValidateTemplateName( defaultTemplate, TemplateKind.Default, true )
@@ -503,6 +534,12 @@ namespace Caravela.Framework.Impl.Advices
             if ( this._templateInstance == null )
             {
                 throw new InvalidOperationException();
+            }
+
+            if ( targetType.TypeKind == TypeKind.Interface )
+            {
+                throw new InvalidOperationException(
+                    UserMessageFormatter.Format( $"Cannot add an IntroduceMethod advice to '{targetType}' because it is an interface." ) );
             }
 
             var diagnosticList = new DiagnosticList();
@@ -552,6 +589,12 @@ namespace Caravela.Framework.Impl.Advices
                 throw GeneralDiagnosticDescriptors.UnsupportedFeature.CreateException( $"Invoker overrides." );
             }
 
+            if ( targetDeclaration.IsAbstract )
+            {
+                throw new InvalidOperationException(
+                    UserMessageFormatter.Format( $"Cannot add an OverrideEventAccessors advice to '{targetDeclaration}' because it is an abstract." ) );
+            }
+
             var diagnosticList = new DiagnosticList();
 
             var addTemplateRef = this.ValidateTemplateName( addTemplate, TemplateKind.Default, true )
@@ -594,6 +637,12 @@ namespace Caravela.Framework.Impl.Advices
                 throw new InvalidOperationException();
             }
 
+            if ( targetType.TypeKind == TypeKind.Interface )
+            {
+                throw new InvalidOperationException(
+                    UserMessageFormatter.Format( $"Cannot add an IntroduceMethod advice to '{targetType}' because it is an interface." ) );
+            }
+
             var diagnosticList = new DiagnosticList();
 
             var template = this.ValidateTemplateName( eventTemplate, TemplateKind.Default, true )
@@ -634,6 +683,12 @@ namespace Caravela.Framework.Impl.Advices
             if ( this._templateInstance == null )
             {
                 throw new InvalidOperationException();
+            }
+
+            if ( targetType.TypeKind == TypeKind.Interface )
+            {
+                throw new InvalidOperationException(
+                    UserMessageFormatter.Format( $"Cannot add an IntroduceMethod advice to '{targetType}' because it is an interface." ) );
             }
 
             var diagnosticList = new DiagnosticList();

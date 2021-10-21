@@ -26,7 +26,7 @@ namespace Caravela.AspectWorkbench.ViewModels
     [NotifyPropertyChanged]
     public class MainViewModel
     {
-        private static readonly TestProjectProperties _projectProperties = new( "", ImmutableArray.Create( "NET5_0" ), "net5.0" );
+        private static readonly TestProjectProperties _projectProperties = new( null, ImmutableArray.Create( "NET5_0" ), "net5.0" );
         private TemplateTest? _currentTest;
 
         public string Title => this.CurrentPath == null ? "Aspect Workbench" : $"Aspect Workbench - {this.CurrentPath}";
@@ -95,7 +95,10 @@ namespace Caravela.AspectWorkbench.ViewModels
             }
 
             using var testProjectOptions = new TestProjectOptions() { FormatCompileTimeCode = true };
-            var serviceProvider = ServiceProviderFactory.GetServiceProvider( testProjectOptions ).WithProjectScopedServices();
+
+            var serviceProvider = ServiceProviderFactory.GetServiceProvider( testProjectOptions )
+                .WithProjectScopedServices( TestCompilationFactory.GetMetadataReferences() );
+
             var syntaxColorizer = new SyntaxColorizer( serviceProvider );
 
             var testRunner = TestRunnerFactory.CreateTestRunner( testInput, serviceProvider, null );

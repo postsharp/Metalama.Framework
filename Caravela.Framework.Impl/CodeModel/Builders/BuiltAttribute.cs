@@ -4,6 +4,7 @@
 using Caravela.Framework.Code;
 using Caravela.Framework.Code.Collections;
 using Caravela.Framework.Impl.Utilities;
+using System;
 using System.Collections.Generic;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
@@ -30,5 +31,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public INamedArgumentList NamedArguments => this.AttributeBuilder.NamedArguments;
 
         IType IHasType.Type => this.Type;
+
+        public FormattableString FormatPredecessor() => this.AttributeBuilder.FormatPredecessor();
     }
 }

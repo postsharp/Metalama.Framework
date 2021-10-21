@@ -11,6 +11,7 @@ using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Transformations;
 using Microsoft.CodeAnalysis;
 using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using TypedConstant = Caravela.Framework.Code.TypedConstant;
@@ -64,7 +65,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
             if ( ctor == null )
             {
                 throw GeneralDiagnosticDescriptors.CompatibleAttributeConstructorDoesNotExist.CreateException(
-                    (this.ParentAdvice.Aspect.AspectClass.DisplayName, this, type) );
+                    (this.ParentAdvice.Aspect.AspectClass.ShortName, this, type) );
             }
 
             var ctorArguments = constructorArguments.Select( ( _, i ) => new TypedConstant( ctor.Parameters[i].Type, constructorArguments[i] ) )
@@ -86,8 +87,14 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public ImmutableArray<SyntaxReference> DeclaringSyntaxReferences
             => ((IDeclarationImpl?) this.ContainingDeclaration)?.DeclaringSyntaxReferences ?? ImmutableArray<SyntaxReference>.Empty;
 
+        public abstract bool CanBeInherited { get; }
+
+        public IEnumerable<IDeclaration> GetDerivedDeclarations( bool deep = true ) => throw new NotImplementedException();
+
         public override string ToString() => this.ToDisplayString( CodeDisplayFormat.MinimallyQualified );
 
         public IDeclaration OriginalDefinition => this;
+
+        public IAssembly DeclaringAssembly => this.Compilation.DeclaringAssembly;
     }
 }

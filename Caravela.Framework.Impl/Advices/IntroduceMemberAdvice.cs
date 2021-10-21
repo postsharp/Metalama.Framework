@@ -74,7 +74,7 @@ namespace Caravela.Framework.Impl.Advices
                         diagnosticAdder.Report(
                             AdviceDiagnosticDescriptors.CannotIntroduceInstanceMemberIntoStaticType.CreateDiagnostic(
                                 this.TargetDeclaration.GetDiagnosticLocation(),
-                                (this.Aspect.AspectClass.DisplayName, this.MemberBuilder, this.TargetDeclaration) ) );
+                                (this.Aspect.AspectClass.ShortName, this.MemberBuilder, this.TargetDeclaration) ) );
                     }
 
                     this.MemberBuilder.IsStatic = false;

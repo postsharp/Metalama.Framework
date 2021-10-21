@@ -24,6 +24,7 @@ namespace Caravela.TestFramework
             string testName,
             string sourceCode,
             TestDirectoryOptionsReader? directoryOptionsReader = null,
+            string? projectDirectory = null,
             string? relativePath = null,
             string? fullPath = null )
         {
@@ -32,6 +33,7 @@ namespace Caravela.TestFramework
             this.SourceCode = sourceCode;
             this.RelativePath = relativePath;
             this.FullPath = fullPath;
+            this.ProjectDirectory = projectDirectory ?? projectProperties.ProjectDirectory;
 
             if ( directoryOptionsReader != null )
             {
@@ -86,6 +88,7 @@ namespace Caravela.TestFramework
                     Path.GetFileNameWithoutExtension( path ),
                     sourceCode,
                     directoryOptionsReader,
+                    projectDirectory,
                     PathUtil.GetRelativePath( projectDirectory, path ),
                     path );
             }
@@ -127,6 +130,7 @@ namespace Caravela.TestFramework
                 Path.GetFileNameWithoutExtension( relativePath ),
                 sourceCode,
                 directoryOptionsReader,
+                projectProperties.ProjectDirectory,
                 relativePath,
                 fullPath );
         }
@@ -149,7 +153,7 @@ namespace Caravela.TestFramework
         /// <summary>
         /// Gets the directory containing the project (<c>csproj</c>) file.
         /// </summary>
-        public string ProjectDirectory => this.ProjectProperties.ProjectDirectory;
+        public string ProjectDirectory { get; }
 
         /// <summary>
         /// Gets the path of the current test file relatively to <see cref="ProjectDirectory"/>.
