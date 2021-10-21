@@ -80,18 +80,16 @@ namespace Caravela.Framework.Tests.Integration.Runners
         /// <summary>
         /// Runs the template test with name and source provided in the <paramref name="testInput"/>.
         /// </summary>
-        /// <param name="serviceProvider"></param>
         /// <param name="testInput">Specifies the input test parameters such as the name and the source.</param>
         /// <param name="testResult"></param>
         /// <param name="state"></param>
         /// <returns>The result of the test execution.</returns>
         private protected override async Task RunAsync(
-            ServiceProvider serviceProvider,
             TestInput testInput,
             TestResult testResult,
             Dictionary<string, object?> state )
         {
-            await base.RunAsync( serviceProvider, testInput, testResult, state );
+            await base.RunAsync( testInput, testResult, state );
 
             if ( !testResult.Success )
             {
@@ -108,6 +106,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
                 testAnalyzer.Visit( templateSyntaxRoot );
             }
 
+            var serviceProvider = testResult.ProjectScopedServiceProvider;
             var assemblyLocator = serviceProvider.GetService<ReferenceAssemblyLocator>();
 
             // Create an empty compilation (just with references) for the compile-time project.

@@ -50,7 +50,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
         /// </summary>
         /// <param name="projectOptions"></param>
         /// <returns></returns>
-        internal DesignTimeAspectPipeline? GetOrCreatePipeline( IProjectOptions projectOptions, CancellationToken cancellationToken )
+        internal DesignTimeAspectPipeline? GetOrCreatePipeline( IProjectOptions projectOptions, Compilation compilation, CancellationToken cancellationToken )
         {
             if ( !projectOptions.IsFrameworkEnabled )
             {
@@ -62,6 +62,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
 
             if ( this._pipelinesByProjectId.TryGetValue( projectOptions.ProjectId, out var pipeline ) )
             {
+                // TODO: we must validate that the project options and metadata references are still identical to those cached, otherwise we should create a new pipeline.
                 return pipeline;
             }
             else
@@ -76,7 +77,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
                     }
 
                     var serviceProvider = ServiceProviderFactory.GetServiceProvider().WithServices( projectOptions, this );
-                    pipeline = new DesignTimeAspectPipeline( serviceProvider, this._domain, this._isTest );
+                    pipeline = new DesignTimeAspectPipeline( serviceProvider, this._domain, compilation.References, this._isTest );
                     pipeline.ExternalBuildStarted += this.OnExternalBuildStarted;
 
                     if ( !this._isTest )
@@ -114,7 +115,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
             IProjectOptions projectOptions,
             CancellationToken cancellationToken )
         {
-            var pipeline = this.GetOrCreatePipeline( projectOptions, cancellationToken );
+            var pipeline = this.GetOrCreatePipeline( projectOptions, compilation, cancellationToken );
 
             if ( pipeline == null )
             {
@@ -130,7 +131,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
             CancellationToken cancellationToken,
             [NotNullWhen( true )] out CompilationResult? compilationResult )
         {
-            var designTimePipeline = this.GetOrCreatePipeline( projectOptions, cancellationToken );
+            var designTimePipeline = this.GetOrCreatePipeline( projectOptions, compilation, cancellationToken );
 
             if ( designTimePipeline == null )
             {
@@ -151,7 +152,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
             [NotNullWhen( true )] out PartialCompilation? outputCompilation,
             out ImmutableArray<Diagnostic> diagnostics )
         {
-            var designTimePipeline = this.GetOrCreatePipeline( projectOptions, cancellationToken );
+            var designTimePipeline = this.GetOrCreatePipeline( projectOptions, inputCompilation, cancellationToken );
 
             if ( designTimePipeline == null )
             {

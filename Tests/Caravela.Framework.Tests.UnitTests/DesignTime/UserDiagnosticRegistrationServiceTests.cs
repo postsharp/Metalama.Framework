@@ -130,7 +130,7 @@ namespace Caravela.Framework.Tests.UnitTests.DesignTime.TestCode
             var compilation = CreateCSharpCompilation( code );
 
             using var domain = new UnloadableCompileTimeDomain();
-            using DesignTimeAspectPipeline pipeline = new( testContext.ServiceProvider, domain, true );
+            using DesignTimeAspectPipeline pipeline = new( testContext.ServiceProvider, domain, compilation.References, true );
 
             var diagnosticsFileName = Path.Combine( testContext.ProjectOptions.SettingsDirectory, "userDiagnostics.json" );
 

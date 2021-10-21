@@ -18,7 +18,6 @@ namespace Caravela.Framework.Tests.UnitTests.DesignTime
         {
             using var testContext = this.CreateTestContext();
             using var domain = new UnloadableCompileTimeDomain();
-            var pipeline = new DesignTimeAspectPipeline( testContext.ServiceProvider, domain, true );
 
             // Initial compilation.
             var code1 = @"
@@ -34,6 +33,9 @@ public interface I {}
 ";
 
             var compilation1 = testContext.CreateCompilationModel( code1 );
+
+            var pipeline = new DesignTimeAspectPipeline( testContext.ServiceProvider, domain, compilation1.RoslynCompilation.References, true );
+
             Assert.True( pipeline.TryExecute( compilation1.RoslynCompilation, CancellationToken.None, out var compilationResult1 ) );
 
             Assert.Equal( new[] { "Aspect" }, compilationResult1!.InheritableAspectTypes.ToArray() );
@@ -45,7 +47,6 @@ public interface I {}
         {
             using var testContext = this.CreateTestContext();
             using var domain = new UnloadableCompileTimeDomain();
-            var pipeline = new DesignTimeAspectPipeline( testContext.ServiceProvider, domain, true );
 
             var aspectCode = @"
 using Caravela.Framework.Aspects;
@@ -63,6 +64,7 @@ public class Aspect : TypeAspect
 
             var targetTree1 = compilation1.RoslynCompilation.SyntaxTrees.Single( t => t.FilePath == "target.cs" );
 
+            var pipeline = new DesignTimeAspectPipeline( testContext.ServiceProvider, domain, compilation1.RoslynCompilation.References, true );
             Assert.True( pipeline.TryExecute( compilation1.RoslynCompilation, CancellationToken.None, out var compilationResult1 ) );
             Assert.Equal( new[] { "T:I" }, compilationResult1!.GetInheritableAspectTargets( "Aspect" ).ToArray() );
 

@@ -35,22 +35,25 @@ namespace Caravela.Framework.Tests.Integration.Runners
         /// <summary>
         /// Runs the template test with name and source provided in the <paramref name="testInput"/>.
         /// </summary>
-        /// <param name="serviceProvider"></param>
         /// <param name="testInput">Specifies the input test parameters such as the name and the source.</param>
         /// <param name="testResult"></param>
         /// <param name="state"></param>
         /// <returns>The result of the test execution.</returns>
         private protected override async Task RunAsync(
-            ServiceProvider serviceProvider,
             TestInput testInput,
             TestResult testResult,
             Dictionary<string, object?> state )
         {
-            var builder = new LinkerTestInputBuilder( serviceProvider );
+            // There is a chicken-or-test in the design of the test because the project-scoped service provider is needed before the compilation
+            // is created. We break the cycle by providing the service provider with the default set of references, which should work for 
+            // the linker tests because they are not cross-assembly.
+            var preliminaryProjectBuilder = this.BaseServiceProvider.WithProjectScopedServices( TestCompilationFactory.GetMetadataReferences() );
+            
+            var builder = new LinkerTestInputBuilder( preliminaryProjectBuilder );
 
             state["builder"] = builder;
 
-            await base.RunAsync( serviceProvider, testInput, testResult, state );
+            await base.RunAsync( testInput, testResult, state );
 
             if ( !testResult.Success )
             {
@@ -59,7 +62,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
 
             // Create the linker input.
             var linkerInput = builder.ToAspectLinkerInput( PartialCompilation.CreateComplete( testResult.InputCompilation.AssertNotNull() ) );
-            var linker = new AspectLinker( serviceProvider, linkerInput );
+            var linker = new AspectLinker( testResult.ProjectScopedServiceProvider, linkerInput );
             var result = linker.ToResult();
 
             var linkedCompilation = result.Compilation;

@@ -17,7 +17,7 @@ namespace Caravela.Framework.Tests.PublicPipeline.Aspects.Fabrics.NamespaceFabri
 
     internal class Aspect : OverrideMethodAspect
     {
-        public override object? OverrideMethod() => throw new System.NotSupportedException("Compile-time only code cannot be called at run-time.");
+        public override dynamic? OverrideMethod() => throw new System.NotSupportedException("Compile-time only code cannot be called at run-time.");
 
     }
 #pragma warning restore CS0067

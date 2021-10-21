@@ -89,6 +89,7 @@ using Caravela.Framework.Code;
             using DesignTimeAspectPipeline pipeline = new(
                 serviceProvider,
                 domain,
+                compilation1.References,
                 true );
 
             pipeline.ExternalBuildStarted += ( _, _ ) =>

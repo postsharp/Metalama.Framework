@@ -110,7 +110,7 @@ namespace Caravela.Compiler
         {
             if ( this.MustReplaceByThrow( node ) )
             {
-                return WithThrowNotSupportedExceptionBody( node, "Compile-time only code cannot be called at run-time." );
+                return this.WithThrowNotSupportedExceptionBody( node, "Compile-time only code cannot be called at run-time." );
             }
 
             return node;
@@ -159,7 +159,7 @@ namespace Caravela.Compiler
                     return node;
                 }
 
-                return WithThrowNotSupportedExceptionBody( node, "Compile-time only code cannot be called at run-time." );
+                return this.WithThrowNotSupportedExceptionBody( node, "Compile-time only code cannot be called at run-time." );
             }
 
             return node;
@@ -169,7 +169,7 @@ namespace Caravela.Compiler
         {
             if ( this.MustReplaceByThrow( node ) )
             {
-                return WithThrowNotSupportedExceptionBody( node, "Compile-time only code cannot be called at run-time." );
+                return this.WithThrowNotSupportedExceptionBody( node, "Compile-time only code cannot be called at run-time." );
             }
 
             return node;

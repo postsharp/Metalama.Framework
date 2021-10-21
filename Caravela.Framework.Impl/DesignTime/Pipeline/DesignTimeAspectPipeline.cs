@@ -58,8 +58,9 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
         public DesignTimeAspectPipeline(
             ServiceProvider serviceProvider,
             CompileTimeDomain domain,
+            IEnumerable<MetadataReference> metadataReferences,
             bool isTest )
-            : base( serviceProvider.WithProjectScopedServices(), AspectExecutionScenario.DesignTime, isTest, domain )
+            : base( serviceProvider.WithProjectScopedServices( metadataReferences ), AspectExecutionScenario.DesignTime, isTest, domain )
         {
             this._currentState = new PipelineState( this );
 

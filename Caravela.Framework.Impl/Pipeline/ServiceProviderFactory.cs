@@ -85,7 +85,7 @@ namespace Caravela.Framework.Impl.Pipeline
         /// <see cref="AddAsyncLocalService"/> are ignored). This scenario is used in tests. Otherwise, a shallow clone of the async-local or the global
         /// provider is provided.
         /// </summary>
-        public static ServiceProvider GetServiceProvider( IPathOptions? pathOptions = null, IAssemblyLocator? assemblyLocator = null )
+        public static ServiceProvider GetServiceProvider( IPathOptions? pathOptions = null )
         {
             ServiceProvider serviceProvider;
 
@@ -98,11 +98,6 @@ namespace Caravela.Framework.Impl.Pipeline
             else
             {
                 serviceProvider = CreateBaseServiceProvider( pathOptions );
-            }
-
-            if ( assemblyLocator != null )
-            {
-                serviceProvider = serviceProvider.WithService( assemblyLocator );
             }
 
             return serviceProvider;

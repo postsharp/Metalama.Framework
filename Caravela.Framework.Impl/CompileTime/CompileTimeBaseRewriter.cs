@@ -26,7 +26,9 @@ namespace Caravela.Framework.Impl.CompileTime
 
         protected Compilation RunTimeCompilation { get; }
 
-        protected abstract T RewriteThrowNotSupported<T>( T node ) where T : SyntaxNode;
+        protected virtual T RewriteThrowNotSupported<T>( T node )
+            where T : SyntaxNode
+            => node;
 
         protected MethodDeclarationSyntax WithThrowNotSupportedExceptionBody( MethodDeclarationSyntax method, string message )
         {
@@ -70,7 +72,7 @@ namespace Caravela.Framework.Impl.CompileTime
                 case PropertyDeclarationSyntax { AccessorList: { } } property:
                     // Property with accessor list - change all accessors to expression bodied which do throw exception, remove initializer.
 
-                    return ReplaceDynamicToObjectRewriter.Rewrite(
+                    return this.RewriteThrowNotSupported(
                         property
                             .WithAccessorList(
                                 property.AccessorList!.WithAccessors(
@@ -107,7 +109,7 @@ namespace Caravela.Framework.Impl.CompileTime
                 case EventDeclarationSyntax @event:
                     // Event with accessor list.
 
-                    return ReplaceDynamicToObjectRewriter.Rewrite(
+                    return this.RewriteThrowNotSupported(
                         @event
                             .WithAccessorList(
                                 @event.AccessorList.AssertNotNull()

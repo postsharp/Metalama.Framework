@@ -11,6 +11,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Reflection.Metadata;
@@ -33,8 +34,10 @@ namespace Caravela.TestFramework
         private static readonly Regex _spaceRegex = new( " +", RegexOptions.Compiled );
         private static readonly Regex _newLineRegex = new( "( *[\n|\r])+", RegexOptions.Compiled );
         private static readonly AsyncLocal<bool> _isTestRunning = new();
-        private readonly ServiceProvider _baseServiceProvider;
-        private readonly MetadataReference[] _metadataReferences;
+
+        public ServiceProvider BaseServiceProvider { get; }
+
+        public ImmutableArray<MetadataReference> MetadataReferences { get; }
 
         protected BaseTestRunner(
             ServiceProvider serviceProvider,
@@ -42,11 +45,11 @@ namespace Caravela.TestFramework
             IEnumerable<MetadataReference> metadataReferences,
             ITestOutputHelper? logger )
         {
-            this._metadataReferences = metadataReferences
+            this.MetadataReferences = metadataReferences
                 .Append( MetadataReference.CreateFromFile( typeof(BaseTestRunner).Assembly.Location ) )
-                .ToArray();
+                .ToImmutableArray();
 
-            this._baseServiceProvider = serviceProvider.WithMark( ServiceProviderMark.Test );
+            this.BaseServiceProvider = serviceProvider.WithMark( ServiceProviderMark.Test );
             this.ProjectDirectory = projectDirectory;
             this.Logger = logger;
         }
@@ -73,17 +76,15 @@ namespace Caravela.TestFramework
 
         private async Task RunAndAssertCoreAsync( TestInput testInput )
         {
-            var serviceProvider = this._baseServiceProvider.WithProjectScopedServices();
             Dictionary<string, object?> state = new( StringComparer.Ordinal );
             using var testResult = new TestResult();
-            await this.RunAsync( serviceProvider, testInput, testResult, state );
+            await this.RunAsync( testInput, testResult, state );
             this.SaveResults( testInput, testResult, state );
             this.ExecuteAssertions( testInput, testResult, state );
         }
 
         public Task RunAsync( TestInput testInput, TestResult testResult )
             => this.RunAsync(
-                this._baseServiceProvider.WithProjectScopedServices(),
                 testInput,
                 testResult,
                 new Dictionary<string, object?>( StringComparer.InvariantCulture ) );
@@ -92,13 +93,11 @@ namespace Caravela.TestFramework
         /// Runs a test. The present implementation of this method only prepares an input project and stores it in the <see cref="TestResult"/>.
         /// Derived classes must call this base method and continue with running the test.
         /// </summary>
-        /// <param name="serviceProvider"></param>
         /// <param name="testInput"></param>
         /// <param name="testResult">The output object must be created by the caller and passed, so that the caller can get
         ///     a partial object in case of exception.</param>
         /// <param name="state"></param>
         private protected virtual async Task RunAsync(
-            ServiceProvider serviceProvider,
             TestInput testInput,
             TestResult testResult,
             Dictionary<string, object?> state )
@@ -218,6 +217,7 @@ namespace Caravela.TestFramework
 
                 testResult.InputProject = project;
                 testResult.InputCompilation = initialCompilation;
+                testResult.ProjectScopedServiceProvider = this.BaseServiceProvider.WithProjectScopedServices( initialCompilation.References );
 
                 if ( this.ShouldStopOnInvalidInput( testInput.Options ) )
                 {
@@ -240,18 +240,22 @@ namespace Caravela.TestFramework
         /// <summary>
         /// Compiles a dependency using the Caravela pipeline, emits a binary assembly, and returns a reference to it.
         /// </summary>
-        private async Task<MetadataReference?> CompileDependencyAsync( string code, Project project, TestResult testResult )
+        private async Task<MetadataReference?> CompileDependencyAsync( string code, Project emptyProject, TestResult testResult )
         {
-            project = project.AddDocument( "dependency.cs", code ).Project;
+            // The assembly name must match the file name otherwise it wont be found bu AssemblyLocator.
+            var name = Guid.NewGuid().ToString();
+            var project = emptyProject.AddDocument( "dependency.cs", code ).Project;
 
             using var domain = new UnloadableCompileTimeDomain();
 
             // Transform with Caravela.
-            var pipeline = new CompileTimeAspectPipeline( this._baseServiceProvider.WithProjectScopedServices(), true, domain );
+            var pipeline = new CompileTimeAspectPipeline( this.BaseServiceProvider.WithProjectScopedServices( this.MetadataReferences ), true, domain );
+
+            var compilation = (await project.GetCompilationAsync())!.WithAssemblyName( name );
 
             if ( !pipeline.TryExecute(
                 testResult.InputCompilationDiagnostics,
-                (await project.GetCompilationAsync())!,
+                compilation,
                 default,
                 CancellationToken.None,
                 out _,
@@ -264,8 +268,8 @@ namespace Caravela.TestFramework
             }
 
             // Emit the binary assembly.
-            var testOptions = this._baseServiceProvider.GetService<TestProjectOptions>();
-            var outputPath = Path.Combine( testOptions.BaseDirectory, "dependency.dll" );
+            var testOptions = this.BaseServiceProvider.GetService<TestProjectOptions>();
+            var outputPath = Path.Combine( testOptions.BaseDirectory, name + ".dll" );
 
             var emitResult = resultCompilation.Emit( outputPath, manifestResources: outputResources.Select( r => r.Resource ) );
 
@@ -437,7 +441,7 @@ namespace Caravela.TestFramework
         /// <returns>A new project instance.</returns>
         internal Project CreateProject( TestOptions options )
         {
-            var compilation = TestCompilationFactory.CreateEmptyCSharpCompilation( null, this._metadataReferences );
+            var compilation = TestCompilationFactory.CreateEmptyCSharpCompilation( null, this.MetadataReferences );
 
             var guid = Guid.NewGuid();
             var workspace1 = new AdhocWorkspace();
@@ -455,9 +459,9 @@ namespace Caravela.TestFramework
             return project;
         }
 
-        private protected async Task WriteHtmlAsync( IServiceProvider serviceProvider, TestInput testInput, TestResult testResult )
+        private protected async Task WriteHtmlAsync( TestInput testInput, TestResult testResult )
         {
-            var htmlCodeWriter = this.CreateHtmlCodeWriter( serviceProvider, testInput.Options );
+            var htmlCodeWriter = this.CreateHtmlCodeWriter( testResult.ProjectScopedServiceProvider, testInput.Options );
 
             var htmlDirectory = Path.Combine(
                 this.ProjectDirectory!,

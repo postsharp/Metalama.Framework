@@ -133,7 +133,7 @@ namespace Caravela.Framework.Tests.UnitTests.DesignTime
             using TestProjectOptions testProjectOptions = new();
             var compilation = CreateCSharpCompilation( new Dictionary<string, string>() { { "F1.cs", "public class X {}" } } );
             using DesignTimeAspectPipelineFactory factory = new( new UnloadableCompileTimeDomain() );
-            var pipeline = factory.GetOrCreatePipeline( testProjectOptions, CancellationToken.None )!;
+            var pipeline = factory.GetOrCreatePipeline( testProjectOptions, compilation, CancellationToken.None )!;
 
             // First execution of the pipeline.
             Assert.True( factory.TryExecute( testProjectOptions, compilation, CancellationToken.None, out var results ) );
@@ -212,7 +212,7 @@ Target.cs:
                 assemblyName );
 
             using DesignTimeAspectPipelineFactory factory = new( new UnloadableCompileTimeDomain() );
-            var pipeline = factory.GetOrCreatePipeline( projectOptions, CancellationToken.None )!;
+            var pipeline = factory.GetOrCreatePipeline( projectOptions, compilation, CancellationToken.None )!;
 
             // First execution of the pipeline.
             Assert.True( factory.TryExecute( projectOptions, compilation, CancellationToken.None, out var results ) );
@@ -303,7 +303,7 @@ Target.cs:
 
             // Build the project from the compile-time pipeline.
             using UnloadableCompileTimeDomain domain = new();
-            var serviceProvider = ServiceProviderFactory.GetServiceProvider( projectOptions ).WithProjectScopedServices();
+            var serviceProvider = ServiceProviderFactory.GetServiceProvider( projectOptions ).WithProjectScopedServices( compilation.References );
             var compileTimeAspectPipeline = new CompileTimeAspectPipeline( serviceProvider, true, domain );
             DiagnosticList compileDiagnostics = new();
             Assert.True( compileTimeAspectPipeline.TryExecute( compileDiagnostics, compilation5, default, CancellationToken.None, out _, out _, out _ ) );

@@ -30,7 +30,7 @@ namespace Caravela.Framework.Impl.CompileTime
         private readonly CompileTimeDomain _domain;
         private readonly IServiceProvider _serviceProvider;
         private readonly CompileTimeCompilationBuilder _builder;
-        private readonly IAssemblyLocator? _runTimeAssemblyLocator;
+        private readonly IAssemblyLocator _runTimeAssemblyLocator;
         private readonly SystemTypeResolver _systemTypeResolver;
 
         // Maps the identity of the run-time project to the compile-time project.
@@ -43,7 +43,7 @@ namespace Caravela.Framework.Impl.CompileTime
             this._domain = domain;
             this._serviceProvider = serviceProvider;
             this._builder = new CompileTimeCompilationBuilder( serviceProvider, domain );
-            this._runTimeAssemblyLocator = serviceProvider.GetOptionalService<IAssemblyLocator>();
+            this._runTimeAssemblyLocator = serviceProvider.GetService<IAssemblyLocator>();
             this.AttributeDeserializer = new AttributeDeserializer( serviceProvider, this );
             this._systemTypeResolver = serviceProvider.GetService<SystemTypeResolver>();
         }
@@ -95,7 +95,7 @@ namespace Caravela.Framework.Impl.CompileTime
         /// Gets the <see cref="CompileTimeProject"/> for a given <see cref="AssemblyIdentity"/>,
         /// or <c>null</c> if it does not exist. 
         /// </summary>
-        public CompileTimeProject? GetCompileTimeProject( AssemblyIdentity runTimeAssemblyIdentity, CancellationToken cancellationToken )
+        private CompileTimeProject? GetCompileTimeProject( AssemblyIdentity runTimeAssemblyIdentity, CancellationToken cancellationToken )
         {
             // This method is a smell and should probably not exist.
 
@@ -120,9 +120,7 @@ namespace Caravela.Framework.Impl.CompileTime
             }
             else
             {
-                MetadataReference? metadataReference = null;
-
-                if ( this._runTimeAssemblyLocator?.TryFindAssembly( runTimeAssemblyIdentity, out metadataReference ) != true )
+                if ( this._runTimeAssemblyLocator.TryFindAssembly( runTimeAssemblyIdentity, out var metadataReference ) != true )
                 {
                     diagnosticAdder.Report(
                         GeneralDiagnosticDescriptors.CannotFindCompileTimeAssembly.CreateDiagnostic(
@@ -134,7 +132,7 @@ namespace Caravela.Framework.Impl.CompileTime
                     return false;
                 }
 
-                return this.TryGetCompileTimeProject( metadataReference!, diagnosticAdder, cacheOnly, cancellationToken, out compileTimeProject );
+                return this.TryGetCompileTimeProject( metadataReference, diagnosticAdder, cacheOnly, cancellationToken, out compileTimeProject );
             }
         }
 

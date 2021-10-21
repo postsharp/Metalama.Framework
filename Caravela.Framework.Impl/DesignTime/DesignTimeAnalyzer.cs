@@ -122,7 +122,10 @@ namespace Caravela.Framework.Impl.DesignTime
                 }
 
                 // Perform additional analysis not done by the design-time pipeline.
-                var pipeline = DesignTimeAspectPipelineFactory.Instance.GetOrCreatePipeline( buildOptions, context.CancellationToken );
+                var pipeline = DesignTimeAspectPipelineFactory.Instance.GetOrCreatePipeline(
+                    buildOptions,
+                    context.SemanticModel.Compilation,
+                    context.CancellationToken );
 
                 if ( pipeline != null )
                 {

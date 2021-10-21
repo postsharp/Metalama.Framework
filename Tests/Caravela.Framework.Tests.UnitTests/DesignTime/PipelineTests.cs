@@ -21,7 +21,7 @@ namespace Caravela.Framework.Tests.UnitTests.DesignTime
             var compilation = CreateCSharpCompilation( code );
 
             using var domain = new UnloadableCompileTimeDomain();
-            using DesignTimeAspectPipeline pipeline = new( testContext.ServiceProvider, domain, true );
+            using DesignTimeAspectPipeline pipeline = new( testContext.ServiceProvider, domain, compilation.References, true );
             Assert.True( pipeline.TryExecute( compilation, CancellationToken.None, out _ ) );
         }
 
@@ -43,7 +43,7 @@ namespace Caravela.Framework.Tests.UnitTests.DesignTime
             var compilation = CreateCSharpCompilation( code );
 
             using var domain = new UnloadableCompileTimeDomain();
-            using DesignTimeAspectPipeline pipeline = new( testContext.ServiceProvider, domain, true );
+            using DesignTimeAspectPipeline pipeline = new( testContext.ServiceProvider, domain, compilation.References, true );
             Assert.True( pipeline.TryExecute( compilation, CancellationToken.None, out _ ) );
         }
     }

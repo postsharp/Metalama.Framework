@@ -47,7 +47,6 @@ namespace Caravela.TestFramework
         /// </summary>
         /// <returns>The result of the test execution.</returns>
         private protected override async Task RunAsync(
-            ServiceProvider serviceProvider,
             TestInput testInput,
             TestResult testResult,
             Dictionary<string, object?> state )
@@ -62,7 +61,7 @@ namespace Caravela.TestFramework
                 this._runCount++;
             }
 
-            await base.RunAsync( serviceProvider, testInput, testResult, state );
+            await base.RunAsync( testInput, testResult, state );
 
             if ( testResult.InputCompilation == null )
             {
@@ -71,7 +70,7 @@ namespace Caravela.TestFramework
                 return;
             }
 
-            var serviceProviderWithObserver = serviceProvider.WithServices( new Observer( testResult ) );
+            var serviceProviderWithObserver = testResult.ProjectScopedServiceProvider.WithServices( new Observer( testResult ) );
 
             using var domain = new UnloadableCompileTimeDomain();
 
@@ -143,7 +142,7 @@ namespace Caravela.TestFramework
 
             if ( testInput.Options.WriteInputHtml.GetValueOrDefault() || testInput.Options.WriteOutputHtml.GetValueOrDefault() )
             {
-                await this.WriteHtmlAsync( serviceProvider, testInput, testResult );
+                await this.WriteHtmlAsync( testInput, testResult );
             }
         }
 

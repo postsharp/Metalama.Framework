@@ -33,12 +33,12 @@ namespace Caravela.Framework.Impl.CompileTime
                 }
             }
 
-            return new(
+            return new AssemblyIdentity(
                 assemblyName.Name,
                 assemblyName.Version,
-                assemblyName.CodeBase,
+                assemblyName.CultureName,
                 publicKeyOrToken,
-                hasPublicKey);
+                hasPublicKey );
         }
 
         public static INamedTypeSymbol GetTypeByMetadataNameSafe( this Compilation compilation, string name )

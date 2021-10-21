@@ -6,6 +6,7 @@ using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Formatting;
+using Caravela.Framework.Impl.Pipeline;
 using Caravela.TestFramework.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -24,12 +25,19 @@ namespace Caravela.TestFramework
     /// </summary>
     public class TestResult : IDisposable
     {
-        private bool _frozen;
-
-        public TestInput? TestInput { get; set; }
+        private static readonly Regex _cleanCallStackRegex = new( " in (.*):line \\d+" );
 
         private readonly List<TestSyntaxTree> _syntaxTrees = new();
-        private static readonly Regex _cleanCallStackRegex = new( " in (.*):line \\d+" );
+        private bool _frozen;
+        private ServiceProvider? _serviceProvider;
+
+        internal ServiceProvider ProjectScopedServiceProvider
+        {
+            get => this._serviceProvider ?? throw new InvalidOperationException( "The service provider has not been set." );
+            set => this._serviceProvider = value;
+        }
+
+        public TestInput? TestInput { get; set; }
 
         public DiagnosticList InputCompilationDiagnostics { get; } = new();
 

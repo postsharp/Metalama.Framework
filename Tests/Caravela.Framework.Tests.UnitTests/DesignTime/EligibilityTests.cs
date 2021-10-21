@@ -76,7 +76,7 @@ namespace Ns { class C {} }
                 .ToDictionary( GetName, d => d );
 
             this._domain = new UnloadableCompileTimeDomain();
-            this._pipeline = new DesignTimeAspectPipeline( testContext.ServiceProvider, this._domain, true );
+            this._pipeline = new DesignTimeAspectPipeline( testContext.ServiceProvider, this._domain, this._compilation.RoslynCompilation.References, true );
             this._pipeline.TryGetConfiguration( this._compilation.PartialCompilation, NullDiagnosticAdder.Instance, true, CancellationToken.None, out _ );
         }
 

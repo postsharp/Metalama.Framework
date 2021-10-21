@@ -323,7 +323,7 @@ namespace Caravela.Framework.Impl.CompileTime
                 foreach ( var implementedInterface in allImplementedInterfaces )
                 {
 #pragma warning disable 618
-                    if ( implementedInterface.Name is nameof(IAspect) or nameof(IEligible<IDeclaration>) or nameof(IProjectData) )
+                    if ( implementedInterface.Name is nameof(IAspect) or nameof(IEligible<IDeclaration>) or nameof(ProjectData) )
 #pragma warning restore 618
                     {
                         foreach ( var member in implementedInterface.GetMembers() )
@@ -464,7 +464,7 @@ namespace Caravela.Framework.Impl.CompileTime
                 {
                     if ( methodSymbol.IsOverride && methodSymbol.OverriddenMethod!.IsAbstract )
                     {
-                        yield return WithThrowNotSupportedExceptionBody( node, "Template code cannot be directly executed." );
+                        yield return this.WithThrowNotSupportedExceptionBody( node, "Template code cannot be directly executed." );
                     }
                     else
                     {
@@ -582,7 +582,7 @@ namespace Caravela.Framework.Impl.CompileTime
                     {
                         // If the property implements an abstract property, it cannot be removed.
 
-                        yield return WithThrowNotSupportedExceptionBody( node, "Template code cannot be directly executed." );
+                        yield return this.WithThrowNotSupportedExceptionBody( node, "Template code cannot be directly executed." );
                     }
                     else
                     {
@@ -661,7 +661,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
                 if ( success )
                 {
-                    yield return WithThrowNotSupportedExceptionBody( node, "Template code cannot be directly executed." );
+                    yield return this.WithThrowNotSupportedExceptionBody( node, "Template code cannot be directly executed." );
 
                     if ( transformedAddDeclaration != null )
                     {
@@ -814,6 +814,8 @@ namespace Caravela.Framework.Impl.CompileTime
                     return base.VisitIdentifierName( node );
                 }
             }
+
+            protected override T RewriteThrowNotSupported<T>( T node ) => ReplaceDynamicToObjectRewriter.Rewrite( node );
 
             private Context WithScope( TemplatingScope scope )
             {

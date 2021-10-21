@@ -2,7 +2,6 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Compiler;
-using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Options;
 using Caravela.Framework.Project;
@@ -23,9 +22,9 @@ namespace Caravela.Framework.Impl.Pipeline
         {
             var projectOptions = new ProjectOptions( context.GlobalOptions, context.Plugins );
 
-            var serviceProvider = ServiceProviderFactory.GetServiceProvider( assemblyLocator: new CompilationAssemblyLocator( context.Compilation ) )
+            var serviceProvider = ServiceProviderFactory.GetServiceProvider()
                 .WithService( projectOptions )
-                .WithProjectScopedServices();
+                .WithProjectScopedServices( context.Compilation.References );
 
             try
             {
