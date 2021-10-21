@@ -6,6 +6,7 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Eligibility;
 using Caravela.Framework.Fabrics;
 using Caravela.Framework.Impl.Aspects;
+using Caravela.Framework.Impl.CodeModel;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -33,11 +34,20 @@ namespace Caravela.Framework.Impl.Fabrics
             {
                 var fabricInstance = new FabricInstance( templateClass.Driver, builder.Target );
 
+                if ( fabricInstance.Driver.Kind is FabricKind.Namespace or FabricKind.Type )
+                {
+                    // We need to freeze project data before execution of type fabrics. Only project fabrics can modify the state.
+                    ((ProjectModel) builder.Project).FreezeProjectData();
+                }
+
                 using ( internalBuilder.WithPredecessor( new AspectPredecessor( AspectPredecessorKind.Fabric, fabricInstance ) ) )
                 {
                     templateClass.Driver.Execute( internalBuilder, templateClass, fabricInstance );
                 }
             }
+            
+            // Prevent further modifications of the project data.
+            ((ProjectModel) builder.Project).FreezeProjectData();
         }
 
         void IAspect.BuildAspectClass( IAspectClassBuilder builder ) { }

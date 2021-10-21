@@ -11,20 +11,20 @@ namespace Caravela.Framework.Impl.Fabrics
 {
     internal class FabricInstance : IFabricInstance, IAspectPredecessorImpl
     {
-        private readonly FabricDriver _driver;
+        public FabricDriver Driver { get; }
 
         public IDeclaration? TargetDeclaration { get; }
 
         public FabricInstance( FabricDriver driver, IDeclaration? targetDeclaration )
         {
-            this._driver = driver;
+            this.Driver = driver;
             this.TargetDeclaration = targetDeclaration;
         }
 
-        public IFabric Fabric => this._driver.Fabric;
+        public IFabric Fabric => this.Driver.Fabric;
 
-        public FormattableString FormatPredecessor() => this._driver.FormatPredecessor();
+        public FormattableString FormatPredecessor() => this.Driver.FormatPredecessor();
 
-        public Location? GetDiagnosticLocation( Compilation compilation ) => this._driver.GetDiagnosticLocation();
+        public Location? GetDiagnosticLocation( Compilation compilation ) => this.Driver.GetDiagnosticLocation();
     }
 }

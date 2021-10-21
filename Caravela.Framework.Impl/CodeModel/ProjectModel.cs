@@ -17,10 +17,11 @@ namespace Caravela.Framework.Impl.CodeModel
 {
     internal class ProjectModel : IProject
     {
-        private readonly ConcurrentDictionary<Type, object> _extensions = new();
+        private readonly ConcurrentDictionary<Type, ProjectData> _extensions = new();
         private readonly IProjectOptions _projectOptions;
         private readonly SyntaxTree? _anySyntaxTree;
         private readonly Lazy<ImmutableArray<IAssemblyIdentity>> _projectReferences;
+        private bool _isFrozen;
 
         public ProjectModel( Compilation compilation, IServiceProvider serviceProvider )
         {
@@ -59,14 +60,29 @@ namespace Caravela.Framework.Impl.CodeModel
             where T : ProjectData, new()
             => (T) this._extensions.GetOrAdd( typeof(T), this.CreateProjectData );
 
-        private object CreateProjectData( Type t )
+        private ProjectData CreateProjectData( Type t )
         {
             var data = (ProjectData) Activator.CreateInstance( t );
-            data.Initialize( this );
+            data.Initialize( this, this._isFrozen );
 
             return data;
         }
 
         public IServiceProvider ServiceProvider { get; }
+
+        internal void FreezeProjectData()
+        {
+            if ( this._isFrozen )
+            {
+                return;
+            }
+
+            this._isFrozen = true;
+            
+            foreach ( var data in this._extensions.Values )
+            {
+                data.MakeReadOnly();
+            }
+        }
     }
 }

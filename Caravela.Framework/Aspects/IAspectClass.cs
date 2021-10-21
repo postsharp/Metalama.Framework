@@ -25,7 +25,7 @@ namespace Caravela.Framework.Aspects
 
         /// <summary>
         /// Gets the name of the aspect displayed to the design-time UI. This property should not be used to report diagnostics (<see cref="ShortName"/>
-        /// should be used instead). This property can be set by the implementation of the <see cref="IAspect.BuildAspectClass"/>
+        /// should be used instead). It can be set by the implementation of the <see cref="IAspect.BuildAspectClass"/>
         /// method by setting the <see cref="IAspectClassBuilder.DisplayName"/> property. By default, it is equal to <see cref="ShortName"/>.
         /// </summary>
         string DisplayName { get; }
@@ -42,7 +42,7 @@ namespace Caravela.Framework.Aspects
         bool IsAbstract { get; }
 
         /// <summary>
-        /// Gets a value indicating whether instances of this aspect classes are inherited by derived declarations.
+        /// Gets a value indicating whether instances of this aspect class are inherited by derived declarations.
         /// This property can be set by the implementation of the <see cref="IAspect.BuildAspectClass"/>
         /// method by setting the <see cref="IAspectClassBuilder.IsInherited"/> property. By default, it is <c>false</c>.
         /// </summary>
