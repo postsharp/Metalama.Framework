@@ -6,6 +6,8 @@
       PostSharp project "Caravela" SDK. A tool for custom source code modifying extensions using the Roslyn API. More powerful than source generators.
     </PackageDescription>
     <RootNamespace>Caravela.Framework.Impl</RootNamespace>
+    <!-- This is to prevent the Caravela.Compiler.Sdk package to change our nuspec --> 
+    <CaravelaCompilerDisablePackCustomization>True</CaravelaCompilerDisablePackCustomization>
   </PropertyGroup>
 
   <ItemGroup>
