@@ -112,7 +112,10 @@ function Clean() {
 
     dir obj -Recurse | rd -Recurse -Force
     dir bin -Recurse | rd -Recurse -Force
-    rd artifacts -Recurse -Force
+    
+    If ( Test-Path -Path "artifacts" ) {
+        rd "artifacts" -Recurse -Force
+    }
 
     if ( Test-Path $PropsFilePath ) {
         Remove-Item $PropsFilePath
@@ -195,6 +198,8 @@ function Pack() {
 function CopyToPublishDir() {
     
     Write-Host "------ Publishing ---------------------------------" -ForegroundColor Cyan
+    
+    # TODO: Redesign this to remove the back reference. 
     
     & dotnet build eng\CopyToPublishDir.proj --nologo --no-restore -v:$Verbosity
     if ($LASTEXITCODE -ne 0 ) { throw "Copying to publish directory failed." }
