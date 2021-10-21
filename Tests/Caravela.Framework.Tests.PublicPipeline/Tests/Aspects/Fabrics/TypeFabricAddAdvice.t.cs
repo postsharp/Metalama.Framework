@@ -11,7 +11,7 @@ return s;};
         
         class Fabric : ITypeFabric
         {
-            public void AmendType(ITypeAmender builder) => throw new System.NotSupportedException("Compile-time only code cannot be called at run-time.");
+            public void AmendType(ITypeAmender amender) => throw new System.NotSupportedException("Compile-time only code cannot be called at run-time.");
 
             
             [Template]

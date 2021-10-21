@@ -9,7 +9,7 @@ namespace Caravela.Framework.Tests.PublicPipeline.Aspects.Fabrics.NamespaceFabri
 #pragma warning disable CS0067
     internal class Fabric : INamespaceFabric
     {
-        public void AmendNamespace(INamespaceAmender builder) => throw new System.NotSupportedException("Compile-time only code cannot be called at run-time.");
+        public void AmendNamespace(INamespaceAmender amender) => throw new System.NotSupportedException("Compile-time only code cannot be called at run-time.");
 
     }
 #pragma warning restore CS0067

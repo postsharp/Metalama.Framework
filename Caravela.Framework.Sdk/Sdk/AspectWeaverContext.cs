@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Compiler;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Impl.CodeModel;
 using Microsoft.CodeAnalysis;
@@ -36,13 +37,13 @@ namespace Caravela.Framework.Impl.Sdk
         private readonly Action<Diagnostic> _addDiagnostic;
 
         // TODO: support reading existing resources
-        private readonly Action<ResourceDescription> _addManifestResource;
+        private readonly Action<ManagedResource> _addManifestResource;
 
         /// <summary>
-        /// Adds a new <see cref="ResourceDescription"/> to the compilation.
+        /// Adds a new <see cref="ManagedResource"/> to the compilation.
         /// </summary>
         /// <param name="resource"></param>
-        public void AddManifestResource( ResourceDescription resource ) => this._addManifestResource( resource );
+        public void AddManifestResource( ManagedResource resource ) => this._addManifestResource( resource );
 
         /// <summary>
         /// Rewrites the syntax trees affected by aspects.
@@ -122,7 +123,7 @@ namespace Caravela.Framework.Impl.Sdk
             IReadOnlyDictionary<ISymbol, IAspectInstance> aspectInstances,
             IPartialCompilation compilation,
             Action<Diagnostic> addDiagnostic,
-            Action<ResourceDescription> addManifestResource )
+            Action<ManagedResource> addManifestResource )
         {
             this.AspectClass = aspectClass;
             this.AspectInstances = aspectInstances;

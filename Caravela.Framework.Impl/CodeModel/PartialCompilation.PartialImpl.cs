@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Compiler;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -24,7 +25,7 @@ namespace Caravela.Framework.Impl.CodeModel
                 ImmutableDictionary<string, SyntaxTree> syntaxTrees,
                 ImmutableHashSet<INamedTypeSymbol>? types,
                 DerivedTypeIndex derivedTypeIndex,
-                ImmutableArray<ResourceDescription> resources )
+                ImmutableArray<ManagedResource> resources )
                 : base( compilation, derivedTypeIndex, resources )
             {
                 this._types = types;
@@ -37,7 +38,7 @@ namespace Caravela.Framework.Impl.CodeModel
                 PartialCompilation baseCompilation,
                 IReadOnlyList<SyntaxTreeModification>? modifiedSyntaxTrees,
                 IReadOnlyList<SyntaxTree>? addedTrees,
-                ImmutableArray<ResourceDescription>? resources )
+                ImmutableArray<ManagedResource>? resources )
                 : base( baseCompilation, modifiedSyntaxTrees, addedTrees, resources )
             {
                 this._types = types;
@@ -55,7 +56,7 @@ namespace Caravela.Framework.Impl.CodeModel
             public override PartialCompilation Update(
                 IReadOnlyList<SyntaxTreeModification>? replacedTrees = null,
                 IReadOnlyList<SyntaxTree>? addedTrees = null,
-                ImmutableArray<ResourceDescription>? resources = null )
+                ImmutableArray<ManagedResource>? resources = null )
             {
                 var syntaxTrees = this._syntaxTrees.ToBuilder();
 

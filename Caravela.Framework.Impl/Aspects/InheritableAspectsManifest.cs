@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Compiler;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
@@ -51,15 +52,15 @@ namespace Caravela.Framework.Impl.Aspects
             stream.Flush();
         }
 
-        public ResourceDescription ToResource()
+        public ManagedResource ToResource()
         {
             var stream = new MemoryStream();
             this.Serialize( stream );
-            _ = stream.Seek( 0, SeekOrigin.Begin );
+            var bytes = stream.ToArray();
 
-            return new ResourceDescription(
+            return new ManagedResource(
                 CompileTimeConstants.InheritableAspectManifestResourceName,
-                () => stream,
+                bytes,
                 true );
         }
 

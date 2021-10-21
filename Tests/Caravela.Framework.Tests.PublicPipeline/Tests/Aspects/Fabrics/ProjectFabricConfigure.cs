@@ -13,11 +13,9 @@ namespace Caravela.Framework.Tests.PublicPipeline.Aspects.Fabrics.ProjectFabricC
         }
     }
 
-    internal class Configuration : IProjectData
+    internal class Configuration : ProjectData
     {
         public string? Message { get; set; }
-
-        public void Initialize( IProject project ) { }
     }
 
     internal class Aspect : OverrideMethodAspect

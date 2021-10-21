@@ -6,20 +6,15 @@ using Caravela.Framework.Aspects;
 namespace Caravela.Framework.Project
 {
     /// <summary>
-    /// An interface that must be implemented by classes that want to extend <see cref="IProject"/> with project-local data using the <see cref="IProject.Data{T}"/> method.
+    /// An base class that must be implemented by classes that want to extend <see cref="IProject"/> with project-local data using the <see cref="IProject.Data{T}"/> method.
     /// </summary>
     [CompileTimeOnly]
-    public interface IProjectData
+    public abstract class ProjectData
     {
         /// <summary>
         /// Initializes the object from project properties.
         /// </summary>
         /// <param name="project"></param>
-        void Initialize( IProject project )
-#if NET5_0
-        { }
-#else
-            ;
-#endif
+        public virtual void Initialize( IProject project ) { }
     }
 }

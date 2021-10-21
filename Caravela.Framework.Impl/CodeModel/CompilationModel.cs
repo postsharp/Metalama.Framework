@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Compiler;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Code.Collections;
@@ -35,14 +36,14 @@ namespace Caravela.Framework.Impl.CodeModel
         public static CompilationModel CreateInitialInstance(
             IProject project,
             Compilation compilation,
-            ImmutableArray<ResourceDescription> resources = default )
+            ImmutableArray<ManagedResource> resources = default )
             => new( project, PartialCompilation.CreateComplete( compilation, resources ) );
 
         public static CompilationModel CreateInitialInstance(
             IProject project,
             Compilation compilation,
             SyntaxTree syntaxTree,
-            ImmutableArray<ResourceDescription> resources = default )
+            ImmutableArray<ManagedResource> resources = default )
             => new( project, PartialCompilation.CreatePartial( compilation, syntaxTree, resources ) );
 
         private readonly ImmutableDictionaryOfArray<DeclarationRef<IDeclaration>, IObservableTransformation> _transformations;

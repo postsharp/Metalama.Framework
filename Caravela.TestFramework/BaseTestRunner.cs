@@ -267,7 +267,7 @@ namespace Caravela.TestFramework
             var testOptions = this._baseServiceProvider.GetService<TestProjectOptions>();
             var outputPath = Path.Combine( testOptions.BaseDirectory, "dependency.dll" );
 
-            var emitResult = resultCompilation.Emit( outputPath, manifestResources: outputResources );
+            var emitResult = resultCompilation.Emit( outputPath, manifestResources: outputResources.Select( r => r.Resource ) );
 
             if ( !emitResult.Success )
             {

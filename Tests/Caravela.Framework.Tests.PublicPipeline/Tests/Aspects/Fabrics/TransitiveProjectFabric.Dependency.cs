@@ -18,11 +18,9 @@ namespace Caravela.Framework.Tests.Integration.Tests.Aspects.Fabrics.TransitiveP
         }
     }
 
-    public class Configuration : IProjectData
+    public class Configuration : ProjectData
     {
         public string Message { get; set; } = "Not Configured";
-
-        public void Initialize( IProject project ) { }
     }
 
     public class Aspect : OverrideMethodAspect

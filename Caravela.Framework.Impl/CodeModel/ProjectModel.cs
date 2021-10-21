@@ -56,12 +56,12 @@ namespace Caravela.Framework.Impl.CodeModel
         public bool TryGetProperty( string name, [NotNullWhen( true )] out string? value ) => this._projectOptions.TryGetProperty( name, out value );
 
         public T Data<T>()
-            where T : class, IProjectData, new()
+            where T : ProjectData, new()
             => (T) this._extensions.GetOrAdd( typeof(T), this.CreateProjectData );
 
         private object CreateProjectData( Type t )
         {
-            var data = (IProjectData) Activator.CreateInstance( t );
+            var data = (ProjectData) Activator.CreateInstance( t );
             data.Initialize( this );
 
             return data;

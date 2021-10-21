@@ -26,7 +26,9 @@ namespace Caravela.Framework.Impl.CompileTime
 
         protected Compilation RunTimeCompilation { get; }
 
-        protected static MethodDeclarationSyntax WithThrowNotSupportedExceptionBody( MethodDeclarationSyntax method, string message )
+        protected abstract T RewriteThrowNotSupported<T>( T node ) where T : SyntaxNode;
+
+        protected MethodDeclarationSyntax WithThrowNotSupportedExceptionBody( MethodDeclarationSyntax method, string message )
         {
             // Method does not have a body (e.g. because it's abstract) , so there is nothing to replace.
             if ( method.Body == null && method.ExpressionBody == null )
@@ -35,7 +37,7 @@ namespace Caravela.Framework.Impl.CompileTime
                 throw new ArgumentOutOfRangeException( nameof(method) );
             }
 
-            return ReplaceDynamicToObjectRewriter.Rewrite(
+            return this.RewriteThrowNotSupported(
                 method
                     .WithBody( null )
                     .WithExpressionBody( ArrowExpressionClause( GetNotSupportedExceptionExpression( message ) ) )
@@ -46,7 +48,7 @@ namespace Caravela.Framework.Impl.CompileTime
                     .WithTrailingTrivia( LineFeed, LineFeed ) );
         }
 
-        protected static BasePropertyDeclarationSyntax WithThrowNotSupportedExceptionBody( BasePropertyDeclarationSyntax memberDeclaration, string message )
+        protected BasePropertyDeclarationSyntax WithThrowNotSupportedExceptionBody( BasePropertyDeclarationSyntax memberDeclaration, string message )
         {
             if ( memberDeclaration.Modifiers.Any( x => x.Kind() == SyntaxKind.AbstractKeyword ) )
             {
@@ -58,7 +60,7 @@ namespace Caravela.Framework.Impl.CompileTime
             {
                 case PropertyDeclarationSyntax { ExpressionBody: { } } property:
                     // Expression bodied property - change the expression to throw exception.
-                    return ReplaceDynamicToObjectRewriter.Rewrite(
+                    return this.RewriteThrowNotSupported(
                         property
                             .WithExpressionBody( property.ExpressionBody?.WithExpression( GetNotSupportedExceptionExpression( message ) ) )
                             .NormalizeWhitespace()

@@ -19,7 +19,7 @@ namespace Caravela.Framework.Impl.CodeModel
     {
         /// <summary>
         /// The compilation with respect to which the <see cref="ModifiedSyntaxTrees"/> collection has been constructed.
-        /// Typically, this is the argument of the <see cref="CreateComplete"/> or <see cref="CreatePartial(Microsoft.CodeAnalysis.Compilation,Microsoft.CodeAnalysis.SyntaxTree,System.Collections.Immutable.ImmutableArray{Microsoft.CodeAnalysis.ResourceDescription})"/>
+        /// Typically, this is the argument of the <see cref="CreateComplete"/> or <see cref="CreatePartial(Microsoft.CodeAnalysis.Compilation,Microsoft.CodeAnalysis.SyntaxTree,System.Collections.Immutable.ImmutableArray{Caravela.Compiler.ManagedResource})"/>
         /// method, ignoring any modification done by <see cref="Update"/>.
         /// </summary>
         private readonly Compilation _initialCompilation;
@@ -68,7 +68,7 @@ namespace Caravela.Framework.Impl.CodeModel
         public bool IsEmpty => this.SyntaxTrees.Count == 0;
 
         // Initial constructor.
-        private PartialCompilation( Compilation compilation, DerivedTypeIndex derivedTypeIndex, ImmutableArray<ResourceDescription> resources )
+        private PartialCompilation( Compilation compilation, DerivedTypeIndex derivedTypeIndex, ImmutableArray<ManagedResource> resources )
         {
             this.Compilation = this._initialCompilation = compilation;
             this.ModifiedSyntaxTrees = ImmutableDictionary<string, SyntaxTreeModification>.Empty;
@@ -81,7 +81,7 @@ namespace Caravela.Framework.Impl.CodeModel
             PartialCompilation baseCompilation,
             IReadOnlyList<SyntaxTreeModification>? modifiedSyntaxTrees,
             IReadOnlyList<SyntaxTree>? addedSyntaxTrees,
-            ImmutableArray<ResourceDescription>? newResources )
+            ImmutableArray<ManagedResource>? newResources )
         {
             this._initialCompilation = baseCompilation._initialCompilation;
             var compilation = baseCompilation.Compilation;
@@ -132,7 +132,7 @@ namespace Caravela.Framework.Impl.CodeModel
         /// <summary>
         /// Creates a <see cref="PartialCompilation"/> that represents a complete compilation.
         /// </summary>
-        public static PartialCompilation CreateComplete( Compilation compilation, ImmutableArray<ResourceDescription> resources = default )
+        public static PartialCompilation CreateComplete( Compilation compilation, ImmutableArray<ManagedResource> resources = default )
             => new CompleteImpl( compilation, resources );
 
         /// <summary>
@@ -141,7 +141,7 @@ namespace Caravela.Framework.Impl.CodeModel
         public static PartialCompilation CreatePartial(
             Compilation compilation,
             SyntaxTree syntaxTree,
-            ImmutableArray<ResourceDescription> resources = default )
+            ImmutableArray<ManagedResource> resources = default )
         {
             var syntaxTrees = new[] { syntaxTree };
             var closure = GetClosure( compilation, syntaxTrees );
@@ -160,7 +160,7 @@ namespace Caravela.Framework.Impl.CodeModel
         public static PartialCompilation CreatePartial(
             Compilation compilation,
             IReadOnlyList<SyntaxTree> syntaxTrees,
-            ImmutableArray<ResourceDescription> resources = default )
+            ImmutableArray<ManagedResource> resources = default )
         {
             var closure = GetClosure( compilation, syntaxTrees );
 
@@ -177,10 +177,10 @@ namespace Caravela.Framework.Impl.CodeModel
             IReadOnlyList<SyntaxTree>? additions )
             => this.Update( modifications, additions );
 
-        public IPartialCompilation WithAdditionalResources( params ResourceDescription[] resources )
+        public IPartialCompilation WithAdditionalResources( params ManagedResource[] resources )
             => this.Update( null, null, this.Resources.AddRange( resources ) );
 
-        public ImmutableArray<ResourceDescription> Resources { get; }
+        public ImmutableArray<ManagedResource> Resources { get; }
 
         /// <summary>
         ///  Adds and replaces syntax trees of the current <see cref="PartialCompilation"/> and returns a new <see cref="PartialCompilation"/>
@@ -189,7 +189,7 @@ namespace Caravela.Framework.Impl.CodeModel
         public abstract PartialCompilation Update(
             IReadOnlyList<SyntaxTreeModification>? replacedTrees = null,
             IReadOnlyList<SyntaxTree>? addedTrees = null,
-            ImmutableArray<ResourceDescription>? resources = null );
+            ImmutableArray<ManagedResource>? resources = null );
 
         /// <summary>
         /// Gets a closure of the syntax trees declaring all base types and interfaces of all types declared in input syntax trees.

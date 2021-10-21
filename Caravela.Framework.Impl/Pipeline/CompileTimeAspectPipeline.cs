@@ -46,16 +46,16 @@ namespace Caravela.Framework.Impl.Pipeline
         public bool TryExecute(
             IDiagnosticAdder diagnosticAdder,
             Compilation compilation,
-            ImmutableArray<ResourceDescription> resources,
+            ImmutableArray<ManagedResource> resources,
             CancellationToken cancellationToken,
             out ImmutableArray<SyntaxTreeTransformation> syntaxTreeTransformations,
-            out ImmutableArray<ResourceDescription> additionalResources,
+            out ImmutableArray<ManagedResource> additionalResources,
             [NotNullWhen( true )] out Compilation? resultingCompilation )
         {
             if ( !this.ProjectOptions.IsFrameworkEnabled )
             {
                 syntaxTreeTransformations = ImmutableArray<SyntaxTreeTransformation>.Empty;
-                additionalResources = ImmutableArray<ResourceDescription>.Empty;
+                additionalResources = ImmutableArray<ManagedResource>.Empty;
                 resultingCompilation = compilation;
 
                 return true;
@@ -101,7 +101,7 @@ namespace Caravela.Framework.Impl.Pipeline
                 // Add managed resources.
                 if ( resultPartialCompilation.Resources.IsDefaultOrEmpty )
                 {
-                    additionalResources = ImmutableArray<ResourceDescription>.Empty;
+                    additionalResources = ImmutableArray<ManagedResource>.Empty;
                 }
                 else
                 {

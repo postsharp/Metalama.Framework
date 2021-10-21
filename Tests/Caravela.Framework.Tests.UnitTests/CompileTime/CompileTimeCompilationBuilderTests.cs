@@ -208,7 +208,7 @@ class ReferencingClass
                             null,
                             null,
                             null,
-                            new[] { compileTimeProject!.ToResource() } );
+                            new[] { compileTimeProject!.ToResource().Resource } );
 
                         Assert.True( emitResult.Success );
                     }
@@ -559,7 +559,7 @@ class ReferencingClass
                 Assert.True(
                     referencedCompilation.Emit(
                             peStream,
-                            manifestResources: new[] { referencedCompileTimeProject!.ToResource() } )
+                            manifestResources: new[] { referencedCompileTimeProject!.ToResource().Resource } )
                         .Success );
             }
 
@@ -620,7 +620,7 @@ public class ReferencedClass
                 Assert.True(
                     referencedCompilation.Emit(
                             peStream,
-                            manifestResources: new[] { referencedCompileTimeProject!.ToResource() } )
+                            manifestResources: new[] { referencedCompileTimeProject!.ToResource().Resource } )
                         .Success );
             }
 

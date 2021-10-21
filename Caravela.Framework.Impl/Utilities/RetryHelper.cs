@@ -3,6 +3,7 @@
 
 using System;
 using System.Diagnostics.CodeAnalysis;
+using System.IO;
 using System.Threading;
 
 namespace Caravela.Framework.Impl.Utilities
@@ -24,7 +25,7 @@ namespace Caravela.Framework.Impl.Utilities
         {
             var delay = 10.0;
             const int maxAttempts = 12;
-            retryPredicate ??= e => e is UnauthorizedAccessException || (uint) e.HResult == 0x80070020;
+            retryPredicate ??= e => e is UnauthorizedAccessException or IOException || (uint) e.HResult == 0x80070020;
 
             for ( var i = 0; /* nothing */; i++ )
             {
