@@ -1,10 +1,11 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.DesignTime.Contracts;
 using Microsoft.CodeAnalysis.Text;
 using System.Collections.Immutable;
 
-namespace Caravela.Framework.DesignTime.Contracts
+namespace Caravela.Framework.Impl.Formatting
 {
     /// <summary>
     /// Represents a <see cref="TextSpan"/> and its <see cref="TextSpanClassification"/>.

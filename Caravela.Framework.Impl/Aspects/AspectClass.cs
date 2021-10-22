@@ -238,7 +238,25 @@ namespace Caravela.Framework.Impl.Aspects
             AspectDriverFactory aspectDriverFactory,
             [NotNullWhen( true )] out AspectClass? aspectClass )
         {
-            var prototype = aspectTypeSymbol.IsAbstract ? null : (IAspect) FormatterServices.GetUninitializedObject( aspectReflectionType ).AssertNotNull();
+            IAspect? prototype;
+
+            if ( aspectTypeSymbol.IsAbstract )
+            {
+                prototype = null;
+            }
+            else
+            {
+                var untypedPrototype = FormatterServices.GetUninitializedObject( aspectReflectionType ).AssertNotNull();
+                var aspectInterfaceType = typeof(IAspect);
+
+                if ( !aspectInterfaceType.IsInstanceOfType( untypedPrototype ) )
+                {
+                    // TODO #29259: AspectClass.TryCreate throws InvalidCastException when VSX has different build than our compiler package
+                    throw new AssertionFailedException( "Assembly version mismatch." );
+                }
+
+                prototype = (IAspect) untypedPrototype;
+            }
 
             aspectClass = new AspectClass(
                 serviceProvider,

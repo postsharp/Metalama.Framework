@@ -14,6 +14,7 @@ using System.Collections.Immutable;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 
 namespace Caravela.Framework.Impl.CompileTime
 {
@@ -86,11 +87,13 @@ namespace Caravela.Framework.Impl.CompileTime
                     this.GetType().Assembly.GetManifestResourceStream( _compileTimeFrameworkAssemblyName + ".dll" ),
                     filePath: _compileTimeFrameworkAssemblyName + ".dll" );
 
-            // Get implementation assembly paths from the current AppDomain
+            // Get implementation assembly paths from the current AppDomain. We need to match our exact version number.
             var caravelaImplementationPaths = AppDomain.CurrentDomain.GetAssemblies()
                 .Where( a => !a.IsDynamic ) // accessing Location of dynamic assemblies throws
+                .Where(
+                    a => this.CaravelaImplementationAssemblyNames.Contains( Path.GetFileNameWithoutExtension( a.Location ) ) &&
+                         AssemblyName.GetAssemblyName( a.Location ).Version == this.GetType().Assembly.GetName().Version )
                 .Select( a => a.Location )
-                .Where( path => this.CaravelaImplementationAssemblyNames.Contains( Path.GetFileNameWithoutExtension( path ) ) )
                 .ToList();
 
             // Assert that we found everything we need, because debugging is difficult when this step goes wrong.
