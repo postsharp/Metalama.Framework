@@ -123,12 +123,32 @@ function Clean() {
 }
 
 function CreateVersionFile() {
-    $timestamp = [System.DateTime]::Now.ToString('MMdd.HHmm')
-        
+    $timestamp = [System.DateTime]::Now.ToString('MMdd.HHmmss')
+    
     if ( $Local ) {
-        # Local build with timestamp-based version and randomized package number.
-        $packageVersion = "`$(MainVersion)-local-$([System.DateTime]::Now.Year)$timestamp-$([string]::Format( "{0:x8}", $(Get-Random) ) )-$configuration"
-        $assemblyVersion = "`$(MainVersion)$timestamp"
+        # Local build with timestamp-based version and randomized package number. For the assembly version we use a local incremental file stored in the user profile.
+        $localVersionDirectory="$Env:APPDATA\Caravela.Engineering"
+        $localVersionFile = "$localVersionDirectory\$ProductName.version"
+        if ( Test-Path $localVersionFile ) {
+            $localVersion =  ((Get-Content $localVersionFile) -as [int]) + 1
+        } else {
+            $localVersion = 1
+        }
+        if ( $localVersion -lt 1000 ) { $localVersion = 1000 }
+
+
+        if ( -Not (Test-Path $localVersionDirectory) ) {
+            md $localVersionDirectory | Out-Null
+        }
+        Set-Content $localVersionFile $localVersion
+                
+        $packageVersionSuffix = "local-$localVersion-$([System.DateTime]::Now.Year)$timestamp-$([string]::Format( "{0:x8}", $(Get-Random) ) )-$configuration"
+        $packageVersion = "`$(MainVersion)-$packageVersionSuffix"
+        $assemblyVersion = "`$(MainVersion).$localVersion"
+
+        Write-Host "PackageVersion = *-$packageVersionSuffix, AssemblyVersion=*.$localVersion"
+       
+
     } elseif ( $Numbered -ge 0 ) {
         # Build server build with a build number given by the build server
         $packageVersion = "`$(MainVersion)-build-$configuration.$Numbered"
