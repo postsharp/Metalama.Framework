@@ -27,7 +27,8 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
     /// <summary>
     /// The design-time implementation of <see cref="AspectPipeline"/>.
     /// </summary>
-    internal partial class DesignTimeAspectPipeline : AspectPipeline
+    /// Must be public because of testing.
+    public partial class DesignTimeAspectPipeline : AspectPipeline
     {
         private readonly ConditionalWeakTable<Compilation, CompilationResult> _compilationResultCache = new();
         private static readonly string _sourceGeneratorAssemblyName = typeof(DesignTimeAspectPipelineFactory).Assembly.GetName().Name;
@@ -283,7 +284,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
         public bool IsCompileTimeSyntaxTreeOutdated( string name )
             => this._currentState.CompileTimeSyntaxTrees.AssertNotNull().TryGetValue( name, out var syntaxTree ) && syntaxTree == null;
 
-        public IEnumerable<AspectClass> GetEligibleAspects( Compilation compilation, ISymbol symbol, CancellationToken cancellationToken )
+        internal IEnumerable<AspectClass> GetEligibleAspects( Compilation compilation, ISymbol symbol, CancellationToken cancellationToken )
         {
             var classes = this.AspectClasses;
 

@@ -11,7 +11,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
     /// <summary>
     /// A compilation-independent version of <see cref="ScopedSuppression"/>, which stores the symbol id instead of the <see cref="ISymbol"/> itself.
     /// </summary>
-    internal readonly struct CacheableScopedSuppression
+    public readonly struct CacheableScopedSuppression
     {
         /// <summary>
         /// Gets the suppression definition.
