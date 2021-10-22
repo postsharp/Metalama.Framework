@@ -36,7 +36,7 @@ namespace Caravela.Framework.CompilerExtensions
                         if ( !_initialized )
                         {
                             // To debug, uncomment the next line.
-                            System.Diagnostics.Debugger.Launch();
+                            // System.Diagnostics.Debugger.Launch();
 
                             var currentAssembly = typeof(ResourceExtractor).Assembly;
 
