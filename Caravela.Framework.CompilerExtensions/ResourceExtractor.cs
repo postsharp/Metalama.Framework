@@ -36,7 +36,7 @@ namespace Caravela.Framework.CompilerExtensions
                         if ( !_initialized )
                         {
                             // To debug, uncomment the next line.
-                            // Debugger.Launch();
+                            System.Diagnostics.Debugger.Launch();
 
                             var currentAssembly = typeof(ResourceExtractor).Assembly;
 
@@ -153,10 +153,16 @@ namespace Caravela.Framework.CompilerExtensions
         {
             var requestedAssemblyName = new AssemblyName( args.Name );
 
-            if ( _embeddedAssemblies.TryGetValue( requestedAssemblyName.Name, out var assembly )
-                 && AssemblyName.ReferenceMatchesDefinition( requestedAssemblyName, assembly.AssemblyName ) )
+            if ( _embeddedAssemblies.TryGetValue( requestedAssemblyName.Name, out var assembly ) )
             {
-                return Assembly.LoadFile( assembly.Path );
+                if ( AssemblyName.ReferenceMatchesDefinition( requestedAssemblyName, assembly.AssemblyName ) )
+                {
+                    return Assembly.LoadFile( assembly.Path );
+                }
+                else
+                {
+                    // This is not the expected version.
+                }
             }
 
             return null;

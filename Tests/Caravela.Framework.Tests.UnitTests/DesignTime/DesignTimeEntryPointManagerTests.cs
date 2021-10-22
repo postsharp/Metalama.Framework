@@ -77,9 +77,7 @@ namespace Caravela.Framework.Tests.UnitTests.DesignTime
 
             public Version Version { get; }
 
-            public T? GetCompilerService<T>()
-                where T : class, ICompilerService
-                => throw new NotImplementedException();
+            public ICompilerService? GetCompilerService( Type type ) => throw new NotImplementedException();
 
             public event Action? Unloaded;
 

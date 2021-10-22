@@ -28,7 +28,7 @@ namespace Caravela.Framework.Impl.DesignTime
             this._serviceProvider = serviceProvider;
         }
 
-        IReadOnlyClassifiedTextSpanCollection IClassificationService.GetClassifiedTextSpans(
+        IClassifiedTextSpans IClassificationService.GetClassifiedTextSpans(
             SemanticModel model,
             CancellationToken cancellationToken )
             => this.GetClassifiedTextSpans( model, cancellationToken );

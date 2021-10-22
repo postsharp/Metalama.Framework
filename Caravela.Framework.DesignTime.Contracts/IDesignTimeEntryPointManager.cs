@@ -14,6 +14,7 @@ namespace Caravela.Framework.DesignTime.Contracts
     /// on the <see cref="AppDomain"/> using <see cref="AppDomain.GetData"/> and <see cref="AppDomain.SetData"/>.
     /// </summary>
     [Guid( "c6c2ccd1-d8f8-4252-9df1-6c1528272efe" )]
+    [ComImport]
     public interface IDesignTimeEntryPointManager
     {
         /// <summary>

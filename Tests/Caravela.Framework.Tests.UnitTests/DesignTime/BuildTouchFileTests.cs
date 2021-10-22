@@ -77,7 +77,7 @@ using Caravela.Framework.Code;
 
             foreach ( var fileName in code.Keys )
             {
-                File.Create( fileName );
+                File.WriteAllText( fileName, "" );
                 projectFilesTimestamps.Add( fileName, File.GetLastWriteTime( fileName ) );
             }
 

@@ -10,5 +10,6 @@ namespace Caravela.Framework.DesignTime.Contracts
     /// can be returned synchronously.
     /// </summary>
     [Guid( "32aeeb0f-92e3-4952-91c0-1477f791b309" )]
+    [ComImport]
     public interface ICompilerService { }
 }

@@ -4,9 +4,11 @@
 using Caravela.Framework.DesignTime.Contracts;
 using Caravela.Framework.Impl.Pipeline;
 using Caravela.Framework.Impl.Utilities;
+using Microsoft.CodeAnalysis;
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 
 namespace Caravela.Framework.Impl.DesignTime
 {
@@ -55,7 +57,8 @@ namespace Caravela.Framework.Impl.DesignTime
                         }
                     } );
 
-                var textWriter = File.CreateText( Path.Combine( directory, $"Caravela.{Process.GetCurrentProcess().ProcessName}.{pid}.log" ) );
+                // The filename must be unique because several instances of the current assembly (of different versions) may be loaded in the process.
+                var textWriter = File.CreateText( Path.Combine( directory, $"Caravela.{Process.GetCurrentProcess().ProcessName}.{pid}.{Guid.NewGuid()}.log" ) );
 
                 Logger.Initialize( textWriter );
             }
@@ -67,9 +70,10 @@ namespace Caravela.Framework.Impl.DesignTime
 
         public Version Version { get; }
 
-        public T? GetCompilerService<T>()
-            where T : class, ICompilerService
-            => typeof(T) == typeof(IClassificationService) ? (T) (object) new ClassificationService( ServiceProviderFactory.GlobalProvider ) : null;
+        public ICompilerService? GetCompilerService( Type type )
+            => type.IsEquivalentTo( typeof(IClassificationService) )
+                ? new ClassificationService( ServiceProviderFactory.GlobalProvider.WithProjectScopedServices( Enumerable.Empty<MetadataReference>() ) )
+                : null;
 
         event Action? ICompilerServiceProvider.Unloaded
         {

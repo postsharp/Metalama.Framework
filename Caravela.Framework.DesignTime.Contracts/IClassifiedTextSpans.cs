@@ -10,14 +10,17 @@ namespace Caravela.Framework.DesignTime.Contracts
     // The type identifier cannot be modified even during refactoring.
 
     /// <summary>
-    /// A read-only collection of <see cref="ClassifiedTextSpan"/> with additional methods.
+    /// A read-only collection of <see cref="IClassifiedTextSpan"/> with additional methods.
     /// </summary>
     [Guid( "da58deff-93d5-4d5a-bf6e-11df8bdbd74d" )]
-    public interface IReadOnlyClassifiedTextSpanCollection : IReadOnlyCollection<ClassifiedTextSpan>
+    [ComImport]
+    public interface IClassifiedTextSpans
     {
+        IEnumerable<IClassifiedTextSpan> GetClassifiedTextSpans();
+        
         /// <summary>
-        /// Gets all <see cref="ClassifiedTextSpan"/> in a given <see cref="TextSpan"/>. 
+        /// Gets all <see cref="IClassifiedTextSpan"/> in a given <see cref="TextSpan"/>. 
         /// </summary>
-        IEnumerable<ClassifiedTextSpan> GetClassifiedSpans( TextSpan textSpan );
+        IEnumerable<IClassifiedTextSpan> GetClassifiedTextSpans( TextSpan textSpan );
     }
 }
