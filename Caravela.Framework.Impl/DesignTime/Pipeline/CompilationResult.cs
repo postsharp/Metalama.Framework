@@ -18,7 +18,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
     /// <summary>
     /// Caches the pipeline results for each syntax tree.
     /// </summary>
-    internal sealed class CompilationResult : IInheritableAspectsManifest
+    public sealed class CompilationResult : IInheritableAspectsManifest
     {
         private static readonly ImmutableDictionary<string, SyntaxTreeResult> _emptySyntaxTreeResults =
             ImmutableDictionary.Create<string, SyntaxTreeResult>( StringComparer.Ordinal );
@@ -63,12 +63,12 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
             this.IsDirty = isDirty;
         }
 
-        public CompilationResult() { }
+        internal CompilationResult() { }
 
         /// <summary>
         /// Updates cache with a <see cref="DesignTimeAspectPipelineResult"/> that includes results for several syntax trees.
         /// </summary>
-        public CompilationResult Update( PartialCompilation compilation, DesignTimeAspectPipelineResult pipelineResults )
+        internal CompilationResult Update( PartialCompilation compilation, DesignTimeAspectPipelineResult pipelineResults )
         {
             var resultsByTree = SplitResultsByTree( compilation, pipelineResults );
 
@@ -244,7 +244,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
             return resultBuilders.Select( b => b.Value.ToImmutable( compilation.Compilation ) );
         }
 
-        public CompilationResult Invalidate( CompilationChanges compilationChanges )
+        internal CompilationResult Invalidate( CompilationChanges compilationChanges )
         {
             if ( !compilationChanges.HasChange )
             {
@@ -299,7 +299,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
             return new CompilationResult();
         }
 
-        public (ImmutableArray<Diagnostic> Diagnostics, ImmutableArray<CacheableScopedSuppression> Suppressions) GetDiagnosticsOnSyntaxTree( string path )
+        internal (ImmutableArray<Diagnostic> Diagnostics, ImmutableArray<CacheableScopedSuppression> Suppressions) GetDiagnosticsOnSyntaxTree( string path )
         {
             if ( this._syntaxTreeResults.TryGetValue( path, out var syntaxTreeResult ) )
             {

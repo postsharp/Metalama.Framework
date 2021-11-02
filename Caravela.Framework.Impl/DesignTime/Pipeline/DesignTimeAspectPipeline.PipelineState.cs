@@ -21,7 +21,7 @@ using System.Threading;
 
 namespace Caravela.Framework.Impl.DesignTime.Pipeline
 {
-    internal partial class DesignTimeAspectPipeline
+    public partial class DesignTimeAspectPipeline
     {
         internal readonly struct PipelineState
         {

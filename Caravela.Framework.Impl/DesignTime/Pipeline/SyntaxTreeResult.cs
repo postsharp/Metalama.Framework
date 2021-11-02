@@ -11,7 +11,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
     /// Represents the content of <see cref="DesignTimeAspectPipelineResult"/>, but only the items that relate to a single <see cref="Microsoft.CodeAnalysis.SyntaxTree"/>.
     /// This class is compilation-independent and cacheable.
     /// </summary>
-    internal class SyntaxTreeResult
+    public class SyntaxTreeResult
     {
         /// <summary>
         /// Gets the <see cref="Microsoft.CodeAnalysis.SyntaxTree"/> for which the results was prepared.
