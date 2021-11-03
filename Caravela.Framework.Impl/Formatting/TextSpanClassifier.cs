@@ -21,6 +21,8 @@ namespace Caravela.Framework.Impl.Formatting
     {
 #if !DEBUG
 #pragma warning disable IDE0052 // Remove unread private members
+
+        // ReSharper disable once NotAccessedField.Local
 #endif
         private readonly SourceText _sourceText;
 #if !DEBUG
@@ -348,7 +350,6 @@ namespace Caravela.Framework.Impl.Formatting
             }
 
 #if DEBUG
-
             // ReSharper disable once UnusedVariable
             var text = this._sourceText.GetSubText( span ).ToString();
 #endif

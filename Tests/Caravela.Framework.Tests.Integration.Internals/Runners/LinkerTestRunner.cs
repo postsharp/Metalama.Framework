@@ -39,7 +39,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
         /// <param name="testResult"></param>
         /// <param name="state"></param>
         /// <returns>The result of the test execution.</returns>
-        private protected override async Task RunAsync(
+        protected override async Task RunAsync(
             TestInput testInput,
             TestResult testResult,
             Dictionary<string, object?> state )
@@ -87,7 +87,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
             }
         }
 
-        private protected override void ExecuteAssertions( TestInput testInput, TestResult testResult, Dictionary<string, object?> state )
+        protected override void ExecuteAssertions( TestInput testInput, TestResult testResult, Dictionary<string, object?> state )
         {
             var assertionWalker = new LinkerInlineAssertionWalker();
 

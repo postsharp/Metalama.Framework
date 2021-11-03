@@ -97,7 +97,7 @@ namespace Caravela.TestFramework
         /// <param name="testResult">The output object must be created by the caller and passed, so that the caller can get
         ///     a partial object in case of exception.</param>
         /// <param name="state"></param>
-        private protected virtual async Task RunAsync(
+        protected virtual async Task RunAsync(
             TestInput testInput,
             TestResult testResult,
             Dictionary<string, object?> state )
@@ -306,7 +306,7 @@ namespace Caravela.TestFramework
             }
         }
 
-        private protected static string NormalizeEndOfLines( string? s ) => string.IsNullOrWhiteSpace( s ) ? "" : _newLineRegex.Replace( s, "\n" ).Trim();
+        protected internal static string NormalizeEndOfLines( string? s ) => string.IsNullOrWhiteSpace( s ) ? "" : _newLineRegex.Replace( s, "\n" ).Trim();
 
         internal static string? NormalizeTestOutput( string? s, bool preserveFormatting )
             => s == null ? null : NormalizeTestOutput( CSharpSyntaxTree.ParseText( s ).GetRoot(), preserveFormatting );
@@ -328,7 +328,7 @@ namespace Caravela.TestFramework
             }
         }
 
-        private protected virtual bool CompareTransformedCode => true;
+        protected virtual bool CompareTransformedCode => true;
 
         private protected virtual void SaveResults( TestInput testInput, TestResult testResult, Dictionary<string, object?> state )
         {
@@ -420,7 +420,7 @@ namespace Caravela.TestFramework
             state["actualTransformedNormalizedSourceText"] = actualTransformedNormalizedSourceText;
         }
 
-        private protected virtual void ExecuteAssertions( TestInput testInput, TestResult testResult, Dictionary<string, object?> state )
+        protected virtual void ExecuteAssertions( TestInput testInput, TestResult testResult, Dictionary<string, object?> state )
         {
             if ( !this.CompareTransformedCode )
             {
@@ -505,7 +505,7 @@ namespace Caravela.TestFramework
             }
         }
 
-        private protected virtual HtmlCodeWriter CreateHtmlCodeWriter( IServiceProvider serviceProvider, TestOptions options )
+        protected virtual HtmlCodeWriter CreateHtmlCodeWriter( IServiceProvider serviceProvider, TestOptions options )
             => new( serviceProvider, new HtmlCodeWriterOptions( options.AddHtmlTitles.GetValueOrDefault() ) );
 
         private async Task WriteHtmlAsync( TestSyntaxTree testSyntaxTree, string htmlDirectory, HtmlCodeWriter htmlCodeWriter )

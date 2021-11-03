@@ -1,4 +1,4 @@
-# Caravela.Framework.Tests.InternalPipeline
+# Caravela.Framework.Tests.Integration.Internals
 
 This project contains tests that
   a) are based on Caravela.TestFramework AND

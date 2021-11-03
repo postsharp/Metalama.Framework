@@ -31,7 +31,7 @@ namespace Caravela.TestFramework
         private bool _frozen;
         private ServiceProvider? _serviceProvider;
 
-        internal ServiceProvider ProjectScopedServiceProvider
+        public ServiceProvider ProjectScopedServiceProvider
         {
             get => this._serviceProvider ?? throw new InvalidOperationException( "The service provider has not been set." );
             set => this._serviceProvider = value;
@@ -92,15 +92,10 @@ namespace Caravela.TestFramework
         public bool Success { get; private set; } = true;
 
         /// <summary>
-        /// Gets the <see cref="System.Exception"/> in which the test resulted, if any.
-        /// </summary>
-        public Exception? Exception { get; private set; }
-
-        /// <summary>
         /// Gets or sets a value indicating whether the output run-time code should be included in the result of
         ///  <see cref="GetConsolidatedTestOutput"/>.
         /// </summary>
-        internal bool HasOutputCode { get; set; }
+        public bool HasOutputCode { get; set; }
 
         public Compilation? CompileTimeCompilation { get; private set; }
 
@@ -200,7 +195,7 @@ namespace Caravela.TestFramework
             }
         }
 
-        internal void SetFailed( string reason, Exception? exception = null )
+        public void SetFailed( string reason, Exception? exception = null )
         {
             if ( this._frozen )
             {
@@ -209,7 +204,6 @@ namespace Caravela.TestFramework
 
             this._frozen = true;
 
-            this.Exception = exception;
             this.Success = false;
             this.ErrorMessage = reason;
 

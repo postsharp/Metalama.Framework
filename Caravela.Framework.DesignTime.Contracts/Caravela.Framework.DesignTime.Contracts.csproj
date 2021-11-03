@@ -9,7 +9,7 @@
   <ItemGroup>
     <!-- The references to Roslyn here must be the lowest possible. -->
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="$(RoslynVersion)" PrivateAssets="all" />
-    <InternalsVisibleTo Include="Caravela.Framework.Tests.UnitTests" />
+    <InternalsVisibleTo Include="Caravela.Framework.Tests.UnitTests.Internals" />
   </ItemGroup>
   
 

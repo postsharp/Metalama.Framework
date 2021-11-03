@@ -1,13 +1,14 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Impl.Collections;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 #if !DEBUG
 using System.Runtime.CompilerServices;
+
+#else
+using Caravela.Framework.Impl.Collections;
 #endif
 
 namespace Caravela.Framework.Impl
@@ -16,28 +17,36 @@ namespace Caravela.Framework.Impl
     /// A utility class that checks runtime invariant and throws <see cref="AssertionFailedException"/> in case of failure.
     /// </summary>
     [ExcludeFromCodeCoverage]
-    internal static class Invariant
+    public static class Invariant
     {
         /// <summary>
         /// Checks that a given condition is true and throws an <see cref="AssertionFailedException"/> in case it is not.
         /// </summary>
         /// <param name="condition">The condition that must be true.</param>
-        [Conditional( "DEBUG" )]
+#if !DEBUG
+        [MethodImpl( MethodImplOptions.AggressiveInlining )]
+#endif
         public static void Assert( [DoesNotReturnIf( false )] bool condition )
         {
+#if !DEBUG
             if ( !condition )
             {
                 throw new AssertionFailedException();
             }
+#endif
         }
 
-        [Conditional( "DEBUG" )]
+#if !DEBUG
+        [MethodImpl( MethodImplOptions.AggressiveInlining )]
+#endif
         public static void Implies( bool premise, bool conclusion )
         {
+#if !DEBUG
             if ( premise && !conclusion )
             {
                 throw new AssertionFailedException();
             }
+#endif
         }
 
 #if !DEBUG
@@ -59,9 +68,6 @@ namespace Caravela.Framework.Impl
         /// <summary>
         /// Checks that a reference is non-null and throws an <see cref="AssertionFailedException"/> if it is not.
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="obj"></param>
-        /// <returns></returns>
 #if !DEBUG
         [MethodImpl( MethodImplOptions.AggressiveInlining )]
 #endif
@@ -87,7 +93,7 @@ namespace Caravela.Framework.Impl
         /// <param name="obj"></param>
         /// <returns></returns>
 #if !DEBUG
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl( MethodImplOptions.AggressiveInlining )]
 #endif
         public static T AssertNotNull<T>( this T? obj, string? justification = null )
             where T : struct
@@ -99,7 +105,9 @@ namespace Caravela.Framework.Impl
             }
 #endif
 
-            return obj == null ? default : obj.Value;
+#pragma warning disable 8629
+            return obj.Value;
+#pragma warning restore 8629
         }
 
 #if !DEBUG
