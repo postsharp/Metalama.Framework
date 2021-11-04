@@ -16,6 +16,7 @@ namespace Caravela.Framework.Impl.Linking
 
         public static LinkerGeneratedAnnotation FromString( string str )
         {
+            // ReSharper disable once RedundantAssignment
             var success = Enum.TryParse<LinkerGeneratedFlags>( str, out var flags );
 
             Invariant.Assert( success );

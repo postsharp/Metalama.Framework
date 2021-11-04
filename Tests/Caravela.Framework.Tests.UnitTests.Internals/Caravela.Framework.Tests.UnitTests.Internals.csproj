@@ -28,4 +28,12 @@
     <PackageReference Include="Caravela.Compiler.Sdk" Version="$(CaravelaCompilerVersion)" />
   </ItemGroup>
   
-  </Project>
+   
+
+
+  <!-- Ignore project if the build is obfuscated because this project relies on obfuscated internals -->
+  <ItemGroup Condition="'$(Obfuscate)'=='True'">
+    <Compile Remove="**\*" />
+  </ItemGroup>
+
+</Project>

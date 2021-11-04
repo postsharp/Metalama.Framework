@@ -19,9 +19,8 @@
 
   <ItemGroup>
 	  <!-- We cannot use InternalsVisibleTo for Caravela.TestFramework because of obfuscation in the release build. -->
-    <InternalsVisibleTo Include="Caravela.Framework.Tests.UnitTests" />
-    <InternalsVisibleTo Include="Caravela.Framework.Tests.InternalPipeline" />
-    <InternalsVisibleTo Include="Caravela.Framework.Tests.PublicPipeline" />
+    <InternalsVisibleTo Include="Caravela.Framework.Tests.UnitTests.Internals" />
+    <InternalsVisibleTo Include="Caravela.Framework.Tests.Integration.Internals" />
     <InternalsVisibleTo Include="Caravela.Framework.CompilerAddIn" />
     <InternalsVisibleTo Include="DynamicProxyGenAssembly2" Key="$(FakeItEasyKey)" LoadsWithinVisualStudio="false" />
     </ItemGroup>

@@ -93,12 +93,12 @@ namespace Caravela.Framework.Tests.Integration.Runners
             this._htmlEpilogue = epilogueBuilder.ToString();
         }
 
-        private protected override bool CompareTransformedCode => false;
+        protected override bool CompareTransformedCode => false;
 
-        private protected override HtmlCodeWriter CreateHtmlCodeWriter( IServiceProvider serviceProvider, TestOptions options )
+        protected override HtmlCodeWriter CreateHtmlCodeWriter( IServiceProvider serviceProvider, TestOptions options )
             => new( serviceProvider, new HtmlCodeWriterOptions( options.AddHtmlTitles.GetValueOrDefault(), _htmlProlog, this._htmlEpilogue ) );
 
-        private protected override void ExecuteAssertions( TestInput testInput, TestResult testResult, Dictionary<string, object?> state )
+        protected override void ExecuteAssertions( TestInput testInput, TestResult testResult, Dictionary<string, object?> state )
         {
             base.ExecuteAssertions( testInput, testResult, state );
 

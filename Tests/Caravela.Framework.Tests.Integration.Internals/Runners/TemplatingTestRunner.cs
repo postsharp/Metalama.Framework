@@ -84,7 +84,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
         /// <param name="testResult"></param>
         /// <param name="state"></param>
         /// <returns>The result of the test execution.</returns>
-        private protected override async Task RunAsync(
+        protected override async Task RunAsync(
             TestInput testInput,
             TestResult testResult,
             Dictionary<string, object?> state )

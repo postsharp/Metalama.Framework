@@ -20,8 +20,6 @@
 
   <ItemGroup>
 
-    <Compile Include="..\..\NullableAttributes.cs" Link="NullableAttributes.cs" />
-      
    <!-- Exclude files that intentionally do not compile -->
    <Compile Remove="Tests\**\__*.cs" />
       

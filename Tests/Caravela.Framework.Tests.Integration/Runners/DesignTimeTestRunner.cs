@@ -25,7 +25,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
             ITestOutputHelper? logger )
             : base( serviceProvider, projectDirectory, metadataReferences, logger ) { }
 
-        private protected override async Task RunAsync(
+        protected override async Task RunAsync(
             TestInput testInput,
             TestResult testResult,
             Dictionary<string, object?> state )

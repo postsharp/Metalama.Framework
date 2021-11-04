@@ -118,6 +118,7 @@ namespace Caravela.Framework.Impl.CodeModel.References
             this.TargetKind = DeclarationRefTargetKind.Default;
         }
 
+        // ReSharper disable once UnusedParameter.Local
         public DeclarationRef( SyntaxNode? declaration, DeclarationRefTargetKind targetKind, Compilation compilation )
         {
 #if DEBUG

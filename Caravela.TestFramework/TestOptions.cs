@@ -212,13 +212,13 @@ namespace Caravela.TestFramework
 
                     case "DesignTime":
                         this.TestRunnerFactoryType =
-                            "Caravela.Framework.Tests.Integration.Runners.DesignTimeTestRunnerFactory, Caravela.Framework.Tests.PublicPipeline";
+                            "Caravela.Framework.Tests.Integration.Runners.DesignTimeTestRunnerFactory, Caravela.Framework.Tests.Integration";
 
                         break;
 
                     case "LiveTemplate":
                         this.TestRunnerFactoryType =
-                            "Caravela.Framework.Tests.Integration.Runners.LiveTemplateTestRunnerFactory, Caravela.Framework.Tests.InternalPipeline";
+                            "Caravela.Framework.Tests.Integration.Runners.LiveTemplateTestRunnerFactory, Caravela.Framework.Tests.Integration.Internals";
 
                         break;
 

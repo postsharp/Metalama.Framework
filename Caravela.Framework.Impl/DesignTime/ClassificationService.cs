@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.DesignTime.Contracts;
+using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Formatting;
 using Caravela.Framework.Impl.Templating;
@@ -28,6 +29,8 @@ namespace Caravela.Framework.Impl.DesignTime
             this._serviceProvider = serviceProvider;
         }
 
+        public bool ContainsCompileTimeCode( SyntaxNode syntaxRoot ) => CompileTimeCodeDetector.HasCompileTimeCode( syntaxRoot );
+
         IClassifiedTextSpans IClassificationService.GetClassifiedTextSpans(
             SemanticModel model,
             CancellationToken cancellationToken )
@@ -35,8 +38,6 @@ namespace Caravela.Framework.Impl.DesignTime
 
         public ClassifiedTextSpanCollection GetClassifiedTextSpans( SemanticModel model, CancellationToken cancellationToken )
         {
-            // TODO: if the root is not "our", return false.
-
             var syntaxRoot = model.SyntaxTree.GetRoot();
             var diagnostics = new DiagnosticList();
 

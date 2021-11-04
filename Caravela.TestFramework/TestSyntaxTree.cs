@@ -75,7 +75,7 @@ namespace Caravela.TestFramework
             }
         }
 
-        internal async Task SetRunTimeCodeAsync( SyntaxNode syntaxNode )
+        public async Task SetRunTimeCodeAsync( SyntaxNode syntaxNode )
         {
             CompilationUnitSyntax compilationUnit;
 

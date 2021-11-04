@@ -11,7 +11,7 @@ using System.Text;
 namespace Caravela.Framework.Impl
 {
     [ExcludeFromCodeCoverage]
-    internal class AssertionFailedException : Exception
+    public sealed class AssertionFailedException : Exception
     {
         public IReadOnlyList<Diagnostic> Diagnostics { get; }
 

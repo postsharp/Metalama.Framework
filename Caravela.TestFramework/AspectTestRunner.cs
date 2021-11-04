@@ -46,7 +46,7 @@ namespace Caravela.TestFramework
         /// Runs the aspect test with the given name and source.
         /// </summary>
         /// <returns>The result of the test execution.</returns>
-        private protected override async Task RunAsync(
+        protected override async Task RunAsync(
             TestInput testInput,
             TestResult testResult,
             Dictionary<string, object?> state )
@@ -359,7 +359,7 @@ namespace Caravela.TestFramework
             state["expectedProgramOutput"] = expectedOutput;
         }
 
-        private protected override void ExecuteAssertions( TestInput testInput, TestResult testResult, Dictionary<string, object?> state )
+        protected override void ExecuteAssertions( TestInput testInput, TestResult testResult, Dictionary<string, object?> state )
         {
             base.ExecuteAssertions( testInput, testResult, state );
 
