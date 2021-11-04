@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Compiler;
+using Caravela.Framework.Aspects;
 using Caravela.Framework.Fabrics;
 using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.Diagnostics;
@@ -240,7 +241,27 @@ namespace Caravela.Framework.Impl.CompileTime
         /// </summary>
         /// <param name="reflectionName"></param>
         /// <returns></returns>
-        public Type? GetTypeOrNull( string reflectionName ) => this.IsEmpty ? null : this.Assembly.GetType( reflectionName, false );
+        public Type? GetTypeOrNull( string reflectionName )
+        {
+            if ( this.IsEmpty )
+            {
+                return null;
+            }
+            else
+            {
+                var type = this.Assembly.GetType( reflectionName, false );
+
+                // Check that the type is linked properly. An error here may be caused by a bug in 
+                // a handler of the AppDomain.AssemblyResolve event.
+                if ( type.GetInterfaces().Any( i => i.FullName == typeof(IAspect).FullName && !typeof(IAspect).IsAssignableFrom( i ) ) )
+                {
+                    // There must have been some assembly version mismatch.
+                    throw new AssertionFailedException( "Assembly version mismatch." );
+                }
+
+                return type;
+            }
+        }
 
         public Type GetType( string reflectionName )
             => this.GetTypeOrNull( reflectionName ) ?? throw new ArgumentOutOfRangeException(

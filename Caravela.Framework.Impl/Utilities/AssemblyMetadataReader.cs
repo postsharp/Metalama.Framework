@@ -56,7 +56,7 @@ namespace Caravela.Framework.Impl.Utilities
         /// Gets the unique BuildId for the main assembly.
         /// </summary>
         public static string BuildId
-            => MainInstance.Version.ToString( 3 ) + "-" +
+            => MainInstance.Version.ToString( 4 ) + "-" +
                string.Join( "", MainInstance.ModuleId.ToByteArray().Take( 4 ).Select( i => i.ToString( "x2", CultureInfo.InvariantCulture ) ) );
 
         public static AssemblyMetadataReader MainInstance => GetInstance( typeof(AssemblyMetadataReader).Assembly );

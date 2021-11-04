@@ -25,6 +25,7 @@ namespace Caravela.Framework.Impl.Pipeline
         CompileTimeProjectLoader CompileTimeProjectLoader,
         ServiceProvider ServiceProvider )
     {
+        // TODO: the use of WithStages is a smell, probably stages should not be in AspectProjectConfiguration.
         public AspectProjectConfiguration WithStages( Func<PipelineStage, PipelineStage> stageMapper )
             => new(
                 this.Stages.Select( stageMapper ).ToImmutableArray(),

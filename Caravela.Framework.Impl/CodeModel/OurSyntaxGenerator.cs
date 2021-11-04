@@ -32,12 +32,25 @@ namespace Caravela.Framework.Impl.CodeModel
 
         static OurSyntaxGenerator()
         {
-            var version =
+            var referencedWorkspaceAssemblyName =
                 typeof(OurSyntaxGenerator).Assembly.GetReferencedAssemblies()
-                    .Single( a => string.Equals( a.Name, "Microsoft.CodeAnalysis.Workspaces", StringComparison.OrdinalIgnoreCase ) )
-                    .Version;
+                    .Single( a => string.Equals( a.Name, "Microsoft.CodeAnalysis.Workspaces", StringComparison.OrdinalIgnoreCase ) );
 
-            var assembly = Assembly.Load( "Microsoft.CodeAnalysis.CSharp.Workspaces, Version=" + version );
+            var requiredWorkspaceImplementationAssemblyName = new AssemblyName(
+                referencedWorkspaceAssemblyName.ToString().Replace( "Microsoft.CodeAnalysis.Workspaces", "Microsoft.CodeAnalysis.CSharp.Workspaces" ) );
+            
+            // See if the assembly is already loaded in the AppDomain.
+            var assembly = AppDomain.CurrentDomain
+                .GetAssemblies()
+                .Where( a => AssemblyName.ReferenceMatchesDefinition( requiredWorkspaceImplementationAssemblyName, a.GetName() ) )
+                .OrderByDescending( a => a.GetName().Version )
+                .FirstOrDefault();
+
+            // If is not present, load it.
+            if ( assembly == null )
+            {
+                assembly = Assembly.Load( requiredWorkspaceImplementationAssemblyName );
+            }
 
             var type = assembly.GetType( $"Microsoft.CodeAnalysis.CSharp.CodeGeneration.CSharpSyntaxGenerator" )!;
             var field = type.GetField( "Instance", BindingFlags.Public | BindingFlags.Static )!;

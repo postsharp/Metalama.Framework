@@ -246,14 +246,16 @@ namespace Caravela.Framework.Impl.Aspects
             }
             else
             {
-                var untypedPrototype = FormatterServices.GetUninitializedObject( aspectReflectionType ).AssertNotNull();
                 var aspectInterfaceType = typeof(IAspect);
 
-                if ( !aspectInterfaceType.IsInstanceOfType( untypedPrototype ) )
+                if ( !aspectInterfaceType.IsAssignableFrom( aspectInterfaceType ) )
                 {
-                    // TODO #29259: AspectClass.TryCreate throws InvalidCastException when VSX has different build than our compiler package
+                    // This happens in case of a bug in assembly resolution
+                    // (typically AppDomain.AssemblyResolve event handler).
                     throw new AssertionFailedException( "Assembly version mismatch." );
                 }
+
+                var untypedPrototype = FormatterServices.GetUninitializedObject( aspectReflectionType ).AssertNotNull();
 
                 prototype = (IAspect) untypedPrototype;
             }
