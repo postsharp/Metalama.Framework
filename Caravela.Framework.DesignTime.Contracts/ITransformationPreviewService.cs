@@ -8,10 +8,17 @@ using System.Threading;
 
 namespace Caravela.Framework.DesignTime.Contracts
 {
+    /// <summary>
+    /// Defines a method that allows to transform a single syntax tree in a compilation. This service
+    /// is used to produce the diff view between original code and transform code.
+    /// </summary>
     [Guid( "63bba422-ac06-40c8-b0a9-4d2402942aec" )]
     [ComImport]
     public interface ITransformationPreviewService : ICompilerService
     {
+        /// <summary>
+        /// Transforms a single syntax tree in a compilation.
+        /// </summary>
         bool TryPreviewTransformation(
             Compilation compilation,
             SyntaxTree syntaxTree,
