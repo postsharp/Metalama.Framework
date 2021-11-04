@@ -7,7 +7,6 @@ using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.Aspects;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
-using Caravela.Framework.Impl.DesignTime.Pipeline;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Pipeline;
 using Microsoft.CodeAnalysis;
@@ -64,7 +63,7 @@ namespace Caravela.Framework.Impl.DesignTime.Refactoring
             [NotNullWhen( true )] out PartialCompilation? outputCompilation,
             out ImmutableArray<Diagnostic> diagnostics )
         {
-            var pipelineConfiguration = designTimeProjectConfiguration.WithStages( s => MapPipelineStage( designTimeProjectConfiguration, s ) );
+            var pipelineConfiguration = designTimeProjectConfiguration.WithStages( s => CompileTimeAspectPipeline.MapStage( designTimeProjectConfiguration, s ) );
 
             DiagnosticList diagnosticList = new();
 
@@ -81,16 +80,6 @@ namespace Caravela.Framework.Impl.DesignTime.Refactoring
 
             return true;
         }
-
-        private static PipelineStage MapPipelineStage( AspectProjectConfiguration configuration, PipelineStage stage )
-            => stage switch
-            {
-                SourceGeneratorPipelineStage => new CompileTimePipelineStage(
-                    configuration.CompileTimeProject!,
-                    configuration.AspectLayers,
-                    stage.ServiceProvider ),
-                _ => stage
-            };
 
         private protected override HighLevelPipelineStage CreateStage(
             ImmutableArray<OrderedAspectLayer> parts,

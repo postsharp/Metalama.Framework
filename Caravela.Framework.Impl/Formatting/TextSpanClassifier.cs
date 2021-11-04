@@ -323,7 +323,13 @@ namespace Caravela.Framework.Impl.Formatting
 
                 var previousChar = trivia.Span.Start == 0 ? '\0' : this._sourceString[trivia.Span.Start - 1];
                 var triviaStart = trivia.Span.Start;
-                var triviaEnd = trivia.Span.End;
+                var triviaEnd = Math.Min( trivia.Span.End, this._sourceString.Length - 1 );
+
+                if ( triviaStart > triviaEnd )
+                {
+                    // This should not happen.
+                    continue;
+                }
 
                 // If we have an indenting trivia, trim the start of the span.
                 if ( previousChar == '\n' || previousChar == '\r' )
@@ -350,6 +356,7 @@ namespace Caravela.Framework.Impl.Formatting
             }
 
 #if DEBUG
+
             // ReSharper disable once UnusedVariable
             var text = this._sourceText.GetSubText( span ).ToString();
 #endif

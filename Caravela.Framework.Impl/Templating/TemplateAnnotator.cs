@@ -806,9 +806,6 @@ namespace Caravela.Framework.Impl.Templating
 
                             break;
 
-                        case { TypeKind: TypeKind.Error }:
-                            return node;
-
                         case { TypeKind: TypeKind.Dynamic }:
                             // In case of invocation of a dynamic location, there is no list of parameters, only arguments.
                             parameters = default;
@@ -816,7 +813,8 @@ namespace Caravela.Framework.Impl.Templating
                             break;
 
                         default:
-                            throw new AssertionFailedException( $"Don't know how to get the parameters of '{node.Expression}'." );
+                            // We can get here in case of syntax error.
+                            return node;
                     }
 
                     break;

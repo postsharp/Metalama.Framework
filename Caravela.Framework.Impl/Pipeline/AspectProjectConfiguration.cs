@@ -34,6 +34,15 @@ namespace Caravela.Framework.Impl.Pipeline
                 this.CompileTimeProjectLoader,
                 this.ServiceProvider );
 
+        public AspectProjectConfiguration WithServiceProvider( ServiceProvider serviceProvider )
+            => new(
+                this.Stages,
+                this.AspectClasses,
+                this.AspectLayers,
+                this.CompileTimeProject,
+                this.CompileTimeProjectLoader,
+                serviceProvider );
+
         private readonly ImmutableDictionary<string, IBoundAspectClass> _aspectClassesByName = AspectClasses.ToImmutableDictionary( c => c.FullName, c => c );
 
         public IBoundAspectClass GetAspectClass( string typeName ) => this._aspectClassesByName[typeName];

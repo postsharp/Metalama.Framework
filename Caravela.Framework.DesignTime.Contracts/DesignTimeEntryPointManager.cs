@@ -58,8 +58,9 @@ namespace Caravela.Framework.DesignTime.Contracts
             }
         }
 
-        // The constructor is internal because it is used for tests, so we don't base tests on the singleton instance.
-        internal DesignTimeEntryPointManager() { }
+        // The constructor is public because it is used for tests, so we don't base tests on the singleton instance.
+        // ReSharper disable once EmptyConstructor
+        public DesignTimeEntryPointManager() { }
 
         private readonly object _sync = new();
         private volatile TaskCompletionSource<ICompilerServiceProvider> _registrationTask = new();

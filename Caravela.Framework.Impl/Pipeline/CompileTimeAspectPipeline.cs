@@ -7,6 +7,7 @@ using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.Aspects;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
+using Caravela.Framework.Impl.DesignTime.Pipeline;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Formatting;
 using Caravela.Framework.Impl.Templating;
@@ -28,9 +29,10 @@ namespace Caravela.Framework.Impl.Pipeline
         public CompileTimeAspectPipeline(
             ServiceProvider serviceProvider,
             bool isTest,
-            CompileTimeDomain? domain = null ) : base(
+            CompileTimeDomain? domain = null,
+            AspectExecutionScenario executionScenario = AspectExecutionScenario.CompileTime ) : base(
             serviceProvider,
-            AspectExecutionScenario.CompileTime,
+            executionScenario,
             isTest,
             domain )
         {
@@ -52,6 +54,56 @@ namespace Caravela.Framework.Impl.Pipeline
             out ImmutableArray<ManagedResource> additionalResources,
             [NotNullWhen( true )] out Compilation? resultingCompilation )
         {
+            // Run the code analyzers that normally run at design time.
+            if ( !TemplatingCodeValidator.Validate( compilation, diagnosticAdder, this.ServiceProvider, cancellationToken ) )
+            {
+                resultingCompilation = null;
+
+                return false;
+            }
+
+            var partialCompilation = PartialCompilation.CreateComplete( compilation );
+
+            // Initialize the pipeline and generate the compile-time project.
+            if ( !this.TryInitialize( diagnosticAdder, partialCompilation, null, cancellationToken, out var configuration ) )
+            {
+                resultingCompilation = null;
+
+                return false;
+            }
+
+            if ( this.TryExecuteCore(
+                diagnosticAdder,
+                partialCompilation,
+                resources,
+                configuration,
+                cancellationToken,
+                out syntaxTreeTransformations,
+                out additionalResources,
+                out var resultingPartialCompilation ) )
+            {
+                resultingCompilation = resultingPartialCompilation.Compilation;
+
+                return true;
+            }
+            else
+            {
+                resultingCompilation = null;
+
+                return false;
+            }
+        }
+
+        internal bool TryExecuteCore(
+            IDiagnosticAdder diagnosticAdder,
+            PartialCompilation compilation,
+            ImmutableArray<ManagedResource> resources,
+            AspectProjectConfiguration configuration,
+            CancellationToken cancellationToken,
+            out ImmutableArray<SyntaxTreeTransformation> syntaxTreeTransformations,
+            out ImmutableArray<ManagedResource> additionalResources,
+            [NotNullWhen( true )] out PartialCompilation? resultingCompilation )
+        {
             if ( !this.ProjectOptions.IsFrameworkEnabled )
             {
                 syntaxTreeTransformations = ImmutableArray<SyntaxTreeTransformation>.Empty;
@@ -67,21 +119,8 @@ namespace Caravela.Framework.Impl.Pipeline
 
             try
             {
-                if ( !TemplatingCodeValidator.Validate( compilation, diagnosticAdder, this.ServiceProvider, cancellationToken ) )
-                {
-                    return false;
-                }
-
-                var partialCompilation = PartialCompilation.CreateComplete( compilation, resources );
-
-                // Initialize the pipeline and generate the compile-time project.
-                if ( !this.TryInitialize( diagnosticAdder, partialCompilation, null, cancellationToken, out var configuration ) )
-                {
-                    return false;
-                }
-
                 // Execute the pipeline.
-                if ( !this.TryExecute( partialCompilation, diagnosticAdder, configuration, cancellationToken, out var result ) )
+                if ( !this.TryExecute( compilation, diagnosticAdder, configuration, cancellationToken, out var result ) )
                 {
                     return false;
                 }
@@ -121,8 +160,7 @@ namespace Caravela.Framework.Impl.Pipeline
                     additionalResources = additionalResources.Add( resource );
                 }
 
-                resultPartialCompilation = (PartialCompilation) RunTimeAssemblyRewriter.Rewrite( resultPartialCompilation, this.ServiceProvider );
-                resultingCompilation = resultPartialCompilation.Compilation;
+                resultingCompilation = (PartialCompilation) RunTimeAssemblyRewriter.Rewrite( resultPartialCompilation, this.ServiceProvider );
                 syntaxTreeTransformations = resultPartialCompilation.ToTransformations();
 
                 return true;
@@ -144,5 +182,15 @@ namespace Caravela.Framework.Impl.Pipeline
             ImmutableArray<OrderedAspectLayer> parts,
             CompileTimeProject compileTimeProject )
             => new CompileTimePipelineStage( compileTimeProject, parts, this.ServiceProvider );
+
+        internal static PipelineStage MapStage( AspectProjectConfiguration configuration, PipelineStage stage )
+            => stage switch
+            {
+                SourceGeneratorPipelineStage => new CompileTimePipelineStage(
+                    configuration.CompileTimeProject!,
+                    configuration.AspectLayers,
+                    stage.ServiceProvider ),
+                _ => stage
+            };
     }
 }
