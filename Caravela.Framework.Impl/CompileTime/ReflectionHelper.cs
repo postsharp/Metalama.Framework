@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Immutable;
@@ -46,15 +47,22 @@ namespace Caravela.Framework.Impl.CompileTime
                 nameof(name),
                 $"Cannot find a type '{name}' in compilation '{compilation.AssemblyName}" );
 
-        public static string GetReflectionName( this INamedTypeSymbol s )
+        /// <summary>
+        /// Gets a string that would be equal to <see cref="Type.FullName"/>, except that we do not qualify type names with the assembly name.
+        /// </summary>
+        public static string GetReflectionName( this ITypeSymbol s )
         {
             var sb = new StringBuilder();
             Append( s );
 
             void Append( INamespaceOrTypeSymbol symbol )
             {
+                // Append the containing namespace or type.
                 switch ( symbol.ContainingSymbol )
                 {
+                    case null:
+                        break;
+
                     case ITypeSymbol typeSymbol:
                         Append( typeSymbol );
                         sb.Append( '+' );
@@ -75,13 +83,58 @@ namespace Caravela.Framework.Impl.CompileTime
                         throw new AssertionFailedException();
                 }
 
-                if ( !string.IsNullOrEmpty( symbol.MetadataName ) )
+                switch ( symbol )
                 {
-                    sb.Append( symbol.MetadataName );
-                }
-                else
-                {
-                    throw new AssertionFailedException( $"{symbol.ToDisplayString()} does not have a MetadataName." );
+                    case INamedTypeSymbol { IsGenericType: true } unboundGenericType when !unboundGenericType.IsGenericTypeDefinition():
+                        sb.Append( unboundGenericType.MetadataName );
+                        sb.Append( "[[" );
+
+                        for ( var i = 0; i < unboundGenericType.TypeArguments.Length; i++ )
+                        {
+                            if ( i > 0 )
+                            {
+                                sb.Append( ", " );
+                            }
+
+                            var arg = unboundGenericType.TypeArguments[i];
+                            Append( arg );
+                        }
+
+                        sb.Append( "]]" );
+
+                        break;
+
+                    case { } when !string.IsNullOrEmpty( symbol.MetadataName ):
+                        sb.Append( symbol.MetadataName );
+
+                        break;
+
+                    case IArrayTypeSymbol array:
+                        Append( array.ElementType );
+                        sb.Append( '[' );
+
+                        for ( var i = 1; i < array.Rank; i++ )
+                        {
+                            sb.Append( ',' );
+                        }
+
+                        sb.Append( ']' );
+
+                        break;
+
+                    case IPointerTypeSymbol pointer:
+                        Append( pointer.PointedAtType );
+                        sb.Append( '*' );
+
+                        break;
+
+                    case IDynamicTypeSymbol:
+                        sb.Append( "System.Object" );
+
+                        break;
+
+                    default:
+                        throw new AssertionFailedException( $"Don't know how to process a {symbol!.Kind}." );
                 }
             }
 

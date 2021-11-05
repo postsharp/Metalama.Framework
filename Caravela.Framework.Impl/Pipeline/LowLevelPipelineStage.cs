@@ -62,7 +62,9 @@ namespace Caravela.Framework.Impl.Pipeline
                 aspectInstances,
                 input.PartialCompilation,
                 diagnostics.Report,
-                resources.Add );
+                resources.Add,
+                new AspectWeaverHelper( pipelineConfiguration.ServiceProvider, input.PartialCompilation.Compilation ),
+                pipelineConfiguration.ServiceProvider );
 
             PartialCompilation newCompilation;
 

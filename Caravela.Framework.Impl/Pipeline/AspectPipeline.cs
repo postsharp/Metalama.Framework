@@ -185,8 +185,8 @@ namespace Caravela.Framework.Impl.Pipeline
                 .Select(
                     g =>
                         g.Key is _highLevelStageGroupingKey
-                            ? new AspectPipelineStageConfiguration( AspectPipelineStageKind.HighLevel, g.ToImmutableArray(), null )
-                            : new AspectPipelineStageConfiguration( AspectPipelineStageKind.LowLevel, g.ToImmutableArray(), (IAspectWeaver) g.Key ) )
+                            ? new PipelineStageConfiguration( PipelineStageKind.HighLevel, g.ToImmutableArray(), null )
+                            : new PipelineStageConfiguration( PipelineStageKind.LowLevel, g.ToImmutableArray(), (IAspectWeaver) g.Key ) )
                 .ToImmutableArray();
 
             configuration = new AspectPipelineConfiguration(
@@ -300,11 +300,11 @@ namespace Caravela.Framework.Impl.Pipeline
         /// <param name="compileTimeProject"></param>
         /// <returns></returns>
         private protected abstract HighLevelPipelineStage CreateHighLevelStage(
-            AspectPipelineStageConfiguration configuration,
+            PipelineStageConfiguration configuration,
             CompileTimeProject compileTimeProject );
 
         private protected virtual LowLevelPipelineStage? CreateLowLevelStage(
-            AspectPipelineStageConfiguration configuration,
+            PipelineStageConfiguration configuration,
             CompileTimeProject compileTimeProject )
         {
             var partData = configuration.Parts.Single();
@@ -312,14 +312,14 @@ namespace Caravela.Framework.Impl.Pipeline
             return new LowLevelPipelineStage( configuration.Weaver!, partData.AspectClass, this.ServiceProvider );
         }
 
-        private PipelineStage? CreateStage( AspectPipelineStageConfiguration configuration, CompileTimeProject project )
+        private PipelineStage? CreateStage( PipelineStageConfiguration configuration, CompileTimeProject project )
         {
             switch ( configuration.Kind )
             {
-                case AspectPipelineStageKind.LowLevel:
+                case PipelineStageKind.LowLevel:
                     return this.CreateLowLevelStage( configuration, project );
 
-                case AspectPipelineStageKind.HighLevel:
+                case PipelineStageKind.HighLevel:
 
                     return this.CreateHighLevelStage( configuration, project );
 

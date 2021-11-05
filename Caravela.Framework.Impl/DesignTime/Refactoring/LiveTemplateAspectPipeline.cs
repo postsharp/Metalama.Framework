@@ -3,7 +3,6 @@
 
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
-using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.Aspects;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
@@ -80,7 +79,7 @@ namespace Caravela.Framework.Impl.DesignTime.Refactoring
         }
 
         private protected override HighLevelPipelineStage CreateHighLevelStage(
-            AspectPipelineStageConfiguration configuration,
+            PipelineStageConfiguration configuration,
             CompileTimeProject compileTimeProject )
             => new CompileTimePipelineStage( compileTimeProject, configuration.Parts, this.ServiceProvider );
 

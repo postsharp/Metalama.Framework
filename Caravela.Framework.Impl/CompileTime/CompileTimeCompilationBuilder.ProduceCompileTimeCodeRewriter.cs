@@ -761,9 +761,8 @@ namespace Caravela.Framework.Impl.CompileTime
             {
                 if ( this._currentContext.Scope != TemplatingScope.RunTimeOnly )
                 {
-                    var typeSymbol = this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetSymbolInfo( node.Type ).Symbol;
-
-                    if ( typeSymbol != null && this.SymbolClassifier.GetTemplatingScope( typeSymbol ) == TemplatingScope.RunTimeOnly )
+                    if ( this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetSymbolInfo( node.Type ).Symbol is ITypeSymbol typeSymbol
+                         && this.SymbolClassifier.GetTemplatingScope( typeSymbol ) == TemplatingScope.RunTimeOnly )
                     {
                         // We are in a compile-time-only block but we have a typeof to a run-time-only block. 
                         // This is a situation we can handle by rewriting the typeof to a call to UserCodeContext.GetCompileTimeType.
@@ -781,7 +780,7 @@ namespace Caravela.Framework.Impl.CompileTime
                                     new[]
                                     {
                                         Argument( SyntaxFactoryEx.LiteralExpression( DocumentationCommentId.CreateReferenceId( typeSymbol ) ) ),
-                                        Argument( SyntaxFactoryEx.LiteralExpression( typeSymbol.ToDisplayString() ) )
+                                        Argument( SyntaxFactoryEx.LiteralExpression( typeSymbol.GetReflectionName() ) )
                                     } ) ) );
 
                         return invocation;

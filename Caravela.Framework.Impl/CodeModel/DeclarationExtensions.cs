@@ -110,7 +110,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public static DeclarationRef<T> ToRef<T>( this T declaration )
             where T : class, IDeclaration
-            => ((IDeclarationImpl) declaration).ToRef().Cast<T>();
+            => ((IDeclarationImpl) declaration).ToRef().As<T>();
 
         public static MemberRef<T> ToMemberRef<T>( this T member )
             where T : class, IMemberOrNamedType

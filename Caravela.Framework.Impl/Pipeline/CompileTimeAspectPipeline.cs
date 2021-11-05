@@ -3,11 +3,9 @@
 
 using Caravela.Compiler;
 using Caravela.Framework.Aspects;
-using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.Aspects;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
-using Caravela.Framework.Impl.DesignTime.Pipeline;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Formatting;
 using Caravela.Framework.Impl.Templating;
@@ -179,9 +177,8 @@ namespace Caravela.Framework.Impl.Pipeline
         }
 
         private protected override HighLevelPipelineStage CreateHighLevelStage(
-            AspectPipelineStageConfiguration configuration,
+            PipelineStageConfiguration configuration,
             CompileTimeProject compileTimeProject )
             => new CompileTimePipelineStage( compileTimeProject, configuration.Parts, this.ServiceProvider );
-
     }
 }

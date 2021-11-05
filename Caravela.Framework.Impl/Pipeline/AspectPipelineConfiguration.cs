@@ -16,7 +16,7 @@ namespace Caravela.Framework.Impl.Pipeline
     /// the order of layers.
     /// </summary>
     internal record AspectPipelineConfiguration(
-        ImmutableArray<AspectPipelineStageConfiguration> Stages,
+        ImmutableArray<PipelineStageConfiguration> Stages,
         ImmutableArray<IBoundAspectClass> AspectClasses,
         ImmutableArray<OrderedAspectLayer> AspectLayers,
         CompileTimeProject? CompileTimeProject,

@@ -22,7 +22,9 @@ namespace Caravela.Framework.Impl.Sdk
         private readonly Action<Diagnostic> _addDiagnostic;
         private readonly Action<ManagedResource> _addResource;
         private IPartialCompilation _compilation;
-        
+
+        public IServiceProvider ServiceProvider { get; }
+
         /// <summary>
         /// Gets the type of aspects that must be handled.
         /// </summary>
@@ -39,7 +41,7 @@ namespace Caravela.Framework.Impl.Sdk
         public IPartialCompilation Compilation
         {
             get => this._compilation;
-            
+
             set
             {
                 if ( ((IPartialCompilationInternal) value).InitialCompilation != ((IPartialCompilationInternal) this._compilation).InitialCompilation )
@@ -48,11 +50,13 @@ namespace Caravela.Framework.Impl.Sdk
                         nameof(value),
                         "The compilation must have been derived from the initial value of the Compilation property." );
                 }
-                
+
                 this._compilation = value;
             }
         }
-        
+
+        public IAspectWeaverHelper Helper { get; }
+
         /// <summary>
         /// Adds a new <see cref="ManagedResource"/> to the compilation.
         /// </summary>
@@ -137,13 +141,17 @@ namespace Caravela.Framework.Impl.Sdk
             IReadOnlyDictionary<ISymbol, IAspectInstance> aspectInstances,
             IPartialCompilation compilation,
             Action<Diagnostic> addDiagnostic,
-            Action<ManagedResource> addResource )
+            Action<ManagedResource> addResource,
+            IAspectWeaverHelper helper,
+            IServiceProvider serviceProvider )
         {
             this.AspectClass = aspectClass;
             this.AspectInstances = aspectInstances;
             this._compilation = compilation;
             this._addDiagnostic = addDiagnostic;
             this._addResource = addResource;
+            this.Helper = helper;
+            this.ServiceProvider = serviceProvider;
         }
 
         /// <summary>
@@ -151,7 +159,7 @@ namespace Caravela.Framework.Impl.Sdk
         /// </summary>
         /// <param name="diagnostic"></param>
         public void ReportDiagnostic( Diagnostic diagnostic ) => this._addDiagnostic( diagnostic );
-        
+
         // TODO: add support for suppressions.
     }
 }

@@ -151,11 +151,11 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
 
         /// <inheritdoc/>
         private protected override HighLevelPipelineStage CreateHighLevelStage(
-            AspectPipelineStageConfiguration configuration,
+            PipelineStageConfiguration configuration,
             CompileTimeProject compileTimeProject )
             => new SourceGeneratorPipelineStage( compileTimeProject, configuration.Parts, this.ServiceProvider );
 
-        private protected override LowLevelPipelineStage? CreateLowLevelStage( AspectPipelineStageConfiguration configuration, CompileTimeProject compileTimeProject )
+        private protected override LowLevelPipelineStage? CreateLowLevelStage( PipelineStageConfiguration configuration, CompileTimeProject compileTimeProject )
             => null;
 
         protected override void Dispose( bool disposing )
@@ -323,7 +323,5 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
                 }
             }
         }
-        
-        
     }
 }
