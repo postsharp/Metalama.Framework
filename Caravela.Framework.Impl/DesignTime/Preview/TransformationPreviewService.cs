@@ -14,9 +14,9 @@ using Caravela.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Immutable;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Caravela.Framework.Impl.DesignTime.Preview
 {
@@ -31,12 +31,11 @@ namespace Caravela.Framework.Impl.DesignTime.Preview
 
         public TransformationPreviewService() : this( DesignTimeAspectPipelineFactory.Instance ) { }
 
-        public bool TryPreviewTransformation(
+        public async Task PreviewTransformationAsync(
             Compilation compilation,
             SyntaxTree syntaxTree,
-            CancellationToken cancellationToken,
-            [NotNullWhen( true )] out SyntaxTree? transformedSyntaxTree,
-            [NotNullWhen( false )] out string? error )
+            IPreviewTransformationResult?[] result, 
+            CancellationToken cancellationToken )
         {
             // Get the pipeline for the compilation.
             if ( !this._designTimeAspectPipelineFactory.TryGetPipeline( compilation, out var designTimePipeline ) )
@@ -44,10 +43,9 @@ namespace Caravela.Framework.Impl.DesignTime.Preview
                 // We cannot create the pipeline because we don't have all options.
                 // If this is a problem, we will need to pass all options as AssemblyMetadataAttribute.
 
-                transformedSyntaxTree = null;
-                error = "The component has not been initialized yet.";
+                result[0] = PreviewTransformationResult.Failure( "The component has not been initialized yet." );
 
-                return false;
+                return;
             }
 
             // Get a compilation _without_ generated code, and map the target symbol.
@@ -61,11 +59,11 @@ namespace Caravela.Framework.Impl.DesignTime.Preview
             // Get the pipeline configuration from the design-time pipeline.
             if ( !designTimePipeline.TryGetConfiguration( partialCompilation, diagnostics, true, cancellationToken, out var designTimeConfiguration ) )
             {
-                transformedSyntaxTree = null;
+                var error = string.Join( Environment.NewLine, diagnostics.Where( d => d.Severity == DiagnosticSeverity.Error ) );
 
-                error = string.Join( Environment.NewLine, diagnostics.Where( d => d.Severity == DiagnosticSeverity.Error ) );
+                result[0] = PreviewTransformationResult.Failure( error );
 
-                return false;
+                return;
             }
 
             // For preview, we need to override a few options, especially to enable code formatting.
@@ -81,27 +79,25 @@ namespace Caravela.Framework.Impl.DesignTime.Preview
                 this._designTimeAspectPipelineFactory.Domain,
                 AspectExecutionScenario.Preview );
 
-            if ( !previewPipeline.TryExecuteCore(
+            var pipelineResult = await previewPipeline.ExecuteCoreAsync(
                 diagnostics,
                 partialCompilation,
                 ImmutableArray<ManagedResource>.Empty,
                 previewConfiguration,
-                cancellationToken,
-                out _,
-                out _,
-                out var resultingCompilation ) )
+                cancellationToken );
+
+            if ( pipelineResult == null )
             {
-                transformedSyntaxTree = null;
+                var error = string.Join( Environment.NewLine, diagnostics.Where( d => d.Severity == DiagnosticSeverity.Error ) );
 
-                error = string.Join( Environment.NewLine, diagnostics.Where( d => d.Severity == DiagnosticSeverity.Error ) );
+                result[0] = PreviewTransformationResult.Failure( error );
 
-                return false;
+                return;
             }
 
-            transformedSyntaxTree = resultingCompilation.SyntaxTrees[syntaxTree.FilePath];
-            error = null;
+            var transformedSyntaxTree = pipelineResult.ResultingCompilation.SyntaxTrees[syntaxTree.FilePath];
 
-            return true;
+            result[0] = PreviewTransformationResult.Success( transformedSyntaxTree );
         }
     }
 }

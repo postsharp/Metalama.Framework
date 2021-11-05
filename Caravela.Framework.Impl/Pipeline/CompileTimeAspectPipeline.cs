@@ -12,7 +12,6 @@ using Caravela.Framework.Impl.Templating;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -43,21 +42,16 @@ namespace Caravela.Framework.Impl.Pipeline
             }
         }
 
-        public bool TryExecute(
+        public async Task<CompileTimeAspectPipelineResult?> ExecuteAsync(
             IDiagnosticAdder diagnosticAdder,
             Compilation compilation,
             ImmutableArray<ManagedResource> resources,
-            CancellationToken cancellationToken,
-            out ImmutableArray<SyntaxTreeTransformation> syntaxTreeTransformations,
-            out ImmutableArray<ManagedResource> additionalResources,
-            [NotNullWhen( true )] out Compilation? resultingCompilation )
+            CancellationToken cancellationToken )
         {
             // Run the code analyzers that normally run at design time.
             if ( !TemplatingCodeValidator.Validate( compilation, diagnosticAdder, this.ServiceProvider, cancellationToken ) )
             {
-                resultingCompilation = null;
-
-                return false;
+                return null;
             }
 
             var partialCompilation = PartialCompilation.CreateComplete( compilation );
@@ -65,62 +59,38 @@ namespace Caravela.Framework.Impl.Pipeline
             // Initialize the pipeline and generate the compile-time project.
             if ( !this.TryInitialize( diagnosticAdder, partialCompilation, null, cancellationToken, out var configuration ) )
             {
-                resultingCompilation = null;
-
-                return false;
+                return null;
             }
 
-            if ( this.TryExecuteCore(
+            return await this.ExecuteCoreAsync(
                 diagnosticAdder,
                 partialCompilation,
                 resources,
                 configuration,
-                cancellationToken,
-                out syntaxTreeTransformations,
-                out additionalResources,
-                out var resultingPartialCompilation ) )
-            {
-                resultingCompilation = resultingPartialCompilation.Compilation;
-
-                return true;
-            }
-            else
-            {
-                resultingCompilation = null;
-
-                return false;
-            }
+                cancellationToken );
         }
 
-        internal bool TryExecuteCore(
+        internal async Task<CompileTimeAspectPipelineResult?> ExecuteCoreAsync(
             IDiagnosticAdder diagnosticAdder,
             PartialCompilation compilation,
             ImmutableArray<ManagedResource> resources,
             AspectPipelineConfiguration configuration,
-            CancellationToken cancellationToken,
-            out ImmutableArray<SyntaxTreeTransformation> syntaxTreeTransformations,
-            out ImmutableArray<ManagedResource> additionalResources,
-            [NotNullWhen( true )] out PartialCompilation? resultingCompilation )
+            CancellationToken cancellationToken )
         {
             if ( !this.ProjectOptions.IsFrameworkEnabled )
             {
-                syntaxTreeTransformations = ImmutableArray<SyntaxTreeTransformation>.Empty;
-                additionalResources = ImmutableArray<ManagedResource>.Empty;
-                resultingCompilation = compilation;
-
-                return true;
+                return new CompileTimeAspectPipelineResult(
+                    ImmutableArray<SyntaxTreeTransformation>.Empty,
+                    ImmutableArray<ManagedResource>.Empty,
+                    compilation );
             }
-
-            syntaxTreeTransformations = default;
-            additionalResources = default;
-            resultingCompilation = null;
 
             try
             {
                 // Execute the pipeline.
                 if ( !this.TryExecute( compilation, diagnosticAdder, configuration, cancellationToken, out var result ) )
                 {
-                    return false;
+                    return null;
                 }
 
                 var resultPartialCompilation = result.PartialCompilation;
@@ -129,13 +99,12 @@ namespace Caravela.Framework.Impl.Pipeline
                 if ( this.ProjectOptions.FormatOutput && OutputCodeFormatter.CanFormat )
                 {
                     // ReSharper disable once AccessToModifiedClosure
-                    resultPartialCompilation = Task.Run(
-                            () => OutputCodeFormatter.FormatToSyntaxAsync( resultPartialCompilation, cancellationToken ),
-                            cancellationToken )
-                        .Result;
+                    resultPartialCompilation = await OutputCodeFormatter.FormatToSyntaxAsync( resultPartialCompilation, cancellationToken );
                 }
 
                 // Add managed resources.
+                ImmutableArray<ManagedResource> additionalResources;
+
                 if ( resultPartialCompilation.Resources.IsDefaultOrEmpty )
                 {
                     additionalResources = ImmutableArray<ManagedResource>.Empty;
@@ -158,10 +127,10 @@ namespace Caravela.Framework.Impl.Pipeline
                     additionalResources = additionalResources.Add( resource );
                 }
 
-                resultingCompilation = (PartialCompilation) RunTimeAssemblyRewriter.Rewrite( resultPartialCompilation, this.ServiceProvider );
-                syntaxTreeTransformations = resultPartialCompilation.ToTransformations();
+                var resultingCompilation = (PartialCompilation) RunTimeAssemblyRewriter.Rewrite( resultPartialCompilation, this.ServiceProvider );
+                var syntaxTreeTransformations = resultingCompilation.ToTransformations();
 
-                return true;
+                return new CompileTimeAspectPipelineResult( syntaxTreeTransformations, additionalResources, resultingCompilation );
             }
             catch ( InvalidUserCodeException exception )
             {
@@ -170,9 +139,7 @@ namespace Caravela.Framework.Impl.Pipeline
                     diagnosticAdder.Report( diagnostic );
                 }
 
-                syntaxTreeTransformations = default;
-
-                return false;
+                return null;
             }
         }
 

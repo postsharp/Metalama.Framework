@@ -16,6 +16,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -159,7 +160,7 @@ F1.cs:
         }
 
         [Fact]
-        public void ChangeInAspectCode()
+        public async Task ChangeInAspectCode()
         {
             var assemblyName = "test_" + Guid.NewGuid();
 
@@ -306,7 +307,9 @@ Target.cs:
             var serviceProvider = ServiceProviderFactory.GetServiceProvider( projectOptions ).WithProjectScopedServices( compilation.References );
             var compileTimeAspectPipeline = new CompileTimeAspectPipeline( serviceProvider, true, domain );
             DiagnosticList compileDiagnostics = new();
-            Assert.True( compileTimeAspectPipeline.TryExecute( compileDiagnostics, compilation5, default, CancellationToken.None, out _, out _, out _ ) );
+            var pipelineResult = await compileTimeAspectPipeline.ExecuteAsync( compileDiagnostics, compilation5, default, CancellationToken.None );
+
+            Assert.NotNull( pipelineResult );
 
             // Simulate an external build event. This is normally triggered by the build touch file.
             pipeline.OnExternalBuildStarted();
