@@ -28,9 +28,14 @@ namespace Caravela.Framework.Tests.UnitTests.CodeModel
             var typeSymbol = reflectionMapper.GetTypeSymbol( type );
             var compileTimeType = (CompileTimeType) new CompileTimeTypeFactory().Get( typeSymbol );
 
-            var expectedTypeName = type.FullName?.ReplaceOrdinal(
-                ", System.Private.CoreLib, Version=5.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e",
-                "" );
+            var expectedTypeName = type.FullName?
+#if NET5_0
+                .ReplaceOrdinal( ", System.Private.CoreLib, Version=5.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e", "" )
+#else
+                .ReplaceOrdinal( ", mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", "" )
+#endif
+                .ReplaceOrdinal( "[[", "[" )
+                .ReplaceOrdinal( "]]", "]" );
 
             Assert.Equal( expectedTypeName, compileTimeType.FullName );
 

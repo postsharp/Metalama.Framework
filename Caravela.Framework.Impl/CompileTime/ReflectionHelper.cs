@@ -52,6 +52,11 @@ namespace Caravela.Framework.Impl.CompileTime
         /// </summary>
         public static string GetReflectionName( this ITypeSymbol s )
         {
+            if ( s is ITypeParameterSymbol typeParameter )
+            {
+                return typeParameter.Name;
+            }
+            
             var sb = new StringBuilder();
             Append( s );
 
@@ -87,7 +92,7 @@ namespace Caravela.Framework.Impl.CompileTime
                 {
                     case INamedTypeSymbol { IsGenericType: true } unboundGenericType when !unboundGenericType.IsGenericTypeDefinition():
                         sb.Append( unboundGenericType.MetadataName );
-                        sb.Append( "[[" );
+                        sb.Append( "[" );
 
                         for ( var i = 0; i < unboundGenericType.TypeArguments.Length; i++ )
                         {
@@ -100,7 +105,7 @@ namespace Caravela.Framework.Impl.CompileTime
                             Append( arg );
                         }
 
-                        sb.Append( "]]" );
+                        sb.Append( "]" );
 
                         break;
 

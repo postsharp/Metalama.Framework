@@ -251,6 +251,11 @@ namespace Caravela.Framework.Impl.CompileTime
             {
                 var type = this.Assembly.GetType( reflectionName, false );
 
+                if ( type == null )
+                {
+                    return null;
+                }
+
                 // Check that the type is linked properly. An error here may be caused by a bug in 
                 // a handler of the AppDomain.AssemblyResolve event.
                 if ( type.GetInterfaces().Any( i => i.FullName == typeof(IAspect).FullName && !typeof(IAspect).IsAssignableFrom( i ) ) )
