@@ -581,8 +581,8 @@ namespace Caravela.Framework.Impl.Templating
                             var node = nodeOrToken.AsNode() ?? nodeOrToken.Parent;
 
                             if ( node != null &&
-                                 this._templateMemberClassifier.IsNodeOfDynamicType( node ) &&
-                                 symbol is not ITypeSymbol )
+                                 symbol is not (ITypeSymbol or ILocalSymbol) &&
+                                 this._templateMemberClassifier.IsNodeOfDynamicType( node ) )
                             {
                                 // Annotate dynamic members differently for syntax coloring.
                                 nodeOrToken = nodeOrToken.AddColoringAnnotation( TextSpanClassification.Dynamic );
