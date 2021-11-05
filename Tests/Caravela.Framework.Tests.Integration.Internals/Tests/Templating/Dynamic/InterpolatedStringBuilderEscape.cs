@@ -22,11 +22,11 @@ namespace Caravela.Framework.Tests.Integration.Templating.Dynamic.InterpolatedSt
         
             // Interpolated string.
             var s = new InterpolatedStringBuilder();
-            s.AddText( "{" );
+            s.AddText( "{ " );
             s.AddText( "$" );
             s.AddText( "\\" );
             s.AddText( "\n" );
-            s.AddText("}");
+            s.AddText(" }");
             
             var a = s.ToValue();
             return default;
