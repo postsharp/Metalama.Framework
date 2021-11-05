@@ -20,9 +20,9 @@ namespace Caravela.Framework.Impl.Fabrics
     internal sealed class FabricManager
     {
         private readonly FabricAspectSource _aspectSource;
-        private readonly AspectProjectConfiguration _configuration;
+        private readonly AspectPipelineConfiguration _configuration;
 
-        public FabricManager( AspectProjectConfiguration configuration )
+        public FabricManager( AspectPipelineConfiguration configuration )
         {
             this._configuration = configuration;
             this._aspectSource = new FabricAspectSource( configuration );

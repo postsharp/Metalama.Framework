@@ -36,7 +36,7 @@ namespace Caravela.Framework.Impl.Pipeline
                 .ToImmutableArray();
 
             var aspectInstanceResults = aggregateInstances
-                .Select( ai => aspectDriver.ExecuteAspect( ai, compilation, pipelineStepsState.ProjectConfiguration, cancellationToken ) )
+                .Select( ai => aspectDriver.ExecuteAspect( ai, compilation, pipelineStepsState.PipelineConfiguration, cancellationToken ) )
                 .ToImmutableArray();
 
             var success = aspectInstanceResults.All( ar => ar.Success );

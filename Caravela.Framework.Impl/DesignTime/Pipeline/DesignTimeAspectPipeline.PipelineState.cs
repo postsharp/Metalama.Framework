@@ -38,7 +38,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
 
             public ImmutableDictionary<string, SyntaxTree?>? CompileTimeSyntaxTrees { get; }
 
-            public AspectProjectConfiguration? Configuration { get; }
+            public AspectPipelineConfiguration? Configuration { get; }
 
             internal DesignTimeAspectPipelineStatus Status { get; }
 
@@ -64,7 +64,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
 
             private PipelineState(
                 PipelineState prototype,
-                AspectProjectConfiguration configuration,
+                AspectPipelineConfiguration configuration,
                 DesignTimeAspectPipelineStatus status ) : this( prototype )
             {
                 this.Configuration = configuration;
@@ -77,7 +77,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
                 DesignTimeAspectPipelineStatus status,
                 CompilationChangeTracker tracker,
                 CompilationResult compilationResult,
-                AspectProjectConfiguration? configuration )
+                AspectPipelineConfiguration? configuration )
                 : this( prototype )
             {
                 this.CompileTimeSyntaxTrees = compileTimeSyntaxTrees;
@@ -317,7 +317,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
                 IDiagnosticAdder diagnosticAdder,
                 bool ignoreStatus,
                 CancellationToken cancellationToken,
-                [NotNullWhen( true )] out AspectProjectConfiguration? configuration )
+                [NotNullWhen( true )] out AspectPipelineConfiguration? configuration )
             {
                 if ( state.Status == DesignTimeAspectPipelineStatus.NeedsExternalBuild && ignoreStatus )
                 {

@@ -20,12 +20,12 @@ namespace Caravela.Framework.Impl.Fabrics
     /// </summary>
     internal class FabricAspectSource : IAspectSource
     {
-        private readonly AspectProjectConfiguration _context;
+        private readonly AspectPipelineConfiguration _context;
 
         private readonly List<FabricDriver> _drivers = new(); // Note that this list is ordered.
         private readonly ImmutableArray<IAspectClass> _aspectClasses;
 
-        public FabricAspectSource( AspectProjectConfiguration context )
+        public FabricAspectSource( AspectPipelineConfiguration context )
         {
             this._context = context;
             this._aspectClasses = ImmutableArray.Create<IAspectClass>( context.GetAspectClass( FabricTopLevelAspectClass.FabricAspectName ) );

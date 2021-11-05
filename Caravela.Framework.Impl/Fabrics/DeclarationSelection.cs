@@ -28,26 +28,26 @@ namespace Caravela.Framework.Impl.Fabrics
         private readonly AspectPredecessor _predecessor;
         private readonly Action<IAspectSource> _registerAspectSource;
         private readonly Func<CompilationModel, IEnumerable<T>> _selector;
-        private readonly AspectProjectConfiguration _projectConfiguration;
+        private readonly AspectPipelineConfiguration _pipelineConfiguration;
 
         public DeclarationSelection(
             IDeclaration containingDeclaration,
             AspectPredecessor predecessor,
             Action<IAspectSource> registerAspectSource,
             Func<CompilationModel, IEnumerable<T>> selectTargets,
-            AspectProjectConfiguration projectConfiguration )
+            AspectPipelineConfiguration pipelineConfiguration )
         {
             this._containingDeclaration = containingDeclaration;
             this._predecessor = predecessor;
             this._registerAspectSource = registerAspectSource;
             this._selector = selectTargets;
-            this._projectConfiguration = projectConfiguration;
+            this._pipelineConfiguration = pipelineConfiguration;
         }
 
         private AspectClass GetAspectClass<TAspect>()
             where TAspect : IAspect
         {
-            var aspectClass = this._projectConfiguration.GetAspectClass( typeof(TAspect).FullName );
+            var aspectClass = this._pipelineConfiguration.GetAspectClass( typeof(TAspect).FullName );
 
             if ( aspectClass.IsAbstract )
             {
@@ -74,11 +74,11 @@ namespace Caravela.Framework.Impl.Fabrics
                         item =>
                         {
                             var lambda = Expression.Lambda<Func<IAspect>>(
-                                this._projectConfiguration.UserCodeInvoker.Invoke( () => createAspect( item ) ).Body,
+                                this._pipelineConfiguration.UserCodeInvoker.Invoke( () => createAspect( item ) ).Body,
                                 Array.Empty<ParameterExpression>() );
 
                             return new AspectInstance(
-                                this._projectConfiguration.ServiceProvider,
+                                this._pipelineConfiguration.ServiceProvider,
                                 lambda,
                                 item,
                                 aspectClass,
@@ -101,7 +101,7 @@ namespace Caravela.Framework.Impl.Fabrics
                         diagnosticAdder,
                         aspectClass,
                         t => new AspectInstance(
-                            this._projectConfiguration.UserCodeInvoker.Invoke( () => createAspect( t ) ),
+                            this._pipelineConfiguration.UserCodeInvoker.Invoke( () => createAspect( t ) ),
                             t,
                             aspectClass,
                             this._predecessor ) ) ) );

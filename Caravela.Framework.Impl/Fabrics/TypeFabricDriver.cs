@@ -17,7 +17,7 @@ namespace Caravela.Framework.Impl.Fabrics
     /// </summary>
     internal class TypeFabricDriver : FabricDriver
     {
-        public TypeFabricDriver( AspectProjectConfiguration configuration, IFabric fabric, Compilation runTimeCompilation ) : base(
+        public TypeFabricDriver( AspectPipelineConfiguration configuration, IFabric fabric, Compilation runTimeCompilation ) : base(
             configuration,
             fabric,
             runTimeCompilation ) { }
@@ -42,7 +42,7 @@ namespace Caravela.Framework.Impl.Fabrics
         {
             public Builder(
                 INamedType namedType,
-                AspectProjectConfiguration context,
+                AspectPipelineConfiguration context,
                 IAspectBuilderInternal aspectBuilder,
                 TemplateClassInstance templateClassInstance,
                 FabricInstance fabricInstance ) : base( namedType, context, aspectBuilder, fabricInstance )

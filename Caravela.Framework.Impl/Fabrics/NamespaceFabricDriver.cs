@@ -16,7 +16,7 @@ namespace Caravela.Framework.Impl.Fabrics
     /// </summary>
     internal class NamespaceFabricDriver : FabricDriver
     {
-        public NamespaceFabricDriver( AspectProjectConfiguration configuration, IFabric fabric, Compilation runTimeCompilation ) :
+        public NamespaceFabricDriver( AspectPipelineConfiguration configuration, IFabric fabric, Compilation runTimeCompilation ) :
             base( configuration, fabric, runTimeCompilation ) { }
 
         private ISymbol TargetSymbol => this.FabricSymbol.ContainingNamespace;
@@ -37,7 +37,7 @@ namespace Caravela.Framework.Impl.Fabrics
         {
             public Builder(
                 INamespace ns,
-                AspectProjectConfiguration context,
+                AspectPipelineConfiguration context,
                 IAspectBuilderInternal aspectBuilder,
                 FabricInstance fabricInstance ) : base(
                 ns,

@@ -98,7 +98,7 @@ namespace Caravela.Framework.Impl.Pipeline
             IDiagnosticAdder diagnosticAdder,
             PartialCompilation compilation,
             ImmutableArray<ManagedResource> resources,
-            AspectProjectConfiguration configuration,
+            AspectPipelineConfiguration configuration,
             CancellationToken cancellationToken,
             out ImmutableArray<SyntaxTreeTransformation> syntaxTreeTransformations,
             out ImmutableArray<ManagedResource> additionalResources,
@@ -178,19 +178,10 @@ namespace Caravela.Framework.Impl.Pipeline
             }
         }
 
-        private protected override HighLevelPipelineStage CreateStage(
-            ImmutableArray<OrderedAspectLayer> parts,
+        private protected override HighLevelPipelineStage CreateHighLevelStage(
+            AspectPipelineStageConfiguration configuration,
             CompileTimeProject compileTimeProject )
-            => new CompileTimePipelineStage( compileTimeProject, parts, this.ServiceProvider );
+            => new CompileTimePipelineStage( compileTimeProject, configuration.Parts, this.ServiceProvider );
 
-        internal static PipelineStage MapStage( AspectProjectConfiguration configuration, PipelineStage stage )
-            => stage switch
-            {
-                SourceGeneratorPipelineStage => new CompileTimePipelineStage(
-                    configuration.CompileTimeProject!,
-                    configuration.AspectLayers,
-                    stage.ServiceProvider ),
-                _ => stage
-            };
     }
 }

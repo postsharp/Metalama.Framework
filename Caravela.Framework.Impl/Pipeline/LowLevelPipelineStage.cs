@@ -34,7 +34,7 @@ namespace Caravela.Framework.Impl.Pipeline
 
         /// <inheritdoc/>
         public override bool TryExecute(
-            AspectProjectConfiguration projectConfiguration,
+            AspectPipelineConfiguration pipelineConfiguration,
             PipelineStageResult input,
             IDiagnosticAdder diagnostics,
             CancellationToken cancellationToken,

@@ -63,7 +63,7 @@ namespace Caravela.Framework.Impl.Aspects
         public AspectInstanceResult ExecuteAspect(
             IAspectInstanceInternal aspectInstance,
             CompilationModel compilationModelRevision,
-            AspectProjectConfiguration projectConfiguration,
+            AspectPipelineConfiguration pipelineConfiguration,
             CancellationToken cancellationToken )
             => aspectInstance.TargetDeclaration switch
             {
@@ -71,27 +71,27 @@ namespace Caravela.Framework.Impl.Aspects
                     compilation,
                     aspectInstance,
                     compilationModelRevision,
-                    projectConfiguration,
+                    pipelineConfiguration,
                     cancellationToken ),
-                INamedType type => this.EvaluateAspect( type, aspectInstance, compilationModelRevision, projectConfiguration, cancellationToken ),
-                IMethod method => this.EvaluateAspect( method, aspectInstance, compilationModelRevision, projectConfiguration, cancellationToken ),
-                IField field => this.EvaluateAspect( field, aspectInstance, compilationModelRevision, projectConfiguration, cancellationToken ),
-                IProperty property => this.EvaluateAspect( property, aspectInstance, compilationModelRevision, projectConfiguration, cancellationToken ),
+                INamedType type => this.EvaluateAspect( type, aspectInstance, compilationModelRevision, pipelineConfiguration, cancellationToken ),
+                IMethod method => this.EvaluateAspect( method, aspectInstance, compilationModelRevision, pipelineConfiguration, cancellationToken ),
+                IField field => this.EvaluateAspect( field, aspectInstance, compilationModelRevision, pipelineConfiguration, cancellationToken ),
+                IProperty property => this.EvaluateAspect( property, aspectInstance, compilationModelRevision, pipelineConfiguration, cancellationToken ),
                 IConstructor constructor => this.EvaluateAspect(
                     constructor,
                     aspectInstance,
                     compilationModelRevision,
-                    projectConfiguration,
+                    pipelineConfiguration,
                     cancellationToken ),
-                IParameter parameter => this.EvaluateAspect( parameter, aspectInstance, compilationModelRevision, projectConfiguration, cancellationToken ),
+                IParameter parameter => this.EvaluateAspect( parameter, aspectInstance, compilationModelRevision, pipelineConfiguration, cancellationToken ),
                 ITypeParameter genericParameter => this.EvaluateAspect(
                     genericParameter,
                     aspectInstance,
                     compilationModelRevision,
-                    projectConfiguration,
+                    pipelineConfiguration,
                     cancellationToken ),
-                IEvent @event => this.EvaluateAspect( @event, aspectInstance, compilationModelRevision, projectConfiguration, cancellationToken ),
-                INamespace ns => this.EvaluateAspect( ns, aspectInstance, compilationModelRevision, projectConfiguration, cancellationToken ),
+                IEvent @event => this.EvaluateAspect( @event, aspectInstance, compilationModelRevision, pipelineConfiguration, cancellationToken ),
+                INamespace ns => this.EvaluateAspect( ns, aspectInstance, compilationModelRevision, pipelineConfiguration, cancellationToken ),
                 _ => throw new NotSupportedException( $"Cannot add an aspect to a declaration of type {aspectInstance.TargetDeclaration.DeclarationKind}." )
             };
 
@@ -99,7 +99,7 @@ namespace Caravela.Framework.Impl.Aspects
             T targetDeclaration,
             IAspectInstanceInternal aspectInstance,
             CompilationModel compilationModelRevision,
-            AspectProjectConfiguration projectConfiguration,
+            AspectPipelineConfiguration pipelineConfiguration,
             CancellationToken cancellationToken )
             where T : class, IDeclaration
         {
@@ -162,7 +162,7 @@ namespace Caravela.Framework.Impl.Aspects
                     diagnosticSink,
                     declarativeAdvices,
                     adviceFactory,
-                    projectConfiguration,
+                    pipelineConfiguration,
                     aspectInstance,
                     cancellationToken );
 

@@ -72,8 +72,7 @@ namespace Caravela.Framework.Impl.DesignTime.Preview
             var previewServiceProvider = designTimeConfiguration.ServiceProvider.WithService(
                 new PreviewProjectOptions( designTimeConfiguration.ServiceProvider.GetService<IProjectOptions>() ) );
 
-            var previewConfiguration = designTimeConfiguration.WithServiceProvider( previewServiceProvider )
-                .WithStages( s => CompileTimeAspectPipeline.MapStage( designTimeConfiguration, s ) );
+            var previewConfiguration = designTimeConfiguration.WithServiceProvider( previewServiceProvider );
 
             // Execute the compile-time pipeline with the design-time project configuration.
             var previewPipeline = new CompileTimeAspectPipeline(

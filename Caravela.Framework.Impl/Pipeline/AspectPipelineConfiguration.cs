@@ -6,9 +6,7 @@ using Caravela.Framework.Impl.Aspects;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Utilities;
 using Caravela.Framework.Project;
-using System;
 using System.Collections.Immutable;
-using System.Linq;
 
 namespace Caravela.Framework.Impl.Pipeline
 {
@@ -17,25 +15,15 @@ namespace Caravela.Framework.Impl.Pipeline
     /// when the user code change. This includes the <see cref="CompileTimeProject"/>, the pipeline stages and
     /// the order of layers.
     /// </summary>
-    internal record AspectProjectConfiguration(
-        ImmutableArray<PipelineStage> Stages,
+    internal record AspectPipelineConfiguration(
+        ImmutableArray<AspectPipelineStageConfiguration> Stages,
         ImmutableArray<IBoundAspectClass> AspectClasses,
         ImmutableArray<OrderedAspectLayer> AspectLayers,
         CompileTimeProject? CompileTimeProject,
         CompileTimeProjectLoader CompileTimeProjectLoader,
         ServiceProvider ServiceProvider )
     {
-        // TODO: the use of WithStages is a smell, probably stages should not be in AspectProjectConfiguration.
-        public AspectProjectConfiguration WithStages( Func<PipelineStage, PipelineStage> stageMapper )
-            => new(
-                this.Stages.Select( stageMapper ).ToImmutableArray(),
-                this.AspectClasses,
-                this.AspectLayers,
-                this.CompileTimeProject,
-                this.CompileTimeProjectLoader,
-                this.ServiceProvider );
-
-        public AspectProjectConfiguration WithServiceProvider( ServiceProvider serviceProvider )
+        public AspectPipelineConfiguration WithServiceProvider( ServiceProvider serviceProvider )
             => new(
                 this.Stages,
                 this.AspectClasses,

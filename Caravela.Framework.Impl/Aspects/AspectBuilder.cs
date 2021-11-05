@@ -22,7 +22,7 @@ namespace Caravela.Framework.Impl.Aspects
         where T : class, IDeclaration
     {
         private readonly UserDiagnosticSink _diagnosticSink;
-        private readonly AspectProjectConfiguration _configuration;
+        private readonly AspectPipelineConfiguration _configuration;
         private readonly IImmutableList<Advice> _declarativeAdvices;
         private bool _skipped;
         private AspectPredecessor _predecessor;
@@ -32,7 +32,7 @@ namespace Caravela.Framework.Impl.Aspects
             UserDiagnosticSink diagnosticSink,
             IEnumerable<Advice> declarativeAdvices,
             AdviceFactory adviceFactory,
-            AspectProjectConfiguration configuration,
+            AspectPipelineConfiguration configuration,
             IAspectInstance aspectInstance,
             CancellationToken cancellationToken )
         {
