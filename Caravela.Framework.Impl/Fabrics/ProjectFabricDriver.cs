@@ -36,7 +36,7 @@ namespace Caravela.Framework.Impl.Fabrics
 
         public override void Execute( IAspectBuilderInternal aspectBuilder, FabricTemplateClass fabricTemplateClass, FabricInstance fabricInstance )
         {
-            var builder = new Builder( (ICompilation) aspectBuilder.Target, this.Configuration, aspectBuilder, fabricInstance );
+            var builder = new Amender( (ICompilation) aspectBuilder.Target, this.Configuration, aspectBuilder, fabricInstance );
             ((IProjectFabric) this.Fabric).AmendProject( builder );
         }
 
@@ -87,17 +87,16 @@ namespace Caravela.Framework.Impl.Fabrics
 
         public override FormattableString FormatPredecessor() => $"project fabric '{this.Fabric.GetType()}'";
 
-        private class Builder : BaseBuilder<ICompilation>, IProjectAmender
+        private class Amender : BaseAmender<ICompilation>, IProjectAmender
         {
-            public Builder(
+            public Amender(
                 ICompilation compilation,
                 AspectPipelineConfiguration context,
                 IAspectBuilderInternal aspectBuilder,
                 FabricInstance fabricInstance ) : base(
                 compilation,
                 context,
-                aspectBuilder,
-                fabricInstance ) { }
+                aspectBuilder ) { }
         }
     }
 }

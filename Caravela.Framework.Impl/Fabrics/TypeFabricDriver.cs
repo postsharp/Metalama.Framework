@@ -6,7 +6,9 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Fabrics;
 using Caravela.Framework.Impl.Aspects;
 using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.CodeModel.References;
 using Caravela.Framework.Impl.Pipeline;
+using Caravela.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
 
@@ -28,7 +30,7 @@ namespace Caravela.Framework.Impl.Fabrics
         {
             // Type fabrics execute as aspects, called from FabricAspectClass.
             var templateInstance = new TemplateClassInstance( this.Fabric, templateClass );
-            var builder = new Builder( (INamedType) aspectBuilder.Target, this.Configuration, aspectBuilder, templateInstance, fabricInstance );
+            var builder = new Amender( (INamedType) aspectBuilder.Target, this.Configuration, aspectBuilder, templateInstance, fabricInstance );
             ((ITypeFabric) this.Fabric).AmendType( builder );
         }
 
@@ -38,21 +40,27 @@ namespace Caravela.Framework.Impl.Fabrics
 
         public override FormattableString FormatPredecessor() => $"type fabric on '{this.TargetSymbol}'";
 
-        private class Builder : BaseBuilder<INamedType>, ITypeAmender
+        private class Amender : BaseAmender<INamedType>, ITypeAmender
         {
-            public Builder(
+            private readonly IAspectBuilderInternal _aspectBuilder;
+
+            public Amender(
                 INamedType namedType,
-                AspectPipelineConfiguration context,
+                AspectPipelineConfiguration configuration,
                 IAspectBuilderInternal aspectBuilder,
                 TemplateClassInstance templateClassInstance,
-                FabricInstance fabricInstance ) : base( namedType, context, aspectBuilder, fabricInstance )
+                FabricInstance fabricInstance ) : base( namedType.ToRef(), namedType.Compilation.Project, configuration, fabricInstance )
             {
+                this._aspectBuilder = aspectBuilder;
+                this.Type = namedType;
                 this.Advices = aspectBuilder.AdviceFactory.WithTemplateClassInstance( templateClassInstance );
             }
 
-            public INamedType Type => this.Target;
+            public INamedType Type { get; }
 
             public IAdviceFactory Advices { get; }
+
+            protected override void AddAspectSource( IAspectSource aspectSource ) => this._aspectBuilder.AddAspectSource( aspectSource );
         }
     }
 }

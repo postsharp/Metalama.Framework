@@ -26,17 +26,7 @@ namespace Caravela.Framework.Fabrics
         IProject Project { get; }
 
         /// <summary>
-        /// Gets the target declaration of the current <see cref="IFabric"/>.
-        /// </summary>
-        T Target { get; }
-
-        /// <summary>
-        /// Gets an object that allows reporting or suppressing warnings and errors.
-        /// </summary>
-        IDiagnosticSink Diagnostics { get; }
-
-        /// <summary>
-        /// Creates an object that allows adding aspects to members of the <see cref="Target"/> declaration.
+        /// Creates an object that allows adding aspects to members of the target declaration.
         /// </summary>
         /// <param name="selector"></param>
         /// <typeparam name="TChild"></typeparam>

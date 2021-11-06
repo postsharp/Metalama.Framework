@@ -10,9 +10,6 @@ namespace Caravela.Framework.Fabrics
     /// </summary>
     public interface INamespaceAmender : IAmender<INamespace>
     {
-        /// <summary>
-        /// Gets the target namespace of the current <see cref="INamespaceFabric"/>.
-        /// </summary>
-        INamespace Namespace { get; }
+        
     }
 }

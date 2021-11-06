@@ -5,6 +5,7 @@ using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Impl.Advices;
+using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Fabrics;
 using Caravela.Framework.Impl.Pipeline;
@@ -74,7 +75,7 @@ namespace Caravela.Framework.Impl.Aspects
         public IDeclarationSelection<TMember> WithMembers<TMember>( Func<T, IEnumerable<TMember>> selector )
             where TMember : class, IDeclaration
             => new DeclarationSelection<TMember>(
-                this.Target,
+                this.Target.ToRef(),
                 this._predecessor,
                 this.AddAspectSource,
                 compilation =>

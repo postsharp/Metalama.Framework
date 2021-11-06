@@ -6,6 +6,7 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Eligibility;
 using Caravela.Framework.Impl.Aspects;
 using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.CodeModel.References;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Pipeline;
 using Caravela.Framework.Impl.Utilities;
@@ -24,14 +25,14 @@ namespace Caravela.Framework.Impl.Fabrics
     internal class DeclarationSelection<T> : IDeclarationSelection<T>
         where T : class, IDeclaration
     {
-        private readonly IDeclaration _containingDeclaration;
+        private readonly IDeclarationRef<IDeclaration> _containingDeclaration;
         private readonly AspectPredecessor _predecessor;
         private readonly Action<IAspectSource> _registerAspectSource;
         private readonly Func<CompilationModel, IEnumerable<T>> _selector;
         private readonly AspectPipelineConfiguration _pipelineConfiguration;
 
         public DeclarationSelection(
-            IDeclaration containingDeclaration,
+            IDeclarationRef<IDeclaration> containingDeclaration,
             AspectPredecessor predecessor,
             Action<IAspectSource> registerAspectSource,
             Func<CompilationModel, IEnumerable<T>> selectTargets,
@@ -140,12 +141,14 @@ namespace Caravela.Framework.Impl.Fabrics
             {
                 var predecessorInstance = (IAspectPredecessorImpl) this._predecessor.Instance;
 
-                if ( !item.IsContainedIn( this._containingDeclaration ) || item.DeclaringAssembly.IsExternal )
+                var containingDeclaration = this._containingDeclaration.Resolve( compilation ).AssertNotNull();
+                
+                if ( !item.IsContainedIn( containingDeclaration ) || item.DeclaringAssembly.IsExternal )
                 {
                     diagnosticAdder.Report(
                         GeneralDiagnosticDescriptors.CanAddChildAspectOnlyUnderParent.CreateDiagnostic(
                             predecessorInstance.GetDiagnosticLocation( compilation.RoslynCompilation ),
-                            (predecessorInstance.FormatPredecessor(), aspectClass.ShortName, item, this._containingDeclaration) ) );
+                            (predecessorInstance.FormatPredecessor(), aspectClass.ShortName, item, containingDeclaration) ) );
 
                     continue;
                 }

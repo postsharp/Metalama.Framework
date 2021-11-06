@@ -5,7 +5,9 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Fabrics;
 using Caravela.Framework.Impl.Aspects;
 using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.CodeModel.References;
 using Caravela.Framework.Impl.Pipeline;
+using Caravela.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
 
@@ -14,16 +16,22 @@ namespace Caravela.Framework.Impl.Fabrics
     /// <summary>
     /// Implementation of <see cref="FabricAspect{T}"/> for namespace-level fabrics.
     /// </summary>
-    internal class NamespaceFabricDriver : FabricDriver
+    internal class NamespaceFabricDriver : StaticFabricDriver
     {
-        public NamespaceFabricDriver( AspectPipelineConfiguration configuration, IFabric fabric, Compilation runTimeCompilation ) :
-            base( configuration, fabric, runTimeCompilation ) { }
+        private readonly IDeclarationRef<INamespace> _targetNamespace;
+
+        public NamespaceFabricDriver( AspectPipelineConfiguration configuration, IFabric fabric, IDeclarationRef<INamespace> targetNamespace, Compilation runTimeCompilation ) :
+            base( configuration, fabric, runTimeCompilation )
+        {
+            this._targetNamespace = targetNamespace;
+        }
 
         private ISymbol TargetSymbol => this.FabricSymbol.ContainingNamespace;
 
+        
         public override void Execute( IAspectBuilderInternal aspectBuilder, FabricTemplateClass fabricTemplateClass, FabricInstance fabricInstance )
         {
-            var builder = new Builder( (INamespace) aspectBuilder.Target, this.Configuration, aspectBuilder, fabricInstance );
+            var builder = new Amender( (INamespace) aspectBuilder.Target, this.Configuration, fabricInstance );
             ((INamespaceFabric) this.Fabric).AmendNamespace( builder );
         }
 
@@ -33,19 +41,29 @@ namespace Caravela.Framework.Impl.Fabrics
 
         public override FormattableString FormatPredecessor() => $"namespace fabric '{this.Fabric.GetType()}' on '{this.TargetSymbol}'";
 
-        private class Builder : BaseBuilder<INamespace>, INamespaceAmender
+        protected override StaticFabricResult Execute( IProject project )
         {
-            public Builder(
-                INamespace ns,
-                AspectPipelineConfiguration context,
-                IAspectBuilderInternal aspectBuilder,
+            var amender = new Amender( this._targetNamespace, project, this.Configuration, TODO );
+            ((INamespaceFabric)this.Fabric).AmendNamespace( amender );
+
+            return amender.ToResult();
+        }
+
+        private class Amender : StaticAmender<INamespace>, INamespaceAmender
+        {
+            public Amender(
+                IDeclarationRef<INamespace> ns,
+                IProject project,
+                AspectPipelineConfiguration configuration,
                 FabricInstance fabricInstance ) : base(
                 ns,
-                context,
-                aspectBuilder,
+                project,
+                configuration,
                 fabricInstance ) { }
 
-            public INamespace Namespace => this.Target;
+            protected override void AddAspectSource( IAspectSource aspectSource ) => throw new NotImplementedException();
+
+            
         }
     }
 }

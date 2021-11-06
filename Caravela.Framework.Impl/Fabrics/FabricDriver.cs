@@ -7,6 +7,7 @@ using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Fabrics;
 using Caravela.Framework.Impl.Aspects;
 using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.CodeModel.References;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Pipeline;
@@ -15,10 +16,45 @@ using Caravela.Framework.Validation;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Reflection;
 
 namespace Caravela.Framework.Impl.Fabrics
 {
+    /// <summary>
+    /// The base class for <see cref="ProjectFabricDriver"/> and <see cref="NamespaceFabricDriver"/>,
+    /// which are executed when building the project configuration, not when executing the pipeline.
+    /// </summary>
+    internal abstract class StaticFabricDriver : FabricDriver
+    {
+        protected StaticFabricDriver( AspectPipelineConfiguration configuration, IFabric fabric, Compilation runTimeCompilation ) : 
+            base(
+                configuration,
+                fabric,
+                runTimeCompilation )
+        {
+            
+        }
+
+        protected abstract StaticFabricResult Execute( IProject project );
+        
+        
+
+        protected class StaticAmender<T> : BaseAmender<T> 
+            where T : class, IDeclaration
+        {
+            public List<IAspectSource> AspectSources { get; }
+            public StaticAmender( IDeclarationRef<T> targetRef, IProject project, AspectPipelineConfiguration configuration, FabricInstance fabricInstance ) :
+                base( targetRef, project, configuration, fabricInstance ) { }
+
+            protected override void AddAspectSource( IAspectSource aspectSource ) => this.AspectSources.Add( aspectSource );
+
+            public StaticFabricResult ToResult() => new StaticFabricResult( this.AspectSources.ToImmutableArray() );
+        }
+    }
+
+    internal record StaticFabricResult( ImmutableArray<IAspectSource> AspectSources );
+    
     /// <summary>
     /// The base class for fabric drivers, which are responsible for ordering and executing fabrics.
     /// </summary>
@@ -101,46 +137,44 @@ namespace Caravela.Framework.Impl.Fabrics
             return string.Compare( this.FabricSymbol.Name, other.FabricSymbol.Name, StringComparison.Ordinal );
         }
 
-        protected abstract class BaseBuilder<T> : IAmender<T>
+        protected abstract class BaseAmender<T> : IAmender<T>
             where T : class, IDeclaration
         {
-            private readonly IAspectBuilderInternal _aspectBuilder;
+            // The Target property is protected (and not exposed to the API) because
+            private readonly IDeclarationRef<T> _targetRef;
             private readonly FabricInstance _fabricInstance;
-            private readonly AspectPipelineConfiguration _context;
+            private readonly AspectPipelineConfiguration _configuration;
 
-            protected BaseBuilder(
-                T target,
-                AspectPipelineConfiguration context,
-                IAspectBuilderInternal aspectBuilder,
+            protected BaseAmender(
+                IDeclarationRef<T> targetRef,
+                IProject project,
+                AspectPipelineConfiguration configuration,
                 FabricInstance fabricInstance )
             {
-                this._aspectBuilder = aspectBuilder;
                 this._fabricInstance = fabricInstance;
-                this._context = context;
-                this.Target = target;
+                this._configuration = configuration;
+                this._targetRef = targetRef;
+                this.Project = project;
             }
 
-            public IProject Project => this.Target.Compilation.Project;
+            public IProject Project { get; }
 
-            public T Target { get; }
-
-            public IDiagnosticSink Diagnostics => this._aspectBuilder.Diagnostics;
-
-            private void RegisterAspectSource( IAspectSource aspectSource ) => this._aspectBuilder.AddAspectSource( aspectSource );
+            
+            protected abstract void AddAspectSource( IAspectSource aspectSource );
 
             public IDeclarationSelection<TChild> WithMembers<TChild>( Func<T, IEnumerable<TChild>> selector )
                 where TChild : class, IDeclaration
                 => new DeclarationSelection<TChild>(
-                    this.Target,
+                    this._targetRef,
                     new AspectPredecessor( AspectPredecessorKind.Fabric, this._fabricInstance ),
-                    this.RegisterAspectSource,
+                    this.AddAspectSource,
                     compilation =>
                     {
-                        var targetDeclaration = compilation.Factory.GetDeclaration( this.Target );
+                        var targetDeclaration = this._targetRef.Resolve( compilation ).AssertNotNull();
 
-                        return this._context.UserCodeInvoker.Wrap( this._context.UserCodeInvoker.Invoke( () => selector( targetDeclaration ) ) );
+                        return this._configuration.UserCodeInvoker.Wrap( this._configuration.UserCodeInvoker.Invoke( () => selector( targetDeclaration ) ) );
                     },
-                    this._context );
+                    this._configuration );
 
             [Obsolete( "Not implemented." )]
             public void AddValidator( Action<ValidateDeclarationContext<T>> validator ) => throw new NotImplementedException();
