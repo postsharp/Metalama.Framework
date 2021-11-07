@@ -170,7 +170,7 @@ namespace Caravela.Framework.Impl.CompileTime
                 }
             }
 
-            attributeInstance = localAttributeInstance;
+            attributeInstance = localAttributeInstance!;
 
             return true;
         }

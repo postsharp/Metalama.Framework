@@ -53,7 +53,7 @@ namespace Caravela.Framework.Impl.Fabrics
                 var target = driverGroup.Key;
 
                 // Create template classes for all fabrics.
-                var compileTimeProject = this._fabricManager.CompileTimeProject!;
+                var compileTimeProject = this._fabricManager.CompileTimeProject;
 
                 var drivers = driverGroup
                     .Select( x => x.Driver )

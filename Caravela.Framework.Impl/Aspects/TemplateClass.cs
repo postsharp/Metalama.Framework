@@ -67,7 +67,7 @@ namespace Caravela.Framework.Impl.Aspects
                 throw new AssertionFailedException( $"Could not find the compile template for {sourceTemplate}." );
             }
 
-            templateDriver = new TemplateDriver( this.ServiceProvider, this, sourceTemplate.GetSymbol().AssertNotNull(), compiledTemplateMethodInfo );
+            templateDriver = new TemplateDriver( this.ServiceProvider, compiledTemplateMethodInfo );
             this._templateDrivers.Add( id, templateDriver );
 
             return templateDriver;

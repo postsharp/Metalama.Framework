@@ -53,7 +53,7 @@ class C< [MyAttribute(4)]T>
 
             var targets = compilation.GetAllAttributesOfType( myAttribute )
                 .OrderBy( a => a.ConstructorArguments[0].Value )
-                .Select( a => a.ContainingDeclaration!.ToDisplayString() + ":" + a.ConstructorArguments[0].Value )
+                .Select( a => a.ContainingDeclaration.ToDisplayString() + ":" + a.ConstructorArguments[0].Value )
                 .ToArray();
 
             Assert.Equal(

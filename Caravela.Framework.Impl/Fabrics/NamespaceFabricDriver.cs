@@ -38,7 +38,6 @@ namespace Caravela.Framework.Impl.Fabrics
         public override bool TryExecute( IProject project, IDiagnosticAdder diagnosticAdder, [NotNullWhen( true )] out StaticFabricResult? result )
         {
             var amender = new Amender(
-                this._targetNamespace,
                 project,
                 this.FabricManager,
                 new FabricInstance( this, this._targetNamespace.As<IDeclaration>() ) );
@@ -65,7 +64,6 @@ namespace Caravela.Framework.Impl.Fabrics
         private class Amender : StaticAmender<INamespace>, INamespaceAmender
         {
             public Amender(
-                ISdkRef<INamespace> ns,
                 IProject project,
                 FabricManager fabricManager,
                 FabricInstance fabricInstance ) : base(

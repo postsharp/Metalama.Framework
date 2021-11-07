@@ -2,7 +2,6 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Aspects;
-using Caravela.Framework.Impl.Aspects;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Formatting;
 using Caravela.Framework.Impl.Utilities;
@@ -18,20 +17,14 @@ namespace Caravela.Framework.Impl.Templating
     internal class TemplateDriver
     {
         private readonly UserCodeInvoker _userCodeInvoker;
-        private readonly ISymbol _sourceTemplateSymbol;
         private readonly MethodInfo _templateMethod;
-        private readonly TemplateClass _aspectClass;
-
+        
         public TemplateDriver(
             IServiceProvider serviceProvider,
-            TemplateClass aspectClass,
-            ISymbol sourceTemplateSymbol,
             MethodInfo compiledTemplateMethodInfo )
         {
             this._userCodeInvoker = serviceProvider.GetService<UserCodeInvoker>();
-            this._sourceTemplateSymbol = sourceTemplateSymbol;
             this._templateMethod = compiledTemplateMethodInfo ?? throw new ArgumentNullException( nameof(compiledTemplateMethodInfo) );
-            this._aspectClass = aspectClass;
         }
 
         public bool TryExpandDeclaration(

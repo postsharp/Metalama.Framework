@@ -12,22 +12,6 @@ using System.Collections.Immutable;
 namespace Caravela.Framework.Impl.CodeModel.References
 {
     /// <summary>
-    /// A weakly typed base for <see cref="ISdkRef{T}"/>.
-    /// </summary>
-    internal interface IRefImpl
-    {
-        // TODO: the target must be made a private implementation detail, but many linker tests rely on it.
-
-        /// <summary>
-        /// Gets the target object (typically a symbol or a <see cref="DeclarationBuilder"/>) pointed at by the reference.
-        /// </summary>
-        object? Target { get; }
-    }
-
-    internal interface IRefImpl<out T> : ISdkRef<T>, IRefImpl
-        where T : class, ICompilationElement { }
-
-    /// <summary>
     /// Contains factory methods for the generic <see cref="Ref{T}"/>.
     /// </summary>
     internal static class Ref

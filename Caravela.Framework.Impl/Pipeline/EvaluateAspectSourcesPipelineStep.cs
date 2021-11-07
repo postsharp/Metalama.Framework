@@ -12,22 +12,6 @@ using System.Threading;
 
 namespace Caravela.Framework.Impl.Pipeline
 {
-    internal readonly struct ResolvedAspectInstance
-    {
-        public AspectInstance AspectInstance { get; }
-
-        public IDeclarationImpl TargetDeclaration { get; }
-
-        public EligibleScenarios Eligibility { get; }
-
-        public ResolvedAspectInstance( AspectInstance aspectInstance, IDeclarationImpl targetDeclaration, EligibleScenarios eligibility )
-        {
-            this.AspectInstance = aspectInstance;
-            this.TargetDeclaration = targetDeclaration;
-            this.Eligibility = eligibility;
-        }
-    }
-
     /// <summary>
     /// The <see cref="PipelineStage"/> that evaluates aspect sources and adds aspect instances to other steps. This step runs
     /// in a fake depth numbered -1 because it needs to run before any other step within the aspect type.

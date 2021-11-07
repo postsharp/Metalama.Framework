@@ -8,7 +8,7 @@ using System.Collections.Immutable;
 namespace Caravela.Framework.Impl.Pipeline
 {
     /// <summary>
-    /// The static configuration of a <see cref="PipelineStage"/>.
+    /// The static configuration of a <see cref="Caravela.Framework.Impl.Pipeline.PipelineStage"/>.
     /// </summary>
     internal record PipelineStageConfiguration( PipelineStageKind Kind, ImmutableArray<OrderedAspectLayer> Parts, IAspectWeaver? Weaver );
 }

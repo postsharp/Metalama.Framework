@@ -220,13 +220,13 @@ namespace Caravela.Framework.Tests.Integration.Runners
                 var compiledTemplateMethod = compiledAspectType.GetMethod( compiledTemplateMethodName, BindingFlags.Instance | BindingFlags.Public );
 
                 Invariant.Assert( compiledTemplateMethod != null );
-                var driver = new TemplateDriver( serviceProvider, null!, templateMethod, compiledTemplateMethod );
+                var driver = new TemplateDriver( serviceProvider, compiledTemplateMethod );
 
                 var compilationModel = CompilationModel.CreateInitialInstance(
                     new NullProject( serviceProvider ),
                     (CSharpCompilation) testResult.InputCompilation );
 
-                var template = TemplateMember.Create<IMethod>( compilationModel.Factory.GetMethod( templateMethod ), TemplateInfo.None );
+                var template = TemplateMember.Create( compilationModel.Factory.GetMethod( templateMethod ), TemplateInfo.None );
 
                 var (expansionContext, targetMethod) = CreateTemplateExpansionContext( serviceProvider, assembly, compilationModel, template );
 

@@ -226,14 +226,14 @@ namespace Caravela.TestFramework
             var text = syntaxTree?.GetText()
                 .GetSubText( diagnostic.Location.SourceSpan )
                 .ToString()
-                .Replace( "\r\n", " " )
-                .Replace( "\n", " " )
-                .Replace( "\n", " " )
-                .Replace( "\t", " " ) ?? "";
+                .ReplaceOrdinal( "\r\n", " " )
+                .ReplaceOrdinal( "\n", " " )
+                .ReplaceOrdinal( "\n", " " )
+                .ReplaceOrdinal( "\t", " " ) ?? "";
 
-            while ( text.Contains( "  " ) )
+            while ( text.ContainsOrdinal( "  " ) )
             {
-                text = text.Replace( "  ", " " );
+                text = text.ReplaceOrdinal( "  ", " " );
             }
 
             return text;
