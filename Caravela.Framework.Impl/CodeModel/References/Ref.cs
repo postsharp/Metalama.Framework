@@ -95,8 +95,6 @@ namespace Caravela.Framework.Impl.CodeModel.References
         public static Ref<IDeclaration> ReturnParameter( IMethodSymbol methodSymbol ) => new( methodSymbol, DeclarationRefTargetKind.Return );
 
         internal static Ref<ICompilation> Compilation() => new( null, DeclarationRefTargetKind.Assembly );
-        
-        
     }
 
     /// <summary>

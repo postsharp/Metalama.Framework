@@ -56,7 +56,7 @@ namespace Caravela.Framework.Impl.Linking
                         // This is a workaround for a problem I don't fully understand.
                         // We can get here at design time, in the preview pipeline. In this case, generating exactly correct code
                         // is not important. At compile time, an invalid symbol would result in a failed compilation, which is ok.
-                        
+
                         if ( symbolInfo.CandidateSymbols.Length == 1 )
                         {
                             referencedSymbol = symbolInfo.CandidateSymbols[0];

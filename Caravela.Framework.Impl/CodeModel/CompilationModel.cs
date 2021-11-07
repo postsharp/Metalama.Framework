@@ -12,7 +12,6 @@ using Caravela.Framework.Impl.CodeModel.Collections;
 using Caravela.Framework.Impl.CodeModel.References;
 using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.CompileTime;
-using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Transformations;
 using Caravela.Framework.Impl.Utilities;
 using Caravela.Framework.Project;
@@ -240,12 +239,13 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public IEnumerable<IAttribute> GetAllAttributesOfType( INamedType type )
             => this._allMemberAttributesByTypeName[AttributeRef.GetShortName( type.Name )]
-                .Select( a =>
-                {
-                    a.TryGetTarget( this, out var target );
+                .Select(
+                    a =>
+                    {
+                        a.TryGetTarget( this, out var target );
 
-                    return target;
-                } )
+                        return target;
+                    } )
                 .WhereNotNull()
                 .Where( a => a.Type.Equals( type ) );
 

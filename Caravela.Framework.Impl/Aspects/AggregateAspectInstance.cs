@@ -60,7 +60,7 @@ namespace Caravela.Framework.Impl.Aspects
 
         public ImmutableDictionary<TemplateClass, TemplateClassInstance> TemplateInstances => this._primaryInstance.TemplateInstances;
 
-        public FormattableString FormatPredecessor( ICompilation compilation ) => this._primaryInstance.FormatPredecessor(compilation);
+        public FormattableString FormatPredecessor( ICompilation compilation ) => this._primaryInstance.FormatPredecessor( compilation );
 
         public Location? GetDiagnosticLocation( Compilation compilation ) => this._primaryInstance.GetDiagnosticLocation( compilation );
     }

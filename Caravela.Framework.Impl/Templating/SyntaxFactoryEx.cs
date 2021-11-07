@@ -39,12 +39,13 @@ namespace Caravela.Framework.Impl.Templating
             };
 
         public static ExpressionSyntax LiteralExpression( string? s )
-            => s == null ? SyntaxFactory.ParenthesizedExpression( SyntaxFactory.CastExpression(
-                SyntaxFactory.NullableType(
-                    SyntaxFactory.PredefinedType(
-                        SyntaxFactory.Token(SyntaxKind.StringKeyword))),
-                SyntaxFactory.LiteralExpression(
-                    SyntaxKind.NullLiteralExpression))).WithAdditionalAnnotations( Simplifier.Annotation ) : SyntaxFactory.LiteralExpression( SyntaxKind.StringLiteralExpression, SyntaxFactory.Literal( s ) );
+            => s == null
+                ? SyntaxFactory.ParenthesizedExpression(
+                        SyntaxFactory.CastExpression(
+                            SyntaxFactory.NullableType( SyntaxFactory.PredefinedType( SyntaxFactory.Token( SyntaxKind.StringKeyword ) ) ),
+                            SyntaxFactory.LiteralExpression( SyntaxKind.NullLiteralExpression ) ) )
+                    .WithAdditionalAnnotations( Simplifier.Annotation )
+                : SyntaxFactory.LiteralExpression( SyntaxKind.StringLiteralExpression, SyntaxFactory.Literal( s ) );
 
         public static LiteralExpressionSyntax LiteralExpression( int i )
             => SyntaxFactory.LiteralExpression( SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal( i ) );

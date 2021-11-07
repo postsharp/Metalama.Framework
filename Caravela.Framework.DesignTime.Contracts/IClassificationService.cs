@@ -20,7 +20,7 @@ namespace Caravela.Framework.DesignTime.Contracts
         /// getting a semantic model, and should be called before calling <see cref="GetClassifiedTextSpans"/>.
         /// </summary>
         bool ContainsCompileTimeCode( SyntaxNode syntaxRoot );
-        
+
         /// <summary>
         /// Returns a set of <see cref="TextSpanClassification"/> saying how a <see cref="SyntaxTree"/> must be colored
         /// in the editor.

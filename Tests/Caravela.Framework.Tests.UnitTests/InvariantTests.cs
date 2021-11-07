@@ -10,7 +10,7 @@ namespace Caravela.Framework.Tests.UnitTests
     public class InvariantTests
     {
         // These tests essentially verify that the behavior is the same in the debug and release mode.
-        
+
         [Fact]
         public void AssertExecutesArgument()
         {
@@ -24,7 +24,7 @@ namespace Caravela.Framework.Tests.UnitTests
 
                         return true;
                     } ) );
-            
+
             Assert.True( called );
         }
 
@@ -42,7 +42,7 @@ namespace Caravela.Framework.Tests.UnitTests
 
                         return true;
                     } ) );
-            
+
             Assert.True( called );
         }
 

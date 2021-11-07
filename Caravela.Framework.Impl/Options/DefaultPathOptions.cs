@@ -18,7 +18,6 @@ namespace Caravela.Framework.Impl.Options
 
         public static readonly DefaultPathOptions Instance = new();
 
-
         public virtual string? GetNewCrashReportPath()
         {
             RetryHelper.Retry(
@@ -28,10 +27,8 @@ namespace Caravela.Framework.Impl.Options
                     {
                         Directory.CreateDirectory( _crashReportDirectory );
                     }
-                    
                 } );
 
-            
             return Path.Combine( _crashReportDirectory, $"exception-{Guid.NewGuid()}.log" );
         }
 
@@ -40,7 +37,5 @@ namespace Caravela.Framework.Impl.Options
         public virtual string AssemblyLocatorCacheDirectory => TempPathHelper.GetTempPath( "AssemblyLocator" );
 
         public virtual string SettingsDirectory => Path.Combine( Environment.GetFolderPath( Environment.SpecialFolder.UserProfile ), "Caravela" );
-
-        
     }
 }

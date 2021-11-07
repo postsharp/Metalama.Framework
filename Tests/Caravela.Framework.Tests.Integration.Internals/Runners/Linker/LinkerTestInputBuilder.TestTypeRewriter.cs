@@ -835,7 +835,10 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
 
                 return A.Fake<Advice>(
                     i => i.WithArgumentsForConstructor(
-                        new object?[] { fakeAspectInstance, fakeAspectInstance.TemplateInstances.Values.Single(),  A.Fake<IDeclaration>(), aspectLayer.LayerName, null } ) );
+                        new object?[]
+                        {
+                            fakeAspectInstance, fakeAspectInstance.TemplateInstances.Values.Single(), A.Fake<IDeclaration>(), aspectLayer.LayerName, null
+                        } ) );
             }
         }
     }

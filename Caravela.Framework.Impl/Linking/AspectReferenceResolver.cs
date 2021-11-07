@@ -169,7 +169,7 @@ namespace Caravela.Framework.Impl.Linking
                     IDeclaration canonicalReplacedMember = replacedMember switch
                     {
                         BuiltDeclaration builtDeclaration => builtDeclaration.Builder,
-                        _ => replacedMember,
+                        _ => replacedMember
                     };
 
                     if ( canonicalReplacedMember is ITransformation replacedTransformation )

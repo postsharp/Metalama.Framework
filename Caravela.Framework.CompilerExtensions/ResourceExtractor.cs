@@ -168,7 +168,7 @@ namespace Caravela.Framework.CompilerExtensions
                 var assemblyName = assembly.GetName();
 
                 // We need to explicitly verify the exact version, because AssemblyName.ReferenceMatchesDefinition is too tolerant. 
-                if ( AssemblyName.ReferenceMatchesDefinition( requestedAssemblyName, assemblyName ) 
+                if ( AssemblyName.ReferenceMatchesDefinition( requestedAssemblyName, assemblyName )
                      && assemblyName.Version == requestedAssemblyName.Version )
                 {
                     return assembly;

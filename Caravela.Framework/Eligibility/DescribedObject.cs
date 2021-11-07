@@ -27,8 +27,9 @@ namespace Caravela.Framework.Eligibility
         string IFormattable.ToString( string? format, IFormatProvider? formatProvider ) // ReSharper disable FormatStringProblem
         {
             var theFormatProvider = formatProvider ?? CaravelaExecutionContext.Current.FormatProvider;
-        return this.Description?.ToString( theFormatProvider )
-               ?? string.Format( theFormatProvider, "{0:" + format + "}", this.Object );
+
+            return this.Description?.ToString( theFormatProvider )
+                   ?? string.Format( theFormatProvider, "{0:" + format + "}", this.Object );
         }
     }
 }

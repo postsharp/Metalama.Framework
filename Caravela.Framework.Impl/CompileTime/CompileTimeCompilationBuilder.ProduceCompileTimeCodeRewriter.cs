@@ -202,7 +202,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
                                             transformedChild = transformedChild
                                                 .WithIdentifier( Identifier( newName ) )
-                                                .WithModifiers( TokenList(Token( SyntaxKind.InternalKeyword )) )
+                                                .WithModifiers( TokenList( Token( SyntaxKind.InternalKeyword ) ) )
                                                 .WithAttributeLists(
                                                     transformedChild.AttributeLists.Add( AttributeList( SingletonSeparatedList( originalNameAttribute ) ) ) );
 
@@ -239,7 +239,7 @@ namespace Caravela.Framework.Impl.CompileTime
                                     TemplatingDiagnosticDescriptors.RunTimeTypesCannotHaveCompileTimeTypesExceptClasses.CreateDiagnostic(
                                         childSymbol.GetDiagnosticLocation(),
                                         (childSymbol, typeof(TypeFabric)) ) );
-                                
+
                                 this.Success = false;
                             }
 

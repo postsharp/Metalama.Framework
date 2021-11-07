@@ -11,12 +11,11 @@ namespace Caravela.Framework.Impl.Options
         /// Returns a new path where a crash report file can be created, or <c>null</c> if no crash report can be created.
         /// </summary>
         string? GetNewCrashReportPath();
-        
+
         string CompileTimeProjectCacheDirectory { get; }
 
         string AssemblyLocatorCacheDirectory { get; }
 
         string SettingsDirectory { get; }
-
     }
 }

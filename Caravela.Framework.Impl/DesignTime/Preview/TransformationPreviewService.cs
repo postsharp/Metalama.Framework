@@ -34,7 +34,7 @@ namespace Caravela.Framework.Impl.DesignTime.Preview
         public async Task PreviewTransformationAsync(
             Compilation compilation,
             SyntaxTree syntaxTree,
-            IPreviewTransformationResult?[] result, 
+            IPreviewTransformationResult?[] result,
             CancellationToken cancellationToken )
         {
             // Get the pipeline for the compilation.

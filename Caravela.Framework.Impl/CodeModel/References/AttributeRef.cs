@@ -77,13 +77,13 @@ namespace Caravela.Framework.Impl.CodeModel.References
         {
             if ( !this.TryGetTarget( (CompilationModel) compilation, out var attribute ) )
             {
-                throw new AssertionFailedException("Attempt to resolve an invalid custom attribute.");
+                throw new AssertionFailedException( "Attempt to resolve an invalid custom attribute." );
             }
 
             return attribute;
         }
 
-        public bool TryGetTarget( CompilationModel compilation, [NotNullWhen(true)] out IAttribute? attribute )
+        public bool TryGetTarget( CompilationModel compilation, [NotNullWhen( true )] out IAttribute? attribute )
         {
             switch ( this.Target )
             {
@@ -119,7 +119,7 @@ namespace Caravela.Framework.Impl.CodeModel.References
 
                 case AttributeBuilder builder:
                     attribute = new BuiltAttribute( builder, compilation );
-                    
+
                     return true;
 
                 default:
