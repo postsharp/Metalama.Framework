@@ -6,11 +6,11 @@ using Caravela.Framework.Project;
 
 namespace Caravela.Framework.Tests.Integration.Tests.Aspects.Fabrics.TransitiveProjectFabric
 {
-    public class TransitiveFabric : ITransitiveProjectFabric
+    public class TransitiveFabric : Framework.Fabrics.TransitiveProjectFabric
     {
-        public void AmendProject( IProjectAmender amender )
+        public override void AmendProject( IProjectAmender amender )
         {
-            var configuration = amender.Project.Data<Configuration>();
+            var configuration = amender.Project.Extension<Configuration>();
 
             // Capture the message outside of the lambda otherwise it gets evaluated later and we don't test that the transitive fabric runs
             // after the non-transitive one.
@@ -19,7 +19,7 @@ namespace Caravela.Framework.Tests.Integration.Tests.Aspects.Fabrics.TransitiveP
         }
     }
 
-    public class Configuration : ProjectData
+    public class Configuration : ProjectExtension
     {
         public string Message { get; set; } = "Not Configured";
     }

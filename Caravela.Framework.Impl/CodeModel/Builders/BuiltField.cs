@@ -34,12 +34,10 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public IType Type => this.FieldBuilder.Type;
 
         [Memo]
-        public IMethod? GetMethod
-            => this.FieldBuilder.GetMethod != null ? new BuiltAccessor( this, (AccessorBuilder) this.FieldBuilder.GetMethod ) : null;
+        public IMethod? GetMethod => this.FieldBuilder.GetMethod != null ? new BuiltAccessor( this, (AccessorBuilder) this.FieldBuilder.GetMethod ) : null;
 
         [Memo]
-        public IMethod? SetMethod
-            => this.FieldBuilder.SetMethod != null ? new BuiltAccessor( this, (AccessorBuilder) this.FieldBuilder.SetMethod ) : null;
+        public IMethod? SetMethod => this.FieldBuilder.SetMethod != null ? new BuiltAccessor( this, (AccessorBuilder) this.FieldBuilder.SetMethod ) : null;
 
         IInvokerFactory<IFieldOrPropertyInvoker> IFieldOrProperty.Invokers => throw new NotImplementedException();
 
@@ -47,9 +45,9 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public FieldInfo ToFieldInfo() => this.FieldBuilder.ToFieldInfo();
 
-        IField IDeclarationRef<IField>.Resolve( CompilationModel compilation ) => (IField) this.GetForCompilation( compilation );
+        IField IRef<IField>.GetTarget( ICompilation compilation ) => (IField) this.GetForCompilation( compilation );
 
-        ISymbol IDeclarationRef<IField>.GetSymbol( Compilation compilation ) => throw new NotSupportedException();
+        ISymbol ISdkRef<IField>.GetSymbol( Compilation compilation ) => throw new NotSupportedException();
 
         public IMethod? GetAccessor( MethodKind methodKind ) => this.GetAccessorImpl( methodKind );
 

@@ -4,6 +4,7 @@
 using Caravela.Framework.Code;
 using Caravela.Framework.Code.Invokers;
 using Caravela.Framework.Impl.Aspects;
+using Caravela.Framework.Impl.Utilities;
 using System;
 
 namespace Caravela.Framework.Impl.CodeModel.Invokers
@@ -27,7 +28,7 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
             };
 
             this.AspectReference = new AspectReferenceSpecification(
-                declaration.GetCompilationModel().AspectLayerId,
+                CaravelaExecutionContextImpl.Current.AspectLayerId,
                 linkingOrder );
         }
 

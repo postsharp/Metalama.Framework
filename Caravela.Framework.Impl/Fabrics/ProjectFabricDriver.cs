@@ -3,10 +3,10 @@
 
 using Caravela.Framework.Code;
 using Caravela.Framework.Fabrics;
-using Caravela.Framework.Impl.Aspects;
 using Caravela.Framework.Impl.CodeModel;
-using Caravela.Framework.Impl.Pipeline;
+using Caravela.Framework.Impl.CodeModel.References;
 using Caravela.Framework.Impl.Utilities;
+using Caravela.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
 using System.IO;
@@ -16,12 +16,12 @@ namespace Caravela.Framework.Impl.Fabrics
     /// <summary>
     /// Implementation of <see cref="FabricAspect{T}"/> for project-level fabrics.
     /// </summary>
-    internal class ProjectFabricDriver : FabricDriver
+    internal class ProjectFabricDriver : StaticFabricDriver
     {
         private readonly int _depth;
 
-        public ProjectFabricDriver( AspectPipelineConfiguration configuration, IFabric fabric, Compilation runTimeCompilation ) :
-            base( configuration, fabric, runTimeCompilation )
+        public ProjectFabricDriver( FabricManager fabricManager, Fabric fabric, Compilation runTimeCompilation ) :
+            base( fabricManager, fabric, runTimeCompilation )
         {
             var depth = 0;
 
@@ -34,17 +34,11 @@ namespace Caravela.Framework.Impl.Fabrics
             this._depth = depth;
         }
 
-        public override void Execute( IAspectBuilderInternal aspectBuilder, FabricTemplateClass fabricTemplateClass, FabricInstance fabricInstance )
-        {
-            var builder = new Amender( (ICompilation) aspectBuilder.Target, this.Configuration, aspectBuilder, fabricInstance );
-            ((IProjectFabric) this.Fabric).AmendProject( builder );
-        }
-
-        public override FabricKind Kind => this.Fabric is ITransitiveProjectFabric ? FabricKind.Transitive : FabricKind.Compilation;
+        public override FabricKind Kind => this.Fabric is TransitiveProjectFabric ? FabricKind.Transitive : FabricKind.Compilation;
 
         protected override int CompareToCore( FabricDriver other )
         {
-            if ( this.Fabric is ITransitiveProjectFabric )
+            if ( this.Fabric is TransitiveProjectFabric )
             {
                 // For transitive project fabrics, we first consider the depth of the dependency in the project graph.
                 var thisReferenceDepth = CompilationReferenceGraph.GetInstance( this.Compilation ).GetDepth( this.FabricSymbol.ContainingAssembly );
@@ -83,20 +77,27 @@ namespace Caravela.Framework.Impl.Fabrics
             return string.Compare( this.FabricSymbol.Name, other.FabricSymbol.Name, StringComparison.Ordinal );
         }
 
-        public override IDeclaration GetTarget( CompilationModel compilation ) => compilation;
-
+        
         public override FormattableString FormatPredecessor() => $"project fabric '{this.Fabric.GetType()}'";
 
-        private class Amender : BaseAmender<ICompilation>, IProjectAmender
+        public override StaticFabricResult Execute( IProject project )
+        {
+            var amender = new Amender( project, this.FabricManager, new FabricInstance( this, this.FabricSymbol.ContainingAssembly.ToRef() ) );
+            ((ProjectFabric) this.Fabric).AmendProject( amender );
+
+            return amender.ToResult();
+        }
+
+        private class Amender : StaticAmender<ICompilation>, IProjectAmender
         {
             public Amender(
-                ICompilation compilation,
-                AspectPipelineConfiguration context,
-                IAspectBuilderInternal aspectBuilder,
+                IProject project,
+                FabricManager fabricManager,
                 FabricInstance fabricInstance ) : base(
-                compilation,
-                context,
-                aspectBuilder ) { }
+                project,
+                fabricManager,
+                fabricInstance,
+                Ref.Compilation() ) { }
         }
     }
 }

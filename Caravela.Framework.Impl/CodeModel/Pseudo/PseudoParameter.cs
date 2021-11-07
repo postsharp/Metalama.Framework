@@ -71,7 +71,7 @@ namespace Caravela.Framework.Impl.CodeModel.Pseudo
 
         ISymbol? ISdkDeclaration.Symbol => null;
 
-        DeclarationRef<IDeclaration> IDeclarationImpl.ToRef() => throw new NotImplementedException();
+        Ref<IDeclaration> IDeclarationImpl.ToRef() => throw new NotImplementedException();
 
         ImmutableArray<SyntaxReference> IDeclarationImpl.DeclaringSyntaxReferences => ImmutableArray<SyntaxReference>.Empty;
 

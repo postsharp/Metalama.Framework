@@ -1,8 +1,8 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Code;
 using Caravela.Framework.Diagnostics;
+using Microsoft.CodeAnalysis;
 using static Caravela.Framework.Diagnostics.Severity;
 
 // ReSharper disable SA1118
@@ -15,7 +15,7 @@ namespace Caravela.Framework.Impl.Linking
 
         private const string _category = "Caravela.Linker";
 
-        public static readonly DiagnosticDefinition<(string AspectType, IDeclaration TargetDeclaration)>
+        public static readonly DiagnosticDefinition<(string AspectType, ISymbol TargetDeclaration)>
             CannotUseBaseInvokerWithNonInstanceExpression = new(
                 "CR0600",
                 "Cannot use Base invoker with non-this instance expression.",

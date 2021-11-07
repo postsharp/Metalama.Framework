@@ -56,12 +56,12 @@ namespace Caravela.Framework.Impl.CompileTime
         public IReadOnlyList<string> PlugInTypes => this._manifest?.PlugInTypes ?? Array.Empty<string>();
 
         /// <summary>
-        /// Gets the list of types that implement the <see cref="IFabric"/> interface, but the <see cref="ITransitiveProjectFabric"/>.
+        /// Gets the list of types that implement the <see cref="Fabric"/> interface, but the <see cref="TransitiveProjectFabric"/>.
         /// </summary>
         public IReadOnlyList<string> FabricTypes => this._manifest?.FabricTypes ?? Array.Empty<string>();
 
         /// <summary>
-        /// Gets the list of types that implement the <see cref="ITransitiveProjectFabric"/> interface.
+        /// Gets the list of types that implement the <see cref="TransitiveProjectFabric"/> interface.
         /// </summary>
         public IReadOnlyList<string> TransitiveFabricTypes => this._manifest?.TransitiveFabricTypes ?? Array.Empty<string>();
 

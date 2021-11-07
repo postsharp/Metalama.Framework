@@ -41,7 +41,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         public ISymbol? Symbol => this.Underlying.Symbol;
 
-        public DeclarationRef<IDeclaration> ToRef() => this.Underlying.ToRef();
+        public Ref<IDeclaration> ToRef() => this.Underlying.ToRef();
 
         public ImmutableArray<SyntaxReference> DeclaringSyntaxReferences => this.Underlying.DeclaringSyntaxReferences;
 

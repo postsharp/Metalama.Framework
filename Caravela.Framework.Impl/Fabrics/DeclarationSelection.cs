@@ -10,6 +10,7 @@ using Caravela.Framework.Impl.CodeModel.References;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Pipeline;
 using Caravela.Framework.Impl.Utilities;
+using Caravela.Framework.Project;
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
@@ -25,30 +26,33 @@ namespace Caravela.Framework.Impl.Fabrics
     internal class DeclarationSelection<T> : IDeclarationSelection<T>
         where T : class, IDeclaration
     {
-        private readonly IDeclarationRef<IDeclaration> _containingDeclaration;
+        private readonly ISdkRef<IDeclaration> _containingDeclaration;
         private readonly AspectPredecessor _predecessor;
         private readonly Action<IAspectSource> _registerAspectSource;
         private readonly Func<CompilationModel, IEnumerable<T>> _selector;
-        private readonly AspectPipelineConfiguration _pipelineConfiguration;
+        private readonly BoundAspectClassCollection _aspectClasses;
+        private readonly IServiceProvider _serviceProvider;
 
         public DeclarationSelection(
-            IDeclarationRef<IDeclaration> containingDeclaration,
+            ISdkRef<IDeclaration> containingDeclaration,
             AspectPredecessor predecessor,
             Action<IAspectSource> registerAspectSource,
             Func<CompilationModel, IEnumerable<T>> selectTargets,
-            AspectPipelineConfiguration pipelineConfiguration )
+            BoundAspectClassCollection aspectClasses,
+            IServiceProvider serviceProvider )
         {
             this._containingDeclaration = containingDeclaration;
             this._predecessor = predecessor;
             this._registerAspectSource = registerAspectSource;
             this._selector = selectTargets;
-            this._pipelineConfiguration = pipelineConfiguration;
+            this._aspectClasses = aspectClasses;
+            this._serviceProvider = serviceProvider;
         }
 
         private AspectClass GetAspectClass<TAspect>()
             where TAspect : IAspect
         {
-            var aspectClass = this._pipelineConfiguration.GetAspectClass( typeof(TAspect).FullName );
+            var aspectClass = this._aspectClasses[typeof(TAspect).FullName];
 
             if ( aspectClass.IsAbstract )
             {
@@ -64,6 +68,7 @@ namespace Caravela.Framework.Impl.Fabrics
             where TAspect : Attribute, IAspect<T>
         {
             var aspectClass = this.GetAspectClass<TAspect>();
+            var userCodeInvoker = this._serviceProvider.GetService<UserCodeInvoker>();
 
             this.RegisterAspectSource(
                 new ProgrammaticAspectSource<TAspect, T>(
@@ -75,13 +80,13 @@ namespace Caravela.Framework.Impl.Fabrics
                         item =>
                         {
                             var lambda = Expression.Lambda<Func<IAspect>>(
-                                this._pipelineConfiguration.UserCodeInvoker.Invoke( () => createAspect( item ) ).Body,
+                                userCodeInvoker.Invoke( () => createAspect( item ) ).Body,
                                 Array.Empty<ParameterExpression>() );
 
                             return new AspectInstance(
-                                this._pipelineConfiguration.ServiceProvider,
+                                this._serviceProvider,
                                 lambda,
-                                item,
+                                item.ToRef<IDeclaration>(),
                                 aspectClass,
                                 this._predecessor );
                         } ) ) );
@@ -93,6 +98,7 @@ namespace Caravela.Framework.Impl.Fabrics
             where TAspect : Attribute, IAspect<T>
         {
             var aspectClass = this.GetAspectClass<TAspect>();
+            var userCodeInvoker = this._serviceProvider.GetService<UserCodeInvoker>();
 
             this.RegisterAspectSource(
                 new ProgrammaticAspectSource<TAspect, T>(
@@ -102,8 +108,8 @@ namespace Caravela.Framework.Impl.Fabrics
                         diagnosticAdder,
                         aspectClass,
                         t => new AspectInstance(
-                            this._pipelineConfiguration.UserCodeInvoker.Invoke( () => createAspect( t ) ),
-                            t,
+                            userCodeInvoker.Invoke( () => createAspect( t ) ),
+                            t.ToRef<IDeclaration>(),
                             aspectClass,
                             this._predecessor ) ) ) );
 
@@ -124,7 +130,7 @@ namespace Caravela.Framework.Impl.Fabrics
                         aspectClass,
                         t => new AspectInstance(
                             new TAspect(),
-                            t,
+                            t.ToRef<IDeclaration>(),
                             aspectClass,
                             this._predecessor ) ) ) );
 
@@ -137,39 +143,39 @@ namespace Caravela.Framework.Impl.Fabrics
             AspectClass aspectClass,
             Func<T, AspectInstance> createAspectInstance )
         {
-            foreach ( var item in this._selector( compilation ) )
+            foreach ( var targetDeclaration in this._selector( compilation ) )
             {
                 var predecessorInstance = (IAspectPredecessorImpl) this._predecessor.Instance;
 
-                var containingDeclaration = this._containingDeclaration.Resolve( compilation ).AssertNotNull();
-                
-                if ( !item.IsContainedIn( containingDeclaration ) || item.DeclaringAssembly.IsExternal )
+                var containingDeclaration = this._containingDeclaration.GetTarget( compilation ).AssertNotNull();
+
+                if ( !targetDeclaration.IsContainedIn( containingDeclaration ) || targetDeclaration.DeclaringAssembly.IsExternal )
                 {
                     diagnosticAdder.Report(
                         GeneralDiagnosticDescriptors.CanAddChildAspectOnlyUnderParent.CreateDiagnostic(
                             predecessorInstance.GetDiagnosticLocation( compilation.RoslynCompilation ),
-                            (predecessorInstance.FormatPredecessor(), aspectClass.ShortName, item, containingDeclaration) ) );
+                            (predecessorInstance.FormatPredecessor( compilation ), aspectClass.ShortName, targetDeclaration, containingDeclaration) ) );
 
                     continue;
                 }
 
-                var eligibility = aspectClass.GetEligibility( item );
-                var canBeInherited = ((IDeclarationImpl) item).CanBeInherited;
+                var eligibility = aspectClass.GetEligibility( targetDeclaration );
+                var canBeInherited = ((IDeclarationImpl) targetDeclaration).CanBeInherited;
                 var requiredEligibility = canBeInherited ? EligibleScenarios.Aspect | EligibleScenarios.Inheritance : EligibleScenarios.Aspect;
 
                 if ( !eligibility.IncludesAny( requiredEligibility ) )
                 {
-                    var reason = aspectClass.GetIneligibilityJustification( requiredEligibility, new DescribedObject<IDeclaration>( item ) )!;
+                    var reason = aspectClass.GetIneligibilityJustification( requiredEligibility, new DescribedObject<IDeclaration>( targetDeclaration ) )!;
 
                     diagnosticAdder.Report(
                         GeneralDiagnosticDescriptors.IneligibleChildAspect.CreateDiagnostic(
                             predecessorInstance.GetDiagnosticLocation( compilation.RoslynCompilation ),
-                            (predecessorInstance.FormatPredecessor(), aspectClass.ShortName, item, reason) ) );
+                            (predecessorInstance.FormatPredecessor( compilation ), aspectClass.ShortName, targetDeclaration, reason) ) );
 
                     continue;
                 }
 
-                yield return createAspectInstance( item );
+                yield return createAspectInstance( targetDeclaration );
             }
         }
 

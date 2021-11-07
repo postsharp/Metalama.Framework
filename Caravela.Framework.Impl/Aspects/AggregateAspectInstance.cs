@@ -3,6 +3,7 @@
 
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
+using Caravela.Framework.Impl.CodeModel.References;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -43,7 +44,9 @@ namespace Caravela.Framework.Impl.Aspects
 
         public IAspect Aspect => this._primaryInstance.Aspect;
 
-        public IDeclaration TargetDeclaration => this._primaryInstance.TargetDeclaration;
+        IRef<IDeclaration> IAspectInstance.TargetDeclaration => this.TargetDeclaration;
+
+        public Ref<IDeclaration> TargetDeclaration => this._primaryInstance.TargetDeclaration;
 
         public IAspectClass AspectClass => this._primaryInstance.AspectClass;
 
@@ -57,7 +60,7 @@ namespace Caravela.Framework.Impl.Aspects
 
         public ImmutableDictionary<TemplateClass, TemplateClassInstance> TemplateInstances => this._primaryInstance.TemplateInstances;
 
-        public FormattableString FormatPredecessor() => this._primaryInstance.FormatPredecessor();
+        public FormattableString FormatPredecessor( ICompilation compilation ) => this._primaryInstance.FormatPredecessor(compilation);
 
         public Location? GetDiagnosticLocation( Compilation compilation ) => this._primaryInstance.GetDiagnosticLocation( compilation );
     }

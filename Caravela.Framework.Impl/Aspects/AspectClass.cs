@@ -108,7 +108,7 @@ namespace Caravela.Framework.Impl.Aspects
             this._prototypeAspectInstance = prototype;
 
             this.TemplateClasses = ImmutableArray.Create<TemplateClass>( this );
-            
+
             // This must be called after Members is built and assigned.
             this._aspectDriver = aspectDriverFactory.GetAspectDriver( this, aspectTypeSymbol );
         }
@@ -212,7 +212,7 @@ namespace Caravela.Framework.Impl.Aspects
         /// </summary>
         public AttributeAspectInstance CreateAspectInstanceFromAttribute(
             IAspect aspect,
-            IDeclaration target,
+            in Ref<IDeclaration> target,
             IAttribute attribute,
             CompileTimeProjectLoader loader )
             => new( aspect, target, this, attribute, loader );
@@ -222,7 +222,7 @@ namespace Caravela.Framework.Impl.Aspects
         /// This method is used by live templates.
         /// </summary>
         public AspectInstance CreateDefaultAspectInstance( IDeclaration target, in AspectPredecessor predecessor )
-            => new( (IAspect) Activator.CreateInstance( this.AspectType ), target, this, predecessor );
+            => new( (IAspect) Activator.CreateInstance( this.AspectType ), target.ToRef(), this, predecessor );
 
         /// <summary>
         /// Creates an instance of the <see cref="AspectClass"/> class.

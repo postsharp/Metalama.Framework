@@ -5,8 +5,8 @@ namespace Caravela.Framework.Fabrics
 {
     /// <summary>
     /// An interface that, when implemented by a type in an assembly (under any name or namespace), allows that type to analyze and
-    /// add aspects to any project that references this assembly. However, the <see cref="IProjectFabric.AmendProject"/> method
-    /// is not executed in the current project (you will need another class that does not implement <see cref="ITransitiveProjectFabric"/>
+    /// add aspects to any project that references this assembly. However, the <see cref="ProjectFabric.AmendProject"/> method
+    /// is not executed in the current project (you will need another class that does not implement <see cref="TransitiveProjectFabric"/>
     /// to amend the current project). 
     /// </summary>
     /// <remarks>
@@ -14,5 +14,5 @@ namespace Caravela.Framework.Fabrics
     /// executed first. Then, transitive fabrics are ordered by assembly name, then by distance to the root directory in the file system,
     /// then by type name.
     /// </remarks>
-    public interface ITransitiveProjectFabric : IProjectFabric { }
+    public abstract class TransitiveProjectFabric : ProjectFabric { }
 }

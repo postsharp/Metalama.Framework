@@ -25,8 +25,8 @@ namespace Caravela.Framework.Impl.CodeModel
     /// </summary>
     internal class DeclarationFactory : ITypeFactory
     {
-        private readonly ConcurrentDictionary<DeclarationRef<ICompilationElement>, object> _cache =
-            new( DeclarationRefEqualityComparer<DeclarationRef<ICompilationElement>>.Instance );
+        private readonly ConcurrentDictionary<Ref<ICompilationElement>, object> _cache =
+            new( DeclarationRefEqualityComparer<Ref<ICompilationElement>>.Instance );
 
         private readonly INamedType?[] _specialTypes = new INamedType?[(int) SpecialType.Count];
 
@@ -253,27 +253,27 @@ namespace Caravela.Framework.Impl.CodeModel
 
         internal IAttribute GetAttribute( AttributeBuilder attributeBuilder )
             => (IAttribute) this._cache.GetOrAdd(
-                DeclarationRef.FromBuilder( attributeBuilder ).As<ICompilationElement>(),
+                Ref.FromBuilder( attributeBuilder ).As<ICompilationElement>(),
                 l => new BuiltAttribute( (AttributeBuilder) l.Target!, this._compilationModel ) );
 
         internal IParameter GetParameter( IParameterBuilder parameterBuilder )
             => (IParameter) this._cache.GetOrAdd(
-                DeclarationRef.FromBuilder( parameterBuilder ).As<ICompilationElement>(),
+                Ref.FromBuilder( parameterBuilder ).As<ICompilationElement>(),
                 l => new BuiltParameter( (IParameterBuilder) l.Target!, this._compilationModel ) );
 
         internal ITypeParameter GetGenericParameter( TypeParameterBuilder typeParameterBuilder )
             => (ITypeParameter) this._cache.GetOrAdd(
-                DeclarationRef.FromBuilder( typeParameterBuilder ).As<ICompilationElement>(),
+                Ref.FromBuilder( typeParameterBuilder ).As<ICompilationElement>(),
                 l => new BuiltTypeParameter( (TypeParameterBuilder) l.Target!, this._compilationModel ) );
 
         internal IMethod GetMethod( MethodBuilder methodBuilder )
             => (IMethod) this._cache.GetOrAdd(
-                DeclarationRef.FromBuilder( methodBuilder ).As<ICompilationElement>(),
+                Ref.FromBuilder( methodBuilder ).As<ICompilationElement>(),
                 l => new BuiltMethod( (MethodBuilder) l.Target!, this._compilationModel ) );
 
         internal IMethod GetMethod( AccessorBuilder methodBuilder )
             => (IMethod) this._cache.GetOrAdd(
-                DeclarationRef.FromBuilder( methodBuilder ).As<ICompilationElement>(),
+                Ref.FromBuilder( methodBuilder ).As<ICompilationElement>(),
                 valueFactory: l =>
                 {
                     var builder = (AccessorBuilder) l.Target!;
@@ -283,17 +283,17 @@ namespace Caravela.Framework.Impl.CodeModel
 
         internal IField GetField( IFieldBuilder fieldBuilder )
             => (IField) this._cache.GetOrAdd(
-                DeclarationRef.FromBuilder( fieldBuilder ).As<ICompilationElement>(),
+                Ref.FromBuilder( fieldBuilder ).As<ICompilationElement>(),
                 l => new BuiltField( (FieldBuilder) l.Target!, this._compilationModel ) );
 
         internal IProperty GetProperty( PropertyBuilder propertyBuilder )
             => (IProperty) this._cache.GetOrAdd(
-                DeclarationRef.FromBuilder( propertyBuilder ).As<ICompilationElement>(),
+                Ref.FromBuilder( propertyBuilder ).As<ICompilationElement>(),
                 l => new BuiltProperty( (PropertyBuilder) l.Target!, this._compilationModel ) );
 
         internal IEvent GetEvent( EventBuilder propertyBuilder )
             => (IEvent) this._cache.GetOrAdd(
-                DeclarationRef.FromBuilder( propertyBuilder ).As<ICompilationElement>(),
+                Ref.FromBuilder( propertyBuilder ).As<ICompilationElement>(),
                 l => new BuiltEvent( (EventBuilder) l.Target!, this._compilationModel ) );
 
         internal IDeclaration GetDeclaration( IDeclarationBuilder builder )
@@ -310,7 +310,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
                 // This is for linker tests (fake builders), which resolve to themselves.
                 // ReSharper disable once SuspiciousTypeConversion.Global
-                IDeclarationRef<IDeclaration> reference => reference.Resolve( this._compilationModel ).AssertNotNull(),
+                ISdkRef<IDeclaration> reference => reference.GetTarget( this._compilationModel ).AssertNotNull(),
                 _ => throw new AssertionFailedException()
             };
 
@@ -343,9 +343,9 @@ namespace Caravela.Framework.Impl.CodeModel
             {
                 return declaration;
             }
-            else if ( declaration is IDeclarationRef<IDeclaration> reference )
+            else if ( declaration is ISdkRef<IDeclaration> reference )
             {
-                return (T) reference.Resolve( this._compilationModel ).AssertNotNull();
+                return (T) reference.GetTarget( this._compilationModel ).AssertNotNull();
             }
             else if ( declaration is NamedType namedType )
             {
@@ -354,7 +354,7 @@ namespace Caravela.Framework.Impl.CodeModel
             }
             else
             {
-                return declaration.ToRef().Resolve( this._compilationModel );
+                return declaration.ToRef().GetTarget( this._compilationModel );
             }
         }
 

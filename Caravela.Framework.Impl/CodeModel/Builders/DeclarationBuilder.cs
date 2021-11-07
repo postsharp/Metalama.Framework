@@ -21,7 +21,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
     /// <summary>
     /// Base class implementing <see cref="IDeclarationBuilder"/>. These classes are returned by introduction advices so the user can continue
     /// specifying the introduced declaration. They are bound to the <see cref="CompilationModel"/> that created them, but implement
-    /// <see cref="IDeclarationRef{T}"/> so they can resolve, using <see cref="DeclarationFactory"/>, to the consuming <see cref="CompilationModel"/>.
+    /// <see cref="ISdkRef{T}"/> so they can resolve, using <see cref="DeclarationFactory"/>, to the consuming <see cref="CompilationModel"/>.
     /// 
     /// </summary>
     internal abstract class DeclarationBuilder : IDeclarationBuilder, IDeclarationImpl, ITransformation
@@ -80,7 +80,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public IDiagnosticLocation? DiagnosticLocation => this.ContainingDeclaration?.DiagnosticLocation;
 
-        public DeclarationRef<IDeclaration> ToRef() => DeclarationRef.FromBuilder( this );
+        public Ref<IDeclaration> ToRef() => Ref.FromBuilder( this );
 
         ISymbol? ISdkDeclaration.Symbol => null;
 

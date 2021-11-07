@@ -3,12 +3,14 @@
 
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Advices;
+using Caravela.Framework.Impl.Aspects;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Formatting;
 using Caravela.Framework.Impl.Linking;
 using Caravela.Framework.Impl.Serialization;
 using Caravela.Framework.Impl.Templating.MetaModel;
+using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -42,7 +44,17 @@ namespace Caravela.Framework.Impl.Templating
         {
             _current.Value = expansionContext;
 
-            return new DisposeCookie( () => _current.Value = null );
+            var handle = CaravelaExecutionContextImpl.WithContext(
+                expansionContext.Compilation.Project.ServiceProvider,
+                expansionContext.AspectLayerId,
+                (CompilationModel) expansionContext.Compilation );
+
+
+            return new DisposeCookie( () =>
+            {
+                _current.Value = null;
+                handle.Dispose();
+            } );
         }
 
         /// <summary>
@@ -50,11 +62,16 @@ namespace Caravela.Framework.Impl.Templating
         /// This method is used in tests, when the <see cref="CurrentSyntaxGenerationContext"/> property is needed but not the <see cref="Current"/>
         /// one.
         /// </summary>
-        internal static IDisposable WithSyntaxGenerationContext( SyntaxGenerationContext generationContext )
+        internal static IDisposable WithTestingContext( SyntaxGenerationContext generationContext, IServiceProvider serviceProvider )
         {
+            var handle = CaravelaExecutionContextImpl.WithContext( serviceProvider, AspectLayerId.Null );
             _currentSyntaxGenerationContext.Value = generationContext;
 
-            return new DisposeCookie( () => _currentSyntaxGenerationContext.Value = null );
+            return new DisposeCookie( () =>
+            {
+                _currentSyntaxGenerationContext.Value = null;
+                handle.Dispose();
+            } );
         }
 
         public TemplateLexicalScope LexicalScope { get; }
@@ -69,7 +86,8 @@ namespace Caravela.Framework.Impl.Templating
             SyntaxSerializationService syntaxSerializationService,
             SyntaxGenerationContext syntaxGenerationContext,
             TemplateMember<IMethod> templateMethod,
-            IUserExpression? proceedExpression )
+            IUserExpression? proceedExpression,
+            AspectLayerId aspectLayerId )
         {
             this._templateMethod = templateMethod;
             this.TemplateInstance = templateInstance;
@@ -77,6 +95,7 @@ namespace Caravela.Framework.Impl.Templating
             this.Compilation = compilation;
             this.SyntaxSerializationService = syntaxSerializationService;
             this.SyntaxGenerationContext = syntaxGenerationContext;
+            this.AspectLayerId = aspectLayerId;
             this.LexicalScope = lexicalScope;
             this._proceedExpression = proceedExpression;
             Invariant.Assert( this.DiagnosticSink.DefaultScope != null );
@@ -90,6 +109,8 @@ namespace Caravela.Framework.Impl.Templating
         public SyntaxSerializationService SyntaxSerializationService { get; }
 
         public SyntaxGenerationContext SyntaxGenerationContext { get; }
+
+        public AspectLayerId AspectLayerId { get; }
 
         public OurSyntaxGenerator SyntaxGenerator => this.SyntaxGenerationContext.SyntaxGenerator;
 

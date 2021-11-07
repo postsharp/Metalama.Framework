@@ -61,7 +61,7 @@ namespace Caravela.Framework.Impl.CodeModel
                 this,
                 this._symbol.GetNamespaceMembers()
                     .Where( n => this.Compilation.PartialCompilation.ParentNamespaces.Contains( n ) )
-                    .Select( n => new DeclarationRef<INamespace>( n ) ) );
+                    .Select( n => new Ref<INamespace>( n ) ) );
 
         public override string ToString() => this.IsGlobalNamespace ? "<Global Namespace>" : this.FullName;
 

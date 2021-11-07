@@ -37,7 +37,7 @@ namespace Caravela.Framework.Aspects
         Inherited,
 
         /// <summary>
-        /// The aspect has been created by a fabric. <see cref="AspectPredecessor.Instance"/> is an <see cref="IFabric"/>.
+        /// The aspect has been created by a fabric. <see cref="AspectPredecessor.Instance"/> is an <see cref="Fabrics.Fabric"/>.
         /// </summary>
         Fabric
     }

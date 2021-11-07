@@ -3,6 +3,7 @@
 
 using Caravela.Framework.Code;
 using Caravela.Framework.Eligibility.Implementation;
+using Caravela.Framework.Project;
 using System;
 using System.Linq;
 
@@ -145,7 +146,7 @@ namespace Caravela.Framework.Eligibility
 
                     var formattedAccessibilities = string.Join(
                         " or ",
-                        accessibilities.Select( a => string.Format( CaravelaStaticServices.FormatProvider, "{0}", a ) ) );
+                        accessibilities.Select( a => string.Format( CaravelaExecutionContext.Current.FormatProvider, "{0}", a ) ) );
 
                     return $"{member} must be {formattedAccessibilities}";
                 } );

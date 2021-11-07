@@ -32,10 +32,9 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public MemberInfo ToMemberInfo() => throw new NotImplementedException();
 
-        IMemberOrNamedType IDeclarationRef<IMemberOrNamedType>.Resolve( CompilationModel compilation )
-            => (IMemberOrNamedType) this.GetForCompilation( compilation );
+        IMemberOrNamedType IRef<IMemberOrNamedType>.GetTarget( ICompilation compilation ) => (IMemberOrNamedType) this.GetForCompilation( compilation );
 
-        ISymbol IDeclarationRef<IMemberOrNamedType>.GetSymbol( Compilation compilation ) => throw new NotSupportedException();
+        ISymbol ISdkRef<IMemberOrNamedType>.GetSymbol( Compilation compilation ) => throw new NotSupportedException();
 
         public object? Target => throw new NotImplementedException();
     }

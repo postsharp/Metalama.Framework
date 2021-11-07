@@ -184,7 +184,8 @@ namespace Caravela.Framework.Impl.Transformations
                     context.ServiceProvider.GetService<SyntaxSerializationService>(),
                     context.SyntaxGenerationContext,
                     default,
-                    proceedExpression );
+                    proceedExpression,
+                    this.Advice.AspectLayerId);
 
                 var templateDriver = this.Advice.TemplateInstance.TemplateClass.GetTemplateDriver( accessorTemplate.Declaration! );
 

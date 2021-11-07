@@ -12,9 +12,9 @@ using System.Linq;
 
 namespace Caravela.Framework.Impl.CodeModel.References
 {
-    internal class AttributeRef : IDeclarationRef<IAttribute>
+    internal class AttributeRef : IRefImpl<IAttribute>
     {
-        private readonly DeclarationRef<IDeclaration> _declaringDeclaration;
+        private readonly Ref<IDeclaration> _declaringDeclaration;
 
         public object? Target { get; private set; }
 
@@ -40,7 +40,7 @@ namespace Caravela.Framework.Impl.CodeModel.References
             return (attributeData, resolved.Symbol);
         }
 
-        public AttributeRef( AttributeData attributeData, DeclarationRef<IDeclaration> declaringDeclaration )
+        public AttributeRef( AttributeData attributeData, Ref<IDeclaration> declaringDeclaration )
         {
             this.Target = attributeData;
             this._declaringDeclaration = declaringDeclaration;
@@ -49,7 +49,7 @@ namespace Caravela.Framework.Impl.CodeModel.References
         public AttributeRef( AttributeSyntax attributeSyntax, SyntaxNode? declaration, DeclarationRefTargetKind targetKind, Compilation compilation )
         {
             this.Target = attributeSyntax;
-            this._declaringDeclaration = new DeclarationRef<IDeclaration>( declaration, targetKind, compilation );
+            this._declaringDeclaration = new Ref<IDeclaration>( declaration, targetKind, compilation );
         }
 
         public AttributeRef( AttributeBuilder builder )
@@ -73,13 +73,25 @@ namespace Caravela.Framework.Impl.CodeModel.References
                     _ => throw new AssertionFailedException()
                 } );
 
-        public IAttribute? Resolve( CompilationModel compilation )
+        public IAttribute GetTarget( ICompilation compilation )
+        {
+            if ( !this.TryGetTarget( (CompilationModel) compilation, out var attribute ) )
+            {
+                throw new AssertionFailedException("Attempt to resolve an invalid custom attribute.");
+            }
+
+            return attribute;
+        }
+
+        public bool TryGetTarget( CompilationModel compilation, [NotNullWhen(true)] out IAttribute? attribute )
         {
             switch ( this.Target )
             {
                 case null:
                     // This happens when ResolveAttributeData was already called but was unsuccessful.
-                    return null;
+                    attribute = null;
+
+                    return false;
 
                 case AttributeSyntax attributeSyntax:
                     {
@@ -87,27 +99,35 @@ namespace Caravela.Framework.Impl.CodeModel.References
 
                         if ( resolved.Attribute == null || resolved.Parent == null )
                         {
-                            return null;
+                            attribute = null;
+
+                            return false;
                         }
 
-                        return new Attribute(
+                        attribute = new Attribute(
                             resolved.Attribute,
                             compilation,
                             compilation.Factory.GetDeclaration( resolved.Parent, this._declaringDeclaration.TargetKind ) );
+
+                        return true;
                     }
 
                 case AttributeData attributeData:
-                    return new Attribute( attributeData, compilation, this._declaringDeclaration.Resolve( compilation ) );
+                    attribute = new Attribute( attributeData, compilation, this._declaringDeclaration.GetTarget( compilation ) );
+
+                    return true;
 
                 case AttributeBuilder builder:
-                    return new BuiltAttribute( builder, compilation );
+                    attribute = new BuiltAttribute( builder, compilation );
+                    
+                    return true;
 
                 default:
                     throw new AssertionFailedException( $"Don't know how to resolve a {this.Target.GetType().Name}.'" );
             }
         }
 
-        public ISymbol GetSymbol( Compilation compilation ) => throw new NotSupportedException();
+        ISymbol ISdkRef<IAttribute>.GetSymbol( Compilation compilation ) => throw new NotSupportedException();
 
         public override string ToString() => this.Target?.ToString() ?? "null";
 

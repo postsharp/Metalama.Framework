@@ -11,7 +11,7 @@ namespace Caravela.Framework.Impl.ReflectionMocks
 {
     internal class CompileTimeEventInfo : EventInfo, ICompileTimeReflectionObject<IEvent>
     {
-        public IDeclarationRef<IEvent> Target { get; }
+        public ISdkRef<IEvent> Target { get; }
 
         public CompileTimeEventInfo( IEvent @event )
         {

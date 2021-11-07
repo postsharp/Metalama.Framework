@@ -37,7 +37,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public IParameterList Parameters
             => new ParameterList(
                 this,
-                this.MethodBuilder.Parameters.AsBuilderList.Select( DeclarationRef.FromBuilder<IParameter, IParameterBuilder> ) );
+                this.MethodBuilder.Parameters.AsBuilderList.Select( Ref.FromBuilder<IParameter, IParameterBuilder> ) );
 
         public MethodKind MethodKind => this.MethodBuilder.MethodKind;
 
@@ -62,7 +62,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public IGenericParameterList TypeParameters
             => new GenericParameterList(
                 this,
-                this.MethodBuilder.GenericParameters.AsBuilderList.Select( DeclarationRef.FromBuilder<ITypeParameter, TypeParameterBuilder> ) );
+                this.MethodBuilder.GenericParameters.AsBuilderList.Select( Ref.FromBuilder<ITypeParameter, TypeParameterBuilder> ) );
 
         public IReadOnlyList<IType> TypeArguments => throw new NotImplementedException();
 
@@ -80,8 +80,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public IMethod? OverriddenMethod => this.Compilation.Factory.GetDeclaration( this.MethodBuilder.OverriddenMethod );
 
-        IMethod IDeclarationRef<IMethod>.Resolve( CompilationModel compilation ) => (IMethod) this.GetForCompilation( compilation );
+        IMethod IRef<IMethod>.GetTarget( ICompilation compilation ) => (IMethod) this.GetForCompilation( compilation );
 
-        ISymbol IDeclarationRef<IMethod>.GetSymbol( Compilation compilation ) => throw new NotSupportedException();
+        ISymbol ISdkRef<IMethod>.GetSymbol( Compilation compilation ) => throw new NotSupportedException();
     }
 }

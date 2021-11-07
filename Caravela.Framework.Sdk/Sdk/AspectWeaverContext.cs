@@ -3,7 +3,9 @@
 
 using Caravela.Compiler;
 using Caravela.Framework.Aspects;
+using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.CodeModel.References;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -73,7 +75,7 @@ namespace Caravela.Framework.Impl.Sdk
         public void RewriteAspectTargets( CSharpSyntaxRewriter rewriter )
         {
             var nodes = this.AspectInstances.Values
-                .Select( a => a.TargetDeclaration.GetSymbol() )
+                .Select( a => ((ISdkRef<IDeclaration>) a.TargetDeclaration).GetSymbol( this._compilation.Compilation ) )
                 .Where( s => s != null )
                 .SelectMany( s => s!.DeclaringSyntaxReferences )
                 .GroupBy( r => r.SyntaxTree );

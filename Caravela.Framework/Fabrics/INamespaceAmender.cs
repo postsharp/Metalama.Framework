@@ -6,10 +6,7 @@ using Caravela.Framework.Code;
 namespace Caravela.Framework.Fabrics
 {
     /// <summary>
-    /// Argument of <see cref="INamespaceFabric.AmendNamespace"/>. Allows reporting diagnostics and adding aspects to the target declaration of the fabric. 
+    /// Argument of <see cref="NamespaceFabric.AmendNamespace"/>. Allows reporting diagnostics and adding aspects to the target declaration of the fabric. 
     /// </summary>
-    public interface INamespaceAmender : IAmender<INamespace>
-    {
-        
-    }
+    public interface INamespaceAmender : IAmender<INamespace> { }
 }

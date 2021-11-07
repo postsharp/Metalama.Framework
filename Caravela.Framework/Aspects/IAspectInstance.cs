@@ -22,7 +22,7 @@ namespace Caravela.Framework.Aspects
         /// <summary>
         /// Gets the declaration to which the aspect is applied.
         /// </summary>
-        IDeclaration TargetDeclaration { get; }
+        IRef<IDeclaration> TargetDeclaration { get; }
 
         /// <summary>
         /// Gets the aspect type.

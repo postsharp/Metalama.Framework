@@ -12,8 +12,8 @@ using System.Collections.Generic;
 namespace Caravela.Framework.Fabrics
 {
     /// <summary>
-    /// Base interface for the argument of <see cref="IProjectFabric.AmendProject"/>, <see cref="INamespaceFabric.AmendNamespace"/>
-    /// or <see cref="ITypeFabric.AmendType"/>. Allows to report diagnostics and add aspects to the target declaration of the fabric.
+    /// Base interface for the argument of <see cref="ProjectFabric.AmendProject"/>, <see cref="NamespaceFabric.AmendNamespace"/>
+    /// or <see cref="TypeFabric.AmendType"/>. Allows to report diagnostics and add aspects to the target declaration of the fabric.
     /// </summary>
     [InternalImplement]
     [CompileTimeOnly]

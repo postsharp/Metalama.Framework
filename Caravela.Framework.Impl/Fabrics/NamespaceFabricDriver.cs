@@ -6,7 +6,6 @@ using Caravela.Framework.Fabrics;
 using Caravela.Framework.Impl.Aspects;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CodeModel.References;
-using Caravela.Framework.Impl.Pipeline;
 using Caravela.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
@@ -18,33 +17,31 @@ namespace Caravela.Framework.Impl.Fabrics
     /// </summary>
     internal class NamespaceFabricDriver : StaticFabricDriver
     {
-        private readonly IDeclarationRef<INamespace> _targetNamespace;
+        private readonly Ref<INamespace> _targetNamespace;
 
-        public NamespaceFabricDriver( AspectPipelineConfiguration configuration, IFabric fabric, IDeclarationRef<INamespace> targetNamespace, Compilation runTimeCompilation ) :
-            base( configuration, fabric, runTimeCompilation )
+        public NamespaceFabricDriver( FabricManager fabricManager, Fabric fabric, Compilation runTimeCompilation ) :
+            base( fabricManager, fabric, runTimeCompilation )
         {
-            this._targetNamespace = targetNamespace;
+            this._targetNamespace = Ref.FromSymbol<INamespace>( this.FabricSymbol.ContainingNamespace );
         }
 
         private ISymbol TargetSymbol => this.FabricSymbol.ContainingNamespace;
 
-        
-        public override void Execute( IAspectBuilderInternal aspectBuilder, FabricTemplateClass fabricTemplateClass, FabricInstance fabricInstance )
-        {
-            var builder = new Amender( (INamespace) aspectBuilder.Target, this.Configuration, fabricInstance );
-            ((INamespaceFabric) this.Fabric).AmendNamespace( builder );
-        }
-
         public override FabricKind Kind => FabricKind.Namespace;
 
-        public override IDeclaration GetTarget( CompilationModel compilation ) => compilation.Factory.GetNamespace( (INamespaceSymbol) this.TargetSymbol );
+        public IDeclaration GetTarget( CompilationModel compilation ) => compilation.Factory.GetNamespace( (INamespaceSymbol) this.TargetSymbol );
 
         public override FormattableString FormatPredecessor() => $"namespace fabric '{this.Fabric.GetType()}' on '{this.TargetSymbol}'";
 
-        protected override StaticFabricResult Execute( IProject project )
+        public override StaticFabricResult Execute( IProject project )
         {
-            var amender = new Amender( this._targetNamespace, project, this.Configuration, TODO );
-            ((INamespaceFabric)this.Fabric).AmendNamespace( amender );
+            var amender = new Amender(
+                this._targetNamespace,
+                project,
+                this.FabricManager,
+                new FabricInstance( this, this._targetNamespace.As<IDeclaration>() ) );
+
+            ((NamespaceFabric) this.Fabric).AmendNamespace( amender );
 
             return amender.ToResult();
         }
@@ -52,18 +49,14 @@ namespace Caravela.Framework.Impl.Fabrics
         private class Amender : StaticAmender<INamespace>, INamespaceAmender
         {
             public Amender(
-                IDeclarationRef<INamespace> ns,
+                ISdkRef<INamespace> ns,
                 IProject project,
-                AspectPipelineConfiguration configuration,
+                FabricManager fabricManager,
                 FabricInstance fabricInstance ) : base(
-                ns,
                 project,
-                configuration,
-                fabricInstance ) { }
-
-            protected override void AddAspectSource( IAspectSource aspectSource ) => throw new NotImplementedException();
-
-            
+                fabricManager,
+                fabricInstance,
+                fabricInstance.TargetDeclaration.As<INamespace>()) { }
         }
     }
 }

@@ -4,6 +4,7 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Simplification;
 using System;
 using System.Linq;
 using RefKind = Caravela.Framework.Code.RefKind;
@@ -17,10 +18,10 @@ namespace Caravela.Framework.Impl.Templating
     {
         public static LiteralExpressionSyntax Null => SyntaxFactory.LiteralExpression( SyntaxKind.NullLiteralExpression );
 
-        public static LiteralExpressionSyntax LiteralExpression( object? obj )
+        public static ExpressionSyntax LiteralExpression( object? obj )
             => LiteralExpressionOrNull( obj ) ?? throw new ArgumentOutOfRangeException( nameof(obj) );
 
-        public static LiteralExpressionSyntax? LiteralExpressionOrNull( object? obj )
+        public static ExpressionSyntax? LiteralExpressionOrNull( object? obj )
             => obj switch
             {
                 string s => LiteralExpression( s ),
@@ -37,8 +38,13 @@ namespace Caravela.Framework.Impl.Templating
                 _ => null
             };
 
-        public static LiteralExpressionSyntax LiteralExpression( string? s )
-            => s == null ? Null : SyntaxFactory.LiteralExpression( SyntaxKind.StringLiteralExpression, SyntaxFactory.Literal( s ) );
+        public static ExpressionSyntax LiteralExpression( string? s )
+            => s == null ? SyntaxFactory.ParenthesizedExpression( SyntaxFactory.CastExpression(
+                SyntaxFactory.NullableType(
+                    SyntaxFactory.PredefinedType(
+                        SyntaxFactory.Token(SyntaxKind.StringKeyword))),
+                SyntaxFactory.LiteralExpression(
+                    SyntaxKind.NullLiteralExpression))).WithAdditionalAnnotations( Simplifier.Annotation ) : SyntaxFactory.LiteralExpression( SyntaxKind.StringLiteralExpression, SyntaxFactory.Literal( s ) );
 
         public static LiteralExpressionSyntax LiteralExpression( int i )
             => SyntaxFactory.LiteralExpression( SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal( i ) );

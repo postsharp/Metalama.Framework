@@ -28,27 +28,21 @@ namespace Caravela.Framework.Impl.Linking
         private readonly LinkerIntroductionRegistry _introductionRegistry;
         private readonly LinkerAnalysisRegistry _analysisRegistry;
         private readonly IServiceProvider _serviceProvider;
-
-        public AspectReferenceResolver ReferenceResolver { get; }
-
-        public Compilation IntermediateCompilation { get; }
-
-        public UserDiagnosticSink DiagnosticSink { get; }
+        private readonly Compilation _intermediateCompilation;
+        private readonly UserDiagnosticSink _diagnosticSink;
 
         public LinkerRewritingDriver(
             Compilation intermediateCompilation,
             LinkerIntroductionRegistry introductionRegistry,
             LinkerAnalysisRegistry analysisRegistry,
-            AspectReferenceResolver referenceResolver,
             UserDiagnosticSink diagnosticSink,
             IServiceProvider serviceProvider )
         {
             this._introductionRegistry = introductionRegistry;
             this._analysisRegistry = analysisRegistry;
-            this.IntermediateCompilation = intermediateCompilation;
-            this.DiagnosticSink = diagnosticSink;
+            this._intermediateCompilation = intermediateCompilation;
+            this._diagnosticSink = diagnosticSink;
             this._serviceProvider = serviceProvider;
-            this.ReferenceResolver = referenceResolver;
         }
 
         /// <summary>
@@ -611,10 +605,12 @@ namespace Caravela.Framework.Impl.Linking
                                     default:
                                         var aspectInstance = this.ResolveAspectInstance( aspectReference );
 
-                                        this.DiagnosticSink.Report(
+                                        var targetDeclaration = aspectInstance.TargetDeclaration.GetSymbol( this._intermediateCompilation );
+
+                                        this._diagnosticSink.Report(
                                             AspectLinkerDiagnosticDescriptors.CannotUseBaseInvokerWithNonInstanceExpression.CreateDiagnostic(
-                                                aspectInstance.TargetDeclaration.GetDiagnosticLocation(),
-                                                (aspectInstance.AspectClass.ShortName, aspectInstance.TargetDeclaration) ) );
+                                                targetDeclaration.GetDiagnosticLocation(),
+                                                (aspectInstance.AspectClass.ShortName, TargetDeclaration: targetDeclaration) ) );
 
                                         return aspectReference.Expression;
                                 }

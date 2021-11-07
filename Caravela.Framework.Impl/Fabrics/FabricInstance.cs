@@ -4,6 +4,7 @@
 using Caravela.Framework.Code;
 using Caravela.Framework.Fabrics;
 using Caravela.Framework.Impl.Aspects;
+using Caravela.Framework.Impl.CodeModel.References;
 using Microsoft.CodeAnalysis;
 using System;
 
@@ -13,17 +14,19 @@ namespace Caravela.Framework.Impl.Fabrics
     {
         public FabricDriver Driver { get; }
 
-        public IDeclaration? TargetDeclaration { get; }
+        IRef<IDeclaration>? IFabricInstance.TargetDeclaration => this.TargetDeclaration.IsDefault ? null : this.TargetDeclaration;
 
-        public FabricInstance( FabricDriver driver, IDeclaration? targetDeclaration )
+        public Ref<IDeclaration> TargetDeclaration { get; }
+
+        public FabricInstance( FabricDriver driver, in Ref<IDeclaration> targetDeclaration )
         {
             this.Driver = driver;
             this.TargetDeclaration = targetDeclaration;
         }
 
-        public IFabric Fabric => this.Driver.Fabric;
+        public Fabric Fabric => this.Driver.Fabric;
 
-        public FormattableString FormatPredecessor() => this.Driver.FormatPredecessor();
+        public FormattableString FormatPredecessor( ICompilation compilation ) => this.Driver.FormatPredecessor();
 
         public Location? GetDiagnosticLocation( Compilation compilation ) => this.Driver.GetDiagnosticLocation();
     }

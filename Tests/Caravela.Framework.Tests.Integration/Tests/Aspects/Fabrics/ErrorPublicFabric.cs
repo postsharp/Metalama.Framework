@@ -5,9 +5,9 @@ namespace Caravela.Framework.Tests.PublicPipeline.Aspects.Fabrics.ErrorPublicFab
     // <target>
     internal class TargetCode
     {
-        public class F : ITypeFabric
+        public class F : TypeFabric
         {
-            public void AmendType( ITypeAmender amender ) { }
+            public override void AmendType( ITypeAmender amender ) { }
         }
     }
 }

@@ -10,7 +10,7 @@ namespace Caravela.Framework.Impl.ReflectionMocks
 {
     internal class CompileTimeParameterInfo : ParameterInfo, ICompileTimeReflectionObject<IParameter>
     {
-        public IDeclarationRef<IParameter> Target { get; }
+        public ISdkRef<IParameter> Target { get; }
 
         private CompileTimeParameterInfo( IParameter parameter )
         {

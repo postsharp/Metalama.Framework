@@ -22,6 +22,11 @@ namespace Caravela.Framework.Code
     public interface IAttribute : IDeclaration, IHasType, IAspectPredecessor
     {
         /// <summary>
+        /// Gets the declaration that owns the custom attribute.
+        /// </summary>
+        new IDeclaration ContainingDeclaration { get; }
+
+        /// <summary>
         /// Gets the custom attribute type.
         /// </summary>
         new INamedType Type { get; }

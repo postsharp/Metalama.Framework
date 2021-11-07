@@ -94,7 +94,7 @@ namespace Caravela.Framework.Impl.Linking
 
             foreach ( var transformation in allTransformations.OfType<IReplaceMember>() )
             {
-                var replacedMember = transformation.ReplacedMember.Resolve( input.CompilationModel );
+                var replacedMember = transformation.ReplacedMember.GetTarget( input.CompilationModel );
 
                 IDeclaration canonicalReplacedMember = replacedMember switch
                 {

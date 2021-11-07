@@ -7,12 +7,12 @@ using System.Reflection;
 namespace Caravela.Framework.Impl.CodeModel.References
 {
     /// <summary>
-    /// A specialization of <see cref="IDeclarationRef{T}"/> that exposes a <see cref="Name"/> property.
+    /// A specialization of <see cref="ISdkRef{T}"/> that exposes a <see cref="Name"/> property.
     /// This allows for efficient implementation of name-based lookups.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    internal interface IMemberRef<out T> : IDeclarationRef<T>
-        where T : IMemberOrNamedType
+    internal interface IMemberRef<out T> : IRefImpl<T>
+        where T : class, IMemberOrNamedType
     {
         /// <summary>
         /// Gets the member name without resolving to the target.

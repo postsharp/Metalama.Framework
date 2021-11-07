@@ -6,9 +6,9 @@ using Caravela.Framework.Fabrics;
 
 namespace Caravela.Framework.Tests.PublicPipeline.Aspects.Fabrics.NamespaceFabricAddAspects
 {
-    internal class Fabric : INamespaceFabric
+    internal class Fabric : NamespaceFabric
     {
-        public void AmendNamespace( INamespaceAmender amender )
+        public override void AmendNamespace( INamespaceAmender amender )
         {
             amender
                 .WithMembers( c => c.AllTypes

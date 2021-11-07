@@ -7,11 +7,11 @@ namespace Caravela.Framework.Fabrics
     /// An interface that, when implemented by a type in a given namespace, allows that type to analyze and
     /// add aspects to that namespace.
     /// </summary>
-    public interface INamespaceFabric : IFabric
+    public abstract class NamespaceFabric : Fabric
     {
         /// <summary>
         /// The user can implement this method to analyze types in the current namespace, add aspects, and report or suppress diagnostics.
         /// </summary>
-        void AmendNamespace( INamespaceAmender amender );
+        public abstract void AmendNamespace( INamespaceAmender amender );
     }
 }

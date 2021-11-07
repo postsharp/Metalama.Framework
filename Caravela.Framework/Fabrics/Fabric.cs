@@ -7,9 +7,9 @@ namespace Caravela.Framework.Fabrics
 {
     /// <summary>
     /// Allows adding aspects or analyzing a project, namespace, or type just by adding a type implementing this interface.
-    /// You must not implement this interface directly, but <see cref="IProjectFabric"/>, <see cref="INamespaceFabric"/>,
-    /// or <see cref="ITypeFabric"/>. 
+    /// You must not implement this interface directly, but <see cref="ProjectFabric"/>, <see cref="NamespaceFabric"/>,
+    /// or <see cref="TypeFabric"/>. 
     /// </summary>
     [CompileTimeOnly]
-    public interface IFabric { }
+    public abstract class Fabric { }
 }

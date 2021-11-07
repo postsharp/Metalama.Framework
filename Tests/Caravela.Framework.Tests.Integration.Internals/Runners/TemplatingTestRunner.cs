@@ -319,7 +319,9 @@ namespace Caravela.Framework.Tests.Integration.Runners
                         serviceProvider.GetService<SyntaxSerializationService>(),
                         syntaxGenerationContext,
                         default,
-                        proceedExpression ), roslynTargetMethod);
+                        proceedExpression,
+                        default),
+                    roslynTargetMethod);
 
             static ExpressionSyntax GetProceedInvocation( IMethod targetMethod )
             {

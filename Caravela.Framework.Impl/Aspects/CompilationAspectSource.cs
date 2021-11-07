@@ -57,24 +57,28 @@ namespace Caravela.Framework.Impl.Aspects
 
                         if ( this._loader.AttributeDeserializer.TryCreateAttribute( attributeData, diagnosticAdder, out var attributeInstance ) )
                         {
+                            var targetDeclaration = attribute.ContainingDeclaration;
+
                             var aspectInstance = ((AspectClass) aspectClass).CreateAspectInstanceFromAttribute(
                                 (IAspect) attributeInstance,
-                                attribute.ContainingDeclaration.AssertNotNull(),
+                                targetDeclaration.ToRef(),
                                 attribute,
                                 this._loader );
 
-                            if ( aspectInstance.Eligibility == EligibleScenarios.None )
+                            var eligibility = aspectInstance.ComputeEligibility( targetDeclaration );
+
+                            if ( eligibility == EligibleScenarios.None )
                             {
                                 var requestedEligibility = aspectClass.IsInherited ? EligibleScenarios.Inheritance : EligibleScenarios.Aspect;
 
                                 var reason = ((AspectClass) aspectClass).GetIneligibilityJustification(
                                     requestedEligibility,
-                                    new DescribedObject<IDeclaration>( aspectInstance.TargetDeclaration ) )!;
+                                    new DescribedObject<IDeclaration>( targetDeclaration ) )!;
 
                                 diagnosticAdder.Report(
                                     GeneralDiagnosticDescriptors.AspectNotEligibleOnAspect.CreateDiagnostic(
                                         attribute.GetDiagnosticLocation(),
-                                        (aspectClass.ShortName, aspectInstance.TargetDeclaration, reason) ) );
+                                        (aspectClass.ShortName, targetDeclaration, reason) ) );
 
                                 return null;
                             }

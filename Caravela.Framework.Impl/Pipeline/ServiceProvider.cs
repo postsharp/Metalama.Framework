@@ -160,7 +160,7 @@ namespace Caravela.Framework.Impl.Pipeline
             var serviceProvider = this.WithServices( new ReflectionMapperFactory(), new AssemblyLocator( metadataReferences ) );
 
             serviceProvider = serviceProvider.WithServices( new SyntaxSerializationService( serviceProvider ), new CompileTimeTypeFactory() );
-            serviceProvider = serviceProvider.WithServices( new UserCodeExecutionContext( serviceProvider ), new SystemTypeResolver( serviceProvider ) );
+            serviceProvider = serviceProvider.WithServices( new SystemTypeResolver( serviceProvider ) );
             serviceProvider = serviceProvider.WithService( new UserCodeInvoker( serviceProvider ) );
 
             return serviceProvider;

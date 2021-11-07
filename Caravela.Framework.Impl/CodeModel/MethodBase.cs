@@ -57,7 +57,7 @@ namespace Caravela.Framework.Impl.CodeModel
         public IParameterList Parameters
             => new ParameterList(
                 this,
-                this.MethodSymbol.Parameters.Select( p => DeclarationRef.FromSymbol<IParameter>( p ) ) );
+                this.MethodSymbol.Parameters.Select( p => Ref.FromSymbol<IParameter>( p ) ) );
 
         MethodKind IMethodBase.MethodKind
             => this.MethodSymbol.MethodKind switch

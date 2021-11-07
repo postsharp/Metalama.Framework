@@ -252,7 +252,7 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
                 {
                     for ( var i = 0; i < sourceItems.Length; i++ )
                     {
-                        yield return sourceItems[i].Resolve( compilation );
+                        yield return sourceItems[i].GetTarget( compilation );
                     }
                 }
             }

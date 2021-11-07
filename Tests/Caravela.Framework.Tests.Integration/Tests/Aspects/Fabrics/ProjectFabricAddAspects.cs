@@ -6,9 +6,9 @@ using Caravela.Framework.Fabrics;
 
 namespace Caravela.Framework.Tests.PublicPipeline.Aspects.Fabrics.ProjectFabricAddAspects
 {
-    internal class Fabric : IProjectFabric
+    internal class Fabric : ProjectFabric
     {
-        public void AmendProject( IProjectAmender amender )
+        public override void AmendProject( IProjectAmender amender )
         {
             amender
                 .WithMembers( c => c.Types.SelectMany( t => t.Methods ).Where( m => m.ReturnType.Is( typeof(string) ) ) )

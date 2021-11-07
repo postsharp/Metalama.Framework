@@ -42,10 +42,12 @@ namespace Caravela.Framework.Impl.Pipeline
         {
             // TODO: it is suboptimal to get a CompilationModel here.
             var compilationModel = CompilationModel.CreateInitialInstance( input.Project, input.PartialCompilation );
+            var compilation = input.PartialCompilation.Compilation;
 
             var aspectInstances = input.AspectSources
                 .SelectMany( s => s.GetAspectInstances( compilationModel, this._aspectClass, diagnostics, cancellationToken ) )
-                .GroupBy( i => i.TargetDeclaration.GetSymbol().AssertNotNull( "The Roslyn compilation should include all introduced declarations." ) )
+                .GroupBy(
+                    i => i.TargetDeclaration.GetSymbol( compilation ).AssertNotNull( "The Roslyn compilation should include all introduced declarations." ) )
                 .ToImmutableDictionary( g => g.Key, g => (IAspectInstance) AggregateAspectInstance.GetInstance( g ) );
 
             if ( !aspectInstances.Any() )
@@ -63,7 +65,7 @@ namespace Caravela.Framework.Impl.Pipeline
                 input.PartialCompilation,
                 diagnostics.Report,
                 resources.Add,
-                new AspectWeaverHelper( pipelineConfiguration.ServiceProvider, input.PartialCompilation.Compilation ),
+                new AspectWeaverHelper( pipelineConfiguration.ServiceProvider, compilation ),
                 pipelineConfiguration.ServiceProvider );
 
             PartialCompilation newCompilation;

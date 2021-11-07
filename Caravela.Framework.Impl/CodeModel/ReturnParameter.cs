@@ -61,7 +61,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public abstract ISymbol? Symbol { get; }
 
-        public abstract DeclarationRef<IDeclaration> ToRef();
+        public abstract Ref<IDeclaration> ToRef();
 
         public ImmutableArray<SyntaxReference> DeclaringSyntaxReferences => ((IDeclarationImpl) this.DeclaringMember).DeclaringSyntaxReferences;
 

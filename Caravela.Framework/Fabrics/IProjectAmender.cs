@@ -6,7 +6,7 @@ using Caravela.Framework.Code;
 namespace Caravela.Framework.Fabrics
 {
     /// <summary>
-    /// Argument of <see cref="IProjectFabric.AmendProject"/>. Allows reporting diagnostics and adding aspects to the target project. 
+    /// Argument of <see cref="ProjectFabric.AmendProject"/>. Allows reporting diagnostics and adding aspects to the target project. 
     /// </summary>
     public interface IProjectAmender : IAmender<ICompilation> { }
 }

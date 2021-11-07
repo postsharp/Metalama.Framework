@@ -16,7 +16,7 @@ namespace Caravela.Framework.Impl.Serialization
     {
         public override ExpressionSyntax Serialize( CompileTimeEventInfo obj, SyntaxSerializationContext serializationContext )
         {
-            var @event = obj.Target.Resolve( serializationContext.CompilationModel ).AssertNotNull();
+            var @event = obj.Target.GetTarget( serializationContext.CompilationModel ).AssertNotNull();
 
             var eventName = @event.Name;
             var typeCreation = this.Service.Serialize( CompileTimeType.Create( @event.DeclaringType ), serializationContext );

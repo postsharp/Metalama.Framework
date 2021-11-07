@@ -6,9 +6,6 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Fabrics;
 using Caravela.Framework.Impl.Aspects;
 using Caravela.Framework.Impl.CodeModel;
-using Caravela.Framework.Impl.CodeModel.References;
-using Caravela.Framework.Impl.Pipeline;
-using Caravela.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
 
@@ -19,24 +16,24 @@ namespace Caravela.Framework.Impl.Fabrics
     /// </summary>
     internal class TypeFabricDriver : FabricDriver
     {
-        public TypeFabricDriver( AspectPipelineConfiguration configuration, IFabric fabric, Compilation runTimeCompilation ) : base(
-            configuration,
+        public TypeFabricDriver( FabricManager fabricManager, Fabric fabric, Compilation runTimeCompilation ) : base(
+            fabricManager,
             fabric,
             runTimeCompilation ) { }
 
         private ISymbol TargetSymbol => this.FabricSymbol.ContainingType;
 
-        public override void Execute( IAspectBuilderInternal aspectBuilder, FabricTemplateClass templateClass, FabricInstance fabricInstance )
+        public void Execute( IAspectBuilderInternal aspectBuilder, FabricTemplateClass templateClass, FabricInstance fabricInstance )
         {
             // Type fabrics execute as aspects, called from FabricAspectClass.
             var templateInstance = new TemplateClassInstance( this.Fabric, templateClass );
-            var builder = new Amender( (INamedType) aspectBuilder.Target, this.Configuration, aspectBuilder, templateInstance, fabricInstance );
-            ((ITypeFabric) this.Fabric).AmendType( builder );
+            var builder = new Amender( (INamedType) aspectBuilder.Target, this.FabricManager, aspectBuilder, templateInstance, fabricInstance );
+            ((TypeFabric) this.Fabric).AmendType( builder );
         }
 
         public override FabricKind Kind => FabricKind.Type;
 
-        public override IDeclaration GetTarget( CompilationModel compilation ) => compilation.Factory.GetNamedType( (INamedTypeSymbol) this.TargetSymbol );
+        public IDeclaration GetTarget( CompilationModel compilation ) => compilation.Factory.GetNamedType( (INamedTypeSymbol) this.TargetSymbol );
 
         public override FormattableString FormatPredecessor() => $"type fabric on '{this.TargetSymbol}'";
 
@@ -46,10 +43,10 @@ namespace Caravela.Framework.Impl.Fabrics
 
             public Amender(
                 INamedType namedType,
-                AspectPipelineConfiguration configuration,
+                FabricManager fabricManager,
                 IAspectBuilderInternal aspectBuilder,
                 TemplateClassInstance templateClassInstance,
-                FabricInstance fabricInstance ) : base( namedType.ToRef(), namedType.Compilation.Project, configuration, fabricInstance )
+                FabricInstance fabricInstance ) : base( namedType.Compilation.Project, fabricManager, fabricInstance, fabricInstance.TargetDeclaration.As<INamedType>() )
             {
                 this._aspectBuilder = aspectBuilder;
                 this.Type = namedType;

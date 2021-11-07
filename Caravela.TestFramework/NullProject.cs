@@ -25,8 +25,8 @@ namespace Caravela.TestFramework
 
         public bool TryGetProperty( string name, [NotNullWhen( true )] out string? value ) => throw new NotImplementedException();
 
-        public T Data<T>()
-            where T : ProjectData, new()
+        public T Extension<T>()
+            where T : ProjectExtension, new()
             => throw new NotImplementedException();
 
         public IServiceProvider ServiceProvider { get; }

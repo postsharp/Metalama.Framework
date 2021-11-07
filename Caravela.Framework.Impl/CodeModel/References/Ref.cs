@@ -12,9 +12,25 @@ using System.Collections.Immutable;
 namespace Caravela.Framework.Impl.CodeModel.References
 {
     /// <summary>
-    /// Contains factory methods for the generic <see cref="DeclarationRef{T}"/>.
+    /// A weakly typed base for <see cref="ISdkRef{T}"/>.
     /// </summary>
-    internal static class DeclarationRef
+    internal interface IRefImpl
+    {
+        // TODO: the target must be made a private implementation detail, but many linker tests rely on it.
+
+        /// <summary>
+        /// Gets the target object (typically a symbol or a <see cref="DeclarationBuilder"/>) pointed at by the reference.
+        /// </summary>
+        object? Target { get; }
+    }
+
+    internal interface IRefImpl<out T> : ISdkRef<T>, IRefImpl
+        where T : class, ICompilationElement { }
+
+    /// <summary>
+    /// Contains factory methods for the generic <see cref="Ref{T}"/>.
+    /// </summary>
+    internal static class Ref
     {
         /// <summary>
         /// Asserts that a given symbol is compatible with a given <see cref="IDeclaration"/> interface.
@@ -37,58 +53,60 @@ namespace Caravela.Framework.Impl.CodeModel.References
         }
 
         /// <summary>
-        /// Creates a <see cref="DeclarationRef{T}"/> from a <see cref="DeclarationBuilder"/>.
+        /// Creates a <see cref="Ref{T}"/> from a <see cref="DeclarationBuilder"/>.
         /// </summary>
         /// <param name="builder"></param>
         /// <typeparam name="TCodeElement"></typeparam>
         /// <typeparam name="TBuilder"></typeparam>
         /// <returns></returns>
-        public static DeclarationRef<TCodeElement> FromBuilder<TCodeElement, TBuilder>( TBuilder builder )
+        public static Ref<TCodeElement> FromBuilder<TCodeElement, TBuilder>( TBuilder builder )
             where TCodeElement : class, IDeclaration
             where TBuilder : IDeclarationBuilder
             => new( builder );
 
         /// <summary>
-        /// Creates a <see cref="DeclarationRef{T}"/> from a <see cref="DeclarationBuilder"/>.
+        /// Creates a <see cref="Ref{T}"/> from a <see cref="DeclarationBuilder"/>.
         /// </summary>
         /// <param name="builder"></param>
         /// <returns></returns>
-        public static DeclarationRef<IDeclaration> FromBuilder( IDeclarationBuilder builder ) => new( builder );
+        public static Ref<IDeclaration> FromBuilder( IDeclarationBuilder builder ) => new( builder );
 
         /// <summary>
-        /// Creates a <see cref="DeclarationRef{T}"/> from a Roslyn symbol.
+        /// Creates a <see cref="Ref{T}"/> from a Roslyn symbol.
         /// </summary>
         /// <param name="symbol"></param>
         /// <returns></returns>
-        public static DeclarationRef<IDeclaration> FromSymbol( ISymbol symbol ) => new( symbol );
+        public static Ref<IDeclaration> FromSymbol( ISymbol symbol ) => new( symbol );
 
-        public static DeclarationRef<T> FromDocumentationId<T>( string documentationId )
+        public static Ref<T> FromDocumentationId<T>( string documentationId )
             where T : class, ICompilationElement
             => new( documentationId );
 
         /// <summary>
-        /// Creates a <see cref="DeclarationRef{T}"/> from a Roslyn symbol.
+        /// Creates a <see cref="Ref{T}"/> from a Roslyn symbol.
         /// </summary>
         /// <param name="symbol"></param>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public static DeclarationRef<T> FromSymbol<T>( ISymbol symbol )
+        public static Ref<T> FromSymbol<T>( ISymbol symbol )
             where T : class, ICompilationElement
             => new( symbol );
 
-        public static DeclarationRef<IDeclaration> ReturnParameter( IMethodSymbol methodSymbol ) => new( methodSymbol, DeclarationRefTargetKind.Return );
+        public static Ref<IDeclaration> ReturnParameter( IMethodSymbol methodSymbol ) => new( methodSymbol, DeclarationRefTargetKind.Return );
 
-        internal static DeclarationRef<IDeclaration> Assembly() => new( null, DeclarationRefTargetKind.Assembly );
+        internal static Ref<ICompilation> Compilation() => new( null, DeclarationRefTargetKind.Assembly );
+        
+        
     }
 
     /// <summary>
-    /// The base implementation of <see cref="IDeclarationRef{T}"/>.
+    /// The base implementation of <see cref="ISdkRef{T}"/>.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    internal readonly struct DeclarationRef<T> : IDeclarationRef<T>
+    internal readonly struct Ref<T> : IRefImpl<T>
         where T : class, ICompilationElement
     {
-        internal DeclarationRef( ISymbol? symbol, DeclarationRefTargetKind targetKind = DeclarationRefTargetKind.Default )
+        internal Ref( ISymbol? symbol, DeclarationRefTargetKind targetKind = DeclarationRefTargetKind.Default )
         {
             this.TargetKind = targetKind;
 
@@ -100,26 +118,26 @@ namespace Caravela.Framework.Impl.CodeModel.References
             this.Target = symbol;
         }
 
-        internal DeclarationRef( IDeclarationBuilder builder )
+        internal Ref( IDeclarationBuilder builder )
         {
             this.Target = builder;
             this.TargetKind = DeclarationRefTargetKind.Default;
         }
 
-        private DeclarationRef( object? target, DeclarationRefTargetKind targetKind )
+        private Ref( object? target, DeclarationRefTargetKind targetKind )
         {
             this.Target = target;
             this.TargetKind = targetKind;
         }
 
-        internal DeclarationRef( string documentationId )
+        internal Ref( string documentationId )
         {
             this.Target = documentationId;
             this.TargetKind = DeclarationRefTargetKind.Default;
         }
 
         // ReSharper disable once UnusedParameter.Local
-        public DeclarationRef( SyntaxNode? declaration, DeclarationRefTargetKind targetKind, Compilation compilation )
+        public Ref( SyntaxNode? declaration, DeclarationRefTargetKind targetKind, Compilation compilation )
         {
 #if DEBUG
             if ( declaration != null )
@@ -138,7 +156,7 @@ namespace Caravela.Framework.Impl.CodeModel.References
 
         public DeclarationRefTargetKind TargetKind { get; }
 
-        public T Resolve( CompilationModel compilation ) => Resolve( this.Target, compilation, this.TargetKind );
+        public T GetTarget( ICompilation compilation ) => Resolve( this.Target, (CompilationModel) compilation, this.TargetKind );
 
         public ( ImmutableArray<AttributeData> Attributes, ISymbol Symbol ) GetAttributeData( Compilation compilation )
         {
@@ -163,6 +181,8 @@ namespace Caravela.Framework.Impl.CodeModel.References
 
             return (symbol.GetAttributes(), symbol);
         }
+
+        public bool IsDefault => this.Target == null;
 
         public ISymbol GetSymbol( Compilation compilation ) => this.GetSymbolWithKind( this.GetSymbolIgnoringKind( compilation ) );
 
@@ -256,6 +276,9 @@ namespace Caravela.Framework.Impl.CodeModel.References
             return symbol;
         }
 
+        internal static T Resolve( object? reference, ICompilation compilation, DeclarationRefTargetKind kind = DeclarationRefTargetKind.Default )
+            => Resolve( reference, (CompilationModel) compilation, kind );
+
         internal static T Resolve( object? reference, CompilationModel compilation, DeclarationRefTargetKind kind = DeclarationRefTargetKind.Default )
         {
             switch ( reference )
@@ -295,7 +318,7 @@ namespace Caravela.Framework.Impl.CodeModel.References
 
         public override string ToString() => this.Target?.ToString() ?? "null";
 
-        public DeclarationRef<TOut> As<TOut>()
+        public Ref<TOut> As<TOut>()
             where TOut : class, ICompilationElement
             => new( this.Target, this.TargetKind );
 

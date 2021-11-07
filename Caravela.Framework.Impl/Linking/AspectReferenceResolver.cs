@@ -164,7 +164,7 @@ namespace Caravela.Framework.Impl.Linking
 
                 if ( introducedMember.Introduction is IReplaceMember replaceMember )
                 {
-                    var replacedMember = replaceMember.ReplacedMember.Resolve( this._finalCompilationModel );
+                    var replacedMember = replaceMember.ReplacedMember.GetTarget( this._finalCompilationModel );
 
                     IDeclaration canonicalReplacedMember = replacedMember switch
                     {
@@ -320,7 +320,7 @@ namespace Caravela.Framework.Impl.Linking
                             referenceSpecification );
                     }
                     else if ( targetMemberIntroduction.Introduction is IReplaceMember replaceMember
-                              && replaceMember.ReplacedMember.Resolve( this._finalCompilationModel ).GetSymbol() != null )
+                              && replaceMember.ReplacedMember.GetTarget( this._finalCompilationModel ).GetSymbol() != null )
                     {
                         // Introduction replaced existing source member, resolve to default semantics, i.e. source symbol.
 

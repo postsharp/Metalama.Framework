@@ -84,7 +84,8 @@ namespace Caravela.Framework.Impl.Aspects
 
                     return this._configuration.UserCodeInvoker.Invoke( () => selector( translatedTarget ) );
                 },
-                this._configuration );
+                this._configuration.AspectClasses,
+                this._configuration.ServiceProvider );
 
         IDeclaration IAspectLayerBuilder.Target => this.Target;
 

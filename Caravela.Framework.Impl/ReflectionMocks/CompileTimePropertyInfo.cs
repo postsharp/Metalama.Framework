@@ -12,7 +12,7 @@ namespace Caravela.Framework.Impl.ReflectionMocks
 {
     internal class CompileTimePropertyInfo : PropertyInfo, ICompileTimeReflectionObject<IProperty>
     {
-        public IDeclarationRef<IProperty> Target { get; set; }
+        public ISdkRef<IProperty> Target { get; set; }
 
         private CompileTimePropertyInfo( IProperty property )
         {

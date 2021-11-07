@@ -46,7 +46,6 @@ namespace Caravela.Framework.Impl.Linking
                 input.IntermediateCompilation.Compilation,
                 input.IntroductionRegistry,
                 input.AnalysisRegistry,
-                input.ReferenceResolver,
                 input.DiagnosticSink,
                 this._serviceProvider );
 

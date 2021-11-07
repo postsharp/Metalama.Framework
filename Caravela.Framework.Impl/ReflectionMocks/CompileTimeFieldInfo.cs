@@ -12,7 +12,7 @@ namespace Caravela.Framework.Impl.ReflectionMocks
 {
     internal class CompileTimeFieldInfo : FieldInfo, ICompileTimeReflectionObject<IField>
     {
-        public IDeclarationRef<IField> Target { get; set; }
+        public ISdkRef<IField> Target { get; set; }
 
         private CompileTimeFieldInfo( IField field )
         {
@@ -39,8 +39,7 @@ namespace Caravela.Framework.Impl.ReflectionMocks
 
         public override Type FieldType => throw CompileTimeMocksHelper.CreateNotSupportedException();
 
-        public override object GetValue( object obj )
-            => throw CompileTimeMocksHelper.CreateNotSupportedException();
+        public override object GetValue( object obj ) => throw CompileTimeMocksHelper.CreateNotSupportedException();
 
         public override void SetValue( object obj, object value, BindingFlags invokeAttr, Binder binder, CultureInfo culture )
             => throw CompileTimeMocksHelper.CreateNotSupportedException();

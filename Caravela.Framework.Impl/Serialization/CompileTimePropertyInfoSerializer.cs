@@ -19,7 +19,7 @@ namespace Caravela.Framework.Impl.Serialization
 
         public override ExpressionSyntax Serialize( CompileTimePropertyInfo obj, SyntaxSerializationContext serializationContext )
         {
-            var property = obj.Target.Resolve( serializationContext.CompilationModel ).AssertNotNull();
+            var property = obj.Target.GetTarget( serializationContext.CompilationModel ).AssertNotNull();
 
             return this.SerializeProperty( property, serializationContext );
         }

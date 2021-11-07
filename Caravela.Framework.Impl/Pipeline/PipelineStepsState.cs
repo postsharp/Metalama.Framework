@@ -8,6 +8,7 @@ using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Transformations;
+using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -87,8 +88,15 @@ namespace Caravela.Framework.Impl.Pipeline
 
                 this.DetectUnorderedSteps( ref previousStep, this._currentStep );
 
-                var compilationForAspectLayer = this.Compilation.GetCompilationModel().WithAspectLayer( this._currentStep.AspectLayer.AspectLayerId );
-                this.Compilation = this._currentStep!.Execute( compilationForAspectLayer, this, cancellationToken );
+                var compilation = this.Compilation.GetCompilationModel();
+
+                using ( CaravelaExecutionContextImpl.WithContext(
+                    this.PipelineConfiguration.ServiceProvider,
+                    this._currentStep.AspectLayer.AspectLayerId,
+                    compilation ) )
+                {
+                    this.Compilation = this._currentStep!.Execute( compilation, this, cancellationToken );
+                }
             }
         }
 
@@ -215,13 +223,13 @@ namespace Caravela.Framework.Impl.Pipeline
             return success;
         }
 
-        public void AddAspectInstances( IEnumerable<AspectInstance> aspectInstances )
+        public void AddAspectInstances( IEnumerable<ResolvedAspectInstance> aspectInstances )
         {
             foreach ( var aspectInstance in aspectInstances )
             {
                 var depth = this.Compilation.GetDepth( aspectInstance.TargetDeclaration );
 
-                if ( !this.TryGetOrAddStep( new AspectLayerId( aspectInstance.AspectClass ), depth, true, out var step ) )
+                if ( !this.TryGetOrAddStep( new AspectLayerId( aspectInstance.AspectInstance.AspectClass ), depth, true, out var step ) )
                 {
                     // This should not happen here. The source should not have been added.
                     throw new AssertionFailedException();
