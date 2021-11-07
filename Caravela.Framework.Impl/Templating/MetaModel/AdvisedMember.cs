@@ -41,6 +41,6 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
         public IUserReceiver This
             => new ThisInstanceUserReceiver(
                 this.DeclaringType,
-                new AspectReferenceSpecification( CaravelaExecutionContextImpl.Current.AspectLayerId, AspectReferenceOrder.Base ) );
+                new AspectReferenceSpecification( UserCodeExecutionContext.Current.AspectLayerId!.Value, AspectReferenceOrder.Base ) );
     }
 }

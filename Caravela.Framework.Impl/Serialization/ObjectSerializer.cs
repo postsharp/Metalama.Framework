@@ -29,7 +29,7 @@ namespace Caravela.Framework.Impl.Serialization
         public abstract ExpressionSyntax Serialize( object obj, SyntaxSerializationContext serializationContext );
 
         /// <summary>
-        /// Throws a <see cref="InvalidUserCodeException"/> if we are in an infinite recursion cycle because of an attempt to serialize <paramref name="obj"/>.
+        /// Throws a <see cref="DiagnosticException"/> if we are in an infinite recursion cycle because of an attempt to serialize <paramref name="obj"/>.
         /// </summary>
         protected static void ThrowIfStackTooDeep( object obj )
         {

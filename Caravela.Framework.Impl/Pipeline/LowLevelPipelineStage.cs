@@ -68,22 +68,19 @@ namespace Caravela.Framework.Impl.Pipeline
                 new AspectWeaverHelper( pipelineConfiguration.ServiceProvider, compilation ),
                 pipelineConfiguration.ServiceProvider );
 
-            PartialCompilation newCompilation;
+            var executionContext = new UserCodeExecutionContext(
+                this.ServiceProvider,
+                diagnostics,
+                UserCodeMemberInfo.FromDelegate( new Action<AspectWeaverContext>( this._aspectWeaver.Transform ) ) );
 
-            try
+            if ( !this.ServiceProvider.GetService<UserCodeInvoker>().TryInvoke( () => this._aspectWeaver.Transform( context ), executionContext ) )
             {
-                this.ServiceProvider.GetService<UserCodeInvoker>().Invoke( () => this._aspectWeaver.Transform( context ) );
-                newCompilation = (PartialCompilation) context.Compilation;
-            }
-            catch ( Exception ex )
-            {
-                diagnostics.Report(
-                    GeneralDiagnosticDescriptors.ExceptionInWeaver.CreateDiagnostic( null, (this._aspectClass.ShortName, ex.ToDiagnosticString()) ) );
-
                 result = null;
 
                 return false;
             }
+
+            var newCompilation = (PartialCompilation) context.Compilation;
 
             // TODO: update AspectCompilation.Aspects
             result = new PipelineStageResult(

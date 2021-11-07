@@ -41,7 +41,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization
         [Fact]
         public void TestMultiArray()
         {
-            Assert.Throws<InvalidUserCodeException>( () => this.AssertSerialization( "new System.Int32[,]{{2}}", new[,] { { 2 } } ) );
+            Assert.Throws<DiagnosticException>( () => this.AssertSerialization( "new System.Int32[,]{{2}}", new[,] { { 2 } } ) );
         }
 
         private void AssertSerialization( string expected, object o )

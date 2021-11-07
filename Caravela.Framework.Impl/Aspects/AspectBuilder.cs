@@ -15,6 +15,7 @@ using Caravela.Framework.Validation;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
 using System.Threading;
 
 namespace Caravela.Framework.Impl.Aspects
@@ -68,24 +69,35 @@ namespace Caravela.Framework.Impl.Aspects
             return new DisposeAction( () => this._predecessor = oldPredecessor );
         }
 
+        IDiagnosticAdder IAspectBuilderInternal.DiagnosticAdder => this._diagnosticSink;
+
         public IDiagnosticSink Diagnostics => this._diagnosticSink;
 
         public T Target { get; }
 
         public IDeclarationSelection<TMember> WithMembers<TMember>( Func<T, IEnumerable<TMember>> selector )
             where TMember : class, IDeclaration
-            => new DeclarationSelection<TMember>(
+        {
+            var executionContext = UserCodeExecutionContext.Current;
+
+            return new DeclarationSelection<TMember>(
                 this.Target.ToRef(),
                 this._predecessor,
                 this.AddAspectSource,
-                compilation =>
+                ( compilation, diagnostics ) =>
                 {
                     var translatedTarget = compilation.Factory.GetDeclaration( this.Target );
 
-                    return this._configuration.UserCodeInvoker.Invoke( () => selector( translatedTarget ) );
+                    this._configuration.UserCodeInvoker.TryInvokeEnumerable(
+                        () => selector( translatedTarget ),
+                        executionContext.WithDiagnosticAdder( diagnostics ),
+                        out var items );
+
+                    return items ?? Enumerable.Empty<TMember>();
                 },
                 this._configuration.AspectClasses,
                 this._configuration.ServiceProvider );
+        }
 
         IDeclaration IAspectLayerBuilder.Target => this.Target;
 

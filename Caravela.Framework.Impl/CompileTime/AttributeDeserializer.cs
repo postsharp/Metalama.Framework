@@ -22,11 +22,13 @@ namespace Caravela.Framework.Impl.CompileTime
 {
     internal class AttributeDeserializer
     {
+        private readonly IServiceProvider _serviceProvider;
         private readonly CompileTimeTypeResolver _compileTimeTypeResolver;
         private readonly UserCodeInvoker _userCodeInvoker;
 
         public AttributeDeserializer( IServiceProvider serviceProvider, CompileTimeTypeResolver compileTimeTypeResolver )
         {
+            this._serviceProvider = serviceProvider;
             this._compileTimeTypeResolver = compileTimeTypeResolver;
             this._userCodeInvoker = serviceProvider.GetService<UserCodeInvoker>();
         }
@@ -115,20 +117,10 @@ namespace Caravela.Framework.Impl.CompileTime
                     diagnosticAdder );
             }
 
-            Attribute localAttributeInstance;
+            var executionContext = new UserCodeExecutionContext( this._serviceProvider, diagnosticAdder, UserCodeMemberInfo.FromMemberInfo( constructor ) );
 
-            try
+            if ( !this._userCodeInvoker.TryInvoke( () => (Attribute) constructor.Invoke( parameters ), executionContext, out var localAttributeInstance ) )
             {
-                localAttributeInstance = attributeInstance =
-                    attributeInstance = this._userCodeInvoker.Invoke( () => (Attribute) constructor.Invoke( parameters ) ).AssertNotNull();
-            }
-            catch ( Exception e )
-            {
-                diagnosticAdder.Report(
-                    GeneralDiagnosticDescriptors.ExceptionInUserCode.CreateDiagnostic(
-                        attribute.GetLocation(),
-                        (type.Name, "new", e.GetType().Name, e.ToString()) ) );
-
                 attributeInstance = null;
 
                 return false;
@@ -149,17 +141,10 @@ namespace Caravela.Framework.Impl.CompileTime
                 {
                     var translatedValue = this.TranslateAttributeArgument( attribute, arg.Value, property.PropertyType, diagnosticAdder );
 
-                    try
+                    if ( !this._userCodeInvoker.TryInvoke(
+                        () => property.SetValue( localAttributeInstance, translatedValue ),
+                        executionContext.WithInvokedMember( UserCodeMemberInfo.FromMemberInfo( property ) ) ) )
                     {
-                        this._userCodeInvoker.Invoke( () => property.SetValue( localAttributeInstance, translatedValue ) );
-                    }
-                    catch ( Exception e )
-                    {
-                        diagnosticAdder.Report(
-                            GeneralDiagnosticDescriptors.ExceptionInUserCode.CreateDiagnostic(
-                                attribute.GetLocation(),
-                                (type.Name, property.Name, e.GetType().Name, e.ToString()) ) );
-
                         attributeInstance = null;
 
                         return false;
@@ -169,7 +154,14 @@ namespace Caravela.Framework.Impl.CompileTime
                 {
                     var translatedValue = this.TranslateAttributeArgument( attribute, arg.Value, field.FieldType, diagnosticAdder );
 
-                    this._userCodeInvoker.Invoke( () => field.SetValue( localAttributeInstance, translatedValue ) );
+                    if ( !this._userCodeInvoker.TryInvoke(
+                        () => field.SetValue( localAttributeInstance, translatedValue ),
+                        executionContext.WithInvokedMember( UserCodeMemberInfo.FromMemberInfo( field ) ) ) )
+                    {
+                        attributeInstance = null;
+
+                        return false;
+                    }
                 }
                 else
                 {
@@ -177,6 +169,8 @@ namespace Caravela.Framework.Impl.CompileTime
                     throw new AssertionFailedException( $"Cannot find a FieldInfo or PropertyInfo named '{arg.Key}'." );
                 }
             }
+
+            attributeInstance = localAttributeInstance;
 
             return true;
         }

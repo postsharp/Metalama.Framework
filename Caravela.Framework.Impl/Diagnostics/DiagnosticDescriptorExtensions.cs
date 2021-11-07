@@ -14,26 +14,26 @@ namespace Caravela.Framework.Impl.Diagnostics
             => new( definition.Id, definition.Title, definition.MessageFormat, definition.Category, definition.Severity.ToRoslynSeverity(), true );
 
         /// <summary>
-        /// Creates an <see cref="InvalidUserCodeException"/> instance based on the current descriptor and given arguments.
+        /// Creates an <see cref="DiagnosticException"/> instance based on the current descriptor and given arguments.
         /// The diagnostic location is taken from <see cref="DiagnosticContext"/>. This method must be called in user-called code
         /// in case of precondition failure (i.e. when the responsibility of the error lays on the user).
         /// </summary>
         public static Exception CreateException<T>( this DiagnosticDefinition<T> definition, T arguments )
             where T : notnull
-            => new InvalidUserCodeException( definition.CreateDiagnostic( DiagnosticContext.CurrentLocation?.GetLocation(), arguments ) );
+            => new DiagnosticException( definition.CreateDiagnostic( DiagnosticContext.CurrentLocation?.GetLocation(), arguments ) );
 
         // Coverage: ignore (trivial)
         public static Exception CreateException<T>( this DiagnosticDefinition<T> definition, Location? location, T arguments )
             where T : notnull
-            => new InvalidUserCodeException( definition.CreateDiagnostic( location ?? DiagnosticContext.CurrentLocation?.GetLocation(), arguments ) );
+            => new DiagnosticException( definition.CreateDiagnostic( location ?? DiagnosticContext.CurrentLocation?.GetLocation(), arguments ) );
 
         // Coverage: ignore (trivial)
         public static Exception CreateException( this DiagnosticDefinition definition, params object[] arguments )
-            => new InvalidUserCodeException( definition.CreateDiagnostic( DiagnosticContext.CurrentLocation?.GetLocation(), arguments ) );
+            => new DiagnosticException( definition.CreateDiagnostic( DiagnosticContext.CurrentLocation?.GetLocation(), arguments ) );
 
         // Coverage: ignore (trivial)
         public static Exception CreateException( this DiagnosticDefinition definition, Location? location, params object[] arguments )
-            => new InvalidUserCodeException( definition.CreateDiagnostic( location ?? DiagnosticContext.CurrentLocation?.GetLocation(), arguments ) );
+            => new DiagnosticException( definition.CreateDiagnostic( location ?? DiagnosticContext.CurrentLocation?.GetLocation(), arguments ) );
 
         /// <summary>
         /// Instantiates a <see cref="Diagnostic"/> based on the current descriptor and given arguments.

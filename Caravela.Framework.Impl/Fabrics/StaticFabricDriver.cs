@@ -5,10 +5,12 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Fabrics;
 using Caravela.Framework.Impl.Aspects;
 using Caravela.Framework.Impl.CodeModel.References;
+using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Caravela.Framework.Impl.Fabrics
 {
@@ -24,7 +26,7 @@ namespace Caravela.Framework.Impl.Fabrics
                 fabric,
                 runTimeCompilation ) { }
 
-        public abstract StaticFabricResult Execute( IProject project );
+        public abstract bool TryExecute( IProject project, IDiagnosticAdder diagnosticAdder, [NotNullWhen( true )] out StaticFabricResult? result );
 
         protected class StaticAmender<T> : BaseAmender<T>
             where T : class, IDeclaration

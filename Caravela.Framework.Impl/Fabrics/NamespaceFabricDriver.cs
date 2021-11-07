@@ -3,12 +3,14 @@
 
 using Caravela.Framework.Code;
 using Caravela.Framework.Fabrics;
-using Caravela.Framework.Impl.Aspects;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CodeModel.References;
+using Caravela.Framework.Impl.Diagnostics;
+using Caravela.Framework.Impl.Utilities;
 using Caravela.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Caravela.Framework.Impl.Fabrics
 {
@@ -33,7 +35,7 @@ namespace Caravela.Framework.Impl.Fabrics
 
         public override FormattableString FormatPredecessor() => $"namespace fabric '{this.Fabric.GetType()}' on '{this.TargetSymbol}'";
 
-        public override StaticFabricResult Execute( IProject project )
+        public override bool TryExecute( IProject project, IDiagnosticAdder diagnosticAdder, [NotNullWhen( true )] out StaticFabricResult? result )
         {
             var amender = new Amender(
                 this._targetNamespace,
@@ -41,9 +43,23 @@ namespace Caravela.Framework.Impl.Fabrics
                 this.FabricManager,
                 new FabricInstance( this, this._targetNamespace.As<IDeclaration>() ) );
 
-            ((NamespaceFabric) this.Fabric).AmendNamespace( amender );
+            var executionContext = new UserCodeExecutionContext(
+                this.FabricManager.ServiceProvider,
+                diagnosticAdder,
+                UserCodeMemberInfo.FromDelegate( new Action<INamespaceAmender>( ((NamespaceFabric) this.Fabric).AmendNamespace ) ) );
 
-            return amender.ToResult();
+            if ( !this.FabricManager.UserCodeInvoker.TryInvoke( () => ((NamespaceFabric) this.Fabric).AmendNamespace( amender ), executionContext ) )
+            {
+                result = null;
+
+                return false;
+            }
+
+            // TODO: Exception handling.
+
+            result = amender.ToResult();
+
+            return true;
         }
 
         private class Amender : StaticAmender<INamespace>, INamespaceAmender
@@ -56,7 +72,7 @@ namespace Caravela.Framework.Impl.Fabrics
                 project,
                 fabricManager,
                 fabricInstance,
-                fabricInstance.TargetDeclaration.As<INamespace>()) { }
+                fabricInstance.TargetDeclaration.As<INamespace>() ) { }
         }
     }
 }

@@ -42,7 +42,7 @@ namespace Caravela.Framework.Impl.Fabrics
 
                 using ( internalBuilder.WithPredecessor( new AspectPredecessor( AspectPredecessorKind.Fabric, fabricInstance ) ) )
                 {
-                    ((TypeFabricDriver) templateClass.Driver).Execute( internalBuilder, templateClass, fabricInstance );
+                    _ = ((TypeFabricDriver) templateClass.Driver).TryExecute( internalBuilder, templateClass, fabricInstance );
                 }
             }
         }

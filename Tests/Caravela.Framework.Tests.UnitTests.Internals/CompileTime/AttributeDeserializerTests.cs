@@ -360,7 +360,7 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime
             DiagnosticList diagnosticList = new();
 
             Assert.False( loader.AttributeDeserializer.TryCreateAttribute( attribute, diagnosticList, out var deserializedAttribute ) );
-            Assert.Contains( diagnosticList, d => d.Id == GeneralDiagnosticDescriptors.ExceptionInUserCode.Id );
+            Assert.Contains( diagnosticList, d => d.Id == GeneralDiagnosticDescriptors.ExceptionInUserCodeWithoutTarget.Id );
             Assert.Null( deserializedAttribute );
         }
 
@@ -379,7 +379,7 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime
             DiagnosticList diagnosticList = new();
 
             Assert.False( loader.AttributeDeserializer.TryCreateAttribute( attribute, diagnosticList, out var deserializedAttribute ) );
-            Assert.Contains( diagnosticList, d => d.Id == GeneralDiagnosticDescriptors.ExceptionInUserCode.Id );
+            Assert.Contains( diagnosticList, d => d.Id == GeneralDiagnosticDescriptors.ExceptionInUserCodeWithoutTarget.Id );
             Assert.Null( deserializedAttribute );
         }
 

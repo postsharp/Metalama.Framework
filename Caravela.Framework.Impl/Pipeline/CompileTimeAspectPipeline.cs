@@ -135,7 +135,7 @@ namespace Caravela.Framework.Impl.Pipeline
 
                 return new CompileTimeAspectPipelineResult( syntaxTreeTransformations, additionalResources, resultingCompilation );
             }
-            catch ( InvalidUserCodeException exception )
+            catch ( DiagnosticException exception )
             {
                 foreach ( var diagnostic in exception.Diagnostics )
                 {

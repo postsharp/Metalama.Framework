@@ -43,7 +43,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization
         {
             using var testContext = this.CreateTestContext();
 
-            Assert.Throws<InvalidUserCodeException>(
+            Assert.Throws<DiagnosticException>(
                 () =>
                 {
                     var o = new List<object>();
@@ -56,7 +56,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization
         public void TestUnsupportedAnonymousType()
         {
             using var testContext = this.CreateTestContext();
-            Assert.Throws<InvalidUserCodeException>( () => testContext.Serialize( new { A = "F" } ) );
+            Assert.Throws<DiagnosticException>( () => testContext.Serialize( new { A = "F" } ) );
         }
 
         [Fact]

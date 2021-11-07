@@ -6,18 +6,16 @@ using System.Threading;
 
 namespace Caravela.Framework.Project
 {
-    
-    internal static class CaravelaExecutionContext 
+    internal static class CaravelaExecutionContext
     {
-        private static readonly AsyncLocal<IExecutionContext?> _current = new ();
+        private static readonly AsyncLocal<IExecutionContext?> _current = new();
 
         public static IExecutionContext Current => _current.Value ?? throw new InvalidOperationException();
-        
-        public static IExecutionContext? CurrentInternal
+
+        public static IExecutionContext? CurrentOrNull
         {
             get => _current.Value;
             set => _current.Value = value;
         }
-
     }
 }

@@ -223,7 +223,18 @@ namespace Caravela.TestFramework
                 syntaxTree = this.InputCompilation!.SyntaxTrees.SingleOrDefault( t => t.FilePath == diagnostic.Location.GetLineSpan().Path );
             }
 
-            var text = syntaxTree?.GetText().GetSubText( diagnostic.Location.SourceSpan ).ToString();
+            var text = syntaxTree?.GetText()
+                .GetSubText( diagnostic.Location.SourceSpan )
+                .ToString()
+                .Replace( "\r\n", " " )
+                .Replace( "\n", " " )
+                .Replace( "\n", " " )
+                .Replace( "\t", " " ) ?? "";
+
+            while ( text.Contains( "  " ) )
+            {
+                text = text.Replace( "  ", " " );
+            }
 
             return text;
         }

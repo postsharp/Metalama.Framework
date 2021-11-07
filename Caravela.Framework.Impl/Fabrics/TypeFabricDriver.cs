@@ -6,6 +6,7 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Fabrics;
 using Caravela.Framework.Impl.Aspects;
 using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
 
@@ -23,12 +24,18 @@ namespace Caravela.Framework.Impl.Fabrics
 
         private ISymbol TargetSymbol => this.FabricSymbol.ContainingType;
 
-        public void Execute( IAspectBuilderInternal aspectBuilder, FabricTemplateClass templateClass, FabricInstance fabricInstance )
+        public bool TryExecute( IAspectBuilderInternal aspectBuilder, FabricTemplateClass templateClass, FabricInstance fabricInstance )
         {
             // Type fabrics execute as aspects, called from FabricAspectClass.
             var templateInstance = new TemplateClassInstance( this.Fabric, templateClass );
             var builder = new Amender( (INamedType) aspectBuilder.Target, this.FabricManager, aspectBuilder, templateInstance, fabricInstance );
-            ((TypeFabric) this.Fabric).AmendType( builder );
+
+            var executionContext = new UserCodeExecutionContext(
+                this.FabricManager.ServiceProvider,
+                aspectBuilder.DiagnosticAdder,
+                UserCodeMemberInfo.FromDelegate( new Action<ITypeAmender>( ((TypeFabric) this.Fabric).AmendType ) ) );
+
+            return this.FabricManager.UserCodeInvoker.TryInvoke( () => ((TypeFabric) this.Fabric).AmendType( builder ), executionContext );
         }
 
         public override FabricKind Kind => FabricKind.Type;
@@ -46,7 +53,11 @@ namespace Caravela.Framework.Impl.Fabrics
                 FabricManager fabricManager,
                 IAspectBuilderInternal aspectBuilder,
                 TemplateClassInstance templateClassInstance,
-                FabricInstance fabricInstance ) : base( namedType.Compilation.Project, fabricManager, fabricInstance, fabricInstance.TargetDeclaration.As<INamedType>() )
+                FabricInstance fabricInstance ) : base(
+                namedType.Compilation.Project,
+                fabricManager,
+                fabricInstance,
+                fabricInstance.TargetDeclaration.As<INamedType>() )
             {
                 this._aspectBuilder = aspectBuilder;
                 this.Type = namedType;

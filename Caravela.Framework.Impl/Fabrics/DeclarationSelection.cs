@@ -29,7 +29,7 @@ namespace Caravela.Framework.Impl.Fabrics
         private readonly ISdkRef<IDeclaration> _containingDeclaration;
         private readonly AspectPredecessor _predecessor;
         private readonly Action<IAspectSource> _registerAspectSource;
-        private readonly Func<CompilationModel, IEnumerable<T>> _selector;
+        private readonly Func<CompilationModel, IDiagnosticAdder, IEnumerable<T>> _selector;
         private readonly BoundAspectClassCollection _aspectClasses;
         private readonly IServiceProvider _serviceProvider;
 
@@ -37,7 +37,7 @@ namespace Caravela.Framework.Impl.Fabrics
             ISdkRef<IDeclaration> containingDeclaration,
             AspectPredecessor predecessor,
             Action<IAspectSource> registerAspectSource,
-            Func<CompilationModel, IEnumerable<T>> selectTargets,
+            Func<CompilationModel, IDiagnosticAdder, IEnumerable<T>> selectTargets,
             BoundAspectClassCollection aspectClasses,
             IServiceProvider serviceProvider )
         {
@@ -69,6 +69,7 @@ namespace Caravela.Framework.Impl.Fabrics
         {
             var aspectClass = this.GetAspectClass<TAspect>();
             var userCodeInvoker = this._serviceProvider.GetService<UserCodeInvoker>();
+            var executionContext = UserCodeExecutionContext.Current;
 
             this.RegisterAspectSource(
                 new ProgrammaticAspectSource<TAspect, T>(
@@ -79,16 +80,31 @@ namespace Caravela.Framework.Impl.Fabrics
                         aspectClass,
                         item =>
                         {
-                            var lambda = Expression.Lambda<Func<IAspect>>(
-                                userCodeInvoker.Invoke( () => createAspect( item ) ).Body,
-                                Array.Empty<ParameterExpression>() );
+                            if ( !userCodeInvoker.TryInvoke(
+                                () => createAspect( item ),
+                                executionContext.WithDiagnosticAdder( diagnostics ),
+                                out var expression ) )
+                            {
+                                return null;
+                            }
 
-                            return new AspectInstance(
+                            var lambda = Expression.Lambda<Func<IAspect>>( expression!.Body, Array.Empty<ParameterExpression>() );
+
+                            if ( !AspectInstance.TryCreateInstance(
                                 this._serviceProvider,
+                                diagnostics,
                                 lambda,
                                 item.ToRef<IDeclaration>(),
                                 aspectClass,
-                                this._predecessor );
+                                this._predecessor,
+                                out var aspectInstance ) )
+                            {
+                                return null;
+                            }
+                            else
+                            {
+                                return aspectInstance;
+                            }
                         } ) ) );
 
             return this;
@@ -99,6 +115,7 @@ namespace Caravela.Framework.Impl.Fabrics
         {
             var aspectClass = this.GetAspectClass<TAspect>();
             var userCodeInvoker = this._serviceProvider.GetService<UserCodeInvoker>();
+            var executionContext = UserCodeExecutionContext.Current;
 
             this.RegisterAspectSource(
                 new ProgrammaticAspectSource<TAspect, T>(
@@ -107,11 +124,22 @@ namespace Caravela.Framework.Impl.Fabrics
                         compilation,
                         diagnosticAdder,
                         aspectClass,
-                        t => new AspectInstance(
-                            userCodeInvoker.Invoke( () => createAspect( t ) ),
-                            t.ToRef<IDeclaration>(),
-                            aspectClass,
-                            this._predecessor ) ) ) );
+                        t =>
+                        {
+                            if ( !userCodeInvoker.TryInvoke(
+                                () => createAspect( t ),
+                                executionContext.WithDiagnosticAdder( diagnosticAdder ),
+                                out var aspect ) )
+                            {
+                                return null;
+                            }
+
+                            return new AspectInstance(
+                                aspect!,
+                                t.ToRef<IDeclaration>(),
+                                aspectClass,
+                                this._predecessor );
+                        } ) ) );
 
             return this;
         }
@@ -141,9 +169,9 @@ namespace Caravela.Framework.Impl.Fabrics
             CompilationModel compilation,
             IDiagnosticAdder diagnosticAdder,
             AspectClass aspectClass,
-            Func<T, AspectInstance> createAspectInstance )
+            Func<T, AspectInstance?> createAspectInstance )
         {
-            foreach ( var targetDeclaration in this._selector( compilation ) )
+            foreach ( var targetDeclaration in this._selector( compilation, diagnosticAdder ) )
             {
                 var predecessorInstance = (IAspectPredecessorImpl) this._predecessor.Instance;
 
@@ -175,7 +203,12 @@ namespace Caravela.Framework.Impl.Fabrics
                     continue;
                 }
 
-                yield return createAspectInstance( targetDeclaration );
+                var aspectInstance = createAspectInstance( targetDeclaration );
+
+                if ( aspectInstance != null )
+                {
+                    yield return aspectInstance;
+                }
             }
         }
 

@@ -226,7 +226,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
                     new NullProject( serviceProvider ),
                     (CSharpCompilation) testResult.InputCompilation );
 
-                var template = TemplateMember.Create<IMemberOrNamedType>( compilationModel.Factory.GetMethod( templateMethod ), TemplateInfo.None );
+                var template = TemplateMember.Create<IMethod>( compilationModel.Factory.GetMethod( templateMethod ), TemplateInfo.None );
 
                 var (expansionContext, targetMethod) = CreateTemplateExpansionContext( serviceProvider, assembly, compilationModel, template );
 
@@ -259,7 +259,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
             ServiceProvider serviceProvider,
             Assembly assembly,
             CompilationModel compilation,
-            TemplateMember<IMemberOrNamedType> template )
+            TemplateMember<IMethod> template )
         {
             var roslynCompilation = compilation.RoslynCompilation;
 
@@ -304,7 +304,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
                 targetMethod,
                 new MetaApiProperties(
                     diagnostics,
-                    template,
+                    template.Cast(),
                     ImmutableDictionary.Create<string, object?>().Add( "TestKey", "TestValue" ),
                     default,
                     syntaxGenerationContext,
@@ -318,9 +318,9 @@ namespace Caravela.Framework.Tests.Integration.Runners
                         lexicalScope,
                         serviceProvider.GetService<SyntaxSerializationService>(),
                         syntaxGenerationContext,
-                        default,
+                        template,
                         proceedExpression,
-                        default),
+                        default ),
                     roslynTargetMethod);
 
             static ExpressionSyntax GetProceedInvocation( IMethod targetMethod )

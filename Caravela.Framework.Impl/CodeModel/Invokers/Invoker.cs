@@ -28,7 +28,7 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
             };
 
             this.AspectReference = new AspectReferenceSpecification(
-                CaravelaExecutionContextImpl.Current.AspectLayerId,
+                UserCodeExecutionContext.Current.AspectLayerId!.Value,
                 linkingOrder );
         }
 

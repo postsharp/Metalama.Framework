@@ -7,6 +7,7 @@ using Caravela.Framework.Fabrics;
 using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Templating.Mapping;
+using Caravela.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -23,7 +24,7 @@ namespace Caravela.Framework.Impl.CompileTime
     /// Represents the compile-time project extracted from a run-time project, including its
     /// <see cref="System.Reflection.Assembly"/> allowing for execution, and metadata.
     /// </summary>
-    internal sealed class CompileTimeProject
+    internal sealed class CompileTimeProject : IService
     {
         private readonly CompileTimeProjectManifest? _manifest;
         private readonly CompileTimeDomain _domain;

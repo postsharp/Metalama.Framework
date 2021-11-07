@@ -191,13 +191,13 @@ namespace Caravela.Framework.Impl.Transformations
                 var expansionContext = new TemplateExpansionContext(
                     this.Advice.Aspect.Aspect,
                     metaApi,
-                    this.OverriddenDeclaration.Compilation,
+                    (CompilationModel) this.OverriddenDeclaration.Compilation,
                     context.LexicalScopeProvider.GetLexicalScope( accessor ),
                     context.ServiceProvider.GetService<SyntaxSerializationService>(),
                     context.SyntaxGenerationContext,
                     default,
                     proceedExpression,
-                    this.Advice.AspectLayerId);
+                    this.Advice.AspectLayerId );
 
                 var templateDriver = this.Advice.TemplateInstance.TemplateClass.GetTemplateDriver( accessorTemplate.Declaration! );
 

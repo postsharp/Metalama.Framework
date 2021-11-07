@@ -810,7 +810,7 @@ namespace Caravela.Framework.Impl.Advices
         {
             if ( diagnosticList.HasErrors() )
             {
-                throw new InvalidUserCodeException(
+                throw new DiagnosticException(
                     "Errors have occured while creating advice.",
                     diagnosticList.Where( d => d.Severity == DiagnosticSeverity.Error ).ToImmutableArray() );
             }

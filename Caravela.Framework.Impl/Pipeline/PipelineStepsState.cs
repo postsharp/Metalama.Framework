@@ -8,7 +8,6 @@ using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Transformations;
-using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -90,13 +89,7 @@ namespace Caravela.Framework.Impl.Pipeline
 
                 var compilation = this.Compilation.GetCompilationModel();
 
-                using ( CaravelaExecutionContextImpl.WithContext(
-                    this.PipelineConfiguration.ServiceProvider,
-                    this._currentStep.AspectLayer.AspectLayerId,
-                    compilation ) )
-                {
-                    this.Compilation = this._currentStep!.Execute( compilation, this, cancellationToken );
-                }
+                this.Compilation = this._currentStep!.Execute( compilation, this, cancellationToken );
             }
         }
 

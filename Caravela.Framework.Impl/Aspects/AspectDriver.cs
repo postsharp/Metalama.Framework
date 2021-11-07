@@ -170,28 +170,24 @@ namespace Caravela.Framework.Impl.Aspects
                     aspectInstance,
                     cancellationToken );
 
-                try
-                {
-                    this._serviceProvider.GetService<UserCodeInvoker>().Invoke( () => aspectOfT.BuildAspect( aspectBuilder ) );
-                }
-                catch ( InvalidUserCodeException e )
+                var executionContext = new UserCodeExecutionContext(
+                    this._serviceProvider,
+                    diagnosticSink,
+                    UserCodeMemberInfo.FromDelegate( new Action<IAspectBuilder<T>>( aspectOfT.BuildAspect ) ),
+                    new AspectLayerId( this._aspectClass ),
+                    compilationModelRevision,
+                    targetDeclaration );
+
+                if ( !this._serviceProvider.GetService<UserCodeInvoker>().TryInvoke( () => aspectOfT.BuildAspect( aspectBuilder ), executionContext ) )
                 {
                     aspectInstance.Skip();
 
                     return
                         new AspectInstanceResult(
                             false,
-                            new ImmutableUserDiagnosticList( e.Diagnostics, ImmutableArray<ScopedSuppression>.Empty ),
+                            diagnosticSink.ToImmutable(),
                             ImmutableArray<Advice>.Empty,
-                            aspectBuilder.AspectSources.ToImmutableArray() );
-                }
-                catch ( Exception e )
-                {
-                    var diagnostic = GeneralDiagnosticDescriptors.ExceptionInUserCode.CreateDiagnostic(
-                        targetDeclaration.GetDiagnosticLocation(),
-                        (AspectType: this._aspectClass.ShortName, MethodName: nameof(IAspect<T>.BuildAspect), e.GetType().Name, e.Format( 5 )) );
-
-                    return CreateResultForError( diagnostic );
+                            ImmutableArray<IAspectSource>.Empty );
                 }
 
                 var aspectResult = aspectBuilder.ToResult();

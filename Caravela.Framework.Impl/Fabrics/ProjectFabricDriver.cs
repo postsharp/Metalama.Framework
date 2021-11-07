@@ -5,10 +5,12 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Fabrics;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CodeModel.References;
+using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Utilities;
 using Caravela.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 
 namespace Caravela.Framework.Impl.Fabrics
@@ -77,15 +79,27 @@ namespace Caravela.Framework.Impl.Fabrics
             return string.Compare( this.FabricSymbol.Name, other.FabricSymbol.Name, StringComparison.Ordinal );
         }
 
-        
         public override FormattableString FormatPredecessor() => $"project fabric '{this.Fabric.GetType()}'";
 
-        public override StaticFabricResult Execute( IProject project )
+        public override bool TryExecute( IProject project, IDiagnosticAdder diagnosticAdder, [NotNullWhen( true )] out StaticFabricResult? result )
         {
             var amender = new Amender( project, this.FabricManager, new FabricInstance( this, this.FabricSymbol.ContainingAssembly.ToRef() ) );
-            ((ProjectFabric) this.Fabric).AmendProject( amender );
 
-            return amender.ToResult();
+            var executionContext = new UserCodeExecutionContext(
+                this.FabricManager.ServiceProvider,
+                diagnosticAdder,
+                UserCodeMemberInfo.FromDelegate( new Action<IProjectAmender>( ((ProjectFabric) this.Fabric).AmendProject ) ) );
+
+            if ( !this.FabricManager.UserCodeInvoker.TryInvoke( () => ((ProjectFabric) this.Fabric).AmendProject( amender ), executionContext ) )
+            {
+                result = null;
+
+                return false;
+            }
+
+            result = amender.ToResult();
+
+            return true;
         }
 
         private class Amender : StaticAmender<ICompilation>, IProjectAmender

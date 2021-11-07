@@ -5,6 +5,7 @@ using Caravela.Framework.Aspects;
 using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.Aspects;
 using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Fabrics;
@@ -104,13 +105,16 @@ namespace Caravela.Framework.Impl.Pipeline
             }
 
             // Create a project-level service provider.
-            var projectServiceProvider = this.ServiceProvider.WithService( loader ).WithMark( ServiceProviderMark.Project );
+            var projectServiceProviderWithoutPlugins = this.ServiceProvider.WithService( loader ).WithMark( ServiceProviderMark.Project );
+            var projectServiceProviderWithProject = projectServiceProviderWithoutPlugins;
 
             // Create compiler plug-ins found in compile-time code.
             ImmutableArray<object> compilerPlugIns;
 
             if ( compileTimeProject != null )
             {
+                projectServiceProviderWithProject = projectServiceProviderWithProject.WithService( compileTimeProject );
+
                 // The instantiation of compiler plug-ins defined in the current compilation is a bit rough here, but it is supposed to be used
                 // by our internal tests only. However, the logic will interfere with production scenario, where a plug-in will be both
                 // in ProjectOptions.PlugIns and in CompileTimeProjects.PlugInTypes. So, we do not load the plug ins found by CompileTimeProjects.PlugInTypes
@@ -123,13 +127,40 @@ namespace Caravela.Framework.Impl.Pipeline
                 var additionalPlugIns = compileTimeProject.ClosureProjects
                     .SelectMany( p => p.PlugInTypes.Select( t => (Project: p, TypeName: t) ) )
                     .Where( t => !loadedPlugInsTypes.Contains( t.TypeName ) )
-                    .Select( t => invoker.Invoke( () => Activator.CreateInstance( t.Project.GetType( t.TypeName ) ) ) )
+                    .Select(
+                        t =>
+                        {
+                            var type = t.Project.GetType( t.TypeName );
+                            var constructor = type.GetConstructor( Type.EmptyTypes );
+
+                            if ( constructor == null )
+                            {
+                                diagnosticAdder.Report( GeneralDiagnosticDescriptors.TypeMustHavePublicDefaultConstructor.CreateDiagnostic( null, type ) );
+
+                                return null;
+                            }
+
+                            var executionContext = new UserCodeExecutionContext(
+                                projectServiceProviderWithoutPlugins,
+                                diagnosticAdder,
+                                UserCodeMemberInfo.FromMemberInfo( constructor ) );
+
+                            if ( !invoker.TryInvoke( () => Activator.CreateInstance( type ), executionContext, out var instance ) )
+                            {
+                                return null;
+                            }
+                            else
+                            {
+                                return instance;
+                            }
+                        } )
+                    .WhereNotNull()
                     .ToList();
 
                 if ( additionalPlugIns.Count > 0 )
                 {
                     // If we have plug-in defined in code, we have to fork the service provider for this specific project.
-                    projectServiceProvider = projectServiceProvider.WithServices( additionalPlugIns.OfType<IService>() );
+                    projectServiceProviderWithProject = projectServiceProviderWithProject.WithServices( additionalPlugIns.OfType<IService>() );
                 }
 
                 compilerPlugIns = additionalPlugIns
@@ -140,13 +171,13 @@ namespace Caravela.Framework.Impl.Pipeline
             {
                 compilerPlugIns = this.ProjectOptions.PlugIns;
             }
-            
+
             // Creates a project model that includes the final service provider.
-            var projectModel = new ProjectModel( compilation.Compilation, projectServiceProvider );
+            var projectModel = new ProjectModel( compilation.Compilation, projectServiceProviderWithProject );
 
             // Create aspect types.
-            var driverFactory = new AspectDriverFactory( compilation.Compilation, compilerPlugIns, projectServiceProvider );
-            var aspectTypeFactory = new AspectClassMetadataFactory( projectServiceProvider, driverFactory );
+            var driverFactory = new AspectDriverFactory( compilation.Compilation, compilerPlugIns, projectServiceProviderWithProject );
+            var aspectTypeFactory = new AspectClassMetadataFactory( projectServiceProviderWithProject, driverFactory );
 
             var aspectClasses = aspectTypeFactory.GetAspectClasses( compilation.Compilation, compileTimeProject, diagnosticAdder ).ToImmutableArray();
 
@@ -175,7 +206,7 @@ namespace Caravela.Framework.Impl.Pipeline
 
             if ( compileTimeProject != null )
             {
-                var fabricTopLevelAspectClass = new FabricTopLevelAspectClass( projectServiceProvider, roslynCompilation, compileTimeProject );
+                var fabricTopLevelAspectClass = new FabricTopLevelAspectClass( projectServiceProviderWithProject, roslynCompilation, compileTimeProject );
                 var fabricAspectLayer = new OrderedAspectLayer( -1, fabricTopLevelAspectClass.Layer );
 
                 allOrderedAspectLayers = orderedAspectLayers.Insert( 0, fabricAspectLayer );
@@ -183,7 +214,7 @@ namespace Caravela.Framework.Impl.Pipeline
 
                 // Execute fabrics.
                 var fabricManager = new FabricManager( allAspectClasses, this.ServiceProvider, compileTimeProject );
-                fabricsConfiguration = fabricManager.ExecuteFabrics( compileTimeProject, roslynCompilation, projectModel );
+                fabricsConfiguration = fabricManager.ExecuteFabrics( compileTimeProject, roslynCompilation, projectModel, diagnosticAdder );
             }
             else
             {
@@ -213,7 +244,7 @@ namespace Caravela.Framework.Impl.Pipeline
                 loader,
                 fabricsConfiguration,
                 projectModel,
-                projectServiceProvider );
+                projectServiceProviderWithProject );
 
             return true;
 

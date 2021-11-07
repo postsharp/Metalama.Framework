@@ -2,10 +2,10 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
-using Caravela.Framework.Project;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CodeModel.References;
 using Caravela.Framework.Impl.Utilities;
+using Caravela.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Globalization;
@@ -32,7 +32,7 @@ namespace Caravela.Framework.Impl.ReflectionMocks
         }
 
         public static Type GetCompileTimeType( string id, string fullMetadataName )
-            => CaravelaExecutionContextImpl.Current.ServiceProvider.GetService<CompileTimeTypeFactory>().Get( id, fullMetadataName );
+            => UserCodeExecutionContext.Current.ServiceProvider.GetService<CompileTimeTypeFactory>().Get( id, fullMetadataName );
 
         internal static Type CreateFromDocumentationId( string documentationId, string fullMetadataName )
             => new CompileTimeType( Ref.FromDocumentationId<IType>( documentationId ), fullMetadataName );

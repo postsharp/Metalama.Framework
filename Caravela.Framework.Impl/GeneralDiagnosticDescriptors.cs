@@ -5,6 +5,7 @@ using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Code.DeclarationBuilders;
 using Caravela.Framework.Diagnostics;
+using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
 using static Caravela.Framework.Diagnostics.Severity;
@@ -115,13 +116,6 @@ namespace Caravela.Framework.Impl
             _category,
             Error );
 
-        public static readonly DiagnosticDefinition<(string AspectType, string MethodName, string ExceptionType, string Exception)> ExceptionInUserCode = new(
-            "CR0026",
-            _category,
-            "The aspect method '{0}.{1}' has thrown an exception of type '{2}': {3}",
-            Error,
-            "The aspect has thrown an exception." );
-
         public static readonly DiagnosticDefinition<AssemblyIdentity> CannotFindCompileTimeAssembly = new(
             "CR0027",
             _category,
@@ -216,6 +210,35 @@ namespace Caravela.Framework.Impl
                 "The {0} cannot add a child aspect of type '{1}' to '{2}' because {3}.",
                 Error,
                 "A parent aspect or fabric can add child aspects only under its target declaration." );
+
+        public static readonly DiagnosticDefinition<Type>
+            TypeMustHavePublicDefaultConstructor = new(
+                "CR0040",
+                _category,
+                "The  type '{0}' must have a default constructor.",
+                Error,
+                "The type must have a default constructor." );
+
+        internal static readonly DiagnosticDefinition<(UserCodeMemberInfo TemplateSymbol, IDeclaration TargetDeclaration, string ExceptionType, string
+                ExceptionMessage, string Details)>
+            ExceptionInUserCodeWithTarget
+                = new(
+                    "CR0041",
+                    "Exception in user code",
+                    "'{0}' threw '{2}' when applied to '{1}': {3}. Exception details are in '{4}'. To attach a debugger to the compiler, use the " +
+                    " '-p:DebugCaravela=True' command-line option.",
+                    _category,
+                    Error );
+
+        internal static readonly DiagnosticDefinition<(UserCodeMemberInfo TemplateSymbol, string ExceptionType, string ExceptionMessage, string Details)>
+            ExceptionInUserCodeWithoutTarget
+                = new(
+                    "CR0042",
+                    "Exception in user code",
+                    "'{0}' threw '{1}': {2}. Exception details are in '{3}'. To attach a debugger to the compiler, use the " +
+                    " '-p:DebugCaravela=True' command-line option.",
+                    _category,
+                    Error );
 
         // TODO: Use formattable string (C# does not seem to find extension methods).
         public static readonly DiagnosticDefinition<string>

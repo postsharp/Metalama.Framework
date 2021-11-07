@@ -7,16 +7,16 @@ namespace Caravela.Framework.Impl.Options
 {
     public interface IPathOptions : IService
     {
+        /// <summary>
+        /// Returns a new path where a crash report file can be created, or <c>null</c> if no crash report can be created.
+        /// </summary>
+        string? GetNewCrashReportPath();
+        
         string CompileTimeProjectCacheDirectory { get; }
 
         string AssemblyLocatorCacheDirectory { get; }
 
         string SettingsDirectory { get; }
 
-        /// <summary>
-        /// Gets the directory in which crash reports are stored, or a null or empty string to store
-        /// in the temporary directory.
-        /// </summary>
-        string CrashReportDirectory { get; }
     }
 }

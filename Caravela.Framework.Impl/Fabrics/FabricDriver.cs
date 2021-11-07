@@ -9,11 +9,13 @@ using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CodeModel.References;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
+using Caravela.Framework.Impl.Utilities;
 using Caravela.Framework.Project;
 using Caravela.Framework.Validation;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 
 namespace Caravela.Framework.Impl.Fabrics
@@ -57,7 +59,6 @@ namespace Caravela.Framework.Impl.Fabrics
         protected string OriginalPath { get; }
 
         public abstract FabricKind Kind { get; }
-
 
         public int CompareTo( FabricDriver? other )
         {
@@ -124,18 +125,32 @@ namespace Caravela.Framework.Impl.Fabrics
 
             public IDeclarationSelection<TChild> WithMembers<TChild>( Func<T, IEnumerable<TChild>> selector )
                 where TChild : class, IDeclaration
-                => new DeclarationSelection<TChild>(
+            {
+                var executionContext = UserCodeExecutionContext.Current;
+
+                return new DeclarationSelection<TChild>(
                     this._targetDeclaration,
                     new AspectPredecessor( AspectPredecessorKind.Fabric, this._fabricInstance ),
                     this.AddAspectSource,
-                    compilation =>
+                    ( compilation, diagnostics ) =>
                     {
                         var targetDeclaration = this._targetDeclaration.GetTarget( compilation ).AssertNotNull();
 
-                        return this._fabricManager.UserCodeInvoker.Wrap( this._fabricManager.UserCodeInvoker.Invoke( () => selector( targetDeclaration ) ) );
+                        if ( !this._fabricManager.UserCodeInvoker.TryInvoke(
+                            () => selector( targetDeclaration ),
+                            executionContext.WithDiagnosticAdder( diagnostics ),
+                            out var targets ) )
+                        {
+                            return Enumerable.Empty<TChild>();
+                        }
+                        else
+                        {
+                            return targets!;
+                        }
                     },
                     this._fabricManager.AspectClasses,
                     this._fabricManager.ServiceProvider );
+            }
 
             [Obsolete( "Not implemented." )]
             public void AddValidator( Action<ValidateDeclarationContext<T>> validator ) => throw new NotImplementedException();

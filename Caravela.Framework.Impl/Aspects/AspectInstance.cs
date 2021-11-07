@@ -13,6 +13,7 @@ using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 
 namespace Caravela.Framework.Impl.Aspects
@@ -56,18 +57,6 @@ namespace Caravela.Framework.Impl.Aspects
                 .Add( aspectClass, new TemplateClassInstance( aspect, aspectClass ) );
         }
 
-        public EligibleScenarios ComputeEligibility( IDeclaration declaration )
-        {
-            var eligibility = ((IAspectClassImpl) this.AspectClass).GetEligibility( declaration );
-
-            if ( (eligibility & EligibleScenarios.Inheritance) != 0 && !((IDeclarationImpl) declaration).CanBeInherited )
-            {
-                eligibility &= ~EligibleScenarios.Inheritance;
-            }
-
-            return eligibility;
-        }
-
         internal AspectInstance(
             IAspect aspect,
             in Ref<IDeclaration> declaration,
@@ -83,28 +72,48 @@ namespace Caravela.Framework.Impl.Aspects
             this.TemplateInstances = templateInstances.ToImmutableDictionary( t => t.TemplateClass, t => t );
         }
 
-        internal AspectInstance(
+        public static bool TryCreateInstance(
             IServiceProvider serviceProvider,
+            IDiagnosticAdder diagnosticAdder,
             Expression<Func<IAspect>> aspectExpression,
             in Ref<IDeclaration> declaration,
             AspectClass aspectClass,
-            in AspectPredecessor predecessor )
+            in AspectPredecessor predecessor,
+            [NotNullWhen( true )] out AspectInstance? aspectInstance )
         {
             var userCodeInvoker = serviceProvider.GetService<UserCodeInvoker>();
-
             var aspectFunc = aspectExpression.Compile();
-            this.Aspect = userCodeInvoker.Invoke( () => aspectFunc() );
-            this.TargetDeclaration = declaration;
-            this.AspectClass = aspectClass;
-            this.Predecessor = predecessor;
 
-            this.TemplateInstances = ImmutableDictionary.Create<TemplateClass, TemplateClassInstance>()
-                .Add( aspectClass, new TemplateClassInstance( this.Aspect, aspectClass ) );
+            var executionContext = new UserCodeExecutionContext( serviceProvider, diagnosticAdder, UserCodeMemberInfo.FromExpression( aspectExpression ) );
+
+            if ( !userCodeInvoker.TryInvoke( () => aspectFunc(), executionContext, out var aspect ) )
+            {
+                aspectInstance = null;
+
+                return false;
+            }
+
+            aspectInstance = new AspectInstance( aspect!, in declaration, aspectClass, in predecessor );
+
+            return true;
+        }
+
+        public EligibleScenarios ComputeEligibility( IDeclaration declaration )
+        {
+            var eligibility = ((IAspectClassImpl) this.AspectClass).GetEligibility( declaration );
+
+            if ( (eligibility & EligibleScenarios.Inheritance) != 0 && !((IDeclarationImpl) declaration).CanBeInherited )
+            {
+                eligibility &= ~EligibleScenarios.Inheritance;
+            }
+
+            return eligibility;
         }
 
         public override string ToString() => this.AspectClass.ShortName + "@" + this.TargetDeclaration;
 
-        public FormattableString FormatPredecessor(ICompilation compilation) => $"aspect '{this.AspectClass.ShortName}' applied to '{this.TargetDeclaration.GetTarget(compilation)}'";
+        public FormattableString FormatPredecessor( ICompilation compilation )
+            => $"aspect '{this.AspectClass.ShortName}' applied to '{this.TargetDeclaration.GetTarget( compilation )}'";
 
         public Location? GetDiagnosticLocation( Compilation compilation )
             => compilation.GetTypeByMetadataName( this.AspectClass.FullName )?.GetDiagnosticLocation();

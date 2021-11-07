@@ -184,7 +184,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
                         if ( !arg.IsReferenceable )
                         {
-                            throw new InvalidUserCodeException(
+                            throw new DiagnosticException(
                                 GeneralDiagnosticDescriptors.CannotPassExpressionToByRefParameter.CreateDiagnostic(
                                     null,
                                     (arg.Syntax.ToString(), parameter.Name, parameter.DeclaringMember) ) );

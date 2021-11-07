@@ -39,7 +39,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization
 
             using var testContext = this.CreateTestContext();
 
-            Assert.Throws<InvalidUserCodeException>( () => testContext.Serialize( l ) );
+            Assert.Throws<DiagnosticException>( () => testContext.Serialize( l ) );
         }
 
         private void AssertSerialization<T>( string expected, List<T> o )

@@ -34,6 +34,9 @@ namespace Caravela.TestFramework
             Directory.CreateDirectory( projectDirectory );
         }
 
+        // Don't create crash reports for user exceptions so we have deterministic error messages.
+        public override string? GetNewCrashReportPath() => null;
+
         public string BaseDirectory { get; }
 
         public bool DebugCompilerProcess => false;

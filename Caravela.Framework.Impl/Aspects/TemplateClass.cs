@@ -24,7 +24,8 @@ namespace Caravela.Framework.Impl.Aspects
     /// </summary>
     internal abstract class TemplateClass
     {
-        private readonly IServiceProvider _serviceProvider;
+        public IServiceProvider ServiceProvider { get; }
+
         private readonly Dictionary<string, TemplateDriver> _templateDrivers = new( StringComparer.Ordinal );
 
         protected TemplateClass(
@@ -34,7 +35,7 @@ namespace Caravela.Framework.Impl.Aspects
             IDiagnosticAdder diagnosticAdder,
             TemplateClass? baseClass )
         {
-            this._serviceProvider = serviceProvider;
+            this.ServiceProvider = serviceProvider;
             this.BaseClass = baseClass;
             this.Members = this.GetMembers( compilation, aspectTypeSymbol, diagnosticAdder );
         }
@@ -66,7 +67,7 @@ namespace Caravela.Framework.Impl.Aspects
                 throw new AssertionFailedException( $"Could not find the compile template for {sourceTemplate}." );
             }
 
-            templateDriver = new TemplateDriver( this._serviceProvider, this, sourceTemplate.GetSymbol().AssertNotNull(), compiledTemplateMethodInfo );
+            templateDriver = new TemplateDriver( this.ServiceProvider, this, sourceTemplate.GetSymbol().AssertNotNull(), compiledTemplateMethodInfo );
             this._templateDrivers.Add( id, templateDriver );
 
             return templateDriver;
@@ -89,7 +90,7 @@ namespace Caravela.Framework.Impl.Aspects
                 return ImmutableDictionary<string, TemplateClassMember>.Empty;
             }
 
-            var symbolClassifier = this._serviceProvider.GetService<SymbolClassificationService>().GetClassifier( compilation );
+            var symbolClassifier = this.ServiceProvider.GetService<SymbolClassificationService>().GetClassifier( compilation );
 
             var members = this.BaseClass?.Members.ToBuilder()
                           ?? ImmutableDictionary.CreateBuilder<string, TemplateClassMember>( StringComparer.Ordinal );
