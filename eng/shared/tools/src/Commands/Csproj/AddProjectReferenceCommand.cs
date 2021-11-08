@@ -1,15 +1,14 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
-
+﻿using PostSharp.Engineering.BuildTools.Console;
 using System;
 using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.IO;
 using System.Xml;
+using Spectre.Console;
 
-namespace PostSharp.Engineering.BuildTools.MsBuild
+namespace PostSharp.Engineering.BuildTools.Commands.Csproj
 {
-    internal class AddProjectReferenceCommand : Command
+    public class AddProjectReferenceCommand : Command
     {
         public AddProjectReferenceCommand() : base( "apr",
             "Adds a project reference next to another project reference in all projects matching a filter." )
@@ -21,22 +20,24 @@ namespace PostSharp.Engineering.BuildTools.MsBuild
             this.Handler = CommandHandler.Create<InvocationContext, string, string, string>( Execute );
         }
 
-        private static int Execute( InvocationContext context, string existing, string @new, string filter )
+        public static int Execute( InvocationContext context, string existing, string @new, string filter )
         {
+            var console = new ConsoleHelper( context.Console );
+            
             foreach ( var project in Directory.EnumerateFiles( Directory.GetCurrentDirectory(), $"*{filter}*.csproj",
                 SearchOption.AllDirectories ) )
             {
-                AddReference( context, project, existing, @new );
+                AddReference( console, project, existing, @new );
             }
 
             return 0;
         }
 
-        private static void AddReference( InvocationContext context, string project, string existingReference,
+        private static void AddReference( ConsoleHelper console, string project, string existingReference,
             string newReference )
         {
-            context.Console.Out.Write( Path.GetFileName( project ) );
-            context.Console.Out.Write( ": " );
+            console.Out.Write( Path.GetFileName( project ) );
+            console.Out.Write( ": " );
 
             var xml = new XmlDocument();
             xml.Load( project );
@@ -48,7 +49,7 @@ namespace PostSharp.Engineering.BuildTools.MsBuild
 
             if ( newReferenceItem != null )
             {
-                context.Console.Out.WriteLine( "skipped - contains new reference" );
+                console.Out.WriteLine( "skipped - contains new reference" );
                 return;
             }
 
@@ -57,7 +58,7 @@ namespace PostSharp.Engineering.BuildTools.MsBuild
 
             if ( existingReferenceItem == null )
             {
-                context.Console.Out.WriteLine( $"skipped - doesn't reference {existingReference}" );
+                console.Out.WriteLine( $"skipped - doesn't reference {existingReference}" );
                 return;
             }
 
@@ -77,7 +78,7 @@ namespace PostSharp.Engineering.BuildTools.MsBuild
             existingReferenceItem.ParentNode.InsertAfter( newReferenceItem, existingReferenceItem );
             xml.Save( project );
 
-            context.Console.Out.WriteLine( "modified" );
+            console.Out.WriteLine( "modified" );
         }
     }
 }

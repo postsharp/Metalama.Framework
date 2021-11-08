@@ -1,21 +1,17 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
-
-using Microsoft.CodeAnalysis;
+﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
+using PostSharp.Engineering.BuildTools.Console;
 using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.IO;
 using System.Linq;
-using System.Linq.Expressions;
-using System.Runtime.CompilerServices;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 
-namespace PostSharp.Engineering.BuildTools.Coverage
+namespace PostSharp.Engineering.BuildTools.Commands.Coverage
 {
     public class WarnCommand : Command
     {
@@ -28,21 +24,24 @@ namespace PostSharp.Engineering.BuildTools.Coverage
 
         private void Execute( InvocationContext context, string path )
         {
+            ConsoleHelper console = new ConsoleHelper( context.Console );
+            
             var totalInvalidDeclarations = 0;
 
             var document = JsonDocument.Parse( File.ReadAllText( path ) );
 
             foreach ( var packageNode in document.RootElement.EnumerateObject() )
             {
-                this.ProcessPackage( context, packageNode, ref totalInvalidDeclarations );
+                this.ProcessPackage( console, packageNode, ref totalInvalidDeclarations );
             }
 
-            context.Console.Out.WriteLine(
+            console.WriteImportantMessage(
                 $"The whole solution has {totalInvalidDeclarations} declaration(s) with insufficient test coverage." );
             context.ResultCode = totalInvalidDeclarations == 0 ? 0 : 1;
         }
 
-        private void ProcessPackage( InvocationContext context, JsonProperty packageNode, ref int totalInvalidDeclarations )
+        private void ProcessPackage(ConsoleHelper console, JsonProperty packageNode,
+            ref int totalInvalidDeclarations )
         {
             var invalidDeclarations = 0;
             var packageName = packageNode.Name;
@@ -54,15 +53,15 @@ namespace PostSharp.Engineering.BuildTools.Coverage
 
             HashSet<SyntaxNode> nonCoveredNodes = new();
 
-            foreach ( var fileNode in packageNode.Value.EnumerateObject().OrderBy( n=> n.Name ) )
+            foreach ( var fileNode in packageNode.Value.EnumerateObject().OrderBy( n => n.Name ) )
             {
                 SyntaxTree? syntaxTree = null;
 
-                foreach ( var classNode in fileNode.Value.EnumerateObject().OrderBy( n=> n.Name ) )
+                foreach ( var classNode in fileNode.Value.EnumerateObject().OrderBy( n => n.Name ) )
                 {
                     var className = classNode.Name;
 
-                    foreach ( var methodNode in classNode.Value.EnumerateObject().OrderBy( n=> n.Name ) )
+                    foreach ( var methodNode in classNode.Value.EnumerateObject().OrderBy( n => n.Name ) )
                     {
                         // Getting the method name is convenient to set a conditional breakpoint.
                         var methodName = methodNode.Name;
@@ -79,7 +78,7 @@ namespace PostSharp.Engineering.BuildTools.Coverage
                             var lineNumber = int.Parse( lineNode.Name ) - 1;
 
                             // The sequence point is not covered.
-                            syntaxTree ??=  CSharpSyntaxTree.ParseText(
+                            syntaxTree ??= CSharpSyntaxTree.ParseText(
                                 File.ReadAllText( fileNode.Name ),
                                 CSharpParseOptions.Default.WithPreprocessorSymbols( "NET5_0" ),
                                 fileNode.Name );
@@ -128,34 +127,32 @@ namespace PostSharp.Engineering.BuildTools.Coverage
                                 continue;
                             }
 
-                          
 
-                            var declarations = node.AncestorsAndSelf().Where( a => a is MemberDeclarationSyntax or AccessorDeclarationSyntax).Reverse()
+                            var declarations = node.AncestorsAndSelf()
+                                .Where( a => a is MemberDeclarationSyntax or AccessorDeclarationSyntax ).Reverse()
                                 .ToList();
-                            
+
                             if ( declarations.Count == 0 )
                             {
                                 return;
                             }
 
                             var member = declarations.OfType<MemberDeclarationSyntax>().Last();
-                            
+
                             if ( ShouldIgnoreMember( member ) )
                             {
                                 break;
                             }
-                            
+
                             if ( ShouldIgnoreNodeOrAncestor( member, node ) )
                             {
                                 continue;
                             }
 
 
-
-
                             var memberName = string.Join( '.', declarations.Select( GetNodeSignature ) );
-                            
-                            context.Console.Error.WriteLine(
+
+                            console.WriteWarning(
                                 $"{node.SyntaxTree.FilePath}({lineNumber + 1}): warning COVER01: '{memberName}' has gaps in test coverage." );
                             totalInvalidDeclarations++;
                             invalidDeclarations++;
@@ -166,7 +163,7 @@ namespace PostSharp.Engineering.BuildTools.Coverage
                 }
             }
 
-            context.Console.Out.WriteLine(
+            console.WriteWarning(
                 $"Module {packageName} has {invalidDeclarations} declaration(s) with insufficient test coverage." );
         }
 
@@ -178,7 +175,8 @@ namespace PostSharp.Engineering.BuildTools.Coverage
         private static bool IsSameMemberName( MemberDeclarationSyntax declaringMember, ExpressionSyntax expression )
             => expression switch
             {
-                MemberAccessExpressionSyntax name => NormalizeName( GetNodeName( declaringMember ) ) == NormalizeName( name.Name.Identifier.Text ),
+                MemberAccessExpressionSyntax name => NormalizeName( GetNodeName( declaringMember ) ) ==
+                                                     NormalizeName( name.Name.Identifier.Text ),
                 _ => false
             };
 
@@ -186,7 +184,9 @@ namespace PostSharp.Engineering.BuildTools.Coverage
 
         private static bool ShouldIgnoreNodeOrAncestor( MemberDeclarationSyntax declaringMember, SyntaxNode? node )
             => ShouldIgnoreNode( declaringMember, node ) ||
-               (node != null && node is not MemberDeclarationSyntax && ShouldIgnoreNodeOrAncestor( declaringMember, node.Parent )); 
+               (node != null && node is not MemberDeclarationSyntax &&
+                ShouldIgnoreNodeOrAncestor( declaringMember, node.Parent ));
+
         private static bool ShouldIgnoreNode( MemberDeclarationSyntax declaringMember, SyntaxNode? node )
         {
             switch ( node )
@@ -224,7 +224,7 @@ namespace PostSharp.Engineering.BuildTools.Coverage
                                                              ShouldIgnoreNode( declaringMember,
                                                                  accessor.ExpressionBody ):
                     return true;
-             
+
                 default:
                     var parentStatement = GetParentStatement( node );
                     if ( parentStatement != null && ContainsIgnoreComment( parentStatement.ToFullString() ) )
@@ -233,7 +233,7 @@ namespace PostSharp.Engineering.BuildTools.Coverage
                     }
 
                     var parentBlock = GetParentBlock( node );
-                    
+
                     if ( parentBlock != null && ContainsIgnoreComment( parentBlock.ToFullString() ) )
                     {
                         return true;
@@ -253,15 +253,18 @@ namespace PostSharp.Engineering.BuildTools.Coverage
 
             // Process properties with accessors.
             PropertyDeclarationSyntax { ExpressionBody: null, AccessorList: { } accessorList }
-                when accessorList.Accessors.All( a => ShouldIgnoreNode( member, a.Body ) && ShouldIgnoreNode(member, a.ExpressionBody ) )
+                when accessorList.Accessors.All( a =>
+                    ShouldIgnoreNode( member, a.Body ) && ShouldIgnoreNode( member, a.ExpressionBody ) )
                 => true,
 
             // Process properties without accessors.
-            PropertyDeclarationSyntax { ExpressionBody: { Expression: { } expression } } when ShouldIgnoreNode( member, expression )
+            PropertyDeclarationSyntax { ExpressionBody: { Expression: { } expression } } when ShouldIgnoreNode( member,
+                    expression )
                 => true,
 
             // Process methods.
-            MethodDeclarationSyntax method when ShouldIgnoreNode( member, method.ExpressionBody ) && ShouldIgnoreNode( member, method.Body )
+            MethodDeclarationSyntax method when ShouldIgnoreNode( member, method.ExpressionBody ) &&
+                                                ShouldIgnoreNode( member, method.Body )
                 => true,
 
             _ => member.GetLeadingTrivia().Any( t => ContainsIgnoreComment( t.ToFullString() ) )
@@ -278,12 +281,17 @@ namespace PostSharp.Engineering.BuildTools.Coverage
                                                   string.Join( ",",
                                                       c.ParameterList.Parameters.Select( p => p.Type?.ToString() ) ) +
                                                   ")",
-                IndexerDeclarationSyntax i => "this[" + string.Join( ",", i.ParameterList.Parameters.Select( p => p.Type?.ToString() ) ) + "]",
-                OperatorDeclarationSyntax o => o.OperatorToken.Text + "(" + string.Join( ",", o.ParameterList.Parameters.Select( p => p.Type?.ToString() ) ) + ")",
+                IndexerDeclarationSyntax i => "this[" +
+                                              string.Join( ",",
+                                                  i.ParameterList.Parameters.Select( p => p.Type?.ToString() ) ) + "]",
+                OperatorDeclarationSyntax o => o.OperatorToken.Text + "(" +
+                                               string.Join( ",",
+                                                   o.ParameterList.Parameters.Select( p => p.Type?.ToString() ) ) + ")",
                 ConversionOperatorDeclarationSyntax c => "convert(" + string.Join( ",",
                     c.ParameterList.Parameters.Select( p => p.Type?.ToString() ) ) + ")" + "):" + c.Type,
                 _ => GetNodeName( node )
             };
+
         private static string GetNodeName( SyntaxNode node )
             => node switch
             {
@@ -292,7 +300,8 @@ namespace PostSharp.Engineering.BuildTools.Coverage
                 AccessorDeclarationSyntax a => a.Keyword.Text,
                 MethodDeclarationSyntax m => m.Identifier.Text,
                 BaseTypeDeclarationSyntax c => c.Identifier.Text,
-                FieldDeclarationSyntax f => string.Join( ",", f.Declaration.Variables.Select( v => v.Identifier.Text ) ),
+                FieldDeclarationSyntax f => string.Join( ",",
+                    f.Declaration.Variables.Select( v => v.Identifier.Text ) ),
                 EventDeclarationSyntax e => e.Identifier.Text, EventFieldDeclarationSyntax e => string.Join( ",",
                     e.Declaration.Variables.Select( v => v.Identifier.Text ) ),
                 PropertyDeclarationSyntax p => p.Identifier.Text,
@@ -309,7 +318,7 @@ namespace PostSharp.Engineering.BuildTools.Coverage
                 { Parent: { } parent } => GetParentStatement( parent ),
                 _ => null
             };
-        
+
         private static BlockSyntax? GetParentBlock( SyntaxNode node )
             => node switch
             {

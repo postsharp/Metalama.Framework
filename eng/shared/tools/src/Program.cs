@@ -1,8 +1,9 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-
-using PostSharp.Engineering.BuildTools.Coverage;
-using PostSharp.Engineering.BuildTools.MsBuild;
-using PostSharp.Engineering.BuildTools.Nuget;
+﻿using PostSharp.Engineering.BuildTools.Build;
+using PostSharp.Engineering.BuildTools.Commands.Build;
+using PostSharp.Engineering.BuildTools.Commands.Coverage;
+using PostSharp.Engineering.BuildTools.Commands.Csproj;
+using PostSharp.Engineering.BuildTools.Commands.NuGet;
+using System.Collections.Immutable;
 using System.CommandLine;
 
 namespace PostSharp.Engineering.BuildTools
@@ -13,12 +14,24 @@ namespace PostSharp.Engineering.BuildTools
         {
             var rootCommand = new RootCommand { };
 
-            rootCommand.AddCommand( new MsBuildCommand() );
-            rootCommand.AddCommand( new NuGetCommand() );
-            rootCommand.AddCommand( new CoverageCommand() );
+            rootCommand.AddCommonCommands( new Product( "Test", ImmutableArray<Solution>.Empty ) );
 
             // Parse the incoming args and invoke the handler
             return rootCommand.InvokeAsync( args ).Result;
+        }
+    }
+
+    public static class RootCommandExtensions
+    {
+        public static void AddCommonCommands( this RootCommand rootCommand, Product? product = null )
+        {
+            rootCommand.AddCommand( new CsprojCommand() );
+            rootCommand.AddCommand( new NuGetCommand() );
+            rootCommand.AddCommand( new CoverageCommand() );
+            if ( product != null )
+            {
+                rootCommand.AddCommand( new ProductCommand( product ) );
+            }
         }
     }
 }

@@ -1,6 +1,4 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
-
+﻿using PostSharp.Engineering.BuildTools.Console;
 using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.IO;
@@ -10,7 +8,7 @@ using System.Xml;
 using System.Xml.Linq;
 using System.Xml.XPath;
 
-namespace PostSharp.Engineering.BuildTools.Nuget
+namespace PostSharp.Engineering.BuildTools.Commands.NuGet
 {
     internal class RenamePackagesCommand : Command
     {
@@ -25,28 +23,31 @@ namespace PostSharp.Engineering.BuildTools.Nuget
             this.Handler = CommandHandler.Create<InvocationContext, DirectoryInfo>( Execute );
         }
 
-        private static int Execute( InvocationContext context, DirectoryInfo directory )
+        public static int Execute( InvocationContext context, DirectoryInfo directory )
         {
+            var console = new ConsoleHelper( context.Console );
+            
             var success = true;
 
             var files = Directory.GetFiles( directory.FullName, "Microsoft.*.nupkg" );
 
             if ( files.Length == 0 )
             {
-                context.Console.Error.WriteLine( $"No matching package found in '{directory.FullName}'." );
+                console.WriteError( $"No matching package found in '{directory.FullName}'." );
+                return 1;
             }
 
             foreach ( var file in files )
             {
-                success &= RenamePackage( context.Console, directory.FullName, file );
+                success &= RenamePackage( console, directory.FullName, file );
             }
 
             return success ? 0 : 2;
         }
 
-        private static bool RenamePackage( IConsole console, string directory, string inputPath )
+        private static bool RenamePackage( ConsoleHelper console, string directory, string inputPath )
         {
-            console.Out.WriteLine( "Processing " + inputPath );
+            console.WriteMessage( "Processing " + inputPath );
 
             var outputPath = Path.Combine(
                 Path.GetDirectoryName( inputPath )!,
@@ -60,7 +61,7 @@ namespace PostSharp.Engineering.BuildTools.Nuget
 
             if ( oldNuspecEntry == null )
             {
-                console.Error.WriteLine( "Usage: Cannot find the nuspec file." );
+                console.WriteError( "Usage: Cannot find the nuspec file." );
                 return false;
             }
 

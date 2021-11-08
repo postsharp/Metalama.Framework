@@ -1,7 +1,5 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
-
-using NuGet.Versioning;
+﻿using NuGet.Versioning;
+using PostSharp.Engineering.BuildTools.Console;
 using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.Invocation;
@@ -13,7 +11,7 @@ using System.Xml;
 using System.Xml.Linq;
 using System.Xml.XPath;
 
-namespace PostSharp.Engineering.BuildTools.Nuget
+namespace PostSharp.Engineering.BuildTools.Commands.NuGet
 {
     internal class VerifyPackageCommand : Command
     {
@@ -30,8 +28,9 @@ namespace PostSharp.Engineering.BuildTools.Nuget
             this.Handler = CommandHandler.Create<InvocationContext, DirectoryInfo>( Execute );
         }
 
-        private static int Execute( InvocationContext context, DirectoryInfo directory )
+        public static int Execute( InvocationContext context, DirectoryInfo directory )
         {
+            var console = new ConsoleHelper( context.Console );
             var success = true;
 
             var files = Directory.GetFiles( directory.FullName, "*.nupkg" );
@@ -44,13 +43,13 @@ namespace PostSharp.Engineering.BuildTools.Nuget
 
             foreach ( var file in files )
             {
-                success &= VerifyPackage( context.Console, directory.FullName, file );
+                success &= VerifyPackage( console, directory.FullName, file );
             }
 
             return success ? 0 : 2;
         }
 
-        private static bool VerifyPackage( IConsole console, string directory, string inputPath )
+        private static bool VerifyPackage( ConsoleHelper console, string directory, string inputPath )
         {
             var inputShortPath = Path.GetFileName( inputPath );
 
@@ -62,7 +61,7 @@ namespace PostSharp.Engineering.BuildTools.Nuget
 
             if ( nuspecEntry == null )
             {
-                console.Error.WriteLine( $"{inputPath} Cannot find the nuspec file." );
+                console.WriteError( $"{inputPath} Cannot find the nuspec file." );
                 return false;
             }
 
@@ -88,7 +87,7 @@ namespace PostSharp.Engineering.BuildTools.Nuget
                 var versionRangeString = dependency.Attribute( "version" ).Value;
                 if ( !VersionRange.TryParse( versionRangeString, out var versionRange ) )
                 {
-                    console.Error.WriteLine(
+                    console.WriteError(
                         $"{inputShortPath}: cannot parse the version range '{versionRangeString}'." );
                     success = false;
                     continue;
@@ -113,7 +112,7 @@ namespace PostSharp.Engineering.BuildTools.Nuget
 
                     if ( !packageFound )
                     {
-                        console.Error.WriteLine(
+                        console.WriteError(
                             $"{inputShortPath}: {dependentId} {versionRangeString} is not public." );
                         success = false;
                         continue;
@@ -123,7 +122,7 @@ namespace PostSharp.Engineering.BuildTools.Nuget
 
             if ( success )
             {
-                console.Out.WriteLine( inputShortPath + ": correct" );
+                console.WriteMessage( inputShortPath + ": correct" );
             }
 
             return success;
