@@ -1,2 +1,2 @@
 // The compiled template failed. 
-// Error CR0041 on `Template`: `'Aspect.Template()' threw 'DiagnosticException' when applied to 'TargetCode.Method(int)': DynamicReceiverThisInStaticContext.cs(22,20): error CR0114: The advice 'Aspect.Template()' cannot use 'meta.This' in an advice applied to method 'TargetCode.Method(int)' because the target method is static. Exception details are in '(none)'. To attach a debugger to the compiler, use the  '-p:DebugCaravela=True' command-line option.`
+// Error CR0114 on `Method`: `The advice 'Aspect.Template()' cannot use 'meta.This' in an advice applied to method 'TargetCode.Method(int)' because the target method is static.`

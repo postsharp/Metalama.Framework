@@ -6,7 +6,7 @@ using System;
 
 namespace Caravela.Framework.Project
 {
-    public interface IExecutionContext
+    internal interface IExecutionContext
     {
         IServiceProvider ServiceProvider { get; }
 

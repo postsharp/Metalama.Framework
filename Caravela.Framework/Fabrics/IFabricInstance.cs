@@ -21,6 +21,6 @@ namespace Caravela.Framework.Fabrics
         /// Gets the declaration to which the fabric is applied. It can be an <see cref="INamedType"/>, an <see cref="INamespace"/>
         /// or the <see cref="ICompilation"/>.
         /// </summary>
-        IRef<IDeclaration>? TargetDeclaration { get; }
+        IRef<IDeclaration> TargetDeclaration { get; }
     }
 }

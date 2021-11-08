@@ -12,22 +12,22 @@ namespace Caravela.Framework.Impl.Fabrics
 {
     internal class FabricInstance : IFabricInstance, IAspectPredecessorImpl
     {
-        public FabricDriver Driver { get; }
+        private readonly FabricDriver _driver;
 
-        IRef<IDeclaration>? IFabricInstance.TargetDeclaration => this.TargetDeclaration.IsDefault ? null : this.TargetDeclaration;
+        IRef<IDeclaration> IFabricInstance.TargetDeclaration => this.TargetDeclaration;
 
         public Ref<IDeclaration> TargetDeclaration { get; }
 
         public FabricInstance( FabricDriver driver, in Ref<IDeclaration> targetDeclaration )
         {
-            this.Driver = driver;
+            this._driver = driver;
             this.TargetDeclaration = targetDeclaration;
         }
 
-        public Fabric Fabric => this.Driver.Fabric;
+        public Fabric Fabric => this._driver.Fabric;
 
-        public FormattableString FormatPredecessor( ICompilation compilation ) => this.Driver.FormatPredecessor();
+        public FormattableString FormatPredecessor( ICompilation compilation ) => this._driver.FormatPredecessor();
 
-        public Location? GetDiagnosticLocation( Compilation compilation ) => this.Driver.GetDiagnosticLocation();
+        public Location? GetDiagnosticLocation( Compilation compilation ) => this._driver.GetDiagnosticLocation();
     }
 }

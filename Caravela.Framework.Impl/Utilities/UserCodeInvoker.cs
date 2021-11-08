@@ -50,7 +50,7 @@ namespace Caravela.Framework.Impl.Utilities
                 exactLocation = GetSourceCodeLocation( stackTrace, compileTimeProject );
             }
 
-            if ( e is DiagnosticException invalidUserCodeException )
+            if ( userException is DiagnosticException invalidUserCodeException )
             {
                 if ( exactLocation != null )
                 {
