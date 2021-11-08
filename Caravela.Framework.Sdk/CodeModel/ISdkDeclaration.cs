@@ -10,7 +10,7 @@ namespace Caravela.Framework.Impl.CodeModel
     /// <summary>
     /// Extends the user-level <see cref="IDeclaration"/> interface with a <see cref="Symbol"/> property exposing the Roslyn <see cref="ISymbol"/>. 
     /// </summary>
-    public interface ISdkDeclaration : IDeclaration
+    internal interface ISdkDeclaration : IDeclaration
     {
         /// <summary>
         /// Gets the Roslyn <see cref="ISymbol"/> for the current declaration, or throws <see cref="NotSupportedException"/>

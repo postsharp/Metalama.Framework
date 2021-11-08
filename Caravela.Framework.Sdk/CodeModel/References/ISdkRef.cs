@@ -10,7 +10,7 @@ namespace Caravela.Framework.Impl.CodeModel.References
     /// Represents a reference to a declaration that can be resolved using <see cref="IRef{T}.GetTarget"/>.
     /// </summary>
     /// <typeparam name="T">The type of the target object of the declaration.</typeparam>
-    public interface ISdkRef<out T> : IRef<T>
+    internal interface ISdkRef<out T> : IRef<T>
         where T : class, ICompilationElement
     {
         // This is a temporary method to extract the symbol from the reference, when there is any.
