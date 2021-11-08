@@ -42,17 +42,17 @@ namespace Caravela.Framework.Impl.Pipeline
 
         public IReadOnlyList<IAspectSource> ExternalAspectSources => new[] { this._overflowAspectSource };
 
-        public AspectProjectConfiguration ProjectConfiguration { get; }
+        public AspectPipelineConfiguration PipelineConfiguration { get; }
 
         public PipelineStepsState(
             IReadOnlyList<OrderedAspectLayer> aspectLayers,
             CompilationModel inputCompilation,
             IReadOnlyList<IAspectSource> inputAspectSources,
-            AspectProjectConfiguration projectConfiguration )
+            AspectPipelineConfiguration pipelineConfiguration )
         {
-            this._diagnostics = new UserDiagnosticSink( projectConfiguration.CompileTimeProject );
+            this._diagnostics = new UserDiagnosticSink( pipelineConfiguration.CompileTimeProject );
             this.Compilation = inputCompilation;
-            this.ProjectConfiguration = projectConfiguration;
+            this.PipelineConfiguration = pipelineConfiguration;
 
             // Create an empty collection of steps.
             this._comparer = new PipelineStepIdComparer( aspectLayers );

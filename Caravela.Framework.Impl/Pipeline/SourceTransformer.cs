@@ -9,6 +9,7 @@ using System;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Caravela.Framework.Impl.Pipeline
 {
@@ -37,17 +38,20 @@ namespace Caravela.Framework.Impl.Pipeline
             {
                 using CompileTimeAspectPipeline pipeline = new( serviceProvider, false );
 
-                if ( pipeline.TryExecute(
-                    new DiagnosticAdderAdapter( context.ReportDiagnostic ),
-                    context.Compilation,
-                    context.Resources.ToImmutableArray(),
-                    CancellationToken.None,
-                    out var syntaxTreeTransformations,
-                    out var additionalResources,
-                    out _ ) )
+                // ReSharper disable once AccessToDisposedClosure
+                var pipelineResult =
+                    Task.Run(
+                            () => pipeline.ExecuteAsync(
+                                new DiagnosticAdderAdapter( context.ReportDiagnostic ),
+                                context.Compilation,
+                                context.Resources.ToImmutableArray(),
+                                CancellationToken.None ) )
+                        .Result;
+
+                if ( pipelineResult != null )
                 {
-                    context.AddResources( additionalResources );
-                    context.AddSyntaxTreeTransformations( syntaxTreeTransformations );
+                    context.AddResources( pipelineResult.AdditionalResources );
+                    context.AddSyntaxTreeTransformations( pipelineResult.SyntaxTreeTransformations );
                 }
             }
             catch ( Exception e )

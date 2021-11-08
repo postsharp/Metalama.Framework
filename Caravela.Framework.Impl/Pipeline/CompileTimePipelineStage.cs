@@ -29,13 +29,13 @@ namespace Caravela.Framework.Impl.Pipeline
 
         /// <inheritdoc/>
         protected override PipelineStageResult GetStageResult(
-            AspectProjectConfiguration projectConfiguration,
+            AspectPipelineConfiguration pipelineConfiguration,
             PipelineStageResult input,
             IPipelineStepsResult pipelineStepResult,
             CancellationToken cancellationToken )
         {
             var linker = new AspectLinker(
-                projectConfiguration.ServiceProvider,
+                pipelineConfiguration.ServiceProvider,
                 new AspectLinkerInput(
                     input.PartialCompilation,
                     pipelineStepResult.Compilation,

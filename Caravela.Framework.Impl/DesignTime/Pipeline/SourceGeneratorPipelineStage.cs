@@ -34,7 +34,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
 
         /// <inheritdoc/>
         protected override PipelineStageResult GetStageResult(
-            AspectProjectConfiguration projectConfiguration,
+            AspectPipelineConfiguration pipelineConfiguration,
             PipelineStageResult input,
             IPipelineStepsResult pipelineStepResult,
             CancellationToken cancellationToken )

@@ -40,7 +40,7 @@ namespace Caravela.Framework.Impl.Pipeline
             // Gets aspects that can be inherited.
             var inheritableAspectInstances = aspectInstances
                 .Where( a => a.Eligibility.IncludesAll( EligibleScenarios.Inheritance ) && a.AspectClass.IsInherited )
-                .Cast<AttributeAspectInstance>()
+                .OfType<AttributeAspectInstance>()
                 .ToList();
 
             // Gets aspects that have been inherited by the source. 

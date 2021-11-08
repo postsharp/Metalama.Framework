@@ -15,19 +15,12 @@ namespace Caravela.Framework.Impl.CodeModel
     /// Represents a subset of a Roslyn <see cref="Microsoft.CodeAnalysis.Compilation"/>. The subset is limited
     /// to specific syntax trees.
     /// </summary>
-    public abstract partial class PartialCompilation : IPartialCompilation
+    public abstract partial class PartialCompilation : IPartialCompilationInternal
     {
-        /// <summary>
-        /// The compilation with respect to which the <see cref="ModifiedSyntaxTrees"/> collection has been constructed.
-        /// Typically, this is the argument of the <see cref="CreateComplete"/> or <see cref="CreatePartial(Microsoft.CodeAnalysis.Compilation,Microsoft.CodeAnalysis.SyntaxTree,System.Collections.Immutable.ImmutableArray{Caravela.Compiler.ManagedResource})"/>
-        /// method, ignoring any modification done by <see cref="Update"/>.
-        /// </summary>
-        private readonly Compilation _initialCompilation;
-
         internal DerivedTypeIndex DerivedTypes { get; }
 
         /// <summary>
-        /// Gets the set of modifications present in the current compilation compared to the <see cref="_initialCompilation"/>.
+        /// Gets the set of modifications present in the current compilation compared to the <see cref="InitialCompilation"/>.
         /// The key of the dictionary is the <see cref="SyntaxTree.FilePath"/> and the value is a <see cref="SyntaxTree"/>
         /// of <see cref="Compilation"/>. 
         /// </summary>
@@ -70,7 +63,7 @@ namespace Caravela.Framework.Impl.CodeModel
         // Initial constructor.
         private PartialCompilation( Compilation compilation, DerivedTypeIndex derivedTypeIndex, ImmutableArray<ManagedResource> resources )
         {
-            this.Compilation = this._initialCompilation = compilation;
+            this.Compilation = this.InitialCompilation = compilation;
             this.ModifiedSyntaxTrees = ImmutableDictionary<string, SyntaxTreeModification>.Empty;
             this.Resources = resources;
             this.DerivedTypes = derivedTypeIndex;
@@ -83,7 +76,7 @@ namespace Caravela.Framework.Impl.CodeModel
             IReadOnlyList<SyntaxTree>? addedSyntaxTrees,
             ImmutableArray<ManagedResource>? newResources )
         {
-            this._initialCompilation = baseCompilation._initialCompilation;
+            this.InitialCompilation = baseCompilation.InitialCompilation;
             var compilation = baseCompilation.Compilation;
 
             this.DerivedTypes = baseCompilation.DerivedTypes;
@@ -271,5 +264,12 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public override string ToString()
             => $"{{Assembly={this.Compilation.AssemblyName}, SyntaxTrees={this.SyntaxTrees.Count}/{this.Compilation.SyntaxTrees.Count()}}}";
+
+        /// <summary>
+        /// Gets the compilation with respect to which the <see cref="ModifiedSyntaxTrees"/> collection has been constructed.
+        /// Typically, this is the argument of the <see cref="CreateComplete"/> or <see cref="CreatePartial(Microsoft.CodeAnalysis.Compilation,Microsoft.CodeAnalysis.SyntaxTree,System.Collections.Immutable.ImmutableArray{Caravela.Compiler.ManagedResource})"/>
+        /// method, ignoring any modification done by <see cref="Update"/>.
+        /// </summary>
+        public Compilation InitialCompilation { get; }
     }
 }

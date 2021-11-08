@@ -6,9 +6,7 @@ using Caravela.Framework.Impl.Aspects;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Utilities;
 using Caravela.Framework.Project;
-using System;
 using System.Collections.Immutable;
-using System.Linq;
 
 namespace Caravela.Framework.Impl.Pipeline
 {
@@ -17,22 +15,22 @@ namespace Caravela.Framework.Impl.Pipeline
     /// when the user code change. This includes the <see cref="CompileTimeProject"/>, the pipeline stages and
     /// the order of layers.
     /// </summary>
-    internal record AspectProjectConfiguration(
-        ImmutableArray<PipelineStage> Stages,
+    internal record AspectPipelineConfiguration(
+        ImmutableArray<PipelineStageConfiguration> Stages,
         ImmutableArray<IBoundAspectClass> AspectClasses,
         ImmutableArray<OrderedAspectLayer> AspectLayers,
         CompileTimeProject? CompileTimeProject,
         CompileTimeProjectLoader CompileTimeProjectLoader,
         ServiceProvider ServiceProvider )
     {
-        public AspectProjectConfiguration WithStages( Func<PipelineStage, PipelineStage> stageMapper )
+        public AspectPipelineConfiguration WithServiceProvider( ServiceProvider serviceProvider )
             => new(
-                this.Stages.Select( stageMapper ).ToImmutableArray(),
+                this.Stages,
                 this.AspectClasses,
                 this.AspectLayers,
                 this.CompileTimeProject,
                 this.CompileTimeProjectLoader,
-                this.ServiceProvider );
+                serviceProvider );
 
         private readonly ImmutableDictionary<string, IBoundAspectClass> _aspectClassesByName = AspectClasses.ToImmutableDictionary( c => c.FullName, c => c );
 

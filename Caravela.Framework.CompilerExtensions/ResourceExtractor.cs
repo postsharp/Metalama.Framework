@@ -4,6 +4,7 @@
 using Caravela.Framework.Impl.Utilities;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Text;
@@ -17,7 +18,7 @@ namespace Caravela.Framework.CompilerExtensions
     public static class ResourceExtractor
     {
         private static readonly object _initializeLock = new();
-        private static readonly Dictionary<string, (AssemblyName AssemblyName, string Path)> _embeddedAssemblies = new( StringComparer.OrdinalIgnoreCase );
+        private static readonly Dictionary<string, Assembly> _embeddedAssemblies = new( StringComparer.OrdinalIgnoreCase );
         private static string? _snapshotDirectory;
         private static volatile bool _initialized;
         private static Assembly? _caravelaImplementationAssembly;
@@ -51,11 +52,11 @@ namespace Caravela.Framework.CompilerExtensions
                             // Load assemblies from the temp directory.
                             foreach ( var file in Directory.GetFiles( _snapshotDirectory, "*.dll" ) )
                             {
-                                var assemblyName = RetryHelper.Retry( () => AssemblyName.GetAssemblyName( file ) );
-                                _embeddedAssemblies[assemblyName.Name] = (assemblyName, file);
+                                var assembly = Assembly.LoadFile( file );
+                                _embeddedAssemblies[assembly.GetName().Name] = Assembly.LoadFile( file );
                             }
 
-                            _caravelaImplementationAssembly = Assembly.Load( _embeddedAssemblies["Caravela.Framework.Impl"].AssemblyName );
+                            _caravelaImplementationAssembly = _embeddedAssemblies["Caravela.Framework.Impl"];
 
                             _initialized = true;
                         }
@@ -91,7 +92,16 @@ namespace Caravela.Framework.CompilerExtensions
             if ( !File.Exists( completedFilePath ) )
             {
                 StringBuilder log = new();
-                log.AppendLine( $"Extracting resources from assembly '{currentAssembly.GetName()}', Path='{currentAssembly.Location}'." );
+                log.AppendLine( $"Extracting resources..." );
+
+                var processName = Process.GetCurrentProcess();
+                log.AppendLine( $"Process Name: {processName.ProcessName}" );
+                log.AppendLine( $"Process Id: {processName.Id}" );
+                log.AppendLine( $"Source Assembly Name: '{currentAssembly.FullName}'" );
+                log.AppendLine( $"Source Assembly Location: '{currentAssembly.Location}'" );
+                log.AppendLine( "Stack trace:" );
+                log.AppendLine( new StackTrace().ToString() );
+                log.AppendLine( "----" );
 
                 // We cannot use MutexHelper because of dependencies on an embedded assembly.
                 using var extractMutex = new Mutex( false, "Global\\Caravela_Extract_" + AssemblyMetadataReader.BuildId );
@@ -155,9 +165,13 @@ namespace Caravela.Framework.CompilerExtensions
 
             if ( _embeddedAssemblies.TryGetValue( requestedAssemblyName.Name, out var assembly ) )
             {
-                if ( AssemblyName.ReferenceMatchesDefinition( requestedAssemblyName, assembly.AssemblyName ) )
+                var assemblyName = assembly.GetName();
+
+                // We need to explicitly verify the exact version, because AssemblyName.ReferenceMatchesDefinition is too tolerant. 
+                if ( AssemblyName.ReferenceMatchesDefinition( requestedAssemblyName, assemblyName ) 
+                     && assemblyName.Version == requestedAssemblyName.Version )
                 {
-                    return Assembly.LoadFile( assembly.Path );
+                    return assembly;
                 }
                 else
                 {

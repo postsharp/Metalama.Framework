@@ -15,6 +15,11 @@ namespace Caravela.Framework.Aspects
         CompileTime,
 
         /// <summary>
+        /// Preview of the compile-time transformation.
+        /// </summary>
+        Preview,
+
+        /// <summary>
         /// Design time, automatically.
         /// </summary>
         DesignTime,

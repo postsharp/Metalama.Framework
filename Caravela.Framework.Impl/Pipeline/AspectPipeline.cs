@@ -80,7 +80,7 @@ namespace Caravela.Framework.Impl.Pipeline
             PartialCompilation compilation,
             IReadOnlyList<SyntaxTree>? compileTimeTreesHint,
             CancellationToken cancellationToken,
-            [NotNullWhen( true )] out AspectProjectConfiguration? configuration )
+            [NotNullWhen( true )] out AspectPipelineConfiguration? configuration )
         {
             this.PipelineInitializationCount++;
 
@@ -182,10 +182,14 @@ namespace Caravela.Framework.Impl.Pipeline
 
             var stages = allOrderedAspectLayers
                 .GroupAdjacent( x => GetGroupingKey( x.AspectClass.AspectDriver ) )
-                .Select( g => this.CreateStage( g.Key, g.ToImmutableArray(), compileTimeProject! ) )
+                .Select(
+                    g =>
+                        g.Key is _highLevelStageGroupingKey
+                            ? new PipelineStageConfiguration( PipelineStageKind.HighLevel, g.ToImmutableArray(), null )
+                            : new PipelineStageConfiguration( PipelineStageKind.LowLevel, g.ToImmutableArray(), (IAspectWeaver) g.Key ) )
                 .ToImmutableArray();
 
-            configuration = new AspectProjectConfiguration(
+            configuration = new AspectPipelineConfiguration(
                 stages,
                 allAspectClasses,
                 allOrderedAspectLayers,
@@ -210,7 +214,7 @@ namespace Caravela.Framework.Impl.Pipeline
         }
 
         private protected virtual ImmutableArray<IAspectSource> CreateAspectSources(
-            AspectProjectConfiguration configuration,
+            AspectPipelineConfiguration configuration,
             Compilation compilation,
             CancellationToken cancellationToken )
         {
@@ -239,13 +243,13 @@ namespace Caravela.Framework.Impl.Pipeline
         private protected bool TryExecute(
             PartialCompilation compilation,
             IDiagnosticAdder diagnosticAdder,
-            AspectProjectConfiguration projectConfiguration,
+            AspectPipelineConfiguration pipelineConfiguration,
             CancellationToken cancellationToken,
             [NotNullWhen( true )] out PipelineStageResult? pipelineStageResult )
         {
-            var project = new ProjectModel( compilation.Compilation, projectConfiguration.ServiceProvider );
+            var project = new ProjectModel( compilation.Compilation, pipelineConfiguration.ServiceProvider );
 
-            if ( projectConfiguration.CompileTimeProject == null || projectConfiguration.AspectClasses.Length == 0 )
+            if ( pipelineConfiguration.CompileTimeProject == null || pipelineConfiguration.AspectClasses.Length == 0 )
             {
                 // If there is no aspect in the compilation, don't execute the pipeline.
                 pipelineStageResult = new PipelineStageResult( compilation, project, ImmutableArray<OrderedAspectLayer>.Empty );
@@ -253,13 +257,22 @@ namespace Caravela.Framework.Impl.Pipeline
                 return true;
             }
 
-            var aspectSources = this.CreateAspectSources( projectConfiguration, compilation.Compilation, cancellationToken );
+            var aspectSources = this.CreateAspectSources( pipelineConfiguration, compilation.Compilation, cancellationToken );
 
-            pipelineStageResult = new PipelineStageResult( compilation, project, projectConfiguration.AspectLayers, aspectSources: aspectSources );
+            pipelineStageResult = new PipelineStageResult( compilation, project, pipelineConfiguration.AspectLayers, aspectSources: aspectSources );
 
-            foreach ( var stage in projectConfiguration.Stages )
+            foreach ( var stageConfiguration in pipelineConfiguration.Stages )
             {
-                if ( !stage.TryExecute( projectConfiguration, pipelineStageResult, diagnosticAdder, cancellationToken, out var newStageResult ) )
+                var stage = this.CreateStage( stageConfiguration, pipelineConfiguration.CompileTimeProject );
+
+                if ( stage == null )
+                {
+                    // This stage is skipped in the current pipeline (e.g. design-time).
+                    
+                    continue;
+                }
+
+                if ( !stage.TryExecute( pipelineConfiguration, pipelineStageResult, diagnosticAdder, cancellationToken, out var newStageResult ) )
                 {
                     return false;
                 }
@@ -283,29 +296,32 @@ namespace Caravela.Framework.Impl.Pipeline
         /// <summary>
         /// Creates an instance of <see cref="HighLevelPipelineStage"/>.
         /// </summary>
-        /// <param name="parts"></param>
+        /// <param name="configuration"></param>
         /// <param name="compileTimeProject"></param>
         /// <returns></returns>
-        private protected abstract HighLevelPipelineStage CreateStage(
-            ImmutableArray<OrderedAspectLayer> parts,
+        private protected abstract HighLevelPipelineStage CreateHighLevelStage(
+            PipelineStageConfiguration configuration,
             CompileTimeProject compileTimeProject );
 
-        private PipelineStage CreateStage(
-            object groupKey,
-            ImmutableArray<OrderedAspectLayer> parts,
+        private protected virtual LowLevelPipelineStage? CreateLowLevelStage(
+            PipelineStageConfiguration configuration,
             CompileTimeProject compileTimeProject )
         {
-            switch ( groupKey )
+            var partData = configuration.Parts.Single();
+
+            return new LowLevelPipelineStage( configuration.Weaver!, partData.AspectClass, this.ServiceProvider );
+        }
+
+        private PipelineStage? CreateStage( PipelineStageConfiguration configuration, CompileTimeProject project )
+        {
+            switch ( configuration.Kind )
             {
-                case IAspectWeaver weaver:
+                case PipelineStageKind.LowLevel:
+                    return this.CreateLowLevelStage( configuration, project );
 
-                    var partData = parts.Single();
+                case PipelineStageKind.HighLevel:
 
-                    return new LowLevelPipelineStage( weaver, partData.AspectClass, this.ServiceProvider );
-
-                case _highLevelStageGroupingKey:
-
-                    return this.CreateStage( parts, compileTimeProject );
+                    return this.CreateHighLevelStage( configuration, project );
 
                 default:
 

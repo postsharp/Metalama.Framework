@@ -4,7 +4,6 @@
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Eligibility;
-using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.Aspects;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
@@ -16,7 +15,6 @@ using Caravela.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Runtime.CompilerServices;
@@ -138,7 +136,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
             IDiagnosticAdder diagnosticAdder,
             bool ignoreStatus,
             CancellationToken cancellationToken,
-            [NotNullWhen( true )] out AspectProjectConfiguration? configuration )
+            [NotNullWhen( true )] out AspectPipelineConfiguration? configuration )
         {
             lock ( this._sync )
             {
@@ -152,10 +150,13 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
         }
 
         /// <inheritdoc/>
-        private protected override HighLevelPipelineStage CreateStage(
-            ImmutableArray<OrderedAspectLayer> parts,
+        private protected override HighLevelPipelineStage CreateHighLevelStage(
+            PipelineStageConfiguration configuration,
             CompileTimeProject compileTimeProject )
-            => new SourceGeneratorPipelineStage( compileTimeProject, parts, this.ServiceProvider );
+            => new SourceGeneratorPipelineStage( compileTimeProject, configuration.Parts, this.ServiceProvider );
+
+        private protected override LowLevelPipelineStage? CreateLowLevelStage( PipelineStageConfiguration configuration, CompileTimeProject compileTimeProject )
+            => null;
 
         protected override void Dispose( bool disposing )
         {

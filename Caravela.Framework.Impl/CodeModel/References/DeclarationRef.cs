@@ -266,10 +266,10 @@ namespace Caravela.Framework.Impl.CodeModel.References
                         : throw new AssertionFailedException();
 
                 case ISymbol symbol:
-                    return (T) compilation.Factory.GetDeclaration( symbol.AssertValidType<T>(), kind );
+                    return (T) compilation.Factory.GetCompilationElement( symbol.AssertValidType<T>(), kind );
 
                 case SyntaxNode node:
-                    return (T) compilation.Factory.GetDeclaration(
+                    return (T) compilation.Factory.GetCompilationElement(
                         GetSymbolOfNode( compilation.PartialCompilation.Compilation, node ).AssertValidType<T>(),
                         kind );
 
@@ -278,14 +278,14 @@ namespace Caravela.Framework.Impl.CodeModel.References
 
                 case string documentationId:
                     {
-                        var symbol = DocumentationCommentId.GetFirstSymbolForDeclarationId( documentationId, compilation.RoslynCompilation );
+                        var symbol = DocumentationCommentId.GetFirstSymbolForReferenceId( documentationId, compilation.RoslynCompilation );
 
                         if ( symbol == null )
                         {
                             throw new AssertionFailedException( $"Cannot resolve {documentationId} into a symbol." );
                         }
 
-                        return (T) compilation.Factory.GetDeclaration( symbol );
+                        return (T) compilation.Factory.GetCompilationElement( symbol );
                     }
 
                 default:
@@ -295,7 +295,7 @@ namespace Caravela.Framework.Impl.CodeModel.References
 
         public override string ToString() => this.Target?.ToString() ?? "null";
 
-        public DeclarationRef<TOut> Cast<TOut>()
+        public DeclarationRef<TOut> As<TOut>()
             where TOut : class, ICompilationElement
             => new( this.Target, this.TargetKind );
 

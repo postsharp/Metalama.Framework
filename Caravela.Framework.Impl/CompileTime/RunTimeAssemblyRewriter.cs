@@ -55,7 +55,16 @@ namespace Caravela.Compiler
 
             if ( transformedCompilation.Compilation.GetTypeByMetadataName( "Caravela.Compiler.Intrinsics" ) == null )
             {
-                transformedCompilation = transformedCompilation.WithSyntaxTreeModifications( null, new[] { _intrinsicsSyntaxTree.Value } );
+                var instrinsicsSyntaxTree = _intrinsicsSyntaxTree.Value;
+
+                // We need to copy syntax tree options, otherwise we may have language version mismatch.
+                if ( compilation.Compilation.SyntaxTrees.Any() )
+                {
+                    var options = compilation.Compilation.SyntaxTrees.First().Options;
+                    instrinsicsSyntaxTree = instrinsicsSyntaxTree.WithRootAndOptions( instrinsicsSyntaxTree.GetRoot(), options );
+                }
+                
+                transformedCompilation = transformedCompilation.WithSyntaxTreeModifications( null, new[] { instrinsicsSyntaxTree } );
             }
 
             return transformedCompilation;

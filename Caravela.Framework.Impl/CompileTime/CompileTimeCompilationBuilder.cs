@@ -202,7 +202,7 @@ namespace Caravela.Framework.Impl.CompileTime
             return transformedFileName;
         }
 
-        internal static string GetCompileTimeAssemblyName(
+        private static string GetCompileTimeAssemblyName(
             string runTimeAssemblyName,
             IEnumerable<CompileTimeProject> referencedProjects,
             ulong sourceHash,

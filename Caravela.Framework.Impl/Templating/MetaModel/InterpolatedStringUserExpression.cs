@@ -7,6 +7,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
+using System.Text;
 
 namespace Caravela.Framework.Impl.Templating.MetaModel
 {
@@ -25,18 +26,39 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
             var syntaxGenerationContext = TemplateExpansionContext.CurrentSyntaxGenerationContext;
             List<InterpolatedStringContentSyntax> contents = new( this._builder.Items.Count );
 
+            var textAccumulator = new StringBuilder();
+
+            void FlushTextToken()
+            {
+                if ( textAccumulator.Length > 0 )
+                {
+                    var text = textAccumulator.ToString()
+                        .Replace( "{", "{{" )
+                        .Replace( "}", "}}" );
+
+                    var literal = SyntaxFactory.Literal( text );
+                    var escapedText = literal.Text.Substring( 1, literal.Text.Length - 2 );
+
+                    contents.Add(
+                        SyntaxFactory.InterpolatedStringText(
+                            SyntaxFactory.Token( default, SyntaxKind.InterpolatedStringTextToken, escapedText, text, default ) ) );
+
+                    textAccumulator.Length = 0;
+                }
+            }
+
             foreach ( var content in this._builder.Items )
             {
                 switch ( content )
                 {
                     case string text:
-                        contents.Add(
-                            SyntaxFactory.InterpolatedStringText(
-                                SyntaxFactory.Token( default, SyntaxKind.InterpolatedStringTextToken, text, text, default ) ) );
-
+                        textAccumulator.Append( text );
+                    
                         break;
 
                     case InterpolatedStringBuilder.Token token:
+                        
+                        FlushTextToken();
 
                         contents.Add(
                             SyntaxFactory.Interpolation(
@@ -49,6 +71,8 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
                         throw new AssertionFailedException();
                 }
             }
+            
+            FlushTextToken();
 
             var syntax = TemplateSyntaxFactory.RenderInterpolatedString(
                 SyntaxFactory.InterpolatedStringExpression(

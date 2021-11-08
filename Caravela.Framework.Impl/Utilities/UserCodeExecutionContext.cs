@@ -42,6 +42,7 @@ namespace Caravela.Framework.Impl.Utilities
                 } );
         }
 
-        public static Type GetCompileTimeType( string id, string name ) => Current._serviceProvider.GetService<CompileTimeTypeFactory>().Get( id, name );
+        public static Type GetCompileTimeType( string id, string fullMetadataName )
+            => Current._serviceProvider.GetService<CompileTimeTypeFactory>().Get( id, fullMetadataName );
     }
 }

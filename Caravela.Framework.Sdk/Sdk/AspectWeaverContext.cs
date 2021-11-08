@@ -19,6 +19,12 @@ namespace Caravela.Framework.Impl.Sdk
     /// </summary>
     public sealed class AspectWeaverContext
     {
+        private readonly Action<Diagnostic> _addDiagnostic;
+        private readonly Action<ManagedResource> _addResource;
+        private IPartialCompilation _compilation;
+
+        public IServiceProvider ServiceProvider { get; }
+
         /// <summary>
         /// Gets the type of aspects that must be handled.
         /// </summary>
@@ -32,18 +38,30 @@ namespace Caravela.Framework.Impl.Sdk
         /// <summary>
         /// Gets or sets the compilation.
         /// </summary>
-        public IPartialCompilation Compilation { get; set; }
+        public IPartialCompilation Compilation
+        {
+            get => this._compilation;
 
-        private readonly Action<Diagnostic> _addDiagnostic;
+            set
+            {
+                if ( ((IPartialCompilationInternal) value).InitialCompilation != ((IPartialCompilationInternal) this._compilation).InitialCompilation )
+                {
+                    throw new ArgumentOutOfRangeException(
+                        nameof(value),
+                        "The compilation must have been derived from the initial value of the Compilation property." );
+                }
 
-        // TODO: support reading existing resources
-        private readonly Action<ManagedResource> _addManifestResource;
+                this._compilation = value;
+            }
+        }
+
+        public IAspectWeaverHelper Helper { get; }
 
         /// <summary>
         /// Adds a new <see cref="ManagedResource"/> to the compilation.
         /// </summary>
         /// <param name="resource"></param>
-        public void AddManifestResource( ManagedResource resource ) => this._addManifestResource( resource );
+        public void AddResource( ManagedResource resource ) => this._addResource( resource );
 
         /// <summary>
         /// Rewrites the syntax trees affected by aspects.
@@ -123,13 +141,17 @@ namespace Caravela.Framework.Impl.Sdk
             IReadOnlyDictionary<ISymbol, IAspectInstance> aspectInstances,
             IPartialCompilation compilation,
             Action<Diagnostic> addDiagnostic,
-            Action<ManagedResource> addManifestResource )
+            Action<ManagedResource> addResource,
+            IAspectWeaverHelper helper,
+            IServiceProvider serviceProvider )
         {
             this.AspectClass = aspectClass;
             this.AspectInstances = aspectInstances;
-            this.Compilation = compilation;
+            this._compilation = compilation;
             this._addDiagnostic = addDiagnostic;
-            this._addManifestResource = addManifestResource;
+            this._addResource = addResource;
+            this.Helper = helper;
+            this.ServiceProvider = serviceProvider;
         }
 
         /// <summary>
@@ -137,5 +159,7 @@ namespace Caravela.Framework.Impl.Sdk
         /// </summary>
         /// <param name="diagnostic"></param>
         public void ReportDiagnostic( Diagnostic diagnostic ) => this._addDiagnostic( diagnostic );
+
+        // TODO: add support for suppressions.
     }
 }

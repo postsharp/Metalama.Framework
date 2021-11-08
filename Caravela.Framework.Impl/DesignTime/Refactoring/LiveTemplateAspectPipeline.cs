@@ -3,11 +3,9 @@
 
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
-using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.Aspects;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
-using Caravela.Framework.Impl.DesignTime.Pipeline;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Pipeline;
 using Microsoft.CodeAnalysis;
@@ -36,7 +34,7 @@ namespace Caravela.Framework.Impl.DesignTime.Refactoring
         }
 
         private protected override ImmutableArray<IAspectSource> CreateAspectSources(
-            AspectProjectConfiguration configuration,
+            AspectPipelineConfiguration configuration,
             Compilation compilation,
             CancellationToken cancellationToken )
             => ImmutableArray.Create<IAspectSource>( this._source );
@@ -44,7 +42,7 @@ namespace Caravela.Framework.Impl.DesignTime.Refactoring
         public static bool TryExecute(
             ServiceProvider serviceProvider,
             CompileTimeDomain domain,
-            AspectProjectConfiguration configuration,
+            AspectPipelineConfiguration configuration,
             AspectClass aspectClass,
             PartialCompilation inputCompilation,
             ISymbol targetSymbol,
@@ -58,14 +56,12 @@ namespace Caravela.Framework.Impl.DesignTime.Refactoring
         }
 
         private bool TryExecute(
-            AspectProjectConfiguration designTimeProjectConfiguration,
+            AspectPipelineConfiguration pipelineConfiguration,
             PartialCompilation compilation,
             CancellationToken cancellationToken,
             [NotNullWhen( true )] out PartialCompilation? outputCompilation,
             out ImmutableArray<Diagnostic> diagnostics )
         {
-            var pipelineConfiguration = designTimeProjectConfiguration.WithStages( s => MapPipelineStage( designTimeProjectConfiguration, s ) );
-
             DiagnosticList diagnosticList = new();
 
             if ( !this.TryExecute( compilation, diagnosticList, pipelineConfiguration, cancellationToken, out var result ) )
@@ -82,20 +78,10 @@ namespace Caravela.Framework.Impl.DesignTime.Refactoring
             return true;
         }
 
-        private static PipelineStage MapPipelineStage( AspectProjectConfiguration configuration, PipelineStage stage )
-            => stage switch
-            {
-                SourceGeneratorPipelineStage => new CompileTimePipelineStage(
-                    configuration.CompileTimeProject!,
-                    configuration.AspectLayers,
-                    stage.ServiceProvider ),
-                _ => stage
-            };
-
-        private protected override HighLevelPipelineStage CreateStage(
-            ImmutableArray<OrderedAspectLayer> parts,
+        private protected override HighLevelPipelineStage CreateHighLevelStage(
+            PipelineStageConfiguration configuration,
             CompileTimeProject compileTimeProject )
-            => new CompileTimePipelineStage( compileTimeProject, parts, this.ServiceProvider );
+            => new CompileTimePipelineStage( compileTimeProject, configuration.Parts, this.ServiceProvider );
 
         private class InteractiveAspectSource : IAspectSource
         {

@@ -24,13 +24,13 @@ namespace Caravela.Framework.Impl.Fabrics
     /// </summary>
     internal abstract class FabricDriver : IComparable<FabricDriver>
     {
-        protected AspectProjectConfiguration Configuration { get; }
+        protected AspectPipelineConfiguration Configuration { get; }
 
         public IFabric Fabric { get; }
 
         public Compilation Compilation { get; }
 
-        protected FabricDriver( AspectProjectConfiguration configuration, IFabric fabric, Compilation runTimeCompilation )
+        protected FabricDriver( AspectPipelineConfiguration configuration, IFabric fabric, Compilation runTimeCompilation )
         {
             this.Configuration = configuration;
             this.Fabric = fabric;
@@ -106,11 +106,11 @@ namespace Caravela.Framework.Impl.Fabrics
         {
             private readonly IAspectBuilderInternal _aspectBuilder;
             private readonly FabricInstance _fabricInstance;
-            private readonly AspectProjectConfiguration _context;
+            private readonly AspectPipelineConfiguration _context;
 
             protected BaseBuilder(
                 T target,
-                AspectProjectConfiguration context,
+                AspectPipelineConfiguration context,
                 IAspectBuilderInternal aspectBuilder,
                 FabricInstance fabricInstance )
             {

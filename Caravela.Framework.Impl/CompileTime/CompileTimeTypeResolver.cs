@@ -78,7 +78,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
                 case INamedTypeSymbol { IsGenericType: true } genericType when !genericType.IsGenericTypeDefinition():
                     {
-                        var typeDefinition = this.GetCompileTimeNamedType( genericType.ConstructedFrom );
+                        var typeDefinition = this.GetCompileTimeNamedType( genericType.OriginalDefinition );
 
                         if ( typeDefinition == null )
                         {

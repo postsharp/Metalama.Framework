@@ -253,14 +253,13 @@ namespace Caravela.TestFramework
 
             var compilation = (await project.GetCompilationAsync())!.WithAssemblyName( name );
 
-            if ( !pipeline.TryExecute(
+            var pipelineResult = await pipeline.ExecuteAsync(
                 testResult.InputCompilationDiagnostics,
                 compilation,
                 default,
-                CancellationToken.None,
-                out _,
-                out var outputResources,
-                out var resultCompilation ) )
+                CancellationToken.None );
+
+            if ( pipelineResult == null )
             {
                 testResult.SetFailed( "Transformation of the dependency failed." );
 
@@ -271,7 +270,9 @@ namespace Caravela.TestFramework
             var testOptions = this.BaseServiceProvider.GetService<TestProjectOptions>();
             var outputPath = Path.Combine( testOptions.BaseDirectory, name + ".dll" );
 
-            var emitResult = resultCompilation.Emit( outputPath, manifestResources: outputResources.Select( r => r.Resource ) );
+            var emitResult = pipelineResult.ResultingCompilation.Compilation.Emit(
+                outputPath,
+                manifestResources: pipelineResult.AdditionalResources.Select( r => r.Resource ) );
 
             if ( !emitResult.Success )
             {

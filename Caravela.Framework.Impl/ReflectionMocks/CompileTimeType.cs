@@ -20,12 +20,17 @@ namespace Caravela.Framework.Impl.ReflectionMocks
 
         private CompileTimeType( IDeclarationRef<IType> typeSymbol, string fullName )
         {
+            if ( string.IsNullOrEmpty( fullName ) )
+            {
+                throw new ArgumentNullException( nameof(fullName) );
+            }
+
             this.FullName = fullName;
             this.Target = typeSymbol;
         }
 
-        internal static Type CreateFromDocumentationId( string documentationId, string fullName )
-            => new CompileTimeType( DeclarationRef.FromDocumentationId<IType>( documentationId ), fullName );
+        internal static Type CreateFromDocumentationId( string documentationId, string fullMetadataName )
+            => new CompileTimeType( DeclarationRef.FromDocumentationId<IType>( documentationId ), fullMetadataName );
 
         // For test only. This is also used from serializers but these used should be removed when serializers will stop using symbols.
         internal static Type Create( IType type ) => Create( type.GetSymbol() );
@@ -135,7 +140,7 @@ namespace Caravela.Framework.Impl.ReflectionMocks
 
         public override Type[] GetInterfaces() => throw CompileTimeMocksHelper.CreateNotSupportedException();
 
-        public override string ToString() => $"Compile-time mock for run-time type {this.FullName}";
+        public override string ToString() => $"Compile-time mock for run-time type '{this.FullName}'";
 
         public override int GetHashCode() => this.Target.GetHashCode();
     }

@@ -82,17 +82,19 @@ namespace Caravela.Framework.Impl.CompileTime
             _ = new[] { 1, 2, 3 }.Buffer();
 
             // Get our public API assembly in its .NET Standard 2.0 build.
+            var currentAssembly = this.GetType().Assembly;
+
             var frameworkAssemblyReference = (MetadataReference)
                 MetadataReference.CreateFromStream(
-                    this.GetType().Assembly.GetManifestResourceStream( _compileTimeFrameworkAssemblyName + ".dll" ),
-                    filePath: _compileTimeFrameworkAssemblyName + ".dll" );
+                    currentAssembly.GetManifestResourceStream( _compileTimeFrameworkAssemblyName + ".dll" ),
+                    filePath: $"[{currentAssembly.Location}]{_compileTimeFrameworkAssemblyName}.dll" );
 
             // Get implementation assembly paths from the current AppDomain. We need to match our exact version number.
             var caravelaImplementationPaths = AppDomain.CurrentDomain.GetAssemblies()
                 .Where( a => !a.IsDynamic ) // accessing Location of dynamic assemblies throws
                 .Where(
                     a => this.CaravelaImplementationAssemblyNames.Contains( Path.GetFileNameWithoutExtension( a.Location ) ) &&
-                         AssemblyName.GetAssemblyName( a.Location ).Version == this.GetType().Assembly.GetName().Version )
+                         AssemblyName.GetAssemblyName( a.Location ).Version == currentAssembly.GetName().Version )
                 .Select( a => a.Location )
                 .ToList();
 

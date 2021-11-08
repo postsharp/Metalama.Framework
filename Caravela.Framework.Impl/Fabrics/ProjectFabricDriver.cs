@@ -20,7 +20,7 @@ namespace Caravela.Framework.Impl.Fabrics
     {
         private readonly int _depth;
 
-        public ProjectFabricDriver( AspectProjectConfiguration configuration, IFabric fabric, Compilation runTimeCompilation ) :
+        public ProjectFabricDriver( AspectPipelineConfiguration configuration, IFabric fabric, Compilation runTimeCompilation ) :
             base( configuration, fabric, runTimeCompilation )
         {
             var depth = 0;
@@ -91,7 +91,7 @@ namespace Caravela.Framework.Impl.Fabrics
         {
             public Builder(
                 ICompilation compilation,
-                AspectProjectConfiguration context,
+                AspectPipelineConfiguration context,
                 IAspectBuilderInternal aspectBuilder,
                 FabricInstance fabricInstance ) : base(
                 compilation,

@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.DesignTime.Contracts;
+using Caravela.Framework.Impl.DesignTime.Preview;
 using Caravela.Framework.Impl.Pipeline;
 using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
@@ -71,9 +72,20 @@ namespace Caravela.Framework.Impl.DesignTime
         public Version Version { get; }
 
         public ICompilerService? GetCompilerService( Type type )
-            => type.IsEquivalentTo( typeof(IClassificationService) )
-                ? new ClassificationService( ServiceProviderFactory.GlobalProvider.WithProjectScopedServices( Enumerable.Empty<MetadataReference>() ) )
-                : null;
+        {
+            if ( type.IsEquivalentTo( typeof(IClassificationService) ) )
+            {
+                return new ClassificationService( ServiceProviderFactory.GlobalProvider.WithProjectScopedServices( Enumerable.Empty<MetadataReference>() ) );
+            }
+            else if ( type.IsEquivalentTo( typeof(ITransformationPreviewService) ) )
+            {
+                return new TransformationPreviewService();
+            }
+            else
+            {
+                return null;
+            }
+        }
 
         event Action? ICompilerServiceProvider.Unloaded
         {

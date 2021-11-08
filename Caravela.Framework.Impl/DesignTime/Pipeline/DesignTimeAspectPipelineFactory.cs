@@ -31,12 +31,14 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
         public const string ProjectIdPreprocessorSymbolPrefix = "CaravelaProjectId_";
 
         private readonly ConcurrentDictionary<string, DesignTimeAspectPipeline> _pipelinesByProjectId = new();
-        private readonly CompileTimeDomain _domain;
+
+        public CompileTimeDomain Domain { get; }
+
         private readonly bool _isTest;
 
         public DesignTimeAspectPipelineFactory( CompileTimeDomain domain, bool isTest = false )
         {
-            this._domain = domain;
+            this.Domain = domain;
             this._isTest = isTest;
         }
 
@@ -77,7 +79,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
                     }
 
                     var serviceProvider = ServiceProviderFactory.GetServiceProvider().WithServices( projectOptions, this );
-                    pipeline = new DesignTimeAspectPipeline( serviceProvider, this._domain, compilation.References, this._isTest );
+                    pipeline = new DesignTimeAspectPipeline( serviceProvider, this.Domain, compilation.References, this._isTest );
                     pipeline.ExternalBuildStarted += this.OnExternalBuildStarted;
 
                     if ( !this._isTest )
@@ -185,7 +187,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
 
             return LiveTemplateAspectPipeline.TryExecute(
                 configuration.ServiceProvider,
-                this._domain,
+                this.Domain,
                 configuration,
                 aspectClass,
                 partialCompilation,
@@ -203,10 +205,10 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
             }
 
             this._pipelinesByProjectId.Clear();
-            this._domain.Dispose();
+            this.Domain.Dispose();
         }
 
-        public IInheritableAspectsManifest? GetInheritableAspectsManifest( Compilation compilation, CancellationToken cancellationToken )
+        public bool TryGetPipeline( Compilation compilation, [NotNullWhen( true )] out DesignTimeAspectPipeline? pipeline )
         {
             var projectIdConstant = compilation.SyntaxTrees.First()
                 .Options.PreprocessorSymbolNames.FirstOrDefault( x => x.StartsWith( ProjectIdPreprocessorSymbolPrefix, StringComparison.OrdinalIgnoreCase ) );
@@ -216,10 +218,17 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
             if ( projectId == null )
             {
                 // The compilation does not reference our package.
-                return null;
+                pipeline = null;
+
+                return false;
             }
 
-            if ( !this._pipelinesByProjectId.TryGetValue( projectId, out var pipeline ) )
+            return this._pipelinesByProjectId.TryGetValue( projectId, out pipeline );
+        }
+
+        public IInheritableAspectsManifest? GetInheritableAspectsManifest( Compilation compilation, CancellationToken cancellationToken )
+        {
+            if ( !this.TryGetPipeline( compilation, out var pipeline ) )
             {
                 // We cannot create the pipeline because we don't have all options.
                 // If this is a problem, we will need to pass all options as AssemblyMetadataAttribute.
