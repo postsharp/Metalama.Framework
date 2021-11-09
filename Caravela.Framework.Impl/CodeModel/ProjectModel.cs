@@ -82,6 +82,9 @@ namespace Caravela.Framework.Impl.CodeModel
             foreach ( var data in this._extensions.Values )
             {
                 data.MakeReadOnly();
+                
+                // Also set the property explicitly in case an implementer skips the call to base.MakeReadOnly.
+                data.IsReadOnly = true;
             }
         }
     }
