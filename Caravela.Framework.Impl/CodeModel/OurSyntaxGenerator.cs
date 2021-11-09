@@ -38,7 +38,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
             var requiredWorkspaceImplementationAssemblyName = new AssemblyName(
                 referencedWorkspaceAssemblyName.ToString().Replace( "Microsoft.CodeAnalysis.Workspaces", "Microsoft.CodeAnalysis.CSharp.Workspaces" ) );
-            
+
             // See if the assembly is already loaded in the AppDomain.
             var assembly = AppDomain.CurrentDomain
                 .GetAssemblies()

@@ -11,11 +11,11 @@ namespace Caravela.Framework.Fabrics
     /// When the project contains several project fabrics, the ones whose source file is the closest to the root directory is executed
     /// first. The project fabrics are then ordered by type name.
     /// </remarks>
-    public interface IProjectFabric : IFabric
+    public abstract class ProjectFabric : Fabric
     {
         /// <summary>
         /// The user can implement this method to analyze types in the current project, add aspects, and report or suppress diagnostics.
         /// </summary>
-        void AmendProject( IProjectAmender amender );
+        public abstract void AmendProject( IProjectAmender amender );
     }
 }

@@ -52,12 +52,14 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         ICompilation ICompilationElement.Compilation => this.Compilation;
 
+        protected IDeclaration GetForCompilation( ICompilation compilation ) => this.GetForCompilation( (CompilationModel) compilation );
+
         protected IDeclaration GetForCompilation( CompilationModel compilation )
             => this.Compilation == compilation ? this : compilation.Factory.GetDeclaration( this.Builder );
 
         ISymbol? ISdkDeclaration.Symbol => null;
 
-        public DeclarationRef<IDeclaration> ToRef() => DeclarationRef.FromBuilder( this.Builder );
+        public Ref<IDeclaration> ToRef() => Ref.FromBuilder( this.Builder );
 
         public ImmutableArray<SyntaxReference> DeclaringSyntaxReferences => this.Builder.DeclaringSyntaxReferences;
 

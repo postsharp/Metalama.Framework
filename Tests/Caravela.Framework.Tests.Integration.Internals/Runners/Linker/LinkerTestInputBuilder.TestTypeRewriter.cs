@@ -416,10 +416,10 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
 
                         _ = declarationKind switch
                         {
-                            DeclarationKind.Method => o.Implements<IMethod>().Implements<IDeclarationRef<IMethod>>(),
-                            DeclarationKind.Property => o.Implements<IProperty>().Implements<IDeclarationRef<IProperty>>(),
-                            DeclarationKind.Event => o.Implements<IEvent>().Implements<IDeclarationRef<IEvent>>(),
-                            DeclarationKind.Field => o.Implements<IField>().Implements<IDeclarationRef<IField>>(),
+                            DeclarationKind.Method => o.Implements<IMethod>().Implements<IRefImpl<IMethod>>(),
+                            DeclarationKind.Property => o.Implements<IProperty>().Implements<IRefImpl<IProperty>>(),
+                            DeclarationKind.Event => o.Implements<IEvent>().Implements<IRefImpl<IEvent>>(),
+                            DeclarationKind.Field => o.Implements<IField>().Implements<IRefImpl<IField>>(),
                             _ => throw new AssertionFailedException()
                         };
 
@@ -432,30 +432,30 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
                 switch ( declarationKind )
                 {
                     case DeclarationKind.Method:
-                        A.CallTo( () => ((IDeclarationRef<IMethod>) transformation).Target ).Returns( transformation );
+                        A.CallTo( () => ((IRefImpl<IMethod>) transformation).Target ).Returns( transformation );
 
-                        A.CallTo( () => ((IDeclarationRef<IMethod>) transformation).Resolve( A<CompilationModel>.Ignored ) )
+                        A.CallTo( () => ((IRefImpl<IMethod>) transformation).GetTarget( A<CompilationModel>.Ignored ) )
                             .Returns( (IMethod) transformation );
 
                         break;
 
                     case DeclarationKind.Property:
-                        A.CallTo( () => ((IDeclarationRef<IProperty>) transformation).Target ).Returns( transformation );
+                        A.CallTo( () => ((IRefImpl<IProperty>) transformation).Target ).Returns( transformation );
 
-                        A.CallTo( () => ((IDeclarationRef<IProperty>) transformation).Resolve( A<CompilationModel>.Ignored ) )
+                        A.CallTo( () => ((IRefImpl<IProperty>) transformation).GetTarget( A<CompilationModel>.Ignored ) )
                             .Returns( (IProperty) transformation );
 
                         break;
 
                     case DeclarationKind.Event:
-                        A.CallTo( () => ((IDeclarationRef<IEvent>) transformation).Target ).Returns( transformation );
-                        A.CallTo( () => ((IDeclarationRef<IEvent>) transformation).Resolve( A<CompilationModel>.Ignored ) ).Returns( (IEvent) transformation );
+                        A.CallTo( () => ((IRefImpl<IEvent>) transformation).Target ).Returns( transformation );
+                        A.CallTo( () => ((IRefImpl<IEvent>) transformation).GetTarget( A<CompilationModel>.Ignored ) ).Returns( (IEvent) transformation );
 
                         break;
 
                     case DeclarationKind.Field:
-                        A.CallTo( () => ((IDeclarationRef<IField>) transformation).Target ).Returns( transformation );
-                        A.CallTo( () => ((IDeclarationRef<IField>) transformation).Resolve( A<CompilationModel>.Ignored ) ).Returns( (IField) transformation );
+                        A.CallTo( () => ((IRefImpl<IField>) transformation).Target ).Returns( transformation );
+                        A.CallTo( () => ((IRefImpl<IField>) transformation).GetTarget( A<CompilationModel>.Ignored ) ).Returns( (IField) transformation );
 
                         break;
                 }
@@ -831,11 +831,14 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
                         null!,
                         new AspectDriverFactory( fakeCompilation, ImmutableArray<object>.Empty, this._owner.ServiceProvider ) );
 
-                var fakeAspectInstance = new AspectInstance( A.Fake<IAspect>(), A.Fake<IDeclaration>(), aspectClass, default );
+                var fakeAspectInstance = new AspectInstance( A.Fake<IAspect>(), default, aspectClass, default );
 
                 return A.Fake<Advice>(
                     i => i.WithArgumentsForConstructor(
-                        new object?[] { fakeAspectInstance, fakeAspectInstance.TemplateInstances.Values.Single(), aspectLayer, null } ) );
+                        new object?[]
+                        {
+                            fakeAspectInstance, fakeAspectInstance.TemplateInstances.Values.Single(), A.Fake<IDeclaration>(), aspectLayer.LayerName, null
+                        } ) );
             }
         }
     }

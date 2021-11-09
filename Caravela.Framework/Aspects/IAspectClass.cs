@@ -47,12 +47,12 @@ namespace Caravela.Framework.Aspects
         /// method by setting the <see cref="IAspectClassBuilder.IsInherited"/> property. By default, it is <c>false</c>.
         /// </summary>
         bool IsInherited { get; }
-        
+
         /// <summary>
         /// Gets a value indicating whether the aspect class derives from <c>System.Attribute</c>.
         /// </summary>
         bool IsAttribute { get; }
-        
+
         /// <summary>
         /// Gets the type of the aspect. 
         /// </summary>

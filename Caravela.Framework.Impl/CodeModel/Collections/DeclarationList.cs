@@ -12,7 +12,7 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
 {
     internal abstract class DeclarationList<TDeclaration, TSource> : IReadOnlyList<TDeclaration>
         where TDeclaration : class, IDeclaration
-        where TSource : IDeclarationRef<TDeclaration>
+        where TSource : ISdkRef<TDeclaration>
     {
         private volatile TDeclaration?[]? _targetItems;
 
@@ -40,7 +40,7 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
 
             foreach ( var item in sourceItems )
             {
-                if ( item.Target != null )
+                if ( ((IRefImpl) item).Target != null )
                 {
                     builder.Add( item );
                     canMoveToImmutable = false;
@@ -87,7 +87,7 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
 
                 if ( targetItem == null )
                 {
-                    targetItem = this.SourceItems[index].Resolve( this.Compilation ).AssertNotNull();
+                    targetItem = this.SourceItems[index].GetTarget( this.Compilation ).AssertNotNull();
                     _ = Interlocked.CompareExchange( ref targetItems[index], targetItem, null );
                 }
 

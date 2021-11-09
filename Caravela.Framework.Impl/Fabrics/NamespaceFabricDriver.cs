@@ -3,49 +3,74 @@
 
 using Caravela.Framework.Code;
 using Caravela.Framework.Fabrics;
-using Caravela.Framework.Impl.Aspects;
 using Caravela.Framework.Impl.CodeModel;
-using Caravela.Framework.Impl.Pipeline;
+using Caravela.Framework.Impl.CodeModel.References;
+using Caravela.Framework.Impl.Diagnostics;
+using Caravela.Framework.Impl.Utilities;
+using Caravela.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Caravela.Framework.Impl.Fabrics
 {
     /// <summary>
     /// Implementation of <see cref="FabricAspect{T}"/> for namespace-level fabrics.
     /// </summary>
-    internal class NamespaceFabricDriver : FabricDriver
+    internal class NamespaceFabricDriver : StaticFabricDriver
     {
-        public NamespaceFabricDriver( AspectPipelineConfiguration configuration, IFabric fabric, Compilation runTimeCompilation ) :
-            base( configuration, fabric, runTimeCompilation ) { }
+        private readonly Ref<INamespace> _targetNamespace;
+
+        public NamespaceFabricDriver( FabricManager fabricManager, Fabric fabric, Compilation runTimeCompilation ) :
+            base( fabricManager, fabric, runTimeCompilation )
+        {
+            this._targetNamespace = Ref.FromSymbol<INamespace>( this.FabricSymbol.ContainingNamespace );
+        }
 
         private ISymbol TargetSymbol => this.FabricSymbol.ContainingNamespace;
 
-        public override void Execute( IAspectBuilderInternal aspectBuilder, FabricTemplateClass fabricTemplateClass, FabricInstance fabricInstance )
-        {
-            var builder = new Builder( (INamespace) aspectBuilder.Target, this.Configuration, aspectBuilder, fabricInstance );
-            ((INamespaceFabric) this.Fabric).AmendNamespace( builder );
-        }
-
         public override FabricKind Kind => FabricKind.Namespace;
 
-        public override IDeclaration GetTarget( CompilationModel compilation ) => compilation.Factory.GetNamespace( (INamespaceSymbol) this.TargetSymbol );
+        public IDeclaration GetTarget( CompilationModel compilation ) => compilation.Factory.GetNamespace( (INamespaceSymbol) this.TargetSymbol );
 
         public override FormattableString FormatPredecessor() => $"namespace fabric '{this.Fabric.GetType()}' on '{this.TargetSymbol}'";
 
-        private class Builder : BaseBuilder<INamespace>, INamespaceAmender
+        public override bool TryExecute( IProject project, IDiagnosticAdder diagnosticAdder, [NotNullWhen( true )] out StaticFabricResult? result )
         {
-            public Builder(
-                INamespace ns,
-                AspectPipelineConfiguration context,
-                IAspectBuilderInternal aspectBuilder,
-                FabricInstance fabricInstance ) : base(
-                ns,
-                context,
-                aspectBuilder,
-                fabricInstance ) { }
+            var amender = new Amender(
+                project,
+                this.FabricManager,
+                new FabricInstance( this, this._targetNamespace.As<IDeclaration>() ) );
 
-            public INamespace Namespace => this.Target;
+            var executionContext = new UserCodeExecutionContext(
+                this.FabricManager.ServiceProvider,
+                diagnosticAdder,
+                UserCodeMemberInfo.FromDelegate( new Action<INamespaceAmender>( ((NamespaceFabric) this.Fabric).AmendNamespace ) ) );
+
+            if ( !this.FabricManager.UserCodeInvoker.TryInvoke( () => ((NamespaceFabric) this.Fabric).AmendNamespace( amender ), executionContext ) )
+            {
+                result = null;
+
+                return false;
+            }
+
+            // TODO: Exception handling.
+
+            result = amender.ToResult();
+
+            return true;
+        }
+
+        private class Amender : StaticAmender<INamespace>, INamespaceAmender
+        {
+            public Amender(
+                IProject project,
+                FabricManager fabricManager,
+                FabricInstance fabricInstance ) : base(
+                project,
+                fabricManager,
+                fabricInstance,
+                fabricInstance.TargetDeclaration.As<INamespace>() ) { }
         }
     }
 }

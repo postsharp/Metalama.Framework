@@ -219,7 +219,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
             // Split inheritable aspects by syntax tree.
             foreach ( var inheritableAspectInstance in pipelineResults.InheritableAspects )
             {
-                var targetSymbol = inheritableAspectInstance.TargetDeclaration.GetSymbol().AssertNotNull();
+                var targetSymbol = inheritableAspectInstance.TargetDeclaration.GetSymbol( compilation.Compilation ).AssertNotNull();
                 var syntaxTree = targetSymbol.GetPrimarySyntaxReference().AssertNotNull().SyntaxTree;
                 var filePath = syntaxTree.FilePath;
                 var builder = resultBuilders[filePath];

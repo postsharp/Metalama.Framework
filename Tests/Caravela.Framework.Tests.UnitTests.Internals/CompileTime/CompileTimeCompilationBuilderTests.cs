@@ -693,12 +693,12 @@ using Caravela.Framework.Aspects;
 [CompileTimeOnly]
 public class CompileTimeOnlyClass
 {
-   static Type Type1 = global::Caravela.Framework.Impl.Utilities.UserCodeExecutionContext.GetCompileTimeType(""RunTimeOnlyClass"",""RunTimeOnlyClass"");
+   static Type Type1 = global::Caravela.Framework.Impl.ReflectionMocks.CompileTimeType.GetCompileTimeType(""RunTimeOnlyClass"",""RunTimeOnlyClass"");
    static Type Type2 = typeof(CompileTimeOnlyClass);
    static string Name1 = ""RunTimeOnlyClass"";
    static string Name2 = ""CompileTimeOnlyClass"";
 
-   void Method() { var t = global::Caravela.Framework.Impl.Utilities.UserCodeExecutionContext.GetCompileTimeType(""RunTimeOnlyClass"",""RunTimeOnlyClass""); }
+   void Method() { var t = global::Caravela.Framework.Impl.ReflectionMocks.CompileTimeType.GetCompileTimeType(""RunTimeOnlyClass"",""RunTimeOnlyClass""); }
    string Property => ""RunTimeOnlyClass"";
 }
 ";
@@ -861,7 +861,7 @@ using Caravela.Framework.Fabrics;
 
 public class SomeClass
 {
-    class Fabric : IFabric {}
+    class Fabric : TypeFabric { public override void AmendType( ITypeAmender amender ) {} }
 }
 
 namespace SomeNamespace
@@ -870,7 +870,7 @@ namespace SomeNamespace
     {
         class NestedTwice
         {
-            class Fabric : IFabric {}
+            class Fabric  : TypeFabric { public override void AmendType( ITypeAmender amender ) {} }
         }
     }
 }
@@ -885,15 +885,15 @@ using Caravela.Framework.Impl.CompileTime;
 
 [OriginalPath(""main.cs"")]
 [OriginalId(""T:SomeClass.Fabric"")]
-class SomeClass_Fabric : IFabric
-{ }
+internal class SomeClass_Fabric : TypeFabric
+{ public override void AmendType(ITypeAmender amender) { } }
 
 namespace SomeNamespace
 {
     [OriginalPath(""main.cs"")]
     [OriginalId(""T:SomeNamespace.OtherClass`1.NestedTwice.Fabric"")]
-    class OtherClassX1_NestedTwice_Fabric : IFabric
-    { }
+    internal class OtherClassX1_NestedTwice_Fabric : TypeFabric
+    { public override void AmendType(ITypeAmender amender) { } }
 }
 ";
 

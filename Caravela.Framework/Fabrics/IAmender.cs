@@ -3,7 +3,6 @@
 
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
-using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Project;
 using Caravela.Framework.Validation;
 using System;
@@ -12,8 +11,8 @@ using System.Collections.Generic;
 namespace Caravela.Framework.Fabrics
 {
     /// <summary>
-    /// Base interface for the argument of <see cref="IProjectFabric.AmendProject"/>, <see cref="INamespaceFabric.AmendNamespace"/>
-    /// or <see cref="ITypeFabric.AmendType"/>. Allows to report diagnostics and add aspects to the target declaration of the fabric.
+    /// Base interface for the argument of <see cref="ProjectFabric.AmendProject"/>, <see cref="NamespaceFabric.AmendNamespace"/>
+    /// or <see cref="TypeFabric.AmendType"/>. Allows to report diagnostics and add aspects to the target declaration of the fabric.
     /// </summary>
     [InternalImplement]
     [CompileTimeOnly]
@@ -26,17 +25,7 @@ namespace Caravela.Framework.Fabrics
         IProject Project { get; }
 
         /// <summary>
-        /// Gets the target declaration of the current <see cref="IFabric"/>.
-        /// </summary>
-        T Target { get; }
-
-        /// <summary>
-        /// Gets an object that allows reporting or suppressing warnings and errors.
-        /// </summary>
-        IDiagnosticSink Diagnostics { get; }
-
-        /// <summary>
-        /// Creates an object that allows adding aspects to members of the <see cref="Target"/> declaration.
+        /// Creates an object that allows adding aspects to members of the target declaration.
         /// </summary>
         /// <param name="selector"></param>
         /// <typeparam name="TChild"></typeparam>

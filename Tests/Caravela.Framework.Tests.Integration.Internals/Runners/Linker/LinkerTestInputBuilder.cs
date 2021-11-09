@@ -451,7 +451,7 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
             A.CallTo( () => observableTransformation.ContainingDeclaration ).Returns( containingDeclaration );
 
             A.CallTo( () => ((IDeclarationImpl) observableTransformation).ToRef() )
-                .Returns( new DeclarationRef<IDeclaration>( (IDeclarationBuilder) observableTransformation ) );
+                .Returns( new Ref<IDeclaration>( (IDeclarationBuilder) observableTransformation ) );
 
             A.CallTo( () => ((IMemberIntroduction) observableTransformation).InsertPosition )
                 .Returns( new InsertPosition( insertPositionRelation, (MemberDeclarationSyntax) insertPositionNode ) );

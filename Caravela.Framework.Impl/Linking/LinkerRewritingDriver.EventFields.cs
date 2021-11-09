@@ -15,7 +15,7 @@ namespace Caravela.Framework.Impl.Linking
     {
         private IReadOnlyList<MemberDeclarationSyntax> RewriteEventField( EventFieldDeclarationSyntax eventFieldDeclaration, IEventSymbol symbol )
         {
-            var generationContext = SyntaxGenerationContext.Create( this._serviceProvider, this.IntermediateCompilation, eventFieldDeclaration );
+            var generationContext = SyntaxGenerationContext.Create( this._serviceProvider, this._intermediateCompilation, eventFieldDeclaration );
 
             if ( this._introductionRegistry.IsOverrideTarget( symbol ) )
             {

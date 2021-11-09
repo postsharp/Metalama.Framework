@@ -94,16 +94,6 @@ namespace Caravela.Framework.Impl.Templating
                 _category,
                 Error );
 
-        internal static readonly DiagnosticDefinition<(ISymbol TemplateSymbol, IDeclaration TargetDeclaration, string ExceptionType, string ExceptionMessage)>
-            ExceptionInTemplate
-                = new(
-                    "CR0112",
-                    "An advice threw an exception",
-                    "The advice '{0}' threw '{2}' when applied to '{1}': {3}. For more information, attach a debugger to the compiler using the " +
-                    " '-p:DebugCaravela=True' command-line option.",
-                    _category,
-                    Error );
-
         internal static readonly DiagnosticDefinition<(string AspectName, string AssemblyName)>
             CannotFindAspectInCompilation
                 = new(

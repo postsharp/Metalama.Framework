@@ -12,7 +12,6 @@ using Caravela.Framework.Impl.CodeModel.Collections;
 using Caravela.Framework.Impl.CodeModel.References;
 using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.CompileTime;
-using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Transformations;
 using Caravela.Framework.Impl.Utilities;
 using Caravela.Framework.Project;
@@ -26,11 +25,6 @@ namespace Caravela.Framework.Impl.CodeModel
 {
     internal partial class CompilationModel : ICompilationInternal, IDeclarationImpl
     {
-        static CompilationModel()
-        {
-            CaravelaStaticServices.Initialize( UserMessageFormatter.Instance );
-        }
-
         public static CompilationModel CreateInitialInstance( IProject project, PartialCompilation compilation ) => new( project, compilation );
 
         public static CompilationModel CreateInitialInstance(
@@ -46,18 +40,18 @@ namespace Caravela.Framework.Impl.CodeModel
             ImmutableArray<ManagedResource> resources = default )
             => new( project, PartialCompilation.CreatePartial( compilation, syntaxTree, resources ) );
 
-        private readonly ImmutableDictionaryOfArray<DeclarationRef<IDeclaration>, IObservableTransformation> _transformations;
+        private readonly ImmutableDictionaryOfArray<Ref<IDeclaration>, IObservableTransformation> _transformations;
 
         // This collection index all attributes on types and members, but not attributes on the assembly and the module.
         private readonly ImmutableDictionaryOfArray<string, AttributeRef> _allMemberAttributesByTypeName;
 
-        private readonly ImmutableDictionaryOfArray<DeclarationRef<IDeclaration>, IAspectInstance> _aspects;
+        private readonly ImmutableDictionaryOfArray<Ref<IDeclaration>, IAspectInstanceInternal> _aspects;
 
         private readonly int _revision;
 
         private readonly DerivedTypeIndex _derivedTypes;
 
-        private ImmutableDictionary<DeclarationRef<IDeclaration>, int> _depthsCache = ImmutableDictionary.Create<DeclarationRef<IDeclaration>, int>();
+        private ImmutableDictionary<Ref<IDeclaration>, int> _depthsCache = ImmutableDictionary.Create<Ref<IDeclaration>, int>();
 
         public DeclarationFactory Factory { get; }
 
@@ -77,9 +71,9 @@ namespace Caravela.Framework.Impl.CodeModel
             this.InvariantComparer = new DeclarationEqualityComparer( this.ReflectionMapper, this.RoslynCompilation );
             this._derivedTypes = partialCompilation.DerivedTypes;
 
-            this._transformations = ImmutableDictionaryOfArray<DeclarationRef<IDeclaration>, IObservableTransformation>
+            this._transformations = ImmutableDictionaryOfArray<Ref<IDeclaration>, IObservableTransformation>
                 .Empty
-                .WithKeyComparer( DeclarationRefEqualityComparer<DeclarationRef<IDeclaration>>.Instance );
+                .WithKeyComparer( DeclarationRefEqualityComparer<Ref<IDeclaration>>.Instance );
 
             this.Factory = new DeclarationFactory( this );
 
@@ -92,7 +86,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
             this._allMemberAttributesByTypeName = attributeDiscoveryVisitor.GetDiscoveredAttributes();
 
-            this._aspects = ImmutableDictionaryOfArray<DeclarationRef<IDeclaration>, IAspectInstance>.Empty;
+            this._aspects = ImmutableDictionaryOfArray<Ref<IDeclaration>, IAspectInstanceInternal>.Empty;
             this.SymbolClassifier = project.ServiceProvider.GetService<SymbolClassificationService>().GetClassifier( this.RoslynCompilation );
             this.EmptyGenericMap = new GenericMap( partialCompilation.Compilation );
         }
@@ -136,7 +130,6 @@ namespace Caravela.Framework.Impl.CodeModel
             this._revision = prototype._revision + 1;
 
             this._derivedTypes = prototype._derivedTypes;
-            this.AspectLayerId = prototype.AspectLayerId;
             this.PartialCompilation = prototype.PartialCompilation;
             this.ReflectionMapper = prototype.ReflectionMapper;
             this.InvariantComparer = prototype.InvariantComparer;
@@ -149,14 +142,9 @@ namespace Caravela.Framework.Impl.CodeModel
             this.EmptyGenericMap = prototype.EmptyGenericMap;
         }
 
-        private CompilationModel( CompilationModel prototype, AspectLayerId aspectLayerId ) : this( prototype )
+        private CompilationModel( CompilationModel prototype, IReadOnlyList<IAspectInstanceInternal> aspectInstances ) : this( prototype )
         {
-            this.AspectLayerId = aspectLayerId;
-        }
-
-        private CompilationModel( CompilationModel prototype, IReadOnlyList<IAspectInstance> aspectInstances ) : this( prototype )
-        {
-            this._aspects = this._aspects.AddRange( aspectInstances, a => a.TargetDeclaration.ToRef() );
+            this._aspects = this._aspects.AddRange( aspectInstances, a => a.TargetDeclaration );
         }
 
         internal CompilationModel WithTransformations( IReadOnlyList<IObservableTransformation> introducedDeclarations )
@@ -169,13 +157,8 @@ namespace Caravela.Framework.Impl.CodeModel
             return new CompilationModel( this, introducedDeclarations );
         }
 
-        /// <summary>
-        /// Returns a shallow clone of the current compilation, but annotated with a given <see cref="AspectLayerId"/>.
-        /// </summary>
-        internal CompilationModel WithAspectLayer( AspectLayerId aspectLayerId ) => new( this, aspectLayerId );
-
-        public CompilationModel WithAspectInstances( IReadOnlyList<AspectInstance> aspectInstances )
-            => aspectInstances.Count == 0 ? this : new CompilationModel( this, aspectInstances );
+        public CompilationModel WithAspectInstances( ImmutableArray<AspectInstance> aspectInstances )
+            => aspectInstances.Length == 0 ? this : new CompilationModel( this, aspectInstances );
 
         public string AssemblyName => this.RoslynCompilation.AssemblyName ?? "";
 
@@ -256,7 +239,13 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public IEnumerable<IAttribute> GetAllAttributesOfType( INamedType type )
             => this._allMemberAttributesByTypeName[AttributeRef.GetShortName( type.Name )]
-                .Select( a => a.Resolve( this ) )
+                .Select(
+                    a =>
+                    {
+                        a.TryGetTarget( this, out var target );
+
+                        return target;
+                    } )
                 .WhereNotNull()
                 .Where( a => a.Type.Equals( type ) );
 
@@ -274,7 +263,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
                 if ( !filteredGroup.IsEmpty )
                 {
-                    yield return (group.Key.Resolve( this ), filteredGroup);
+                    yield return (group.Key.GetTarget( this ), filteredGroup);
                 }
             }
         }
@@ -345,7 +334,7 @@ namespace Caravela.Framework.Impl.CodeModel
             return depth;
         }
 
-        DeclarationRef<IDeclaration> IDeclarationImpl.ToRef() => DeclarationRef.Assembly();
+        Ref<IDeclaration> IDeclarationImpl.ToRef() => Ref.Compilation().As<IDeclaration>();
 
         ImmutableArray<SyntaxReference> IDeclarationImpl.DeclaringSyntaxReferences => ImmutableArray<SyntaxReference>.Empty;
 
@@ -365,8 +354,6 @@ namespace Caravela.Framework.Impl.CodeModel
         IDiagnosticLocation? IDiagnosticScope.DiagnosticLocation => null;
 
         public string? Name => this.RoslynCompilation.AssemblyName;
-
-        public AspectLayerId AspectLayerId { get; }
 
         public override string ToString() => $"{this.RoslynCompilation.AssemblyName}, rev={this._revision}";
 

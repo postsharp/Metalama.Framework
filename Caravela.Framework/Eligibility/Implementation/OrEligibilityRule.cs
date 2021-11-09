@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Project;
 using System;
 using System.Collections.Immutable;
 using System.Text;
@@ -52,7 +53,7 @@ namespace Caravela.Framework.Eligibility.Implementation
                         stringBuilder.Append( " or " );
                     }
 
-                    stringBuilder.Append( justification.ToString( CaravelaStaticServices.FormatProvider ) );
+                    stringBuilder.Append( justification.ToString( CaravelaExecutionContext.Current.FormatProvider ) );
                 }
             }
 

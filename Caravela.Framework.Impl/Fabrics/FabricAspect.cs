@@ -7,6 +7,7 @@ using Caravela.Framework.Eligibility;
 using Caravela.Framework.Fabrics;
 using Caravela.Framework.Impl.Aspects;
 using Caravela.Framework.Impl.CodeModel;
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -23,6 +24,11 @@ namespace Caravela.Framework.Impl.Fabrics
 
         public FabricAspect( ImmutableArray<FabricTemplateClass> templateClasses )
         {
+            if ( templateClasses.Any( c => c.Driver.Kind != FabricKind.Type ) )
+            {
+                throw new ArgumentOutOfRangeException( nameof(templateClasses), "Only type fabrics are supported." );
+            }
+
             this._templateClasses = templateClasses;
         }
 
@@ -32,28 +38,19 @@ namespace Caravela.Framework.Impl.Fabrics
 
             foreach ( var templateClass in this._templateClasses )
             {
-                var fabricInstance = new FabricInstance( templateClass.Driver, builder.Target );
-
-                if ( fabricInstance.Driver.Kind is FabricKind.Namespace or FabricKind.Type )
-                {
-                    // We need to freeze project data before execution of type fabrics. Only project fabrics can modify the state.
-                    ((ProjectModel) builder.Project).FreezeProjectData();
-                }
+                var fabricInstance = new FabricInstance( templateClass.Driver, builder.Target.ToRef<IDeclaration>() );
 
                 using ( internalBuilder.WithPredecessor( new AspectPredecessor( AspectPredecessorKind.Fabric, fabricInstance ) ) )
                 {
-                    templateClass.Driver.Execute( internalBuilder, templateClass, fabricInstance );
+                    _ = ((TypeFabricDriver) templateClass.Driver).TryExecute( internalBuilder, templateClass, fabricInstance );
                 }
             }
-            
-            // Prevent further modifications of the project data.
-            ((ProjectModel) builder.Project).FreezeProjectData();
         }
 
         void IAspect.BuildAspectClass( IAspectClassBuilder builder ) { }
 
         void IEligible<T>.BuildEligibility( IEligibilityBuilder<T> builder ) { }
 
-        public IEnumerable<IFabric> Fabrics => this._templateClasses.Select( t => t.Driver.Fabric );
+        public IEnumerable<Fabric> Fabrics => this._templateClasses.Select( t => t.Driver.Fabric );
     }
 }

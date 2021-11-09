@@ -5,6 +5,7 @@ using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Eligibility;
 using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.CodeModel.References;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Utilities;
 using Caravela.Framework.Project;
@@ -12,6 +13,7 @@ using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 
 namespace Caravela.Framework.Impl.Aspects
@@ -28,7 +30,9 @@ namespace Caravela.Framework.Impl.Aspects
 
         public IAspectClass AspectClass { get; }
 
-        public IDeclaration TargetDeclaration { get; }
+        IRef<IDeclaration> IAspectInstance.TargetDeclaration => this.TargetDeclaration;
+
+        public Ref<IDeclaration> TargetDeclaration { get; }
 
         public bool IsSkipped { get; private set; }
 
@@ -40,25 +44,63 @@ namespace Caravela.Framework.Impl.Aspects
 
         public AspectPredecessor Predecessor { get; }
 
-        public EligibleScenarios Eligibility { get; }
-
         ImmutableArray<AspectPredecessor> IAspectInstance.Predecessors => ImmutableArray.Create( this.Predecessor );
 
-        internal AspectInstance( IAspect aspect, IDeclaration declaration, AspectClass aspectClass, in AspectPredecessor predecessor )
+        internal AspectInstance( IAspect aspect, in Ref<IDeclaration> declaration, AspectClass aspectClass, in AspectPredecessor predecessor )
         {
             this.Aspect = aspect;
             this.TargetDeclaration = declaration;
             this.AspectClass = aspectClass;
             this.Predecessor = predecessor;
-            this.Eligibility = ComputeEligibility( aspectClass, declaration );
 
             this.TemplateInstances = ImmutableDictionary.Create<TemplateClass, TemplateClassInstance>()
                 .Add( aspectClass, new TemplateClassInstance( aspect, aspectClass ) );
         }
 
-        private static EligibleScenarios ComputeEligibility( IAspectClassImpl aspectClass, IDeclaration declaration )
+        internal AspectInstance(
+            IAspect aspect,
+            in Ref<IDeclaration> declaration,
+            IAspectClass aspectClass,
+            IEnumerable<TemplateClassInstance> templateInstances,
+            in AspectPredecessor predecessor )
         {
-            var eligibility = aspectClass.GetEligibility( declaration );
+            this.Aspect = aspect;
+            this.TargetDeclaration = declaration;
+            this.AspectClass = aspectClass;
+            this.Predecessor = predecessor;
+
+            this.TemplateInstances = templateInstances.ToImmutableDictionary( t => t.TemplateClass, t => t );
+        }
+
+        public static bool TryCreateInstance(
+            IServiceProvider serviceProvider,
+            IDiagnosticAdder diagnosticAdder,
+            Expression<Func<IAspect>> aspectExpression,
+            in Ref<IDeclaration> declaration,
+            AspectClass aspectClass,
+            in AspectPredecessor predecessor,
+            [NotNullWhen( true )] out AspectInstance? aspectInstance )
+        {
+            var userCodeInvoker = serviceProvider.GetService<UserCodeInvoker>();
+            var aspectFunc = aspectExpression.Compile();
+
+            var executionContext = new UserCodeExecutionContext( serviceProvider, diagnosticAdder, UserCodeMemberInfo.FromExpression( aspectExpression ) );
+
+            if ( !userCodeInvoker.TryInvoke( () => aspectFunc(), executionContext, out var aspect ) )
+            {
+                aspectInstance = null;
+
+                return false;
+            }
+
+            aspectInstance = new AspectInstance( aspect!, in declaration, aspectClass, in predecessor );
+
+            return true;
+        }
+
+        public EligibleScenarios ComputeEligibility( IDeclaration declaration )
+        {
+            var eligibility = ((IAspectClassImpl) this.AspectClass).GetEligibility( declaration );
 
             if ( (eligibility & EligibleScenarios.Inheritance) != 0 && !((IDeclarationImpl) declaration).CanBeInherited )
             {
@@ -68,45 +110,10 @@ namespace Caravela.Framework.Impl.Aspects
             return eligibility;
         }
 
-        internal AspectInstance(
-            IAspect aspect,
-            IDeclaration declaration,
-            IAspectClass aspectClass,
-            IEnumerable<TemplateClassInstance> templateInstances,
-            AspectPredecessor predecessor )
-        {
-            this.Aspect = aspect;
-            this.TargetDeclaration = declaration;
-            this.AspectClass = aspectClass;
-            this.Predecessor = predecessor;
-            this.Eligibility = ComputeEligibility( (IAspectClassImpl) aspectClass, declaration );
-
-            this.TemplateInstances = templateInstances.ToImmutableDictionary( t => t.TemplateClass, t => t );
-        }
-
-        internal AspectInstance(
-            IServiceProvider serviceProvider,
-            Expression<Func<IAspect>> aspectExpression,
-            IDeclaration declaration,
-            AspectClass aspectClass,
-            AspectPredecessor predecessor )
-        {
-            var userCodeInvoker = serviceProvider.GetService<UserCodeInvoker>();
-
-            var aspectFunc = aspectExpression.Compile();
-            this.Aspect = userCodeInvoker.Invoke( () => aspectFunc() );
-            this.TargetDeclaration = declaration;
-            this.AspectClass = aspectClass;
-            this.Predecessor = predecessor;
-            this.Eligibility = ComputeEligibility( aspectClass, declaration );
-
-            this.TemplateInstances = ImmutableDictionary.Create<TemplateClass, TemplateClassInstance>()
-                .Add( aspectClass, new TemplateClassInstance( this.Aspect, aspectClass ) );
-        }
-
         public override string ToString() => this.AspectClass.ShortName + "@" + this.TargetDeclaration;
 
-        public FormattableString FormatPredecessor() => $"aspect '{this.AspectClass.ShortName}' applied to '{this.TargetDeclaration}'";
+        public FormattableString FormatPredecessor( ICompilation compilation )
+            => $"aspect '{this.AspectClass.ShortName}' applied to '{this.TargetDeclaration.GetTarget( compilation )}'";
 
         public Location? GetDiagnosticLocation( Compilation compilation )
             => compilation.GetTypeByMetadataName( this.AspectClass.FullName )?.GetDiagnosticLocation();
@@ -117,7 +124,7 @@ namespace Caravela.Framework.Impl.Aspects
             {
                 return 1;
             }
-            
+
             var predecessorKindComparison = this.Predecessor.Kind.CompareTo( other.AssertNotNull().Predecessor.Kind );
 
             if ( predecessorKindComparison != 0 )

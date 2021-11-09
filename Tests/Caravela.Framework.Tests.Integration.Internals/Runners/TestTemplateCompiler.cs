@@ -58,7 +58,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
 
                 return !this.HasError;
             }
-            catch ( InvalidUserCodeException e )
+            catch ( DiagnosticException e )
             {
                 this._diagnosticAdder.Report( e.Diagnostics );
                 annotatedNode = null;

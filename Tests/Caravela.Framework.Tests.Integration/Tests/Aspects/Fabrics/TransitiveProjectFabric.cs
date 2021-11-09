@@ -2,11 +2,11 @@ using Caravela.Framework.Fabrics;
 
 namespace Caravela.Framework.Tests.Integration.Tests.Aspects.Fabrics.TransitiveProjectFabric
 {
-    public class Fabric : IProjectFabric
+    public class  Fabric : ProjectFabric
     {
-        public void AmendProject( IProjectAmender amender )
+        public override void AmendProject( IProjectAmender amender )
         {
-            amender.Project.Data<Configuration>().Message = "Configured";
+            amender.Project.Extension<Configuration>().Message = "Configured";
         }
     }
 

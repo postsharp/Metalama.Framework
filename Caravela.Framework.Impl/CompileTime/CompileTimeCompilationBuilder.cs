@@ -627,8 +627,8 @@ namespace Caravela.Framework.Impl.CompileTime
                         textMapDirectory.Write( outputPaths.Directory );
 
                         var aspectType = compileTimeCompilation.GetTypeByMetadataName( typeof(IAspect).FullName );
-                        var fabricType = compileTimeCompilation.GetTypeByMetadataName( typeof(IFabric).FullName );
-                        var transitiveFabricType = compileTimeCompilation.GetTypeByMetadataName( typeof(ITransitiveProjectFabric).FullName );
+                        var fabricType = compileTimeCompilation.GetTypeByMetadataName( typeof(Fabric).FullName );
+                        var transitiveFabricType = compileTimeCompilation.GetTypeByMetadataName( typeof(TransitiveProjectFabric).FullName );
 
                         var aspectTypes = compileTimeCompilation.Assembly
                             .GetTypes()

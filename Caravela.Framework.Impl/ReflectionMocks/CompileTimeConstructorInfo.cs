@@ -12,7 +12,7 @@ namespace Caravela.Framework.Impl.ReflectionMocks
 {
     internal class CompileTimeConstructorInfo : ConstructorInfo, ICompileTimeReflectionObject<IConstructor>
     {
-        public IDeclarationRef<IConstructor> Target { get; }
+        public ISdkRef<IConstructor> Target { get; }
 
         private CompileTimeConstructorInfo( IConstructor method )
         {

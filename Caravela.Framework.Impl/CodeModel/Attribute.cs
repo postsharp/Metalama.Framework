@@ -76,7 +76,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public override string ToString() => this.AttributeData.ToString();
 
-        public FormattableString FormatPredecessor() => $"the attribute of type '{this.Type}' on '{this.ContainingDeclaration}'";
+        public FormattableString FormatPredecessor( ICompilation compilation ) => $"the attribute of type '{this.Type}' on '{this.ContainingDeclaration}'";
 
         public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => throw new NotImplementedException();
 

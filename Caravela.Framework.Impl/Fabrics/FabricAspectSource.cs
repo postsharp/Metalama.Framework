@@ -6,7 +6,6 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Aspects;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Diagnostics;
-using Caravela.Framework.Impl.Pipeline;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -20,20 +19,16 @@ namespace Caravela.Framework.Impl.Fabrics
     /// </summary>
     internal class FabricAspectSource : IAspectSource
     {
-        private readonly AspectPipelineConfiguration _context;
+        private readonly FabricManager _fabricManager;
 
-        private readonly List<FabricDriver> _drivers = new(); // Note that this list is ordered.
+        private readonly ImmutableArray<TypeFabricDriver> _drivers; // Note that this list is ordered.
         private readonly ImmutableArray<IAspectClass> _aspectClasses;
 
-        public FabricAspectSource( AspectPipelineConfiguration context )
+        public FabricAspectSource( FabricManager fabricManager, ImmutableArray<TypeFabricDriver> drivers )
         {
-            this._context = context;
-            this._aspectClasses = ImmutableArray.Create<IAspectClass>( context.GetAspectClass( FabricTopLevelAspectClass.FabricAspectName ) );
-        }
-
-        public void Register( FabricDriver driver )
-        {
-            this._drivers.Add( driver );
+            this._fabricManager = fabricManager;
+            this._drivers = drivers;
+            this._aspectClasses = ImmutableArray.Create<IAspectClass>( fabricManager.AspectClasses[FabricTopLevelAspectClass.FabricAspectName] );
         }
 
         ImmutableArray<IAspectClass> IAspectSource.AspectClasses => this._aspectClasses;
@@ -58,14 +53,14 @@ namespace Caravela.Framework.Impl.Fabrics
                 var target = driverGroup.Key;
 
                 // Create template classes for all fabrics.
-                var compileTimeProject = this._context.CompileTimeProject!;
+                var compileTimeProject = this._fabricManager.CompileTimeProject;
 
                 var drivers = driverGroup
                     .Select( x => x.Driver )
                     .Select(
                         x => new FabricTemplateClass(
                             x,
-                            this._context.ServiceProvider,
+                            this._fabricManager.ServiceProvider,
                             compilation.RoslynCompilation,
                             diagnosticAdder,
                             null,
@@ -88,7 +83,7 @@ namespace Caravela.Framework.Impl.Fabrics
                 };
 
                 // Creates the aggregate AspectInstance for the target declaration.
-                var aggregateInstance = new AspectInstance( aspect, target, aggregateClass, templateInstances, default );
+                var aggregateInstance = new AspectInstance( aspect, target.ToRef(), aggregateClass, templateInstances, default );
 
                 yield return aggregateInstance;
             }

@@ -23,15 +23,6 @@ namespace Caravela.Framework.Impl.Advices
 
         public ImmutableDictionary<string, object?> ReadOnlyTags => this.Tags?.ToImmutableDictionary() ?? ImmutableDictionary<string, object?>.Empty;
 
-        protected Advice( AspectInstance aspect, TemplateClassInstance template, AspectLayerId aspectLayerId, Dictionary<string, object?>? tags )
-        {
-            this.Tags = tags;
-            this.Aspect = aspect;
-            this.TargetDeclaration = aspect.TargetDeclaration;
-            this.AspectLayerId = aspectLayerId;
-            this.TemplateInstance = template;
-        }
-
         protected Advice(
             IAspectInstanceInternal aspect,
             TemplateClassInstance template,

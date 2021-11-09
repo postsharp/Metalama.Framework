@@ -40,7 +40,7 @@ namespace Caravela.Framework.Tests.UnitTests
 
                 Assert.False( true, "Exception InvalidUserCodeException was not received." );
             }
-            catch ( InvalidUserCodeException e )
+            catch ( DiagnosticException e )
             {
                 // ReSharper disable once ParameterOnlyUsedForPreconditionCheck.Local
                 Assert.Contains( e.Diagnostics, d => d.Id == diagnosticDefinition.Id );

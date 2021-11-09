@@ -27,14 +27,14 @@ namespace Caravela.Framework.Impl.CodeModel.References
             this.Target = builder;
         }
 
-        public MemberRef( in DeclarationRef<IDeclaration> declarationRef )
+        public MemberRef( in Ref<IDeclaration> declarationRef )
         {
             this.Target = declarationRef.Target;
         }
 
         public object? Target { get; }
 
-        public T Resolve( CompilationModel compilation ) => DeclarationRef<T>.Resolve( this.Target, compilation );
+        public T GetTarget( ICompilation compilation ) => Ref<T>.Resolve( this.Target, compilation );
 
         public ISymbol GetSymbol( Compilation compilation ) => this.Target as ISymbol ?? throw new InvalidOperationException();
 

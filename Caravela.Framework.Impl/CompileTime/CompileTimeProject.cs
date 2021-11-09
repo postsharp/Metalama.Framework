@@ -7,6 +7,7 @@ using Caravela.Framework.Fabrics;
 using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Templating.Mapping;
+using Caravela.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -23,7 +24,7 @@ namespace Caravela.Framework.Impl.CompileTime
     /// Represents the compile-time project extracted from a run-time project, including its
     /// <see cref="System.Reflection.Assembly"/> allowing for execution, and metadata.
     /// </summary>
-    internal sealed class CompileTimeProject
+    internal sealed class CompileTimeProject : IService
     {
         private readonly CompileTimeProjectManifest? _manifest;
         private readonly CompileTimeDomain _domain;
@@ -56,12 +57,12 @@ namespace Caravela.Framework.Impl.CompileTime
         public IReadOnlyList<string> PlugInTypes => this._manifest?.PlugInTypes ?? Array.Empty<string>();
 
         /// <summary>
-        /// Gets the list of types that implement the <see cref="IFabric"/> interface, but the <see cref="ITransitiveProjectFabric"/>.
+        /// Gets the list of types that implement the <see cref="Fabric"/> interface, but the <see cref="TransitiveProjectFabric"/>.
         /// </summary>
         public IReadOnlyList<string> FabricTypes => this._manifest?.FabricTypes ?? Array.Empty<string>();
 
         /// <summary>
-        /// Gets the list of types that implement the <see cref="ITransitiveProjectFabric"/> interface.
+        /// Gets the list of types that implement the <see cref="TransitiveProjectFabric"/> interface.
         /// </summary>
         public IReadOnlyList<string> TransitiveFabricTypes => this._manifest?.TransitiveFabricTypes ?? Array.Empty<string>();
 

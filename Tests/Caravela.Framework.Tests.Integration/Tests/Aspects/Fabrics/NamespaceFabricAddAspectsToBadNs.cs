@@ -8,9 +8,9 @@ using  Caravela.Framework.Tests.PublicPipeline.Aspects.Fabrics.NamespaceFabricAd
 
 namespace Caravela.Framework.Tests.PublicPipeline.Aspects.Fabrics.NamespaceFabricAddAspectsToBadNs
 {
-    internal class Fabric : INamespaceFabric
+    internal class Fabric : NamespaceFabric
     {
-        public void AmendNamespace( INamespaceAmender amender )
+        public override void AmendNamespace( INamespaceAmender amender )
         {
             amender
                 .WithMembers<INamedType>( c => new[] { (INamedType) c.Compilation.TypeFactory.GetTypeByReflectionType( typeof(C2) ) } )

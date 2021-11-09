@@ -220,13 +220,13 @@ namespace Caravela.Framework.Tests.Integration.Runners
                 var compiledTemplateMethod = compiledAspectType.GetMethod( compiledTemplateMethodName, BindingFlags.Instance | BindingFlags.Public );
 
                 Invariant.Assert( compiledTemplateMethod != null );
-                var driver = new TemplateDriver( serviceProvider, null!, templateMethod, compiledTemplateMethod );
+                var driver = new TemplateDriver( serviceProvider, compiledTemplateMethod );
 
                 var compilationModel = CompilationModel.CreateInitialInstance(
                     new NullProject( serviceProvider ),
                     (CSharpCompilation) testResult.InputCompilation );
 
-                var template = TemplateMember.Create<IMemberOrNamedType>( compilationModel.Factory.GetMethod( templateMethod ), TemplateInfo.None );
+                var template = TemplateMember.Create( compilationModel.Factory.GetMethod( templateMethod ), TemplateInfo.None );
 
                 var (expansionContext, targetMethod) = CreateTemplateExpansionContext( serviceProvider, assembly, compilationModel, template );
 
@@ -259,7 +259,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
             ServiceProvider serviceProvider,
             Assembly assembly,
             CompilationModel compilation,
-            TemplateMember<IMemberOrNamedType> template )
+            TemplateMember<IMethod> template )
         {
             var roslynCompilation = compilation.RoslynCompilation;
 
@@ -304,7 +304,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
                 targetMethod,
                 new MetaApiProperties(
                     diagnostics,
-                    template,
+                    template.Cast(),
                     ImmutableDictionary.Create<string, object?>().Add( "TestKey", "TestValue" ),
                     default,
                     syntaxGenerationContext,
@@ -318,8 +318,10 @@ namespace Caravela.Framework.Tests.Integration.Runners
                         lexicalScope,
                         serviceProvider.GetService<SyntaxSerializationService>(),
                         syntaxGenerationContext,
-                        default,
-                        proceedExpression ), roslynTargetMethod);
+                        template,
+                        proceedExpression,
+                        default ),
+                    roslynTargetMethod);
 
             static ExpressionSyntax GetProceedInvocation( IMethod targetMethod )
             {

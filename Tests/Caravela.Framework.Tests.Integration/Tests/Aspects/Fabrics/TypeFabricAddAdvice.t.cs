@@ -1,24 +1,22 @@
-class TargetCode
+internal class TargetCode
     {
-        int Method1(int a) {
+        private int Method1( int a ) {
     global::System.Console.WriteLine("overridden");
 return a;};
-        string Method2(string s) {
+
+        private string Method2( string s ) {
     global::System.Console.WriteLine("overridden");
 return s;};
 #pragma warning disable CS0067
-        
-        
-        class Fabric : ITypeFabric
+
+        private class Fabric : TypeFabric
         {
-            public void AmendType(ITypeAmender amender) => throw new System.NotSupportedException("Compile-time only code cannot be called at run-time.");
+            public override void AmendType(ITypeAmender amender) => throw new System.NotSupportedException("Compile-time only code cannot be called at run-time.");
 
-            
+
             [Template]
-dynamic? Template() => throw new System.NotSupportedException("Compile-time only code cannot be called at run-time.");
+private dynamic? Template() => throw new System.NotSupportedException("Compile-time only code cannot be called at run-time.");
 
-        
         }
 #pragma warning restore CS0067
-        
     }

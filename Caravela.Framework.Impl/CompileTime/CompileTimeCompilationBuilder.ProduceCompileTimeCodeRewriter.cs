@@ -8,6 +8,7 @@ using Caravela.Framework.Fabrics;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.Diagnostics;
+using Caravela.Framework.Impl.ReflectionMocks;
 using Caravela.Framework.Impl.Templating;
 using Caravela.Framework.Impl.Utilities;
 using Caravela.Framework.Project;
@@ -39,7 +40,7 @@ namespace Caravela.Framework.Impl.CompileTime
             private readonly IDiagnosticAdder _diagnosticAdder;
             private readonly TemplateCompiler _templateCompiler;
             private readonly CancellationToken _cancellationToken;
-            private readonly NameSyntax _userCodeExecutionContextType;
+            private readonly NameSyntax _compileTimeTypeName;
             private readonly SyntaxGenerationContext _syntaxGenerationContext;
             private readonly NameSyntax _originalNameTypeSyntax;
             private readonly NameSyntax _originalPathTypeSyntax;
@@ -70,9 +71,9 @@ namespace Caravela.Framework.Impl.CompileTime
 
                 this._syntaxGenerationContext = SyntaxGenerationContext.CreateDefault( serviceProvider, compileTimeCompilation );
 
-                this._userCodeExecutionContextType = (NameSyntax)
+                this._compileTimeTypeName = (NameSyntax)
                     this._syntaxGenerationContext.SyntaxGenerator.Type(
-                        this._syntaxGenerationContext.ReflectionMapper.GetTypeSymbol( typeof(UserCodeExecutionContext) ) );
+                        this._syntaxGenerationContext.ReflectionMapper.GetTypeSymbol( typeof(CompileTimeType) ) );
 
                 this._originalNameTypeSyntax = (NameSyntax)
                     this._syntaxGenerationContext.SyntaxGenerator.Type(
@@ -83,8 +84,8 @@ namespace Caravela.Framework.Impl.CompileTime
                         this._syntaxGenerationContext.ReflectionMapper.GetTypeSymbol( typeof(OriginalPathAttribute) ) );
 
                 var reflectionMapper = serviceProvider.GetService<ReflectionMapperFactory>().GetInstance( runTimeCompilation );
-                this._fabricType = reflectionMapper.GetTypeSymbol( typeof(IFabric) );
-                this._typeFabricType = reflectionMapper.GetTypeSymbol( typeof(ITypeFabric) );
+                this._fabricType = reflectionMapper.GetTypeSymbol( typeof(Fabric) );
+                this._typeFabricType = reflectionMapper.GetTypeSymbol( typeof(TypeFabric) );
             }
 
             // TODO: assembly and module-level attributes?
@@ -180,7 +181,9 @@ namespace Caravela.Framework.Impl.CompileTime
                                                 this._diagnosticAdder.Report(
                                                     TemplatingDiagnosticDescriptors.RunTimeTypesCannotHaveCompileTimeTypesExceptClasses.CreateDiagnostic(
                                                         childSymbol.GetDiagnosticLocation(),
-                                                        (childSymbol, typeof(ITypeFabric)) ) );
+                                                        (childSymbol, typeof(TypeFabric)) ) );
+
+                                                this.Success = false;
                                             }
 
                                             // Create the [OriginalId] attribute.
@@ -199,6 +202,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
                                             transformedChild = transformedChild
                                                 .WithIdentifier( Identifier( newName ) )
+                                                .WithModifiers( TokenList( Token( SyntaxKind.InternalKeyword ) ) )
                                                 .WithAttributeLists(
                                                     transformedChild.AttributeLists.Add( AttributeList( SingletonSeparatedList( originalNameAttribute ) ) ) );
 
@@ -234,7 +238,9 @@ namespace Caravela.Framework.Impl.CompileTime
                                 this._diagnosticAdder.Report(
                                     TemplatingDiagnosticDescriptors.RunTimeTypesCannotHaveCompileTimeTypesExceptClasses.CreateDiagnostic(
                                         childSymbol.GetDiagnosticLocation(),
-                                        (childSymbol, typeof(ITypeFabric)) ) );
+                                        (childSymbol, typeof(TypeFabric)) ) );
+
+                                this.Success = false;
                             }
 
                             break;
@@ -323,7 +329,7 @@ namespace Caravela.Framework.Impl.CompileTime
                 foreach ( var implementedInterface in allImplementedInterfaces )
                 {
 #pragma warning disable 618
-                    if ( implementedInterface.Name is nameof(IAspect) or nameof(IEligible<IDeclaration>) or nameof(ProjectData) )
+                    if ( implementedInterface.Name is nameof(IAspect) or nameof(IEligible<IDeclaration>) or nameof(ProjectExtension) )
 #pragma warning restore 618
                     {
                         foreach ( var member in implementedInterface.GetMembers() )
@@ -770,8 +776,8 @@ namespace Caravela.Framework.Impl.CompileTime
                         var memberAccess =
                             MemberAccessExpression(
                                 SyntaxKind.SimpleMemberAccessExpression,
-                                this._userCodeExecutionContextType,
-                                IdentifierName( nameof(UserCodeExecutionContext.GetCompileTimeType) ) );
+                                this._compileTimeTypeName,
+                                IdentifierName( nameof(CompileTimeType.GetCompileTimeType) ) );
 
                         var invocation = InvocationExpression(
                             memberAccess,

@@ -48,7 +48,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
             // is created. We break the cycle by providing the service provider with the default set of references, which should work for 
             // the linker tests because they are not cross-assembly.
             var preliminaryProjectBuilder = this.BaseServiceProvider.WithProjectScopedServices( TestCompilationFactory.GetMetadataReferences() );
-            
+
             var builder = new LinkerTestInputBuilder( preliminaryProjectBuilder );
 
             state["builder"] = builder;

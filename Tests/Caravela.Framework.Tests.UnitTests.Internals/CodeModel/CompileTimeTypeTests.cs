@@ -39,7 +39,7 @@ namespace Caravela.Framework.Tests.UnitTests.CodeModel
 
             Assert.Equal( expectedTypeName, compileTimeType.FullName );
 
-            var resolvedType = compileTimeType.Target.Resolve( compilation );
+            var resolvedType = compileTimeType.Target.GetTarget( compilation );
 
             Assert.NotNull( resolvedType );
         }

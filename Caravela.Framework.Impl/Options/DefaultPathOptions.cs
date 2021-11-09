@@ -12,16 +12,30 @@ namespace Caravela.Framework.Impl.Options
     /// </summary>
     public class DefaultPathOptions : IPathOptions
     {
+        private static readonly string _crashReportDirectory = TempPathHelper.GetTempPath( "CrashReports" );
+
         protected DefaultPathOptions() { }
 
         public static readonly DefaultPathOptions Instance = new();
+
+        public virtual string? GetNewCrashReportPath()
+        {
+            RetryHelper.Retry(
+                () =>
+                {
+                    if ( !Directory.Exists( _crashReportDirectory ) )
+                    {
+                        Directory.CreateDirectory( _crashReportDirectory );
+                    }
+                } );
+
+            return Path.Combine( _crashReportDirectory, $"exception-{Guid.NewGuid()}.log" );
+        }
 
         public virtual string CompileTimeProjectCacheDirectory => TempPathHelper.GetTempPath( "CompileTime" );
 
         public virtual string AssemblyLocatorCacheDirectory => TempPathHelper.GetTempPath( "AssemblyLocator" );
 
         public virtual string SettingsDirectory => Path.Combine( Environment.GetFolderPath( Environment.SpecialFolder.UserProfile ), "Caravela" );
-
-        public virtual string CrashReportDirectory => TempPathHelper.GetTempPath( "CrashReports" );
     }
 }

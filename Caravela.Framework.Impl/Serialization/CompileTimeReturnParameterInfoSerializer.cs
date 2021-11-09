@@ -16,7 +16,7 @@ namespace Caravela.Framework.Impl.Serialization
     {
         public override ExpressionSyntax Serialize( CompileTimeReturnParameterInfo obj, SyntaxSerializationContext serializationContext )
         {
-            var parameter = obj.Target.Resolve( serializationContext.CompilationModel ).AssertNotNull();
+            var parameter = obj.Target.GetTarget( serializationContext.CompilationModel ).AssertNotNull();
 
             ExpressionSyntax? methodBaseExpression;
 

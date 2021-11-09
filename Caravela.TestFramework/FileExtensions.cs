@@ -12,17 +12,17 @@ namespace Caravela.TestFramework
         /// Transformed C# code (<c>.t.cs</c>).
         /// </summary>
         public const string TransformedCode = ".t.cs";
-        
+
         /// <summary>
         /// Program output (<c>.t.txt</c>).
         /// </summary>
         public const string ProgramOutput = ".t.txt";
-        
+
         /// <summary>
         /// HTML rendering of the input C# (<c>.cs.html</c>).
         /// </summary>
         public const string InputHtml = ".cs.html";
-        
+
         /// <summary>
         /// HTML rendering of the transformed C# (<c>.cs.html</c>).
         /// </summary>

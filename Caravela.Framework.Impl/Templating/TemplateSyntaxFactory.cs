@@ -253,7 +253,7 @@ namespace Caravela.Framework.Impl.Templating
                         expression.Syntax,
                         SyntaxFactory.IdentifierName( member ) )
                     .WithAdditionalAnnotations( Simplifier.Annotation ),
-                TemplateExpansionContext.Current.Compilation,
+                TemplateExpansionContext.Current.Compilation.AssertNotNull(),
                 TemplateExpansionContext.Current.SyntaxGenerationContext.ServiceProvider );
         }
 
@@ -264,7 +264,7 @@ namespace Caravela.Framework.Impl.Templating
             => TemplateExpansionContext.Current.SyntaxSerializationService.Serialize(
                 o,
                 new SyntaxSerializationContext(
-                    TemplateExpansionContext.Current.Compilation.GetCompilationModel(),
+                    TemplateExpansionContext.Current.Compilation.AssertNotNull().GetCompilationModel(),
                     TemplateExpansionContext.CurrentSyntaxGenerationContext.SyntaxGenerator ) );
 
         public static T AddSimplifierAnnotations<T>( T node )
@@ -372,6 +372,8 @@ namespace Caravela.Framework.Impl.Templating
                 return operand;
             }
         }
+
+        public static ExpressionSyntax StringLiteralExpression( string? value ) => SyntaxFactoryEx.LiteralExpression( value );
 
         public static Type GetCompileTimeType( string documentationId, string name )
             => TemplateExpansionContext.Current.SyntaxGenerationContext.ServiceProvider.GetService<CompileTimeTypeFactory>().Get( documentationId, name );

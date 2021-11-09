@@ -63,7 +63,7 @@ namespace Caravela.Compiler
                     var options = compilation.Compilation.SyntaxTrees.First().Options;
                     instrinsicsSyntaxTree = instrinsicsSyntaxTree.WithRootAndOptions( instrinsicsSyntaxTree.GetRoot(), options );
                 }
-                
+
                 transformedCompilation = transformedCompilation.WithSyntaxTreeModifications( null, new[] { instrinsicsSyntaxTree } );
             }
 

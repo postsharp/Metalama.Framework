@@ -14,16 +14,16 @@ namespace Caravela.Framework.Impl
     /// the responsibility can be put on the user. This exception type is typically not observed out of Caravela code,
     ///  and should be handled properly.
     /// </summary>
-    public sealed class InvalidUserCodeException : Exception
+    public sealed class DiagnosticException : Exception
     {
         public ImmutableArray<Diagnostic> Diagnostics { get; }
 
-        internal InvalidUserCodeException( string message, ImmutableArray<Diagnostic> diagnostics ) : base( GetMessage( message, diagnostics ) )
+        internal DiagnosticException( string message, ImmutableArray<Diagnostic> diagnostics ) : base( GetMessage( message, diagnostics ) )
         {
             this.Diagnostics = diagnostics;
         }
 
-        internal InvalidUserCodeException( Diagnostic diagnostic )
+        internal DiagnosticException( Diagnostic diagnostic )
             : base( diagnostic.ToString() )
         {
             this.Diagnostics = ImmutableArray.Create( diagnostic );

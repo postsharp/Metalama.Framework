@@ -2,6 +2,8 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Diagnostics;
+using Caravela.Framework.Impl.Collections;
+using Caravela.Framework.Impl.Pipeline;
 using Caravela.Framework.Impl.Utilities;
 using Caravela.Framework.Project;
 using System;
@@ -13,16 +15,15 @@ namespace Caravela.Framework.Impl.Diagnostics
 {
     internal class DiagnosticDefinitionDiscoveryService : IService
     {
-        private readonly CodeInvoker _userCodeInvoker;
+        private readonly IServiceProvider _serviceProvider;
+        private readonly UserCodeInvoker _userCodeInvoker;
 
         // This constructor is called in a path where no user code is involved
-        public DiagnosticDefinitionDiscoveryService()
-        {
-            this._userCodeInvoker = new CodeInvoker();
-        }
+        public DiagnosticDefinitionDiscoveryService() : this( ServiceProvider.Empty.WithServices( new UserCodeInvoker( ServiceProvider.Empty ) ) ) { }
 
         public DiagnosticDefinitionDiscoveryService( IServiceProvider serviceProvider )
         {
+            this._serviceProvider = serviceProvider;
             this._userCodeInvoker = serviceProvider.GetService<UserCodeInvoker>();
         }
 
@@ -33,12 +34,46 @@ namespace Caravela.Framework.Impl.Diagnostics
             => type.Select( this.GetDefinitions<SuppressionDefinition> ).SelectMany( d => d );
 
         private IEnumerable<T> GetDefinitions<T>( Type declaringTypes )
-            => declaringTypes.GetFields( BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic )
+            where T : class
+        {
+            T? GetFieldValue( FieldInfo f )
+            {
+                var executionContext = new UserCodeExecutionContext(
+                    this._serviceProvider,
+                    NullDiagnosticAdder.Instance,
+                    UserCodeMemberInfo.FromMemberInfo( f ) );
+
+                if ( !this._userCodeInvoker.TryInvoke( () => f.GetValue( null ), executionContext, out var value ) )
+                {
+                    return null;
+                }
+
+                return (T?) value;
+            }
+
+            T? GetPropertyValue( PropertyInfo p )
+            {
+                var executionContext = new UserCodeExecutionContext(
+                    this._serviceProvider,
+                    NullDiagnosticAdder.Instance,
+                    UserCodeMemberInfo.FromMemberInfo( p ) );
+
+                if ( !this._userCodeInvoker.TryInvoke( () => p.GetValue( null ), executionContext, out var value ) )
+                {
+                    return null;
+                }
+
+                return (T?) value;
+            }
+
+            return declaringTypes.GetFields( BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic )
                 .Where( f => typeof(T).IsAssignableFrom( f.FieldType ) )
-                .Select( f => (T) this._userCodeInvoker.Invoke( () => f.GetValue( null ) ) )
+                .Select( GetFieldValue )
                 .Concat(
                     declaringTypes.GetProperties( BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic )
                         .Where( p => typeof(T).IsAssignableFrom( p.PropertyType ) )
-                        .Select( p => (T) this._userCodeInvoker.Invoke( () => p.GetValue( null ) ) ) );
+                        .Select( GetPropertyValue ) )
+                .WhereNotNull();
+        }
     }
 }

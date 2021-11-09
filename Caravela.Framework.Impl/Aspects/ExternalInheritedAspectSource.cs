@@ -108,7 +108,12 @@ namespace Caravela.Framework.Impl.Aspects
                         throw new AssertionFailedException();
                     }
 
-                    yield return new AttributeAspectInstance( (IAspect) attributeInstance, derived, (AspectClass) aspectClass, attribute, this._loader );
+                    yield return new AttributeAspectInstance(
+                        (IAspect) attributeInstance,
+                        derived.ToRef(),
+                        (AspectClass) aspectClass,
+                        attribute,
+                        this._loader );
                 }
             }
         }

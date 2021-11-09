@@ -5,6 +5,7 @@ using Caravela.Framework.Aspects;
 using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.Aspects;
 using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Fabrics;
@@ -103,12 +104,17 @@ namespace Caravela.Framework.Impl.Pipeline
                 return false;
             }
 
+            // Create a project-level service provider.
+            var projectServiceProviderWithoutPlugins = this.ServiceProvider.WithService( loader ).WithMark( ServiceProviderMark.Project );
+            var projectServiceProviderWithProject = projectServiceProviderWithoutPlugins;
+
             // Create compiler plug-ins found in compile-time code.
             ImmutableArray<object> compilerPlugIns;
-            var projectServiceProvider = this.ServiceProvider.WithService( loader ).WithMark( ServiceProviderMark.Project );
 
             if ( compileTimeProject != null )
             {
+                projectServiceProviderWithProject = projectServiceProviderWithProject.WithService( compileTimeProject );
+
                 // The instantiation of compiler plug-ins defined in the current compilation is a bit rough here, but it is supposed to be used
                 // by our internal tests only. However, the logic will interfere with production scenario, where a plug-in will be both
                 // in ProjectOptions.PlugIns and in CompileTimeProjects.PlugInTypes. So, we do not load the plug ins found by CompileTimeProjects.PlugInTypes
@@ -121,13 +127,40 @@ namespace Caravela.Framework.Impl.Pipeline
                 var additionalPlugIns = compileTimeProject.ClosureProjects
                     .SelectMany( p => p.PlugInTypes.Select( t => (Project: p, TypeName: t) ) )
                     .Where( t => !loadedPlugInsTypes.Contains( t.TypeName ) )
-                    .Select( t => invoker.Invoke( () => Activator.CreateInstance( t.Project.GetType( t.TypeName ) ) ) )
+                    .Select(
+                        t =>
+                        {
+                            var type = t.Project.GetType( t.TypeName );
+                            var constructor = type.GetConstructor( Type.EmptyTypes );
+
+                            if ( constructor == null )
+                            {
+                                diagnosticAdder.Report( GeneralDiagnosticDescriptors.TypeMustHavePublicDefaultConstructor.CreateDiagnostic( null, type ) );
+
+                                return null;
+                            }
+
+                            var executionContext = new UserCodeExecutionContext(
+                                projectServiceProviderWithoutPlugins,
+                                diagnosticAdder,
+                                UserCodeMemberInfo.FromMemberInfo( constructor ) );
+
+                            if ( !invoker.TryInvoke( () => Activator.CreateInstance( type ), executionContext, out var instance ) )
+                            {
+                                return null;
+                            }
+                            else
+                            {
+                                return instance;
+                            }
+                        } )
+                    .WhereNotNull()
                     .ToList();
 
                 if ( additionalPlugIns.Count > 0 )
                 {
                     // If we have plug-in defined in code, we have to fork the service provider for this specific project.
-                    projectServiceProvider = projectServiceProvider.WithServices( additionalPlugIns.OfType<IService>() );
+                    projectServiceProviderWithProject = projectServiceProviderWithProject.WithServices( additionalPlugIns.OfType<IService>() );
                 }
 
                 compilerPlugIns = additionalPlugIns
@@ -139,9 +172,12 @@ namespace Caravela.Framework.Impl.Pipeline
                 compilerPlugIns = this.ProjectOptions.PlugIns;
             }
 
+            // Creates a project model that includes the final service provider.
+            var projectModel = new ProjectModel( compilation.Compilation, projectServiceProviderWithProject );
+
             // Create aspect types.
-            var driverFactory = new AspectDriverFactory( compilation.Compilation, compilerPlugIns, projectServiceProvider );
-            var aspectTypeFactory = new AspectClassMetadataFactory( projectServiceProvider, driverFactory );
+            var driverFactory = new AspectDriverFactory( compilation.Compilation, compilerPlugIns, projectServiceProviderWithProject );
+            var aspectTypeFactory = new AspectClassMetadataFactory( projectServiceProviderWithProject, driverFactory );
 
             var aspectClasses = aspectTypeFactory.GetAspectClasses( compilation.Compilation, compileTimeProject, diagnosticAdder ).ToImmutableArray();
 
@@ -164,21 +200,32 @@ namespace Caravela.Framework.Impl.Pipeline
             }
 
             ImmutableArray<OrderedAspectLayer> allOrderedAspectLayers;
-            ImmutableArray<IBoundAspectClass> allAspectClasses;
+            BoundAspectClassCollection allAspectClasses;
+
+            FabricsConfiguration? fabricsConfiguration;
 
             if ( compileTimeProject != null )
             {
-                var fabricTopLevelAspectClass = new FabricTopLevelAspectClass( projectServiceProvider, roslynCompilation, compileTimeProject );
+                var fabricTopLevelAspectClass = new FabricTopLevelAspectClass( projectServiceProviderWithProject, roslynCompilation, compileTimeProject );
                 var fabricAspectLayer = new OrderedAspectLayer( -1, fabricTopLevelAspectClass.Layer );
 
                 allOrderedAspectLayers = orderedAspectLayers.Insert( 0, fabricAspectLayer );
-                allAspectClasses = aspectClasses.As<IBoundAspectClass>().Add( fabricTopLevelAspectClass );
+                allAspectClasses = new BoundAspectClassCollection( aspectClasses.As<IBoundAspectClass>().Add( fabricTopLevelAspectClass ) );
+
+                // Execute fabrics.
+                var fabricManager = new FabricManager( allAspectClasses, this.ServiceProvider, compileTimeProject );
+                fabricsConfiguration = fabricManager.ExecuteFabrics( compileTimeProject, roslynCompilation, projectModel, diagnosticAdder );
             }
             else
             {
                 allOrderedAspectLayers = orderedAspectLayers;
-                allAspectClasses = aspectClasses.As<IBoundAspectClass>();
+                allAspectClasses = new BoundAspectClassCollection( aspectClasses.As<IBoundAspectClass>() );
+
+                fabricsConfiguration = null;
             }
+
+            // Freeze the project model to prevent any further modification of configuration.
+            projectModel.Freeze();
 
             var stages = allOrderedAspectLayers
                 .GroupAdjacent( x => GetGroupingKey( x.AspectClass.AspectDriver ) )
@@ -195,7 +242,9 @@ namespace Caravela.Framework.Impl.Pipeline
                 allOrderedAspectLayers,
                 compileTimeProject,
                 loader,
-                projectServiceProvider );
+                fabricsConfiguration,
+                projectModel,
+                projectServiceProviderWithProject );
 
             return true;
 
@@ -218,19 +267,15 @@ namespace Caravela.Framework.Impl.Pipeline
             Compilation compilation,
             CancellationToken cancellationToken )
         {
-            var aspectClasses = configuration.AspectClasses.As<IAspectClass>();
+            var aspectClasses = configuration.AspectClasses.ToImmutableArray<IAspectClass>();
 
             var sources = ImmutableArray.Create<IAspectSource>(
                 new CompilationAspectSource( aspectClasses, configuration.CompileTimeProjectLoader ),
                 new ExternalInheritedAspectSource( compilation, aspectClasses, configuration.ServiceProvider, cancellationToken ) );
 
-            if ( configuration.CompileTimeProject != null )
+            if ( configuration.FabricsConfiguration != null )
             {
-                var fabricManager = new FabricManager( configuration );
-
-                fabricManager.ExecuteFabrics( configuration.CompileTimeProject, compilation );
-
-                sources = sources.Add( fabricManager.AspectSource );
+                sources = sources.AddRange( configuration.FabricsConfiguration.AspectSources );
             }
 
             return sources;
@@ -247,19 +292,21 @@ namespace Caravela.Framework.Impl.Pipeline
             CancellationToken cancellationToken,
             [NotNullWhen( true )] out PipelineStageResult? pipelineStageResult )
         {
-            var project = new ProjectModel( compilation.Compilation, pipelineConfiguration.ServiceProvider );
-
-            if ( pipelineConfiguration.CompileTimeProject == null || pipelineConfiguration.AspectClasses.Length == 0 )
+            if ( pipelineConfiguration.CompileTimeProject == null || pipelineConfiguration.AspectClasses.Count == 0 )
             {
                 // If there is no aspect in the compilation, don't execute the pipeline.
-                pipelineStageResult = new PipelineStageResult( compilation, project, ImmutableArray<OrderedAspectLayer>.Empty );
+                pipelineStageResult = new PipelineStageResult( compilation, pipelineConfiguration.ProjectModel, ImmutableArray<OrderedAspectLayer>.Empty );
 
                 return true;
             }
 
             var aspectSources = this.CreateAspectSources( pipelineConfiguration, compilation.Compilation, cancellationToken );
 
-            pipelineStageResult = new PipelineStageResult( compilation, project, pipelineConfiguration.AspectLayers, aspectSources: aspectSources );
+            pipelineStageResult = new PipelineStageResult(
+                compilation,
+                pipelineConfiguration.ProjectModel,
+                pipelineConfiguration.AspectLayers,
+                aspectSources: aspectSources );
 
             foreach ( var stageConfiguration in pipelineConfiguration.Stages )
             {
@@ -268,7 +315,7 @@ namespace Caravela.Framework.Impl.Pipeline
                 if ( stage == null )
                 {
                     // This stage is skipped in the current pipeline (e.g. design-time).
-                    
+
                     continue;
                 }
 

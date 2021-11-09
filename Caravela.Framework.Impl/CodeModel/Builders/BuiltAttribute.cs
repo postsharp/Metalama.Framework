@@ -16,6 +16,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
             this.AttributeBuilder = builder;
         }
 
+        IDeclaration IAttribute.ContainingDeclaration => this.ContainingDeclaration.AssertNotNull();
+        
         public AttributeBuilder AttributeBuilder { get; }
 
         public override DeclarationBuilder Builder => this.AttributeBuilder;

@@ -3,18 +3,19 @@
 
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
-using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Fabrics;
 using Caravela.Framework.Impl.Aspects;
 using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.CodeModel.References;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
-using Caravela.Framework.Impl.Pipeline;
+using Caravela.Framework.Impl.Utilities;
 using Caravela.Framework.Project;
 using Caravela.Framework.Validation;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 
 namespace Caravela.Framework.Impl.Fabrics
@@ -24,15 +25,15 @@ namespace Caravela.Framework.Impl.Fabrics
     /// </summary>
     internal abstract class FabricDriver : IComparable<FabricDriver>
     {
-        protected AspectPipelineConfiguration Configuration { get; }
+        protected FabricManager FabricManager { get; }
 
-        public IFabric Fabric { get; }
+        public Fabric Fabric { get; }
 
         public Compilation Compilation { get; }
 
-        protected FabricDriver( AspectPipelineConfiguration configuration, IFabric fabric, Compilation runTimeCompilation )
+        protected FabricDriver( FabricManager fabricManager, Fabric fabric, Compilation runTimeCompilation )
         {
-            this.Configuration = configuration;
+            this.FabricManager = fabricManager;
             this.Fabric = fabric;
             this.Compilation = runTimeCompilation;
             this.OriginalPath = this.Fabric.GetType().GetCustomAttribute<OriginalPathAttribute>().AssertNotNull().Path;
@@ -48,19 +49,16 @@ namespace Caravela.Framework.Impl.Fabrics
             else
             {
                 this.FabricSymbol = (INamedTypeSymbol)
-                    configuration.ServiceProvider.GetService<ReflectionMapperFactory>().GetInstance( runTimeCompilation ).GetTypeSymbol( fabric.GetType() );
+                    fabricManager.ServiceProvider.GetService<ReflectionMapperFactory>().GetInstance( runTimeCompilation ).GetTypeSymbol( fabric.GetType() );
             }
         }
 
+        // TODO: We should not hold a symbol here because fabrics must be compilation-independent.
         public INamedTypeSymbol FabricSymbol { get; }
 
         protected string OriginalPath { get; }
 
-        public abstract void Execute( IAspectBuilderInternal aspectBuilder, FabricTemplateClass fabricTemplateClass, FabricInstance fabricInstance );
-
         public abstract FabricKind Kind { get; }
-
-        public abstract IDeclaration GetTarget( CompilationModel compilation );
 
         public int CompareTo( FabricDriver? other )
         {
@@ -101,46 +99,58 @@ namespace Caravela.Framework.Impl.Fabrics
             return string.Compare( this.FabricSymbol.Name, other.FabricSymbol.Name, StringComparison.Ordinal );
         }
 
-        protected abstract class BaseBuilder<T> : IAmender<T>
+        protected abstract class BaseAmender<T> : IAmender<T>
             where T : class, IDeclaration
         {
-            private readonly IAspectBuilderInternal _aspectBuilder;
+            // The Target property is protected (and not exposed to the API) because
             private readonly FabricInstance _fabricInstance;
-            private readonly AspectPipelineConfiguration _context;
+            private readonly Ref<T> _targetDeclaration;
+            private readonly FabricManager _fabricManager;
 
-            protected BaseBuilder(
-                T target,
-                AspectPipelineConfiguration context,
-                IAspectBuilderInternal aspectBuilder,
-                FabricInstance fabricInstance )
+            protected BaseAmender(
+                IProject project,
+                FabricManager fabricManager,
+                FabricInstance fabricInstance,
+                in Ref<T> targetDeclaration )
             {
-                this._aspectBuilder = aspectBuilder;
                 this._fabricInstance = fabricInstance;
-                this._context = context;
-                this.Target = target;
+                this._targetDeclaration = targetDeclaration;
+                this._fabricManager = fabricManager;
+                this.Project = project;
             }
 
-            public IProject Project => this.Target.Compilation.Project;
+            public IProject Project { get; }
 
-            public T Target { get; }
-
-            public IDiagnosticSink Diagnostics => this._aspectBuilder.Diagnostics;
-
-            private void RegisterAspectSource( IAspectSource aspectSource ) => this._aspectBuilder.AddAspectSource( aspectSource );
+            protected abstract void AddAspectSource( IAspectSource aspectSource );
 
             public IDeclarationSelection<TChild> WithMembers<TChild>( Func<T, IEnumerable<TChild>> selector )
                 where TChild : class, IDeclaration
-                => new DeclarationSelection<TChild>(
-                    this.Target,
-                    new AspectPredecessor( AspectPredecessorKind.Fabric, this._fabricInstance ),
-                    this.RegisterAspectSource,
-                    compilation =>
-                    {
-                        var targetDeclaration = compilation.Factory.GetDeclaration( this.Target );
+            {
+                var executionContext = UserCodeExecutionContext.Current;
 
-                        return this._context.UserCodeInvoker.Wrap( this._context.UserCodeInvoker.Invoke( () => selector( targetDeclaration ) ) );
+                return new DeclarationSelection<TChild>(
+                    this._targetDeclaration,
+                    new AspectPredecessor( AspectPredecessorKind.Fabric, this._fabricInstance ),
+                    this.AddAspectSource,
+                    ( compilation, diagnostics ) =>
+                    {
+                        var targetDeclaration = this._targetDeclaration.GetTarget( compilation ).AssertNotNull();
+
+                        if ( !this._fabricManager.UserCodeInvoker.TryInvoke(
+                            () => selector( targetDeclaration ),
+                            executionContext.WithDiagnosticAdder( diagnostics ),
+                            out var targets ) )
+                        {
+                            return Enumerable.Empty<TChild>();
+                        }
+                        else
+                        {
+                            return targets!;
+                        }
                     },
-                    this._context );
+                    this._fabricManager.AspectClasses,
+                    this._fabricManager.ServiceProvider );
+            }
 
             [Obsolete( "Not implemented." )]
             public void AddValidator( Action<ValidateDeclarationContext<T>> validator ) => throw new NotImplementedException();

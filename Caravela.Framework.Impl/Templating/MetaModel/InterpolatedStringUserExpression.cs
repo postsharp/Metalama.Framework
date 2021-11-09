@@ -53,11 +53,11 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
                 {
                     case string text:
                         textAccumulator.Append( text );
-                    
+
                         break;
 
                     case InterpolatedStringBuilder.Token token:
-                        
+
                         FlushTextToken();
 
                         contents.Add(
@@ -71,7 +71,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
                         throw new AssertionFailedException();
                 }
             }
-            
+
             FlushTextToken();
 
             var syntax = TemplateSyntaxFactory.RenderInterpolatedString(

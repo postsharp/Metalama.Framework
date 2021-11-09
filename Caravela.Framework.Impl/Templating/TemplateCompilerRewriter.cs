@@ -480,9 +480,9 @@ namespace Caravela.Framework.Impl.Templating
                     var location = this._syntaxTreeAnnotationMap.GetLocation( expression );
 
                     // Find a meaningful parent exception.
-                    var parentExpression = expression.Ancestors()
-                                               .Where( n => n is InvocationExpressionSyntax or BinaryExpressionSyntax )
-                                               .FirstOrDefault()
+                    var parentExpression = expression
+                                               .Ancestors()
+                                               .FirstOrDefault( n => n is InvocationExpressionSyntax or BinaryExpressionSyntax )
                                            ?? expression;
 
                     this.Report( TemplatingDiagnosticDescriptors.CannotUseThisInRunTimeContext.CreateDiagnostic( location, parentExpression.ToString() ) );
@@ -495,12 +495,24 @@ namespace Caravela.Framework.Impl.Templating
             // A local function that wraps the input `expression` into a LiteralExpression.
             ExpressionSyntax CreateRunTimeExpressionForLiteralCreateExpressionFactory( SyntaxKind syntaxKind )
             {
+                InvocationExpressionSyntax literalExpression;
+
+                if ( syntaxKind == SyntaxKind.StringLiteralExpression )
+                {
+                    literalExpression = InvocationExpression(
+                            this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.StringLiteralExpression) ) )
+                        .AddArgumentListArguments( Argument( expression ) );
+                }
+                else
+                {
+                    literalExpression = this.MetaSyntaxFactory.LiteralExpression(
+                        this.Transform( syntaxKind ),
+                        this.MetaSyntaxFactory.Literal( expression ) );
+                }
+
                 return InvocationExpression( this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.RuntimeExpression) ) )
                     .AddArgumentListArguments(
-                        Argument(
-                            this.MetaSyntaxFactory.LiteralExpression(
-                                this.Transform( syntaxKind ),
-                                this.MetaSyntaxFactory.Literal( expression ) ) ),
+                        Argument( literalExpression ),
                         Argument( LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( DocumentationCommentId.CreateDeclarationId( type ) ) ) ) );
             }
 

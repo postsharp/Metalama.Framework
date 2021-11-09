@@ -5,15 +5,15 @@ using Caravela.Framework.Project;
 
 namespace Caravela.Framework.Tests.PublicPipeline.Aspects.Fabrics.ProjectFabricConfigure
 {
-    internal class Fabric : IProjectFabric
+    internal class Fabric : ProjectFabric
     {
-        public void AmendProject( IProjectAmender amender )
+        public override void AmendProject( IProjectAmender amender )
         {
-            amender.Project.Data<Configuration>().Message = "Hello, world.";
+            amender.Project.Extension<Configuration>().Message = "Hello, world.";
         }
     }
 
-    internal class Configuration : ProjectData
+    internal class Configuration : ProjectExtension
     {
         public string? Message { get; set; }
     }
@@ -22,7 +22,7 @@ namespace Caravela.Framework.Tests.PublicPipeline.Aspects.Fabrics.ProjectFabricC
     {
         public override dynamic? OverrideMethod()
         {
-            Console.WriteLine( meta.Target.Project.Data<Configuration>().Message );
+            Console.WriteLine( meta.Target.Project.Extension<Configuration>().Message );
 
             return meta.Proceed();
         }

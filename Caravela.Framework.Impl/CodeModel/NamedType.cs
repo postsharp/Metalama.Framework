@@ -243,7 +243,7 @@ namespace Caravela.Framework.Impl.CodeModel
             => new GenericParameterList(
                 this,
                 this.TypeSymbol.TypeParameters
-                    .Select( DeclarationRef.FromSymbol<ITypeParameter> ) );
+                    .Select( Ref.FromSymbol<ITypeParameter> ) );
 
         [Memo]
         public INamespace Namespace => this.Compilation.Factory.GetNamespace( this.TypeSymbol.ContainingNamespace );
@@ -533,7 +533,7 @@ namespace Caravela.Framework.Impl.CodeModel
                     else
                     {
                         // Otherwise resolve the MemberRef.
-                        var resolved = replace.ReplacedMember.Resolve( this.Compilation );
+                        var resolved = replace.ReplacedMember.GetTarget( this.Compilation );
 
                         if ( resolved is TMember )
                         {

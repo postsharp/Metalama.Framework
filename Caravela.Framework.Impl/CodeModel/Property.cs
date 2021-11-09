@@ -47,7 +47,7 @@ namespace Caravela.Framework.Impl.CodeModel
         public IParameterList Parameters
             => new ParameterList(
                 this,
-                this._symbol.Parameters.Select( p => new DeclarationRef<IParameter>( p ) ) );
+                this._symbol.Parameters.Select( p => new Ref<IParameter>( p ) ) );
 
         [Memo]
         public IMethod? GetMethod => this._symbol.GetMethod == null ? null : this.Compilation.Factory.GetMethod( this._symbol.GetMethod );

@@ -7,9 +7,9 @@ using Caravela.Framework.Fabrics;
 namespace Caravela.Framework.Tests.PublicPipeline.Aspects.Fabrics.NamespaceFabricAddAspects
 {
 #pragma warning disable CS0067
-    internal class Fabric : INamespaceFabric
+    internal class Fabric : NamespaceFabric
     {
-        public void AmendNamespace(INamespaceAmender amender) => throw new System.NotSupportedException("Compile-time only code cannot be called at run-time.");
+        public override void AmendNamespace(INamespaceAmender amender) => throw new System.NotSupportedException("Compile-time only code cannot be called at run-time.");
 
     }
 #pragma warning restore CS0067

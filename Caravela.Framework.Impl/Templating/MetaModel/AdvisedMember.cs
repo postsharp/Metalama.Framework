@@ -4,6 +4,7 @@
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Aspects;
 using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.Utilities;
 using System.Reflection;
 
 namespace Caravela.Framework.Impl.Templating.MetaModel
@@ -40,6 +41,6 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
         public IUserReceiver This
             => new ThisInstanceUserReceiver(
                 this.DeclaringType,
-                new AspectReferenceSpecification( this.Underlying.GetCompilationModel().AspectLayerId, AspectReferenceOrder.Base ) );
+                new AspectReferenceSpecification( UserCodeExecutionContext.Current.AspectLayerId!.Value, AspectReferenceOrder.Base ) );
     }
 }

@@ -37,7 +37,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public IParameterList Parameters
             => new ParameterList(
                 this,
-                this.PropertyBuilder.Parameters.AsBuilderList.Select( DeclarationRef.FromBuilder<IParameter, IParameterBuilder> ) );
+                this.PropertyBuilder.Parameters.AsBuilderList.Select( Ref.FromBuilder<IParameter, IParameterBuilder> ) );
 
         public RefKind RefKind => this.PropertyBuilder.RefKind;
 
@@ -70,9 +70,9 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public PropertyInfo ToPropertyInfo() => this.PropertyBuilder.ToPropertyInfo();
 
-        IProperty IDeclarationRef<IProperty>.Resolve( CompilationModel compilation ) => (IProperty) this.GetForCompilation( compilation );
+        IProperty IRef<IProperty>.GetTarget( ICompilation compilation ) => (IProperty) this.GetForCompilation( compilation );
 
-        ISymbol IDeclarationRef<IProperty>.GetSymbol( Compilation compilation ) => throw new NotSupportedException();
+        ISymbol ISdkRef<IProperty>.GetSymbol( Compilation compilation ) => throw new NotSupportedException();
 
         public IMethod? GetAccessor( MethodKind methodKind ) => this.GetAccessorImpl( methodKind );
 

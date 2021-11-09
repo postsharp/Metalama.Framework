@@ -16,9 +16,9 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public sealed override DeclarationBuilder Builder => this.MemberBuilder;
 
-        IMember IDeclarationRef<IMember>.Resolve( CompilationModel compilation ) => throw new NotImplementedException();
+        IMember IRef<IMember>.GetTarget( ICompilation compilation ) => throw new NotImplementedException();
 
-        ISymbol IDeclarationRef<IMember>.GetSymbol( Compilation compilation ) => throw new NotImplementedException();
+        ISymbol ISdkRef<IMember>.GetSymbol( Compilation compilation ) => throw new NotImplementedException();
 
         public bool IsExplicitInterfaceImplementation => this.MemberBuilder.IsExplicitInterfaceImplementation;
 

@@ -122,7 +122,10 @@ namespace Caravela.Framework.Impl.Pipeline
                 // Add the index of inherited aspects.
                 if ( result.ExternallyInheritableAspects.Length > 0 )
                 {
-                    var inheritedAspectsManifest = InheritableAspectsManifest.Create( result.ExternallyInheritableAspects );
+                    var inheritedAspectsManifest = InheritableAspectsManifest.Create(
+                        result.ExternallyInheritableAspects,
+                        resultPartialCompilation.Compilation );
+
                     var resource = inheritedAspectsManifest.ToResource();
                     additionalResources = additionalResources.Add( resource );
                 }
@@ -132,7 +135,7 @@ namespace Caravela.Framework.Impl.Pipeline
 
                 return new CompileTimeAspectPipelineResult( syntaxTreeTransformations, additionalResources, resultingCompilation );
             }
-            catch ( InvalidUserCodeException exception )
+            catch ( DiagnosticException exception )
             {
                 foreach ( var diagnostic in exception.Diagnostics )
                 {

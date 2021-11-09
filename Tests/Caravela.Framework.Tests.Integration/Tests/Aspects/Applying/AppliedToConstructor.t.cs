@@ -1,2 +1,2 @@
 // CompileTimeAspectPipeline.TryExecute failed. 
-// Error CR0026 on `TargetClass`: `The aspect method 'MyAspect.BuildAspect' has thrown an exception of type 'Exception': System.Exception: Oops`
+// Error CR0041 on `throw new Exception( "Oops" );`: `'MyAspect.BuildAspect' threw 'Exception' when applied to 'TargetClass.TargetClass()': Oops. Exception details are in '(none)'. To attach a debugger to the compiler, use the  '-p:DebugCaravela=True' command-line option.`

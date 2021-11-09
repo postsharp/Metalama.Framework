@@ -19,7 +19,7 @@ namespace Caravela.Framework.DesignTime.Contracts
         // Note: the C# idiomatic form of this method should return a Task<IPreviewTransformationResult?>. However, we're using [ComImport] and type equivalence
         // and it does not support any generic type in argument methods. An alternative design would be to stop using ComImport and type equivalence,
         // but in this case we would need a new assembly every time we want to add an interface.
-        
+
         /// <summary>
         /// Transforms a single syntax tree in a compilation.
         /// </summary>
@@ -29,7 +29,7 @@ namespace Caravela.Framework.DesignTime.Contracts
         Task PreviewTransformationAsync(
             Compilation compilation,
             SyntaxTree syntaxTree,
-            IPreviewTransformationResult?[] result, 
+            IPreviewTransformationResult?[] result,
             CancellationToken cancellationToken );
     }
 }

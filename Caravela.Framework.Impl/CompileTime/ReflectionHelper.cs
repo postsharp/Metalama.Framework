@@ -56,7 +56,7 @@ namespace Caravela.Framework.Impl.CompileTime
             {
                 return typeParameter.Name;
             }
-            
+
             var sb = new StringBuilder();
             Append( s );
 

@@ -3,7 +3,6 @@
 
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Options;
-using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
 using System.IO;
@@ -14,21 +13,14 @@ namespace Caravela.Framework.Impl.Pipeline
     {
         public void ReportException( Exception exception, Action<Diagnostic> reportDiagnostic, out bool mustRethrow )
         {
-            var tempPath = DefaultPathOptions.Instance.CrashReportDirectory;
+            var reportFile = DefaultPathOptions.Instance.GetNewCrashReportPath();
 
-            RetryHelper.Retry(
-                () =>
-                {
-                    if ( !Directory.Exists( tempPath ) )
-                    {
-                        Directory.CreateDirectory( tempPath );
-                    }
-                } );
+            if ( reportFile != null )
+            {
+                File.WriteAllText( reportFile, exception.ToString() );
+            }
 
-            var reportFile = Path.Combine( tempPath, $"exception-{Guid.NewGuid()}.txt" );
-            File.WriteAllText( reportFile, exception.ToString() );
-
-            reportDiagnostic( GeneralDiagnosticDescriptors.UnhandledException.CreateDiagnostic( null, (exception.Message, reportFile) ) );
+            reportDiagnostic( GeneralDiagnosticDescriptors.UnhandledException.CreateDiagnostic( null, (exception.Message, reportFile ?? "(none)") ) );
             mustRethrow = false;
         }
     }

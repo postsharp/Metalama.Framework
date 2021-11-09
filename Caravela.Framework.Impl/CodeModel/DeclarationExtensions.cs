@@ -92,7 +92,7 @@ namespace Caravela.Framework.Impl.CodeModel
             };
 
         public static IEnumerable<AttributeRef> ToAttributeLinks( this IEnumerable<AttributeData> attributes, ISymbol declaringSymbol )
-            => attributes.Select( a => new AttributeRef( a, DeclarationRef.FromSymbol( declaringSymbol ) ) );
+            => attributes.Select( a => new AttributeRef( a, Ref.FromSymbol( declaringSymbol ) ) );
 
         public static IEnumerable<AttributeRef> GetAllAttributes( this ISymbol symbol )
             => symbol switch
@@ -102,13 +102,13 @@ namespace Caravela.Framework.Impl.CodeModel
                     .ToAttributeLinks( method )
                     .Concat(
                         method.GetReturnTypeAttributes()
-                            .Select( a => new AttributeRef( a, DeclarationRef.ReturnParameter( method ) ) ) ),
+                            .Select( a => new AttributeRef( a, Ref.ReturnParameter( method ) ) ) ),
                 _ => symbol.GetAttributes().ToAttributeLinks( symbol )
             };
 
-        public static DeclarationRef<IDeclaration> ToRef( this ISymbol symbol ) => DeclarationRef.FromSymbol( symbol );
+        public static Ref<IDeclaration> ToRef( this ISymbol symbol ) => Ref.FromSymbol( symbol );
 
-        public static DeclarationRef<T> ToRef<T>( this T declaration )
+        public static Ref<T> ToRef<T>( this T declaration )
             where T : class, IDeclaration
             => ((IDeclarationImpl) declaration).ToRef().As<T>();
 
@@ -184,7 +184,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
                         if ( !arg.IsReferenceable )
                         {
-                            throw new InvalidUserCodeException(
+                            throw new DiagnosticException(
                                 GeneralDiagnosticDescriptors.CannotPassExpressionToByRefParameter.CreateDiagnostic(
                                     null,
                                     (arg.Syntax.ToString(), parameter.Name, parameter.DeclaringMember) ) );

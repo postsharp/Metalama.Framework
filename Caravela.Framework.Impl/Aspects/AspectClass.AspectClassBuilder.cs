@@ -30,7 +30,7 @@ namespace Caravela.Framework.Impl.Aspects
                             UserMessageFormatter.Format(
                                 $"Cannot set the IsInherited property to true because the aspect class '{this._parent.ShortName}' does not derive from System.Attribute." ) );
                     }
-                    
+
                     this._parent.IsInherited = value;
                 }
             }

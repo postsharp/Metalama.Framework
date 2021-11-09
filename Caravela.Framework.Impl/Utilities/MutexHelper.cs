@@ -21,7 +21,7 @@ namespace Caravela.Framework.Impl.Utilities
         private static Mutex CreateGlobalMutex( string fullName )
         {
             var mutexName = "Global\\Caravela_" + HashUtilities.HashString( fullName );
-            
+
             Logger.Instance?.Write( $"  Mutex name: '{mutexName}'." );
 
             return new Mutex( false, mutexName );

@@ -44,7 +44,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization
 
             var d = new Dictionary<object, object>();
             d.Add( d, "20" );
-            Assert.Throws<InvalidUserCodeException>( () => testContext.Serialize( d ) );
+            Assert.Throws<DiagnosticException>( () => testContext.Serialize( d ) );
         }
 
         [Fact]
@@ -54,7 +54,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization
 
             var d = new Dictionary<object, object>();
             d.Add( "20", d );
-            Assert.Throws<InvalidUserCodeException>( () => testContext.Serialize( d ) );
+            Assert.Throws<DiagnosticException>( () => testContext.Serialize( d ) );
         }
 
         [Fact]
@@ -102,7 +102,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization
         public void TestStringDictionaryWithUnknownComparer()
         {
             // fallback to default comparer
-            Assert.Throws<InvalidUserCodeException>(
+            Assert.Throws<DiagnosticException>(
                 () => this.AssertSerialization(
                     "new global::System.Collections.Generic.Dictionary<global::System.String, global::System.Object>{}",
                     new Dictionary<string, object>( StringComparer.Create( new CultureInfo( "sk-SK" ), false ) ) ) );
@@ -111,7 +111,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization
         [Fact]
         public void TestStringDictionaryWithUnknownComparer2()
         {
-            Assert.Throws<InvalidUserCodeException>(
+            Assert.Throws<DiagnosticException>(
                 () =>
 
                     // fallback to default comparer
@@ -123,7 +123,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization
         [Fact]
         public void TestIntDictionaryWithUnknownComparer()
         {
-            Assert.Throws<InvalidUserCodeException>(
+            Assert.Throws<DiagnosticException>(
                 () =>
 
                     // fallback to default comparer
