@@ -1,37 +1,28 @@
 ﻿using PostSharp.Engineering.BuildTools.Console;
+using Spectre.Console;
+using Spectre.Console.Cli;
 using System;
-using System.CommandLine;
-using System.CommandLine.Invocation;
 using System.IO;
 using System.Xml;
-using Spectre.Console;
 
 namespace PostSharp.Engineering.BuildTools.Commands.Csproj
 {
-    public class AddProjectReferenceCommand : Command
+    public class AddProjectReferenceCommand : Command<AddProjectReferenceSettings>
     {
-        public AddProjectReferenceCommand() : base( "apr",
-            "Adds a project reference next to another project reference in all projects matching a filter." )
+        public override int Execute( CommandContext context, AddProjectReferenceSettings settings )
         {
-            this.AddArgument( new Argument<string>( "existing", "Existing reference file name" ) );
-            this.AddArgument( new Argument<string>( "new", "Added reference path" ) );
-            this.AddArgument( new Argument<string?>( "filter", () => null, "Project name filter" ) );
+            var console = new ConsoleHelper();
 
-            this.Handler = CommandHandler.Create<InvocationContext, string, string, string>( Execute );
-        }
-
-        public static int Execute( InvocationContext context, string existing, string @new, string filter )
-        {
-            var console = new ConsoleHelper( context.Console );
-            
-            foreach ( var project in Directory.EnumerateFiles( Directory.GetCurrentDirectory(), $"*{filter}*.csproj",
+            foreach ( var project in Directory.EnumerateFiles( Directory.GetCurrentDirectory(),
+                $"*{settings.Filter}*.csproj",
                 SearchOption.AllDirectories ) )
             {
-                AddReference( console, project, existing, @new );
+                AddReference( console, project, settings.PreviousReference, settings.NewReference );
             }
 
             return 0;
         }
+
 
         private static void AddReference( ConsoleHelper console, string project, string existingReference,
             string newReference )

@@ -14,6 +14,7 @@
 
     <ItemGroup>
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="3.11.0" />
+        <PackageReference Include="Microsoft.Extensions.FileSystemGlobbing" Version="6.0.0" />
         <PackageReference Include="NuGet.Versioning" Version="5.8.1" />
         <PackageReference Include="Spectre.Console" Version="0.42.0" />
         <PackageReference Include="System.CommandLine" Version="2.0.0-beta1.20574.7" />

@@ -1,28 +1,25 @@
 ﻿using PostSharp.Engineering.BuildTools.Build;
-using PostSharp.Engineering.BuildTools.Console;
-using System.CommandLine.Invocation;
+using Spectre.Console.Cli;
+using System.ComponentModel;
 
 namespace PostSharp.Engineering.BuildTools.Commands.Build
 {
-    public class BuildCommand : BaseBuildCommand
+    public class BuildOptions : CommonOptions
     {
-        public BuildCommand( Product product ) : base( product, "build", "Build the whole product" )
+        [Description( "Signs the assemblies and packages" )]
+        [CommandOption( "--sign" )]
+        public bool Sign { get; }
+    }
+    public class BuildCommand : BaseProductCommand<BuildOptions>
+    {
+        protected override int ExecuteCore( BuildContext buildContext, BuildOptions options )
         {
-            this.Handler =
-                CommandHandler.Create<InvocationContext, BuildConfiguration, int, bool, Verbosity>( this.Execute );
-        }
-
-        public int Execute( InvocationContext context, BuildConfiguration configuration, int number, bool @public,
-            Verbosity verbosity )
-        {
-            var buildOptions = new BuildOptions( VersionSpec.Create( number, @public ), configuration, verbosity );
-            
-            if ( !BuildContext.TryCreate( context, buildOptions, out var buildContext ) )
+            if ( !buildContext.Product.Build( buildContext, options ) )
             {
-                return 1;
+                return 2;
             }
-            
-            this.Product.Build( buildContext );
+
+
             return 0;
         }
     }

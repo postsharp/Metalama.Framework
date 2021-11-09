@@ -1,18 +1,18 @@
-﻿using PostSharp.Engineering.BuildTools;
-using PostSharp.Engineering.BuildTools.Console;
+﻿using PostSharp.Engineering.BuildTools.Console;
+using Spectre.Console;
 using System;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Threading;
-using Spectre.Console;
 
 namespace PostSharp.MSBuild
 {
     internal static class ToolInvocationHelper
     {
-        public static bool InvokeTool( ConsoleHelper console, string fileName, string commandLine, string workingDirectory,
+        public static bool InvokeTool( ConsoleHelper console, string fileName, string commandLine,
+            string workingDirectory,
             CancellationToken cancellationToken = default,
             params (string key, string value)[] environmentVariables )
         {
@@ -33,7 +33,8 @@ namespace PostSharp.MSBuild
             }
         }
 
-        public static bool InvokeTool( ConsoleHelper console, string fileName, string commandLine, string workingDirectory,
+        public static bool InvokeTool( ConsoleHelper console, string fileName, string commandLine,
+            string workingDirectory,
             CancellationToken cancellationToken,
             out int exitCode, params (string key, string value)[] environmentVariables )
         {
@@ -58,7 +59,8 @@ namespace PostSharp.MSBuild
 
         // #16205 We don't allow cancellation here because there's no other working way to wait for a process exit
         // than Process.WaitForExit() on .NET Core when capturing process output.
-        public static bool InvokeTool( ConsoleHelper console, string fileName, string commandLine, string workingDirectory,
+        public static bool InvokeTool( ConsoleHelper console, string fileName, string commandLine,
+            string workingDirectory,
             out int exitCode, out string output,
             params (string key, string value)[] environmentVariables )
         {
@@ -89,7 +91,8 @@ namespace PostSharp.MSBuild
             return success && exitCode == 0;
         }
 
-        private static bool InvokeTool( ConsoleHelper console, string fileName, string commandLine, string workingDirectory,
+        private static bool InvokeTool( ConsoleHelper console, string fileName, string commandLine,
+            string workingDirectory,
             CancellationToken? cancellationToken, out int exitCode, Action<string> handleErrorData,
             Action<string> handleOutputData, params (string key, string value)[] environmentVariables )
         {
@@ -170,7 +173,8 @@ namespace PostSharp.MSBuild
                     }
                 };
 
-                console.WriteMessage( "Executing \"{0}\" {1}", process.StartInfo.FileName, process.StartInfo.Arguments );
+                console.WriteMessage( "Executing \"{0}\" {1}", process.StartInfo.FileName,
+                    process.StartInfo.Arguments );
 
                 using ( process )
                 {

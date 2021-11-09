@@ -1,3 +1,5 @@
+using PostSharp.Engineering.BuildTools.Commands.Build;
+
 namespace PostSharp.Engineering.BuildTools.Build
 {
     public abstract class Solution
@@ -6,10 +8,10 @@ namespace PostSharp.Engineering.BuildTools.Build
         public bool CanTest { get; }
         public bool CanPack { get; }
 
-        public abstract void Build( BuildContext context );
-        public abstract void Test( BuildContext context, bool includeCoverage );
-        public abstract void Restore( BuildContext context );
-        public abstract void Pack( BuildContext context );
+        public abstract bool Build( BuildContext context, CommonOptions options );
+        public abstract bool Test( BuildContext context, TestOptions options );
+        public abstract bool Restore( BuildContext context, CommonOptions options );
+        public abstract bool Pack( BuildContext context, CommonOptions options );
 
         protected Solution( string path, bool canTest, bool canPack )
         {

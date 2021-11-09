@@ -1,5 +1,5 @@
 ﻿using Spectre.Console;
-using System.CommandLine;
+using System.IO;
 
 namespace PostSharp.Engineering.BuildTools.Console
 {
@@ -13,12 +13,12 @@ namespace PostSharp.Engineering.BuildTools.Console
 
         public void WriteError( string message )
         {
-            this.Error.MarkupLine( $"[red]{message}[/]" );
+            this.Error.MarkupLine( $"[red]{message.EscapeMarkup()}[/]" );
         }
 
         public void WriteWarning( string message )
         {
-            this.Out.MarkupLine( $"[warning]{message}[/]" );
+            this.Out.MarkupLine( $"[warning]{message.EscapeMarkup()}[/]" );
         }
 
         public void WriteWarning( string format, params object[] args ) =>
@@ -26,7 +26,7 @@ namespace PostSharp.Engineering.BuildTools.Console
 
         public void WriteMessage( string message )
         {
-            this.Out.WriteLine( message );
+            this.Out.MarkupLine( "[dim]" + message.EscapeMarkup() + "[/]" );
         }
 
         public void WriteMessage( string format, params object[] args ) =>
@@ -35,7 +35,7 @@ namespace PostSharp.Engineering.BuildTools.Console
 
         public void WriteImportantMessage( string message )
         {
-            this.Out.MarkupLine( "[bold]" + message + "[/]" );
+            this.Out.MarkupLine( "[bold]" + message.EscapeMarkup() + "[/]" );
         }
 
         public void WriteImportantMessage( string format, params object[] args ) =>
@@ -44,23 +44,23 @@ namespace PostSharp.Engineering.BuildTools.Console
 
         public void WriteSuccess( string message )
         {
-            this.Out.MarkupLine( $"[green]{message}[/]" );
+            this.Out.MarkupLine( $"[green]{message.EscapeMarkup()}[/]" );
         }
 
         public void WriteHeading( string message )
         {
-            this.Out.MarkupLine( $"[bold underline cyan]{message}[/]" );
+            this.Out.MarkupLine( $"[bold underline cyan]{message.EscapeMarkup()}[/]" );
         }
 
-        public ConsoleHelper( IConsole console )
+        public ConsoleHelper()
         {
             var factory = new AnsiConsoleFactory();
-            this.Out = factory.Create( new AnsiConsoleSettings()
-            {
-                Out = new AnsiConsoleOutputWrapper( console.Out )
-            } );
-            this.Error =
-                factory.Create( new AnsiConsoleSettings() { Out = new AnsiConsoleOutputWrapper( console.Error ) } );
+
+            IAnsiConsole CreateConsole( TextWriter writer )
+                => factory.Create( new AnsiConsoleSettings { Out = new AnsiConsoleOutputWrapper( writer ) } );
+
+            this.Out = CreateConsole( System.Console.Out );
+            this.Error = CreateConsole( System.Console.Error );
         }
     }
 }

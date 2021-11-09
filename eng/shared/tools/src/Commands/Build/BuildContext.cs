@@ -1,31 +1,31 @@
 using PostSharp.Engineering.BuildTools.Console;
+using Spectre.Console.Cli;
 using System;
-using System.CommandLine.Invocation;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
-using System.Text;
 
 namespace PostSharp.Engineering.BuildTools.Build
 {
     public class BuildContext
     {
-        public BuildOptions Options { get; }
         public ConsoleHelper Console { get; }
 
         public string RepoDirectory { get; }
 
-        private BuildContext( BuildOptions options, ConsoleHelper console, string repoDirectory )
+        public Product Product { get; }
+
+        private BuildContext( ConsoleHelper console, string repoDirectory, Product product )
         {
-            this.Options = options;
             this.Console = console;
             this.RepoDirectory = repoDirectory;
+            this.Product = product;
         }
 
-        public static bool TryCreate( InvocationContext invocationContext, BuildOptions options,
+        public static bool TryCreate( CommandContext commandContext,
             [NotNullWhen( true )] out BuildContext? buildContext )
         {
-            var console = new ConsoleHelper( invocationContext.Console );
             var repoDirectory = FindRepoDirectory( Environment.CurrentDirectory );
+            var console = new ConsoleHelper();
 
             if ( repoDirectory == null )
             {
@@ -34,13 +34,13 @@ namespace PostSharp.Engineering.BuildTools.Build
                 return false;
             }
 
-            buildContext = new BuildContext( options, console, repoDirectory );
+            buildContext = new BuildContext( console, repoDirectory, (Product) commandContext.Data! );
             return true;
         }
 
         private static string? FindRepoDirectory( string directory )
         {
-            if ( File.Exists( Path.Combine( directory, ".git" ) ) )
+            if ( Directory.Exists( Path.Combine( directory, ".git" ) ) )
             {
                 return directory;
             }

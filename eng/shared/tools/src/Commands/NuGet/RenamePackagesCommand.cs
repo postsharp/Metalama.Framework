@@ -1,6 +1,5 @@
 ﻿using PostSharp.Engineering.BuildTools.Console;
-using System.CommandLine;
-using System.CommandLine.Invocation;
+using Spectre.Console.Cli;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
@@ -10,24 +9,15 @@ using System.Xml.XPath;
 
 namespace PostSharp.Engineering.BuildTools.Commands.NuGet
 {
-    internal class RenamePackagesCommand : Command
+    public class RenamePackagesCommand : Command<RenamePackageSettings>
     {
-        public RenamePackagesCommand() : base( "rename", "Rename NuGet packages in a directory" )
+        public override int Execute( CommandContext context, RenamePackageSettings settings )
         {
-            this.AddOption(
-                new Option( "-d", "Directory containing the packages" )
-                {
-                    Name = "directory", IsRequired = true, Argument = new Argument<DirectoryInfo>()
-                } );
+            var console = new ConsoleHelper();
 
-            this.Handler = CommandHandler.Create<InvocationContext, DirectoryInfo>( Execute );
-        }
-
-        public static int Execute( InvocationContext context, DirectoryInfo directory )
-        {
-            var console = new ConsoleHelper( context.Console );
-            
             var success = true;
+
+            var directory = new DirectoryInfo( settings.Directory );
 
             var files = Directory.GetFiles( directory.FullName, "Microsoft.*.nupkg" );
 
@@ -57,7 +47,7 @@ namespace PostSharp.Engineering.BuildTools.Commands.NuGet
 
             using var archive = ZipFile.Open( outputPath, ZipArchiveMode.Update );
 
-            var oldNuspecEntry = archive.Entries.Single( entry => entry.FullName.EndsWith( ".nuspec" ) );
+            var oldNuspecEntry = archive.Entries.SingleOrDefault( entry => entry.FullName.EndsWith( ".nuspec" ) );
 
             if ( oldNuspecEntry == null )
             {

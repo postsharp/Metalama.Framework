@@ -1,8 +1,7 @@
 ﻿using NuGet.Versioning;
 using PostSharp.Engineering.BuildTools.Console;
+using Spectre.Console.Cli;
 using System.Collections.Generic;
-using System.CommandLine;
-using System.CommandLine.Invocation;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
@@ -13,43 +12,46 @@ using System.Xml.XPath;
 
 namespace PostSharp.Engineering.BuildTools.Commands.NuGet
 {
-    internal class VerifyPackageCommand : Command
+    internal class VerifyPublicPackageCommand : Command<VerifyPackageSettings>
     {
         private static readonly Dictionary<string, bool> _cache = new();
 
-        public VerifyPackageCommand() : base( "verify", "Verifies all packages in a directory." )
-        {
-            this.AddOption(
-                new Option( "-d", "Directory containing the packages" )
-                {
-                    Name = "directory", IsRequired = true, Argument = new Argument<DirectoryInfo>()
-                } );
 
-            this.Handler = CommandHandler.Create<InvocationContext, DirectoryInfo>( Execute );
+        public override int Execute( CommandContext context, VerifyPackageSettings settings )
+        {
+            var console = new ConsoleHelper();
+            return Execute(console, settings) ? 0 : 1;
         }
 
-        public static int Execute( InvocationContext context, DirectoryInfo directory )
+        public static bool Execute(ConsoleHelper console, VerifyPackageSettings settings)
         {
-            var console = new ConsoleHelper( context.Console );
+            console.WriteHeading( "Verifying public packages." );
             var success = true;
 
-            var files = Directory.GetFiles( directory.FullName, "*.nupkg" );
+            var directory = new DirectoryInfo(settings.Directory);
 
-            if ( files.Length == 0 )
+            var files = Directory.GetFiles(directory.FullName, "*.nupkg");
+
+            if (files.Length == 0)
             {
-                context.Console.Error.Write( $"No matching package found in '{directory.FullName}'." );
-                return 1;
+                console.WriteError($"No matching package found in '{directory.FullName}'.");
+                return false;
             }
 
-            foreach ( var file in files )
+            foreach (var file in files)
             {
-                success &= VerifyPackage( console, directory.FullName, file );
+                success &= ProcessPackage(console, directory.FullName, file);
             }
 
-            return success ? 0 : 2;
+            if ( success )
+            {
+                console.WriteSuccess( "Signing artifacts was successful: no private dependency found." );
+            }
+
+            return success;
         }
 
-        private static bool VerifyPackage( ConsoleHelper console, string directory, string inputPath )
+        private static bool ProcessPackage( ConsoleHelper console, string directory, string inputPath )
         {
             var inputShortPath = Path.GetFileName( inputPath );
 
@@ -57,7 +59,7 @@ namespace PostSharp.Engineering.BuildTools.Commands.NuGet
 
             using var archive = ZipFile.Open( inputPath, ZipArchiveMode.Read );
 
-            var nuspecEntry = archive.Entries.Single( entry => entry.FullName.EndsWith( ".nuspec" ) );
+            var nuspecEntry = archive.Entries.SingleOrDefault( entry => entry.FullName.EndsWith( ".nuspec" ) );
 
             if ( nuspecEntry == null )
             {
@@ -80,6 +82,7 @@ namespace PostSharp.Engineering.BuildTools.Commands.NuGet
 
             var httpClient = new HttpClient();
 
+            // Verify dependencies.
             foreach ( var dependency in nuspecXml.XPathSelectElements( "//p:dependency", namespaceManager ) )
             {
                 // Get dependency id and version.
@@ -115,7 +118,6 @@ namespace PostSharp.Engineering.BuildTools.Commands.NuGet
                         console.WriteError(
                             $"{inputShortPath}: {dependentId} {versionRangeString} is not public." );
                         success = false;
-                        continue;
                     }
                 }
             }

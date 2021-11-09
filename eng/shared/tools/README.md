@@ -5,10 +5,10 @@ Make sure you have read and understood [PostSharp Engineering](../README.md) bef
 ## Table of contents
 
 - [PostSharp Engineering: Build Tools](#postsharp-engineering-build-tools)
-	- [Table of contents](#table-of-contents)
-	- [Introduction](#introduction)
-	- [Building](#building)
-	- [Using the tools](#using-the-tools)
+    - [Table of contents](#table-of-contents)
+    - [Introduction](#introduction)
+    - [Building](#building)
+    - [Using the tools](#using-the-tools)
 
 ## Introduction
 
@@ -24,4 +24,4 @@ Use the `BuildTools.ps1` script.
 
 2. Run the tool. See the help.
 
-	```tools\postsharp-eng```
+   ```tools\postsharp-eng```

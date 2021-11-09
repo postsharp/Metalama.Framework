@@ -3,9 +3,8 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 using PostSharp.Engineering.BuildTools.Console;
+using Spectre.Console.Cli;
 using System.Collections.Generic;
-using System.CommandLine;
-using System.CommandLine.Invocation;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
@@ -13,22 +12,15 @@ using System.Text.RegularExpressions;
 
 namespace PostSharp.Engineering.BuildTools.Commands.Coverage
 {
-    public class WarnCommand : Command
+    public class AnalyzeCoverageCommand : Command<AnalyzeCoverageSettings>
     {
-        public WarnCommand() : base( "warn", "Emit warnings based on a test coverage report" )
+        public override int Execute( CommandContext context, AnalyzeCoverageSettings settings )
         {
-            this.AddArgument( new Argument<string>( "path", "Path to the OpenCover xml file" ) );
+            ConsoleHelper console = new();
 
-            this.Handler = CommandHandler.Create<InvocationContext, string>( this.Execute );
-        }
-
-        private void Execute( InvocationContext context, string path )
-        {
-            ConsoleHelper console = new ConsoleHelper( context.Console );
-            
             var totalInvalidDeclarations = 0;
 
-            var document = JsonDocument.Parse( File.ReadAllText( path ) );
+            var document = JsonDocument.Parse( File.ReadAllText( settings.Path ) );
 
             foreach ( var packageNode in document.RootElement.EnumerateObject() )
             {
@@ -37,10 +29,10 @@ namespace PostSharp.Engineering.BuildTools.Commands.Coverage
 
             console.WriteImportantMessage(
                 $"The whole solution has {totalInvalidDeclarations} declaration(s) with insufficient test coverage." );
-            context.ResultCode = totalInvalidDeclarations == 0 ? 0 : 1;
+            return totalInvalidDeclarations == 0 ? 0 : 1;
         }
 
-        private void ProcessPackage(ConsoleHelper console, JsonProperty packageNode,
+        private void ProcessPackage( ConsoleHelper console, JsonProperty packageNode,
             ref int totalInvalidDeclarations )
         {
             var invalidDeclarations = 0;
