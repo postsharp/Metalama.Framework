@@ -14,7 +14,9 @@
     <None Include="build\Caravela.Framework.Sdk.targets" Pack="true" PackagePath="build" />
 
     <InternalsVisibleTo Include="Caravela.Framework.Impl" />
-    
+    <InternalsVisibleTo Include="Caravela.Framework.Tests.UnitTests.Internals" />
+    <InternalsVisibleTo Include="Caravela.Framework.Tests.Integration.Internals" />
+        
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="$(RoslynVersion)" />
     <PackageReference Include="Caravela.Compiler.Sdk" Version="$(CaravelaCompilerVersion)" />
     <ProjectReference Include="..\Caravela.Framework\Caravela.Framework.csproj" />
