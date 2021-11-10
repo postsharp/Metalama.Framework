@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Aspects;
+using Caravela.Framework.Validation;
 
 namespace Caravela.Framework.Diagnostics
 {
@@ -10,5 +11,6 @@ namespace Caravela.Framework.Diagnostics
     /// </summary>
     /// <seealso href="@diagnostics"/>
     [CompileTimeOnly]
+    [InternalImplement]
     public interface IDiagnosticLocation { }
 }
