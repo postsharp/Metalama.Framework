@@ -9,7 +9,6 @@ using System;
 using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
-using System.Threading;
 
 namespace PostSharp.Engineering.BuildTools.Commands.Build
 {
@@ -45,7 +44,7 @@ namespace PostSharp.Engineering.BuildTools.Commands.Build
                 }
 
                 // We have to read the version from the file we have generated - using MSBuild, because it contains properties.
-                var packageVersion = this.ReadPackageVersion(context);
+                var packageVersion = this.ReadPackageVersion( context );
 
 
                 // Copy artifacts.
@@ -97,7 +96,8 @@ namespace PostSharp.Engineering.BuildTools.Commands.Build
                     // Restore signing tools.
                     var restoreTool = Path.Combine( context.RepoDirectory, "eng", "shared", "tools", "Restore.ps1" );
                     var signTool = Path.Combine( context.RepoDirectory, "tools", "SignClient.exe" );
-                    var signToolConfig = Path.Combine( context.RepoDirectory, "eng", "shared", "tools", "signclient-appsettings.json" );
+                    var signToolConfig = Path.Combine( context.RepoDirectory, "eng", "shared", "tools",
+                        "signclient-appsettings.json" );
                     var signToolSecret = Environment.GetEnvironmentVariable( "SIGNSERVER_SECRET" );
 
                     if ( signToolSecret == null )
@@ -105,7 +105,7 @@ namespace PostSharp.Engineering.BuildTools.Commands.Build
                         context.Console.WriteError( "The SIGNSERVER_SECRET environment variable is not defined." );
                         return false;
                     }
-                    
+
                     if ( !ToolInvocationHelper.InvokePowershell( context.Console, restoreTool, "SignClient",
                         context.RepoDirectory ) )
                     {
@@ -134,7 +134,7 @@ namespace PostSharp.Engineering.BuildTools.Commands.Build
                     {
                         return false;
                     }
-                    
+
                     context.Console.WriteSuccess( "Signing artifacts was successful." );
                 }
             }
@@ -149,11 +149,11 @@ namespace PostSharp.Engineering.BuildTools.Commands.Build
             return true;
         }
 
-        private string? ReadPackageVersion(BuildContext context)
+        private string? ReadPackageVersion( BuildContext context )
         {
             var versionFilePath = context.VersionFilePath;
-            var versionFile = Project.FromFile(versionFilePath, new ProjectOptions());
-            var packageVersion = versionFile.Properties.Single(p => p.Name == this.ProductName + "Version")
+            var versionFile = Project.FromFile( versionFilePath, new ProjectOptions() );
+            var packageVersion = versionFile.Properties.Single( p => p.Name == this.ProductName + "Version" )
                 .EvaluatedValue;
             ProjectCollection.GlobalProjectCollection.UnloadAllProjects();
             return packageVersion;
@@ -200,7 +200,7 @@ namespace PostSharp.Engineering.BuildTools.Commands.Build
 
         public bool Test( BuildContext context, TestOptions options )
         {
-            if ( !options.NoDependencies && !this.Build( context, (BuildOptions)options.WithIncludeTests( true ) ) )
+            if ( !options.NoDependencies && !this.Build( context, (BuildOptions) options.WithIncludeTests( true ) ) )
             {
                 return false;
             }
@@ -211,12 +211,14 @@ namespace PostSharp.Engineering.BuildTools.Commands.Build
             if ( options.AnalyzeCoverage )
             {
                 // Removing the TestResults directory so that we reset the code coverage information.
-                if ( Directory.Exists( testResultsDir ) ) {
+                if ( Directory.Exists( testResultsDir ) )
+                {
                     Directory.Delete( testResultsDir, true );
                 }
+
                 properties = options.AnalyzeCoverage
-                    ? ImmutableDictionary.Create<string,string>()
-                        .Add( "CollectCoverage", "True")
+                    ? ImmutableDictionary.Create<string, string>()
+                        .Add( "CollectCoverage", "True" )
                         .Add( "CoverletOutput", testResultsDir + "\\" )
                     : ImmutableDictionary<string, string>.Empty;
             }
@@ -226,19 +228,20 @@ namespace PostSharp.Engineering.BuildTools.Commands.Build
             }
 
 
-           
-
             foreach ( var solution in this.Solutions )
             {
                 var solutionOptions = options;
-                
+
                 if ( options.AnalyzeCoverage && solution.SupportsTestCoverage )
                 {
-                    solutionOptions = (TestOptions)options.WithAdditionalProperties( properties ).WithoutConcurrency();
+                    solutionOptions = (TestOptions) options.WithAdditionalProperties( properties ).WithoutConcurrency();
                 }
-                
+
                 context.Console.WriteHeading( $"Testing {solution.Name}." );
-                solution.Test( context, solutionOptions );
+                if ( !solution.Test( context, solutionOptions ) )
+                {
+                    return false;
+                }
                 context.Console.WriteSuccess( $"Testing {solution.Name} was successful" );
             }
 
@@ -259,7 +262,7 @@ namespace PostSharp.Engineering.BuildTools.Commands.Build
         public bool Prepare( BuildContext context, CommonOptions options )
         {
             context.Console.WriteHeading( "Preparing the version file" );
-            
+
             var timestamp = DateTime.Now.ToString( "MMdd.HHmmss" );
             var configuration = options.Configuration.ToString().ToLower();
 
@@ -299,7 +302,7 @@ namespace PostSharp.Engineering.BuildTools.Commands.Build
                         packageVersion = $"$(MainVersion)-{packageVersionSuffix}";
                         assemblyVersion = $"$(MainVersion).{localVersion}";
 
-                        
+
                         break;
                     }
                 case VersionKind.Numbered:
@@ -326,7 +329,7 @@ namespace PostSharp.Engineering.BuildTools.Commands.Build
 
             context.Console.WriteMessage( $"Writing '{propsFilePath}'." );
             File.WriteAllText( propsFilePath, props );
-            
+
             context.Console.WriteSuccess(
                 $"Preparing the version file was successful. {this.ProductName}Version={this.ReadPackageVersion( context )}" );
 

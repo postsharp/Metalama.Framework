@@ -30,19 +30,20 @@ namespace PostSharp.Engineering.BuildTools.Commands.Build
         [Description( "Determines wether test-only assemblies should be included in the operation" )]
         [CommandOption( "--include-tests" )]
         public bool IncludeTests { get; protected set; }
-        
-        [Description("Disables concurrent processing")]
-        [CommandOption("--no-concurrency")]
-        public bool NoConcurrency { get; protected set; }
-        
 
-        public ImmutableDictionary<string,string> Properties { get; protected set; } = ImmutableDictionary<string, string>.Empty;
-        
+        [Description( "Disables concurrent processing" )]
+        [CommandOption( "--no-concurrency" )]
+        public bool NoConcurrency { get; protected set; }
+
+
+        public ImmutableDictionary<string, string> Properties { get; protected set; } =
+            ImmutableDictionary<string, string>.Empty;
+
         public CommonOptions WithIncludeTests( bool value )
         {
             var clone = (CommonOptions) this.MemberwiseClone();
             clone.IncludeTests = value;
-            
+
             return clone;
         }
 
@@ -50,24 +51,24 @@ namespace PostSharp.Engineering.BuildTools.Commands.Build
         {
             var clone = (CommonOptions) this.MemberwiseClone();
             clone.NoConcurrency = true;
-            
+
             return clone;
         }
 
-        
+
         public CommonOptions WithAdditionalProperties( ImmutableDictionary<string, string> properties )
         {
             if ( properties.IsEmpty )
             {
                 return this;
             }
-            
+
             var clone = (CommonOptions) this.MemberwiseClone();
             clone.Properties = clone.Properties.AddRange( properties );
 
             return clone;
         }
-   
+
 
         public VersionSpec VersionSpec => this.BuildNumber > 0
             ? new VersionSpec( VersionKind.Numbered, this.BuildNumber )

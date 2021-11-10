@@ -6,7 +6,7 @@ using PostSharp.Engineering.BuildTools.Commands.Build;
 using Spectre.Console.Cli;
 using System.Collections.Immutable;
 
-namespace BuildCaravela
+namespace Build
 {
     internal class Program
     {
@@ -16,10 +16,7 @@ namespace BuildCaravela
             {
                 ProductName = "Caravela",
                 Solutions = ImmutableArray.Create<Solution>(
-                    new DotNetSolution( "Caravela.sln" )
-                    {
-                        SupportsTestCoverage = true
-                    },
+                    new DotNetSolution( "Caravela.sln" ) { SupportsTestCoverage = true },
                     new DotNetSolution( "Tests\\Caravela.Framework.TestApp\\Caravela.Framework.TestApp.sln" )
                     {
                         IsTestOnly = true

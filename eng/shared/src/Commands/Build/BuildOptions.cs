@@ -8,7 +8,5 @@ namespace PostSharp.Engineering.BuildTools.Commands.Build
         [Description( "Signs the assemblies and packages" )]
         [CommandOption( "--sign" )]
         public bool Sign { get; init; }
-
-     
     }
 }

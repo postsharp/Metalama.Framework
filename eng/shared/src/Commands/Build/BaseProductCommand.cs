@@ -14,31 +14,25 @@ namespace PostSharp.Engineering.BuildTools.Commands.Build
         {
             try
             {
-
                 var stopwatch = Stopwatch.StartNew();
-            
-            if ( !BuildContext.TryCreate( context, out var buildContext ) )
-            {
-                return 1;
-            }
-            else
-            {
-                
-                buildContext.Console.Out.Write( new FigletText( buildContext.Product.ProductName )
-                    .LeftAligned()
-                    .Color( Color.Purple ) );
 
-                int exitCode;
+                if ( !BuildContext.TryCreate( context, out var buildContext ) )
+                {
+                    return 1;
+                }
+                else
+                {
+                    buildContext.Console.Out.Write( new FigletText( buildContext.Product.ProductName )
+                        .LeftAligned()
+                        .Color( Color.Purple ) );
 
-              
-                    exitCode = this.ExecuteCore( buildContext, settings );
-               
-                
-                
-                buildContext.Console.WriteMessage( $"Finished at {DateTime.Now} after {stopwatch.Elapsed}." );
 
-                return exitCode;
-            }
+                    var exitCode = this.ExecuteCore( buildContext, settings );
+
+                    buildContext.Console.WriteMessage( $"Finished at {DateTime.Now} after {stopwatch.Elapsed}." );
+
+                    return exitCode;
+                }
             }
             catch ( Exception ex )
             {

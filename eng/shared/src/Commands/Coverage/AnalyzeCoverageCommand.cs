@@ -20,24 +20,24 @@ namespace PostSharp.Engineering.BuildTools.Commands.Coverage
         {
             ConsoleHelper console = new();
 
-            return Execute(console, settings)  ? 0 : 1 ;
+            return Execute( console, settings ) ? 0 : 1;
         }
 
-        public static bool Execute(ConsoleHelper console, AnalyzeCoverageSettings settings)
+        public static bool Execute( ConsoleHelper console, AnalyzeCoverageSettings settings )
         {
             console.WriteHeading( "Analyzing test coverage" );
-            
+
             var totalInvalidDeclarations = 0;
 
-            var document = JsonDocument.Parse(File.ReadAllText(settings.Path));
+            var document = JsonDocument.Parse( File.ReadAllText( settings.Path ) );
 
-            foreach (var packageNode in document.RootElement.EnumerateObject())
+            foreach ( var packageNode in document.RootElement.EnumerateObject() )
             {
-                ProcessPackage(console, packageNode, ref totalInvalidDeclarations);
+                ProcessPackage( console, packageNode, ref totalInvalidDeclarations );
             }
 
             console.WriteImportantMessage(
-                $"The whole solution has {totalInvalidDeclarations} declaration(s) with insufficient test coverage.");
+                $"The whole solution has {totalInvalidDeclarations} declaration(s) with insufficient test coverage." );
             return totalInvalidDeclarations == 0;
         }
 

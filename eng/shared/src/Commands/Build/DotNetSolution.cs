@@ -23,18 +23,19 @@ namespace PostSharp.Engineering.BuildTools.Commands.Build
         public override bool Restore( BuildContext context, CommonOptions options ) =>
             this.RunDotNet( context, options, "restore" );
 
-        private bool RunDotNet( BuildContext context, CommonOptions options, string command,  string arguments = "" )
+        private bool RunDotNet( BuildContext context, CommonOptions options, string command, string arguments = "" )
         {
             var argsBuilder = new StringBuilder();
             var path = Path.Combine( context.RepoDirectory, this.SolutionPath );
-            argsBuilder.Append( $"{command} -p:Configuration={options.Configuration} \"{path}\" -v:{options.Verbosity.ToAlias()} --nologo" );
+            argsBuilder.Append(
+                $"{command} -p:Configuration={options.Configuration} \"{path}\" -v:{options.Verbosity.ToAlias()} --nologo" );
 
             if ( options.NoConcurrency )
             {
                 argsBuilder.Append( " -m:1" );
             }
 
-            foreach ( var property in options.Properties) 
+            foreach ( var property in options.Properties )
             {
                 argsBuilder.Append( $" -p:{property.Key}={property.Value}" );
             }
@@ -45,7 +46,7 @@ namespace PostSharp.Engineering.BuildTools.Commands.Build
             }
 
             return ToolInvocationHelper.InvokeTool( context.Console, "dotnet",
-argsBuilder.ToString(),
+                argsBuilder.ToString(),
                 Environment.CurrentDirectory );
         }
     }

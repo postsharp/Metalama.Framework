@@ -10,11 +10,5 @@ namespace PostSharp.Engineering.BuildTools.Commands.Build
             this.Kind = kind;
             this.Number = number;
         }
-
-        public static VersionSpec Create( int number, bool isPublic ) => isPublic
-            ? new VersionSpec( VersionKind.Public )
-            : number > 0
-                ? new VersionSpec( VersionKind.Numbered, number )
-                : new VersionSpec( VersionKind.Local );
     }
 }

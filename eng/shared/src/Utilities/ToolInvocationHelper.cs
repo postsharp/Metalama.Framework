@@ -18,7 +18,7 @@ namespace PostSharp.Engineering.BuildTools.Utilities
             return InvokeTool( console, "powershell", $"-NonInteractive -File {fileName} {commandLine}",
                 workingDirectory, CancellationToken.None );
         }
-        
+
         public static bool InvokeTool( ConsoleHelper console, string fileName, string commandLine,
             string workingDirectory,
             CancellationToken cancellationToken = default,
@@ -75,7 +75,6 @@ namespace PostSharp.Engineering.BuildTools.Utilities
                                 console.WriteMessage( s );
                             }
                         }
-                      
                     },
                     environmentVariables );
         }
@@ -164,7 +163,6 @@ namespace PostSharp.Engineering.BuildTools.Utilities
                     {
                         if ( args.Data == null )
                         {
-                            
                             stdErrorClosed.Set();
                         }
                         else
