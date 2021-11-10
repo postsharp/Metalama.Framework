@@ -808,16 +808,68 @@ namespace Caravela.Framework.Impl.CompileTime
 
             public override SyntaxToken VisitToken( SyntaxToken token ) => this._templateCompiler.LocationAnnotationMap.AddLocationAnnotation( token );
 
+            public override SyntaxNode? VisitQualifiedName( QualifiedNameSyntax node )
+            {
+                // Fully qualify type names and namespaces.
+                
+                var symbol = this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetSymbolInfo( node ).Symbol;
+
+                if ( symbol is INamespaceOrTypeSymbol namespaceOrType )
+                {
+                    return OurSyntaxGenerator.CompileTime.NameExpression( namespaceOrType ).WithTriviaFrom( node );
+                }
+
+                return base.VisitQualifiedName( node );
+            }
+
+            public override SyntaxNode? VisitMemberAccessExpression( MemberAccessExpressionSyntax node )
+            {
+                // Fully qualify type names and namespaces.
+                
+                var symbol = this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetSymbolInfo( node ).Symbol;
+
+                if ( symbol is INamespaceOrTypeSymbol namespaceOrType )
+                {
+                    return OurSyntaxGenerator.CompileTime.NameExpression( namespaceOrType ).WithTriviaFrom( node );
+                }
+
+                return base.VisitMemberAccessExpression( node );
+            }
+
             public override SyntaxNode? VisitIdentifierName( IdentifierNameSyntax node )
             {
                 if ( node.Identifier.Text == "dynamic" )
                 {
                     return PredefinedType( Token( SyntaxKind.ObjectKeyword ) ).WithTriviaFrom( node );
                 }
-                else
+                else if ( node.Identifier.Kind() == SyntaxKind.IdentifierToken && !node.IsVar )
                 {
-                    return base.VisitIdentifierName( node );
+                    // Fully qualifies simple identifiers.
+                    
+                    var symbol = this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetSymbolInfo( node ).Symbol;
+
+                    if ( symbol is INamespaceOrTypeSymbol namespaceOrType )
+                    {
+                        return OurSyntaxGenerator.CompileTime.NameExpression( namespaceOrType ).WithTriviaFrom( node );
+                    }
+                    else if ( symbol is { IsStatic: true } && node.Parent is not MemberAccessExpressionSyntax && node.Parent is not AliasQualifiedNameSyntax )
+                    {
+                        switch ( symbol.Kind )
+                        {
+                            case SymbolKind.Field:
+                            case SymbolKind.Property:
+                            case SymbolKind.Event:
+                            case SymbolKind.Method:
+                                // We have an access to a field or method with a "using static", or a non-qualified static member access.
+                                return MemberAccessExpression(
+                                    SyntaxKind.SimpleMemberAccessExpression,
+                                    OurSyntaxGenerator.CompileTime.NameExpression( symbol.ContainingType ),
+                                    IdentifierName( node.Identifier.Text ) );
+                        }
+                    }
                 }
+
+                return base.VisitIdentifierName( node );
             }
 
             protected override T RewriteThrowNotSupported<T>( T node ) => ReplaceDynamicToObjectRewriter.Rewrite( node );

@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading;
@@ -49,11 +50,33 @@ namespace Caravela.Framework.CompilerExtensions
                             // Extract embedded assemblies to a temp directory.
                             ExtractEmbeddedAssemblies( currentAssembly );
 
+                            // Caravela.Try already has a copy of the exact same Caravela assemblies loaded in the AppDomain. If this happens, we don't load
+                            // a different copy, but we take the existing one. We first index the AppDomain assemblies by name, then we compare.
+                            var existingAssemblies = AppDomain.CurrentDomain.GetAssemblies()
+                                .Select( x => (Name: x.GetName(), Assembly: x) )
+#if DEBUG                                
+                                .OrderBy( x => x.Name.Name )
+#endif
+                                .ToList();
+                            
                             // Load assemblies from the temp directory.
                             foreach ( var file in Directory.GetFiles( _snapshotDirectory, "*.dll" ) )
                             {
-                                var assembly = Assembly.LoadFile( file );
-                                _embeddedAssemblies[assembly.GetName().Name] = Assembly.LoadFile( file );
+                                var assemblyName = AssemblyName.GetAssemblyName( file );
+
+                                var assembly = existingAssemblies.FirstOrDefault(
+                                        x => AssemblyName.ReferenceMatchesDefinition( assemblyName, x.Name )
+                                             && x.Name.Version == assemblyName.Version )
+                                    .Assembly;
+
+                                if ( assembly == null )
+                                {
+                                    // If the assembly is not yet loaded, load it now.
+                                    assembly = Assembly.LoadFile( file );
+                                }
+
+                                // Index the assembly even if we did not load it ourselves.
+                                _embeddedAssemblies[assemblyName.Name] = assembly;
                             }
 
                             _caravelaImplementationAssembly = _embeddedAssemblies["Caravela.Framework.Impl"];
