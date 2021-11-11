@@ -145,7 +145,7 @@ namespace Caravela.Framework.Impl.Fabrics
                         }
                         else
                         {
-                            return targets!;
+                            return targets;
                         }
                     },
                     this._fabricManager.AspectClasses,

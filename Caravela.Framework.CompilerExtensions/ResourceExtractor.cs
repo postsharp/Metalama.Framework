@@ -55,23 +55,27 @@ namespace Caravela.Framework.CompilerExtensions
                             ExtractEmbeddedAssemblies( currentAssembly );
 
                             // Load assemblies from the temp directory.
+                            AssemblyName? caravelaImplementationAssemblyName = null;
+
                             foreach ( var file in Directory.GetFiles( _snapshotDirectory, "*.dll" ) )
                             {
+                                // We don't load assemblies using Assembly.LoadFile here, because the assemblies may be loaded in
+                                // the main load context, or may be loaded later. We will use Assembly.LoadFile in last chance in the AssemblyResolve event.
+                                // This scenario is used in Caravela.Try.
+
                                 var assemblyName = AssemblyName.GetAssemblyName( file );
 
                                 // Index the assembly even if we did not load it ourselves.
                                 _embeddedAssemblies[assemblyName.Name] = (file, assemblyName);
 
-                                // We don't load assemblies using Assembly.LoadFile here, because the assemblies may be loaded in
-                                // the main load context, or may be loaded later. We will use Assembly.LoadFile in last chance in the AssemblyResolve event.
-                                // This scenario is used in Caravela.Try.
-
                                 if ( assemblyName.Name == "Caravela.Framework.Impl" )
                                 {
-                                    // Attempt to use the main assembly in the default context. If it does not work, this will trigger an AssemblyResolve event.
-                                    _caravelaImplementationAssembly = Assembly.Load( assemblyName );
+                                    caravelaImplementationAssemblyName = assemblyName;
                                 }
                             }
+
+                            // Attempt to use the main assembly in the default context. If it does not work, this will trigger an AssemblyResolve event.
+                            _caravelaImplementationAssembly = Assembly.Load( caravelaImplementationAssemblyName );
 
                             _initialized = true;
                         }
@@ -193,7 +197,7 @@ namespace Caravela.Framework.CompilerExtensions
                                    existingAssemblyName.Version == requestedAssemblyName.Version;
                         } );
 
-                if ( existingAssembly == null )
+                if ( existingAssembly != null )
                 {
                     return existingAssembly;
                 }
