@@ -43,7 +43,7 @@ namespace Caravela.Framework.Impl.DesignTime
                 if ( !buildOptions.DesignTimeEnabled )
                 {
                     // Execute the fallback.
-                    Logger.Instance?.Write( $"DesignTimeSourceGenerator.Execute('{compilation.AssemblyName}'): DesignTimeEnabled is false, will output fallback files from {buildOptions.AuxiliaryFileDirectoryPath}." );
+                    Logger.Instance?.Write( $"DesignTimeSourceGenerator.Execute('{compilation.AssemblyName}'): DesignTimeEnabled is false, will output fallback files from {buildOptions.AuxiliaryFilePath}." );
 
                     ExecuteFallback( context, buildOptions );
 
@@ -87,7 +87,7 @@ namespace Caravela.Framework.Impl.DesignTime
             var serviceProvider = ServiceProvider.Empty.WithServices( buildOptions );
             var auxiliaryFileProvider = new AuxiliaryFileProvider( serviceProvider );
 
-            if ( buildOptions.AuxiliaryFileDirectoryPath == null)
+            if ( buildOptions.AuxiliaryFilePath == null)
             {
                 return;
             }

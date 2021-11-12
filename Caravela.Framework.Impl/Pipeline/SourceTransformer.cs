@@ -84,16 +84,19 @@ namespace Caravela.Framework.Impl.Pipeline
             {
                 var existingAuxiliaryFiles = new HashSet<string>();
 
-                foreach ( var existingAuxiliaryFile in Directory.GetFiles( projectOptions.AuxiliaryFileDirectoryPath, "*", SearchOption.AllDirectories ) )
+                if ( Directory.Exists( projectOptions.AuxiliaryFilePath ) )
                 {
-                    existingAuxiliaryFiles.Add( existingAuxiliaryFile );
+                    foreach ( var existingAuxiliaryFile in Directory.GetFiles( projectOptions.AuxiliaryFilePath, "*", SearchOption.AllDirectories ) )
+                    {
+                        existingAuxiliaryFiles.Add( existingAuxiliaryFile );
+                    }
                 }
 
                 var finalAuxiliaryFiles = new HashSet<string>();
 
-                foreach ( var auxiliaryFile in pipelineResult.AuxiliaryFiles )
+                foreach ( var file in pipelineResult.AuxiliaryFiles )
                 {
-                    var fullPath = Path.GetFullPath( Path.Combine( projectOptions.AuxiliaryFileDirectoryPath, auxiliaryFile.Kind.ToString(), auxiliaryFile.Path ) );
+                    var fullPath = GetAuxiliaryFileFullPath( file );
                     finalAuxiliaryFiles.Add( fullPath );
                 }
 
@@ -102,12 +105,14 @@ namespace Caravela.Framework.Impl.Pipeline
                     File.Delete( deletedAuxiliaryFile );
                 }
 
-                foreach ( var auxiliaryFile in pipelineResult.AuxiliaryFiles )
+                foreach ( var file in pipelineResult.AuxiliaryFiles )
                 {
-                    var fullPath = Path.Combine( projectOptions.AuxiliaryFileDirectoryPath, auxiliaryFile.Kind.ToString(), auxiliaryFile.Path );
+                    var fullPath = GetAuxiliaryFileFullPath( file );
                     Directory.CreateDirectory( Path.GetDirectoryName( fullPath ) );
-                    File.WriteAllBytes( fullPath, auxiliaryFile.Content );
+                    File.WriteAllBytes( fullPath, file.Content );
                 }
+
+                string GetAuxiliaryFileFullPath( AuxiliaryFile file ) => Path.Combine( projectOptions.AuxiliaryFilePath, file.Kind.ToString(), file.Path );
             }
             catch
             {

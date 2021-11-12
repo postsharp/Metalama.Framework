@@ -61,6 +61,6 @@ namespace Caravela.Framework.Impl.Options
         /// <summary>
         /// Gets a path to a directory that contains initial auxiliary files.
         /// </summary>
-        string? AuxiliaryFileDirectoryPath { get; }
+        string? AuxiliaryFilePath { get; }
     }
 }

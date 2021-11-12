@@ -77,7 +77,7 @@ namespace Caravela.TestFramework
 
         public bool DesignTimeEnabled => true;
 
-        public string? AuxiliaryFileDirectoryPath => null;
+        public string? AuxiliaryFilePath => null;
 
         public bool TryGetProperty( string name, [NotNullWhen( true )] out string? value ) => this._properties.TryGetValue( name, out value );
 

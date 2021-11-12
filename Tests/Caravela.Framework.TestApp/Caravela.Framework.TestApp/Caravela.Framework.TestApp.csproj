@@ -6,6 +6,7 @@
     <CaravelaEmitCompilerTransformedFiles>true</CaravelaEmitCompilerTransformedFiles>
     <CaravelaDebugTransformedCode>true</CaravelaDebugTransformedCode>
     <EnforceCodeStyleInBuild>False</EnforceCodeStyleInBuild>
+    <CaravelaDesignTimeEnabled>False</CaravelaDesignTimeEnabled>
   </PropertyGroup>
 
   <ItemGroup>

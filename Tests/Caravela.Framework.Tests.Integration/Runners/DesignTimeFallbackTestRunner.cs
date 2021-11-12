@@ -145,7 +145,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
 
             public bool DesignTimeEnabled => false;
 
-            public string? AuxiliaryFileDirectoryPath => null;
+            public string? AuxiliaryFilePath => null;
 
             public bool DebugCompilerProcess => this._underlying.DebugCompilerProcess;
 

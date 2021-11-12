@@ -51,6 +51,6 @@ namespace Caravela.Framework.Impl.DesignTime.Preview
 
         bool IProjectOptions.DesignTimeEnabled => true;
 
-        string? IProjectOptions.AuxiliaryFileDirectoryPath => null;
+        string? IProjectOptions.AuxiliaryFilePath => null;
     }
 }

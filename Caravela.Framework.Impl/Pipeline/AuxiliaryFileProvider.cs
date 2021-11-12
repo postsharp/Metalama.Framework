@@ -22,14 +22,14 @@ namespace Caravela.Framework.Impl.Pipeline
         {
             var buildOptions = this._serviceProvider.GetOptionalService<IProjectOptions>();
 
-            if (buildOptions == null || buildOptions.AuxiliaryFileDirectoryPath == null )
+            if (buildOptions == null || buildOptions.AuxiliaryFilePath == null )
             {
                 return ImmutableArray<AuxiliaryFile>.Empty;
             }
 
             var builder = ImmutableArray<AuxiliaryFile>.Empty.ToBuilder();
 
-            foreach (var kindDirectory in Directory.GetDirectories(buildOptions.AuxiliaryFileDirectoryPath))
+            foreach (var kindDirectory in Directory.GetDirectories(buildOptions.AuxiliaryFilePath))
             {
                 if (!Enum.TryParse<AuxiliaryFileKind>(Path.GetFileName(kindDirectory), out var kind))
                 {
@@ -44,7 +44,7 @@ namespace Caravela.Framework.Impl.Pipeline
                     var fileNormalized = Path.GetFullPath( file );
                     var relativePath = fileNormalized.Substring( kindDirectoryNormalized.Length + 1 );
 
-                    builder.Add( new ExistingAuxiliaryFile( buildOptions.AuxiliaryFileDirectoryPath, kind, relativePath ) );
+                    builder.Add( new ExistingAuxiliaryFile( buildOptions.AuxiliaryFilePath, kind, relativePath ) );
                 }
             }
 

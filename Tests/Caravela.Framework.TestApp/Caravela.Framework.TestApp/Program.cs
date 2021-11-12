@@ -14,12 +14,11 @@ namespace Caravela.Framework.TestApp
         [SuppressWarning]
         private static async Task MethodAsync()
         {
-            
         }
 
         private static void Main()
         {
-            //Console.WriteLine( $"x={x}" ); 
+            //Console.WriteLine( $"x={x}" );
 
             int x = 0;
 
@@ -36,12 +35,12 @@ namespace Caravela.Framework.TestApp
             PrintDebugInfo();
 
             PrintArray();
-            
+
             Cancel();
         }
 
         private void Method() { }
-        
+
         [SwallowExceptionsAspect]
         [PrintDebugInfoAspect]
         public static void MethodWithTwoAspects()

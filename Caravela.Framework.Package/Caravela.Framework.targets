@@ -18,12 +18,14 @@
         <CaravelaAuxiliaryFilePath>$(MSBuildProjectDirectory)\$(IntermediateOutputPath)\caravela-aux\</CaravelaAuxiliaryFilePath>
     </PropertyGroup>
 
-    <!-- Design time fallback. -->
-    <ItemGroup Condition="'$(CaravelaDesignTimeEnabled)' == 'False' AND '$(DesignTimeBuild)' == 'True'">
+    <!-- Design time fallback dependency that forces rerun of analyzers/source generators when changed. -->    
+    <PropertyGroup>
         <CaravelaDesignTimeFallbackTouchFile>$(CaravelaAuxiliaryFilePath)DesignTimeFallback\.touch</CaravelaDesignTimeFallbackTouchFile>
+    </PropertyGroup>
+
+    <ItemGroup Condition="'$(DesignTimeBuild)' == 'True'">
         <AdditionalFiles Include="$(CaravelaDesignTimeFallbackTouchFile)" />
     </ItemGroup>
-
 
     <Target Name="ExportCaravelaFrameworkProperties" BeforeTargets="PrepareForBuild">
         <Error Text="The IntermediateOutputPath property is not defined." Condition="'$(IntermediateOutputPath)'==''" />
