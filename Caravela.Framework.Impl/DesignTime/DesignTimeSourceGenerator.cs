@@ -36,23 +36,23 @@ namespace Caravela.Framework.Impl.DesignTime
                 // TODO: Skip (or use different code) if design time exp is disabled.
                 Logger.Instance?.Write( $"DesignTimeSourceGenerator.Execute('{compilation.AssemblyName}')." );
 
-                var buildOptions = new ProjectOptions( context.AnalyzerConfigOptions );
+                var projectOptions = new ProjectOptions( context.AnalyzerConfigOptions );
 
-                DebuggingHelper.AttachDebugger( buildOptions );
+                DebuggingHelper.AttachDebugger( projectOptions );
 
-                if ( !buildOptions.DesignTimeEnabled )
+                if ( !projectOptions.DesignTimeEnabled )
                 {
                     // Execute the fallback.
-                    Logger.Instance?.Write( $"DesignTimeSourceGenerator.Execute('{compilation.AssemblyName}'): DesignTimeEnabled is false, will output fallback files from {buildOptions.AuxiliaryFilePath}." );
+                    Logger.Instance?.Write( $"DesignTimeSourceGenerator.Execute('{compilation.AssemblyName}'): DesignTimeEnabled is false, will output fallback files from {projectOptions.AuxiliaryFilePath}." );
 
-                    ExecuteFallback( context, buildOptions );
+                    ExecuteFallback( context, projectOptions );
 
                     return;
                 }
 
                 // Execute the pipeline.
                 if ( !DesignTimeAspectPipelineFactory.Instance.TryExecute(
-                    buildOptions,
+                    projectOptions,
                     compilation,
                     context.CancellationToken,
                     out var compilationResult ) )
@@ -82,12 +82,12 @@ namespace Caravela.Framework.Impl.DesignTime
             }
         }
 
-        private static void ExecuteFallback( GeneratorExecutionContext context, IProjectOptions buildOptions )
+        private static void ExecuteFallback( GeneratorExecutionContext context, IProjectOptions projectOptions )
         {
-            var serviceProvider = ServiceProvider.Empty.WithServices( buildOptions );
+            var serviceProvider = ServiceProvider.Empty.WithServices( projectOptions );
             var auxiliaryFileProvider = new AuxiliaryFileProvider( serviceProvider );
 
-            if ( buildOptions.AuxiliaryFilePath == null)
+            if ( projectOptions.AuxiliaryFilePath == null)
             {
                 return;
             }

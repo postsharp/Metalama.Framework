@@ -20,16 +20,16 @@ namespace Caravela.Framework.Impl.Pipeline
 
         public ImmutableArray<AuxiliaryFile> GetAuxiliaryFiles()
         {
-            var buildOptions = this._serviceProvider.GetOptionalService<IProjectOptions>();
+            var projectOptions = this._serviceProvider.GetOptionalService<IProjectOptions>();
 
-            if (buildOptions == null || buildOptions.AuxiliaryFilePath == null )
+            if (projectOptions == null || projectOptions.AuxiliaryFilePath == null )
             {
                 return ImmutableArray<AuxiliaryFile>.Empty;
             }
 
             var builder = ImmutableArray<AuxiliaryFile>.Empty.ToBuilder();
 
-            foreach (var kindDirectory in Directory.GetDirectories(buildOptions.AuxiliaryFilePath))
+            foreach (var kindDirectory in Directory.GetDirectories(projectOptions.AuxiliaryFilePath))
             {
                 if (!Enum.TryParse<AuxiliaryFileKind>(Path.GetFileName(kindDirectory), out var kind))
                 {
@@ -44,7 +44,7 @@ namespace Caravela.Framework.Impl.Pipeline
                     var fileNormalized = Path.GetFullPath( file );
                     var relativePath = fileNormalized.Substring( kindDirectoryNormalized.Length + 1 );
 
-                    builder.Add( new ExistingAuxiliaryFile( buildOptions.AuxiliaryFilePath, kind, relativePath ) );
+                    builder.Add( new ExistingAuxiliaryFile( projectOptions.AuxiliaryFilePath, kind, relativePath ) );
                 }
             }
 

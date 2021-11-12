@@ -70,14 +70,14 @@ namespace Caravela.Framework.Impl.DesignTime
             try
             {
                 // Execute the analysis that are not performed in the pipeline.
-                var buildOptions = new ProjectOptions( context.Options.AnalyzerConfigOptionsProvider );
+                var projectOptions = new ProjectOptions( context.Options.AnalyzerConfigOptionsProvider );
 
                 var syntaxTreeFilePath = context.SemanticModel.SyntaxTree.FilePath;
                 Logger.Instance?.Write( $"DesignTimeAnalyzer.AnalyzeSemanticModel('{syntaxTreeFilePath}')" );
 
-                DebuggingHelper.AttachDebugger( buildOptions );
+                DebuggingHelper.AttachDebugger( projectOptions );
 
-                if ( !buildOptions.DesignTimeEnabled )
+                if ( !projectOptions.DesignTimeEnabled )
                 {
                     Logger.Instance?.Write( $"DesignTimeAnalyzer.AnalyzeSemanticModel: design time experience is disabled." );
                     return;
@@ -87,7 +87,7 @@ namespace Caravela.Framework.Impl.DesignTime
                 var compilation = context.SemanticModel.Compilation;
 
                 if ( !DesignTimeAspectPipelineFactory.Instance.TryExecute(
-                    buildOptions,
+                    projectOptions,
                     compilation,
                     context.CancellationToken,
                     out var compilationResult ) )
@@ -129,7 +129,7 @@ namespace Caravela.Framework.Impl.DesignTime
 
                 // Perform additional analysis not done by the design-time pipeline.
                 var pipeline = DesignTimeAspectPipelineFactory.Instance.GetOrCreatePipeline(
-                    buildOptions,
+                    projectOptions,
                     context.SemanticModel.Compilation,
                     context.CancellationToken );
 

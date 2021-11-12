@@ -53,12 +53,12 @@ namespace Caravela.Framework.Impl.Pipeline
 
             var linkerResult = linker.ToResult();
 
-            var buildOptions = this.ServiceProvider.GetOptionalService<IProjectOptions>();
+            var projectOptions = this.ServiceProvider.GetOptionalService<IProjectOptions>();
             IReadOnlyList<AuxiliaryFile>? fallbackFiles = null;
 
-            if ( buildOptions != null && !buildOptions.DesignTimeEnabled )
+            if ( projectOptions != null && !projectOptions.DesignTimeEnabled )
             {
-                fallbackFiles = this.GenerateDesignTimeFallbackFiles( pipelineConfiguration, input, buildOptions.AssertNotNull(), cancellationToken );
+                fallbackFiles = this.GenerateDesignTimeFallbackFiles( pipelineConfiguration, input, projectOptions.AssertNotNull(), cancellationToken );
             }
 
             return new PipelineStageResult(
