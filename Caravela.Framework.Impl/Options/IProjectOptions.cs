@@ -52,5 +52,15 @@ namespace Caravela.Framework.Impl.Options
         IProjectOptions Apply( IProjectOptions options );
 
         bool TryGetProperty( string name, [NotNullWhen( true )] out string? value );
+
+        /// <summary>
+        /// Gets a value indicating whether the design time experience for the source generator is enabled.
+        /// </summary>
+        bool DesignTimeEnabled { get; }
+
+        /// <summary>
+        /// Gets a path to a directory that contains initial auxiliary files.
+        /// </summary>
+        string? AuxiliaryFileDirectoryPath { get; }
     }
 }

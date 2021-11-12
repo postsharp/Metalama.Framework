@@ -6,8 +6,11 @@ using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Options;
 using Caravela.Framework.Project;
 using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
+using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -53,6 +56,8 @@ namespace Caravela.Framework.Impl.Pipeline
                     context.AddResources( pipelineResult.AdditionalResources );
                     context.AddSyntaxTreeTransformations( pipelineResult.SyntaxTreeTransformations );
                 }
+
+                HandleAuxiliaryFiles( projectOptions, pipelineResult );
             }
             catch ( Exception e )
             {
@@ -65,6 +70,48 @@ namespace Caravela.Framework.Impl.Pipeline
                 {
                     throw;
                 }
+            }
+        }
+
+        private static void HandleAuxiliaryFiles( IProjectOptions projectOptions, CompileTimeAspectPipelineResult? pipelineResult )
+        {
+            if ( pipelineResult == null )
+            {
+                return;
+            }
+
+            try
+            {
+                var existingAuxiliaryFiles = new HashSet<string>();
+
+                foreach ( var existingAuxiliaryFile in Directory.GetFiles( projectOptions.AuxiliaryFileDirectoryPath, "*", SearchOption.AllDirectories ) )
+                {
+                    existingAuxiliaryFiles.Add( existingAuxiliaryFile );
+                }
+
+                var finalAuxiliaryFiles = new HashSet<string>();
+
+                foreach ( var auxiliaryFile in pipelineResult.AuxiliaryFiles )
+                {
+                    var fullPath = Path.GetFullPath( Path.Combine( projectOptions.AuxiliaryFileDirectoryPath, auxiliaryFile.Kind.ToString(), auxiliaryFile.Path ) );
+                    finalAuxiliaryFiles.Add( fullPath );
+                }
+
+                foreach ( var deletedAuxiliaryFile in existingAuxiliaryFiles.Except( finalAuxiliaryFiles ) )
+                {
+                    File.Delete( deletedAuxiliaryFile );
+                }
+
+                foreach ( var auxiliaryFile in pipelineResult.AuxiliaryFiles )
+                {
+                    var fullPath = Path.Combine( projectOptions.AuxiliaryFileDirectoryPath, auxiliaryFile.Kind.ToString(), auxiliaryFile.Path );
+                    Directory.CreateDirectory( Path.GetDirectoryName( fullPath ) );
+                    File.WriteAllBytes( fullPath, auxiliaryFile.Content );
+                }
+            }
+            catch
+            {
+                // TODO: Warn.
             }
         }
     }

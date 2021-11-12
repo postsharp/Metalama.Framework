@@ -57,6 +57,12 @@ namespace Caravela.Framework.Impl.Options
 
         public string? Configuration => this.GetStringOption( "TargetFramework" );
 
+        public bool DesignTimeEnabled => this.GetBooleanOption( "CaravelaDesignTimeEnabled", true );
+
+        public string? AuxiliaryFileDirectoryPath => this.GetStringOption( "CaravelaDesignTimeFallbackPath" );
+
+        public string? DesignTimeFallbackTouchFile => this.GetStringOption( "CaravelaDesignTimeFallbackTouchFile" );
+
         public bool TryGetProperty( string name, [NotNullWhen( true )] out string? value )
         {
             value = this.GetStringOption( name );

@@ -1,0 +1,3 @@
+{
+  "TestRunnerFactoryType": "Caravela.Framework.Tests.Integration.Runners.DesignTimeFallbackTestRunnerFactory, Caravela.Framework.Tests.Integration"
+}

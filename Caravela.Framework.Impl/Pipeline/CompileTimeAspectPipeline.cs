@@ -82,7 +82,8 @@ namespace Caravela.Framework.Impl.Pipeline
                 return new CompileTimeAspectPipelineResult(
                     ImmutableArray<SyntaxTreeTransformation>.Empty,
                     ImmutableArray<ManagedResource>.Empty,
-                    compilation );
+                    compilation,
+                    ImmutableArray<AuxiliaryFile>.Empty );
             }
 
             try
@@ -133,7 +134,7 @@ namespace Caravela.Framework.Impl.Pipeline
                 var resultingCompilation = (PartialCompilation) RunTimeAssemblyRewriter.Rewrite( resultPartialCompilation, this.ServiceProvider );
                 var syntaxTreeTransformations = resultingCompilation.ToTransformations();
 
-                return new CompileTimeAspectPipelineResult( syntaxTreeTransformations, additionalResources, resultingCompilation );
+                return new CompileTimeAspectPipelineResult( syntaxTreeTransformations, additionalResources, resultingCompilation, result.AuxiliaryFiles );
             }
             catch ( DiagnosticException exception )
             {

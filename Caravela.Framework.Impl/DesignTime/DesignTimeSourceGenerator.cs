@@ -4,11 +4,15 @@
 using Caravela.Compiler;
 using Caravela.Framework.Impl.DesignTime.Pipeline;
 using Caravela.Framework.Impl.Options;
+using Caravela.Framework.Impl.Pipeline;
 using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.Text;
 using System;
 using System.Diagnostics.CodeAnalysis;
+using System.IO;
+using System.Linq;
 
 namespace Caravela.Framework.Impl.DesignTime
 {
@@ -29,11 +33,22 @@ namespace Caravela.Framework.Impl.DesignTime
 
             try
             {
+                // TODO: Skip (or use different code) if design time exp is disabled.
                 Logger.Instance?.Write( $"DesignTimeSourceGenerator.Execute('{compilation.AssemblyName}')." );
 
                 var buildOptions = new ProjectOptions( context.AnalyzerConfigOptions );
 
                 DebuggingHelper.AttachDebugger( buildOptions );
+
+                if ( !buildOptions.DesignTimeEnabled )
+                {
+                    // Execute the fallback.
+                    Logger.Instance?.Write( $"DesignTimeSourceGenerator.Execute('{compilation.AssemblyName}'): DesignTimeEnabled is false, will output fallback files from {buildOptions.AuxiliaryFileDirectoryPath}." );
+
+                    ExecuteFallback( context, buildOptions );
+
+                    return;
+                }
 
                 // Execute the pipeline.
                 if ( !DesignTimeAspectPipelineFactory.Instance.TryExecute(
@@ -65,6 +80,27 @@ namespace Caravela.Framework.Impl.DesignTime
             {
                 DesignTimeExceptionHandler.ReportException( e );
             }
+        }
+
+        private static void ExecuteFallback( GeneratorExecutionContext context, IProjectOptions buildOptions )
+        {
+            var serviceProvider = ServiceProvider.Empty.WithServices( buildOptions );
+            var auxiliaryFileProvider = new AuxiliaryFileProvider( serviceProvider );
+
+            if ( buildOptions.AuxiliaryFileDirectoryPath == null)
+            {
+                return;
+            }
+
+            var sourcesCount = 0;
+
+            foreach (var file in auxiliaryFileProvider.GetAuxiliaryFiles().Where(f => f.Kind == AuxiliaryFileKind.DesignTimeFallback && StringComparer.Ordinal.Equals(Path.GetExtension(f.Path), ".cs") ))
+            {
+                context.AddSource( Path.GetFileName( file.Path ), SourceText.From( file.Content, file.Content.Length ) );
+                sourcesCount++;
+            }
+
+            Logger.Instance?.Write( $"DesignTimeSourceGenerator.Execute('{context.Compilation.AssemblyName}'): {sourcesCount} sources generated." );
         }
 
         void ISourceGenerator.Initialize( GeneratorInitializationContext context )

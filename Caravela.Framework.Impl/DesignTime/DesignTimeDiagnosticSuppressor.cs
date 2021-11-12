@@ -47,6 +47,12 @@ namespace Caravela.Framework.Impl.DesignTime
 
                 DebuggingHelper.AttachDebugger( buildOptions );
 
+                if ( !buildOptions.DesignTimeEnabled )
+                {
+                    Logger.Instance?.Write( $"DesignTimeAnalyzer.AnalyzeSemanticModel: design time experience is disabled." );
+                    return;
+                }
+
                 this.ReportSuppressions(
                     compilation,
                     context.ReportedDiagnostics,

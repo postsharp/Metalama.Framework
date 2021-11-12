@@ -29,7 +29,7 @@ namespace Caravela.Framework.Impl.Pipeline
     /// </summary>
     public abstract class AspectPipeline : IDisposable
     {
-        private const string _highLevelStageGroupingKey = nameof(_highLevelStageGroupingKey);
+        private const string _highLevelStageGroupingKey = nameof( _highLevelStageGroupingKey );
         private readonly bool _ownsDomain;
 
         public IProjectOptions ProjectOptions { get; }
@@ -281,6 +281,18 @@ namespace Caravela.Framework.Impl.Pipeline
             return sources;
         }
 
+        private protected virtual ImmutableArray<AuxiliaryFile> GetAuxiliaryFiles( ServiceProvider serviceProvider )
+        {
+            var provider = serviceProvider.GetOptionalService<IAuxiliaryFileProvider>();
+
+            if (provider == null)
+            {
+                return ImmutableArray<AuxiliaryFile>.Empty;
+            }
+
+            return provider.GetAuxiliaryFiles();
+        }
+
         /// <summary>
         /// Executes the all stages of the current pipeline, report diagnostics, and returns the last <see cref="PipelineStageResult"/>.
         /// </summary>
@@ -301,12 +313,14 @@ namespace Caravela.Framework.Impl.Pipeline
             }
 
             var aspectSources = this.CreateAspectSources( pipelineConfiguration, compilation.Compilation, cancellationToken );
+            var auxiliaryFiles = this.GetAuxiliaryFiles( pipelineConfiguration.ServiceProvider );
 
             pipelineStageResult = new PipelineStageResult(
                 compilation,
                 pipelineConfiguration.ProjectModel,
                 pipelineConfiguration.AspectLayers,
-                aspectSources: aspectSources );
+                aspectSources: aspectSources,
+                auxiliaryFiles: auxiliaryFiles );
 
             foreach ( var stageConfiguration in pipelineConfiguration.Stages )
             {

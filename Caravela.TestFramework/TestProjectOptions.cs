@@ -75,6 +75,10 @@ namespace Caravela.TestFramework
 
         public IProjectOptions Apply( IProjectOptions options ) => options;
 
+        public bool DesignTimeEnabled => true;
+
+        public string? AuxiliaryFileDirectoryPath => null;
+
         public bool TryGetProperty( string name, [NotNullWhen( true )] out string? value ) => this._properties.TryGetValue( name, out value );
 
         public void Dispose()

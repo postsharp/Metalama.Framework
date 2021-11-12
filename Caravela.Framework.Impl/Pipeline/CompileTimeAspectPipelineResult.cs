@@ -10,5 +10,6 @@ namespace Caravela.Framework.Impl.Pipeline
     public record CompileTimeAspectPipelineResult(
         ImmutableArray<SyntaxTreeTransformation> SyntaxTreeTransformations,
         ImmutableArray<ManagedResource> AdditionalResources,
-        IPartialCompilation ResultingCompilation );
+        IPartialCompilation ResultingCompilation,
+        ImmutableArray<AuxiliaryFile> AuxiliaryFiles);
 }

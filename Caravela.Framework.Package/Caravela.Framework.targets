@@ -13,6 +13,17 @@
         <DefineConstants>$(DefineConstants);CARAVELA</DefineConstants>
     </PropertyGroup>
 
+    <!-- Auxiliary files. -->
+    <PropertyGroup>
+        <CaravelaAuxiliaryFilePath>$(MSBuildProjectDirectory)\$(IntermediateOutputPath)\caravela-aux\</CaravelaAuxiliaryFilePath>
+    </PropertyGroup>
+
+    <!-- Design time fallback. -->
+    <ItemGroup Condition="'$(CaravelaDesignTimeEnabled)' == 'False' AND '$(DesignTimeBuild)' == 'True'">
+        <CaravelaDesignTimeFallbackTouchFile>$(CaravelaAuxiliaryFilePath)DesignTimeFallback\.touch</CaravelaDesignTimeFallbackTouchFile>
+        <AdditionalFiles Include="$(CaravelaDesignTimeFallbackTouchFile)" />
+    </ItemGroup>
+
 
     <Target Name="ExportCaravelaFrameworkProperties" BeforeTargets="PrepareForBuild">
         <Error Text="The IntermediateOutputPath property is not defined." Condition="'$(IntermediateOutputPath)'==''" />
