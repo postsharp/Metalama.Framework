@@ -56,7 +56,7 @@ namespace Caravela.Framework.Impl.Pipeline
             IReadOnlyList<IAspectSource>? aspectSources = null,
             ImmutableArray<AttributeAspectInstance>? inheritableAspectInstances = null,
             IReadOnlyList<IntroducedSyntaxTree>? additionalSyntaxTrees = null,
-            ImmutableArray<AuxiliaryFile>? auxiliaryFiles = null)
+            ImmutableArray<AuxiliaryFile>? auxiliaryFiles = null )
         {
             this.PartialCompilation = compilation;
             this.Diagnostics = diagnostics ?? ImmutableUserDiagnosticList.Empty;

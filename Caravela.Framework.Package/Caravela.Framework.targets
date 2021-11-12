@@ -18,7 +18,7 @@
         <CaravelaAuxiliaryFilePath>$(MSBuildProjectDirectory)\$(IntermediateOutputPath)\caravela-aux\</CaravelaAuxiliaryFilePath>
     </PropertyGroup>
 
-    <!-- Design time fallback dependency that forces rerun of analyzers/source generators when changed. -->    
+    <!-- Design time fallback dependency that forces rerun of analyzers/source generators when changed. -->
     <PropertyGroup>
         <CaravelaDesignTimeFallbackTouchFile>$(CaravelaAuxiliaryFilePath)DesignTimeFallback\.touch</CaravelaDesignTimeFallbackTouchFile>
     </PropertyGroup>

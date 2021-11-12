@@ -1,10 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-
 namespace Caravela.Framework.Impl.Pipeline
 {
     internal class GeneratedAuxiliaryFile : AuxiliaryFile
@@ -15,7 +11,7 @@ namespace Caravela.Framework.Impl.Pipeline
 
         public override byte[] Content { get; }
 
-        public GeneratedAuxiliaryFile( string path, AuxiliaryFileKind kind, byte[] content)
+        public GeneratedAuxiliaryFile( string path, AuxiliaryFileKind kind, byte[] content )
         {
             this.Path = path;
             this.Kind = kind;

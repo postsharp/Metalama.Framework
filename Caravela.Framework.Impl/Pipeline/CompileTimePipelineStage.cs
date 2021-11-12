@@ -9,7 +9,6 @@ using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Linking;
 using Caravela.Framework.Impl.Options;
 using Caravela.Framework.Project;
-using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -71,7 +70,11 @@ namespace Caravela.Framework.Impl.Pipeline
                 auxiliaryFiles: fallbackFiles != null ? input.AuxiliaryFiles.AddRange( fallbackFiles ) : input.AuxiliaryFiles );
         }
 
-        private IReadOnlyList<AuxiliaryFile> GenerateDesignTimeFallbackFiles( AspectPipelineConfiguration pipelineConfiguration, PipelineStageResult input, IProjectOptions buildOptions, CancellationToken cancellationToken )
+        private IReadOnlyList<AuxiliaryFile> GenerateDesignTimeFallbackFiles(
+            AspectPipelineConfiguration pipelineConfiguration,
+            PipelineStageResult input,
+            IProjectOptions buildOptions,
+            CancellationToken cancellationToken )
         {
             var generatedFiles = new List<AuxiliaryFile>();
             var pipelineStage = new SourceGeneratorPipelineStage( this.CompileTimeProject, input.AspectLayers, this.ServiceProvider );
@@ -85,12 +88,13 @@ namespace Caravela.Framework.Impl.Pipeline
                     var name = Path.GetFileNameWithoutExtension( syntaxTree.Name );
                     var ext = Path.GetExtension( syntaxTree.Name );
                     var relativePath = Path.Combine( path, $"{name}.g{ext}" );
-                    var content = (syntaxTree.GeneratedSyntaxTree.Encoding ?? System.Text.Encoding.UTF8).GetBytes( syntaxTree.GeneratedSyntaxTree.ToString() );
+                    var content = (syntaxTree.GeneratedSyntaxTree.Encoding ?? Encoding.UTF8).GetBytes( syntaxTree.GeneratedSyntaxTree.ToString() );
                     generatedFiles.Add( new GeneratedAuxiliaryFile( relativePath, AuxiliaryFileKind.DesignTimeFallback, content ) );
                 }
             }
 
-            generatedFiles.Add( new GeneratedAuxiliaryFile( ".touch", AuxiliaryFileKind.DesignTimeFallback, Encoding.UTF8.GetBytes( Guid.NewGuid().ToString() ) ) );
+            generatedFiles.Add(
+                new GeneratedAuxiliaryFile( ".touch", AuxiliaryFileKind.DesignTimeFallback, Encoding.UTF8.GetBytes( Guid.NewGuid().ToString() ) ) );
 
             return generatedFiles;
         }

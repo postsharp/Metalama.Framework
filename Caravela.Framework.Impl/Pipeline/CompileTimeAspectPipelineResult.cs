@@ -11,5 +11,5 @@ namespace Caravela.Framework.Impl.Pipeline
         ImmutableArray<SyntaxTreeTransformation> SyntaxTreeTransformations,
         ImmutableArray<ManagedResource> AdditionalResources,
         IPartialCompilation ResultingCompilation,
-        ImmutableArray<AuxiliaryFile> AuxiliaryFiles);
+        ImmutableArray<AuxiliaryFile> AuxiliaryFiles );
 }

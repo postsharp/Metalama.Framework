@@ -43,7 +43,8 @@ namespace Caravela.Framework.Impl.DesignTime
                 if ( !projectOptions.DesignTimeEnabled )
                 {
                     // Execute the fallback.
-                    Logger.Instance?.Write( $"DesignTimeSourceGenerator.Execute('{compilation.AssemblyName}'): DesignTimeEnabled is false, will output fallback files from {projectOptions.AuxiliaryFilePath}." );
+                    Logger.Instance?.Write(
+                        $"DesignTimeSourceGenerator.Execute('{compilation.AssemblyName}'): DesignTimeEnabled is false, will output fallback files from {projectOptions.AuxiliaryFilePath}." );
 
                     ExecuteFallback( context, projectOptions );
 
@@ -87,14 +88,15 @@ namespace Caravela.Framework.Impl.DesignTime
             var serviceProvider = ServiceProvider.Empty.WithServices( projectOptions );
             var auxiliaryFileProvider = new AuxiliaryFileProvider( serviceProvider );
 
-            if ( projectOptions.AuxiliaryFilePath == null)
+            if ( projectOptions.AuxiliaryFilePath == null )
             {
                 return;
             }
 
             var sourcesCount = 0;
 
-            foreach (var file in auxiliaryFileProvider.GetAuxiliaryFiles().Where(f => f.Kind == AuxiliaryFileKind.DesignTimeFallback && StringComparer.Ordinal.Equals(Path.GetExtension(f.Path), ".cs") ))
+            foreach ( var file in auxiliaryFileProvider.GetAuxiliaryFiles()
+                .Where( f => f.Kind == AuxiliaryFileKind.DesignTimeFallback && StringComparer.Ordinal.Equals( Path.GetExtension( f.Path ), ".cs" ) ) )
             {
                 context.AddSource( Path.GetFileName( file.Path ), SourceText.From( file.Content, file.Content.Length ) );
                 sourcesCount++;

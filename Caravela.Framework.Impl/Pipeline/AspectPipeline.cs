@@ -29,7 +29,7 @@ namespace Caravela.Framework.Impl.Pipeline
     /// </summary>
     public abstract class AspectPipeline : IDisposable
     {
-        private const string _highLevelStageGroupingKey = nameof( _highLevelStageGroupingKey );
+        private const string _highLevelStageGroupingKey = nameof(_highLevelStageGroupingKey);
         private readonly bool _ownsDomain;
 
         public IProjectOptions ProjectOptions { get; }
@@ -285,7 +285,7 @@ namespace Caravela.Framework.Impl.Pipeline
         {
             var provider = serviceProvider.GetOptionalService<IAuxiliaryFileProvider>();
 
-            if (provider == null)
+            if ( provider == null )
             {
                 return ImmutableArray<AuxiliaryFile>.Empty;
             }

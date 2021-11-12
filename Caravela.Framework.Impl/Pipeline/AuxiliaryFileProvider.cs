@@ -13,7 +13,7 @@ namespace Caravela.Framework.Impl.Pipeline
     {
         private readonly ServiceProvider _serviceProvider;
 
-        public AuxiliaryFileProvider(ServiceProvider serviceProvider)
+        public AuxiliaryFileProvider( ServiceProvider serviceProvider )
         {
             this._serviceProvider = serviceProvider;
         }
@@ -22,23 +22,23 @@ namespace Caravela.Framework.Impl.Pipeline
         {
             var projectOptions = this._serviceProvider.GetOptionalService<IProjectOptions>();
 
-            if (projectOptions == null || projectOptions.AuxiliaryFilePath == null )
+            if ( projectOptions == null || projectOptions.AuxiliaryFilePath == null )
             {
                 return ImmutableArray<AuxiliaryFile>.Empty;
             }
 
             var builder = ImmutableArray<AuxiliaryFile>.Empty.ToBuilder();
 
-            foreach (var kindDirectory in Directory.GetDirectories(projectOptions.AuxiliaryFilePath))
+            foreach ( var kindDirectory in Directory.GetDirectories( projectOptions.AuxiliaryFilePath ) )
             {
-                if (!Enum.TryParse<AuxiliaryFileKind>(Path.GetFileName(kindDirectory), out var kind))
+                if ( !Enum.TryParse<AuxiliaryFileKind>( Path.GetFileName( kindDirectory ), out var kind ) )
                 {
                     continue;
                 }
 
                 var kindDirectoryNormalized = Path.GetFullPath( kindDirectory );
 
-                foreach (var file in Directory.GetFiles(kindDirectory, "*", SearchOption.AllDirectories))
+                foreach ( var file in Directory.GetFiles( kindDirectory, "*", SearchOption.AllDirectories ) )
                 {
                     // TODO: This is probably not reliable.
                     var fileNormalized = Path.GetFullPath( file );
