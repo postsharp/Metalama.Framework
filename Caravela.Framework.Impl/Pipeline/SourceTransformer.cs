@@ -75,7 +75,7 @@ namespace Caravela.Framework.Impl.Pipeline
 
         private static void HandleAuxiliaryFiles( IProjectOptions projectOptions, CompileTimeAspectPipelineResult? pipelineResult )
         {
-            if ( pipelineResult == null )
+            if ( pipelineResult == null || projectOptions.AuxiliaryFilePath == null )
             {
                 return;
             }
