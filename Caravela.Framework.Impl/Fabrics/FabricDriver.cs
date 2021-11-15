@@ -136,7 +136,7 @@ namespace Caravela.Framework.Impl.Fabrics
                     {
                         var targetDeclaration = this._targetDeclaration.GetTarget( compilation ).AssertNotNull();
 
-                        if ( !this._fabricManager.UserCodeInvoker.TryInvoke(
+                        if ( !this._fabricManager.UserCodeInvoker.TryInvokeEnumerable(
                             () => selector( targetDeclaration ),
                             executionContext.WithDiagnosticAdder( diagnostics ),
                             out var targets ) )
@@ -145,7 +145,7 @@ namespace Caravela.Framework.Impl.Fabrics
                         }
                         else
                         {
-                            return targets!;
+                            return targets;
                         }
                     },
                     this._fabricManager.AspectClasses,

@@ -26,6 +26,11 @@ namespace Caravela.Framework.Project
         /// <summary>
         /// Signals that further modifications of the object must be prevented.
         /// </summary>
-        public virtual void MakeReadOnly() { }
+        protected internal virtual void MakeReadOnly()
+        {
+            this.IsReadOnly = true;
+        }
+        
+        public bool IsReadOnly { get; internal set; }
     }
 }

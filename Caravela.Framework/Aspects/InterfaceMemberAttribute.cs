@@ -7,7 +7,7 @@ namespace Caravela.Framework.Aspects
 {
     /// <summary>
     /// Custom attribute that applied to a member of an aspect class and means that this aspect member is a template implementing a member of an interface implemented by
-    /// <see cref="IAdviceFactory.ImplementInterface(Caravela.Framework.Code.INamedType,Caravela.Framework.Code.INamedType,Caravela.Framework.Aspects.OverrideStrategy,System.Collections.Generic.Dictionary{string,object?}?)"/>.
+    /// <see cref="IAdviceFactory.ImplementInterface(Caravela.Framework.Code.INamedType,Caravela.Framework.Code.INamedType,Caravela.Framework.Aspects.OverrideStrategy,Caravela.Framework.Aspects.Tags?)"/>.
     /// </summary>
     [AttributeUsage( AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Method | AttributeTargets.Event )]
     public sealed class InterfaceMemberAttribute : TemplateAttribute

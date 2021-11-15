@@ -30,7 +30,7 @@ namespace Caravela.Framework.Aspects
         ///     of the <see cref="meta"/> API.</param>
         /// <remarks>When an aspect overrides the same declaration in same aspect part multiple, the order of advices is equal to the inverse of order of calls of this method.</remarks>
         /// <seealso href="@overriding-members"/>
-        void OverrideMethod( IMethod method, in MethodTemplateSelector templateSelector, Dictionary<string, object?>? tags = null );
+        void OverrideMethod( IMethod method, in MethodTemplateSelector templateSelector, Tags? tags = null );
 
         /// <summary>
         /// Introduces a new method or overrides the implementation of the existing one.
@@ -54,7 +54,7 @@ namespace Caravela.Framework.Aspects
             string template,
             IntroductionScope scope = IntroductionScope.Default,
             OverrideStrategy whenExists = OverrideStrategy.Default,
-            Dictionary<string, object?>? tags = null );
+            Tags? tags = null );
 
         /// <summary>
         /// Overrides a field or property by specifying a property template.
@@ -69,7 +69,7 @@ namespace Caravela.Framework.Aspects
         void OverrideFieldOrProperty(
             IFieldOrProperty targetDeclaration,
             string template,
-            Dictionary<string, object?>? tags = null );
+            Tags? tags = null );
 
         /// <summary>
         /// Overrides a field or property by specifying a method template for the getter, the setter, or both.
@@ -92,7 +92,7 @@ namespace Caravela.Framework.Aspects
             IFieldOrProperty targetDeclaration,
             in GetterTemplateSelector getTemplateSelector = default,
             string? setTemplate = null,
-            Dictionary<string, object?>? tags = null );
+            Tags? tags = null );
 
         /// <summary>
         /// Introduces a field to the target type.
@@ -134,7 +134,7 @@ namespace Caravela.Framework.Aspects
             string template,
             IntroductionScope scope = IntroductionScope.Default,
             OverrideStrategy whenExists = OverrideStrategy.Default,
-            Dictionary<string, object?>? tags = null );
+            Tags? tags = null );
 
         /// <summary>
         /// Introduces a property to the target type, or overrides the implementation of an existing one, by specifying individual template methods for each accessor. 
@@ -163,7 +163,7 @@ namespace Caravela.Framework.Aspects
             string? setTemplate,
             IntroductionScope scope = IntroductionScope.Default,
             OverrideStrategy whenExists = OverrideStrategy.Default,
-            Dictionary<string, object?>? tags = null );
+            Tags? tags = null );
 
         /// <summary>
         /// Overrides an event by specifying a template for the adder, the remover, and/or the raiser.
@@ -185,7 +185,7 @@ namespace Caravela.Framework.Aspects
             string? addTemplate,
             string? removeTemplate,
             string? raiseTemplate,
-            Dictionary<string, object?>? tags = null );
+            Tags? tags = null );
 
         /// <summary>
         /// Introduces a new event to the target type, or overrides the implementation of an existing one, by specifying an event template.
@@ -209,7 +209,7 @@ namespace Caravela.Framework.Aspects
             string eventTemplate,
             IntroductionScope scope = IntroductionScope.Default,
             OverrideStrategy whenExists = OverrideStrategy.Default,
-            Dictionary<string, object?>? tags = null );
+            Tags? tags = null );
 
         /// <summary>
         /// Introduces a new event to the target type, or overrides the implementation of an existing one, by specifying individual template methods
@@ -241,7 +241,7 @@ namespace Caravela.Framework.Aspects
             string? raiseTemplate = null,
             IntroductionScope scope = IntroductionScope.Default,
             OverrideStrategy whenExists = OverrideStrategy.Default,
-            Dictionary<string, object?>? tags = null );
+            Tags? tags = null );
 
         /// <summary>
         /// Makes a type implement a new interface specified as an <see cref="INamedType"/>.
@@ -257,7 +257,7 @@ namespace Caravela.Framework.Aspects
             INamedType targetType,
             INamedType interfaceType,
             OverrideStrategy whenExists = OverrideStrategy.Default,
-            Dictionary<string, object?>? tags = null );
+            Tags? tags = null );
 
         /// <summary>
         /// Makes a type implement a new interface specified as a reflection <see cref="Type"/>.
@@ -273,7 +273,7 @@ namespace Caravela.Framework.Aspects
             INamedType targetType,
             Type interfaceType,
             OverrideStrategy whenExists = OverrideStrategy.Default,
-            Dictionary<string, object?>? tags = null );
+            Tags? tags = null );
 
         [Obsolete( "Not implemented." )]
         void ImplementInterface(
@@ -281,7 +281,7 @@ namespace Caravela.Framework.Aspects
             INamedType interfaceType,
             IReadOnlyList<InterfaceMemberSpecification> interfaceMemberSpecifications,
             OverrideStrategy whenExists = OverrideStrategy.Default,
-            Dictionary<string, object?>? tags = null );
+            Tags? tags = null );
 
         [Obsolete( "Not implemented." )]
         void ImplementInterface(
@@ -289,6 +289,6 @@ namespace Caravela.Framework.Aspects
             Type interfaceType,
             IReadOnlyList<InterfaceMemberSpecification> interfaceMemberSpecifications,
             OverrideStrategy whenExists = OverrideStrategy.Default,
-            Dictionary<string, object?>? tags = null );
+            Tags? tags = null );
     }
 }

@@ -58,6 +58,7 @@ namespace Caravela.Framework.Impl.CompileTime
         private readonly INamedTypeSymbol? _templateAttribute;
         private readonly INamedTypeSymbol? _ignoreUnlessOverriddenAttribute;
         private readonly ConcurrentDictionary<ISymbol, TemplatingScope?> _cacheScopeFromAttributes = new( SymbolEqualityComparer.Default );
+        private readonly ConcurrentDictionary<ISymbol, TemplatingScope> _cacheResultingScope = new( SymbolEqualityComparer.Default );
         private readonly ConcurrentDictionary<ISymbol, TemplateInfo> _cacheInheritedTemplateInfo = new( SymbolEqualityComparer.Default );
         private readonly ConcurrentDictionary<ISymbol, TemplateInfo> _cacheNonInheritedTemplateInfo = new( SymbolEqualityComparer.Default );
         private readonly ReferenceAssemblyLocator _referenceAssemblyLocator;
@@ -197,7 +198,18 @@ namespace Caravela.Framework.Impl.CompileTime
 
         public TemplatingScope GetTemplatingScope( ISymbol symbol )
         {
-            var scope = this.GetTemplatingScope( symbol, 0 );
+            if ( !this._cacheResultingScope.TryGetValue( symbol, out var scope ) )
+            {
+                scope = this.GetTemplatingScopeCore( symbol );
+                this._cacheResultingScope.TryAdd( symbol, scope );
+            }
+
+            return scope;
+        }
+        
+        private TemplatingScope GetTemplatingScopeCore( ISymbol symbol )
+        {
+            var scope = this.GetTemplatingScopeCore( symbol, 0 );
 
             if ( scope == TemplatingScope.CompileTimeOnly )
             {
@@ -228,7 +240,7 @@ namespace Caravela.Framework.Impl.CompileTime
             return scope;
         }
 
-        private TemplatingScope GetTemplatingScope( ISymbol symbol, int recursion )
+        private TemplatingScope GetTemplatingScopeCore( ISymbol symbol, int recursion )
         {
             if ( symbol is ITypeParameterSymbol )
             {
@@ -255,7 +267,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
                 case IArrayTypeSymbol array:
                     {
-                        var arrayScope = this.GetTemplatingScope( array.ElementType, recursion + 1 );
+                        var arrayScope = this.GetTemplatingScopeCore( array.ElementType, recursion + 1 );
 
                         if ( arrayScope == TemplatingScope.Dynamic )
                         {
@@ -268,16 +280,16 @@ namespace Caravela.Framework.Impl.CompileTime
                     }
 
                 case IPointerTypeSymbol pointer:
-                    return this.GetTemplatingScope( pointer.PointedAtType, recursion + 1 );
+                    return this.GetTemplatingScopeCore( pointer.PointedAtType, recursion + 1 );
 
                 case INamedTypeSymbol { IsGenericType: true } namedType
                     when !namedType.IsGenericTypeDefinition() &&
                          !SymbolEqualityComparer.Default.Equals( namedType, namedType.OriginalDefinition ):
                     {
                         List<TemplatingScope> scopes = new( namedType.TypeArguments.Length + 1 );
-                        var declarationScope = this.GetTemplatingScope( namedType.OriginalDefinition, recursion + 1 );
+                        var declarationScope = this.GetTemplatingScopeCore( namedType.OriginalDefinition, recursion + 1 );
                         scopes.Add( declarationScope );
-                        scopes.AddRange( namedType.TypeArguments.Select( arg => this.GetTemplatingScope( arg, recursion + 1 ) ) );
+                        scopes.AddRange( namedType.TypeArguments.Select( arg => this.GetTemplatingScopeCore( arg, recursion + 1 ) ) );
 
                         var compileTimeOnlyCount = 0;
                         var runtimeCount = 0;
@@ -320,21 +332,25 @@ namespace Caravela.Framework.Impl.CompileTime
                             }
                         }
 
-                        if ( runtimeCount > 0 && compileTimeOnlyCount > 0 )
+                        switch ( runtimeCount )
                         {
-                            return TemplatingScope.Conflict;
-                        }
-                        else if ( runtimeCount > 0 )
-                        {
-                            return TemplatingScope.RunTimeOnly;
-                        }
-                        else if ( compileTimeOnlyCount > 0 )
-                        {
-                            return TemplatingScope.CompileTimeOnly;
-                        }
-                        else
-                        {
-                            return TemplatingScope.Both;
+                            case > 0 when compileTimeOnlyCount > 0:
+                                return TemplatingScope.Conflict;
+
+                            case > 0:
+                                return TemplatingScope.RunTimeOnly;
+
+                            default:
+                                {
+                                    if ( compileTimeOnlyCount > 0 )
+                                    {
+                                        return TemplatingScope.CompileTimeOnly;
+                                    }
+                                    else
+                                    {
+                                        return TemplatingScope.Both;
+                                    }
+                                }
                         }
                     }
             }
@@ -353,7 +369,63 @@ namespace Caravela.Framework.Impl.CompileTime
                 return scopeFromAssembly.Value;
             }
 
-            return this.GetScopeFromAttributes( symbol ) ?? TemplatingScope.RunTimeOnly;
+            // From attributes.
+            var scopeFromAttributes = this.GetScopeFromAttributes( symbol ) ?? TemplatingScope.RunTimeOnly;
+
+            if ( scopeFromAttributes != TemplatingScope.Both )
+            {
+                return scopeFromAttributes;
+            }
+
+            // From signature.
+            return this.GetScopeFromSignature( symbol, recursion + 1 );
+        }
+
+        private TemplatingScope GetScopeFromSignature( ISymbol symbol, int recursion )
+        {
+            var signatureScope = TemplatingScope.Both;
+
+            void CombineScope( ITypeSymbol type )
+            {
+                var typeScope = this.GetTemplatingScopeCore( type, recursion + 1 );
+
+                if ( typeScope != TemplatingScope.Both )
+                {
+                    signatureScope = signatureScope == TemplatingScope.Both ? typeScope : TemplatingScope.Conflict;
+                }
+            }
+
+            switch ( symbol )
+            {
+                case IMethodSymbol method:
+                    CombineScope( method.ReturnType );
+
+                    foreach ( var parameter in method.Parameters )
+                    {
+                        CombineScope( parameter.Type );
+                    }
+
+                    return signatureScope;
+
+                case IPropertySymbol property:
+                    CombineScope( property.Type );
+
+                    foreach ( var parameter in property.Parameters )
+                    {
+                        CombineScope( parameter.Type );
+                    }
+
+                    return signatureScope;
+
+                case IFieldSymbol field:
+                    return this.GetTemplatingScopeCore( field.Type, recursion + 1 );
+
+                case IEventSymbol @event:
+                    return this.GetTemplatingScopeCore( @event.Type, recursion + 1 );
+
+                default:
+                    return TemplatingScope.Both;
+            }
         }
 
         private TemplatingScope? GetScopeFromAttributes( ISymbol symbol )
@@ -461,7 +533,7 @@ namespace Caravela.Framework.Impl.CompileTime
             return AddToCache( null );
         }
 
-        internal bool TryGetWellKnownScope( ISymbol symbol, bool isMember, out TemplatingScope scope )
+        private bool TryGetWellKnownScope( ISymbol symbol, bool isMember, out TemplatingScope scope )
         {
             scope = TemplatingScope.Unknown;
 
