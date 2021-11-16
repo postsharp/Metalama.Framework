@@ -255,16 +255,15 @@ namespace BuildCaravela
 
 #### Step 7. Create Build.ps1, the front-end build script
 
-Create `eng\Build.ps1` file. The content should look like:
+Create `Build.ps1` file in the repo root directory. The content should look like:
 
 ```powershell
-# Enter the Visual Studio context.
 if ( $env:VisualStudioVersion -eq $null ) {
     Import-Module "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\Common7\Tools\Microsoft.VisualStudio.DevShell.dll"
-    Enter-VsDevShell 50da0b83 -StartInPath $(Get-Location)
+    Enter-VsDevShell -VsInstallPath "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\" -StartInPath $(Get-Location)
 }
 
-& dotnet run --project .\eng\src\Build.csproj -- $args 
+& dotnet run --project "$PSScriptRoot\eng\src\Build.csproj" -- $args
 ```
 
 ### Usage
@@ -275,7 +274,7 @@ The product package version and package version suffix configuration is centrali
 
 #### Package dependencies versions configuration
 
-Package dependecies vesrions configuration is centralized in the `eng\Versions.props` script. Each dependency version is configured in a property named `<[DependencyName]Version>`, eg. `<SystemCollectionsImmutableVersion>`.
+Package dependencies versions configuration is centralized in the `eng\Versions.props` script. Each dependency version is configured in a property named `<[DependencyName]Version>`, eg. `<SystemCollectionsImmutableVersion>`.
 
 This property value is then available in all MSBuild project files in the repository and can be used in the `PackageReference` items. For example:
 
@@ -287,7 +286,7 @@ This property value is then available in all MSBuild project files in the reposi
 
 #### Build and testing locally
 
-For details, do `eng\Build.ps1` in PowerShell. 
+For details, do `Build.ps1` in PowerShell. 
 
 
 #### Referencing a package in another repository
@@ -347,7 +346,7 @@ Create "Debug Build and Test" build configuration using manual build steps confi
 
 | # | Name | Type | Configuration |
 | - | ---- | ---- | ------------- |
-| 1 | Debug Build and Test | PowerShell | Format stderr output as: error; Script: file; Script file: `eng/Build.ps1`; Script arguments: `test --numbered-build %build.number%` |
+| 1 | Debug Build and Test | PowerShell | Format stderr output as: error; Script: file; Script file: `Build.ps1`; Script arguments: `test --numbered-build %build.number%` |
 
 ##### Artifact paths:
 
@@ -363,8 +362,8 @@ Create "Release Build and Test" build configuration using manual build steps con
 
 | # | Name | Type | Configuration |
 | - | ---- | ---- | ------------- |
-| 1 | Local Release Signed Build And Test | PowerShell | Format stderr output as: error; Script: file; Script file: `eng/Build.ps1`; Script arguments: `test --configuration Release --sign` |
-| 2 | Public Release Signed Build | PowerShell | Format stderr output as: error; Script: file; Script file: `eng/Build.ps1`; Script arguments: `build --public-build -configuration Release --sign` |
+| 1 | Local Release Signed Build And Test | PowerShell | Format stderr output as: error; Script: file; Script file: `Build.ps1`; Script arguments: `test --configuration Release --sign` |
+| 2 | Public Release Signed Build | PowerShell | Format stderr output as: error; Script: file; Script file: `Build.ps1`; Script arguments: `build --public-build -configuration Release --sign --zip` |
 
 The tests are not performed on the public release build, as some tests may require NuGet packages, which leads to a package version conflict. The tests then may use different packages with the same package version producing false test results.
 

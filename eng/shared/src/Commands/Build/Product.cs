@@ -8,6 +8,7 @@ using PostSharp.Engineering.BuildTools.Utilities;
 using System;
 using System.Collections.Immutable;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Threading;
 
@@ -41,11 +42,20 @@ namespace PostSharp.Engineering.BuildTools.Commands.Build
                 }
             }
             
+            
+            
             // Build dependencies.
             if ( !options.NoDependencies && !this.Prepare( context, options ) )
             {
                 return false;
             }
+
+            
+            var artifactsDirectory = Path.Combine( context.RepoDirectory, "artifacts" );
+            var privateArtifactsDir = Path.Combine( artifactsDirectory, "private", options.BuildConfiguration.ToString().ToLowerInvariant() );
+            
+            // We have to read the version from the file we have generated - using MSBuild, because it contains properties.
+            var packageVersion = this.ReadPackageVersion( context );
 
 
             // Build.
@@ -53,19 +63,33 @@ namespace PostSharp.Engineering.BuildTools.Commands.Build
             {
                 return false;
             }
+            
+            // Zipping internal artefacts.
+            void CreateZip(string directory)
+            {
+                if ( options.CreateZip )
+                {
+                    var zipFile = Path.Combine( directory, $"{this.ProductName}-{packageVersion}.zip" );
+
+                    context.Console.WriteMessage( $"Creating '{zipFile}'." );
+                    var tempFile = Path.Combine( Path.GetTempPath(), Guid.NewGuid() + ".zip" );
+                    ZipFile.CreateFromDirectory( directory,
+                        tempFile,
+                        CompressionLevel.Optimal, false );
+                    File.Move( tempFile, zipFile );
+                }
+            }
+            CreateZip(privateArtifactsDir);
 
             // If we're doing a public build, copy public artifacts to the publish directory.
             if ( options.PublicBuild )
             {
-                // We have to read the version from the file we have generated - using MSBuild, because it contains properties.
-                var packageVersion = this.ReadPackageVersion( context );
-
+              
 
                 // Copy artifacts.
                 context.Console.WriteHeading( "Copying public artifacts" );
                 var matcher = new Matcher( StringComparison.OrdinalIgnoreCase );
-                var artifactsDirectory = Path.Combine( context.RepoDirectory, "artifacts" );
-
+               
                 foreach ( var publicArtifacts in context.Product.PublicArtifacts )
                 {
                     var file =
@@ -82,7 +106,6 @@ namespace PostSharp.Engineering.BuildTools.Commands.Build
                     Directory.CreateDirectory( publicArtifactsDirectory );
                 }
 
-                var privateArtifactsDir = Path.Combine( artifactsDirectory, "private", options.BuildConfiguration.ToString().ToLowerInvariant() );
                 
                 var matches = matcher.Execute( new DirectoryInfoWrapper( new DirectoryInfo( privateArtifactsDir ) ) );
                 if ( matches is { HasMatches: true } )
@@ -152,6 +175,9 @@ namespace PostSharp.Engineering.BuildTools.Commands.Build
                     {
                         return false;
                     }
+                    
+                    // Zipping public artefacts.
+                   CreateZip( publicArtifactsDirectory );
 
                     context.Console.WriteSuccess( "Signing artifacts was successful." );
                 }
@@ -161,6 +187,8 @@ namespace PostSharp.Engineering.BuildTools.Commands.Build
                 context.Console.WriteWarning( $"Cannot use --sign option in a non-public build." );
                 return false;
             }
+            
+           
 
             context.Console.WriteSuccess( $"Building the whole {this.ProductName} product was successful." );
 

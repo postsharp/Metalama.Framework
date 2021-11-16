@@ -3,4 +3,4 @@ if ( $env:VisualStudioVersion -eq $null ) {
     Enter-VsDevShell -VsInstallPath "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\" -StartInPath $(Get-Location)
 }
 
-& dotnet run --project .\eng\src\Build.csproj -- $args
+& dotnet run --project "$PSScriptRoot\eng\src\Build.csproj" -- $args
