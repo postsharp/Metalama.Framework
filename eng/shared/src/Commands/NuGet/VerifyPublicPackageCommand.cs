@@ -27,8 +27,6 @@ namespace PostSharp.Engineering.BuildTools.Commands.NuGet
 
         public static bool Execute( ConsoleHelper console, VerifyPackageSettings settings )
         {
-            console.WriteHeading( "Verifying public packages." );
-            var success = true;
 
             var directory = new DirectoryInfo( settings.Directory );
 
@@ -36,10 +34,12 @@ namespace PostSharp.Engineering.BuildTools.Commands.NuGet
 
             if ( files.Length == 0 )
             {
-                console.WriteError( $"No matching package found in '{directory.FullName}'." );
-                return false;
+                return true;
             }
 
+            console.WriteHeading( "Verifying public packages." );
+            var success = true;
+            
             foreach ( var file in files )
             {
                 success &= ProcessPackage( console, directory.FullName, file );

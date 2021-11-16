@@ -90,13 +90,6 @@ This section describes centralized NuGet packages metadata management.
         <None Include="$(MSBuildThisFileDirectory)..\THIRD-PARTY-NOTICES.TXT" Visible="false" Pack="true" PackagePath="" />
     </ItemGroup>
 
-    <!-- This is the list of files that can be published to the public nuget.org -->
-    <!-- To avoid unintended publishing of artefacts, all items must be explicitly specified without wildcard -->    
-    <ItemGroup>
-        <ShippedFile Include="$(PackagesDir)\PostSharp.Backstage.Settings.$(Version).nupkg" />
-        <ShippedFile Include="$(PackagesDir)\PostSharp.Cli.$(Version).nupkg" />
-    </ItemGroup>
-
 </Project>
 ```
 

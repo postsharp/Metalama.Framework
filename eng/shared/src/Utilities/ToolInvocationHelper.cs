@@ -58,9 +58,13 @@ namespace PostSharp.Engineering.BuildTools.Utilities
                     {
                         if ( !string.IsNullOrWhiteSpace( s ) )
                         {
-                            if ( s.StartsWith( "CSC : warning" ) )
+                            if ( s.Contains( ": warning " ) )
                             {
                                 console.WriteWarning( s );
+                            }
+                            else if ( s.Contains( ": error " ) )
+                            {
+                                console.WriteError( s );
                             }
                             else if ( s.StartsWith( "Passed! " ) )
                             {
