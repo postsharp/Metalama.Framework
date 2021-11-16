@@ -45,7 +45,7 @@ namespace PostSharp.Engineering.BuildTools.Commands.Build
             }
 
             // We have to read the version from the file we have generated - using MSBuild, because it contains properties.
-            var packageVersion = this.ReadVersionFile( context );
+            var packageVersion = this.ReadGeneratedVersionFile( context.VersionFilePath );
 
 
 
@@ -189,9 +189,9 @@ namespace PostSharp.Engineering.BuildTools.Commands.Build
             return true;
         }
 
-        private (string PackageVersion, string Configuration) ReadVersionFile( BuildContext context )
+        private (string PackageVersion, string Configuration) ReadGeneratedVersionFile( string path )
         {
-            var versionFilePath = context.VersionFilePath;
+            var versionFilePath = path;
             var versionFile = Project.FromFile( versionFilePath, new ProjectOptions() );
             var packageVersion = versionFile
                 .Properties
@@ -211,6 +211,30 @@ namespace PostSharp.Engineering.BuildTools.Commands.Build
             }
             ProjectCollection.GlobalProjectCollection.UnloadAllProjects();
             return (packageVersion, configuration);
+        }
+
+        private (string MainVersion, string PackageVersionSuffix) ReadMainVersionFile( string path )
+        {
+            var versionFilePath = path;
+            var versionFile = Project.FromFile( versionFilePath, new ProjectOptions() );
+            var mainVersion = versionFile
+                .Properties
+                .Single( p => p.Name == "MainVersion" )
+                .EvaluatedValue;
+            if ( string.IsNullOrEmpty( mainVersion ) )
+            {
+                throw new InvalidOperationException( "MainVersion should not be null." );
+            }
+            var suffix = versionFile
+                .Properties
+                .Single( p => p.Name ==  "PackageVersionSuffix" )
+                .EvaluatedValue;
+            if ( string.IsNullOrEmpty( suffix ) )
+            {
+                throw new InvalidOperationException( "PackageVersionSuffix should not be null." );
+            }
+            ProjectCollection.GlobalProjectCollection.UnloadAllProjects();
+            return (mainVersion, suffix);
         }
 
         protected virtual void BeforeSigningArtifacts( BuildContext context, BuildOptions options ) { }
@@ -321,6 +345,9 @@ namespace PostSharp.Engineering.BuildTools.Commands.Build
                 this.Clean( context );
             }
 
+            var (mainVersion, mainPackageVersionSuffix) =
+                this.ReadMainVersionFile( Path.Combine( context.RepoDirectory, "eng", "MainVersion.props" ) );
+            
 
             context.Console.WriteHeading( "Preparing the version file" );
 
@@ -359,8 +386,8 @@ namespace PostSharp.Engineering.BuildTools.Commands.Build
 
                         var packageVersionSuffix =
                             $"local-{Environment.UserName}-{configuration}.{localVersion}";
-                        packageVersion = $"$(MainVersion)-{packageVersionSuffix}";
-                        assemblyVersion = $"$(MainVersion).{localVersion}";
+                        packageVersion = $"{mainVersion}-{packageVersionSuffix}";
+                        assemblyVersion = $"{mainVersion}.{localVersion}";
 
 
                         break;
@@ -369,29 +396,37 @@ namespace PostSharp.Engineering.BuildTools.Commands.Build
                     {
                         // Build server build with a build number given by the build server
                         var versionNumber = options.VersionSpec.Number;
-                        packageVersion = $"$(MainVersion).{versionNumber}-dev-{configuration}";
-                        assemblyVersion = $"$(MainVersion).{versionNumber}";
+                        packageVersion = $"{mainVersion}.{versionNumber}-dev-{configuration}";
+                        assemblyVersion = $"{mainVersion}.{versionNumber}";
                         break;
                     }
                 case VersionKind.Public:
                     // Public build
-                    packageVersion = "$(MainVersion)$(PackageVersionSuffix)";
-                    assemblyVersion = "$(MainVersion)";
+                    packageVersion = $"{mainVersion}{mainPackageVersionSuffix}";
+                    assemblyVersion = $"{mainVersion}";
                     break;
                 default:
                     throw new InvalidOperationException();
             }
 
             var artifactsDir = Path.Combine( context.RepoDirectory, "artifacts", "private" );
+            if ( !Directory.Exists( artifactsDir ) )
+            {
+                Directory.CreateDirectory( artifactsDir );
+            }
 
             var props = this.GenerateVersionFile( packageVersion, assemblyVersion, configuration, artifactsDir );
             var propsFilePath = Path.Combine( context.RepoDirectory, $"eng\\{this.ProductName}Version.props" );
 
             context.Console.WriteMessage( $"Writing '{propsFilePath}'." );
             File.WriteAllText( propsFilePath, props );
+            
+            // We write a copy of the version file to the artifacts directory because this file is used during publishing.
+             
+            File.WriteAllText( Path.Combine( artifactsDir, $"{this.ProductName}Version.props" ), props );
 
             context.Console.WriteSuccess(
-                $"Preparing the version file was successful. {this.ProductName}Version={this.ReadVersionFile( context ).PackageVersion}" );
+                $"Preparing the version file was successful. {this.ProductName}Version={this.ReadGeneratedVersionFile( context.VersionFilePath ).PackageVersion}" );
 
             return true;
         }
@@ -401,7 +436,6 @@ namespace PostSharp.Engineering.BuildTools.Commands.Build
             var props = $@"
 <!-- This file is generated by the engineering tooling -->
 <Project>
-    <Import Project=""MainVersion.props"" />
     <PropertyGroup>
         <{this.ProductName}Version>{packageVersion}</{this.ProductName}Version>
         <{this.ProductName}AssemblyVersion>{assemblyVersion}</{this.ProductName}AssemblyVersion>
@@ -453,9 +487,11 @@ namespace PostSharp.Engineering.BuildTools.Commands.Build
         {
             context.Console.WriteHeading( "Publishing files" );
 
+            var hasTarget = false;
             if ( !this.PublishDirectory( context, options,
                 Path.Combine( context.RepoDirectory, "artifacts", "private" ),
-                false ) )
+                false,
+                ref hasTarget ) )
             {
                 return false;
             }
@@ -464,22 +500,30 @@ namespace PostSharp.Engineering.BuildTools.Commands.Build
             {
                 if ( !this.PublishDirectory( context, options,
                     Path.Combine( context.RepoDirectory, "artifacts", "public" ),
-                    true ) )
+                    true,
+                    ref hasTarget ) )
                 {
                     return false;
                 }
             }
 
-            context.Console.WriteSuccess( "Publishing has succeeded." );
+            if ( !hasTarget )
+            {
+             context.Console.WriteWarning( "No active publishing target was detected." );   
+            }
+            else
+            {
+                context.Console.WriteSuccess( "Publishing has succeeded." );
+            }
 
             return true;
         }
 
-        private bool PublishDirectory( BuildContext context, PublishOptions options, string directory, bool isPublic )
+        private bool PublishDirectory( BuildContext context, PublishOptions options, string directory, bool isPublic, ref bool hasTarget )
         {
             var success = true;
 
-            var versionFile =  this.ReadVersionFile( context );
+            var versionFile =  this.ReadGeneratedVersionFile( Path.Combine( context.RepoDirectory, $"artifacts\\private\\{this.ProductName}Version.props" ) );
                 
             foreach ( var publishingTarget in this.PublishingTargets )
             {
@@ -488,6 +532,8 @@ namespace PostSharp.Engineering.BuildTools.Commands.Build
                 if ( (publishingTarget.SupportsPrivatePublishing && !isPublic) ||
                      (publishingTarget.SupportsPublicPublishing && isPublic) )
                 {
+                    hasTarget = true;
+                    
                     publishingTarget.Artifacts.AddToMatcher( matcher, versionFile.PackageVersion, versionFile.Configuration );
                 }
 
