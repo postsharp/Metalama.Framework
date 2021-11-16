@@ -45,8 +45,11 @@ if ( $Public ) {
 }
 
 if ( $Release ) {
-    $arguments += "--configuration Release"
+    $arguments += "--configuration"
+    $arguments += "Release"
 }
+
+$arguments += "--zip"
 
 Write-Host "Update your command line to the new format. The new arguments are: $arguments"
 & dotnet run --project .\eng\src\Build.csproj -- $arguments
