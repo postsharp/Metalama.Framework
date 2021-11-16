@@ -43,7 +43,7 @@ if ( $Release -or $Local -or $Numbered -gt 0 -or $Public ) {
     if ( $Public ) {
         $version = "--public-build" 
     } elseif ( $Numbered -gt 0 ) {
-        $version = "--versioned-build $Numbered"
+        $version = "--numbered-build $Numbered"
     }
 
     if ( $Release ) {
@@ -59,4 +59,4 @@ if ( $Release -or $Local -or $Numbered -gt 0 -or $Public ) {
     & dotnet run --project .\eng\src\Build.csproj -- $args    
 }
 
-
+exit $LASTEXITCODE

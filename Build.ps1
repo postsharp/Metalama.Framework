@@ -4,3 +4,5 @@ if ( $env:VisualStudioVersion -eq $null ) {
 }
 
 & dotnet run --project "$PSScriptRoot\eng\src\Build.csproj" -- $args
+exit $LASTEXITCODE
+
