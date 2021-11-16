@@ -177,7 +177,7 @@ Add the following imports to `Directory.Build.props`:
   <Import Project="eng\shared\build\BuildOptions.props" />
 ```
 
-#### Step 5. Directory.Build.prop
+#### Step 5. Directory.Build.targets
 
 Add the following imports to `Directory.Build.targets`:
 
@@ -187,7 +187,7 @@ Add the following imports to `Directory.Build.targets`:
 
 #### Step 6. Create the front-end build project
 
-Create a file `eng\Build.csproj` with the following content:
+Create a file `eng\src\Build.csproj` with the following content:
 
 ```xml
 <Project Sdk="Microsoft.NET.Sdk">
@@ -209,7 +209,7 @@ Create a file `eng\Build.csproj` with the following content:
 </Project>
 ```
 
-Create also a file `eng\Program.cs` with content that varies according to your repo. You can use all the power of C# and PowerShell to customize the
+Create also a file `eng\src\Program.cs` with content that varies according to your repo. You can use all the power of C# and PowerShell to customize the
 build. Note that in the `PublicArtifacts`, the strings `$(Configuration)` and `$(PackageVersion)`, and only those strings, are replaced by their value. 
 
 ```cs
@@ -264,7 +264,7 @@ if ( $env:VisualStudioVersion -eq $null ) {
     Enter-VsDevShell 50da0b83 -StartInPath $(Get-Location)
 }
 
-& dotnet run --project .\eng\src\BuildFoo.csproj -- $args 
+& dotnet run --project .\eng\src\Build.csproj -- $args 
 ```
 
 ### Usage
@@ -292,9 +292,9 @@ For details, do `eng\Build.ps1` in PowerShell.
 
 #### Referencing a package in another repository
 
-Local NuGet packages creating using the `eng\shared\build\Build.ps1` script can be referenced in other repositories in such a way that it is easy to switch between published packages and locally-built packages. 
+Local NuGet packages created using the `shared\src\PostSharp.Engineering.BuildTools.csproj` project can be referenced in other repositories in such a way that it is easy to switch between published packages and locally-built packages. 
 
-By convention, a file named `.local`, if present, indicates that local package should be used. Otherwise, the network package will be used. The `.local` file should not be commited in the source control.
+By convention, a file named `[ReferencedProduct].local`, if present, indicates that the local packages should be used. Otherwise, the published packages will be used. The `[ReferencedProduct].local` file should not be committed in the source control.
 
 Follow these steps:
 
@@ -304,6 +304,8 @@ Follow these steps:
 <Import Project="[PathToReferencedRepo]\[ReferencedProduct]Version.props" Condition="Exists('[ReferencedProduct].local')"/>
 ```
 
+These imports need to be placed before the `eng\Version.props` project is imported.
+
 2. In the dependencies version, set the default version of the referenced package (that is, the one to be used when the local build is _not_ used):
 
 ```xml
@@ -312,7 +314,7 @@ Follow these steps:
 
 This version will be used instead of the local build by default.
 
-3. Add a package reference to projects where required:
+3. Add package references to projects where required:
 
 ```xml
 <PackageReference Include="[ReferencedPackage]" Version="$([ReferencedProduct]Version)" />
@@ -320,8 +322,8 @@ This version will be used instead of the local build by default.
 
 To build:
 
-* To use the __local build__, create an empty file `.local`. Add this file to `.gitignore`.
-* To use the __published build__, remove the `.local` file.
+* To use the __local build__, create an empty file `[ReferencedProduct].local`. Add this file to `.gitignore`.
+* To use the __published build__, remove the `[ReferencedProduct].local` file.
 
 ## Continuous integration
 
