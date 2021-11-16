@@ -7,8 +7,6 @@ using Caravela.Framework.Validation;
 
 namespace Caravela.Framework.Eligibility
 {
-#error Deliberately causing a build issue.
-
     /// <summary>
     /// The non-generic base interface for <see cref="IEligibilityBuilder{T}"/>.
     /// </summary>
