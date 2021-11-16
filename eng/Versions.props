@@ -6,7 +6,7 @@
     <!-- However, if you don't, default values are used. -->
     <Import Project="MainVersion.props" Condition="!Exists('../artifacts/private/CaravelaVersion.props')" />
     
-    <PropertyGroup Condition="!Exists('CaravelaVersion.props')">
+    <PropertyGroup Condition="!Exists('../artifacts/private/CaravelaVersion.props')">
         <CaravelaVersion>$(MainVersion)$(PackageVersionSuffix)</CaravelaVersion>
         <CaravelaAssemblyVersion>$(MainVersion)</CaravelaAssemblyVersion>
     </PropertyGroup>
