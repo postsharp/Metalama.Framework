@@ -1,6 +1,6 @@
 ﻿namespace PostSharp.Engineering.BuildTools.Commands.Build
 {
-    public class PrepareCommand : BaseProductCommand<CommonOptions>
+    public class PrepareCommand : BaseBuildCommand<CommonOptions>
     {
         protected override int ExecuteCore( BuildContext buildContext, CommonOptions options )
         {

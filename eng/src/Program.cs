@@ -22,12 +22,12 @@ namespace Build
                         IsTestOnly = true
                     } ),
                 PublicArtifacts = ImmutableArray.Create(
-                    "bin\\$(Configuration)\\Caravela.Framework.$(PackageVersion).nupkg",
-                    "bin\\$(Configuration)\\Caravela.TestFramework.$(PackageVersion).nupkg",
-                    "bin\\$(Configuration)\\Caravela.Framework.Redist.$(PackageVersion).nupkg",
-                    "bin\\$(Configuration)\\Caravela.Framework.Sdk.$(PackageVersion).nupkg",
-                    "bin\\$(Configuration)\\Caravela.Framework.Impl.$(PackageVersion).nupkg",
-                    "bin\\$(Configuration)\\Caravela.Framework.DesignTime.Contracts.$(PackageVersion).nupkg" )
+                    "Caravela.Framework.$(PackageVersion).nupkg",
+                    "Caravela.TestFramework.$(PackageVersion).nupkg",
+                    "Caravela.Framework.Redist.$(PackageVersion).nupkg",
+                    "Caravela.Framework.Sdk.$(PackageVersion).nupkg",
+                    "Caravela.Framework.Impl.$(PackageVersion).nupkg",
+                    "Caravela.Framework.DesignTime.Contracts.$(PackageVersion).nupkg" )
             };
             var commandApp = new CommandApp();
             commandApp.AddProductCommands( product );

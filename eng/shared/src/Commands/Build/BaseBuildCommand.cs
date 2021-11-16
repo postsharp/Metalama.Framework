@@ -7,8 +7,8 @@ using System.Diagnostics;
 
 namespace PostSharp.Engineering.BuildTools.Commands.Build
 {
-    public abstract class BaseProductCommand<T> : Command<T>
-        where T : CommonOptions
+    public abstract class BaseBuildCommand<T> : Command<T>
+        where T : CommandSettings
     {
         public sealed override int Execute( CommandContext context, T settings )
         {

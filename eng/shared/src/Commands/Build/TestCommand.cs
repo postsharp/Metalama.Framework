@@ -1,6 +1,6 @@
 ﻿namespace PostSharp.Engineering.BuildTools.Commands.Build
 {
-    public class TestCommand : BaseProductCommand<TestOptions>
+    public class TestCommand : BaseBuildCommand<TestOptions>
     {
         protected override int ExecuteCore( BuildContext buildContext, TestOptions options )
         {

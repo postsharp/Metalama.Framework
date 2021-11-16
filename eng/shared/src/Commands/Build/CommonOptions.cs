@@ -8,7 +8,7 @@ namespace PostSharp.Engineering.BuildTools.Commands.Build
     {
         [Description( "Sets the build configuration (Debug or Release)" )]
         [CommandOption( "-c|--configuration" )]
-        public BuildConfiguration Configuration { get; protected set; }
+        public BuildConfiguration BuildConfiguration { get; protected set; }
 
         [Description( "Creates a numbered build (typically for an internal CI build)" )]
         [CommandOption( "--numbered-build" )]
@@ -34,6 +34,10 @@ namespace PostSharp.Engineering.BuildTools.Commands.Build
         [Description( "Disables concurrent processing" )]
         [CommandOption( "--no-concurrency" )]
         public bool NoConcurrency { get; protected set; }
+        
+        [Description( "Use force" )]
+        [CommandOption( "--force" )]
+        public bool Force { get; protected set; }
 
 
         public ImmutableDictionary<string, string> Properties { get; protected set; } =

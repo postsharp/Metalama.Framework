@@ -1,6 +1,6 @@
 ﻿namespace PostSharp.Engineering.BuildTools.Commands.Build
 {
-    public class CleanCommand : BaseProductCommand<CommonOptions>
+    public class CleanCommand : BaseBuildCommand<CommonOptions>
     {
         protected override int ExecuteCore( BuildContext buildContext, CommonOptions options )
         {

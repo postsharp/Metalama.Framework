@@ -18,6 +18,8 @@ namespace PostSharp.Engineering.BuildTools
                         .WithDescription( "Builds all packages in the product (implies 'prepare')" );
                     x.AddCommand<TestCommand>( "test" ).WithData( product )
                         .WithDescription( "Builds all packages then run all tests (implies 'build')" );
+                    x.AddCommand<PublishCommand>( "publish" ).WithData( product )
+                        .WithDescription( "Publishes all packages that have been previously built by the 'build' command" );
                 } );
             }
         }

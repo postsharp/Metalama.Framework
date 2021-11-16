@@ -28,7 +28,7 @@ namespace PostSharp.Engineering.BuildTools.Commands.Build
             var argsBuilder = new StringBuilder();
             var path = Path.Combine( context.RepoDirectory, this.SolutionPath );
             argsBuilder.Append(
-                $"{command} -p:Configuration={options.Configuration} \"{path}\" -v:{options.Verbosity.ToAlias()} --nologo" );
+                $"{command} -p:Configuration={options.BuildConfiguration} \"{path}\" -v:{options.Verbosity.ToAlias()} --nologo" );
 
             if ( options.NoConcurrency )
             {

@@ -9,6 +9,7 @@ using System;
 using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
+using System.Threading;
 
 namespace PostSharp.Engineering.BuildTools.Commands.Build
 {
@@ -22,19 +23,8 @@ namespace PostSharp.Engineering.BuildTools.Commands.Build
 
         public bool Build( BuildContext context, BuildOptions options )
         {
-            if ( !options.NoDependencies && !this.Prepare( context, options ) )
-            {
-                return false;
-            }
-
-
-            if ( !this.BuildCore( context, options ) )
-            {
-                return false;
-            }
-
-            // If we're doing a public build, copy public artifacts to the publish directory.
-            if ( options.PublicBuild )
+            // Validate options.
+            if ( options.PublicBuild  )
             {
                 if ( context.Product.PublicArtifacts.IsEmpty )
                 {
@@ -43,6 +33,30 @@ namespace PostSharp.Engineering.BuildTools.Commands.Build
                     return false;
                 }
 
+                if ( options.BuildConfiguration != BuildConfiguration.Release )
+                {
+                    context.Console.WriteError(
+                        $"Cannot build a public version of a {options.BuildConfiguration} build without --force." );
+                    return false;
+                }
+            }
+            
+            // Build dependencies.
+            if ( !options.NoDependencies && !this.Prepare( context, options ) )
+            {
+                return false;
+            }
+
+
+            // Build.
+            if ( !this.BuildCore( context, options ) )
+            {
+                return false;
+            }
+
+            // If we're doing a public build, copy public artifacts to the publish directory.
+            if ( options.PublicBuild )
+            {
                 // We have to read the version from the file we have generated - using MSBuild, because it contains properties.
                 var packageVersion = this.ReadPackageVersion( context );
 
@@ -54,19 +68,23 @@ namespace PostSharp.Engineering.BuildTools.Commands.Build
 
                 foreach ( var publicArtifacts in context.Product.PublicArtifacts )
                 {
-                    matcher.AddInclude( publicArtifacts
+                    var file =
+                        publicArtifacts
                         .Replace( "$(PackageVersion)", packageVersion )
-                        .Replace( "$(Configuration)", options.Configuration.ToString() ) );
+                        .Replace( "$(Configuration)", options.BuildConfiguration.ToString() );
+                    matcher.AddInclude( file );
                 }
 
-                var publicArtifactsDirectory = Path.Combine( artifactsDirectory, "publish" );
+                var publicArtifactsDirectory = Path.Combine( artifactsDirectory, "public" );
 
                 if ( !Directory.Exists( publicArtifactsDirectory ) )
                 {
                     Directory.CreateDirectory( publicArtifactsDirectory );
                 }
 
-                var matches = matcher.Execute( new DirectoryInfoWrapper( new DirectoryInfo( artifactsDirectory ) ) );
+                var privateArtifactsDir = Path.Combine( artifactsDirectory, "private", options.BuildConfiguration.ToString().ToLowerInvariant() );
+                
+                var matches = matcher.Execute( new DirectoryInfoWrapper( new DirectoryInfo( privateArtifactsDir ) ) );
                 if ( matches is { HasMatches: true } )
                 {
                     foreach ( var file in matches.Files )
@@ -261,10 +279,15 @@ namespace PostSharp.Engineering.BuildTools.Commands.Build
 
         public bool Prepare( BuildContext context, CommonOptions options )
         {
+            if ( !options.NoDependencies )
+            {
+                this.Clean( context );
+            }
+            
+            
             context.Console.WriteHeading( "Preparing the version file" );
 
-            var timestamp = DateTime.Now.ToString( "MMdd.HHmmss" );
-            var configuration = options.Configuration.ToString().ToLower();
+            var configuration = options.BuildConfiguration.ToString().ToLower();
 
             string packageVersion;
             string assemblyVersion;
@@ -298,7 +321,7 @@ namespace PostSharp.Engineering.BuildTools.Commands.Build
 
 
                         var packageVersionSuffix =
-                            $"local-{localVersion}-{DateTime.Now.Year}{timestamp}-{new Random().Next():x8}-{configuration}";
+                            $"local-{Environment.UserName}-{configuration}.{localVersion}";
                         packageVersion = $"$(MainVersion)-{packageVersionSuffix}";
                         assemblyVersion = $"$(MainVersion).{localVersion}";
 
@@ -309,7 +332,7 @@ namespace PostSharp.Engineering.BuildTools.Commands.Build
                     {
                         // Build server build with a build number given by the build server
                         var versionNumber = options.VersionSpec.Number;
-                        packageVersion = $"$(MainVersion)-build-{configuration}.{versionNumber}";
+                        packageVersion = $"$(MainVersion).{versionNumber}-dev-{configuration}";
                         assemblyVersion = $"$(MainVersion).{versionNumber}";
                         break;
                     }
@@ -322,7 +345,7 @@ namespace PostSharp.Engineering.BuildTools.Commands.Build
                     throw new InvalidOperationException();
             }
 
-            var artifactsDir = Path.Combine( context.RepoDirectory, "artifacts", "bin", configuration );
+            var artifactsDir = Path.Combine( context.RepoDirectory, "artifacts", "private" );
 
             var props = this.GenerateVersionFile( packageVersion, assemblyVersion, artifactsDir );
             var propsFilePath = Path.Combine( context.RepoDirectory, $"eng\\{this.ProductName}Version.props" );
@@ -387,6 +410,117 @@ namespace PostSharp.Engineering.BuildTools.Commands.Build
             context.Console.WriteHeading( $"Cleaning {this.ProductName}." );
             DeleteDirectory( Path.Combine( context.RepoDirectory, "artifacts" ) );
             CleanRecursive( context.RepoDirectory );
+        }
+
+        public bool Publish( BuildContext context, PublishOptions options )
+        {
+            // Validation.
+            var hasEnvironmentError = false;
+            if ( string.IsNullOrEmpty( Environment.GetEnvironmentVariable( "INTERNAL_NUGET_PUSH_URL" ) ) )
+            {
+                context.Console.WriteError( "The INTERNAL_NUGET_PUSH_URL environment variable is not defined." );
+                hasEnvironmentError = true;
+            }
+            
+            if ( string.IsNullOrEmpty( Environment.GetEnvironmentVariable( "INTERNAL_NUGET_API_KEY" ) ) )
+            {
+                context.Console.WriteError( "The INTERNAL_NUGET_API_KEY environment variable is not defined." );
+                hasEnvironmentError = true;
+            }
+
+            if ( options.Public && string.IsNullOrEmpty( Environment.GetEnvironmentVariable( "NUGET_ORG_API_KEY" ) ) )
+            {
+                context.Console.WriteError( "The NUGET_ORG_API_KEY environment variable is not defined." );
+                hasEnvironmentError = true;
+            }
+
+            if ( hasEnvironmentError )
+            {
+                return false;
+            }
+            
+            context.Console.WriteHeading( "Publishing files" );
+
+            if ( !this.PublishDirectory( context,  options, Path.Combine( context.RepoDirectory, "artifacts", "private" ),
+                false ) )
+            {
+                return false;
+            }
+
+            if ( options.Public )
+            {
+                if ( !this.PublishDirectory( context,  options, Path.Combine( context.RepoDirectory, "artifacts", "public" ),
+                    true ) )
+                {
+                    return false;
+                }   
+            }
+            
+            context.Console.WriteSuccess( "Publishing has succeeded." );
+
+            return true;
+
+        }
+
+        private bool PublishDirectory( BuildContext context, PublishOptions options, string path, bool isPublic )
+        {
+            var matcher = new Matcher( StringComparison.OrdinalIgnoreCase );
+            matcher.AddInclude( "**\\*.nupkg" );
+            
+            var matchingResult = matcher.Execute( new DirectoryInfoWrapper( new DirectoryInfo( path ) ) );
+
+            var success = true;
+            foreach ( var file in matchingResult.Files )
+            {
+                success &= PublishFile( context, options, Path.Combine( path, file.Path ), isPublic );
+            }
+
+            if ( !success )
+            {
+                context.Console.WriteError( "Publishing has failed." );
+            }
+
+            return success;
+        }
+
+        private static bool PublishFile( BuildContext context, PublishOptions options, string path, bool isPublic )
+        {
+            if ( path.Contains( "-local-" ) )
+            {
+                context.Console.WriteError( $"The file {path} cannot be published because this is a local build." );
+                return false;
+            }
+            
+            context.Console.WriteMessage( $"Publishing {path}." );
+
+            switch ( Path.GetExtension( path ) )
+            {
+                case ".nupkg":
+                    var server = isPublic
+                        ? "https://api.nuget.org/v3/index.json"
+                        : Environment.GetEnvironmentVariable( "INTERNAL_NUGET_PUSH_URL" );
+                    var apiKeyVariable = isPublic ? "NUGET_ORG_API_KEY" : "INTERNAL_NUGET_API_KEY";
+
+
+                    var arguments =
+                        $"push {path} -Source {server} -ApiKey %{apiKeyVariable}% -SkipDuplicate -NonInteractive";
+
+                    if ( options.Dry )
+                    {
+                        context.Console.WriteImportantMessage( "Dry run: nuget " + arguments );
+                        return true;
+                    }
+                    else
+                    {
+
+                        return ToolInvocationHelper.InvokeTool( context.Console, "nuget", arguments,
+                            Environment.CurrentDirectory, CancellationToken.None );
+                    }
+
+                default:
+                    throw new InvalidOperationException( "Don't know how to publish this file." );
+            }
+            
         }
     }
 }

@@ -113,6 +113,8 @@ class C
 {
   void M() {}
   int F;
+
+  class Nested {}
 }
 ";
 
@@ -121,6 +123,7 @@ class C
             this.AssertScope( compilation, type, TemplatingScope.CompileTimeOnly );
             this.AssertScope( compilation, type.GetMembers( "F" ).Single(), TemplatingScope.CompileTimeOnlyReturningBoth );
             this.AssertScope( compilation, type.GetMembers( "M" ).Single(), TemplatingScope.CompileTimeOnly );
+            this.AssertScope( compilation, type.GetMembers( "Nested" ).Single(), TemplatingScope.CompileTimeOnly );
         }
 
         [Fact]

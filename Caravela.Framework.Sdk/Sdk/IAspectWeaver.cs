@@ -11,7 +11,7 @@ namespace Caravela.Framework.Impl.Sdk
     /// of this class must be public, have a default constructor, and be annotated with the <see cref="AspectWeaverAttribute"/>
     /// and <see cref="CompilerPluginAttribute"/> custom attributes.
     /// </summary>
-    [CompileTime]
+    [CompileTimeOnly] /* For cases when the weaver is not in a separate compile-time assembly */
     public interface IAspectWeaver : IAspectDriver
     {
         /// <summary>

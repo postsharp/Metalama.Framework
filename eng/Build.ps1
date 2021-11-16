@@ -1,7 +1,6 @@
+# This is the backward-compatibility script for TeamCity and it should be deleted after the build configuration has been ported.
+
 param (
-
-    [string] $otherArgs,
-
 # LEGACY. Creates a numbered build (typically internal builds on a build server).
     [Parameter(Mandatory=$false, ValueFromPipeline=$false )]
     [int] $Numbered = -1,
@@ -27,7 +26,7 @@ param (
 
 if ( $env:VisualStudioVersion -eq $null ) {
     Import-Module "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\Common7\Tools\Microsoft.VisualStudio.DevShell.dll"
-    Enter-VsDevShell 50da0b83 -StartInPath $(Get-Location)
+    Enter-VsDevShell -VsInstallPath "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\" -StartInPath $(Get-Location)
 }
 
 if ( $Release -or $Local -or $Numbered -gt 0 -or $Public ) {
@@ -57,7 +56,7 @@ if ( $Release -or $Local -or $Numbered -gt 0 -or $Public ) {
     & dotnet run --project .\eng\src\Build.csproj -- $command $version $configuration
 } else {
     # Use the new command line
-    & dotnet run --project .\eng\src\Build.csproj -- $otherArgs    
+    & dotnet run --project .\eng\src\Build.csproj -- $args    
 }
 
 
