@@ -352,7 +352,7 @@ Create "Debug Build and Test" build configuration using manual build steps confi
 ##### Artifact paths:
 
 ```
-artifacts\bin\Debug\*.nupkg => artifacts/bin/Debug
+artifacts\** => artifacts
 ```
 
 #### "Release Build and Test" build configuration
