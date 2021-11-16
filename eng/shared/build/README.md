@@ -371,12 +371,69 @@ The tests are not performed on the public release build, as some tests may requi
 #### Artifact paths:
 
 ```
-artifacts/publish/*.nupkg => artifacts/publish
-artifacts/bin/Release/*.nupkg => artifacts/bin/Release
+artifacts\** => artifacts
 ```
 
 #### Snapshot dependencies:
 - Debug Build and Test
 
-#### Parameters:
+#### Required environment variables:
 - SIGNSERVER_SECRET
+
+
+## Deployment
+
+
+#### "Publish Debug to Internal Feed" deployment configuration 
+
+Create "Publish Debug to Internal Feed" deployment configuration using manual build steps configuration.
+
+##### Build steps:
+
+| # | Name       | Type | Configuration                                                                                                                                                                                   |
+|---|------------|------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| 1 | Deploy | Powershell | Command: `Build.ps1 deploy` |
+
+##### Snapshot dependencies:
+
+- Debug Build and Test
+
+##### Artifact dependencies:
+
+- Debug Build and Test
+    
+    ```
+    +:artifacts/**/* => artifacts
+    ```
+
+#### Required environment variables:
+- INTERNAL_NUGET_PUSH_URL
+- INTERNAL_NUGET_API_KEY
+- NUGET_ORG_API_KEY
+
+#### "Publish Release to NuGet.Org and Internal Feed"  deployment configuration
+
+Create "Publish Release to NuGet.Org and Internal Feed" deployment configuration using manual build steps configuration.
+
+##### Build steps:
+
+| # | Name                  | Type | Configuration                                                                                                                                                                                     |
+|---|-----------------------|------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| 1 | Deploy     | Powershell | Command: `Build.ps1 deploy --public`  |
+
+##### Snapshot dependencies:
+
+- Debug Build and Test
+- Release Build and Test
+
+###### Artifact dependencies:
+
+- Release Build and Test
+
+```
++:artifacts/**/* => artifacts
+```
+
+#### Required environment variables:
+- INTERNAL_NUGET_PUSH_URL
+- INTERNAL_NUGET_API_KEY

@@ -115,7 +115,7 @@ namespace PostSharp.Engineering.BuildTools.Commands.Build
                         var targetFile = Path.Combine( publicArtifactsDirectory, Path.GetFileName( file.Path ) );
 
                         context.Console.WriteMessage( file.Path );
-                        File.Copy( Path.Combine( artifactsDirectory, file.Path ), targetFile, true );
+                        File.Copy( Path.Combine( privateArtifactsDir, file.Path ), targetFile, true );
                     }
                 }
 
