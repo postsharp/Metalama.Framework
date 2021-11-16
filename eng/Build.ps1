@@ -35,14 +35,14 @@ if ( $Release -or $Local -or $Numbered -gt 0 -or $Public ) {
     
     # Map the old arguments to the new one
     if ( $Test ) {
-        $command = "test"
+        $command = "test  --zip"
     } else {
-        $command = "build"
+        $command = "build --zip"
     }
     
     if ( $Public ) {
         $version = "--public-build" 
-    } elseif ( $Numbered > 0 ) {
+    } elseif ( $Numbered -gt 0 ) {
         $version = "--versioned-build $Numbered"
     }
 
