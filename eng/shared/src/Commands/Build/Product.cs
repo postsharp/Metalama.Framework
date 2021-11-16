@@ -219,20 +219,23 @@ namespace PostSharp.Engineering.BuildTools.Commands.Build
             var versionFile = Project.FromFile( versionFilePath, new ProjectOptions() );
             var mainVersion = versionFile
                 .Properties
-                .Single( p => p.Name == "MainVersion" )
-                .EvaluatedValue;
+                .SingleOrDefault( p => p.Name == "MainVersion" )
+                ?.EvaluatedValue;
+            
             if ( string.IsNullOrEmpty( mainVersion ) )
             {
-                throw new InvalidOperationException( "MainVersion should not be null." );
+                throw new InvalidOperationException( $"MainVersion should not be null in '{path}'." );
             }
+
             var suffix = versionFile
-                .Properties
-                .Single( p => p.Name ==  "PackageVersionSuffix" )
-                .EvaluatedValue;
-            if ( string.IsNullOrEmpty( suffix ) )
-            {
-                throw new InvalidOperationException( "PackageVersionSuffix should not be null." );
-            }
+                             .Properties
+                             .SingleOrDefault( p => p.Name == "PackageVersionSuffix" )
+                             ?.EvaluatedValue
+                         ?? "";
+            
+            // Empty suffixes are allowed and mean RTM.
+            
+           
             ProjectCollection.GlobalProjectCollection.UnloadAllProjects();
             return (mainVersion, suffix);
         }
