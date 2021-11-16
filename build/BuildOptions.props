@@ -4,11 +4,12 @@
     <PropertyGroup>
         <LangVersion>latest</LangVersion>
         <Nullable>enable</Nullable>
+         <WarningsAsErrors>$(WarningsAsErrors);NU1603;NU1605</WarningsAsErrors>
     </PropertyGroup>
 
     <!-- Output path -->
     <PropertyGroup>
-        <PackageOutputPath>$(MSBuildThisFileDirectory)..\..\..\artifacts\bin\$(Configuration)</PackageOutputPath>
+        <PackageOutputPath>$([MSBuild]::NormalizeDirectory(`$(MSBuildThisFileDirectory)..\..\..\artifacts\private`))</PackageOutputPath>
     </PropertyGroup>
 
     <!-- Obfuscation -->

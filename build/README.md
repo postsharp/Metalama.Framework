@@ -70,7 +70,7 @@ This section describes centralized NuGet packages metadata management.
 
 1. Create `eng\Packaging.props` file. The content should look like this:
 
-```
+```xml
 <Project>
 
     <!-- Properties of NuGet packages-->
@@ -90,13 +90,6 @@ This section describes centralized NuGet packages metadata management.
         <None Include="$(MSBuildThisFileDirectory)..\THIRD-PARTY-NOTICES.TXT" Visible="false" Pack="true" PackagePath="" />
     </ItemGroup>
 
-    <!-- This is the list of files that can be published to the public nuget.org -->
-    <!-- To avoid unintended publishing of artefacts, all items must be explicitly specified without wildcard -->    
-    <ItemGroup>
-        <ShippedFile Include="$(PackagesDir)\PostSharp.Backstage.Settings.$(Version).nupkg" />
-        <ShippedFile Include="$(PackagesDir)\PostSharp.Cli.$(Version).nupkg" />
-    </ItemGroup>
-
 </Project>
 ```
 
@@ -108,7 +101,7 @@ This section describes centralized NuGet packages metadata management.
   <Import Project="eng\Packaging.props" />
 ```
 
-Now all the packages creted from the repository will contain the metadata configured in the `eng\Packaging.props` file.
+Now all the packages created from the repository will contain the metadata configured in the `eng\Packaging.props` file.
 
 ## Versioning, building and packaging
 
@@ -118,11 +111,15 @@ This section describes centralized main version and dependencies version managem
 
 In this how-to, we use the name `[Product]` as a placeholder for the name of the product contained in a specific repository containing the `eng\shared` subtree.
 
-1. Add `eng\[Product]Version.props` to `.gitignore`.
+#### Step 1: .gitignore
 
-2. Create `eng\MainVersion.props` file. The content should look like:
+Add `eng\[Product]Version.props` to `.gitignore`.
 
-```
+#### Step 2: MainVersion.props
+
+Create `eng\MainVersion.props` file. The content should look like:
+
+```xml
 <Project>
     <PropertyGroup>
         <MainVersion>0.3.6</MainVersion>
@@ -131,9 +128,11 @@ In this how-to, we use the name `[Product]` as a placeholder for the name of the
 </Project>
 ```
 
-3. Create `eng\Versions.props` file. The content should look like:
+#### Step 3. Versions.props
 
-```
+Create `eng\Versions.props` file. The content should look like:
+
+```xml
 <Project>
 
     <!-- Normally you should call build.ps1 -local -prepare before opening the project in an IDE, and it creates [Product]Version.props. -->
@@ -162,24 +161,103 @@ In this how-to, we use the name `[Product]` as a placeholder for the name of the
 </Project>
 ```
 
-4. Add the following imports to `Directory.Build.props`:
+#### Step 4. Directory.Build.props
 
-```
+Add the following imports to `Directory.Build.props`:
+
+```xml
   <Import Project="eng\Versions.props" />
   <Import Project="eng\shared\build\BuildOptions.props" />
 ```
 
-5. Add the following imports to `Directory.Build.targets`:
+#### Step 5. Directory.Build.targets
 
-```
+Add the following imports to `Directory.Build.targets`:
+
+```xml
   <Import Project="eng\shared\build\TeamCity.targets" />
 ```
 
-6. Create `eng\Build.ps1` file. The content should look like:
+#### Step 6. Create the front-end build project
 
+Create a file `eng\src\Build.csproj` with the following content:
+
+```xml
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net5.0</TargetFramework>
+        <AssemblyName>Build</AssemblyName>
+        <GenerateDocumentationFile>false</GenerateDocumentationFile>
+        <LangVersion>latest</LangVersion>
+        <Nullable>enable</Nullable>
+        <NoWarn>SA0001;CS8002</NoWarn>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\shared\src\PostSharp.Engineering.BuildTools.csproj"/>
+    </ItemGroup>
+
+</Project>
 ```
-# .FORWARDHELPTARGETNAME eng/shared/build/Build.ps1
-Invoke-Expression "& eng/shared/build/Build.ps1 -ProductName [Product] $args"
+
+Create also a file `eng\src\Program.cs` with content that varies according to your repo. You can use all the power of C# and PowerShell to customize the
+build. Note that in the `PublicArtifacts`, the strings `$(Configuration)` and `$(PackageVersion)`, and only those strings, are replaced by their value. 
+
+```cs
+using PostSharp.Engineering.BuildTools;
+using PostSharp.Engineering.BuildTools.Commands.Build;
+using Spectre.Console.Cli;
+using System.Collections.Immutable;
+
+namespace BuildCaravela
+{
+    internal class Program
+    {
+        private static int Main( string[] args )
+        {
+            var product = new Product
+            {
+                ProductName = "Caravela",
+                Solutions = ImmutableArray.Create<Solution>(
+                    new DotNetSolution( "Caravela.sln" )
+                    {
+                        SupportsTestCoverage = true
+                    },
+                    new DotNetSolution( "Tests\\Caravela.Framework.TestApp\\Caravela.Framework.TestApp.sln" )
+                    {
+                        IsTestOnly = true
+                    } ),
+                PublicArtifacts = ImmutableArray.Create(
+                    "bin\\$(Configuration)\\Caravela.Framework.$(PackageVersion).nupkg",
+                    "bin\\$(Configuration)\\Caravela.TestFramework.$(PackageVersion).nupkg",
+                    "bin\\$(Configuration)\\Caravela.Framework.Redist.$(PackageVersion).nupkg",
+                    "bin\\$(Configuration)\\Caravela.Framework.Sdk.$(PackageVersion).nupkg",
+                    "bin\\$(Configuration)\\Caravela.Framework.Impl.$(PackageVersion).nupkg",
+                    "bin\\$(Configuration)\\Caravela.Framework.DesignTime.Contracts.$(PackageVersion).nupkg" )
+            };
+            var commandApp = new CommandApp();
+            commandApp.AddProductCommands( product );
+
+            return commandApp.Run( args );
+        }
+    }
+}
+```
+
+#### Step 7. Create Build.ps1, the front-end build script
+
+Create `Build.ps1` file in the repo root directory. The content should look like:
+
+```powershell
+if ( $env:VisualStudioVersion -eq $null ) {
+    Import-Module "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\Common7\Tools\Microsoft.VisualStudio.DevShell.dll"
+    Enter-VsDevShell -VsInstallPath "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\" -StartInPath $(Get-Location)
+}
+
+& dotnet run --project "$PSScriptRoot\eng\src\Build.csproj" -- $args
+exit $LASTEXITCODE
 ```
 
 ### Usage
@@ -190,7 +268,7 @@ The product package version and package version suffix configuration is centrali
 
 #### Package dependencies versions configuration
 
-Package dependecies vesrions configuration is centralized in the `eng\Versions.props` script. Each dependency version is configured in a property named `<[DependencyName]Version>`, eg. `<SystemCollectionsImmutableVersion>`.
+Package dependencies versions configuration is centralized in the `eng\Versions.props` script. Each dependency version is configured in a property named `<[DependencyName]Version>`, eg. `<SystemCollectionsImmutableVersion>`.
 
 This property value is then available in all MSBuild project files in the repository and can be used in the `PackageReference` items. For example:
 
@@ -202,48 +280,49 @@ This property value is then available in all MSBuild project files in the reposi
 
 #### Build and testing locally
 
-For details, do `help eng\Build.ps1` in PowerShell or see the initial comments in the `eng\shared\build\Build.ps1` script for details. 
+For details, do `Build.ps1` in PowerShell. 
 
-For a local build, the `-Local` switch must be used.
 
 #### Referencing a package in another repository
 
-Local NuGet packages creating using the `eng\shared\build\Build.ps1` script can be referenced in other repositories in such a way that it is easy to switch between published packages and locally-built packages. 
+Local NuGet packages created using the `shared\src\PostSharp.Engineering.BuildTools.csproj` project can be referenced in other repositories in such a way that it is easy to switch between published packages and locally-built packages. 
 
-By convention, a file named `.local`, if present, indicates that local package should be used. Otherwise, the network package will be used. The `.local` file should not be commited in the source control.
+By convention, a file named `[ReferencedProduct].local`, if present, indicates that the local packages should be used. Otherwise, the published packages will be used. The `[ReferencedProduct].local` file should not be committed in the source control.
 
 Follow these steps:
 
 1. Add the following import to `Directory.Build.props`.
 
+```xml
+<Import Project="[PathToReferencedRepo]\[ReferencedProduct]Version.props" Condition="Exists('[ReferencedProduct].local')"/>
 ```
-<Import Project="[PathToReferencedRepo]\[ReferencedProduct]Version.props" Condition="Exists('.local')"/>
-```
+
+These imports need to be placed before the `eng\Version.props` project is imported.
 
 2. In the dependencies version, set the default version of the referenced package (that is, the one to be used when the local build is _not_ used):
 
-```
+```xml
 <[ReferencedProduct]Version Condition="'$([ReferencedProduct]Version)'==''">0.3.6-preview</[ReferencedProduct]Version>
 ```
 
 This version will be used instead of the local build by default.
 
-3. Add a package reference to projects where required:
+3. Add package references to projects where required:
 
-```
+```xml
 <PackageReference Include="[ReferencedPackage]" Version="$([ReferencedProduct]Version)" />
 ```
 
 To build:
 
-* To use the __local build__, create an empty file `.local`. Add this file to `.gitignore`.
-* To use the __published build__, remove the `.local` file.
+* To use the __local build__, create an empty file `[ReferencedProduct].local`. Add this file to `.gitignore`.
+* To use the __published build__, remove the `[ReferencedProduct].local` file.
 
 ## Continuous integration
 
-We use TeamCity as our CI/CD pipeplie at the moment. The folowing sections describe a common way to set up continous integration on TeamCity. See [PostSharp Engineering: Deployment Features](../deploy/README.md#continuous-deployment) for information about continuous deployment.
+We use TeamCity as our CI/CD pipeline at the moment. The following sections describe a common way to set up continuous integration on TeamCity. See [PostSharp Engineering: Deployment Features](../deploy/README.md#continuous-deployment) for information about continuous deployment.
 
-### Instalation
+### Installation
 
 1. Create a new (sub)project using manual setup.
    
@@ -253,37 +332,101 @@ We use TeamCity as our CI/CD pipeplie at the moment. The folowing sections descr
 
 4. Create build configurations. Set build agent requirements and triggers as needed.
 
-   1. Create "Debug Build and Test" build configuration using manual build steps configuration.
+#### "Debug Build and Test" build configuration
+   
+Create "Debug Build and Test" build configuration using manual build steps configuration.
 
-Build steps:
-
-| # | Name | Type | Configuration |
-| - | ---- | ---- | ------------- |
-| 1 | Debug Build and Test | PowerShell | Format stderr output as: error; Script: file; Script file: eng/Build.ps1; Script arguments: -Numbered %build.number% -Test |
-
-Artifact paths:
-
-```
-artifacts\bin\Debug\*.nupkg => artifacts/bin/Debug
-```
-
-   2. Create "Release Build and Test" build configuration using manual build steps configuration.
-
-Build steps:
+##### Build steps:
 
 | # | Name | Type | Configuration |
 | - | ---- | ---- | ------------- |
-| 1 | Release Build and Test | PowerShell | Format stderr output as: error; Script: file; Script file: eng/Build.ps1; Script arguments: -Public -Release -Sign -Test |
+| 1 | Debug Build and Test | PowerShell | Format stderr output as: error; Script: file; Script file: `Build.ps1`; Script arguments: `test --numbered-build %build.number%` |
 
-Artifact paths:
+##### Artifact paths:
 
 ```
-artifacts/publish/*.nupkg => artifacts/publish
-artifacts/bin/Release/*.nupkg => artifacts/bin/Release
+artifacts\** => artifacts
 ```
 
-Snapshot dependencies:
+#### "Release Build and Test" build configuration
+
+Create "Release Build and Test" build configuration using manual build steps configuration.
+
+##### Build steps:
+
+| # | Name | Type | Configuration |
+| - | ---- | ---- | ------------- |
+| 1 | Local Release Signed Build And Test | PowerShell | Format stderr output as: error; Script: file; Script file: `Build.ps1`; Script arguments: `test --configuration Release --sign` |
+| 2 | Public Release Signed Build | PowerShell | Format stderr output as: error; Script: file; Script file: `Build.ps1`; Script arguments: `build --public-build -configuration Release --sign --zip` |
+
+The tests are not performed on the public release build, as some tests may require NuGet packages, which leads to a package version conflict. The tests then may use different packages with the same package version producing false test results.
+
+#### Artifact paths:
+
+```
+artifacts\** => artifacts
+```
+
+#### Snapshot dependencies:
 - Debug Build and Test
 
-Parameters:
+#### Required environment variables:
 - SIGNSERVER_SECRET
+
+
+## Deployment
+
+
+#### "Publish Debug to Internal Feed" deployment configuration 
+
+Create "Publish Debug to Internal Feed" deployment configuration using manual build steps configuration.
+
+##### Build steps:
+
+| # | Name       | Type | Configuration                                                                                                                                                                                   |
+|---|------------|------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| 1 | Deploy | Powershell | Command: `Build.ps1 deploy` |
+
+##### Snapshot dependencies:
+
+- Debug Build and Test
+
+##### Artifact dependencies:
+
+- Debug Build and Test
+    
+    ```
+    +:artifacts/**/* => artifacts
+    ```
+
+#### Required environment variables:
+- INTERNAL_NUGET_PUSH_URL
+- INTERNAL_NUGET_API_KEY
+- NUGET_ORG_API_KEY
+
+#### "Publish Release to NuGet.Org and Internal Feed"  deployment configuration
+
+Create "Publish Release to NuGet.Org and Internal Feed" deployment configuration using manual build steps configuration.
+
+##### Build steps:
+
+| # | Name                  | Type | Configuration                                                                                                                                                                                     |
+|---|-----------------------|------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| 1 | Deploy     | Powershell | Command: `Build.ps1 deploy --public`  |
+
+##### Snapshot dependencies:
+
+- Debug Build and Test
+- Release Build and Test
+
+###### Artifact dependencies:
+
+- Release Build and Test
+
+```
++:artifacts/**/* => artifacts
+```
+
+#### Required environment variables:
+- INTERNAL_NUGET_PUSH_URL
+- INTERNAL_NUGET_API_KEY
