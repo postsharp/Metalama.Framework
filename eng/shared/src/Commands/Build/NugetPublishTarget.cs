@@ -62,17 +62,17 @@ namespace PostSharp.Engineering.BuildTools.Commands.Build
             
             // Note that we don't expand the ApiKey environment variable so we don't expose passwords to logs.
             var arguments =
-                $"push {file} -Source {server} -ApiKey {Environment.ExpandEnvironmentVariables( source.ApiKey )} -SkipDuplicate -NonInteractive";
+                $"nuget push {file} --source {server} --api-key {Environment.ExpandEnvironmentVariables( source.ApiKey )} --skip-duplicate";
 
             if ( options.Dry )
             {
-                context.Console.WriteImportantMessage( "Dry run: nuget " + arguments );
+                context.Console.WriteImportantMessage( "Dry run: dotnet " + arguments );
                 return SuccessCode.Success;
             }
             else
             {
 
-                return ToolInvocationHelper.InvokeTool( context.Console, "nuget", arguments,
+                return ToolInvocationHelper.InvokeTool( context.Console, "dotnet", arguments,
                     Environment.CurrentDirectory, CancellationToken.None )
                     ? SuccessCode.Success
                     : SuccessCode.Error;
