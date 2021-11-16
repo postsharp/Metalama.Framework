@@ -9,7 +9,7 @@ namespace PostSharp.Engineering.BuildTools.Commands.Build
         [CommandOption( "--sign" )]
         public bool Sign { get; protected set; }
         
-        [Description( "Create a zip file with all artefacts" )]
+        [Description( "Create a zip file with all artifacts" )]
         [CommandOption( "--zip" )]
         public bool CreateZip { get; protected set; }
     }

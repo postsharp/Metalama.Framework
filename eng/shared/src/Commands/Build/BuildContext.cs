@@ -15,7 +15,7 @@ namespace PostSharp.Engineering.BuildTools.Commands.Build
         public Product Product { get; }
 
         public string VersionFilePath =>
-            Path.Combine( this.RepoDirectory, $"eng\\{this.Product.ProductName}Version.props" );
+            Path.Combine( this.RepoDirectory, $"artifacts\\private\\{this.Product.ProductName}Version.props" );
 
         private BuildContext( ConsoleHelper console, string repoDirectory, Product product )
         {
