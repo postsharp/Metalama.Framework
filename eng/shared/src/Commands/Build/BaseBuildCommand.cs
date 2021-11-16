@@ -37,7 +37,7 @@ namespace PostSharp.Engineering.BuildTools.Commands.Build
             catch ( Exception ex )
             {
                 AnsiConsole.WriteException( ex );
-                return -1;
+                return 10;
             }
         }
 

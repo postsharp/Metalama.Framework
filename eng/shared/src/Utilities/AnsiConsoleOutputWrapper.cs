@@ -12,6 +12,17 @@ namespace PostSharp.Engineering.BuildTools.Utilities
         public AnsiConsoleOutputWrapper( TextWriter underlying )
         {
             this._underlying = underlying;
+            
+            try
+            {
+                this.Width = Console.WindowWidth;
+                this.Height = Console.WindowHeight;
+            }
+            catch ( IOException )
+            {
+                this.Width = 16 * 1024;
+                this.Height = 256;    
+            }
         }
 
         void IAnsiConsoleOutput.SetEncoding( Encoding encoding ) { }
@@ -20,8 +31,8 @@ namespace PostSharp.Engineering.BuildTools.Utilities
 
         public bool IsTerminal => true;
 
-        public int Width => Console.WindowWidth;
+        public int Width { get; }
 
-        public int Height => Console.WindowHeight;
+        public int Height { get; }
     }
 }
