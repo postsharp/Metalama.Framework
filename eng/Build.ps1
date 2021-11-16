@@ -38,9 +38,9 @@ if ( $Test ) {
 }
 
 if ( $Public ) {
-    $arguments += "--public-build" 
+    $arguments += "--public" 
 } elseif ( $Numbered -gt 0 ) {
-    $arguments += "--numbered-build"
+    $arguments += "--numbered"
     $arguments += $Numbered
 }
 
