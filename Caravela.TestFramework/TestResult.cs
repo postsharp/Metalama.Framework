@@ -345,6 +345,12 @@ namespace Caravela.TestFramework
             this.InputProject = null;
             this.IntermediateLinkerCompilation = null;
             this.InitialCompilationModel = null;
+            
+            // Diagnostics may have reference to declarations, and must be collected too.
+            this.PipelineDiagnostics.Clear();
+            this.InputCompilationDiagnostics.Clear();
+            this.OutputCompilationDiagnostics.Clear();
+            this.CompileTimeCompilationDiagnostics.Clear();
         }
     }
 }

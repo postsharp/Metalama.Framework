@@ -3,6 +3,7 @@
 
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
+using Caravela.Framework.Validation;
 
 namespace Caravela.Framework.Diagnostics
 {
@@ -11,6 +12,7 @@ namespace Caravela.Framework.Diagnostics
     /// </summary>
     /// <seealso href="@diagnostics"/>
     [CompileTimeOnly]
+    [InternalImplement]
     public interface IDiagnosticSink
     {
         /// <summary>

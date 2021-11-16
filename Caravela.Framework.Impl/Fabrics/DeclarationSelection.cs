@@ -148,19 +148,36 @@ namespace Caravela.Framework.Impl.Fabrics
             where TAspect : Attribute, IAspect<T>, new()
         {
             var aspectClass = this.GetAspectClass<TAspect>();
+            
+            var userCodeInvoker = this._serviceProvider.GetService<UserCodeInvoker>();
+            var executionContext = UserCodeExecutionContext.Current;
 
             this.RegisterAspectSource(
                 new ProgrammaticAspectSource<TAspect, T>(
                     aspectClass,
-                    ( compilation, diagnosticAdder ) => this.SelectAndValidateTargets(
-                        compilation,
-                        diagnosticAdder,
-                        aspectClass,
-                        t => new AspectInstance(
-                            new TAspect(),
-                            t.ToRef<IDeclaration>(),
+                    ( compilation, diagnosticAdder ) =>
+                    {
+                        return this.SelectAndValidateTargets(
+                            compilation,
+                            diagnosticAdder,
                             aspectClass,
-                            this._predecessor ) ) ) );
+                            t =>
+                            {
+                                if ( !userCodeInvoker.TryInvoke(
+                                    () => new TAspect(),
+                                    executionContext.WithDiagnosticAdder( diagnosticAdder ),
+                                    out var aspect ) )
+                                {
+                                    return null;
+                                }
+                                
+                                return new AspectInstance(
+                                    aspect!,
+                                    t.ToRef<IDeclaration>(),
+                                    aspectClass,
+                                    this._predecessor );
+                            } );
+                    } ) );
 
             return this;
         }
