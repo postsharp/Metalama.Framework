@@ -15,7 +15,7 @@
 
 ## Introduction
 
-This repository contains common development, build and publishig scripts and configurations. It is meant to be integrated in other repositories in form of a GIT subtree.
+This repository contains common development, build and publishing scripts and configurations. It is meant to be integrated in other repositories in form of a GIT subtree.
 
 ## Prerequisities
 
@@ -35,13 +35,13 @@ This repository contains common development, build and publishig scripts and con
 
 `git subtree add --prefix eng/shared https://postsharp@dev.azure.com/postsharp/Caravela/_git/Caravela.Engineering master --squash`
 
-3. Check `README.md` in each directory in the `eng\shared` subtree for futher installation steps.
+3. Check `README.md` in each directory in the `eng\shared` subtree for further installation steps.
 
 ## Updating
 
 1. From the repository root containing the `eng\shared` subtree, execute `& eng\shared\PullEngineering.ps1`.
 2. Follow the steps described in [the changelog](CHANGELOG.md).
-3. Commit & push. (Even if there are no changes ouside the `eng\shared` subtree.)
+3. Commit & push. (Even if there are no changes outside the `eng\shared` subtree.)
 
 ## Features
 
@@ -70,8 +70,8 @@ To clone a repository containing `eng\shared` GIT subtree, use the following com
 
 ## Repositories with disabled symbolic links
 
-When you have an existing repository where the symbolic links are disabled and you want to check-out changes cotaining symbolic links, you need to change the `symlinks` setting to `true` in `.git\config` configuration file.
+When you have an existing repository where the symbolic links are disabled and you want to check-out changes containing symbolic links, you need to change the `symlinks` setting to `true` in `.git\config` configuration file.
 
 Checking files out after that will properly create all symbolic links.
 
-Changing this setting after the check-out will make the repositry dirty. Reverting the "changes" will fix the links.
+Changing this setting after the check-out will make the repository dirty. Reverting the "changes" will fix the links.

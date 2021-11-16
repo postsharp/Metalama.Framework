@@ -12,3 +12,4 @@ trap
 }
 
 & dotnet publish $PSScriptRoot/src/PostSharp.Engineering.BuildTools.sln
+exit $LASTEXITCODE
