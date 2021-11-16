@@ -1,26 +1,26 @@
 # This is the backward-compatibility script for TeamCity and it should be deleted after the build configuration has been ported.
 
 param (
-# LEGACY. Creates a numbered build (typically internal builds on a build server).
+    # Creates a numbered build (typically internal builds on a build server).
     [Parameter(Mandatory=$false, ValueFromPipeline=$false )]
     [int] $Numbered = -1,
 
-# LEGACY. Creates a release build instead of a debug one.
+    # Creates a release build instead of a debug one.
     [switch] $Release = $false,
 
-# LEGACY. Creates a local build with a version number based on a timestamp (typically a development build).
+    # Creates a local build with a version number based on a timestamp (typically a development build).
     [switch] $Local = $false,
 
-# LEGACY. Creates a public build.
+    # Creates a public build.
     [switch] $Public = $false,
 
-# LEGACY. Sings the public packages (doesn't work without -Public -Release).
+    # Sings the public packages (doesn't work without -Public -Release).
     [switch] $Sign = $false,
 
-# LEGACY. Creates $(ProductName)Version.props but does not build the project.
+    # Creates $(ProductName)Version.props but does not build the project.
     [switch] $Prepare = $false,
 
-# LEGACY. Runs the test suite.
+    # Runs the test suite.
     [switch] $Test = $false
 )
 
@@ -29,34 +29,26 @@ if ( $env:VisualStudioVersion -eq $null ) {
     Enter-VsDevShell -VsInstallPath "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\" -StartInPath $(Get-Location)
 }
 
-if ( $Release -or $Local -or $Numbered -gt 0 -or $Public ) {
-    
-    
-    
-    # Map the old arguments to the new one
-    if ( $Test ) {
-        $command = "test  --zip"
-    } else {
-        $command = "build --zip"
-    }
-    
-    if ( $Public ) {
-        $version = "--public-build" 
-    } elseif ( $Numbered -gt 0 ) {
-        $version = "--numbered-build $Numbered"
-    }
-
-    if ( $Release ) {
-        $configuration = "--configuration Release"
-    } else {
-        $configuration = ""
-    }
-    
-    Write-Host "Update your command line to the new format. The new arguments are: '$command $version $configuration'"
-    & dotnet run --project .\eng\src\Build.csproj -- $command $version $configuration
+# Map the old arguments to the new one
+$arguments = @()
+if ( $Test ) {
+    $arguments += "test"
 } else {
-    # Use the new command line
-    & dotnet run --project .\eng\src\Build.csproj -- $args    
+    $arguments += "build"
 }
+
+if ( $Public ) {
+    $arguments += "--public-build" 
+} elseif ( $Numbered -gt 0 ) {
+    $arguments += "--numbered-build"
+    $arguments += $Numbered
+}
+
+if ( $Release ) {
+    $arguments += "--configuration Release"
+}
+
+Write-Host "Update your command line to the new format. The new arguments are: $arguments"
+& dotnet run --project .\eng\src\Build.csproj -- $arguments
 
 exit $LASTEXITCODE
