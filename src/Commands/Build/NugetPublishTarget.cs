@@ -1,6 +1,5 @@
 ﻿using PostSharp.Engineering.BuildTools.Utilities;
 using System;
-using System.Collections.Immutable;
 using System.Threading;
 
 namespace PostSharp.Engineering.BuildTools.Commands.Build

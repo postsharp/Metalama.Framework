@@ -11,11 +11,11 @@ namespace PostSharp.Engineering.BuildTools.Commands.Build
         public BuildConfiguration BuildConfiguration { get; protected set; }
 
         [Description( "Creates a numbered build (typically for an internal CI build)" )]
-        [CommandOption( "--numbered-build" )]
+        [CommandOption( "--numbered" )]
         public int BuildNumber { get; protected set; }
 
         [Description( "Creates a public build (typically to publish to nuget.org)" )]
-        [CommandOption( "--public-build" )]
+        [CommandOption( "--public" )]
         public bool PublicBuild { get; protected set; }
 
         [Description( "Sets the verbosity" )]
