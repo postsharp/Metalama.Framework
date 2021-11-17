@@ -49,8 +49,8 @@ namespace Caravela.Framework.Impl.DesignTime.Preview
 
         bool IProjectOptions.TryGetProperty( string name, [NotNullWhen( true )] out string? value ) => this._underlying.TryGetProperty( name, out value );
 
-        bool IProjectOptions.DesignTimeEnabled => true;
+        bool IProjectOptions.IsDesignTimeEnabled => true;
 
-        string? IProjectOptions.AuxiliaryFilePath => null;
+        string? IProjectOptions.AdditionalCompilationOutputDirectory => null;
     }
 }

@@ -57,7 +57,7 @@ namespace Caravela.Framework.Impl.Pipeline
                     context.AddSyntaxTreeTransformations( pipelineResult.SyntaxTreeTransformations );
                 }
 
-                HandleAuxiliaryFiles( projectOptions, pipelineResult );
+                HandleAdditionalCompilationOutputFiles( projectOptions, pipelineResult );
             }
             catch ( Exception e )
             {
@@ -73,46 +73,51 @@ namespace Caravela.Framework.Impl.Pipeline
             }
         }
 
-        private static void HandleAuxiliaryFiles( IProjectOptions projectOptions, CompileTimeAspectPipelineResult? pipelineResult )
+        private static void HandleAdditionalCompilationOutputFiles( IProjectOptions projectOptions, CompileTimeAspectPipelineResult? pipelineResult )
         {
-            if ( pipelineResult == null || projectOptions.AuxiliaryFilePath == null )
+            if ( pipelineResult == null || projectOptions.AdditionalCompilationOutputDirectory == null )
             {
                 return;
             }
 
             try
             {
-                var existingAuxiliaryFiles = new HashSet<string>();
+                var existingFiles = new HashSet<string>();
 
-                if ( Directory.Exists( projectOptions.AuxiliaryFilePath ) )
+                if ( Directory.Exists( projectOptions.AdditionalCompilationOutputDirectory ) )
                 {
-                    foreach ( var existingAuxiliaryFile in Directory.GetFiles( projectOptions.AuxiliaryFilePath, "*", SearchOption.AllDirectories ) )
+                    foreach ( var existingAuxiliaryFile in Directory.GetFiles(
+                        projectOptions.AdditionalCompilationOutputDirectory,
+                        "*",
+                        SearchOption.AllDirectories ) )
                     {
-                        existingAuxiliaryFiles.Add( existingAuxiliaryFile );
+                        existingFiles.Add( existingAuxiliaryFile );
                     }
                 }
 
-                var finalAuxiliaryFiles = new HashSet<string>();
+                var finalFiles = new HashSet<string>();
 
-                foreach ( var file in pipelineResult.AuxiliaryFiles )
+                foreach ( var file in pipelineResult.AdditionalCompilationOutputFiles )
                 {
-                    var fullPath = GetAuxiliaryFileFullPath( file );
-                    finalAuxiliaryFiles.Add( fullPath );
+                    var fullPath = GetFileFullPath( file );
+                    finalFiles.Add( fullPath );
                 }
 
-                foreach ( var deletedAuxiliaryFile in existingAuxiliaryFiles.Except( finalAuxiliaryFiles ) )
+                foreach ( var deletedAuxiliaryFile in existingFiles.Except( finalFiles ) )
                 {
                     File.Delete( deletedAuxiliaryFile );
                 }
 
-                foreach ( var file in pipelineResult.AuxiliaryFiles )
+                foreach ( var file in pipelineResult.AdditionalCompilationOutputFiles )
                 {
-                    var fullPath = GetAuxiliaryFileFullPath( file );
+                    var fullPath = GetFileFullPath( file );
                     Directory.CreateDirectory( Path.GetDirectoryName( fullPath ) );
-                    File.WriteAllBytes( fullPath, file.Content );
+                    using var stream = File.OpenWrite( fullPath );
+                    file.WriteToStream( stream );
                 }
 
-                string GetAuxiliaryFileFullPath( AuxiliaryFile file ) => Path.Combine( projectOptions.AuxiliaryFilePath, file.Kind.ToString(), file.Path );
+                string GetFileFullPath( AdditionalCompilationOutputFile file )
+                    => Path.Combine( projectOptions.AdditionalCompilationOutputDirectory, file.Kind.ToString(), file.Path );
             }
             catch
             {

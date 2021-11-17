@@ -5,7 +5,6 @@ using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.DesignTime.Pipeline;
-using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Linking;
 using Caravela.Framework.Impl.Options;
 using Caravela.Framework.Project;
@@ -53,11 +52,16 @@ namespace Caravela.Framework.Impl.Pipeline
             var linkerResult = linker.ToResult();
 
             var projectOptions = this.ServiceProvider.GetOptionalService<IProjectOptions>();
-            IReadOnlyList<AuxiliaryFile>? fallbackFiles = null;
+            IReadOnlyList<AdditionalCompilationOutputFile>? additionalCompilationOutputFiles = null;
 
-            if ( projectOptions != null && !projectOptions.DesignTimeEnabled )
+            if ( projectOptions != null && !projectOptions.IsDesignTimeEnabled )
             {
-                fallbackFiles = this.GenerateDesignTimeFallbackFiles( pipelineConfiguration, input, projectOptions.AssertNotNull(), cancellationToken );
+                additionalCompilationOutputFiles = this.GenerateAdditionalCompilationOutputFiles(
+                    pipelineConfiguration,
+                    input,
+                    pipelineStepResult,
+                    projectOptions.AssertNotNull(),
+                    cancellationToken );
             }
 
             return new PipelineStageResult(
@@ -67,36 +71,81 @@ namespace Caravela.Framework.Impl.Pipeline
                 pipelineStepResult.Diagnostics.Concat( linkerResult.Diagnostics ),
                 pipelineStepResult.ExternalAspectSources,
                 input.ExternallyInheritableAspects.AddRange( pipelineStepResult.InheritableAspectInstances ),
-                auxiliaryFiles: fallbackFiles != null ? input.AuxiliaryFiles.AddRange( fallbackFiles ) : input.AuxiliaryFiles );
+                additionalCompilationOutputFiles: additionalCompilationOutputFiles != null ? input.AdditionalCompilationOutputFiles.AddRange( additionalCompilationOutputFiles ) : input.AdditionalCompilationOutputFiles );
         }
 
-        private IReadOnlyList<AuxiliaryFile> GenerateDesignTimeFallbackFiles(
+        private IReadOnlyList<AdditionalCompilationOutputFile> GenerateAdditionalCompilationOutputFiles(
             AspectPipelineConfiguration pipelineConfiguration,
             PipelineStageResult input,
+            IPipelineStepsResult pipelineStepResult,
             IProjectOptions buildOptions,
             CancellationToken cancellationToken )
         {
-            var generatedFiles = new List<AuxiliaryFile>();
-            var pipelineStage = new SourceGeneratorPipelineStage( this.CompileTimeProject, input.AspectLayers, this.ServiceProvider );
+            var generatedFiles = new List<AdditionalCompilationOutputFile>();
+
+            SourceGeneratorPipelineRunner.Execute(
+                this.CompileTimeProject,
+                input.PartialCompilation,
+                pipelineStepResult.Compilation,
+                this.ServiceProvider,
+                cancellationToken,
+                out _,
+                out var additionalSyntaxTrees );
 
             // Ignore diagnostics, because these will be coming from the analyzer.
-            if ( pipelineStage.TryExecute( pipelineConfiguration, input, NullDiagnosticAdder.Instance, cancellationToken, out var stageResult ) )
+            var uniquePaths = new HashSet<string>();
+
+            foreach ( var syntaxTree in additionalSyntaxTrees )
             {
-                foreach ( var syntaxTree in stageResult.AdditionalSyntaxTrees )
-                {
-                    var path = Path.GetDirectoryName( syntaxTree.Name );
-                    var name = Path.GetFileNameWithoutExtension( syntaxTree.Name );
-                    var ext = Path.GetExtension( syntaxTree.Name );
-                    var relativePath = Path.Combine( path, $"{name}.g{ext}" );
-                    var content = (syntaxTree.GeneratedSyntaxTree.Encoding ?? Encoding.UTF8).GetBytes( syntaxTree.GeneratedSyntaxTree.ToString() );
-                    generatedFiles.Add( new GeneratedAuxiliaryFile( relativePath, AuxiliaryFileKind.DesignTimeFallback, content ) );
-                }
+                var path = Path.GetDirectoryName( syntaxTree.Name );
+                var name = Path.GetFileNameWithoutExtension( syntaxTree.Name );
+                var ext = Path.GetExtension( syntaxTree.Name );
+                var relativePath = Path.Combine( path, $"{name}.g{ext}" );
+                relativePath = GetUniqueFilename( relativePath );
+
+                generatedFiles.Add(
+                    new GeneratedAdditionalCompilationOutputFile(
+                        relativePath,
+                        AdditionalCompilationOutputFileKind.DesignTimeGeneratedCode,
+                        stream =>
+                        {
+                            using var writer = new StreamWriter( stream, syntaxTree.GeneratedSyntaxTree.Encoding ?? Encoding.UTF8 );
+                            writer.Write( syntaxTree.GeneratedSyntaxTree.ToString() );
+                        } ) );
             }
 
             generatedFiles.Add(
-                new GeneratedAuxiliaryFile( ".touch", AuxiliaryFileKind.DesignTimeFallback, Encoding.UTF8.GetBytes( Guid.NewGuid().ToString() ) ) );
+                new GeneratedAdditionalCompilationOutputFile(
+                    "touch",
+                    AdditionalCompilationOutputFileKind.DesignTimeTouch,
+                    stream =>
+                    {
+                        using var writer = new StreamWriter( stream, Encoding.UTF8 );
+                        writer.Write( Guid.NewGuid() );
+                    } ) );
 
             return generatedFiles;
+
+            string GetUniqueFilename(string filename)
+            {
+                if (!uniquePaths.Add( filename ))
+                {
+                    for ( var i = 1; ; i++ )
+                    {
+                        var path = Path.GetDirectoryName( filename );
+                        var name = Path.GetFileNameWithoutExtension( filename );
+                        var ext = Path.GetExtension( filename );
+                        var relativePath = Path.Combine( path, $"{name}.g.{i}{ext}" );
+
+                        if ( uniquePaths.Add( relativePath ) )
+                        {
+                            return relativePath;
+                        }
+                    }
+                }
+
+                return filename;
+            }
         }
     }
 }

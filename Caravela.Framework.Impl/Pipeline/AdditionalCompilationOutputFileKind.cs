@@ -3,12 +3,9 @@
 
 namespace Caravela.Framework.Impl.Pipeline
 {
-    public abstract class AuxiliaryFile
+    public enum AdditionalCompilationOutputFileKind
     {
-        public abstract AuxiliaryFileKind Kind { get; }
-
-        public abstract string Path { get; }
-
-        public abstract byte[] Content { get; }
+        DesignTimeGeneratedCode,
+        DesignTimeTouch
     }
 }

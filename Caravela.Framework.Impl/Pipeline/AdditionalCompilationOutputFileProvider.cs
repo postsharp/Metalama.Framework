@@ -9,29 +9,29 @@ using System.IO;
 
 namespace Caravela.Framework.Impl.Pipeline
 {
-    internal class AuxiliaryFileProvider : IAuxiliaryFileProvider
+    internal class AdditionalCompilationOutputFileProvider : IAdditionalOutputFileProvider
     {
         private readonly ServiceProvider _serviceProvider;
 
-        public AuxiliaryFileProvider( ServiceProvider serviceProvider )
+        public AdditionalCompilationOutputFileProvider( ServiceProvider serviceProvider )
         {
             this._serviceProvider = serviceProvider;
         }
 
-        public ImmutableArray<AuxiliaryFile> GetAuxiliaryFiles()
+        public ImmutableArray<AdditionalCompilationOutputFile> GetAdditionalCompilationOutputFiles()
         {
             var projectOptions = this._serviceProvider.GetOptionalService<IProjectOptions>();
 
-            if ( projectOptions == null || projectOptions.AuxiliaryFilePath == null )
+            if ( projectOptions == null || projectOptions.AdditionalCompilationOutputDirectory == null )
             {
-                return ImmutableArray<AuxiliaryFile>.Empty;
+                return ImmutableArray<AdditionalCompilationOutputFile>.Empty;
             }
 
-            var builder = ImmutableArray<AuxiliaryFile>.Empty.ToBuilder();
+            var builder = ImmutableArray<AdditionalCompilationOutputFile>.Empty.ToBuilder();
 
-            foreach ( var kindDirectory in Directory.GetDirectories( projectOptions.AuxiliaryFilePath ) )
+            foreach ( var kindDirectory in Directory.GetDirectories( projectOptions.AdditionalCompilationOutputDirectory ) )
             {
-                if ( !Enum.TryParse<AuxiliaryFileKind>( Path.GetFileName( kindDirectory ), out var kind ) )
+                if ( !Enum.TryParse<AdditionalCompilationOutputFileKind>( Path.GetFileName( kindDirectory ), out var kind ) )
                 {
                     continue;
                 }
@@ -44,7 +44,7 @@ namespace Caravela.Framework.Impl.Pipeline
                     var fileNormalized = Path.GetFullPath( file );
                     var relativePath = fileNormalized.Substring( kindDirectoryNormalized.Length + 1 );
 
-                    builder.Add( new ExistingAuxiliaryFile( projectOptions.AuxiliaryFilePath, kind, relativePath ) );
+                    builder.Add( new ExistingAdditionalCompilationOutputFile( projectOptions.AdditionalCompilationOutputDirectory, kind, relativePath ) );
                 }
             }
 

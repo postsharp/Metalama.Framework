@@ -33,20 +33,19 @@ namespace Caravela.Framework.Impl.DesignTime
 
             try
             {
-                // TODO: Skip (or use different code) if design time exp is disabled.
                 Logger.Instance?.Write( $"DesignTimeSourceGenerator.Execute('{compilation.AssemblyName}')." );
 
                 var projectOptions = new ProjectOptions( context.AnalyzerConfigOptions );
 
                 DebuggingHelper.AttachDebugger( projectOptions );
 
-                if ( !projectOptions.DesignTimeEnabled )
+                if ( !projectOptions.IsDesignTimeEnabled )
                 {
                     // Execute the fallback.
                     Logger.Instance?.Write(
-                        $"DesignTimeSourceGenerator.Execute('{compilation.AssemblyName}'): DesignTimeEnabled is false, will output fallback files from {projectOptions.AuxiliaryFilePath}." );
+                        $"DesignTimeSourceGenerator.Execute('{compilation.AssemblyName}'): DesignTimeEnabled is false, will output fallback files from {projectOptions.AdditionalCompilationOutputDirectory}." );
 
-                    ExecuteFallback( context, projectOptions );
+                    ExecuteFromAdditionalCompilationOutputFiles( context, projectOptions );
 
                     return;
                 }
@@ -83,22 +82,24 @@ namespace Caravela.Framework.Impl.DesignTime
             }
         }
 
-        private static void ExecuteFallback( GeneratorExecutionContext context, IProjectOptions projectOptions )
+        private static void ExecuteFromAdditionalCompilationOutputFiles( GeneratorExecutionContext context, IProjectOptions projectOptions )
         {
             var serviceProvider = ServiceProvider.Empty.WithServices( projectOptions );
-            var auxiliaryFileProvider = new AuxiliaryFileProvider( serviceProvider );
+            var provider = new AdditionalCompilationOutputFileProvider( serviceProvider );
 
-            if ( projectOptions.AuxiliaryFilePath == null )
+            if ( projectOptions.AdditionalCompilationOutputDirectory == null )
             {
                 return;
             }
 
             var sourcesCount = 0;
 
-            foreach ( var file in auxiliaryFileProvider.GetAuxiliaryFiles()
-                .Where( f => f.Kind == AuxiliaryFileKind.DesignTimeFallback && StringComparer.Ordinal.Equals( Path.GetExtension( f.Path ), ".cs" ) ) )
+            foreach ( var file in provider.GetAdditionalCompilationOutputFiles()
+                .Where(
+                    f => f.Kind == AdditionalCompilationOutputFileKind.DesignTimeGeneratedCode && StringComparer.Ordinal.Equals( Path.GetExtension( f.Path ), ".cs" ) ) )
             {
-                context.AddSource( Path.GetFileName( file.Path ), SourceText.From( file.Content, file.Content.Length ) );
+                using var stream = file.GetStream();
+                context.AddSource( Path.GetFileName( file.Path ), SourceText.From( stream ) );
                 sourcesCount++;
             }
 

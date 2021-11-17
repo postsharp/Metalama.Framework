@@ -15,12 +15,12 @@
 
     <!-- Auxiliary files. -->
     <PropertyGroup>
-        <CaravelaAuxiliaryFilePath>$(MSBuildProjectDirectory)\$(IntermediateOutputPath)\caravela-aux\</CaravelaAuxiliaryFilePath>
+        <CaravelaAdditionalCompilationOutputDirectory>$(MSBuildProjectDirectory)\$(IntermediateOutputPath)\caravela-aux\</CaravelaAdditionalCompilationOutputDirectory>
     </PropertyGroup>
 
     <!-- Design time fallback dependency that forces rerun of analyzers/source generators when changed. -->
     <PropertyGroup>
-        <CaravelaDesignTimeFallbackTouchFile>$(CaravelaAuxiliaryFilePath)DesignTimeFallback\.touch</CaravelaDesignTimeFallbackTouchFile>
+        <CaravelaDesignTimeFallbackTouchFile>$(CaravelaAdditionalCompilationOutputDirectory)DesignTimeTouch\touch</CaravelaDesignTimeFallbackTouchFile>
     </PropertyGroup>
 
     <ItemGroup Condition="'$(DesignTimeBuild)' == 'True'">

@@ -281,16 +281,16 @@ namespace Caravela.Framework.Impl.Pipeline
             return sources;
         }
 
-        private protected virtual ImmutableArray<AuxiliaryFile> GetAuxiliaryFiles( ServiceProvider serviceProvider )
+        private protected virtual ImmutableArray<AdditionalCompilationOutputFile> GetAdditionalCompilationOutputFiles( ServiceProvider serviceProvider )
         {
-            var provider = serviceProvider.GetOptionalService<IAuxiliaryFileProvider>();
+            var provider = serviceProvider.GetOptionalService<IAdditionalOutputFileProvider>();
 
             if ( provider == null )
             {
-                return ImmutableArray<AuxiliaryFile>.Empty;
+                return ImmutableArray<AdditionalCompilationOutputFile>.Empty;
             }
 
-            return provider.GetAuxiliaryFiles();
+            return provider.GetAdditionalCompilationOutputFiles();
         }
 
         /// <summary>
@@ -313,14 +313,14 @@ namespace Caravela.Framework.Impl.Pipeline
             }
 
             var aspectSources = this.CreateAspectSources( pipelineConfiguration, compilation.Compilation, cancellationToken );
-            var auxiliaryFiles = this.GetAuxiliaryFiles( pipelineConfiguration.ServiceProvider );
+            var additionalCompilationOutputFiles = this.GetAdditionalCompilationOutputFiles( pipelineConfiguration.ServiceProvider );
 
             pipelineStageResult = new PipelineStageResult(
                 compilation,
                 pipelineConfiguration.ProjectModel,
                 pipelineConfiguration.AspectLayers,
                 aspectSources: aspectSources,
-                auxiliaryFiles: auxiliaryFiles );
+                additionalCompilationOutputFiles: additionalCompilationOutputFiles );
 
             foreach ( var stageConfiguration in pipelineConfiguration.Stages )
             {

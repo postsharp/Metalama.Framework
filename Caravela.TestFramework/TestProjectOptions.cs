@@ -75,9 +75,9 @@ namespace Caravela.TestFramework
 
         public IProjectOptions Apply( IProjectOptions options ) => options;
 
-        public bool DesignTimeEnabled => true;
+        public bool IsDesignTimeEnabled => true;
 
-        public string? AuxiliaryFilePath => null;
+        public string? AdditionalCompilationOutputDirectory => null;
 
         public bool TryGetProperty( string name, [NotNullWhen( true )] out string? value ) => this._properties.TryGetValue( name, out value );
 

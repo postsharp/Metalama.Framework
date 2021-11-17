@@ -8,7 +8,7 @@ using Caravela.Framework.TestApp.Aspects;
 
 namespace Caravela.Framework.TestApp
 {
-    [IntroduceSomeMethodAspect("Foo", "Bar")]
+    [IntroduceSomeMethodAspect("Foo2", "Bar")]
     internal partial class Program
     {
         [SuppressWarning]
@@ -23,9 +23,9 @@ namespace Caravela.Framework.TestApp
             int x = 0;
 
             Foo();
-       //     new Program().SomeOtherIntroducedMethod();
+            //     new Program().SomeOtherIntroducedMethod();
 
-           // IMethod m = null;
+            // IMethod m = null;
             // m.Base.Invoke( null );
 
             // TemplateContext.compileTime( 0 );

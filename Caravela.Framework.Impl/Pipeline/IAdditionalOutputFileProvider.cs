@@ -6,8 +6,8 @@ using System.Collections.Immutable;
 
 namespace Caravela.Framework.Impl.Pipeline
 {
-    public interface IAuxiliaryFileProvider : IService
+    public interface IAdditionalOutputFileProvider : IService
     {
-        ImmutableArray<AuxiliaryFile> GetAuxiliaryFiles();
+        ImmutableArray<AdditionalCompilationOutputFile> GetAdditionalCompilationOutputFiles();
     }
 }

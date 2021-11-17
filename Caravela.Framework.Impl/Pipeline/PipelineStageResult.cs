@@ -46,7 +46,7 @@ namespace Caravela.Framework.Impl.Pipeline
 
         public ImmutableArray<AttributeAspectInstance> ExternallyInheritableAspects { get; }
 
-        public ImmutableArray<AuxiliaryFile> AuxiliaryFiles { get; }
+        public ImmutableArray<AdditionalCompilationOutputFile> AdditionalCompilationOutputFiles { get; }
 
         public PipelineStageResult(
             PartialCompilation compilation,
@@ -56,7 +56,7 @@ namespace Caravela.Framework.Impl.Pipeline
             IReadOnlyList<IAspectSource>? aspectSources = null,
             ImmutableArray<AttributeAspectInstance>? inheritableAspectInstances = null,
             IReadOnlyList<IntroducedSyntaxTree>? additionalSyntaxTrees = null,
-            ImmutableArray<AuxiliaryFile>? auxiliaryFiles = null )
+            ImmutableArray<AdditionalCompilationOutputFile>? additionalCompilationOutputFiles = null )
         {
             this.PartialCompilation = compilation;
             this.Diagnostics = diagnostics ?? ImmutableUserDiagnosticList.Empty;
@@ -65,7 +65,7 @@ namespace Caravela.Framework.Impl.Pipeline
             this.ExternallyInheritableAspects = inheritableAspectInstances ?? ImmutableArray<AttributeAspectInstance>.Empty;
             this.Project = project;
             this.AdditionalSyntaxTrees = additionalSyntaxTrees ?? ImmutableArray<IntroducedSyntaxTree>.Empty;
-            this.AuxiliaryFiles = auxiliaryFiles ?? ImmutableArray<AuxiliaryFile>.Empty;
+            this.AdditionalCompilationOutputFiles = additionalCompilationOutputFiles ?? ImmutableArray<AdditionalCompilationOutputFile>.Empty;
         }
     }
 }

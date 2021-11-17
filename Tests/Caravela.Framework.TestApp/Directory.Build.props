@@ -11,8 +11,7 @@
   <PropertyGroup>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <DebugCaravelaAnalyzer>True</DebugCaravelaAnalyzer>
-	  <DebugCaravelaIde>True</DebugCaravelaIde>
-    <DebugCaravela>True</DebugCaravela>
+	 <DebugCaravelaIde>False</DebugCaravelaIde>
     <!-- Overwrite from the parent directory -->
     
   </PropertyGroup>

@@ -56,11 +56,11 @@ namespace Caravela.Framework.Impl.Options
         /// <summary>
         /// Gets a value indicating whether the design time experience is enabled for the project.
         /// </summary>
-        bool DesignTimeEnabled { get; }
+        bool IsDesignTimeEnabled { get; }
 
         /// <summary>
-        /// Gets a path to a directory that stores auxiliary files.
+        /// Gets a path to a directory that stores additional compilation output files.
         /// </summary>
-        string? AuxiliaryFilePath { get; }
+        string? AdditionalCompilationOutputDirectory { get; }
     }
 }
