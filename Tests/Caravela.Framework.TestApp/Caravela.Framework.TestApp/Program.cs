@@ -8,24 +8,25 @@ using Caravela.Framework.TestApp.Aspects;
 
 namespace Caravela.Framework.TestApp
 {
-    [IntroduceSomeMethodAspect("Foo2", "Bar")]
+    [IntroduceSomeMethodAspect("Foo", "Bar")]
     internal partial class Program
     {
         [SuppressWarning]
         private static async Task MethodAsync()
         {
+            
         }
 
         private static void Main()
         {
-            //Console.WriteLine( $"x={x}" );
+            //Console.WriteLine( $"x={x}" ); 
 
             int x = 0;
 
             Foo();
-            //     new Program().SomeOtherIntroducedMethod();
+       //     new Program().SomeOtherIntroducedMethod();
 
-            // IMethod m = null;
+           // IMethod m = null;
             // m.Base.Invoke( null );
 
             // TemplateContext.compileTime( 0 );
@@ -35,12 +36,12 @@ namespace Caravela.Framework.TestApp
             PrintDebugInfo();
 
             PrintArray();
-
+            
             Cancel();
         }
 
         private void Method() { }
-
+        
         [SwallowExceptionsAspect]
         [PrintDebugInfoAspect]
         public static void MethodWithTwoAspects()
