@@ -1,5 +1,10 @@
 ﻿<Project>
 
+
+  <ItemGroup Condition="'$(CaravelaCompileTimeOnlyProject)'=='True'">
+        <AssemblyAttribute Include="Caravela.Framework.Aspects.CompileTimeOnlyAttribute"/>
+    </ItemGroup>
+
     <PropertyGroup>
         <!-- This must be in .targets, not in .props, because it relies on other properties and
               is not meant to be overwritten -->
