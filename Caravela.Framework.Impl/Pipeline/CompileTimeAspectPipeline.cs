@@ -10,7 +10,6 @@ using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Formatting;
 using Caravela.Framework.Impl.Templating;
 using Microsoft.CodeAnalysis;
-using System;
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Linq;
@@ -60,7 +59,6 @@ namespace Caravela.Framework.Impl.Pipeline
                     partialCompilation );
             }
 
-            
             // Run the code analyzers that normally run at design time.
             if ( !TemplatingCodeValidator.Validate( compilation, diagnosticAdder, this.ServiceProvider, cancellationToken ) )
             {

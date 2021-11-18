@@ -67,7 +67,7 @@ namespace Caravela.Framework.Impl.Pipeline
                 resources.Add,
                 new AspectWeaverHelper( pipelineConfiguration.ServiceProvider, compilation ),
                 pipelineConfiguration.ServiceProvider,
-                input.Project);
+                input.Project );
 
             var executionContext = new UserCodeExecutionContext(
                 this.ServiceProvider,

@@ -34,7 +34,7 @@ namespace Caravela.Framework.Impl.CodeModel
         /// Returns a copy of the current <see cref="IPartialCompilation"/> where the <see cref="SyntaxTrees"/> have been modified.
         /// </summary>
         /// <seealso cref="PartialCompilationExtensions.UpdateSyntaxTrees(Caravela.Framework.Impl.CodeModel.IPartialCompilation,System.Func{Microsoft.CodeAnalysis.SyntaxTree,System.Threading.CancellationToken,Microsoft.CodeAnalysis.SyntaxTree},System.Threading.CancellationToken)"/>
-         ///<seealso cref="PartialCompilationExtensions.RewriteSyntaxTrees"/>
+        /// <seealso cref="PartialCompilationExtensions.RewriteSyntaxTrees"/>
         IPartialCompilation WithSyntaxTreeModifications(
             IReadOnlyList<SyntaxTreeModification>? modifications = null,
             IReadOnlyList<SyntaxTree>? additions = null );

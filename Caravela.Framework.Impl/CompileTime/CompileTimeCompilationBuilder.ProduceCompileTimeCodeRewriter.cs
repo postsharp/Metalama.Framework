@@ -130,7 +130,7 @@ namespace Caravela.Framework.Impl.CompileTime
                 }
                 else
                 {
-                    return base.VisitDelegateDeclaration( node )!.WithAdditionalAnnotations( _hasCompileTimeCodeAnnotation );;
+                    return base.VisitDelegateDeclaration( node )!.WithAdditionalAnnotations( _hasCompileTimeCodeAnnotation );
                 }
             }
 
