@@ -693,8 +693,8 @@ using Caravela.Framework.Aspects;
 [CompileTimeOnly]
 public class CompileTimeOnlyClass
 {
-   static Type Type1 = global::Caravela.Framework.Impl.ReflectionMocks.CompileTimeType.GetCompileTimeType(""RunTimeOnlyClass"",""RunTimeOnlyClass"");
-   static Type Type2 = typeof(CompileTimeOnlyClass);
+   static global::System.Type Type1 = global::Caravela.Framework.Impl.ReflectionMocks.CompileTimeType.GetCompileTimeType(""RunTimeOnlyClass"",""RunTimeOnlyClass"");
+   static global::System.Type Type2 = typeof(global::CompileTimeOnlyClass);
    static string Name1 = ""RunTimeOnlyClass"";
    static string Name2 = ""CompileTimeOnlyClass"";
 

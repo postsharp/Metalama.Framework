@@ -16,7 +16,7 @@ namespace Caravela.Framework.Tests.Integration.Tests.Aspects.Introductions.Metho
             builder.Advices.IntroduceMethod(
                 builder.Target,
                 nameof(OnPropertyChanged),
-                tags: new Dictionary<string, object?> { { "event", eventBuilder } } );
+                tags: new Tags { { "event", eventBuilder } } );
         }
 
         [Template]

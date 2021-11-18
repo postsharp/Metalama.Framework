@@ -1,12 +1,12 @@
 <Project>
 
     <!-- Normally you should call build.ps1 -local -prepare before opening the project in an IDE, and it creates CaravelaVersion.props. -->
-    <Import Project="CaravelaVersion.props" Condition="Exists('CaravelaVersion.props')" />
+    <Import Project="../artifacts/private/CaravelaVersion.props" Condition="Exists('../artifacts/private/CaravelaVersion.props')" />
 
     <!-- However, if you don't, default values are used. -->
-    <Import Project="MainVersion.props" Condition="!Exists('CaravelaVersion.props')" />
+    <Import Project="MainVersion.props" Condition="!Exists('../artifacts/private/CaravelaVersion.props')" />
     
-    <PropertyGroup Condition="!Exists('CaravelaVersion.props')">
+    <PropertyGroup Condition="!Exists('../artifacts/private/CaravelaVersion.props')">
         <CaravelaVersion>$(MainVersion)$(PackageVersionSuffix)</CaravelaVersion>
         <CaravelaAssemblyVersion>$(MainVersion)</CaravelaAssemblyVersion>
     </PropertyGroup>

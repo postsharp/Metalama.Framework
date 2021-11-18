@@ -9,7 +9,7 @@
 
     <!-- Output path -->
     <PropertyGroup>
-        <PackageOutputPath>$(MSBuildThisFileDirectory)..\..\..\artifacts\bin\$(Configuration)</PackageOutputPath>
+        <PackageOutputPath>$([MSBuild]::NormalizeDirectory(`$(MSBuildThisFileDirectory)..\..\..\artifacts\private`))</PackageOutputPath>
     </PropertyGroup>
 
     <!-- Obfuscation -->

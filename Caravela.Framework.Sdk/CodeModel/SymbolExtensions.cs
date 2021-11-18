@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
+using Caravela.Framework.Impl.CodeModel.References;
 using Microsoft.CodeAnalysis;
 using System;
 
@@ -13,6 +14,9 @@ namespace Caravela.Framework.Impl.CodeModel
     public static class SymbolExtensions
     {
         public static ISymbol? GetSymbol( this IDeclaration declaration ) => ((ISdkDeclaration) declaration).Symbol;
+
+        public static ISymbol? GetSymbol( this IRef<ICompilationElement> declaration, Compilation compilation )
+            => ((ISdkRef<ICompilationElement>) declaration).GetSymbol( compilation );
 
         private static T? GetSymbol<T>( this IDeclaration declaration )
             where T : ISymbol
