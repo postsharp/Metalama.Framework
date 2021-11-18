@@ -25,7 +25,8 @@ namespace Caravela.Framework.Impl.CompileTime
             "Code",
             "Diagnostics",
             "Fabrics",
-            "Validation" );
+            "Validation",
+            "Project" );
 
         public static bool HasCompileTimeCode( SyntaxNode node ) => DetectCompileTimeVisitor.Instance.Visit( node );
 
