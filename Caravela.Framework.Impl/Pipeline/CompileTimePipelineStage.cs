@@ -84,7 +84,7 @@ namespace Caravela.Framework.Impl.Pipeline
             // TODO: We don't need these diagnostics, but we cannot pass NullDiagnosticAdder here.
             var diagnostics = new UserDiagnosticSink();
 
-            DesignTimeSyntaxTreeGenerator.Execute(
+            DesignTimeSyntaxTreeGenerator.GenerateDesignTimeSyntaxTrees(
                 input.PartialCompilation,
                 pipelineStepResult.Compilation,
                 this.ServiceProvider,

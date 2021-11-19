@@ -32,7 +32,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
         {
             var diagnosticSink = new UserDiagnosticSink(this.CompileTimeProject);
 
-            DesignTimeSyntaxTreeGenerator.Execute(
+            DesignTimeSyntaxTreeGenerator.GenerateDesignTimeSyntaxTrees(
                 input.PartialCompilation,
                 pipelineStepResult.Compilation,
                 this.ServiceProvider,

@@ -20,17 +20,19 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
 {
     internal static class DesignTimeSyntaxTreeGenerator
     {
-        public static void Execute(
+        public static void GenerateDesignTimeSyntaxTrees(
             PartialCompilation partialCompilation,
             CompilationModel compilationModel,
             IServiceProvider serviceProvider,
             CancellationToken cancellationToken,
             UserDiagnosticSink diagnostics,
-            out List<IntroducedSyntaxTree> additionalSyntaxTrees )
+            out IReadOnlyList<IntroducedSyntaxTree> additionalSyntaxTrees )
         {
+
             var transformations = compilationModel.GetAllObservableTransformations( true );
 
-            additionalSyntaxTrees = new List<IntroducedSyntaxTree>();
+            var additionalSyntaxTreeList = new List<IntroducedSyntaxTree>();
+            additionalSyntaxTrees = additionalSyntaxTreeList;
 
             LexicalScopeFactory lexicalScopeFactory = new( compilationModel );
             var introductionNameProvider = new LinkerIntroductionNameProvider();
@@ -114,7 +116,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
                 var generatedSyntaxTree = SyntaxFactory.SyntaxTree( topDeclaration.NormalizeWhitespace(), encoding: Encoding.UTF8 );
                 var syntaxTreeName = declaringType.FullName + ".cs";
 
-                additionalSyntaxTrees.Add( new IntroducedSyntaxTree( syntaxTreeName, originalSyntaxTree, generatedSyntaxTree ) );
+                additionalSyntaxTreeList.Add( new IntroducedSyntaxTree( syntaxTreeName, originalSyntaxTree, generatedSyntaxTree ) );
             }
         }
     }
