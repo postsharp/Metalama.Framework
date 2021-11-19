@@ -3,6 +3,7 @@
 
 using Caravela.Compiler;
 using Caravela.Framework.Aspects;
+using Caravela.Framework.Impl.AdditionalOutputs;
 using Caravela.Framework.Impl.Aspects;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;

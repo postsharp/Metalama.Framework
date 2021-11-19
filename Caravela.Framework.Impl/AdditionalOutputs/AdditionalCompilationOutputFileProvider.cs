@@ -2,12 +2,13 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Impl.Options;
+using Caravela.Framework.Impl.Pipeline;
 using Caravela.Framework.Project;
 using System;
 using System.Collections.Immutable;
 using System.IO;
 
-namespace Caravela.Framework.Impl.Pipeline
+namespace Caravela.Framework.Impl.AdditionalOutputs
 {
     internal class AdditionalCompilationOutputFileProvider : IAdditionalOutputFileProvider
     {

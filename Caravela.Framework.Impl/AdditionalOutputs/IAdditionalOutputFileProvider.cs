@@ -4,7 +4,7 @@
 using Caravela.Framework.Project;
 using System.Collections.Immutable;
 
-namespace Caravela.Framework.Impl.Pipeline
+namespace Caravela.Framework.Impl.AdditionalOutputs
 {
     public interface IAdditionalOutputFileProvider : IService
     {

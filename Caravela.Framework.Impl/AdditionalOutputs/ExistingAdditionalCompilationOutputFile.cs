@@ -4,7 +4,7 @@
 using System;
 using System.IO;
 
-namespace Caravela.Framework.Impl.Pipeline
+namespace Caravela.Framework.Impl.AdditionalOutputs
 {
     internal class ExistingAdditionalCompilationOutputFile : AdditionalCompilationOutputFile
     {

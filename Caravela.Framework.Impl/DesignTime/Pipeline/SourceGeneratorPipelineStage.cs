@@ -4,6 +4,7 @@
 using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.CompileTime;
+using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Pipeline;
 using System;
 using System.Collections.Generic;
@@ -29,20 +30,21 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
             IPipelineStepsResult pipelineStepResult,
             CancellationToken cancellationToken )
         {
-            SourceGeneratorPipelineRunner.Execute(
-                this.CompileTimeProject,
+            var diagnosticSink = new UserDiagnosticSink(this.CompileTimeProject);
+
+            DesignTimeSyntaxTreeGenerator.Execute(
                 input.PartialCompilation,
                 pipelineStepResult.Compilation,
                 this.ServiceProvider,
                 cancellationToken,
-                out var diagnostics,
+                diagnosticSink,
                 out var additionalSyntaxTrees );
 
             return new PipelineStageResult(
                 input.PartialCompilation,
                 input.Project,
                 input.AspectLayers,
-                input.Diagnostics.Concat( pipelineStepResult.Diagnostics ).Concat( diagnostics.ToImmutable() ),
+                input.Diagnostics.Concat( pipelineStepResult.Diagnostics ).Concat( diagnosticSink.ToImmutable() ),
                 input.AspectSources.Concat( pipelineStepResult.ExternalAspectSources ),
                 pipelineStepResult.InheritableAspectInstances,
                 input.AdditionalSyntaxTrees.Concat( additionalSyntaxTrees ) );

@@ -3,7 +3,6 @@
 
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
-using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Linking;
 using Caravela.Framework.Impl.Pipeline;
@@ -19,19 +18,17 @@ using System.Threading;
 
 namespace Caravela.Framework.Impl.DesignTime.Pipeline
 {
-    internal static class SourceGeneratorPipelineRunner
+    internal static class DesignTimeSyntaxTreeGenerator
     {
         public static void Execute(
-            CompileTimeProject compileTimeProject,
             PartialCompilation partialCompilation,
             CompilationModel compilationModel,
             IServiceProvider serviceProvider,
             CancellationToken cancellationToken,
-            out UserDiagnosticSink diagnostics,
+            UserDiagnosticSink diagnostics,
             out List<IntroducedSyntaxTree> additionalSyntaxTrees )
         {
             var transformations = compilationModel.GetAllObservableTransformations( true );
-            diagnostics = new UserDiagnosticSink( compileTimeProject );
 
             additionalSyntaxTrees = new List<IntroducedSyntaxTree>();
 

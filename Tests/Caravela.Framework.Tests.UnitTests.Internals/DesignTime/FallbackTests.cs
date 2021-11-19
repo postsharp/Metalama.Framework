@@ -3,6 +3,7 @@
 
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Impl;
+using Caravela.Framework.Impl.AdditionalOutputs;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Options;
 using Caravela.Framework.Impl.Pipeline;
@@ -174,7 +175,7 @@ public class TargetClass
 
             var newSyntaxTrees = new List<SyntaxTree>();
 
-            foreach ( var file in compileTimeResult.AuxiliaryFiles.Where( f => f.Kind == AdditionalCompilationOutputFileKind.DesignTimeGeneratedCode ) )
+            foreach ( var file in compileTimeResult.AdditionalCompilationOutputFiles.Where( f => f.Kind == AdditionalCompilationOutputFileKind.DesignTimeGeneratedCode ) )
             {
                 using var outputStream = new MemoryStream();
                 file.WriteToStream( outputStream );

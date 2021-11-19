@@ -3,7 +3,7 @@
 
 using System.IO;
 
-namespace Caravela.Framework.Impl.Pipeline
+namespace Caravela.Framework.Impl.AdditionalOutputs
 {
     public abstract class AdditionalCompilationOutputFile
     {

@@ -1,10 +1,12 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Impl.AdditionalOutputs;
 using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.DesignTime.Pipeline;
+using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Linking;
 using Caravela.Framework.Impl.Options;
 using Caravela.Framework.Project;
@@ -57,10 +59,8 @@ namespace Caravela.Framework.Impl.Pipeline
             if ( projectOptions != null && !projectOptions.IsDesignTimeEnabled )
             {
                 additionalCompilationOutputFiles = this.GenerateAdditionalCompilationOutputFiles(
-                    pipelineConfiguration,
                     input,
                     pipelineStepResult,
-                    projectOptions.AssertNotNull(),
                     cancellationToken );
             }
 
@@ -75,21 +75,21 @@ namespace Caravela.Framework.Impl.Pipeline
         }
 
         private IReadOnlyList<AdditionalCompilationOutputFile> GenerateAdditionalCompilationOutputFiles(
-            AspectPipelineConfiguration pipelineConfiguration,
             PipelineStageResult input,
             IPipelineStepsResult pipelineStepResult,
-            IProjectOptions buildOptions,
             CancellationToken cancellationToken )
         {
             var generatedFiles = new List<AdditionalCompilationOutputFile>();
 
-            SourceGeneratorPipelineRunner.Execute(
-                this.CompileTimeProject,
+            // TODO: We don't need these diagnostics, but we cannot pass NullDiagnosticAdder here.
+            var diagnostics = new UserDiagnosticSink();
+
+            DesignTimeSyntaxTreeGenerator.Execute(
                 input.PartialCompilation,
                 pipelineStepResult.Compilation,
                 this.ServiceProvider,
                 cancellationToken,
-                out _,
+                diagnostics,
                 out var additionalSyntaxTrees );
 
             // Ignore diagnostics, because these will be coming from the analyzer.
