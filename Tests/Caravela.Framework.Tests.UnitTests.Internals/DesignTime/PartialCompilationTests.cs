@@ -20,7 +20,7 @@ namespace Caravela.Framework.Tests.UnitTests.DesignTime
 
             var compilation = CreateCSharpCompilation( code );
 
-            using var buildOptions = new TestProjectOptions();
+            using var projectOptions = new TestProjectOptions();
             using var domain = new UnloadableCompileTimeDomain();
             var syntaxTree1 = compilation.SyntaxTrees.Single();
             var partialCompilation = PartialCompilation.CreatePartial( compilation, syntaxTree1 );

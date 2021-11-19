@@ -3,6 +3,7 @@
 
 using Caravela.Compiler;
 using Caravela.Framework.Aspects;
+using Caravela.Framework.Impl.AdditionalOutputs;
 using Caravela.Framework.Impl.Aspects;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
@@ -82,7 +83,8 @@ namespace Caravela.Framework.Impl.Pipeline
                 return new CompileTimeAspectPipelineResult(
                     ImmutableArray<SyntaxTreeTransformation>.Empty,
                     ImmutableArray<ManagedResource>.Empty,
-                    compilation );
+                    compilation,
+                    ImmutableArray<AdditionalCompilationOutputFile>.Empty );
             }
 
             try
@@ -133,7 +135,7 @@ namespace Caravela.Framework.Impl.Pipeline
                 var resultingCompilation = (PartialCompilation) RunTimeAssemblyRewriter.Rewrite( resultPartialCompilation, this.ServiceProvider );
                 var syntaxTreeTransformations = resultingCompilation.ToTransformations();
 
-                return new CompileTimeAspectPipelineResult( syntaxTreeTransformations, additionalResources, resultingCompilation );
+                return new CompileTimeAspectPipelineResult( syntaxTreeTransformations, additionalResources, resultingCompilation, result.AdditionalCompilationOutputFiles );
             }
             catch ( DiagnosticException exception )
             {

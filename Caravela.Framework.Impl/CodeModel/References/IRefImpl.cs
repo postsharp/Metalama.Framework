@@ -18,7 +18,7 @@ namespace Caravela.Framework.Impl.CodeModel.References
         /// </summary>
         object? Target { get; }
     }
-    
+
     internal interface IRefImpl<out T> : ISdkRef<T>, IRefImpl
         where T : class, ICompilationElement { }
 }

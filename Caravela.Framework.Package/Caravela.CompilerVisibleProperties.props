@@ -14,6 +14,8 @@
         <CompilerVisibleProperty Include="CaravelaFormatCompileTimeCode" />
         <CompilerVisibleProperty Include="CaravelaUserCodeTrusted" />
         <CompilerVisibleProperty Include="AssemblyName" />
+        <CompilerVisibleProperty Include="CaravelaDesignTimeEnabled" />
+        <CompilerVisibleProperty Include="CaravelaAdditionalCompilationOutputDirectory" />
     </ItemGroup>
 
     <!-- More properties are already exported by Caravela.Compiler and don't need to be exported a second time. -->

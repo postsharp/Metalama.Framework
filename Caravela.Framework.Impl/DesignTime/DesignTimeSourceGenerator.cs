@@ -2,13 +2,18 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Compiler;
+using Caravela.Framework.Impl.AdditionalOutputs;
 using Caravela.Framework.Impl.DesignTime.Pipeline;
 using Caravela.Framework.Impl.Options;
+using Caravela.Framework.Impl.Pipeline;
 using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.Text;
 using System;
 using System.Diagnostics.CodeAnalysis;
+using System.IO;
+using System.Linq;
 
 namespace Caravela.Framework.Impl.DesignTime
 {
@@ -31,13 +36,24 @@ namespace Caravela.Framework.Impl.DesignTime
             {
                 Logger.Instance?.Write( $"DesignTimeSourceGenerator.Execute('{compilation.AssemblyName}')." );
 
-                var buildOptions = new ProjectOptions( context.AnalyzerConfigOptions );
+                var projectOptions = new ProjectOptions( context.AnalyzerConfigOptions );
 
-                DebuggingHelper.AttachDebugger( buildOptions );
+                DebuggingHelper.AttachDebugger( projectOptions );
+
+                if ( !projectOptions.IsDesignTimeEnabled )
+                {
+                    // Execute the fallback.
+                    Logger.Instance?.Write(
+                        $"DesignTimeSourceGenerator.Execute('{compilation.AssemblyName}'): DesignTimeEnabled is false, will output fallback files from {projectOptions.AdditionalCompilationOutputDirectory}." );
+
+                    ExecuteFromAdditionalCompilationOutputFiles( context, projectOptions );
+
+                    return;
+                }
 
                 // Execute the pipeline.
                 if ( !DesignTimeAspectPipelineFactory.Instance.TryExecute(
-                    buildOptions,
+                    projectOptions,
                     compilation,
                     context.CancellationToken,
                     out var compilationResult ) )
@@ -65,6 +81,30 @@ namespace Caravela.Framework.Impl.DesignTime
             {
                 DesignTimeExceptionHandler.ReportException( e );
             }
+        }
+
+        private static void ExecuteFromAdditionalCompilationOutputFiles( GeneratorExecutionContext context, IProjectOptions projectOptions )
+        {
+            var serviceProvider = ServiceProvider.Empty.WithServices( projectOptions );
+            var provider = new AdditionalCompilationOutputFileProvider( serviceProvider );
+
+            if ( projectOptions.AdditionalCompilationOutputDirectory == null )
+            {
+                return;
+            }
+
+            var sourcesCount = 0;
+
+            foreach ( var file in provider.GetAdditionalCompilationOutputFiles()
+                .Where(
+                    f => f.Kind == AdditionalCompilationOutputFileKind.DesignTimeGeneratedCode && StringComparer.Ordinal.Equals( Path.GetExtension( f.Path ), ".cs" ) ) )
+            {
+                using var stream = file.GetStream();
+                context.AddSource( Path.GetFileName( file.Path ), SourceText.From( stream ) );
+                sourcesCount++;
+            }
+
+            Logger.Instance?.Write( $"DesignTimeSourceGenerator.Execute('{context.Compilation.AssemblyName}'): {sourcesCount} sources generated." );
         }
 
         void ISourceGenerator.Initialize( GeneratorInitializationContext context )
