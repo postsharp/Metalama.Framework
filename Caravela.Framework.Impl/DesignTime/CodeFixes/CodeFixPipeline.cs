@@ -18,12 +18,20 @@ namespace Caravela.Framework.Impl.DesignTime.CodeFixes
     {
         private readonly SyntaxTree _syntaxTree;
         private readonly TextSpan _span;
+        private readonly Diagnostic _diagnostic;
 
-        public CodeFixPipeline( ServiceProvider serviceProvider, bool isTest, CompileTimeDomain? domain, SyntaxTree syntaxTree, TextSpan span ) :
+        public CodeFixPipeline(
+            ServiceProvider serviceProvider,
+            bool isTest,
+            CompileTimeDomain? domain,
+            SyntaxTree syntaxTree,
+            TextSpan span,
+            Diagnostic diagnostic ) :
             base( serviceProvider, ExecutionScenario.CodeFix, isTest, domain )
         {
             this._syntaxTree = syntaxTree;
             this._span = span;
+            this._diagnostic = diagnostic;
         }
 
         private protected override HighLevelPipelineStage CreateHighLevelStage(
@@ -35,13 +43,13 @@ namespace Caravela.Framework.Impl.DesignTime.CodeFixes
             => null;
 
         private protected override bool FilterCodeFix( IDiagnosticDefinition diagnosticDefinition, Location location )
-            => location.SourceTree == this._syntaxTree && location.SourceSpan.IntersectsWith( this._span );
+            => diagnosticDefinition.Id == this._diagnostic.Id && location.SourceTree == this._syntaxTree && location.SourceSpan.IntersectsWith( this._span );
 
         public bool TryExecute(
             PartialCompilation partialCompilation,
             AspectPipelineConfiguration configuration,
             CancellationToken cancellationToken,
-            out ImmutableArray<UserCodeFix> codeFixes,
+            out ImmutableArray<CodeFixInstance> codeFixes,
             [NotNullWhen( true )] out CompilationModel? compilationModel )
         {
             if ( !this.TryExecute( partialCompilation, NullDiagnosticAdder.Instance, configuration, cancellationToken, out var result ) )

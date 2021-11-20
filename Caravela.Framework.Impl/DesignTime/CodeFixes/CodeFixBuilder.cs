@@ -17,13 +17,13 @@ namespace Caravela.Framework.Impl.DesignTime.CodeFixes
 {
     internal class CodeFixBuilder : ICodeFixBuilder
     {
-        private readonly CodeFixProviderContext _context;
+        private readonly CodeFixContext _context;
         private CompilationModel? _compilation;
         private Solution _solution;
         private bool _hasChange;
         private HashSet<DocumentId> _changedDocuments = new();
 
-        public CodeFixBuilder( CodeFixProviderContext context, CancellationToken cancellationToken )
+        public CodeFixBuilder( CodeFixContext context, CancellationToken cancellationToken )
         {
             this._context = context;
             this._solution = this._context.OriginalDocument.Project.Solution;

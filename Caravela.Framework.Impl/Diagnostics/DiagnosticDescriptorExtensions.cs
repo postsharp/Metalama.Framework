@@ -11,10 +11,7 @@ namespace Caravela.Framework.Impl.Diagnostics
 {
     internal static class DiagnosticDescriptorExtensions
     {
-        public const string DiagnosticPropertyKey = "Caravela.HasCodeFix";
-
-        private static readonly ImmutableDictionary<string, string?> _propertiesOfDiagnosticWithCodeFix =
-            ImmutableDictionary.Create<string, string?>().Add( DiagnosticPropertyKey, "true" );
+        public const string CodeFixesDiagnosticPropertyKey = "Caravela.CodeFixes";
 
         public static DiagnosticDescriptor ToRoslynDescriptor( this IDiagnosticDefinition definition )
             => new( definition.Id, definition.Title, definition.MessageFormat, definition.Category, definition.Severity.ToRoslynSeverity(), true );
@@ -49,7 +46,7 @@ namespace Caravela.Framework.Impl.Diagnostics
             Location? location,
             T arguments,
             IEnumerable<Location>? additionalLocations = null,
-            bool hasCodeFix = false )
+            string? codeFixes = null )
             where T : notnull
         {
             object[] argumentArray;
@@ -67,22 +64,22 @@ namespace Caravela.Framework.Impl.Diagnostics
                 argumentArray = new object[] { arguments };
             }
 
-            return definition.CreateDiagnosticImpl( location, argumentArray, additionalLocations, hasCodeFix );
+            return definition.CreateDiagnosticImpl( location, argumentArray, additionalLocations, codeFixes );
         }
 
         public static Diagnostic CreateDiagnostic(
             this DiagnosticDefinition definition,
             Location? location,
             IEnumerable<Location>? additionalLocations = null,
-            bool hasCodeFix = false )
-            => definition.CreateDiagnosticImpl( location, Array.Empty<object>(), additionalLocations, hasCodeFix );
+            string? codeFixes = null )
+            => definition.CreateDiagnosticImpl( location, Array.Empty<object>(), additionalLocations, codeFixes );
 
         private static Diagnostic CreateDiagnosticImpl(
             this IDiagnosticDefinition definition,
             Location? location,
             object[]? arguments,
             IEnumerable<Location>? additionalLocations,
-            bool hasCodeFix = false )
+            string? codeFixes = null )
         {
             return Diagnostic.Create(
                 definition.Id,
@@ -94,7 +91,9 @@ namespace Caravela.Framework.Impl.Diagnostics
                 definition.Severity == Severity.Error ? 0 : 1,
                 location: location,
                 additionalLocations: additionalLocations,
-                properties: hasCodeFix ? _propertiesOfDiagnosticWithCodeFix : ImmutableDictionary<string, string?>.Empty );
+                properties: codeFixes != null
+                    ? ImmutableDictionary.Create<string, string?>().Add( CodeFixesDiagnosticPropertyKey, codeFixes )
+                    : ImmutableDictionary<string, string?>.Empty );
         }
     }
 }

@@ -2,7 +2,6 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
-using Caravela.Framework.CodeFixes;
 using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
@@ -11,6 +10,7 @@ using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Text;
 
 namespace Caravela.Framework.Impl.Diagnostics
 {
@@ -24,7 +24,7 @@ namespace Caravela.Framework.Impl.Diagnostics
         private readonly CodeFixFilter _codeFixFilter;
         private ImmutableArray<Diagnostic>.Builder? _diagnostics;
         private ImmutableArray<ScopedSuppression>.Builder? _suppressions;
-        private ImmutableArray<UserCodeFix>.Builder? _codeFixes;
+        private ImmutableArray<CodeFixInstance>.Builder? _codeFixes;
 
         public IDeclaration? DefaultScope { get; private set; }
 
@@ -55,18 +55,51 @@ namespace Caravela.Framework.Impl.Diagnostics
             }
         }
 
-        private bool CaptureCodeFix( IDiagnosticDefinition diagnosticDefinition, Location? location, Action<ICodeFixProviderContext>? codeFix )
+        /// <summary>
+        /// Returns a string containing all code fix titles and captures the code fixes if we should.  
+        /// </summary>
+        private string? ProcessCodeFix( IDiagnosticDefinition diagnosticDefinition, Location? location, IEnumerable<CodeFix>? codeFixes )
         {
-            if ( codeFix != null && location != null && this._codeFixFilter( diagnosticDefinition, location ) )
+            if ( codeFixes != null )
             {
-                this._codeFixes ??= ImmutableArray.CreateBuilder<UserCodeFix>();
-                this._codeFixes.Add( new UserCodeFix( diagnosticDefinition, location, codeFix ) );
+                // This code implements an optimization to allow allocating a StringBuilder if there is a single code fix. 
+                string? firstTitle = null;
+                StringBuilder? stringBuilder = null;
 
-                return true;
+                // Store the code fixes if we should.
+                foreach ( var codeFix in codeFixes )
+                {
+                    if ( location != null && this._codeFixFilter( diagnosticDefinition, location ) )
+                    {
+                        this._codeFixes ??= ImmutableArray.CreateBuilder<CodeFixInstance>();
+                        this._codeFixes.Add( new CodeFixInstance( diagnosticDefinition, location, codeFix ) );
+                    }
+
+                    if ( firstTitle == null )
+                    {
+                        // This gets executed for the first code fix.
+                        firstTitle = codeFix.Title;
+                    }
+                    else
+                    {
+                        if ( stringBuilder == null )
+                        {
+                            // This gets executed for the second code fix.
+                            stringBuilder = new StringBuilder();
+                            stringBuilder.Append( firstTitle );
+                        }
+
+                        // This gets executed for all code fixes but the first one.
+                        stringBuilder.Append( '\n' );
+                        stringBuilder.Append( codeFix.Title );
+                    }
+                }
+
+                return stringBuilder?.ToString() ?? firstTitle;
             }
             else
             {
-                return false;
+                return null;
             }
         }
 
@@ -120,27 +153,27 @@ namespace Caravela.Framework.Impl.Diagnostics
             }
         }
 
-        public void Report( IDiagnosticLocation? location, DiagnosticDefinition definition, Action<ICodeFixProviderContext>? codeFixProvider = null )
+        public void Report( IDiagnosticLocation? location, DiagnosticDefinition definition, IEnumerable<CodeFix>? codeFixes = null )
         {
             this.ValidateUserReport( definition );
 
             var resolvedLocation = this.GetLocation( location );
-            var hasCodeFix = this.CaptureCodeFix( definition, resolvedLocation, codeFixProvider );
+            var hasCodeFix = this.ProcessCodeFix( definition, resolvedLocation, codeFixes );
 
-            this.Report( definition.CreateDiagnostic( resolvedLocation, hasCodeFix: hasCodeFix ) );
+            this.Report( definition.CreateDiagnostic( resolvedLocation, codeFixes: hasCodeFix ) );
         }
 
         public void Report<T>(
             IDiagnosticLocation? location,
             DiagnosticDefinition<T> definition,
             T arguments,
-            Action<ICodeFixProviderContext>? codeFixProvider = null )
+            IEnumerable<CodeFix>? codeFixes = null )
             where T : notnull
         {
             var resolvedLocation = this.GetLocation( location );
-            var hasCodeFix = this.CaptureCodeFix( definition, resolvedLocation, codeFixProvider );
+            var hasCodeFix = this.ProcessCodeFix( definition, resolvedLocation, codeFixes );
 
-            this.Report( definition.CreateDiagnostic( resolvedLocation, arguments, hasCodeFix: hasCodeFix ) );
+            this.Report( definition.CreateDiagnostic( resolvedLocation, arguments, codeFixes: hasCodeFix ) );
         }
 
         public void Suppress( IDeclaration? scope, SuppressionDefinition definition )

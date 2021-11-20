@@ -3,8 +3,7 @@
 
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
-using Caravela.Framework.CodeFixes;
-using System;
+using System.Collections.Generic;
 
 namespace Caravela.Framework.Diagnostics
 {
@@ -25,8 +24,8 @@ namespace Caravela.Framework.Diagnostics
             this IDiagnosticSink diagnosticSink,
             IDiagnosticScope? scope,
             DiagnosticDefinition definition,
-            Action<ICodeFixProviderContext>? codeFixProvider = null )
-            => diagnosticSink.Report( scope?.DiagnosticLocation, definition, codeFixProvider );
+            IEnumerable<CodeFix>? codeFixes = null )
+            => diagnosticSink.Report( scope?.DiagnosticLocation, definition, codeFixes );
 
         /// <summary>
         /// Reports a diagnostic by specifying its target declaration.
@@ -40,9 +39,9 @@ namespace Caravela.Framework.Diagnostics
             IDiagnosticScope? scope,
             DiagnosticDefinition<T> definition,
             T arguments,
-            Action<ICodeFixProviderContext>? codeFixProvider = null )
+            IEnumerable<CodeFix>? codeFixes = null )
             where T : notnull
-            => diagnosticSink.Report( scope?.DiagnosticLocation, definition, arguments, codeFixProvider );
+            => diagnosticSink.Report( scope?.DiagnosticLocation, definition, arguments, codeFixes );
 
         /// <summary>
         /// Reports a parameterless diagnostic on the current target declaration.
@@ -52,8 +51,8 @@ namespace Caravela.Framework.Diagnostics
         public static void Report(
             this IDiagnosticSink diagnosticSink,
             DiagnosticDefinition definition,
-            Action<ICodeFixProviderContext>? codeFixProvider = null )
-            => diagnosticSink.Report( null, definition, codeFixProvider );
+            IEnumerable<CodeFix>? codeFixes = null )
+            => diagnosticSink.Report( null, definition, codeFixes );
 
         /// <summary>
         /// Reports a strongly-typed diagnostic on the current target declaration.
@@ -65,9 +64,9 @@ namespace Caravela.Framework.Diagnostics
             this IDiagnosticSink diagnosticSink,
             DiagnosticDefinition<T> definition,
             T arguments,
-            Action<ICodeFixProviderContext>? codeFixProvider = null )
+            IEnumerable<CodeFix>? codeFixes = null )
             where T : notnull
-            => diagnosticSink.Report( null, definition, arguments, codeFixProvider );
+            => diagnosticSink.Report( null, definition, arguments, codeFixes );
 
         /// <summary>
         /// Suppresses a diagnostic in the current target declaration.

@@ -6,6 +6,7 @@ using Caravela.Framework.Impl.DesignTime.Diff;
 using Caravela.Framework.Impl.DesignTime.Pipeline;
 using Caravela.Framework.Impl.Diagnostics;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CodeActions;
 using Microsoft.CodeAnalysis.Text;
 using System.Collections.Immutable;
 using System.Linq;
@@ -31,19 +32,58 @@ namespace Caravela.Framework.Impl.DesignTime.CodeFixes
             ImmutableArray<Diagnostic> diagnostics,
             CancellationToken cancellationToken )
         {
+            var codeFixesBuilder = ImmutableArray.CreateBuilder<AssignedCodeFix>();
+
+            foreach ( var diagnostic in diagnostics )
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+
+                if ( diagnostic.Properties.TryGetValue( DiagnosticDescriptorExtensions.CodeFixesDiagnosticPropertyKey, out var codeFixTitles ) &&
+                     !string.IsNullOrEmpty( codeFixTitles ) )
+                {
+                    var splitTitles = codeFixTitles!.Split( '\n' );
+
+                    for ( var i = 0; i < splitTitles.Length; i++ )
+                    {
+                        var codeFixId = i;
+                        var codeFixTitle = splitTitles[i];
+                        
+                        // TODO: We may support hierarchical code fixes by allowing a separator in the title given by the user, i.e. '|'.
+                        // The creation of the tree structure would then be done here.
+
+                        var codeAction = CodeAction.Create(
+                            codeFixTitle,
+                            ct => this.ExecuteCodeFixAsync( document, span, diagnostic, codeFixId, codeFixTitle, cancellationToken ) );
+
+                        codeFixesBuilder.Add( new AssignedCodeFix( codeAction, ImmutableArray.Create( diagnostic ) ) );
+                    }
+                }
+            }
+
+            return codeFixesBuilder.ToImmutable();
+        }
+
+        private async Task<Solution> ExecuteCodeFixAsync(
+            Document document,
+            TextSpan span,
+            Diagnostic diagnostic,
+            int codeFixId,
+            string codeFixTitle,
+            CancellationToken cancellationToken )
+        {
             var project = document.Project;
             var compilation = await project.GetCompilationAsync( cancellationToken );
 
             if ( compilation == null )
             {
-                return default;
+                return project.Solution;
             }
 
             var syntaxTree = await document.GetSyntaxTreeAsync( cancellationToken );
 
             if ( syntaxTree == null )
             {
-                return default;
+                return project.Solution;
             }
 
             // Get the pipeline for the compilation.
@@ -52,7 +92,7 @@ namespace Caravela.Framework.Impl.DesignTime.CodeFixes
                 // We cannot create the pipeline because we don't have all options.
                 // If this is a problem, we will need to pass all options as AssemblyMetadataAttribute.
 
-                return default;
+                return project.Solution;
             }
 
             // Get a compilation _without_ generated code, and map the target symbol.
@@ -69,7 +109,7 @@ namespace Caravela.Framework.Impl.DesignTime.CodeFixes
                 cancellationToken,
                 out var designTimeConfiguration ) )
             {
-                return default;
+                return project.Solution;
             }
 
             // Execute the compile-time pipeline with the design-time project configuration.
@@ -78,7 +118,8 @@ namespace Caravela.Framework.Impl.DesignTime.CodeFixes
                 false,
                 this._designTimeAspectPipelineFactory.Domain,
                 syntaxTree,
-                span );
+                span,
+                diagnostic );
 
             if ( !codeFixPipeline.TryExecute(
                 partialCompilation,
@@ -87,29 +128,30 @@ namespace Caravela.Framework.Impl.DesignTime.CodeFixes
                 out var userCodeFixes,
                 out var compilationModel ) )
             {
-                return default;
+                return project.Solution;
             }
 
-            var codeFixesBuilder = ImmutableArray.CreateBuilder<AssignedCodeFix>();
-
-            foreach ( var codeFix in userCodeFixes )
+            if ( codeFixId >= userCodeFixes.Length )
             {
-                // Get the diagnostics to which that diagnostic apply. We don't need to check the syntax tree because the pipeline has filtered anyway.
-                var applicableDiagnostics = diagnostics
-                    .Where( d => d.Id == codeFix.DiagnosticDefinition.Id && d.Location.SourceSpan.Equals( codeFix.Location.SourceSpan ) )
-                    .ToImmutableArray();
-
-                foreach ( var codeAction in codeFix.CreateCodeActions(
-                    document,
-                    compilationModel,
-                    designTimeConfiguration.ServiceProvider,
-                    cancellationToken ) )
-                {
-                    codeFixesBuilder.Add( new AssignedCodeFix( codeAction, applicableDiagnostics ) );
-                }
+                // There was some mismatch in the generation of code fixes. 
+                return project.Solution;
             }
 
-            return codeFixesBuilder.ToImmutable();
+            var codeFix = userCodeFixes[codeFixId];
+
+            if ( codeFix.CodeFix.Title != codeFixTitle )
+            {
+                // There was some mismatch in the generation of code fixes. 
+                return project.Solution;
+            }
+
+            var context = new CodeFixContext( document, compilationModel, designTimeConfiguration.ServiceProvider );
+            var codeFixBuilder = new CodeFixBuilder( context, cancellationToken );
+
+            // TODO: use user code invoker
+            await codeFix.CodeFix.Action( codeFixBuilder );
+
+            return await codeFixBuilder.GetResultingSolutionAsync();
         }
     }
 }

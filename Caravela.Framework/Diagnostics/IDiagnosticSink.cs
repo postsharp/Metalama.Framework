@@ -5,10 +5,23 @@ using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.CodeFixes;
 using Caravela.Framework.Validation;
-using System;
+using System.Collections.Generic;
 
 namespace Caravela.Framework.Diagnostics
 {
+    public readonly struct CodeFix
+    {
+        public string Title { get; }
+
+        public CodeFixAsyncAction Action { get; }
+
+        public CodeFix( string title, CodeFixAsyncAction action )
+        {
+            this.Title = title;
+            this.Action = action;
+        }
+    }
+
     /// <summary>
     /// A sink that reports diagnostics reported from user code.
     /// </summary>
@@ -22,8 +35,8 @@ namespace Caravela.Framework.Diagnostics
         /// </summary>
         /// <param name="location">The code location to which the diagnostic should be written.</param>
         /// <param name="definition"></param>
-        /// <param name="codeFixProvider"></param>
-        void Report( IDiagnosticLocation? location, DiagnosticDefinition definition, Action<ICodeFixProviderContext>? codeFixProvider = null );
+        /// <param name="codeFixes"></param>
+        void Report( IDiagnosticLocation? location, DiagnosticDefinition definition, IEnumerable<CodeFix>? codeFixes = null );
 
         /// <summary>
         /// Reports a parametric diagnostic by specifying its location.
@@ -31,12 +44,12 @@ namespace Caravela.Framework.Diagnostics
         /// <param name="location">The code location to which the diagnostic should be written.</param>
         /// <param name="definition"></param>
         /// <param name="arguments"></param>
-        /// <param name="codeFixProvider"></param>
+        /// <param name="codeFixes"></param>
         void Report<T>(
             IDiagnosticLocation? location,
             DiagnosticDefinition<T> definition,
             T arguments,
-            Action<ICodeFixProviderContext>? codeFixProvider = null )
+            IEnumerable<CodeFix>? codeFixes = null )
             where T : notnull;
 
         /// <summary>

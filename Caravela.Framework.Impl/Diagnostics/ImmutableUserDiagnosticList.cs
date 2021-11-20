@@ -15,7 +15,7 @@ namespace Caravela.Framework.Impl.Diagnostics
 
         public ImmutableArray<ScopedSuppression> DiagnosticSuppressions { get; }
 
-        public ImmutableArray<UserCodeFix> CodeFixes { get; }
+        public ImmutableArray<CodeFixInstance> CodeFixes { get; }
 
         public ImmutableUserDiagnosticList( ImmutableArray<Diagnostic>? diagnostics, ImmutableArray<ScopedSuppression>? suppressions )
         {

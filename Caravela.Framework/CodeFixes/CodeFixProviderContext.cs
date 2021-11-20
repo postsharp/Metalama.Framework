@@ -10,16 +10,7 @@ using System.Threading.Tasks;
 
 namespace Caravela.Framework.CodeFixes
 {
-    [CompileTimeOnly]
-    [InternalImplement]
-    public interface ICodeFixProviderContext
-    {
-        CancellationToken CancellationToken { get; }
-
-        void AddCodeFix( string name, BuildCodeFixAsyncAction action );
-    }
-
-    public delegate Task BuildCodeFixAsyncAction( ICodeFixBuilder builder );
+    public delegate Task CodeFixAsyncAction( ICodeFixBuilder builder );
 
     [CompileTimeOnly]
     [InternalImplement]

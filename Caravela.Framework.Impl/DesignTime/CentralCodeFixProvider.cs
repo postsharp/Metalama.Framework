@@ -18,6 +18,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using CodeFixContext = Microsoft.CodeAnalysis.CodeFixes.CodeFixContext;
 
 namespace Caravela.Framework.Impl.DesignTime
 {
@@ -51,7 +52,7 @@ namespace Caravela.Framework.Impl.DesignTime
                         _makePartialKey ),
                     context.Diagnostics );
             }
-            else if ( context.Diagnostics.Any( d => d.Properties.ContainsKey( DiagnosticDescriptorExtensions.DiagnosticPropertyKey ) ) )
+            else if ( context.Diagnostics.Any( d => d.Properties.ContainsKey( DiagnosticDescriptorExtensions.CodeFixesDiagnosticPropertyKey ) ) )
             {
                 // We have a user diagnostics where a code fix provider was specified. We need to execute the CodeFix pipeline to gather
                 // the actual code fixes.
