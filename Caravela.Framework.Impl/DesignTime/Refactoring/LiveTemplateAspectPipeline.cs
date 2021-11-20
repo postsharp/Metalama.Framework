@@ -28,7 +28,7 @@ namespace Caravela.Framework.Impl.DesignTime.Refactoring
             ServiceProvider serviceProvider,
             CompileTimeDomain domain,
             AspectClass aspectClass,
-            ISymbol targetSymbol ) : base( serviceProvider, AspectExecutionScenario.LiveTemplate, false, domain )
+            ISymbol targetSymbol ) : base( serviceProvider, ExecutionScenario.LiveTemplate, false, domain )
         {
             this._source = new InteractiveAspectSource( aspectClass, targetSymbol );
         }
@@ -72,7 +72,7 @@ namespace Caravela.Framework.Impl.DesignTime.Refactoring
                 return false;
             }
 
-            outputCompilation = result.PartialCompilation;
+            outputCompilation = result.Compilation;
             diagnostics = ImmutableArray<Diagnostic>.Empty;
 
             return true;

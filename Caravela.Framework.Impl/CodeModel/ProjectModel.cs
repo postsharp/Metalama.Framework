@@ -14,6 +14,32 @@ using System.Linq;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
+    internal class ExecutionScenario : IExecutionScenario
+    {
+        public bool IsDesignTime { get; }
+
+        public bool SupportsNonObservableTransformations { get; }
+
+        public bool SupportsCodeFixes { get; }
+
+        public static IExecutionScenario DesignTime { get; } = new ExecutionScenario( true, false, false );
+
+        public static IExecutionScenario Preview { get; } = new ExecutionScenario( true, true, false );
+
+        public static IExecutionScenario LiveTemplate { get; } = new ExecutionScenario( true, true, false );
+
+        public static IExecutionScenario CompileTime { get; } = new ExecutionScenario( false, true, false );
+
+        public static IExecutionScenario CodeFix { get; } = new ExecutionScenario( true, false, true );
+
+        public ExecutionScenario( bool isDesignTime, bool supportsNonObservableTransformations, bool supportsCodeFixes )
+        {
+            this.IsDesignTime = isDesignTime;
+            this.SupportsNonObservableTransformations = supportsNonObservableTransformations;
+            this.SupportsCodeFixes = supportsCodeFixes;
+        }
+    }
+
     internal class ProjectModel : IProject
     {
         private readonly ConcurrentDictionary<Type, ProjectExtension> _extensions = new();
@@ -82,7 +108,7 @@ namespace Caravela.Framework.Impl.CodeModel
             foreach ( var data in this._extensions.Values )
             {
                 data.MakeReadOnly();
-                
+
                 // Also set the property explicitly in case an implementer skips the call to base.MakeReadOnly.
                 data.IsReadOnly = true;
             }

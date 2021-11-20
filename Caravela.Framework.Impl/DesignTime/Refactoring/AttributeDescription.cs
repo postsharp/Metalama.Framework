@@ -9,13 +9,13 @@ namespace Caravela.Framework.Impl.DesignTime.Refactoring
     {
         public AttributeDescription(
             string name,
-            ImmutableList<(string Name, string Value)>? properties = null,
-            ImmutableList<string>? arguments = null,
+            ImmutableList<string>? constructorArguments = null,
+            ImmutableList<(string Name, string Value)>? namedArguments = null,
             ImmutableList<string>? imports = null )
         {
             this.Name = name;
-            this.Properties = properties ?? ImmutableList<(string, string)>.Empty;
-            this.Arguments = arguments ?? ImmutableList<string>.Empty;
+            this.Properties = namedArguments ?? ImmutableList<(string, string)>.Empty;
+            this.Arguments = constructorArguments ?? ImmutableList<string>.Empty;
             this.Imports = imports ?? ImmutableList<string>.Empty;
         }
 

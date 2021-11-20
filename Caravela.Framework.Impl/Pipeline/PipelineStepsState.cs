@@ -50,7 +50,7 @@ namespace Caravela.Framework.Impl.Pipeline
             IReadOnlyList<IAspectSource> inputAspectSources,
             AspectPipelineConfiguration pipelineConfiguration )
         {
-            this._diagnostics = new UserDiagnosticSink( pipelineConfiguration.CompileTimeProject );
+            this._diagnostics = new UserDiagnosticSink( pipelineConfiguration.CompileTimeProject, pipelineConfiguration.CodeFixFilter );
             this.Compilation = inputCompilation;
             this.PipelineConfiguration = pipelineConfiguration;
 

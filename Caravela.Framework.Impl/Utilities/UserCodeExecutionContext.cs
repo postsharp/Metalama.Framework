@@ -5,6 +5,7 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Aspects;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Diagnostics;
+using Caravela.Framework.Impl.Pipeline;
 using Caravela.Framework.Project;
 using System;
 using System.Globalization;
@@ -18,6 +19,8 @@ namespace Caravela.Framework.Impl.Utilities
     /// </summary>
     internal class UserCodeExecutionContext : IExecutionContext
     {
+        private IExecutionScenario? _executionScenario;
+
         public static UserCodeExecutionContext Current => (UserCodeExecutionContext) CaravelaExecutionContext.Current ?? throw new InvalidOperationException();
 
         public static UserCodeExecutionContext? CurrentInternal => (UserCodeExecutionContext?) CaravelaExecutionContext.CurrentOrNull;
@@ -51,7 +54,11 @@ namespace Caravela.Framework.Impl.Utilities
 
         public CompilationModel? Compilation { get; }
 
-        ICompilation? IExecutionContext.Compilation => this.Compilation;
+        public IExecutionScenario ExecutionScenario
+            => this._executionScenario ??= this.ServiceProvider.GetService<AspectPipelineDescription>().ExecutionScenario;
+
+        ICompilation IExecutionContext.Compilation
+            => this.Compilation ?? throw new InvalidOperationException( "There is no compilation in the current execution context" );
 
         public UserCodeExecutionContext(
             IServiceProvider serviceProvider,

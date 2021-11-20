@@ -99,8 +99,8 @@ public class Class
 
             var attributeDescription = new AttributeDescription(
                 name: "TestAttribute",
-                arguments: new[] { "ARG1", "ARG2" }.ToImmutableList(),
-                properties: new List<(string Name, string Value)> { ("Prop1", "111"), ("Prop2", "222") }.ToImmutableList() );
+                constructorArguments: new[] { "ARG1", "ARG2" }.ToImmutableList(),
+                namedArguments: new List<(string Name, string Value)> { ("Prop1", "111"), ("Prop2", "222") }.ToImmutableList() );
 
             var newRoot = await this.AddAttributeAsync( originalMethodDeclaration, attributeDescription );
 

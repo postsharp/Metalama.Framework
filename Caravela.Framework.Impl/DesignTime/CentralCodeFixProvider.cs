@@ -1,7 +1,10 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Impl.DesignTime.CodeFixes;
+using Caravela.Framework.Impl.DesignTime.Diagnostics;
 using Caravela.Framework.Impl.DesignTime.Utilities;
+using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeActions;
@@ -12,6 +15,7 @@ using Microsoft.CodeAnalysis.Text;
 using System;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -23,19 +27,53 @@ namespace Caravela.Framework.Impl.DesignTime
     public class CentralCodeFixProvider : CodeFixProvider
     {
         private const string _makePartialKey = "Caravela.MakePartial";
+        private readonly DesignTimeDiagnosticDefinitions _designTimeDiagnosticDefinitions = DesignTimeDiagnosticDefinitions.GetInstance();
 
-        public override Task RegisterCodeFixesAsync( CodeFixContext context )
+        public CentralCodeFixProvider()
+        {
+            this.FixableDiagnosticIds =
+                ImmutableArray.Create( DesignTimeDiagnosticDescriptors.TypeNotPartial.Id )
+                    .AddRange( this._designTimeDiagnosticDefinitions.UserDiagnosticDescriptors.Keys );
+        }
+
+        public override async Task RegisterCodeFixesAsync( CodeFixContext context )
         {
             Logger.Instance?.Write( "DesignTimeCodeFixProvider.RegisterCodeFixesAsync" );
 
-            context.RegisterCodeFix(
-                CodeAction.Create(
-                    "Make partial",
-                    cancellationToken => GetFixedDocument( context.Document, context.Span, cancellationToken.IgnoreIfDebugging() ),
-                    _makePartialKey ),
-                context.Diagnostics );
+            if ( context.Diagnostics.Any( d => d.Id == DesignTimeDiagnosticDescriptors.TypeNotPartial.Id ) )
+            {
+                // This is a hard-coded code fix. It may need to be refactored with our framework.
 
-            return Task.CompletedTask;
+                context.RegisterCodeFix(
+                    CodeAction.Create(
+                        "Make partial",
+                        cancellationToken => GetFixedDocument( context.Document, context.Span, cancellationToken.IgnoreIfDebugging() ),
+                        _makePartialKey ),
+                    context.Diagnostics );
+            }
+            else if ( context.Diagnostics.Any( d => d.Properties.ContainsKey( DiagnosticDescriptorExtensions.DiagnosticPropertyKey ) ) )
+            {
+                // We have a user diagnostics where a code fix provider was specified. We need to execute the CodeFix pipeline to gather
+                // the actual code fixes.
+                var userCodeFixProvider = new UserCodeFixProvider();
+
+                var codeFixes = await userCodeFixProvider.ProvideCodeFixesAsync(
+                    context.Document,
+                    context.Span,
+                    context.Diagnostics,
+                    context.CancellationToken );
+
+                if ( codeFixes.IsDefault )
+                {
+                    // This means the call was not successful.
+                    return;
+                }
+
+                foreach ( var fix in codeFixes )
+                {
+                    context.RegisterCodeFix( fix.CodeAction, fix.Diagnostic );
+                }
+            }
         }
 
         // See https://github.com/dotnet/roslyn/blob/master/docs/analyzers/FixAllProvider.md for more information on Fix All Providers
@@ -82,6 +120,6 @@ namespace Caravela.Framework.Impl.DesignTime
                 _ => null
             };
 
-        public override ImmutableArray<string> FixableDiagnosticIds { get; } = ImmutableArray.Create( DesignTimeDiagnosticDescriptors.TypeNotPartial.Id );
+        public override ImmutableArray<string> FixableDiagnosticIds { get; }
     }
 }

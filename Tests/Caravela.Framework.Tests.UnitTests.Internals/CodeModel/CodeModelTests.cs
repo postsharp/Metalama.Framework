@@ -141,9 +141,9 @@ class TestAttribute : Attribute
             Assert.Equal( "TestAttribute", attribute.Type.FullName );
             Assert.Equal( new object?[] { 42, "foo", null }, attribute.ConstructorArguments.Select( a => a.Value ) );
             var namedArguments = attribute.NamedArguments;
-            Assert.Equal( 2, namedArguments.Count );
-            Assert.Equal( 1, namedArguments.GetValue( "E" ) );
-            var types = Assert.IsAssignableFrom<IReadOnlyList<TypedConstant>>( namedArguments.GetValue( "Types" ) );
+            Assert.Equal( 2, namedArguments.Length );
+            Assert.Equal( 1, attribute.GetNamedArgumentValue( "E" ) );
+            var types = Assert.IsAssignableFrom<IReadOnlyList<TypedConstant>>( attribute.GetNamedArgumentValue( "Types" ) );
             Assert.Equal( 5, types.Count );
             var type0 = Assert.IsAssignableFrom<INamedType>( types[0].Value );
             Assert.Equal( "E", type0.FullName );

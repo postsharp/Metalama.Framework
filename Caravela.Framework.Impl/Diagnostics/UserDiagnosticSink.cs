@@ -2,9 +2,11 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
+using Caravela.Framework.CodeFixes;
 using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
+using Caravela.Framework.Impl.DesignTime.CodeFixes;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -19,21 +21,25 @@ namespace Caravela.Framework.Impl.Diagnostics
     internal partial class UserDiagnosticSink : IDiagnosticSink, IDiagnosticAdder
     {
         private readonly DiagnosticManifest? _diagnosticManifest;
+        private readonly CodeFixFilter _codeFixFilter;
         private ImmutableArray<Diagnostic>.Builder? _diagnostics;
         private ImmutableArray<ScopedSuppression>.Builder? _suppressions;
+        private ImmutableArray<UserCodeFix>.Builder? _codeFixes;
 
         public IDeclaration? DefaultScope { get; private set; }
 
-        internal UserDiagnosticSink( CompileTimeProject? compileTimeProject, IDeclaration? defaultScope = null )
+        internal UserDiagnosticSink( CompileTimeProject? compileTimeProject, CodeFixFilter? codeFixFilter, IDeclaration? defaultScope = null )
         {
             this._diagnosticManifest = compileTimeProject?.ClosureDiagnosticManifest;
+            this._codeFixFilter = codeFixFilter ?? (( _, _ ) => false);
             this.DefaultScope = defaultScope;
         }
 
         // This overload is used for tests only.
-        internal UserDiagnosticSink( IDeclaration? defaultScope = null )
+        internal UserDiagnosticSink( IDeclaration? defaultScope = null, CodeFixFilter? codeFixFilter = null )
         {
             this.DefaultScope = defaultScope;
+            this._codeFixFilter = codeFixFilter ?? (( _, _ ) => false);
         }
 
         public int ErrorCount { get; private set; }
@@ -46,6 +52,21 @@ namespace Caravela.Framework.Impl.Diagnostics
             if ( diagnostic.Severity == DiagnosticSeverity.Error )
             {
                 this.ErrorCount++;
+            }
+        }
+
+        private bool CaptureCodeFix( IDiagnosticDefinition diagnosticDefinition, Location? location, Action<ICodeFixProviderContext>? codeFix )
+        {
+            if ( codeFix != null && location != null && this._codeFixFilter( diagnosticDefinition, location ) )
+            {
+                this._codeFixes ??= ImmutableArray.CreateBuilder<UserCodeFix>();
+                this._codeFixes.Add( new UserCodeFix( diagnosticDefinition, location, codeFix ) );
+
+                return true;
+            }
+            else
+            {
+                return false;
             }
         }
 
@@ -99,17 +120,27 @@ namespace Caravela.Framework.Impl.Diagnostics
             }
         }
 
-        public void Report( IDiagnosticLocation? location, DiagnosticDefinition definition, params object[] args )
+        public void Report( IDiagnosticLocation? location, DiagnosticDefinition definition, Action<ICodeFixProviderContext>? codeFixProvider = null )
         {
             this.ValidateUserReport( definition );
-            this.Report( definition.CreateDiagnostic( this.GetLocation( location ) ) );
+
+            var resolvedLocation = this.GetLocation( location );
+            var hasCodeFix = this.CaptureCodeFix( definition, resolvedLocation, codeFixProvider );
+
+            this.Report( definition.CreateDiagnostic( resolvedLocation, hasCodeFix: hasCodeFix ) );
         }
 
-        public void Report<T>( IDiagnosticLocation? location, DiagnosticDefinition<T> definition, T arguments )
+        public void Report<T>(
+            IDiagnosticLocation? location,
+            DiagnosticDefinition<T> definition,
+            T arguments,
+            Action<ICodeFixProviderContext>? codeFixProvider = null )
             where T : notnull
         {
-            this.ValidateUserReport( definition );
-            this.Report( definition.CreateDiagnostic( this.GetLocation( location ), arguments ) );
+            var resolvedLocation = this.GetLocation( location );
+            var hasCodeFix = this.CaptureCodeFix( definition, resolvedLocation, codeFixProvider );
+
+            this.Report( definition.CreateDiagnostic( resolvedLocation, arguments, hasCodeFix: hasCodeFix ) );
         }
 
         public void Suppress( IDeclaration? scope, SuppressionDefinition definition )

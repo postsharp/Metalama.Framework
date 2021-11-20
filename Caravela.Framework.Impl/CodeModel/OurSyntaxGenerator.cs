@@ -319,7 +319,126 @@ namespace Caravela.Framework.Impl.CodeModel
             }
         }
 
-        public ExpressionSyntax AttributeValueExpression( object? value, ReflectionMapper reflectionMapper )
+        public AttributeSyntax Attribute( IAttributeData attribute, ReflectionMapper reflectionMapper )
+        {
+            var constructorArguments = attribute.ConstructorArguments.Select(
+                a => AttributeArgument( this.AttributeValueExpression( a.Value, reflectionMapper ) ) );
+
+            var namedArguments = attribute.NamedArguments.Select(
+                a => AttributeArgument(
+                    NameEquals( a.Key ),
+                    null,
+                    this.AttributeValueExpression( a.Value, reflectionMapper ) ) );
+
+            return SyntaxFactory.Attribute(
+                (NameSyntax) this.Type( attribute.Type.GetSymbol() ),
+                AttributeArgumentList( SeparatedList( constructorArguments.Concat( namedArguments ) ) ) );
+        }
+
+        public SyntaxNode AddAttribute( SyntaxNode oldNode, IAttributeData attribute, ReflectionMapper reflectionMapper )
+        {
+            var newNode = oldNode.WithoutLeadingTrivia();
+
+            var attributeList = AttributeList( SingletonSeparatedList( this.Attribute( attribute, reflectionMapper ) ) );
+
+            switch ( oldNode.Kind() )
+            {
+                case SyntaxKind.MethodDeclaration:
+                    newNode = ((MethodDeclarationSyntax) newNode).AddAttributeLists( attributeList );
+
+                    break;
+
+                case SyntaxKind.DestructorDeclaration:
+                    newNode = ((DestructorDeclarationSyntax) newNode).AddAttributeLists( attributeList );
+
+                    break;
+
+                case SyntaxKind.ConstructorDeclaration:
+                    newNode = ((ConstructorDeclarationSyntax) newNode).AddAttributeLists( attributeList );
+
+                    break;
+
+                case SyntaxKind.InterfaceDeclaration:
+                    newNode = ((InterfaceDeclarationSyntax) newNode).AddAttributeLists( attributeList );
+
+                    break;
+
+                case SyntaxKind.DelegateDeclaration:
+                    newNode = ((DelegateDeclarationSyntax) newNode).AddAttributeLists( attributeList );
+
+                    break;
+
+                case SyntaxKind.EnumDeclaration:
+                    newNode = ((EnumDeclarationSyntax) newNode).AddAttributeLists( attributeList );
+
+                    break;
+
+                case SyntaxKind.ClassDeclaration:
+                    newNode = ((ClassDeclarationSyntax) newNode).AddAttributeLists( attributeList );
+
+                    break;
+
+                case SyntaxKind.StructDeclaration:
+                    newNode = ((StructDeclarationSyntax) newNode).AddAttributeLists( attributeList );
+
+                    break;
+
+                case SyntaxKind.Parameter:
+                    newNode = ((ParameterSyntax) newNode).AddAttributeLists( attributeList );
+
+                    break;
+
+                case SyntaxKind.PropertyDeclaration:
+                    newNode = ((PropertyDeclarationSyntax) newNode).AddAttributeLists( attributeList );
+
+                    break;
+
+                case SyntaxKind.EventDeclaration:
+                    newNode = ((EventDeclarationSyntax) newNode).AddAttributeLists( attributeList );
+
+                    break;
+
+                case SyntaxKind.AddAccessorDeclaration:
+                case SyntaxKind.RemoveAccessorDeclaration:
+                case SyntaxKind.GetAccessorDeclaration:
+                case SyntaxKind.SetAccessorDeclaration:
+                    newNode = ((AccessorDeclarationSyntax) newNode).AddAttributeLists( attributeList );
+
+                    break;
+
+                case SyntaxKind.OperatorDeclaration:
+                    newNode = ((OperatorDeclarationSyntax) newNode).AddAttributeLists( attributeList );
+
+                    break;
+
+                case SyntaxKind.ConversionOperatorDeclaration:
+                    newNode = ((ConversionOperatorDeclarationSyntax) newNode).AddAttributeLists( attributeList );
+
+                    break;
+
+                case SyntaxKind.IndexerDeclaration:
+                    newNode = ((IndexerDeclarationSyntax) newNode).AddAttributeLists( attributeList );
+
+                    break;
+
+                case SyntaxKind.FieldDeclaration:
+                    newNode = ((FieldDeclarationSyntax) newNode).AddAttributeLists( attributeList );
+
+                    break;
+
+                case SyntaxKind.EventFieldDeclaration:
+                    newNode = ((EventFieldDeclarationSyntax) newNode).AddAttributeLists( attributeList );
+
+                    break;
+
+                default:
+                    throw new AssertionFailedException();
+            }
+
+            return newNode.WithLeadingTrivia( oldNode.GetLeadingTrivia() );
+        }
+
+        private ExpressionSyntax AttributeValueExpression( object? value, ReflectionMapper reflectionMapper )
         {
             if ( value == null )
             {

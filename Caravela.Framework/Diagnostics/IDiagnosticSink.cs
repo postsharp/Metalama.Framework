@@ -3,7 +3,9 @@
 
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
+using Caravela.Framework.CodeFixes;
 using Caravela.Framework.Validation;
+using System;
 
 namespace Caravela.Framework.Diagnostics
 {
@@ -20,8 +22,8 @@ namespace Caravela.Framework.Diagnostics
         /// </summary>
         /// <param name="location">The code location to which the diagnostic should be written.</param>
         /// <param name="definition"></param>
-        /// <param name="args"></param>
-        void Report( IDiagnosticLocation? location, DiagnosticDefinition definition, params object[] args );
+        /// <param name="codeFixProvider"></param>
+        void Report( IDiagnosticLocation? location, DiagnosticDefinition definition, Action<ICodeFixProviderContext>? codeFixProvider = null );
 
         /// <summary>
         /// Reports a parametric diagnostic by specifying its location.
@@ -29,7 +31,12 @@ namespace Caravela.Framework.Diagnostics
         /// <param name="location">The code location to which the diagnostic should be written.</param>
         /// <param name="definition"></param>
         /// <param name="arguments"></param>
-        void Report<T>( IDiagnosticLocation? location, DiagnosticDefinition<T> definition, T arguments )
+        /// <param name="codeFixProvider"></param>
+        void Report<T>(
+            IDiagnosticLocation? location,
+            DiagnosticDefinition<T> definition,
+            T arguments,
+            Action<ICodeFixProviderContext>? codeFixProvider = null )
             where T : notnull;
 
         /// <summary>

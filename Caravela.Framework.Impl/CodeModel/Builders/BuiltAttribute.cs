@@ -2,10 +2,11 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
-using Caravela.Framework.Code.Collections;
 using Caravela.Framework.Impl.Utilities;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Linq;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
@@ -17,7 +18,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         }
 
         IDeclaration IAttribute.ContainingDeclaration => this.ContainingDeclaration.AssertNotNull();
-        
+
         public AttributeBuilder AttributeBuilder { get; }
 
         public override DeclarationBuilder Builder => this.AttributeBuilder;
@@ -28,9 +29,23 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         [Memo]
         public IConstructor Constructor => this.Compilation.Factory.GetConstructor( this.AttributeBuilder.Constructor );
 
-        public IReadOnlyList<TypedConstant> ConstructorArguments => this.AttributeBuilder.ConstructorArguments;
+        [Memo]
+        public ImmutableArray<TypedConstant> ConstructorArguments
+            => this.AttributeBuilder.ConstructorArguments.Select(
+                    a => new TypedConstant(
+                        this.GetCompilationModel().Factory.GetIType( a.Type ),
+                        a.Value ) )
+                .ToImmutableArray();
 
-        public INamedArgumentList NamedArguments => this.AttributeBuilder.NamedArguments;
+        [Memo]
+        public ImmutableArray<KeyValuePair<string, TypedConstant>> NamedArguments
+            => this.AttributeBuilder.NamedArguments.Select(
+                    a => new KeyValuePair<string, TypedConstant>(
+                        a.Key,
+                        new TypedConstant(
+                            this.GetCompilationModel().Factory.GetIType( a.Value.Type ),
+                            a.Value.Value ) ) )
+                .ToImmutableArray();
 
         IType IHasType.Type => this.Type;
 

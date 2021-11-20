@@ -41,8 +41,8 @@ namespace Caravela.Framework.Impl.Pipeline
             [NotNullWhen( true )] out PipelineStageResult? result )
         {
             // TODO: it is suboptimal to get a CompilationModel here.
-            var compilationModel = CompilationModel.CreateInitialInstance( input.Project, input.PartialCompilation );
-            var compilation = input.PartialCompilation.Compilation;
+            var compilationModel = CompilationModel.CreateInitialInstance( input.Project, input.Compilation );
+            var compilation = input.Compilation.Compilation;
 
             var aspectInstances = input.AspectSources
                 .SelectMany( s => s.GetAspectInstances( compilationModel, this._aspectClass, diagnostics, cancellationToken ) )
@@ -62,7 +62,7 @@ namespace Caravela.Framework.Impl.Pipeline
             var context = new AspectWeaverContext(
                 this._aspectClass,
                 aspectInstances,
-                input.PartialCompilation,
+                input.Compilation,
                 diagnostics.Report,
                 resources.Add,
                 new AspectWeaverHelper( pipelineConfiguration.ServiceProvider, compilation ),
@@ -88,6 +88,7 @@ namespace Caravela.Framework.Impl.Pipeline
                 newCompilation,
                 input.Project,
                 input.AspectLayers,
+                null,
                 input.Diagnostics,
                 input.AspectSources );
 

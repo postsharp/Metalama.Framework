@@ -7,14 +7,11 @@ using Caravela.Framework.Code.DeclarationBuilders;
 using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.CodeModel.References;
-using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Transformations;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Linq;
-using TypedConstant = Caravela.Framework.Code.TypedConstant;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
@@ -53,25 +50,9 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public abstract string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null );
 
-        public IAttributeBuilder AddAttribute( INamedType type, params object?[] constructorArguments )
+        public void AddAttribute( AttributeConstruction attribute )
         {
-            /* We are interested in the fact that there is a matching ctor. 
-               If there are multiple we don't care at this point as we will generate code eventually and C# will resolve the correct one.
-               Of course this is a bit strange for the user, but currently it's not important.
-            */
-
-            var ctor = type.Constructors.OfCompatibleSignature( constructorArguments.Select( x => x?.GetType() ).ToList() ).FirstOrDefault();
-
-            if ( ctor == null )
-            {
-                throw GeneralDiagnosticDescriptors.CompatibleAttributeConstructorDoesNotExist.CreateException(
-                    (this.ParentAdvice.Aspect.AspectClass.ShortName, this, type) );
-            }
-
-            var ctorArguments = constructorArguments.Select( ( _, i ) => new TypedConstant( ctor.Parameters[i].Type, constructorArguments[i] ) )
-                .ToList();
-
-            return new AttributeBuilder( this, ctor, ctorArguments );
+            throw new NotImplementedException();
         }
 
         public void RemoveAttributes( INamedType type ) => throw new NotImplementedException();

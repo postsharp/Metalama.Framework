@@ -2,7 +2,6 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Project;
-using System;
 
 namespace Caravela.Framework.Code
 {
@@ -16,6 +15,6 @@ namespace Caravela.Framework.Code
         /// </summary>
         public static T GetTarget<T>( this IRef<T> reference )
             where T : class, ICompilationElement
-            => reference.GetTarget( CaravelaExecutionContext.Current.Compilation ?? throw new InvalidOperationException() );
+            => reference.GetTarget( CaravelaExecutionContext.Current.Compilation );
     }
 }

@@ -4,9 +4,9 @@
 namespace Caravela.Framework.Diagnostics
 {
     /// <summary>
-    /// Defines a diagnostic that has no parameters or has weakly typed (<c>object[]</c>) parameters. Diagnostics must be
+    /// Defines a diagnostic that has no parameter. Diagnostics must be
     /// defined as static fields or properties of an aspect classes. Diagnostics are instantiated with <see cref="IDiagnosticSink"/>.
-    /// For a strongly-typed variant, see <see cref="DiagnosticDefinition{T}"/>. 
+    /// For a diagnostics with parameters, see <see cref="DiagnosticDefinition{T}"/>. 
     /// </summary>
     /// <seealso href="@diagnostics"/>
     public sealed class DiagnosticDefinition : IDiagnosticDefinition

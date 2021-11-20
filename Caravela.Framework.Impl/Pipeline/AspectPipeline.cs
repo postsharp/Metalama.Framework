@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Aspects;
+using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.Aspects;
 using Caravela.Framework.Impl.CodeModel;
@@ -51,7 +52,7 @@ namespace Caravela.Framework.Impl.Pipeline
         /// <param name="assemblyLocator"></param>
         protected AspectPipeline(
             ServiceProvider serviceProvider,
-            AspectExecutionScenario executionScenario,
+            IExecutionScenario executionScenario,
             bool isTest,
             CompileTimeDomain? domain )
         {
@@ -244,7 +245,8 @@ namespace Caravela.Framework.Impl.Pipeline
                 loader,
                 fabricsConfiguration,
                 projectModel,
-                projectServiceProviderWithProject );
+                projectServiceProviderWithProject,
+                this.FilterCodeFix );
 
             return true;
 
@@ -261,6 +263,8 @@ namespace Caravela.Framework.Impl.Pipeline
                     _ => throw new AssertionFailedException()
                 };
         }
+
+        private protected virtual bool FilterCodeFix( IDiagnosticDefinition diagnosticDefinition, Location location ) => false;
 
         private protected virtual ImmutableArray<IAspectSource> CreateAspectSources(
             AspectPipelineConfiguration configuration,
@@ -295,7 +299,11 @@ namespace Caravela.Framework.Impl.Pipeline
             if ( pipelineConfiguration.CompileTimeProject == null || pipelineConfiguration.AspectClasses.Count == 0 )
             {
                 // If there is no aspect in the compilation, don't execute the pipeline.
-                pipelineStageResult = new PipelineStageResult( compilation, pipelineConfiguration.ProjectModel, ImmutableArray<OrderedAspectLayer>.Empty );
+                pipelineStageResult = new PipelineStageResult(
+                    compilation,
+                    pipelineConfiguration.ProjectModel,
+                    ImmutableArray<OrderedAspectLayer>.Empty,
+                    null );
 
                 return true;
             }
@@ -306,6 +314,7 @@ namespace Caravela.Framework.Impl.Pipeline
                 compilation,
                 pipelineConfiguration.ProjectModel,
                 pipelineConfiguration.AspectLayers,
+                null,
                 aspectSources: aspectSources );
 
             foreach ( var stageConfiguration in pipelineConfiguration.Stages )

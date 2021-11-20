@@ -31,7 +31,7 @@ namespace Caravela.Framework.Impl.Formatting
         {
             var syntax = await FormatToSyntaxAsync( document, diagnostics, reformatAll, cancellationToken );
 
-            return (document.Project.RemoveDocument( document.Id ).AddDocument( document.Name, syntax, document.Folders, document.FilePath ), syntax);
+            return (document.Project.Solution.WithDocumentSyntaxRoot( document.Id, syntax ).GetDocument( document.Id )!, syntax);
         }
 
         public static async ValueTask<CompilationUnitSyntax> FormatToSyntaxAsync(

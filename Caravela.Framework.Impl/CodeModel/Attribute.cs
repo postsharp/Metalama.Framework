@@ -49,13 +49,13 @@ namespace Caravela.Framework.Impl.CodeModel
         public IConstructor Constructor => this._compilation.Factory.GetConstructor( this.AttributeData.AttributeConstructor.AssertNotNull() );
 
         [Memo]
-        public IReadOnlyList<TypedConstant> ConstructorArguments => this.AttributeData.ConstructorArguments.Select( this.Translate ).ToImmutableArray();
+        public ImmutableArray<TypedConstant> ConstructorArguments => this.AttributeData.ConstructorArguments.Select( this.Translate ).ToImmutableArray();
 
         [Memo]
-        public INamedArgumentList NamedArguments
-            => new NamedArgumentsList(
-                this.AttributeData.NamedArguments
-                    .Select( kvp => new KeyValuePair<string, TypedConstant>( kvp.Key, this.Translate( kvp.Value ) ) ) );
+        public ImmutableArray<KeyValuePair<string, TypedConstant>> NamedArguments
+            => this.AttributeData.NamedArguments
+                .Select( kvp => new KeyValuePair<string, TypedConstant>( kvp.Key, this.Translate( kvp.Value ) ) )
+                .ToImmutableArray();
 
         private TypedConstant Translate( Microsoft.CodeAnalysis.TypedConstant constant )
         {

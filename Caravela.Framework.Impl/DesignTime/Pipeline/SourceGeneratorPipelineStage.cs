@@ -36,15 +36,15 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
         protected override PipelineStageResult GetStageResult(
             AspectPipelineConfiguration pipelineConfiguration,
             PipelineStageResult input,
-            IPipelineStepsResult pipelineStepResult,
+            IPipelineStepsResult pipelineStepsResult,
             CancellationToken cancellationToken )
         {
-            var transformations = pipelineStepResult.Compilation.GetAllObservableTransformations( true );
-            UserDiagnosticSink diagnostics = new( this.CompileTimeProject );
+            var transformations = pipelineStepsResult.Compilation.GetAllObservableTransformations( true );
+            UserDiagnosticSink diagnostics = new( this.CompileTimeProject, pipelineConfiguration.CodeFixFilter );
 
             var additionalSyntaxTrees = new List<IntroducedSyntaxTree>();
 
-            LexicalScopeFactory lexicalScopeFactory = new( pipelineStepResult.Compilation );
+            LexicalScopeFactory lexicalScopeFactory = new( pipelineStepsResult.Compilation );
             var introductionNameProvider = new LinkerIntroductionNameProvider();
 
             foreach ( var transformationGroup in transformations )
@@ -79,7 +79,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
                     default );
 
                 // Add members to the class.
-                var syntaxGenerationContext = SyntaxGenerationContext.CreateDefault( this.ServiceProvider, input.PartialCompilation.Compilation );
+                var syntaxGenerationContext = SyntaxGenerationContext.CreateDefault( this.ServiceProvider, input.Compilation.Compilation );
 
                 foreach ( var transformation in transformationGroup.Transformations )
                 {
@@ -130,12 +130,13 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
             }
 
             return new PipelineStageResult(
-                input.PartialCompilation,
+                input.Compilation,
                 input.Project,
                 input.AspectLayers,
-                input.Diagnostics.Concat( pipelineStepResult.Diagnostics ).Concat( diagnostics.ToImmutable() ),
-                input.AspectSources.Concat( pipelineStepResult.ExternalAspectSources ),
-                pipelineStepResult.InheritableAspectInstances,
+                input.CompilationModel,
+                input.Diagnostics.Concat( pipelineStepsResult.Diagnostics ).Concat( diagnostics.ToImmutable() ),
+                input.AspectSources.Concat( pipelineStepsResult.ExternalAspectSources ),
+                pipelineStepsResult.InheritableAspectInstances,
                 input.AdditionalSyntaxTrees.Concat( additionalSyntaxTrees ) );
         }
     }

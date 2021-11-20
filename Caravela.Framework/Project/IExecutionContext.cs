@@ -6,12 +6,14 @@ using System;
 
 namespace Caravela.Framework.Project
 {
-    internal interface IExecutionContext
+    public interface IExecutionContext
     {
         IServiceProvider ServiceProvider { get; }
 
         IFormatProvider FormatProvider { get; }
 
-        ICompilation? Compilation { get; }
+        ICompilation Compilation { get; }
+
+        IExecutionScenario ExecutionScenario { get; }
     }
 }

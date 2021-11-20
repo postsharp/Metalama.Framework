@@ -6,6 +6,8 @@ using System;
 
 namespace Caravela.Framework.Code
 {
+    // TODO: Verify that it can represent values of run-time-only values and all kinds of arrays.
+
     /// <summary>
     /// Represents a typed value that can be defined, defined to null, or undefined. Used to represent default values,
     /// for instance <see cref="IParameter.DefaultValue"/>, or custom attribute arguments. For enum values whose type is not a compile-time

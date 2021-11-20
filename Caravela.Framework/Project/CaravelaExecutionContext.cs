@@ -6,7 +6,7 @@ using System.Threading;
 
 namespace Caravela.Framework.Project
 {
-    internal static class CaravelaExecutionContext
+    public static class CaravelaExecutionContext
     {
         private static readonly AsyncLocal<IExecutionContext?> _current = new();
 
