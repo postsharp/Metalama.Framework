@@ -148,7 +148,7 @@ namespace Caravela.Framework.Impl.Fabrics
             where TAspect : Attribute, IAspect<T>, new()
         {
             var aspectClass = this.GetAspectClass<TAspect>();
-            
+
             var userCodeInvoker = this._serviceProvider.GetService<UserCodeInvoker>();
             var executionContext = UserCodeExecutionContext.Current;
 
@@ -170,7 +170,7 @@ namespace Caravela.Framework.Impl.Fabrics
                                 {
                                     return null;
                                 }
-                                
+
                                 return new AspectInstance(
                                     aspect!,
                                     t.ToRef<IDeclaration>(),

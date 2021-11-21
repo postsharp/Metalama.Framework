@@ -8,7 +8,6 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.SourceTransformer
@@ -86,7 +85,7 @@ namespace Caravela.SourceTransformer
 
                 TypeSyntax fieldType;
                 ExpressionSyntax deferenceExpression;
-                Func<ExpressionSyntax,ExpressionSyntax> evaluateExpression;
+                Func<ExpressionSyntax, ExpressionSyntax> evaluateExpression;
 
                 if ( isValueType )
                 {
@@ -94,7 +93,7 @@ namespace Caravela.SourceTransformer
                     // general way to ensure, without locks, that the writing of the struct is atomic. Improvements are possible for
                     // other intrinsic types provided by Interlocked, but it would require more work, and a convention meaning that
                     // the default value means unassigned.
-                    
+
                     fieldType = QualifiedName(
                         QualifiedName(
                             QualifiedName(
@@ -123,7 +122,7 @@ namespace Caravela.SourceTransformer
 
                 if ( node.ExpressionBody != null )
                 {
-                    var block = TransformExpression( fieldName, evaluateExpression(node.ExpressionBody.Expression), deferenceExpression );
+                    var block = TransformExpression( fieldName, evaluateExpression( node.ExpressionBody.Expression ), deferenceExpression );
 
                     var newNode = node.WithExpressionBody( null )
                         .WithSemicolonToken( default )
@@ -138,7 +137,7 @@ namespace Caravela.SourceTransformer
                     var getAccessor = node.AccessorList!.Accessors.SingleOrDefault( a => a.Kind() == SyntaxKind.GetAccessorDeclaration )!;
                     var setAccessor = node.AccessorList!.Accessors.SingleOrDefault( a => a.Kind() == SyntaxKind.SetAccessorDeclaration );
 
-                    var block = TransformExpression( fieldName, evaluateExpression(getAccessor.ExpressionBody!.Expression), deferenceExpression );
+                    var block = TransformExpression( fieldName, evaluateExpression( getAccessor.ExpressionBody!.Expression ), deferenceExpression );
 
                     var newGetAccessor =
                         getAccessor.WithExpressionBody( null )

@@ -79,7 +79,7 @@ namespace Caravela.Framework.Impl.DesignTime.CodeFixes
             {
                 originalNode = variableDeclaration.Parent!;
             }
-            
+
             var originalRoot = await originalNode.SyntaxTree.GetRootAsync( this.CancellationToken );
             var originalDocument = this._solution.GetDocument( originalNode.SyntaxTree ).AssertNotNull();
 
@@ -107,7 +107,7 @@ namespace Caravela.Framework.Impl.DesignTime.CodeFixes
             }
 
             var attributeTypeSymbol = (ITypeSymbol) attributeType.ToRef().GetSymbol( compilation! );
-            
+
             var targetSymbol = targetDeclaration.ToRef().GetSymbol( compilation! );
 
             if ( targetSymbol == null )
@@ -120,26 +120,26 @@ namespace Caravela.Framework.Impl.DesignTime.CodeFixes
             {
                 var syntaxTree = syntaxReferenceGroup.Key;
                 var originalRoot = await syntaxTree.GetRootAsync( this.CancellationToken );
-                
+
                 var originalDocument = this._solution.GetDocument( syntaxTree ).AssertNotNull();
 
                 var rewriter = new RemoveAttributeRewriter( compilation.GetSemanticModel( syntaxTree ), attributeTypeSymbol );
 
                 var transformedRoot = originalRoot;
                 var syntaxNodes = new List<SyntaxNode>();
-                
+
                 foreach ( var syntaxReference in syntaxReferenceGroup )
                 {
                     var originalNode = await syntaxReference.GetSyntaxAsync( this.CancellationToken );
                     syntaxNodes.Add( originalNode );
-                } 
+                }
 
                 transformedRoot = transformedRoot.ReplaceNodes( syntaxNodes, ( node, _ ) => rewriter.Visit( node ) );
 
                 this._solution = this._solution.WithDocumentSyntaxRoot( originalDocument.Id, transformedRoot );
                 this._changedDocuments.Add( originalDocument.Id );
             }
-            
+
             return true;
         }
 

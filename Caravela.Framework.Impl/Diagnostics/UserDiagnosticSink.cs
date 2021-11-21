@@ -15,8 +15,6 @@ using System.Text;
 
 namespace Caravela.Framework.Impl.Diagnostics
 {
-   
-    
     /// <summary>
     /// Implements the user-level <see cref="IDiagnosticSink"/> interface
     /// and maps user-level diagnostics into Roslyn <see cref="Diagnostic"/>.
@@ -129,9 +127,10 @@ namespace Caravela.Framework.Impl.Diagnostics
         }
 
         public ImmutableUserDiagnosticList ToImmutable()
-            => new( this._diagnostics?.ToImmutable(), this._suppressions?.ToImmutable(), this._codeFixes?.ToImmutable());
+            => new( this._diagnostics?.ToImmutable(), this._suppressions?.ToImmutable(), this._codeFixes?.ToImmutable() );
 
-        public override string ToString() => $"Diagnostics={this._diagnostics?.Count ?? 0}, Suppressions={this._suppressions?.Count ?? 0}, CodeFixes={this._codeFixes?.Count ?? 0}";
+        public override string ToString()
+            => $"Diagnostics={this._diagnostics?.Count ?? 0}, Suppressions={this._suppressions?.Count ?? 0}, CodeFixes={this._codeFixes?.Count ?? 0}";
 
         private Location? GetLocation( IDiagnosticLocation? location ) => ((IDiagnosticLocationImpl?) location)?.DiagnosticLocation;
 
@@ -181,7 +180,7 @@ namespace Caravela.Framework.Impl.Diagnostics
             var definition = GeneralDiagnosticDescriptors.SuggestedCodeFix;
             var resolvedLocation = this.GetLocation( location );
             var codeFixTitles = this.ProcessCodeFix( definition, resolvedLocation, codeFixes );
-            
+
             this.Report( definition.CreateDiagnostic( resolvedLocation, default, codeFixes: codeFixTitles ) );
         }
 

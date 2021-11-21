@@ -99,7 +99,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public static IPartialCompilation AddSyntaxTrees( this IPartialCompilation compilation, params SyntaxTree[] syntaxTrees )
             => compilation.WithSyntaxTreeModifications( null, syntaxTrees );
-        
+
         public static IPartialCompilation AddSyntaxTrees( this IPartialCompilation compilation, IEnumerable<SyntaxTree> syntaxTrees )
             => compilation.WithSyntaxTreeModifications( null, syntaxTrees.ToList() );
     }

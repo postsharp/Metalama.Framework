@@ -3,7 +3,6 @@
 
 using Caravela.Framework.Impl.Aspects;
 using Caravela.Framework.Impl.CodeModel;
-using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.DesignTime.Diagnostics;
 using Caravela.Framework.Impl.DesignTime.Diff;
@@ -408,7 +407,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
                     new ImmutableUserDiagnosticList(
                         diagnosticList.ToImmutableArray(),
                         pipelineResult?.Diagnostics.DiagnosticSuppressions,
-                        pipelineResult?.Diagnostics.CodeFixes),
+                        pipelineResult?.Diagnostics.CodeFixes ),
                     pipelineResult?.ExternallyInheritableAspects ?? ImmutableArray<AttributeAspectInstance>.Empty );
 
                 var directoryOptions = state._pipeline.ServiceProvider.GetService<IPathOptions>();

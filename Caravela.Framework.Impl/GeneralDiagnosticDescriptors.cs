@@ -239,7 +239,7 @@ namespace Caravela.Framework.Impl
                     " '-p:DebugCaravela=True' command-line option.",
                     _category,
                     Error );
-        
+
         internal static readonly DiagnosticDefinition<None>
             SuggestedCodeFix
                 = new(

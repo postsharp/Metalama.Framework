@@ -30,7 +30,7 @@ namespace Caravela.Framework.Project
         {
             this.IsReadOnly = true;
         }
-        
+
         public bool IsReadOnly { get; internal set; }
     }
 }

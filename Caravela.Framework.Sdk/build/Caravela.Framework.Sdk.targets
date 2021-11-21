@@ -2,7 +2,7 @@
 
 <Project>
 
-    
+
     <Target Name="CaravelaSdkSetAnalyzerAssembliesInPackage"
             DependsOnTargets="ResolveReferences;BuiltProjectOutputGroup">
         <ItemGroup>

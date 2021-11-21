@@ -4,7 +4,6 @@
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.DesignTime.CodeFixes;
 using Caravela.Framework.Impl.Diagnostics;
-using Caravela.Framework.Impl.Options;
 using Caravela.Framework.Impl.Pipeline;
 using Microsoft.CodeAnalysis;
 using System;
@@ -128,7 +127,7 @@ namespace Caravela.TestFramework
                 codeFix.Title,
                 CancellationToken.None );
 
-            var transformedCompilation = await transformedSolution.GetProject( inputDocument.Project.Id)!.GetCompilationAsync(  );
+            var transformedCompilation = await transformedSolution.GetProject( inputDocument.Project.Id )!.GetCompilationAsync();
 
             await testResult.SetOutputCompilationAsync( transformedCompilation! );
             testResult.HasOutputCode = true;
@@ -136,7 +135,10 @@ namespace Caravela.TestFramework
             return true;
         }
 
-        private async Task<bool> ProcessCompileTimePipelineOutputAsync( TestInput testInput, TestResult testResult, CompileTimeAspectPipelineResult pipelineResult )
+        private async Task<bool> ProcessCompileTimePipelineOutputAsync(
+            TestInput testInput,
+            TestResult testResult,
+            CompileTimeAspectPipelineResult pipelineResult )
         {
             var resultCompilation = pipelineResult.ResultingCompilation.Compilation;
             testResult.OutputCompilation = resultCompilation;
@@ -149,7 +151,7 @@ namespace Caravela.TestFramework
             // Emit binary and report diagnostics.
             bool MustBeReported( Diagnostic d )
             {
-                if (d.Id == "CS1701")
+                if ( d.Id == "CS1701" )
                 {
                     // Ignore warning CS1701: Assuming assembly reference "Assembly Name #1" matches "Assembly Name #2", you may need to supply runtime policy.
                     // This warning is ignored by MSBuild anyway.
@@ -160,7 +162,7 @@ namespace Caravela.TestFramework
                        && !testInput.Options.IgnoredDiagnostics.Contains( d.Id );
             }
 
-            if (!testInput.Options.OutputCompilationDisabled.GetValueOrDefault())
+            if ( !testInput.Options.OutputCompilationDisabled.GetValueOrDefault() )
             {
                 // We don't build the PDB because the syntax trees were not written to disk anyway.
                 var peStream = new MemoryStream();
@@ -168,13 +170,13 @@ namespace Caravela.TestFramework
 
                 testResult.OutputCompilationDiagnostics.Report( emitResult.Diagnostics.Where( MustBeReported ) );
 
-                if (!emitResult.Success)
+                if ( !emitResult.Success )
                 {
                     testResult.SetFailed( "Final Compilation.Emit failed." );
                 }
                 else
                 {
-                    if (!this.VerifyBinaryStream( testInput, testResult, peStream ))
+                    if ( !this.VerifyBinaryStream( testInput, testResult, peStream ) )
                     {
                         return false;
                     }

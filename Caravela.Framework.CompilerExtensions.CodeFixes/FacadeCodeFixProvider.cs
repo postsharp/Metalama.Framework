@@ -16,7 +16,7 @@ namespace Caravela.Framework.CompilerExtensions
     public class FacadeCodeFixProvider : CodeFixProvider
     {
         private CodeFixProvider _impl;
-       
+
         public FacadeCodeFixProvider()
         {
             this._impl = (CodeFixProvider) ResourceExtractor.CreateInstance( "Caravela.Framework.Impl.DesignTime.CentralCodeFixProvider" );

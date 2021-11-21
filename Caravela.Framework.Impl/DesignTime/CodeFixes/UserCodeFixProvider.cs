@@ -11,7 +11,6 @@ using System.Threading;
 
 namespace Caravela.Framework.Impl.DesignTime.CodeFixes
 {
-    
     internal class UserCodeFixProvider
     {
         private readonly CodeFixRunner _codeFixRunner;
@@ -21,7 +20,7 @@ namespace Caravela.Framework.Impl.DesignTime.CodeFixes
             this._codeFixRunner = new CodeFixRunner( designTimeAspectPipelineFactory, projectOptions );
         }
 
-        public UserCodeFixProvider( IProjectOptions projectOptions) : this( DesignTimeAspectPipelineFactory.Instance, projectOptions ) { }
+        public UserCodeFixProvider( IProjectOptions projectOptions ) : this( DesignTimeAspectPipelineFactory.Instance, projectOptions ) { }
 
         public ImmutableArray<AssignedCodeFix> ProvideCodeFixes(
             Document document,
@@ -39,7 +38,7 @@ namespace Caravela.Framework.Impl.DesignTime.CodeFixes
                 {
                     var splitTitles = codeFixTitles!.Split( CodeFixTitles.Separator );
 
-                    foreach (var codeFixTitle in splitTitles)
+                    foreach ( var codeFixTitle in splitTitles )
                     {
                         // TODO: We may support hierarchical code fixes by allowing a separator in the title given by the user, i.e. '|'.
                         // The creation of the tree structure would then be done here.
@@ -57,7 +56,5 @@ namespace Caravela.Framework.Impl.DesignTime.CodeFixes
 
             return codeFixesBuilder.ToImmutable();
         }
-
- 
     }
 }

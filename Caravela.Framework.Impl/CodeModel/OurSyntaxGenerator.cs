@@ -345,7 +345,6 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public SyntaxNode AddAttribute( SyntaxNode oldNode, IAttributeData attribute, ReflectionMapper reflectionMapper )
         {
-            
             var attributeList = AttributeList( SingletonSeparatedList( this.Attribute( attribute, reflectionMapper ) ) )
                 .WithLeadingTrivia( oldNode.GetLeadingTrivia() )
                 .WithTrailingTrivia( ElasticLineFeed );

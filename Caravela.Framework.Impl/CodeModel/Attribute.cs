@@ -44,11 +44,9 @@ namespace Caravela.Framework.Impl.CodeModel
         [Memo]
         public INamedType Type => this._compilation.Factory.GetNamedType( this.AttributeData.AttributeClass.AssertNotNull() );
 
-        
         [Memo]
         public IConstructor Constructor => this._compilation.Factory.GetConstructor( this.AttributeData.AttributeConstructor.AssertNotNull() );
 
-        
         [Memo]
         public ImmutableArray<TypedConstant> ConstructorArguments => this.AttributeData.ConstructorArguments.Select( this.Translate ).ToImmutableArray();
 
@@ -80,7 +78,7 @@ namespace Caravela.Framework.Impl.CodeModel
         public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => throw new NotImplementedException();
 
         IDeclaration? IDeclaration.ContainingDeclaration => this.ContainingDeclaration;
-        
+
         Location? IAspectPredecessorImpl.GetDiagnosticLocation( Compilation compilation ) => this.DiagnosticLocation;
 
         IType IHasType.Type => this.Type;

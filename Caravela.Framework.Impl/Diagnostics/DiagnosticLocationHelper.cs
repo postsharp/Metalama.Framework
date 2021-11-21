@@ -99,7 +99,5 @@ namespace Caravela.Framework.Impl.Diagnostics
 
             return application.GetSyntax().GetLocation();
         }
-
-        
     }
 }

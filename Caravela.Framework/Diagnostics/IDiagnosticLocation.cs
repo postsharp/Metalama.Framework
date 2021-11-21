@@ -14,8 +14,5 @@ namespace Caravela.Framework.Diagnostics
     /// <seealso href="@diagnostics"/>
     [CompileTimeOnly]
     [InternalImplement]
-    public interface IDiagnosticLocation
-    {
-       
-    }
+    public interface IDiagnosticLocation { }
 }

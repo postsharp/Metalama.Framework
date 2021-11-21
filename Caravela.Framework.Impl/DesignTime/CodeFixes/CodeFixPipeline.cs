@@ -36,8 +36,8 @@ namespace Caravela.Framework.Impl.DesignTime.CodeFixes
             => null;
 
         private protected override bool FilterCodeFix( IDiagnosticDefinition diagnosticDefinition, Location location )
-            => diagnosticDefinition.Id == this._diagnostic.Id && 
-               location.SourceTree == this._diagnostic.Location.SourceTree && 
+            => diagnosticDefinition.Id == this._diagnostic.Id &&
+               location.SourceTree == this._diagnostic.Location.SourceTree &&
                location.SourceSpan.Equals( this._diagnostic.Location.SourceSpan );
 
         public bool TryExecute(

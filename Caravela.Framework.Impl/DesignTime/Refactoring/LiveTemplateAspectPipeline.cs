@@ -9,7 +9,6 @@ using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Pipeline;
 using Microsoft.CodeAnalysis;
-using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
@@ -53,12 +52,10 @@ namespace Caravela.Framework.Impl.DesignTime.Refactoring
             [NotNullWhen( true )] out PartialCompilation? outputCompilation,
             out ImmutableArray<Diagnostic> diagnostics )
         {
-            
             LiveTemplateAspectPipeline pipeline = new( serviceProvider, domain, aspectClass, aspect, targetSymbol );
 
             return pipeline.TryExecute( configuration, inputCompilation, cancellationToken, out outputCompilation, out diagnostics );
         }
-        
 
         private bool TryExecute(
             AspectPipelineConfiguration pipelineConfiguration,

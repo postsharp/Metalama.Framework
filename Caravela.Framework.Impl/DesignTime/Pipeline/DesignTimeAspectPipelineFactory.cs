@@ -18,6 +18,7 @@ using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
+
 // ReSharper disable InconsistentlySynchronizedField
 
 namespace Caravela.Framework.Impl.DesignTime.Pipeline
@@ -191,8 +192,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
 
                 return false;
             }
-            
-            
+
             return LiveTemplateAspectPipeline.TryExecute(
                 configuration.ServiceProvider,
                 this.Domain,

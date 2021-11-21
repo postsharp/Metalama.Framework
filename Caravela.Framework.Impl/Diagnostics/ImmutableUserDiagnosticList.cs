@@ -10,7 +10,10 @@ namespace Caravela.Framework.Impl.Diagnostics
 {
     public readonly struct ImmutableUserDiagnosticList
     {
-        public static ImmutableUserDiagnosticList Empty { get; } = new( ImmutableArray<Diagnostic>.Empty, ImmutableArray<ScopedSuppression>.Empty, ImmutableArray<CodeFixInstance>.Empty );
+        public static ImmutableUserDiagnosticList Empty { get; } = new(
+            ImmutableArray<Diagnostic>.Empty,
+            ImmutableArray<ScopedSuppression>.Empty,
+            ImmutableArray<CodeFixInstance>.Empty );
 
         public ImmutableArray<Diagnostic> ReportedDiagnostics { get; }
 
@@ -18,7 +21,10 @@ namespace Caravela.Framework.Impl.Diagnostics
 
         public ImmutableArray<CodeFixInstance> CodeFixes { get; }
 
-        public ImmutableUserDiagnosticList( ImmutableArray<Diagnostic> diagnostics, ImmutableArray<ScopedSuppression> suppressions, ImmutableArray<CodeFixInstance> codeFixes )
+        public ImmutableUserDiagnosticList(
+            ImmutableArray<Diagnostic> diagnostics,
+            ImmutableArray<ScopedSuppression> suppressions,
+            ImmutableArray<CodeFixInstance> codeFixes )
         {
             this.CodeFixes = codeFixes.IsDefault ? ImmutableArray<CodeFixInstance>.Empty : codeFixes;
             this.ReportedDiagnostics = diagnostics.IsDefault ? ImmutableArray<Diagnostic>.Empty : diagnostics;
@@ -32,23 +38,22 @@ namespace Caravela.Framework.Impl.Diagnostics
             : this(
                 diagnostics ?? ImmutableArray<Diagnostic>.Empty,
                 suppressions ?? ImmutableArray<ScopedSuppression>.Empty,
-                codeFixes ?? ImmutableArray<CodeFixInstance>.Empty )
-        {
-            
-        }
-            
-        
+                codeFixes ?? ImmutableArray<CodeFixInstance>.Empty ) { }
 
         // Coverage: ignore (design time)
-        internal ImmutableUserDiagnosticList( IReadOnlyList<Diagnostic> diagnostics, ImmutableArray<ScopedSuppression> suppressions = default, ImmutableArray<CodeFixInstance> codeFixes = default ) 
+        internal ImmutableUserDiagnosticList(
+            IReadOnlyList<Diagnostic> diagnostics,
+            ImmutableArray<ScopedSuppression> suppressions = default,
+            ImmutableArray<CodeFixInstance> codeFixes = default )
             : this( diagnostics.ToImmutableArray(), suppressions, codeFixes ) { }
 
         public ImmutableUserDiagnosticList Concat( in ImmutableUserDiagnosticList other )
             => new(
                 this.ReportedDiagnostics.AddRange( other.ReportedDiagnostics ),
                 this.DiagnosticSuppressions.AddRange( other.DiagnosticSuppressions ),
-                this.CodeFixes.AddRange( other.CodeFixes ));
+                this.CodeFixes.AddRange( other.CodeFixes ) );
 
-        public override string ToString() => $"Diagnostics={this.ReportedDiagnostics.Length}, Suppressions={this.DiagnosticSuppressions.Length}, CodeFixes={this.CodeFixes.Length}";
+        public override string ToString()
+            => $"Diagnostics={this.ReportedDiagnostics.Length}, Suppressions={this.DiagnosticSuppressions.Length}, CodeFixes={this.CodeFixes.Length}";
     }
 }

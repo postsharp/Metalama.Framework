@@ -61,7 +61,7 @@ namespace Caravela.Framework.CodeFixes
 
         public static CodeFix ApplyAspect<T>( T targetDeclaration, IAspect<T> aspect, string? title )
             where T : class, IDeclaration
-            => new CodeFix(
+            => new(
                 title ?? $"Apply {aspect.GetType().Name} to {targetDeclaration.ToDisplayString( CodeDisplayFormat.MinimallyQualified )}",
                 builder => builder.ApplyAspectAsync( targetDeclaration, aspect ) );
     }

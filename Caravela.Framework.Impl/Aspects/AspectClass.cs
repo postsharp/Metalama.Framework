@@ -106,7 +106,7 @@ namespace Caravela.Framework.Impl.Aspects
             this.DiagnosticLocation = aspectTypeSymbol.GetDiagnosticLocation();
             this.AspectType = aspectType;
             this._prototypeAspectInstance = prototype;
-            
+
             this.TemplateClasses = ImmutableArray.Create<TemplateClass>( this );
 
             // This must be called after Members is built and assigned.
@@ -131,7 +131,7 @@ namespace Caravela.Framework.Impl.Aspects
                 }
 
                 this._layers = classBuilder.Layers.As<string?>().Prepend( null ).Select( l => new AspectLayer( this, l ) ).ToImmutableArray();
-                
+
                 // Call BuildEligibility for all relevant interface implementations.
                 List<KeyValuePair<Type, IEligibilityRule<IDeclaration>>> eligibilityRules = new();
 
@@ -213,8 +213,6 @@ namespace Caravela.Framework.Impl.Aspects
         /// </summary>
         public AspectInstance CreateAspectInstance( IDeclaration target, IAspect aspect, in AspectPredecessor predecessor )
             => new( aspect, target.ToRef(), this, predecessor );
-        
-        
 
         /// <summary>
         /// Creates an instance of the <see cref="AspectClass"/> class.

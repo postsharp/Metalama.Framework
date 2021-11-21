@@ -7,7 +7,6 @@ using Caravela.Framework.Impl.Options;
 using Caravela.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 using System;
 using System.Collections.Generic;
@@ -56,7 +55,7 @@ namespace Caravela.Framework.Impl.Utilities
                 foreach ( var diagnostic in invalidUserCodeException.Diagnostics )
                 {
                     var betterLocation = exactLocation ?? (diagnostic.Location == Location.None ? context.InvokedMember.GetDiagnosticLocation() : null);
-                    
+
                     if ( betterLocation != null )
                     {
                         // Report the original diagnostics, but with the fixed location.

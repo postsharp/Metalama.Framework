@@ -1,3 +1,6 @@
+// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.DesignTime.Diff;
@@ -23,7 +26,7 @@ namespace Caravela.Framework.Impl.DesignTime.CodeFixes
             this._designTimeAspectPipelineFactory = new TestDesignTimeAspectPipelineFactory( domain, projectOptions );
             this._projectOptions = projectOptions;
         }
-        
+
         internal CodeFixRunner( DesignTimeAspectPipelineFactory designTimeAspectPipelineFactory, IProjectOptions projectOptions )
         {
             this._designTimeAspectPipelineFactory = designTimeAspectPipelineFactory;
@@ -112,13 +115,19 @@ namespace Caravela.Framework.Impl.DesignTime.CodeFixes
                 return project.Solution;
             }
 
-            var context = new CodeFixContext( document, compilationModel, this._designTimeAspectPipelineFactory,this._projectOptions,designTimeConfiguration );
+            var context = new CodeFixContext(
+                document,
+                compilationModel,
+                this._designTimeAspectPipelineFactory,
+                this._projectOptions,
+                designTimeConfiguration );
+
             var codeFixBuilder = new CodeFixBuilder( context, cancellationToken );
 
             // TODO: use user code invoker
             await codeFix.CodeFix.Action( codeFixBuilder );
 
             return await codeFixBuilder.GetResultingSolutionAsync();
-        }        
+        }
     }
 }

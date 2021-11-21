@@ -16,7 +16,7 @@ namespace Caravela.Framework.Impl.DesignTime.CodeFixes
             private readonly SemanticModel _semanticModel;
             private readonly ITypeSymbol _attributeType;
 
-            public RemoveAttributeRewriter( SemanticModel semanticModel, ITypeSymbol attributeType ) 
+            public RemoveAttributeRewriter( SemanticModel semanticModel, ITypeSymbol attributeType )
             {
                 this._semanticModel = semanticModel;
                 this._attributeType = attributeType;

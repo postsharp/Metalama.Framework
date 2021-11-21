@@ -811,7 +811,7 @@ namespace Caravela.Framework.Impl.CompileTime
             public override SyntaxNode? VisitQualifiedName( QualifiedNameSyntax node )
             {
                 // Fully qualify type names and namespaces.
-                
+
                 var symbol = this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetSymbolInfo( node ).Symbol;
 
                 if ( symbol is INamespaceOrTypeSymbol namespaceOrType )
@@ -825,7 +825,7 @@ namespace Caravela.Framework.Impl.CompileTime
             public override SyntaxNode? VisitMemberAccessExpression( MemberAccessExpressionSyntax node )
             {
                 // Fully qualify type names and namespaces.
-                
+
                 var symbol = this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetSymbolInfo( node ).Symbol;
 
                 if ( symbol is INamespaceOrTypeSymbol namespaceOrType )
@@ -845,7 +845,7 @@ namespace Caravela.Framework.Impl.CompileTime
                 else if ( node.Identifier.Kind() == SyntaxKind.IdentifierToken && !node.IsVar )
                 {
                     // Fully qualifies simple identifiers.
-                    
+
                     var symbol = this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetSymbolInfo( node ).Symbol;
 
                     if ( symbol is INamespaceOrTypeSymbol namespaceOrType )

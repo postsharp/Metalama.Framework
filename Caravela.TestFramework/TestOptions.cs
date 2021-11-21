@@ -121,8 +121,7 @@ namespace Caravela.TestFramework
         /// Gets the set of preprocessor symbols that are required for this test, otherwise the test would be skipped.
         /// </summary>
         public List<string> RequiredConstants { get; } = new();
-        
-        
+
         /// <summary>
         /// Gets or sets a value indicating whether a code fix should be applied. When this value is true, the output buffer
         /// of the test is not the one transformed by the aspect, but the one transformed by the code fix. The test will fail
@@ -130,7 +129,7 @@ namespace Caravela.TestFramework
         /// To apply a different code fix, use the <see cref="AppliedCodeFixIndex"/> property.
         /// </summary>
         public bool? ApplyCodeFix { get; set; }
-        
+
         /// <summary>
         /// Gets or sets the zero-based index of the code fix to be applied when <see cref="ApplyCodeFix"/> is <c>true</c>.
         /// </summary>
@@ -290,7 +289,7 @@ namespace Caravela.TestFramework
                         this.AcceptInvalidInput = true;
 
                         break;
-                    
+
                     case "ApplyCodeFix":
                         this.ApplyCodeFix = true;
 
@@ -298,7 +297,7 @@ namespace Caravela.TestFramework
                         {
                             this.AppliedCodeFixIndex = index;
                         }
-                        
+
                         break;
 
                     default:

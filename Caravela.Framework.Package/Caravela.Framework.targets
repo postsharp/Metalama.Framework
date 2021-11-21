@@ -1,8 +1,8 @@
 ﻿<Project>
 
 
-  <ItemGroup Condition="'$(CaravelaCompileTimeOnlyProject)'=='True'">
-        <AssemblyAttribute Include="Caravela.Framework.Aspects.CompileTimeOnlyAttribute"/>
+    <ItemGroup Condition="'$(CaravelaCompileTimeOnlyProject)'=='True'">
+        <AssemblyAttribute Include="Caravela.Framework.Aspects.CompileTimeOnlyAttribute" />
     </ItemGroup>
 
     <PropertyGroup>

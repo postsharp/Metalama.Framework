@@ -34,7 +34,7 @@ namespace Caravela.Framework.Impl.Sdk
         /// Gets the set of aspect instances that must be weaved.
         /// </summary>
         public IReadOnlyDictionary<ISymbol, IAspectInstance> AspectInstances { get; }
-        
+
         /// <summary>
         /// Gets the current project.
         /// </summary>

@@ -27,7 +27,6 @@ namespace Caravela.Framework.Impl.Diagnostics
             where T : notnull
             => new DiagnosticException( definition.CreateDiagnostic( location, arguments ) );
 
-
         /// <summary>
         /// Instantiates a <see cref="Diagnostic"/> based on the current descriptor and given arguments.
         /// </summary>
@@ -37,7 +36,7 @@ namespace Caravela.Framework.Impl.Diagnostics
             T arguments,
             IEnumerable<Location>? additionalLocations = null,
             CodeFixTitles codeFixes = default,
-            ImmutableDictionary<string, string?>? properties = null)
+            ImmutableDictionary<string, string?>? properties = null )
             where T : notnull
         {
             object[] argumentArray;
@@ -73,7 +72,7 @@ namespace Caravela.Framework.Impl.Diagnostics
                 propertiesWithCodeFixes ??= ImmutableDictionary.Create<string, string?>();
                 propertiesWithCodeFixes = propertiesWithCodeFixes.Add( CodeFixTitles.DiagnosticPropertyKey, codeFixes.Value );
             }
-            
+
             return Diagnostic.Create(
                 definition.Id,
                 definition.Category,
