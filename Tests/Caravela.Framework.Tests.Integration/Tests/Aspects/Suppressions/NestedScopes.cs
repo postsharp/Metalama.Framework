@@ -24,7 +24,7 @@ namespace Caravela.Framework.Tests.Integration.Aspects.Suppressions.NestedScopes
         public override void BuildAspect( IAspectBuilder<IMethod> builder )
         {
             builder.Advices.OverrideMethod( builder.Target, nameof(Override) );
-            builder.Diagnostics.Suppress( null, _suppression );
+            builder.Diagnostics.Suppress( builder.Target, _suppression );
         }
     }
 

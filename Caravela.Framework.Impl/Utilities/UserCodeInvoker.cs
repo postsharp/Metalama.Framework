@@ -7,6 +7,7 @@ using Caravela.Framework.Impl.Options;
 using Caravela.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 using System;
 using System.Collections.Generic;
@@ -52,9 +53,11 @@ namespace Caravela.Framework.Impl.Utilities
 
             if ( userException is DiagnosticException invalidUserCodeException )
             {
-                if ( exactLocation != null )
+                foreach ( var diagnostic in invalidUserCodeException.Diagnostics )
                 {
-                    foreach ( var diagnostic in invalidUserCodeException.Diagnostics )
+                    var betterLocation = exactLocation ?? (diagnostic.Location == Location.None ? context.InvokedMember.GetDiagnosticLocation() : null);
+                    
+                    if ( betterLocation != null )
                     {
                         // Report the original diagnostics, but with the fixed location.
                         context.Diagnostics.Report(
@@ -69,13 +72,15 @@ namespace Caravela.Framework.Impl.Utilities
                                 diagnostic.Descriptor.Title,
                                 diagnostic.Descriptor.Description,
                                 diagnostic.Descriptor.HelpLinkUri,
-                                exactLocation,
-                                diagnostic.AdditionalLocations ) );
+                                betterLocation,
+                                diagnostic.AdditionalLocations,
+                                properties: diagnostic.Properties ) );
                     }
-                }
-                else
-                {
-                    context.Diagnostics.Report( invalidUserCodeException.Diagnostics );
+                    else
+                    {
+                        // If we don't have a better location, report the original diagnostic.
+                        context.Diagnostics.Report( diagnostic );
+                    }
                 }
             }
             else

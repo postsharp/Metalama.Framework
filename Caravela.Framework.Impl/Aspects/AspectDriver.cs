@@ -138,8 +138,7 @@ namespace Caravela.Framework.Impl.Aspects
 
             var diagnosticSink = new UserDiagnosticSink( this._aspectClass.Project, pipelineConfiguration.CodeFixFilter, targetDeclaration );
 
-            using ( DiagnosticContext.WithDefaultLocation( diagnosticSink.DefaultScope?.DiagnosticLocation ) )
-            {
+          
                 var declarativeAdvices =
                     this._declarativeAdviceAttributes
                         .Select(
@@ -198,7 +197,7 @@ namespace Caravela.Framework.Impl.Aspects
                 }
 
                 return aspectResult;
-            }
+            
         }
 
         private static Advice? CreateDeclarativeAdvice<T>(

@@ -351,8 +351,6 @@ namespace Caravela.Framework.Impl.CodeModel
 
         IAttributeList IDeclaration.Attributes => throw new NotSupportedException();
 
-        IDiagnosticLocation? IDiagnosticScope.DiagnosticLocation => null;
-
         public string? Name => this.RoslynCompilation.AssemblyName;
 
         public override string ToString() => $"{this.RoslynCompilation.AssemblyName}, rev={this._revision}";
@@ -377,5 +375,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         [Memo]
         public IAssemblyIdentity Identity => new AssemblyIdentityModel( this.RoslynCompilation.Assembly.Identity );
+
+        Location? IDiagnosticLocationImpl.DiagnosticLocation => null;
     }
 }

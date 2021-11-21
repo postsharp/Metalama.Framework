@@ -133,7 +133,7 @@ namespace Caravela.Framework.Tests.UnitTests.DesignTime
         {
             using TestProjectOptions testProjectOptions = new();
             var compilation = CreateCSharpCompilation( new Dictionary<string, string>() { { "F1.cs", "public class X {}" } } );
-            using DesignTimeAspectPipelineFactory factory = new( new UnloadableCompileTimeDomain() );
+            using TestDesignTimeAspectPipelineFactory factory = new( new UnloadableCompileTimeDomain(), testProjectOptions );
             var pipeline = factory.GetOrCreatePipeline( testProjectOptions, compilation, CancellationToken.None )!;
 
             // First execution of the pipeline.
@@ -177,7 +177,7 @@ class MyAspect : MethodAspect
 
    public override void BuildAspect( IAspectBuilder<IMethod> aspectBuilder )
    {
-        aspectBuilder.Diagnostics.Report( _description, this.Version );
+        aspectBuilder.Diagnostics.Report( aspectBuilder.Target, _description, this.Version );
    }
 }
 ";
@@ -212,7 +212,7 @@ Target.cs:
                 },
                 assemblyName );
 
-            using DesignTimeAspectPipelineFactory factory = new( new UnloadableCompileTimeDomain() );
+            using TestDesignTimeAspectPipelineFactory factory = new( new UnloadableCompileTimeDomain(), projectOptions );
             var pipeline = factory.GetOrCreatePipeline( projectOptions, compilation, CancellationToken.None )!;
 
             // First execution of the pipeline.
@@ -370,7 +370,7 @@ partial class C
 
             using TestProjectOptions projectOptions = new();
 
-            using DesignTimeAspectPipelineFactory factory = new( new UnloadableCompileTimeDomain() );
+            using TestDesignTimeAspectPipelineFactory factory = new( new UnloadableCompileTimeDomain(), projectOptions );
 
             void TestWithTargetCode( string targetCode )
             {

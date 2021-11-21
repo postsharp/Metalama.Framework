@@ -33,8 +33,6 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
             => this.Builder.ToDisplayString( format, context );
 
-        public IDiagnosticLocation? DiagnosticLocation => this.Builder.DiagnosticLocation;
-
         public IAssembly DeclaringAssembly => this.Builder.DeclaringAssembly;
 
         DeclarationOrigin IDeclaration.Origin => DeclarationOrigin.Aspect;
@@ -71,5 +69,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         [Memo]
         public IDeclaration OriginalDefinition => this.Compilation.Factory.GetDeclaration( this.Builder.OriginalDefinition );
+
+        Location? IDiagnosticLocationImpl.DiagnosticLocation => this.Builder.DiagnosticLocation;
     }
 }

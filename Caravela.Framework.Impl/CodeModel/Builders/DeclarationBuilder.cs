@@ -56,8 +56,6 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public virtual void Freeze() => this.IsFrozen = true;
 
-        public IDiagnosticLocation? DiagnosticLocation => this.ContainingDeclaration?.DiagnosticLocation;
-
         public Ref<IDeclaration> ToRef() => Ref.FromBuilder( this );
 
         ISymbol? ISdkDeclaration.Symbol => null;
@@ -74,5 +72,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public IDeclaration OriginalDefinition => this;
 
         public IAssembly DeclaringAssembly => this.Compilation.DeclaringAssembly;
+
+        // TODO: should we locate diagnostic on the aspect attribute?
+        public Location? DiagnosticLocation => null;
     }
 }

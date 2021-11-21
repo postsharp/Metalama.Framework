@@ -16,13 +16,13 @@ namespace Caravela.Framework.Tests.Integration.CodeFixes.ApplyAspect
 {
     class Aspect1 : MethodAspect
     {
-        static DiagnosticDefinition _diag = new DiagnosticDefinition( "MY001", Severity.Warning, "Apply Aspect2" );
+        static DiagnosticDefinition<None> _diag = new ( "MY001", Severity.Warning, "Apply Aspect2" );
     
         public override void BuildAspect(IAspectBuilder<IMethod> builder)
         {
             base.BuildAspect(builder);
             
-            builder.Diagnostics.Report( _diag, CodeFix.ApplyAspect( builder.Target, new Aspect2(), "Apply" ) );
+            builder.Diagnostics.Report( builder.Target, _diag, default, CodeFix.ApplyAspect( builder.Target, new Aspect2(), "Apply" ) );
         }
     }
     

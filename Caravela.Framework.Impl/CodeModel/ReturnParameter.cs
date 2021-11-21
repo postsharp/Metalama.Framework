@@ -16,7 +16,7 @@ using TypedConstant = Caravela.Framework.Code.TypedConstant;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    internal abstract class ReturnParameter : IParameter, IHasDiagnosticLocation, IDeclarationImpl
+    internal abstract class ReturnParameter : IParameter, IDiagnosticLocationImpl, IDeclarationImpl
     {
         protected abstract RefKind SymbolRefKind { get; }
 
@@ -55,9 +55,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public abstract bool Equals( IDeclaration other );
 
-        public IDiagnosticLocation? DiagnosticLocation => this.DeclaringMember.DiagnosticLocation;
-
-        Location? IHasDiagnosticLocation.DiagnosticLocation => this.DeclaringMember.GetDiagnosticLocation();
+        Location? IDiagnosticLocationImpl.DiagnosticLocation => this.DeclaringMember.GetDiagnosticLocation();
 
         public abstract ISymbol? Symbol { get; }
 

@@ -95,8 +95,6 @@ namespace Caravela.Framework.Impl.CodeModel.Pseudo
 
         public DeclarationKind DeclarationKind => DeclarationKind.Method;
 
-        public IDiagnosticLocation? DiagnosticLocation => this.DeclaringMember.DiagnosticLocation;
-
         public ICompilation Compilation => this.DeclaringMember.Compilation;
 
         public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => throw new NotImplementedException();
@@ -126,5 +124,7 @@ namespace Caravela.Framework.Impl.CodeModel.Pseudo
         public IDeclaration OriginalDefinition => throw new NotImplementedException();
 
         public IMember? OverriddenMember => ((IMemberWithAccessors?) ((IMemberImpl) this.DeclaringMember).OverriddenMember)?.GetAccessor( this.MethodKind );
+
+        public Location? DiagnosticLocation => this.DeclaringMember.GetDiagnosticLocation();
     }
 }

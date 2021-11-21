@@ -5,13 +5,10 @@ using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.CodeFixes;
 using Caravela.Framework.Validation;
-using System.Collections;
 using System.Collections.Generic;
 
 namespace Caravela.Framework.Diagnostics
 {
- 
-
     /// <summary>
     /// A sink that reports diagnostics reported from user code.
     /// </summary>
@@ -21,14 +18,6 @@ namespace Caravela.Framework.Diagnostics
     public interface IDiagnosticSink
     {
         /// <summary>
-        /// Reports a parameterless diagnostic by specifying its location.
-        /// </summary>
-        /// <param name="location">The code location to which the diagnostic should be written.</param>
-        /// <param name="definition"></param>
-        /// <param name="codeFixes"></param>
-        void Report( IDiagnosticLocation? location, DiagnosticDefinition definition, IEnumerable<CodeFix>? codeFixes = null );
-
-        /// <summary>
         /// Reports a parametric diagnostic by specifying its location.
         /// </summary>
         /// <param name="location">The code location to which the diagnostic should be written.</param>
@@ -36,7 +25,7 @@ namespace Caravela.Framework.Diagnostics
         /// <param name="arguments"></param>
         /// <param name="codeFixes"></param>
         void Report<T>(
-            IDiagnosticLocation? location,
+            IDiagnosticLocation location,
             DiagnosticDefinition<T> definition,
             T arguments,
             IEnumerable<CodeFix>? codeFixes = null )
@@ -47,8 +36,8 @@ namespace Caravela.Framework.Diagnostics
         /// </summary>
         /// <param name="scope">The declaration in which the diagnostic must be suppressed.</param>
         /// <param name="definition"></param>
-        void Suppress( IDeclaration? scope, SuppressionDefinition definition );
+        void Suppress( IDeclaration scope, SuppressionDefinition definition );
 
-        void Suggest( IDiagnosticLocation? location, IEnumerable<CodeFix>? codeFixes );
+        void Suggest( IDiagnosticLocation location, IEnumerable<CodeFix>? codeFixes );
     }
 }

@@ -38,29 +38,26 @@ namespace Caravela.Framework.Impl.Templating
 
             using ( meta.WithContext( templateExpansionContext.MetaApi ) )
             {
-                using ( DiagnosticContext.WithDefaultLocation( templateExpansionContext.DiagnosticSink.DefaultScope.DiagnosticLocation ) )
+                if ( !this._userCodeInvoker.TryInvoke(
+                    () => (SyntaxNode) this._templateMethod.Invoke( templateExpansionContext.TemplateInstance, Array.Empty<object>() ),
+                    templateExpansionContext,
+                    out var output ) )
                 {
-                    if ( !this._userCodeInvoker.TryInvoke(
-                        () => (SyntaxNode) this._templateMethod.Invoke( templateExpansionContext.TemplateInstance, Array.Empty<object>() ),
-                        templateExpansionContext,
-                        out var output ) )
-                    {
-                        block = null;
+                    block = null;
 
-                        return false;
-                    }
-
-                    var errorCountAfter = templateExpansionContext.DiagnosticSink.ErrorCount;
-
-                    block = (BlockSyntax) new FlattenBlocksRewriter().Visit( output! );
-
-                    block = block.NormalizeWhitespace();
-
-                    // We add generated-code annotations to the statements and not to the block itself so that the brackets don't get colored.
-                    block = block.AddGeneratedCodeAnnotation();
-
-                    return errorCountAfter == errorCountBefore;
+                    return false;
                 }
+
+                var errorCountAfter = templateExpansionContext.DiagnosticSink.ErrorCount;
+
+                block = (BlockSyntax) new FlattenBlocksRewriter().Visit( output! );
+
+                block = block.NormalizeWhitespace();
+
+                // We add generated-code annotations to the statements and not to the block itself so that the brackets don't get colored.
+                block = block.AddGeneratedCodeAnnotation();
+
+                return errorCountAfter == errorCountBefore;
             }
         }
     }

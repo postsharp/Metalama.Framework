@@ -17,7 +17,7 @@ using RoslynMethodKind = Microsoft.CodeAnalysis.MethodKind;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    internal abstract class Declaration : IDeclarationImpl, IHasDiagnosticLocation
+    internal abstract class Declaration : IDeclarationImpl
     {
         protected Declaration( CompilationModel compilation )
         {
@@ -109,8 +109,6 @@ namespace Caravela.Framework.Impl.CodeModel
 
             return semanticModel.LookupSymbols( lookupPosition ).AddRange( implicitSymbols );
         }
-
-        IDiagnosticLocation? IDiagnosticScope.DiagnosticLocation => this.DiagnosticLocation?.ToDiagnosticLocation();
 
         ImmutableArray<SyntaxReference> IDeclarationImpl.DeclaringSyntaxReferences => this.Symbol.DeclaringSyntaxReferences;
 

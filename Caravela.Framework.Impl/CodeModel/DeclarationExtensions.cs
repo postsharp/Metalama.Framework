@@ -119,7 +119,7 @@ namespace Caravela.Framework.Impl.CodeModel
         public static Location? GetDiagnosticLocation( this IDeclaration declaration )
             => declaration switch
             {
-                IHasDiagnosticLocation hasLocation => hasLocation.DiagnosticLocation,
+                IDiagnosticLocationImpl hasLocation => hasLocation.DiagnosticLocation,
                 _ => null
             };
 

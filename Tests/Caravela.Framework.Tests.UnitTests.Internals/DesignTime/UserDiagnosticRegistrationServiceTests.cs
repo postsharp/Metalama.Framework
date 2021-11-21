@@ -33,7 +33,7 @@ namespace Caravela.Framework.Tests.UnitTests.DesignTime.TestCode
 
         public override void BuildAspect(IAspectBuilder<IMethod> builder)
         {
-            builder.Diagnostics.Report(_userError, builder.Target);
+            builder.Diagnostics.Report(builder.Target, _userError, builder.Target);
         }
     }
 }
@@ -88,7 +88,7 @@ namespace Caravela.Framework.Tests.UnitTests.DesignTime.TestCode
         public override void BuildAspect(IAspectBuilder<IMethod> builder)
         {
             builder.Diagnostics.Suppress(builder.Target, _suppressionDefinition);
-            builder.Diagnostics.Report(_userWarning, builder.Target);
+            builder.Diagnostics.Report(builder.Target, _userWarning, builder.Target);
         }
     }
 }

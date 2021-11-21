@@ -15,6 +15,8 @@ using System.Text;
 
 namespace Caravela.Framework.Impl.Diagnostics
 {
+   
+    
     /// <summary>
     /// Implements the user-level <see cref="IDiagnosticSink"/> interface
     /// and maps user-level diagnostics into Roslyn <see cref="Diagnostic"/>.
@@ -131,8 +133,7 @@ namespace Caravela.Framework.Impl.Diagnostics
 
         public override string ToString() => $"Diagnostics={this._diagnostics?.Count ?? 0}, Suppressions={this._suppressions?.Count ?? 0}, CodeFixes={this._codeFixes?.Count ?? 0}";
 
-        private Location? GetLocation( IDiagnosticLocation? location )
-            => ((DiagnosticLocation?) location)?.Location ?? this.DefaultScope?.GetDiagnosticLocation();
+        private Location? GetLocation( IDiagnosticLocation? location ) => ((IDiagnosticLocationImpl?) location)?.DiagnosticLocation;
 
         private void ValidateUserReport( IDiagnosticDefinition definition )
         {
@@ -150,16 +151,6 @@ namespace Caravela.Framework.Impl.Diagnostics
                 throw new InvalidOperationException(
                     $"The aspect cannot suppress the diagnostic {definition.SuppressedDiagnosticId} because the SuppressionDefinition is not declared as a static field or property of the aspect class." );
             }
-        }
-
-        public void Report( IDiagnosticLocation? location, DiagnosticDefinition definition, IEnumerable<CodeFix>? codeFixes = null )
-        {
-            this.ValidateUserReport( definition );
-
-            var resolvedLocation = this.GetLocation( location );
-            var codeFixTitles = this.ProcessCodeFix( definition, resolvedLocation, codeFixes );
-
-            this.Report( definition.CreateDiagnostic( resolvedLocation, codeFixes: codeFixTitles ) );
         }
 
         public void Report<T>(
@@ -191,7 +182,7 @@ namespace Caravela.Framework.Impl.Diagnostics
             var resolvedLocation = this.GetLocation( location );
             var codeFixTitles = this.ProcessCodeFix( definition, resolvedLocation, codeFixes );
             
-            this.Report( definition.CreateDiagnostic( resolvedLocation, codeFixes: codeFixTitles ) );
+            this.Report( definition.CreateDiagnostic( resolvedLocation, default, codeFixes: codeFixTitles ) );
         }
 
         public void AddCodeFixes( IEnumerable<CodeFixInstance> codeFixes )
