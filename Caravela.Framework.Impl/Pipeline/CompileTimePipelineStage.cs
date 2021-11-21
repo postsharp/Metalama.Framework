@@ -91,8 +91,8 @@ namespace Caravela.Framework.Impl.Pipeline
                 input.Compilation,
                 pipelineStepResult.Compilation,
                 this.ServiceProvider,
-                cancellationToken,
                 diagnostics,
+                cancellationToken,
                 out var additionalSyntaxTrees );
 
             // Ignore diagnostics, because these will be coming from the analyzer.
@@ -133,7 +133,7 @@ namespace Caravela.Framework.Impl.Pipeline
             {
                 if ( !uniquePaths.Add( filename ) )
                 {
-                    for ( var i = 1;; i++ )
+                    for ( var i = 1; /* Intentionally empty */; i++ )
                     {
                         var path = Path.GetDirectoryName( filename );
                         var name = Path.GetFileNameWithoutExtension( filename );

@@ -36,8 +36,8 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
                 input.Compilation,
                 pipelineStepsResult.Compilation,
                 this.ServiceProvider,
-                cancellationToken,
                 diagnosticSink,
+                cancellationToken,
                 out var additionalSyntaxTrees );
 
             return new PipelineStageResult(
