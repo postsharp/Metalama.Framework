@@ -73,7 +73,7 @@ namespace Caravela.Framework.Code.DeclarationBuilders
             // Map constructor arguments.
             var typedConstructorArguments = ImmutableArray.CreateBuilder<TypedConstant>( constructor.Parameters.Count );
 
-            for ( var i = 0; i < constructors.Count; i++ )
+            for ( var i = 0; i < constructor.Parameters.Count; i++ )
             {
                 typedConstructorArguments[i] = new TypedConstant( constructor.Parameters[i].Type, constructorArguments[0] );
             }

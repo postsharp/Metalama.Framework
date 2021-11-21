@@ -42,10 +42,11 @@ namespace Caravela.Framework.Impl.Pipeline
             var success = aspectInstanceResults.All( ar => ar.Success );
             var reportedDiagnostics = aspectInstanceResults.SelectMany( air => air.Diagnostics.ReportedDiagnostics );
             var diagnosticSuppressions = aspectInstanceResults.SelectMany( air => air.Diagnostics.DiagnosticSuppressions );
+            var codeFixes = aspectInstanceResults.SelectMany( air => air.Diagnostics.CodeFixes );
             var addedAspectSources = aspectInstanceResults.SelectMany( air => air.AspectSources );
             var addedAdvices = aspectInstanceResults.SelectMany( air => air.Advices );
 
-            pipelineStepsState.AddDiagnostics( reportedDiagnostics, diagnosticSuppressions );
+            pipelineStepsState.AddDiagnostics( reportedDiagnostics, diagnosticSuppressions, codeFixes );
             success &= pipelineStepsState.AddAspectSources( addedAspectSources );
             success &= pipelineStepsState.AddAdvices( addedAdvices );
 

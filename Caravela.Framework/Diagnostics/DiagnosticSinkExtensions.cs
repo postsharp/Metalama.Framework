@@ -3,6 +3,7 @@
 
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
+using Caravela.Framework.CodeFixes;
 using System.Collections.Generic;
 
 namespace Caravela.Framework.Diagnostics
@@ -74,5 +75,7 @@ namespace Caravela.Framework.Diagnostics
         /// <param name="diagnosticSink"></param> 
         /// <param name="definition">A <see cref="SuppressionDefinition"/>, which must be defined in a static field or property of an aspect class.</param>
         public static void Suppress( this IDiagnosticSink diagnosticSink, SuppressionDefinition definition ) => diagnosticSink.Suppress( null, definition );
+
+        public static void Suggest( this IDiagnosticSink diagnosticSink, IEnumerable<CodeFix> codeFixes ) => diagnosticSink.Suggest( null, codeFixes );
     }
 }

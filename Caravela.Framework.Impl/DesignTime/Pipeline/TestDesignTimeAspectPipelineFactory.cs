@@ -1,0 +1,27 @@
+using Caravela.Framework.Impl.CompileTime;
+using Caravela.Framework.Impl.Options;
+using Microsoft.CodeAnalysis;
+using System.Diagnostics.CodeAnalysis;
+using System.Threading;
+
+namespace Caravela.Framework.Impl.DesignTime.Pipeline
+{
+    internal class TestDesignTimeAspectPipelineFactory : DesignTimeAspectPipelineFactory
+    {
+        private readonly IProjectOptions _projectOptions;
+
+        public TestDesignTimeAspectPipelineFactory( CompileTimeDomain domain, IProjectOptions projectOptions ) : base( domain, true )
+        {
+            this._projectOptions = projectOptions;
+        }
+
+        protected override string GetProjectId( IProjectOptions projectOptions, Compilation compilation ) => compilation.AssemblyName!;
+
+        public override bool TryGetPipeline( Compilation compilation,  [NotNullWhen(true)]out  DesignTimeAspectPipeline? pipeline )
+        {
+            pipeline = this.GetOrCreatePipeline( this._projectOptions, compilation, CancellationToken.None );
+
+            return true;
+        }
+    }
+}

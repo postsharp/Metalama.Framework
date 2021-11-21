@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
+using Caravela.Framework.CodeFixes;
 using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
@@ -58,7 +59,7 @@ namespace Caravela.Framework.Impl.Diagnostics
         /// <summary>
         /// Returns a string containing all code fix titles and captures the code fixes if we should.  
         /// </summary>
-        private string? ProcessCodeFix( IDiagnosticDefinition diagnosticDefinition, Location? location, IEnumerable<CodeFix>? codeFixes )
+        private CodeFixTitles ProcessCodeFix( IDiagnosticDefinition diagnosticDefinition, Location? location, IEnumerable<CodeFix>? codeFixes )
         {
             if ( codeFixes != null )
             {
@@ -90,16 +91,16 @@ namespace Caravela.Framework.Impl.Diagnostics
                         }
 
                         // This gets executed for all code fixes but the first one.
-                        stringBuilder.Append( '\n' );
+                        stringBuilder.Append( CodeFixTitles.Separator );
                         stringBuilder.Append( codeFix.Title );
                     }
                 }
 
-                return stringBuilder?.ToString() ?? firstTitle;
+                return new CodeFixTitles( stringBuilder?.ToString() ?? firstTitle );
             }
             else
             {
-                return null;
+                return default;
             }
         }
 
@@ -126,11 +127,9 @@ namespace Caravela.Framework.Impl.Diagnostics
         }
 
         public ImmutableUserDiagnosticList ToImmutable()
-            => new(
-                this._diagnostics?.ToImmutable() ?? ImmutableArray<Diagnostic>.Empty,
-                this._suppressions?.ToImmutable() ?? ImmutableArray<ScopedSuppression>.Empty );
+            => new( this._diagnostics?.ToImmutable(), this._suppressions?.ToImmutable(), this._codeFixes?.ToImmutable());
 
-        public override string ToString() => $"Diagnostics={this._diagnostics?.Count ?? 0}, Suppressions={this._suppressions?.Count ?? 0}";
+        public override string ToString() => $"Diagnostics={this._diagnostics?.Count ?? 0}, Suppressions={this._suppressions?.Count ?? 0}, CodeFixes={this._codeFixes?.Count ?? 0}";
 
         private Location? GetLocation( IDiagnosticLocation? location )
             => ((DiagnosticLocation?) location)?.Location ?? this.DefaultScope?.GetDiagnosticLocation();
@@ -158,9 +157,9 @@ namespace Caravela.Framework.Impl.Diagnostics
             this.ValidateUserReport( definition );
 
             var resolvedLocation = this.GetLocation( location );
-            var hasCodeFix = this.ProcessCodeFix( definition, resolvedLocation, codeFixes );
+            var codeFixTitles = this.ProcessCodeFix( definition, resolvedLocation, codeFixes );
 
-            this.Report( definition.CreateDiagnostic( resolvedLocation, codeFixes: hasCodeFix ) );
+            this.Report( definition.CreateDiagnostic( resolvedLocation, codeFixes: codeFixTitles ) );
         }
 
         public void Report<T>(
@@ -171,9 +170,9 @@ namespace Caravela.Framework.Impl.Diagnostics
             where T : notnull
         {
             var resolvedLocation = this.GetLocation( location );
-            var hasCodeFix = this.ProcessCodeFix( definition, resolvedLocation, codeFixes );
+            var codeFixTitles = this.ProcessCodeFix( definition, resolvedLocation, codeFixes );
 
-            this.Report( definition.CreateDiagnostic( resolvedLocation, arguments, codeFixes: hasCodeFix ) );
+            this.Report( definition.CreateDiagnostic( resolvedLocation, arguments, codeFixes: codeFixTitles ) );
         }
 
         public void Suppress( IDeclaration? scope, SuppressionDefinition definition )
@@ -183,6 +182,24 @@ namespace Caravela.Framework.Impl.Diagnostics
             if ( this.DefaultScope != null )
             {
                 this.Suppress( new ScopedSuppression( definition, scope ?? this.DefaultScope ) );
+            }
+        }
+
+        public void Suggest( IDiagnosticLocation? location, IEnumerable<CodeFix>? codeFixes )
+        {
+            var definition = GeneralDiagnosticDescriptors.SuggestedCodeFix;
+            var resolvedLocation = this.GetLocation( location );
+            var codeFixTitles = this.ProcessCodeFix( definition, resolvedLocation, codeFixes );
+            
+            this.Report( definition.CreateDiagnostic( resolvedLocation, codeFixes: codeFixTitles ) );
+        }
+
+        public void AddCodeFixes( IEnumerable<CodeFixInstance> codeFixes )
+        {
+            foreach ( var codeFix in codeFixes )
+            {
+                this._codeFixes ??= ImmutableArray.CreateBuilder<CodeFixInstance>();
+                this._codeFixes.Add( codeFix );
             }
         }
     }

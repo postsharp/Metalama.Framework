@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Aspects;
 using Caravela.Framework.Impl.Aspects;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
@@ -17,6 +18,7 @@ using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
+// ReSharper disable InconsistentlySynchronizedField
 
 namespace Caravela.Framework.Impl.DesignTime.Pipeline
 {
@@ -47,6 +49,8 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
         /// </summary>
         public static DesignTimeAspectPipelineFactory Instance { get; } = new( new CompileTimeDomain() );
 
+        protected virtual string GetProjectId( IProjectOptions projectOptions, Compilation compilation ) => projectOptions.ProjectId;
+
         /// <summary>
         /// Gets the pipeline for a given project, and creates it if necessary.
         /// </summary>
@@ -62,7 +66,9 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
             // We lock the dictionary because the ConcurrentDictionary does not guarantee that the creation delegate
             // is called only once, and we prefer a single instance for the simplicity of debugging. 
 
-            if ( this._pipelinesByProjectId.TryGetValue( projectOptions.ProjectId, out var pipeline ) )
+            var projectId = this.GetProjectId( projectOptions, compilation );
+
+            if ( this._pipelinesByProjectId.TryGetValue( projectId, out var pipeline ) )
             {
                 // TODO: we must validate that the project options and metadata references are still identical to those cached, otherwise we should create a new pipeline.
                 return pipeline;
@@ -71,7 +77,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
             {
                 lock ( this._pipelinesByProjectId )
                 {
-                    if ( this._pipelinesByProjectId.TryGetValue( projectOptions.ProjectId, out pipeline ) )
+                    if ( this._pipelinesByProjectId.TryGetValue( projectId, out pipeline ) )
                     {
                         cancellationToken.ThrowIfCancellationRequested();
 
@@ -91,7 +97,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
                         Thread.Sleep( 5000 );
                     }
 
-                    if ( !this._pipelinesByProjectId.TryAdd( projectOptions.ProjectId, pipeline ) )
+                    if ( !this._pipelinesByProjectId.TryAdd( projectId, pipeline ) )
                     {
                         throw new AssertionFailedException();
                     }
@@ -148,6 +154,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
         public bool TryApplyAspectToCode(
             IProjectOptions projectOptions,
             AspectClass aspectClass,
+            IAspect aspect,
             Compilation inputCompilation,
             ISymbol targetSymbol,
             CancellationToken cancellationToken,
@@ -184,12 +191,14 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
 
                 return false;
             }
-
+            
+            
             return LiveTemplateAspectPipeline.TryExecute(
                 configuration.ServiceProvider,
                 this.Domain,
                 configuration,
                 aspectClass,
+                aspect,
                 partialCompilation,
                 sourceSymbol,
                 cancellationToken,
@@ -208,7 +217,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
             this.Domain.Dispose();
         }
 
-        public bool TryGetPipeline( Compilation compilation, [NotNullWhen( true )] out DesignTimeAspectPipeline? pipeline )
+        public virtual bool TryGetPipeline( Compilation compilation, [NotNullWhen( true )] out DesignTimeAspectPipeline? pipeline )
         {
             var projectIdConstant = compilation.SyntaxTrees.First()
                 .Options.PreprocessorSymbolNames.FirstOrDefault( x => x.StartsWith( ProjectIdPreprocessorSymbolPrefix, StringComparison.OrdinalIgnoreCase ) );

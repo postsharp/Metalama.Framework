@@ -15,6 +15,12 @@ namespace Caravela.Framework.Aspects
     public interface IAspectClassBuilder
     {
         /// <summary>
+        /// Gets or sets a value indicating whether the aspect can be used as a live template. A live template is a code transformation
+        /// that is applied in the IDE to the source code. A live template must have a default constructor.
+        /// </summary>
+        bool IsLiveTemplate { get; set; }
+
+        /// <summary>
         /// Gets or sets a value indicating whether the aspect can be inherited.
         /// </summary>
         bool IsInherited { get; set; }

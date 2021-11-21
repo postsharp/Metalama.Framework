@@ -296,6 +296,10 @@ namespace Caravela.Framework.Impl.Pipeline
             CancellationToken cancellationToken,
             [NotNullWhen( true )] out PipelineStageResult? pipelineStageResult )
         {
+            // When we reuse a pipeline configuration created from a different pipeline (e.g. design-time to code fix),
+            // we need to substitute the code fix filter.
+            pipelineConfiguration = pipelineConfiguration.WithCodeFixFilter( this.FilterCodeFix );
+            
             if ( pipelineConfiguration.CompileTimeProject == null || pipelineConfiguration.AspectClasses.Count == 0 )
             {
                 // If there is no aspect in the compilation, don't execute the pipeline.

@@ -185,7 +185,7 @@ namespace Caravela.Framework.Impl.Utilities
             }
         }
 
-        public static SyntaxNode? GetPrimaryDeclaration( this ISymbol symbol ) => symbol.GetPrimarySyntaxReference()?.GetSyntax();
+        public static SyntaxNode? GetPrimaryDeclaration( this ISymbol symbol ) =>  symbol.GetPrimarySyntaxReference()?.GetSyntax();
 
         public static bool IsInterfaceMemberImplementation( this ISymbol symbol )
             => symbol switch

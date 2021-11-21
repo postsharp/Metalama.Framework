@@ -43,19 +43,16 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         Advice ITransformation.Advice => this.ParentAdvice;
 
-        public DeclarationBuilder( Advice parentAdvice )
+        protected DeclarationBuilder( Advice parentAdvice )
         {
             this.ParentAdvice = parentAdvice;
         }
 
         public abstract string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null );
 
-        public void AddAttribute( AttributeConstruction attribute )
-        {
-            throw new NotImplementedException();
-        }
+        public void AddAttribute( AttributeConstruction attribute ) => this.Attributes.Add( new AttributeBuilder( this, attribute ) );
 
-        public void RemoveAttributes( INamedType type ) => throw new NotImplementedException();
+        public void RemoveAttributes( INamedType type ) => this.Attributes.RemoveAll( a => a.Type.Is( type ) );
 
         public virtual void Freeze() => this.IsFrozen = true;
 

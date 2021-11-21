@@ -5,6 +5,7 @@ using Caravela.Framework.Impl.DesignTime.CodeFixes;
 using Caravela.Framework.Impl.DesignTime.Diagnostics;
 using Caravela.Framework.Impl.DesignTime.Utilities;
 using Caravela.Framework.Impl.Diagnostics;
+using Caravela.Framework.Impl.Options;
 using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeActions;
@@ -34,6 +35,7 @@ namespace Caravela.Framework.Impl.DesignTime
         {
             this.FixableDiagnosticIds =
                 ImmutableArray.Create( DesignTimeDiagnosticDescriptors.TypeNotPartial.Id )
+                    .Add( GeneralDiagnosticDescriptors.SuggestedCodeFix.Id )
                     .AddRange( this._designTimeDiagnosticDefinitions.UserDiagnosticDescriptors.Keys );
         }
 
@@ -52,15 +54,15 @@ namespace Caravela.Framework.Impl.DesignTime
                         _makePartialKey ),
                     context.Diagnostics );
             }
-            else if ( context.Diagnostics.Any( d => d.Properties.ContainsKey( DiagnosticDescriptorExtensions.CodeFixesDiagnosticPropertyKey ) ) )
+            else if ( context.Diagnostics.Any( d => d.Properties.ContainsKey( CodeFixTitles.DiagnosticPropertyKey ) ) )
             {
                 // We have a user diagnostics where a code fix provider was specified. We need to execute the CodeFix pipeline to gather
                 // the actual code fixes.
-                var userCodeFixProvider = new UserCodeFixProvider();
+                var projectOptions = new ProjectOptions( context.Document.Project );
+                var userCodeFixProvider = new UserCodeFixProvider( projectOptions );
 
-                var codeFixes = await userCodeFixProvider.ProvideCodeFixesAsync(
+                var codeFixes = userCodeFixProvider.ProvideCodeFixes(
                     context.Document,
-                    context.Span,
                     context.Diagnostics,
                     context.CancellationToken );
 

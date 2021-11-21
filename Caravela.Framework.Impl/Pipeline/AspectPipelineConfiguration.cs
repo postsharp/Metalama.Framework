@@ -39,6 +39,21 @@ namespace Caravela.Framework.Impl.Pipeline
                 this.ProjectModel,
                 serviceProvider,
                 this.CodeFixFilter );
+        
+        public AspectPipelineConfiguration WithCodeFixFilter( CodeFixFilter codeFixFilter )
+            => codeFixFilter == this.CodeFixFilter ? this :
+                new(
+                this.Stages,
+                this.AspectClasses,
+                this.AspectLayers,
+                this.CompileTimeProject,
+                this.CompileTimeProjectLoader,
+                this.FabricsConfiguration,
+                this.ProjectModel,
+                this.ServiceProvider,
+                codeFixFilter );
+
+
 
         public UserCodeInvoker UserCodeInvoker => this.ServiceProvider.GetService<UserCodeInvoker>();
     }

@@ -7,11 +7,6 @@ using System.Runtime.Serialization;
 
 namespace Caravela.Framework.Aspects
 {
-    public interface ILiveTemplate : IAspect { }
-
-    public interface ILiveTemplate<in T> : ILiveTemplate, IEligible<T>
-        where T : class, IDeclaration { }
-
     /// <summary>
     /// The base interface for all aspects. A class should not implement
     /// this interface, but the strongly-typed variant <see cref="IAspect{T}"/>.

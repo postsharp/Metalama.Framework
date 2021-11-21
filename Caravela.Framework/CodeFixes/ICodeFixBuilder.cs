@@ -10,19 +10,17 @@ using System.Threading.Tasks;
 
 namespace Caravela.Framework.CodeFixes
 {
-    public delegate Task CodeFixAsyncAction( ICodeFixBuilder builder );
-
     [CompileTimeOnly]
     [InternalImplement]
     public interface ICodeFixBuilder
     {
         CancellationToken CancellationToken { get; }
 
-        Task AddAttributeAsync( IDeclaration targetDeclaration, AttributeConstruction attribute );
+        Task<bool> AddAttributeAsync( IDeclaration targetDeclaration, AttributeConstruction attribute );
 
-        Task RemoveAttributeAsync( IDeclaration declaration, INamedType attributeType );
+        Task<bool> RemoveAttributeAsync( IDeclaration declaration, INamedType attributeType );
 
-        Task ApplyLiveTemplateAsync<TTarget>( TTarget declaration, ILiveTemplate<TTarget> liveTemplate )
+        Task<bool> ApplyAspectAsync<TTarget>( TTarget targetDeclaration, IAspect<TTarget> aspect )
             where TTarget : class, IDeclaration;
     }
 }

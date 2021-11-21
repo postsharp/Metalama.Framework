@@ -1,7 +1,10 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Impl.CompileTime;
+using Caravela.Framework.Impl.DesignTime.CodeFixes;
 using Caravela.Framework.Impl.Diagnostics;
+using Caravela.Framework.Impl.Options;
 using Caravela.Framework.Impl.Pipeline;
 using Microsoft.CodeAnalysis;
 using System;
@@ -84,55 +87,20 @@ namespace Caravela.TestFramework
 
             if ( pipelineResult != null )
             {
-                var resultCompilation = pipelineResult.ResultingCompilation.Compilation;
-                testResult.OutputCompilation = resultCompilation;
-                testResult.HasOutputCode = true;
-
-                var minimalVerbosity = testInput.Options.ReportOutputWarnings.GetValueOrDefault() ? DiagnosticSeverity.Warning : DiagnosticSeverity.Error;
-
-                await testResult.SetOutputCompilationAsync( resultCompilation );
-
-                // Emit binary and report diagnostics.
-                bool MustBeReported( Diagnostic d )
+                if ( testInput.Options.ApplyCodeFix.GetValueOrDefault() )
                 {
-                    if ( d.Id == "CS1701" )
+                    // When we test code fixed, we don't apply the pipeline output, but we apply the code fix instead.
+                    if ( !await ApplyCodeFixAsync( testInput, testResult, domain ) )
                     {
-                        // Ignore warning CS1701: Assuming assembly reference "Assembly Name #1" matches "Assembly Name #2", you may need to supply runtime policy.
-                        // This warning is ignored by MSBuild anyway.
-                        return false;
-                    }
-
-                    return d.Severity >= minimalVerbosity
-                           && !testInput.Options.IgnoredDiagnostics.Contains( d.Id );
-                }
-
-                if ( !testInput.Options.OutputCompilationDisabled.GetValueOrDefault() )
-                {
-                    // We don't build the PDB because the syntax trees were not written to disk anyway.
-                    var peStream = new MemoryStream();
-                    var emitResult = resultCompilation.Emit( peStream );
-
-                    testResult.OutputCompilationDiagnostics.Report( emitResult.Diagnostics.Where( MustBeReported ) );
-
-                    if ( !emitResult.Success )
-                    {
-                        testResult.SetFailed( "Final Compilation.Emit failed." );
-                    }
-                    else
-                    {
-                        if ( !this.VerifyBinaryStream( testInput, testResult, peStream ) )
-                        {
-                            return;
-                        }
-
-#if NET5_0
-                        await ExecuteTestProgramAsync( testInput, testResult, peStream );
-#endif
+                        return;
                     }
                 }
                 else
                 {
-                    testResult.OutputCompilationDiagnostics.Report( resultCompilation.GetDiagnostics().Where( MustBeReported ) );
+                    if ( !await this.ProcessCompileTimePipelineOutputAsync( testInput, testResult, pipelineResult ) )
+                    {
+                        return;
+                    }
                 }
             }
             else
@@ -144,6 +112,84 @@ namespace Caravela.TestFramework
             {
                 await this.WriteHtmlAsync( testInput, testResult );
             }
+        }
+
+        private static async Task<bool> ApplyCodeFixAsync( TestInput testInput, TestResult testResult, CompileTimeDomain domain )
+        {
+            var codeFixes = testResult.PipelineDiagnostics.SelectMany( d => CodeFixTitles.GetCodeFixTitles( d ).Select( t => (Diagnostic: d, Title: t) ) );
+            var codeFix = codeFixes.ElementAt( testInput.Options.AppliedCodeFixIndex.GetValueOrDefault() );
+            var codeFixRunner = new CodeFixRunner( domain, new TestProjectOptions() );
+
+            var inputDocument = testResult.SyntaxTrees[0].InputDocument;
+
+            var transformedSolution = await codeFixRunner.ExecuteCodeFixAsync(
+                inputDocument,
+                codeFix.Diagnostic,
+                codeFix.Title,
+                CancellationToken.None );
+
+            var transformedCompilation = await transformedSolution.GetProject( inputDocument.Project.Id)!.GetCompilationAsync(  );
+
+            await testResult.SetOutputCompilationAsync( transformedCompilation! );
+            testResult.HasOutputCode = true;
+
+            return true;
+        }
+
+        private async Task<bool> ProcessCompileTimePipelineOutputAsync( TestInput testInput, TestResult testResult, CompileTimeAspectPipelineResult pipelineResult )
+        {
+            var resultCompilation = pipelineResult.ResultingCompilation.Compilation;
+            testResult.OutputCompilation = resultCompilation;
+            testResult.HasOutputCode = true;
+
+            var minimalVerbosity = testInput.Options.ReportOutputWarnings.GetValueOrDefault() ? DiagnosticSeverity.Warning : DiagnosticSeverity.Error;
+
+            await testResult.SetOutputCompilationAsync( resultCompilation );
+
+            // Emit binary and report diagnostics.
+            bool MustBeReported( Diagnostic d )
+            {
+                if (d.Id == "CS1701")
+                {
+                    // Ignore warning CS1701: Assuming assembly reference "Assembly Name #1" matches "Assembly Name #2", you may need to supply runtime policy.
+                    // This warning is ignored by MSBuild anyway.
+                    return false;
+                }
+
+                return d.Severity >= minimalVerbosity
+                       && !testInput.Options.IgnoredDiagnostics.Contains( d.Id );
+            }
+
+            if (!testInput.Options.OutputCompilationDisabled.GetValueOrDefault())
+            {
+                // We don't build the PDB because the syntax trees were not written to disk anyway.
+                var peStream = new MemoryStream();
+                var emitResult = resultCompilation.Emit( peStream );
+
+                testResult.OutputCompilationDiagnostics.Report( emitResult.Diagnostics.Where( MustBeReported ) );
+
+                if (!emitResult.Success)
+                {
+                    testResult.SetFailed( "Final Compilation.Emit failed." );
+                }
+                else
+                {
+                    if (!this.VerifyBinaryStream( testInput, testResult, peStream ))
+                    {
+                        return false;
+                    }
+
+#if NET5_0
+                    await ExecuteTestProgramAsync( testInput, testResult, peStream );
+#endif
+                }
+            }
+            else
+            {
+                testResult.OutputCompilationDiagnostics.Report( resultCompilation.GetDiagnostics().Where( MustBeReported ) );
+            }
+
+            return true;
         }
 
 #if NET5_0

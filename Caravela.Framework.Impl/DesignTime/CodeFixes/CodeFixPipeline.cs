@@ -7,7 +7,6 @@ using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Pipeline;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.Text;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
@@ -16,21 +15,15 @@ namespace Caravela.Framework.Impl.DesignTime.CodeFixes
 {
     internal class CodeFixPipeline : AspectPipeline
     {
-        private readonly SyntaxTree _syntaxTree;
-        private readonly TextSpan _span;
         private readonly Diagnostic _diagnostic;
 
         public CodeFixPipeline(
             ServiceProvider serviceProvider,
             bool isTest,
             CompileTimeDomain? domain,
-            SyntaxTree syntaxTree,
-            TextSpan span,
             Diagnostic diagnostic ) :
             base( serviceProvider, ExecutionScenario.CodeFix, isTest, domain )
         {
-            this._syntaxTree = syntaxTree;
-            this._span = span;
             this._diagnostic = diagnostic;
         }
 
@@ -43,7 +36,9 @@ namespace Caravela.Framework.Impl.DesignTime.CodeFixes
             => null;
 
         private protected override bool FilterCodeFix( IDiagnosticDefinition diagnosticDefinition, Location location )
-            => diagnosticDefinition.Id == this._diagnostic.Id && location.SourceTree == this._syntaxTree && location.SourceSpan.IntersectsWith( this._span );
+            => diagnosticDefinition.Id == this._diagnostic.Id && 
+               location.SourceTree == this._diagnostic.Location.SourceTree && 
+               location.SourceSpan.Equals( this._diagnostic.Location.SourceSpan );
 
         public bool TryExecute(
             PartialCompilation partialCompilation,

@@ -24,6 +24,9 @@ namespace Caravela.Framework.Impl.Options
             this.PlugIns = plugIns ?? ImmutableArray<object>.Empty;
         }
 
+        public ProjectOptions( Microsoft.CodeAnalysis.Project project, ImmutableArray<object>? plugIns = null ) :
+            this( new OptionsAdapter( project.AnalyzerOptions.AnalyzerConfigOptionsProvider ), plugIns ) { }
+        
         public ProjectOptions( AnalyzerConfigOptionsProvider options, ImmutableArray<object>? plugIns = null ) :
             this( new OptionsAdapter( options ), plugIns ) { }
 

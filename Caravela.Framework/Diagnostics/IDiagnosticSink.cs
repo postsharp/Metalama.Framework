@@ -5,22 +5,12 @@ using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.CodeFixes;
 using Caravela.Framework.Validation;
+using System.Collections;
 using System.Collections.Generic;
 
 namespace Caravela.Framework.Diagnostics
 {
-    public readonly struct CodeFix
-    {
-        public string Title { get; }
-
-        public CodeFixAsyncAction Action { get; }
-
-        public CodeFix( string title, CodeFixAsyncAction action )
-        {
-            this.Title = title;
-            this.Action = action;
-        }
-    }
+ 
 
     /// <summary>
     /// A sink that reports diagnostics reported from user code.
@@ -58,5 +48,7 @@ namespace Caravela.Framework.Diagnostics
         /// <param name="scope">The declaration in which the diagnostic must be suppressed.</param>
         /// <param name="definition"></param>
         void Suppress( IDeclaration? scope, SuppressionDefinition definition );
+
+        void Suggest( IDiagnosticLocation? location, IEnumerable<CodeFix>? codeFixes );
     }
 }

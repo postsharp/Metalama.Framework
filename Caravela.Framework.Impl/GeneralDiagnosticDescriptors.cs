@@ -239,6 +239,15 @@ namespace Caravela.Framework.Impl
                     " '-p:DebugCaravela=True' command-line option.",
                     _category,
                     Error );
+        
+        internal static readonly DiagnosticDefinition
+            SuggestedCodeFix
+                = new(
+                    "CR0043",
+                    Hidden,
+                    "Code fix suggestion",
+                    "Code fix suggestion",
+                    _category );
 
         // TODO: Use formattable string (C# does not seem to find extension methods).
         public static readonly DiagnosticDefinition<string>
