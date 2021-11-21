@@ -20,14 +20,12 @@ namespace Caravela.Framework.Impl.CodeModel
             {
                 IDynamicTypeSymbol => throw new AssertionFailedException(),
                 IArrayTypeSymbol { ElementType: IDynamicTypeSymbol } => throw new AssertionFailedException(),
-                _ => this.Get( DocumentationCommentId.CreateReferenceId( symbol ), symbol.GetReflectionName() )
+                _ => this.Get( symbol.GetSymbolKey(), symbol.GetReflectionName() )
             };
 
-        public Type Get( string documentationId, string fullMetadataName )
+        public Type Get( SymbolKey symbolKey, string fullMetadataName )
         {
-            Invariant.Assert( !documentationId.StartsWith( "T:", StringComparison.OrdinalIgnoreCase ) );
-
-            return this._instances.GetOrAdd( documentationId, id => CompileTimeType.CreateFromDocumentationId( id, fullMetadataName ) );
+            return this._instances.GetOrAdd( symbolKey.ToString(), id => CompileTimeType.CreateFromSymbolKey( new SymbolKey(id), fullMetadataName ) );
         }
     }
 }
