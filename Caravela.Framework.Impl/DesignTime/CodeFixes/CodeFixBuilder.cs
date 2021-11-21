@@ -66,7 +66,7 @@ namespace Caravela.Framework.Impl.DesignTime.CodeFixes
                 return false;
             }
 
-            var targetSymbol = targetDeclaration.ToRef().GetSymbol( compilation! );
+            var targetSymbol = targetDeclaration.ToRef().GetSymbol( compilation );
 
             if ( targetSymbol == null )
             {
@@ -106,9 +106,9 @@ namespace Caravela.Framework.Impl.DesignTime.CodeFixes
                 return false;
             }
 
-            var attributeTypeSymbol = (ITypeSymbol) attributeType.ToRef().GetSymbol( compilation! );
+            var attributeTypeSymbol = (ITypeSymbol) attributeType.ToRef().GetSymbol( compilation );
 
-            var targetSymbol = targetDeclaration.ToRef().GetSymbol( compilation! );
+            var targetSymbol = targetDeclaration.ToRef().GetSymbol( compilation );
 
             if ( targetSymbol == null )
             {
@@ -155,7 +155,7 @@ namespace Caravela.Framework.Impl.DesignTime.CodeFixes
                 return false;
             }
 
-            var targetSymbol = targetDeclaration.ToRef().GetSymbol( compilation! );
+            var targetSymbol = targetDeclaration.ToRef().GetSymbol( compilation );
 
             if ( targetSymbol == null )
             {

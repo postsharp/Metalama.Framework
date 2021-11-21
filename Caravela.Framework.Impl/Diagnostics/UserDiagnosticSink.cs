@@ -73,7 +73,7 @@ namespace Caravela.Framework.Impl.Diagnostics
                     if ( location != null && this._codeFixFilter( diagnosticDefinition, location ) )
                     {
                         this._codeFixes ??= ImmutableArray.CreateBuilder<CodeFixInstance>();
-                        this._codeFixes.Add( new CodeFixInstance( diagnosticDefinition, location, codeFix ) );
+                        this._codeFixes.Add( new CodeFixInstance( diagnosticDefinition.Id, location, codeFix ) );
                     }
 
                     if ( firstTitle == null )
@@ -132,7 +132,7 @@ namespace Caravela.Framework.Impl.Diagnostics
         public override string ToString()
             => $"Diagnostics={this._diagnostics?.Count ?? 0}, Suppressions={this._suppressions?.Count ?? 0}, CodeFixes={this._codeFixes?.Count ?? 0}";
 
-        private Location? GetLocation( IDiagnosticLocation? location ) => ((IDiagnosticLocationImpl?) location)?.DiagnosticLocation;
+        private static Location? GetLocation( IDiagnosticLocation? location ) => ((IDiagnosticLocationImpl?) location)?.DiagnosticLocation;
 
         private void ValidateUserReport( IDiagnosticDefinition definition )
         {
@@ -159,7 +159,9 @@ namespace Caravela.Framework.Impl.Diagnostics
             IEnumerable<CodeFix>? codeFixes = null )
             where T : notnull
         {
-            var resolvedLocation = this.GetLocation( location );
+            this.ValidateUserReport( definition );
+            
+            var resolvedLocation = GetLocation( location );
             var codeFixTitles = this.ProcessCodeFix( definition, resolvedLocation, codeFixes );
 
             this.Report( definition.CreateDiagnostic( resolvedLocation, arguments, codeFixes: codeFixTitles ) );
@@ -178,7 +180,7 @@ namespace Caravela.Framework.Impl.Diagnostics
         public void Suggest( IDiagnosticLocation? location, IEnumerable<CodeFix>? codeFixes )
         {
             var definition = GeneralDiagnosticDescriptors.SuggestedCodeFix;
-            var resolvedLocation = this.GetLocation( location );
+            var resolvedLocation = GetLocation( location );
             var codeFixTitles = this.ProcessCodeFix( definition, resolvedLocation, codeFixes );
 
             this.Report( definition.CreateDiagnostic( resolvedLocation, default, codeFixes: codeFixTitles ) );

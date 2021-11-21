@@ -39,7 +39,7 @@ namespace Caravela.Framework.Impl.DesignTime
                     .AddRange( this._designTimeDiagnosticDefinitions.UserDiagnosticDescriptors.Keys );
         }
 
-        public override async Task RegisterCodeFixesAsync( CodeFixContext context )
+        public override Task RegisterCodeFixesAsync( CodeFixContext context )
         {
             Logger.Instance?.Write( "DesignTimeCodeFixProvider.RegisterCodeFixesAsync" );
 
@@ -69,7 +69,7 @@ namespace Caravela.Framework.Impl.DesignTime
                 if ( codeFixes.IsDefault )
                 {
                     // This means the call was not successful.
-                    return;
+                    return Task.CompletedTask;
                 }
 
                 foreach ( var fix in codeFixes )
@@ -77,6 +77,8 @@ namespace Caravela.Framework.Impl.DesignTime
                     context.RegisterCodeFix( fix.CodeAction, fix.Diagnostic );
                 }
             }
+            
+            return Task.CompletedTask;
         }
 
         // See https://github.com/dotnet/roslyn/blob/master/docs/analyzers/FixAllProvider.md for more information on Fix All Providers

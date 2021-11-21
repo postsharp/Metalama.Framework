@@ -15,7 +15,7 @@ namespace Caravela.Framework.CompilerExtensions
     [Shared]
     public class FacadeCodeFixProvider : CodeFixProvider
     {
-        private CodeFixProvider _impl;
+        private readonly CodeFixProvider _impl;
 
         public FacadeCodeFixProvider()
         {
@@ -25,5 +25,7 @@ namespace Caravela.Framework.CompilerExtensions
         public override Task RegisterCodeFixesAsync( CodeFixContext context ) => this._impl.RegisterCodeFixesAsync( context );
 
         public override ImmutableArray<string> FixableDiagnosticIds => this._impl.FixableDiagnosticIds;
+
+        public override FixAllProvider? GetFixAllProvider() => this._impl.GetFixAllProvider();
     }
 }

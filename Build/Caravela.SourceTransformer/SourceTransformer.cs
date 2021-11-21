@@ -94,7 +94,7 @@ namespace Caravela.SourceTransformer
                     // other intrinsic types provided by Interlocked, but it would require more work, and a convention meaning that
                     // the default value means unassigned.
 
-                    fieldType = QualifiedName(
+                    var fieldInstanceType = QualifiedName(
                         QualifiedName(
                             QualifiedName(
                                 IdentifierName( "System" ),
@@ -103,13 +103,15 @@ namespace Caravela.SourceTransformer
                         GenericName( Identifier( "StrongBox" ) )
                             .WithTypeArgumentList( TypeArgumentList( SingletonSeparatedList( node.Type ) ) ) );
 
+                    fieldType = NullableType( fieldInstanceType );
+
                     deferenceExpression = MemberAccessExpression(
                         SyntaxKind.SimpleMemberAccessExpression,
                         IdentifierName( fieldName ),
                         IdentifierName( "Value" ) );
 
                     evaluateExpression = expression
-                        => ObjectCreationExpression( fieldType ).WithArgumentList( ArgumentList( SingletonSeparatedList( Argument( expression ) ) ) );
+                        => ObjectCreationExpression( fieldInstanceType ).WithArgumentList( ArgumentList( SingletonSeparatedList( Argument( expression ) ) ) );
                 }
                 else
                 {

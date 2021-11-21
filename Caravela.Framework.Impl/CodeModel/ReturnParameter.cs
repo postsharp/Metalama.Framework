@@ -15,7 +15,7 @@ using TypedConstant = Caravela.Framework.Code.TypedConstant;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    internal abstract class ReturnParameter : IParameter, IDiagnosticLocationImpl, IDeclarationImpl
+    internal abstract class ReturnParameter : IParameter, IDeclarationImpl
     {
         protected abstract RefKind SymbolRefKind { get; }
 

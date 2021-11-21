@@ -24,7 +24,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
         {
             pipeline = this.GetOrCreatePipeline( this._projectOptions, compilation, CancellationToken.None );
 
-            return true;
+            return pipeline != null;
         }
     }
 }

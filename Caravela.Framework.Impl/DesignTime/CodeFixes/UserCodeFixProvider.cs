@@ -47,7 +47,7 @@ namespace Caravela.Framework.Impl.DesignTime.CodeFixes
 
                         var codeAction = CodeAction.Create(
                             codeFixTitle,
-                            ct => this._codeFixRunner.ExecuteCodeFixAsync( document, diagnostic, title, cancellationToken ) );
+                            ct => this._codeFixRunner.ExecuteCodeFixAsync( document, diagnostic, title, ct ) );
 
                         codeFixesBuilder.Add( new AssignedCodeFix( codeAction, ImmutableArray.Create( diagnostic ) ) );
                     }
