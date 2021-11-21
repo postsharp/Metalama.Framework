@@ -13,6 +13,10 @@ using System.Threading;
 
 namespace Caravela.Framework.Impl.DesignTime.CodeFixes
 {
+    /// <summary>
+    /// The implementation of <see cref="AspectPipeline"/> used to gather the code fix implementations, when a code fix
+    /// is selected for preview or execution.
+    /// </summary>
     internal class CodeFixPipeline : AspectPipeline
     {
         private readonly Diagnostic _diagnostic;

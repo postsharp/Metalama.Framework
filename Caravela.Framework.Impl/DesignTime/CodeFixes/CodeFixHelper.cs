@@ -14,6 +14,9 @@ using System.Threading.Tasks;
 
 namespace Caravela.Framework.Impl.DesignTime.CodeFixes
 {
+    /// <summary>
+    /// Helper methods used by different implementations of code fixes.
+    /// </summary>
     internal static class CodeFixHelper
     {
         public static async Task<Solution> ApplyChangesAsync(

@@ -18,6 +18,9 @@ using System.Threading.Tasks;
 
 namespace Caravela.Framework.Impl.DesignTime.CodeFixes
 {
+    /// <summary>
+    /// The implementation of <see cref="ICodeFixBuilder"/>, passed to user code.
+    /// </summary>
     internal partial class CodeFixBuilder : ICodeFixBuilder
     {
         private readonly CodeFixContext _context;

@@ -11,6 +11,9 @@ using System.Threading;
 
 namespace Caravela.Framework.Impl.DesignTime.CodeFixes
 {
+    /// <summary>
+    /// A service used by <see cref="CentralCodeFixProvider"/> to handle user-defined code fixes.
+    /// </summary>
     internal class UserCodeFixProvider
     {
         private readonly CodeFixRunner _codeFixRunner;
@@ -22,12 +25,12 @@ namespace Caravela.Framework.Impl.DesignTime.CodeFixes
 
         public UserCodeFixProvider( IProjectOptions projectOptions ) : this( DesignTimeAspectPipelineFactory.Instance, projectOptions ) { }
 
-        public ImmutableArray<AssignedCodeFix> ProvideCodeFixes(
+        public ImmutableArray<AssignedCodeAction> ProvideCodeFixes(
             Document document,
             ImmutableArray<Diagnostic> diagnostics,
             CancellationToken cancellationToken )
         {
-            var codeFixesBuilder = ImmutableArray.CreateBuilder<AssignedCodeFix>();
+            var codeFixesBuilder = ImmutableArray.CreateBuilder<AssignedCodeAction>();
 
             foreach ( var diagnostic in diagnostics )
             {
@@ -49,7 +52,7 @@ namespace Caravela.Framework.Impl.DesignTime.CodeFixes
                             codeFixTitle,
                             ct => this._codeFixRunner.ExecuteCodeFixAsync( document, diagnostic, title, ct ) );
 
-                        codeFixesBuilder.Add( new AssignedCodeFix( codeAction, ImmutableArray.Create( diagnostic ) ) );
+                        codeFixesBuilder.Add( new AssignedCodeAction( codeAction, ImmutableArray.Create( diagnostic ) ) );
                     }
                 }
             }

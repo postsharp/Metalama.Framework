@@ -7,5 +7,8 @@ using System.Collections.Immutable;
 
 namespace Caravela.Framework.Impl.DesignTime.CodeFixes
 {
-    internal record AssignedCodeFix( CodeAction CodeAction, ImmutableArray<Diagnostic> Diagnostic );
+    /// <summary>
+    /// Represents a <see cref="CodeAction"/> and the set of diagnostics to which it is attached. 
+    /// </summary>
+    internal record AssignedCodeAction( CodeAction CodeAction, ImmutableArray<Diagnostic> Diagnostic );
 }

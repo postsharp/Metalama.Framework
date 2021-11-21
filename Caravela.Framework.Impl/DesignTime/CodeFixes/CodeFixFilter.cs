@@ -6,5 +6,8 @@ using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl.DesignTime.CodeFixes
 {
+    /// <summary>
+    /// A predicate that determines whether code fixes should be captured for a specific diagnostic and location.
+    /// </summary>
     internal delegate bool CodeFixFilter( IDiagnosticDefinition diagnosticDefinition, Location location );
 }

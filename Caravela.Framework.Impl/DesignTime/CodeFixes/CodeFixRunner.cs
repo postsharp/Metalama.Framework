@@ -17,6 +17,10 @@ namespace Caravela.Framework.Impl.DesignTime.CodeFixes
 #pragma warning disable CA1001 // (DesignTimeAspectPipelineFactory is not owned)
 
     // This class needs to be public because it is used by the public test runner.
+    
+    /// <summary>
+    /// Executes code fixes.
+    /// </summary>
     public sealed class CodeFixRunner
 #pragma warning restore CA1001
     {
@@ -95,7 +99,7 @@ namespace Caravela.Framework.Impl.DesignTime.CodeFixes
                 designTimeConfiguration,
                 cancellationToken,
                 out var userCodeFixes,
-                out var compilationModel ) )
+                out _ ) )
             {
                 return project.Solution;
             }
@@ -120,7 +124,6 @@ namespace Caravela.Framework.Impl.DesignTime.CodeFixes
 
             var context = new CodeFixContext(
                 document,
-                compilationModel,
                 this._designTimeAspectPipelineFactory,
                 this._projectOptions,
                 designTimeConfiguration );
