@@ -77,7 +77,7 @@ namespace Caravela.Framework.Impl.DesignTime
                     context.RegisterCodeFix( fix.CodeAction, fix.Diagnostic );
                 }
             }
-            
+
             return Task.CompletedTask;
         }
 

@@ -2,7 +2,6 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Compiler;
-using Caravela.Framework.Aspects;
 using Caravela.Framework.Impl.AdditionalOutputs;
 using Caravela.Framework.Impl.Aspects;
 using Caravela.Framework.Impl.CodeModel;
@@ -58,7 +57,8 @@ namespace Caravela.Framework.Impl.Pipeline
                 return new CompileTimeAspectPipelineResult(
                     ImmutableArray<SyntaxTreeTransformation>.Empty,
                     ImmutableArray<ManagedResource>.Empty,
-                    partialCompilation );
+                    partialCompilation,
+                    ImmutableArray<AdditionalCompilationOutputFile>.Empty );
             }
 
             // Run the code analyzers that normally run at design time.
@@ -145,7 +145,11 @@ namespace Caravela.Framework.Impl.Pipeline
                 var resultingCompilation = (PartialCompilation) RunTimeAssemblyRewriter.Rewrite( resultPartialCompilation, this.ServiceProvider );
                 var syntaxTreeTransformations = resultingCompilation.ToTransformations();
 
-                return new CompileTimeAspectPipelineResult( syntaxTreeTransformations, additionalResources, resultingCompilation, result.AdditionalCompilationOutputFiles );
+                return new CompileTimeAspectPipelineResult(
+                    syntaxTreeTransformations,
+                    additionalResources,
+                    resultingCompilation,
+                    result.AdditionalCompilationOutputFiles );
             }
             catch ( DiagnosticException exception )
             {

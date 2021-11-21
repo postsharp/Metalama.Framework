@@ -19,7 +19,7 @@ namespace Caravela.Framework.Project
         /// of this interface.
         /// </summary>
         string Name { get; }
-        
+
         /// <summary>
         /// Gets a value indicating whether Caravela is currently executing at design time. 
         /// </summary>
@@ -39,7 +39,7 @@ namespace Caravela.Framework.Project
         /// for preview or for execution. In other scenarios, the implementation is dropped. 
         /// </summary>
         bool CapturesCodeFixImplementations { get; }
-        
+
         /// <summary>
         /// Gets a value indicating whether the current execution context is interested by the titles of code fixes. This does <i>not</i> imply
         /// <see cref="CapturesCodeFixImplementations"/>.

@@ -30,7 +30,7 @@ namespace Caravela.Framework.Impl.DesignTime
             try
             {
                 var projectOptions = new ProjectOptions( context.Document.Project.AnalyzerOptions.AnalyzerConfigOptionsProvider );
-                
+
                 DebuggingHelper.AttachDebugger( projectOptions );
 
                 if ( !context.Document.SupportsSemanticModel )

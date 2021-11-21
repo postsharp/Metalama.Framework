@@ -160,7 +160,7 @@ namespace Caravela.Framework.Impl.Diagnostics
             where T : notnull
         {
             this.ValidateUserReport( definition );
-            
+
             var resolvedLocation = GetLocation( location );
             var codeFixTitles = this.ProcessCodeFix( definition, resolvedLocation, codeFixes );
 

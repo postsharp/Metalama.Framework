@@ -334,7 +334,7 @@ namespace Caravela.Framework.Impl.Pipeline
                 pipelineConfiguration.AspectLayers,
                 null,
                 aspectSources: aspectSources,
-                additionalCompilationOutputFiles: additionalCompilationOutputFiles);
+                additionalCompilationOutputFiles: additionalCompilationOutputFiles );
 
             foreach ( var stageConfiguration in pipelineConfiguration.Stages )
             {

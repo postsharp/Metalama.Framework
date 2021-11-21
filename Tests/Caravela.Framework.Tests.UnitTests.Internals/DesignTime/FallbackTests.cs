@@ -1,9 +1,9 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Aspects;
 using Caravela.Framework.Impl;
 using Caravela.Framework.Impl.AdditionalOutputs;
+using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Options;
 using Caravela.Framework.Impl.Pipeline;
@@ -159,7 +159,7 @@ public class TargetClass
                 designTimeFallbackServiceProvider,
                 true,
                 domain,
-                AspectExecutionScenario.CompileTime );
+                ExecutionScenario.CompileTime );
 
             var diagnosticList = new DiagnosticList();
 
@@ -175,7 +175,8 @@ public class TargetClass
 
             var newSyntaxTrees = new List<SyntaxTree>();
 
-            foreach ( var file in compileTimeResult.AdditionalCompilationOutputFiles.Where( f => f.Kind == AdditionalCompilationOutputFileKind.DesignTimeGeneratedCode ) )
+            foreach ( var file in compileTimeResult.AdditionalCompilationOutputFiles.Where(
+                f => f.Kind == AdditionalCompilationOutputFileKind.DesignTimeGeneratedCode ) )
             {
                 using var outputStream = new MemoryStream();
                 file.WriteToStream( outputStream );

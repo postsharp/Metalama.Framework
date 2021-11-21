@@ -15,7 +15,7 @@ using System.Threading.Tasks;
 namespace Caravela.Framework.Impl.DesignTime.CodeFixes
 {
 #pragma warning disable CA1001 // (DesignTimeAspectPipelineFactory is not owned)
-    
+
     // This class needs to be public because it is used by the public test runner.
     public sealed class CodeFixRunner
 #pragma warning restore CA1001

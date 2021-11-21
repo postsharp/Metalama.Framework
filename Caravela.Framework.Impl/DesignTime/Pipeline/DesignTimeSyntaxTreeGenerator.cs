@@ -28,7 +28,6 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
             UserDiagnosticSink diagnostics,
             out IReadOnlyList<IntroducedSyntaxTree> additionalSyntaxTrees )
         {
-
             var transformations = compilationModel.GetAllObservableTransformations( true );
 
             var additionalSyntaxTreeList = new List<IntroducedSyntaxTree>();

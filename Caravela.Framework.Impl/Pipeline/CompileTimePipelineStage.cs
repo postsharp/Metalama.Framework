@@ -69,11 +69,12 @@ namespace Caravela.Framework.Impl.Pipeline
                 input.Project,
                 input.AspectLayers,
                 null,
-                null,
                 pipelineStepsResult.Diagnostics.Concat( linkerResult.Diagnostics ),
                 pipelineStepsResult.ExternalAspectSources,
                 input.ExternallyInheritableAspects.AddRange( pipelineStepsResult.InheritableAspectInstances ),
-                additionalCompilationOutputFiles: additionalCompilationOutputFiles != null ? input.AdditionalCompilationOutputFiles.AddRange( additionalCompilationOutputFiles ) : input.AdditionalCompilationOutputFiles );
+                additionalCompilationOutputFiles: additionalCompilationOutputFiles != null
+                    ? input.AdditionalCompilationOutputFiles.AddRange( additionalCompilationOutputFiles )
+                    : input.AdditionalCompilationOutputFiles );
         }
 
         private IReadOnlyList<AdditionalCompilationOutputFile> GenerateAdditionalCompilationOutputFiles(
@@ -87,7 +88,7 @@ namespace Caravela.Framework.Impl.Pipeline
             var diagnostics = new UserDiagnosticSink();
 
             DesignTimeSyntaxTreeGenerator.GenerateDesignTimeSyntaxTrees(
-                input.PartialCompilation,
+                input.Compilation,
                 pipelineStepResult.Compilation,
                 this.ServiceProvider,
                 cancellationToken,
@@ -128,11 +129,11 @@ namespace Caravela.Framework.Impl.Pipeline
 
             return generatedFiles;
 
-            string GetUniqueFilename(string filename)
+            string GetUniqueFilename( string filename )
             {
-                if (!uniquePaths.Add( filename ))
+                if ( !uniquePaths.Add( filename ) )
                 {
-                    for ( var i = 1; ; i++ )
+                    for ( var i = 1;; i++ )
                     {
                         var path = Path.GetDirectoryName( filename );
                         var name = Path.GetFileNameWithoutExtension( filename );
