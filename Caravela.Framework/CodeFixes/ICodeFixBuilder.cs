@@ -10,16 +10,31 @@ using System.Threading.Tasks;
 
 namespace Caravela.Framework.CodeFixes
 {
+    /// <summary>
+    /// Argument of the delegate passed to <see cref="CodeFix.Create"/>. Exposes methods that allow to modify the current solution. 
+    /// </summary>
     [CompileTimeOnly]
     [InternalImplement]
     public interface ICodeFixBuilder
     {
+        /// <summary>
+        /// Gets the <see cref="CancellationToken"/> for the current code fix.
+        /// </summary>
         CancellationToken CancellationToken { get; }
 
+        /// <summary>
+        /// Adds a custom attribute to a given declaration.
+        /// </summary>
         Task<bool> AddAttributeAsync( IDeclaration targetDeclaration, AttributeConstruction attribute );
 
-        Task<bool> RemoveAttributeAsync( IDeclaration declaration, INamedType attributeType );
+        /// <summary>
+        /// Removes custom attributes of a given type from a given declaration and all contained declarations.
+        /// </summary>
+        Task<bool> RemoveAttributeAsync( IDeclaration targetDeclaration, INamedType attributeType );
 
+        /// <summary>
+        /// Applies an aspect to a given declaration (so that the <i>source</i> code of the given declaration is modified by the affect).
+        /// </summary>
         Task<bool> ApplyAspectAsync<TTarget>( TTarget targetDeclaration, IAspect<TTarget> aspect )
             where TTarget : class, IDeclaration;
     }

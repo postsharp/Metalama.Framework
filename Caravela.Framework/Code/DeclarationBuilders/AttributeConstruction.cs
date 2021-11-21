@@ -9,16 +9,32 @@ using System.Linq;
 
 namespace Caravela.Framework.Code.DeclarationBuilders
 {
+    /// <summary>
+    /// Encapsulates the information necessary to create a custom attribute. 
+    /// </summary>
     public sealed class AttributeConstruction : IAttributeData
     {
+        /// <summary>
+        /// Gets the attribute constructor.
+        /// </summary>
         public IConstructor Constructor { get; }
 
+        /// <summary>
+        /// Gets the attribute type.
+        /// </summary>
         public INamedType Type => this.Constructor.DeclaringType;
 
         IType IHasType.Type => this.Type;
 
+        /// <summary>
+        /// Gets the constructor arguments.
+        /// </summary>
         public ImmutableArray<TypedConstant> ConstructorArguments { get; }
 
+        /// <summary>
+        /// Gets the named arguments, i.e. the assigned fields and properties.
+        /// Note that the order may be important in case of non-trivial property setters.
+        /// </summary>
         public ImmutableArray<KeyValuePair<string, TypedConstant>> NamedArguments { get; }
 
         private AttributeConstruction(
@@ -31,6 +47,9 @@ namespace Caravela.Framework.Code.DeclarationBuilders
             this.NamedArguments = namedArguments;
         }
 
+        /// <summary>
+        /// Creates a new <see cref="AttributeConstruction"/> by explicitly specifying the constructor and strongly-typed arguments.
+        /// </summary>
         public static AttributeConstruction Create(
             IConstructor constructor,
             ImmutableArray<TypedConstant> constructorArguments = default,
@@ -40,6 +59,10 @@ namespace Caravela.Framework.Code.DeclarationBuilders
                 constructorArguments.IsDefault ? ImmutableArray<TypedConstant>.Empty : constructorArguments,
                 namedArguments.IsDefault ? ImmutableArray<KeyValuePair<string, TypedConstant>>.Empty : namedArguments );
 
+        /// <summary>
+        /// Creates a new <see cref="AttributeConstruction"/> by specifying the reflection <see cref="System.Type"/> of the attribute.
+        /// The method will attempt to find a suitable constructor.
+        /// </summary>
         public static AttributeConstruction Create(
             Type attributeType,
             IReadOnlyList<object?>? constructorArguments = null,
@@ -49,6 +72,10 @@ namespace Caravela.Framework.Code.DeclarationBuilders
                 constructorArguments,
                 namedArguments );
 
+        /// <summary>
+        /// Creates a new <see cref="AttributeConstruction"/> by specifying the <see cref="INamedType"/> of the attribute.
+        /// The method will attempt to find a suitable constructor.
+        /// </summary>
         public static AttributeConstruction Create(
             INamedType attributeType,
             IReadOnlyList<object?>? constructorArguments = null,

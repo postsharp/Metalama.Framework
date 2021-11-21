@@ -7,11 +7,12 @@ namespace Caravela.Framework.Diagnostics
 
     /// <summary>
     /// Defines a diagnostic with a strongly-typed set of parameters that are typically specified by using a named tuple for generic parameter
-    /// <typeparamref name="T"/>. For diagnostics that accept a single parameter, <typeparamref name="T"/> must be set to the type of this parameter. Diagnostics must be
-    /// defined as static fields or properties of an aspect classes. Diagnostics are instantiated with <see cref="IDiagnosticSink"/>.
-    /// For a weakly-typed or parameterless variant, see <see cref="DiagnosticDefinition"/>. 
+    /// <typeparamref name="T"/>. For diagnostics that accept a single parameter, <typeparamref name="T"/> must be set to the type of this parameter.
+    /// To accept several parameters, use a tuple. For no parameters, use <see cref="None"/> for the value of <typeparamref name="T"/>. 
     /// </summary>
-    /// <typeparam name="T">Type of arguments: a single type if there is a single argument, or a named tuple type.</typeparam>
+    /// <typeparam name="T">Type of arguments: a single type if there is a single argument, or a named tuple type for several arguments, or use <see cref="None"/>.
+    /// Alternatively, you can also use <c>object[]</c>.
+    /// </typeparam>
     /// <seealso href="@diagnostics"/>
     public sealed class DiagnosticDefinition<T> : IDiagnosticDefinition
         where T : notnull
