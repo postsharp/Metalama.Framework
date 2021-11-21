@@ -195,5 +195,28 @@ namespace Caravela.Framework.Impl.Utilities
                 IEventSymbol eventSymbol => eventSymbol.ExplicitInterfaceImplementations.Any(),
                 _ => false
             };
+
+        public static ISymbol? Translate( this ISymbol? symbol, Compilation compilation )
+        {
+            if ( symbol == null )
+            {
+                return null;
+            }
+            else if ( symbol.ContainingAssembly == compilation.Assembly
+                      || compilation.SourceModule.ReferencedAssemblySymbols.Contains( symbol.ContainingAssembly ) )
+            {
+                // The symbol is valid in the current compilation.
+                return symbol;
+            }
+            else
+            {
+                // The symbol is not valid in the current compilation. We need to go through documentation id 
+                // TODO: port to SymbolKey
+
+                var symbolId = DocumentationCommentId.CreateReferenceId( symbol );
+
+                return DocumentationCommentId.GetFirstSymbolForReferenceId( symbolId, compilation );
+            }
+        }
     }
 }

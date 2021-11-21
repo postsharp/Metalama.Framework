@@ -5,6 +5,7 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Code.DeclarationBuilders;
 using Caravela.Framework.Impl.CodeModel.Builders;
 using Caravela.Framework.Impl.Linking;
+using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Immutable;
@@ -186,7 +187,7 @@ namespace Caravela.Framework.Impl.CodeModel.References
                     }
 
                 case ISymbol symbol:
-                    return symbol;
+                    return symbol.Translate( compilation ).AssertNotNull();
 
                 case string documentationId:
                     {

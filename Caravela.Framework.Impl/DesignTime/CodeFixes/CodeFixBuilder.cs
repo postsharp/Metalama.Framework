@@ -10,7 +10,6 @@ using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Formatting;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.FindSymbols;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -105,16 +104,14 @@ namespace Caravela.Framework.Impl.DesignTime.CodeFixes
             var project = this._solution.GetProject( this._context.OriginalDocument.Project.Id ).AssertNotNull();
             var compilation = (await project.GetCompilationAsync( this.CancellationToken )).AssertNotNull();
 
-            // Map the symbols to the current solution.
-            var attributeTypeSymbol = (ITypeSymbol) await SymbolFinder.FindSourceDefinitionAsync(
-                attributeType.ToRef().GetSymbol( compilation ),
-                this._solution,
-                this.CancellationToken );
+            var attributeTypeSymbol = (ITypeSymbol?) attributeType.GetSymbol( compilation );
 
-            var targetSymbol = await SymbolFinder.FindSourceDefinitionAsync(
-                targetDeclaration.ToRef().GetSymbol( compilation ),
-                this._solution,
-                this.CancellationToken );
+            if ( attributeTypeSymbol == null )
+            {
+                return false;
+            }
+
+            var targetSymbol = targetDeclaration.GetSymbol( compilation );
 
             if ( targetSymbol == null )
             {
