@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Impl.AdditionalOutputs;
 using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.Aspects;
 using Caravela.Framework.Impl.CodeModel;
@@ -51,6 +52,8 @@ namespace Caravela.Framework.Impl.Pipeline
         /// </summary>
         public CompilationModel? CompilationModel { get; }
 
+        public ImmutableArray<AdditionalCompilationOutputFile> AdditionalCompilationOutputFiles { get; }
+
         public PipelineStageResult(
             PartialCompilation compilation,
             ProjectModel project,
@@ -59,7 +62,8 @@ namespace Caravela.Framework.Impl.Pipeline
             ImmutableUserDiagnosticList? diagnostics = null,
             IReadOnlyList<IAspectSource>? aspectSources = null,
             ImmutableArray<AttributeAspectInstance>? inheritableAspectInstances = null,
-            IReadOnlyList<IntroducedSyntaxTree>? additionalSyntaxTrees = null )
+            IReadOnlyList<IntroducedSyntaxTree>? additionalSyntaxTrees = null,
+            ImmutableArray<AdditionalCompilationOutputFile>? additionalCompilationOutputFiles = null )
         {
             this.Compilation = compilation;
             this.Diagnostics = diagnostics ?? ImmutableUserDiagnosticList.Empty;
@@ -69,6 +73,7 @@ namespace Caravela.Framework.Impl.Pipeline
             this.ExternallyInheritableAspects = inheritableAspectInstances ?? ImmutableArray<AttributeAspectInstance>.Empty;
             this.Project = project;
             this.AdditionalSyntaxTrees = additionalSyntaxTrees ?? ImmutableArray<IntroducedSyntaxTree>.Empty;
+            this.AdditionalCompilationOutputFiles = additionalCompilationOutputFiles ?? ImmutableArray<AdditionalCompilationOutputFile>.Empty;
         }
     }
 }

@@ -29,9 +29,9 @@ namespace Caravela.Framework.Impl.DesignTime
         {
             try
             {
-                var buildOptions = new ProjectOptions( context.Document.Project );
-
-                DebuggingHelper.AttachDebugger( buildOptions );
+                var projectOptions = new ProjectOptions( context.Document.Project.AnalyzerOptions.AnalyzerConfigOptionsProvider );
+                
+                DebuggingHelper.AttachDebugger( projectOptions );
 
                 if ( !context.Document.SupportsSemanticModel )
                 {
@@ -66,7 +66,7 @@ namespace Caravela.Framework.Impl.DesignTime
                 // Execute the pipeline.
 
                 var compilation = await context.Document.Project.GetCompilationAsync( cancellationToken );
-                var eligibleAspects = DesignTimeAspectPipelineFactory.Instance.GetEligibleAspects( compilation!, symbol, buildOptions, cancellationToken );
+                var eligibleAspects = DesignTimeAspectPipelineFactory.Instance.GetEligibleAspects( compilation!, symbol, projectOptions, cancellationToken );
 
                 var aspectActions = ImmutableArray.CreateBuilder<CodeAction>();
                 var liveTemplatesActions = ImmutableArray.CreateBuilder<CodeAction>();
@@ -80,7 +80,7 @@ namespace Caravela.Framework.Impl.DesignTime
                         liveTemplatesActions.Add(
                             CodeAction.Create(
                                 aspect.DisplayName,
-                                ct => ApplyLiveTemplateAsync( buildOptions, aspect, symbol, context.Document, ct.IgnoreIfDebugging() ) ) );
+                                ct => ApplyLiveTemplateAsync( projectOptions, aspect, symbol, context.Document, ct.IgnoreIfDebugging() ) ) );
                     }
                 }
 

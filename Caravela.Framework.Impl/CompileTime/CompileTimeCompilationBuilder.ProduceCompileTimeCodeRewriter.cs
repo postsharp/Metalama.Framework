@@ -328,9 +328,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
                 foreach ( var implementedInterface in allImplementedInterfaces )
                 {
-#pragma warning disable 618
                     if ( implementedInterface.Name is nameof(IAspect) or nameof(IEligible<IDeclaration>) or nameof(ProjectExtension) )
-#pragma warning restore 618
                     {
                         foreach ( var member in implementedInterface.GetMembers() )
                         {

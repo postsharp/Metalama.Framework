@@ -52,5 +52,15 @@ namespace Caravela.Framework.Impl.Options
         IProjectOptions Apply( IProjectOptions options );
 
         bool TryGetProperty( string name, [NotNullWhen( true )] out string? value );
+
+        /// <summary>
+        /// Gets a value indicating whether the design time experience is enabled for the project.
+        /// </summary>
+        bool IsDesignTimeEnabled { get; }
+
+        /// <summary>
+        /// Gets a path to a directory that stores additional compilation output files.
+        /// </summary>
+        string? AdditionalCompilationOutputDirectory { get; }
     }
 }
