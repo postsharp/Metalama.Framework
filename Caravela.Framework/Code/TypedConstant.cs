@@ -10,9 +10,7 @@ namespace Caravela.Framework.Code
 
     /// <summary>
     /// Represents a typed value that can be defined, defined to null, or undefined. Used to represent default values,
-    /// for instance <see cref="IParameter.DefaultValue"/>, or custom attribute arguments. For enum values whose type is not a compile-time
-    /// type, <see cref="Value"/> represents the underlying integer value and <see cref="Type"/> the type of the enum. For enum values whose
-    /// type is compile-time, <see cref="Value"/> is of enum type.
+    /// for instance <see cref="IParameter.DefaultValue"/>, or custom attribute arguments.
     /// </summary>
     [CompileTimeOnly]
     public readonly struct TypedConstant : IHasType
@@ -66,6 +64,17 @@ namespace Caravela.Framework.Code
         /// <summary>
         /// Gets the default value.
         /// </summary>
+        /// <remarks>
+        /// <para>
+        /// For enum values whose type is not a compile-time type, <see cref="Value"/> represents the underlying integer value and <see cref="Type"/> the type of the enum.
+        /// </para>
+        /// <para>
+        /// For enum values whose type is compile-time, <see cref="Value"/> is of enum type.
+        /// </para>
+        /// <para>
+        /// Arrays are represented as an <c>IReadOnlyList</c>.
+        /// </para>
+        /// </remarks>
         public object? Value
         {
             get
