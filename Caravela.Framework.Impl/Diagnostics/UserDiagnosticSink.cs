@@ -177,13 +177,13 @@ namespace Caravela.Framework.Impl.Diagnostics
             }
         }
 
-        public void Suggest( IDiagnosticLocation? location, IEnumerable<CodeFix>? codeFixes )
+        public void Suggest( IDiagnosticLocation? location, CodeFix codeFix )
         {
             var definition = GeneralDiagnosticDescriptors.SuggestedCodeFix;
             var resolvedLocation = GetLocation( location );
-            var codeFixTitles = this.ProcessCodeFix( definition, resolvedLocation, codeFixes );
+            var codeFixTitles = this.ProcessCodeFix( definition, resolvedLocation, codeFix );
 
-            this.Report( definition.CreateDiagnostic( resolvedLocation, default, codeFixes: codeFixTitles ) );
+            this.Report( definition.CreateDiagnostic( resolvedLocation, codeFixTitles.Value!, codeFixes: codeFixTitles ) );
         }
 
         public void AddCodeFixes( IEnumerable<CodeFixInstance> codeFixes )

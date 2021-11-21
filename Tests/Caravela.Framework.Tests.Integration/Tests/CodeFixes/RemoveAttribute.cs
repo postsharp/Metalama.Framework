@@ -19,7 +19,7 @@ namespace Caravela.Framework.Tests.Integration.CodeFixes.RemoveAttribute
         {
             base.BuildAspect(builder);
             
-            builder.Diagnostics.Report( builder.Target, _diag, default, CodeFix.RemoveAttribute(  builder.Target.DeclaringType, typeof(MyAttribute) ) );
+            builder.Diagnostics.Report( builder.Target, _diag, default, CodeFix.RemoveAttributes(  builder.Target.DeclaringType, typeof(MyAttribute) ) );
         }
     }
     

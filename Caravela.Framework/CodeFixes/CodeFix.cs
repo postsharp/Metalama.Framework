@@ -97,8 +97,8 @@ namespace Caravela.Framework.CodeFixes
         /// <param name="attributeType">The type of the attribute.</param>
         /// <param name="title">An optional title of the <see cref="CodeFix"/>, displayed to the user in the light bulb or refactoring menu. When
         /// not specified, the title is generated from the other parameters.</param>
-        public static CodeFix RemoveAttribute( IDeclaration targetDeclaration, Type attributeType, string? title = null )
-            => RemoveAttribute( targetDeclaration, (INamedType) targetDeclaration.Compilation.TypeFactory.GetTypeByReflectionType( attributeType ), title );
+        public static CodeFix RemoveAttributes( IDeclaration targetDeclaration, Type attributeType, string? title = null )
+            => RemoveAttributes( targetDeclaration, (INamedType) targetDeclaration.Compilation.TypeFactory.GetTypeByReflectionType( attributeType ), title );
 
         /// <summary>
         /// Creates a <see cref="CodeFix"/> that removes all custom attributes of a given type from a declaration and all container declarations,
@@ -108,11 +108,11 @@ namespace Caravela.Framework.CodeFixes
         /// <param name="attributeType">The type of the attribute.</param>
         /// <param name="title">An optional title of the <see cref="CodeFix"/>, displayed to the user in the light bulb or refactoring menu. When
         /// not specified, the title is generated from the other parameters.</param>
-        public static CodeFix RemoveAttribute( IDeclaration targetDeclaration, INamedType attributeType, string? title = null )
+        public static CodeFix RemoveAttributes( IDeclaration targetDeclaration, INamedType attributeType, string? title = null )
             => new(
                 title
                 ?? $"Remove [{RemoveSuffix( attributeType.Name, "Attribute" )}] from '{targetDeclaration.ToDisplayString( CodeDisplayFormat.ShortDiagnosticMessage )}'",
-                builder => builder.RemoveAttributeAsync( targetDeclaration, attributeType ) );
+                builder => builder.RemoveAttributesAsync( targetDeclaration, attributeType ) );
 
         private static string RemoveSuffix( string s, string suffix )
             => s.EndsWith( suffix, StringComparison.Ordinal ) ? s.Substring( 0, s.Length - suffix.Length ) : s;

@@ -42,9 +42,8 @@ namespace Caravela.Framework.Diagnostics
         /// <summary>
         /// Suggest a code fix without reporting a diagnostic.
         /// </summary>
-        /// <param name="location">The code location for which the code fixes should be suggested, typically an <see cref="IDeclaration"/>.</param>
-        /// <param name="codeFixes">The <see cref="CodeFix"/> or collection of code fixes to be suggested. Note that the <see cref="CodeFix"/> class
-        /// implements the <c>IEnumerable&lt;CodeFix&gt;</c> so you don't need to use additional syntax for a single code fix.</param>
-        void Suggest( IDiagnosticLocation location, IEnumerable<CodeFix> codeFixes );
+        /// <param name="location">The code location for which the code fix should be suggested, typically an <see cref="IDeclaration"/>.</param>
+        /// <param name="codeFix">The <see cref="CodeFix"/>.</param>
+        void Suggest( IDiagnosticLocation location, CodeFix codeFix );
     }
 }

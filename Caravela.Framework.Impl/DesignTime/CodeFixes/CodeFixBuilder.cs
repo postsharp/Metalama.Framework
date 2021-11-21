@@ -10,6 +10,7 @@ using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Formatting;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.FindSymbols;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -97,36 +98,37 @@ namespace Caravela.Framework.Impl.DesignTime.CodeFixes
             return true;
         }
 
-        public async Task<bool> RemoveAttributeAsync( IDeclaration targetDeclaration, INamedType attributeType )
+        public async Task<bool> RemoveAttributesAsync( IDeclaration targetDeclaration, INamedType attributeType )
         {
             this.CancellationToken.ThrowIfCancellationRequested();
 
-            var compilation = await this._solution.GetProject( this._context.OriginalDocument.Project.Id )!.GetCompilationAsync( this.CancellationToken );
+            var project = this._solution.GetProject( this._context.OriginalDocument.Project.Id ).AssertNotNull();
+            var compilation = (await project.GetCompilationAsync( this.CancellationToken )).AssertNotNull();
 
-            if ( compilation == null )
-            {
-                // TODO: Error. Log.
-                return false;
-            }
+            // Map the symbols to the current solution.
+            var attributeTypeSymbol = (ITypeSymbol) await SymbolFinder.FindSourceDefinitionAsync(
+                attributeType.ToRef().GetSymbol( compilation ),
+                this._solution,
+                this.CancellationToken );
 
-            var attributeTypeSymbol = (ITypeSymbol) attributeType.ToRef().GetSymbol( compilation );
-
-            var targetSymbol = targetDeclaration.ToRef().GetSymbol( compilation );
+            var targetSymbol = await SymbolFinder.FindSourceDefinitionAsync(
+                targetDeclaration.ToRef().GetSymbol( compilation ),
+                this._solution,
+                this.CancellationToken );
 
             if ( targetSymbol == null )
             {
-                throw new ArgumentOutOfRangeException( nameof(targetDeclaration), "The declaration is not declared in source." );
+                return false;
             }
 
             // We need to process all syntaxes that define this symbol.
             foreach ( var syntaxReferenceGroup in targetSymbol.DeclaringSyntaxReferences.GroupBy( r => r.SyntaxTree ) )
             {
-                var syntaxTree = syntaxReferenceGroup.Key;
-                var originalRoot = await syntaxTree.GetRootAsync( this.CancellationToken );
+                var originalSyntaxTree = syntaxReferenceGroup.Key;
+                var originalDocument = project.GetDocument( originalSyntaxTree ).AssertNotNull();
+                var originalRoot = await originalSyntaxTree.GetRootAsync( this.CancellationToken );
 
-                var originalDocument = this._solution.GetDocument( syntaxTree ).AssertNotNull();
-
-                var rewriter = new RemoveAttributeRewriter( compilation.GetSemanticModel( syntaxTree ), attributeTypeSymbol );
+                var rewriter = new RemoveAttributeRewriter( compilation.GetSemanticModel( originalSyntaxTree ), attributeTypeSymbol );
 
                 var transformedRoot = originalRoot;
                 var syntaxNodes = new List<SyntaxNode>();
@@ -145,6 +147,9 @@ namespace Caravela.Framework.Impl.DesignTime.CodeFixes
 
             return true;
         }
+
+        public Task<bool> RemoveAttributesAsync( IDeclaration targetDeclaration, Type attributeType )
+            => this.RemoveAttributesAsync( targetDeclaration, (INamedType) targetDeclaration.Compilation.TypeFactory.GetTypeByReflectionType( attributeType ) );
 
         public async Task<bool> ApplyAspectAsync<TTarget>( TTarget targetDeclaration, IAspect<TTarget> aspect )
             where TTarget : class, IDeclaration

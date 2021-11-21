@@ -240,12 +240,12 @@ namespace Caravela.Framework.Impl
                     _category,
                     Error );
 
-        internal static readonly DiagnosticDefinition<None>
+        internal static readonly DiagnosticDefinition<string>
             SuggestedCodeFix
                 = new(
                     "CR0043",
                     Hidden,
-                    "Code fix suggestion",
+                    "Suggestion: {0}",
                     "Code fix suggestion",
                     _category );
 
