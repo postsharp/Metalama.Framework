@@ -703,7 +703,7 @@ public class CompileTimeOnlyClass
 }
 ";
 
-            var compilation = CreateCSharpCompilation( code, name:"test" );
+            var compilation = CreateCSharpCompilation( code, name: "test" );
 
             using var testContext = this.CreateTestContext();
             var loader = CompileTimeProjectLoader.Create( new CompileTimeDomain(), testContext.ServiceProvider );

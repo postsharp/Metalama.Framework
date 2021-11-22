@@ -77,9 +77,10 @@ namespace Caravela.Framework.Impl.CodeModel.References
             where T : class, ICompilationElement
             => new( symbol, compilation );
 
-        public static Ref<IDeclaration> ReturnParameter( IMethodSymbol methodSymbol, Compilation compilation ) => new( methodSymbol, compilation, DeclarationRefTargetKind.Return );
+        public static Ref<IDeclaration> ReturnParameter( IMethodSymbol methodSymbol, Compilation compilation )
+            => new( methodSymbol, compilation, DeclarationRefTargetKind.Return );
 
-        internal static Ref<ICompilation> Compilation() => new( null, null, DeclarationRefTargetKind.Assembly );
+        internal static Ref<ICompilation> Compilation() => new( DeclarationRefTargetKind.Assembly );
     }
 
     /// <summary>
@@ -91,7 +92,7 @@ namespace Caravela.Framework.Impl.CodeModel.References
     {
         // The compilation for which the symbol (stored in Target) is valid.
         private readonly Compilation? _compilation;
-        
+
         internal Ref( ISymbol symbol, Compilation compilation, DeclarationRefTargetKind targetKind = DeclarationRefTargetKind.Default )
         {
             symbol.AssertValidType<T>();
@@ -108,7 +109,7 @@ namespace Caravela.Framework.Impl.CodeModel.References
             this._compilation = builder.GetCompilationModel().RoslynCompilation;
         }
 
-        private Ref( object? target, Compilation? compilation,  DeclarationRefTargetKind targetKind )
+        private Ref( object? target, Compilation? compilation, DeclarationRefTargetKind targetKind )
         {
             this.Target = target;
             this.TargetKind = targetKind;

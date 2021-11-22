@@ -2,6 +2,8 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 extern alias roslyn;
+
+// ReSharper disable once RedundantBlankLines
 using Microsoft.CodeAnalysis;
 using System.Threading;
 using SymbolKey = roslyn::Microsoft.CodeAnalysis.SymbolKey;
@@ -9,6 +11,9 @@ using SymbolKeyExtensions = roslyn::Microsoft.CodeAnalysis.SymbolKeyExtensions;
 
 namespace Caravela.Framework.Impl.Utilities
 {
+    /// <summary>
+    /// An identifier of an <see cref="ISymbol"/> that works across compilations, but not across different versions of Roslyn.  
+    /// </summary>
     internal struct SymbolId
     {
 #pragma warning disable IDE0044 // SymbolKey.Resolve is mutating.
@@ -19,12 +24,13 @@ namespace Caravela.Framework.Impl.Utilities
         {
             this._symbolKey = new SymbolKey( id );
         }
+
         private SymbolId( SymbolKey symbolKey )
         {
             this._symbolKey = symbolKey;
         }
 
-        public ISymbol? Resolve( Compilation compilation, bool ignoreAssemblyKey = false, CancellationToken cancellationToken = default ) 
+        public ISymbol? Resolve( Compilation compilation, bool ignoreAssemblyKey = false, CancellationToken cancellationToken = default )
             => this._symbolKey.Resolve( compilation, ignoreAssemblyKey, cancellationToken ).Symbol;
 
         public override string ToString() => this._symbolKey.ToString();
@@ -37,11 +43,11 @@ namespace Caravela.Framework.Impl.Utilities
             }
             else
             {
+                // ReSharper disable once InvokeAsExtensionMethod
                 var symbolKey = SymbolKeyExtensions.GetSymbolKey( symbol, cancellationToken );
 
                 return new SymbolId( symbolKey );
             }
         }
     }
-    
 }

@@ -196,7 +196,7 @@ namespace Caravela.Framework.Impl.Utilities
                 _ => false
             };
 
-        public static ISymbol? Translate( this ISymbol? symbol, Compilation? originalCompilation,  Compilation compilation )
+        public static ISymbol? Translate( this ISymbol? symbol, Compilation? originalCompilation, Compilation compilation )
         {
             if ( symbol == null )
             {
@@ -219,7 +219,6 @@ namespace Caravela.Framework.Impl.Utilities
             }
         }
 
-        
         public static SymbolId GetSymbolId( this ISymbol? symbol ) => SymbolId.Create( symbol );
     }
 }

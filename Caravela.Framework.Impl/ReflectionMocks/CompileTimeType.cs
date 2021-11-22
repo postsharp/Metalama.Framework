@@ -32,7 +32,7 @@ namespace Caravela.Framework.Impl.ReflectionMocks
         }
 
         public static Type GetCompileTimeType( string id, string fullMetadataName )
-            => UserCodeExecutionContext.Current.ServiceProvider.GetService<CompileTimeTypeFactory>().Get( new SymbolId(id), fullMetadataName );
+            => UserCodeExecutionContext.Current.ServiceProvider.GetService<CompileTimeTypeFactory>().Get( new SymbolId( id ), fullMetadataName );
 
         internal static Type CreateFromSymbolId( SymbolId symbolId, string fullMetadataName )
             => new CompileTimeType( Ref.FromSymbolKey<IType>( symbolId ), fullMetadataName );

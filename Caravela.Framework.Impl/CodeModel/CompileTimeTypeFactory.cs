@@ -9,7 +9,6 @@ using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Concurrent;
 
-
 namespace Caravela.Framework.Impl.CodeModel
 {
     // The only class that should use this factory is SystemTypeResolver.
@@ -27,7 +26,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public Type Get( SymbolId symbolKey, string fullMetadataName )
         {
-            return this._instances.GetOrAdd( symbolKey.ToString(), id => CompileTimeType.CreateFromSymbolId( new SymbolId(id), fullMetadataName ) );
+            return this._instances.GetOrAdd( symbolKey.ToString(), id => CompileTimeType.CreateFromSymbolId( new SymbolId( id ), fullMetadataName ) );
         }
     }
 }

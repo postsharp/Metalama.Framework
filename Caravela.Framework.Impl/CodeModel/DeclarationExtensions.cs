@@ -112,7 +112,8 @@ namespace Caravela.Framework.Impl.CodeModel
             where T : class, IDeclaration
             => ((IDeclarationImpl) declaration).ToRef().As<T>();
 
-        public static ISymbol? GetSymbol( this IDeclaration declaration, Compilation compilation ) => declaration.GetSymbol().Translate( declaration.GetCompilationModel().RoslynCompilation,  compilation );
+        public static ISymbol? GetSymbol( this IDeclaration declaration, Compilation compilation )
+            => declaration.GetSymbol().Translate( declaration.GetCompilationModel().RoslynCompilation, compilation );
 
         public static MemberRef<T> ToMemberRef<T>( this T member )
             where T : class, IMemberOrNamedType

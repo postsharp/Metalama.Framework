@@ -83,7 +83,10 @@ namespace Caravela.Framework.Impl.Fabrics
 
         public override bool TryExecute( IProject project, IDiagnosticAdder diagnosticAdder, [NotNullWhen( true )] out StaticFabricResult? result )
         {
-            var amender = new Amender( project, this.FabricManager, new FabricInstance( this, this.FabricSymbol.ContainingAssembly.ToRef(this.Compilation) ) );
+            var amender = new Amender(
+                project,
+                this.FabricManager,
+                new FabricInstance( this, this.FabricSymbol.ContainingAssembly.ToRef( this.Compilation ) ) );
 
             var executionContext = new UserCodeExecutionContext(
                 this.FabricManager.ServiceProvider,

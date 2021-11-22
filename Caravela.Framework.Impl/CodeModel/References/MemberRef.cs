@@ -15,12 +15,12 @@ namespace Caravela.Framework.Impl.CodeModel.References
         where T : class, IMemberOrNamedType
     {
         private readonly Ref<T> _underlying;
-        
+
         public MemberRef( ISymbol symbol, Compilation compilation )
         {
             symbol.AssertValidType<T>();
 
-            this._underlying = new Ref<T>(symbol, compilation);
+            this._underlying = new Ref<T>( symbol, compilation );
         }
 
         public MemberRef( IMemberOrNamedTypeBuilder builder )
@@ -35,7 +35,7 @@ namespace Caravela.Framework.Impl.CodeModel.References
 
         public object? Target => this._underlying.Target;
 
-        public T GetTarget( ICompilation compilation ) => this._underlying.GetTarget(compilation);
+        public T GetTarget( ICompilation compilation ) => this._underlying.GetTarget( compilation );
 
         public ISymbol? GetSymbol( Compilation compilation ) => this._underlying.GetSymbol( compilation );
 

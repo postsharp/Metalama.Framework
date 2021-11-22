@@ -377,6 +377,6 @@ namespace Caravela.Framework.Impl.Templating
         public static ExpressionSyntax StringLiteralExpression( string? value ) => SyntaxFactoryEx.LiteralExpression( value );
 
         public static Type GetCompileTimeType( string id, string name )
-            => TemplateExpansionContext.Current.SyntaxGenerationContext.ServiceProvider.GetService<CompileTimeTypeFactory>().Get( new SymbolId(id), name );
+            => TemplateExpansionContext.Current.SyntaxGenerationContext.ServiceProvider.GetService<CompileTimeTypeFactory>().Get( new SymbolId( id ), name );
     }
 }

@@ -177,7 +177,7 @@ namespace Caravela.Framework.Impl.CodeModel
                     .GetAttributes()
                     .Union( this.RoslynCompilation.SourceModule.GetAttributes() )
                     .Where( a => a.AttributeConstructor != null )
-                    .Select( a => new AttributeRef( a,  Ref.FromSymbol( RoslynCompilation.Assembly, this.RoslynCompilation ) ) ) );
+                    .Select( a => new AttributeRef( a, Ref.FromSymbol( this.RoslynCompilation.Assembly, this.RoslynCompilation ) ) ) );
 
         public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
             => this.RoslynCompilation.AssemblyName ?? "<Anonymous>";

@@ -32,7 +32,7 @@ namespace Caravela.Framework.CodeFixes
         /// Removes custom attributes of a type, given as an <see cref="INamedType"/>, from a given declaration and all contained declarations.
         /// </summary>
         Task<bool> RemoveAttributesAsync( IDeclaration targetDeclaration, INamedType attributeType );
-        
+
         /// <summary>
         /// Removes custom attributes of a type, given as a reflection <see cref="Type"/>, from a given declaration and all contained declarations.
         /// </summary>
