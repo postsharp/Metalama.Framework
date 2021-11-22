@@ -211,13 +211,15 @@ namespace Caravela.Framework.Impl.Utilities
                 // The symbol is not valid in the current compilation. We need to go through documentation id 
                 // TODO: port to SymbolKey
 
-                var symbolId = DocumentationCommentId.CreateDeclarationId( symbol );
+                var symbolId = symbol.GetSymbolId();
 
-                var resolvedSymbol = DocumentationCommentId.GetFirstSymbolForDeclarationId( symbolId, compilation );
+                var resolvedSymbol = symbolId.Resolve( compilation );
 
                 return resolvedSymbol;
             }
         }
 
+        
+        public static SymbolId GetSymbolId( this ISymbol? symbol ) => SymbolId.Create( symbol );
     }
 }

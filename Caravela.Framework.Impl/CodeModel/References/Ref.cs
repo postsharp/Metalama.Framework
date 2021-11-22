@@ -63,9 +63,9 @@ namespace Caravela.Framework.Impl.CodeModel.References
         /// <returns></returns>
         public static Ref<IDeclaration> FromSymbol( ISymbol symbol, Compilation compilation ) => new( symbol, compilation );
 
-        public static Ref<T> FromDocumentationId<T>( string documentationId )
+        public static Ref<T> FromSymbolKey<T>( SymbolId symbolKey )
             where T : class, ICompilationElement
-            => new( documentationId );
+            => new( symbolKey );
 
         /// <summary>
         /// Creates a <see cref="Ref{T}"/> from a Roslyn symbol.
@@ -122,9 +122,9 @@ namespace Caravela.Framework.Impl.CodeModel.References
             this.Target = null;
         }
 
-        internal Ref( string documentationId )
+        internal Ref( SymbolId symbolKey )
         {
-            this.Target = documentationId;
+            this.Target = symbolKey.ToString();
             this.TargetKind = DeclarationRefTargetKind.Default;
             this._compilation = null;
         }
@@ -200,13 +200,15 @@ namespace Caravela.Framework.Impl.CodeModel.References
                 case ISymbol symbol:
                     return symbol.Translate( this._compilation, compilation ).AssertNotNull();
 
-                case string documentationId:
+                case string symbolId:
                     {
-                        var symbol = DocumentationCommentId.GetFirstSymbolForReferenceId( documentationId, compilation );
+                        var symbolKey = new SymbolId( symbolId );
+
+                        var symbol = symbolKey.Resolve( compilation );
 
                         if ( symbol == null )
                         {
-                            throw new AssertionFailedException( $"Cannot resolve {documentationId} into a symbol." );
+                            throw new AssertionFailedException( $"Cannot resolve {symbolId} into a symbol." );
                         }
 
                         return symbol;
@@ -293,13 +295,13 @@ namespace Caravela.Framework.Impl.CodeModel.References
                 case IDeclarationBuilder builder:
                     return (T) compilation.Factory.GetDeclaration( builder );
 
-                case string documentationId:
+                case string symbolId:
                     {
-                        var symbol = DocumentationCommentId.GetFirstSymbolForReferenceId( documentationId, compilation.RoslynCompilation );
+                        var symbol = new SymbolId( symbolId ).Resolve( compilation.RoslynCompilation );
 
                         if ( symbol == null )
                         {
-                            throw new AssertionFailedException( $"Cannot resolve {documentationId} into a symbol." );
+                            throw new AssertionFailedException( $"Cannot resolve '{symbolId}' into a symbol." );
                         }
 
                         return (T) compilation.Factory.GetCompilationElement( symbol );

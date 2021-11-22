@@ -783,7 +783,7 @@ namespace Caravela.Framework.Impl.CompileTime
                                 SeparatedList(
                                     new[]
                                     {
-                                        Argument( SyntaxFactoryEx.LiteralExpression( DocumentationCommentId.CreateReferenceId( typeSymbol ) ) ),
+                                        Argument( SyntaxFactoryEx.LiteralExpression( typeSymbol.GetSymbolId().ToString() ) ),
                                         Argument( SyntaxFactoryEx.LiteralExpression( typeSymbol.GetReflectionName() ) )
                                     } ) ) );
 

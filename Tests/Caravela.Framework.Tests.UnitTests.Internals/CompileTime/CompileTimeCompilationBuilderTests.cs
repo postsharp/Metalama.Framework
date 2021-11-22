@@ -693,17 +693,17 @@ using Caravela.Framework.Aspects;
 [CompileTimeOnly]
 public class CompileTimeOnlyClass
 {
-   static global::System.Type Type1 = global::Caravela.Framework.Impl.ReflectionMocks.CompileTimeType.GetCompileTimeType(""RunTimeOnlyClass"",""RunTimeOnlyClass"");
+   static global::System.Type Type1 = global::Caravela.Framework.Impl.ReflectionMocks.CompileTimeType.GetCompileTimeType(""1 (D \""RunTimeOnlyClass\"" (N \""\"" 0 (U (S \""test\"" 3) 2) 1) 0 0 (% 0) 0)"",""RunTimeOnlyClass"");
    static global::System.Type Type2 = typeof(global::CompileTimeOnlyClass);
    static string Name1 = ""RunTimeOnlyClass"";
    static string Name2 = ""CompileTimeOnlyClass"";
 
-   void Method() { var t = global::Caravela.Framework.Impl.ReflectionMocks.CompileTimeType.GetCompileTimeType(""RunTimeOnlyClass"",""RunTimeOnlyClass""); }
+   void Method() { var t = global::Caravela.Framework.Impl.ReflectionMocks.CompileTimeType.GetCompileTimeType(""1 (D \""RunTimeOnlyClass\"" (N \""\"" 0 (U (S \""test\"" 3) 2) 1) 0 0 (% 0) 0)"",""RunTimeOnlyClass""); }
    string Property => ""RunTimeOnlyClass"";
 }
 ";
 
-            var compilation = CreateCSharpCompilation( code );
+            var compilation = CreateCSharpCompilation( code, name:"test" );
 
             using var testContext = this.CreateTestContext();
             var loader = CompileTimeProjectLoader.Create( new CompileTimeDomain(), testContext.ServiceProvider );
