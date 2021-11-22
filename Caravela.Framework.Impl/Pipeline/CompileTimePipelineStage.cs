@@ -69,9 +69,9 @@ namespace Caravela.Framework.Impl.Pipeline
                 input.Project,
                 input.AspectLayers,
                 null,
-                pipelineStepsResult.Diagnostics.Concat( linkerResult.Diagnostics ),
-                pipelineStepsResult.ExternalAspectSources,
-                input.ExternallyInheritableAspects.AddRange( pipelineStepsResult.InheritableAspectInstances ),
+                pipelineStepResult.Diagnostics.Concat( linkerResult.Diagnostics ),
+                pipelineStepResult.ExternalAspectSources,
+                input.ExternallyInheritableAspects.AddRange( pipelineStepResult.InheritableAspectInstances ),
                 additionalCompilationOutputFiles: additionalCompilationOutputFiles != null
                     ? input.AdditionalCompilationOutputFiles.AddRange( additionalCompilationOutputFiles )
                     : input.AdditionalCompilationOutputFiles );

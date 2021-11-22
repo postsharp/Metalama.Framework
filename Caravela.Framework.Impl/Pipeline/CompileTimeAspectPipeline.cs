@@ -88,15 +88,6 @@ namespace Caravela.Framework.Impl.Pipeline
             AspectPipelineConfiguration configuration,
             CancellationToken cancellationToken )
         {
-            if ( !this.ProjectOptions.IsFrameworkEnabled )
-            {
-                return new CompileTimeAspectPipelineResult(
-                    ImmutableArray<SyntaxTreeTransformation>.Empty,
-                    ImmutableArray<ManagedResource>.Empty,
-                    compilation,
-                    ImmutableArray<AdditionalCompilationOutputFile>.Empty );
-            }
-
             try
             {
                 // Execute the pipeline.
