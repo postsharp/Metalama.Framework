@@ -27,9 +27,9 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
 
         private string SerializeType( string code )
         {
-            using var testContext = this.CreateTestContext();
+            using var testContext = this.CreateSerializationTestContext( code );
 
-            var compilation = testContext.CreateCompilationModel( code );
+            var compilation = testContext.Compilation;
             IType single = compilation.Types.Single( t => t.Name == "Target" ).NestedTypes.Single( nt => nt.Name == "Sub" );
 
             return testContext.Serialize( CompileTimeType.Create( single ) ).ToString();

@@ -14,7 +14,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization
         [Fact]
         public void TestInt()
         {
-            using var testContext = this.CreateTestContext();
+            using var testContext = this.CreateSerializationTestContext( "" );
 
             Assert.Equal( "42", testContext.Serialize( 42 ).ToString() );
             Assert.Equal( "2147483647", testContext.Serialize( int.MaxValue ).ToString() );
@@ -24,7 +24,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization
         [Fact]
         public void TestChar()
         {
-            using var testContext = this.CreateTestContext();
+            using var testContext = this.CreateSerializationTestContext( "" );
 
             Assert.Equal( "'\\0'", testContext.Serialize( '\0' ).ToString() );
             Assert.Equal( "'\\n'", testContext.Serialize( '\n' ).ToString() );
@@ -36,7 +36,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization
         [Fact]
         public void TestBool()
         {
-            using var testContext = this.CreateTestContext();
+            using var testContext = this.CreateSerializationTestContext( "" );
 
             Assert.Equal( "true", testContext.Serialize( true ).ToString() );
             Assert.Equal( "false", testContext.Serialize( false ).ToString() );
@@ -45,7 +45,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization
         [Fact]
         public void TestByte()
         {
-            using var testContext = this.CreateTestContext();
+            using var testContext = this.CreateSerializationTestContext( "" );
 
             Assert.Equal( "42", testContext.Serialize<byte>( 42 ).ToString() );
             Assert.Equal( "0", testContext.Serialize<byte>( 0 ).ToString() );
@@ -55,7 +55,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization
         [Fact]
         public void TestSByte()
         {
-            using var testContext = this.CreateTestContext();
+            using var testContext = this.CreateSerializationTestContext( "" );
 
             Assert.Equal( "42", testContext.Serialize<sbyte>( 42 ).ToString() );
             Assert.Equal( "127", testContext.Serialize<sbyte>( 127 ).ToString() );
@@ -65,7 +65,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization
         [Fact]
         public void TestUShort()
         {
-            using var testContext = this.CreateTestContext();
+            using var testContext = this.CreateSerializationTestContext( "" );
 
             Assert.Equal( "42", testContext.Serialize<ushort>( 42 ).ToString() );
             Assert.Equal( ushort.MaxValue.ToString(), testContext.Serialize( ushort.MaxValue ).ToString() );
@@ -75,7 +75,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization
         [Fact]
         public void TestShort()
         {
-            using var testContext = this.CreateTestContext();
+            using var testContext = this.CreateSerializationTestContext( "" );
 
             Assert.Equal( "42", testContext.Serialize<short>( 42 ).ToString() );
             Assert.Equal( short.MaxValue.ToString(), testContext.Serialize( short.MaxValue ).ToString() );
@@ -85,7 +85,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization
         [Fact]
         public void TestULong()
         {
-            using var testContext = this.CreateTestContext();
+            using var testContext = this.CreateSerializationTestContext( "" );
 
             Assert.Equal( "42UL", testContext.Serialize<ulong>( 42 ).ToString() );
             Assert.Equal( ulong.MaxValue + "UL", testContext.Serialize( ulong.MaxValue ).ToString() );
@@ -95,7 +95,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization
         [Fact]
         public void TestUInt()
         {
-            using var testContext = this.CreateTestContext();
+            using var testContext = this.CreateSerializationTestContext( "" );
 
             Assert.Equal( "42U", testContext.Serialize<uint>( 42 ).ToString() );
             Assert.Equal( uint.MaxValue + "U", testContext.Serialize( uint.MaxValue ).ToString() );
@@ -105,7 +105,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization
         [Fact]
         public void TestLong()
         {
-            using var testContext = this.CreateTestContext();
+            using var testContext = this.CreateSerializationTestContext( "" );
 
             Assert.Equal( "42L", testContext.Serialize<long>( 42 ).ToString() );
             Assert.Equal( "9223372036854775807L", testContext.Serialize( long.MaxValue ).ToString() );
@@ -115,7 +115,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization
         [Fact]
         public void TestFloat()
         {
-            using var testContext = this.CreateTestContext();
+            using var testContext = this.CreateSerializationTestContext( "" );
 
             Assert.Equal( "42F", testContext.Serialize<float>( 42 ).ToString() );
 #if NET5_0 // The result is slightly different in .NET Framework but there is probably no point to investigate.            
@@ -134,7 +134,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization
         [Fact]
         public void TestDouble()
         {
-            using var testContext = this.CreateTestContext();
+            using var testContext = this.CreateSerializationTestContext( "" );
 
             Assert.Equal( "42", testContext.Serialize<double>( 42 ).ToString() );
 #if NET5_0 // The result is slightly different in .NET Framework but there is probably no point to investigate.
@@ -153,7 +153,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization
         [Fact]
         public void TestDecimal()
         {
-            using var testContext = this.CreateTestContext();
+            using var testContext = this.CreateSerializationTestContext( "" );
 
             Assert.Equal( "42M", testContext.Serialize<decimal>( 42 ).ToString() );
             Assert.Equal( "1.0M", testContext.Serialize( 1.0M ).ToString() );
@@ -169,7 +169,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization
         [Fact]
         public unsafe void TestUIntPtr()
         {
-            using var testContext = this.CreateTestContext();
+            using var testContext = this.CreateSerializationTestContext( "" );
 
             var pointer = (int*) 300;
             Assert.Equal( "new global::System.UIntPtr(400UL)", testContext.Serialize( new UIntPtr( 400UL ) ).NormalizeWhitespace().ToString() );
@@ -180,7 +180,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization
         [Fact]
         public unsafe void TestIntPtr()
         {
-            using var testContext = this.CreateTestContext();
+            using var testContext = this.CreateSerializationTestContext( "" );
 
             var pointer = (int*) 300;
             Assert.Equal( "new global::System.IntPtr(-400L)", testContext.Serialize( new IntPtr( -400L ) ).NormalizeWhitespace().ToString() );

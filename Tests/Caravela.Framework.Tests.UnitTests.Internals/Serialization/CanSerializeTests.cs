@@ -14,7 +14,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization
     {
         private void AssertCanSerialize( bool expected, Type type )
         {
-            using var testContext = this.CreateTestContext();
+            using var testContext = this.CreateSerializationTestContext( "" );
 
             var serializableTypes = testContext.SerializationService.GetSerializableTypes( testContext.SerializationContext.Compilation );
             var diagnosticList = new DiagnosticList();

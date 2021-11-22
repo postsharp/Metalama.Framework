@@ -239,6 +239,8 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
                 {
                     var introducedElementName = ((ITestTransformation) transformation).IntroducedElementName.AssertNotNull();
 
+                    A.CallTo( () => ((IDeclarationImpl) observableTransformation).Compilation ).Returns( initialCompilationModel );
+
                     var insertPositionNode =
                         insertPositionNodeId != null
                             ? nodeIdToSyntaxNode[insertPositionNodeId]
@@ -261,7 +263,8 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
                         if ( replacedMemberSymbol != null )
                         {
                             // This is replaced source element.
-                            A.CallTo( () => replaceMember.ReplacedMember ).Returns( new MemberRef<IMemberOrNamedType>( replacedMemberSymbol, inputCompilation ) );
+                            A.CallTo( () => replaceMember.ReplacedMember )
+                                .Returns( new MemberRef<IMemberOrNamedType>( replacedMemberSymbol, inputCompilation ) );
                         }
                         else
                         {
@@ -279,6 +282,8 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
 
                             var replacedTransformation =
                                 rewriter.ReplacedTransformations.Single( x => ((ITestTransformation) x).SymbolHelperNodeId == replacedSymbolHelperNodeId );
+
+                            A.CallTo( () => ((IDeclarationImpl) replacedTransformation).Compilation ).Returns( initialCompilationModel );
 
                             A.CallTo( () => replaceMember.ReplacedMember )
                                 .Returns( new MemberRef<IMemberOrNamedType>( (IMemberOrNamedTypeBuilder) replacedTransformation ) );
