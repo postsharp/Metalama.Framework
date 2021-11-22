@@ -5,6 +5,7 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Code.DeclarationBuilders;
 using Caravela.Framework.Impl.CodeModel.Builders;
 using Caravela.Framework.Impl.Linking;
+using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Immutable;
@@ -62,7 +63,7 @@ namespace Caravela.Framework.Impl.CodeModel.References
         /// <returns></returns>
         public static Ref<IDeclaration> FromSymbol( ISymbol symbol ) => new( symbol );
 
-        public static Ref<T> FromSymbolKey<T>( SymbolKey symbolKey )
+        public static Ref<T> FromSymbolKey<T>( SymbolId symbolKey )
             where T : class, ICompilationElement
             => new( symbolKey );
 
@@ -112,7 +113,7 @@ namespace Caravela.Framework.Impl.CodeModel.References
             this.TargetKind = targetKind;
         }
 
-        internal Ref( SymbolKey symbolKey )
+        internal Ref( SymbolId symbolKey )
         {
             this.Target = symbolKey.ToString();
             this.TargetKind = DeclarationRefTargetKind.Default;
@@ -190,9 +191,9 @@ namespace Caravela.Framework.Impl.CodeModel.References
 
                 case string symbolId:
                     {
-                        var symbolKey = new SymbolKey( symbolId );
+                        var symbolKey = new SymbolId( symbolId );
 
-                        var symbol = symbolKey.Resolve( compilation ).Symbol;
+                        var symbol = symbolKey.Resolve( compilation );
 
                         if ( symbol == null )
                         {
@@ -285,7 +286,7 @@ namespace Caravela.Framework.Impl.CodeModel.References
 
                 case string symbolId:
                     {
-                        var symbol = new SymbolKey( symbolId ).Resolve( compilation.RoslynCompilation ).Symbol;
+                        var symbol = new SymbolId( symbolId ).Resolve( compilation.RoslynCompilation );
 
                         if ( symbol == null )
                         {

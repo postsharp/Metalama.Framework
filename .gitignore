@@ -47,3 +47,4 @@ CaravelaVersion.props
 TestResults
 launchSettings.json
 .idea/workspace.xml
+eng/*.local

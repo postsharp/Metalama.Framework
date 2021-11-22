@@ -195,5 +195,7 @@ namespace Caravela.Framework.Impl.Utilities
                 IEventSymbol eventSymbol => eventSymbol.ExplicitInterfaceImplementations.Any(),
                 _ => false
             };
+        
+        public static SymbolId GetSymbolId( this ISymbol? symbol ) => SymbolId.Create( symbol );
     }
 }

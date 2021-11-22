@@ -60,8 +60,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.Framework.CompileT
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Caravela.Framework.Tests.UnitTests", "Tests\Caravela.Framework.Tests.UnitTests\Caravela.Framework.Tests.UnitTests.csproj", "{62E8C6ED-B0E7-48E3-9C1C-345F46687E3C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Caravela.Roslyn", "Caravela.Roslyn\Caravela.Roslyn.csproj", "{32A3B60D-588E-4864-B537-EA976C0587B7}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -136,10 +134,6 @@ Global
 		{62E8C6ED-B0E7-48E3-9C1C-345F46687E3C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{62E8C6ED-B0E7-48E3-9C1C-345F46687E3C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{62E8C6ED-B0E7-48E3-9C1C-345F46687E3C}.Release|Any CPU.Build.0 = Release|Any CPU
-		{32A3B60D-588E-4864-B537-EA976C0587B7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{32A3B60D-588E-4864-B537-EA976C0587B7}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{32A3B60D-588E-4864-B537-EA976C0587B7}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{32A3B60D-588E-4864-B537-EA976C0587B7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

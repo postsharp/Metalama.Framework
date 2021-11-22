@@ -49,12 +49,18 @@
 		    <GeneratePathProperty>true</GeneratePathProperty>
 		</PackageReference>
 		<EmbeddedResource Include="$(PkgNewtonsoft_Json)\lib\netstandard2.0\Newtonsoft.Json.dll" Link="Resources\Newtonsoft.Json.dll" />
+		
+		<PackageReference Include="Caravela.RoslynUtilities" Version="$(CaravelaCompilerVersion)" PrivateAssets="all">
+            <GeneratePathProperty>true</GeneratePathProperty>
+        </PackageReference>
+        <EmbeddedResource Include="$(PkgCaravela_RoslynUtilities)\lib\netstandard2.0\Caravela.RoslynUtilities.dll" Link="Resources\Caravela.RoslynUtilities.dll" />
+
 
 		<EmbeddedResource Include="..\Caravela.Framework.Impl\bin\$(Configuration)\$(TargetFramework)\Caravela.Framework.Impl.dll" Link="Resources\Caravela.Framework.Impl.dll" />
 		<EmbeddedResource Include="..\Caravela.Framework.DesignTime.Contracts\bin\$(Configuration)\$(TargetFramework)\Caravela.Framework.DesignTime.Contracts.dll" Link="Resources\Caravela.Framework.DesignTime.Contracts.dll" />
 		<EmbeddedResource Include="..\Caravela.Framework.Sdk\bin\$(Configuration)\$(TargetFramework)\Caravela.Framework.Sdk.dll" Link="Resources\Caravela.Framework.Sdk.dll" />
 		<EmbeddedResource Include="..\Caravela.Framework\bin\$(Configuration)\$(TargetFramework)\Caravela.Framework.dll" Link="Resources\Caravela.Framework.dll" />
-		<EmbeddedResource Include="..\Caravela.Roslyn\bin\$(Configuration)\$(TargetFramework)\Caravela.Roslyn.dll" Link="Resources\Caravela.Roslyn.dll" />
+		
 		
 		<PackageReference Include="Caravela.Compiler.Sdk" Version="$(CaravelaCompilerVersion)" PrivateAssets="true" />
 

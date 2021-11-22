@@ -32,10 +32,10 @@ namespace Caravela.Framework.Impl.ReflectionMocks
         }
 
         public static Type GetCompileTimeType( string id, string fullMetadataName )
-            => UserCodeExecutionContext.Current.ServiceProvider.GetService<CompileTimeTypeFactory>().Get( new SymbolKey(id), fullMetadataName );
+            => UserCodeExecutionContext.Current.ServiceProvider.GetService<CompileTimeTypeFactory>().Get( new SymbolId(id), fullMetadataName );
 
-        internal static Type CreateFromSymbolKey( SymbolKey symbolKey, string fullMetadataName )
-            => new CompileTimeType( Ref.FromSymbolKey<IType>( symbolKey ), fullMetadataName );
+        internal static Type CreateFromSymbolId( SymbolId symbolId, string fullMetadataName )
+            => new CompileTimeType( Ref.FromSymbolKey<IType>( symbolId ), fullMetadataName );
 
         // For test only. This is also used from serializers but these used should be removed when serializers will stop using symbols.
         internal static Type Create( IType type ) => Create( type.GetSymbol() );

@@ -3,10 +3,12 @@
 
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.ReflectionMocks;
+using Caravela.Framework.Impl.Utilities;
 using Caravela.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Concurrent;
+
 
 namespace Caravela.Framework.Impl.CodeModel
 {
@@ -20,12 +22,12 @@ namespace Caravela.Framework.Impl.CodeModel
             {
                 IDynamicTypeSymbol => throw new AssertionFailedException(),
                 IArrayTypeSymbol { ElementType: IDynamicTypeSymbol } => throw new AssertionFailedException(),
-                _ => this.Get( symbol.GetSymbolKey(), symbol.GetReflectionName() )
+                _ => this.Get( symbol.GetSymbolId(), symbol.GetReflectionName() )
             };
 
-        public Type Get( SymbolKey symbolKey, string fullMetadataName )
+        public Type Get( SymbolId symbolKey, string fullMetadataName )
         {
-            return this._instances.GetOrAdd( symbolKey.ToString(), id => CompileTimeType.CreateFromSymbolKey( new SymbolKey(id), fullMetadataName ) );
+            return this._instances.GetOrAdd( symbolKey.ToString(), id => CompileTimeType.CreateFromSymbolId( new SymbolId(id), fullMetadataName ) );
         }
     }
 }
