@@ -196,16 +196,14 @@ namespace Caravela.Framework.Impl.Utilities
                 _ => false
             };
 
-        public static ISymbol? Translate( this ISymbol? symbol, Compilation compilation )
+        public static ISymbol? Translate( this ISymbol? symbol, Compilation? originalCompilation,  Compilation compilation )
         {
             if ( symbol == null )
             {
                 return null;
             }
-            else if ( symbol.ContainingAssembly == compilation.Assembly
-                      || compilation.SourceModule.ReferencedAssemblySymbols.Contains( symbol.ContainingAssembly ) )
+            else if ( originalCompilation == compilation )
             {
-                // The symbol is valid in the current compilation.
                 return symbol;
             }
             else
@@ -213,10 +211,13 @@ namespace Caravela.Framework.Impl.Utilities
                 // The symbol is not valid in the current compilation. We need to go through documentation id 
                 // TODO: port to SymbolKey
 
-                var symbolId = DocumentationCommentId.CreateReferenceId( symbol );
+                var symbolId = DocumentationCommentId.CreateDeclarationId( symbol );
 
-                return DocumentationCommentId.GetFirstSymbolForReferenceId( symbolId, compilation );
+                var resolvedSymbol = DocumentationCommentId.GetFirstSymbolForDeclarationId( symbolId, compilation );
+
+                return resolvedSymbol;
             }
         }
+
     }
 }

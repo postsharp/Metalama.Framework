@@ -38,10 +38,10 @@ namespace Caravela.Framework.Impl.ReflectionMocks
             => new CompileTimeType( Ref.FromDocumentationId<IType>( documentationId ), fullMetadataName );
 
         // For test only. This is also used from serializers but these used should be removed when serializers will stop using symbols.
-        internal static Type Create( IType type ) => Create( type.GetSymbol() );
+        internal static Type Create( IType type ) => Create( type.GetSymbol(), type.GetCompilationModel().RoslynCompilation );
 
         // For test only.
-        internal static Type Create( ITypeSymbol typeSymbol ) => new CompileTimeType( Ref.FromSymbol<IType>( typeSymbol ), typeSymbol.ToDisplayString() );
+        internal static Type Create( ITypeSymbol typeSymbol, Compilation compilation ) => new CompileTimeType( Ref.FromSymbol<IType>( typeSymbol, compilation ), typeSymbol.ToDisplayString() );
 
         public override string Namespace => throw CompileTimeMocksHelper.CreateNotSupportedException();
 

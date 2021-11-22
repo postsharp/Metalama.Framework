@@ -167,7 +167,7 @@ namespace Caravela.Framework.Impl.CodeModel
                 this,
                 this.PartialCompilation.Types
                     .Where( t => this.SymbolClassifier.GetTemplatingScope( t ) != TemplatingScope.CompileTimeOnly )
-                    .Select( t => new MemberRef<INamedType>( t ) ) );
+                    .Select( t => new MemberRef<INamedType>( t, this.RoslynCompilation ) ) );
 
         [Memo]
         public IAttributeList Attributes
@@ -177,7 +177,7 @@ namespace Caravela.Framework.Impl.CodeModel
                     .GetAttributes()
                     .Union( this.RoslynCompilation.SourceModule.GetAttributes() )
                     .Where( a => a.AttributeConstructor != null )
-                    .Select( a => new AttributeRef( a, this.RoslynCompilation.Assembly.ToRef() ) ) );
+                    .Select( a => new AttributeRef( a,  Ref.FromSymbol( RoslynCompilation.Assembly, this.RoslynCompilation ) ) ) );
 
         public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
             => this.RoslynCompilation.AssemblyName ?? "<Anonymous>";

@@ -261,7 +261,7 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
                         if ( replacedMemberSymbol != null )
                         {
                             // This is replaced source element.
-                            A.CallTo( () => replaceMember.ReplacedMember ).Returns( new MemberRef<IMemberOrNamedType>( replacedMemberSymbol ) );
+                            A.CallTo( () => replaceMember.ReplacedMember ).Returns( new MemberRef<IMemberOrNamedType>( replacedMemberSymbol, inputCompilation ) );
                         }
                         else
                         {

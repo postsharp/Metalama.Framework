@@ -4,7 +4,6 @@
 using Caravela.Framework.Code;
 using Caravela.Framework.Code.DeclarationBuilders;
 using Microsoft.CodeAnalysis;
-using System;
 
 namespace Caravela.Framework.Impl.CodeModel.References
 {
@@ -15,28 +14,32 @@ namespace Caravela.Framework.Impl.CodeModel.References
     internal readonly struct MemberRef<T> : IMemberRef<T>
         where T : class, IMemberOrNamedType
     {
-        public MemberRef( ISymbol symbol )
+        private readonly Ref<T> _underlying;
+        
+        public MemberRef( ISymbol symbol, Compilation compilation )
         {
             symbol.AssertValidType<T>();
 
-            this.Target = symbol;
+            this._underlying = new Ref<T>(symbol, compilation);
         }
 
         public MemberRef( IMemberOrNamedTypeBuilder builder )
         {
-            this.Target = builder;
+            this._underlying = new Ref<T>( builder );
         }
 
         public MemberRef( in Ref<IDeclaration> declarationRef )
         {
-            this.Target = declarationRef.Target;
+            this._underlying = declarationRef.As<T>();
         }
 
-        public object? Target { get; }
+        public object? Target => this._underlying.Target;
 
-        public T GetTarget( ICompilation compilation ) => Ref<T>.Resolve( this.Target, compilation );
+        public T GetTarget( ICompilation compilation ) => this._underlying.GetTarget(compilation);
 
-        public ISymbol GetSymbol( Compilation compilation ) => this.Target as ISymbol ?? throw new InvalidOperationException();
+        public ISymbol? GetSymbol( Compilation compilation ) => this._underlying.GetSymbol( compilation );
+
+        public override string ToString() => this._underlying.ToString();
 
         public string Name
             => this.Target switch
@@ -45,7 +48,5 @@ namespace Caravela.Framework.Impl.CodeModel.References
                 IMemberOrNamedTypeBuilder builder => builder.Name,
                 _ => throw new AssertionFailedException()
             };
-
-        public override string ToString() => this.Target?.ToString() ?? "null";
     }
 }

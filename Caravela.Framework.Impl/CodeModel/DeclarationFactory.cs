@@ -74,75 +74,75 @@ namespace Caravela.Framework.Impl.CodeModel
             }
 
             return (INamespace) this._cache.GetOrAdd(
-                namespaceSymbol.ToRef().As<ICompilationElement>(),
+                namespaceSymbol.ToRef(this.Compilation).As<ICompilationElement>(),
                 l => new Namespace( (INamespaceSymbol) l.GetSymbol( this.Compilation ), this._compilationModel ) );
         }
 
         internal IAssembly GetAssembly( IAssemblySymbol assemblySymbol )
             => (IAssembly) this._cache.GetOrAdd(
-                assemblySymbol.ToRef().As<ICompilationElement>(),
+                assemblySymbol.ToRef(this.Compilation).As<ICompilationElement>(),
                 l => !SymbolEqualityComparer.Default.Equals( l.GetSymbol( this.Compilation ), this._compilationModel.RoslynCompilation.Assembly )
                     ? new ReferencedAssembly( (IAssemblySymbol) l.GetSymbol( this.Compilation ), this._compilationModel )
                     : this._compilationModel );
 
         public IType GetIType( ITypeSymbol typeSymbol )
             => (IType) this._cache.GetOrAdd(
-                typeSymbol.ToRef().As<ICompilationElement>(),
+                typeSymbol.ToRef(this.Compilation).As<ICompilationElement>(),
                 l => CodeModelFactory.CreateIType( (ITypeSymbol) l.GetSymbol( this.Compilation ), this._compilationModel ) );
 
         public INamedType GetNamedType( INamedTypeSymbol typeSymbol )
             => (NamedType) this._cache.GetOrAdd(
-                typeSymbol.ToRef().As<ICompilationElement>(),
+                typeSymbol.ToRef(this.Compilation).As<ICompilationElement>(),
                 s => new NamedType( (INamedTypeSymbol) s.GetSymbol( this.Compilation ), this._compilationModel ) );
 
         private IArrayType GetArrayType( IArrayTypeSymbol typeSymbol )
             => (ArrayType) this._cache.GetOrAdd(
-                typeSymbol.ToRef().As<ICompilationElement>(),
+                typeSymbol.ToRef(this.Compilation).As<ICompilationElement>(),
                 s => new ArrayType( (IArrayTypeSymbol) s.GetSymbol( this.Compilation ), this._compilationModel ) );
 
         private IDynamicType GetDynamicType( IDynamicTypeSymbol typeSymbol )
             => (DynamicType) this._cache.GetOrAdd(
-                typeSymbol.ToRef().As<ICompilationElement>(),
+                typeSymbol.ToRef(this.Compilation).As<ICompilationElement>(),
                 s => new DynamicType( (IDynamicTypeSymbol) s.GetSymbol( this.Compilation ), this._compilationModel ) );
 
         private IPointerType GetPointerType( IPointerTypeSymbol typeSymbol )
             => (PointerType) this._cache.GetOrAdd(
-                typeSymbol.ToRef().As<ICompilationElement>(),
+                typeSymbol.ToRef(this.Compilation).As<ICompilationElement>(),
                 s => new PointerType( (IPointerTypeSymbol) s.GetSymbol( this.Compilation ), this._compilationModel ) );
 
         public ITypeParameter GetGenericParameter( ITypeParameterSymbol typeParameterSymbol )
             => (TypeParameter) this._cache.GetOrAdd(
-                typeParameterSymbol.ToRef().As<ICompilationElement>(),
+                typeParameterSymbol.ToRef(this.Compilation).As<ICompilationElement>(),
                 tp => new TypeParameter( (ITypeParameterSymbol) tp.GetSymbol( this.Compilation ), this._compilationModel ) );
 
         public IMethod GetMethod( IMethodSymbol methodSymbol )
             => (IMethod) this._cache.GetOrAdd(
-                methodSymbol.ToRef().As<ICompilationElement>(),
+                methodSymbol.ToRef(this.Compilation).As<ICompilationElement>(),
                 ms => new Method( (IMethodSymbol) ms.GetSymbol( this.Compilation ), this._compilationModel ) );
 
         public IProperty GetProperty( IPropertySymbol propertySymbol )
             => (IProperty) this._cache.GetOrAdd(
-                propertySymbol.ToRef().As<ICompilationElement>(),
+                propertySymbol.ToRef(this.Compilation).As<ICompilationElement>(),
                 ms => new Property( (IPropertySymbol) ms.GetSymbol( this.Compilation ), this._compilationModel ) );
 
         public IField GetField( IFieldSymbol fieldSymbol )
             => (IField) this._cache.GetOrAdd(
-                fieldSymbol.ToRef().As<ICompilationElement>(),
+                fieldSymbol.ToRef(this.Compilation).As<ICompilationElement>(),
                 ms => new Field( (IFieldSymbol) ms.GetSymbol( this.Compilation ), this._compilationModel ) );
 
         public IConstructor GetConstructor( IMethodSymbol methodSymbol )
             => (IConstructor) this._cache.GetOrAdd(
-                methodSymbol.ToRef().As<ICompilationElement>(),
+                methodSymbol.ToRef(this.Compilation).As<ICompilationElement>(),
                 ms => new Constructor( (IMethodSymbol) ms.GetSymbol( this.Compilation ), this._compilationModel ) );
 
         public IParameter GetParameter( IParameterSymbol parameterSymbol )
             => (IParameter) this._cache.GetOrAdd(
-                parameterSymbol.ToRef().As<ICompilationElement>(),
+                parameterSymbol.ToRef(this.Compilation).As<ICompilationElement>(),
                 ms => new Parameter( (IParameterSymbol) ms.GetSymbol( this.Compilation ), this._compilationModel ) );
 
         public IEvent GetEvent( IEventSymbol @event )
             => (IEvent) this._cache.GetOrAdd(
-                @event.ToRef().As<ICompilationElement>(),
+                @event.ToRef(this.Compilation).As<ICompilationElement>(),
                 ms => new Event( (IEventSymbol) ms.GetSymbol( this.Compilation ), this._compilationModel ) );
 
         internal IDeclaration GetDeclaration( ISymbol symbol, DeclarationRefTargetKind kind = DeclarationRefTargetKind.Default )

@@ -45,7 +45,7 @@ namespace Caravela.Framework.Impl.CodeModel
                 this,
                 this._symbol.GetTypeMembers()
                     .Where( t => this.Compilation.ContainsType( t ) )
-                    .Select( n => new MemberRef<INamedType>( n ) ) );
+                    .Select( n => new MemberRef<INamedType>( n, this.Compilation.RoslynCompilation ) ) );
 
         [Memo]
         public INamedTypeList AllTypes
@@ -54,14 +54,14 @@ namespace Caravela.Framework.Impl.CodeModel
                 this._symbol.SelectManyRecursive( ns => ns.GetNamespaceMembers(), includeThis: true )
                     .SelectMany( ns => ns.GetTypeMembers() )
                     .Where( t => this.Compilation.ContainsType( t ) )
-                    .Select( n => new MemberRef<INamedType>( n ) ) );
+                    .Select( n => new MemberRef<INamedType>( n, this.Compilation.RoslynCompilation ) ) );
 
         public INamespaceList Namespaces
             => new NamespaceList(
                 this,
                 this._symbol.GetNamespaceMembers()
                     .Where( n => this.Compilation.PartialCompilation.ParentNamespaces.Contains( n ) )
-                    .Select( n => new Ref<INamespace>( n ) ) );
+                    .Select( n => new Ref<INamespace>( n, this.Compilation.RoslynCompilation ) ) );
 
         public override string ToString() => this.IsGlobalNamespace ? "<Global Namespace>" : this.FullName;
 

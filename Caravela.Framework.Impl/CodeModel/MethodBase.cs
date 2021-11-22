@@ -51,13 +51,13 @@ namespace Caravela.Framework.Impl.CodeModel
                     .SelectMany( n => n.DescendantNodes( c => c == n || c is not LocalFunctionStatementSyntax ) )
                     .OfType<LocalFunctionStatementSyntax>()
                     .Select( f => (IMethodSymbol) this.Compilation.RoslynCompilation.GetSemanticModel( f.SyntaxTree ).GetDeclaredSymbol( f )! )
-                    .Select( s => new MemberRef<IMethod>( s ) ) );
+                    .Select( s => new MemberRef<IMethod>( s, this.Compilation.RoslynCompilation ) ) );
 
         [Memo]
         public IParameterList Parameters
             => new ParameterList(
                 this,
-                this.MethodSymbol.Parameters.Select( p => Ref.FromSymbol<IParameter>( p ) ) );
+                this.MethodSymbol.Parameters.Select( p => Ref.FromSymbol<IParameter>( p, this.Compilation.RoslynCompilation ) ) );
 
         MethodKind IMethodBase.MethodKind
             => this.MethodSymbol.MethodKind switch

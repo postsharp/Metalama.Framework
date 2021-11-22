@@ -38,7 +38,7 @@ namespace Caravela.Framework.Impl.CodeModel
                 this,
                 this.Symbol.GetAttributes()
                     .Where( a => a.AttributeConstructor != null )
-                    .Select( a => new AttributeRef( a, Ref.FromSymbol<IDeclaration>( this.Symbol ) ) ) );
+                    .Select( a => new AttributeRef( a, Ref.FromSymbol<IDeclaration>( this.Symbol, this.Compilation.RoslynCompilation ) ) ) );
 
         [Memo]
         public IAssembly DeclaringAssembly => this.Compilation.Factory.GetAssembly( this.Symbol.ContainingAssembly );
@@ -47,7 +47,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public abstract ISymbol Symbol { get; }
 
-        public virtual Ref<IDeclaration> ToRef() => Ref.FromSymbol( this.Symbol );
+        public virtual Ref<IDeclaration> ToRef() => Ref.FromSymbol( this.Symbol, this.Compilation.RoslynCompilation );
 
         public virtual string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
             => this.Symbol.ToDisplayString( format.ToRoslyn() );

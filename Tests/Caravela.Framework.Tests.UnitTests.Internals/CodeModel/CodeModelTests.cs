@@ -465,7 +465,7 @@ class C<T>
 
             var typeKinds = new[] { TypeKind.Array, Class, TypeKind.Delegate, Dynamic, TypeKind.Enum, GenericParameter, Interface, Pointer, Struct };
 
-            Assert.Equal( typeKinds, type.Fields.Select( p => p.Type.TypeKind ) );
+            Assert.Equal( typeKinds, type.Fields.Select( p => p.Type.TypeKind ).ToArray() );
         }
 
         [Fact]

@@ -149,7 +149,7 @@ namespace Caravela.Framework.Impl.CodeModel
                 this,
                 this.TypeSymbol.GetTypeMembers()
                     .Where( t => this.Compilation.SymbolClassifier.GetTemplatingScope( t ) != TemplatingScope.CompileTimeOnly )
-                    .Select( t => new MemberRef<INamedType>( t ) ) );
+                    .Select( t => new MemberRef<INamedType>( t, this.Compilation.RoslynCompilation ) ) );
 
         [Memo]
         public IPropertyList Properties
@@ -212,7 +212,7 @@ namespace Caravela.Framework.Impl.CodeModel
                     .GetMembers()
                     .OfType<IMethodSymbol>()
                     .Where( m => m.MethodKind == MethodKind.Constructor )
-                    .Select( m => new MemberRef<IConstructor>( m ) ) );
+                    .Select( m => new MemberRef<IConstructor>( m, this.Compilation.RoslynCompilation ) ) );
 
         [Memo]
         public IConstructor? StaticConstructor
@@ -243,7 +243,7 @@ namespace Caravela.Framework.Impl.CodeModel
             => new GenericParameterList(
                 this,
                 this.TypeSymbol.TypeParameters
-                    .Select( Ref.FromSymbol<ITypeParameter> ) );
+                    .Select( x => Ref.FromSymbol<ITypeParameter>( x, this.Compilation.RoslynCompilation) ) );
 
         [Memo]
         public INamespace Namespace => this.Compilation.Factory.GetNamespace( this.TypeSymbol.ContainingNamespace );
@@ -502,7 +502,7 @@ namespace Caravela.Framework.Impl.CodeModel
             if ( transformations.Length == 0 )
             {
                 // No transformations.
-                return symbolMembers.Select( x => new MemberRef<TMember>( x ) );
+                return symbolMembers.Select( x => new MemberRef<TMember>( x, this.Compilation.RoslynCompilation ) );
             }
 
             if ( !transformations.OfType<TBuilder>().Any( t => t is IReplaceMember ) )
@@ -510,7 +510,7 @@ namespace Caravela.Framework.Impl.CodeModel
                 // No replaced members.
                 return
                     symbolMembers
-                        .Select( x => new MemberRef<TMember>( x ) )
+                        .Select( x => new MemberRef<TMember>( x, this.Compilation.RoslynCompilation ) )
                         .Concat( transformations.OfType<TBuilder>().Select( x => x.ToMemberRef<TMember>() ) );
             }
 
@@ -567,7 +567,7 @@ namespace Caravela.Framework.Impl.CodeModel
             {
                 if ( !replacedSymbols.Contains( symbol ) )
                 {
-                    members.Add( new MemberRef<TMember>( symbol ) );
+                    members.Add( new MemberRef<TMember>( symbol, this.Compilation.RoslynCompilation ) );
                 }
             }
 
