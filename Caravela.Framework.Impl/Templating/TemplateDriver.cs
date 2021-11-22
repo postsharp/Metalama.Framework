@@ -18,7 +18,7 @@ namespace Caravela.Framework.Impl.Templating
     {
         private readonly UserCodeInvoker _userCodeInvoker;
         private readonly MethodInfo _templateMethod;
-        
+
         public TemplateDriver(
             IServiceProvider serviceProvider,
             MethodInfo compiledTemplateMethodInfo )

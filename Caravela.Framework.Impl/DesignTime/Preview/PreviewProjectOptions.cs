@@ -48,5 +48,9 @@ namespace Caravela.Framework.Impl.DesignTime.Preview
         IProjectOptions IProjectOptions.Apply( IProjectOptions options ) => throw new NotSupportedException();
 
         bool IProjectOptions.TryGetProperty( string name, [NotNullWhen( true )] out string? value ) => this._underlying.TryGetProperty( name, out value );
+
+        bool IProjectOptions.IsDesignTimeEnabled => true;
+
+        string? IProjectOptions.AdditionalCompilationOutputDirectory => null;
     }
 }

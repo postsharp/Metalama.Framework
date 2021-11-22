@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Aspects;
+using Caravela.Framework.Impl.AdditionalOutputs;
 using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.Aspects;
 using Caravela.Framework.Impl.CodeModel;
@@ -281,6 +282,18 @@ namespace Caravela.Framework.Impl.Pipeline
             return sources;
         }
 
+        private protected virtual ImmutableArray<AdditionalCompilationOutputFile> GetAdditionalCompilationOutputFiles( ServiceProvider serviceProvider )
+        {
+            var provider = serviceProvider.GetOptionalService<IAdditionalOutputFileProvider>();
+
+            if ( provider == null )
+            {
+                return ImmutableArray<AdditionalCompilationOutputFile>.Empty;
+            }
+
+            return provider.GetAdditionalCompilationOutputFiles();
+        }
+
         /// <summary>
         /// Executes the all stages of the current pipeline, report diagnostics, and returns the last <see cref="PipelineStageResult"/>.
         /// </summary>
@@ -301,12 +314,14 @@ namespace Caravela.Framework.Impl.Pipeline
             }
 
             var aspectSources = this.CreateAspectSources( pipelineConfiguration, compilation.Compilation, cancellationToken );
+            var additionalCompilationOutputFiles = this.GetAdditionalCompilationOutputFiles( pipelineConfiguration.ServiceProvider );
 
             pipelineStageResult = new PipelineStageResult(
                 compilation,
                 pipelineConfiguration.ProjectModel,
                 pipelineConfiguration.AspectLayers,
-                aspectSources: aspectSources );
+                aspectSources: aspectSources,
+                additionalCompilationOutputFiles: additionalCompilationOutputFiles );
 
             foreach ( var stageConfiguration in pipelineConfiguration.Stages )
             {
