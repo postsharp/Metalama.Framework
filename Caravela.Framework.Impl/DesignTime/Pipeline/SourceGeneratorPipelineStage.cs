@@ -30,7 +30,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
             IPipelineStepsResult pipelineStepResult,
             CancellationToken cancellationToken )
         {
-            var diagnosticSink = new UserDiagnosticSink(this.CompileTimeProject);
+            var diagnosticSink = new UserDiagnosticSink( this.CompileTimeProject );
 
             DesignTimeSyntaxTreeGenerator.GenerateDesignTimeSyntaxTrees(
                 input.PartialCompilation,

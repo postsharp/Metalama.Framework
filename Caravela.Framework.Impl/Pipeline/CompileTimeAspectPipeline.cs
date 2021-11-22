@@ -57,7 +57,8 @@ namespace Caravela.Framework.Impl.Pipeline
                 return new CompileTimeAspectPipelineResult(
                     ImmutableArray<SyntaxTreeTransformation>.Empty,
                     ImmutableArray<ManagedResource>.Empty,
-                    partialCompilation );
+                    partialCompilation,
+                    ImmutableArray<AdditionalCompilationOutputFile>.Empty );
             }
 
             // Run the code analyzers that normally run at design time.
