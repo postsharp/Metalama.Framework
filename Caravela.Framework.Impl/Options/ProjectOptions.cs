@@ -43,7 +43,8 @@ namespace Caravela.Framework.Impl.Options
 
         public ImmutableArray<object> PlugIns { get; }
 
-        public bool IsFrameworkEnabled => this.GetBooleanOption( "CaravelaEnabled", true );
+        public bool IsFrameworkEnabled
+            => this.GetBooleanOption( "CaravelaEnabled", true ) && !this.GetBooleanOption( "CaravelaCompileTimeOnlyProject" );
 
         public bool FormatOutput => this.GetBooleanOption( "CaravelaFormatOutput" );
 

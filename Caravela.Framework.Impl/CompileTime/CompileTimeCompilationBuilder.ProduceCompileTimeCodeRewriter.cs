@@ -113,7 +113,7 @@ namespace Caravela.Framework.Impl.CompileTime
                 }
                 else
                 {
-                    return base.VisitEnumDeclaration( node );
+                    return base.VisitEnumDeclaration( node )!.WithAdditionalAnnotations( _hasCompileTimeCodeAnnotation );
                 }
             }
 
@@ -130,7 +130,7 @@ namespace Caravela.Framework.Impl.CompileTime
                 }
                 else
                 {
-                    return base.VisitDelegateDeclaration( node );
+                    return base.VisitDelegateDeclaration( node )!.WithAdditionalAnnotations( _hasCompileTimeCodeAnnotation );
                 }
             }
 

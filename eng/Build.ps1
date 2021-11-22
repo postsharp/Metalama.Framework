@@ -49,6 +49,10 @@ if ( $Release ) {
     $arguments += "Release"
 }
 
+if ( $Sign ) {
+    $arguments += "--sign"
+}
+
 $arguments += "--zip"
 
 Write-Host "Update your command line to the new format. The new arguments are: $arguments"

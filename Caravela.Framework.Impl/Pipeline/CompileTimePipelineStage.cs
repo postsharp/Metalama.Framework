@@ -71,7 +71,9 @@ namespace Caravela.Framework.Impl.Pipeline
                 pipelineStepResult.Diagnostics.Concat( linkerResult.Diagnostics ),
                 pipelineStepResult.ExternalAspectSources,
                 input.ExternallyInheritableAspects.AddRange( pipelineStepResult.InheritableAspectInstances ),
-                additionalCompilationOutputFiles: additionalCompilationOutputFiles != null ? input.AdditionalCompilationOutputFiles.AddRange( additionalCompilationOutputFiles ) : input.AdditionalCompilationOutputFiles );
+                additionalCompilationOutputFiles: additionalCompilationOutputFiles != null
+                    ? input.AdditionalCompilationOutputFiles.AddRange( additionalCompilationOutputFiles )
+                    : input.AdditionalCompilationOutputFiles );
         }
 
         private IReadOnlyList<AdditionalCompilationOutputFile> GenerateAdditionalCompilationOutputFiles(
@@ -126,11 +128,11 @@ namespace Caravela.Framework.Impl.Pipeline
 
             return generatedFiles;
 
-            string GetUniqueFilename(string filename)
+            string GetUniqueFilename( string filename )
             {
-                if (!uniquePaths.Add( filename ))
+                if ( !uniquePaths.Add( filename ) )
                 {
-                    for ( var i = 1; ; i++ )
+                    for ( var i = 1; /* Intentionally empty */; i++ )
                     {
                         var path = Path.GetDirectoryName( filename );
                         var name = Path.GetFileNameWithoutExtension( filename );

@@ -13,6 +13,7 @@
         <CompilerVisibleProperty Include="CaravelaFormatOutput" />
         <CompilerVisibleProperty Include="CaravelaFormatCompileTimeCode" />
         <CompilerVisibleProperty Include="CaravelaUserCodeTrusted" />
+        <CompilerVisibleProperty Include="CaravelaCompileTimeOnlyProject" />
         <CompilerVisibleProperty Include="AssemblyName" />
         <CompilerVisibleProperty Include="CaravelaDesignTimeEnabled" />
         <CompilerVisibleProperty Include="CaravelaAdditionalCompilationOutputDirectory" />

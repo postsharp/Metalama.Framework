@@ -3,12 +3,10 @@
 
 using Caravela.Compiler;
 using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
-using Caravela.Framework.Impl.CodeModel.References;
+using Caravela.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -19,7 +17,7 @@ namespace Caravela.Framework.Impl.Sdk
     /// <summary>
     /// Context for the <see cref="IAspectWeaver"/>.
     /// </summary>
-    public sealed class AspectWeaverContext
+    public sealed partial class AspectWeaverContext
     {
         private readonly Action<Diagnostic> _addDiagnostic;
         private readonly Action<ManagedResource> _addResource;
@@ -36,6 +34,11 @@ namespace Caravela.Framework.Impl.Sdk
         /// Gets the set of aspect instances that must be weaved.
         /// </summary>
         public IReadOnlyDictionary<ISymbol, IAspectInstance> AspectInstances { get; }
+        
+        /// <summary>
+        /// Gets the current project.
+        /// </summary>
+        public IProject Project { get; }
 
         /// <summary>
         /// Gets or sets the compilation.
@@ -75,7 +78,7 @@ namespace Caravela.Framework.Impl.Sdk
         public void RewriteAspectTargets( CSharpSyntaxRewriter rewriter )
         {
             var nodes = this.AspectInstances.Values
-                .Select( a => ((ISdkRef<IDeclaration>) a.TargetDeclaration).GetSymbol( this._compilation.Compilation ) )
+                .Select( a => a.TargetDeclaration.GetSymbol( this._compilation.Compilation ) )
                 .Where( s => s != null )
                 .SelectMany( s => s!.DeclaringSyntaxReferences )
                 .GroupBy( r => r.SyntaxTree );
@@ -98,60 +101,22 @@ namespace Caravela.Framework.Impl.Sdk
             this.Compilation = this.Compilation.WithSyntaxTreeModifications( modifiedSyntaxTrees );
         }
 
-        private class Rewriter : CSharpSyntaxRewriter
-        {
-            private readonly ImmutableHashSet<SyntaxNode> _targets;
-            private readonly CSharpSyntaxRewriter _userRewriter;
-
-            public Rewriter( ImmutableHashSet<SyntaxNode> targets, CSharpSyntaxRewriter userRewriter )
-            {
-                this._userRewriter = userRewriter;
-                this._targets = targets;
-            }
-
-            public override SyntaxNode? Visit( SyntaxNode? node )
-            {
-                switch ( node )
-                {
-                    case CompilationUnitSyntax:
-                        return base.Visit( node );
-
-                    case MemberDeclarationSyntax or AccessorDeclarationSyntax:
-                        {
-                            if ( this._targets.Contains( node ) )
-                            {
-                                return this._userRewriter.Visit( node );
-                            }
-                            else if ( node is BaseTypeDeclarationSyntax or NamespaceDeclarationSyntax )
-                            {
-                                // Visit types and namespaces.
-
-                                return base.Visit( node );
-                            }
-
-                            break;
-                        }
-                }
-
-                // Don't visit other members.
-                return node;
-            }
-        }
-
         internal AspectWeaverContext(
             IAspectClass aspectClass,
             IReadOnlyDictionary<ISymbol, IAspectInstance> aspectInstances,
             IPartialCompilation compilation,
             Action<Diagnostic> addDiagnostic,
-            Action<ManagedResource> addResource,
+            Action<ManagedResource> addManifestResource,
             IAspectWeaverHelper helper,
-            IServiceProvider serviceProvider )
+            IServiceProvider serviceProvider,
+            IProject project )
         {
             this.AspectClass = aspectClass;
             this.AspectInstances = aspectInstances;
             this._compilation = compilation;
             this._addDiagnostic = addDiagnostic;
-            this._addResource = addResource;
+            this.Project = project;
+            this._addResource = addManifestResource;
             this.Helper = helper;
             this.ServiceProvider = serviceProvider;
         }

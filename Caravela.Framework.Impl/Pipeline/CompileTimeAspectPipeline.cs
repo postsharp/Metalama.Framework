@@ -49,13 +49,23 @@ namespace Caravela.Framework.Impl.Pipeline
             ImmutableArray<ManagedResource> resources,
             CancellationToken cancellationToken )
         {
+            var partialCompilation = PartialCompilation.CreateComplete( compilation );
+
+            // Skip if Caravela has been disabled for this project.
+            if ( !this.ProjectOptions.IsFrameworkEnabled )
+            {
+                return new CompileTimeAspectPipelineResult(
+                    ImmutableArray<SyntaxTreeTransformation>.Empty,
+                    ImmutableArray<ManagedResource>.Empty,
+                    partialCompilation,
+                    ImmutableArray<AdditionalCompilationOutputFile>.Empty );
+            }
+
             // Run the code analyzers that normally run at design time.
             if ( !TemplatingCodeValidator.Validate( compilation, diagnosticAdder, this.ServiceProvider, cancellationToken ) )
             {
                 return null;
             }
-
-            var partialCompilation = PartialCompilation.CreateComplete( compilation );
 
             // Initialize the pipeline and generate the compile-time project.
             if ( !this.TryInitialize( diagnosticAdder, partialCompilation, null, cancellationToken, out var configuration ) )
@@ -78,15 +88,6 @@ namespace Caravela.Framework.Impl.Pipeline
             AspectPipelineConfiguration configuration,
             CancellationToken cancellationToken )
         {
-            if ( !this.ProjectOptions.IsFrameworkEnabled )
-            {
-                return new CompileTimeAspectPipelineResult(
-                    ImmutableArray<SyntaxTreeTransformation>.Empty,
-                    ImmutableArray<ManagedResource>.Empty,
-                    compilation,
-                    ImmutableArray<AdditionalCompilationOutputFile>.Empty );
-            }
-
             try
             {
                 // Execute the pipeline.
