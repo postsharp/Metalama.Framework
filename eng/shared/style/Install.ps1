@@ -70,11 +70,6 @@ function CreateOrCheckSymbolicLink {
 
 if ( $Create -or $Check ) {
     CreateOrCheckSymbolicLink -Source $EditorConfigFile -Target ".\$EngineeringDirectory\style\.editorconfig" -Check $Check -Create $Create
-
-    Get-ChildItem ".\" -Filter "*.sln" | 
-    Foreach-Object {
-        CreateOrCheckSymbolicLink -Source "$($_.FullName).DotSettings" -Target ".\$EngineeringDirectory\style\sln.DotSettings" -Check $Check -Create $Create
-    }
 }
 
 exit 0

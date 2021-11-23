@@ -1,4 +1,7 @@
-﻿using Microsoft.Build.Definition;
+﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+
+using Microsoft.Build.Definition;
 using Microsoft.Build.Evaluation;
 using Microsoft.Extensions.FileSystemGlobbing;
 using Microsoft.Extensions.FileSystemGlobbing.Abstractions;
@@ -7,39 +10,36 @@ using PostSharp.Engineering.BuildTools.NuGet;
 using PostSharp.Engineering.BuildTools.Utilities;
 using System;
 using System.Collections.Immutable;
+using System.Globalization;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
 
 namespace PostSharp.Engineering.BuildTools.Build.Model
 {
-
     public class Product
     {
         public string EngineeringDirectory { get; init; } = "eng";
-        
+
         public string ProductName { get; init; } = "Unnamed";
-        
-        public string ProductNameWithoutDot => this.ProductName.Replace( ".", "" );
-        
+
+        public string ProductNameWithoutDot => this.ProductName.Replace( ".", "", StringComparison.OrdinalIgnoreCase );
+
         public ParametricString PrivateArtifactsDirectory { get; init; } = Path.Combine( "artifacts", "private" );
-        
+
         public ParametricString PublicArtifactsDirectory { get; init; } = Path.Combine( "artifacts", "public" );
-        
+
         public bool GenerateArcadeProperties { get; init; }
-        
+
         public ImmutableArray<string> AdditionalDirectoriesToClean { get; init; } = ImmutableArray<string>.Empty;
 
         public ImmutableArray<Solution> Solutions { get; init; } = ImmutableArray<Solution>.Empty;
 
-
-        public ImmutableArray<PublishingTarget> PublishingTargets { get; init; } =ImmutableArray<PublishingTarget>.Empty;
+        public ImmutableArray<PublishingTarget> PublishingTargets { get; init; } = ImmutableArray<PublishingTarget>.Empty;
 
         public ImmutableArray<ProductDependency> Dependencies { get; init; } = ImmutableArray<ProductDependency>.Empty;
 
         public ImmutableDictionary<string, string> SupportedProperties { get; init; } = ImmutableDictionary<string, string>.Empty;
-
-
 
         public bool Build( BuildContext context, BuildOptions options )
         {
@@ -48,12 +48,11 @@ namespace PostSharp.Engineering.BuildTools.Build.Model
             {
                 if ( options.BuildConfiguration != BuildConfiguration.Release )
                 {
-                    context.Console.WriteError(
-                        $"Cannot build a public version of a {options.BuildConfiguration} build without --force." );
+                    context.Console.WriteError( $"Cannot build a public version of a {options.BuildConfiguration} build without --force." );
+
                     return false;
                 }
             }
-
 
             // Build dependencies.
             if ( !options.NoDependencies && !this.Prepare( context, options ) )
@@ -62,12 +61,9 @@ namespace PostSharp.Engineering.BuildTools.Build.Model
             }
 
             // We have to read the version from the file we have generated - using MSBuild, because it contains properties.
-            var versionInfo = this.ReadGeneratedVersionFile( context.GetVersionFilePath(options.BuildConfiguration) );
+            var versionInfo = this.ReadGeneratedVersionFile( context.GetVersionFilePath( options.BuildConfiguration ) );
 
-            
             var privateArtifactsDir = Path.Combine( context.RepoDirectory, this.PrivateArtifactsDirectory.ToString( versionInfo ) );
-
-
 
             // Build.
             if ( !this.BuildCore( context, options ) )
@@ -75,10 +71,8 @@ namespace PostSharp.Engineering.BuildTools.Build.Model
                 return false;
             }
 
-
             // Allow for some customization before we create the zip file and copy to the public directory.
             this.BuildCompleted?.Invoke( (context, options, privateArtifactsDir) );
-
 
             // Zipping internal artifacts.
             void CreateZip( string directory )
@@ -89,9 +83,13 @@ namespace PostSharp.Engineering.BuildTools.Build.Model
 
                     context.Console.WriteMessage( $"Creating '{zipFile}'." );
                     var tempFile = Path.Combine( Path.GetTempPath(), Guid.NewGuid() + ".zip" );
-                    ZipFile.CreateFromDirectory( directory,
+
+                    ZipFile.CreateFromDirectory(
+                        directory,
                         tempFile,
-                        CompressionLevel.Optimal, false );
+                        CompressionLevel.Optimal,
+                        false );
+
                     File.Move( tempFile, zipFile );
                 }
             }
@@ -113,7 +111,6 @@ namespace PostSharp.Engineering.BuildTools.Build.Model
                     }
                 }
 
-
                 var publicArtifactsDirectory = Path.Combine( context.RepoDirectory, this.PublicArtifactsDirectory.ToString( versionInfo ) );
 
                 if ( !Directory.Exists( publicArtifactsDirectory ) )
@@ -121,8 +118,8 @@ namespace PostSharp.Engineering.BuildTools.Build.Model
                     Directory.CreateDirectory( publicArtifactsDirectory );
                 }
 
-
                 var matches = matcher.Execute( new DirectoryInfoWrapper( new DirectoryInfo( privateArtifactsDir ) ) );
+
                 if ( matches is { HasMatches: true } )
                 {
                     foreach ( var file in matches.Files )
@@ -135,7 +132,8 @@ namespace PostSharp.Engineering.BuildTools.Build.Model
                 }
 
                 // Verify that public packages have no private dependencies.
-                if ( !VerifyPublicPackageCommand.Execute( context.Console,
+                if ( !VerifyPublicPackageCommand.Execute(
+                    context.Console,
                     new VerifyPackageSettings { Directory = publicArtifactsDirectory } ) )
                 {
                     return false;
@@ -143,25 +141,31 @@ namespace PostSharp.Engineering.BuildTools.Build.Model
 
                 // Sign public artifacts.
                 var signSuccess = true;
+
                 if ( options.Sign )
                 {
                     context.Console.WriteHeading( "Signing artifacts" );
 
                     // Restore signing tools.
-                    var restoreTool = Path.Combine( context.RepoDirectory, this.EngineeringDirectory, "shared", "tools", "Restore.ps1" );
                     var signTool = Path.Combine( context.RepoDirectory, "tools", "SignClient.exe" );
-                    var signToolConfig = Path.Combine( context.RepoDirectory, this.EngineeringDirectory, "shared", "tools",
+
+                    var signToolConfig = Path.Combine(
+                        context.RepoDirectory,
+                        this.EngineeringDirectory,
+                        "shared",
+                        "tools",
                         "signclient-appsettings.json" );
+
                     var signToolSecret = Environment.GetEnvironmentVariable( "SIGNSERVER_SECRET" );
 
                     if ( signToolSecret == null )
                     {
                         context.Console.WriteError( "The SIGNSERVER_SECRET environment variable is not defined." );
+
                         return false;
                     }
 
-                    if ( !ToolInvocationHelper.InvokePowershell( context.Console, restoreTool, "SignClient",
-                        context.RepoDirectory ) )
+                    if ( !RestoreDependencyHelper.RestoreTool( context, "SignClient" ) )
                     {
                         return false;
                     }
@@ -198,44 +202,50 @@ namespace PostSharp.Engineering.BuildTools.Build.Model
             else if ( options.Sign )
             {
                 context.Console.WriteWarning( $"Cannot use --sign option in a non-public build." );
+
                 return false;
             }
-
 
             context.Console.WriteSuccess( $"Building the whole {this.ProductName} product was successful." );
 
             return true;
         }
 
-        
         private VersionInfo ReadGeneratedVersionFile( string path )
         {
             var versionFilePath = path;
             var versionFile = Project.FromFile( versionFilePath, new ProjectOptions() );
+
             var packageVersion = versionFile
                 .Properties
                 .Single( p => p.Name == this.ProductNameWithoutDot + "Version" )
                 .EvaluatedValue;
+
             if ( string.IsNullOrEmpty( packageVersion ) )
             {
                 throw new InvalidOperationException( "PackageVersion should not be null." );
             }
+
             var configuration = versionFile
                 .Properties
                 .Single( p => p.Name == this.ProductNameWithoutDot + "BuildConfiguration" )
                 .EvaluatedValue;
+
             if ( string.IsNullOrEmpty( configuration ) )
             {
                 throw new InvalidOperationException( "BuildConfiguration should not be null." );
             }
+
             ProjectCollection.GlobalProjectCollection.UnloadAllProjects();
-            return new (packageVersion, configuration);
+
+            return new VersionInfo( packageVersion, configuration );
         }
 
-        private (string MainVersion, string PackageVersionSuffix) ReadMainVersionFile( string path )
+        private static (string MainVersion, string PackageVersionSuffix) ReadMainVersionFile( string path )
         {
             var versionFilePath = path;
             var versionFile = Project.FromFile( versionFilePath, new ProjectOptions() );
+
             var mainVersion = versionFile
                 .Properties
                 .SingleOrDefault( p => p.Name == "MainVersion" )
@@ -254,8 +264,8 @@ namespace PostSharp.Engineering.BuildTools.Build.Model
 
             // Empty suffixes are allowed and mean RTM.
 
-
             ProjectCollection.GlobalProjectCollection.UnloadAllProjects();
+
             return (mainVersion, suffix);
         }
 
@@ -308,7 +318,6 @@ namespace PostSharp.Engineering.BuildTools.Build.Model
             return true;
         }
 
-
         public bool Test( BuildContext context, TestOptions options )
         {
             if ( !options.NoDependencies && !this.Build( context, (BuildOptions) options.WithIncludeTests( true ) ) )
@@ -338,7 +347,6 @@ namespace PostSharp.Engineering.BuildTools.Build.Model
                 properties = ImmutableDictionary<string, string>.Empty;
             }
 
-
             foreach ( var solution in this.Solutions )
             {
                 var solutionOptions = options;
@@ -349,6 +357,7 @@ namespace PostSharp.Engineering.BuildTools.Build.Model
                 }
 
                 context.Console.WriteHeading( $"Testing {solution.Name}." );
+
                 if ( !solution.Test( context, solutionOptions ) )
                 {
                     return false;
@@ -359,7 +368,8 @@ namespace PostSharp.Engineering.BuildTools.Build.Model
 
             if ( options.AnalyzeCoverage )
             {
-                if ( !AnalyzeCoverageCommand.Execute( context.Console,
+                if ( !AnalyzeCoverageCommand.Execute(
+                    context.Console,
                     new AnalyzeCoverageSettings { Path = Path.Combine( testResultsDir, "coverage.net5.0.json" ) } ) )
                 {
                     return false;
@@ -379,16 +389,16 @@ namespace PostSharp.Engineering.BuildTools.Build.Model
             }
 
             var (mainVersion, mainPackageVersionSuffix) =
-                this.ReadMainVersionFile( Path.Combine( context.RepoDirectory, this.EngineeringDirectory, "MainVersion.props" ) );
-
+                ReadMainVersionFile( Path.Combine( context.RepoDirectory, this.EngineeringDirectory, "MainVersion.props" ) );
 
             context.Console.WriteHeading( "Preparing the version file" );
 
-            var configuration = options.BuildConfiguration.ToString().ToLower();
+            var configuration = options.BuildConfiguration.ToString().ToLowerInvariant();
 
             var versionPrefix = mainVersion;
             int patchNumber;
             string versionSuffix;
+
             switch ( options.VersionSpec.Kind )
             {
                 case VersionKind.Local:
@@ -396,11 +406,13 @@ namespace PostSharp.Engineering.BuildTools.Build.Model
                         // Local build with timestamp-based version and randomized package number. For the assembly version we use a local incremental file stored in the user profile.
                         var localVersionDirectory =
                             Environment.ExpandEnvironmentVariables( "%APPDATA%\\Caravela.Engineering" );
+
                         var localVersionFile = $"{localVersionDirectory}\\{this.ProductName}.version";
                         int localVersion;
+
                         if ( File.Exists( localVersionFile ) )
                         {
-                            localVersion = int.Parse( File.ReadAllText( localVersionFile ) ) + 1;
+                            localVersion = int.Parse( File.ReadAllText( localVersionFile ), CultureInfo.InvariantCulture ) + 1;
                         }
                         else
                         {
@@ -408,41 +420,48 @@ namespace PostSharp.Engineering.BuildTools.Build.Model
                         }
 
                         if ( localVersion < 1000 )
-                        { localVersion = 1000; }
-
+                        {
+                            localVersion = 1000;
+                        }
 
                         if ( !Directory.Exists( localVersionDirectory ) )
                         {
                             Directory.CreateDirectory( localVersionDirectory );
                         }
 
-                        File.WriteAllText( localVersionFile, localVersion.ToString() );
-
+                        File.WriteAllText( localVersionFile, localVersion.ToString( CultureInfo.InvariantCulture ) );
 
                         versionSuffix =
                             $"local-{Environment.UserName}-{configuration}";
+
                         patchNumber = localVersion;
 
                         break;
                     }
+
                 case VersionKind.Numbered:
                     {
                         // Build server build with a build number given by the build server
                         patchNumber = options.VersionSpec.Number;
                         versionSuffix = $"dev-{configuration}";
+
                         break;
                     }
+
                 case VersionKind.Public:
                     // Public build
-                    versionSuffix = mainPackageVersionSuffix.TrimStart('-');
+                    versionSuffix = mainPackageVersionSuffix.TrimStart( '-' );
                     patchNumber = 0;
+
                     break;
+
                 default:
                     throw new InvalidOperationException();
             }
 
             var privateArtifactsRelativeDir = this.PrivateArtifactsDirectory.ToString( new VersionInfo( null!, options.BuildConfiguration.ToString() ) );
             var artifactsDir = Path.Combine( context.RepoDirectory, privateArtifactsRelativeDir );
+
             if ( !Directory.Exists( artifactsDir ) )
             {
                 Directory.CreateDirectory( artifactsDir );
@@ -461,25 +480,25 @@ namespace PostSharp.Engineering.BuildTools.Build.Model
     <!-- This file must not be added to source control and must not be uploaded as a build artifact.
          It must be imported by other repos as a dependency. 
          Dependent projects should not directly reference the artifacts path, which is considered an implementation detail. -->
-    <Import Project=""{Path.Combine(privateArtifactsRelativeDir, propsFileName)}""/>
+    <Import Project=""{Path.Combine( privateArtifactsRelativeDir, propsFileName )}""/>
 </Project>
 ";
+
             File.WriteAllText( Path.Combine( context.RepoDirectory, this.ProductName + ".Import.props" ), importFileContent );
 
             context.Console.WriteSuccess(
-                $"Preparing the version file was successful. {this.ProductNameWithoutDot}Version={this.ReadGeneratedVersionFile( context.GetVersionFilePath(options.BuildConfiguration) ).PackageVersion}" );
+                $"Preparing the version file was successful. {this.ProductNameWithoutDot}Version={this.ReadGeneratedVersionFile( context.GetVersionFilePath( options.BuildConfiguration ) ).PackageVersion}" );
 
             return true;
         }
 
         protected virtual string GenerateVersionFile( string versionPrefix, int patchNumber, string versionSuffix, string configuration )
         {
-
-
             var props = $@"
 <!-- This file is generated by the engineering tooling -->
 <Project>
     <PropertyGroup>";
+
             if ( this.GenerateArcadeProperties )
             {
                 // Caravela.Compiler, because of Arcade, requires the version number to be decomposed in a prefix, patch number, and suffix.
@@ -507,7 +526,6 @@ namespace PostSharp.Engineering.BuildTools.Build.Model
                     arcadeSuffix += patchNumber;
                 }
 
-                    
                 var packageSuffix = string.IsNullOrEmpty( arcadeSuffix ) ? "" : "-" + arcadeSuffix;
 
                 props += $@"
@@ -536,6 +554,7 @@ namespace PostSharp.Engineering.BuildTools.Build.Model
     </PropertyGroup>
 </Project>
 ";
+
             return props;
         }
 
@@ -568,6 +587,7 @@ namespace PostSharp.Engineering.BuildTools.Build.Model
             }
 
             context.Console.WriteHeading( $"Cleaning {this.ProductName}." );
+
             foreach ( var directory in this.AdditionalDirectoriesToClean )
             {
                 DeleteDirectory( Path.Combine( context.RepoDirectory, directory ) );
@@ -575,7 +595,7 @@ namespace PostSharp.Engineering.BuildTools.Build.Model
 
             var stringParameters = new VersionInfo( options.BuildConfiguration.ToString(), null! );
 
-            DeleteDirectory( Path.Combine( context.RepoDirectory, this.PrivateArtifactsDirectory.ToString(stringParameters) ) );
+            DeleteDirectory( Path.Combine( context.RepoDirectory, this.PrivateArtifactsDirectory.ToString( stringParameters ) ) );
             DeleteDirectory( Path.Combine( context.RepoDirectory, this.PublicArtifactsDirectory.ToString( stringParameters ) ) );
             CleanRecursive( context.RepoDirectory );
         }
@@ -584,13 +604,16 @@ namespace PostSharp.Engineering.BuildTools.Build.Model
         {
             context.Console.WriteHeading( "Publishing files" );
 
-            var versionFile = this.ReadGeneratedVersionFile( context.GetVersionFilePath(options.BuildConfiguration) );
+            var versionFile = this.ReadGeneratedVersionFile( context.GetVersionFilePath( options.BuildConfiguration ) );
 
             var stringParameters = new VersionInfo( versionFile.Configuration, versionFile.PackageVersion );
 
-
             var hasTarget = false;
-            if ( !this.PublishDirectory( context, options, versionFile,
+
+            if ( !this.PublishDirectory(
+                context,
+                options,
+                versionFile,
                 Path.Combine( context.RepoDirectory, this.PrivateArtifactsDirectory.ToString( stringParameters ) ),
                 false,
                 ref hasTarget ) )
@@ -600,7 +623,10 @@ namespace PostSharp.Engineering.BuildTools.Build.Model
 
             if ( options.Public )
             {
-                if ( !this.PublishDirectory( context, options, versionFile,
+                if ( !this.PublishDirectory(
+                    context,
+                    options,
+                    versionFile,
                     Path.Combine( context.RepoDirectory, this.PublicArtifactsDirectory.ToString( stringParameters ) ),
                     true,
                     ref hasTarget ) )
@@ -621,7 +647,13 @@ namespace PostSharp.Engineering.BuildTools.Build.Model
             return true;
         }
 
-        private bool PublishDirectory( BuildContext context, PublishOptions options, VersionInfo versionFile, string directory, bool isPublic, ref bool hasTarget )
+        private bool PublishDirectory(
+            BuildContext context,
+            PublishOptions options,
+            VersionInfo versionFile,
+            string directory,
+            bool isPublic,
+            ref bool hasTarget )
         {
             var success = true;
 
@@ -642,18 +674,20 @@ namespace PostSharp.Engineering.BuildTools.Build.Model
                 var matchingResult =
                     matcher.Execute( new DirectoryInfoWrapper( new DirectoryInfo( directory ) ) );
 
-
                 foreach ( var file in matchingResult.Files )
                 {
-                    if ( Path.GetExtension( file.Path ).Equals( publishingTarget.MainExtension ) )
+                    if ( Path.GetExtension( file.Path ).Equals( publishingTarget.MainExtension, StringComparison.OrdinalIgnoreCase ) )
                     {
-                        if ( file.Path.Contains( "-local-" ) )
+                        if ( file.Path.Contains( "-local-", StringComparison.OrdinalIgnoreCase ) )
                         {
                             context.Console.WriteError( "Cannot publish a local build." );
+
                             return false;
                         }
 
-                        switch ( publishingTarget.Execute( context, options,
+                        switch ( publishingTarget.Execute(
+                            context,
+                            options,
                             Path.Combine( directory, file.Path ),
                             isPublic ) )
                         {
@@ -662,6 +696,7 @@ namespace PostSharp.Engineering.BuildTools.Build.Model
 
                             case SuccessCode.Error:
                                 success = false;
+
                                 break;
 
                             case SuccessCode.Fatal:
@@ -671,12 +706,10 @@ namespace PostSharp.Engineering.BuildTools.Build.Model
                 }
             }
 
-
             if ( !success )
             {
                 context.Console.WriteError( "Publishing has failed." );
             }
-
 
             return success;
         }

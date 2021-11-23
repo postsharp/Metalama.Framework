@@ -1,4 +1,7 @@
-﻿namespace PostSharp.Engineering.BuildTools.Build.Model
+﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+
+namespace PostSharp.Engineering.BuildTools.Build.Model
 {
     public abstract class PublishingTarget
     {
@@ -7,13 +10,13 @@
         /// when the <see cref="PublishOptions.Public"/> option is specified.
         /// </summary>
         public abstract bool SupportsPublicPublishing { get; }
-        
+
         /// <summary>
         /// Gets a value indicating whether the target support private publishing, i.e. if it should be included
         /// when the <see cref="PublishOptions.Public"/> option is not specified.
         /// </summary>
         public abstract bool SupportsPrivatePublishing { get; }
-        
+
         /// <summary>
         /// Gets the extension of the principal artifacts of this target (e.g. <c>.nupkg</c> for a package).
         /// </summary>

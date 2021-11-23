@@ -1,4 +1,7 @@
-﻿using PostSharp.Engineering.BuildTools.Build;
+﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+
+using PostSharp.Engineering.BuildTools.Build;
 using PostSharp.Engineering.BuildTools.Build.Model;
 using System;
 using System.Text;
@@ -11,8 +14,7 @@ namespace PostSharp.Engineering.BuildTools.Utilities
         {
             var argsBuilder = new StringBuilder();
 
-            argsBuilder.Append(
-                $"{command} -p:Configuration={options.BuildConfiguration} \"{solution}\" -v:{options.Verbosity.ToAlias()} --nologo" );
+            argsBuilder.Append( $"{command} -p:Configuration={options.BuildConfiguration} \"{solution}\" -v:{options.Verbosity.ToAlias()} --nologo" );
 
             if ( options.NoConcurrency )
             {
@@ -29,7 +31,9 @@ namespace PostSharp.Engineering.BuildTools.Utilities
                 argsBuilder.Append( " " + arguments.Trim() );
             }
 
-            return ToolInvocationHelper.InvokeTool( context.Console, "dotnet",
+            return ToolInvocationHelper.InvokeTool(
+                context.Console,
+                "dotnet",
                 argsBuilder.ToString(),
                 Environment.CurrentDirectory );
         }

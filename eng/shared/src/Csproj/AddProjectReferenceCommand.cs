@@ -1,4 +1,7 @@
-﻿using PostSharp.Engineering.BuildTools.Utilities;
+﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+
+using PostSharp.Engineering.BuildTools.Utilities;
 using Spectre.Console;
 using Spectre.Console.Cli;
 using System;
@@ -15,7 +18,8 @@ namespace PostSharp.Engineering.BuildTools.Csproj
         {
             var console = new ConsoleHelper();
 
-            foreach ( var project in Directory.EnumerateFiles( Directory.GetCurrentDirectory(),
+            foreach ( var project in Directory.EnumerateFiles(
+                Directory.GetCurrentDirectory(),
                 $"*{settings.Filter}*.csproj",
                 SearchOption.AllDirectories ) )
             {
@@ -25,8 +29,10 @@ namespace PostSharp.Engineering.BuildTools.Csproj
             return 0;
         }
 
-
-        private static void AddReference( ConsoleHelper console, string project, string existingReference,
+        private static void AddReference(
+            ConsoleHelper console,
+            string project,
+            string existingReference,
             string newReference )
         {
             console.Out.Write( Path.GetFileName( project ) );
@@ -43,6 +49,7 @@ namespace PostSharp.Engineering.BuildTools.Csproj
             if ( newReferenceItem != null )
             {
                 console.Out.WriteLine( "skipped - contains new reference" );
+
                 return;
             }
 
@@ -52,6 +59,7 @@ namespace PostSharp.Engineering.BuildTools.Csproj
             if ( existingReferenceItem == null )
             {
                 console.Out.WriteLine( $"skipped - doesn't reference {existingReference}" );
+
                 return;
             }
 
@@ -60,8 +68,9 @@ namespace PostSharp.Engineering.BuildTools.Csproj
             var newReferenceFullPath = Path.GetFullPath( newReference );
             var newReferenceUri = new Uri( newReferenceFullPath );
             var newReferenceRelativeUri = projectUri.MakeRelativeUri( newReferenceUri );
+
             var newReferenceRelativePath =
-                Uri.UnescapeDataString( newReferenceRelativeUri.OriginalString ).Replace( "/", "\\" );
+                Uri.UnescapeDataString( newReferenceRelativeUri.OriginalString ).Replace( "/", "\\", StringComparison.OrdinalIgnoreCase );
 
             newReferenceItem = xml.CreateElement( "ProjectReference" );
             var newReferenceAttribute = xml.CreateAttribute( "Include" );

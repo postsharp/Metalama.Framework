@@ -1,4 +1,7 @@
-﻿using PostSharp.Engineering.BuildTools.Build;
+﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+
+using PostSharp.Engineering.BuildTools.Build;
 using Spectre.Console.Cli;
 using System.ComponentModel;
 
@@ -6,10 +9,6 @@ namespace PostSharp.Engineering.BuildTools.Engineering
 {
     internal class EngineeringSettings : BaseCommandSettings
     {
-        [Description( "Allows to overwrite the target local repo even when there are uncommitted changes." )]
-        [CommandOption( "--force" )]
-        public bool Force { get; init; }
-
         [Description( "Clones the repo if it does not exist." )]
         [CommandOption( "--create" )]
         public bool Create { get; init; }
@@ -24,9 +23,5 @@ namespace PostSharp.Engineering.BuildTools.Engineering
         [Description( "Name of the branch. The default is 'develop' for push and 'master' for pull." )]
         [CommandOption( "-b|--branch" )]
         public string? Branch { get; init; }
-
-       
-
-
     }
 }

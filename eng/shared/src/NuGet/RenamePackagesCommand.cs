@@ -1,5 +1,9 @@
-﻿using PostSharp.Engineering.BuildTools.Utilities;
+﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+
+using PostSharp.Engineering.BuildTools.Utilities;
 using Spectre.Console.Cli;
+using System;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
@@ -29,6 +33,7 @@ namespace PostSharp.Engineering.BuildTools.NuGet
             if ( files.Length == 0 )
             {
                 console.WriteError( $"No matching package found in '{directory.FullName}'." );
+
                 return false;
             }
 
@@ -46,22 +51,24 @@ namespace PostSharp.Engineering.BuildTools.NuGet
 
             var outputPath = Path.Combine(
                 Path.GetDirectoryName( inputPath )!,
-                Path.GetFileName( inputPath ).Replace( "Microsoft", "Caravela.Roslyn" ) );
+                Path.GetFileName( inputPath ).Replace( "Microsoft", "Caravela.Roslyn", StringComparison.OrdinalIgnoreCase ) );
 
             File.Copy( inputPath, outputPath, true );
 
             using var archive = ZipFile.Open( outputPath, ZipArchiveMode.Update );
 
-            var oldNuspecEntry = archive.Entries.SingleOrDefault( entry => entry.FullName.EndsWith( ".nuspec" ) );
+            var oldNuspecEntry = archive.Entries.SingleOrDefault( entry => entry.FullName.EndsWith( ".nuspec", StringComparison.OrdinalIgnoreCase ) );
 
             if ( oldNuspecEntry == null )
             {
                 console.WriteError( "Usage: Cannot find the nuspec file." );
+
                 return false;
             }
 
             XDocument nuspecXml;
             XmlReader xmlReader;
+
             using ( var nuspecStream = oldNuspecEntry.Open() )
             {
                 xmlReader = new XmlTextReader( nuspecStream );
@@ -73,10 +80,13 @@ namespace PostSharp.Engineering.BuildTools.NuGet
             // Rename the packageId.
             var packageIdElement =
                 nuspecXml.Root.Element( XName.Get( "metadata", ns ) )!.Element( XName.Get( "id", ns ) )!;
+
             var oldPackageId = packageIdElement.Value;
-            var newPackageId = oldPackageId.Replace( "Microsoft", "Caravela.Roslyn" );
+            var newPackageId = oldPackageId.Replace( "Microsoft", "Caravela.Roslyn", StringComparison.OrdinalIgnoreCase );
+
             var packageVersion = nuspecXml.Root.Element( XName.Get( "metadata", ns ) )!
                 .Element( XName.Get( "version", ns ) )!.Value;
+
             packageIdElement.Value = newPackageId;
 
             // Rename the dependencies.
@@ -87,13 +97,13 @@ namespace PostSharp.Engineering.BuildTools.NuGet
             {
                 var dependentId = dependency.Attribute( "id" )!.Value;
 
-                if ( dependentId.StartsWith( "Microsoft" ) )
+                if ( dependentId.StartsWith( "Microsoft", StringComparison.OrdinalIgnoreCase ) )
                 {
                     var dependencyPath = Path.Combine( directory, dependentId + "." + packageVersion + ".nupkg" );
 
                     if ( File.Exists( dependencyPath ) )
                     {
-                        dependency.Attribute( "id" )!.Value = dependentId.Replace( "Microsoft", "Caravela.Roslyn" );
+                        dependency.Attribute( "id" )!.Value = dependentId.Replace( "Microsoft", "Caravela.Roslyn", StringComparison.OrdinalIgnoreCase );
                     }
                     else
                     {

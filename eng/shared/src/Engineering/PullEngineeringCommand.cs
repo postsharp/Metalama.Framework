@@ -1,4 +1,7 @@
-﻿using PostSharp.Engineering.BuildTools.Build;
+﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+
+using PostSharp.Engineering.BuildTools.Build;
 using PostSharp.Engineering.BuildTools.Utilities;
 using System.IO;
 
@@ -6,11 +9,12 @@ namespace PostSharp.Engineering.BuildTools.Engineering
 {
     internal class PullEngineeringCommand : BaseEngineeringCommand<PullEngineeringSettings>
     {
-        protected override bool ExecuteCore( BuildContext context, PullEngineeringSettings options)
+        protected override bool ExecuteCore( BuildContext context, PullEngineeringSettings options )
         {
             context.Console.WriteHeading( "Pulling engineering" );
 
-            var sharedRepo = this.GetEngineeringRepo( context, options );
+            var sharedRepo = GetEngineeringRepo( context, options );
+
             if ( sharedRepo == null )
             {
                 return false;
@@ -27,7 +31,7 @@ namespace PostSharp.Engineering.BuildTools.Engineering
                 return false;
             }
 
-            if ( !CheckNoChange(context, options, context.RepoDirectory) )
+            if ( !CheckNoChange( context, options, context.RepoDirectory ) )
             {
                 return false;
             }

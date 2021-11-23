@@ -1,4 +1,7 @@
-﻿using PostSharp.Engineering.BuildTools.Build;
+﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+
+using PostSharp.Engineering.BuildTools.Build;
 using PostSharp.Engineering.BuildTools.Utilities;
 using System.IO;
 
@@ -7,8 +10,7 @@ namespace PostSharp.Engineering.BuildTools.Engineering
     internal abstract class BaseEngineeringCommand<T> : BaseCommand<T>
         where T : EngineeringSettings
     {
-
-        protected string? GetEngineeringRepo( BuildContext context, EngineeringSettings options )
+        protected static string? GetEngineeringRepo( BuildContext context, EngineeringSettings options )
         {
             var sharedRepo = Path.GetFullPath( Path.Combine( context.RepoDirectory, "..", "Caravela.Engineering" ) );
 
@@ -18,6 +20,7 @@ namespace PostSharp.Engineering.BuildTools.Engineering
                 if ( !options.Create )
                 {
                     context.Console.WriteError( $"The directory '{sharedRepo} does not exist. Use --create'" );
+
                     return null;
                 }
                 else
@@ -35,31 +38,6 @@ namespace PostSharp.Engineering.BuildTools.Engineering
             }
 
             return sharedRepo;
-        }
-
-        protected static bool CheckNoChange( BuildContext context, EngineeringSettings options, string repo )
-        {
-            if ( !options.Force )
-            {
-                if ( !ToolInvocationHelper.InvokeTool(
-                    context.Console,
-                    "git", $"status --porcelain",
-                    repo, out var exitCode, out var statusOutput )
-                    || exitCode != 0 )
-                {
-                    return false;
-                }
-
-
-                if ( !string.IsNullOrWhiteSpace( statusOutput ) )
-                {
-                    context.Console.WriteError( $"There are non-commited changes in '{repo}' Use --force." );
-                    context.Console.WriteImportantMessage( statusOutput );
-                    return false;
-                }
-            }
-
-            return true;
         }
 
         protected static void CopyDirectory( string source, string target )
@@ -100,14 +78,13 @@ namespace PostSharp.Engineering.BuildTools.Engineering
                 foreach ( var directory in Directory.GetDirectories( sourceSubdirectory ) )
                 {
                     var shortName = Path.GetFileName( directory );
+
                     if ( shortName != ".git" )
                     {
                         CopyRecursive( directory, Path.Combine( targetSubdirectory, shortName ) );
                     }
                 }
             }
-
         }
-
     }
 }

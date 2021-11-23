@@ -1,11 +1,14 @@
-﻿using System.Collections.Immutable;
+﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+
 using PostSharp.Engineering.BuildTools;
 using PostSharp.Engineering.BuildTools.Build.Model;
 using Spectre.Console.Cli;
+using System.Collections.Immutable;
 
 namespace Build
 {
-    internal class Program
+    internal static class Program
     {
         private static int Main( string[] args )
         {
@@ -37,7 +40,7 @@ namespace Build
             {
                 ProductName = "Caravela",
                 Solutions = ImmutableArray.Create<Solution>(
-                    new DotNetSolution( "Caravela.sln" ) { SupportsTestCoverage = true },
+                    new DotNetSolution( "Caravela.sln" ) { SupportsTestCoverage = true, CanFormatCode = true },
                     new DotNetSolution( "Tests\\Caravela.Framework.TestApp\\Caravela.Framework.TestApp.sln" ) { IsTestOnly = true } ),
                 PublishingTargets = ImmutableArray.Create<PublishingTarget>( publicPublishing, privatePublishing )
             };

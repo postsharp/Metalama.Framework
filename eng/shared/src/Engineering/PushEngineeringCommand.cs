@@ -1,17 +1,19 @@
-﻿using PostSharp.Engineering.BuildTools.Build;
+﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+
+using PostSharp.Engineering.BuildTools.Build;
 using PostSharp.Engineering.BuildTools.Utilities;
 using System.IO;
 
 namespace PostSharp.Engineering.BuildTools.Engineering
 {
-
     internal class PushEngineeringCommand : BaseEngineeringCommand<EngineeringSettings>
     {
         protected override bool ExecuteCore( BuildContext context, EngineeringSettings options )
         {
             context.Console.WriteHeading( "Pushing engineering." );
 
-            var sharedRepo = this.GetEngineeringRepo( context, options );
+            var sharedRepo = GetEngineeringRepo( context, options );
 
             if ( sharedRepo == null )
             {
@@ -25,14 +27,11 @@ namespace PostSharp.Engineering.BuildTools.Engineering
             // Stage all changes to the commit, but does not commit.
             ToolInvocationHelper.InvokeTool( context.Console, "git", $"add --all", sharedRepo );
 
-
             ToolInvocationHelper.InvokeTool( context.Console, "git", $"status", sharedRepo );
 
             context.Console.WriteSuccess( "Pushing engineering was successful. You now need to commit and push manually." );
 
             return true;
         }
-
-     
     }
 }

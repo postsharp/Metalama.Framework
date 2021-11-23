@@ -1,4 +1,7 @@
-﻿using PostSharp.Engineering.BuildTools.Utilities;
+﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+
+using PostSharp.Engineering.BuildTools.Utilities;
 using System;
 using System.Threading;
 
@@ -7,7 +10,7 @@ namespace PostSharp.Engineering.BuildTools.Build.Model
     public class NugetPublishTarget : PublishingTarget
     {
         public NugetSource PrivateSource { get; }
-        
+
         public NugetSource? PublicSource { get; }
 
         public NugetPublishTarget( Pattern packages, NugetSource privateSource, NugetSource? publicSource = null )
@@ -33,9 +36,9 @@ namespace PostSharp.Engineering.BuildTools.Build.Model
             {
                 throw new InvalidOperationException();
             }
-            
+
             var hasEnvironmentError = false;
-                    
+
             context.Console.WriteMessage( $"Publishing {file}." );
 
             var server = Environment.ExpandEnvironmentVariables( source.Source );
@@ -46,9 +49,10 @@ namespace PostSharp.Engineering.BuildTools.Build.Model
                 context.Console.WriteError( $"The {source.Source} environment variable is not defined." );
                 hasEnvironmentError = true;
             }
-            
+
             var apiKey = Environment.ExpandEnvironmentVariables( source.ApiKey );
-            if ( string.IsNullOrEmpty(  apiKey ) )
+
+            if ( string.IsNullOrEmpty( apiKey ) )
             {
                 context.Console.WriteError( $"The {source.ApiKey} environment variable is not defined." );
                 hasEnvironmentError = true;
@@ -58,8 +62,7 @@ namespace PostSharp.Engineering.BuildTools.Build.Model
             {
                 return SuccessCode.Fatal;
             }
-            
-            
+
             // Note that we don't expand the ApiKey environment variable so we don't expose passwords to logs.
             var arguments =
                 $"nuget push {file} --source {server} --api-key {Environment.ExpandEnvironmentVariables( source.ApiKey )} --skip-duplicate";
@@ -67,13 +70,17 @@ namespace PostSharp.Engineering.BuildTools.Build.Model
             if ( options.Dry )
             {
                 context.Console.WriteImportantMessage( "Dry run: dotnet " + arguments );
+
                 return SuccessCode.Success;
             }
             else
             {
-
-                return ToolInvocationHelper.InvokeTool( context.Console, "dotnet", arguments,
-                    Environment.CurrentDirectory, CancellationToken.None )
+                return ToolInvocationHelper.InvokeTool(
+                    context.Console,
+                    "dotnet",
+                    arguments,
+                    Environment.CurrentDirectory,
+                    CancellationToken.None )
                     ? SuccessCode.Success
                     : SuccessCode.Error;
             }

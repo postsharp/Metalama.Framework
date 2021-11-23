@@ -1,10 +1,15 @@
-﻿using Microsoft.CodeAnalysis;
+﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 using PostSharp.Engineering.BuildTools.Utilities;
 using Spectre.Console.Cli;
+using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
@@ -36,18 +41,20 @@ namespace PostSharp.Engineering.BuildTools.Coverage
                 ProcessPackage( console, packageNode, ref totalInvalidDeclarations );
             }
 
-            console.WriteImportantMessage(
-                $"The whole solution has {totalInvalidDeclarations} declaration(s) with insufficient test coverage." );
+            console.WriteImportantMessage( $"The whole solution has {totalInvalidDeclarations} declaration(s) with insufficient test coverage." );
+
             return totalInvalidDeclarations == 0;
         }
 
-        private static void ProcessPackage( ConsoleHelper console, JsonProperty packageNode,
+        private static void ProcessPackage(
+            ConsoleHelper console,
+            JsonProperty packageNode,
             ref int totalInvalidDeclarations )
         {
             var invalidDeclarations = 0;
             var packageName = packageNode.Name;
 
-            if ( packageName.Contains( ".Tests" ) )
+            if ( packageName.Contains( ".Tests", StringComparison.OrdinalIgnoreCase ) )
             {
                 return;
             }
@@ -73,12 +80,13 @@ namespace PostSharp.Engineering.BuildTools.Coverage
                         foreach ( var lineNode in methodNode.Value.GetProperty( "Lines" ).EnumerateObject() )
                         {
                             var hits = lineNode.Value.GetInt32();
+
                             if ( hits > 0 )
                             {
                                 continue;
                             }
 
-                            var lineNumber = int.Parse( lineNode.Name ) - 1;
+                            var lineNumber = int.Parse( lineNode.Name, CultureInfo.InvariantCulture ) - 1;
 
                             // The sequence point is not covered.
                             syntaxTree ??= CSharpSyntaxTree.ParseText(
@@ -91,16 +99,17 @@ namespace PostSharp.Engineering.BuildTools.Coverage
                             var span = TextSpan.FromBounds( line.Start, line.End );
 
                             int spanStart, spanEnd;
+
                             for ( spanStart = span.Start;
-                                char.IsWhiteSpace( sourceText[spanStart] ) && spanStart < span.End;
-                                spanStart++ )
+                                  char.IsWhiteSpace( sourceText[spanStart] ) && spanStart < span.End;
+                                  spanStart++ )
                             {
                                 // Intentionally empty.
                             }
 
                             for ( spanEnd = span.End;
-                                char.IsWhiteSpace( sourceText[spanEnd] ) && spanEnd > spanStart;
-                                spanEnd-- )
+                                  char.IsWhiteSpace( sourceText[spanEnd] ) && spanEnd > spanStart;
+                                  spanEnd-- )
                             {
                                 // Intentionally empty.
                             }
@@ -114,7 +123,6 @@ namespace PostSharp.Engineering.BuildTools.Coverage
                                 continue;
                             }
 
-
                             var node = syntaxTree.GetRoot()
                                 .FindNode( TextSpan.FromBounds( spanStart, spanEnd ), true, true );
 
@@ -124,15 +132,14 @@ namespace PostSharp.Engineering.BuildTools.Coverage
                                 continue;
                             }
 
-
                             if ( !nonCoveredNodes.Add( node ) )
                             {
                                 continue;
                             }
 
-
                             var declarations = node.AncestorsAndSelf()
-                                .Where( a => a is MemberDeclarationSyntax or AccessorDeclarationSyntax ).Reverse()
+                                .Where( a => a is MemberDeclarationSyntax or AccessorDeclarationSyntax )
+                                .Reverse()
                                 .ToList();
 
                             if ( declarations.Count == 0 )
@@ -152,11 +159,9 @@ namespace PostSharp.Engineering.BuildTools.Coverage
                                 continue;
                             }
 
-
                             var memberName = string.Join( '.', declarations.Select( GetNodeSignature ) );
 
-                            console.WriteWarning(
-                                $"{node.SyntaxTree.FilePath}({lineNumber + 1}): warning COVER01: '{memberName}' has gaps in test coverage." );
+                            console.WriteWarning( $"{node.SyntaxTree.FilePath}({lineNumber + 1}): warning COVER01: '{memberName}' has gaps in test coverage." );
                             totalInvalidDeclarations++;
                             invalidDeclarations++;
 
@@ -166,12 +171,10 @@ namespace PostSharp.Engineering.BuildTools.Coverage
                 }
             }
 
-            console.WriteWarning(
-                $"Module {packageName} has {invalidDeclarations} declaration(s) with insufficient test coverage." );
+            console.WriteWarning( $"Module {packageName} has {invalidDeclarations} declaration(s) with insufficient test coverage." );
         }
 
-
-        private static readonly Regex _ignoreCommentRegex = new(@"//\s*Coverage:\s*Ignore", RegexOptions.IgnoreCase);
+        private static readonly Regex _ignoreCommentRegex = new( @"//\s*Coverage:\s*Ignore", RegexOptions.IgnoreCase );
 
         private static bool ContainsIgnoreComment( string text ) => _ignoreCommentRegex.IsMatch( text );
 
@@ -196,7 +199,8 @@ namespace PostSharp.Engineering.BuildTools.Coverage
             {
                 case null:
                 case BlockSyntax block when block.Statements.Count == 0 || (block.Statements.Count == 1 &&
-                                                                            ShouldIgnoreNode( declaringMember,
+                                                                            ShouldIgnoreNode(
+                                                                                declaringMember,
                                                                                 block.Statements[0] )):
                 case ThrowExpressionSyntax:
                 case ThrowStatementSyntax:
@@ -224,12 +228,14 @@ namespace PostSharp.Engineering.BuildTools.Coverage
                 case CastExpressionSyntax cast when ShouldIgnoreNode( declaringMember, cast.Expression ):
                 case CatchClauseSyntax:
                 case AccessorDeclarationSyntax accessor when ShouldIgnoreNode( declaringMember, accessor.Body ) &&
-                                                             ShouldIgnoreNode( declaringMember,
+                                                             ShouldIgnoreNode(
+                                                                 declaringMember,
                                                                  accessor.ExpressionBody ):
                     return true;
 
                 default:
                     var parentStatement = GetParentStatement( node );
+
                     if ( parentStatement != null && ContainsIgnoreComment( parentStatement.ToFullString() ) )
                     {
                         return true;
@@ -246,51 +252,58 @@ namespace PostSharp.Engineering.BuildTools.Coverage
             }
         }
 
-        private static bool ShouldIgnoreMember( MemberDeclarationSyntax member ) => member switch
-        {
-            // Ignore a few methods that generally have a trivial implementation, or an implementation that is not used in real code. 
-            MethodDeclarationSyntax { Identifier: { Text: "ToString" or "GetHashCode" or "Equals" } } => true,
+        private static bool ShouldIgnoreMember( MemberDeclarationSyntax member )
+            => member switch
+            {
+                // Ignore a few methods that generally have a trivial implementation, or an implementation that is not used in real code. 
+                MethodDeclarationSyntax { Identifier: { Text: "ToString" or "GetHashCode" or "Equals" } } => true,
 
-            // Ignore operators because some operators come in pairs, only one of which will be used. 
-            OperatorDeclarationSyntax => true,
+                // Ignore operators because some operators come in pairs, only one of which will be used. 
+                OperatorDeclarationSyntax => true,
 
-            // Process properties with accessors.
-            PropertyDeclarationSyntax { ExpressionBody: null, AccessorList: { } accessorList }
-                when accessorList.Accessors.All( a =>
-                    ShouldIgnoreNode( member, a.Body ) && ShouldIgnoreNode( member, a.ExpressionBody ) )
-                => true,
+                // Process properties with accessors.
+                PropertyDeclarationSyntax { ExpressionBody: null, AccessorList: { } accessorList }
+                    when accessorList.Accessors.All(
+                        a =>
+                            ShouldIgnoreNode( member, a.Body ) && ShouldIgnoreNode( member, a.ExpressionBody ) )
+                    => true,
 
-            // Process properties without accessors.
-            PropertyDeclarationSyntax { ExpressionBody: { Expression: { } expression } } when ShouldIgnoreNode( member,
-                    expression )
-                => true,
+                // Process properties without accessors.
+                PropertyDeclarationSyntax { ExpressionBody: { Expression: { } expression } } when ShouldIgnoreNode(
+                        member,
+                        expression )
+                    => true,
 
-            // Process methods.
-            MethodDeclarationSyntax method when ShouldIgnoreNode( member, method.ExpressionBody ) &&
-                                                ShouldIgnoreNode( member, method.Body )
-                => true,
+                // Process methods.
+                MethodDeclarationSyntax method when ShouldIgnoreNode( member, method.ExpressionBody ) &&
+                                                    ShouldIgnoreNode( member, method.Body )
+                    => true,
 
-            _ => member.GetLeadingTrivia().Any( t => ContainsIgnoreComment( t.ToFullString() ) )
-        };
-
+                _ => member.GetLeadingTrivia().Any( t => ContainsIgnoreComment( t.ToFullString() ) )
+            };
 
         private static string GetNodeSignature( SyntaxNode node )
             => node switch
             {
                 MethodDeclarationSyntax m => m.Identifier.Text + "(" +
-                                             string.Join( ",",
+                                             string.Join(
+                                                 ",",
                                                  m.ParameterList.Parameters.Select( p => p.Type?.ToString() ) ) + ")",
                 ConstructorDeclarationSyntax c => "ctor" + "(" +
-                                                  string.Join( ",",
+                                                  string.Join(
+                                                      ",",
                                                       c.ParameterList.Parameters.Select( p => p.Type?.ToString() ) ) +
                                                   ")",
                 IndexerDeclarationSyntax i => "this[" +
-                                              string.Join( ",",
+                                              string.Join(
+                                                  ",",
                                                   i.ParameterList.Parameters.Select( p => p.Type?.ToString() ) ) + "]",
                 OperatorDeclarationSyntax o => o.OperatorToken.Text + "(" +
-                                               string.Join( ",",
+                                               string.Join(
+                                                   ",",
                                                    o.ParameterList.Parameters.Select( p => p.Type?.ToString() ) ) + ")",
-                ConversionOperatorDeclarationSyntax c => "convert(" + string.Join( ",",
+                ConversionOperatorDeclarationSyntax c => "convert(" + string.Join(
+                    ",",
                     c.ParameterList.Parameters.Select( p => p.Type?.ToString() ) ) + ")" + "):" + c.Type,
                 _ => GetNodeName( node )
             };
@@ -303,9 +316,12 @@ namespace PostSharp.Engineering.BuildTools.Coverage
                 AccessorDeclarationSyntax a => a.Keyword.Text,
                 MethodDeclarationSyntax m => m.Identifier.Text,
                 BaseTypeDeclarationSyntax c => c.Identifier.Text,
-                FieldDeclarationSyntax f => string.Join( ",",
+                FieldDeclarationSyntax f => string.Join(
+                    ",",
                     f.Declaration.Variables.Select( v => v.Identifier.Text ) ),
-                EventDeclarationSyntax e => e.Identifier.Text, EventFieldDeclarationSyntax e => string.Join( ",",
+                EventDeclarationSyntax e => e.Identifier.Text,
+                EventFieldDeclarationSyntax e => string.Join(
+                    ",",
                     e.Declaration.Variables.Select( v => v.Identifier.Text ) ),
                 PropertyDeclarationSyntax p => p.Identifier.Text,
                 NamespaceDeclarationSyntax n => n.Name.ToString(),
