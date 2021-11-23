@@ -1,5 +1,7 @@
+// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+
 using PostSharp.Engineering.BuildTools.Build;
-using System;
 using System.IO;
 
 namespace PostSharp.Engineering.BuildTools.Dependencies

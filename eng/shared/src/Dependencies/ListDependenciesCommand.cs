@@ -1,3 +1,6 @@
+// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+
 using PostSharp.Engineering.BuildTools.Build;
 
 namespace PostSharp.Engineering.BuildTools.Dependencies
@@ -14,9 +17,8 @@ namespace PostSharp.Engineering.BuildTools.Dependencies
             }
             else
             {
-
                 context.Console.WriteImportantMessage( $"{context.Product.ProductName} has {productDependencies.Length} dependencies:" );
-                
+
                 for ( var i = 0; i < productDependencies.Length; i++ )
                 {
                     context.Console.WriteImportantMessage( $"    {i + 1}: {productDependencies[i].Name}" );

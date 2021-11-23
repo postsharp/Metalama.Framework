@@ -7,7 +7,7 @@ using Spectre.Console.Cli;
 
 namespace PostSharp.Engineering.BuildTools
 {
-    internal class Program
+    internal static class Program
     {
         private static int Main( string[] args )
         {

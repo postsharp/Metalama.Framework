@@ -22,7 +22,7 @@ namespace PostSharp.Engineering.BuildTools.Dependencies
 
                 return false;
             }
-            
+
             var stringBuilder = new StringBuilder();
             stringBuilder.AppendLine( "<Project>" );
 
@@ -49,9 +49,7 @@ namespace PostSharp.Engineering.BuildTools.Dependencies
             }
             else
             {
-
                 var localRepos = options.All ? context.Product.Dependencies.Select( x => x.Name ) : options.Repos;
-
 
                 foreach ( var localDependency in localRepos )
                 {
@@ -94,15 +92,14 @@ namespace PostSharp.Engineering.BuildTools.Dependencies
                 }
 
                 stringBuilder.AppendLine( "</Project>" );
-                
+
                 context.Console.WriteMessage( $"Generating '{path}'" );
                 File.WriteAllText( path, stringBuilder.ToString() );
             }
-            
+
             context.Console.WriteSuccess( "Setting local dependencies was successful." );
 
             return true;
         }
     }
-    
 }
