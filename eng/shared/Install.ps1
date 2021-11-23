@@ -1,3 +1,7 @@
+Param ( 
+
+    [string] $EngineeringDirectory = "eng" )
+
 
 # Stop after first error.
 $ErrorActionPreference = "Stop"
@@ -16,6 +20,6 @@ If ( -Not ( Test-Path -Path ".\.git" ) ) {
 
 $ScriptDir = Split-Path $script:MyInvocation.MyCommand.Path
 
-echo "Copying $ScriptDir to eng\shared"
+echo "Copying $ScriptDir to $EngineeringDirectory\shared"
 
-Copy-Item $ScriptDir\* "eng\shared" -Force -Recurse -Exclude ".git" 
+Copy-Item $ScriptDir\* "$EngineeringDirectory\shared" -Force -Recurse -Exclude ".git" 
