@@ -52,7 +52,9 @@ namespace PostSharp.Engineering.BuildTools.Engineering
 
                 foreach ( var existingDirectory in Directory.GetDirectories( target ) )
                 {
-                    if ( Path.GetFileName( existingDirectory ) != ".git" )
+                    var shortName = Path.GetFileName( existingDirectory );
+
+                    if ( shortName != ".git" && shortName != "bin" && shortName != "obj" )
                     {
                         Directory.Delete( existingDirectory, true );
                     }
