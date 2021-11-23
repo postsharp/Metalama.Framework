@@ -48,3 +48,4 @@ TestResults
 launchSettings.json
 .idea/workspace.xml
 eng/*.local
+Caravela.Import.props

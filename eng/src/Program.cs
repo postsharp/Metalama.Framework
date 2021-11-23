@@ -42,7 +42,8 @@ namespace Build
                 Solutions = ImmutableArray.Create<Solution>(
                     new DotNetSolution( "Caravela.sln" ) { SupportsTestCoverage = true, CanFormatCode = true },
                     new DotNetSolution( "Tests\\Caravela.Framework.TestApp\\Caravela.Framework.TestApp.sln" ) { IsTestOnly = true } ),
-                PublishingTargets = ImmutableArray.Create<PublishingTarget>( publicPublishing, privatePublishing )
+                PublishingTargets = ImmutableArray.Create<PublishingTarget>( publicPublishing, privatePublishing ),
+                Dependencies = ImmutableArray.Create( new ProductDependency( "Caravela.Compiler" ) )
             };
 
             var commandApp = new CommandApp();

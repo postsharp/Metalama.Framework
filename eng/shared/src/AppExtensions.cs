@@ -3,6 +3,7 @@
 
 using PostSharp.Engineering.BuildTools.Build;
 using PostSharp.Engineering.BuildTools.Build.Model;
+using PostSharp.Engineering.BuildTools.Dependencies;
 using PostSharp.Engineering.BuildTools.Engineering;
 using Spectre.Console.Cli;
 using System.Linq;
@@ -40,6 +41,20 @@ namespace PostSharp.Engineering.BuildTools
                         {
                             x.AddCommand<FormatCommand>( "format" ).WithData( product ).WithDescription( "Formats the code" );
                         }
+                        
+                        x.AddBranch( "dependencies",
+                                     configurator =>
+                                     {
+                                         configurator.AddCommand<ListDependenciesCommand>( "list" ).WithData( product ).WithDescription( "Lists the dependencies of this product" );
+
+                                         configurator.AddCommand<GenerateDependencyFileCommand>( "local" )
+                                             .WithData( product )
+                                             .WithDescription( "Generates the Dependencies.props to consume local repos." );
+                                         
+                                         configurator.AddCommand<PrintDependenciesCommand>( "print" )
+                                             .WithData( product )
+                                             .WithDescription( "Prints the dependency file." );
+                                     } );
 
                         x.AddBranch(
                             "engineering",
