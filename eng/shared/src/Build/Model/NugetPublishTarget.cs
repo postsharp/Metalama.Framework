@@ -3,7 +3,6 @@
 
 using PostSharp.Engineering.BuildTools.Utilities;
 using System;
-using System.Threading;
 
 namespace PostSharp.Engineering.BuildTools.Build.Model
 {
@@ -79,8 +78,7 @@ namespace PostSharp.Engineering.BuildTools.Build.Model
                     context.Console,
                     "dotnet",
                     arguments,
-                    Environment.CurrentDirectory,
-                    CancellationToken.None )
+                    Environment.CurrentDirectory )
                     ? SuccessCode.Success
                     : SuccessCode.Error;
             }

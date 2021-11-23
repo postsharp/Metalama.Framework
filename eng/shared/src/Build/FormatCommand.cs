@@ -23,8 +23,7 @@ namespace PostSharp.Engineering.BuildTools.Build
             }
 
             var signTool = Path.Combine( context.RepoDirectory, "tools", "jb.exe" );
-            var settingsPath = Path.Combine( context.RepoDirectory, context.Product.EngineeringDirectory, "shared", "style", "CommonStyle.DotSettings" );
-
+            
             foreach ( var solution in context.Product.Solutions )
             {
                 if ( solution.CanFormatCode )
@@ -32,7 +31,7 @@ namespace PostSharp.Engineering.BuildTools.Build
                     if ( !ToolInvocationHelper.InvokeTool(
                         context.Console,
                         signTool,
-                        $"cleanupcode --profile:Custom {solution.SolutionPath} --settings:{settingsPath} --disable-settings-layers:\"GlobalAll;GlobalPerProduct;SolutionPersonal;ProjectPersonal\"",
+                        $"cleanupcode --profile:Custom {solution.SolutionPath} --disable-settings-layers:\"GlobalAll;GlobalPerProduct;SolutionPersonal;ProjectPersonal\"",
                         Path.GetDirectoryName( solution.SolutionPath )! ) )
                     {
                         return false;

@@ -15,6 +15,18 @@ namespace PostSharp.Engineering.BuildTools.Utilities
 {
     public static class ToolInvocationHelper
     {
+        private static readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
+        
+        static ToolInvocationHelper()
+        {
+            Console.CancelKeyPress += OnCancel;
+        }
+
+        private static void OnCancel( object? sender, ConsoleCancelEventArgs e )
+        {
+            _cancellationTokenSource.Cancel();
+        }
+
         public static bool InvokePowershell(
             ConsoleHelper console,
             string fileName,
@@ -25,8 +37,7 @@ namespace PostSharp.Engineering.BuildTools.Utilities
                 console,
                 "powershell",
                 $"-NonInteractive -File {fileName} {commandLine}",
-                workingDirectory,
-                CancellationToken.None );
+                workingDirectory );
         }
 
         public static bool InvokeTool(
@@ -34,7 +45,6 @@ namespace PostSharp.Engineering.BuildTools.Utilities
             string fileName,
             string commandLine,
             string workingDirectory,
-            CancellationToken cancellationToken = default,
             params (string key, string value)[] environmentVariables )
         {
             if ( !InvokeTool(
@@ -42,7 +52,6 @@ namespace PostSharp.Engineering.BuildTools.Utilities
                 fileName,
                 commandLine,
                 workingDirectory,
-                cancellationToken,
                 out var exitCode,
                 environmentVariables ) )
             {
@@ -65,7 +74,6 @@ namespace PostSharp.Engineering.BuildTools.Utilities
             string fileName,
             string commandLine,
             string workingDirectory,
-            CancellationToken cancellationToken,
             out int exitCode,
             params (string key, string value)[] environmentVariables )
         {
@@ -75,7 +83,7 @@ namespace PostSharp.Engineering.BuildTools.Utilities
                     fileName,
                     commandLine,
                     workingDirectory,
-                    cancellationToken,
+                    _cancellationTokenSource.Token,
                     out exitCode,
                     s =>
                     {
