@@ -118,7 +118,7 @@ namespace Caravela.Framework.CodeFixes
             => s.EndsWith( suffix, StringComparison.Ordinal ) ? s.Substring( 0, s.Length - suffix.Length ) : s;
 
         /// <summary>
-        /// Creates a <see cref="CodeFix"/> that applies an given aspect to a given declaration, so that the <i>source</i> code itself is modified by
+        /// Creates a <see cref="CodeFix"/> that applies a given aspect to a given declaration, so that the <i>source</i> code itself is modified by
         /// the aspect. 
         /// </summary>
         /// <param name="targetDeclaration">The declaration to which the aspect must be applied.</param>

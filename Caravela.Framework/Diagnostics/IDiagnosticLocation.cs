@@ -7,7 +7,7 @@ using Caravela.Framework.Validation;
 namespace Caravela.Framework.Diagnostics
 {
     /// <summary>
-    /// An base interface for objects to which a diagnostic can be reported.
+    /// A base interface for objects to which a diagnostic can be reported.
     /// </summary>
     /// <seealso href="@diagnostics"/>
     [CompileTimeOnly]
