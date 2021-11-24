@@ -64,7 +64,7 @@ namespace PostSharp.Engineering.BuildTools.Build.Model
 
             // Note that we don't expand the ApiKey environment variable so we don't expose passwords to logs.
             var arguments =
-                $"nuget push {file} --source {server} --api-key {Environment.ExpandEnvironmentVariables( source.ApiKey )} --skip-duplicate";
+                $"nuget push {file} --source {server} --api-key {source.ApiKey} --skip-duplicate";
 
             if ( options.Dry )
             {
