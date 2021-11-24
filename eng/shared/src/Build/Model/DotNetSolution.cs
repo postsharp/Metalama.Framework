@@ -10,11 +10,11 @@ namespace PostSharp.Engineering.BuildTools.Build.Model
     {
         public DotNetSolution( string solutionPath ) : base( solutionPath ) { }
 
-        public override bool Build( BuildContext context, BuildOptions options ) => this.RunDotNet( context, options, "build" );
+        public override bool Build( BuildContext context, BuildOptions options ) => this.RunDotNet( context, options, "build", "--no-restore" );
 
-        public override bool Pack( BuildContext context, BuildOptions options ) => this.RunDotNet( context, options, "pack" );
+        public override bool Pack( BuildContext context, BuildOptions options ) => this.RunDotNet( context, options, "pack", "--no-restore" );
 
-        public override bool Test( BuildContext context, TestOptions options ) => this.RunDotNet( context, options, "test", "--no-restore" );
+        public override bool Test( BuildContext context, BuildOptions options ) => this.RunDotNet( context, options, "test", "--no-restore" );
 
         public override bool Restore( BuildContext context, BaseBuildSettings options ) => this.RunDotNet( context, options, "restore" );
 

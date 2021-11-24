@@ -28,6 +28,8 @@ namespace PostSharp.Engineering.BuildTools.Build.Model
 
         internal bool TryGetFiles( string directory, VersionInfo versionInfo, List<FilePatternMatch> files )
         {
+            var matches = new List<string>();
+
             var matcher = new Matcher( StringComparison.OrdinalIgnoreCase );
 
             foreach ( var pattern in this.Items )

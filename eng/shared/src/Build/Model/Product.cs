@@ -1,4 +1,7 @@
-﻿using Microsoft.Build.Definition;
+﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+
+using Microsoft.Build.Definition;
 using Microsoft.Build.Evaluation;
 using Microsoft.Extensions.FileSystemGlobbing;
 using PostSharp.Engineering.BuildTools.Coverage;
@@ -300,28 +303,39 @@ namespace PostSharp.Engineering.BuildTools.Build.Model
                         }
                     }
 
-                    if ( solution.IsTestOnly )
+                    switch ( solution.GetBuildMethod() )
                     {
-                        // Never try to pack solutions.
-                        if ( !solution.Build( context, options ) )
-                        {
-                            return false;
-                        }
-                    }
-                    else
-                    {
-                        if ( !solution.CanPack || (solution.PackRequiresExplicitBuild && !options.NoDependencies) )
-                        {
+                        case BuildMethod.Build:
                             if ( !solution.Build( context, options ) )
                             {
                                 return false;
                             }
-                        }
 
-                        if ( solution.CanPack && !solution.Pack( context, options ) )
-                        {
-                            return false;
-                        }
+                            break;
+
+                        case BuildMethod.Pack:
+                            if ( solution.PackRequiresExplicitBuild && !options.NoDependencies )
+                            {
+                                if ( !solution.Build( context, options ) )
+                                {
+                                    return false;
+                                }
+                            }
+
+                            if ( !solution.Pack( context, options ) )
+                            {
+                                return false;
+                            }
+
+                            break;
+
+                        case BuildMethod.Test:
+                            if ( !solution.Test( context, options ) )
+                            {
+                                return false;
+                            }
+
+                            break;
                     }
 
                     context.Console.WriteSuccess( $"Building {solution.Name} was successful." );
@@ -331,7 +345,7 @@ namespace PostSharp.Engineering.BuildTools.Build.Model
             return true;
         }
 
-        public bool Test( BuildContext context, TestOptions options )
+        public bool Test( BuildContext context, BuildOptions options )
         {
             if ( !options.NoDependencies && !this.Build( context, (BuildOptions) options.WithIncludeTests( true ) ) )
             {
@@ -366,7 +380,7 @@ namespace PostSharp.Engineering.BuildTools.Build.Model
 
                 if ( options.AnalyzeCoverage && solution.SupportsTestCoverage )
                 {
-                    solutionOptions = (TestOptions) options.WithAdditionalProperties( properties ).WithoutConcurrency();
+                    solutionOptions = (BuildOptions) options.WithAdditionalProperties( properties ).WithoutConcurrency();
                 }
 
                 context.Console.WriteHeading( $"Testing {solution.Name}." );
@@ -547,7 +561,7 @@ namespace PostSharp.Engineering.BuildTools.Build.Model
         <{this.ProductNameWithoutDot}VersionPatchNumber>{patchNumber}</{this.ProductNameWithoutDot}VersionPatchNumber>
         <{this.ProductNameWithoutDot}Version>{versionPrefix}{packageSuffix}</{this.ProductNameWithoutDot}Version>
         <{this.ProductNameWithoutDot}AssemblyVersion>{versionPrefix}.{patchNumber}</{this.ProductNameWithoutDot}AssemblyVersion>
-        ";
+        <{this.ProductNameWithoutDot}BuildConfiguration>{configuration}</{this.ProductNameWithoutDot}BuildConfiguration>";
             }
             else
             {
@@ -555,12 +569,13 @@ namespace PostSharp.Engineering.BuildTools.Build.Model
 
                 props += $@"
         <{this.ProductNameWithoutDot}Version>{versionPrefix}.{patchNumber}{packageSuffix}</{this.ProductNameWithoutDot}Version>
-        <{this.ProductNameWithoutDot}AssemblyVersion>{versionPrefix}.{patchNumber}</{this.ProductNameWithoutDot}AssemblyVersion>";
+        <{this.ProductNameWithoutDot}AssemblyVersion>{versionPrefix}.{patchNumber}</{this.ProductNameWithoutDot}AssemblyVersion>
+        <{this.ProductNameWithoutDot}BuildConfiguration>{configuration}</{this.ProductNameWithoutDot}BuildConfiguration>";
             }
 
             props += $@"
-        <{this.ProductNameWithoutDot}BuildConfiguration>{configuration}</{this.ProductNameWithoutDot}BuildConfiguration>
-        <{this.ProductNameWithoutDot}Dependencies>{string.Join( ";", this.Dependencies.Select( x => x.Name ) )}</{this.ProductNameWithoutDot}Dependencies>
+    </PropertyGroup>
+    <PropertyGroup>
         <!-- Adds the local output directories as nuget sources for referencing projects. -->
         <RestoreAdditionalProjectSources>$(RestoreAdditionalProjectSources);$(MSBuildThisFileDirectory)</RestoreAdditionalProjectSources>
     </PropertyGroup>

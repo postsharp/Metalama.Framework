@@ -12,11 +12,11 @@ namespace PostSharp.Engineering.BuildTools.Build.Model
     {
         public MsbuildSolution( string solutionPath ) : base( solutionPath ) { }
 
-        public override bool Build( BuildContext context, BuildOptions options ) => this.RunMsbuild( context, options, "Build" );
+        public override bool Build( BuildContext context, BuildOptions options ) => this.RunMsbuild( context, options, "Build", "-p:RestorePackages=false" );
 
-        public override bool Pack( BuildContext context, BuildOptions options ) => this.RunMsbuild( context, options, "Pack" );
+        public override bool Pack( BuildContext context, BuildOptions options ) => this.RunMsbuild( context, options, "Pack", "-p:RestorePackages=false" );
 
-        public override bool Test( BuildContext context, TestOptions options ) => this.RunMsbuild( context, options, "Test", "-p:RestorePackages=false" );
+        public override bool Test( BuildContext context, BuildOptions options ) => this.RunMsbuild( context, options, "Test", "-p:RestorePackages=false" );
 
         public override bool Restore( BuildContext context, BaseBuildSettings options ) => this.RunMsbuild( context, options, "Restore" );
 

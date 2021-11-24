@@ -12,32 +12,32 @@ namespace PostSharp.Engineering.BuildTools.Build
     {
         [Description( "Sets the build configuration (Debug or Release)" )]
         [CommandOption( "-c|--configuration" )]
-        public BuildConfiguration BuildConfiguration { get; protected set; }
+        public BuildConfiguration BuildConfiguration { get; set; }
 
         [Description( "Creates a numbered build (typically for an internal CI build)" )]
         [CommandOption( "--numbered" )]
-        public int BuildNumber { get; protected set; }
+        public int BuildNumber { get; set; }
 
         [Description( "Creates a public build (typically to publish to nuget.org)" )]
         [CommandOption( "--public" )]
-        public bool PublicBuild { get; protected set; }
+        public bool PublicBuild { get; set; }
 
         [Description( "Sets the verbosity" )]
         [CommandOption( "-v|--verbosity" )]
         [DefaultValue( Verbosity.Minimal )]
-        public Verbosity Verbosity { get; protected set; }
+        public Verbosity Verbosity { get; set; }
 
         [Description( "Executes only the current command, but not the previous command" )]
         [CommandOption( "--no-dependencies" )]
-        public bool NoDependencies { get; protected set; }
+        public bool NoDependencies { get; set; }
 
         [Description( "Determines wether test-only assemblies should be included in the operation" )]
         [CommandOption( "--include-tests" )]
-        public bool IncludeTests { get; protected set; }
+        public bool IncludeTests { get; set; }
 
         [Description( "Disables concurrent processing" )]
         [CommandOption( "--no-concurrency" )]
-        public bool NoConcurrency { get; protected set; }
+        public bool NoConcurrency { get; set; }
 
         public BaseBuildSettings WithIncludeTests( bool value )
         {
