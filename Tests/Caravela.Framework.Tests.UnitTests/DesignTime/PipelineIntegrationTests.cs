@@ -6,6 +6,7 @@ using Caravela.Framework.Impl.DesignTime.Pipeline;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Pipeline;
 using Caravela.Framework.Impl.Templating;
+using Caravela.Framework.Tests.UnitTests.Utilities;
 using Caravela.TestFramework;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -303,7 +304,11 @@ Target.cs:
 
             // Build the project from the compile-time pipeline.
             using UnloadableCompileTimeDomain domain = new();
-            var serviceProvider = ServiceProviderFactory.GetServiceProvider( projectOptions ).WithProjectScopedServices( compilation.References );
+            
+            var serviceProvider = ServiceProviderFactory.GetServiceProvider( projectOptions )
+                .WithServices( new ThrowingDiagnosticsSink(), new DummyLicenseConsumptionManager() )
+                .WithProjectScopedServices( compilation.References );
+            
             var compileTimeAspectPipeline = new CompileTimeAspectPipeline( serviceProvider, true, domain );
             DiagnosticList compileDiagnostics = new();
             Assert.True( compileTimeAspectPipeline.TryExecute( compileDiagnostics, compilation5, default, CancellationToken.None, out _, out _, out _ ) );

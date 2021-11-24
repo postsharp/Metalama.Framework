@@ -4,6 +4,7 @@
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Validation;
+using PostSharp.Backstage.Extensibility;
 using System;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;

@@ -9,8 +9,12 @@ using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Formatting;
+using Caravela.Framework.Impl.Licensing;
 using Caravela.Framework.Impl.Templating;
 using Microsoft.CodeAnalysis;
+using PostSharp.Backstage.Extensibility.Extensions;
+using PostSharp.Backstage.Licensing;
+using PostSharp.Backstage.Licensing.Consumption;
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
@@ -67,6 +71,11 @@ namespace Caravela.Framework.Impl.Pipeline
 
             try
             {
+                var licenseManager = this.ServiceProvider.GetRequiredService<ILicenseConsumptionManager>();
+
+                // TODO: Implement all license policies.
+                licenseManager.ConsumeFeatures( new LicenseConsumer( this.ServiceProvider ), LicensedFeatures.Community );
+                
                 if ( !TemplatingCodeValidator.Validate( compilation, diagnosticAdder, this.ServiceProvider, cancellationToken ) )
                 {
                     return false;

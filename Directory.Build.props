@@ -1,5 +1,7 @@
 <Project>
 
+    <Import Project="..\PostSharp.Backstage.Settings\eng\BackstageVersion.props" Condition="Exists('.local')" />
+
     <Import Project="eng\Versions.props" />
     <Import Project="eng\StrongName.props" />
     <Import Project="eng\Packaging.props" />

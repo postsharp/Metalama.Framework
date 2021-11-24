@@ -3,7 +3,7 @@
 
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
-using Caravela.Framework.Project;
+using PostSharp.Backstage.Extensibility;
 
 namespace Caravela.Framework.Impl.Observers
 {

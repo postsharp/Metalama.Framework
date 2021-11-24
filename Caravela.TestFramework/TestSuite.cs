@@ -2,8 +2,10 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Impl.Pipeline;
+using Caravela.TestFramework.Licensing;
 using Caravela.TestFramework.Utilities;
 using Caravela.TestFramework.XunitFramework;
+using PostSharp.Backstage.Licensing.Consumption;
 using System;
 using System.IO;
 using System.Linq;
@@ -71,7 +73,10 @@ namespace Caravela.TestFramework
         {
             var directory = this.GetDirectory( callerMemberName! );
             using var testOptions = new TestProjectOptions();
-            var serviceProvider = ServiceProviderFactory.GetServiceProvider( testOptions );
+
+            var serviceProvider =
+                ServiceProviderFactory.GetServiceProvider( testOptions )
+                    .WithServices( new TestDiagnosticsSink(), new TestFrameworkLicenseConsumptionManager() );
 
             var assemblyAssets = GetAssemblyAssets( this.GetType().Assembly );
 

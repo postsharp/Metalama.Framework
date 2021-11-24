@@ -4,6 +4,7 @@
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Options;
 using Caravela.Framework.Project;
+using PostSharp.Backstage.Extensibility;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 

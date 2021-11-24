@@ -19,7 +19,9 @@
     <!-- Versions of dependencies -->
     <PropertyGroup>
         <RoslynVersion>3.11.0</RoslynVersion>
-        <CaravelaCompilerVersion>3.11.1012-preview</CaravelaCompilerVersion>
+        <!-- TODO: Set public version -->
+        <CaravelaCompilerVersion>3.11.1012-local-98</CaravelaCompilerVersion>
+        <BackstageVersion Condition="'$(BackstageVersion)'==''">1.0.0-preview</BackstageVersion>
         <MicrosoftCSharpVersion>4.7.0</MicrosoftCSharpVersion>
         <NewtonsoftJsonVersion>13.0.1</NewtonsoftJsonVersion>
         <SystemCollectionsImmutableVersion>5.0.0</SystemCollectionsImmutableVersion>

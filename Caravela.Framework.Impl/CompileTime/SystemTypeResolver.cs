@@ -3,6 +3,7 @@
 
 using Caravela.Framework.Project;
 using Microsoft.CodeAnalysis;
+using PostSharp.Backstage.Extensibility;
 using System;
 using System.Linq;
 using System.Reflection;

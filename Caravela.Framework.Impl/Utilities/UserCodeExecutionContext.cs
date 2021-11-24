@@ -4,6 +4,7 @@
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Project;
+using PostSharp.Backstage.Extensibility;
 using System;
 using System.Globalization;
 using System.Threading;

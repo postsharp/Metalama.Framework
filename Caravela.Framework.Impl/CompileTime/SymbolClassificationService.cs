@@ -4,6 +4,7 @@
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Project;
 using Microsoft.CodeAnalysis;
+using PostSharp.Backstage.Extensibility;
 using System;
 using System.Runtime.CompilerServices;
 

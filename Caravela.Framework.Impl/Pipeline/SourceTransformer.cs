@@ -23,6 +23,7 @@ namespace Caravela.Framework.Impl.Pipeline
             var projectOptions = new ProjectOptions( context.GlobalOptions, context.Plugins );
 
             var serviceProvider = ServiceProviderFactory.GetServiceProvider()
+                .WithNextProvider( context.Services )
                 .WithService( projectOptions )
                 .WithProjectScopedServices( context.Compilation.References );
 

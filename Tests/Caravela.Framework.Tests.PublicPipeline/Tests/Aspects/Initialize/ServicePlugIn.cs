@@ -2,6 +2,7 @@ using System;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Impl.Sdk;
 using Caravela.Framework.Project;
+using PostSharp.Backstage.Extensibility;
 
 namespace Caravela.Framework.Tests.PublicPipeline.Aspects.Initialize.ServicePlugIn
 {
@@ -15,7 +16,8 @@ namespace Caravela.Framework.Tests.PublicPipeline.Aspects.Initialize.ServicePlug
             return meta.Proceed();
         }
     }
-
+    
+    [CompileTimeOnly]
     internal interface IMyService : IService
     {
         string Message { get; }
