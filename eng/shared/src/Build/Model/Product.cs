@@ -1,7 +1,4 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
-
-using Microsoft.Build.Definition;
+﻿using Microsoft.Build.Definition;
 using Microsoft.Build.Evaluation;
 using Microsoft.Extensions.FileSystemGlobbing;
 using PostSharp.Engineering.BuildTools.Coverage;
@@ -82,6 +79,7 @@ namespace PostSharp.Engineering.BuildTools.Build.Model
                 if ( !publishingTarget.Artifacts.TryGetFiles( privateArtifactsDir, versionInfo, artifacts ) )
                 {
                     context.Console.WriteError( $"The build did not generate the artifacts '{publishingTarget.Artifacts}'." );
+
                     return false;
                 }
             }
@@ -119,9 +117,10 @@ namespace PostSharp.Engineering.BuildTools.Build.Model
                 {
                     if ( publishingTarget.SupportsPublicPublishing )
                     {
-                        if ( !publishingTarget.Artifacts.TryGetFiles( privateArtifactsDir, versionInfo, files))
+                        if ( !publishingTarget.Artifacts.TryGetFiles( privateArtifactsDir, versionInfo, files ) )
                         {
                             context.Console.WriteError( $"The pattern '{publishingTarget.Artifacts}' in '{privateArtifactsDir}' did not generate any output." );
+
                             return false;
                         }
                     }
@@ -141,7 +140,7 @@ namespace PostSharp.Engineering.BuildTools.Build.Model
                     context.Console.WriteMessage( file.Path );
                     File.Copy( Path.Combine( privateArtifactsDir, file.Path ), targetFile, true );
                 }
-                
+
                 // Verify that public packages have no private dependencies.
                 if ( !VerifyPublicPackageCommand.Execute(
                     context.Console,
@@ -311,7 +310,7 @@ namespace PostSharp.Engineering.BuildTools.Build.Model
                     }
                     else
                     {
-                        if ( !solution.CanPack || solution.PackRequiresExplicitBuild && !options.NoDependencies )
+                        if ( !solution.CanPack || (solution.PackRequiresExplicitBuild && !options.NoDependencies) )
                         {
                             if ( !solution.Build( context, options ) )
                             {
@@ -548,7 +547,7 @@ namespace PostSharp.Engineering.BuildTools.Build.Model
         <{this.ProductNameWithoutDot}VersionPatchNumber>{patchNumber}</{this.ProductNameWithoutDot}VersionPatchNumber>
         <{this.ProductNameWithoutDot}Version>{versionPrefix}{packageSuffix}</{this.ProductNameWithoutDot}Version>
         <{this.ProductNameWithoutDot}AssemblyVersion>{versionPrefix}.{patchNumber}</{this.ProductNameWithoutDot}AssemblyVersion>
-        <{this.ProductNameWithoutDot}BuildConfiguration>{configuration}</{this.ProductNameWithoutDot}BuildConfiguration>";
+        ";
             }
             else
             {
@@ -556,13 +555,12 @@ namespace PostSharp.Engineering.BuildTools.Build.Model
 
                 props += $@"
         <{this.ProductNameWithoutDot}Version>{versionPrefix}.{patchNumber}{packageSuffix}</{this.ProductNameWithoutDot}Version>
-        <{this.ProductNameWithoutDot}AssemblyVersion>{versionPrefix}.{patchNumber}</{this.ProductNameWithoutDot}AssemblyVersion>
-        <{this.ProductNameWithoutDot}BuildConfiguration>{configuration}</{this.ProductNameWithoutDot}BuildConfiguration>";
+        <{this.ProductNameWithoutDot}AssemblyVersion>{versionPrefix}.{patchNumber}</{this.ProductNameWithoutDot}AssemblyVersion>";
             }
 
             props += $@"
-    </PropertyGroup>
-    <PropertyGroup>
+        <{this.ProductNameWithoutDot}BuildConfiguration>{configuration}</{this.ProductNameWithoutDot}BuildConfiguration>
+        <{this.ProductNameWithoutDot}Dependencies>{string.Join( ";", this.Dependencies.Select( x => x.Name ) )}</{this.ProductNameWithoutDot}Dependencies>
         <!-- Adds the local output directories as nuget sources for referencing projects. -->
         <RestoreAdditionalProjectSources>$(RestoreAdditionalProjectSources);$(MSBuildThisFileDirectory)</RestoreAdditionalProjectSources>
     </PropertyGroup>
@@ -680,14 +678,13 @@ namespace PostSharp.Engineering.BuildTools.Build.Model
                 {
                     hasTarget = true;
 
-                    if ( !publishingTarget.Artifacts.TryGetFiles( directory, versionFile, files))
+                    if ( !publishingTarget.Artifacts.TryGetFiles( directory, versionFile, files ) )
                     {
                         context.Console.WriteError( $"The pattern '{publishingTarget.Artifacts}' in '{directory}' did not generate any file match." );
+
                         return false;
                     }
-
                 }
-
 
                 foreach ( var file in files )
                 {

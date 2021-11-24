@@ -15,8 +15,8 @@ namespace PostSharp.Engineering.BuildTools.Utilities
 {
     public static class ToolInvocationHelper
     {
-        private static readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
-        
+        private static readonly CancellationTokenSource _cancellationTokenSource = new();
+
         static ToolInvocationHelper()
         {
             Console.CancelKeyPress += OnCancel;

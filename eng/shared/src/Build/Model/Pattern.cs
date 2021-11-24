@@ -28,8 +28,6 @@ namespace PostSharp.Engineering.BuildTools.Build.Model
 
         internal bool TryGetFiles( string directory, VersionInfo versionInfo, List<FilePatternMatch> files )
         {
-            var matches = new List<string>();
-
             var matcher = new Matcher( StringComparison.OrdinalIgnoreCase );
 
             foreach ( var pattern in this.Items )
@@ -44,10 +42,10 @@ namespace PostSharp.Engineering.BuildTools.Build.Model
                 {
                     matcher.AddInclude( file );
                 }
-              
             }
-var matchingResult =
-            matcher.Execute( new DirectoryInfoWrapper( new DirectoryInfo( directory ) ) );
+
+            var matchingResult =
+                matcher.Execute( new DirectoryInfoWrapper( new DirectoryInfo( directory ) ) );
 
             if ( !matchingResult.HasMatches )
             {
@@ -61,8 +59,6 @@ var matchingResult =
             return true;
         }
 
-        public override string ToString()
-            => string.Join( " ", this.Items.Select( i => (i.IsExclude ? "-" : "+") + i.Pattern ) );
-        
+        public override string ToString() => string.Join( " ", this.Items.Select( i => (i.IsExclude ? "-" : "+") + i.Pattern ) );
     }
 }

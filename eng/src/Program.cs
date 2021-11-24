@@ -30,11 +30,8 @@ namespace Build
                 Pattern.Empty.Add( publicPackages ),
                 privateSource,
                 publicSource );
-
-            // These packages are published to private feeds only.
-            var privatePublishing = new NugetPublishTarget(
-                Pattern.Empty.Add( "*.nupkg" ).Remove( publicPackages ),
-                privateSource );
+            
+            // Currently we have no private package in this product.
 
             var product = new Product
             {
@@ -42,7 +39,7 @@ namespace Build
                 Solutions = ImmutableArray.Create<Solution>(
                     new DotNetSolution( "Caravela.sln" ) { SupportsTestCoverage = true, CanFormatCode = true },
                     new DotNetSolution( "Tests\\Caravela.Framework.TestApp\\Caravela.Framework.TestApp.sln" ) { IsTestOnly = true } ),
-                PublishingTargets = ImmutableArray.Create<PublishingTarget>( publicPublishing, privatePublishing ),
+                PublishingTargets = ImmutableArray.Create<PublishingTarget>( publicPublishing ),
                 Dependencies = ImmutableArray.Create( new ProductDependency( "Caravela.Compiler" ) )
             };
 

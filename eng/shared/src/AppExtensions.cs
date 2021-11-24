@@ -75,14 +75,15 @@ namespace PostSharp.Engineering.BuildTools
                                     .WithDescription(
                                         $"Copies the remote engineering repo to {product.EngineeringDirectory}/shared. Automatically pulls 'master'." );
                             } );
+
                         root.AddBranch(
                             "tools",
                             tools =>
                             {
                                 tools.AddBranch(
-                       "csproj",
-                       csproj => csproj.AddCommand<AddProjectReferenceCommand>( "add-project-reference" )
-                           .WithDescription( "Adds a <ProjectReference> item to *.csproj in a directory" ) );
+                                    "csproj",
+                                    csproj => csproj.AddCommand<AddProjectReferenceCommand>( "add-project-reference" )
+                                        .WithDescription( "Adds a <ProjectReference> item to *.csproj in a directory" ) );
 
                                 tools.AddBranch(
                                     "nuget",
@@ -92,7 +93,8 @@ namespace PostSharp.Engineering.BuildTools
                                             .WithDescription( "Renames all packages in a directory" );
 
                                         nuget.AddCommand<VerifyPublicPackageCommand>( "verify-public" )
-                                            .WithDescription( "Verifies that all packages in a directory have only references to packages published on nuget.org." );
+                                            .WithDescription(
+                                                "Verifies that all packages in a directory have only references to packages published on nuget.org." );
                                     } );
                             } );
                     } );

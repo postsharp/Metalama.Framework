@@ -23,7 +23,7 @@ namespace PostSharp.Engineering.BuildTools.Build
             }
 
             var signTool = Path.Combine( context.RepoDirectory, "tools", "jb.exe" );
-            
+
             foreach ( var solution in context.Product.Solutions )
             {
                 if ( solution.CanFormatCode )
