@@ -93,7 +93,8 @@ public class Aspect : TypeAspect
         public void CrossProjectIntegration()
         {
             using var domain = new UnloadableCompileTimeDomain();
-            using var factory = new DesignTimeAspectPipelineFactory( domain, true );
+            using var options = new TestProjectOptions();
+            using var factory = new TestDesignTimeAspectPipelineFactory( domain, options );
 
             var code1 = @"
 using Caravela.Framework.Aspects;
@@ -114,16 +115,11 @@ public interface I {}
 
             using var testContext1 = this.CreateTestContext();
 
-            var compilation1 = CreateCSharpCompilation(
-                code1,
-                preprocessorSymbols: new[] { DesignTimeAspectPipelineFactory.ProjectIdPreprocessorSymbolPrefix + testContext1.ProjectOptions.ProjectId } );
+            var compilation1 = CreateCSharpCompilation( code1 );
 
             using var testContext2 = this.CreateTestContext();
 
-            var compilation2 = CreateCSharpCompilation(
-                code2,
-                additionalReferences: new[] { compilation1.ToMetadataReference() },
-                preprocessorSymbols: new[] { DesignTimeAspectPipelineFactory.ProjectIdPreprocessorSymbolPrefix + testContext2.ProjectOptions.ProjectId } );
+            var compilation2 = CreateCSharpCompilation( code2, additionalReferences: new[] { compilation1.ToMetadataReference() } );
 
             // We have to execute the pipeline on compilation1 first and explicitly because implicit running is not currently possible
             // because of missing project options.

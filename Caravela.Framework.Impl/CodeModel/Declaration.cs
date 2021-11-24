@@ -3,7 +3,6 @@
 
 using Caravela.Framework.Code;
 using Caravela.Framework.Code.Collections;
-using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Impl.CodeModel.Collections;
 using Caravela.Framework.Impl.CodeModel.References;
 using Caravela.Framework.Impl.Diagnostics;
@@ -17,7 +16,7 @@ using RoslynMethodKind = Microsoft.CodeAnalysis.MethodKind;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    internal abstract class Declaration : IDeclarationImpl, IHasDiagnosticLocation
+    internal abstract class Declaration : IDeclarationImpl
     {
         protected Declaration( CompilationModel compilation )
         {
@@ -39,7 +38,7 @@ namespace Caravela.Framework.Impl.CodeModel
                 this,
                 this.Symbol.GetAttributes()
                     .Where( a => a.AttributeConstructor != null )
-                    .Select( a => new AttributeRef( a, Ref.FromSymbol<IDeclaration>( this.Symbol ) ) ) );
+                    .Select( a => new AttributeRef( a, Ref.FromSymbol<IDeclaration>( this.Symbol, this.Compilation.RoslynCompilation ) ) ) );
 
         [Memo]
         public IAssembly DeclaringAssembly => this.Compilation.Factory.GetAssembly( this.Symbol.ContainingAssembly );
@@ -48,7 +47,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public abstract ISymbol Symbol { get; }
 
-        public virtual Ref<IDeclaration> ToRef() => Ref.FromSymbol( this.Symbol );
+        public virtual Ref<IDeclaration> ToRef() => Ref.FromSymbol( this.Symbol, this.Compilation.RoslynCompilation );
 
         public virtual string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
             => this.Symbol.ToDisplayString( format.ToRoslyn() );
@@ -109,8 +108,6 @@ namespace Caravela.Framework.Impl.CodeModel
 
             return semanticModel.LookupSymbols( lookupPosition ).AddRange( implicitSymbols );
         }
-
-        IDiagnosticLocation? IDiagnosticScope.DiagnosticLocation => this.DiagnosticLocation?.ToDiagnosticLocation();
 
         ImmutableArray<SyntaxReference> IDeclarationImpl.DeclaringSyntaxReferences => this.Symbol.DeclaringSyntaxReferences;
 

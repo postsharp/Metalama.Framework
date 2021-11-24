@@ -42,7 +42,7 @@ namespace Caravela.Framework.Impl.Pipeline
             CancellationToken cancellationToken,
             [NotNullWhen( true )] out PipelineStageResult? result )
         {
-            var compilation = CompilationModel.CreateInitialInstance( input.Project, input.PartialCompilation );
+            var compilation = CompilationModel.CreateInitialInstance( input.Project, input.Compilation );
 
             this.ServiceProvider.GetOptionalService<ICompilationModelObserver>()?.OnInitialCompilationModelCreated( compilation );
 
@@ -65,13 +65,13 @@ namespace Caravela.Framework.Impl.Pipeline
         /// </summary>
         /// <param name="pipelineConfiguration"></param>
         /// <param name="input"></param>
-        /// <param name="pipelineStepResult"></param>
+        /// <param name="pipelineStepsResult"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         protected abstract PipelineStageResult GetStageResult(
             AspectPipelineConfiguration pipelineConfiguration,
             PipelineStageResult input,
-            IPipelineStepsResult pipelineStepResult,
+            IPipelineStepsResult pipelineStepsResult,
             CancellationToken cancellationToken );
     }
 }

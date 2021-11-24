@@ -319,7 +319,65 @@ namespace Caravela.Framework.Impl.CodeModel
             }
         }
 
-        public ExpressionSyntax AttributeValueExpression( object? value, ReflectionMapper reflectionMapper )
+        public AttributeSyntax Attribute( IAttributeData attribute, ReflectionMapper reflectionMapper )
+        {
+            var constructorArguments = attribute.ConstructorArguments.Select(
+                a => AttributeArgument( this.AttributeValueExpression( a.Value, reflectionMapper ) ) );
+
+            var namedArguments = attribute.NamedArguments.Select(
+                a => AttributeArgument(
+                    NameEquals( a.Key ),
+                    null,
+                    this.AttributeValueExpression( a.Value, reflectionMapper ) ) );
+
+            var attributeSyntax = SyntaxFactory.Attribute( (NameSyntax) this.Type( attribute.Type.GetSymbol() ) );
+
+            var argumentList = AttributeArgumentList( SeparatedList( constructorArguments.Concat( namedArguments ) ) );
+
+            if ( argumentList.Arguments.Count > 0 )
+            {
+                // Add the argument list only when it is non-empty, otherwise this generates redundant parenthesis.
+                attributeSyntax = attributeSyntax.WithArgumentList( argumentList );
+            }
+
+            return attributeSyntax;
+        }
+
+        public SyntaxNode AddAttribute( SyntaxNode oldNode, IAttributeData attribute, ReflectionMapper reflectionMapper )
+        {
+            var attributeList = AttributeList( SingletonSeparatedList( this.Attribute( attribute, reflectionMapper ) ) )
+                .WithLeadingTrivia( oldNode.GetLeadingTrivia() )
+                .WithTrailingTrivia( ElasticLineFeed );
+
+            SyntaxNode newNode = oldNode.Kind() switch
+            {
+                SyntaxKind.MethodDeclaration => ((MethodDeclarationSyntax) oldNode).AddAttributeLists( attributeList ),
+                SyntaxKind.DestructorDeclaration => ((DestructorDeclarationSyntax) oldNode).AddAttributeLists( attributeList ),
+                SyntaxKind.ConstructorDeclaration => ((ConstructorDeclarationSyntax) oldNode).AddAttributeLists( attributeList ),
+                SyntaxKind.InterfaceDeclaration => ((InterfaceDeclarationSyntax) oldNode).AddAttributeLists( attributeList ),
+                SyntaxKind.DelegateDeclaration => ((DelegateDeclarationSyntax) oldNode).AddAttributeLists( attributeList ),
+                SyntaxKind.EnumDeclaration => ((EnumDeclarationSyntax) oldNode).AddAttributeLists( attributeList ),
+                SyntaxKind.ClassDeclaration => ((ClassDeclarationSyntax) oldNode).AddAttributeLists( attributeList ),
+                SyntaxKind.StructDeclaration => ((StructDeclarationSyntax) oldNode).AddAttributeLists( attributeList ),
+                SyntaxKind.Parameter => ((ParameterSyntax) oldNode).AddAttributeLists( attributeList ),
+                SyntaxKind.PropertyDeclaration => ((PropertyDeclarationSyntax) oldNode).AddAttributeLists( attributeList ),
+                SyntaxKind.EventDeclaration => ((EventDeclarationSyntax) oldNode).AddAttributeLists( attributeList ),
+                SyntaxKind.AddAccessorDeclaration => ((AccessorDeclarationSyntax) oldNode).AddAttributeLists( attributeList ),
+                SyntaxKind.RemoveAccessorDeclaration => ((AccessorDeclarationSyntax) oldNode).AddAttributeLists( attributeList ),
+                SyntaxKind.GetAccessorDeclaration => ((AccessorDeclarationSyntax) oldNode).AddAttributeLists( attributeList ),
+                SyntaxKind.SetAccessorDeclaration => ((AccessorDeclarationSyntax) oldNode).AddAttributeLists( attributeList ),
+                SyntaxKind.OperatorDeclaration => ((OperatorDeclarationSyntax) oldNode).AddAttributeLists( attributeList ),
+                SyntaxKind.ConversionOperatorDeclaration => ((ConversionOperatorDeclarationSyntax) oldNode).AddAttributeLists( attributeList ),
+                SyntaxKind.IndexerDeclaration => ((IndexerDeclarationSyntax) oldNode).AddAttributeLists( attributeList ),
+                SyntaxKind.FieldDeclaration => ((FieldDeclarationSyntax) oldNode).AddAttributeLists( attributeList ),
+                SyntaxKind.EventFieldDeclaration => ((EventFieldDeclarationSyntax) oldNode).AddAttributeLists( attributeList ),
+                _ => throw new AssertionFailedException()
+            };
+
+            return newNode;
+        }
+
+        private ExpressionSyntax AttributeValueExpression( object? value, ReflectionMapper reflectionMapper )
         {
             if ( value == null )
             {

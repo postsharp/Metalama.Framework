@@ -136,69 +136,66 @@ namespace Caravela.Framework.Impl.Aspects
                 return CreateResultForError( diagnostic );
             }
 
-            var diagnosticSink = new UserDiagnosticSink( this._aspectClass.Project, targetDeclaration );
+            var diagnosticSink = new UserDiagnosticSink( this._aspectClass.Project, pipelineConfiguration.CodeFixFilter, targetDeclaration );
 
-            using ( DiagnosticContext.WithDefaultLocation( diagnosticSink.DefaultScope?.DiagnosticLocation ) )
+            var declarativeAdvices =
+                this._declarativeAdviceAttributes
+                    .Select(
+                        x => CreateDeclarativeAdvice(
+                            aspectInstance,
+                            aspectInstance.TemplateInstances[x.TemplateClass],
+                            diagnosticSink,
+                            targetDeclaration,
+                            x.TemplateInfo,
+                            x.Symbol ) )
+                    .WhereNotNull()
+                    .ToArray();
+
+            var adviceFactory = new AdviceFactory(
+                compilationModelRevision,
+                diagnosticSink,
+                declarativeAdvices,
+                aspectInstance,
+                aspectInstance.TemplateInstances.Count == 1 ? aspectInstance.TemplateInstances.Values.Single() : null,
+                this._serviceProvider );
+
+            var aspectBuilder = new AspectBuilder<T>(
+                targetDeclaration,
+                diagnosticSink,
+                declarativeAdvices,
+                adviceFactory,
+                pipelineConfiguration,
+                aspectInstance,
+                cancellationToken );
+
+            var executionContext = new UserCodeExecutionContext(
+                this._serviceProvider,
+                diagnosticSink,
+                UserCodeMemberInfo.FromDelegate( new Action<IAspectBuilder<T>>( aspectOfT.BuildAspect ) ),
+                new AspectLayerId( this._aspectClass ),
+                compilationModelRevision,
+                targetDeclaration );
+
+            if ( !this._serviceProvider.GetService<UserCodeInvoker>().TryInvoke( () => aspectOfT.BuildAspect( aspectBuilder ), executionContext ) )
             {
-                var declarativeAdvices =
-                    this._declarativeAdviceAttributes
-                        .Select(
-                            x => CreateDeclarativeAdvice(
-                                aspectInstance,
-                                aspectInstance.TemplateInstances[x.TemplateClass],
-                                diagnosticSink,
-                                targetDeclaration,
-                                x.TemplateInfo,
-                                x.Symbol ) )
-                        .WhereNotNull()
-                        .ToArray();
+                aspectInstance.Skip();
 
-                var adviceFactory = new AdviceFactory(
-                    compilationModelRevision,
-                    diagnosticSink,
-                    declarativeAdvices,
-                    aspectInstance,
-                    aspectInstance.TemplateInstances.Count == 1 ? aspectInstance.TemplateInstances.Values.Single() : null,
-                    this._serviceProvider );
-
-                var aspectBuilder = new AspectBuilder<T>(
-                    targetDeclaration,
-                    diagnosticSink,
-                    declarativeAdvices,
-                    adviceFactory,
-                    pipelineConfiguration,
-                    aspectInstance,
-                    cancellationToken );
-
-                var executionContext = new UserCodeExecutionContext(
-                    this._serviceProvider,
-                    diagnosticSink,
-                    UserCodeMemberInfo.FromDelegate( new Action<IAspectBuilder<T>>( aspectOfT.BuildAspect ) ),
-                    new AspectLayerId( this._aspectClass ),
-                    compilationModelRevision,
-                    targetDeclaration );
-
-                if ( !this._serviceProvider.GetService<UserCodeInvoker>().TryInvoke( () => aspectOfT.BuildAspect( aspectBuilder ), executionContext ) )
-                {
-                    aspectInstance.Skip();
-
-                    return
-                        new AspectInstanceResult(
-                            false,
-                            diagnosticSink.ToImmutable(),
-                            ImmutableArray<Advice>.Empty,
-                            ImmutableArray<IAspectSource>.Empty );
-                }
-
-                var aspectResult = aspectBuilder.ToResult();
-
-                if ( !aspectResult.Success )
-                {
-                    aspectInstance.Skip();
-                }
-
-                return aspectResult;
+                return
+                    new AspectInstanceResult(
+                        false,
+                        diagnosticSink.ToImmutable(),
+                        ImmutableArray<Advice>.Empty,
+                        ImmutableArray<IAspectSource>.Empty );
             }
+
+            var aspectResult = aspectBuilder.ToResult();
+
+            if ( !aspectResult.Success )
+            {
+                aspectInstance.Skip();
+            }
+
+            return aspectResult;
         }
 
         private static Advice? CreateDeclarativeAdvice<T>(

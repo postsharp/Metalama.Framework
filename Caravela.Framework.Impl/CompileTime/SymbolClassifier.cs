@@ -206,7 +206,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
             return scope;
         }
-        
+
         private TemplatingScope GetTemplatingScopeCore( ISymbol symbol )
         {
             var scope = this.GetTemplatingScopeCore( symbol, 0 );

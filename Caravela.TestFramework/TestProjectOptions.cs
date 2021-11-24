@@ -49,7 +49,7 @@ namespace Caravela.TestFramework
 
         public override string SettingsDirectory { get; }
 
-        public string ProjectId => "test";
+        public string ProjectId => throw new NotSupportedException();
 
         public virtual string? BuildTouchFile => null;
 

@@ -73,7 +73,9 @@ namespace Caravela.Framework.Impl.CompileTime
             if ( type == null )
             {
                 diagnosticAdder.Report(
-                    AttributeDeserializerDiagnostics.CannotFindAttributeType.CreateDiagnostic( attribute.GetLocation(), constructorSymbol.ContainingType ) );
+                    AttributeDeserializerDiagnostics.CannotFindAttributeType.CreateDiagnostic(
+                        attribute.GetDiagnosticLocation(),
+                        constructorSymbol.ContainingType ) );
 
                 attributeInstance = null;
 

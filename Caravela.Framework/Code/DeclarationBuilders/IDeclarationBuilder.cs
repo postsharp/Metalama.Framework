@@ -13,10 +13,9 @@ namespace Caravela.Framework.Code.DeclarationBuilders
         /// <summary>
         /// Adds a custom attribute to the current declaration.
         /// </summary>
-        /// <param name="type">Type of the custom attribute.</param>
-        /// <param name="constructorArguments">Arguments of the constructors.</param>
-        /// <returns></returns>
-        IAttributeBuilder AddAttribute( INamedType type, params object?[] constructorArguments );
+        void AddAttribute( AttributeConstruction attribute );
+
+        // TODO: There is no way to provide the value of an enum when the enum type is run-time-only.
 
         /// <summary>
         /// Removes all custom attributes of a given type from the current declaration.

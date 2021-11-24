@@ -6,13 +6,22 @@ using System.Threading;
 
 namespace Caravela.Framework.Project
 {
-    internal static class CaravelaExecutionContext
+    /// <summary>
+    /// Exposes the current execution context of Caravela.
+    /// </summary>
+    public static class CaravelaExecutionContext
     {
         private static readonly AsyncLocal<IExecutionContext?> _current = new();
 
+        /// <summary>
+        /// Gets the current execution context, or throws an exception if there no execution context.
+        /// </summary>
         public static IExecutionContext Current => _current.Value ?? throw new InvalidOperationException();
 
-        public static IExecutionContext? CurrentOrNull
+        /// <summary>
+        /// Gets or sets the current execution context, or <c>null</c> if there is no execution context.
+        /// </summary>
+        internal static IExecutionContext? CurrentOrNull
         {
             get => _current.Value;
             set => _current.Value = value;

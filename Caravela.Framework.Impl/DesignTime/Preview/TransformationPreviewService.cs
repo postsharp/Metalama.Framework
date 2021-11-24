@@ -2,7 +2,6 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Compiler;
-using Caravela.Framework.Aspects;
 using Caravela.Framework.DesignTime.Contracts;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.DesignTime.Diff;
@@ -77,7 +76,7 @@ namespace Caravela.Framework.Impl.DesignTime.Preview
                 previewServiceProvider,
                 false,
                 this._designTimeAspectPipelineFactory.Domain,
-                AspectExecutionScenario.Preview );
+                ExecutionScenario.Preview );
 
             var pipelineResult = await previewPipeline.ExecuteCoreAsync(
                 diagnostics,

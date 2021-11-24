@@ -12,7 +12,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization
         [Fact]
         public void TestString()
         {
-            using var testContext = this.CreateTestContext();
+            using var testContext = this.CreateSerializationTestContext( "" );
 
             Assert.Equal( "\"Hel\\0lo\\\"\"", testContext.Serialize( "Hel\0lo\"" ).NormalizeWhitespace().ToString() );
 

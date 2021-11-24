@@ -1,7 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl;
 using Caravela.Framework.Impl.Advices;
@@ -298,7 +297,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
                     targetMethod.ReturnType,
                     syntaxGenerationContext );
 
-            var augmentedServiceProvider = serviceProvider.WithService( new AspectPipelineDescription( AspectExecutionScenario.CompileTime, true ) );
+            var augmentedServiceProvider = serviceProvider.WithService( new AspectPipelineDescription( ExecutionScenario.CompileTime, true ) );
 
             var metaApi = MetaApi.ForMethod(
                 targetMethod,

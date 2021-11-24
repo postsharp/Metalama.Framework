@@ -65,12 +65,17 @@ namespace Caravela.TestFramework
         {
             using ( TestExecutionContext.Open() )
             {
-                await this.RunAndAssertCoreAsync( testInput );
-
-                // This is a trick to make the current task, on the heap, stop having a reference to the previous
-                // task. This allows TestExecutionContext.Dispose to perform a full GC. Without Task.Yield, we will
-                // have references to the objects that are in the scope of the test.
-                await Task.Yield();
+                try
+                {
+                    await this.RunAndAssertCoreAsync( testInput );
+                }
+                finally
+                {
+                    // This is a trick to make the current task, on the heap, stop having a reference to the previous
+                    // task. This allows TestExecutionContext.Dispose to perform a full GC. Without Task.Yield, we will
+                    // have references to the objects that are in the scope of the test.
+                    await Task.Yield();
+                }
             }
         }
 
@@ -123,7 +128,9 @@ namespace Caravela.TestFramework
             try
             {
                 // Create parse options.
-                var preprocessorSymbols = testInput.ProjectProperties.PreprocessorSymbols.Add( "TESTRUNNER" ).Add( "CARAVELA" );
+                var preprocessorSymbols = testInput.ProjectProperties.PreprocessorSymbols
+                    .Add( "TESTRUNNER" )
+                    .Add( "CARAVELA" );
 
                 var parseOptions = CSharpParseOptions.Default.WithPreprocessorSymbols( preprocessorSymbols );
 

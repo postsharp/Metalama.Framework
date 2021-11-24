@@ -3,21 +3,18 @@
 
 using Caravela.Framework.Impl.Aspects;
 using Caravela.Framework.Impl.CodeModel.References;
+using Caravela.Framework.Impl.DesignTime.CodeFixes;
 using Caravela.Framework.Impl.DesignTime.Pipeline;
 using Caravela.Framework.Impl.DesignTime.Refactoring;
 using Caravela.Framework.Impl.DesignTime.Utilities;
-using Caravela.Framework.Impl.Diagnostics;
-using Caravela.Framework.Impl.Formatting;
 using Caravela.Framework.Impl.Options;
 using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeActions;
 using Microsoft.CodeAnalysis.CodeRefactorings;
-using Microsoft.CodeAnalysis.CSharp;
 using System;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -118,7 +115,7 @@ namespace Caravela.Framework.Impl.DesignTime
 
         private static async Task<Solution> ApplyLiveTemplateAsync(
             ProjectOptions projectOptions,
-            AspectClass aspect,
+            AspectClass aspectClass,
             ISymbol targetSymbol,
             Document targetDocument,
             CancellationToken cancellationToken )
@@ -132,7 +129,8 @@ namespace Caravela.Framework.Impl.DesignTime
 
             if ( DesignTimeAspectPipelineFactory.Instance.TryApplyAspectToCode(
                 projectOptions,
-                aspect,
+                aspectClass,
+                aspectClass.CreateDefaultInstance(),
                 compilation,
                 targetSymbol,
                 cancellationToken,
@@ -140,45 +138,15 @@ namespace Caravela.Framework.Impl.DesignTime
                 out var diagnostics ) )
             {
                 var project = targetDocument.Project;
-                var solution = project.Solution;
 
-                foreach ( var modifiedSyntaxTree in outputCompilation.ModifiedSyntaxTrees )
-                {
-                    var document = project.GetDocument( modifiedSyntaxTree.Value.OldTree );
-
-                    if ( document == null || !document.SupportsSyntaxTree )
-                    {
-                        continue;
-                    }
-
-                    var newSyntaxRoot = await modifiedSyntaxTree.Value.NewTree.GetRootAsync( cancellationToken );
-
-                    var newDocument = document.WithSyntaxRoot( newSyntaxRoot );
-
-                    var formattedSyntaxRoot = await OutputCodeFormatter.FormatToSyntaxAsync(
-                        newDocument,
-                        reformatAll: false,
-                        cancellationToken: cancellationToken );
-
-                    solution = solution.WithDocumentSyntaxRoot( document.Id, formattedSyntaxRoot );
-                }
+                var solution = await CodeFixHelper.ApplyChangesAsync( outputCompilation, project, cancellationToken );
 
                 return solution;
             }
             else
             {
                 // How to report errors here? We will add a comment to the target symbol.
-                var targetNode = await targetSymbol.GetPrimarySyntaxReference().AssertNotNull().GetSyntaxAsync( cancellationToken );
-
-                var commentedNode = targetNode.WithLeadingTrivia(
-                    diagnostics.Where( d => d.Severity == DiagnosticSeverity.Error )
-                        .SelectMany( d => new[] { SyntaxFactory.Comment( "// " + d.GetMessage( UserMessageFormatter.Instance ) ), SyntaxFactory.LineFeed } ) );
-
-                var newSyntaxRoot = (await targetDocument.GetSyntaxRootAsync( cancellationToken ))!.ReplaceNode( targetNode, commentedNode );
-
-                var newDocument = targetDocument.WithSyntaxRoot( newSyntaxRoot );
-
-                return newDocument.Project.Solution;
+                return await CodeFixHelper.ReportDiagnosticsAsCommentsAsync( targetSymbol, targetDocument, diagnostics, cancellationToken );
             }
         }
     }

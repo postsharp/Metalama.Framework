@@ -28,9 +28,10 @@ namespace Caravela.Framework.Impl.DesignTime.Refactoring
             ServiceProvider serviceProvider,
             CompileTimeDomain domain,
             AspectClass aspectClass,
-            ISymbol targetSymbol ) : base( serviceProvider, AspectExecutionScenario.LiveTemplate, false, domain )
+            IAspect aspect,
+            ISymbol targetSymbol ) : base( serviceProvider, ExecutionScenario.LiveTemplate, false, domain )
         {
-            this._source = new InteractiveAspectSource( aspectClass, targetSymbol );
+            this._source = new InteractiveAspectSource( aspectClass, aspect, targetSymbol );
         }
 
         private protected override ImmutableArray<IAspectSource> CreateAspectSources(
@@ -44,13 +45,14 @@ namespace Caravela.Framework.Impl.DesignTime.Refactoring
             CompileTimeDomain domain,
             AspectPipelineConfiguration configuration,
             AspectClass aspectClass,
+            IAspect aspect,
             PartialCompilation inputCompilation,
             ISymbol targetSymbol,
             CancellationToken cancellationToken,
             [NotNullWhen( true )] out PartialCompilation? outputCompilation,
             out ImmutableArray<Diagnostic> diagnostics )
         {
-            LiveTemplateAspectPipeline pipeline = new( serviceProvider, domain, aspectClass, targetSymbol );
+            LiveTemplateAspectPipeline pipeline = new( serviceProvider, domain, aspectClass, aspect, targetSymbol );
 
             return pipeline.TryExecute( configuration, inputCompilation, cancellationToken, out outputCompilation, out diagnostics );
         }
@@ -72,7 +74,7 @@ namespace Caravela.Framework.Impl.DesignTime.Refactoring
                 return false;
             }
 
-            outputCompilation = result.PartialCompilation;
+            outputCompilation = result.Compilation;
             diagnostics = ImmutableArray<Diagnostic>.Empty;
 
             return true;
@@ -86,10 +88,12 @@ namespace Caravela.Framework.Impl.DesignTime.Refactoring
         private class InteractiveAspectSource : IAspectSource
         {
             private readonly ISymbol _targetSymbol;
+            private readonly IAspect _aspect;
 
-            public InteractiveAspectSource( AspectClass aspectClass, ISymbol targetSymbol )
+            public InteractiveAspectSource( AspectClass aspectClass, IAspect aspect, ISymbol targetSymbol )
             {
                 this._targetSymbol = targetSymbol;
+                this._aspect = aspect;
                 this.AspectClasses = ImmutableArray.Create<IAspectClass>( aspectClass );
             }
 
@@ -105,7 +109,7 @@ namespace Caravela.Framework.Impl.DesignTime.Refactoring
             {
                 var targetDeclaration = compilation.Factory.GetDeclaration( this._targetSymbol );
 
-                return new[] { ((AspectClass) aspectClass).CreateDefaultAspectInstance( targetDeclaration, default ) };
+                return new[] { ((AspectClass) aspectClass).CreateAspectInstance( targetDeclaration, this._aspect, default ) };
             }
         }
     }

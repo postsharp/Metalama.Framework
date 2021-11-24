@@ -2,34 +2,41 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Impl.CodeModel;
-using Caravela.Framework.Impl.ReflectionMocks;
 using Caravela.Framework.Impl.Serialization;
-using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System.Collections.Generic;
 
 namespace Caravela.Framework.Tests.UnitTests.Serialization
 {
     public abstract class SerializerTestsBase : TestBase
     {
-        private protected SerializerTestContext CreateTestContext() => new( this );
+        private protected SerializerTestContext CreateSerializationTestContext( string code ) => new( this, code );
+
+        private protected SerializerTestContext CreateSerializationTestContext( CompilationModel compilation ) => new( this, compilation );
 
         private protected class SerializerTestContext : TestContext
         {
-            public SerializerTestContext( TestBase parent ) : base( parent, null, null )
+            public CompilationModel Compilation { get; }
+
+            public SerializerTestContext( TestBase parent, CompilationModel compilationModel ) : base( parent, null, null )
             {
+                this.Compilation = compilationModel;
+
                 // We need a syntax factory for an arbitrary compilation, but at least with standard references.
                 // Note that we cannot easily get a reference to Caravela.Compiler.Interfaces this way because we have a reference assembly.
 
-                this.SerializationContext = new SyntaxSerializationContext(
-                    this.CreateCompilationModel(
-                        "/* No code is necessary, only references */",
-                        additionalReferences: new[]
-                        {
-                            MetadataReference.CreateFromFile( typeof(ICompileTimeReflectionObject<>).Assembly.Location ),
-                            MetadataReference.CreateFromFile( typeof(Queue<>).Assembly.Location )
-                        } ),
-                    OurSyntaxGenerator.Default );
+                this.SerializationContext = new SyntaxSerializationContext( this.Compilation, OurSyntaxGenerator.Default );
+
+                this.SerializationService = new SyntaxSerializationService( this.ServiceProvider );
+            }
+
+            public SerializerTestContext( TestBase parent, string code ) : base( parent, null, null )
+            {
+                this.Compilation = this.CreateCompilationModel( code );
+
+                // We need a syntax factory for an arbitrary compilation, but at least with standard references.
+                // Note that we cannot easily get a reference to Caravela.Compiler.Interfaces this way because we have a reference assembly.
+
+                this.SerializationContext = new SyntaxSerializationContext( this.Compilation, OurSyntaxGenerator.Default );
 
                 this.SerializationService = new SyntaxSerializationService( this.ServiceProvider );
             }

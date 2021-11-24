@@ -33,11 +33,11 @@ namespace Caravela.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty
 
                 if (dirtyStateProperty?.SetMethod == null)
                 {
-                    builder.Diagnostics.Report( _mustHaveDirtyStateSetter, builder.Target );
+                    builder.Diagnostics.Report( builder.Target, _mustHaveDirtyStateSetter, builder.Target );
                 }
                 else if (dirtyStateProperty.SetMethod.Accessibility != Accessibility.Protected)
                 {
-                    builder.Diagnostics.Report( _dirtyStateSetterMustBeProtected, dirtyStateProperty );
+                    builder.Diagnostics.Report( builder.Target, _dirtyStateSetterMustBeProtected, dirtyStateProperty );
                 }
             }
 

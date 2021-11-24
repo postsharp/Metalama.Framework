@@ -19,8 +19,8 @@ namespace Caravela.Framework.Tests.Integration.Aspects.Suppressions.Fields
 
         public override void BuildAspect( IAspectBuilder<IField> builder )
         {
-            builder.Diagnostics.Suppress( null, _suppression1 );
-            builder.Diagnostics.Suppress( null, _suppression2 );
+            builder.Diagnostics.Suppress( builder.Target, _suppression1 );
+            builder.Diagnostics.Suppress( builder.Target, _suppression2 );
         }
     }
 

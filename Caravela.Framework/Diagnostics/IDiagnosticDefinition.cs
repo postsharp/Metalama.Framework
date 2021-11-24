@@ -7,7 +7,7 @@ using Caravela.Framework.Validation;
 namespace Caravela.Framework.Diagnostics
 {
     /// <summary>
-    /// A base interface for <see cref="DiagnosticDefinition"/> and <see cref="DiagnosticDefinition{T}"/>.
+    /// A non-generic base interface for <see cref="DiagnosticDefinition{T}"/>.
     /// </summary>
     /// <seealso href="@diagnostics"/>
     [CompileTimeOnly]

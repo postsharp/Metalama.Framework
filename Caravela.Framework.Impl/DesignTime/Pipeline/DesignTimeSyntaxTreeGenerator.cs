@@ -24,11 +24,10 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
             PartialCompilation partialCompilation,
             CompilationModel compilationModel,
             IServiceProvider serviceProvider,
-            CancellationToken cancellationToken,
             UserDiagnosticSink diagnostics,
+            CancellationToken cancellationToken,
             out IReadOnlyList<IntroducedSyntaxTree> additionalSyntaxTrees )
         {
-
             var transformations = compilationModel.GetAllObservableTransformations( true );
 
             var additionalSyntaxTreeList = new List<IntroducedSyntaxTree>();

@@ -321,7 +321,7 @@ namespace Caravela.TestFramework
                               || d.Severity >= DiagnosticSeverity.Warning) )
                     .OrderBy( d => d.Location.SourceSpan.Start )
                     .ThenBy( d => d.GetMessage(), StringComparer.Ordinal )
-                    .Select( d => $"// {d.Severity} {d.Id} on `{this.GetTextUnderDiagnostic( d )}`: `{CleanMessage( d.GetMessage() )}`\n" )
+                    .SelectMany( this.GetDiagnosticComments )
                     .Select( SyntaxFactory.Comment )
                     .ToList() );
 
@@ -330,6 +330,16 @@ namespace Caravela.TestFramework
             // Individual trees should be formatted, so we don't need to format again.
 
             return consolidatedCompilationUnit;
+        }
+
+        private IEnumerable<string> GetDiagnosticComments( Diagnostic d )
+        {
+            yield return $"// {d.Severity} {d.Id} on `{this.GetTextUnderDiagnostic( d )}`: `{CleanMessage( d.GetMessage() )}`\n";
+
+            foreach ( var codeFix in CodeFixTitles.GetCodeFixTitles( d ) )
+            {
+                yield return $"//    CodeFix: {codeFix}`\n";
+            }
         }
 
         public void Dispose()
@@ -345,7 +355,7 @@ namespace Caravela.TestFramework
             this.InputProject = null;
             this.IntermediateLinkerCompilation = null;
             this.InitialCompilationModel = null;
-            
+
             // Diagnostics may have reference to declarations, and must be collected too.
             this.PipelineDiagnostics.Clear();
             this.InputCompilationDiagnostics.Clear();

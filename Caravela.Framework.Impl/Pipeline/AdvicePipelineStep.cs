@@ -5,6 +5,7 @@ using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Collections;
+using Caravela.Framework.Impl.DesignTime.CodeFixes;
 using Caravela.Framework.Impl.Diagnostics;
 using System.Collections.Generic;
 using System.Linq;
@@ -39,7 +40,7 @@ namespace Caravela.Framework.Impl.Pipeline
             var addedDiagnostics = adviceResults.SelectMany( ar => ar.Diagnostics );
 
             pipelineStepsState.AddNonObservableTransformations( addedNonObservableTransformations );
-            pipelineStepsState.AddDiagnostics( addedDiagnostics, Enumerable.Empty<ScopedSuppression>() );
+            pipelineStepsState.AddDiagnostics( addedDiagnostics, Enumerable.Empty<ScopedSuppression>(), Enumerable.Empty<CodeFixInstance>() );
 
             return compilation.WithTransformations( addedObservableIntroductions );
         }

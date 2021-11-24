@@ -59,6 +59,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
                 domain,
                 configuration,
                 aspectClass,
+                aspectClass.CreateDefaultInstance(),
                 partialCompilation,
                 target!,
                 CancellationToken.None,

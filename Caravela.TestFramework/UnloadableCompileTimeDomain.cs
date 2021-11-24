@@ -76,6 +76,14 @@ namespace Caravela.TestFramework
                 {
                     var assemblies = string.Join( ",", this._loadedAssemblies.Where( r => r.IsAlive ).Select( r => ((Assembly) r.Target!).GetName().Name ) );
 
+                    /* IF YOU ARE HERE BECAUSE YOU ARE DEBUGGING A MEMORY LEAK
+                     * 
+                     * Here are a few pointers:
+                     *  - You need to use WinDbg and sos.dll
+                     *  - To know where sos.dll is and how to load it in WinDbg, type `dotnet sos install`.
+                     *  - Follow instructions in https://docs.microsoft.com/en-us/dotnet/standard/assembly/unloadability
+                     */
+
                     throw new InvalidOperationException(
                         "The domain could not be unloaded. There are probably dangling references. " +
                         "The following assemblies are still loaded: " + assemblies + "." );

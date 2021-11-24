@@ -240,6 +240,15 @@ namespace Caravela.Framework.Impl
                     _category,
                     Error );
 
+        internal static readonly DiagnosticDefinition<string>
+            SuggestedCodeFix
+                = new(
+                    "CR0043",
+                    Hidden,
+                    "Suggestion: {0}",
+                    "Code fix suggestion",
+                    _category );
+
         // TODO: Use formattable string (C# does not seem to find extension methods).
         public static readonly DiagnosticDefinition<string>
             UnsupportedFeature = new(

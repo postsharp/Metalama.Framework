@@ -6,5 +6,6 @@ using Caravela.Framework.Impl.Aspects;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    internal interface IAttributeImpl : IAttribute, IAspectPredecessorImpl { }
+    // IAttributeImpl does not implement IDeclarationImpl because it is not backed by an ISymbol.
+    internal interface IAttributeImpl : IAttribute, IDiagnosticLocationImpl, IAspectPredecessorImpl { }
 }

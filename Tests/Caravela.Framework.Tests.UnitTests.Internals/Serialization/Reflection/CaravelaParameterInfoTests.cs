@@ -163,9 +163,9 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
 
         private string SerializeIndexerParameter( string code )
         {
-            using var testContext = this.CreateTestContext();
+            using var testContext = this.CreateSerializationTestContext( code );
 
-            var compilation = testContext.CreateCompilationModel( code );
+            var compilation = testContext.Compilation;
             var targetType = compilation.Types.Single( t => t.Name == "Target" );
             var single = targetType.Properties.Single( m => m.Name == "this[]" ).Parameters.First( p => p.Name == "target" );
             var parameter = single;
@@ -179,9 +179,9 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
 
         private string SerializeParameter( string code )
         {
-            using var testContext = this.CreateTestContext();
+            using var testContext = this.CreateSerializationTestContext( code );
 
-            var compilation = testContext.CreateCompilationModel( code );
+            var compilation = testContext.Compilation;
 
             var single = compilation.Types.Single( t => t.Name == "Target" )
                 .Methods.Single( m => m.Name == "Method" )
@@ -198,9 +198,9 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
 
         private string SerializeReturnParameter( string code )
         {
-            using var testContext = this.CreateTestContext();
+            using var testContext = this.CreateSerializationTestContext( code );
 
-            var compilation = testContext.CreateCompilationModel( code );
+            var compilation = testContext.Compilation;
             var single = compilation.Types.Single( t => t.Name == "Target" ).Methods.Single( m => m.Name == "Method" ).ReturnParameter;
             var p = (MethodReturnParameter) single;
 
@@ -212,9 +212,9 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
 
         private string SerializeReturnParameterOfProperty( string code )
         {
-            using var testContext = this.CreateTestContext();
+            using var testContext = this.CreateSerializationTestContext( code );
 
-            var compilation = testContext.CreateCompilationModel( code );
+            var compilation = testContext.Compilation;
             var single = compilation.Types.Single( t => t.Name == "Target" ).Properties.Single( m => m.Name == "Property" ).GetMethod!.ReturnParameter;
             var p = (MethodReturnParameter) single;
 

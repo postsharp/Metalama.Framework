@@ -77,9 +77,9 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
         // If there is no constructor, there is no constructor to serialize. We are at C#, not IL level.
         private string SerializeConstructor( string code )
         {
-            using var testContext = this.CreateTestContext();
+            using var testContext = this.CreateSerializationTestContext( code );
 
-            var compilation = testContext.CreateCompilationModel( code );
+            var compilation = testContext.Compilation;
             var namedTypes = compilation.Types;
             var type = namedTypes.Single( t => t.Name == "Target" );
             var methods = type.Constructors;

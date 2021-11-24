@@ -20,7 +20,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization
 
         private void AssertDateTimeSerialization( DateTimeOffset dateTime )
         {
-            using var testContext = this.CreateTestContext();
+            using var testContext = this.CreateSerializationTestContext( "" );
 
             var dt = dateTime;
             Assert.Equal( dateTime, DateTimeOffset.Parse( dateTime.ToString( "o" ), CultureInfo.InvariantCulture ) );

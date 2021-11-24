@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Diagnostics;
+using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -13,12 +14,7 @@ namespace Caravela.Framework.Impl.Diagnostics
     /// </summary>
     internal static class DiagnosticLocationHelper
     {
-        public static Location? GetLocation( this IDiagnosticLocation location ) => ((DiagnosticLocation) location).Location;
-
-        public static Location? GetLocation( this AttributeData attributeData )
-            => attributeData.ApplicationSyntaxReference == null
-                ? null
-                : Location.Create( attributeData.ApplicationSyntaxReference.SyntaxTree, attributeData.ApplicationSyntaxReference.Span );
+        public static Location? GetDiagnosticLocation( this IDiagnosticLocation location ) => ((IDiagnosticLocationImpl) location).DiagnosticLocation;
 
         /// <summary>
         /// Gets the <see cref="Location"/> suitable to report a <see cref="Diagnostic"/> on
@@ -90,7 +86,7 @@ namespace Caravela.Framework.Impl.Diagnostics
         /// </summary>
         /// <param name="attribute"></param>
         /// <returns></returns>
-        public static Location? GetDiagnosticLocation( AttributeData attribute )
+        public static Location? GetDiagnosticLocation( this AttributeData attribute )
         {
             var application = attribute.ApplicationSyntaxReference;
 
@@ -103,7 +99,5 @@ namespace Caravela.Framework.Impl.Diagnostics
 
             return application.GetSyntax().GetLocation();
         }
-
-        public static DiagnosticLocation? ToDiagnosticLocation( this Location? location ) => location == null ? null : new DiagnosticLocation( location );
     }
 }

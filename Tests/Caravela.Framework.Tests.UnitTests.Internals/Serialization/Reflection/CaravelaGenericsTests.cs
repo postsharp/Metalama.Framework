@@ -20,12 +20,12 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
         [Fact]
         public void FieldInNestedType()
         {
-            using var testContext = this.CreateTestContext();
-
             var code = "class Target<TKey> { class Nested<TValue> { public System.Collections.Generic.Dictionary<TKey,TValue> Field; } }";
 
+            using var testContext = this.CreateSerializationTestContext( code );
+
             var serialized = testContext.Serialize(
-                    CompileTimeFieldOrPropertyInfo.Create( testContext.CreateCompilationModel( code ).Types.Single().NestedTypes.Single().Fields.Single() ) )
+                    CompileTimeFieldOrPropertyInfo.Create( testContext.Compilation.Types.Single().NestedTypes.Single().Fields.Single() ) )
                 .ToString();
 
             this.AssertEqual(
@@ -45,12 +45,12 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
         [Fact]
         public void MethodInDerivedType()
         {
-            using var testContext = this.CreateTestContext();
-
             var code = "class Target<TKey> : Origin<int, TKey> { TKey ReturnSelf() { return default(TKey); } } class Origin<TA, TB> { }";
 
+            using var testContext = this.CreateSerializationTestContext( code );
+
             var serialized = testContext.Serialize(
-                    CompileTimeMethodInfo.Create( testContext.CreateCompilationModel( code ).Types.Single( t => t.Name == "Target" ).Methods.First() ) )
+                    CompileTimeMethodInfo.Create( testContext.Compilation.Types.Single( t => t.Name == "Target" ).Methods.First() ) )
                 .ToString();
 
             this.AssertEqual(
@@ -70,18 +70,18 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
         [Fact]
         public void TestDerivedGenericType()
         {
-            using var testContext = this.CreateTestContext();
-
             var code = "class Target<T1> { } class User<T2> : Target<T2> { }";
 
+            using var testContext = this.CreateSerializationTestContext( code );
+
             var serialized = testContext
-                .Serialize( CompileTimeType.Create( testContext.CreateCompilationModel( code ).Types.Single( t => t.Name == "User" ).BaseType! ) )
+                .Serialize( CompileTimeType.Create( testContext.Compilation.Types.Single( t => t.Name == "User" ).BaseType! ) )
                 .ToString();
 
             TestExpression<Type>( code, serialized, info => Assert.Equal( "Target`1[T2]", info.ToString() ) );
 
             var serialized2 = testContext
-                .Serialize( CompileTimeType.Create( testContext.CreateCompilationModel( code ).Types.Single( t => t.Name == "Target" ) ) )
+                .Serialize( CompileTimeType.Create( testContext.Compilation.Types.Single( t => t.Name == "Target" ) ) )
                 .ToString();
 
             TestExpression<Type>( code, serialized2, info => Assert.Equal( "Target`1[T1]", info.ToString() ) );
@@ -90,20 +90,21 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
         [Fact]
         public void TestHalfTypes()
         {
-            using var testContext = this.CreateTestContext();
-
             var code = "class Target<T1, T2> { void Method(T1 a, T2 b) { } } class User<T> : Target<int, T> { }";
 
+            using var testContext = this.CreateSerializationTestContext( code );
+
             var serialized = testContext.Serialize(
-                    CompileTimeMethodInfo.Create( testContext.CreateCompilationModel( code ).Types.Single( t => t.Name == "User" ).BaseType!.Methods.First() ) )
+                    CompileTimeMethodInfo.Create( testContext.Compilation.Types.Single( t => t.Name == "User" ).BaseType!.Methods.First() ) )
                 .ToString();
 
             TestExpression<MethodInfo>( code, serialized, info => Assert.Equal( "Target`2[System.Int32,T]", info.DeclaringType?.ToString() ) );
             var code2 = "class Target<T1, T2> { void Method(T1 a, T2 b) { } } class User<T> : Target<T, int> { }";
 
-            var serialized2 = testContext.Serialize(
-                    CompileTimeMethodInfo.Create(
-                        testContext.CreateCompilationModel( code2 ).Types.Single( t => t.Name == "User" ).BaseType!.Methods.First() ) )
+            using var testContext2 = this.CreateSerializationTestContext( code2 );
+
+            var serialized2 = testContext2.Serialize(
+                    CompileTimeMethodInfo.Create( testContext2.Compilation.Types.Single( t => t.Name == "User" ).BaseType!.Methods.First() ) )
                 .ToString();
 
             TestExpression<MethodInfo>( code2, serialized2, info => Assert.Equal( "Target`2[T,System.Int32]", info.DeclaringType?.ToString() ) );

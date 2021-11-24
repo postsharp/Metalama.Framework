@@ -7,9 +7,6 @@ using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CodeModel.References;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System.Linq;
 
 namespace Caravela.Framework.Impl.Aspects
 {
@@ -62,25 +59,6 @@ namespace Caravela.Framework.Impl.Aspects
                 this._attribute,
                 new AspectPredecessor( AspectPredecessorKind.Inherited, this ),
                 this._loader );
-        }
-
-        public AttributeSyntax ToSyntax( SyntaxGenerationContext generationContext )
-        {
-            var constructorArguments = this._attribute.ConstructorArguments.Select(
-                a => SyntaxFactory.AttributeArgument(
-                    generationContext.SyntaxGenerator.AttributeValueExpression( a.Value, generationContext.ReflectionMapper ) ) );
-
-            var namedArguments = this._attribute.NamedArguments.Select(
-                a => SyntaxFactory.AttributeArgument(
-                    SyntaxFactory.NameEquals( a.Key ),
-                    null,
-                    generationContext.SyntaxGenerator.AttributeValueExpression( a.Value, generationContext.ReflectionMapper ) ) );
-
-            var attribute = SyntaxFactory.Attribute(
-                (NameSyntax) generationContext.SyntaxGenerator.Type( this._attribute.Type.GetSymbol() ),
-                SyntaxFactory.AttributeArgumentList( SyntaxFactory.SeparatedList( constructorArguments.Concat( namedArguments ) ) ) );
-
-            return attribute;
         }
     }
 }

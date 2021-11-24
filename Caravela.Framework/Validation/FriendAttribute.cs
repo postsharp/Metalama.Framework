@@ -56,12 +56,14 @@ namespace Caravela.Framework.Validation
                     }
                 }
 
-                reference.Diagnostics.Report(
-                    reference.DiagnosticLocation,
-                    null!,
-                    reference.ReferencedDeclaration,
-                    reference.ReferencedDeclaration,
-                    this._friendTypes );
+                // TODO: Report
+                //
+                // reference.Diagnostics.Report(
+                //     reference.DiagnosticLocation,
+                //     null!,
+                //     reference.ReferencedDeclaration,
+                //     reference.ReferencedDeclaration,
+                //     this._friendTypes );
             }
         }
 
