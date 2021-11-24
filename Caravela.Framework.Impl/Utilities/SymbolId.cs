@@ -10,7 +10,6 @@ using System.Threading;
 using SymbolKey = roslyn::Microsoft.CodeAnalysis.SymbolKey;
 using SymbolKeyExtensions = roslyn::Microsoft.CodeAnalysis.SymbolKeyExtensions;
 
-
 namespace Caravela.Framework.Impl.Utilities
 {
     /// <summary>

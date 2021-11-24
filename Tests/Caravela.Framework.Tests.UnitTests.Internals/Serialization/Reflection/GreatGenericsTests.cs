@@ -18,12 +18,11 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
 {
     public class GreatGenericsTests : ReflectionTestBase
     {
-        private readonly string _code;
         private readonly IEnumerable<INamedType> _topLevelTypes;
 
         public GreatGenericsTests( ITestOutputHelper helper ) : base( helper )
         {
-            this._code = @"
+            var code = @"
 class Origin<T1> { 
     private T1 privateField;
     public T1 Field;
@@ -46,7 +45,7 @@ class User {
     public Descendant<float> FullyInstantiated;
 }";
 
-            using var testContext = this.CreateSerializationTestContext( this._code );
+            using var testContext = this.CreateSerializationTestContext( code );
             var compilation = testContext.Compilation;
             this._topLevelTypes = compilation.Types;
         }
