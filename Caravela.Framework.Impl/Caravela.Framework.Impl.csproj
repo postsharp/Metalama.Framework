@@ -52,7 +52,7 @@
           
          We use an assembly alias to avoid conflicts with nullable attribute classes,
        -->
-    <PackageReference Include="Caravela.RoslynUtilities" Version="$(CaravelaCompilerVersion)" PrivateAssets="all" Aliases="roslyn" >
+    <PackageReference Include="Caravela.RoslynUtilities" Version="$(CaravelaCompilerVersion)" PrivateAssets="all" Aliases="roslyn">
             <GeneratePathProperty>true</GeneratePathProperty>
      </PackageReference>
      <None Include="$(PkgCaravela_RoslynUtilities)\lib\netstandard2.0\Caravela.RoslynUtilities.dll" Pack="true" PackagePath="lib\netstandard2.0" CopyToOutputDirectory="Always" />

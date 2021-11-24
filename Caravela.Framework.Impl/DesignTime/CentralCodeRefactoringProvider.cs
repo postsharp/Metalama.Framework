@@ -10,7 +10,6 @@ using Caravela.Framework.Impl.DesignTime.Utilities;
 using Caravela.Framework.Impl.Options;
 using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CodeActions;
 using Microsoft.CodeAnalysis.CodeRefactorings;
 using System;
 using System.Collections.Immutable;
@@ -68,30 +67,32 @@ namespace Caravela.Framework.Impl.DesignTime
                 var compilation = await context.Document.Project.GetCompilationAsync( cancellationToken );
                 var eligibleAspects = DesignTimeAspectPipelineFactory.Instance.GetEligibleAspects( compilation!, symbol, projectOptions, cancellationToken );
 
-                var aspectActions = ImmutableArray.CreateBuilder<CodeAction>();
-                var liveTemplatesActions = ImmutableArray.CreateBuilder<CodeAction>();
+                var aspectActions = new CodeActionMenuModel( "Add aspect" );
+                var liveTemplatesActions = new CodeActionMenuModel( "Apply live template" );
 
                 foreach ( var aspect in eligibleAspects )
                 {
-                    aspectActions.Add( CodeAction.Create( aspect.DisplayName, ct => AddAspectAttributeAsync( aspect, symbol, context.Document, ct ) ) );
+                    aspectActions.Items.Add( new CodeActionModel( aspect.DisplayName, ct => AddAspectAttributeAsync( aspect, symbol, context.Document, ct ) ) );
 
                     if ( aspect.IsLiveTemplate )
                     {
-                        liveTemplatesActions.Add(
-                            CodeAction.Create(
+                        liveTemplatesActions.Items.Add(
+                            new CodeActionModel(
                                 aspect.DisplayName,
                                 ct => ApplyLiveTemplateAsync( projectOptions, aspect, symbol, context.Document, ct.IgnoreIfDebugging() ) ) );
                     }
                 }
 
-                if ( aspectActions.Count > 0 )
+                var supportsHierarchicalItems = HostProcess.Current.Product != HostProduct.Rider;
+
+                foreach ( var action in aspectActions.ToCodeActions( supportsHierarchicalItems ) )
                 {
-                    context.RegisterRefactoring( CodeAction.Create( "Add aspect", aspectActions.ToImmutable(), true ) );
+                    context.RegisterRefactoring( action );
                 }
 
-                if ( liveTemplatesActions.Count > 0 )
+                foreach ( var action in liveTemplatesActions.ToCodeActions( supportsHierarchicalItems ) )
                 {
-                    context.RegisterRefactoring( CodeAction.Create( "Apply live template", liveTemplatesActions.ToImmutable(), false ) );
+                    context.RegisterRefactoring( action );
                 }
             }
             catch ( Exception e ) when ( DesignTimeExceptionHandler.MustHandle( e ) )
