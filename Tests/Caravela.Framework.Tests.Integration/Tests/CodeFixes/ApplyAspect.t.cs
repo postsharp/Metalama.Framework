@@ -1,5 +1,5 @@
-// Warning MY001 on `Method`: `Add some attribute`
-//    CodeFix: Add [My] to 'TargetCode.Method(int)'`
+// Warning MY001 on `Method`: `Apply Aspect2`
+//    CodeFix: Apply`
 using System;
 using System.Collections.Generic;
 using Caravela.Framework;
@@ -8,18 +8,28 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Diagnostics;
 using Caravela.Framework.CodeFixes;
 using System.ComponentModel;
+using Caravela.Framework.Tests.Integration.CodeFixes.ApplyAspect;
 
-namespace Caravela.Framework.Tests.Integration.CodeFixes.AddAttribute
+namespace Caravela.Framework.Tests.Integration.CodeFixes.ApplyAspect
 {
-    class Aspect : MethodAspect
+    class Aspect1 : MethodAspect
     {
-        static DiagnosticDefinition _diag = new DiagnosticDefinition( "MY001", Severity.Warning, "Add some attribute" );
+        static DiagnosticDefinition<None> _diag = new ( "MY001", Severity.Warning, "Apply Aspect2" );
     
         public override void BuildAspect(IAspectBuilder<IMethod> builder)
         {
             base.BuildAspect(builder);
             
-            builder.Diagnostics.Report( _diag, CodeFix.AddAttribute(  builder.Target, typeof(MyAttribute) ) );
+            builder.Diagnostics.Report( builder.Target, _diag, default, CodeFix.ApplyAspect( builder.Target, new Aspect2(), "Apply" ) );
+        }
+    }
+    
+    class Aspect2 : OverrideMethodAspect
+    {
+        public override dynamic? OverrideMethod()
+        {
+            Console.WriteLine("Oops");
+            return meta.Proceed();
         }
     }
     
@@ -27,11 +37,11 @@ namespace Caravela.Framework.Tests.Integration.CodeFixes.AddAttribute
 
     class TargetCode
     {
-        [Aspect]
-        [My]
+        [Aspect1]
         int Method(int a)
-        {
+{
+            Console.WriteLine("Oops");
             return a;
-        }
+}
     }
 }

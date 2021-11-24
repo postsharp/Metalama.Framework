@@ -13,18 +13,18 @@ namespace Caravela.Framework.Tests.Integration.CodeFixes.RemoveAttribute
 {
     class Aspect : MethodAspect
     {
-        static DiagnosticDefinition _diag = new DiagnosticDefinition( "MY001", Severity.Warning, "Add some attribute" );
-    
+        static DiagnosticDefinition<None> _diag = new("MY001", Severity.Warning, "Add some attribute");
+
         public override void BuildAspect(IAspectBuilder<IMethod> builder)
         {
             base.BuildAspect(builder);
-            
-            builder.Diagnostics.Report( _diag, CodeFix.RemoveAttribute(  builder.Target.DeclaringType, typeof(MyAttribute) ) );
+
+            builder.Diagnostics.Report(builder.Target, _diag, default, CodeFix.RemoveAttributes(builder.Target.DeclaringType, typeof(MyAttribute)));
         }
     }
-    
-    class MyAttribute : Attribute {}
-    class YourAttribute : Attribute {}
+
+    class MyAttribute : Attribute { }
+    class YourAttribute : Attribute { }
 
     partial class TargetCode
     {
@@ -37,13 +37,13 @@ namespace Caravela.Framework.Tests.Integration.CodeFixes.RemoveAttribute
         {
             return a;
         }
-        
-     
+
+
     }
-    
+
     partial class TargetCode
     {
-       [Your]
+        [Your]
         int Method3(int a)
         {
             return a;

@@ -16,7 +16,7 @@ namespace Caravela.Framework.Tests.Integration.CodeFixes.Suggest
         {
             base.BuildAspect(builder);
             
-            builder.Diagnostics.Suggest( CodeFix.AddAttribute(  builder.Target, typeof(MyAttribute) ) );
+            builder.Diagnostics.Suggest( builder.Target, CodeFix.AddAttribute(  builder.Target, typeof(MyAttribute) ) );
         }
     }
     

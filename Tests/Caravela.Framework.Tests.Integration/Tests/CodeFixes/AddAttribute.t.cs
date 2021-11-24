@@ -13,13 +13,13 @@ namespace Caravela.Framework.Tests.Integration.CodeFixes.AddAttribute
 {
     class Aspect : MethodAspect
     {
-        static DiagnosticDefinition _diag = new DiagnosticDefinition( "MY001", Severity.Warning, "Add some attribute" );
+        static DiagnosticDefinition<None> _diag = new ( "MY001", Severity.Warning, "Add some attribute" );
     
         public override void BuildAspect(IAspectBuilder<IMethod> builder)
         {
             base.BuildAspect(builder);
             
-            builder.Diagnostics.Report( _diag, CodeFix.AddAttribute(  builder.Target, typeof(MyAttribute) ) );
+            builder.Diagnostics.Report( builder.Target, _diag, default, CodeFix.AddAttribute(  builder.Target, typeof(MyAttribute) ) );
         }
     }
     
