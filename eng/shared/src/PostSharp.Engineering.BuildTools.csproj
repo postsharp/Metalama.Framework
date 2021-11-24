@@ -1,9 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <OutputType>Exe</OutputType>
+        <OutputType>Library</OutputType>
         <TargetFramework>net5.0</TargetFramework>
-        <AssemblyName>postsharp-eng</AssemblyName>
+        <AssemblyName>PostSharp.Engineering.BuildTools</AssemblyName>
         <GenerateDocumentationFile>false</GenerateDocumentationFile>
         <RuntimeIdentifier>win-x64</RuntimeIdentifier>
         <LangVersion>latest</LangVersion>

@@ -30,6 +30,7 @@ To install the common code style configuration:
 ```
 
 3. For each solution, in Rider, open Settings, choose "Manage Layers", select the team-shared layer, click on the `+` icon and then on "Open Settings File", then choose `eng/shared/style/CommonStyle.DotSettings`.
+  This step is required for code formatting using `Build.ps1 reformat`, even if you are otherwise not using Rider.
 
 ## Configuration
 

@@ -3,8 +3,10 @@
 
 using PostSharp.Engineering.BuildTools.Build;
 using PostSharp.Engineering.BuildTools.Build.Model;
+using PostSharp.Engineering.BuildTools.Csproj;
 using PostSharp.Engineering.BuildTools.Dependencies;
 using PostSharp.Engineering.BuildTools.Engineering;
+using PostSharp.Engineering.BuildTools.NuGet;
 using Spectre.Console.Cli;
 using System.Linq;
 
@@ -17,61 +19,81 @@ namespace PostSharp.Engineering.BuildTools
             if ( product != null )
             {
                 app.Configure(
-                    x =>
+                    root =>
                     {
-                        x.Settings.StrictParsing = true;
+                        root.Settings.StrictParsing = true;
 
-                        x.AddCommand<PrepareCommand>( "prepare" )
+                        root.AddCommand<PrepareCommand>( "prepare" )
                             .WithData( product )
                             .WithDescription( "Creates the files that are required to build the product" );
 
-                        x.AddCommand<BuildCommand>( "build" )
+                        root.AddCommand<BuildCommand>( "build" )
                             .WithData( product )
                             .WithDescription( "Builds all packages in the product (implies 'prepare')" );
 
-                        x.AddCommand<TestCommand>( "test" )
+                        root.AddCommand<TestCommand>( "test" )
                             .WithData( product )
                             .WithDescription( "Builds all packages then run all tests (implies 'build')" );
 
-                        x.AddCommand<PublishCommand>( "publish" )
+                        root.AddCommand<PublishCommand>( "publish" )
                             .WithData( product )
                             .WithDescription( "Publishes all packages that have been previously built by the 'build' command" );
 
                         if ( product.Solutions.Any( s => s.CanFormatCode ) )
                         {
-                            x.AddCommand<FormatCommand>( "format" ).WithData( product ).WithDescription( "Formats the code" );
+                            root.AddCommand<FormatCommand>( "format" ).WithData( product ).WithDescription( "Formats the code" );
                         }
 
-                        x.AddBranch(
+                        root.AddBranch(
                             "dependencies",
-                            configurator =>
+                            dependencies =>
                             {
-                                configurator.AddCommand<ListDependenciesCommand>( "list" )
+                                dependencies.AddCommand<ListDependenciesCommand>( "list" )
                                     .WithData( product )
                                     .WithDescription( "Lists the dependencies of this product" );
 
-                                configurator.AddCommand<GenerateDependencyFileCommand>( "local" )
+                                dependencies.AddCommand<GenerateDependencyFileCommand>( "local" )
                                     .WithData( product )
                                     .WithDescription( "Generates the Dependencies.props to consume local repos." );
 
-                                configurator.AddCommand<PrintDependenciesCommand>( "print" )
+                                dependencies.AddCommand<PrintDependenciesCommand>( "print" )
                                     .WithData( product )
                                     .WithDescription( "Prints the dependency file." );
                             } );
 
-                        x.AddBranch(
+                        root.AddBranch(
                             "engineering",
-                            configurator =>
+                            engineering =>
                             {
-                                configurator.AddCommand<PushEngineeringCommand>( "push" )
+                                engineering.AddCommand<PushEngineeringCommand>( "push" )
                                     .WithData( product )
                                     .WithDescription(
                                         $"Copies the changes in {product.EngineeringDirectory}/shared to the local engineering repo, but does not commit nor push." );
 
-                                configurator.AddCommand<PullEngineeringCommand>( "pull" )
+                                engineering.AddCommand<PullEngineeringCommand>( "pull" )
                                     .WithData( product )
                                     .WithDescription(
                                         $"Copies the remote engineering repo to {product.EngineeringDirectory}/shared. Automatically pulls 'master'." );
+                            } );
+                        root.AddBranch(
+                            "tools",
+                            tools =>
+                            {
+                                tools.AddBranch(
+                       "csproj",
+                       csproj => csproj.AddCommand<AddProjectReferenceCommand>( "add-project-reference" )
+                           .WithDescription( "Adds a <ProjectReference> item to *.csproj in a directory" ) );
+
+                                tools.AddBranch(
+                                    "nuget",
+                                    nuget =>
+                                    {
+                                        nuget.AddCommand<RenamePackagesCommand>( "rename" )
+                                            .WithDescription( "Renames all packages in a directory" );
+
+                                        nuget.AddCommand<VerifyPublicPackageCommand>( "verify-public" )
+                                            .WithDescription( "Verifies that all packages in a directory have only references to packages published on nuget.org." );
+                                    } );
                             } );
                     } );
             }

@@ -4,11 +4,11 @@
 using Microsoft.Build.Definition;
 using Microsoft.Build.Evaluation;
 using Microsoft.Extensions.FileSystemGlobbing;
-using Microsoft.Extensions.FileSystemGlobbing.Abstractions;
 using PostSharp.Engineering.BuildTools.Coverage;
 using PostSharp.Engineering.BuildTools.NuGet;
 using PostSharp.Engineering.BuildTools.Utilities;
 using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Globalization;
 using System.IO;
@@ -74,6 +74,18 @@ namespace PostSharp.Engineering.BuildTools.Build.Model
             // Allow for some customization before we create the zip file and copy to the public directory.
             this.BuildCompleted?.Invoke( (context, options, privateArtifactsDir) );
 
+            // Check that the build produced the expected artifacts.
+            var artifacts = new List<FilePatternMatch>();
+
+            foreach ( var publishingTarget in this.PublishingTargets )
+            {
+                if ( !publishingTarget.Artifacts.TryGetFiles( privateArtifactsDir, versionInfo, artifacts ) )
+                {
+                    context.Console.WriteError( $"The build did not generate the artifacts '{publishingTarget.Artifacts}'." );
+                    return false;
+                }
+            }
+
             // Zipping internal artifacts.
             void CreateZip( string directory )
             {
@@ -101,13 +113,17 @@ namespace PostSharp.Engineering.BuildTools.Build.Model
             {
                 // Copy artifacts.
                 context.Console.WriteHeading( "Copying public artifacts" );
-                var matcher = new Matcher( StringComparison.OrdinalIgnoreCase );
+                var files = new List<FilePatternMatch>();
 
                 foreach ( var publishingTarget in this.PublishingTargets )
                 {
                     if ( publishingTarget.SupportsPublicPublishing )
                     {
-                        publishingTarget.Artifacts.AddToMatcher( matcher, versionInfo );
+                        if ( !publishingTarget.Artifacts.TryGetFiles( privateArtifactsDir, versionInfo, files))
+                        {
+                            context.Console.WriteError( $"The pattern '{publishingTarget.Artifacts}' in '{privateArtifactsDir}' did not generate any output." );
+                            return false;
+                        }
                     }
                 }
 
@@ -118,19 +134,14 @@ namespace PostSharp.Engineering.BuildTools.Build.Model
                     Directory.CreateDirectory( publicArtifactsDirectory );
                 }
 
-                var matches = matcher.Execute( new DirectoryInfoWrapper( new DirectoryInfo( privateArtifactsDir ) ) );
-
-                if ( matches is { HasMatches: true } )
+                foreach ( var file in files )
                 {
-                    foreach ( var file in matches.Files )
-                    {
-                        var targetFile = Path.Combine( publicArtifactsDirectory, Path.GetFileName( file.Path ) );
+                    var targetFile = Path.Combine( publicArtifactsDirectory, Path.GetFileName( file.Path ) );
 
-                        context.Console.WriteMessage( file.Path );
-                        File.Copy( Path.Combine( privateArtifactsDir, file.Path ), targetFile, true );
-                    }
+                    context.Console.WriteMessage( file.Path );
+                    File.Copy( Path.Combine( privateArtifactsDir, file.Path ), targetFile, true );
                 }
-
+                
                 // Verify that public packages have no private dependencies.
                 if ( !VerifyPublicPackageCommand.Execute(
                     context.Console,
@@ -282,9 +293,12 @@ namespace PostSharp.Engineering.BuildTools.Build.Model
                 {
                     context.Console.WriteHeading( $"Building {solution.Name}." );
 
-                    if ( !solution.Restore( context, options ) )
+                    if ( !options.NoDependencies )
                     {
-                        return false;
+                        if ( !solution.Restore( context, options ) )
+                        {
+                            return false;
+                        }
                     }
 
                     if ( solution.IsTestOnly )
@@ -297,7 +311,7 @@ namespace PostSharp.Engineering.BuildTools.Build.Model
                     }
                     else
                     {
-                        if ( solution.PackRequiresExplicitBuild && !options.NoDependencies )
+                        if ( !solution.CanPack || solution.PackRequiresExplicitBuild && !options.NoDependencies )
                         {
                             if ( !solution.Build( context, options ) )
                             {
@@ -305,7 +319,7 @@ namespace PostSharp.Engineering.BuildTools.Build.Model
                             }
                         }
 
-                        if ( !solution.Pack( context, options ) )
+                        if ( solution.CanPack && !solution.Pack( context, options ) )
                         {
                             return false;
                         }
@@ -606,7 +620,7 @@ namespace PostSharp.Engineering.BuildTools.Build.Model
 
             var versionFile = this.ReadGeneratedVersionFile( context.GetVersionFilePath( options.BuildConfiguration ) );
 
-            var stringParameters = new VersionInfo( versionFile.Configuration, versionFile.PackageVersion );
+            var stringParameters = new VersionInfo( versionFile.PackageVersion, versionFile.Configuration );
 
             var hasTarget = false;
 
@@ -657,24 +671,25 @@ namespace PostSharp.Engineering.BuildTools.Build.Model
         {
             var success = true;
 
-            var stringArguments = new VersionInfo( versionFile.Configuration, versionFile.PackageVersion );
-
             foreach ( var publishingTarget in this.PublishingTargets )
             {
-                var matcher = new Matcher( StringComparison.OrdinalIgnoreCase );
+                var files = new List<FilePatternMatch>();
 
                 if ( (publishingTarget.SupportsPrivatePublishing && !isPublic) ||
                      (publishingTarget.SupportsPublicPublishing && isPublic) )
                 {
                     hasTarget = true;
 
-                    publishingTarget.Artifacts.AddToMatcher( matcher, stringArguments );
+                    if ( !publishingTarget.Artifacts.TryGetFiles( directory, versionFile, files))
+                    {
+                        context.Console.WriteError( $"The pattern '{publishingTarget.Artifacts}' in '{directory}' did not generate any file match." );
+                        return false;
+                    }
+
                 }
 
-                var matchingResult =
-                    matcher.Execute( new DirectoryInfoWrapper( new DirectoryInfo( directory ) ) );
 
-                foreach ( var file in matchingResult.Files )
+                foreach ( var file in files )
                 {
                     if ( Path.GetExtension( file.Path ).Equals( publishingTarget.MainExtension, StringComparison.OrdinalIgnoreCase ) )
                     {

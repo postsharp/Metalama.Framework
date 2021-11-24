@@ -19,6 +19,8 @@ namespace PostSharp.Engineering.BuildTools.Build.Model
 
         public bool CanFormatCode { get; init; }
 
+        public bool CanPack { get; init; } = true;
+
         public abstract bool Build( BuildContext context, BuildOptions options );
 
         public abstract bool Pack( BuildContext context, BuildOptions options );
