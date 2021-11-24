@@ -80,7 +80,7 @@ namespace Caravela.TestFramework
                      * 
                      * Here are a few pointers:
                      *  - You need to use WinDbg and sos.dll
-                     *  - To know where sos.dll is and how to load it in windbg, type `dotnet sos install`.
+                     *  - To know where sos.dll is and how to load it in WinDbg, type `dotnet sos install`.
                      *  - Follow instructions in https://docs.microsoft.com/en-us/dotnet/standard/assembly/unloadability
                      */
 
