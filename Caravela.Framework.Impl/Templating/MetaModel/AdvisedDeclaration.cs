@@ -5,6 +5,7 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Code.Collections;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CodeModel.References;
+using Caravela.Framework.Impl.Utilities.Dump;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -51,5 +52,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
         public override string ToString() => this.Underlying.ToString();
 
         public IDeclaration OriginalDefinition => this.Underlying.OriginalDefinition;
+
+        public object ToDump() => this.ToDumpImpl();
     }
 }

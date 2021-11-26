@@ -76,5 +76,7 @@ namespace Caravela.Framework.Code
         /// <param name="deep">When <c>true</c>, all derived types and their descendants are recursively returned. When <c>false</c>,
         /// only the first level of types in the current compilation is returned.</param>
         IEnumerable<INamedType> GetDerivedTypes( Type baseType, bool deep = true );
+
+        int Revision { get; }
     }
 }

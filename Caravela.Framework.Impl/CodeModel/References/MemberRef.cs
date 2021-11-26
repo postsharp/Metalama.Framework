@@ -41,6 +41,8 @@ namespace Caravela.Framework.Impl.CodeModel.References
 
         public override string ToString() => this._underlying.ToString();
 
+        public object ToDump() => this.ToString();
+
         public string Name
             => this.Target switch
             {

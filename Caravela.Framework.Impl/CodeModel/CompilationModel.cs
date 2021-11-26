@@ -13,6 +13,7 @@ using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Transformations;
 using Caravela.Framework.Impl.Utilities;
+using Caravela.Framework.Impl.Utilities.Dump;
 using Caravela.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
@@ -45,8 +46,6 @@ namespace Caravela.Framework.Impl.CodeModel
         private readonly ImmutableDictionaryOfArray<string, AttributeRef> _allMemberAttributesByTypeName;
 
         private readonly ImmutableDictionaryOfArray<Ref<IDeclaration>, IAspectInstanceInternal> _aspects;
-
-        private readonly int _revision;
 
         private readonly DerivedTypeIndex _derivedTypes;
 
@@ -126,7 +125,7 @@ namespace Caravela.Framework.Impl.CodeModel
         private CompilationModel( CompilationModel prototype )
         {
             this.Project = prototype.Project;
-            this._revision = prototype._revision + 1;
+            this.Revision = prototype.Revision + 1;
 
             this._derivedTypes = prototype._derivedTypes;
             this.PartialCompilation = prototype.PartialCompilation;
@@ -225,6 +224,8 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public IEnumerable<INamedType> GetDerivedTypes( Type baseType, bool deep )
             => this.GetDerivedTypes( (INamedType) this.Factory.GetTypeByReflectionType( baseType ), deep );
+
+        public int Revision { get; }
 
         // TODO: throw an exception when the caller tries to get aspects that have not been initialized yet.
 
@@ -352,7 +353,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public string? Name => this.RoslynCompilation.AssemblyName;
 
-        public override string ToString() => $"{this.RoslynCompilation.AssemblyName}, rev={this._revision}";
+        public override string ToString() => $"{this.RoslynCompilation.AssemblyName}";
 
         public ICompilationHelpers Helpers { get; } = new CompilationHelpers();
 
@@ -376,5 +377,9 @@ namespace Caravela.Framework.Impl.CodeModel
         public IAssemblyIdentity Identity => new AssemblyIdentityModel( this.RoslynCompilation.Assembly.Identity );
 
         Location? IDiagnosticLocationImpl.DiagnosticLocation => null;
+
+        bool IDeclarationImpl.CanBeInherited => false;
+
+        public object ToDump() => this.ToDumpImpl();
     }
 }

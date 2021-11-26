@@ -2,13 +2,14 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
+using Caravela.Framework.Impl.Utilities.Dump;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Immutable;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    internal class AssemblyIdentityModel : IAssemblyIdentity
+    internal class AssemblyIdentityModel : IAssemblyIdentity, IDumpable
     {
         private readonly AssemblyIdentity _assemblyIdentity;
 
@@ -30,5 +31,7 @@ namespace Caravela.Framework.Impl.CodeModel
         public bool IsStrongNamed => this._assemblyIdentity.IsStrongName;
 
         public bool HasPublicKey => this._assemblyIdentity.HasPublicKey;
+
+        public object ToDump() => this.ToDumpImpl();
     }
 }

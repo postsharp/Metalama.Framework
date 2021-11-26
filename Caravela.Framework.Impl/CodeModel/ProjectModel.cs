@@ -4,6 +4,7 @@
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Options;
 using Caravela.Framework.Impl.Pipeline;
+using Caravela.Framework.Impl.Utilities.Dump;
 using Caravela.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
@@ -14,7 +15,7 @@ using System.Linq;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    internal class ProjectModel : IProject
+    internal class ProjectModel : IProject, IDumpable
     {
         private readonly ConcurrentDictionary<Type, ProjectExtension> _extensions = new();
         private readonly IProjectOptions _projectOptions;
@@ -87,5 +88,7 @@ namespace Caravela.Framework.Impl.CodeModel
                 data.IsReadOnly = true;
             }
         }
+
+        public object ToDump() => this.ToDumpImpl();
     }
 }

@@ -7,6 +7,7 @@ using Caravela.Framework.Impl.CodeModel.Collections;
 using Caravela.Framework.Impl.CodeModel.References;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Utilities;
+using Caravela.Framework.Impl.Utilities.Dump;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
@@ -117,5 +118,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         [Memo]
         public IDeclaration OriginalDefinition => this.Compilation.Factory.GetDeclaration( this.Symbol.OriginalDefinition );
+
+        public object ToDump() => this.ToDumpImpl();
     }
 }

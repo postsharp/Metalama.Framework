@@ -7,6 +7,7 @@ using Caravela.Framework.Impl.Aspects;
 using Caravela.Framework.Impl.CodeModel.Collections;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Utilities;
+using Caravela.Framework.Impl.Utilities.Dump;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -72,6 +73,8 @@ namespace Caravela.Framework.Impl.CodeModel
         }
 
         public override string ToString() => this.AttributeData.ToString();
+
+        public object ToDump() => this.ToDumpImpl();
 
         public FormattableString FormatPredecessor( ICompilation compilation ) => $"the attribute of type '{this.Type}' on '{this.ContainingDeclaration}'";
 

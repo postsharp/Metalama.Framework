@@ -22,6 +22,7 @@
     <InternalsVisibleTo Include="Caravela.Framework.Tests.UnitTests.Internals" />
     <InternalsVisibleTo Include="Caravela.Framework.Tests.Integration.Internals" />
     <InternalsVisibleTo Include="Caravela.Framework.CompilerAddIn" />
+    <InternalsVisibleTo Include="Caravela.Framework.Workspaces" />
     <InternalsVisibleTo Include="DynamicProxyGenAssembly2" Key="$(FakeItEasyKey)" LoadsWithinVisualStudio="false" />
     </ItemGroup>
     
@@ -52,7 +53,7 @@
           
          We use an assembly alias to avoid conflicts with nullable attribute classes,
        -->
-    <PackageReference Include="Caravela.RoslynUtilities" Version="$(CaravelaCompilerVersion)" PrivateAssets="all" Aliases="roslyn" >
+    <PackageReference Include="Caravela.RoslynUtilities" Version="$(CaravelaCompilerVersion)" PrivateAssets="all" Aliases="roslyn">
             <GeneratePathProperty>true</GeneratePathProperty>
      </PackageReference>
      <None Include="$(PkgCaravela_RoslynUtilities)\lib\netstandard2.0\Caravela.RoslynUtilities.dll" Pack="true" PackagePath="lib\netstandard2.0" CopyToOutputDirectory="Always" />

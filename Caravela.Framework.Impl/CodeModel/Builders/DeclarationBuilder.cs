@@ -7,6 +7,7 @@ using Caravela.Framework.Code.DeclarationBuilders;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.CodeModel.References;
 using Caravela.Framework.Impl.Transformations;
+using Caravela.Framework.Impl.Utilities.Dump;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -67,6 +68,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public IEnumerable<IDeclaration> GetDerivedDeclarations( bool deep = true ) => throw new NotImplementedException();
 
         public override string ToString() => this.ToDisplayString( CodeDisplayFormat.MinimallyQualified );
+
+        public object ToDump() => this.ToDumpImpl();
 
         public IDeclaration OriginalDefinition => this;
 

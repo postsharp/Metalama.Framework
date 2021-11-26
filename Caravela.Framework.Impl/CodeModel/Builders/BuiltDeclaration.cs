@@ -6,6 +6,7 @@ using Caravela.Framework.Code.Collections;
 using Caravela.Framework.Impl.CodeModel.Collections;
 using Caravela.Framework.Impl.CodeModel.References;
 using Caravela.Framework.Impl.Utilities;
+using Caravela.Framework.Impl.Utilities.Dump;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -65,6 +66,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public IEnumerable<IDeclaration> GetDerivedDeclarations( bool deep = true ) => throw new NotImplementedException();
 
         public override string ToString() => this.Builder.ToString();
+
+        public object ToDump() => this.ToDumpImpl();
 
         [Memo]
         public IDeclaration OriginalDefinition => this.Compilation.Factory.GetDeclaration( this.Builder.OriginalDefinition );
