@@ -33,17 +33,17 @@ namespace Caravela.Framework.LinqPad
                 {
                     if ( property.IsLazy )
                     {
-                        value = PropertyValueFormatter.FormatLazyPropertyValue( this._instance, property.Type, property.GetFunc );
+                        value = FacadePropertyFormatter.FormatLazyPropertyValue( this._instance, property.Type, property.GetFunc );
                     }
                     else
                     {
                         var rawValue = property.GetFunc( this._instance );
-                        value = PropertyValueFormatter.FormatPropertyValue( rawValue );
+                        value = FacadePropertyFormatter.FormatPropertyValue( rawValue );
                     }
                 }
                 catch ( Exception e )
                 {
-                    value = PropertyValueFormatter.FormatException( e );
+                    value = FacadePropertyFormatter.FormatException( e );
                 }
 
                 yield return value;

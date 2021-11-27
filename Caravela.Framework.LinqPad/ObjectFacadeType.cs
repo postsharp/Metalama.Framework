@@ -24,10 +24,17 @@ namespace Caravela.Framework.LinqPad
 
         private ObjectFacadeType( Type type )
         {
-            Dictionary<string, PropertyInfo> publicProperties = new();
+            Dictionary<string, ObjectFacadeProperty> properties = new();
+
+            if ( type.IsInterface )
+            {
+                throw new ArgumentOutOfRangeException( nameof(type), "The type cannot be an interface." );
+            }
 
             // Find getters of properties of public interfaces.
-            foreach ( var implementedInterface in type.GetInterfaces() )
+            var implementedInterfaces = type.GetInterfaces();
+
+            foreach ( var implementedInterface in implementedInterfaces )
             {
                 if ( !IsPublicType( implementedInterface ) )
                 {
@@ -47,16 +54,24 @@ namespace Caravela.Framework.LinqPad
 
                         if ( property != null )
                         {
-                            publicProperties[property.Name] = property;
+                            properties[property.Name] = new ObjectFacadeProperty( property.Name, property.PropertyType, CreateCompiledGetter( property ) );
                         }
                     }
                 }
             }
 
             // Find getters of public properties.
-            if ( IsPublicType( type ) )
+            var publicType = GetPublicBase( type );
+
+            if ( publicType == null && implementedInterfaces.Length == 0 )
             {
-                foreach ( var property in type.GetProperties( BindingFlags.Public | BindingFlags.Instance ) )
+                // When the type is completely internal, like anonymous types, expose it anyway.
+                publicType = type;
+            }
+
+            if ( publicType != null )
+            {
+                foreach ( var property in publicType.GetProperties( BindingFlags.Public | BindingFlags.Instance ) )
                 {
                     var getter = property.GetMethod;
 
@@ -65,18 +80,22 @@ namespace Caravela.Framework.LinqPad
                         continue;
                     }
 
-                    publicProperties[property.Name] = property;
+                    properties[property.Name] = new ObjectFacadeProperty( property.Name, property.PropertyType, CreateCompiledGetter( property ) );
+                }
+
+                foreach ( var field in publicType.GetFields( BindingFlags.Public | BindingFlags.Instance ) )
+                {
+                    properties[field.Name] = new ObjectFacadeProperty( field.Name, field.FieldType, CreateCompiledGetter( field ) );
                 }
             }
 
-            var facadeProperties = publicProperties
-                .Select( g => new ObjectFacadeProperty( Name: g.Key, g.Value.PropertyType, CreateGetFunc( g.Value ), false ) )
+            var facadeProperties = properties.Values
                 .OrderBy( p => (p.Name, p.Type), PropertyComparer.Instance )
                 .ToList();
 
             if ( typeof(IDeclaration).IsAssignableFrom( type ) )
             {
-                facadeProperties.Add( new ObjectFacadeProperty( "Permalink", typeof(Permalink), o => new Permalink( (IDeclaration) o ), false ) );
+                facadeProperties.Add( new ObjectFacadeProperty( "Permalink", typeof(Permalink), o => new Permalink( (IDeclaration) o ) ) );
             }
 
             this.Properties = facadeProperties.ToImmutableArray();
@@ -85,17 +104,20 @@ namespace Caravela.Framework.LinqPad
             this.PropertyTypes = this.Properties.Select( p => p.Type ).ToImmutableArray();
         }
 
-        private static Func<object, object?> CreateGetFunc( PropertyInfo property )
+        private static Func<object, object?> CreateCompiledGetter( MemberInfo member )
         {
             var parameter = Expression.Parameter( typeof(object) );
-            var castParameter = Expression.Convert( parameter, property.DeclaringType! );
-            var getProperty = Expression.Convert( Expression.Property( castParameter, property ), typeof(object) );
+            var castParameter = Expression.Convert( parameter, member.DeclaringType! );
+            var getProperty = Expression.Convert( Expression.PropertyOrField( castParameter, member.Name ), typeof(object) );
             var lambda = Expression.Lambda<Func<object, object?>>( getProperty, parameter ).Compile();
 
             return lambda;
         }
 
         private static bool IsPublicType( Type type ) => type.IsPublic && type.Assembly != typeof(ObjectFacadeType).Assembly;
+
+        private static Type? GetPublicBase( Type type )
+            => IsPublicType( type ) ? type : type.BaseType != null && type.BaseType != typeof(object) ? GetPublicBase( type.BaseType ) : null;
 
         public static ObjectFacadeType GetFormatterType( Type type ) => _instances.GetOrAdd( type, t => new ObjectFacadeType( t ) );
     }

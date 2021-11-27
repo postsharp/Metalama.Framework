@@ -5,5 +5,5 @@ using System;
 
 namespace Caravela.Framework.LinqPad
 {
-    internal record ObjectFacadeProperty( string Name, Type Type, Func<object, object?> GetFunc, bool IsLazy );
+    internal record ObjectFacadeProperty( string Name, Type Type, Func<object, object?> GetFunc, bool IsLazy = false );
 }

@@ -6,11 +6,12 @@ using Caravela.Framework.Impl;
 using LINQPad;
 using System;
 using System.Collections;
+using System.Linq;
 using System.Reflection;
 
 namespace Caravela.Framework.LinqPad
 {
-    internal static class PropertyValueFormatter
+    internal static class FacadePropertyFormatter
     {
         public static object FormatLazyPropertyValue( object owner, Type propertyType, Func<object, object?> getter )
         {
@@ -24,31 +25,49 @@ namespace Caravela.Framework.LinqPad
                 throw new ArgumentNullException( nameof(owner) );
             }
 
-            return typeof(PropertyValueFormatter)
+            return typeof(FacadePropertyFormatter)
                 .GetMethod( nameof(CreateLazy), BindingFlags.Static | BindingFlags.NonPublic )
                 .AssertNotNull()
                 .MakeGenericMethod( propertyType )
                 .Invoke( null, new object[] { new Func<object?>( () => getter( owner ) ) } )!;
         }
 
-        public static object? FormatPropertyValue( object? value )
-        {
-            if ( value is Permalink permalink )
-            {
-                return permalink.Format();
-            }
-            else if ( value is Severity severity )
-            {
-                var sign = severity switch
-                {
-                    Severity.Warning => "\u26A0",
-                    Severity.Error => "\uD83D\uDEC7",
-                    Severity.Info => "\u2139",
-                    Severity.Hidden => "",
-                    _ => ""
-                };
+        public static object? FormatPropertyValue( object? value ) => FormatPropertyValueTestable( value ).View;
 
-                return sign + " " + severity.ToString();
+        public static (object? View, object? ViewModel) FormatPropertyValueTestable( object? value )
+        {
+            switch ( value )
+            {
+                case null:
+                    return (null, null);
+
+                case Permalink permalink:
+                    return (permalink.Format(), null);
+
+                case Severity severity:
+                    {
+                        var sign = severity switch
+                        {
+                            Severity.Warning => "\u26A0",
+                            Severity.Error => "\u26D4",
+                            Severity.Info => "\u2139",
+                            Severity.Hidden => "\uD83D\uDEC7",
+                            _ => ""
+                        };
+
+                        return (sign + " " + severity.ToString(), severity);
+                    }
+            }
+
+            var groupingInterface = value.GetType().GetInterface( "System.Linq.IGrouping`2" );
+
+            if ( groupingInterface != null )
+            {
+                value = typeof(FacadePropertyFormatter)
+                    .GetMethod( nameof(CreateGrouping), BindingFlags.Static | BindingFlags.NonPublic )
+                    .AssertNotNull()
+                    .MakeGenericMethod( groupingInterface.GetGenericArguments() )
+                    .Invoke( null, new[] { value } )!;
             }
 
             if ( IsComplexType( value ) )
@@ -70,7 +89,7 @@ namespace Caravela.Framework.LinqPad
                                 case 0:
                                     // Did not managed to render this with some styling. The following did not work:
                                     // Util.RawHtml, Util.WithStyle
-                                    return "(empty)";
+                                    return ("(empty)", value);
 
                                 case 1:
                                     summary = "(1 item)";
@@ -93,14 +112,19 @@ namespace Caravela.Framework.LinqPad
                     default:
                         summary = value!.ToString();
 
+                        if ( string.IsNullOrWhiteSpace( summary ) )
+                        {
+                            summary = value.GetType().Name;
+                        }
+
                         break;
                 }
 
-                return CreateSummary( value, summary!, cssClass );
+                return (CreateSummary( value, summary!, cssClass ), value);
             }
             else
             {
-                return value;
+                return (value, value);
             }
         }
 
@@ -117,6 +141,8 @@ namespace Caravela.Framework.LinqPad
         }
 
         private static Lazy<T> CreateLazy<T>( Func<object?> func ) => new( () => (T) func()! );
+
+        private static GroupingFacade<TKey, TItems> CreateGrouping<TKey, TItems>( IGrouping<TKey, TItems> group ) => new( group );
 
         private static object CreateSummary( object o, string summary, string? cssClass = null )
         {

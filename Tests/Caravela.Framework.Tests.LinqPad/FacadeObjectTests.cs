@@ -3,6 +3,7 @@
 
 using Caravela.Framework.Impl.Testing;
 using Caravela.Framework.LinqPad;
+using System;
 using Xunit;
 
 namespace Caravela.Framework.Tests.Workspaces
@@ -48,10 +49,26 @@ namespace Caravela.Framework.Tests.Workspaces
             using var testContext = this.CreateTestContext();
             var compilation = testContext.CreateCompilation( "class C {}" );
 
-            var namedType = compilation.Types[0];
-            var type = ObjectFacadeFactory.GetFacade( namedType )!.Type;
+            var type = ObjectFacadeType.GetFormatterType( compilation.Types[0].GetType() );
             Assert.Contains( "Methods", type.PropertyNames );
             Assert.Contains( "DeclaringAssembly", type.PropertyNames );
+        }
+
+        [Fact]
+        public void ValueTupleTest()
+        {
+            var type = ObjectFacadeType.GetFormatterType( typeof(ValueTuple<int, string>) );
+            Assert.Contains( "Item1", type.PropertyNames );
+            Assert.Contains( "Item2", type.PropertyNames );
+        }
+
+        [Fact]
+        public void AnonymousTypeTest()
+        {
+            var o = new { Id = 1, Name = "name" };
+            var type = ObjectFacadeType.GetFormatterType( o.GetType() );
+            Assert.Contains( "Id", type.PropertyNames );
+            Assert.Contains( "Name", type.PropertyNames );
         }
     }
 }
