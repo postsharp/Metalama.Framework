@@ -22,7 +22,6 @@
     <InternalsVisibleTo Include="Caravela.Framework.Tests.UnitTests.Internals" />
     <InternalsVisibleTo Include="Caravela.Framework.Tests.Integration.Internals" />
     <InternalsVisibleTo Include="Caravela.Framework.CompilerAddIn" />
-    <InternalsVisibleTo Include="Caravela.Framework.Workspaces" />
     <InternalsVisibleTo Include="DynamicProxyGenAssembly2" Key="$(FakeItEasyKey)" LoadsWithinVisualStudio="false" />
     </ItemGroup>
     

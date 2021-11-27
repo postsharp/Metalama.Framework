@@ -73,5 +73,7 @@ namespace Caravela.Framework.Code
         /// <param name="value"></param>
         /// <returns></returns>
         dynamic? Cast( IType type, object? value );
+
+        IDeclaration? GetDeclarationFromId( string declarationId );
     }
 }

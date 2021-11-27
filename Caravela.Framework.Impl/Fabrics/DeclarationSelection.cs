@@ -94,7 +94,7 @@ namespace Caravela.Framework.Impl.Fabrics
                                 this._serviceProvider,
                                 diagnostics,
                                 lambda,
-                                item.ToRef<IDeclaration>(),
+                                item.ToTypedRef<IDeclaration>(),
                                 aspectClass,
                                 this._predecessor,
                                 out var aspectInstance ) )
@@ -136,7 +136,7 @@ namespace Caravela.Framework.Impl.Fabrics
 
                             return new AspectInstance(
                                 aspect!,
-                                t.ToRef<IDeclaration>(),
+                                t.ToTypedRef<IDeclaration>(),
                                 aspectClass,
                                 this._predecessor );
                         } ) ) );
@@ -173,7 +173,7 @@ namespace Caravela.Framework.Impl.Fabrics
 
                                 return new AspectInstance(
                                     aspect!,
-                                    t.ToRef<IDeclaration>(),
+                                    t.ToTypedRef<IDeclaration>(),
                                     aspectClass,
                                     this._predecessor );
                             } );

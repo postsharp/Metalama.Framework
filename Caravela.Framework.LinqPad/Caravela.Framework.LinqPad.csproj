@@ -7,32 +7,20 @@
         <UseWpf>true</UseWpf>
         <RootNamespace>Caravela.Framework.LinqPad</RootNamespace>
          <ImplicitUsings>disable</ImplicitUsings> 
-         <PackageTags>$(PackageTags) linqpaddriver</PackageTags>
+         <PackageTags>$(PackageTags) linqpaddriver linqpad-samples</PackageTags>
     </PropertyGroup>
 
     <ItemGroup>
       <PackageReference Include="LINQPad.Reference" Version="1.2.0-beta" />
-    </ItemGroup>
-
-    <ItemGroup>
       <ProjectReference Include="..\Caravela.Framework.Workspaces\Caravela.Framework.Workspaces.csproj" />
       <ProjectReference Include="..\Caravela.Framework.Impl\Caravela.Framework.Impl.csproj" />
+      
+      <InternalsVisibleTo Include="Caravela.Framework.Tests.LinqPad" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Compile Remove="Unsuccessful\**" />
+   <ItemGroup>
+        <None Include="linqpad-samples/*.linq" Pack="True" PackagePath="linqpad-samples" />
     </ItemGroup>
 
-    <ItemGroup>
-      <EmbeddedResource Remove="Unsuccessful\**" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <None Remove="Unsuccessful\**" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Page Remove="Unsuccessful\**" />
-    </ItemGroup>
 
 </Project>

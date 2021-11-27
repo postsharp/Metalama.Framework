@@ -3,8 +3,7 @@
     <PropertyGroup>
         <TargetFramework>net6.0</TargetFramework>
         <RootNamespace>Caravela.Framework.Workspaces</RootNamespace>
-        <PackageTags>$(PackageTags) linqpad-samples</PackageTags>
-         <UseCaravelaCompiler>Private</UseCaravelaCompiler>
+        <UseCaravelaCompiler>Private</UseCaravelaCompiler>
     </PropertyGroup>
 
     <ItemGroup>
@@ -23,8 +22,5 @@
           
     </ItemGroup>
     
-    <ItemGroup>
-        <None Include="linqpad-samples/*.linq" Pack="True" PackagePath="linqpad-samples" />
-    </ItemGroup>
-
+ 
 </Project>

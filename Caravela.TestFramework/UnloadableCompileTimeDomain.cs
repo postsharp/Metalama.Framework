@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Impl.CompileTime;
+using Caravela.Framework.Impl.Testing;
 using System.Diagnostics.CodeAnalysis;
 #if NET5_0
 using Caravela.Framework.Impl.Utilities;

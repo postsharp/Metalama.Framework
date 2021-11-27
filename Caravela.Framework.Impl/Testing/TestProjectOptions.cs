@@ -7,7 +7,7 @@ using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 
-namespace Caravela.TestFramework
+namespace Caravela.Framework.Impl.Testing
 {
     /// <summary>
     /// An implementation of <see cref="IProjectOptions"/> and <see cref="IPathOptions"/> that can be used in tests.

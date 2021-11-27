@@ -3,11 +3,11 @@
 
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
+using Caravela.Framework.Code.Collections;
 using Caravela.Framework.Eligibility;
 using Caravela.Framework.Eligibility.Implementation;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.CodeModel;
-using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Pipeline;

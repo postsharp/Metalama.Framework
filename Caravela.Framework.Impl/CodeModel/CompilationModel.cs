@@ -97,7 +97,7 @@ namespace Caravela.Framework.Impl.CodeModel
         {
             this._transformations = prototype._transformations.AddRange(
                 observableTransformations,
-                t => t.ContainingDeclaration.ToRef(),
+                t => t.ContainingDeclaration.ToTypedRef(),
                 t => t );
 
             // TODO: Performance. The next line essentially instantiates the complete code model. We should look at attributes without doing that. 
@@ -216,7 +216,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public IEnumerable<T> GetAspectsOf<T>( IDeclaration declaration )
             where T : IAspect
-            => this._aspects[declaration.ToRef()].Select( a => a.Aspect ).OfType<T>();
+            => this._aspects[declaration.ToTypedRef()].Select( a => a.Aspect ).OfType<T>();
 
         public IEnumerable<INamedType> GetDerivedTypes( INamedType baseType, bool deep )
             => this._derivedTypes.GetDerivedTypes( baseType.GetSymbol(), deep ).Select( t => this.Factory.GetNamedType( t ) );
@@ -249,7 +249,7 @@ namespace Caravela.Framework.Impl.CodeModel
                 .Where( a => a.Type.Equals( type ) );
 
         internal ImmutableArray<IObservableTransformation> GetObservableTransformationsOnElement( IDeclaration declaration )
-            => this._transformations[declaration.ToRef()];
+            => this._transformations[declaration.ToTypedRef()];
 
         internal IEnumerable<(IDeclaration DeclaringDeclaration, ImmutableArray<IObservableTransformation> Transformations)> GetAllObservableTransformations(
             bool designTimeOnly )
@@ -269,7 +269,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         internal int GetDepth( IDeclaration declaration )
         {
-            var reference = declaration.ToRef();
+            var reference = declaration.ToTypedRef();
 
             if ( this._depthsCache.TryGetValue( reference, out var value ) )
             {
@@ -304,7 +304,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         internal int GetDepth( INamedType namedType )
         {
-            var reference = namedType.ToRef<IDeclaration>();
+            var reference = namedType.ToTypedRef<IDeclaration>();
 
             if ( this._depthsCache.TryGetValue( reference, out var depth ) )
             {
@@ -333,13 +333,15 @@ namespace Caravela.Framework.Impl.CodeModel
             return depth;
         }
 
-        Ref<IDeclaration> IDeclarationImpl.ToRef() => Ref.Compilation().As<IDeclaration>();
+        public Ref<IDeclaration> ToRef() => Ref.Compilation( this.RoslynCompilation ).As<IDeclaration>();
 
         ImmutableArray<SyntaxReference> IDeclarationImpl.DeclaringSyntaxReferences => ImmutableArray<SyntaxReference>.Empty;
 
         IEnumerable<IDeclaration> IDeclarationImpl.GetDerivedDeclarations( bool deep ) => Enumerable.Empty<IDeclaration>();
 
         string IDisplayable.ToDisplayString( CodeDisplayFormat? format, CodeDisplayContext? context ) => this.RoslynCompilation.AssemblyName ?? "";
+
+        IRef<IDeclaration> IDeclaration.ToRef() => this.ToRef();
 
         [Memo]
         public IAssembly DeclaringAssembly => this.Factory.GetAssembly( this.RoslynCompilation.Assembly );

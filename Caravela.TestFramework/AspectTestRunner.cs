@@ -5,6 +5,7 @@ using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.DesignTime.CodeFixes;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Pipeline;
+using Caravela.Framework.Impl.Testing;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;

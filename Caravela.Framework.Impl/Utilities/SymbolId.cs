@@ -4,6 +4,7 @@
 // ReSharper disable once RedundantBlankLines
 
 extern alias roslyn;
+
 using Microsoft.CodeAnalysis;
 using System.Threading;
 using SymbolKey = roslyn::Microsoft.CodeAnalysis.SymbolKey;

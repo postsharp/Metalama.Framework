@@ -12,6 +12,8 @@ namespace Caravela.Framework.Code
     public interface IRef<out T>
         where T : class, ICompilationElement
     {
+        string? Serialize();
+
         /// <summary>
         /// Gets the target of the reference for a given compilation. To get the reference for the
         /// current execution context, use the <see cref="RefExtensions.GetTarget{T}"/> extension method.

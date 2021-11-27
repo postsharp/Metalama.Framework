@@ -5,12 +5,12 @@ using System;
 using System.Collections.Concurrent;
 using System.Threading;
 
-namespace Caravela.TestFramework
+namespace Caravela.Framework.Impl.Testing
 {
     /// <summary>
     /// Stores async-local data about the current test.
     /// </summary>
-    internal class TestExecutionContext : IDisposable
+    public class TestExecutionContext : IDisposable
     {
         private static readonly AsyncLocal<TestExecutionContext> _current = new();
 

@@ -57,6 +57,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public Ref<IDeclaration> ToRef() => Ref.FromBuilder( this );
 
+        IRef<IDeclaration> IDeclaration.ToRef() => this.ToRef();
+
         ISymbol? ISdkDeclaration.Symbol => null;
 
         public ImmutableArray<SyntaxReference> DeclaringSyntaxReferences

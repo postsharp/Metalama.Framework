@@ -81,7 +81,7 @@ namespace Caravela.Framework.Impl.Aspects
             var executionContext = UserCodeExecutionContext.Current;
 
             return new DeclarationSelection<TMember>(
-                this.Target.ToRef(),
+                this.Target.ToTypedRef(),
                 this._predecessor,
                 this.AddAspectSource,
                 ( compilation, diagnostics ) =>

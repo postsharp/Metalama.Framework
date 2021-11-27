@@ -78,6 +78,8 @@ namespace Caravela.Framework.Impl.CodeModel.Pseudo
 
         public IDeclaration OriginalDefinition => throw new NotImplementedException();
 
+        public IRef<IDeclaration> ToRef() => throw new NotImplementedException();
+
         public IAssembly DeclaringAssembly => this.DeclaringMember.DeclaringAssembly;
 
         public Location? DiagnosticLocation => this.DeclaringMember.GetDiagnosticLocation();

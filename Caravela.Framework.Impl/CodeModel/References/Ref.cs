@@ -80,7 +80,7 @@ namespace Caravela.Framework.Impl.CodeModel.References
         public static Ref<IDeclaration> ReturnParameter( IMethodSymbol methodSymbol, Compilation compilation )
             => new( methodSymbol, compilation, DeclarationRefTargetKind.Return );
 
-        internal static Ref<ICompilation> Compilation() => new( DeclarationRefTargetKind.Assembly );
+        internal static Ref<ICompilation> Compilation( Compilation compilation ) => new( DeclarationRefTargetKind.Assembly, compilation );
     }
 
     /// <summary>
@@ -116,9 +116,9 @@ namespace Caravela.Framework.Impl.CodeModel.References
             this._compilation = compilation;
         }
 
-        internal Ref( DeclarationRefTargetKind targetKind )
+        internal Ref( DeclarationRefTargetKind targetKind, Compilation compilation )
         {
-            this._compilation = null;
+            this._compilation = compilation;
             this.TargetKind = targetKind;
             this.Target = null;
         }
@@ -150,6 +150,21 @@ namespace Caravela.Framework.Impl.CodeModel.References
         public object? Target { get; }
 
         public DeclarationRefTargetKind TargetKind { get; }
+
+        public string? Serialize()
+        {
+            if ( this._compilation == null )
+            {
+                throw new InvalidOperationException( "This reference cannot be serialized because it has no compilation." );
+            }
+
+            var symbol = this.GetSymbol( this._compilation );
+
+            return DocumentationCommentId.CreateDeclarationId( symbol );
+        }
+
+        public static ISymbol? Deserialize( Compilation compilation, string serializedId )
+            => DocumentationCommentId.GetFirstSymbolForDeclarationId( serializedId, compilation );
 
         public T GetTarget( ICompilation compilation ) => Resolve( this.Target, (CompilationModel) compilation, this.TargetKind );
 
@@ -276,7 +291,7 @@ namespace Caravela.Framework.Impl.CodeModel.References
         internal static T Resolve( object? reference, ICompilation compilation, DeclarationRefTargetKind kind = DeclarationRefTargetKind.Default )
             => Resolve( reference, (CompilationModel) compilation, kind );
 
-        internal static T Resolve( object? reference, CompilationModel compilation, DeclarationRefTargetKind kind = DeclarationRefTargetKind.Default )
+        private static T Resolve( object? reference, CompilationModel compilation, DeclarationRefTargetKind kind = DeclarationRefTargetKind.Default )
         {
             switch ( reference )
             {
@@ -286,12 +301,13 @@ namespace Caravela.Framework.Impl.CodeModel.References
                         : throw new AssertionFailedException();
 
                 case ISymbol symbol:
-                    return (T) compilation.Factory.GetCompilationElement( symbol.AssertValidType<T>(), kind );
+                    return (T) compilation.Factory.GetCompilationElement( symbol.AssertValidType<T>(), kind ).AssertNotNull();
 
                 case SyntaxNode node:
                     return (T) compilation.Factory.GetCompilationElement(
-                        GetSymbolOfNode( compilation.PartialCompilation.Compilation, node ).AssertValidType<T>(),
-                        kind );
+                            GetSymbolOfNode( compilation.PartialCompilation.Compilation, node ).AssertValidType<T>(),
+                            kind )
+                        .AssertNotNull();
 
                 case IDeclarationBuilder builder:
                     return (T) compilation.Factory.GetDeclaration( builder );
@@ -305,7 +321,7 @@ namespace Caravela.Framework.Impl.CodeModel.References
                             throw new AssertionFailedException( $"Cannot resolve '{symbolId}' into a symbol." );
                         }
 
-                        return (T) compilation.Factory.GetCompilationElement( symbol );
+                        return (T) compilation.Factory.GetCompilationElement( symbol ).AssertNotNull();
                     }
 
                 default:

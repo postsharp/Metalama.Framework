@@ -11,12 +11,12 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 
-namespace Caravela.TestFramework
+namespace Caravela.Framework.Impl.Testing
 {
     /// <summary>
     /// Utility class that creates a <see cref="CSharpCompilation"/>.
     /// </summary>
-    internal static class TestCompilationFactory
+    public static class TestCompilationFactory
     {
         public static CSharpCompilation CreateEmptyCSharpCompilation(
             string? name,

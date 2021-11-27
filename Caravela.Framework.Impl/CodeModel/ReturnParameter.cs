@@ -6,7 +6,6 @@ using Caravela.Framework.Code.Collections;
 using Caravela.Framework.Impl.CodeModel.References;
 using Caravela.Framework.Impl.ReflectionMocks;
 using Microsoft.CodeAnalysis;
-using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Reflection;
@@ -23,7 +22,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public abstract IType Type { get; }
 
-        public string Name => throw new NotSupportedException( "Cannot get the name of a return parameter." );
+        public string Name => "<return>";
 
         public int Index => -1;
 
@@ -36,6 +35,9 @@ namespace Caravela.Framework.Impl.CodeModel
         public ParameterInfo ToParameterInfo() => CompileTimeReturnParameterInfo.Create( this );
 
         public virtual bool IsReturnParameter => true;
+
+        IRef<IDeclaration> IDeclaration.ToRef()
+            => Ref.ReturnParameter( (IMethodSymbol) this.DeclaringMember.GetSymbol().AssertNotNull(), this.GetCompilationModel().RoslynCompilation );
 
         public IAssembly DeclaringAssembly => this.DeclaringMember.DeclaringAssembly;
 
@@ -68,6 +70,6 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public abstract IDeclaration OriginalDefinition { get; }
 
-        public override string ToString() => this.DeclaringMember + ":return";
+        public override string ToString() => this.DeclaringMember + "/" + this.Name;
     }
 }

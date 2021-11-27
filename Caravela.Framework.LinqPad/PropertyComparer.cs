@@ -1,3 +1,6 @@
+// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+
 using System;
 using System.Collections.Generic;
 
@@ -13,6 +16,8 @@ namespace Caravela.Framework.LinqPad
             => s switch
             {
                 "Index" => 0,
+                "Id" => 0,
+                "Severity" => 1,
                 "Position" => 1,
                 "Name" => 2,
                 _ => 10

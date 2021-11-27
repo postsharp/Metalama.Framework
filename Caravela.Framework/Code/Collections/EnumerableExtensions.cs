@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Caravela.Framework.Code.Collections
 {
@@ -134,5 +135,9 @@ namespace Caravela.Framework.Code.Collections
                 recursionCheck--;
             }
         }
+
+        public static IEnumerable<T> WhereNotNull<T>( this IEnumerable<T?> items )
+            where T : class
+            => items.Where( i => i != null )!;
     }
 }

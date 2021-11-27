@@ -84,6 +84,8 @@ namespace Caravela.Framework.Impl.CodeModel.Pseudo
 
         public INamedType DeclaringType => this.DeclaringMember.DeclaringType;
 
+        IRef<IDeclaration> IDeclaration.ToRef() => throw new NotImplementedException();
+
         public IAssembly DeclaringAssembly => this.DeclaringMember.DeclaringAssembly;
 
         public DeclarationOrigin Origin => DeclarationOrigin.Source;

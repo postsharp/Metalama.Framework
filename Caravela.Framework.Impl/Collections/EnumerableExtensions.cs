@@ -61,10 +61,6 @@ namespace Caravela.Framework.Impl.Collections
             where TKey : notnull
             => enumerable.ToMultiValueDictionary( getKey, i => i, keyComparer );
 
-        public static IEnumerable<T> WhereNotNull<T>( this IEnumerable<T?> items )
-            where T : class
-            => items.Where( i => i != null )!;
-
         public static IReadOnlyList<T> ConcatNotNull<T>( this IReadOnlyList<T> a, T? b )
             where T : class
         {

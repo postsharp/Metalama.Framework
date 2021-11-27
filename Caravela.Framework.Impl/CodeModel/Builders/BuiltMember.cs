@@ -16,6 +16,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public sealed override DeclarationBuilder Builder => this.MemberBuilder;
 
+        string? IRef<IMember>.Serialize() => null;
+
         IMember IRef<IMember>.GetTarget( ICompilation compilation ) => throw new NotImplementedException();
 
         ISymbol ISdkRef<IMember>.GetSymbol( Compilation compilation ) => throw new NotImplementedException();

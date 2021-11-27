@@ -32,6 +32,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
             => this.Builder.ToDisplayString( format, context );
 
+        IRef<IDeclaration> IDeclaration.ToRef() => this.Builder.ToRef();
+
         public IAssembly DeclaringAssembly => this.Builder.DeclaringAssembly;
 
         DeclarationOrigin IDeclaration.Origin => DeclarationOrigin.Aspect;

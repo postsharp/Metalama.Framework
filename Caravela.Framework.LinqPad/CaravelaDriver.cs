@@ -211,11 +211,11 @@ namespace {nameSpace}
             }
         }
 
-        public override ICustomMemberProvider? GetCustomDisplayMemberProvider( object objectToWrite ) => FormattedObject.Get( objectToWrite );
+        public override ICustomMemberProvider? GetCustomDisplayMemberProvider( object objectToWrite ) => ObjectFacadeFactory.GetFacade( objectToWrite );
 
         public override void InitializeContext( IConnectionInfo cxInfo, object context, QueryExecutionManager executionManager )
         {
-            Util.HtmlHead.AddStyles( "a.error { color: red !important; }" );
+            Util.HtmlHead.AddStyles( "a.error { color: red !important; } span.null, .empty { color: #888 !important; }" );
 
             base.InitializeContext( cxInfo, context, executionManager );
         }

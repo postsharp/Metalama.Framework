@@ -23,9 +23,9 @@ namespace Caravela.Framework.Impl.CodeModel
             this._compilation = compilation;
         }
 
-        public bool Equals( IDeclaration x, IDeclaration y ) => this._innerComparer.Equals( x.ToRef(), y.ToRef() );
+        public bool Equals( IDeclaration x, IDeclaration y ) => this._innerComparer.Equals( x.ToTypedRef(), y.ToTypedRef() );
 
-        public int GetHashCode( IDeclaration obj ) => this._innerComparer.GetHashCode( obj.ToRef() );
+        public int GetHashCode( IDeclaration obj ) => this._innerComparer.GetHashCode( obj.ToTypedRef() );
 
         public bool Equals( IType x, IType y ) => SymbolEqualityComparer.Default.Equals( x.GetSymbol(), y.GetSymbol() );
 

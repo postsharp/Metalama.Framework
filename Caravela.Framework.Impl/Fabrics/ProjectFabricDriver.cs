@@ -85,8 +85,9 @@ namespace Caravela.Framework.Impl.Fabrics
         {
             var amender = new Amender(
                 project,
+                this.Compilation,
                 this.FabricManager,
-                new FabricInstance( this, this.FabricSymbol.ContainingAssembly.ToRef( this.Compilation ) ) );
+                new FabricInstance( this, this.FabricSymbol.ContainingAssembly.ToTypedRef( this.Compilation ) ) );
 
             var executionContext = new UserCodeExecutionContext(
                 this.FabricManager.ServiceProvider,
@@ -109,12 +110,13 @@ namespace Caravela.Framework.Impl.Fabrics
         {
             public Amender(
                 IProject project,
+                Compilation compilation,
                 FabricManager fabricManager,
                 FabricInstance fabricInstance ) : base(
                 project,
                 fabricManager,
                 fabricInstance,
-                Ref.Compilation() ) { }
+                Ref.Compilation( compilation ) ) { }
         }
     }
 }

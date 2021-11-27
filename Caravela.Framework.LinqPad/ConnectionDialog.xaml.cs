@@ -3,6 +3,7 @@
 
 using LINQPad.Extensibility.DataContext;
 using Microsoft.Win32;
+using System.IO;
 using System.Windows;
 
 namespace Caravela.Framework.LinqPad
@@ -41,6 +42,7 @@ namespace Caravela.Framework.LinqPad
 
             if ( dialog.ShowDialog() == true )
             {
+                this._connectionInfo.DisplayName = Path.GetFileName( dialog.FileName );
                 this._connectionData.Project = dialog.FileName;
             }
         }

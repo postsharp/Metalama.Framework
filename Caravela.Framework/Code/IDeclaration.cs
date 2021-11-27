@@ -14,6 +14,8 @@ namespace Caravela.Framework.Code
     [CompileTimeOnly]
     public interface IDeclaration : IDisplayable, IDiagnosticLocation, ICompilationElement
     {
+        IRef<IDeclaration> ToRef();
+
         /// <summary>
         /// Gets the declaring assembly, which can be the current <see cref="ICompilationElement.Compilation"/>
         /// or a reference assembly.

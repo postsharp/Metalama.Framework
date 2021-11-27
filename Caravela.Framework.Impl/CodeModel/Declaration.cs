@@ -49,6 +49,8 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public virtual Ref<IDeclaration> ToRef() => Ref.FromSymbol( this.Symbol, this.Compilation.RoslynCompilation );
 
+        IRef<IDeclaration> IDeclaration.ToRef() => this.ToRef();
+
         public virtual string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
             => this.Symbol.ToDisplayString( format.ToRoslyn() );
 

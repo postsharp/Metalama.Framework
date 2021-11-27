@@ -28,6 +28,8 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         public ICompilation Compilation => this.Underlying.Compilation;
 
+        IRef<IDeclaration> IDeclaration.ToRef() => this.Underlying.ToRef();
+
         public IAssembly DeclaringAssembly => this.Underlying.DeclaringAssembly;
 
         public DeclarationOrigin Origin => this.Underlying.Origin;

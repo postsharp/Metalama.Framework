@@ -55,7 +55,7 @@ namespace Caravela.Framework.Impl.CodeModel.References
         public AttributeRef( AttributeBuilder builder )
         {
             this.Target = builder;
-            this._declaringDeclaration = builder.ContainingDeclaration.ToRef();
+            this._declaringDeclaration = builder.ContainingDeclaration.ToTypedRef();
         }
 
         public string? AttributeTypeName
@@ -72,6 +72,8 @@ namespace Caravela.Framework.Impl.CodeModel.References
                     },
                     _ => throw new AssertionFailedException()
                 } );
+
+        public string? Serialize() => null;
 
         public IAttribute GetTarget( ICompilation compilation )
         {
