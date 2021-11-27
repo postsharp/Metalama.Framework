@@ -9,7 +9,7 @@ using System.Reflection;
 
 namespace Caravela.Framework.LinqPad
 {
-    internal static class PropertyValueFormatter 
+    internal static class PropertyValueFormatter
     {
         public static object FormatLazyPropertyValue( object owner, MethodInfo getter )
         {
@@ -46,6 +46,7 @@ namespace Caravela.Framework.LinqPad
                 {
                     case IEnumerable:
                         cssClass = "collection";
+
                         if ( EnumerableAccessor.Get( value.GetType() ) is { HasCount: true } accessor )
                         {
                             var count = accessor.GetCount( value );
@@ -74,16 +75,12 @@ namespace Caravela.Framework.LinqPad
                         break;
 
                     default:
-                        summary = value.ToString();
+                        summary = value!.ToString();
 
                         break;
                 }
 
-                return typeof(PropertyValueFormatter)
-                    .GetMethod( nameof(CreateSummary), BindingFlags.Static | BindingFlags.NonPublic )
-                    .AssertNotNull()
-                    .MakeGenericMethod( getter.ReturnType )
-                    .Invoke( null, new[] { value, summary, cssClass } );
+                return CreateSummary( value, summary!, cssClass );
             }
             else
             {
@@ -92,6 +89,7 @@ namespace Caravela.Framework.LinqPad
         }
 
         private static bool _alreadyAddedCss;
+
         public static object FormatException( Exception exception )
         {
             if ( !_alreadyAddedCss )
@@ -99,13 +97,12 @@ namespace Caravela.Framework.LinqPad
                 _alreadyAddedCss = true;
             }
 
-            return CreateSummary<Exception>( exception, exception.Message, "error" );
+            return CreateSummary( exception, exception.Message, "error" );
         }
 
         private static Lazy<T> CreateLazy<T>( Func<object?> func ) => new( () => (T) func()! );
 
-        private static object CreateSummary<T>( object o, string summary, string? cssClass = null )
-            where T : notnull
+        private static object CreateSummary( object o, string summary, string? cssClass = null )
         {
             DumpContainer container = new();
 
@@ -121,7 +118,6 @@ namespace Caravela.Framework.LinqPad
             {
                 link.CssClass = cssClass;
             }
-            
 
             container.Content = link;
 
@@ -143,24 +139,6 @@ namespace Caravela.Framework.LinqPad
             }
 
             return true;
-        }
-
-        private class Summary<T>
-            where T : notnull
-        {
-            private readonly string _summary;
-
-            public override string ToString() => this._summary;
-
-            // ReSharper disable once UnusedAutoPropertyAccessor.Local
-            // ReSharper disable once MemberCanBePrivate.Local
-            public Lazy<T> Details { get; }
-
-            public Summary( T detail, string summary )
-            {
-                this._summary = summary;
-                this.Details = new Lazy<T>( () => detail );
-            }
         }
     }
 }

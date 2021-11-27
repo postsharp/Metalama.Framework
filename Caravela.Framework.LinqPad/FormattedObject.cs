@@ -5,7 +5,6 @@ using LINQPad;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 
@@ -13,7 +12,7 @@ namespace Caravela.Framework.LinqPad
 {
     internal class FormattedObject : ICustomMemberProvider
     {
-        private static ConditionalWeakTable<object, FormattedObject> _instances = new();
+        private static readonly ConditionalWeakTable<object, FormattedObject> _instances = new();
         private readonly FormattedObjectType _type;
         private readonly object _instance;
 
@@ -28,7 +27,7 @@ namespace Caravela.Framework.LinqPad
             }
             else
             {
-                if ( !_instances.TryGetValue( instance, out var proxy ) )
+                if ( !_instances.TryGetValue( instance!, out var proxy ) )
                 {
                     proxy = new FormattedObject( FormattedObjectType.GetFormatterType( instance!.GetType() ), instance );
                     _instances.AddOrUpdate( instance, proxy );
@@ -74,7 +73,5 @@ namespace Caravela.Framework.LinqPad
                 yield return value;
             }
         }
-        
-         
     }
 }

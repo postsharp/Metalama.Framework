@@ -13,7 +13,7 @@ namespace Caravela.Framework.Workspaces
 
         public override int GetHashCode() => this._value?.GetHashCode( StringComparison.Ordinal ) ?? 0;
 
-        private readonly string _value;
+        private readonly string? _value;
 
         public TargetFramework( string value )
         {
@@ -26,6 +26,6 @@ namespace Caravela.Framework.Workspaces
 
         public static bool operator !=( TargetFramework a, TargetFramework b ) => !a.Equals( b );
 
-        public override string ToString() => this._value;
+        public override string ToString() => this._value ?? "null";
     }
 }

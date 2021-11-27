@@ -28,6 +28,6 @@ namespace Caravela.Framework.LinqPad
 
         public bool HasCount => this._getter != null;
 
-        public int GetCount( object obj ) => (int) this._getter.AssertNotNull().Invoke( obj, null );
+        public int GetCount( object obj ) => (int) this._getter.AssertNotNull().Invoke( obj, null )!;
     }
 }

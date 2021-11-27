@@ -41,7 +41,8 @@ namespace Caravela.Framework.Impl.ReflectionMocks
         internal static Type Create( IType type ) => Create( type.GetSymbol(), type.GetCompilationModel().RoslynCompilation );
 
         // For test only.
-        internal static Type Create( ITypeSymbol typeSymbol, Compilation compilation ) => new CompileTimeType( Ref.FromSymbol<IType>( typeSymbol, compilation ), typeSymbol.ToDisplayString() );
+        internal static Type Create( ITypeSymbol typeSymbol, Compilation compilation )
+            => new CompileTimeType( Ref.FromSymbol<IType>( typeSymbol, compilation ), typeSymbol.ToDisplayString() );
 
         public override string Namespace => throw CompileTimeMocksHelper.CreateNotSupportedException();
 
