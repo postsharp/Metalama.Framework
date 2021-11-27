@@ -3,10 +3,9 @@
 
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Aspects;
-using Caravela.Framework.Impl.Utilities.Dump;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
     // IAttributeImpl does not implement IDeclarationImpl because it is not backed by an ISymbol.
-    internal interface IAttributeImpl : IAttribute, IDiagnosticLocationImpl, IAspectPredecessorImpl, IDumpable { }
+    internal interface IAttributeImpl : IAttribute, IDiagnosticLocationImpl, IAspectPredecessorImpl { }
 }

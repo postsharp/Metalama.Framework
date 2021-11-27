@@ -1,6 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
-
+/*
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl;
 using Caravela.Framework.Impl.Utilities.Dump;
@@ -72,4 +72,4 @@ namespace Caravela.Framework.Tests.UnitTests.CodeModel
             Assert.Equal( isLazy, ObjectDumper.RequiresLazyLoad( type ) );
         }
     }
-}
+}*/

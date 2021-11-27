@@ -1,7 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Impl.Utilities.Dump;
 using Caravela.Framework.Workspaces;
 
 namespace Caravela.Framework.LinqPad
@@ -16,7 +15,6 @@ namespace Caravela.Framework.LinqPad
 
         public CaravelaDataContext( string path )
         {
-            ObjectDumper.Formatter = new LinqPadSpecializedFormatter();
             this.projectSet = Workspace.Default.Load( path );
         }
     }

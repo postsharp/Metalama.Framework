@@ -3,7 +3,6 @@
 
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel.Builders;
-using Caravela.Framework.Impl.Utilities.Dump;
 
 namespace Caravela.Framework.Impl.CodeModel.References
 {
@@ -20,6 +19,6 @@ namespace Caravela.Framework.Impl.CodeModel.References
         object? Target { get; }
     }
 
-    internal interface IRefImpl<out T> : ISdkRef<T>, IRefImpl, IDumpable
+    internal interface IRefImpl<out T> : ISdkRef<T>, IRefImpl
         where T : class, ICompilationElement { }
 }

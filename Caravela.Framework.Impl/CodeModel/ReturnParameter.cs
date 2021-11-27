@@ -5,7 +5,6 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Code.Collections;
 using Caravela.Framework.Impl.CodeModel.References;
 using Caravela.Framework.Impl.ReflectionMocks;
-using Caravela.Framework.Impl.Utilities.Dump;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -69,6 +68,6 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public abstract IDeclaration OriginalDefinition { get; }
 
-        public object ToDump() => this.ToDumpImpl();
+        public override string ToString() => this.DeclaringMember + ":return";
     }
 }

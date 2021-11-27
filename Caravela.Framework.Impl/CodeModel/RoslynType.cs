@@ -4,7 +4,6 @@
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Utilities;
-using Caravela.Framework.Impl.Utilities.Dump;
 using Microsoft.CodeAnalysis;
 using System;
 using SpecialType = Caravela.Framework.Code.SpecialType;
@@ -50,8 +49,6 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public bool Equals( IType other ) => this.Symbol.Equals( ((ITypeInternal) other).TypeSymbol );
 
-        public override string ToString() => this.Symbol.ToString();
-
-        public object ToDump() => this.ToDumpImpl();
+        public override string ToString() => this.Symbol.ToDisplayString( SymbolDisplayFormat.CSharpShortErrorMessageFormat );
     }
 }

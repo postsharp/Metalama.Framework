@@ -3,8 +3,9 @@
 
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl;
-using Caravela.Framework.Impl.Utilities.Dump;
+using Caravela.Framework.Impl.Pipeline;
 using Caravela.Framework.Workspaces;
+using LINQPad;
 using LINQPad.Extensibility.DataContext;
 using System;
 using System.Collections.Generic;
@@ -83,7 +84,7 @@ namespace {nameSpace}
             assembliesToReference.Add( typeof(CaravelaDriver).Assembly.Location );
             assembliesToReference.Add( typeof(CaravelaDataContext).Assembly.Location );
             assembliesToReference.Add( typeof(IDeclaration).Assembly.Location );
-            assembliesToReference.Add( typeof(ObjectDumper).Assembly.Location );
+            assembliesToReference.Add( typeof(AspectPipeline).Assembly.Location );
 
             // CompileSource is a static helper method to compile C# source code using LINQPad's built-in Roslyn libraries.
             // If you prefer, you can add a NuGet reference to the Roslyn libraries and use them directly.
@@ -132,7 +133,7 @@ namespace {nameSpace}
                 Type parentType = (Type) table.Tag;
 
                 var props = GetProperties( parentType )
-                    .OrderBy( p => (p.Name, p.PropertyType), ObjectDumper.PropertyComparer.Instance )
+                    .OrderBy( p => (p.Name, p.PropertyType), PropertyComparer.Instance )
                     .Select( p => GetChildItem( elementTypeLookup, p.Name, p.PropertyType ) );
 
                 table.Children = props.ToList();
@@ -208,6 +209,15 @@ namespace {nameSpace}
             {
                 return type.GetProperties();
             }
+        }
+
+        public override ICustomMemberProvider? GetCustomDisplayMemberProvider( object objectToWrite ) => FormattedObject.Get( objectToWrite );
+
+        public override void InitializeContext( IConnectionInfo cxInfo, object context, QueryExecutionManager executionManager )
+        {
+            Util.HtmlHead.AddStyles( "a.error { color: red !important; }" );
+
+            base.InitializeContext( cxInfo, context, executionManager );
         }
     }
 }

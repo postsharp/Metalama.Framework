@@ -1,15 +1,17 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Impl;
+using LINQPad;
 using System;
 using System.Collections;
 using System.Reflection;
 
-namespace Caravela.Framework.Impl.Utilities.Dump
+namespace Caravela.Framework.LinqPad
 {
-    public class LinqPadFormatter : IDumpFormatter
+    internal static class PropertyValueFormatter 
     {
-        public virtual object FormatLazyPropertyValue( object owner, MethodInfo getter )
+        public static object FormatLazyPropertyValue( object owner, MethodInfo getter )
         {
             if ( getter == null )
             {
@@ -21,14 +23,14 @@ namespace Caravela.Framework.Impl.Utilities.Dump
                 throw new ArgumentNullException( nameof(owner) );
             }
 
-            return typeof(LinqPadFormatter)
+            return typeof(PropertyValueFormatter)
                 .GetMethod( nameof(CreateLazy), BindingFlags.Static | BindingFlags.NonPublic )
                 .AssertNotNull()
                 .MakeGenericMethod( getter.ReturnType )
-                .Invoke( this, new object[] { new Func<object>( () => getter.Invoke( owner, null ) ) } );
+                .Invoke( null, new object[] { new Func<object?>( () => getter.Invoke( owner, null ) ) } )!;
         }
 
-        public virtual object FormatPropertyValue( object value, MethodInfo getter )
+        public static object? FormatPropertyValue( object? value, MethodInfo getter )
         {
             if ( getter == null )
             {
@@ -38,11 +40,12 @@ namespace Caravela.Framework.Impl.Utilities.Dump
             if ( IsComplexType( value ) )
             {
                 string? summary;
+                string? cssClass = null;
 
                 switch ( value )
                 {
                     case IEnumerable:
-
+                        cssClass = "collection";
                         if ( EnumerableAccessor.Get( value.GetType() ) is { HasCount: true } accessor )
                         {
                             var count = accessor.GetCount( value );
@@ -76,11 +79,11 @@ namespace Caravela.Framework.Impl.Utilities.Dump
                         break;
                 }
 
-                return typeof(LinqPadFormatter)
-                    .GetMethod( nameof(this.CreateSummary), BindingFlags.Instance | BindingFlags.NonPublic )
+                return typeof(PropertyValueFormatter)
+                    .GetMethod( nameof(CreateSummary), BindingFlags.Static | BindingFlags.NonPublic )
                     .AssertNotNull()
                     .MakeGenericMethod( getter.ReturnType )
-                    .Invoke( this, new[] { value, summary } );
+                    .Invoke( null, new[] { value, summary, cssClass } );
             }
             else
             {
@@ -88,14 +91,41 @@ namespace Caravela.Framework.Impl.Utilities.Dump
             }
         }
 
-        public object FormatException( Exception exception ) => this.CreateSummary<Exception>( exception, exception.Message );
+        private static bool _alreadyAddedCss;
+        public static object FormatException( Exception exception )
+        {
+            if ( !_alreadyAddedCss )
+            {
+                _alreadyAddedCss = true;
+            }
 
-        private static Lazy<T> CreateLazy<T>( Func<object> func ) => new( () => (T) func() );
+            return CreateSummary<Exception>( exception, exception.Message, "error" );
+        }
 
-        protected virtual object CreateSummary<T>( object o, string summary )
+        private static Lazy<T> CreateLazy<T>( Func<object?> func ) => new( () => (T) func()! );
+
+        private static object CreateSummary<T>( object o, string summary, string? cssClass = null )
             where T : notnull
         {
-            return new Summary<T>( (T) o, summary );
+            DumpContainer container = new();
+
+            Hyperlinq link = new(
+                () =>
+                {
+                    // On click, replace the link by the object content.
+                    container.Content = o;
+                },
+                summary );
+
+            if ( cssClass != null )
+            {
+                link.CssClass = cssClass;
+            }
+            
+
+            container.Content = link;
+
+            return container;
         }
 
         private static bool IsComplexType( object? obj )

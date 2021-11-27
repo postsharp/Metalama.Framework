@@ -13,7 +13,6 @@ using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Transformations;
 using Caravela.Framework.Impl.Utilities;
-using Caravela.Framework.Impl.Utilities.Dump;
 using Caravela.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
@@ -379,7 +378,5 @@ namespace Caravela.Framework.Impl.CodeModel
         Location? IDiagnosticLocationImpl.DiagnosticLocation => null;
 
         bool IDeclarationImpl.CanBeInherited => false;
-
-        public object ToDump() => this.ToDumpImpl();
     }
 }

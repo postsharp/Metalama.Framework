@@ -400,8 +400,6 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public bool Equals( IType other ) => this.Compilation.InvariantComparer.Equals( this, other );
 
-        public override string ToString() => this.TypeSymbol.ToString();
-
         public bool IsSubclassOf( INamedType type )
         {
             // TODO: enum.IsSubclassOf(int) == true etc.

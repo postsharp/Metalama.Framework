@@ -131,8 +131,6 @@ namespace Caravela.Framework.Impl.CodeModel.References
 
         public override string ToString() => this.Target?.ToString() ?? "null";
 
-        public object ToDump() => this.ToString();
-
         [return: NotNullIfNotNull( "name" )]
         internal static string? GetShortName( string? name ) => name?.TrimEnd( "Attribute" );
     }

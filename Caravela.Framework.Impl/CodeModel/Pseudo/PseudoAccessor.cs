@@ -8,7 +8,6 @@ using Caravela.Framework.Impl.CodeModel.Collections;
 using Caravela.Framework.Impl.CodeModel.Invokers;
 using Caravela.Framework.Impl.CodeModel.References;
 using Caravela.Framework.Impl.Utilities;
-using Caravela.Framework.Impl.Utilities.Dump;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -126,7 +125,5 @@ namespace Caravela.Framework.Impl.CodeModel.Pseudo
         public IMember? OverriddenMember => ((IMemberWithAccessors?) ((IMemberImpl) this.DeclaringMember).OverriddenMember)?.GetAccessor( this.MethodKind );
 
         public Location? DiagnosticLocation => this.DeclaringMember.GetDiagnosticLocation();
-
-        public object ToDump() => this.ToDumpImpl();
     }
 }

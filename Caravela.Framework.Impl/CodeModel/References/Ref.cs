@@ -315,8 +315,6 @@ namespace Caravela.Framework.Impl.CodeModel.References
 
         public override string ToString() => this.Target?.ToString() ?? "null";
 
-        public object ToDump() => this.ToString();
-
         public Ref<TOut> As<TOut>()
             where TOut : class, ICompilationElement
             => new( this.Target, this._compilation, this.TargetKind );

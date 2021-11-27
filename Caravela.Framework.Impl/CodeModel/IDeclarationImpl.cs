@@ -3,14 +3,13 @@
 
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel.References;
-using Caravela.Framework.Impl.Utilities.Dump;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    internal interface IDeclarationImpl : ISdkDeclaration, IDeclarationInternal, IDiagnosticLocationImpl, IDumpable
+    internal interface IDeclarationImpl : ISdkDeclaration, IDeclarationInternal, IDiagnosticLocationImpl
     {
         Ref<IDeclaration> ToRef();
 

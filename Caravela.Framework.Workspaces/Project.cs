@@ -4,7 +4,6 @@
 using Caravela.Framework.Code;
 using Caravela.Framework.Code.Collections;
 using Caravela.Framework.Impl.Utilities;
-using Caravela.Framework.Impl.Utilities.Dump;
 using System.Collections.Immutable;
 
 namespace Caravela.Framework.Workspaces
@@ -26,9 +25,6 @@ namespace Caravela.Framework.Workspaces
 
         [Memo]
         public ImmutableArray<INamedType> Types => this.Compilation.Types.SelectManyRecursive( t => t.NestedTypes ).ToImmutableArray();
-
-        // ReSharper disable once UnusedMember.Local
-        private object? ToDump() => ObjectDumper.Dump( this );
 
         public override string ToString()
         {

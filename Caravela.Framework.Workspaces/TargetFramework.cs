@@ -27,8 +27,5 @@ namespace Caravela.Framework.Workspaces
         public static bool operator !=( TargetFramework a, TargetFramework b ) => !a.Equals( b );
 
         public override string ToString() => this._value;
-
-        // ReSharper disable once UnusedMember.Local
-        private object ToDump() => this._value;
     }
 }

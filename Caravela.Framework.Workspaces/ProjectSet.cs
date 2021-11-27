@@ -4,7 +4,6 @@
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.Utilities;
-using Caravela.Framework.Impl.Utilities.Dump;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
@@ -61,8 +60,5 @@ namespace Caravela.Framework.Workspaces
 
             return this._subsets.GetOrAdd( filteredProjectKey, _ => new ProjectSet( filteredProjects ) );
         }
-
-        // ReSharper disable once UnusedMember.Local
-        private object? ToDump() => ObjectDumper.Dump( this );
     }
 }

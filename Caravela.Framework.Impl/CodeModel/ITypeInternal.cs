@@ -2,12 +2,11 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
-using Caravela.Framework.Impl.Utilities.Dump;
 using System.Collections.Generic;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    internal interface ITypeInternal : ISdkType, IDumpable { }
+    internal interface ITypeInternal : ISdkType { }
 
     internal interface INamedTypeInternal : INamedType, ITypeInternal, IGenericInternal
     {
