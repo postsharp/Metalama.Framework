@@ -4,15 +4,19 @@
 using Caravela.Framework.Code;
 using LINQPad;
 
-namespace Caravela.Framework.LinqPad
+namespace Caravela.LinqPad
 {
-    public class Permalink
+    /// <summary>
+    /// Represents a hyperlink to an <see cref="IDeclaration"/>. When clicking on a hyperlink, a new query is opened, starting at
+    /// the declaration.
+    /// </summary>
+    internal class Permalink
     {
-        public IDeclaration Declaration { get; }
+        private readonly IDeclaration _declaration;
 
         public Permalink( IDeclaration declaration )
         {
-            this.Declaration = declaration;
+            this._declaration = declaration;
         }
 
         public object? Format()
@@ -21,7 +25,7 @@ namespace Caravela.Framework.LinqPad
 
             try
             {
-                serializedReference = this.Declaration.ToRef().Serialize();
+                serializedReference = this._declaration.ToRef().Serialize();
             }
             catch
             {
@@ -35,7 +39,7 @@ namespace Caravela.Framework.LinqPad
             }
             else
             {
-                var project = this.Declaration.Compilation.Project;
+                var project = this._declaration.Compilation.Project;
 
                 return new Hyperlinq(
                     QueryLanguage.Expression,

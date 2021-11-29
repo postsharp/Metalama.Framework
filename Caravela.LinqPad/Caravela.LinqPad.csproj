@@ -5,7 +5,7 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <UseWpf>true</UseWpf>
-        <RootNamespace>Caravela.Framework.LinqPad</RootNamespace>
+        <RootNamespace>Caravela.LinqPad</RootNamespace>
          <ImplicitUsings>disable</ImplicitUsings> 
          <PackageTags>$(PackageTags) linqpaddriver linqpad-samples</PackageTags>
     </PropertyGroup>
@@ -15,7 +15,7 @@
       <ProjectReference Include="..\Caravela.Framework.Workspaces\Caravela.Framework.Workspaces.csproj" />
       <ProjectReference Include="..\Caravela.Framework.Impl\Caravela.Framework.Impl.csproj" />
       
-      <InternalsVisibleTo Include="Caravela.Framework.Tests.LinqPad" />
+      <InternalsVisibleTo Include="Caravela.LinqPad.Tests" />
     </ItemGroup>
 
    <ItemGroup>

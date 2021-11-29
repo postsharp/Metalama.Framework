@@ -10,21 +10,24 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 
-namespace Caravela.Framework.LinqPad
+namespace Caravela.LinqPad
 {
-    internal class ObjectFacadeType
+    /// <summary>
+    /// Builds and represents the list of properties of a <see cref="FacadeObject"/>.
+    /// </summary>
+    internal class FacadeType
     {
         public IEnumerable<string> PropertyNames { get; }
 
         public IEnumerable<Type> PropertyTypes { get; }
 
-        public ImmutableArray<ObjectFacadeProperty> Properties { get; }
+        public ImmutableArray<FacadeProperty> Properties { get; }
 
-        private static readonly ConcurrentDictionary<Type, ObjectFacadeType> _instances = new();
+        private static readonly ConcurrentDictionary<Type, FacadeType> _instances = new();
 
-        private ObjectFacadeType( Type type )
+        private FacadeType( Type type )
         {
-            Dictionary<string, ObjectFacadeProperty> properties = new();
+            Dictionary<string, FacadeProperty> properties = new();
 
             if ( type.IsInterface )
             {
@@ -54,7 +57,7 @@ namespace Caravela.Framework.LinqPad
 
                         if ( property != null )
                         {
-                            properties[property.Name] = new ObjectFacadeProperty( property.Name, property.PropertyType, CreateCompiledGetter( property ) );
+                            properties[property.Name] = new FacadeProperty( property.Name, property.PropertyType, CreateCompiledGetter( property ) );
                         }
                     }
                 }
@@ -80,12 +83,12 @@ namespace Caravela.Framework.LinqPad
                         continue;
                     }
 
-                    properties[property.Name] = new ObjectFacadeProperty( property.Name, property.PropertyType, CreateCompiledGetter( property ) );
+                    properties[property.Name] = new FacadeProperty( property.Name, property.PropertyType, CreateCompiledGetter( property ) );
                 }
 
                 foreach ( var field in publicType.GetFields( BindingFlags.Public | BindingFlags.Instance ) )
                 {
-                    properties[field.Name] = new ObjectFacadeProperty( field.Name, field.FieldType, CreateCompiledGetter( field ) );
+                    properties[field.Name] = new FacadeProperty( field.Name, field.FieldType, CreateCompiledGetter( field ) );
                 }
             }
 
@@ -95,7 +98,7 @@ namespace Caravela.Framework.LinqPad
 
             if ( typeof(IDeclaration).IsAssignableFrom( type ) )
             {
-                facadeProperties.Add( new ObjectFacadeProperty( "Permalink", typeof(Permalink), o => new Permalink( (IDeclaration) o ) ) );
+                facadeProperties.Add( new FacadeProperty( "Permalink", typeof(Permalink), o => new Permalink( (IDeclaration) o ) ) );
             }
 
             this.Properties = facadeProperties.ToImmutableArray();
@@ -114,11 +117,11 @@ namespace Caravela.Framework.LinqPad
             return lambda;
         }
 
-        private static bool IsPublicType( Type type ) => type.IsPublic && type.Assembly != typeof(ObjectFacadeType).Assembly;
+        private static bool IsPublicType( Type type ) => type.IsPublic && type.Assembly != typeof(FacadeType).Assembly;
 
         private static Type? GetPublicBase( Type type )
             => IsPublicType( type ) ? type : type.BaseType != null && type.BaseType != typeof(object) ? GetPublicBase( type.BaseType ) : null;
 
-        public static ObjectFacadeType GetFormatterType( Type type ) => _instances.GetOrAdd( type, t => new ObjectFacadeType( t ) );
+        public static FacadeType GetFormatterType( Type type ) => _instances.GetOrAdd( type, t => new FacadeType( t ) );
     }
 }

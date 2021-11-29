@@ -12,13 +12,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
-namespace Caravela.Framework.LinqPad
+namespace Caravela.LinqPad
 {
     /// <summary>
-    /// This static driver let users query any data source that looks like a Data Context - in other words,
-    /// that exposes properties of type IEnumerable of T.
+    /// A LinqPad driver that lets you query Caravela workspaces.
     /// </summary>
-    public class CaravelaDriver : DynamicDataContextDriver
+    public sealed class CaravelaDriver : DynamicDataContextDriver
     {
         public override string Name => "Caravela";
 
@@ -49,7 +48,7 @@ namespace Caravela.Framework.LinqPad
             string source = $@"using System;
 using System;
 using System.Collections.Generic;
-using Caravela.Framework.LinqPad;
+using Caravela.LinqPad;
 
 namespace {nameSpace}
 {{
@@ -68,10 +67,7 @@ namespace {nameSpace}
             var projectSchema = GetSchema( "projectSet.", typeof(ProjectSet) );
             projectSchema.Add( new ExplorerItem( "GetSubset", ExplorerItemKind.Property, ExplorerIcon.View ) );
 
-            return new List<ExplorerItem>()
-            {
-                new( "projectSet", ExplorerItemKind.Parameter, ExplorerIcon.Parameter ) { IsEnumerable = false, Children = projectSchema }
-            };
+            return projectSchema;
         }
 
         public override IEnumerable<string> GetNamespacesToAdd( IConnectionInfo cxInfo )
@@ -211,7 +207,7 @@ namespace {nameSpace}
             }
         }
 
-        public override ICustomMemberProvider? GetCustomDisplayMemberProvider( object objectToWrite ) => ObjectFacadeFactory.GetFacade( objectToWrite );
+        public override ICustomMemberProvider? GetCustomDisplayMemberProvider( object objectToWrite ) => FacadeObjectFactory.GetFacade( objectToWrite );
 
         public override void InitializeContext( IConnectionInfo cxInfo, object context, QueryExecutionManager executionManager )
         {

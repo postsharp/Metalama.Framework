@@ -7,8 +7,11 @@ using System.IO;
 using System.Runtime.CompilerServices;
 using System.Xml.Linq;
 
-namespace Caravela.Framework.LinqPad
+namespace Caravela.LinqPad
 {
+    /// <summary>
+    /// Represents a connection, i.e. contains information about the loaded project or solution.
+    /// </summary>
     internal class ConnectionData : INotifyPropertyChanged
     {
         private string? _project;

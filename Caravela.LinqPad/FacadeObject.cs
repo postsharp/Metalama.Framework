@@ -5,27 +5,30 @@ using LINQPad;
 using System;
 using System.Collections.Generic;
 
-namespace Caravela.Framework.LinqPad
+namespace Caravela.LinqPad
 {
-    internal class ObjectFacade : ICustomMemberProvider
+    /// <summary>
+    /// A facade object for non-trivial object. It exposes only the public properties and use <see cref="FacadePropertyFormatter"/>
+    /// to format property values.
+    /// </summary>
+    internal class FacadeObject : ICustomMemberProvider
     {
-        public ObjectFacadeType Type { get; }
-
+        private readonly FacadeType _type;
         private readonly object _instance;
 
-        internal ObjectFacade( ObjectFacadeType facadeType, object instance )
+        internal FacadeObject( FacadeType facadeType, object instance )
         {
-            this.Type = facadeType;
+            this._type = facadeType;
             this._instance = instance;
         }
 
-        public IEnumerable<string> GetNames() => this.Type.PropertyNames;
+        public IEnumerable<string> GetNames() => this._type.PropertyNames;
 
-        public IEnumerable<Type> GetTypes() => this.Type.PropertyTypes;
+        public IEnumerable<Type> GetTypes() => this._type.PropertyTypes;
 
         public IEnumerable<object?> GetValues()
         {
-            foreach ( var property in this.Type.Properties )
+            foreach ( var property in this._type.Properties )
             {
                 object? value;
 

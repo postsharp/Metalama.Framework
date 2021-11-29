@@ -2,18 +2,17 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Impl.Testing;
-using Caravela.Framework.LinqPad;
 using System;
 using Xunit;
 
-namespace Caravela.Framework.Tests.Workspaces
+namespace Caravela.LinqPad.Tests
 {
     public class FacadeObjectTests : TestBase
     {
         private static object? DumpClass<T>( T? obj )
             where T : class
         {
-            var dump = ObjectFacadeFactory.GetFacade( obj );
+            var dump = FacadeObjectFactory.GetFacade( obj );
 
             if ( obj != null )
             {
@@ -29,7 +28,7 @@ namespace Caravela.Framework.Tests.Workspaces
 
         private static object? DumpStruct<T>( T obj )
             where T : struct
-            => ObjectFacadeFactory.GetFacade( obj );
+            => FacadeObjectFactory.GetFacade( obj );
 
         [Fact]
         public void Tests()
@@ -49,7 +48,7 @@ namespace Caravela.Framework.Tests.Workspaces
             using var testContext = this.CreateTestContext();
             var compilation = testContext.CreateCompilation( "class C {}" );
 
-            var type = ObjectFacadeType.GetFormatterType( compilation.Types[0].GetType() );
+            var type = FacadeType.GetFormatterType( compilation.Types[0].GetType() );
             Assert.Contains( "Methods", type.PropertyNames );
             Assert.Contains( "DeclaringAssembly", type.PropertyNames );
         }
@@ -57,7 +56,7 @@ namespace Caravela.Framework.Tests.Workspaces
         [Fact]
         public void ValueTupleTest()
         {
-            var type = ObjectFacadeType.GetFormatterType( typeof(ValueTuple<int, string>) );
+            var type = FacadeType.GetFormatterType( typeof(ValueTuple<int, string>) );
             Assert.Contains( "Item1", type.PropertyNames );
             Assert.Contains( "Item2", type.PropertyNames );
         }
@@ -66,7 +65,7 @@ namespace Caravela.Framework.Tests.Workspaces
         public void AnonymousTypeTest()
         {
             var o = new { Id = 1, Name = "name" };
-            var type = ObjectFacadeType.GetFormatterType( o.GetType() );
+            var type = FacadeType.GetFormatterType( o.GetType() );
             Assert.Contains( "Id", type.PropertyNames );
             Assert.Contains( "Name", type.PropertyNames );
         }

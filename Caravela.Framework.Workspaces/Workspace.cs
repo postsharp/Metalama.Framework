@@ -16,9 +16,14 @@ using System.Threading.Tasks;
 
 namespace Caravela.Framework.Workspaces
 {
-    public class Workspace : IDisposable
+    /// <summary>
+    /// Represents a mutable set of projects. You can load projects or solutions into a workspaces. When projects target several frameworks,
+    /// they are represented by several instances of the <see cref="Project"/> class in the workspace.
+    /// </summary>
+    public sealed class Workspace : IDisposable
     {
         private readonly ImmutableDictionary<string, string> _properties;
+        private readonly Dictionary<string, ProjectSet> _loadedSolutions = new( StringComparer.OrdinalIgnoreCase );
 
         static Workspace()
         {
@@ -33,14 +38,24 @@ namespace Caravela.Framework.Workspaces
 
         private static readonly Lazy<Workspace> _default = new( () => new Workspace() );
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Workspace"/> class.
+        /// </summary>
+        /// <param name="properties">MSBuild project properties, such as <c>Configuration</c>.</param>
         public Workspace( ImmutableDictionary<string, string>? properties = null )
         {
             this._properties = properties ?? ImmutableDictionary<string, string>.Empty;
             this._workspace = MSBuildWorkspace.Create( this._properties );
         }
 
+        /// <summary>
+        /// Gets the default workspace.
+        /// </summary>
         public static Workspace Default => _default.Value;
 
+        /// <summary>
+        /// Unloads all projects from the current workspace.
+        /// </summary>
         public void Reset()
         {
             this._workspace.Dispose();
@@ -48,6 +63,10 @@ namespace Caravela.Framework.Workspaces
             this._projects.Clear();
         }
 
+        /// <summary>
+        /// Reloads all projects in the current workspace.
+        /// </summary>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
         public async Task ReloadAsync( CancellationToken cancellationToken = default )
         {
             var oldSolution = this._workspace.CurrentSolution;
@@ -59,6 +78,19 @@ namespace Caravela.Framework.Workspaces
             }
         }
 
+        /// <summary>
+        /// Loads a project or a solution in the current workspace, and returns a <see cref="ProjectSet"/>
+        /// with the loaded projects. When loading a multi-targeted project, the <see cref="ProjectSet"/> will contain several projects,
+        /// one for each target framework.
+        /// </summary>
+        /// <param name="path">Path of the project on the file system.</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
+        /// <returns>A <see cref="ProjectSet"/> containing the loaded project or, if the project is multi-targeted, several projects,
+        /// one for each target framework.</returns>
+        /// <remarks>
+        /// <para>When loading projects that have project references, referenced projects are also loaded in the workspace, but are not included
+        /// in the resulting <see cref="ProjectSet"/>.</para>
+        /// </remarks>
         public ProjectSet Load( string path, CancellationToken cancellationToken = default )
         {
             var task = this.LoadAsync( path, cancellationToken );
@@ -67,6 +99,18 @@ namespace Caravela.Framework.Workspaces
             return task.Result;
         }
 
+        /// <summary>
+        /// Asynchronously loads a project in the current workspace, and returns a <see cref="ProjectSet"/>
+        /// with one or more projects, one for each target framework.
+        /// </summary>
+        /// <param name="path">Path of the project on the file system.</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
+        /// <returns>A <see cref="ProjectSet"/> containing the loaded project or, if the project is multi-targeted, several projects,
+        /// one for each target framework.</returns>
+        /// <remarks>
+        /// <para>If the project has project references, referenced projects are also loaded in the workspace, but are not included
+        /// in the resulting <see cref="ProjectSet"/>.</para>
+        /// </remarks>
         public async Task<ProjectSet> LoadAsync( string path, CancellationToken cancellationToken = default )
         {
             switch ( Path.GetExtension( path ).ToLowerInvariant() )
@@ -78,11 +122,11 @@ namespace Caravela.Framework.Workspaces
                     return await this.LoadSolutionAsync( path, cancellationToken );
 
                 default:
-                    throw new ArgumentOutOfRangeException();
+                    throw new ArgumentOutOfRangeException( nameof(path), "Invalid path extension. Only '.csproj' and '.sln' are allowed." );
             }
         }
 
-        public async Task<ProjectSet> LoadProjectAsync( string path, CancellationToken cancellationToken = default )
+        private async Task<ProjectSet> LoadProjectAsync( string path, CancellationToken cancellationToken = default )
         {
             // If we already have the project, don't load it again.
             var existingProjects = this._projects.Where( p => p.Path == path ).ToImmutableArray();
@@ -131,27 +175,46 @@ namespace Caravela.Framework.Workspaces
             return ourProject;
         }
 
-        public async Task<ProjectSet> LoadSolutionAsync( string path, CancellationToken cancellationToken )
+        private async Task<ProjectSet> LoadSolutionAsync( string path, CancellationToken cancellationToken )
         {
+            // If we already have the project, don't load it again.
+            if ( this._loadedSolutions.TryGetValue( path, out var loadedSolution ) )
+            {
+                return loadedSolution;
+            }
+
             var solution = await this._workspace.OpenSolutionAsync( path, cancellationToken: cancellationToken );
+
+            var projectsInSolution = new List<Project>();
 
             foreach ( var project in solution.Projects )
             {
-                try
+                // Check if that specific project has already been loaded.
+                var targetFramework = WorkspaceProjectOptions.GetTargetFrameworkFromRoslynProject( project );
+                var existingProject = this._projects.FirstOrDefault( p => p.Path == path && p.TargetFramework == targetFramework );
+
+                if ( existingProject != null )
                 {
-                    await this.LoadProjectCoreAsync( project, cancellationToken );
+                    projectsInSolution.Add( existingProject );
                 }
-                catch
+                else
                 {
-                    // TODO: log
+                    projectsInSolution.Add( await this.LoadProjectCoreAsync( project, cancellationToken ) );
                 }
             }
 
-            return new ProjectSet( this._projects.ToImmutableArray() );
+            var projectSet = new ProjectSet( projectsInSolution.ToImmutableArray() );
+            this._loadedSolutions.Add( path, projectSet );
+
+            return projectSet;
         }
 
-        public IEnumerable<Project> Projects => this._projects;
+        /// <summary>
+        /// Gets a snapshot of the projects loaded in the current solution.
+        /// </summary>
+        public ImmutableArray<Project> Projects => this._projects.ToImmutableArray();
 
+        /// <inheritdoc />
         public void Dispose()
         {
             this._workspace.Dispose();

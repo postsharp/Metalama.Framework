@@ -12,6 +12,9 @@ using System.Linq;
 
 namespace Caravela.Framework.Workspaces
 {
+    /// <summary>
+    /// The implement of <see cref="IProjectOptions"/> used by <see cref="Workspace"/>.
+    /// </summary>
     internal class WorkspaceProjectOptions : IProjectOptions
     {
         private readonly Microsoft.CodeAnalysis.Project _roslynProject;
@@ -30,15 +33,7 @@ namespace Caravela.Framework.Workspaces
 
             this._roslynProject = roslynProject;
             this._compilation = compilation;
-
-            if ( roslynProject.Name.EndsWith( ')' ) )
-            {
-                var indexOfParenthesis = roslynProject.Name.LastIndexOf( '(' );
-                var targetFramework = roslynProject.Name.Substring( indexOfParenthesis + 1, roslynProject.Name.Length - indexOfParenthesis - 2 );
-
-                this.TargetFramework = targetFramework;
-            }
-
+            this.TargetFramework = GetTargetFrameworkFromRoslynProject( roslynProject );
             this.Configuration = msbuildProject.Properties.FirstOrDefault( p => p.Name == "Configuration" )?.EvaluatedValue;
         }
 
@@ -80,5 +75,20 @@ namespace Caravela.Framework.Workspaces
         public bool IsDesignTimeEnabled => false;
 
         public string? AdditionalCompilationOutputDirectory => null;
+
+        public static string? GetTargetFrameworkFromRoslynProject( Microsoft.CodeAnalysis.Project roslynProject )
+        {
+            if ( roslynProject.Name.EndsWith( ')' ) )
+            {
+                var indexOfParenthesis = roslynProject.Name.LastIndexOf( '(' );
+                var targetFramework = roslynProject.Name.Substring( indexOfParenthesis + 1, roslynProject.Name.Length - indexOfParenthesis - 2 );
+
+                return targetFramework;
+            }
+            else
+            {
+                return null;
+            }
+        }
     }
 }

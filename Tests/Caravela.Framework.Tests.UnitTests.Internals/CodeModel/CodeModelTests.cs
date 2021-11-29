@@ -228,7 +228,7 @@ class C<T1, T2>
 
             var type = compilation.Types.Single();
 
-            Assert.Equal( new[] { "T1", "T2" }, type.TypeArguments.Select( t => t.ToString().AssertNotNull() ) );
+            Assert.Equal( new[] { "C<T1, T2>/T1", "C<T1, T2>/T2" }, type.TypeArguments.Select( t => t.ToString().AssertNotNull() ) );
 
             var method = type.Methods.First();
 
@@ -536,11 +536,11 @@ class C
             var compilation = testContext.CreateCompilationModel( "" );
 
             Assert.Equal(
-                "System.Collections.Generic.List<T>.Enumerator",
+                "List<T>.Enumerator",
                 compilation.Factory.GetTypeByReflectionType( typeof(List<>.Enumerator) ).ToString() );
 
             Assert.Equal(
-                "System.Collections.Generic.Dictionary<int, string>",
+                "Dictionary<int, string>",
                 compilation.Factory.GetTypeByReflectionType( typeof(Dictionary<int, string>) ).ToString() );
 
             Assert.Equal( "int[][*,*]", compilation.Factory.GetTypeByReflectionType( typeof(int[][,]) ).ToString() );
@@ -659,7 +659,7 @@ class Class<T>
 
             Assert.Equal( "string", openType.Fields.Single().ForTypeInstance( typeInstance ).Type.ToString() );
             Assert.Equal( "string", openType.Properties.Single().ForTypeInstance( typeInstance ).Type.ToString() );
-            Assert.Equal( "System.Action<string>", openType.Events.Single().ForTypeInstance( typeInstance ).Type.ToString() );
+            Assert.Equal( "Action<string>", openType.Events.Single().ForTypeInstance( typeInstance ).Type.ToString() );
             Assert.Equal( "string", openType.Methods.Single().ForTypeInstance( typeInstance ).ReturnType.ToString() );
             Assert.Equal( "string", openType.Constructors.Single().ForTypeInstance( typeInstance ).Parameters[0].Type.ToString() );
             Assert.Equal( typeInstance, openType.StaticConstructor!.ForTypeInstance( typeInstance ).DeclaringType );

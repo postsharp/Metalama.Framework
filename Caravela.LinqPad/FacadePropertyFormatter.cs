@@ -9,8 +9,11 @@ using System.Collections;
 using System.Linq;
 using System.Reflection;
 
-namespace Caravela.Framework.LinqPad
+namespace Caravela.LinqPad
 {
+    /// <summary>
+    /// A helper class used by <see cref="FacadeObject"/> to format property values into LinqPad view objects.
+    /// </summary>
     internal static class FacadePropertyFormatter
     {
         public static object FormatLazyPropertyValue( object owner, Type propertyType, Func<object, object?> getter )
@@ -110,7 +113,7 @@ namespace Caravela.Framework.LinqPad
                         break;
 
                     default:
-                        summary = value!.ToString();
+                        summary = value.ToString();
 
                         if ( string.IsNullOrWhiteSpace( summary ) )
                         {
@@ -120,7 +123,7 @@ namespace Caravela.Framework.LinqPad
                         break;
                 }
 
-                return (CreateSummary( value, summary!, cssClass ), value);
+                return (CreateSummary( value, summary, cssClass ), value);
             }
             else
             {

@@ -8,6 +8,9 @@ using System.Collections.Immutable;
 
 namespace Caravela.Framework.Workspaces
 {
+    /// <summary>
+    /// Represents a C# project for a specific compilation.
+    /// </summary>
     public sealed class Project
     {
         public string Path { get; }
@@ -23,6 +26,9 @@ namespace Caravela.Framework.Workspaces
             this.TargetFramework = targetFramework;
         }
 
+        /// <summary>
+        /// Gets the set of types defined in the project, including nested types.
+        /// </summary>
         [Memo]
         public ImmutableArray<INamedType> Types => this.Compilation.Types.SelectManyRecursive( t => t.NestedTypes ).ToImmutableArray();
 

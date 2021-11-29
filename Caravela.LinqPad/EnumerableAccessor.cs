@@ -6,8 +6,11 @@ using System;
 using System.Collections.Concurrent;
 using System.Reflection;
 
-namespace Caravela.Framework.LinqPad
+namespace Caravela.LinqPad
 {
+    /// <summary>
+    /// Exposes the number of items in a collection.
+    /// </summary>
     internal class EnumerableAccessor
     {
         private readonly MethodInfo? _getter;
@@ -20,6 +23,8 @@ namespace Caravela.Framework.LinqPad
             this._getter = type.GetProperty( "Count", BindingFlags.Instance | BindingFlags.Public )?.GetMethod
                            ?? type.GetProperty( "Length", BindingFlags.Instance | BindingFlags.Public )?.GetMethod;
 
+            // TODO: use a compiled Lambda expression.
+            
             if ( this._getter != null && this._getter.ReturnType != typeof(int) )
             {
                 this._getter = null;

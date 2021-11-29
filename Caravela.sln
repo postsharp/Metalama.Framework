@@ -64,9 +64,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Caravela.Framework.Workspac
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Caravela.Framework.Tests.Workspaces", "Tests\Caravela.Framework.Tests.Workspaces\Caravela.Framework.Tests.Workspaces.csproj", "{6B0B4099-06FA-408A-8230-5F952198245B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Caravela.Framework.LinqPad", "Caravela.Framework.LinqPad\Caravela.Framework.LinqPad.csproj", "{A651E922-244B-4EA3-B6C2-F609A5E66FC6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Caravela.LinqPad", "Caravela.LinqPad\Caravela.LinqPad.csproj", "{A651E922-244B-4EA3-B6C2-F609A5E66FC6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Caravela.Framework.Tests.LinqPad", "Tests\Caravela.Framework.Tests.LinqPad\Caravela.Framework.Tests.LinqPad.csproj", "{6615862D-D68E-48D5-B7EF-0C520C0E0ABD}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Caravela.LinqPad.Tests", "Tests\Caravela.LinqPad.Tests\Caravela.LinqPad.Tests.csproj", "{6615862D-D68E-48D5-B7EF-0C520C0E0ABD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

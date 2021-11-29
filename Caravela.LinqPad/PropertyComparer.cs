@@ -4,9 +4,12 @@
 using System;
 using System.Collections.Generic;
 
-namespace Caravela.Framework.LinqPad
+namespace Caravela.LinqPad
 {
-    public class PropertyComparer : IComparer<(string Name, Type Type)>
+    /// <summary>
+    /// Orders instances of <see cref="FacadeProperty"/>.
+    /// </summary>
+    internal sealed class PropertyComparer : IComparer<(string Name, Type Type)>
     {
         private PropertyComparer() { }
 

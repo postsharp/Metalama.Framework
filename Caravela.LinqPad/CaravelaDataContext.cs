@@ -3,8 +3,11 @@
 
 using Caravela.Framework.Workspaces;
 
-namespace Caravela.Framework.LinqPad
+namespace Caravela.LinqPad
 {
+    /// <summary>
+    /// The base class for all queries created with <see cref="CaravelaDriver"/>.
+    /// </summary>
     public class CaravelaDataContext
     {
         // ReSharper disable once InconsistentNaming
