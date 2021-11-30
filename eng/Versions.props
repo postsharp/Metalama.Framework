@@ -16,9 +16,9 @@
         <CaravelaCompilerVersion>4.0.2001</CaravelaCompilerVersion>
         <MicrosoftCSharpVersion>4.7.0</MicrosoftCSharpVersion>
         <NewtonsoftJsonVersion>13.0.1</NewtonsoftJsonVersion>
-        <SystemCollectionsImmutableVersion>6.0.0</SystemCollectionsImmutableVersion>
+        <SystemCollectionsImmutableVersion>5.0.0</SystemCollectionsImmutableVersion>
         <MicrosoftBclHashCodeVersion>1.1.1</MicrosoftBclHashCodeVersion>
-        <SystemReflectionMetadataLoadContextVersion>6.0.0</SystemReflectionMetadataLoadContextVersion>
+        <SystemReflectionMetadataLoadContextVersion>4.7.2</SystemReflectionMetadataLoadContextVersion>
         <K4osHashxxHashVersion>1.0.6</K4osHashxxHashVersion>
         <MicrosoftNETTestSdkVersion>17.0.0</MicrosoftNETTestSdkVersion>
         <xUnitVersion>2.4.1</xUnitVersion>
