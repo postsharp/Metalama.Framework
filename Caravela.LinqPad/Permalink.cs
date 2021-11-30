@@ -12,10 +12,12 @@ namespace Caravela.LinqPad
     /// </summary>
     internal class Permalink
     {
+        private readonly string _workspaceExpression;
         private readonly IDeclaration _declaration;
 
-        public Permalink( IDeclaration declaration )
+        public Permalink( string workspaceExpression, IDeclaration declaration )
         {
+            this._workspaceExpression = workspaceExpression;
             this._declaration = declaration;
         }
 
@@ -43,7 +45,7 @@ namespace Caravela.LinqPad
 
                 return new Hyperlinq(
                     QueryLanguage.Expression,
-                    $@"projectSet.GetDeclaration(@""{project.Path}"", ""{project.TargetFramework ?? ""}"", ""{serializedReference}"")",
+                    $@"{this._workspaceExpression}.GetDeclaration(@""{project.Path}"", ""{project.TargetFramework ?? ""}"", ""{serializedReference}"")",
                     "(open)" );
             }
         }

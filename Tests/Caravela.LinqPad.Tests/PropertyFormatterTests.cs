@@ -19,5 +19,12 @@ namespace Caravela.LinqPad.Tests
             Assert.IsType<DumpContainer>( facade.View );
             Assert.IsType<GroupingFacade<int, (int, int)>>( facade.ViewModel );
         }
+
+        [Fact]
+        public void EnumTest()
+        {
+            var facade = FacadePropertyFormatter.FormatPropertyValueTestable( Framework.Code.Accessibility.Internal );
+            Assert.IsType<string>( facade.View );
+        }
     }
 }

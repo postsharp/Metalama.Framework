@@ -181,10 +181,10 @@ interface I<T>
             Assert.Equal( 0, m1.Parameters.OfParameterType<int>().First().Index );
             Assert.Equal( 0, m1.Parameters.OfParameterType( compilation.Factory.GetSpecialType( SpecialType.Int32 ) ).First().Index );
 
-            CheckParameterData( m1.ReturnParameter, m1, "void", null, -1 );
+            CheckParameterData( m1.ReturnParameter, m1, "void", "<return>", -1 );
             Assert.Equal( 5, m1.Parameters.Count );
             CheckParameterData( m1.Parameters[0], m1, "int", "i", 0 );
-            CheckParameterData( m1.Parameters[1], m1, "T", "t", 1 );
+            CheckParameterData( m1.Parameters[1], m1, "I<T>/T", "t", 1 );
             CheckParameterData( m1.Parameters[2], m1, "dynamic", "d", 2 );
             CheckParameterData( m1.Parameters[3], m1, "object", "o", 3 );
             CheckParameterData( m1.Parameters[4], m1, "string", "s", 4 );
@@ -192,23 +192,14 @@ interface I<T>
             var m2 = methods[1];
             Assert.Equal( "M2", m2.Name );
 
-            CheckParameterData( m2.ReturnParameter, m2, "int", null, -1 );
+            CheckParameterData( m2.ReturnParameter, m2, "int", "<return>", -1 );
             Assert.Equal( 0, m2.Parameters.Count );
 
-            static void CheckParameterData( IParameter parameter, IDeclaration containingDeclaration, string typeName, string? name, int index )
+            static void CheckParameterData( IParameter parameter, IDeclaration containingDeclaration, string typeName, string name, int index )
             {
                 Assert.Same( containingDeclaration, parameter.ContainingDeclaration );
                 Assert.Equal( typeName, parameter.Type.ToString() );
-
-                if ( name != null )
-                {
-                    Assert.Equal( name, parameter.Name );
-                }
-                else
-                {
-                    _ = Assert.Throws<NotSupportedException>( () => _ = parameter.Name );
-                }
-
+                Assert.Equal( name, parameter.Name );
                 Assert.Equal( index, parameter.Index );
             }
         }

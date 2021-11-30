@@ -2,8 +2,8 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
+using Caravela.Framework.Impl.Utilities;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -17,16 +17,19 @@ namespace Caravela.LinqPad
     /// </summary>
     internal class FacadeType
     {
+        // ReSharper disable once PrivateFieldCanBeConvertedToLocalVariable
+        private readonly FacadeObjectFactory _factory;
+
         public IEnumerable<string> PropertyNames { get; }
 
         public IEnumerable<Type> PropertyTypes { get; }
 
         public ImmutableArray<FacadeProperty> Properties { get; }
 
-        private static readonly ConcurrentDictionary<Type, FacadeType> _instances = new();
-
-        private FacadeType( Type type )
+        internal FacadeType( FacadeObjectFactory factory, Type type )
         {
+            this._factory = factory;
+
             Dictionary<string, FacadeProperty> properties = new();
 
             if ( type.IsInterface )
@@ -98,7 +101,18 @@ namespace Caravela.LinqPad
 
             if ( typeof(IDeclaration).IsAssignableFrom( type ) )
             {
-                facadeProperties.Add( new FacadeProperty( "Permalink", typeof(Permalink), o => new Permalink( (IDeclaration) o ) ) );
+                facadeProperties.Add(
+                    new FacadeProperty(
+                        "Permalink",
+                        typeof(Permalink),
+                        o =>
+                        {
+                            var declaration = (IDeclaration) o;
+
+                            var workspaceExpression = this._factory.WorkspaceExpression( declaration );
+
+                            return new Permalink( workspaceExpression, declaration );
+                        } ) );
             }
 
             this.Properties = facadeProperties.ToImmutableArray();
@@ -117,11 +131,24 @@ namespace Caravela.LinqPad
             return lambda;
         }
 
-        private static bool IsPublicType( Type type ) => type.IsPublic && type.Assembly != typeof(FacadeType).Assembly;
+        private static bool IsPublicType( Type type )
+        {
+            if ( !type.IsPublic && type.Assembly != typeof(FacadeType).Assembly )
+            {
+                return false;
+            }
+
+            var attribute = type.GetCustomAttribute<DumpBehaviorAttribute>();
+
+            if ( attribute != null && attribute.Hidden )
+            {
+                return false;
+            }
+
+            return true;
+        }
 
         private static Type? GetPublicBase( Type type )
             => IsPublicType( type ) ? type : type.BaseType != null && type.BaseType != typeof(object) ? GetPublicBase( type.BaseType ) : null;
-
-        public static FacadeType GetFormatterType( Type type ) => _instances.GetOrAdd( type, t => new FacadeType( t ) );
     }
 }

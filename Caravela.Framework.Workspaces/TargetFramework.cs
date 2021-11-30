@@ -5,27 +5,30 @@ using System;
 
 namespace Caravela.Framework.Workspaces
 {
+    /// <summary>
+    /// Represents a target framework such as <c>net6.0</c> or <c>netstandard2.0</c>.
+    /// </summary>
     public readonly struct TargetFramework : IEquatable<TargetFramework>
     {
-        public bool Equals( TargetFramework other ) => this._value == other._value;
+        public string? Id { get; }
+
+        public bool Equals( TargetFramework other ) => this.Id == other.Id;
 
         public override bool Equals( object? obj ) => obj is TargetFramework other && this.Equals( other );
 
-        public override int GetHashCode() => this._value?.GetHashCode( StringComparison.Ordinal ) ?? 0;
+        public override int GetHashCode() => this.Id?.GetHashCode( StringComparison.Ordinal ) ?? 0;
 
-        private readonly string? _value;
-
-        public TargetFramework( string value )
+        public TargetFramework( string? id )
         {
-            this._value = value;
+            this.Id = id;
         }
 
-        public static implicit operator TargetFramework( string framework ) => new( framework );
+        public static implicit operator TargetFramework( string? framework ) => new( framework );
 
         public static bool operator ==( TargetFramework a, TargetFramework b ) => a.Equals( b );
 
         public static bool operator !=( TargetFramework a, TargetFramework b ) => !a.Equals( b );
 
-        public override string ToString() => this._value ?? "null";
+        public override string ToString() => this.Id ?? "null";
     }
 }

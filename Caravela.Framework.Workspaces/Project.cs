@@ -3,8 +3,10 @@
 
 using Caravela.Framework.Code;
 using Caravela.Framework.Code.Collections;
+using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Utilities;
 using System.Collections.Immutable;
+using System.Linq;
 
 namespace Caravela.Framework.Workspaces
 {
@@ -17,14 +19,22 @@ namespace Caravela.Framework.Workspaces
 
         public ICompilation Compilation { get; }
 
-        public string? TargetFramework { get; }
+        public TargetFramework TargetFramework { get; }
 
         internal Project( string path, ICompilation compilation, string? targetFramework )
         {
             this.Path = path;
             this.Compilation = compilation;
-            this.TargetFramework = targetFramework;
+            this.TargetFramework = new TargetFramework( targetFramework );
         }
+
+        [Memo]
+        public ImmutableArray<DiagnosticModel> Diagnostics
+            => this.Compilation
+                .GetRoslynCompilation()
+                .GetDiagnostics()
+                .Select( x => new DiagnosticModel( x, this.Compilation ) )
+                .ToImmutableArray();
 
         /// <summary>
         /// Gets the set of types defined in the project, including nested types.
@@ -36,7 +46,7 @@ namespace Caravela.Framework.Workspaces
         {
             var name = System.IO.Path.GetFileNameWithoutExtension( this.Path );
 
-            if ( this.TargetFramework != null )
+            if ( this.TargetFramework.Id != null )
             {
                 return name + "(" + this.TargetFramework + ")";
             }

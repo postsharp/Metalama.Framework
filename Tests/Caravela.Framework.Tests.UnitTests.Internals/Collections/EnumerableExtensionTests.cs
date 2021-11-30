@@ -2,7 +2,6 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code.Collections;
-using Caravela.Framework.Impl;
 using Caravela.Framework.Impl.Collections;
 using System;
 using System.Collections.Generic;
@@ -32,7 +31,7 @@ namespace Caravela.Framework.Tests.UnitTests.Collections
 
             Assert.Equal( new[] { a, b, c }, d.SelectManyRecursive( n => n.Children, throwOnDuplicate: false ).OrderBy( o => o.Id ) );
             Assert.Equal( new[] { a, b, c, d }, d.SelectManyRecursive( n => n.Children, includeThis: true, throwOnDuplicate: false ).OrderBy( o => o.Id ) );
-            Assert.Throws<AssertionFailedException>( () => d.SelectManyRecursive( n => n.Children, throwOnDuplicate: true ) );
+            Assert.Throws<InvalidOperationException>( () => d.SelectManyRecursive( n => n.Children, throwOnDuplicate: true ) );
         }
 
         [Fact]
@@ -45,7 +44,7 @@ namespace Caravela.Framework.Tests.UnitTests.Collections
             var list = new[] { d, a };
 
             Assert.Equal( new[] { a, b, c, d }, list.SelectManyRecursive( n => n.Children, throwOnDuplicate: false ).OrderBy( o => o.Id ) );
-            Assert.Throws<AssertionFailedException>( () => list.SelectManyRecursive( n => n.Children, throwOnDuplicate: true ) );
+            Assert.Throws<InvalidOperationException>( () => list.SelectManyRecursive( n => n.Children, throwOnDuplicate: true ) );
         }
 
         [Fact]

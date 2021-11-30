@@ -15,29 +15,40 @@ namespace Caravela.Framework.Impl.Testing
     public class TestProjectOptions : DefaultPathOptions, IProjectOptions, IDisposable
     {
         private readonly ImmutableDictionary<string, string> _properties;
+        private readonly Lazy<string> _baseDirectory;
+        private readonly Lazy<string> _settingsDirectory;
+        private readonly Lazy<string> _projectDirectory;
+        private readonly Lazy<string> _compileTimeProjectCacheDirectory;
 
         public TestProjectOptions( ImmutableDictionary<string, string>? properties = null )
         {
             this._properties = properties ?? ImmutableDictionary<string, string>.Empty;
-            this.BaseDirectory = Path.Combine( Path.GetTempPath(), "Caravela", "Tests", Guid.NewGuid().ToString() );
+            var baseDirectory = Path.Combine( Path.GetTempPath(), "Caravela", "Tests", Guid.NewGuid().ToString() );
+            this._baseDirectory = CreateDirectoryLazy( baseDirectory );
 
             var compileTimeProjectCacheDirectory = Path.Combine( this.BaseDirectory, "Cache" );
-            this.CompileTimeProjectCacheDirectory = compileTimeProjectCacheDirectory;
-            Directory.CreateDirectory( compileTimeProjectCacheDirectory );
+            this._compileTimeProjectCacheDirectory = CreateDirectoryLazy( compileTimeProjectCacheDirectory );
 
-            var settingsDirectory = Path.Combine( this.BaseDirectory, "Settings" );
-            this.SettingsDirectory = settingsDirectory;
-            Directory.CreateDirectory( settingsDirectory );
+            var settingsDirectory = Path.Combine( baseDirectory, "Settings" );
+            this._settingsDirectory = CreateDirectoryLazy( settingsDirectory );
 
-            var projectDirectory = Path.Combine( this.BaseDirectory, "Project" );
-            this.ProjectDirectory = projectDirectory;
-            Directory.CreateDirectory( projectDirectory );
+            var projectDirectory = Path.Combine( baseDirectory, "Project" );
+            this._projectDirectory = CreateDirectoryLazy( projectDirectory );
         }
+
+        private static Lazy<string> CreateDirectoryLazy( string path )
+            => new(
+                () =>
+                {
+                    Directory.CreateDirectory( path );
+
+                    return path;
+                } );
 
         // Don't create crash reports for user exceptions so we have deterministic error messages.
         public override string? GetNewCrashReportPath() => null;
 
-        public string BaseDirectory { get; }
+        public string BaseDirectory => this._baseDirectory.Value;
 
         public bool DebugCompilerProcess => false;
 
@@ -45,9 +56,9 @@ namespace Caravela.Framework.Impl.Testing
 
         public bool DebugIdeProcess => false;
 
-        public override string CompileTimeProjectCacheDirectory { get; }
+        public override string CompileTimeProjectCacheDirectory => this._compileTimeProjectCacheDirectory.Value;
 
-        public override string SettingsDirectory { get; }
+        public override string SettingsDirectory => this._settingsDirectory.Value;
 
         public string ProjectId => throw new NotSupportedException();
 
@@ -71,7 +82,7 @@ namespace Caravela.Framework.Impl.Testing
 
         public string? Configuration => "Debug";
 
-        public string ProjectDirectory { get; }
+        public string ProjectDirectory => this._projectDirectory.Value;
 
         public IProjectOptions Apply( IProjectOptions options ) => options;
 

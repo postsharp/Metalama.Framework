@@ -1,29 +1,33 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Code;
 using Caravela.Framework.Impl;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Pipeline;
 using Microsoft.Build.Locator;
 using Microsoft.CodeAnalysis.MSBuild;
 using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Caravela.Framework.Workspaces
 {
     /// <summary>
-    /// Represents a mutable set of projects. You can load projects or solutions into a workspaces. When projects target several frameworks,
+    /// Represents a set of projects. Workspaces can be created using the <see cref="WorkspaceCollection"/> class.  When projects target several frameworks,
     /// they are represented by several instances of the <see cref="Project"/> class in the workspace.
     /// </summary>
-    public sealed class Workspace : IDisposable
+    public sealed class Workspace : IDisposable, IProjectSet, IWorkspaceLoadInfo
     {
         private readonly ImmutableDictionary<string, string> _properties;
-        private readonly Dictionary<string, ProjectSet> _loadedSolutions = new( StringComparer.OrdinalIgnoreCase );
+
+        private readonly ImmutableArray<string> _loadedPaths;
+
+        internal string Key { get; }
+
+        private ProjectSet _projects;
 
         static Workspace()
         {
@@ -33,34 +37,12 @@ namespace Caravela.Framework.Workspaces
             }
         }
 
-        private readonly List<Project> _projects = new();
-        private MSBuildWorkspace _workspace;
-
-        private static readonly Lazy<Workspace> _default = new( () => new Workspace() );
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Workspace"/> class.
-        /// </summary>
-        /// <param name="properties">MSBuild project properties, such as <c>Configuration</c>.</param>
-        public Workspace( ImmutableDictionary<string, string>? properties = null )
+        private Workspace( ImmutableArray<string> loadedPaths, ImmutableDictionary<string, string>? properties, string key, ProjectSet projectSet )
         {
             this._properties = properties ?? ImmutableDictionary<string, string>.Empty;
-            this._workspace = MSBuildWorkspace.Create( this._properties );
-        }
-
-        /// <summary>
-        /// Gets the default workspace.
-        /// </summary>
-        public static Workspace Default => _default.Value;
-
-        /// <summary>
-        /// Unloads all projects from the current workspace.
-        /// </summary>
-        public void Reset()
-        {
-            this._workspace.Dispose();
-            this._workspace = MSBuildWorkspace.Create( this._properties );
-            this._projects.Clear();
+            this._loadedPaths = loadedPaths;
+            this.Key = key;
+            this._projects = projectSet;
         }
 
         /// <summary>
@@ -69,155 +51,106 @@ namespace Caravela.Framework.Workspaces
         /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
         public async Task ReloadAsync( CancellationToken cancellationToken = default )
         {
-            var oldSolution = this._workspace.CurrentSolution;
-            this.Reset();
-
-            foreach ( var project in oldSolution.Projects )
-            {
-                await this.LoadProjectAsync( project.FilePath!, cancellationToken );
-            }
+            this._projects = await LoadProjectSet( this._loadedPaths, this._properties, cancellationToken );
         }
 
-        /// <summary>
-        /// Loads a project or a solution in the current workspace, and returns a <see cref="ProjectSet"/>
-        /// with the loaded projects. When loading a multi-targeted project, the <see cref="ProjectSet"/> will contain several projects,
-        /// one for each target framework.
-        /// </summary>
-        /// <param name="path">Path of the project on the file system.</param>
-        /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
-        /// <returns>A <see cref="ProjectSet"/> containing the loaded project or, if the project is multi-targeted, several projects,
-        /// one for each target framework.</returns>
-        /// <remarks>
-        /// <para>When loading projects that have project references, referenced projects are also loaded in the workspace, but are not included
-        /// in the resulting <see cref="ProjectSet"/>.</para>
-        /// </remarks>
-        public ProjectSet Load( string path, CancellationToken cancellationToken = default )
-        {
-            var task = this.LoadAsync( path, cancellationToken );
-            task.Wait( cancellationToken );
+        public void Reload( CancellationToken cancellationToken = default ) => this.ReloadAsync( cancellationToken ).Wait( cancellationToken );
 
-            return task.Result;
+        public static async Task<Workspace> LoadAsync(
+            string key,
+            ImmutableArray<string> projects,
+            ImmutableDictionary<string, string> properties,
+            CancellationToken cancellationToken )
+        {
+            var projectSet = await LoadProjectSet( projects, properties, cancellationToken );
+
+            return new Workspace( projects, properties, key, projectSet );
         }
 
-        /// <summary>
-        /// Asynchronously loads a project in the current workspace, and returns a <see cref="ProjectSet"/>
-        /// with one or more projects, one for each target framework.
-        /// </summary>
-        /// <param name="path">Path of the project on the file system.</param>
-        /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
-        /// <returns>A <see cref="ProjectSet"/> containing the loaded project or, if the project is multi-targeted, several projects,
-        /// one for each target framework.</returns>
-        /// <remarks>
-        /// <para>If the project has project references, referenced projects are also loaded in the workspace, but are not included
-        /// in the resulting <see cref="ProjectSet"/>.</para>
-        /// </remarks>
-        public async Task<ProjectSet> LoadAsync( string path, CancellationToken cancellationToken = default )
+        private static async Task<ProjectSet> LoadProjectSet(
+            ImmutableArray<string> projects,
+            ImmutableDictionary<string, string> properties,
+            CancellationToken cancellationToken )
         {
-            switch ( Path.GetExtension( path ).ToLowerInvariant() )
-            {
-                case ".csproj":
-                    return await this.LoadProjectAsync( path, cancellationToken );
-
-                case ".sln":
-                    return await this.LoadSolutionAsync( path, cancellationToken );
-
-                default:
-                    throw new ArgumentOutOfRangeException( nameof(path), "Invalid path extension. Only '.csproj' and '.sln' are allowed." );
-            }
-        }
-
-        private async Task<ProjectSet> LoadProjectAsync( string path, CancellationToken cancellationToken = default )
-        {
-            // If we already have the project, don't load it again.
-            var existingProjects = this._projects.Where( p => p.Path == path ).ToImmutableArray();
-
-            if ( !existingProjects.IsEmpty )
-            {
-                return new ProjectSet( existingProjects );
-            }
-
-            // The project may have been loaded into the Roslyn workspace.
-            var existingSolutionProjects = this._workspace.CurrentSolution.Projects.Where( p => p.FilePath == path ).ToList();
-
-            if ( existingSolutionProjects.Count == 0 )
-            {
-                // The project has not been loaded yet.
-
-                await this._workspace.OpenProjectAsync( path, cancellationToken: cancellationToken );
-            }
-
             var ourProjects = ImmutableArray.CreateBuilder<Project>();
+            MSBuildWorkspace msBuildWorkspace = MSBuildWorkspace.Create( properties );
 
-            foreach ( var project in this._workspace.CurrentSolution.Projects.Where( p => p.FilePath == path ) )
+            foreach ( var path in projects )
             {
-                var ourProject = await this.LoadProjectCoreAsync( project, cancellationToken );
+                switch ( Path.GetExtension( path ).ToLowerInvariant() )
+                {
+                    case ".csproj":
+                        await msBuildWorkspace.OpenProjectAsync( path, cancellationToken: cancellationToken );
+
+                        break;
+
+                    case ".sln":
+                    case ".slnf":
+                        await msBuildWorkspace.OpenSolutionAsync( path, cancellationToken: cancellationToken );
+
+                        break;
+
+                    default:
+                        throw new ArgumentOutOfRangeException( nameof(path), "Invalid path extension. Only '.csproj', '.sln' and '.slnf' are allowed." );
+                }
+            }
+
+            foreach ( var msbuildProject in msBuildWorkspace.CurrentSolution.Projects )
+            {
+                var compilation = (await msbuildProject.GetCompilationAsync( cancellationToken )).AssertNotNull();
+                var projectOptions = new WorkspaceProjectOptions( properties, msbuildProject, compilation );
+
+                var serviceProvider = ServiceProviderFactory.GetServiceProvider()
+                    .WithProjectScopedServices( compilation.References )
+                    .WithService( projectOptions )
+                    .WithMark( ServiceProviderMark.Test );
+
+                var compilationModel = CodeModelFactory.CreateCompilation( compilation, serviceProvider );
+
+                var ourProject = new Project( msbuildProject.FilePath!, compilationModel, projectOptions.TargetFramework );
                 ourProjects.Add( ourProject );
             }
 
-            return new ProjectSet( ourProjects.ToImmutable() );
-        }
-
-        private async Task<Project> LoadProjectCoreAsync( Microsoft.CodeAnalysis.Project project, CancellationToken cancellationToken )
-        {
-            var compilation = (await project.GetCompilationAsync( cancellationToken )).AssertNotNull();
-            var projectOptions = new WorkspaceProjectOptions( this._properties, project, compilation );
-
-            var serviceProvider = ServiceProviderFactory.GetServiceProvider()
-                .WithProjectScopedServices( compilation.References )
-                .WithService( projectOptions )
-                .WithMark( ServiceProviderMark.Test );
-
-            var compilationModel = CodeModelFactory.CreateCompilation( compilation, serviceProvider );
-
-            var ourProject = new Project( project.FilePath!, compilationModel, projectOptions.TargetFramework );
-            this._projects.Add( ourProject );
-
-            return ourProject;
-        }
-
-        private async Task<ProjectSet> LoadSolutionAsync( string path, CancellationToken cancellationToken )
-        {
-            // If we already have the project, don't load it again.
-            if ( this._loadedSolutions.TryGetValue( path, out var loadedSolution ) )
-            {
-                return loadedSolution;
-            }
-
-            var solution = await this._workspace.OpenSolutionAsync( path, cancellationToken: cancellationToken );
-
-            var projectsInSolution = new List<Project>();
-
-            foreach ( var project in solution.Projects )
-            {
-                // Check if that specific project has already been loaded.
-                var targetFramework = WorkspaceProjectOptions.GetTargetFrameworkFromRoslynProject( project );
-                var existingProject = this._projects.FirstOrDefault( p => p.Path == path && p.TargetFramework == targetFramework );
-
-                if ( existingProject != null )
-                {
-                    projectsInSolution.Add( existingProject );
-                }
-                else
-                {
-                    projectsInSolution.Add( await this.LoadProjectCoreAsync( project, cancellationToken ) );
-                }
-            }
-
-            var projectSet = new ProjectSet( projectsInSolution.ToImmutableArray() );
-            this._loadedSolutions.Add( path, projectSet );
+            var projectSet = new ProjectSet( ourProjects.ToImmutable() );
 
             return projectSet;
         }
 
-        /// <summary>
-        /// Gets a snapshot of the projects loaded in the current solution.
-        /// </summary>
-        public ImmutableArray<Project> Projects => this._projects.ToImmutableArray();
+        public event EventHandler? Disposed;
 
         /// <inheritdoc />
         public void Dispose()
         {
-            this._workspace.Dispose();
+            this.Disposed?.Invoke( this, EventArgs.Empty );
         }
+
+        public ImmutableArray<Project> Projects => this._projects.Projects;
+
+        public ImmutableArray<TargetFramework> TargetFrameworks => this._projects.TargetFrameworks;
+
+        public ImmutableArray<INamedType> Types => this._projects.Types;
+
+        public ImmutableArray<IMethod> Methods => this._projects.Methods;
+
+        public ImmutableArray<IField> Fields => this._projects.Fields;
+
+        ImmutableArray<string> IWorkspaceLoadInfo.LoadedPaths => this._loadedPaths;
+
+        ImmutableDictionary<string, string> IWorkspaceLoadInfo.Properties => this._properties;
+
+        public ImmutableArray<IProperty> Properties => this._projects.Properties;
+
+        public ImmutableArray<IFieldOrProperty> FieldsAndProperties => this._projects.FieldsAndProperties;
+
+        public ImmutableArray<IConstructor> Constructors => this._projects.Constructors;
+
+        public ImmutableArray<IEvent> Events => this._projects.Events;
+
+        public ImmutableArray<DiagnosticModel> Diagnostics => this._projects.Diagnostics;
+
+        public IProjectSet GetSubset( Predicate<Project> filter ) => this._projects.GetSubset( filter );
+
+        public IDeclaration? GetDeclaration( string projectPath, string targetFramework, string declarationId )
+            => this._projects.GetDeclaration( projectPath, targetFramework, declarationId );
     }
 }

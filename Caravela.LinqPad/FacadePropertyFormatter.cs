@@ -62,6 +62,11 @@ namespace Caravela.LinqPad
                     }
             }
 
+            if ( value.GetType().IsEnum )
+            {
+                return (value.ToString(), null);
+            }
+
             var groupingInterface = value.GetType().GetInterface( "System.Linq.IGrouping`2" );
 
             if ( groupingInterface != null )

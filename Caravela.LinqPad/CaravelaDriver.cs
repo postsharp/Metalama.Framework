@@ -23,6 +23,8 @@ namespace Caravela.LinqPad
 
         public override string Author => "PostSharp Technologies";
 
+        private readonly FacadeObjectFactory _facadeObjectFactory = new();
+
         public override string GetConnectionDescription( IConnectionInfo cxInfo )
         {
             // For static drivers, we can use the description of the custom type & its assembly:
@@ -64,7 +66,7 @@ namespace {nameSpace}
 
             Compile( source, assemblyToBuild.CodeBase! );
 
-            var projectSchema = GetSchema( "projectSet.", typeof(ProjectSet) );
+            var projectSchema = GetSchema( "workspace.", typeof(IProjectSet) );
             projectSchema.Add( new ExplorerItem( "GetSubset", ExplorerItemKind.Property, ExplorerIcon.View ) );
 
             return projectSchema;
@@ -207,7 +209,7 @@ namespace {nameSpace}
             }
         }
 
-        public override ICustomMemberProvider? GetCustomDisplayMemberProvider( object objectToWrite ) => FacadeObjectFactory.GetFacade( objectToWrite );
+        public override ICustomMemberProvider? GetCustomDisplayMemberProvider( object objectToWrite ) => this._facadeObjectFactory.GetFacade( objectToWrite );
 
         public override void InitializeContext( IConnectionInfo cxInfo, object context, QueryExecutionManager executionManager )
         {
