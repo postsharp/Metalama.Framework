@@ -3,6 +3,7 @@
   <PropertyGroup>
     <!-- We need to target .NET Standard 2.0 and .NET 5.0 separately because of NullableAttributes.cs. We don't want these
        types to be in a .NET 5 build, otherwise it would conflict with the types in System.Runtime. --> 
+       <!-- TODO: Do we want to switch to .NET 6? -->
     <TargetFrameworks>netstandard2.0;net5.0</TargetFrameworks>
   </PropertyGroup>
   
