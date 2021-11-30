@@ -20,7 +20,7 @@ namespace Caravela.Framework.Impl.Fabrics
     internal class FabricAspect<T> : IAspect<T>
         where T : class, IDeclaration
     {
-        private ImmutableArray<FabricTemplateClass> _templateClasses;
+        private readonly ImmutableArray<FabricTemplateClass> _templateClasses;
 
         public FabricAspect( ImmutableArray<FabricTemplateClass> templateClasses )
         {

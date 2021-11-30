@@ -1,7 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <!-- TODO: Do we want to switch to .NET 6? -->
     <TargetFrameworks>netstandard2.0;net5.0</TargetFrameworks>
     <PackageId>Caravela.Framework.Redist</PackageId>
     <PackageDescription>
