@@ -157,10 +157,15 @@ namespace Caravela.Framework.Impl.CompileTime
 
             File.WriteAllText( Path.Combine( tempProjectDirectory, "TempProject.csproj" ), projectText );
 
+            var dotnet = System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform( 
+                System.Runtime.InteropServices.OSPlatform.Windows )
+                ? "C:\\Program Files\\dotnet\\dotnet.exe"
+                : "dotnet";
+
             // We may consider executing msbuild.exe instead of dotnet.exe when the build itself runs using msbuild.exe.
             // This way we wouldn't need to require a .NET SDK to be installed. Also, it seems that Rider requires the full path.
             // TODO 29508: Make this cross-platform.
-            var psi = new ProcessStartInfo( "C:\\Program Files (x86)\\dotnet\\dotnet.exe", "build -t:WriteReferenceAssemblies" )
+            var psi = new ProcessStartInfo( dotnet, "build -t:WriteReferenceAssemblies" )
             {
                 // We cannot call dotnet.exe with a \\?\-prefixed path because MSBuild would fail.
                 WorkingDirectory = tempProjectDirectory, UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true
