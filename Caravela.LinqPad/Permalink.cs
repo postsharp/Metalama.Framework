@@ -27,7 +27,7 @@ namespace Caravela.LinqPad
 
             try
             {
-                serializedReference = this._declaration.ToRef().Serialize();
+                serializedReference = this._declaration.ToRef().ToSerializableId();
             }
             catch
             {

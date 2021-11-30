@@ -14,6 +14,11 @@ namespace Caravela.Framework.Code
     [CompileTimeOnly]
     public interface IDeclaration : IDisplayable, IDiagnosticLocation, ICompilationElement
     {
+        /// <summary>
+        /// Gets a reference to the compilation, which can be used to identify the current declaration
+        /// in a different revision of the compilation.
+        /// </summary>
+        /// <returns></returns>
         IRef<IDeclaration> ToRef();
 
         /// <summary>

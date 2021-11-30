@@ -146,7 +146,7 @@ namespace Caravela.Framework.Workspaces
 
         public ImmutableArray<IEvent> Events => this._projects.Events;
 
-        public ImmutableArray<DiagnosticModel> Diagnostics => this._projects.Diagnostics;
+        public ImmutableArray<IDiagnostic> Diagnostics => this._projects.Diagnostics;
 
         public IProjectSet GetSubset( Predicate<Project> filter ) => this._projects.GetSubset( filter );
 

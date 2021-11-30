@@ -29,12 +29,12 @@ namespace Caravela.Framework.Workspaces
         }
 
         [Memo]
-        public ImmutableArray<DiagnosticModel> Diagnostics
+        public ImmutableArray<IDiagnostic> Diagnostics
             => this.Compilation
                 .GetRoslynCompilation()
                 .GetDiagnostics()
                 .Select( x => new DiagnosticModel( x, this.Compilation ) )
-                .ToImmutableArray();
+                .ToImmutableArray<IDiagnostic>();
 
         /// <summary>
         /// Gets the set of types defined in the project, including nested types.

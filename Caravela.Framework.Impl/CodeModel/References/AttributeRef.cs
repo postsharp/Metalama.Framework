@@ -73,7 +73,7 @@ namespace Caravela.Framework.Impl.CodeModel.References
                     _ => throw new AssertionFailedException()
                 } );
 
-        public string? Serialize() => null;
+        public string? ToSerializableId() => null;
 
         public IAttribute GetTarget( ICompilation compilation )
         {

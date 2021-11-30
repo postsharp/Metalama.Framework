@@ -16,8 +16,14 @@ namespace Caravela.Framework.Code
     [CompileTimeOnly]
     public interface ICompilation : IAssembly
     {
+        /// <summary>
+        /// Gets information about the project from which the compilation was created.
+        /// </summary>
         IProject Project { get; }
 
+        /// <summary>
+        /// Gets the assembly name, without version and public key.
+        /// </summary>
         string AssemblyName { get; }
 
         /// <summary>
@@ -77,6 +83,9 @@ namespace Caravela.Framework.Code
         /// only the first level of types in the current compilation is returned.</param>
         IEnumerable<INamedType> GetDerivedTypes( Type baseType, bool deep = true );
 
+        /// <summary>
+        /// Gets the version of the current compilation in the Caravela pipeline. This number is only informational.
+        /// </summary>
         int Revision { get; }
     }
 }

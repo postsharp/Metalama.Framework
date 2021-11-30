@@ -45,7 +45,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public FieldInfo ToFieldInfo() => this.FieldBuilder.ToFieldInfo();
 
-        string? IRef<IField>.Serialize() => null;
+        string? IRef<IField>.ToSerializableId() => null;
 
         IField IRef<IField>.GetTarget( ICompilation compilation ) => (IField) this.GetForCompilation( compilation );
 

@@ -151,7 +151,7 @@ namespace Caravela.Framework.Impl.CodeModel.References
 
         public DeclarationRefTargetKind TargetKind { get; }
 
-        public string? Serialize()
+        public string? ToSerializableId()
         {
             if ( this._compilation == null )
             {

@@ -12,7 +12,12 @@ namespace Caravela.Framework.Code
     public interface IRef<out T>
         where T : class, ICompilationElement
     {
-        string? Serialize();
+        /// <summary>
+        /// Returns a string that uniquely identifies the declaration represented by the current reference. This identifier can then be resolved using <see cref="ITypeFactory.GetDeclarationFromId"/>, even in
+        /// a different process or with a different version of Caravela than the one that created the id.
+        /// </summary>
+        /// <returns>A string, or <c>null</c> if the current reference cannot be serialized to a public id.</returns>
+        string? ToSerializableId();
 
         /// <summary>
         /// Gets the target of the reference for a given compilation. To get the reference for the

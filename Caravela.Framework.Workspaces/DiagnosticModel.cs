@@ -10,7 +10,7 @@ using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Workspaces
 {
-    public sealed class DiagnosticModel
+    internal sealed class DiagnosticModel : IDiagnostic
     {
         private readonly Diagnostic _diagnostic;
 

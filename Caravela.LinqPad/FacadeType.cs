@@ -140,7 +140,7 @@ namespace Caravela.LinqPad
 
             var attribute = type.GetCustomAttribute<DumpBehaviorAttribute>();
 
-            if ( attribute != null && attribute.Hidden )
+            if ( attribute != null && attribute.IsHidden )
             {
                 return false;
             }

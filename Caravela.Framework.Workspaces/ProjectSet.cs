@@ -57,10 +57,10 @@ namespace Caravela.Framework.Workspaces
         public ImmutableArray<IEvent> Events => this.Types.SelectMany( t => t.Events ).ToImmutableArray();
 
         [Memo]
-        public ImmutableArray<DiagnosticModel> Diagnostics
+        public ImmutableArray<IDiagnostic> Diagnostics
             => this.Projects
                 .SelectMany( p => p.Compilation.GetRoslynCompilation().GetDiagnostics().Select( d => new DiagnosticModel( d, p.Compilation ) ) )
-                .ToImmutableArray();
+                .ToImmutableArray<IDiagnostic>();
 
         public IProjectSet GetSubset( Predicate<Project> filter )
         {

@@ -5,9 +5,12 @@ using System;
 
 namespace Caravela.Framework.Impl.Utilities
 {
+    /// <summary>
+    /// Specifies how the interface must be displayed by tools like our LinqPad adapter.
+    /// </summary>
     [AttributeUsage( AttributeTargets.Interface )]
     public class DumpBehaviorAttribute : Attribute
     {
-        public bool Hidden { get; set; }
+        public bool IsHidden { get; set; }
     }
 }

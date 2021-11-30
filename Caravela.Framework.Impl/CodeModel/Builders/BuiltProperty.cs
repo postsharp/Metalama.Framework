@@ -70,7 +70,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public PropertyInfo ToPropertyInfo() => this.PropertyBuilder.ToPropertyInfo();
 
-        string? IRef<IProperty>.Serialize() => null;
+        string? IRef<IProperty>.ToSerializableId() => null;
 
         IProperty IRef<IProperty>.GetTarget( ICompilation compilation ) => (IProperty) this.GetForCompilation( compilation );
 

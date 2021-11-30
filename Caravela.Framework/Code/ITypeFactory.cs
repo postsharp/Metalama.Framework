@@ -74,6 +74,9 @@ namespace Caravela.Framework.Code
         /// <returns></returns>
         dynamic? Cast( IType type, object? value );
 
+        /// <summary>
+        /// Gets a declaration from a serialized identifier generated to <see cref="IRef{T}.ToSerializableId"/>.
+        /// </summary>
         IDeclaration? GetDeclarationFromId( string declarationId );
     }
 }

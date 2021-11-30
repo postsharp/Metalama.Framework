@@ -6,7 +6,10 @@ using System.Collections.Immutable;
 
 namespace Caravela.Framework.Workspaces
 {
-    [DumpBehavior( Hidden = true )]
+    /// <summary>
+    /// Exposes the information needed to reconstruct a <see cref="Workspace"/>.
+    /// </summary>
+    [DumpBehavior( IsHidden = true )]
     public interface IWorkspaceLoadInfo
     {
         ImmutableArray<string> LoadedPaths { get; }

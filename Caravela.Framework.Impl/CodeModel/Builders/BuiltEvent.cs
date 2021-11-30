@@ -51,7 +51,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public EventInfo ToEventInfo() => this.EventBuilder.ToEventInfo();
 
-        string? IRef<IEvent>.Serialize() => null;
+        string? IRef<IEvent>.ToSerializableId() => null;
 
         IEvent IRef<IEvent>.GetTarget( ICompilation compilation ) => (IEvent) this.GetForCompilation( compilation );
 

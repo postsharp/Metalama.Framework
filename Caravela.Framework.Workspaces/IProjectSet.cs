@@ -63,7 +63,7 @@ namespace Caravela.Framework.Workspaces
         /// Gets all diagnostics reported in the projects in the current <see cref="ProjectSet"/>. Note that the diagnostics reported
         /// by Caravela are not yet included in this set.
         /// </summary>
-        ImmutableArray<DiagnosticModel> Diagnostics { get; }
+        ImmutableArray<IDiagnostic> Diagnostics { get; }
 
         /// <summary>
         /// Returns a subset of the current subset.
@@ -77,7 +77,7 @@ namespace Caravela.Framework.Workspaces
         /// </summary>
         /// <param name="projectPath">Path of the project.</param>
         /// <param name="targetFramework">Target framework, or an empty string.</param>
-        /// <param name="declarationId">Serialized identifier of the declaration obtained  with <see cref="IRef{T}.Serialize"/>.</param>
+        /// <param name="declarationId">Serialized identifier of the declaration obtained  with <see cref="IRef{T}.ToSerializableId"/>.</param>
         /// <returns></returns>
         IDeclaration? GetDeclaration( string projectPath, string targetFramework, string declarationId );
     }

@@ -32,7 +32,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public MemberInfo ToMemberInfo() => throw new NotImplementedException();
 
-        string? IRef<IMemberOrNamedType>.Serialize() => null;
+        string? IRef<IMemberOrNamedType>.ToSerializableId() => null;
 
         IMemberOrNamedType IRef<IMemberOrNamedType>.GetTarget( ICompilation compilation ) => (IMemberOrNamedType) this.GetForCompilation( compilation );
 
