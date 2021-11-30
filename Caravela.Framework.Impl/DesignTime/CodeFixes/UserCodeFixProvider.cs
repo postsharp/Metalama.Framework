@@ -5,7 +5,6 @@ using Caravela.Framework.Impl.DesignTime.Pipeline;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Options;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CodeActions;
 using System.Collections.Immutable;
 using System.Threading;
 
@@ -25,12 +24,12 @@ namespace Caravela.Framework.Impl.DesignTime.CodeFixes
 
         public UserCodeFixProvider( IProjectOptions projectOptions ) : this( DesignTimeAspectPipelineFactory.Instance, projectOptions ) { }
 
-        public ImmutableArray<AssignedCodeAction> ProvideCodeFixes(
+        public ImmutableArray<CodeFixModel> ProvideCodeFixes(
             Document document,
             ImmutableArray<Diagnostic> diagnostics,
             CancellationToken cancellationToken )
         {
-            var codeFixesBuilder = ImmutableArray.CreateBuilder<AssignedCodeAction>();
+            var codeFixesBuilder = ImmutableArray.CreateBuilder<CodeFixModel>();
 
             foreach ( var diagnostic in diagnostics )
             {
@@ -48,11 +47,11 @@ namespace Caravela.Framework.Impl.DesignTime.CodeFixes
 
                         var title = codeFixTitle;
 
-                        var codeAction = CodeAction.Create(
+                        var codeAction = new CodeActionModel(
                             codeFixTitle,
                             ct => this._codeFixRunner.ExecuteCodeFixAsync( document, diagnostic, title, ct ) );
 
-                        codeFixesBuilder.Add( new AssignedCodeAction( codeAction, ImmutableArray.Create( diagnostic ) ) );
+                        codeFixesBuilder.Add( new CodeFixModel( codeAction, ImmutableArray.Create( diagnostic ) ) );
                     }
                 }
             }

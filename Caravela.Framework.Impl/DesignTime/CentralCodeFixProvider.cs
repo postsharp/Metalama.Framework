@@ -72,9 +72,14 @@ namespace Caravela.Framework.Impl.DesignTime
                     return Task.CompletedTask;
                 }
 
+                var supportsHierarchicalItems = HostProcess.Current.Product != HostProduct.Rider;
+
                 foreach ( var fix in codeFixes )
                 {
-                    context.RegisterCodeFix( fix.CodeAction, fix.Diagnostic );
+                    foreach ( var codeAction in fix.CodeAction.ToCodeActions( supportsHierarchicalItems ) )
+                    {
+                        context.RegisterCodeFix( codeAction, fix.Diagnostic );
+                    }
                 }
             }
 
