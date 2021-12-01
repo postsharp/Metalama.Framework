@@ -4,6 +4,7 @@
 using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Reflection;
 using System.Text;
@@ -144,6 +145,105 @@ namespace Caravela.Framework.Impl.CompileTime
             }
 
             return sb.ToString();
+        }
+
+        /// <summary>
+        /// Gets a properly-escaped assembly-qualified type name from its components.
+        /// </summary>
+        /// <param name="typeName">The type name.</param>
+        /// <param name="assemblyName">The assembly name.</param>
+        /// <returns>A string of the form <code>TypeName, AssemblyName</code>, where commas in <paramref name="typeName"/> have been properly escaped.</returns>
+        public static string GetAssemblyQualifiedTypeName( string typeName, string assemblyName )
+        {
+            if ( typeName == null )
+            {
+                throw new ArgumentNullException( nameof( assemblyName ) );
+            }
+
+            if ( typeName == null )
+            {
+                throw new ArgumentNullException( nameof( assemblyName ) );
+            }
+
+            return typeName.Replace( ",", "\\," ) + ", " + assemblyName;
+        }
+
+        internal static void VisitTypeElements( Type type, Action<Type> visitor )
+        {
+            visitor( type );
+
+            if ( type.HasElementType )
+            {
+                VisitTypeElements( type.GetElementType(), visitor );
+            }
+            else if ( type.IsGenericType && !type.IsGenericTypeDefinition )
+            {
+                VisitTypeElements( type.GetGenericTypeDefinition(), visitor );
+                foreach ( Type genericArgument in type.GetGenericArguments() )
+                {
+                    VisitTypeElements( genericArgument, visitor );
+                }
+            }
+        }
+
+        internal static bool IsPublic( Type type )
+        {
+            if ( type.HasElementType )
+            {
+                return IsExported( type.GetElementType() );
+            }
+
+            switch ( type.Attributes & TypeAttributes.VisibilityMask )
+            {
+                case TypeAttributes.NestedAssembly:
+                case TypeAttributes.NestedFamANDAssem:
+                case TypeAttributes.NestedPrivate:
+                case TypeAttributes.NestedFamily:
+                case TypeAttributes.NestedFamORAssem:
+                    return false;
+
+                case TypeAttributes.NestedPublic:
+                    return IsPublic( type.DeclaringType );
+
+                case TypeAttributes.NotPublic:
+                    return false;
+
+                case TypeAttributes.Public:
+                    return true;
+
+                default:
+                    throw new ArgumentOutOfRangeException( nameof( type ) );
+            }
+        }
+
+        internal static bool IsExported( Type type )
+        {
+            if ( type.HasElementType )
+            {
+                return IsExported( type.GetElementType() );
+            }
+
+            switch ( type.Attributes & TypeAttributes.VisibilityMask )
+            {
+                case TypeAttributes.NestedAssembly:
+                case TypeAttributes.NestedFamANDAssem:
+                case TypeAttributes.NestedPrivate:
+                    return false;
+
+                case TypeAttributes.NestedFamily:
+                case TypeAttributes.NestedFamORAssem:
+                case TypeAttributes.NestedPublic:
+                    return IsExported( type.DeclaringType );
+
+                case TypeAttributes.NotPublic:
+                    return false;
+
+                case TypeAttributes.Public:
+                    return true;
+
+                default:
+                    throw new ArgumentOutOfRangeException( nameof( type ) );
+            }
         }
     }
 }

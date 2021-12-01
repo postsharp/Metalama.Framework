@@ -1,0 +1,82 @@
+﻿// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
+// source-available license. Please see the LICENSE.md file in the repository root for details.
+
+using Caravela.Framework.Impl.CompileTime.Serialization;
+using System;
+using System.Collections.Generic;
+using Xunit;
+
+namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serialization
+{
+
+    public class ReflectionTypesSerializationTests : SerializationTestsBase
+    {
+        [Fact]
+        public void TestTypeClass()
+        {
+            this.TestSerialization( typeof(DateTime) );
+            this.TestSerialization( typeof(Guid) );
+            this.TestSerialization( typeof(IntrinsicSerializationTests) );
+        }
+
+        [Fact]
+        public void TestTypeGenericClosed()
+        {
+            this.TestSerialization( typeof(Dictionary<string, string>) );
+        }
+
+        [Fact]
+        public void TestTypeGenericOpen()
+        {
+            this.TestSerialization( typeof(Dictionary<,>) );
+        }
+
+        [Fact]
+        public void TestTypeGenericTypeParameter()
+        {
+            this.TestSerialization( typeof(Dictionary<,>).GetGenericArguments()[0] );
+        }
+
+        public int TestField;
+
+        public int TestProperty { get; set; }
+
+        //TODO: Other, more esoteric reflection objects: generic parameters, method arguments etc.
+
+        [Fact]
+        public void TestTypeIntrinsics()
+        {
+            this.TestSerialization( typeof(byte) );
+            this.TestSerialization( typeof(sbyte) );
+            this.TestSerialization( typeof(short) );
+            this.TestSerialization( typeof(ushort) );
+            this.TestSerialization( typeof(int) );
+            this.TestSerialization( typeof(uint) );
+            this.TestSerialization( typeof(long) );
+            this.TestSerialization( typeof(ulong) );
+            this.TestSerialization( typeof(float) );
+            this.TestSerialization( typeof(double) );
+            this.TestSerialization( typeof(string) );
+            this.TestSerialization( typeof(DottedString) );
+            this.TestSerialization( typeof(char) );
+            this.TestSerialization( typeof(object) );
+            this.TestSerialization( typeof(void) );
+            this.TestSerialization( typeof(Type) );
+            this.TestSerialization( typeof(ValueType) );
+        }
+
+        public class ReflectionTestClass
+        {
+            public bool MethodInvoked { get; set; }
+
+            public void Method()
+            {
+                this.MethodInvoked = true;
+            }
+
+            public void MethodWithParameter( int parameter )
+            {
+            }
+        }
+    }
+}

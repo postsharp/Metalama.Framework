@@ -3,6 +3,8 @@
 
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Fabrics;
+using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.CompileTime.Serialization;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Formatting;
 using Caravela.Framework.Impl.Observers;
@@ -15,6 +17,7 @@ using Caravela.Framework.Project;
 using K4os.Hash.xxHash;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Emit;
 using System;
 using System.Collections.Generic;
@@ -134,12 +137,14 @@ namespace Caravela.Framework.Impl.CompileTime
 
             var assemblyName = GetCompileTimeAssemblyName( runTimeCompilation.AssemblyName!, hash );
             compileTimeCompilation = this.CreateEmptyCompileTimeCompilation( assemblyName, referencedProjects );
+            var serializableTypes = this.GetSerializableTypes( runTimeCompilation, treesWithCompileTimeCode, cancellationToken );
 
             var templateCompiler = new TemplateCompiler( this._serviceProvider, runTimeCompilation );
 
             var produceCompileTimeCodeRewriter = new ProduceCompileTimeCodeRewriter(
                 runTimeCompilation,
                 compileTimeCompilation,
+                serializableTypes,
                 diagnosticSink,
                 templateCompiler,
                 this._serviceProvider,
@@ -176,6 +181,14 @@ namespace Caravela.Framework.Impl.CompileTime
             }
 
             compileTimeCompilation = compileTimeCompilation.AddSyntaxTrees( syntaxTrees.Select( t => t.TransformedTree ) );
+
+            // Adds MetaActivator type if there is any serializable type in the assembly.
+            if ( serializableTypes.Count > 0 )
+            {
+                var activatorCompilationUnit = produceCompileTimeCodeRewriter.MetaSerializerGenerator.CreateActivatorCompilationUnit();
+                var activatorTypeSyntaxTree = SyntaxFactory.SyntaxTree( activatorCompilationUnit.NormalizeWhitespace(), path: "MetaActivator.cs" );
+                compileTimeCompilation = compileTimeCompilation.AddSyntaxTrees( activatorTypeSyntaxTree );
+            }
 
             compileTimeCompilation = new RemoveInvalidUsingRewriter( compileTimeCompilation ).VisitTrees( compileTimeCompilation );
 
@@ -461,6 +474,27 @@ namespace Caravela.Framework.Impl.CompileTime
             }
 
             return compileTimeTrees;
+        }
+
+        private IReadOnlyList<MetaSerializableTypeInfo> GetSerializableTypes(
+            Compilation runTimeCompilation, 
+            IReadOnlyList<SyntaxTree> compileTimeSyntaxTrees,
+            CancellationToken cancellationToken )
+        {
+            // TODO: Check that the mapper is not already registered.
+            var reflectionMapper = new ReflectionMapper( runTimeCompilation );
+            var allSerializableTypes = new List<MetaSerializableTypeInfo>();
+
+            foreach ( var tree in compileTimeSyntaxTrees )
+            {
+                var visitor = new CollectSerializableTypesVisitor( runTimeCompilation.GetSemanticModel( tree, true ), reflectionMapper, cancellationToken );
+
+                visitor.Visit( tree.GetRoot() );
+
+                allSerializableTypes.AddRange( visitor.SerializableTypes );
+            }
+
+            return allSerializableTypes;
         }
 
         /// <summary>

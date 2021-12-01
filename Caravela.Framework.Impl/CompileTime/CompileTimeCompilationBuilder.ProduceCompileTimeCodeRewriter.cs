@@ -7,6 +7,7 @@ using Caravela.Framework.Eligibility;
 using Caravela.Framework.Fabrics;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Collections;
+using Caravela.Framework.Impl.CompileTime.Serialization;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.ReflectionMocks;
 using Caravela.Framework.Impl.Templating;
@@ -21,6 +22,7 @@ using System.Linq;
 using System.Threading;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 using Accessibility = Microsoft.CodeAnalysis.Accessibility;
+using MethodKind = Microsoft.CodeAnalysis.MethodKind;
 using TypeKind = Microsoft.CodeAnalysis.TypeKind;
 
 namespace Caravela.Framework.Impl.CompileTime
@@ -37,6 +39,7 @@ namespace Caravela.Framework.Impl.CompileTime
         {
             private static readonly SyntaxAnnotation _hasCompileTimeCodeAnnotation = new( "Caravela_HasCompileTimeCode" );
             private readonly Compilation _compileTimeCompilation;
+            private readonly IReadOnlyDictionary<INamedTypeSymbol, MetaSerializableTypeInfo> _serializableTypes;
             private readonly IDiagnosticAdder _diagnosticAdder;
             private readonly TemplateCompiler _templateCompiler;
             private readonly CancellationToken _cancellationToken;
@@ -54,9 +57,13 @@ namespace Caravela.Framework.Impl.CompileTime
 
             public bool FoundCompileTimeCode { get; private set; }
 
+            // TODO: Having this available outside is probably wrong.
+            public IMetaSerializerGenerator MetaSerializerGenerator { get; }
+
             public ProduceCompileTimeCodeRewriter(
                 Compilation runTimeCompilation,
                 Compilation compileTimeCompilation,
+                IReadOnlyList<MetaSerializableTypeInfo> serializableTypes,
                 IDiagnosticAdder diagnosticAdder,
                 TemplateCompiler templateCompiler,
                 IServiceProvider serviceProvider,
@@ -69,7 +76,12 @@ namespace Caravela.Framework.Impl.CompileTime
                 this._cancellationToken = cancellationToken;
                 this._currentContext = new Context( TemplatingScope.Both, this );
 
+                this._serializableTypes = serializableTypes.ToDictionary<MetaSerializableTypeInfo, INamedTypeSymbol, MetaSerializableTypeInfo>( x => x.Type, x => x, SymbolEqualityComparer.Default );
+
                 this._syntaxGenerationContext = SyntaxGenerationContext.CreateDefault( serviceProvider, compileTimeCompilation );
+
+                // TODO: This should be probably injected as a service, but we are creating the generation context here.
+                this.MetaSerializerGenerator = new MetaSerializerGenerator( runTimeCompilation, this._syntaxGenerationContext );
 
                 this._compileTimeTypeName = (NameSyntax)
                     this._syntaxGenerationContext.SyntaxGenerator.Type(
@@ -368,6 +380,28 @@ namespace Caravela.Framework.Impl.CompileTime
                             }
                         }
                     }
+                }
+
+                // Add serialization logic if the type is serializable and this is the primary declaration.
+                if ( this._serializableTypes.TryGetValue( symbol, out var serializableType ))
+                {
+                    if (!serializableType.Type.GetMembers().Any(m => m is IMethodSymbol method && method.MethodKind == MethodKind.Constructor && method.GetPrimarySyntaxReference() != null))
+                    {
+                        // There is no defined constructor, so we need to explicitly add parameterless contructor.
+                        members.Add(
+                            ConstructorDeclaration(
+                                List<AttributeListSyntax>(),
+                                TokenList( Token( SyntaxKind.PublicKeyword ) ),
+                                Identifier( serializableType.Type.Name ),
+                                ParameterList(),
+                                null,
+                                Block(),
+                                null )
+                            .NormalizeWhitespace() );
+                    }
+
+                    members.Add( this.MetaSerializerGenerator.CreateDeserializingConstructor( serializableType ).NormalizeWhitespace() );
+                    members.Add( this.MetaSerializerGenerator.CreateSerializerType( serializableType ).NormalizeWhitespace() );
                 }
 
                 var transformedNode = node.WithMembers( List( members ) ).WithAdditionalAnnotations( _hasCompileTimeCodeAnnotation );
