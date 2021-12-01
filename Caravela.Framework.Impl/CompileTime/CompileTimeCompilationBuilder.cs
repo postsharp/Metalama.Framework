@@ -202,7 +202,7 @@ namespace Caravela.Framework.Impl.CompileTime
             return transformedFileName;
         }
 
-        internal static string GetCompileTimeAssemblyName(
+        private static string GetCompileTimeAssemblyName(
             string runTimeAssemblyName,
             IEnumerable<CompileTimeProject> referencedProjects,
             ulong sourceHash,
@@ -627,8 +627,8 @@ namespace Caravela.Framework.Impl.CompileTime
                         textMapDirectory.Write( outputPaths.Directory );
 
                         var aspectType = compileTimeCompilation.GetTypeByMetadataName( typeof(IAspect).FullName );
-                        var fabricType = compileTimeCompilation.GetTypeByMetadataName( typeof(IFabric).FullName );
-                        var transitiveFabricType = compileTimeCompilation.GetTypeByMetadataName( typeof(ITransitiveProjectFabric).FullName );
+                        var fabricType = compileTimeCompilation.GetTypeByMetadataName( typeof(Fabric).FullName );
+                        var transitiveFabricType = compileTimeCompilation.GetTypeByMetadataName( typeof(TransitiveProjectFabric).FullName );
 
                         var aspectTypes = compileTimeCompilation.Assembly
                             .GetTypes()

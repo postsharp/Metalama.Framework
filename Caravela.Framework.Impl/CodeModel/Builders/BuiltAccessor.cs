@@ -61,7 +61,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public IParameterList Parameters
             => new ParameterList(
                 this,
-                this.AccessorBuilder.Parameters.AsBuilderList.Select( DeclarationRef.FromBuilder<IParameter, IParameterBuilder> ) );
+                this.AccessorBuilder.Parameters.AsBuilderList.Select( Ref.FromBuilder<IParameter, IParameterBuilder> ) );
 
         public MethodKind MethodKind => this.AccessorBuilder.MethodKind;
 
@@ -92,9 +92,9 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public object? Target => throw new NotImplementedException();
 
-        IMethod IDeclarationRef<IMethod>.Resolve( CompilationModel compilation ) => (IMethod) this.GetForCompilation( compilation );
+        IMethod IRef<IMethod>.GetTarget( ICompilation compilation ) => (IMethod) this.GetForCompilation( compilation );
 
-        ISymbol? IDeclarationRef<IMethod>.GetSymbol( Compilation compilation ) => this.GetSymbol();
+        ISymbol? ISdkRef<IMethod>.GetSymbol( Compilation compilation ) => this.GetSymbol();
 
         public IReadOnlyList<IMethod> ExplicitInterfaceImplementations => this.AccessorBuilder.ExplicitInterfaceImplementations;
 

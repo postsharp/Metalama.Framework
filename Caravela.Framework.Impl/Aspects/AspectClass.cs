@@ -108,7 +108,7 @@ namespace Caravela.Framework.Impl.Aspects
             this._prototypeAspectInstance = prototype;
 
             this.TemplateClasses = ImmutableArray.Create<TemplateClass>( this );
-            
+
             // This must be called after Members is built and assigned.
             this._aspectDriver = aspectDriverFactory.GetAspectDriver( this, aspectTypeSymbol );
         }
@@ -120,18 +120,13 @@ namespace Caravela.Framework.Impl.Aspects
                 // Call BuildAspectClass
                 var classBuilder = new Builder( this );
 
-                try
-                {
-                    this._userCodeInvoker.Invoke( () => this._prototypeAspectInstance.BuildAspectClass( classBuilder ) );
-                }
-                catch ( Exception e )
-                {
-                    var diagnostic = GeneralDiagnosticDescriptors.ExceptionInUserCode.CreateDiagnostic(
-                        null,
-                        (AspectType: this.ShortName, MethodName: nameof(IAspect.BuildAspectClass), e.GetType().Name, e.Format( 5 )) );
+                var executionContext = new UserCodeExecutionContext(
+                    this.ServiceProvider,
+                    diagnosticAdder,
+                    UserCodeMemberInfo.FromDelegate( new Action<IAspectClassBuilder>( this._prototypeAspectInstance.BuildAspectClass ) ) );
 
-                    diagnosticAdder.Report( diagnostic );
-
+                if ( !this._userCodeInvoker.TryInvoke( () => this._prototypeAspectInstance.BuildAspectClass( classBuilder ), executionContext ) )
+                {
                     return false;
                 }
 
@@ -186,18 +181,13 @@ namespace Caravela.Framework.Impl.Aspects
             {
                 var builder = new EligibilityBuilder<T>();
 
-                try
-                {
-                    this._userCodeInvoker.Invoke( () => eligible.BuildEligibility( builder ) );
-                }
-                catch ( Exception e )
-                {
-                    var diagnostic = GeneralDiagnosticDescriptors.ExceptionInUserCode.CreateDiagnostic(
-                        null,
-                        (AspectType: this.ShortName, MethodName: nameof(IAspect.BuildAspectClass), e.GetType().Name, e.Format( 5 )) );
+                var executionContext = new UserCodeExecutionContext(
+                    this.ServiceProvider,
+                    diagnosticAdder,
+                    UserCodeMemberInfo.FromDelegate( new Action<IEligibilityBuilder<T>>( eligible.BuildEligibility ) ) );
 
-                    diagnosticAdder.Report( diagnostic );
-
+                if ( !this._userCodeInvoker.TryInvoke( () => eligible.BuildEligibility( builder ), executionContext ) )
+                {
                     return false;
                 }
 
@@ -212,7 +202,7 @@ namespace Caravela.Framework.Impl.Aspects
         /// </summary>
         public AttributeAspectInstance CreateAspectInstanceFromAttribute(
             IAspect aspect,
-            IDeclaration target,
+            in Ref<IDeclaration> target,
             IAttribute attribute,
             CompileTimeProjectLoader loader )
             => new( aspect, target, this, attribute, loader );
@@ -221,8 +211,8 @@ namespace Caravela.Framework.Impl.Aspects
         /// Creates a new <see cref="AspectInstance"/> by using the default constructor of the current class.
         /// This method is used by live templates.
         /// </summary>
-        public AspectInstance CreateDefaultAspectInstance( IDeclaration target, in AspectPredecessor predecessor )
-            => new( (IAspect) Activator.CreateInstance( this.AspectType ), target, this, predecessor );
+        public AspectInstance CreateAspectInstance( IDeclaration target, IAspect aspect, in AspectPredecessor predecessor )
+            => new( aspect, target.ToRef(), this, predecessor );
 
         /// <summary>
         /// Creates an instance of the <see cref="AspectClass"/> class.
@@ -246,14 +236,16 @@ namespace Caravela.Framework.Impl.Aspects
             }
             else
             {
-                var untypedPrototype = FormatterServices.GetUninitializedObject( aspectReflectionType ).AssertNotNull();
                 var aspectInterfaceType = typeof(IAspect);
 
-                if ( !aspectInterfaceType.IsInstanceOfType( untypedPrototype ) )
+                if ( !aspectInterfaceType.IsAssignableFrom( aspectInterfaceType ) )
                 {
-                    // TODO #29259: AspectClass.TryCreate throws InvalidCastException when VSX has different build than our compiler package
+                    // This happens in case of a bug in assembly resolution
+                    // (typically AppDomain.AssemblyResolve event handler).
                     throw new AssertionFailedException( "Assembly version mismatch." );
                 }
+
+                var untypedPrototype = FormatterServices.GetUninitializedObject( aspectReflectionType ).AssertNotNull();
 
                 prototype = (IAspect) untypedPrototype;
             }
@@ -333,30 +325,41 @@ namespace Caravela.Framework.Impl.Aspects
                 return EligibleScenarios.Aspect;
             }
 
-            var declarationType = targetDeclaration.GetType();
-            var eligibility = EligibleScenarios.All;
+            // We may execute user code, so we need to execute in a user context. This is not optimal, but we don't know,
+            // in the current design, where we have user code. Also, we cannot report diagnostics in the current design,
+            // so we have to let the exception fly.
+            var executionContext = new UserCodeExecutionContext( this.ServiceProvider, NullDiagnosticAdder.Instance, default );
 
-            // If the aspect cannot be inherited, remove the inheritance eligibility.
-            if ( !this.IsInherited )
-            {
-                eligibility &= ~EligibleScenarios.Inheritance;
-            }
+            return this._userCodeInvoker.Invoke( GetEligibilityCore, executionContext );
 
-            // Evaluate all eligibility rules that apply to the target declaration type.
-            foreach ( var rule in this._eligibilityRules )
+            // Implementation, which all runs in a user context.
+            EligibleScenarios GetEligibilityCore()
             {
-                if ( rule.Key.IsAssignableFrom( declarationType ) )
+                var declarationType = targetDeclaration.GetType();
+                var eligibility = EligibleScenarios.All;
+
+                // If the aspect cannot be inherited, remove the inheritance eligibility.
+                if ( !this.IsInherited )
                 {
-                    eligibility &= rule.Value.GetEligibility( targetDeclaration );
+                    eligibility &= ~EligibleScenarios.Inheritance;
+                }
 
-                    if ( eligibility == EligibleScenarios.None )
+                // Evaluate all eligibility rules that apply to the target declaration type.
+                foreach ( var rule in this._eligibilityRules )
+                {
+                    if ( rule.Key.IsAssignableFrom( declarationType ) )
                     {
-                        return EligibleScenarios.None;
+                        eligibility &= rule.Value.GetEligibility( targetDeclaration );
+
+                        if ( eligibility == EligibleScenarios.None )
+                        {
+                            return EligibleScenarios.None;
+                        }
                     }
                 }
-            }
 
-            return eligibility;
+                return eligibility;
+            }
         }
 
         public FormattableString? GetIneligibilityJustification( EligibleScenarios requestedEligibility, IDescribedObject<IDeclaration> target )
@@ -369,10 +372,20 @@ namespace Caravela.Framework.Impl.Aspects
                     .Select( r => r.Value )
                     .ToImmutableArray() );
 
-            return group.GetIneligibilityJustification(
-                requestedEligibility,
-                new DescribedObject<IDeclaration>( targetDeclaration, $"'{targetDeclaration}'" ) );
+            // We may execute user code, so we need to execute in a user context. This is not optimal, but we don't know,
+            // in the current design, where we have user code. Also, we cannot report diagnostics in the current design,
+            // so we have to let the exception fly.
+            var executionContext = new UserCodeExecutionContext( this.ServiceProvider, NullDiagnosticAdder.Instance, default );
+
+            return this._userCodeInvoker.Invoke(
+                () =>
+                    group.GetIneligibilityJustification(
+                        requestedEligibility,
+                        new DescribedObject<IDeclaration>( targetDeclaration, $"'{targetDeclaration}'" ) ),
+                executionContext );
         }
+
+        public IAspect CreateDefaultInstance() => (IAspect) Activator.CreateInstance( this.AspectType );
 
         public override string ToString() => this.FullName;
     }

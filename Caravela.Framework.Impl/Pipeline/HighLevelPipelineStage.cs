@@ -36,13 +36,13 @@ namespace Caravela.Framework.Impl.Pipeline
 
         /// <inheritdoc/>
         public override bool TryExecute(
-            AspectProjectConfiguration projectConfiguration,
+            AspectPipelineConfiguration pipelineConfiguration,
             PipelineStageResult input,
             IDiagnosticAdder diagnostics,
             CancellationToken cancellationToken,
             [NotNullWhen( true )] out PipelineStageResult? result )
         {
-            var compilation = CompilationModel.CreateInitialInstance( input.Project, input.PartialCompilation );
+            var compilation = CompilationModel.CreateInitialInstance( input.Project, input.Compilation );
 
             this.ServiceProvider.GetOptionalService<ICompilationModelObserver>()?.OnInitialCompilationModelCreated( compilation );
 
@@ -50,11 +50,11 @@ namespace Caravela.Framework.Impl.Pipeline
                 this._aspectLayers,
                 compilation,
                 input.AspectSources,
-                projectConfiguration );
+                pipelineConfiguration );
 
             pipelineStepsState.Execute( cancellationToken );
 
-            result = this.GetStageResult( projectConfiguration, input, pipelineStepsState, cancellationToken );
+            result = this.GetStageResult( pipelineConfiguration, input, pipelineStepsState, cancellationToken );
 
             return true;
         }
@@ -63,15 +63,15 @@ namespace Caravela.Framework.Impl.Pipeline
         /// Generates the code required by the aspects whose execution resulted in a given <see cref="IPipelineStepsResult"/>, and combine it with an input
         /// <see cref="PipelineStageResult"/> to produce an output <see cref="PipelineStageResult"/>.
         /// </summary>
-        /// <param name="projectConfiguration"></param>
+        /// <param name="pipelineConfiguration"></param>
         /// <param name="input"></param>
-        /// <param name="pipelineStepResult"></param>
+        /// <param name="pipelineStepsResult"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         protected abstract PipelineStageResult GetStageResult(
-            AspectProjectConfiguration projectConfiguration,
+            AspectPipelineConfiguration pipelineConfiguration,
             PipelineStageResult input,
-            IPipelineStepsResult pipelineStepResult,
+            IPipelineStepsResult pipelineStepsResult,
             CancellationToken cancellationToken );
     }
 }

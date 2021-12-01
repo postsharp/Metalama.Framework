@@ -4,9 +4,9 @@
 using Caravela.Compiler;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -17,8 +17,14 @@ namespace Caravela.Framework.Impl.Sdk
     /// <summary>
     /// Context for the <see cref="IAspectWeaver"/>.
     /// </summary>
-    public sealed class AspectWeaverContext
+    public sealed partial class AspectWeaverContext
     {
+        private readonly Action<Diagnostic> _addDiagnostic;
+        private readonly Action<ManagedResource> _addResource;
+        private IPartialCompilation _compilation;
+
+        public IServiceProvider ServiceProvider { get; }
+
         /// <summary>
         /// Gets the type of aspects that must be handled.
         /// </summary>
@@ -30,20 +36,37 @@ namespace Caravela.Framework.Impl.Sdk
         public IReadOnlyDictionary<ISymbol, IAspectInstance> AspectInstances { get; }
 
         /// <summary>
+        /// Gets the current project.
+        /// </summary>
+        public IProject Project { get; }
+
+        /// <summary>
         /// Gets or sets the compilation.
         /// </summary>
-        public IPartialCompilation Compilation { get; set; }
+        public IPartialCompilation Compilation
+        {
+            get => this._compilation;
 
-        private readonly Action<Diagnostic> _addDiagnostic;
+            set
+            {
+                if ( ((IPartialCompilationInternal) value).InitialCompilation != ((IPartialCompilationInternal) this._compilation).InitialCompilation )
+                {
+                    throw new ArgumentOutOfRangeException(
+                        nameof(value),
+                        "The compilation must have been derived from the initial value of the Compilation property." );
+                }
 
-        // TODO: support reading existing resources
-        private readonly Action<ManagedResource> _addManifestResource;
+                this._compilation = value;
+            }
+        }
+
+        public IAspectWeaverHelper Helper { get; }
 
         /// <summary>
         /// Adds a new <see cref="ManagedResource"/> to the compilation.
         /// </summary>
         /// <param name="resource"></param>
-        public void AddManifestResource( ManagedResource resource ) => this._addManifestResource( resource );
+        public void AddResource( ManagedResource resource ) => this._addResource( resource );
 
         /// <summary>
         /// Rewrites the syntax trees affected by aspects.
@@ -55,7 +78,7 @@ namespace Caravela.Framework.Impl.Sdk
         public void RewriteAspectTargets( CSharpSyntaxRewriter rewriter )
         {
             var nodes = this.AspectInstances.Values
-                .Select( a => a.TargetDeclaration.GetSymbol() )
+                .Select( a => a.TargetDeclaration.GetSymbol( this._compilation.Compilation ) )
                 .Where( s => s != null )
                 .SelectMany( s => s!.DeclaringSyntaxReferences )
                 .GroupBy( r => r.SyntaxTree );
@@ -78,58 +101,24 @@ namespace Caravela.Framework.Impl.Sdk
             this.Compilation = this.Compilation.WithSyntaxTreeModifications( modifiedSyntaxTrees );
         }
 
-        private class Rewriter : CSharpSyntaxRewriter
-        {
-            private readonly ImmutableHashSet<SyntaxNode> _targets;
-            private readonly CSharpSyntaxRewriter _userRewriter;
-
-            public Rewriter( ImmutableHashSet<SyntaxNode> targets, CSharpSyntaxRewriter userRewriter )
-            {
-                this._userRewriter = userRewriter;
-                this._targets = targets;
-            }
-
-            public override SyntaxNode? Visit( SyntaxNode? node )
-            {
-                switch ( node )
-                {
-                    case CompilationUnitSyntax:
-                        return base.Visit( node );
-
-                    case MemberDeclarationSyntax or AccessorDeclarationSyntax:
-                        {
-                            if ( this._targets.Contains( node ) )
-                            {
-                                return this._userRewriter.Visit( node );
-                            }
-                            else if ( node is BaseTypeDeclarationSyntax or NamespaceDeclarationSyntax )
-                            {
-                                // Visit types and namespaces.
-
-                                return base.Visit( node );
-                            }
-
-                            break;
-                        }
-                }
-
-                // Don't visit other members.
-                return node;
-            }
-        }
-
         internal AspectWeaverContext(
             IAspectClass aspectClass,
             IReadOnlyDictionary<ISymbol, IAspectInstance> aspectInstances,
             IPartialCompilation compilation,
             Action<Diagnostic> addDiagnostic,
-            Action<ManagedResource> addManifestResource )
+            Action<ManagedResource> addManifestResource,
+            IAspectWeaverHelper helper,
+            IServiceProvider serviceProvider,
+            IProject project )
         {
             this.AspectClass = aspectClass;
             this.AspectInstances = aspectInstances;
-            this.Compilation = compilation;
+            this._compilation = compilation;
             this._addDiagnostic = addDiagnostic;
-            this._addManifestResource = addManifestResource;
+            this.Project = project;
+            this._addResource = addManifestResource;
+            this.Helper = helper;
+            this.ServiceProvider = serviceProvider;
         }
 
         /// <summary>
@@ -137,5 +126,7 @@ namespace Caravela.Framework.Impl.Sdk
         /// </summary>
         /// <param name="diagnostic"></param>
         public void ReportDiagnostic( Diagnostic diagnostic ) => this._addDiagnostic( diagnostic );
+
+        // TODO: add support for suppressions.
     }
 }

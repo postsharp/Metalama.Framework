@@ -5,6 +5,7 @@ using Caravela.Framework.Diagnostics;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 
 namespace Caravela.Framework.Impl.Diagnostics
 {
@@ -14,26 +15,17 @@ namespace Caravela.Framework.Impl.Diagnostics
             => new( definition.Id, definition.Title, definition.MessageFormat, definition.Category, definition.Severity.ToRoslynSeverity(), true );
 
         /// <summary>
-        /// Creates an <see cref="InvalidUserCodeException"/> instance based on the current descriptor and given arguments.
-        /// The diagnostic location is taken from <see cref="DiagnosticContext"/>. This method must be called in user-called code
-        /// in case of precondition failure (i.e. when the responsibility of the error lays on the user).
+        /// Creates an <see cref="DiagnosticException"/> instance based on the current descriptor and given arguments.
+        /// The diagnostic location will be resolved from the call stack.
         /// </summary>
         public static Exception CreateException<T>( this DiagnosticDefinition<T> definition, T arguments )
             where T : notnull
-            => new InvalidUserCodeException( definition.CreateDiagnostic( DiagnosticContext.CurrentLocation?.GetLocation(), arguments ) );
+            => new DiagnosticException( definition.CreateDiagnostic( null, arguments ) );
 
         // Coverage: ignore (trivial)
-        public static Exception CreateException<T>( this DiagnosticDefinition<T> definition, Location? location, T arguments )
+        public static Exception CreateException<T>( this DiagnosticDefinition<T> definition, Location location, T arguments )
             where T : notnull
-            => new InvalidUserCodeException( definition.CreateDiagnostic( location ?? DiagnosticContext.CurrentLocation?.GetLocation(), arguments ) );
-
-        // Coverage: ignore (trivial)
-        public static Exception CreateException( this DiagnosticDefinition definition, params object[] arguments )
-            => new InvalidUserCodeException( definition.CreateDiagnostic( DiagnosticContext.CurrentLocation?.GetLocation(), arguments ) );
-
-        // Coverage: ignore (trivial)
-        public static Exception CreateException( this DiagnosticDefinition definition, Location? location, params object[] arguments )
-            => new InvalidUserCodeException( definition.CreateDiagnostic( location ?? DiagnosticContext.CurrentLocation?.GetLocation(), arguments ) );
+            => new DiagnosticException( definition.CreateDiagnostic( location, arguments ) );
 
         /// <summary>
         /// Instantiates a <see cref="Diagnostic"/> based on the current descriptor and given arguments.
@@ -42,7 +34,9 @@ namespace Caravela.Framework.Impl.Diagnostics
             this DiagnosticDefinition<T> definition,
             Location? location,
             T arguments,
-            IEnumerable<Location>? additionalLocations = null )
+            IEnumerable<Location>? additionalLocations = null,
+            CodeFixTitles codeFixes = default,
+            ImmutableDictionary<string, string?>? properties = null )
             where T : notnull
         {
             object[] argumentArray;
@@ -51,27 +45,35 @@ namespace Caravela.Framework.Impl.Diagnostics
             {
                 argumentArray = ValueTupleAdapter.ToArray( arguments );
             }
+            else if ( arguments.GetType().IsArray )
+            {
+                argumentArray = (object[]) (object) arguments;
+            }
             else
             {
                 argumentArray = new object[] { arguments };
             }
 
-            return definition.CreateDiagnosticImpl( location, argumentArray, additionalLocations );
+            return definition.CreateDiagnosticImpl( location, argumentArray, additionalLocations, codeFixes, properties );
         }
-
-        public static Diagnostic CreateDiagnostic(
-            this DiagnosticDefinition definition,
-            Location? location,
-            object[]? arguments = null,
-            IEnumerable<Location>? additionalLocations = null )
-            => definition.CreateDiagnosticImpl( location, arguments, additionalLocations );
 
         private static Diagnostic CreateDiagnosticImpl(
             this IDiagnosticDefinition definition,
             Location? location,
             object[]? arguments,
-            IEnumerable<Location>? additionalLocations )
-            => Diagnostic.Create(
+            IEnumerable<Location>? additionalLocations,
+            CodeFixTitles codeFixes = default,
+            ImmutableDictionary<string, string?>? properties = null )
+        {
+            var propertiesWithCodeFixes = properties;
+
+            if ( codeFixes.Value != null )
+            {
+                propertiesWithCodeFixes ??= ImmutableDictionary.Create<string, string?>();
+                propertiesWithCodeFixes = propertiesWithCodeFixes.Add( CodeFixTitles.DiagnosticPropertyKey, codeFixes.Value );
+            }
+
+            return Diagnostic.Create(
                 definition.Id,
                 definition.Category,
                 new NonLocalizedString( definition.MessageFormat, arguments ),
@@ -80,6 +82,8 @@ namespace Caravela.Framework.Impl.Diagnostics
                 true,
                 definition.Severity == Severity.Error ? 0 : 1,
                 location: location,
-                additionalLocations: additionalLocations );
+                additionalLocations: additionalLocations,
+                properties: propertiesWithCodeFixes );
+        }
     }
 }

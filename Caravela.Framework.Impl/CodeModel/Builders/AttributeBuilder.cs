@@ -8,32 +8,19 @@ using Caravela.Framework.Impl.CodeModel.Collections;
 using Caravela.Framework.Impl.Transformations;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
-    internal class AttributeBuilder : DeclarationBuilder, IAttributeBuilder, IObservableTransformation
+    internal class AttributeBuilder : DeclarationBuilder, IAttribute, IObservableTransformation
     {
-        public AttributeBuilder( DeclarationBuilder containingDeclaration, IConstructor constructor, IReadOnlyList<TypedConstant> constructorArguments ) : base(
+        private readonly AttributeConstruction _attributeConstruction;
+
+        public AttributeBuilder( DeclarationBuilder containingDeclaration, AttributeConstruction attributeConstruction ) : base(
             containingDeclaration.ParentAdvice )
         {
+            this._attributeConstruction = attributeConstruction;
             this.ContainingDeclaration = containingDeclaration;
-            this.ConstructorArguments = constructorArguments;
-            this.Constructor = constructor;
-        }
-
-        public NamedArgumentsList NamedArguments { get; } = new();
-
-        public void AddNamedArgument( string name, object? value )
-        {
-            if ( value != null )
-            {
-                var type = this.Compilation.Factory.GetTypeByReflectionType( value.GetType() );
-                this.NamedArguments.Add( new KeyValuePair<string, TypedConstant>( name, new TypedConstant( type, value ) ) );
-            }
-            else
-            {
-                this.NamedArguments.Add( new KeyValuePair<string, TypedConstant>( name, TypedConstant.Null ) );
-            }
         }
 
         string IDisplayable.ToDisplayString( CodeDisplayFormat? format, CodeDisplayContext? context ) => throw new NotImplementedException();
@@ -46,7 +33,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         DeclarationOrigin IDeclaration.Origin => DeclarationOrigin.Aspect;
 
-        IDeclaration? IDeclaration.ContainingDeclaration => throw new NotImplementedException();
+        IDeclaration? IDeclaration.ContainingDeclaration => this.ContainingDeclaration;
 
         IAttributeList IDeclaration.Attributes => AttributeList.Empty;
 
@@ -56,11 +43,11 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public INamedType Type => this.Constructor.DeclaringType;
 
-        public IConstructor Constructor { get; }
+        public IConstructor Constructor => this._attributeConstruction.Constructor;
 
-        public IReadOnlyList<TypedConstant> ConstructorArguments { get; }
+        public ImmutableArray<TypedConstant> ConstructorArguments => this._attributeConstruction.ConstructorArguments;
 
-        INamedArgumentList IAttribute.NamedArguments => this.NamedArguments;
+        public ImmutableArray<KeyValuePair<string, TypedConstant>> NamedArguments => this._attributeConstruction.NamedArguments;
 
         IType IHasType.Type => this.Type;
 

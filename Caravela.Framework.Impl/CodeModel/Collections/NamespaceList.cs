@@ -9,9 +9,9 @@ using System.Linq;
 
 namespace Caravela.Framework.Impl.CodeModel.Collections
 {
-    internal class NamespaceList : DeclarationList<INamespace, DeclarationRef<INamespace>>, INamespaceList
+    internal class NamespaceList : DeclarationList<INamespace, Ref<INamespace>>, INamespaceList
     {
-        public NamespaceList( INamespace containingDeclaration, IEnumerable<DeclarationRef<INamespace>> sourceItems ) : base(
+        public NamespaceList( INamespace containingDeclaration, IEnumerable<Ref<INamespace>> sourceItems ) : base(
             containingDeclaration,
             sourceItems ) { }
 

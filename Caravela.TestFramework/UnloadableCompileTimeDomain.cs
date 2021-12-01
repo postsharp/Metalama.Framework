@@ -20,7 +20,7 @@ namespace Caravela.TestFramework
     /// An implementation of <see cref="CompileTimeDomain"/> base on <c>AssemblyLoadContext</c> and able to unload
     /// itself. When compiled with .NET Standard (instead of .NET 5.0), the class has no unloading effect.
     /// </summary>
-    internal class UnloadableCompileTimeDomain : CompileTimeDomain
+    public sealed class UnloadableCompileTimeDomain : CompileTimeDomain
     {
 #if NET5_0
         private readonly AssemblyLoadContext _assemblyLoadContext;
@@ -75,6 +75,14 @@ namespace Caravela.TestFramework
                 if ( waits > 10 )
                 {
                     var assemblies = string.Join( ",", this._loadedAssemblies.Where( r => r.IsAlive ).Select( r => ((Assembly) r.Target!).GetName().Name ) );
+
+                    /* IF YOU ARE HERE BECAUSE YOU ARE DEBUGGING A MEMORY LEAK
+                     * 
+                     * Here are a few pointers:
+                     *  - You need to use WinDbg and sos.dll
+                     *  - To know where sos.dll is and how to load it in WinDbg, type `dotnet sos install`.
+                     *  - Follow instructions in https://docs.microsoft.com/en-us/dotnet/standard/assembly/unloadability
+                     */
 
                     throw new InvalidOperationException(
                         "The domain could not be unloaded. There are probably dangling references. " +

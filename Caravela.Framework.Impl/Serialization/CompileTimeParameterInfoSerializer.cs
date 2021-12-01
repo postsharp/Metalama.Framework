@@ -16,7 +16,7 @@ namespace Caravela.Framework.Impl.Serialization
     {
         public override ExpressionSyntax Serialize( CompileTimeParameterInfo obj, SyntaxSerializationContext serializationContext )
         {
-            var parameter = obj.Target.Resolve( serializationContext.CompilationModel ).AssertNotNull();
+            var parameter = obj.Target.GetTarget( serializationContext.CompilationModel ).AssertNotNull();
             var declaringMember = parameter.DeclaringMember;
             var method = declaringMember as IMethodBase;
             var ordinal = parameter.Index;

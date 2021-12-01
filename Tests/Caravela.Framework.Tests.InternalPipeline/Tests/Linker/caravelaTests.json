@@ -1,3 +1,0 @@
-{
-    "TestRunnerFactoryType": "Caravela.Framework.Tests.Integration.Runners.LinkerTestRunnerFactory, Caravela.Framework.Tests.InternalPipeline"
-}

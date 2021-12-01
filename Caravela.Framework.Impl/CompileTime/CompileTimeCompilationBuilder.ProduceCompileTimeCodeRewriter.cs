@@ -8,6 +8,7 @@ using Caravela.Framework.Fabrics;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.Diagnostics;
+using Caravela.Framework.Impl.ReflectionMocks;
 using Caravela.Framework.Impl.Templating;
 using Caravela.Framework.Impl.Utilities;
 using Caravela.Framework.Project;
@@ -39,7 +40,7 @@ namespace Caravela.Framework.Impl.CompileTime
             private readonly IDiagnosticAdder _diagnosticAdder;
             private readonly TemplateCompiler _templateCompiler;
             private readonly CancellationToken _cancellationToken;
-            private readonly NameSyntax _userCodeExecutionContextType;
+            private readonly NameSyntax _compileTimeTypeName;
             private readonly SyntaxGenerationContext _syntaxGenerationContext;
             private readonly NameSyntax _originalNameTypeSyntax;
             private readonly NameSyntax _originalPathTypeSyntax;
@@ -70,9 +71,9 @@ namespace Caravela.Framework.Impl.CompileTime
 
                 this._syntaxGenerationContext = SyntaxGenerationContext.CreateDefault( serviceProvider, compileTimeCompilation );
 
-                this._userCodeExecutionContextType = (NameSyntax)
+                this._compileTimeTypeName = (NameSyntax)
                     this._syntaxGenerationContext.SyntaxGenerator.Type(
-                        this._syntaxGenerationContext.ReflectionMapper.GetTypeSymbol( typeof(UserCodeExecutionContext) ) );
+                        this._syntaxGenerationContext.ReflectionMapper.GetTypeSymbol( typeof(CompileTimeType) ) );
 
                 this._originalNameTypeSyntax = (NameSyntax)
                     this._syntaxGenerationContext.SyntaxGenerator.Type(
@@ -83,8 +84,8 @@ namespace Caravela.Framework.Impl.CompileTime
                         this._syntaxGenerationContext.ReflectionMapper.GetTypeSymbol( typeof(OriginalPathAttribute) ) );
 
                 var reflectionMapper = serviceProvider.GetService<ReflectionMapperFactory>().GetInstance( runTimeCompilation );
-                this._fabricType = reflectionMapper.GetTypeSymbol( typeof(IFabric) );
-                this._typeFabricType = reflectionMapper.GetTypeSymbol( typeof(ITypeFabric) );
+                this._fabricType = reflectionMapper.GetTypeSymbol( typeof(Fabric) );
+                this._typeFabricType = reflectionMapper.GetTypeSymbol( typeof(TypeFabric) );
             }
 
             // TODO: assembly and module-level attributes?
@@ -112,7 +113,7 @@ namespace Caravela.Framework.Impl.CompileTime
                 }
                 else
                 {
-                    return base.VisitEnumDeclaration( node );
+                    return base.VisitEnumDeclaration( node )!.WithAdditionalAnnotations( _hasCompileTimeCodeAnnotation );
                 }
             }
 
@@ -129,7 +130,7 @@ namespace Caravela.Framework.Impl.CompileTime
                 }
                 else
                 {
-                    return base.VisitDelegateDeclaration( node );
+                    return base.VisitDelegateDeclaration( node )!.WithAdditionalAnnotations( _hasCompileTimeCodeAnnotation );
                 }
             }
 
@@ -180,7 +181,9 @@ namespace Caravela.Framework.Impl.CompileTime
                                                 this._diagnosticAdder.Report(
                                                     TemplatingDiagnosticDescriptors.RunTimeTypesCannotHaveCompileTimeTypesExceptClasses.CreateDiagnostic(
                                                         childSymbol.GetDiagnosticLocation(),
-                                                        (childSymbol, typeof(ITypeFabric)) ) );
+                                                        (childSymbol, typeof(TypeFabric)) ) );
+
+                                                this.Success = false;
                                             }
 
                                             // Create the [OriginalId] attribute.
@@ -199,6 +202,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
                                             transformedChild = transformedChild
                                                 .WithIdentifier( Identifier( newName ) )
+                                                .WithModifiers( TokenList( Token( SyntaxKind.InternalKeyword ) ) )
                                                 .WithAttributeLists(
                                                     transformedChild.AttributeLists.Add( AttributeList( SingletonSeparatedList( originalNameAttribute ) ) ) );
 
@@ -234,7 +238,9 @@ namespace Caravela.Framework.Impl.CompileTime
                                 this._diagnosticAdder.Report(
                                     TemplatingDiagnosticDescriptors.RunTimeTypesCannotHaveCompileTimeTypesExceptClasses.CreateDiagnostic(
                                         childSymbol.GetDiagnosticLocation(),
-                                        (childSymbol, typeof(ITypeFabric)) ) );
+                                        (childSymbol, typeof(TypeFabric)) ) );
+
+                                this.Success = false;
                             }
 
                             break;
@@ -322,9 +328,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
                 foreach ( var implementedInterface in allImplementedInterfaces )
                 {
-#pragma warning disable 618
-                    if ( implementedInterface.Name is nameof(IAspect) or nameof(IEligible<IDeclaration>) or nameof(ProjectData) )
-#pragma warning restore 618
+                    if ( implementedInterface.Name is nameof(IAspect) or nameof(IEligible<IDeclaration>) or nameof(ProjectExtension) )
                     {
                         foreach ( var member in implementedInterface.GetMembers() )
                         {
@@ -761,9 +765,8 @@ namespace Caravela.Framework.Impl.CompileTime
             {
                 if ( this._currentContext.Scope != TemplatingScope.RunTimeOnly )
                 {
-                    var typeSymbol = this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetSymbolInfo( node.Type ).Symbol;
-
-                    if ( typeSymbol != null && this.SymbolClassifier.GetTemplatingScope( typeSymbol ) == TemplatingScope.RunTimeOnly )
+                    if ( this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetSymbolInfo( node.Type ).Symbol is ITypeSymbol typeSymbol
+                         && this.SymbolClassifier.GetTemplatingScope( typeSymbol ) == TemplatingScope.RunTimeOnly )
                     {
                         // We are in a compile-time-only block but we have a typeof to a run-time-only block. 
                         // This is a situation we can handle by rewriting the typeof to a call to UserCodeContext.GetCompileTimeType.
@@ -771,8 +774,8 @@ namespace Caravela.Framework.Impl.CompileTime
                         var memberAccess =
                             MemberAccessExpression(
                                 SyntaxKind.SimpleMemberAccessExpression,
-                                this._userCodeExecutionContextType,
-                                IdentifierName( nameof(UserCodeExecutionContext.GetCompileTimeType) ) );
+                                this._compileTimeTypeName,
+                                IdentifierName( nameof(CompileTimeType.GetCompileTimeType) ) );
 
                         var invocation = InvocationExpression(
                             memberAccess,
@@ -780,8 +783,8 @@ namespace Caravela.Framework.Impl.CompileTime
                                 SeparatedList(
                                     new[]
                                     {
-                                        Argument( SyntaxFactoryEx.LiteralExpression( DocumentationCommentId.CreateReferenceId( typeSymbol ) ) ),
-                                        Argument( SyntaxFactoryEx.LiteralExpression( typeSymbol.ToDisplayString() ) )
+                                        Argument( SyntaxFactoryEx.LiteralExpression( typeSymbol.GetSymbolId().ToString() ) ),
+                                        Argument( SyntaxFactoryEx.LiteralExpression( typeSymbol.GetReflectionName() ) )
                                     } ) ) );
 
                         return invocation;
@@ -803,16 +806,68 @@ namespace Caravela.Framework.Impl.CompileTime
 
             public override SyntaxToken VisitToken( SyntaxToken token ) => this._templateCompiler.LocationAnnotationMap.AddLocationAnnotation( token );
 
+            public override SyntaxNode? VisitQualifiedName( QualifiedNameSyntax node )
+            {
+                // Fully qualify type names and namespaces.
+
+                var symbol = this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetSymbolInfo( node ).Symbol;
+
+                if ( symbol is INamespaceOrTypeSymbol namespaceOrType )
+                {
+                    return OurSyntaxGenerator.CompileTime.NameExpression( namespaceOrType ).WithTriviaFrom( node );
+                }
+
+                return base.VisitQualifiedName( node );
+            }
+
+            public override SyntaxNode? VisitMemberAccessExpression( MemberAccessExpressionSyntax node )
+            {
+                // Fully qualify type names and namespaces.
+
+                var symbol = this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetSymbolInfo( node ).Symbol;
+
+                if ( symbol is INamespaceOrTypeSymbol namespaceOrType )
+                {
+                    return OurSyntaxGenerator.CompileTime.NameExpression( namespaceOrType ).WithTriviaFrom( node );
+                }
+
+                return base.VisitMemberAccessExpression( node );
+            }
+
             public override SyntaxNode? VisitIdentifierName( IdentifierNameSyntax node )
             {
                 if ( node.Identifier.Text == "dynamic" )
                 {
                     return PredefinedType( Token( SyntaxKind.ObjectKeyword ) ).WithTriviaFrom( node );
                 }
-                else
+                else if ( node.Identifier.Kind() == SyntaxKind.IdentifierToken && !node.IsVar )
                 {
-                    return base.VisitIdentifierName( node );
+                    // Fully qualifies simple identifiers.
+
+                    var symbol = this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetSymbolInfo( node ).Symbol;
+
+                    if ( symbol is INamespaceOrTypeSymbol namespaceOrType )
+                    {
+                        return OurSyntaxGenerator.CompileTime.NameExpression( namespaceOrType ).WithTriviaFrom( node );
+                    }
+                    else if ( symbol is { IsStatic: true } && node.Parent is not MemberAccessExpressionSyntax && node.Parent is not AliasQualifiedNameSyntax )
+                    {
+                        switch ( symbol.Kind )
+                        {
+                            case SymbolKind.Field:
+                            case SymbolKind.Property:
+                            case SymbolKind.Event:
+                            case SymbolKind.Method:
+                                // We have an access to a field or method with a "using static", or a non-qualified static member access.
+                                return MemberAccessExpression(
+                                    SyntaxKind.SimpleMemberAccessExpression,
+                                    OurSyntaxGenerator.CompileTime.NameExpression( symbol.ContainingType ),
+                                    IdentifierName( node.Identifier.Text ) );
+                        }
+                    }
                 }
+
+                return base.VisitIdentifierName( node );
             }
 
             protected override T RewriteThrowNotSupported<T>( T node ) => ReplaceDynamicToObjectRewriter.Rewrite( node );

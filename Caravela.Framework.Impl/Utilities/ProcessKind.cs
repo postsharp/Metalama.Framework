@@ -9,6 +9,6 @@ namespace Caravela.Framework.Impl.Utilities
         Compiler,
         DevEnv,
         RoslynCodeAnalysisService,
-        Resharper
+        Rider
     }
 }

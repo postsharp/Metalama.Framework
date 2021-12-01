@@ -2,10 +2,12 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Compiler;
+using Caravela.Framework.Aspects;
 using Caravela.Framework.Fabrics;
 using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Templating.Mapping;
+using Caravela.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -22,11 +24,14 @@ namespace Caravela.Framework.Impl.CompileTime
     /// Represents the compile-time project extracted from a run-time project, including its
     /// <see cref="System.Reflection.Assembly"/> allowing for execution, and metadata.
     /// </summary>
-    internal sealed class CompileTimeProject
+    internal sealed class CompileTimeProject : IService
     {
         private readonly CompileTimeProjectManifest? _manifest;
+        private readonly CompileTimeDomain _domain;
         private readonly string? _compiledAssemblyPath;
+        private readonly AssemblyIdentity? _compileTimeIdentity;
         private readonly Func<string, TextMapFile?>? _getLocationMap;
+        private readonly DiagnosticManifest _diagnosticManifest;
         private Assembly? _assembly;
 
         /// <summary>
@@ -36,20 +41,9 @@ namespace Caravela.Framework.Impl.CompileTime
         public string? Directory { get; }
 
         /// <summary>
-        /// Gets the <see cref="CompileTimeDomain"/> to which the current project belong.
-        /// </summary>
-        public CompileTimeDomain Domain { get; }
-
-        /// <summary>
         /// Gets the identity of the run-time assembly for which this compile-time project was created.
         /// </summary>
         public AssemblyIdentity RunTimeIdentity { get; }
-
-        /// <summary>
-        /// Gets the identity of the compile-time assembly, which is guaranteed to be unique in the
-        /// current <see cref="Domain"/> for a given source code.
-        /// </summary>
-        public AssemblyIdentity? CompileTimeIdentity { get; }
 
         /// <summary>
         /// Gets the list of aspect types (identified by their fully qualified reflection name) of the aspects
@@ -63,12 +57,12 @@ namespace Caravela.Framework.Impl.CompileTime
         public IReadOnlyList<string> PlugInTypes => this._manifest?.PlugInTypes ?? Array.Empty<string>();
 
         /// <summary>
-        /// Gets the list of types that implement the <see cref="IFabric"/> interface, but the <see cref="ITransitiveProjectFabric"/>.
+        /// Gets the list of types that implement the <see cref="Fabric"/> interface, but the <see cref="TransitiveProjectFabric"/>.
         /// </summary>
         public IReadOnlyList<string> FabricTypes => this._manifest?.FabricTypes ?? Array.Empty<string>();
 
         /// <summary>
-        /// Gets the list of types that implement the <see cref="ITransitiveProjectFabric"/> interface.
+        /// Gets the list of types that implement the <see cref="TransitiveProjectFabric"/> interface.
         /// </summary>
         public IReadOnlyList<string> TransitiveFabricTypes => this._manifest?.TransitiveFabricTypes ?? Array.Empty<string>();
 
@@ -135,17 +129,32 @@ namespace Caravela.Framework.Impl.CompileTime
             Func<string, TextMapFile?>? getLocationMap,
             string? directory )
         {
-            this.Domain = domain;
+            this._domain = domain;
             this._compiledAssemblyPath = compiledAssemblyPath;
             this._getLocationMap = getLocationMap;
             this.Directory = directory;
             this._manifest = manifest;
             this.RunTimeIdentity = runTimeIdentity;
-            this.CompileTimeIdentity = compileTimeIdentity;
+            this._compileTimeIdentity = compileTimeIdentity;
             this.References = references;
             this.ClosureProjects = this.SelectManyRecursive( p => p.References, true, false ).ToImmutableList();
-            this.DiagnosticManifest = this.GetDiagnosticManifest( serviceProvider );
-            this.ClosureDiagnosticManifest = new DiagnosticManifest( this.ClosureProjects.Select( p => p.DiagnosticManifest ).ToList() );
+            this._diagnosticManifest = this.GetDiagnosticManifest( serviceProvider );
+            this.ClosureDiagnosticManifest = new DiagnosticManifest( this.ClosureProjects.Select( p => p._diagnosticManifest ).ToList() );
+
+#if DEBUG
+            if ( manifest != null )
+            {
+                foreach ( var file in manifest.Files )
+                {
+                    var path = Path.Combine( directory, file.TransformedPath );
+
+                    if ( !File.Exists( path ) )
+                    {
+                        throw new AssertionFailedException( $"'{path}' does not exist." );
+                    }
+                }
+            }
+#endif
         }
 
         /// <summary>
@@ -186,7 +195,7 @@ namespace Caravela.Framework.Impl.CompileTime
         /// <summary>
         /// Serializes the current project (its manifest and source code) into a stream that can be embedded as a managed resource.
         /// </summary>
-        public void Serialize( Stream stream )
+        private void Serialize( Stream stream )
         {
             this.AssertNotEmpty();
 
@@ -233,12 +242,37 @@ namespace Caravela.Framework.Impl.CompileTime
         /// </summary>
         /// <param name="reflectionName"></param>
         /// <returns></returns>
-        public Type? GetTypeOrNull( string reflectionName ) => this.IsEmpty ? null : this.Assembly.GetType( reflectionName, false );
+        public Type? GetTypeOrNull( string reflectionName )
+        {
+            if ( this.IsEmpty )
+            {
+                return null;
+            }
+            else
+            {
+                var type = this.Assembly.GetType( reflectionName, false );
+
+                if ( type == null )
+                {
+                    return null;
+                }
+
+                // Check that the type is linked properly. An error here may be caused by a bug in 
+                // a handler of the AppDomain.AssemblyResolve event.
+                if ( type.GetInterfaces().Any( i => i.FullName == typeof(IAspect).FullName && !typeof(IAspect).IsAssignableFrom( i ) ) )
+                {
+                    // There must have been some assembly version mismatch.
+                    throw new AssertionFailedException( "Assembly version mismatch." );
+                }
+
+                return type;
+            }
+        }
 
         public Type GetType( string reflectionName )
             => this.GetTypeOrNull( reflectionName ) ?? throw new ArgumentOutOfRangeException(
                 nameof(reflectionName),
-                $"Cannot find a type named '{reflectionName}' in the compile-time project '{this.CompileTimeIdentity}'." );
+                $"Cannot find a type named '{reflectionName}' in the compile-time project '{this._compileTimeIdentity}'." );
 
         public CompileTimeFile? FindCodeFileFromTransformedPath( string transformedCodePath )
             => this.CodeFiles.Where( t => transformedCodePath.EndsWith( t.TransformedPath, StringComparison.OrdinalIgnoreCase ) )
@@ -261,7 +295,7 @@ namespace Caravela.Framework.Impl.CompileTime
                     }
                 }
 
-                this._assembly = this.Domain.GetOrLoadAssembly( this.CompileTimeIdentity!, this._compiledAssemblyPath! );
+                this._assembly = this._domain.GetOrLoadAssembly( this._compileTimeIdentity!, this._compiledAssemblyPath! );
             }
         }
 
@@ -271,11 +305,6 @@ namespace Caravela.Framework.Impl.CompileTime
         /// Gets a <see cref="TextMapFile"/> given a the path of the transformed code file.
         /// </summary>
         public TextMapFile? GetTextMap( string csFilePath ) => this._getLocationMap?.Invoke( csFilePath );
-
-        /// <summary>
-        /// Gets the list of diagnostics and suppressions defined in the current project.
-        /// </summary>
-        public DiagnosticManifest DiagnosticManifest { get; }
 
         public DiagnosticManifest ClosureDiagnosticManifest { get; }
 

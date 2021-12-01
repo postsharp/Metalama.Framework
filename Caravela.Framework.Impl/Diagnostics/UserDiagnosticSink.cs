@@ -2,13 +2,16 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
+using Caravela.Framework.CodeFixes;
 using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
+using Caravela.Framework.Impl.DesignTime.CodeFixes;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Text;
 
 namespace Caravela.Framework.Impl.Diagnostics
 {
@@ -19,21 +22,25 @@ namespace Caravela.Framework.Impl.Diagnostics
     internal partial class UserDiagnosticSink : IDiagnosticSink, IDiagnosticAdder
     {
         private readonly DiagnosticManifest? _diagnosticManifest;
+        private readonly CodeFixFilter _codeFixFilter;
         private ImmutableArray<Diagnostic>.Builder? _diagnostics;
         private ImmutableArray<ScopedSuppression>.Builder? _suppressions;
+        private ImmutableArray<CodeFixInstance>.Builder? _codeFixes;
 
         public IDeclaration? DefaultScope { get; private set; }
 
-        internal UserDiagnosticSink( CompileTimeProject? compileTimeProject, IDeclaration? defaultScope = null )
+        internal UserDiagnosticSink( CompileTimeProject? compileTimeProject, CodeFixFilter? codeFixFilter, IDeclaration? defaultScope = null )
         {
             this._diagnosticManifest = compileTimeProject?.ClosureDiagnosticManifest;
+            this._codeFixFilter = codeFixFilter ?? (( _, _ ) => false);
             this.DefaultScope = defaultScope;
         }
 
         // This overload is used for tests only.
-        internal UserDiagnosticSink( IDeclaration? defaultScope = null )
+        internal UserDiagnosticSink( IDeclaration? defaultScope = null, CodeFixFilter? codeFixFilter = null )
         {
             this.DefaultScope = defaultScope;
+            this._codeFixFilter = codeFixFilter ?? (( _, _ ) => false);
         }
 
         public int ErrorCount { get; private set; }
@@ -46,6 +53,54 @@ namespace Caravela.Framework.Impl.Diagnostics
             if ( diagnostic.Severity == DiagnosticSeverity.Error )
             {
                 this.ErrorCount++;
+            }
+        }
+
+        /// <summary>
+        /// Returns a string containing all code fix titles and captures the code fixes if we should.  
+        /// </summary>
+        private CodeFixTitles ProcessCodeFix( IDiagnosticDefinition diagnosticDefinition, Location? location, IEnumerable<CodeFix>? codeFixes )
+        {
+            if ( codeFixes != null )
+            {
+                // This code implements an optimization to allow allocating a StringBuilder if there is a single code fix. 
+                string? firstTitle = null;
+                StringBuilder? stringBuilder = null;
+
+                // Store the code fixes if we should.
+                foreach ( var codeFix in codeFixes )
+                {
+                    if ( location != null && this._codeFixFilter( diagnosticDefinition, location ) )
+                    {
+                        this._codeFixes ??= ImmutableArray.CreateBuilder<CodeFixInstance>();
+                        this._codeFixes.Add( new CodeFixInstance( diagnosticDefinition.Id, location, codeFix ) );
+                    }
+
+                    if ( firstTitle == null )
+                    {
+                        // This gets executed for the first code fix.
+                        firstTitle = codeFix.Title;
+                    }
+                    else
+                    {
+                        if ( stringBuilder == null )
+                        {
+                            // This gets executed for the second code fix.
+                            stringBuilder = new StringBuilder();
+                            stringBuilder.Append( firstTitle );
+                        }
+
+                        // This gets executed for all code fixes but the first one.
+                        stringBuilder.Append( CodeFixTitles.Separator );
+                        stringBuilder.Append( codeFix.Title );
+                    }
+                }
+
+                return new CodeFixTitles( stringBuilder?.ToString() ?? firstTitle );
+            }
+            else
+            {
+                return default;
             }
         }
 
@@ -72,14 +127,12 @@ namespace Caravela.Framework.Impl.Diagnostics
         }
 
         public ImmutableUserDiagnosticList ToImmutable()
-            => new(
-                this._diagnostics?.ToImmutable() ?? ImmutableArray<Diagnostic>.Empty,
-                this._suppressions?.ToImmutable() ?? ImmutableArray<ScopedSuppression>.Empty );
+            => new( this._diagnostics?.ToImmutable(), this._suppressions?.ToImmutable(), this._codeFixes?.ToImmutable() );
 
-        public override string ToString() => $"Diagnostics={this._diagnostics?.Count ?? 0}, Suppressions={this._suppressions?.Count ?? 0}";
+        public override string ToString()
+            => $"Diagnostics={this._diagnostics?.Count ?? 0}, Suppressions={this._suppressions?.Count ?? 0}, CodeFixes={this._codeFixes?.Count ?? 0}";
 
-        private Location? GetLocation( IDiagnosticLocation? location )
-            => ((DiagnosticLocation?) location)?.Location ?? this.DefaultScope?.GetDiagnosticLocation();
+        private static Location? GetLocation( IDiagnosticLocation? location ) => ((IDiagnosticLocationImpl?) location)?.DiagnosticLocation;
 
         private void ValidateUserReport( IDiagnosticDefinition definition )
         {
@@ -99,17 +152,19 @@ namespace Caravela.Framework.Impl.Diagnostics
             }
         }
 
-        public void Report( IDiagnosticLocation? location, DiagnosticDefinition definition, params object[] args )
-        {
-            this.ValidateUserReport( definition );
-            this.Report( definition.CreateDiagnostic( this.GetLocation( location ) ) );
-        }
-
-        public void Report<T>( IDiagnosticLocation? location, DiagnosticDefinition<T> definition, T arguments )
+        public void Report<T>(
+            IDiagnosticLocation? location,
+            DiagnosticDefinition<T> definition,
+            T arguments,
+            IEnumerable<CodeFix>? codeFixes = null )
             where T : notnull
         {
             this.ValidateUserReport( definition );
-            this.Report( definition.CreateDiagnostic( this.GetLocation( location ), arguments ) );
+
+            var resolvedLocation = GetLocation( location );
+            var codeFixTitles = this.ProcessCodeFix( definition, resolvedLocation, codeFixes );
+
+            this.Report( definition.CreateDiagnostic( resolvedLocation, arguments, codeFixes: codeFixTitles ) );
         }
 
         public void Suppress( IDeclaration? scope, SuppressionDefinition definition )
@@ -119,6 +174,24 @@ namespace Caravela.Framework.Impl.Diagnostics
             if ( this.DefaultScope != null )
             {
                 this.Suppress( new ScopedSuppression( definition, scope ?? this.DefaultScope ) );
+            }
+        }
+
+        public void Suggest( IDiagnosticLocation? location, CodeFix codeFix )
+        {
+            var definition = GeneralDiagnosticDescriptors.SuggestedCodeFix;
+            var resolvedLocation = GetLocation( location );
+            var codeFixTitles = this.ProcessCodeFix( definition, resolvedLocation, codeFix );
+
+            this.Report( definition.CreateDiagnostic( resolvedLocation, codeFixTitles.Value!, codeFixes: codeFixTitles ) );
+        }
+
+        public void AddCodeFixes( IEnumerable<CodeFixInstance> codeFixes )
+        {
+            foreach ( var codeFix in codeFixes )
+            {
+                this._codeFixes ??= ImmutableArray.CreateBuilder<CodeFixInstance>();
+                this._codeFixes.Add( codeFix );
             }
         }
     }

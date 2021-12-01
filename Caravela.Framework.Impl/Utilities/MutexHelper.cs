@@ -22,6 +22,8 @@ namespace Caravela.Framework.Impl.Utilities
         {
             var mutexName = "Global\\Caravela_" + HashUtilities.HashString( fullName );
 
+            Logger.Instance?.Write( $"  Mutex name: '{mutexName}'." );
+
             return new Mutex( false, mutexName );
         }
 
@@ -38,7 +40,7 @@ namespace Caravela.Framework.Impl.Utilities
 
             public void Dispose()
             {
-                Logger.Instance?.Write( $"Acquiring lock '{this._name}'." );
+                Logger.Instance?.Write( $"Releasing lock '{this._name}'." );
 
                 this._mutex.ReleaseMutex();
                 this._mutex.Dispose();

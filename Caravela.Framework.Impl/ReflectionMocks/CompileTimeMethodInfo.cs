@@ -12,7 +12,7 @@ namespace Caravela.Framework.Impl.ReflectionMocks
 {
     internal class CompileTimeMethodInfo : MethodInfo, ICompileTimeReflectionObject<IMethod>
     {
-        public IDeclarationRef<IMethod> Target { get; set; }
+        public ISdkRef<IMethod> Target { get; set; }
 
         private CompileTimeMethodInfo( IMethod method )
         {

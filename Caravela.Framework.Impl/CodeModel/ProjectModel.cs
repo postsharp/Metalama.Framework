@@ -4,7 +4,6 @@
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Options;
 using Caravela.Framework.Impl.Pipeline;
-using Caravela.Framework.Impl.Utilities;
 using Caravela.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
@@ -17,9 +16,8 @@ namespace Caravela.Framework.Impl.CodeModel
 {
     internal class ProjectModel : IProject
     {
-        private readonly ConcurrentDictionary<Type, ProjectData> _extensions = new();
+        private readonly ConcurrentDictionary<Type, ProjectExtension> _extensions = new();
         private readonly IProjectOptions _projectOptions;
-        private readonly SyntaxTree? _anySyntaxTree;
         private readonly Lazy<ImmutableArray<IAssemblyIdentity>> _projectReferences;
         private bool _isFrozen;
 
@@ -34,7 +32,11 @@ namespace Caravela.Framework.Impl.CodeModel
             }
 
             this._projectOptions = serviceProvider.GetService<IProjectOptions>();
-            this._anySyntaxTree = compilation.SyntaxTrees.FirstOrDefault();
+            var anySyntaxTree = compilation.SyntaxTrees.FirstOrDefault();
+
+            this.PreprocessorSymbols =
+                anySyntaxTree != null ? anySyntaxTree.Options.PreprocessorSymbolNames.ToImmutableHashSet() : ImmutableHashSet<string>.Empty;
+
             this.ServiceProvider = serviceProvider;
 
             this._projectReferences =
@@ -46,9 +48,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public ImmutableArray<IAssemblyIdentity> AssemblyReferences => this._projectReferences.Value;
 
-        [Memo]
-        public ImmutableHashSet<string> PreprocessorSymbols
-            => this._anySyntaxTree != null ? this._anySyntaxTree.Options.PreprocessorSymbolNames.ToImmutableHashSet() : ImmutableHashSet<string>.Empty;
+        public ImmutableHashSet<string> PreprocessorSymbols { get; }
 
         public string? Configuration => this._projectOptions.Configuration;
 
@@ -56,13 +56,13 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public bool TryGetProperty( string name, [NotNullWhen( true )] out string? value ) => this._projectOptions.TryGetProperty( name, out value );
 
-        public T Data<T>()
-            where T : ProjectData, new()
-            => (T) this._extensions.GetOrAdd( typeof(T), this.CreateProjectData );
+        public T Extension<T>()
+            where T : ProjectExtension, new()
+            => (T) this._extensions.GetOrAdd( typeof(T), this.CreateProjectExtension );
 
-        private ProjectData CreateProjectData( Type t )
+        private ProjectExtension CreateProjectExtension( Type t )
         {
-            var data = (ProjectData) Activator.CreateInstance( t );
+            var data = (ProjectExtension) Activator.CreateInstance( t );
             data.Initialize( this, this._isFrozen );
 
             return data;
@@ -70,7 +70,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public IServiceProvider ServiceProvider { get; }
 
-        internal void FreezeProjectData()
+        internal void Freeze()
         {
             if ( this._isFrozen )
             {
@@ -78,10 +78,13 @@ namespace Caravela.Framework.Impl.CodeModel
             }
 
             this._isFrozen = true;
-            
+
             foreach ( var data in this._extensions.Values )
             {
                 data.MakeReadOnly();
+
+                // Also set the property explicitly in case an implementer skips the call to base.MakeReadOnly.
+                data.IsReadOnly = true;
             }
         }
     }

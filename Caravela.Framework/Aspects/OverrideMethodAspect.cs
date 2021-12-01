@@ -89,8 +89,7 @@ namespace Caravela.Framework.Aspects
             }
         }
 
-        public override void BuildEligibility( IEligibilityBuilder<IMethod> builder )
-            => builder.ExceptForInheritance().MustBeNonAbstract();
+        public override void BuildEligibility( IEligibilityBuilder<IMethod> builder ) => builder.ExceptForInheritance().MustBeNonAbstract();
 
         [Template]
         [Abstract]

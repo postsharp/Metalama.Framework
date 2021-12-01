@@ -251,7 +251,7 @@ namespace Caravela.Framework.Impl.Serialization
         /// </summary>
         /// <param name="o">An object to serialize.</param>
         /// <returns>An expression that would create the object.</returns>
-        /// <exception cref="InvalidUserCodeException">When the object cannot be serialized, for example if it's of an unsupported type.</exception>
+        /// <exception cref="DiagnosticException">When the object cannot be serialized, for example if it's of an unsupported type.</exception>
         public ExpressionSyntax Serialize<T>( T? o, SyntaxSerializationContext serializationContext )
         {
             if ( o == null )

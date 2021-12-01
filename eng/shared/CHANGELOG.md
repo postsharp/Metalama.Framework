@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## 2021-11-16
+
+Complete migration to a C#-based build orchestration with major breaking changes.
+
 ## 2021-10-20
 ### Added
 - `eng\shared\Build.ps1` has additional optional parameters `Verbosity` and `TestSolutions`.

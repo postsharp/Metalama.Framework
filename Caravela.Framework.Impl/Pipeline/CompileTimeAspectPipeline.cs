@@ -2,8 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Compiler;
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Impl.AspectOrdering;
+using Caravela.Framework.Impl.AdditionalOutputs;
 using Caravela.Framework.Impl.Aspects;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
@@ -11,13 +10,13 @@ using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Formatting;
 using Caravela.Framework.Impl.Licensing;
 using Caravela.Framework.Impl.Templating;
+using Caravela.Framework.Project;
 using Microsoft.CodeAnalysis;
 using PostSharp.Backstage.Extensibility.Extensions;
 using PostSharp.Backstage.Licensing;
 using PostSharp.Backstage.Licensing.Consumption;
 using System.Collections.Immutable;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -32,9 +31,10 @@ namespace Caravela.Framework.Impl.Pipeline
         public CompileTimeAspectPipeline(
             ServiceProvider serviceProvider,
             bool isTest,
-            CompileTimeDomain? domain = null ) : base(
+            CompileTimeDomain? domain = null,
+            IExecutionScenario? executionScenario = null ) : base(
             serviceProvider,
-            AspectExecutionScenario.CompileTime,
+            executionScenario ?? ExecutionScenario.CompileTime,
             isTest,
             domain )
         {
@@ -47,28 +47,51 @@ namespace Caravela.Framework.Impl.Pipeline
             }
         }
 
-        public bool TryExecute(
+        public async Task<CompileTimeAspectPipelineResult?> ExecuteAsync(
             IDiagnosticAdder diagnosticAdder,
             Compilation compilation,
             ImmutableArray<ManagedResource> resources,
-            CancellationToken cancellationToken,
-            out ImmutableArray<SyntaxTreeTransformation> syntaxTreeTransformations,
-            out ImmutableArray<ManagedResource> additionalResources,
-            [NotNullWhen( true )] out Compilation? resultingCompilation )
+            CancellationToken cancellationToken )
         {
+            var partialCompilation = PartialCompilation.CreateComplete( compilation );
+
+            // Skip if Caravela has been disabled for this project.
             if ( !this.ProjectOptions.IsFrameworkEnabled )
             {
-                syntaxTreeTransformations = ImmutableArray<SyntaxTreeTransformation>.Empty;
-                additionalResources = ImmutableArray<ManagedResource>.Empty;
-                resultingCompilation = compilation;
-
-                return true;
+                return new CompileTimeAspectPipelineResult(
+                    ImmutableArray<SyntaxTreeTransformation>.Empty,
+                    ImmutableArray<ManagedResource>.Empty,
+                    partialCompilation,
+                    ImmutableArray<AdditionalCompilationOutputFile>.Empty );
             }
 
-            syntaxTreeTransformations = default;
-            additionalResources = default;
-            resultingCompilation = null;
+            // Run the code analyzers that normally run at design time.
+            if ( !TemplatingCodeValidator.Validate( compilation, diagnosticAdder, this.ServiceProvider, cancellationToken ) )
+            {
+                return null;
+            }
 
+            // Initialize the pipeline and generate the compile-time project.
+            if ( !this.TryInitialize( diagnosticAdder, partialCompilation, null, cancellationToken, out var configuration ) )
+            {
+                return null;
+            }
+
+            return await this.ExecuteCoreAsync(
+                diagnosticAdder,
+                partialCompilation,
+                resources,
+                configuration,
+                cancellationToken );
+        }
+
+        internal async Task<CompileTimeAspectPipelineResult?> ExecuteCoreAsync(
+            IDiagnosticAdder diagnosticAdder,
+            PartialCompilation compilation,
+            ImmutableArray<ManagedResource> resources,
+            AspectPipelineConfiguration configuration,
+            CancellationToken cancellationToken )
+        {
             try
             {
                 var licenseManager = this.ServiceProvider.GetRequiredService<ILicenseConsumptionManager>();
@@ -90,24 +113,23 @@ namespace Caravela.Framework.Impl.Pipeline
                 }
 
                 // Execute the pipeline.
-                if ( !this.TryExecute( partialCompilation, diagnosticAdder, configuration, cancellationToken, out var result ) )
+                if ( !this.TryExecute( compilation, diagnosticAdder, configuration, cancellationToken, out var result ) )
                 {
-                    return false;
+                    return null;
                 }
 
-                var resultPartialCompilation = result.PartialCompilation;
+                var resultPartialCompilation = result.Compilation;
 
                 // Format the output.
                 if ( this.ProjectOptions.FormatOutput && OutputCodeFormatter.CanFormat )
                 {
                     // ReSharper disable once AccessToModifiedClosure
-                    resultPartialCompilation = Task.Run(
-                            () => OutputCodeFormatter.FormatToSyntaxAsync( resultPartialCompilation, cancellationToken ),
-                            cancellationToken )
-                        .Result;
+                    resultPartialCompilation = await OutputCodeFormatter.FormatToSyntaxAsync( resultPartialCompilation, cancellationToken );
                 }
 
                 // Add managed resources.
+                ImmutableArray<ManagedResource> additionalResources;
+
                 if ( resultPartialCompilation.Resources.IsDefaultOrEmpty )
                 {
                     additionalResources = ImmutableArray<ManagedResource>.Empty;
@@ -125,33 +147,37 @@ namespace Caravela.Framework.Impl.Pipeline
                 // Add the index of inherited aspects.
                 if ( result.ExternallyInheritableAspects.Length > 0 )
                 {
-                    var inheritedAspectsManifest = InheritableAspectsManifest.Create( result.ExternallyInheritableAspects );
+                    var inheritedAspectsManifest = InheritableAspectsManifest.Create(
+                        result.ExternallyInheritableAspects,
+                        resultPartialCompilation.Compilation );
+
                     var resource = inheritedAspectsManifest.ToResource();
                     additionalResources = additionalResources.Add( resource );
                 }
 
-                resultPartialCompilation = (PartialCompilation) RunTimeAssemblyRewriter.Rewrite( resultPartialCompilation, this.ServiceProvider );
-                resultingCompilation = resultPartialCompilation.Compilation;
-                syntaxTreeTransformations = resultPartialCompilation.ToTransformations();
+                var resultingCompilation = (PartialCompilation) RunTimeAssemblyRewriter.Rewrite( resultPartialCompilation, this.ServiceProvider );
+                var syntaxTreeTransformations = resultingCompilation.ToTransformations();
 
-                return true;
+                return new CompileTimeAspectPipelineResult(
+                    syntaxTreeTransformations,
+                    additionalResources,
+                    resultingCompilation,
+                    result.AdditionalCompilationOutputFiles );
             }
-            catch ( InvalidUserCodeException exception )
+            catch ( DiagnosticException exception )
             {
                 foreach ( var diagnostic in exception.Diagnostics )
                 {
                     diagnosticAdder.Report( diagnostic );
                 }
 
-                syntaxTreeTransformations = default;
-
-                return false;
+                return null;
             }
         }
 
-        private protected override HighLevelPipelineStage CreateStage(
-            ImmutableArray<OrderedAspectLayer> parts,
+        private protected override HighLevelPipelineStage CreateHighLevelStage(
+            PipelineStageConfiguration configuration,
             CompileTimeProject compileTimeProject )
-            => new CompileTimePipelineStage( compileTimeProject, parts, this.ServiceProvider );
+            => new CompileTimePipelineStage( compileTimeProject, configuration.Parts, this.ServiceProvider );
     }
 }

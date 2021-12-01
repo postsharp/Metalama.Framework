@@ -8,12 +8,12 @@ using System.Runtime.CompilerServices;
 namespace Caravela.Framework.Impl.CodeModel.References
 {
     /// <summary>
-    /// An implementation of <see cref="IEqualityComparer{T}"/> that can compare implementations of <see cref="IDeclarationRef"/>.
+    /// An implementation of <see cref="IEqualityComparer{T}"/> that can compare implementations of <see cref="IRefImpl"/>.
     /// The comparison is compilation-independent.
     /// </summary>
     /// <typeparam name="T"></typeparam>
     internal class DeclarationRefEqualityComparer<T> : IEqualityComparer<T>
-        where T : IDeclarationRef
+        where T : IRefImpl
     {
         public static readonly DeclarationRefEqualityComparer<T> Instance = new();
 

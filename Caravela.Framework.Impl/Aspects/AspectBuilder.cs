@@ -5,6 +5,7 @@ using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Impl.Advices;
+using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Fabrics;
 using Caravela.Framework.Impl.Pipeline;
@@ -14,6 +15,7 @@ using Caravela.Framework.Validation;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
 using System.Threading;
 
 namespace Caravela.Framework.Impl.Aspects
@@ -22,7 +24,7 @@ namespace Caravela.Framework.Impl.Aspects
         where T : class, IDeclaration
     {
         private readonly UserDiagnosticSink _diagnosticSink;
-        private readonly AspectProjectConfiguration _configuration;
+        private readonly AspectPipelineConfiguration _configuration;
         private readonly IImmutableList<Advice> _declarativeAdvices;
         private bool _skipped;
         private AspectPredecessor _predecessor;
@@ -32,7 +34,7 @@ namespace Caravela.Framework.Impl.Aspects
             UserDiagnosticSink diagnosticSink,
             IEnumerable<Advice> declarativeAdvices,
             AdviceFactory adviceFactory,
-            AspectProjectConfiguration configuration,
+            AspectPipelineConfiguration configuration,
             IAspectInstance aspectInstance,
             CancellationToken cancellationToken )
         {
@@ -67,23 +69,35 @@ namespace Caravela.Framework.Impl.Aspects
             return new DisposeAction( () => this._predecessor = oldPredecessor );
         }
 
+        IDiagnosticAdder IAspectBuilderInternal.DiagnosticAdder => this._diagnosticSink;
+
         public IDiagnosticSink Diagnostics => this._diagnosticSink;
 
         public T Target { get; }
 
         public IDeclarationSelection<TMember> WithMembers<TMember>( Func<T, IEnumerable<TMember>> selector )
             where TMember : class, IDeclaration
-            => new DeclarationSelection<TMember>(
-                this.Target,
+        {
+            var executionContext = UserCodeExecutionContext.Current;
+
+            return new DeclarationSelection<TMember>(
+                this.Target.ToRef(),
                 this._predecessor,
                 this.AddAspectSource,
-                compilation =>
+                ( compilation, diagnostics ) =>
                 {
                     var translatedTarget = compilation.Factory.GetDeclaration( this.Target );
 
-                    return this._configuration.UserCodeInvoker.Invoke( () => selector( translatedTarget ) );
+                    this._configuration.UserCodeInvoker.TryInvokeEnumerable(
+                        () => selector( translatedTarget ),
+                        executionContext.WithDiagnosticAdder( diagnostics ),
+                        out var items );
+
+                    return items ?? Enumerable.Empty<TMember>();
                 },
-                this._configuration );
+                this._configuration.AspectClasses,
+                this._configuration.ServiceProvider );
+        }
 
         IDeclaration IAspectLayerBuilder.Target => this.Target;
 

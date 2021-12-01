@@ -3,7 +3,6 @@
 
 using Caravela.Framework.Code;
 using Caravela.Framework.Code.Collections;
-using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Impl.CodeModel.References;
 using Caravela.Framework.Impl.ReflectionMocks;
 using Microsoft.CodeAnalysis;
@@ -16,7 +15,7 @@ using TypedConstant = Caravela.Framework.Code.TypedConstant;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    internal abstract class ReturnParameter : IParameter, IHasDiagnosticLocation, IDeclarationImpl
+    internal abstract class ReturnParameter : IParameter, IDeclarationImpl
     {
         protected abstract RefKind SymbolRefKind { get; }
 
@@ -55,13 +54,11 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public abstract bool Equals( IDeclaration other );
 
-        public IDiagnosticLocation? DiagnosticLocation => this.DeclaringMember.DiagnosticLocation;
-
-        Location? IHasDiagnosticLocation.DiagnosticLocation => this.DeclaringMember.GetDiagnosticLocation();
+        Location? IDiagnosticLocationImpl.DiagnosticLocation => this.DeclaringMember.GetDiagnosticLocation();
 
         public abstract ISymbol? Symbol { get; }
 
-        public abstract DeclarationRef<IDeclaration> ToRef();
+        public abstract Ref<IDeclaration> ToRef();
 
         public ImmutableArray<SyntaxReference> DeclaringSyntaxReferences => ((IDeclarationImpl) this.DeclaringMember).DeclaringSyntaxReferences;
 

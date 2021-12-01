@@ -83,17 +83,19 @@ namespace Caravela.Framework.Impl.CompileTime
             _ = new[] { 1, 2, 3 }.Buffer();
 
             // Get our public API assembly in its .NET Standard 2.0 build.
+            var currentAssembly = this.GetType().Assembly;
+
             var frameworkAssemblyReference = (MetadataReference)
                 MetadataReference.CreateFromStream(
-                    this.GetType().Assembly.GetManifestResourceStream( _compileTimeFrameworkAssemblyName + ".dll" ),
-                    filePath: _compileTimeFrameworkAssemblyName + ".dll" );
+                    currentAssembly.GetManifestResourceStream( _compileTimeFrameworkAssemblyName + ".dll" ),
+                    filePath: $"[{currentAssembly.Location}]{_compileTimeFrameworkAssemblyName}.dll" );
 
             // Get implementation assembly paths from the current AppDomain. We need to match our exact version number.
             var caravelaImplementationPaths = AppDomain.CurrentDomain.GetAssemblies()
                 .Where( a => !a.IsDynamic ) // accessing Location of dynamic assemblies throws
                 .Where(
                     a => this.CaravelaImplementationAssemblyNames.Contains( Path.GetFileNameWithoutExtension( a.Location ) ) &&
-                         AssemblyName.GetAssemblyName( a.Location ).Version == this.GetType().Assembly.GetName().Version )
+                         AssemblyName.GetAssemblyName( a.Location ).Version == currentAssembly.GetName().Version )
                 .Select( a => a.Location )
                 .ToList();
 
@@ -156,9 +158,31 @@ namespace Caravela.Framework.Impl.CompileTime
 
             File.WriteAllText( Path.Combine( tempProjectDirectory, "TempProject.csproj" ), projectText );
 
+            string dotnetPath;
+
+            if ( System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform( System.Runtime.InteropServices.OSPlatform.Windows ) )
+            {
+                dotnetPath = Environment.ExpandEnvironmentVariables( "%ProgramFiles%\\dotnet\\dotnet.exe" );
+
+                if ( !File.Exists( dotnetPath ) )
+                {
+                    dotnetPath = Environment.ExpandEnvironmentVariables( "%ProgramFiles(x86)%\\dotnet\\dotnet.exe" );
+                }
+                
+                if ( !File.Exists( dotnetPath ) )
+                {
+                    dotnetPath = "dotnet";
+                }
+            }
+            else
+            {
+                dotnetPath = "dotnet";
+            }
+
             // We may consider executing msbuild.exe instead of dotnet.exe when the build itself runs using msbuild.exe.
-            // This way we wouldn't need to require a .NET SDK to be installed.
-            var psi = new ProcessStartInfo( "dotnet", "build -t:WriteReferenceAssemblies" )
+            // This way we wouldn't need to require a .NET SDK to be installed. Also, it seems that Rider requires the full path.
+            // TODO 29508: Make this cross-platform.
+            var psi = new ProcessStartInfo( dotnetPath, "build -t:WriteReferenceAssemblies" )
             {
                 // We cannot call dotnet.exe with a \\?\-prefixed path because MSBuild would fail.
                 WorkingDirectory = tempProjectDirectory, UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true

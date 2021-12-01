@@ -1,5 +1,10 @@
 ﻿<Project>
 
+
+    <ItemGroup Condition="'$(CaravelaCompileTimeOnlyProject)'=='True'">
+        <AssemblyAttribute Include="Caravela.Framework.Aspects.CompileTimeOnlyAttribute" />
+    </ItemGroup>
+
     <PropertyGroup>
         <!-- This must be in .targets, not in .props, because it relies on other properties and
               is not meant to be overwritten -->
@@ -13,6 +18,19 @@
         <DefineConstants>$(DefineConstants);CARAVELA</DefineConstants>
     </PropertyGroup>
 
+    <!-- Auxiliary files. -->
+    <PropertyGroup>
+        <CaravelaAdditionalCompilationOutputDirectory>$(MSBuildProjectDirectory)\$(IntermediateOutputPath)\caravela-aux\</CaravelaAdditionalCompilationOutputDirectory>
+    </PropertyGroup>
+
+    <!-- Design time fallback dependency that forces rerun of analyzers/source generators when changed. -->
+    <PropertyGroup>
+        <CaravelaDesignTimeFallbackTouchFile>$(CaravelaAdditionalCompilationOutputDirectory)DesignTimeTouch\touch</CaravelaDesignTimeFallbackTouchFile>
+    </PropertyGroup>
+
+    <ItemGroup Condition="'$(DesignTimeBuild)' == 'True'">
+        <AdditionalFiles Include="$(CaravelaDesignTimeFallbackTouchFile)" />
+    </ItemGroup>
 
     <Target Name="ExportCaravelaFrameworkProperties" BeforeTargets="PrepareForBuild">
         <Error Text="The IntermediateOutputPath property is not defined." Condition="'$(IntermediateOutputPath)'==''" />

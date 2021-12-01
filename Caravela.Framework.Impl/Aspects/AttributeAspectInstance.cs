@@ -4,11 +4,9 @@
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.CodeModel.References;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System.Linq;
 
 namespace Caravela.Framework.Impl.Aspects
 {
@@ -20,7 +18,12 @@ namespace Caravela.Framework.Impl.Aspects
         private readonly IAttribute _attribute;
         private readonly CompileTimeProjectLoader _loader;
 
-        public AttributeAspectInstance( IAspect aspect, IDeclaration target, AspectClass aspectClass, IAttribute attribute, CompileTimeProjectLoader loader ) :
+        public AttributeAspectInstance(
+            IAspect aspect,
+            in Ref<IDeclaration> target,
+            AspectClass aspectClass,
+            IAttribute attribute,
+            CompileTimeProjectLoader loader ) :
             base( aspect, target, aspectClass, new AspectPredecessor( AspectPredecessorKind.Attribute, attribute ) )
         {
             this._attribute = attribute;
@@ -29,7 +32,7 @@ namespace Caravela.Framework.Impl.Aspects
 
         private AttributeAspectInstance(
             IAspect aspect,
-            IDeclaration target,
+            in Ref<IDeclaration> target,
             AspectClass aspectClass,
             IAttribute attribute,
             in AspectPredecessor aspectPredecessor,
@@ -51,30 +54,11 @@ namespace Caravela.Framework.Impl.Aspects
 
             return new AttributeAspectInstance(
                 (IAspect) attributeInstance,
-                target,
+                target.ToRef(),
                 (AspectClass) this.AspectClass,
                 this._attribute,
                 new AspectPredecessor( AspectPredecessorKind.Inherited, this ),
                 this._loader );
-        }
-
-        public AttributeSyntax ToSyntax( SyntaxGenerationContext generationContext )
-        {
-            var constructorArguments = this._attribute.ConstructorArguments.Select(
-                a => SyntaxFactory.AttributeArgument(
-                    generationContext.SyntaxGenerator.AttributeValueExpression( a.Value, generationContext.ReflectionMapper ) ) );
-
-            var namedArguments = this._attribute.NamedArguments.Select(
-                a => SyntaxFactory.AttributeArgument(
-                    SyntaxFactory.NameEquals( a.Key ),
-                    null,
-                    generationContext.SyntaxGenerator.AttributeValueExpression( a.Value, generationContext.ReflectionMapper ) ) );
-
-            var attribute = SyntaxFactory.Attribute(
-                (NameSyntax) generationContext.SyntaxGenerator.Type( this._attribute.Type.GetSymbol() ),
-                SyntaxFactory.AttributeArgumentList( SyntaxFactory.SeparatedList( constructorArguments.Concat( namedArguments ) ) ) );
-
-            return attribute;
         }
     }
 }

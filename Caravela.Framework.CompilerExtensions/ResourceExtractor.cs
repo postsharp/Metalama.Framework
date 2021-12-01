@@ -3,8 +3,11 @@
 
 using Caravela.Framework.Impl.Utilities;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading;
@@ -17,7 +20,10 @@ namespace Caravela.Framework.CompilerExtensions
     public static class ResourceExtractor
     {
         private static readonly object _initializeLock = new();
-        private static readonly Dictionary<string, (AssemblyName AssemblyName, string Path)> _embeddedAssemblies = new( StringComparer.OrdinalIgnoreCase );
+        private static readonly Dictionary<string, ( string Path, AssemblyName Name )> _embeddedAssemblies = new( StringComparer.OrdinalIgnoreCase );
+
+        private static readonly ConcurrentDictionary<string, Assembly?> _assemblyCache = new( StringComparer.OrdinalIgnoreCase );
+
         private static string? _snapshotDirectory;
         private static volatile bool _initialized;
         private static Assembly? _caravelaImplementationAssembly;
@@ -49,13 +55,27 @@ namespace Caravela.Framework.CompilerExtensions
                             ExtractEmbeddedAssemblies( currentAssembly );
 
                             // Load assemblies from the temp directory.
+                            AssemblyName? caravelaImplementationAssemblyName = null;
+
                             foreach ( var file in Directory.GetFiles( _snapshotDirectory, "*.dll" ) )
                             {
-                                var assemblyName = RetryHelper.Retry( () => AssemblyName.GetAssemblyName( file ) );
-                                _embeddedAssemblies[assemblyName.Name] = (assemblyName, file);
+                                // We don't load assemblies using Assembly.LoadFile here, because the assemblies may be loaded in
+                                // the main load context, or may be loaded later. We will use Assembly.LoadFile in last chance in the AssemblyResolve event.
+                                // This scenario is used in Caravela.Try.
+
+                                var assemblyName = AssemblyName.GetAssemblyName( file );
+
+                                // Index the assembly even if we did not load it ourselves.
+                                _embeddedAssemblies[assemblyName.Name] = (file, assemblyName);
+
+                                if ( assemblyName.Name == "Caravela.Framework.Impl" )
+                                {
+                                    caravelaImplementationAssemblyName = assemblyName;
+                                }
                             }
 
-                            _caravelaImplementationAssembly = Assembly.Load( _embeddedAssemblies["Caravela.Framework.Impl"].AssemblyName );
+                            // Attempt to use the main assembly in the default context. If it does not work, this will trigger an AssemblyResolve event.
+                            _caravelaImplementationAssembly = Assembly.Load( caravelaImplementationAssemblyName );
 
                             _initialized = true;
                         }
@@ -91,7 +111,16 @@ namespace Caravela.Framework.CompilerExtensions
             if ( !File.Exists( completedFilePath ) )
             {
                 StringBuilder log = new();
-                log.AppendLine( $"Extracting resources from assembly '{currentAssembly.GetName()}', Path='{currentAssembly.Location}'." );
+                log.AppendLine( $"Extracting resources..." );
+
+                var processName = Process.GetCurrentProcess();
+                log.AppendLine( $"Process Name: {processName.ProcessName}" );
+                log.AppendLine( $"Process Id: {processName.Id}" );
+                log.AppendLine( $"Source Assembly Name: '{currentAssembly.FullName}'" );
+                log.AppendLine( $"Source Assembly Location: '{currentAssembly.Location}'" );
+                log.AppendLine( "Stack trace:" );
+                log.AppendLine( new StackTrace().ToString() );
+                log.AppendLine( "----" );
 
                 // We cannot use MutexHelper because of dependencies on an embedded assembly.
                 using var extractMutex = new Mutex( false, "Global\\Caravela_Extract_" + AssemblyMetadataReader.BuildId );
@@ -151,21 +180,48 @@ namespace Caravela.Framework.CompilerExtensions
 
         private static Assembly? OnAssemblyResolve( object sender, ResolveEventArgs args )
         {
-            var requestedAssemblyName = new AssemblyName( args.Name );
+            return _assemblyCache.GetOrAdd( args.Name, Load );
 
-            if ( _embeddedAssemblies.TryGetValue( requestedAssemblyName.Name, out var assembly ) )
+            static Assembly? Load( string name )
             {
-                if ( AssemblyName.ReferenceMatchesDefinition( requestedAssemblyName, assembly.AssemblyName ) )
-                {
-                    return Assembly.LoadFile( assembly.Path );
-                }
-                else
-                {
-                    // This is not the expected version.
-                }
-            }
+                var requestedAssemblyName = new AssemblyName( name );
 
-            return null;
+                // First try to find the assembly in the AppDomain.
+                var existingAssembly = AppDomain.CurrentDomain.GetAssemblies()
+                    .FirstOrDefault(
+                        x =>
+                        {
+                            var existingAssemblyName = x.GetName();
+
+                            return AssemblyName.ReferenceMatchesDefinition( requestedAssemblyName, existingAssemblyName ) &&
+                                   existingAssemblyName.Version == requestedAssemblyName.Version;
+                        } );
+
+                if ( existingAssembly != null )
+                {
+                    return existingAssembly;
+                }
+
+                // Find for an assembly in the current AppDomain.
+
+                if ( _embeddedAssemblies.TryGetValue( requestedAssemblyName.Name, out var assembly ) )
+                {
+                    var assemblyName = assembly.Name;
+
+                    // We need to explicitly verify the exact version, because AssemblyName.ReferenceMatchesDefinition is too tolerant. 
+                    if ( AssemblyName.ReferenceMatchesDefinition( requestedAssemblyName, assemblyName )
+                         && assemblyName.Version == requestedAssemblyName.Version )
+                    {
+                        return Assembly.LoadFile( assembly.Path );
+                    }
+                    else
+                    {
+                        // This is not the expected version.
+                    }
+                }
+
+                return null;
+            }
         }
     }
 }

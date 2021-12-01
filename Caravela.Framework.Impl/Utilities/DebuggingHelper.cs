@@ -25,7 +25,7 @@ namespace Caravela.Framework.Impl.Utilities
                 "servicehub.roslyncodeanalysisservice" => ProcessKind.RoslynCodeAnalysisService,
                 "csc" => ProcessKind.Compiler,
                 "dotnet" =>
-                    Environment.CommandLine.Contains( "JetBrains.ReSharper.Roslyn.Worker.exe" ) ? ProcessKind.Resharper :
+                    Environment.CommandLine.Contains( "JetBrains.ReSharper.Roslyn.Worker.exe" ) ? ProcessKind.Rider :
                     Environment.CommandLine.Contains( "VBCSCompiler.dll" ) ? ProcessKind.Compiler :
                     ProcessKind.Other,
                 _ => ProcessKind.Other
@@ -49,7 +49,7 @@ namespace Caravela.Framework.Impl.Utilities
                 {
                     ProcessKind.DevEnv => projectOptions.DebugIdeProcess,
                     ProcessKind.RoslynCodeAnalysisService => projectOptions.DebugAnalyzerProcess,
-                    ProcessKind.Resharper => projectOptions.DebugAnalyzerProcess,
+                    ProcessKind.Rider => projectOptions.DebugAnalyzerProcess,
                     ProcessKind.Compiler => projectOptions.DebugCompilerProcess,
                     _ => false
                 };

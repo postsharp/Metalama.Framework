@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Impl.AdditionalOutputs;
 using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.Aspects;
 using Caravela.Framework.Impl.CodeModel;
@@ -21,7 +22,7 @@ namespace Caravela.Framework.Impl.Pipeline
         /// <summary>
         /// Gets the Roslyn compilation.
         /// </summary>
-        public PartialCompilation PartialCompilation { get; }
+        public PartialCompilation Compilation { get; }
 
         /// <summary>
         /// Gets the set of diagnostics.
@@ -46,22 +47,33 @@ namespace Caravela.Framework.Impl.Pipeline
 
         public ImmutableArray<AttributeAspectInstance> ExternallyInheritableAspects { get; }
 
+        /// <summary>
+        /// Gets the compilation model corresponding to <see cref="Compilation"/>, if it has been created.
+        /// </summary>
+        public CompilationModel? CompilationModel { get; }
+
+        public ImmutableArray<AdditionalCompilationOutputFile> AdditionalCompilationOutputFiles { get; }
+
         public PipelineStageResult(
             PartialCompilation compilation,
             ProjectModel project,
             ImmutableArray<OrderedAspectLayer> aspectLayers,
+            CompilationModel? compilationModel,
             ImmutableUserDiagnosticList? diagnostics = null,
             IReadOnlyList<IAspectSource>? aspectSources = null,
             ImmutableArray<AttributeAspectInstance>? inheritableAspectInstances = null,
-            IReadOnlyList<IntroducedSyntaxTree>? additionalSyntaxTrees = null )
+            IReadOnlyList<IntroducedSyntaxTree>? additionalSyntaxTrees = null,
+            ImmutableArray<AdditionalCompilationOutputFile>? additionalCompilationOutputFiles = null )
         {
-            this.PartialCompilation = compilation;
+            this.Compilation = compilation;
             this.Diagnostics = diagnostics ?? ImmutableUserDiagnosticList.Empty;
             this.AspectSources = aspectSources ?? Array.Empty<IAspectSource>();
             this.AspectLayers = aspectLayers;
+            this.CompilationModel = compilationModel;
             this.ExternallyInheritableAspects = inheritableAspectInstances ?? ImmutableArray<AttributeAspectInstance>.Empty;
             this.Project = project;
             this.AdditionalSyntaxTrees = additionalSyntaxTrees ?? ImmutableArray<IntroducedSyntaxTree>.Empty;
+            this.AdditionalCompilationOutputFiles = additionalCompilationOutputFiles ?? ImmutableArray<AdditionalCompilationOutputFile>.Empty;
         }
     }
 }

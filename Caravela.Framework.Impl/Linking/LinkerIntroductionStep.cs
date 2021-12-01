@@ -76,7 +76,9 @@ namespace Caravela.Framework.Impl.Linking
 
         public override LinkerIntroductionStepOutput Execute( AspectLinkerInput input )
         {
-            var diagnostics = new UserDiagnosticSink( input.CompileTimeProject );
+            // We don't use a code fix filter because the linker is not supposed to suggest code fixes. If that changes, we need to pass a filter.
+            var diagnostics = new UserDiagnosticSink( input.CompileTimeProject, null );
+
             var nameProvider = new LinkerIntroductionNameProvider();
             var lexicalScopeFactory = new LexicalScopeFactory( input.CompilationModel );
             var syntaxTransformationCollection = new SyntaxTransformationCollection();
@@ -94,12 +96,12 @@ namespace Caravela.Framework.Impl.Linking
 
             foreach ( var transformation in allTransformations.OfType<IReplaceMember>() )
             {
-                var replacedMember = transformation.ReplacedMember.Resolve( input.CompilationModel );
+                var replacedMember = transformation.ReplacedMember.GetTarget( input.CompilationModel );
 
                 IDeclaration canonicalReplacedMember = replacedMember switch
                 {
                     BuiltDeclaration declaration => declaration.Builder,
-                    _ => replacedMember,
+                    _ => replacedMember
                 };
 
                 switch ( canonicalReplacedMember )

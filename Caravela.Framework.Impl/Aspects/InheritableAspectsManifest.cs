@@ -2,8 +2,6 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Compiler;
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
 using Microsoft.CodeAnalysis;
 using Newtonsoft.Json;
@@ -31,13 +29,13 @@ namespace Caravela.Framework.Impl.Aspects
             this.InheritableAspects = inheritableAspects;
         }
 
-        public static InheritableAspectsManifest Create( IEnumerable<IAspectInstance> inheritedAspect )
+        public static InheritableAspectsManifest Create( IEnumerable<IAspectInstanceInternal> inheritedAspect, Compilation compilation )
             => new(
                 inheritedAspect.GroupBy( a => a.AspectClass )
                     .ToDictionary(
                         g => g.Key.FullName,
                         g => (IReadOnlyList<string>) g.Select(
-                                i => DocumentationCommentId.CreateDeclarationId( i.TargetDeclaration.GetSymbol().AssertNotNull( "TODO" ) ) )
+                                i => DocumentationCommentId.CreateDeclarationId( i.TargetDeclaration.GetSymbol( compilation ).AssertNotNull( "TODO" ) ) )
                             .ToList(),
                         StringComparer.Ordinal ) );
 

@@ -6,7 +6,7 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Fabrics;
 using Caravela.Framework.Impl.Aspects;
 using Caravela.Framework.Impl.CodeModel;
-using Caravela.Framework.Impl.Pipeline;
+using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
 
@@ -17,42 +17,58 @@ namespace Caravela.Framework.Impl.Fabrics
     /// </summary>
     internal class TypeFabricDriver : FabricDriver
     {
-        public TypeFabricDriver( AspectProjectConfiguration configuration, IFabric fabric, Compilation runTimeCompilation ) : base(
-            configuration,
+        public TypeFabricDriver( FabricManager fabricManager, Fabric fabric, Compilation runTimeCompilation ) : base(
+            fabricManager,
             fabric,
             runTimeCompilation ) { }
 
         private ISymbol TargetSymbol => this.FabricSymbol.ContainingType;
 
-        public override void Execute( IAspectBuilderInternal aspectBuilder, FabricTemplateClass templateClass, FabricInstance fabricInstance )
+        public bool TryExecute( IAspectBuilderInternal aspectBuilder, FabricTemplateClass templateClass, FabricInstance fabricInstance )
         {
             // Type fabrics execute as aspects, called from FabricAspectClass.
             var templateInstance = new TemplateClassInstance( this.Fabric, templateClass );
-            var builder = new Builder( (INamedType) aspectBuilder.Target, this.Configuration, aspectBuilder, templateInstance, fabricInstance );
-            ((ITypeFabric) this.Fabric).AmendType( builder );
+            var builder = new Amender( (INamedType) aspectBuilder.Target, this.FabricManager, aspectBuilder, templateInstance, fabricInstance );
+
+            var executionContext = new UserCodeExecutionContext(
+                this.FabricManager.ServiceProvider,
+                aspectBuilder.DiagnosticAdder,
+                UserCodeMemberInfo.FromDelegate( new Action<ITypeAmender>( ((TypeFabric) this.Fabric).AmendType ) ) );
+
+            return this.FabricManager.UserCodeInvoker.TryInvoke( () => ((TypeFabric) this.Fabric).AmendType( builder ), executionContext );
         }
 
         public override FabricKind Kind => FabricKind.Type;
 
-        public override IDeclaration GetTarget( CompilationModel compilation ) => compilation.Factory.GetNamedType( (INamedTypeSymbol) this.TargetSymbol );
+        public IDeclaration GetTarget( CompilationModel compilation ) => compilation.Factory.GetNamedType( (INamedTypeSymbol) this.TargetSymbol );
 
         public override FormattableString FormatPredecessor() => $"type fabric on '{this.TargetSymbol}'";
 
-        private class Builder : BaseBuilder<INamedType>, ITypeAmender
+        private class Amender : BaseAmender<INamedType>, ITypeAmender
         {
-            public Builder(
+            private readonly IAspectBuilderInternal _aspectBuilder;
+
+            public Amender(
                 INamedType namedType,
-                AspectProjectConfiguration context,
+                FabricManager fabricManager,
                 IAspectBuilderInternal aspectBuilder,
                 TemplateClassInstance templateClassInstance,
-                FabricInstance fabricInstance ) : base( namedType, context, aspectBuilder, fabricInstance )
+                FabricInstance fabricInstance ) : base(
+                namedType.Compilation.Project,
+                fabricManager,
+                fabricInstance,
+                fabricInstance.TargetDeclaration.As<INamedType>() )
             {
+                this._aspectBuilder = aspectBuilder;
+                this.Type = namedType;
                 this.Advices = aspectBuilder.AdviceFactory.WithTemplateClassInstance( templateClassInstance );
             }
 
-            public INamedType Type => this.Target;
+            public INamedType Type { get; }
 
             public IAdviceFactory Advices { get; }
+
+            protected override void AddAspectSource( IAspectSource aspectSource ) => this._aspectBuilder.AddAspectSource( aspectSource );
         }
     }
 }

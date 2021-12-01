@@ -8,7 +8,7 @@ namespace Caravela.Framework.Code
     /// <summary>
     /// Represents a field. Note that fields can be promoted to properties by aspects.
     /// </summary>
-    public interface IField : IFieldOrProperty 
+    public interface IField : IFieldOrProperty
     {
         FieldInfo ToFieldInfo();
     }

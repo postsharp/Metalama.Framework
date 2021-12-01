@@ -9,7 +9,6 @@ using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CodeModel.Builders;
 using Caravela.Framework.Impl.Diagnostics;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Caravela.Framework.Impl.Advices
 {
@@ -106,14 +105,7 @@ namespace Caravela.Framework.Impl.Advices
             // TODO: Don't copy all attributes, but how to decide which ones to keep?
             foreach ( var codeElementAttribute in declaration.Attributes )
             {
-                var builderAttribute = builder.AddAttribute(
-                    codeElementAttribute.Type,
-                    codeElementAttribute.ConstructorArguments.Select( x => x.Value ).ToArray() );
-
-                foreach ( var codeElementAttributeNamedArgument in codeElementAttribute.NamedArguments )
-                {
-                    builderAttribute.AddNamedArgument( codeElementAttributeNamedArgument.Key, codeElementAttributeNamedArgument.Value.Value );
-                }
+                builder.AddAttribute( codeElementAttribute.ToAttributeConstruction() );
             }
         }
     }

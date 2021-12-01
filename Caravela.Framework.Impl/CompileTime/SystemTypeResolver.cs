@@ -47,10 +47,10 @@ namespace Caravela.Framework.Impl.CompileTime
 
             if ( typeSymbol.ContainingAssembly != null )
             {
-                var assemblyName = typeSymbol.ContainingAssembly.Name;
+                var assemblyIdentity = typeSymbol.ContainingAssembly.Identity;
 
                 // We load only system assemblies, not user assemblies loaded in the AppDomain.
-                if ( !this.IsStandardAssemblyName( assemblyName ) )
+                if ( !this.IsStandardAssemblyName( assemblyIdentity.Name ) )
                 {
                     return null;
                 }
@@ -64,13 +64,15 @@ namespace Caravela.Framework.Impl.CompileTime
                 }
 
                 // We don't allow loading new assemblies to the AppDomain.
-                if ( AppDomain.CurrentDomain.GetAssemblies().All( a => a.GetName().Name != assemblyName ) )
+                var assemblyName = new AssemblyName( assemblyIdentity.GetDisplayName() );
+
+                if ( AppDomain.CurrentDomain.GetAssemblies().All( a => AssemblyName.ReferenceMatchesDefinition( assemblyName, a.GetName() ) ) )
                 {
                     // Coverage: ignore
                     return null;
                 }
 
-                typeName += ", " + assemblyName;
+                typeName += ", " + assemblyIdentity.GetDisplayName();
             }
 
             var type = Type.GetType( typeName );

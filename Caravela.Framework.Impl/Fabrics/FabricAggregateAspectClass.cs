@@ -36,7 +36,7 @@ namespace Caravela.Framework.Impl.Fabrics
 
         public bool IsAttribute => false;
 
-        public Type Type => typeof(IFabric);
+        public Type Type => typeof(Fabric);
 
         public CompileTimeProject Project { get; }
 

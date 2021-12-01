@@ -1,2 +1,0 @@
-// The compiled template failed. 
-// Error CR0112 on `Template`: `The advice 'Aspect.Template()' threw 'InvalidUserCodeException' when applied to 'TargetCode.Method(int)': DynamicReceiverThisInStaticContext.cs(22,20): error CR0114: The advice 'Aspect.Template()' cannot use 'meta.This' in an advice applied to method 'TargetCode.Method(int)' because the target method is static. For more information, attach a debugger to the compiler using the  '-p:DebugCaravela=True' command-line option.`

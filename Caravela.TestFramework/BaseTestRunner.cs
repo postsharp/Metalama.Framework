@@ -65,12 +65,17 @@ namespace Caravela.TestFramework
         {
             using ( TestExecutionContext.Open() )
             {
-                await this.RunAndAssertCoreAsync( testInput );
-
-                // This is a trick to make the current task, on the heap, stop having a reference to the previous
-                // task. This allows TestExecutionContext.Dispose to perform a full GC. Without Task.Yield, we will
-                // have references to the objects that are in the scope of the test.
-                await Task.Yield();
+                try
+                {
+                    await this.RunAndAssertCoreAsync( testInput );
+                }
+                finally
+                {
+                    // This is a trick to make the current task, on the heap, stop having a reference to the previous
+                    // task. This allows TestExecutionContext.Dispose to perform a full GC. Without Task.Yield, we will
+                    // have references to the objects that are in the scope of the test.
+                    await Task.Yield();
+                }
             }
         }
 
@@ -97,7 +102,7 @@ namespace Caravela.TestFramework
         /// <param name="testResult">The output object must be created by the caller and passed, so that the caller can get
         ///     a partial object in case of exception.</param>
         /// <param name="state"></param>
-        private protected virtual async Task RunAsync(
+        protected virtual async Task RunAsync(
             TestInput testInput,
             TestResult testResult,
             Dictionary<string, object?> state )
@@ -123,7 +128,9 @@ namespace Caravela.TestFramework
             try
             {
                 // Create parse options.
-                var preprocessorSymbols = testInput.ProjectProperties.PreprocessorSymbols.Add( "TESTRUNNER" ).Add( "CARAVELA" );
+                var preprocessorSymbols = testInput.ProjectProperties.PreprocessorSymbols
+                    .Add( "TESTRUNNER" )
+                    .Add( "CARAVELA" );
 
                 var parseOptions = CSharpParseOptions.Default.WithPreprocessorSymbols( preprocessorSymbols );
 
@@ -256,14 +263,13 @@ namespace Caravela.TestFramework
 
             var compilation = (await project.GetCompilationAsync())!.WithAssemblyName( name );
 
-            if ( !pipeline.TryExecute(
+            var pipelineResult = await pipeline.ExecuteAsync(
                 testResult.InputCompilationDiagnostics,
                 compilation,
                 default,
-                CancellationToken.None,
-                out _,
-                out var outputResources,
-                out var resultCompilation ) )
+                CancellationToken.None );
+
+            if ( pipelineResult == null )
             {
                 testResult.SetFailed( "Transformation of the dependency failed." );
 
@@ -274,7 +280,9 @@ namespace Caravela.TestFramework
             var testOptions = this.BaseServiceProvider.GetService<TestProjectOptions>();
             var outputPath = Path.Combine( testOptions.BaseDirectory, name + ".dll" );
 
-            var emitResult = resultCompilation.Emit( outputPath, manifestResources: outputResources.Select( r => r.Resource ) );
+            var emitResult = pipelineResult.ResultingCompilation.Compilation.Emit(
+                outputPath,
+                manifestResources: pipelineResult.AdditionalResources.Select( r => r.Resource ) );
 
             if ( !emitResult.Success )
             {
@@ -309,7 +317,7 @@ namespace Caravela.TestFramework
             }
         }
 
-        private protected static string NormalizeEndOfLines( string? s ) => string.IsNullOrWhiteSpace( s ) ? "" : _newLineRegex.Replace( s, "\n" ).Trim();
+        protected internal static string NormalizeEndOfLines( string? s ) => string.IsNullOrWhiteSpace( s ) ? "" : _newLineRegex.Replace( s, "\n" ).Trim();
 
         internal static string? NormalizeTestOutput( string? s, bool preserveFormatting )
             => s == null ? null : NormalizeTestOutput( CSharpSyntaxTree.ParseText( s ).GetRoot(), preserveFormatting );
@@ -331,7 +339,7 @@ namespace Caravela.TestFramework
             }
         }
 
-        private protected virtual bool CompareTransformedCode => true;
+        protected virtual bool CompareTransformedCode => true;
 
         private protected virtual void SaveResults( TestInput testInput, TestResult testResult, Dictionary<string, object?> state )
         {
@@ -423,7 +431,7 @@ namespace Caravela.TestFramework
             state["actualTransformedNormalizedSourceText"] = actualTransformedNormalizedSourceText;
         }
 
-        private protected virtual void ExecuteAssertions( TestInput testInput, TestResult testResult, Dictionary<string, object?> state )
+        protected virtual void ExecuteAssertions( TestInput testInput, TestResult testResult, Dictionary<string, object?> state )
         {
             if ( !this.CompareTransformedCode )
             {
@@ -508,7 +516,7 @@ namespace Caravela.TestFramework
             }
         }
 
-        private protected virtual HtmlCodeWriter CreateHtmlCodeWriter( IServiceProvider serviceProvider, TestOptions options )
+        protected virtual HtmlCodeWriter CreateHtmlCodeWriter( IServiceProvider serviceProvider, TestOptions options )
             => new( serviceProvider, new HtmlCodeWriterOptions( options.AddHtmlTitles.GetValueOrDefault() ) );
 
         private async Task WriteHtmlAsync( TestSyntaxTree testSyntaxTree, string htmlDirectory, HtmlCodeWriter htmlCodeWriter )

@@ -3,6 +3,7 @@
 
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Impl.Advices;
+using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Utilities;
 
 namespace Caravela.Framework.Impl.Aspects
@@ -19,5 +20,7 @@ namespace Caravela.Framework.Impl.Aspects
         AdviceFactory AdviceFactory { get; }
 
         DisposeAction WithPredecessor( in AspectPredecessor predecessor );
+
+        IDiagnosticAdder DiagnosticAdder { get; }
     }
 }

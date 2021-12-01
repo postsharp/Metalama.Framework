@@ -20,7 +20,7 @@ namespace Caravela.SourceTransformer
             var changeDynamicToObject = context.GlobalOptions.TryGetValue( "build_property.ChangeDynamicToObject", out var changeDynamicToObjectStr )
                                         && bool.Parse( changeDynamicToObjectStr );
 
-            var rewriter = new Rewriter( changeDynamicToObject );
+            var rewriter = new Rewriter( changeDynamicToObject, context.Compilation );
             var compilation = context.Compilation;
 
             foreach ( var tree in compilation.SyntaxTrees )
@@ -39,11 +39,13 @@ namespace Caravela.SourceTransformer
         private class Rewriter : CSharpSyntaxRewriter
         {
             private readonly bool _changeDynamicToObject;
+            private readonly Compilation _compilation;
             private List<FieldDeclarationSyntax>? _fieldsToAdd;
 
-            public Rewriter( bool changeDynamicToObject )
+            public Rewriter( bool changeDynamicToObject, Compilation compilation )
             {
                 this._changeDynamicToObject = changeDynamicToObject;
+                this._compilation = compilation;
             }
 
             public List<Diagnostic> Diagnostics { get; } = new();
@@ -77,11 +79,52 @@ namespace Caravela.SourceTransformer
 
                 var fieldName = "@" + char.ToLowerInvariant( node.Identifier.ValueText[0] ) + node.Identifier.ValueText.Substring( 1 );
 
-                this._fieldsToAdd!.Add( FieldDeclaration( VariableDeclaration( NullableType( node.Type ) ).AddVariables( VariableDeclarator( fieldName ) ) ) );
+                var semanticModel = this._compilation.GetSemanticModel( node.SyntaxTree );
+                var nodeType = (ITypeSymbol?) semanticModel.GetSymbolInfo( node.Type ).Symbol;
+                var isValueType = nodeType is { IsValueType: true };
+
+                TypeSyntax fieldType;
+                ExpressionSyntax deferenceExpression;
+                Func<ExpressionSyntax, ExpressionSyntax> evaluateExpression;
+
+                if ( isValueType )
+                {
+                    // If we have a value type, we use a StrongBox. This seems inefficient at first sight, but this is the only
+                    // general way to ensure, without locks, that the writing of the struct is atomic. Improvements are possible for
+                    // other intrinsic types provided by Interlocked, but it would require more work, and a convention meaning that
+                    // the default value means unassigned.
+
+                    var fieldInstanceType = QualifiedName(
+                        QualifiedName(
+                            QualifiedName(
+                                IdentifierName( "System" ),
+                                IdentifierName( "Runtime" ) ),
+                            IdentifierName( "CompilerServices" ) ),
+                        GenericName( Identifier( "StrongBox" ) )
+                            .WithTypeArgumentList( TypeArgumentList( SingletonSeparatedList( node.Type ) ) ) );
+
+                    fieldType = NullableType( fieldInstanceType );
+
+                    deferenceExpression = MemberAccessExpression(
+                        SyntaxKind.SimpleMemberAccessExpression,
+                        IdentifierName( fieldName ),
+                        IdentifierName( "Value" ) );
+
+                    evaluateExpression = expression
+                        => ObjectCreationExpression( fieldInstanceType ).WithArgumentList( ArgumentList( SingletonSeparatedList( Argument( expression ) ) ) );
+                }
+                else
+                {
+                    fieldType = NullableType( node.Type );
+                    deferenceExpression = IdentifierName( fieldName );
+                    evaluateExpression = expression => expression;
+                }
+
+                this._fieldsToAdd!.Add( FieldDeclaration( VariableDeclaration( fieldType ).AddVariables( VariableDeclarator( fieldName ) ) ) );
 
                 if ( node.ExpressionBody != null )
                 {
-                    var block = TransformExpression( fieldName, node.ExpressionBody.Expression );
+                    var block = TransformExpression( fieldName, evaluateExpression( node.ExpressionBody.Expression ), deferenceExpression );
 
                     var newNode = node.WithExpressionBody( null )
                         .WithSemicolonToken( default )
@@ -96,7 +139,7 @@ namespace Caravela.SourceTransformer
                     var getAccessor = node.AccessorList!.Accessors.SingleOrDefault( a => a.Kind() == SyntaxKind.GetAccessorDeclaration )!;
                     var setAccessor = node.AccessorList!.Accessors.SingleOrDefault( a => a.Kind() == SyntaxKind.SetAccessorDeclaration );
 
-                    var block = TransformExpression( fieldName, getAccessor.ExpressionBody!.Expression );
+                    var block = TransformExpression( fieldName, evaluateExpression( getAccessor.ExpressionBody!.Expression ), deferenceExpression );
 
                     var newGetAccessor =
                         getAccessor.WithExpressionBody( null )
@@ -142,7 +185,7 @@ namespace Caravela.SourceTransformer
                 return false;
             }
 
-            private static BlockSyntax TransformExpression( string fieldName, ExpressionSyntax expression )
+            private static BlockSyntax TransformExpression( string fieldName, ExpressionSyntax expression, ExpressionSyntax dereferenceExpression )
                 =>
 
                     // PERF: read the field into a local, to avoid unnecessary double read in the fast case
@@ -158,7 +201,7 @@ namespace Caravela.SourceTransformer
                                         Argument( IdentifierName( fieldName ) ).WithRefKindKeyword( Token( SyntaxKind.RefKeyword ) ),
                                         Argument( expression ),
                                         Argument( LiteralExpression( SyntaxKind.NullLiteralExpression ) ) ) ) ),
-                        ReturnStatement( IdentifierName( fieldName ) ) );
+                        ReturnStatement( dereferenceExpression ) );
 
             public override SyntaxNode VisitClassDeclaration( ClassDeclarationSyntax node )
             {

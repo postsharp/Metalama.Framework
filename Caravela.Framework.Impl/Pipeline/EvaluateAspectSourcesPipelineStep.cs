@@ -6,6 +6,7 @@ using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.Aspects;
 using Caravela.Framework.Impl.CodeModel;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
 
@@ -30,30 +31,47 @@ namespace Caravela.Framework.Impl.Pipeline
         {
             var aspectInstances = this._aspectSources.SelectMany(
                     s => s.GetAspectInstances( compilation, this.AspectLayer.AspectClass, pipelineStepsState, cancellationToken ) )
+                .Select(
+                    x =>
+                    {
+                        var target = (IDeclarationImpl) x.TargetDeclaration.GetTarget( compilation );
+
+                        return new ResolvedAspectInstance( x, target, x.ComputeEligibility( target ) );
+                    } )
                 .ToList();
 
             // We assume that all aspect instances are eligible, but some are eligible only for inheritance.
 
             // Get the aspects that can be processed, i.e. they are not abstract-only.
-            var concreteAspectInstances = aspectInstances.Where( a => a.Eligibility.IncludesAll( EligibleScenarios.Aspect ) ).ToList();
+            var concreteAspectInstances = aspectInstances
+                .Where( a => a.Eligibility.IncludesAll( EligibleScenarios.Aspect ) )
+                .ToList();
 
             // Gets aspects that can be inherited.
             var inheritableAspectInstances = aspectInstances
-                .Where( a => a.Eligibility.IncludesAll( EligibleScenarios.Inheritance ) && a.AspectClass.IsInherited )
-                .Cast<AttributeAspectInstance>()
+                .Where(
+                    a => a.Eligibility.IncludesAll( EligibleScenarios.Inheritance ) && a.AspectInstance.AspectClass.IsInherited
+                                                                                    && a.AspectInstance is AttributeAspectInstance )
                 .ToList();
 
             // Gets aspects that have been inherited by the source. 
             var inheritedAspectInstancesInProject = inheritableAspectInstances
-                .SelectMany( a => ((IDeclarationImpl) a.TargetDeclaration).GetDerivedDeclarations().Select( a.CreateDerivedInstance ) )
+                .SelectMany(
+                    a => a.TargetDeclaration.GetDerivedDeclarations()
+                        .Select(
+                            declaration =>
+                                new ResolvedAspectInstance(
+                                    a.AspectInstance.CreateDerivedInstance( declaration ),
+                                    (IDeclarationImpl) declaration,
+                                    EligibleScenarios.Aspect ) ) )
                 .ToList();
 
             // Index these aspects. 
             pipelineStepsState.AddAspectInstances( concreteAspectInstances );
             pipelineStepsState.AddAspectInstances( inheritedAspectInstancesInProject );
-            pipelineStepsState.AddInheritableAspectInstances( inheritableAspectInstances );
+            pipelineStepsState.AddInheritableAspectInstances( inheritableAspectInstances.Select( x => (AttributeAspectInstance) x.AspectInstance ).ToList() );
 
-            return compilation.WithAspectInstances( concreteAspectInstances );
+            return compilation.WithAspectInstances( concreteAspectInstances.Select( x => x.AspectInstance ).ToImmutableArray() );
         }
 
         public void AddAspectSource( IAspectSource aspectSource ) => this._aspectSources.Add( aspectSource );

@@ -27,7 +27,7 @@ namespace Caravela.Framework.Impl.Linking
     {
         private IReadOnlyList<MemberDeclarationSyntax> RewriteProperty( PropertyDeclarationSyntax propertyDeclaration, IPropertySymbol symbol )
         {
-            var generationContext = SyntaxGenerationContext.Create( this._serviceProvider, this.IntermediateCompilation, propertyDeclaration );
+            var generationContext = SyntaxGenerationContext.Create( this._serviceProvider, this._intermediateCompilation, propertyDeclaration );
 
             if ( this._introductionRegistry.IsOverrideTarget( symbol ) )
             {

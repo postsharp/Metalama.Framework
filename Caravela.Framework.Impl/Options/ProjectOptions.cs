@@ -24,6 +24,9 @@ namespace Caravela.Framework.Impl.Options
             this.PlugIns = plugIns ?? ImmutableArray<object>.Empty;
         }
 
+        public ProjectOptions( Microsoft.CodeAnalysis.Project project, ImmutableArray<object>? plugIns = null ) :
+            this( new OptionsAdapter( project.AnalyzerOptions.AnalyzerConfigOptionsProvider ), plugIns ) { }
+
         public ProjectOptions( AnalyzerConfigOptionsProvider options, ImmutableArray<object>? plugIns = null ) :
             this( new OptionsAdapter( options ), plugIns ) { }
 
@@ -43,7 +46,7 @@ namespace Caravela.Framework.Impl.Options
 
         public ImmutableArray<object> PlugIns { get; }
 
-        public bool IsFrameworkEnabled => this.GetBooleanOption( "CaravelaEnabled", true );
+        public bool IsFrameworkEnabled => this.GetBooleanOption( "CaravelaEnabled", true ) && !this.GetBooleanOption( "CaravelaCompileTimeOnlyProject" );
 
         public bool FormatOutput => this.GetBooleanOption( "CaravelaFormatOutput" );
 
@@ -56,6 +59,10 @@ namespace Caravela.Framework.Impl.Options
         public string? TargetFramework => this.GetStringOption( "Configuration" );
 
         public string? Configuration => this.GetStringOption( "TargetFramework" );
+
+        public bool IsDesignTimeEnabled => this.GetBooleanOption( "CaravelaDesignTimeEnabled", true );
+
+        public string? AdditionalCompilationOutputDirectory => this.GetStringOption( "CaravelaAdditionalCompilationOutputDirectory" );
 
         public bool TryGetProperty( string name, [NotNullWhen( true )] out string? value )
         {

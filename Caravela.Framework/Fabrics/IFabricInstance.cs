@@ -7,20 +7,20 @@ using Caravela.Framework.Code;
 namespace Caravela.Framework.Fabrics
 {
     /// <summary>
-    /// Represents an instance of a <see cref="IFabric"/> type including its <see cref="TargetDeclaration"/>.
+    /// Represents an instance of a <see cref="Fabrics.Fabric"/> type including its <see cref="TargetDeclaration"/>.
     /// </summary>
     [CompileTimeOnly]
     public interface IFabricInstance : IAspectPredecessor
     {
         /// <summary>
-        /// Gets the <see cref="IFabric"/> instance.
+        /// Gets the <see cref="Fabrics.Fabric"/> instance.
         /// </summary>
-        IFabric Fabric { get; }
+        Fabric Fabric { get; }
 
         /// <summary>
         /// Gets the declaration to which the fabric is applied. It can be an <see cref="INamedType"/>, an <see cref="INamespace"/>
         /// or the <see cref="ICompilation"/>.
         /// </summary>
-        IDeclaration? TargetDeclaration { get; }
+        IRef<IDeclaration> TargetDeclaration { get; }
     }
 }

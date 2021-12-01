@@ -47,7 +47,10 @@ namespace Caravela.Framework.Impl.DesignTime.Diagnostics
                             _ => throw new NotImplementedException()
                         };
 
-                    designTimeDiagnostic = descriptor.CreateDiagnostic( diagnostic.Location, (diagnostic.Id, diagnostic.GetMessage()) );
+                    designTimeDiagnostic = descriptor.CreateDiagnostic(
+                        diagnostic.Location,
+                        (diagnostic.Id, diagnostic.GetMessage()),
+                        properties: diagnostic.Properties );
                 }
 
                 var reportSourceTree = designTimeDiagnostic.Location.SourceTree;
@@ -106,7 +109,8 @@ namespace Caravela.Framework.Impl.DesignTime.Diagnostics
                             designTimeDiagnostic.DefaultSeverity,
                             true,
                             diagnostic.WarningLevel,
-                            location: newLocation );
+                            location: newLocation,
+                            properties: designTimeDiagnostic.Properties );
 
                     reportDiagnostic( relocatedDiagnostic );
                 }

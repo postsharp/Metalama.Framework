@@ -34,6 +34,9 @@ namespace Caravela.TestFramework
             Directory.CreateDirectory( projectDirectory );
         }
 
+        // Don't create crash reports for user exceptions so we have deterministic error messages.
+        public override string? GetNewCrashReportPath() => null;
+
         public string BaseDirectory { get; }
 
         public bool DebugCompilerProcess => false;
@@ -46,7 +49,7 @@ namespace Caravela.TestFramework
 
         public override string SettingsDirectory { get; }
 
-        public string ProjectId => "test";
+        public string ProjectId => throw new NotSupportedException();
 
         public virtual string? BuildTouchFile => null;
 
@@ -71,6 +74,10 @@ namespace Caravela.TestFramework
         public string ProjectDirectory { get; }
 
         public IProjectOptions Apply( IProjectOptions options ) => options;
+
+        public bool IsDesignTimeEnabled => true;
+
+        public string? AdditionalCompilationOutputDirectory => null;
 
         public bool TryGetProperty( string name, [NotNullWhen( true )] out string? value ) => this._properties.TryGetValue( name, out value );
 

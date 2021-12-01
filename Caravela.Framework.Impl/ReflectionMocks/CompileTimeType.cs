@@ -4,6 +4,8 @@
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CodeModel.References;
+using Caravela.Framework.Impl.Utilities;
+using Caravela.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Globalization;
@@ -14,25 +16,32 @@ namespace Caravela.Framework.Impl.ReflectionMocks
     // This class must be public because it is referenced from compiled templates.
     public sealed class CompileTimeType : Type, ICompileTimeReflectionObject<IType>
     {
-        internal IDeclarationRef<IType> Target { get; }
+        internal ISdkRef<IType> Target { get; }
 
-        IDeclarationRef<IType> ICompileTimeReflectionObject<IType>.Target => this.Target;
+        ISdkRef<IType> ICompileTimeReflectionObject<IType>.Target => this.Target;
 
-        private CompileTimeType( IDeclarationRef<IType> typeSymbol, string fullName )
+        private CompileTimeType( ISdkRef<IType> typeSymbol, string fullName )
         {
+            if ( string.IsNullOrEmpty( fullName ) )
+            {
+                throw new ArgumentNullException( nameof(fullName) );
+            }
+
             this.FullName = fullName;
             this.Target = typeSymbol;
         }
 
-        internal static Type CreateFromDocumentationId( string documentationId, string fullName )
-            => new CompileTimeType( DeclarationRef.FromDocumentationId<IType>( documentationId ), fullName );
+        public static Type GetCompileTimeType( string id, string fullMetadataName )
+            => UserCodeExecutionContext.Current.ServiceProvider.GetService<CompileTimeTypeFactory>().Get( new SymbolId( id ), fullMetadataName );
+
+        internal static Type CreateFromSymbolId( SymbolId symbolId, string fullMetadataName )
+            => new CompileTimeType( Ref.FromSymbolKey<IType>( symbolId ), fullMetadataName );
 
         // For test only. This is also used from serializers but these used should be removed when serializers will stop using symbols.
-        internal static Type Create( IType type ) => Create( type.GetSymbol() );
+        internal static Type Create( IType type ) => Create( type.GetSymbol(), type.GetCompilationModel().RoslynCompilation );
 
         // For test only.
-        internal static Type Create( ITypeSymbol typeSymbol )
-            => new CompileTimeType( DeclarationRef.FromSymbol<IType>( typeSymbol ), typeSymbol.ToDisplayString() );
+        internal static Type Create( ITypeSymbol typeSymbol, Compilation compilation ) => new CompileTimeType( Ref.FromSymbol<IType>( typeSymbol, compilation ), typeSymbol.ToDisplayString() );
 
         public override string Namespace => throw CompileTimeMocksHelper.CreateNotSupportedException();
 
@@ -135,7 +144,7 @@ namespace Caravela.Framework.Impl.ReflectionMocks
 
         public override Type[] GetInterfaces() => throw CompileTimeMocksHelper.CreateNotSupportedException();
 
-        public override string ToString() => $"Compile-time mock for run-time type {this.FullName}";
+        public override string ToString() => $"Compile-time mock for run-time type '{this.FullName}'";
 
         public override int GetHashCode() => this.Target.GetHashCode();
     }

@@ -31,7 +31,7 @@ namespace Caravela.TestFramework
         private bool _frozen;
         private ServiceProvider? _serviceProvider;
 
-        internal ServiceProvider ProjectScopedServiceProvider
+        public ServiceProvider ProjectScopedServiceProvider
         {
             get => this._serviceProvider ?? throw new InvalidOperationException( "The service provider has not been set." );
             set => this._serviceProvider = value;
@@ -92,15 +92,10 @@ namespace Caravela.TestFramework
         public bool Success { get; private set; } = true;
 
         /// <summary>
-        /// Gets the <see cref="System.Exception"/> in which the test resulted, if any.
-        /// </summary>
-        public Exception? Exception { get; private set; }
-
-        /// <summary>
         /// Gets or sets a value indicating whether the output run-time code should be included in the result of
         ///  <see cref="GetConsolidatedTestOutput"/>.
         /// </summary>
-        internal bool HasOutputCode { get; set; }
+        public bool HasOutputCode { get; set; }
 
         public Compilation? CompileTimeCompilation { get; private set; }
 
@@ -200,7 +195,7 @@ namespace Caravela.TestFramework
             }
         }
 
-        internal void SetFailed( string reason, Exception? exception = null )
+        public void SetFailed( string reason, Exception? exception = null )
         {
             if ( this._frozen )
             {
@@ -209,7 +204,6 @@ namespace Caravela.TestFramework
 
             this._frozen = true;
 
-            this.Exception = exception;
             this.Success = false;
             this.ErrorMessage = reason;
 
@@ -229,7 +223,18 @@ namespace Caravela.TestFramework
                 syntaxTree = this.InputCompilation!.SyntaxTrees.SingleOrDefault( t => t.FilePath == diagnostic.Location.GetLineSpan().Path );
             }
 
-            var text = syntaxTree?.GetText().GetSubText( diagnostic.Location.SourceSpan ).ToString();
+            var text = syntaxTree?.GetText()
+                .GetSubText( diagnostic.Location.SourceSpan )
+                .ToString()
+                .ReplaceOrdinal( "\r\n", " " )
+                .ReplaceOrdinal( "\n", " " )
+                .ReplaceOrdinal( "\n", " " )
+                .ReplaceOrdinal( "\t", " " ) ?? "";
+
+            while ( text.ContainsOrdinal( "  " ) )
+            {
+                text = text.ReplaceOrdinal( "  ", " " );
+            }
 
             return text;
         }
@@ -316,7 +321,7 @@ namespace Caravela.TestFramework
                               || d.Severity >= DiagnosticSeverity.Warning) )
                     .OrderBy( d => d.Location.SourceSpan.Start )
                     .ThenBy( d => d.GetMessage(), StringComparer.Ordinal )
-                    .Select( d => $"// {d.Severity} {d.Id} on `{this.GetTextUnderDiagnostic( d )}`: `{CleanMessage( d.GetMessage() )}`\n" )
+                    .SelectMany( this.GetDiagnosticComments )
                     .Select( SyntaxFactory.Comment )
                     .ToList() );
 
@@ -325,6 +330,16 @@ namespace Caravela.TestFramework
             // Individual trees should be formatted, so we don't need to format again.
 
             return consolidatedCompilationUnit;
+        }
+
+        private IEnumerable<string> GetDiagnosticComments( Diagnostic d )
+        {
+            yield return $"// {d.Severity} {d.Id} on `{this.GetTextUnderDiagnostic( d )}`: `{CleanMessage( d.GetMessage() )}`\n";
+
+            foreach ( var codeFix in CodeFixTitles.GetCodeFixTitles( d ) )
+            {
+                yield return $"//    CodeFix: {codeFix}`\n";
+            }
         }
 
         public void Dispose()
@@ -340,6 +355,12 @@ namespace Caravela.TestFramework
             this.InputProject = null;
             this.IntermediateLinkerCompilation = null;
             this.InitialCompilationModel = null;
+
+            // Diagnostics may have reference to declarations, and must be collected too.
+            this.PipelineDiagnostics.Clear();
+            this.InputCompilationDiagnostics.Clear();
+            this.OutputCompilationDiagnostics.Clear();
+            this.CompileTimeCompilationDiagnostics.Clear();
         }
     }
 }

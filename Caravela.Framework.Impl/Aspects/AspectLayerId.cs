@@ -52,7 +52,7 @@ namespace Caravela.Framework.Impl.Aspects
 
         public string? LayerName { get; }
 
-        public string FullName => this.AspectName == null ? "(null)" : this.LayerName == null ? this.AspectName : this.AspectName + ":" + this.LayerName;
+        public string FullName => this.AspectName == null! ? "(null)" : this.LayerName == null ? this.AspectName : this.AspectName + ":" + this.LayerName;
 
         public override string ToString() => this.FullName;
 

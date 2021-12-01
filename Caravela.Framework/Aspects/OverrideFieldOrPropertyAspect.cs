@@ -27,8 +27,7 @@ namespace Caravela.Framework.Aspects
         }
 
         /// <inheritdoc />
-        public override void BuildEligibility( IEligibilityBuilder<IFieldOrProperty> builder )
-            => builder.ExceptForInheritance().MustBeNonAbstract();
+        public override void BuildEligibility( IEligibilityBuilder<IFieldOrProperty> builder ) => builder.ExceptForInheritance().MustBeNonAbstract();
 
         [Template]
         public abstract dynamic? OverrideProperty

@@ -34,18 +34,20 @@ namespace Caravela.Framework.Impl.Pipeline
 
         /// <inheritdoc/>
         public override bool TryExecute(
-            AspectProjectConfiguration projectConfiguration,
+            AspectPipelineConfiguration pipelineConfiguration,
             PipelineStageResult input,
             IDiagnosticAdder diagnostics,
             CancellationToken cancellationToken,
             [NotNullWhen( true )] out PipelineStageResult? result )
         {
             // TODO: it is suboptimal to get a CompilationModel here.
-            var compilationModel = CompilationModel.CreateInitialInstance( input.Project, input.PartialCompilation );
+            var compilationModel = CompilationModel.CreateInitialInstance( input.Project, input.Compilation );
+            var compilation = input.Compilation.Compilation;
 
             var aspectInstances = input.AspectSources
                 .SelectMany( s => s.GetAspectInstances( compilationModel, this._aspectClass, diagnostics, cancellationToken ) )
-                .GroupBy( i => i.TargetDeclaration.GetSymbol().AssertNotNull( "The Roslyn compilation should include all introduced declarations." ) )
+                .GroupBy(
+                    i => i.TargetDeclaration.GetSymbol( compilation ).AssertNotNull( "The Roslyn compilation should include all introduced declarations." ) )
                 .ToImmutableDictionary( g => g.Key, g => (IAspectInstance) AggregateAspectInstance.GetInstance( g ) );
 
             if ( !aspectInstances.Any() )
@@ -60,32 +62,33 @@ namespace Caravela.Framework.Impl.Pipeline
             var context = new AspectWeaverContext(
                 this._aspectClass,
                 aspectInstances,
-                input.PartialCompilation,
+                input.Compilation,
                 diagnostics.Report,
-                resources.Add );
+                resources.Add,
+                new AspectWeaverHelper( pipelineConfiguration.ServiceProvider, compilation ),
+                pipelineConfiguration.ServiceProvider,
+                input.Project );
 
-            PartialCompilation newCompilation;
+            var executionContext = new UserCodeExecutionContext(
+                this.ServiceProvider,
+                diagnostics,
+                UserCodeMemberInfo.FromDelegate( new Action<AspectWeaverContext>( this._aspectWeaver.Transform ) ) );
 
-            try
+            if ( !this.ServiceProvider.GetService<UserCodeInvoker>().TryInvoke( () => this._aspectWeaver.Transform( context ), executionContext ) )
             {
-                this.ServiceProvider.GetService<UserCodeInvoker>().Invoke( () => this._aspectWeaver.Transform( context ) );
-                newCompilation = (PartialCompilation) context.Compilation;
-            }
-            catch ( Exception ex )
-            {
-                diagnostics.Report(
-                    GeneralDiagnosticDescriptors.ExceptionInWeaver.CreateDiagnostic( null, (this._aspectClass.ShortName, ex.ToDiagnosticString()) ) );
-
                 result = null;
 
                 return false;
             }
+
+            var newCompilation = (PartialCompilation) context.Compilation;
 
             // TODO: update AspectCompilation.Aspects
             result = new PipelineStageResult(
                 newCompilation,
                 input.Project,
                 input.AspectLayers,
+                null,
                 input.Diagnostics,
                 input.AspectSources );
 

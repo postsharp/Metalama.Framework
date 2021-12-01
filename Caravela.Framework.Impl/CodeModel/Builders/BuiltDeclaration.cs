@@ -3,7 +3,6 @@
 
 using Caravela.Framework.Code;
 using Caravela.Framework.Code.Collections;
-using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Impl.CodeModel.Collections;
 using Caravela.Framework.Impl.CodeModel.References;
 using Caravela.Framework.Impl.Utilities;
@@ -33,8 +32,6 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
             => this.Builder.ToDisplayString( format, context );
 
-        public IDiagnosticLocation? DiagnosticLocation => this.Builder.DiagnosticLocation;
-
         public IAssembly DeclaringAssembly => this.Builder.DeclaringAssembly;
 
         DeclarationOrigin IDeclaration.Origin => DeclarationOrigin.Aspect;
@@ -52,12 +49,14 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         ICompilation ICompilationElement.Compilation => this.Compilation;
 
+        protected IDeclaration GetForCompilation( ICompilation compilation ) => this.GetForCompilation( (CompilationModel) compilation );
+
         protected IDeclaration GetForCompilation( CompilationModel compilation )
             => this.Compilation == compilation ? this : compilation.Factory.GetDeclaration( this.Builder );
 
         ISymbol? ISdkDeclaration.Symbol => null;
 
-        public DeclarationRef<IDeclaration> ToRef() => DeclarationRef.FromBuilder( this.Builder );
+        public Ref<IDeclaration> ToRef() => Ref.FromBuilder( this.Builder );
 
         public ImmutableArray<SyntaxReference> DeclaringSyntaxReferences => this.Builder.DeclaringSyntaxReferences;
 
@@ -69,5 +68,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         [Memo]
         public IDeclaration OriginalDefinition => this.Compilation.Factory.GetDeclaration( this.Builder.OriginalDefinition );
+
+        Location? IDiagnosticLocationImpl.DiagnosticLocation => this.Builder.DiagnosticLocation;
     }
 }

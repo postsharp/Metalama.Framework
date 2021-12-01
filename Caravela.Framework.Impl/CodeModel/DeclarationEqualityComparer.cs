@@ -14,8 +14,8 @@ namespace Caravela.Framework.Impl.CodeModel
         private readonly Compilation _compilation;
         private readonly ReflectionMapper _reflectionMapper;
 
-        private readonly DeclarationRefEqualityComparer<DeclarationRef<IDeclaration>> _innerComparer =
-            DeclarationRefEqualityComparer<DeclarationRef<IDeclaration>>.Instance;
+        private readonly DeclarationRefEqualityComparer<Ref<IDeclaration>> _innerComparer =
+            DeclarationRefEqualityComparer<Ref<IDeclaration>>.Instance;
 
         public DeclarationEqualityComparer( ReflectionMapper reflectionMapper, Compilation compilation )
         {

@@ -1,27 +1,18 @@
 <Project>
 
-    <!-- Normally you should call build.ps1 -local -prepare before opening the project in an IDE, and it creates CaravelaVersion.props. -->
-    <Import Project="CaravelaVersion.props" Condition="Exists('CaravelaVersion.props')" />
-
-    <!-- However, if you don't, default values are used. -->
-    <Import Project="MainVersion.props" Condition="!Exists('CaravelaVersion.props')" />
+    <!-- Set the default version -->
+    <Import Project="MainVersion.props" />
     
-    <PropertyGroup Condition="!Exists('CaravelaVersion.props')">
+    <PropertyGroup>
         <CaravelaVersion>$(MainVersion)$(PackageVersionSuffix)</CaravelaVersion>
         <CaravelaAssemblyVersion>$(MainVersion)</CaravelaAssemblyVersion>
     </PropertyGroup>
 
-    <PropertyGroup>
-        <AssemblyVersion>$(CaravelaAssemblyVersion)</AssemblyVersion>
-        <Version>$(CaravelaVersion)</Version>
-    </PropertyGroup>
-
+    
     <!-- Versions of dependencies -->
     <PropertyGroup>
         <RoslynVersion>3.11.0</RoslynVersion>
-        <!-- TODO: Set public version -->
-        <CaravelaCompilerVersion>3.11.1012-local-98</CaravelaCompilerVersion>
-        <BackstageVersion Condition="'$(BackstageVersion)'==''">1.0.0-preview</BackstageVersion>
+        <CaravelaCompilerVersion>3.11.1013-dev-debug-150</CaravelaCompilerVersion>
         <MicrosoftCSharpVersion>4.7.0</MicrosoftCSharpVersion>
         <NewtonsoftJsonVersion>13.0.1</NewtonsoftJsonVersion>
         <SystemCollectionsImmutableVersion>5.0.0</SystemCollectionsImmutableVersion>
@@ -35,15 +26,20 @@
 
         <!-- this cannot be called just "PostSharpVersion", because that conflicts with a property used by PostSharp -->
         <PostSharpPackageVersion>6.8.7</PostSharpPackageVersion>
-        
-        <!-- If we're using a local build of Caravela.Compiler, add a local source -->
-        <RestoreAdditionalProjectSources Condition="Exists('..\..\Caravela.Compiler\artifacts\packages\Debug\Shipping\Caravela.Compiler.$(CaravelaCompilerVersion).nupkg')">
-            $(RestoreAdditionalProjectSources);$(MSBuildThisFileDirectory)..\..\Caravela.Compiler\artifacts\packages\Debug\Shipping
-         </RestoreAdditionalProjectSources>
-         <RestoreAdditionalProjectSources Condition="Exists('..\..\Caravela.Compiler\artifacts\packages\Release\Shipping\Caravela.Compiler.$(CaravelaCompilerVersion).nupkg')">
-            $(RestoreAdditionalProjectSources);$(MSBuildThisFileDirectory)..\..\Caravela.Compiler\artifacts\packages\Release\Shipping
-         </RestoreAdditionalProjectSources>
+     
     </PropertyGroup>
+
+    <!-- Import overrides for the local build -->
+    <Import Project="../artifacts/private/Caravela.version.props" Condition="Exists('../artifacts/private/Caravela.version.props')" />
+    <Import Project="Dependencies.props" Condition="Exists('Dependencies.props')"/>
+
+    
+
+    <PropertyGroup>
+        <AssemblyVersion>$(CaravelaAssemblyVersion)</AssemblyVersion>
+        <Version>$(CaravelaVersion)</Version>
+    </PropertyGroup>
+
     
     <!-- Public strong name keys used by InternalsVisibleTo. -->
 

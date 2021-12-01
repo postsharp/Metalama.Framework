@@ -3,7 +3,6 @@
 
 using Caravela.Framework.Code;
 using Caravela.Framework.Code.Collections;
-using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Impl.CodeModel.Collections;
 using Caravela.Framework.Impl.CodeModel.References;
 using Microsoft.CodeAnalysis;
@@ -51,8 +50,6 @@ namespace Caravela.Framework.Impl.CodeModel.Pseudo
 
         public DeclarationKind DeclarationKind => DeclarationKind.Parameter;
 
-        public IDiagnosticLocation? DiagnosticLocation => null;
-
         public ICompilation Compilation => this.DeclaringAccessor.Compilation;
 
         public PseudoParameter( IMethod declaringAccessor, int index, IType type, string? name )
@@ -71,7 +68,7 @@ namespace Caravela.Framework.Impl.CodeModel.Pseudo
 
         ISymbol? ISdkDeclaration.Symbol => null;
 
-        DeclarationRef<IDeclaration> IDeclarationImpl.ToRef() => throw new NotImplementedException();
+        Ref<IDeclaration> IDeclarationImpl.ToRef() => throw new NotImplementedException();
 
         ImmutableArray<SyntaxReference> IDeclarationImpl.DeclaringSyntaxReferences => ImmutableArray<SyntaxReference>.Empty;
 
@@ -82,5 +79,7 @@ namespace Caravela.Framework.Impl.CodeModel.Pseudo
         public IDeclaration OriginalDefinition => throw new NotImplementedException();
 
         public IAssembly DeclaringAssembly => this.DeclaringMember.DeclaringAssembly;
+
+        public Location? DiagnosticLocation => this.DeclaringMember.GetDiagnosticLocation();
     }
 }

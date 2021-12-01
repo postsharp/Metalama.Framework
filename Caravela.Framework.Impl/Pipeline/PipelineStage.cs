@@ -27,14 +27,14 @@ namespace Caravela.Framework.Impl.Pipeline
         /// <summary>
         /// Executes the pipeline, i.e. transforms inputs into outputs.
         /// </summary>
-        /// <param name="projectConfiguration"></param>
+        /// <param name="pipelineConfiguration"></param>
         /// <param name="input">The inputs.</param>
         /// <param name="diagnostics"></param>
         /// <param name="cancellationToken"></param>
         /// <param name="result"></param>
         /// <returns></returns>
         public abstract bool TryExecute(
-            AspectProjectConfiguration projectConfiguration,
+            AspectPipelineConfiguration pipelineConfiguration,
             PipelineStageResult input,
             IDiagnosticAdder diagnostics,
             CancellationToken cancellationToken,

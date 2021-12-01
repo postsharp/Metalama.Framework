@@ -1,0 +1,81 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <!-- Prevent Caravela.TestFramework.props to generate the attribute that ignores the test framework -->        
+        <CaravelaTestReplaceFramework Condition="'$(Obfuscate)'=='True'">False</CaravelaTestReplaceFramework>
+    </PropertyGroup>
+
+    <Import Project="..\..\Caravela.TestFramework\Caravela.TestFramework.props" />
+    <Import Project="..\..\eng\Coverage.props" />
+
+  <PropertyGroup>
+    <TargetFrameworks>net5.0;netframework4.8</TargetFrameworks>
+    <LangVersion>9.0</LangVersion>
+    <IsPackable>false</IsPackable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+     <CaravelaTestAutoExclude>False</CaravelaTestAutoExclude>
+     <CaravelaTestGenerateDefaultRunner>False</CaravelaTestGenerateDefaultRunner>
+     <RootNamespace>Caravela.Framework.Tests.Integration</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+
+   <!-- Exclude files that intentionally do not compile -->
+   <Compile Remove="Tests\**\__*.cs" />
+      
+    <PackageReference Include="FakeItEasy" Version="6.2.1" />
+    <PackageReference Include="FakeItEasy.Analyzer.CSharp" Version="6.0.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftNETTestSdkVersion)" />
+    <PackageReference Include="xunit" Version="$(xUnitVersion)" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="$(xUnitVersion)" />
+    <PackageReference Include="Caravela.Compiler.Sdk" Version="$(CaravelaCompilerVersion)" />
+     
+     <!-- This is used for a test -->
+     <PackageReference Include="Microsoft.Win32.Registry" Version="5.0.0" />
+  </ItemGroup>
+	
+	<!-- Enable dynamic file nesting. See https://github.com/dotnet/project-system/issues/3242#issuecomment-453995460 -->
+	<ItemGroup>
+		<ProjectCapability Include="DynamicDependentFile" />
+		<ProjectCapability Include="DynamicFileNesting" />
+
+		<!-- In Visual Studio, you should define a nesting profile with the following content:
+		
+            {
+                "help": "https://go.microsoft.com/fwlink/?linkid=866610",
+                "dependentFileProviders": {
+                    "add": {
+                        "extensionToExtension": {
+                            "add": {
+                                ".t.cs": [ ".cs" ],
+                                ".cs.html": [ ".cs" ]
+                            }
+                        }
+                    }
+                }
+            }
+            
+            In Rider, go to the wheel icon of the Solution Explorer and choose File Nesting.
+		
+		-->
+	</ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Caravela.Framework.Impl\Caravela.Framework.Impl.csproj" />
+    <ProjectReference Include="..\..\Caravela.Framework\Caravela.Framework.csproj" />
+    <ProjectReference Include="..\..\Caravela.TestFramework\Caravela.TestFramework.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Caravela.AspectWorkbench" />
+    <InternalsVisibleTo Include="DynamicProxyGenAssembly2" Key="$(FakeItEasyKey)" LoadsWithinVisualStudio="false" />
+  </ItemGroup>
+
+  <Import Project="..\..\Caravela.TestFramework\Caravela.TestFramework.targets" />
+
+  <!-- Ignore project if the build is obfuscated because this project relies on obfuscated internals -->
+  <ItemGroup Condition="'$(Obfuscate)'=='True'">
+    <Compile Remove="**\*" />
+  </ItemGroup>
+  
+</Project>

@@ -38,7 +38,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
 
             public ImmutableDictionary<string, SyntaxTree?>? CompileTimeSyntaxTrees { get; }
 
-            public AspectProjectConfiguration? Configuration { get; }
+            public AspectPipelineConfiguration? Configuration { get; }
 
             internal DesignTimeAspectPipelineStatus Status { get; }
 
@@ -64,7 +64,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
 
             private PipelineState(
                 PipelineState prototype,
-                AspectProjectConfiguration configuration,
+                AspectPipelineConfiguration configuration,
                 DesignTimeAspectPipelineStatus status ) : this( prototype )
             {
                 this.Configuration = configuration;
@@ -76,13 +76,15 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
                 ImmutableDictionary<string, SyntaxTree?> compileTimeSyntaxTrees,
                 DesignTimeAspectPipelineStatus status,
                 CompilationChangeTracker tracker,
-                CompilationResult compilationResult )
+                CompilationResult compilationResult,
+                AspectPipelineConfiguration? configuration )
                 : this( prototype )
             {
                 this.CompileTimeSyntaxTrees = compileTimeSyntaxTrees;
                 this.Status = status;
                 this._compilationChangeTracker = tracker;
                 this.CompilationResult = compilationResult;
+                this.Configuration = configuration;
             }
 
             private PipelineState( PipelineState prototype, ImmutableDictionary<string, SyntaxTree?> compileTimeSyntaxTrees )
@@ -154,10 +156,72 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
                 bool invalidateCompilationResult,
                 CancellationToken cancellationToken )
             {
-                var newTracker = this._compilationChangeTracker.Update( newCompilation, cancellationToken );
                 var newStatus = this.Status;
                 var newState = this;
+                var newConfiguration = this.Configuration;
 
+                // Detect changes in project references. 
+                if ( this._compilationChangeTracker.LastCompilation != null )
+                {
+                    var oldExternalReferences = this._compilationChangeTracker.LastCompilation.ExternalReferences;
+
+                    var newExternalReferences = newCompilation.ExternalReferences;
+
+                    if ( oldExternalReferences != newExternalReferences )
+                    {
+                        // If the only differences are in compilation references, do not consider this as a difference.
+                        // Cross-project dependencies are not yet taken into consideration.
+                        var hasChange = false;
+
+                        if ( oldExternalReferences.Length != newExternalReferences.Length )
+                        {
+                            hasChange = true;
+                        }
+                        else
+                        {
+                            for ( var i = 0; i < oldExternalReferences.Length; i++ )
+                            {
+                                if ( !ReferencesEqual( oldExternalReferences[i], newExternalReferences[i] ) )
+                                {
+                                    hasChange = true;
+
+                                    break;
+                                }
+                            }
+                        }
+
+                        if ( hasChange )
+                        {
+                            newConfiguration = null;
+                        }
+                    }
+
+                    static bool ReferencesEqual( MetadataReference a, MetadataReference b )
+                    {
+                        if ( a == b )
+                        {
+                            return true;
+                        }
+                        else
+                        {
+                            switch (a, b)
+                            {
+                                case (CompilationReference compilationReferenceA, CompilationReference compilationReferenceB):
+                                    // The way we compare in this case is naive, but we are processing cross-project dependencies through
+                                    // a different mechanism.
+                                    return compilationReferenceA.Compilation.AssemblyName == compilationReferenceB.Compilation.AssemblyName;
+
+                                case (PortableExecutableReference portableExecutableReferenceA, PortableExecutableReference portableExecutableReferenceB):
+                                    return portableExecutableReferenceA.FilePath == portableExecutableReferenceB.FilePath;
+                            }
+
+                            return false;
+                        }
+                    }
+                }
+
+                // Detect changes in compile-time syntax trees.
+                var newTracker = this._compilationChangeTracker.Update( newCompilation, cancellationToken );
                 var newChanges = newTracker.UnprocessedChanges.AssertNotNull();
 
                 ImmutableDictionary<string, SyntaxTree?> newCompileTimeSyntaxTrees;
@@ -212,6 +276,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
                     newCompileTimeSyntaxTrees = this.CompileTimeSyntaxTrees ?? _emptyCompileTimeSyntaxTrees;
                 }
 
+                // Return the new state.
                 var newCompilationResult = invalidateCompilationResult ? this.CompilationResult.Invalidate( newChanges ) : this.CompilationResult;
 
                 newState = new PipelineState(
@@ -219,10 +284,12 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
                     newCompileTimeSyntaxTrees,
                     newStatus,
                     newTracker,
-                    newCompilationResult );
+                    newCompilationResult,
+                    newConfiguration );
 
                 return newState;
 
+                // Local method called when a change is detected in compile-time code.
                 void OnCompileTimeChange()
                 {
                     invalidateCompilationResult = false;
@@ -250,7 +317,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
                 IDiagnosticAdder diagnosticAdder,
                 bool ignoreStatus,
                 CancellationToken cancellationToken,
-                [NotNullWhen( true )] out AspectProjectConfiguration? configuration )
+                [NotNullWhen( true )] out AspectPipelineConfiguration? configuration )
             {
                 if ( state.Status == DesignTimeAspectPipelineStatus.NeedsExternalBuild && ignoreStatus )
                 {
@@ -339,7 +406,8 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
                     pipelineResult?.AdditionalSyntaxTrees ?? Array.Empty<IntroducedSyntaxTree>(),
                     new ImmutableUserDiagnosticList(
                         diagnosticList.ToImmutableArray(),
-                        pipelineResult?.Diagnostics.DiagnosticSuppressions ),
+                        pipelineResult?.Diagnostics.DiagnosticSuppressions,
+                        pipelineResult?.Diagnostics.CodeFixes ),
                     pipelineResult?.ExternallyInheritableAspects ?? ImmutableArray<AttributeAspectInstance>.Empty );
 
                 var directoryOptions = state._pipeline.ServiceProvider.GetService<IPathOptions>();

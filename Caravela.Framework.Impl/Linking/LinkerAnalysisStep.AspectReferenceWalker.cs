@@ -48,7 +48,24 @@ namespace Caravela.Framework.Impl.Linking
                         _ => node
                     };
 
-                    var referencedSymbol = this._semanticModel.GetSymbolInfo( nodeWithSymbol ).Symbol.AssertNotNull();
+                    var symbolInfo = this._semanticModel.GetSymbolInfo( nodeWithSymbol );
+                    var referencedSymbol = symbolInfo.Symbol;
+
+                    if ( referencedSymbol == null )
+                    {
+                        // This is a workaround for a problem I don't fully understand.
+                        // We can get here at design time, in the preview pipeline. In this case, generating exactly correct code
+                        // is not important. At compile time, an invalid symbol would result in a failed compilation, which is ok.
+
+                        if ( symbolInfo.CandidateSymbols.Length == 1 )
+                        {
+                            referencedSymbol = symbolInfo.CandidateSymbols[0];
+                        }
+                        else
+                        {
+                            return;
+                        }
+                    }
 
                     var resolvedReference = this._referenceResolver.Resolve(
                         this._containingSymbol,

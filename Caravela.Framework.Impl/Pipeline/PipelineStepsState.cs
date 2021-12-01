@@ -6,6 +6,7 @@ using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.Aspects;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Collections;
+using Caravela.Framework.Impl.DesignTime.CodeFixes;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Transformations;
 using Microsoft.CodeAnalysis;
@@ -42,17 +43,17 @@ namespace Caravela.Framework.Impl.Pipeline
 
         public IReadOnlyList<IAspectSource> ExternalAspectSources => new[] { this._overflowAspectSource };
 
-        public AspectProjectConfiguration ProjectConfiguration { get; }
+        public AspectPipelineConfiguration PipelineConfiguration { get; }
 
         public PipelineStepsState(
             IReadOnlyList<OrderedAspectLayer> aspectLayers,
             CompilationModel inputCompilation,
             IReadOnlyList<IAspectSource> inputAspectSources,
-            AspectProjectConfiguration projectConfiguration )
+            AspectPipelineConfiguration pipelineConfiguration )
         {
-            this._diagnostics = new UserDiagnosticSink( projectConfiguration.CompileTimeProject );
+            this._diagnostics = new UserDiagnosticSink( pipelineConfiguration.CompileTimeProject, pipelineConfiguration.CodeFixFilter );
             this.Compilation = inputCompilation;
-            this.ProjectConfiguration = projectConfiguration;
+            this.PipelineConfiguration = pipelineConfiguration;
 
             // Create an empty collection of steps.
             this._comparer = new PipelineStepIdComparer( aspectLayers );
@@ -87,8 +88,9 @@ namespace Caravela.Framework.Impl.Pipeline
 
                 this.DetectUnorderedSteps( ref previousStep, this._currentStep );
 
-                var compilationForAspectLayer = this.Compilation.GetCompilationModel().WithAspectLayer( this._currentStep.AspectLayer.AspectLayerId );
-                this.Compilation = this._currentStep!.Execute( compilationForAspectLayer, this, cancellationToken );
+                var compilation = this.Compilation.GetCompilationModel();
+
+                this.Compilation = this._currentStep!.Execute( compilation, this, cancellationToken );
             }
         }
 
@@ -215,13 +217,13 @@ namespace Caravela.Framework.Impl.Pipeline
             return success;
         }
 
-        public void AddAspectInstances( IEnumerable<AspectInstance> aspectInstances )
+        public void AddAspectInstances( IEnumerable<ResolvedAspectInstance> aspectInstances )
         {
             foreach ( var aspectInstance in aspectInstances )
             {
                 var depth = this.Compilation.GetDepth( aspectInstance.TargetDeclaration );
 
-                if ( !this.TryGetOrAddStep( new AspectLayerId( aspectInstance.AspectClass ), depth, true, out var step ) )
+                if ( !this.TryGetOrAddStep( new AspectLayerId( aspectInstance.AspectInstance.AspectClass ), depth, true, out var step ) )
                 {
                     // This should not happen here. The source should not have been added.
                     throw new AssertionFailedException();
@@ -236,10 +238,14 @@ namespace Caravela.Framework.Impl.Pipeline
             this._inheritableAspectInstances.AddRange( inheritedAspectInstances );
         }
 
-        public void AddDiagnostics( IEnumerable<Diagnostic> diagnostics, IEnumerable<ScopedSuppression> suppressions )
+        public void AddDiagnostics(
+            IEnumerable<Diagnostic> diagnostics,
+            IEnumerable<ScopedSuppression> suppressions,
+            IEnumerable<CodeFixInstance> codeFixInstances )
         {
             this._diagnostics.Report( diagnostics );
             this._diagnostics.Suppress( suppressions );
+            this._diagnostics.AddCodeFixes( codeFixInstances );
         }
 
         public void AddNonObservableTransformations( IEnumerable<INonObservableTransformation> transformations )

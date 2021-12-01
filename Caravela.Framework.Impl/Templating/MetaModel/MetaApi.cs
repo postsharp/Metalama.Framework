@@ -14,6 +14,7 @@ using Caravela.Framework.Impl.Pipeline;
 using Caravela.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Formatting;
 using System;
 using System.Collections.Generic;
@@ -146,7 +147,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
             }
             else
             {
-                var code = SyntaxFactoryEx.LiteralExpression( value ).Token.Text;
+                var code = ((LiteralExpressionSyntax) SyntaxFactoryEx.LiteralExpression( value )).Token.Text;
 
                 string suffix = "", prefix = "";
 
@@ -210,7 +211,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
                     ? "null"
                     : ((RuntimeExpression) expression).Syntax.NormalizeWhitespace().ToFullString() );
 
-        public AspectExecutionScenario ExecutionScenario => this._common.PipelineDescription.ExecutionScenario;
+        public IExecutionScenario ExecutionScenario => this._common.PipelineDescription.ExecutionScenario;
 
         public UserDiagnosticSink Diagnostics => this._common.Diagnostics;
 

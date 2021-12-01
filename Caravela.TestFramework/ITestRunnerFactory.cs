@@ -10,7 +10,7 @@ namespace Caravela.TestFramework
     /// <summary>
     /// Creates a specific instance of the <see cref="BaseTestRunner"/> class.
     /// </summary>
-    internal interface ITestRunnerFactory
+    public interface ITestRunnerFactory
     {
         BaseTestRunner CreateTestRunner(
             ServiceProvider serviceProvider,

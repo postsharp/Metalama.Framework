@@ -7,7 +7,7 @@ using Caravela.Framework.Code;
 namespace Caravela.Framework.Fabrics
 {
     /// <summary>
-    /// Argument of <see cref="ITypeFabric.AmendType"/>. Allows reporting diagnostics and adding aspects to the target declaration of the fabric. 
+    /// Argument of <see cref="TypeFabric.AmendType"/>. Allows reporting diagnostics and adding aspects to the target declaration of the fabric. 
     /// </summary>
     public interface ITypeAmender : IAmender<INamedType>
     {

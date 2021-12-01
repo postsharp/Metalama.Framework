@@ -10,13 +10,13 @@ using System.Linq;
 
 namespace Caravela.Framework.Impl.CodeModel.Collections
 {
-    internal class ParameterList : DeclarationList<IParameter, DeclarationRef<IParameter>>, IParameterList
+    internal class ParameterList : DeclarationList<IParameter, Ref<IParameter>>, IParameterList
     {
-        public ParameterList( IMethodBase containingDeclaration, IEnumerable<DeclarationRef<IParameter>> sourceItems ) : base(
+        public ParameterList( IMethodBase containingDeclaration, IEnumerable<Ref<IParameter>> sourceItems ) : base(
             containingDeclaration,
             sourceItems ) { }
 
-        public ParameterList( IProperty containingDeclaration, IEnumerable<DeclarationRef<IParameter>> sourceItems ) : base(
+        public ParameterList( IProperty containingDeclaration, IEnumerable<Ref<IParameter>> sourceItems ) : base(
             containingDeclaration,
             sourceItems ) { }
 

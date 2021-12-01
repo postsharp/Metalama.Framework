@@ -8,17 +8,17 @@ using System.Collections.Generic;
 
 namespace Caravela.Framework.Impl.CodeModel.Collections
 {
-    internal class GenericParameterList : DeclarationList<ITypeParameter, DeclarationRef<ITypeParameter>>, IGenericParameterList
+    internal class GenericParameterList : DeclarationList<ITypeParameter, Ref<ITypeParameter>>, IGenericParameterList
     {
         public static GenericParameterList Empty { get; } = new();
 
         private GenericParameterList() { }
 
-        public GenericParameterList( INamedType containingDeclaration, IEnumerable<DeclarationRef<ITypeParameter>> sourceItems ) : base(
+        public GenericParameterList( INamedType containingDeclaration, IEnumerable<Ref<ITypeParameter>> sourceItems ) : base(
             containingDeclaration,
             sourceItems ) { }
 
-        public GenericParameterList( IMethod containingDeclaration, IEnumerable<DeclarationRef<ITypeParameter>> sourceItems ) : base(
+        public GenericParameterList( IMethod containingDeclaration, IEnumerable<Ref<ITypeParameter>> sourceItems ) : base(
             containingDeclaration,
             sourceItems ) { }
     }

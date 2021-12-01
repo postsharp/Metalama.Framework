@@ -51,9 +51,9 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public EventInfo ToEventInfo() => this.EventBuilder.ToEventInfo();
 
-        IEvent IDeclarationRef<IEvent>.Resolve( CompilationModel compilation ) => (IEvent) this.GetForCompilation( compilation );
+        IEvent IRef<IEvent>.GetTarget( ICompilation compilation ) => (IEvent) this.GetForCompilation( compilation );
 
-        ISymbol IDeclarationRef<IEvent>.GetSymbol( Compilation compilation ) => throw new NotSupportedException();
+        ISymbol ISdkRef<IEvent>.GetSymbol( Compilation compilation ) => throw new NotSupportedException();
 
         public IMethod? GetAccessor( MethodKind methodKind ) => this.GetAccessorImpl( methodKind );
 

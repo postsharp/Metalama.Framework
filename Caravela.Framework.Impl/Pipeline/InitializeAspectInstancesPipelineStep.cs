@@ -20,7 +20,7 @@ namespace Caravela.Framework.Impl.Pipeline
 
         public InitializeAspectInstancesPipelineStep( PipelineStepId stepId, OrderedAspectLayer aspectLayer ) : base( stepId, aspectLayer ) { }
 
-        public void AddAspectInstance( AspectInstance aspectInstance ) => this._aspectInstances.Add( aspectInstance );
+        public void AddAspectInstance( in ResolvedAspectInstance aspectInstance ) => this._aspectInstances.Add( aspectInstance.AspectInstance );
 
         public override CompilationModel Execute(
             CompilationModel compilation,
@@ -32,20 +32,21 @@ namespace Caravela.Framework.Impl.Pipeline
             var aggregateInstances = this._aspectInstances
                 .GroupBy( a => a.TargetDeclaration )
                 .Select( AggregateAspectInstance.GetInstance )
-                .OrderBy( a => a.TargetDeclaration.ToDisplayString() )
+                .OrderBy( a => a.TargetDeclaration.GetTarget( compilation ).ToDisplayString() )
                 .ToImmutableArray();
 
             var aspectInstanceResults = aggregateInstances
-                .Select( ai => aspectDriver.ExecuteAspect( ai, compilation, pipelineStepsState.ProjectConfiguration, cancellationToken ) )
+                .Select( ai => aspectDriver.ExecuteAspect( ai, compilation, pipelineStepsState.PipelineConfiguration, cancellationToken ) )
                 .ToImmutableArray();
 
             var success = aspectInstanceResults.All( ar => ar.Success );
             var reportedDiagnostics = aspectInstanceResults.SelectMany( air => air.Diagnostics.ReportedDiagnostics );
             var diagnosticSuppressions = aspectInstanceResults.SelectMany( air => air.Diagnostics.DiagnosticSuppressions );
+            var codeFixes = aspectInstanceResults.SelectMany( air => air.Diagnostics.CodeFixes );
             var addedAspectSources = aspectInstanceResults.SelectMany( air => air.AspectSources );
             var addedAdvices = aspectInstanceResults.SelectMany( air => air.Advices );
 
-            pipelineStepsState.AddDiagnostics( reportedDiagnostics, diagnosticSuppressions );
+            pipelineStepsState.AddDiagnostics( reportedDiagnostics, diagnosticSuppressions, codeFixes );
             success &= pipelineStepsState.AddAspectSources( addedAspectSources );
             success &= pipelineStepsState.AddAdvices( addedAdvices );
 

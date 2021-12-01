@@ -279,7 +279,7 @@ namespace Caravela.Framework.Impl.Advices
             return selectedTemplate;
         }
 
-        public void OverrideMethod( IMethod targetMethod, in MethodTemplateSelector templateSelector, Dictionary<string, object?>? tags = null )
+        public void OverrideMethod( IMethod targetMethod, in MethodTemplateSelector templateSelector, Tags? tags = null )
         {
             if ( this._templateInstance == null )
             {
@@ -311,7 +311,7 @@ namespace Caravela.Framework.Impl.Advices
             string defaultTemplate,
             IntroductionScope scope = IntroductionScope.Default,
             OverrideStrategy whenExists = OverrideStrategy.Default,
-            Dictionary<string, object?>? tags = null )
+            Tags? tags = null )
         {
             if ( this._templateInstance == null )
             {
@@ -351,7 +351,7 @@ namespace Caravela.Framework.Impl.Advices
         public void OverrideFieldOrProperty(
             IFieldOrProperty targetDeclaration,
             string defaultTemplate,
-            Dictionary<string, object?>? tags = null )
+            Tags? tags = null )
         {
             if ( this._templateInstance == null )
             {
@@ -395,7 +395,7 @@ namespace Caravela.Framework.Impl.Advices
             IFieldOrProperty targetDeclaration,
             in GetterTemplateSelector getTemplateSelector,
             string? setTemplate,
-            Dictionary<string, object?>? tags = null )
+            Tags? tags = null )
         {
             if ( this._templateInstance == null )
             {
@@ -480,7 +480,7 @@ namespace Caravela.Framework.Impl.Advices
             string defaultTemplate,
             IntroductionScope scope = IntroductionScope.Default,
             OverrideStrategy whenExists = OverrideStrategy.Default,
-            Dictionary<string, object?>? tags = null )
+            Tags? tags = null )
         {
             if ( this._templateInstance == null )
             {
@@ -529,7 +529,7 @@ namespace Caravela.Framework.Impl.Advices
             string? setTemplate,
             IntroductionScope scope = IntroductionScope.Default,
             OverrideStrategy whenExists = OverrideStrategy.Default,
-            Dictionary<string, object?>? tags = null )
+            Tags? tags = null )
         {
             if ( this._templateInstance == null )
             {
@@ -577,7 +577,7 @@ namespace Caravela.Framework.Impl.Advices
             string? addTemplate,
             string? removeTemplate,
             string? invokeTemplate,
-            Dictionary<string, object?>? tags = null )
+            Tags? tags = null )
         {
             if ( this._templateInstance == null )
             {
@@ -630,7 +630,7 @@ namespace Caravela.Framework.Impl.Advices
             string eventTemplate,
             IntroductionScope scope = IntroductionScope.Default,
             OverrideStrategy whenExists = OverrideStrategy.Default,
-            Dictionary<string, object?>? tags = null )
+            Tags? tags = null )
         {
             if ( this._templateInstance == null )
             {
@@ -678,7 +678,7 @@ namespace Caravela.Framework.Impl.Advices
             string? invokeTemplate = null,
             IntroductionScope scope = IntroductionScope.Default,
             OverrideStrategy whenExists = OverrideStrategy.Default,
-            Dictionary<string, object?>? tags = null )
+            Tags? tags = null )
         {
             if ( this._templateInstance == null )
             {
@@ -725,7 +725,7 @@ namespace Caravela.Framework.Impl.Advices
             INamedType targetType,
             INamedType interfaceType,
             OverrideStrategy whenExists = OverrideStrategy.Default,
-            Dictionary<string, object?>? tags = null )
+            Tags? tags = null )
         {
             if ( this._templateInstance == null )
             {
@@ -753,7 +753,7 @@ namespace Caravela.Framework.Impl.Advices
             INamedType targetType,
             Type interfaceType,
             OverrideStrategy whenExists = OverrideStrategy.Default,
-            Dictionary<string, object?>? tags = null )
+            Tags? tags = null )
         {
             this.ImplementInterface(
                 targetType,
@@ -767,7 +767,7 @@ namespace Caravela.Framework.Impl.Advices
             INamedType interfaceType,
             IReadOnlyList<InterfaceMemberSpecification> interfaceMemberSpecifications,
             OverrideStrategy whenExists = OverrideStrategy.Default,
-            Dictionary<string, object?>? tags = null )
+            Tags? tags = null )
         {
             if ( this._templateInstance == null )
             {
@@ -796,7 +796,7 @@ namespace Caravela.Framework.Impl.Advices
             Type interfaceType,
             IReadOnlyList<InterfaceMemberSpecification> interfaceMemberSpecifications,
             OverrideStrategy whenExists = OverrideStrategy.Default,
-            Dictionary<string, object?>? tags = null )
+            Tags? tags = null )
         {
             this.ImplementInterface(
                 targetType,
@@ -810,7 +810,7 @@ namespace Caravela.Framework.Impl.Advices
         {
             if ( diagnosticList.HasErrors() )
             {
-                throw new InvalidUserCodeException(
+                throw new DiagnosticException(
                     "Errors have occured while creating advice.",
                     diagnosticList.Where( d => d.Severity == DiagnosticSeverity.Error ).ToImmutableArray() );
             }

@@ -63,43 +63,47 @@ namespace Caravela.Framework.Impl.Aspects
         public AspectInstanceResult ExecuteAspect(
             IAspectInstanceInternal aspectInstance,
             CompilationModel compilationModelRevision,
-            AspectProjectConfiguration projectConfiguration,
+            AspectPipelineConfiguration pipelineConfiguration,
             CancellationToken cancellationToken )
-            => aspectInstance.TargetDeclaration switch
+        {
+            var target = aspectInstance.TargetDeclaration.GetTarget( compilationModelRevision );
+
+            return target switch
             {
                 ICompilation compilation => this.EvaluateAspect(
                     compilation,
                     aspectInstance,
                     compilationModelRevision,
-                    projectConfiguration,
+                    pipelineConfiguration,
                     cancellationToken ),
-                INamedType type => this.EvaluateAspect( type, aspectInstance, compilationModelRevision, projectConfiguration, cancellationToken ),
-                IMethod method => this.EvaluateAspect( method, aspectInstance, compilationModelRevision, projectConfiguration, cancellationToken ),
-                IField field => this.EvaluateAspect( field, aspectInstance, compilationModelRevision, projectConfiguration, cancellationToken ),
-                IProperty property => this.EvaluateAspect( property, aspectInstance, compilationModelRevision, projectConfiguration, cancellationToken ),
+                INamedType type => this.EvaluateAspect( type, aspectInstance, compilationModelRevision, pipelineConfiguration, cancellationToken ),
+                IMethod method => this.EvaluateAspect( method, aspectInstance, compilationModelRevision, pipelineConfiguration, cancellationToken ),
+                IField field => this.EvaluateAspect( field, aspectInstance, compilationModelRevision, pipelineConfiguration, cancellationToken ),
+                IProperty property => this.EvaluateAspect( property, aspectInstance, compilationModelRevision, pipelineConfiguration, cancellationToken ),
                 IConstructor constructor => this.EvaluateAspect(
                     constructor,
                     aspectInstance,
                     compilationModelRevision,
-                    projectConfiguration,
+                    pipelineConfiguration,
                     cancellationToken ),
-                IParameter parameter => this.EvaluateAspect( parameter, aspectInstance, compilationModelRevision, projectConfiguration, cancellationToken ),
+                IParameter parameter => this.EvaluateAspect( parameter, aspectInstance, compilationModelRevision, pipelineConfiguration, cancellationToken ),
                 ITypeParameter genericParameter => this.EvaluateAspect(
                     genericParameter,
                     aspectInstance,
                     compilationModelRevision,
-                    projectConfiguration,
+                    pipelineConfiguration,
                     cancellationToken ),
-                IEvent @event => this.EvaluateAspect( @event, aspectInstance, compilationModelRevision, projectConfiguration, cancellationToken ),
-                INamespace ns => this.EvaluateAspect( ns, aspectInstance, compilationModelRevision, projectConfiguration, cancellationToken ),
-                _ => throw new NotSupportedException( $"Cannot add an aspect to a declaration of type {aspectInstance.TargetDeclaration.DeclarationKind}." )
+                IEvent @event => this.EvaluateAspect( @event, aspectInstance, compilationModelRevision, pipelineConfiguration, cancellationToken ),
+                INamespace ns => this.EvaluateAspect( ns, aspectInstance, compilationModelRevision, pipelineConfiguration, cancellationToken ),
+                _ => throw new NotSupportedException( $"Cannot add an aspect to a declaration of type {target.DeclarationKind}." )
             };
+        }
 
         private AspectInstanceResult EvaluateAspect<T>(
             T targetDeclaration,
             IAspectInstanceInternal aspectInstance,
             CompilationModel compilationModelRevision,
-            AspectProjectConfiguration projectConfiguration,
+            AspectPipelineConfiguration pipelineConfiguration,
             CancellationToken cancellationToken )
             where T : class, IDeclaration
         {
@@ -132,73 +136,66 @@ namespace Caravela.Framework.Impl.Aspects
                 return CreateResultForError( diagnostic );
             }
 
-            var diagnosticSink = new UserDiagnosticSink( this._aspectClass.Project, targetDeclaration );
+            var diagnosticSink = new UserDiagnosticSink( this._aspectClass.Project, pipelineConfiguration.CodeFixFilter, targetDeclaration );
 
-            using ( DiagnosticContext.WithDefaultLocation( diagnosticSink.DefaultScope?.DiagnosticLocation ) )
+            var declarativeAdvices =
+                this._declarativeAdviceAttributes
+                    .Select(
+                        x => CreateDeclarativeAdvice(
+                            aspectInstance,
+                            aspectInstance.TemplateInstances[x.TemplateClass],
+                            diagnosticSink,
+                            targetDeclaration,
+                            x.TemplateInfo,
+                            x.Symbol ) )
+                    .WhereNotNull()
+                    .ToArray();
+
+            var adviceFactory = new AdviceFactory(
+                compilationModelRevision,
+                diagnosticSink,
+                declarativeAdvices,
+                aspectInstance,
+                aspectInstance.TemplateInstances.Count == 1 ? aspectInstance.TemplateInstances.Values.Single() : null,
+                this._serviceProvider );
+
+            var aspectBuilder = new AspectBuilder<T>(
+                targetDeclaration,
+                diagnosticSink,
+                declarativeAdvices,
+                adviceFactory,
+                pipelineConfiguration,
+                aspectInstance,
+                cancellationToken );
+
+            var executionContext = new UserCodeExecutionContext(
+                this._serviceProvider,
+                diagnosticSink,
+                UserCodeMemberInfo.FromDelegate( new Action<IAspectBuilder<T>>( aspectOfT.BuildAspect ) ),
+                new AspectLayerId( this._aspectClass ),
+                compilationModelRevision,
+                targetDeclaration );
+
+            if ( !this._serviceProvider.GetService<UserCodeInvoker>().TryInvoke( () => aspectOfT.BuildAspect( aspectBuilder ), executionContext ) )
             {
-                var declarativeAdvices =
-                    this._declarativeAdviceAttributes
-                        .Select(
-                            x => CreateDeclarativeAdvice(
-                                aspectInstance,
-                                aspectInstance.TemplateInstances[x.TemplateClass],
-                                diagnosticSink,
-                                targetDeclaration,
-                                x.TemplateInfo,
-                                x.Symbol ) )
-                        .WhereNotNull()
-                        .ToArray();
+                aspectInstance.Skip();
 
-                var adviceFactory = new AdviceFactory(
-                    compilationModelRevision,
-                    diagnosticSink,
-                    declarativeAdvices,
-                    aspectInstance,
-                    aspectInstance.TemplateInstances.Count == 1 ? aspectInstance.TemplateInstances.Values.Single() : null,
-                    this._serviceProvider );
-
-                var aspectBuilder = new AspectBuilder<T>(
-                    targetDeclaration,
-                    diagnosticSink,
-                    declarativeAdvices,
-                    adviceFactory,
-                    projectConfiguration,
-                    aspectInstance,
-                    cancellationToken );
-
-                try
-                {
-                    this._serviceProvider.GetService<UserCodeInvoker>().Invoke( () => aspectOfT.BuildAspect( aspectBuilder ) );
-                }
-                catch ( InvalidUserCodeException e )
-                {
-                    aspectInstance.Skip();
-
-                    return
-                        new AspectInstanceResult(
-                            false,
-                            new ImmutableUserDiagnosticList( e.Diagnostics, ImmutableArray<ScopedSuppression>.Empty ),
-                            ImmutableArray<Advice>.Empty,
-                            aspectBuilder.AspectSources.ToImmutableArray() );
-                }
-                catch ( Exception e )
-                {
-                    var diagnostic = GeneralDiagnosticDescriptors.ExceptionInUserCode.CreateDiagnostic(
-                        targetDeclaration.GetDiagnosticLocation(),
-                        (AspectType: this._aspectClass.ShortName, MethodName: nameof(IAspect<T>.BuildAspect), e.GetType().Name, e.Format( 5 )) );
-
-                    return CreateResultForError( diagnostic );
-                }
-
-                var aspectResult = aspectBuilder.ToResult();
-
-                if ( !aspectResult.Success )
-                {
-                    aspectInstance.Skip();
-                }
-
-                return aspectResult;
+                return
+                    new AspectInstanceResult(
+                        false,
+                        diagnosticSink.ToImmutable(),
+                        ImmutableArray<Advice>.Empty,
+                        ImmutableArray<IAspectSource>.Empty );
             }
+
+            var aspectResult = aspectBuilder.ToResult();
+
+            if ( !aspectResult.Success )
+            {
+                aspectInstance.Skip();
+            }
+
+            return aspectResult;
         }
 
         private static Advice? CreateDeclarativeAdvice<T>(

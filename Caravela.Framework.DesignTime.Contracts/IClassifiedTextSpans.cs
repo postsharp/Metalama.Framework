@@ -17,7 +17,7 @@ namespace Caravela.Framework.DesignTime.Contracts
     public interface IClassifiedTextSpans
     {
         IEnumerable<IClassifiedTextSpan> GetClassifiedTextSpans();
-        
+
         /// <summary>
         /// Gets all <see cref="IClassifiedTextSpan"/> in a given <see cref="TextSpan"/>. 
         /// </summary>
