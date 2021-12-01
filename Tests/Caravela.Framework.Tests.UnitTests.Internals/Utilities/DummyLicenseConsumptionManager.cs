@@ -4,20 +4,18 @@
 using Caravela.Framework.Project;
 using PostSharp.Backstage.Licensing;
 using PostSharp.Backstage.Licensing.Consumption;
-using System;
 
 namespace Caravela.Framework.Tests.UnitTests.Utilities
 {
+    /// <summary>
+    /// License consumption manager allowing consumption of all license features.
+    /// </summary>
     internal class DummyLicenseConsumptionManager : ILicenseConsumptionManager, IService
     {
+        /// <inheritdoc />
         public bool CanConsumeFeatures( ILicenseConsumer consumer, LicensedFeatures requiredFeatures ) => true;
 
-        public void ConsumeFeatures( ILicenseConsumer consumer, LicensedFeatures requiredFeatures )
-        {
-            if ( !this.CanConsumeFeatures( consumer, requiredFeatures ) )
-            {
-                throw new InvalidOperationException( "This manager is not supposed to refuse consumption." );
-            }
-        }
+        /// <inheritdoc />
+        public void ConsumeFeatures( ILicenseConsumer consumer, LicensedFeatures requiredFeatures ) { }
     }
 }

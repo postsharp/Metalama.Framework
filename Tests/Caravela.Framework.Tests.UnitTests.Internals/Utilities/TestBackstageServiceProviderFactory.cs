@@ -7,14 +7,21 @@ using System;
 
 namespace Caravela.Framework.Tests.UnitTests.Utilities
 {
+    /// <summary>
+    /// Factory creating a service provider with backstage service implementations for testing.
+    /// </summary>
     internal static class TestBackstageServiceProviderFactory
     {
+        /// <summary>
+        /// Creates a service provider with backstage service implementations for testing.
+        /// </summary>
+        /// <returns>A service provider with backstage service implementations for testing.</returns>
         public static IServiceProvider Create()
         {
             // We can't add these services to the ServiceProviderFactory using the WithServices method
             // because the backstage interfaces do not inherit from IService.
             var backstageServices = new BackstageServiceCollection()
-                .AddSingleton<IDiagnosticsSink>( new ThrowingDiagnosticsSink() )
+                .AddSingleton<IBackstageDiagnosticSink>( new ThrowingDiagnosticsSink() )
                 .AddSingleton<ILicenseConsumptionManager>( new DummyLicenseConsumptionManager() );
 
             return backstageServices.ToServiceProvider();

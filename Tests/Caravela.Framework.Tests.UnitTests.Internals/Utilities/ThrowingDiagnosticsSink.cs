@@ -7,10 +7,15 @@ using System;
 
 namespace Caravela.Framework.Tests.UnitTests.Utilities
 {
-    internal class ThrowingDiagnosticsSink : IDiagnosticsSink, IService
+    /// <summary>
+    /// Diagnostics sink throwing <see cref="InvalidOperationException"/> for any diagnostic.
+    /// </summary>
+    internal class ThrowingDiagnosticsSink : IBackstageDiagnosticSink, IService
     {
+        /// <inheritdoc />
         public void ReportWarning( string message, IDiagnosticsLocation? location = null ) => throw new InvalidOperationException( message );
 
+        /// <inheritdoc />
         public void ReportError( string message, IDiagnosticsLocation? location = null ) => throw new InvalidOperationException( message );
     }
 }

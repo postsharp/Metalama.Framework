@@ -80,11 +80,11 @@ namespace Caravela.TestFramework
             // We can't add these services to the ServiceProviderFactory using the WithServices method
             // because the backstage interfaces do not inherit from IService.
             var backstageServices = new BackstageServiceCollection()
-                .AddSingleton<IDiagnosticsSink>( diagnosticsSink )
+                .AddSingleton<IBackstageDiagnosticSink>( diagnosticsSink )
                 
                 // This allows the retrieval of the service using its type name
                 .AddSingleton( diagnosticsSink )
-                .AddSingleton<ILicenseConsumptionManager>( new TestFrameworkLicenseConsumptionManager() );
+                .AddSingleton<ILicenseConsumptionManager>( new DummyLicenseConsumptionManager() );
             
             var serviceProvider =
                 ServiceProviderFactory.GetServiceProvider( testOptions )

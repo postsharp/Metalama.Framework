@@ -7,10 +7,15 @@ using PostSharp.Backstage.Licensing.Consumption;
 
 namespace Caravela.TestFramework.Licensing
 {
-    internal class TestFrameworkLicenseConsumptionManager : ILicenseConsumptionManager, IService
+    /// <summary>
+    /// License consumption manager allowing consumption of all license features.
+    /// </summary>
+    internal class DummyLicenseConsumptionManager : ILicenseConsumptionManager, IService
     {
+        /// <inheritdoc />
         public bool CanConsumeFeatures( ILicenseConsumer consumer, LicensedFeatures requiredFeatures ) => true;
 
+        /// <inheritdoc />
         public void ConsumeFeatures( ILicenseConsumer consumer, LicensedFeatures requiredFeatures ) { }
     }
 }
