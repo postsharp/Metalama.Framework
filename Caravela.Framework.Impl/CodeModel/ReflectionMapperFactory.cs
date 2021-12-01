@@ -3,7 +3,6 @@
 
 using Caravela.Framework.Project;
 using Microsoft.CodeAnalysis;
-using PostSharp.Backstage.Extensibility;
 using System.Runtime.CompilerServices;
 
 namespace Caravela.Framework.Impl.CodeModel

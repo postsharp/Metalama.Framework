@@ -2,16 +2,17 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Impl.Diagnostics;
+using Caravela.Framework.Project;
 using Microsoft.CodeAnalysis;
 using PostSharp.Backstage.Extensibility;
 using System.Collections.Generic;
 
 namespace Caravela.TestFramework
 {
-    internal class TestDiagnosticsSink : IDiagnosticsSink
+    internal class TestDiagnosticsSink : IBackstageDiagnosticSink, IService
     {
-        private List<(string Message, IDiagnosticsLocation? Location)> _warnings = new();
-        private List<(string Message, IDiagnosticsLocation? Location)> _errors = new();
+        private readonly List<(string Message, IDiagnosticsLocation? Location)> _warnings = new();
+        private readonly List<(string Message, IDiagnosticsLocation? Location)> _errors = new();
 
         public void ReportWarning( string message, IDiagnosticsLocation? location = null ) => this._warnings.Add( (message, location) );
 

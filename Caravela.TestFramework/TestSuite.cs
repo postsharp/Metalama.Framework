@@ -5,6 +5,7 @@ using Caravela.Framework.Impl.Pipeline;
 using Caravela.TestFramework.Licensing;
 using Caravela.TestFramework.Utilities;
 using Caravela.TestFramework.XunitFramework;
+using PostSharp.Backstage.Extensibility;
 using PostSharp.Backstage.Licensing.Consumption;
 using System;
 using System.IO;
@@ -74,9 +75,20 @@ namespace Caravela.TestFramework
             var directory = this.GetDirectory( callerMemberName! );
             using var testOptions = new TestProjectOptions();
 
+            var diagnosticsSink = new TestDiagnosticsSink();
+            
+            // We can't add these services to the ServiceProviderFactory using the WithServices method
+            // because the backstage interfaces do not inherit from IService.
+            var backstageServices = new BackstageServiceCollection()
+                .AddSingleton<IDiagnosticsSink>( diagnosticsSink )
+                
+                // This allows the retrieval of the service using its type name
+                .AddSingleton( diagnosticsSink )
+                .AddSingleton<ILicenseConsumptionManager>( new TestFrameworkLicenseConsumptionManager() );
+            
             var serviceProvider =
                 ServiceProviderFactory.GetServiceProvider( testOptions )
-                    .WithServices( new TestDiagnosticsSink(), new TestFrameworkLicenseConsumptionManager() );
+                    .WithNextProvider( backstageServices.ToServiceProvider() );
 
             var assemblyAssets = GetAssemblyAssets( this.GetType().Assembly );
 

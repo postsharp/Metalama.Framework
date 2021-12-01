@@ -7,7 +7,6 @@ using Caravela.Framework.Impl.Serialization;
 using Caravela.Framework.Impl.Utilities;
 using Caravela.Framework.Project;
 using Microsoft.CodeAnalysis;
-using PostSharp.Backstage.Extensibility;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -80,31 +79,12 @@ namespace Caravela.Framework.Impl.Pipeline
             return this.WithService( lazy );
         }
 
-        object? IServiceProvider.GetService( Type serviceType ) => this.GetService( serviceType );
+        object? IServiceProvider.GetService( Type serviceType ) => this.GetService( serviceType ) ?? this._nextProvider?.GetService( serviceType );
 
         /// <summary>
         /// Gets the implementation of a given service type.
         /// </summary>
-        public IService? GetService( Type serviceType )
-        {
-            if ( this._services.TryGetValue( serviceType, out var instance ) )
-            {
-                return instance.Value;
-            }
-            else
-            {
-                var service = this._nextProvider?.GetService( serviceType );
-
-                if ( service == null )
-                {
-                    return null;
-                }
-                else
-                {
-                    return (IService) service;
-                }
-            }
-        }
+        private IService? GetService( Type serviceType ) => this._services.TryGetValue( serviceType, out var instance ) ? instance.Value : null;
 
         /// <summary>
         /// Returns a new <see cref="ServiceProvider"/> where some given services have been added to the current <see cref="ServiceProvider"/>.

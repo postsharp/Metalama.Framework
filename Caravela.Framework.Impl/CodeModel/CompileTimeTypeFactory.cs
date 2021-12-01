@@ -6,7 +6,6 @@ using Caravela.Framework.Impl.ReflectionMocks;
 using Caravela.Framework.Impl.Utilities;
 using Caravela.Framework.Project;
 using Microsoft.CodeAnalysis;
-using PostSharp.Backstage.Extensibility;
 using System;
 using System.Collections.Concurrent;
 

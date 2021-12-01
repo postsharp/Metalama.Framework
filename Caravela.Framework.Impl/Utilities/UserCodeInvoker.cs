@@ -8,7 +8,6 @@ using Caravela.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Text;
-using PostSharp.Backstage.Extensibility;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;

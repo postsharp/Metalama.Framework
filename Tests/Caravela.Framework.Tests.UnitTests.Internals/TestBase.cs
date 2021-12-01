@@ -151,6 +151,7 @@ class Expression
                 this.ProjectOptions = projectOptions ?? new TestProjectOptions();
 
                 this.ServiceProvider = ServiceProviderFactory.GetServiceProvider( this.ProjectOptions )
+                    .WithNextProvider( TestBackstageServiceProviderFactory.Create() )
                     .WithProjectScopedServices( TestCompilationFactory.GetMetadataReferences() )
                     .WithMark( ServiceProviderMark.Test );
 

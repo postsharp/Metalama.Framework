@@ -6,7 +6,6 @@ using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.Pipeline;
 using Caravela.Framework.Impl.Utilities;
 using Caravela.Framework.Project;
-using PostSharp.Backstage.Extensibility;
 using System;
 using System.Collections.Generic;
 using System.Linq;

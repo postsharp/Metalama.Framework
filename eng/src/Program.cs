@@ -40,7 +40,9 @@ namespace Build
                     new DotNetSolution( "Caravela.sln" ) { SupportsTestCoverage = true, CanFormatCode = true },
                     new DotNetSolution( "Tests\\Caravela.Framework.TestApp\\Caravela.Framework.TestApp.sln" ) { IsTestOnly = true } ),
                 PublishingTargets = ImmutableArray.Create<PublishingTarget>( publicPublishing ),
-                Dependencies = ImmutableArray.Create( new ProductDependency( "Caravela.Compiler" ) )
+                Dependencies = ImmutableArray.Create(
+                    new ProductDependency( "PostSharp.Backstage.Settings" ),
+                    new ProductDependency( "Caravela.Compiler" ) )
             };
 
             var commandApp = new CommandApp();

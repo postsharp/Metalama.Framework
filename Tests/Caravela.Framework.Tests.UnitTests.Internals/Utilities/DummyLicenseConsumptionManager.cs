@@ -1,13 +1,14 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Project;
 using PostSharp.Backstage.Licensing;
 using PostSharp.Backstage.Licensing.Consumption;
 using System;
 
 namespace Caravela.Framework.Tests.UnitTests.Utilities
 {
-    internal class DummyLicenseConsumptionManager : ILicenseConsumptionManager
+    internal class DummyLicenseConsumptionManager : ILicenseConsumptionManager, IService
     {
         public bool CanConsumeFeatures( ILicenseConsumer consumer, LicensedFeatures requiredFeatures ) => true;
 

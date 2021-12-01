@@ -98,19 +98,6 @@ namespace Caravela.Framework.Impl.Pipeline
 
                 // TODO: Implement all license policies.
                 licenseManager.ConsumeFeatures( new LicenseConsumer( this.ServiceProvider ), LicensedFeatures.Community );
-                
-                if ( !TemplatingCodeValidator.Validate( compilation, diagnosticAdder, this.ServiceProvider, cancellationToken ) )
-                {
-                    return false;
-                }
-
-                var partialCompilation = PartialCompilation.CreateComplete( compilation, resources );
-
-                // Initialize the pipeline and generate the compile-time project.
-                if ( !this.TryInitialize( diagnosticAdder, partialCompilation, null, cancellationToken, out var configuration ) )
-                {
-                    return false;
-                }
 
                 // Execute the pipeline.
                 if ( !this.TryExecute( compilation, diagnosticAdder, configuration, cancellationToken, out var result ) )

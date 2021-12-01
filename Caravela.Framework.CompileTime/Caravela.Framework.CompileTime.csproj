@@ -30,7 +30,6 @@
              but we need the support in the IDE -->
 
         <PackageReference Include="System.Collections.Immutable" Version="$(SystemCollectionsImmutableVersion)" />
-        <PackageReference Include="PostSharp.Backstage.Settings" Version="$(BackstageVersion)" />
         
         <!-- The following references change 'dynamic' into 'object' -->
         <ProjectReference Include="..\Build\Caravela.SourceTransformer\Caravela.SourceTransformer.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />

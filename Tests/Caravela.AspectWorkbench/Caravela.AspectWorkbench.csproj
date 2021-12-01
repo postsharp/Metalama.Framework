@@ -9,7 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="PostSharp.Patterns.Model" Version="6.9.9" />
+    <PackageReference Include="PostSharp.Patterns.Model" Version="6.10.4-rc" />
     <PackageReference Include="RoslynPad.Editor.Windows" Version="4.0.0-4.final" />
     <PackageReference Include="RoslynPad.Roslyn" Version="4.0.0-4.final" />
 	<PackageReference Include="Microsoft.CodeAnalysis.VisualBasic.Workspaces" Version="4.0.0-4.final" />

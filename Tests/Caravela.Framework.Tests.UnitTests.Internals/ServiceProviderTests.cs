@@ -5,7 +5,6 @@ using Caravela.Framework.Impl.Options;
 using Caravela.Framework.Impl.Pipeline;
 using Caravela.Framework.Project;
 using Caravela.TestFramework;
-using PostSharp.Backstage.Extensibility;
 using System.Threading.Tasks;
 using Xunit;
 

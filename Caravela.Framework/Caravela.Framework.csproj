@@ -24,7 +24,6 @@
     <InternalsVisibleTo Include="DynamicProxyGenAssembly2" Key="$(FakeItEasyKey)" LoadsWithinVisualStudio="false" />
     <PackageReference Include="Microsoft.CSharp" Version="$(MicrosoftCSharpVersion)" />
     <PackageReference Include="System.Collections.Immutable" Version="$(SystemCollectionsImmutableVersion)" />
-    <PackageReference Include="PostSharp.Backstage.Settings" Version="$(BackstageVersion)" />
   </ItemGroup>
 
   <!-- based on https://stackoverflow.com/a/56018426/41071 -->
