@@ -41,7 +41,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization
         [Fact]
         public void TestInfiniteRecursion()
         {
-            using var testContext = this.CreateTestContext();
+            using var testContext = this.CreateSerializationTestContext( "" );
 
             Assert.Throws<DiagnosticException>(
                 () =>
@@ -55,7 +55,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization
         [Fact]
         public void TestUnsupportedAnonymousType()
         {
-            using var testContext = this.CreateTestContext();
+            using var testContext = this.CreateSerializationTestContext( "" );
             Assert.Throws<DiagnosticException>( () => testContext.Serialize( new { A = "F" } ) );
         }
 
@@ -67,7 +67,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization
 
         private void AssertSerialization<T>( string expected, T? o )
         {
-            using var testContext = this.CreateTestContext();
+            using var testContext = this.CreateSerializationTestContext( "" );
 
             var creationExpression = testContext.Serialize( o ).NormalizeWhitespace().ToString();
             Assert.Equal( expected, creationExpression );

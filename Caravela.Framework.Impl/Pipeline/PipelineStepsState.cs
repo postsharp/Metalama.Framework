@@ -6,6 +6,7 @@ using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.Aspects;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Collections;
+using Caravela.Framework.Impl.DesignTime.CodeFixes;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Transformations;
 using Microsoft.CodeAnalysis;
@@ -50,7 +51,7 @@ namespace Caravela.Framework.Impl.Pipeline
             IReadOnlyList<IAspectSource> inputAspectSources,
             AspectPipelineConfiguration pipelineConfiguration )
         {
-            this._diagnostics = new UserDiagnosticSink( pipelineConfiguration.CompileTimeProject );
+            this._diagnostics = new UserDiagnosticSink( pipelineConfiguration.CompileTimeProject, pipelineConfiguration.CodeFixFilter );
             this.Compilation = inputCompilation;
             this.PipelineConfiguration = pipelineConfiguration;
 
@@ -237,10 +238,14 @@ namespace Caravela.Framework.Impl.Pipeline
             this._inheritableAspectInstances.AddRange( inheritedAspectInstances );
         }
 
-        public void AddDiagnostics( IEnumerable<Diagnostic> diagnostics, IEnumerable<ScopedSuppression> suppressions )
+        public void AddDiagnostics(
+            IEnumerable<Diagnostic> diagnostics,
+            IEnumerable<ScopedSuppression> suppressions,
+            IEnumerable<CodeFixInstance> codeFixInstances )
         {
             this._diagnostics.Report( diagnostics );
             this._diagnostics.Suppress( suppressions );
+            this._diagnostics.AddCodeFixes( codeFixInstances );
         }
 
         public void AddNonObservableTransformations( IEnumerable<INonObservableTransformation> transformations )

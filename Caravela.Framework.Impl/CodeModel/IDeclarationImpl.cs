@@ -9,7 +9,7 @@ using System.Collections.Immutable;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    internal interface IDeclarationImpl : ISdkDeclaration, IDeclarationInternal
+    internal interface IDeclarationImpl : ISdkDeclaration, IDeclarationInternal, IDiagnosticLocationImpl
     {
         Ref<IDeclaration> ToRef();
 

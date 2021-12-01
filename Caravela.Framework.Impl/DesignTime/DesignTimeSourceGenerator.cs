@@ -97,7 +97,8 @@ namespace Caravela.Framework.Impl.DesignTime
 
             foreach ( var file in provider.GetAdditionalCompilationOutputFiles()
                 .Where(
-                    f => f.Kind == AdditionalCompilationOutputFileKind.DesignTimeGeneratedCode && StringComparer.Ordinal.Equals( Path.GetExtension( f.Path ), ".cs" ) ) )
+                    f => f.Kind == AdditionalCompilationOutputFileKind.DesignTimeGeneratedCode
+                         && StringComparer.Ordinal.Equals( Path.GetExtension( f.Path ), ".cs" ) ) )
             {
                 using var stream = file.GetStream();
                 context.AddSource( Path.GetFileName( file.Path ), SourceText.From( stream ) );

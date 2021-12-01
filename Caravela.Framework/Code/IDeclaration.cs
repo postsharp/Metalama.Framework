@@ -12,7 +12,7 @@ namespace Caravela.Framework.Code
     /// </summary>
     /// <seealso cref="DeclarationExtensions"/>
     [CompileTimeOnly]
-    public interface IDeclaration : IDisplayable, IDiagnosticScope, ICompilationElement
+    public interface IDeclaration : IDisplayable, IDiagnosticLocation, ICompilationElement
     {
         /// <summary>
         /// Gets the declaring assembly, which can be the current <see cref="ICompilationElement.Compilation"/>

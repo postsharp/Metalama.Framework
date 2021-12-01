@@ -3,6 +3,7 @@
 
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.ReflectionMocks;
+using Caravela.Framework.Impl.Utilities;
 using Caravela.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
@@ -20,14 +21,12 @@ namespace Caravela.Framework.Impl.CodeModel
             {
                 IDynamicTypeSymbol => throw new AssertionFailedException(),
                 IArrayTypeSymbol { ElementType: IDynamicTypeSymbol } => throw new AssertionFailedException(),
-                _ => this.Get( DocumentationCommentId.CreateReferenceId( symbol ), symbol.GetReflectionName() )
+                _ => this.Get( symbol.GetSymbolId(), symbol.GetReflectionName() )
             };
 
-        public Type Get( string documentationId, string fullMetadataName )
+        public Type Get( SymbolId symbolKey, string fullMetadataName )
         {
-            Invariant.Assert( !documentationId.StartsWith( "T:", StringComparison.OrdinalIgnoreCase ) );
-
-            return this._instances.GetOrAdd( documentationId, id => CompileTimeType.CreateFromDocumentationId( id, fullMetadataName ) );
+            return this._instances.GetOrAdd( symbolKey.ToString(), id => CompileTimeType.CreateFromSymbolId( new SymbolId( id ), fullMetadataName ) );
         }
     }
 }

@@ -19,7 +19,7 @@ namespace Caravela.Framework.Aspects
         /// </summary>
         /// <remarks>
         /// Note that reporting an error using
-        /// <see cref="IDiagnosticSink.Report"/>
+        /// <see cref="IDiagnosticSink.Report{T}"/>
         /// automatically causes the aspect to be skipped, but, additionally, provided children aspects are ignored.
         /// </remarks>
         void SkipAspect();

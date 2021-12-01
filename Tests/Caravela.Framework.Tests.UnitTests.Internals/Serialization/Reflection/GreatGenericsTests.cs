@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
+using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.ReflectionMocks;
 using System;
 using System.Collections.Generic;
@@ -17,12 +18,11 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
 {
     public class GreatGenericsTests : ReflectionTestBase
     {
-        private readonly string _code;
         private readonly IEnumerable<INamedType> _topLevelTypes;
 
         public GreatGenericsTests( ITestOutputHelper helper ) : base( helper )
         {
-            this._code = @"
+            var code = @"
 class Origin<T1> { 
     private T1 privateField;
     public T1 Field;
@@ -45,8 +45,8 @@ class User {
     public Descendant<float> FullyInstantiated;
 }";
 
-            using var testContext = this.CreateTestContext();
-            var compilation = testContext.CreateCompilationModel( this._code );
+            using var testContext = this.CreateSerializationTestContext( code );
+            var compilation = testContext.Compilation;
             this._topLevelTypes = compilation.Types;
         }
 
@@ -59,7 +59,6 @@ class User {
             var descendant = this._topLevelTypes.Single( t => t.Name == "Descendant" );
 
             this.TestSerializable(
-                this._code,
                 nested.Method( "Method21" ),
                 m =>
                 {
@@ -69,7 +68,6 @@ class User {
                 @"((global::System.Reflection.MethodInfo)global::System.Reflection.MethodBase.GetMethodFromHandle(global::Caravela.Compiler.Intrinsics.GetRuntimeMethodHandle(""M:Origin`1.NestedInOrigin`1.Method21(`0)~`1""), typeof(global::Origin<>.NestedInOrigin<>).TypeHandle))" );
 
             this.TestSerializable(
-                this._code,
                 descendant.BaseType!.Method( "Method21" ),
                 m =>
                 {
@@ -89,7 +87,6 @@ class User {
             var instantiatedBaseOrigin = instantiatedNested.BaseType!;
 
             this.TestSerializable(
-                this._code,
                 instantiatedNested.Method( "Method21" ),
                 m =>
                 {
@@ -99,7 +96,6 @@ class User {
                 @"((global::System.Reflection.MethodInfo)global::System.Reflection.MethodBase.GetMethodFromHandle(global::Caravela.Compiler.Intrinsics.GetRuntimeMethodHandle(""M:Origin`1.NestedInOrigin`1.Method21(`0)~`1""), typeof(global::Origin<global::System.String>.NestedInOrigin<global::System.Single>).TypeHandle))" );
 
             this.TestSerializable(
-                this._code,
                 instantiatedNested.Constructors.Single(),
                 c =>
                 {
@@ -110,43 +106,36 @@ class User {
                 @"((global::System.Reflection.ConstructorInfo)global::System.Reflection.MethodBase.GetMethodFromHandle(global::Caravela.Compiler.Intrinsics.GetRuntimeMethodHandle(""M:Origin`1.NestedInOrigin`1.#ctor""), typeof(global::Origin<global::System.String>.NestedInOrigin<global::System.Single>).TypeHandle))" );
 
             this.TestSerializable(
-                this._code,
                 ((INamedType) instantiatedNested.ContainingDeclaration!).Method( "Method" ),
                 m => Assert.Equal( typeof(string), m.ReturnType ),
                 @"((global::System.Reflection.MethodInfo)global::System.Reflection.MethodBase.GetMethodFromHandle(global::Caravela.Compiler.Intrinsics.GetRuntimeMethodHandle(""M:Origin`1.Method(`0)~`0""), typeof(global::Origin<global::System.String>).TypeHandle))" );
 
             this.TestSerializable(
-                this._code,
                 instantiatedDescendant.Field( "Field" ),
                 ( FieldInfo f ) => Assert.Equal( typeof(float), f.FieldType ),
                 @"typeof(global::Descendant<global::System.Single>).GetField(""Field"", global::System.Reflection.BindingFlags.DeclaredOnly | global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Static | global::System.Reflection.BindingFlags.Instance)" );
 
             this.TestSerializable(
-                this._code,
                 instantiatedBaseOrigin.Field( "Field" ),
                 ( FieldInfo f ) => Assert.Equal( typeof(int), f.FieldType ),
                 @"typeof(global::Origin<global::System.Int32>).GetField(""Field"", global::System.Reflection.BindingFlags.DeclaredOnly | global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Static | global::System.Reflection.BindingFlags.Instance)" );
 
             this.TestSerializable(
-                this._code,
                 instantiatedBaseOrigin.Field( "privateField" ),
                 ( FieldInfo f ) => Assert.Equal( typeof(int), f.FieldType ),
                 @"typeof(global::Origin<global::System.Int32>).GetField(""privateField"", global::System.Reflection.BindingFlags.DeclaredOnly | global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Static | global::System.Reflection.BindingFlags.Instance)" );
 
             this.TestSerializable(
-                this._code,
                 instantiatedBaseOrigin.Property( "Property" ),
                 ( PropertyInfo p ) => Assert.Equal( typeof(int), p.PropertyType ),
                 @"typeof(global::Origin<global::System.Int32>).GetProperty(""Property"", global::System.Reflection.BindingFlags.DeclaredOnly | global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Static | global::System.Reflection.BindingFlags.Instance)" );
 
             this.TestSerializable(
-                this._code,
                 instantiatedBaseOrigin.Property( "privateProperty" ),
                 ( PropertyInfo p ) => Assert.Equal( typeof(int), p.PropertyType ),
                 @"typeof(global::Origin<global::System.Int32>).GetProperty(""privateProperty"", global::System.Reflection.BindingFlags.DeclaredOnly | global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Static | global::System.Reflection.BindingFlags.Instance)" );
 
             this.TestSerializable(
-                this._code,
                 instantiatedBaseOrigin,
                 t =>
                 {
@@ -156,7 +145,6 @@ class User {
                 @"typeof(global::Origin<global::System.Int32>)" );
 
             this.TestSerializable(
-                this._code,
                 instantiatedBaseOrigin.Event( "Actioned" ),
                 e =>
                 {
@@ -166,56 +154,61 @@ class User {
                 @"typeof(global::Origin<global::System.Int32>).GetEvent(""Actioned"")" );
         }
 
-        private void TestSerializable( string context, IType type, Action<Type> withResult, string expectedCode )
+        private void TestSerializable( IType type, Action<Type> withResult, string expectedCode )
         {
-            using var testContext = this.CreateTestContext();
+            var compilation = type.GetCompilationModel();
+            using var testContext = this.CreateSerializationTestContext( compilation );
 
             this.TestExpression<Type>(
-                context,
+                compilation.RoslynCompilation.SyntaxTrees.First().ToString(),
                 testContext.Serialize( CompileTimeType.Create( type ) ).ToString(),
                 withResult,
                 expectedCode );
         }
 
-        private void TestSerializable( string context, IMethod method, Action<MethodInfo> withResult, string expectedCode )
+        private void TestSerializable( IMethod method, Action<MethodInfo> withResult, string expectedCode )
         {
-            using var testContext = this.CreateTestContext();
+            var compilation = method.GetCompilationModel();
+            using var testContext = this.CreateSerializationTestContext( compilation );
 
             this.TestExpression<MethodInfo>(
-                context,
+                compilation.RoslynCompilation.SyntaxTrees.First().ToString(),
                 testContext.Serialize( CompileTimeMethodInfo.Create( method ) ).ToString(),
                 withResult,
                 expectedCode );
         }
 
-        private void TestSerializable( string context, IConstructor method, Action<ConstructorInfo> withResult, string expectedCode )
+        private void TestSerializable( IConstructor method, Action<ConstructorInfo> withResult, string expectedCode )
         {
-            using var testContext = this.CreateTestContext();
+            var compilation = method.GetCompilationModel();
+            using var testContext = this.CreateSerializationTestContext( compilation );
 
             this.TestExpression<ConstructorInfo>(
-                context,
+                compilation.RoslynCompilation.SyntaxTrees.First().ToString(),
                 testContext.Serialize( CompileTimeConstructorInfo.Create( method ) ).ToString(),
                 withResult,
                 expectedCode );
         }
 
-        private void TestSerializable<T>( string context, IFieldOrProperty property, Action<T> withResult, string expectedCode )
+        private void TestSerializable<T>( IFieldOrProperty property, Action<T> withResult, string expectedCode )
         {
-            using var testContext = this.CreateTestContext();
+            var compilation = property.GetCompilationModel();
+            using var testContext = this.CreateSerializationTestContext( compilation );
 
             this.TestExpression<T>(
-                context,
+                compilation.RoslynCompilation.SyntaxTrees.First().ToString(),
                 CaravelaPropertyInfoTests.StripLocationInfo( testContext.Serialize( CompileTimeFieldOrPropertyInfo.Create( property ) ).ToString() ),
                 withResult,
                 expectedCode );
         }
 
-        private void TestSerializable( string context, IEvent @event, Action<EventInfo> withResult, string expectedCode )
+        private void TestSerializable( IEvent @event, Action<EventInfo> withResult, string expectedCode )
         {
-            using var testContext = this.CreateTestContext();
+            var compilation = @event.GetCompilationModel();
+            using var testContext = this.CreateSerializationTestContext( compilation );
 
             this.TestExpression<EventInfo>(
-                context,
+                compilation.RoslynCompilation.SyntaxTrees.First().ToString(),
                 testContext.Serialize( CompileTimeEventInfo.Create( @event ) ).ToString(),
                 withResult,
                 expectedCode );

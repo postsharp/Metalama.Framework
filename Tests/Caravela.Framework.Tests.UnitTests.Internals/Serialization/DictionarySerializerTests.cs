@@ -40,7 +40,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization
         [Fact]
         public void TestRecursiveDictionary_InKey()
         {
-            using var testContext = this.CreateTestContext();
+            using var testContext = this.CreateSerializationTestContext( "" );
 
             var d = new Dictionary<object, object>();
             d.Add( d, "20" );
@@ -50,7 +50,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization
         [Fact]
         public void TestRecursiveDictionary_InValue()
         {
-            using var testContext = this.CreateTestContext();
+            using var testContext = this.CreateSerializationTestContext( "" );
 
             var d = new Dictionary<object, object>();
             d.Add( "20", d );
@@ -134,7 +134,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization
 
         private void AssertSerialization( string expected, object o )
         {
-            using var testContext = this.CreateTestContext();
+            using var testContext = this.CreateSerializationTestContext( "" );
 
             var creationExpression = testContext.Serialize( o ).NormalizeWhitespace().ToString();
             Assert.Equal( expected, creationExpression );

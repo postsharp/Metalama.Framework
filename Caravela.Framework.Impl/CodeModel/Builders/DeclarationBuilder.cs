@@ -4,17 +4,13 @@
 using Caravela.Framework.Code;
 using Caravela.Framework.Code.Collections;
 using Caravela.Framework.Code.DeclarationBuilders;
-using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.CodeModel.References;
-using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Transformations;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Linq;
-using TypedConstant = Caravela.Framework.Code.TypedConstant;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
@@ -46,39 +42,18 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         Advice ITransformation.Advice => this.ParentAdvice;
 
-        public DeclarationBuilder( Advice parentAdvice )
+        protected DeclarationBuilder( Advice parentAdvice )
         {
             this.ParentAdvice = parentAdvice;
         }
 
         public abstract string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null );
 
-        public IAttributeBuilder AddAttribute( INamedType type, params object?[] constructorArguments )
-        {
-            /* We are interested in the fact that there is a matching ctor. 
-               If there are multiple we don't care at this point as we will generate code eventually and C# will resolve the correct one.
-               Of course this is a bit strange for the user, but currently it's not important.
-            */
+        public void AddAttribute( AttributeConstruction attribute ) => this.Attributes.Add( new AttributeBuilder( this, attribute ) );
 
-            var ctor = type.Constructors.OfCompatibleSignature( constructorArguments.Select( x => x?.GetType() ).ToList() ).FirstOrDefault();
-
-            if ( ctor == null )
-            {
-                throw GeneralDiagnosticDescriptors.CompatibleAttributeConstructorDoesNotExist.CreateException(
-                    (this.ParentAdvice.Aspect.AspectClass.ShortName, this, type) );
-            }
-
-            var ctorArguments = constructorArguments.Select( ( _, i ) => new TypedConstant( ctor.Parameters[i].Type, constructorArguments[i] ) )
-                .ToList();
-
-            return new AttributeBuilder( this, ctor, ctorArguments );
-        }
-
-        public void RemoveAttributes( INamedType type ) => throw new NotImplementedException();
+        public void RemoveAttributes( INamedType type ) => this.Attributes.RemoveAll( a => a.Type.Is( type ) );
 
         public virtual void Freeze() => this.IsFrozen = true;
-
-        public IDiagnosticLocation? DiagnosticLocation => this.ContainingDeclaration?.DiagnosticLocation;
 
         public Ref<IDeclaration> ToRef() => Ref.FromBuilder( this );
 
@@ -96,5 +71,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public IDeclaration OriginalDefinition => this;
 
         public IAssembly DeclaringAssembly => this.Compilation.DeclaringAssembly;
+
+        // TODO: should we locate diagnostic on the aspect attribute?
+        public Location? DiagnosticLocation => null;
     }
 }

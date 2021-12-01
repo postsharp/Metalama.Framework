@@ -11,7 +11,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization
         [Fact]
         public void TestTimeSpan()
         {
-            using var testContext = this.CreateTestContext();
+            using var testContext = this.CreateSerializationTestContext( "" );
 
             var ts = TimeSpan.FromMinutes( 38 );
             var ticks = 38 * TimeSpan.TicksPerMinute;
@@ -21,7 +21,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization
         [Fact]
         public void TestZero()
         {
-            using var testContext = this.CreateTestContext();
+            using var testContext = this.CreateSerializationTestContext( "" );
 
             Assert.Equal( "new global::System.TimeSpan(0L)", testContext.Serialize( TimeSpan.Zero ).ToString() );
         }

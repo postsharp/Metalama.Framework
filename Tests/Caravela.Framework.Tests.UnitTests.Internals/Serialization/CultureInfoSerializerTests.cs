@@ -11,7 +11,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization
         [Fact]
         public void TestCzech()
         {
-            using var testContext = this.CreateTestContext();
+            using var testContext = this.CreateSerializationTestContext( "" );
 
             var ci = new CultureInfo( "cs-CZ", true );
             Assert.Equal( @"new global::System.Globalization.CultureInfo(""cs-CZ"", true)", testContext.Serialize( ci ).ToString() );
@@ -20,7 +20,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization
         [Fact]
         public void TestSlovakFalse()
         {
-            using var testContext = this.CreateTestContext();
+            using var testContext = this.CreateSerializationTestContext( "" );
 
             var ci = new CultureInfo( "sk-SK", false );
             Assert.Equal( @"new global::System.Globalization.CultureInfo(""sk-SK"", false)", testContext.Serialize( ci ).ToString() );

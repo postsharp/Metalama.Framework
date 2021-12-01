@@ -109,7 +109,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization
 
             foreach ( var t in typesToTest )
             {
-                using var testContext = this.CreateTestContext();
+                using var testContext = this.CreateSerializationTestContext( "" );
 
                 var actualName = testContext.SerializationContext.GetTypeSyntax( t.Value ).ToString();
                 Assert.Equal( t.Key, actualName );

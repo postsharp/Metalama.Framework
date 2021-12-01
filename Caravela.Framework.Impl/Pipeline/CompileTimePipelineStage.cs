@@ -38,17 +38,17 @@ namespace Caravela.Framework.Impl.Pipeline
         protected override PipelineStageResult GetStageResult(
             AspectPipelineConfiguration pipelineConfiguration,
             PipelineStageResult input,
-            IPipelineStepsResult pipelineStepResult,
+            IPipelineStepsResult pipelineStepsResult,
             CancellationToken cancellationToken )
         {
             var linker = new AspectLinker(
                 pipelineConfiguration.ServiceProvider,
                 new AspectLinkerInput(
-                    input.PartialCompilation,
-                    pipelineStepResult.Compilation,
-                    pipelineStepResult.NonObservableTransformations,
+                    input.Compilation,
+                    pipelineStepsResult.Compilation,
+                    pipelineStepsResult.NonObservableTransformations,
                     input.AspectLayers,
-                    input.Diagnostics.DiagnosticSuppressions.Concat( pipelineStepResult.Diagnostics.DiagnosticSuppressions ),
+                    input.Diagnostics.DiagnosticSuppressions.Concat( pipelineStepsResult.Diagnostics.DiagnosticSuppressions ),
                     this._compileTimeProject ) );
 
             var linkerResult = linker.ToResult();
@@ -60,7 +60,7 @@ namespace Caravela.Framework.Impl.Pipeline
             {
                 additionalCompilationOutputFiles = this.GenerateAdditionalCompilationOutputFiles(
                     input,
-                    pipelineStepResult,
+                    pipelineStepsResult,
                     cancellationToken );
             }
 
@@ -68,9 +68,10 @@ namespace Caravela.Framework.Impl.Pipeline
                 linkerResult.Compilation,
                 input.Project,
                 input.AspectLayers,
-                pipelineStepResult.Diagnostics.Concat( linkerResult.Diagnostics ),
-                pipelineStepResult.ExternalAspectSources,
-                input.ExternallyInheritableAspects.AddRange( pipelineStepResult.InheritableAspectInstances ),
+                null,
+                pipelineStepsResult.Diagnostics.Concat( linkerResult.Diagnostics ),
+                pipelineStepsResult.ExternalAspectSources,
+                input.ExternallyInheritableAspects.AddRange( pipelineStepsResult.InheritableAspectInstances ),
                 additionalCompilationOutputFiles: additionalCompilationOutputFiles != null
                     ? input.AdditionalCompilationOutputFiles.AddRange( additionalCompilationOutputFiles )
                     : input.AdditionalCompilationOutputFiles );
@@ -87,11 +88,11 @@ namespace Caravela.Framework.Impl.Pipeline
             var diagnostics = new UserDiagnosticSink();
 
             DesignTimeSyntaxTreeGenerator.GenerateDesignTimeSyntaxTrees(
-                input.PartialCompilation,
+                input.Compilation,
                 pipelineStepResult.Compilation,
                 this.ServiceProvider,
-                cancellationToken,
                 diagnostics,
+                cancellationToken,
                 out var additionalSyntaxTrees );
 
             // Ignore diagnostics, because these will be coming from the analyzer.

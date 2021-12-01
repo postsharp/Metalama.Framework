@@ -85,9 +85,9 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
 
         private string SerializeType( string code )
         {
-            using var testContext = this.CreateTestContext();
+            using var testContext = this.CreateSerializationTestContext( code );
 
-            var compilation = testContext.CreateCompilationModel( code );
+            var compilation = testContext.Compilation;
             IType single = compilation.Types.Single( t => t.Name == "Target" );
             var actual = testContext.Serialize( CompileTimeType.Create( single ) ).ToString();
 
@@ -96,9 +96,9 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
 
         private string SerializeTypeOfProperty( string code )
         {
-            using var testContext = this.CreateTestContext();
+            using var testContext = this.CreateSerializationTestContext( code );
 
-            var compilation = testContext.CreateCompilationModel( code );
+            var compilation = testContext.Compilation;
             var single = compilation.Types.Single( t => t.Name == "Target" ).Properties.Single( p => p.Name == "Property" ).Type;
             var actual = testContext.Serialize( CompileTimeType.Create( single ) ).ToString();
 

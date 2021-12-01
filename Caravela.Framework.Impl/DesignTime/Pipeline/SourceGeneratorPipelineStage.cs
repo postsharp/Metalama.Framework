@@ -27,26 +27,27 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
         protected override PipelineStageResult GetStageResult(
             AspectPipelineConfiguration pipelineConfiguration,
             PipelineStageResult input,
-            IPipelineStepsResult pipelineStepResult,
+            IPipelineStepsResult pipelineStepsResult,
             CancellationToken cancellationToken )
         {
-            var diagnosticSink = new UserDiagnosticSink( this.CompileTimeProject );
+            var diagnosticSink = new UserDiagnosticSink( this.CompileTimeProject, null );
 
             DesignTimeSyntaxTreeGenerator.GenerateDesignTimeSyntaxTrees(
-                input.PartialCompilation,
-                pipelineStepResult.Compilation,
+                input.Compilation,
+                pipelineStepsResult.Compilation,
                 this.ServiceProvider,
-                cancellationToken,
                 diagnosticSink,
+                cancellationToken,
                 out var additionalSyntaxTrees );
 
             return new PipelineStageResult(
-                input.PartialCompilation,
+                input.Compilation,
                 input.Project,
                 input.AspectLayers,
-                input.Diagnostics.Concat( pipelineStepResult.Diagnostics ).Concat( diagnosticSink.ToImmutable() ),
-                input.AspectSources.Concat( pipelineStepResult.ExternalAspectSources ),
-                pipelineStepResult.InheritableAspectInstances,
+                input.CompilationModel,
+                input.Diagnostics.Concat( pipelineStepsResult.Diagnostics ).Concat( diagnosticSink.ToImmutable() ),
+                input.AspectSources.Concat( pipelineStepsResult.ExternalAspectSources ),
+                pipelineStepsResult.InheritableAspectInstances,
                 input.AdditionalSyntaxTrees.Concat( additionalSyntaxTrees ) );
         }
     }

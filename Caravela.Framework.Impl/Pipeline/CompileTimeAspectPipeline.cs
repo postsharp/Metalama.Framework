@@ -2,7 +2,6 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Compiler;
-using Caravela.Framework.Aspects;
 using Caravela.Framework.Impl.AdditionalOutputs;
 using Caravela.Framework.Impl.Aspects;
 using Caravela.Framework.Impl.CodeModel;
@@ -10,6 +9,7 @@ using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Formatting;
 using Caravela.Framework.Impl.Templating;
+using Caravela.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
 using System.Diagnostics;
@@ -28,9 +28,9 @@ namespace Caravela.Framework.Impl.Pipeline
             ServiceProvider serviceProvider,
             bool isTest,
             CompileTimeDomain? domain = null,
-            AspectExecutionScenario executionScenario = AspectExecutionScenario.CompileTime ) : base(
+            IExecutionScenario? executionScenario = null ) : base(
             serviceProvider,
-            executionScenario,
+            executionScenario ?? ExecutionScenario.CompileTime,
             isTest,
             domain )
         {
@@ -96,7 +96,7 @@ namespace Caravela.Framework.Impl.Pipeline
                     return null;
                 }
 
-                var resultPartialCompilation = result.PartialCompilation;
+                var resultPartialCompilation = result.Compilation;
 
                 // Format the output.
                 if ( this.ProjectOptions.FormatOutput && OutputCodeFormatter.CanFormat )
@@ -136,7 +136,11 @@ namespace Caravela.Framework.Impl.Pipeline
                 var resultingCompilation = (PartialCompilation) RunTimeAssemblyRewriter.Rewrite( resultPartialCompilation, this.ServiceProvider );
                 var syntaxTreeTransformations = resultingCompilation.ToTransformations();
 
-                return new CompileTimeAspectPipelineResult( syntaxTreeTransformations, additionalResources, resultingCompilation, result.AdditionalCompilationOutputFiles );
+                return new CompileTimeAspectPipelineResult(
+                    syntaxTreeTransformations,
+                    additionalResources,
+                    resultingCompilation,
+                    result.AdditionalCompilationOutputFiles );
             }
             catch ( DiagnosticException exception )
             {

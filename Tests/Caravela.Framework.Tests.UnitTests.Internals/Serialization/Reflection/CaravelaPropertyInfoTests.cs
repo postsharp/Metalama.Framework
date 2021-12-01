@@ -109,10 +109,11 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
         [Fact]
         public void TestIndexerOnString()
         {
-            using var testContext = this.CreateTestContext();
-
             var code = "class Target { public string this[int target] {get{return default;}} }";
-            var compilation = testContext.CreateCompilationModel( code );
+
+            using var testContext = this.CreateSerializationTestContext( code );
+
+            var compilation = testContext.Compilation;
             var stringType = (INamedType) compilation.Factory.GetTypeByReflectionType( typeof(string) );
             var properties = stringType.Properties;
             var property = properties.Single( p => p.Name == "this[]" );
@@ -137,9 +138,9 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
 
         private string SerializeIndexerWithTarget( string code )
         {
-            using var testContext = this.CreateTestContext();
+            using var testContext = this.CreateSerializationTestContext( code );
 
-            var compilation = testContext.CreateCompilationModel( code );
+            var compilation = testContext.Compilation;
             var single = compilation.Types.Single( t => t.Name == "Target" ).Properties.Single( p => p.Parameters.Any( pp => pp.Name == "target" ) );
             var property = (Property) single;
             var actual = testContext.Serialize( CompileTimeFieldOrPropertyInfo.Create( property ) ).ToString();
@@ -156,9 +157,9 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
 
         private string SerializeProperty( string code )
         {
-            using var testContext = this.CreateTestContext();
+            using var testContext = this.CreateSerializationTestContext( code );
 
-            var compilation = testContext.CreateCompilationModel( code );
+            var compilation = testContext.Compilation;
             var single = compilation.Types.Single( t => t.Name == "Target" ).Properties.Single( p => p.Name == "Property" );
             var property = (Property) single;
             var actual = testContext.Serialize( CompileTimeFieldOrPropertyInfo.Create( property ) ).ToString();

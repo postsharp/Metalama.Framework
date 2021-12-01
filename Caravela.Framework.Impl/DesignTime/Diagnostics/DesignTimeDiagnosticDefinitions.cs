@@ -27,6 +27,8 @@ namespace Caravela.Framework.Impl.DesignTime.Diagnostics
         /// </summary>
         public ImmutableDictionary<string, DiagnosticDescriptor> SupportedDiagnosticDescriptors { get; }
 
+        public ImmutableDictionary<string, DiagnosticDescriptor> UserDiagnosticDescriptors { get; }
+
         /// <summary>
         /// Gets the set of <see cref="SuppressionDescriptor"/> that are supported the current design-time session.
         /// </summary>
@@ -65,6 +67,8 @@ namespace Caravela.Framework.Impl.DesignTime.Diagnostics
                 StandardDiagnosticDescriptors.Values
                     .Concat( userDefinedDescriptors.Diagnostics.Where( d => !StandardDiagnosticDescriptors.ContainsKey( d.Id ) ) )
                     .ToImmutableDictionary( d => d.Id, d => d, StringComparer.OrdinalIgnoreCase );
+
+            this.UserDiagnosticDescriptors = userDefinedDescriptors.Diagnostics.ToImmutableDictionary( d => d.Id, d => d, StringComparer.OrdinalIgnoreCase );
 
             this.SupportedSuppressionDescriptors =
                 userDefinedDescriptors.Suppressions.ToImmutableDictionary( d => d.SuppressedDiagnosticId, d => d, StringComparer.OrdinalIgnoreCase );

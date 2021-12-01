@@ -61,11 +61,11 @@ namespace Caravela.Framework.Impl.CodeModel.References
         /// </summary>
         /// <param name="symbol"></param>
         /// <returns></returns>
-        public static Ref<IDeclaration> FromSymbol( ISymbol symbol ) => new( symbol );
+        public static Ref<IDeclaration> FromSymbol( ISymbol symbol, Compilation compilation ) => new( symbol, compilation );
 
-        public static Ref<T> FromDocumentationId<T>( string documentationId )
+        public static Ref<T> FromSymbolKey<T>( SymbolId symbolKey )
             where T : class, ICompilationElement
-            => new( documentationId );
+            => new( symbolKey );
 
         /// <summary>
         /// Creates a <see cref="Ref{T}"/> from a Roslyn symbol.
@@ -73,13 +73,14 @@ namespace Caravela.Framework.Impl.CodeModel.References
         /// <param name="symbol"></param>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public static Ref<T> FromSymbol<T>( ISymbol symbol )
+        public static Ref<T> FromSymbol<T>( ISymbol symbol, Compilation compilation )
             where T : class, ICompilationElement
-            => new( symbol );
+            => new( symbol, compilation );
 
-        public static Ref<IDeclaration> ReturnParameter( IMethodSymbol methodSymbol ) => new( methodSymbol, DeclarationRefTargetKind.Return );
+        public static Ref<IDeclaration> ReturnParameter( IMethodSymbol methodSymbol, Compilation compilation )
+            => new( methodSymbol, compilation, DeclarationRefTargetKind.Return );
 
-        internal static Ref<ICompilation> Compilation() => new( null, DeclarationRefTargetKind.Assembly );
+        internal static Ref<ICompilation> Compilation() => new( DeclarationRefTargetKind.Assembly );
     }
 
     /// <summary>
@@ -89,15 +90,15 @@ namespace Caravela.Framework.Impl.CodeModel.References
     internal readonly struct Ref<T> : IRefImpl<T>
         where T : class, ICompilationElement
     {
-        internal Ref( ISymbol? symbol, DeclarationRefTargetKind targetKind = DeclarationRefTargetKind.Default )
+        // The compilation for which the symbol (stored in Target) is valid.
+        private readonly Compilation? _compilation;
+
+        internal Ref( ISymbol symbol, Compilation compilation, DeclarationRefTargetKind targetKind = DeclarationRefTargetKind.Default )
         {
+            symbol.AssertValidType<T>();
+
             this.TargetKind = targetKind;
-
-            if ( symbol != null )
-            {
-                symbol.AssertValidType<T>();
-            }
-
+            this._compilation = compilation;
             this.Target = symbol;
         }
 
@@ -105,18 +106,28 @@ namespace Caravela.Framework.Impl.CodeModel.References
         {
             this.Target = builder;
             this.TargetKind = DeclarationRefTargetKind.Default;
+            this._compilation = builder.GetCompilationModel().RoslynCompilation;
         }
 
-        private Ref( object? target, DeclarationRefTargetKind targetKind )
+        private Ref( object? target, Compilation? compilation, DeclarationRefTargetKind targetKind )
         {
             this.Target = target;
             this.TargetKind = targetKind;
+            this._compilation = compilation;
         }
 
-        internal Ref( string documentationId )
+        internal Ref( DeclarationRefTargetKind targetKind )
         {
-            this.Target = documentationId;
+            this._compilation = null;
+            this.TargetKind = targetKind;
+            this.Target = null;
+        }
+
+        internal Ref( SymbolId symbolKey )
+        {
+            this.Target = symbolKey.ToString();
             this.TargetKind = DeclarationRefTargetKind.Default;
+            this._compilation = null;
         }
 
         // ReSharper disable once UnusedParameter.Local
@@ -133,6 +144,7 @@ namespace Caravela.Framework.Impl.CodeModel.References
 
             this.Target = declaration;
             this.TargetKind = targetKind;
+            this._compilation = compilation;
         }
 
         public object? Target { get; }
@@ -165,7 +177,7 @@ namespace Caravela.Framework.Impl.CodeModel.References
             return (symbol.GetAttributes(), symbol);
         }
 
-        public bool IsDefault => this.Target == null;
+        public bool IsDefault => this.Target == null && this.TargetKind == DeclarationRefTargetKind.Default;
 
         public ISymbol GetSymbol( Compilation compilation ) => this.GetSymbolWithKind( this.GetSymbolIgnoringKind( compilation ) );
 
@@ -187,15 +199,17 @@ namespace Caravela.Framework.Impl.CodeModel.References
                     }
 
                 case ISymbol symbol:
-                    return symbol;
+                    return symbol.Translate( this._compilation, compilation ).AssertNotNull();
 
-                case string documentationId:
+                case string symbolId:
                     {
-                        var symbol = DocumentationCommentId.GetFirstSymbolForReferenceId( documentationId, compilation );
+                        var symbolKey = new SymbolId( symbolId );
+
+                        var symbol = symbolKey.Resolve( compilation );
 
                         if ( symbol == null )
                         {
-                            throw new AssertionFailedException( $"Cannot resolve {documentationId} into a symbol." );
+                            throw new AssertionFailedException( $"Cannot resolve {symbolId} into a symbol." );
                         }
 
                         return symbol;
@@ -282,13 +296,13 @@ namespace Caravela.Framework.Impl.CodeModel.References
                 case IDeclarationBuilder builder:
                     return (T) compilation.Factory.GetDeclaration( builder );
 
-                case string documentationId:
+                case string symbolId:
                     {
-                        var symbol = DocumentationCommentId.GetFirstSymbolForReferenceId( documentationId, compilation.RoslynCompilation );
+                        var symbol = new SymbolId( symbolId ).Resolve( compilation.RoslynCompilation );
 
                         if ( symbol == null )
                         {
-                            throw new AssertionFailedException( $"Cannot resolve {documentationId} into a symbol." );
+                            throw new AssertionFailedException( $"Cannot resolve '{symbolId}' into a symbol." );
                         }
 
                         return (T) compilation.Factory.GetCompilationElement( symbol );
@@ -303,7 +317,7 @@ namespace Caravela.Framework.Impl.CodeModel.References
 
         public Ref<TOut> As<TOut>()
             where TOut : class, ICompilationElement
-            => new( this.Target, this.TargetKind );
+            => new( this.Target, this._compilation, this.TargetKind );
 
         public override int GetHashCode() => this.Target?.GetHashCode() ?? 0;
     }

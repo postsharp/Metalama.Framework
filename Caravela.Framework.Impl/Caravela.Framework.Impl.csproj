@@ -29,6 +29,7 @@
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="$(RoslynVersion)" />
     <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.Common" Version="$(RoslynVersion)" />
     <PackageReference Include="Caravela.Compiler.Sdk" Version="$(CaravelaCompilerVersion)" />
+    
     <PackageReference Include="Microsoft.Bcl.HashCode" Version="$(MicrosoftBclHashCodeVersion)" />
     <PackageReference Include="K4os.Hash.xxHash" Version="$(K4osHashxxHashVersion)" />
     <PackageReference Include="Microsoft.CSharp" Version="$(MicrosoftCSharpVersion)" />
@@ -44,6 +45,17 @@
     
     <!-- The following references handle [Memo] -->
     <ProjectReference Include="..\Build\Caravela.SourceTransformer\Caravela.SourceTransformer.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    
+    
+    <!-- Caravela.RoslynUtilities is embedded in the current package to having to publish Caravela.RoslynUtilities as public package
+         (which would be usable from the current project anyway.
+          
+         We use an assembly alias to avoid conflicts with nullable attribute classes,
+       -->
+    <PackageReference Include="Caravela.RoslynUtilities" Version="$(CaravelaCompilerVersion)" PrivateAssets="all" Aliases="roslyn">
+            <GeneratePathProperty>true</GeneratePathProperty>
+     </PackageReference>
+     <None Include="$(PkgCaravela_RoslynUtilities)\lib\netstandard2.0\Caravela.RoslynUtilities.dll" Pack="true" PackagePath="lib\netstandard2.0" CopyToOutputDirectory="Always" />
     
   </ItemGroup>
     

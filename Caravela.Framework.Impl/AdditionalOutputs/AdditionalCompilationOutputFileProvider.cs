@@ -28,7 +28,7 @@ namespace Caravela.Framework.Impl.AdditionalOutputs
                 return ImmutableArray<AdditionalCompilationOutputFile>.Empty;
             }
 
-            var builder = ImmutableArray<AdditionalCompilationOutputFile>.Empty.ToBuilder();
+            var builder = ImmutableArray.CreateBuilder<AdditionalCompilationOutputFile>();
 
             foreach ( var kindDirectory in Directory.GetDirectories( projectOptions.AdditionalCompilationOutputDirectory ) )
             {

@@ -4,6 +4,7 @@
 using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
+using Caravela.Framework.Impl.DesignTime.CodeFixes;
 using Caravela.Framework.Impl.Fabrics;
 using Caravela.Framework.Impl.Utilities;
 using Caravela.Framework.Project;
@@ -24,7 +25,8 @@ namespace Caravela.Framework.Impl.Pipeline
         CompileTimeProjectLoader CompileTimeProjectLoader,
         FabricsConfiguration? FabricsConfiguration,
         ProjectModel ProjectModel,
-        ServiceProvider ServiceProvider )
+        ServiceProvider ServiceProvider,
+        CodeFixFilter CodeFixFilter )
     {
         public AspectPipelineConfiguration WithServiceProvider( ServiceProvider serviceProvider )
             => new(
@@ -35,7 +37,22 @@ namespace Caravela.Framework.Impl.Pipeline
                 this.CompileTimeProjectLoader,
                 this.FabricsConfiguration,
                 this.ProjectModel,
-                serviceProvider );
+                serviceProvider,
+                this.CodeFixFilter );
+
+        public AspectPipelineConfiguration WithCodeFixFilter( CodeFixFilter codeFixFilter )
+            => codeFixFilter == this.CodeFixFilter
+                ? this
+                : new AspectPipelineConfiguration(
+                    this.Stages,
+                    this.AspectClasses,
+                    this.AspectLayers,
+                    this.CompileTimeProject,
+                    this.CompileTimeProjectLoader,
+                    this.FabricsConfiguration,
+                    this.ProjectModel,
+                    this.ServiceProvider,
+                    codeFixFilter );
 
         public UserCodeInvoker UserCodeInvoker => this.ServiceProvider.GetService<UserCodeInvoker>();
     }

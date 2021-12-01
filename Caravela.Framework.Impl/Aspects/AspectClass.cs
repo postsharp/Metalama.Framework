@@ -211,8 +211,8 @@ namespace Caravela.Framework.Impl.Aspects
         /// Creates a new <see cref="AspectInstance"/> by using the default constructor of the current class.
         /// This method is used by live templates.
         /// </summary>
-        public AspectInstance CreateDefaultAspectInstance( IDeclaration target, in AspectPredecessor predecessor )
-            => new( (IAspect) Activator.CreateInstance( this.AspectType ), target.ToRef(), this, predecessor );
+        public AspectInstance CreateAspectInstance( IDeclaration target, IAspect aspect, in AspectPredecessor predecessor )
+            => new( aspect, target.ToRef(), this, predecessor );
 
         /// <summary>
         /// Creates an instance of the <see cref="AspectClass"/> class.
@@ -384,6 +384,8 @@ namespace Caravela.Framework.Impl.Aspects
                         new DescribedObject<IDeclaration>( targetDeclaration, $"'{targetDeclaration}'" ) ),
                 executionContext );
         }
+
+        public IAspect CreateDefaultInstance() => (IAspect) Activator.CreateInstance( this.AspectType );
 
         public override string ToString() => this.FullName;
     }

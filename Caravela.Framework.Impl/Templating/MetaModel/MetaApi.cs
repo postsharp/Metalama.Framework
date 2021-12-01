@@ -211,7 +211,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
                     ? "null"
                     : ((RuntimeExpression) expression).Syntax.NormalizeWhitespace().ToFullString() );
 
-        public AspectExecutionScenario ExecutionScenario => this._common.PipelineDescription.ExecutionScenario;
+        public IExecutionScenario ExecutionScenario => this._common.PipelineDescription.ExecutionScenario;
 
         public UserDiagnosticSink Diagnostics => this._common.Diagnostics;
 

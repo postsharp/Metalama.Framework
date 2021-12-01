@@ -3,7 +3,6 @@
 
 using Caravela.Framework.Code;
 using Caravela.Framework.Code.Collections;
-using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Impl.Aspects;
 using Caravela.Framework.Impl.CodeModel.Collections;
 using Caravela.Framework.Impl.Diagnostics;
@@ -17,7 +16,7 @@ using TypedConstant = Caravela.Framework.Code.TypedConstant;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    internal class Attribute : IAttributeImpl, IHasDiagnosticLocation
+    internal class Attribute : IAttributeImpl
     {
         private readonly CompilationModel _compilation;
 
@@ -49,13 +48,13 @@ namespace Caravela.Framework.Impl.CodeModel
         public IConstructor Constructor => this._compilation.Factory.GetConstructor( this.AttributeData.AttributeConstructor.AssertNotNull() );
 
         [Memo]
-        public IReadOnlyList<TypedConstant> ConstructorArguments => this.AttributeData.ConstructorArguments.Select( this.Translate ).ToImmutableArray();
+        public ImmutableArray<TypedConstant> ConstructorArguments => this.AttributeData.ConstructorArguments.Select( this.Translate ).ToImmutableArray();
 
         [Memo]
-        public INamedArgumentList NamedArguments
-            => new NamedArgumentsList(
-                this.AttributeData.NamedArguments
-                    .Select( kvp => new KeyValuePair<string, TypedConstant>( kvp.Key, this.Translate( kvp.Value ) ) ) );
+        public ImmutableArray<KeyValuePair<string, TypedConstant>> NamedArguments
+            => this.AttributeData.NamedArguments
+                .Select( kvp => new KeyValuePair<string, TypedConstant>( kvp.Key, this.Translate( kvp.Value ) ) )
+                .ToImmutableArray();
 
         private TypedConstant Translate( Microsoft.CodeAnalysis.TypedConstant constant )
         {
@@ -72,8 +71,6 @@ namespace Caravela.Framework.Impl.CodeModel
             return new TypedConstant( type, value );
         }
 
-        public bool Equals( IDeclaration other ) => throw new NotImplementedException();
-
         public override string ToString() => this.AttributeData.ToString();
 
         public FormattableString FormatPredecessor( ICompilation compilation ) => $"the attribute of type '{this.Type}' on '{this.ContainingDeclaration}'";
@@ -82,12 +79,10 @@ namespace Caravela.Framework.Impl.CodeModel
 
         IDeclaration? IDeclaration.ContainingDeclaration => this.ContainingDeclaration;
 
-        IDiagnosticLocation? IDiagnosticScope.DiagnosticLocation => this.DiagnosticLocation.ToDiagnosticLocation();
-
         Location? IAspectPredecessorImpl.GetDiagnosticLocation( Compilation compilation ) => this.DiagnosticLocation;
 
         IType IHasType.Type => this.Type;
 
-        public Location? DiagnosticLocation => DiagnosticLocationHelper.GetDiagnosticLocation( this.AttributeData );
+        public Location? DiagnosticLocation => this.AttributeData.GetDiagnosticLocation();
     }
 }

@@ -5,7 +5,6 @@ using Caravela.Compiler;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Code.Collections;
-using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Impl.Aspects;
 using Caravela.Framework.Impl.CodeModel.Builders;
 using Caravela.Framework.Impl.CodeModel.Collections;
@@ -168,7 +167,7 @@ namespace Caravela.Framework.Impl.CodeModel
                 this,
                 this.PartialCompilation.Types
                     .Where( t => this.SymbolClassifier.GetTemplatingScope( t ) != TemplatingScope.CompileTimeOnly )
-                    .Select( t => new MemberRef<INamedType>( t ) ) );
+                    .Select( t => new MemberRef<INamedType>( t, this.RoslynCompilation ) ) );
 
         [Memo]
         public IAttributeList Attributes
@@ -178,7 +177,7 @@ namespace Caravela.Framework.Impl.CodeModel
                     .GetAttributes()
                     .Union( this.RoslynCompilation.SourceModule.GetAttributes() )
                     .Where( a => a.AttributeConstructor != null )
-                    .Select( a => new AttributeRef( a, this.RoslynCompilation.Assembly.ToRef() ) ) );
+                    .Select( a => new AttributeRef( a, Ref.FromSymbol( this.RoslynCompilation.Assembly, this.RoslynCompilation ) ) ) );
 
         public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
             => this.RoslynCompilation.AssemblyName ?? "<Anonymous>";
@@ -351,8 +350,6 @@ namespace Caravela.Framework.Impl.CodeModel
 
         IAttributeList IDeclaration.Attributes => throw new NotSupportedException();
 
-        IDiagnosticLocation? IDiagnosticScope.DiagnosticLocation => null;
-
         public string? Name => this.RoslynCompilation.AssemblyName;
 
         public override string ToString() => $"{this.RoslynCompilation.AssemblyName}, rev={this._revision}";
@@ -377,5 +374,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         [Memo]
         public IAssemblyIdentity Identity => new AssemblyIdentityModel( this.RoslynCompilation.Assembly.Identity );
+
+        Location? IDiagnosticLocationImpl.DiagnosticLocation => null;
     }
 }

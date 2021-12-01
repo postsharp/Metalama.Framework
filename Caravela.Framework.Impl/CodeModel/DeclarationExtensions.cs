@@ -91,26 +91,29 @@ namespace Caravela.Framework.Impl.CodeModel
                 _ => Array.Empty<ISymbol>()
             };
 
-        public static IEnumerable<AttributeRef> ToAttributeLinks( this IEnumerable<AttributeData> attributes, ISymbol declaringSymbol )
-            => attributes.Select( a => new AttributeRef( a, Ref.FromSymbol( declaringSymbol ) ) );
+        public static IEnumerable<AttributeRef> ToAttributeLinks( this IEnumerable<AttributeData> attributes, ISymbol declaringSymbol, Compilation compilation )
+            => attributes.Select( a => new AttributeRef( a, Ref.FromSymbol( declaringSymbol, compilation ) ) );
 
-        public static IEnumerable<AttributeRef> GetAllAttributes( this ISymbol symbol )
+        public static IEnumerable<AttributeRef> GetAllAttributes( this ISymbol symbol, Compilation compilation )
             => symbol switch
             {
                 IMethodSymbol method => method
                     .GetAttributes()
-                    .ToAttributeLinks( method )
+                    .ToAttributeLinks( method, compilation )
                     .Concat(
                         method.GetReturnTypeAttributes()
-                            .Select( a => new AttributeRef( a, Ref.ReturnParameter( method ) ) ) ),
-                _ => symbol.GetAttributes().ToAttributeLinks( symbol )
+                            .Select( a => new AttributeRef( a, Ref.ReturnParameter( method, compilation ) ) ) ),
+                _ => symbol.GetAttributes().ToAttributeLinks( symbol, compilation )
             };
 
-        public static Ref<IDeclaration> ToRef( this ISymbol symbol ) => Ref.FromSymbol( symbol );
+        public static Ref<IDeclaration> ToRef( this ISymbol symbol, Compilation compilation ) => Ref.FromSymbol( symbol, compilation );
 
         public static Ref<T> ToRef<T>( this T declaration )
             where T : class, IDeclaration
             => ((IDeclarationImpl) declaration).ToRef().As<T>();
+
+        public static ISymbol? GetSymbol( this IDeclaration declaration, Compilation compilation )
+            => declaration.GetSymbol().Translate( declaration.GetCompilationModel().RoslynCompilation, compilation );
 
         public static MemberRef<T> ToMemberRef<T>( this T member )
             where T : class, IMemberOrNamedType
@@ -119,7 +122,7 @@ namespace Caravela.Framework.Impl.CodeModel
         public static Location? GetDiagnosticLocation( this IDeclaration declaration )
             => declaration switch
             {
-                IHasDiagnosticLocation hasLocation => hasLocation.DiagnosticLocation,
+                IDiagnosticLocationImpl hasLocation => hasLocation.DiagnosticLocation,
                 _ => null
             };
 

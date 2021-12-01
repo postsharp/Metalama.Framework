@@ -24,7 +24,7 @@ namespace Caravela.Framework.Impl.Fabrics
         public NamespaceFabricDriver( FabricManager fabricManager, Fabric fabric, Compilation runTimeCompilation ) :
             base( fabricManager, fabric, runTimeCompilation )
         {
-            this._targetNamespace = Ref.FromSymbol<INamespace>( this.FabricSymbol.ContainingNamespace );
+            this._targetNamespace = Ref.FromSymbol<INamespace>( this.FabricSymbol.ContainingNamespace, runTimeCompilation );
         }
 
         private ISymbol TargetSymbol => this.FabricSymbol.ContainingNamespace;
