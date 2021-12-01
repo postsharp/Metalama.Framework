@@ -5,9 +5,11 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Impl;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Pipeline;
+using Microsoft.Build.Evaluation;
 using Microsoft.Build.Locator;
 using Microsoft.CodeAnalysis.MSBuild;
 using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
 using System.Threading;
@@ -25,6 +27,8 @@ namespace Caravela.Framework.Workspaces
 
         private readonly ImmutableArray<string> _loadedPaths;
 
+        private readonly WorkspaceCollection _collection;
+
         internal string Key { get; }
 
         private ProjectSet _projects;
@@ -37,12 +41,18 @@ namespace Caravela.Framework.Workspaces
             }
         }
 
-        private Workspace( ImmutableArray<string> loadedPaths, ImmutableDictionary<string, string>? properties, string key, ProjectSet projectSet )
+        private Workspace(
+            ImmutableArray<string> loadedPaths,
+            ImmutableDictionary<string, string>? properties,
+            string key,
+            ProjectSet projectSet,
+            WorkspaceCollection collection )
         {
             this._properties = properties ?? ImmutableDictionary<string, string>.Empty;
             this._loadedPaths = loadedPaths;
             this.Key = key;
             this._projects = projectSet;
+            this._collection = collection;
         }
 
         /// <summary>
@@ -51,42 +61,44 @@ namespace Caravela.Framework.Workspaces
         /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
         public async Task ReloadAsync( CancellationToken cancellationToken = default )
         {
-            this._projects = await LoadProjectSet( this._loadedPaths, this._properties, cancellationToken );
+            this._projects = await LoadProjectSet( this._loadedPaths, this._properties, this._collection, cancellationToken );
         }
 
         public void Reload( CancellationToken cancellationToken = default ) => this.ReloadAsync( cancellationToken ).Wait( cancellationToken );
 
-        public static async Task<Workspace> LoadAsync(
+        internal static async Task<Workspace> LoadAsync(
             string key,
             ImmutableArray<string> projects,
             ImmutableDictionary<string, string> properties,
+            WorkspaceCollection collection,
             CancellationToken cancellationToken )
         {
-            var projectSet = await LoadProjectSet( projects, properties, cancellationToken );
+            var projectSet = await LoadProjectSet( projects, properties, collection, cancellationToken );
 
-            return new Workspace( projects, properties, key, projectSet );
+            return new Workspace( projects, properties, key, projectSet, collection );
         }
 
         private static async Task<ProjectSet> LoadProjectSet(
             ImmutableArray<string> projects,
             ImmutableDictionary<string, string> properties,
+            WorkspaceCollection collection,
             CancellationToken cancellationToken )
         {
             var ourProjects = ImmutableArray.CreateBuilder<Project>();
-            MSBuildWorkspace msBuildWorkspace = MSBuildWorkspace.Create( properties );
+            MSBuildWorkspace roslynWorkspace = MSBuildWorkspace.Create( properties );
 
             foreach ( var path in projects )
             {
                 switch ( Path.GetExtension( path ).ToLowerInvariant() )
                 {
                     case ".csproj":
-                        await msBuildWorkspace.OpenProjectAsync( path, cancellationToken: cancellationToken );
+                        await roslynWorkspace.OpenProjectAsync( path, cancellationToken: cancellationToken );
 
                         break;
 
                     case ".sln":
                     case ".slnf":
-                        await msBuildWorkspace.OpenSolutionAsync( path, cancellationToken: cancellationToken );
+                        await roslynWorkspace.OpenSolutionAsync( path, cancellationToken: cancellationToken );
 
                         break;
 
@@ -95,19 +107,39 @@ namespace Caravela.Framework.Workspaces
                 }
             }
 
-            foreach ( var msbuildProject in msBuildWorkspace.CurrentSolution.Projects )
+            using var projectCollection = new ProjectCollection( properties );
+
+            foreach ( var roslynProject in roslynWorkspace.CurrentSolution.Projects )
             {
-                var compilation = (await msbuildProject.GetCompilationAsync( cancellationToken )).AssertNotNull();
-                var projectOptions = new WorkspaceProjectOptions( properties, msbuildProject, compilation );
+                // Get an evaluated MSBuild project (the Roslyn workspace presumably does it, but it the result is not made available). 
+                var targetFramework = WorkspaceProjectOptions.GetTargetFrameworkFromRoslynProject( roslynProject );
+
+                Dictionary<string, string>? projectProperties = null;
+
+                if ( targetFramework != null )
+                {
+                    projectProperties = new Dictionary<string, string> { ["TargetFramework"] = targetFramework };
+                }
+
+                Microsoft.Build.Evaluation.Project msbuildProject = projectCollection.LoadProject( roslynProject.FilePath, projectProperties, null );
+
+                // Gets a Roslyn compilation.
+                var compilation = (await roslynProject.GetCompilationAsync( cancellationToken )).AssertNotNull();
+
+                // Create a compilation model.
+                var context = new ServiceFactoryContext( msbuildProject, compilation, targetFramework );
+                var projectOptions = new WorkspaceProjectOptions( roslynProject, msbuildProject, compilation, targetFramework );
 
                 var serviceProvider = ServiceProviderFactory.GetServiceProvider()
                     .WithProjectScopedServices( compilation.References )
                     .WithService( projectOptions )
+                    .WithServices( collection.CreateServices( context ) )
                     .WithMark( ServiceProviderMark.Test );
 
                 var compilationModel = CodeModelFactory.CreateCompilation( compilation, serviceProvider );
 
-                var ourProject = new Project( msbuildProject.FilePath!, compilationModel, projectOptions.TargetFramework );
+                // Create our workspace project.
+                var ourProject = new Project( roslynProject.FilePath!, compilationModel, projectOptions.TargetFramework );
                 ourProjects.Add( ourProject );
             }
 

@@ -80,60 +80,69 @@ namespace Caravela.LinqPad
 
             if ( IsComplexType( value ) )
             {
-                string? summary;
-                string? cssClass = null;
-
-                switch ( value )
-                {
-                    case IEnumerable:
-                        cssClass = "collection";
-
-                        if ( EnumerableAccessor.Get( value.GetType() ) is { HasCount: true } accessor )
-                        {
-                            var count = accessor.GetCount( value );
-
-                            switch ( count )
-                            {
-                                case 0:
-                                    // Did not managed to render this with some styling. The following did not work:
-                                    // Util.RawHtml, Util.WithStyle
-                                    return ("(empty)", value);
-
-                                case 1:
-                                    summary = "(1 item)";
-
-                                    break;
-
-                                default:
-                                    summary = $"({count} items)";
-
-                                    break;
-                            }
-                        }
-                        else
-                        {
-                            summary = "(? items)";
-                        }
-
-                        break;
-
-                    default:
-                        summary = value.ToString();
-
-                        if ( string.IsNullOrWhiteSpace( summary ) )
-                        {
-                            summary = value.GetType().Name;
-                        }
-
-                        break;
-                }
-
-                return (CreateSummary( value, summary, cssClass ), value);
+                return CreateHyperlinkTestable( value );
             }
             else
             {
                 return (value, value);
             }
+        }
+
+        public static object? CreateHyperlink( object? value ) => value == null ? null : CreateHyperlinkTestable( value ).View;
+
+        private static (object? View, object? ViewModel) CreateHyperlinkTestable( object value )
+        {
+            string? summary;
+            string? cssClass = null;
+
+            switch ( value )
+            {
+                case IEnumerable:
+                    cssClass = "collection";
+
+                    if ( EnumerableAccessor.Get( value.GetType() ) is { HasCount: true } accessor )
+                    {
+                        var count = accessor.GetCount( value );
+
+                        switch ( count )
+                        {
+                            case 0:
+                                // Did not managed to render this with some styling. The following did not work:
+                                // Util.RawHtml, Util.WithStyle
+                                return ("(empty)", value);
+
+                            case 1:
+                                summary = "(1 item)";
+
+                                break;
+
+                            default:
+                                summary = $"({count} items)";
+
+                                break;
+                        }
+                    }
+                    else
+                    {
+                        summary = "(? items)";
+                    }
+
+                    break;
+
+                default:
+                    summary = value.ToString();
+
+                    if ( string.IsNullOrWhiteSpace( summary ) )
+                    {
+                        summary = value.GetType().Name;
+                    }
+
+                    break;
+            }
+
+            var hyperlink = CreateHyperlink( value, summary, cssClass );
+
+            return (hyperlink, value);
         }
 
         private static bool _alreadyAddedCss;
@@ -145,14 +154,14 @@ namespace Caravela.LinqPad
                 _alreadyAddedCss = true;
             }
 
-            return CreateSummary( exception, exception.Message, "error" );
+            return CreateHyperlink( exception, exception.Message, "error" );
         }
 
         private static Lazy<T> CreateLazy<T>( Func<object?> func ) => new( () => (T) func()! );
 
         private static GroupingFacade<TKey, TItems> CreateGrouping<TKey, TItems>( IGrouping<TKey, TItems> group ) => new( group );
 
-        private static object CreateSummary( object o, string summary, string? cssClass = null )
+        private static object CreateHyperlink( object o, string summary, string? cssClass = null )
         {
             DumpContainer container = new();
 

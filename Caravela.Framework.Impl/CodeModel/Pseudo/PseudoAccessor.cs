@@ -1,4 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
@@ -8,6 +8,7 @@ using Caravela.Framework.Impl.CodeModel.Collections;
 using Caravela.Framework.Impl.CodeModel.Invokers;
 using Caravela.Framework.Impl.CodeModel.References;
 using Caravela.Framework.Impl.Utilities;
+using Caravela.Framework.Metrics;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -127,5 +128,9 @@ namespace Caravela.Framework.Impl.CodeModel.Pseudo
         public IMember? OverriddenMember => ((IMemberWithAccessors?) ((IMemberImpl) this.DeclaringMember).OverriddenMember)?.GetAccessor( this.MethodKind );
 
         public Location? DiagnosticLocation => this.DeclaringMember.GetDiagnosticLocation();
+
+        public TExtension GetMetric<TExtension>()
+            where TExtension : IMetric
+            => this.GetCompilationModel().MetricManager.GetMetric<TExtension>( this );
     }
 }

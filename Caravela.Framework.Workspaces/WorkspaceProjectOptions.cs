@@ -3,7 +3,6 @@
 
 using Caravela.Framework.Code.Collections;
 using Caravela.Framework.Impl.Options;
-using Microsoft.Build.Evaluation;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Immutable;
@@ -21,10 +20,12 @@ namespace Caravela.Framework.Workspaces
         private readonly Compilation _compilation;
         private readonly ImmutableDictionary<string, string> _properties;
 
-        public WorkspaceProjectOptions( ImmutableDictionary<string, string> properties, Microsoft.CodeAnalysis.Project roslynProject, Compilation compilation )
+        public WorkspaceProjectOptions(
+            Microsoft.CodeAnalysis.Project roslynProject,
+            Microsoft.Build.Evaluation.Project msbuildProject,
+            Compilation compilation,
+            string? targetFramework )
         {
-            using var projectCollection = new ProjectCollection( properties );
-            var msbuildProject = projectCollection.LoadProject( roslynProject.FilePath );
             var compilerVisibleProperties = msbuildProject.Items.Where( i => i.ItemType == "CompilerVisibleProperty" ).Select( i => i.EvaluatedInclude );
 
             this._properties = compilerVisibleProperties.Select( p => msbuildProject.Properties.FirstOrDefault( x => x.Name == p ) )
@@ -33,7 +34,7 @@ namespace Caravela.Framework.Workspaces
 
             this._roslynProject = roslynProject;
             this._compilation = compilation;
-            this.TargetFramework = GetTargetFrameworkFromRoslynProject( roslynProject );
+            this.TargetFramework = targetFramework;
             this.Configuration = msbuildProject.Properties.FirstOrDefault( p => p.Name == "Configuration" )?.EvaluatedValue;
         }
 

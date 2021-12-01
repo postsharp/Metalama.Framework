@@ -2,9 +2,12 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Metrics;
+using Caravela.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -20,6 +23,7 @@ namespace Caravela.Framework.Workspaces
     public sealed class WorkspaceCollection
     {
         private readonly ConcurrentDictionary<string, Task<Workspace>> _workspaces = new();
+        private readonly List<Func<ServiceFactoryContext, IService>> _serviceFactories = new();
 
         public static WorkspaceCollection Default { get; } = new();
 
@@ -55,7 +59,7 @@ namespace Caravela.Framework.Workspaces
 
             async Task<Workspace> LoadCore( string k )
             {
-                var workspace = await Workspace.LoadAsync( key, paths, properties, cancellationToken );
+                var workspace = await Workspace.LoadAsync( key, paths, properties, this, cancellationToken );
                 workspace.Disposed += this.OnWorkspaceDisposed;
 
                 return workspace;
@@ -63,6 +67,14 @@ namespace Caravela.Framework.Workspaces
 
             return this._workspaces.GetOrAdd( key, LoadCore );
         }
+
+        /// <summary>
+        /// Register a project service. This is useful for instance to register an <see cref="IMetricProvider{T}"/>.
+        /// </summary>
+        /// <param name="factory">A function that instantiates the service for the given project.</param>
+        public void RegisterService( Func<ServiceFactoryContext, IService> factory ) => this._serviceFactories.Add( factory );
+
+        internal IEnumerable<IService> CreateServices( ServiceFactoryContext context ) => this._serviceFactories.Select( x => x( context ) );
 
         private void OnWorkspaceDisposed( object? sender, EventArgs e )
         {
@@ -107,6 +119,9 @@ namespace Caravela.Framework.Workspaces
             }
         }
 
+        /// <summary>
+        /// Removes all cached workspaces, but not the set of registered services.
+        /// </summary>
         public void Reset()
         {
             // TODO: cancel pending tasks. This is not a critical use case currently.

@@ -13,6 +13,7 @@
 
    <ItemGroup>
     <Compile Include="..\NullableAttributes.cs" Link="NullableAttributes.cs" />
+    <Compile Remove="Metrics\Example.cs" />
   </ItemGroup>
 
   <ItemGroup>
