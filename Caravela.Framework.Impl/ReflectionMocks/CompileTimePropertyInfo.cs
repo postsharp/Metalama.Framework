@@ -16,7 +16,7 @@ namespace Caravela.Framework.Impl.ReflectionMocks
 
         private CompileTimePropertyInfo( IProperty property )
         {
-            this.Target = property.ToRef();
+            this.Target = property.ToTypedRef();
         }
 
         public static PropertyInfo Create( IProperty property ) => new CompileTimePropertyInfo( property );

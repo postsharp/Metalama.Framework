@@ -8,6 +8,7 @@ using Caravela.Framework.Impl.CodeModel.Collections;
 using Caravela.Framework.Impl.CodeModel.Invokers;
 using Caravela.Framework.Impl.CodeModel.References;
 using Caravela.Framework.Impl.Utilities;
+using Caravela.Framework.Metrics;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -84,6 +85,8 @@ namespace Caravela.Framework.Impl.CodeModel.Pseudo
 
         public INamedType DeclaringType => this.DeclaringMember.DeclaringType;
 
+        IRef<IDeclaration> IDeclaration.ToRef() => throw new NotImplementedException();
+
         public IAssembly DeclaringAssembly => this.DeclaringMember.DeclaringAssembly;
 
         public DeclarationOrigin Origin => DeclarationOrigin.Source;
@@ -125,5 +128,9 @@ namespace Caravela.Framework.Impl.CodeModel.Pseudo
         public IMember? OverriddenMember => ((IMemberWithAccessors?) ((IMemberImpl) this.DeclaringMember).OverriddenMember)?.GetAccessor( this.MethodKind );
 
         public Location? DiagnosticLocation => this.DeclaringMember.GetDiagnosticLocation();
+
+        public TExtension GetMetric<TExtension>()
+            where TExtension : IMetric
+            => this.GetCompilationModel().MetricManager.GetMetric<TExtension>( this );
     }
 }

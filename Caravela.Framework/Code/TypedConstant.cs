@@ -95,5 +95,7 @@ namespace Caravela.Framework.Code
             this._value = value;
             this._type = type;
         }
+
+        public override string ToString() => this.IsAssigned ? this._value?.ToString() ?? "null" : "(unset)";
     }
 }

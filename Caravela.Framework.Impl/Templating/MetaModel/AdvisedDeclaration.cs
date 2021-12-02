@@ -5,6 +5,7 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Code.Collections;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CodeModel.References;
+using Caravela.Framework.Metrics;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -28,6 +29,8 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         public ICompilation Compilation => this.Underlying.Compilation;
 
+        IRef<IDeclaration> IDeclaration.ToRef() => this.Underlying.ToRef();
+
         public IAssembly DeclaringAssembly => this.Underlying.DeclaringAssembly;
 
         public DeclarationOrigin Origin => this.Underlying.Origin;
@@ -49,6 +52,10 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
         public IEnumerable<IDeclaration> GetDerivedDeclarations( bool deep = true ) => this.Underlying.GetDerivedDeclarations();
 
         public override string ToString() => this.Underlying.ToString();
+
+        public TExtension GetMetric<TExtension>()
+            where TExtension : IMetric
+            => this.Underlying.GetMetric<TExtension>();
 
         public IDeclaration OriginalDefinition => this.Underlying.OriginalDefinition;
     }

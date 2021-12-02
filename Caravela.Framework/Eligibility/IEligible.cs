@@ -29,7 +29,7 @@ namespace Caravela.Framework.Eligibility
         /// </remarks>
         /// <seealso href="@eligibility"/>
         void BuildEligibility( IEligibilityBuilder<T> builder )
-#if NET5_0
+#if NET5_0_OR_GREATER
         { }
 #else
             ;

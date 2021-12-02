@@ -1,6 +1,6 @@
-// @RequiredConstant(NET5_0) - Array slices are not supported in .NET Framework
+// @RequiredConstant(NET5_0_OR_GREATER) - Array slices are not supported in .NET Framework
 
-#if NET5_0
+#if NET5_0_OR_GREATER
 #pragma warning disable CS8600, CS8603
 using System;
 using Caravela.Framework.Aspects;

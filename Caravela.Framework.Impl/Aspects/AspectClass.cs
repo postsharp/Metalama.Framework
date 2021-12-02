@@ -212,7 +212,7 @@ namespace Caravela.Framework.Impl.Aspects
         /// This method is used by live templates.
         /// </summary>
         public AspectInstance CreateAspectInstance( IDeclaration target, IAspect aspect, in AspectPredecessor predecessor )
-            => new( aspect, target.ToRef(), this, predecessor );
+            => new( aspect, target.ToTypedRef(), this, predecessor );
 
         /// <summary>
         /// Creates an instance of the <see cref="AspectClass"/> class.

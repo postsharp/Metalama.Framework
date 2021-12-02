@@ -31,7 +31,7 @@ namespace Caravela.Framework.Tests.UnitTests.Templating
             Assert.Throws<InvalidOperationException>( () => meta.DefineExpression( "", out _ ) );
             Assert.Throws<InvalidOperationException>( () => meta.ParseExpression( "" ) );
 
-#if NET5_0
+#if NET5_0_OR_GREATER
             Assert.Throws<InvalidOperationException>( meta.ProceedAsyncEnumerable );
             Assert.Throws<InvalidOperationException>( meta.ProceedAsyncEnumerator );
 #endif

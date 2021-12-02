@@ -4,6 +4,7 @@
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code.Collections;
 using Caravela.Framework.Diagnostics;
+using Caravela.Framework.Metrics;
 
 namespace Caravela.Framework.Code
 {
@@ -12,8 +13,15 @@ namespace Caravela.Framework.Code
     /// </summary>
     /// <seealso cref="DeclarationExtensions"/>
     [CompileTimeOnly]
-    public interface IDeclaration : IDisplayable, IDiagnosticLocation, ICompilationElement
+    public interface IDeclaration : IDisplayable, IDiagnosticLocation, ICompilationElement, IMeasurable
     {
+        /// <summary>
+        /// Gets a reference to the compilation, which can be used to identify the current declaration
+        /// in a different revision of the compilation.
+        /// </summary>
+        /// <returns></returns>
+        IRef<IDeclaration> ToRef();
+
         /// <summary>
         /// Gets the declaring assembly, which can be the current <see cref="ICompilationElement.Compilation"/>
         /// or a reference assembly.

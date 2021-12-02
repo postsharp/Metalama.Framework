@@ -51,7 +51,7 @@ class C
             Assert.Equal( compilation.Factory.GetTypeByReflectionType( typeof(int) ), iteratorInfo.ItemType );
         }
 
-#if NET5_0
+#if NET5_0_OR_GREATER
         [Fact]
         public void AsyncEnumerableYield()
         {
@@ -179,7 +179,7 @@ class C
             Assert.Equal( compilation.Factory.GetTypeByReflectionType( typeof(int) ), iteratorInfo.ItemType );
         }
 
-#if NET5_0
+#if NET5_0_OR_GREATER
         [Fact]
         public void AsyncEnumerableNonYield()
         {

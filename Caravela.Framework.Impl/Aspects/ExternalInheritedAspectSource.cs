@@ -3,6 +3,7 @@
 
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
+using Caravela.Framework.Code.Collections;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.CompileTime;
@@ -110,7 +111,7 @@ namespace Caravela.Framework.Impl.Aspects
 
                     yield return new AttributeAspectInstance(
                         (IAspect) attributeInstance,
-                        derived.ToRef(),
+                        derived.ToTypedRef(),
                         (AspectClass) aspectClass,
                         attribute,
                         this._loader );

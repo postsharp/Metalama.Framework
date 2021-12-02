@@ -5,35 +5,29 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Code.Collections;
 using Caravela.Framework.Impl.CodeModel.Collections;
 using Caravela.Framework.Impl.CodeModel.References;
-using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Utilities;
+using Caravela.Framework.Metrics;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
 using RoslynMethodKind = Microsoft.CodeAnalysis.MethodKind;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    internal abstract class Declaration : IDeclarationImpl
+    internal abstract class Declaration : SymbolBasedDeclaration
     {
         protected Declaration( CompilationModel compilation )
         {
             this.Compilation = compilation;
         }
 
-        internal CompilationModel Compilation { get; }
+        public override CompilationModel Compilation { get; }
 
-        ICompilation ICompilationElement.Compilation => this.Compilation;
-
-        DeclarationOrigin IDeclaration.Origin => DeclarationOrigin.Source;
+        public override DeclarationOrigin Origin => DeclarationOrigin.Source;
 
         [Memo]
-        public virtual IDeclaration? ContainingDeclaration => this.Compilation.Factory.GetDeclaration( this.Symbol.ContainingSymbol );
-
-        [Memo]
-        public virtual IAttributeList Attributes
+        public override IAttributeList Attributes
             => new AttributeList(
                 this,
                 this.Symbol.GetAttributes()
@@ -41,18 +35,9 @@ namespace Caravela.Framework.Impl.CodeModel
                     .Select( a => new AttributeRef( a, Ref.FromSymbol<IDeclaration>( this.Symbol, this.Compilation.RoslynCompilation ) ) ) );
 
         [Memo]
-        public IAssembly DeclaringAssembly => this.Compilation.Factory.GetAssembly( this.Symbol.ContainingAssembly );
+        public override IAssembly DeclaringAssembly => this.Compilation.Factory.GetAssembly( this.Symbol.ContainingAssembly );
 
-        public abstract DeclarationKind DeclarationKind { get; }
-
-        public abstract ISymbol Symbol { get; }
-
-        public virtual Ref<IDeclaration> ToRef() => Ref.FromSymbol( this.Symbol, this.Compilation.RoslynCompilation );
-
-        public virtual string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
-            => this.Symbol.ToDisplayString( format.ToRoslyn() );
-
-        public Location? DiagnosticLocation => this.Symbol.GetDiagnosticLocation();
+        public override Ref<IDeclaration> ToRef() => Ref.FromSymbol( this.Symbol, this.Compilation.RoslynCompilation );
 
         public IReadOnlyList<ISymbol> LookupSymbols()
         {
@@ -109,13 +94,13 @@ namespace Caravela.Framework.Impl.CodeModel
             return semanticModel.LookupSymbols( lookupPosition ).AddRange( implicitSymbols );
         }
 
-        ImmutableArray<SyntaxReference> IDeclarationImpl.DeclaringSyntaxReferences => this.Symbol.DeclaringSyntaxReferences;
-
-        public abstract bool CanBeInherited { get; }
-
-        public abstract IEnumerable<IDeclaration> GetDerivedDeclarations( bool deep = true );
-
         [Memo]
-        public IDeclaration OriginalDefinition => this.Compilation.Factory.GetDeclaration( this.Symbol.OriginalDefinition );
+        public override IDeclaration OriginalDefinition => this.Compilation.Factory.GetDeclaration( this.Symbol.OriginalDefinition );
+
+        public override string ToString() => this.Symbol.ToDisplayString( SymbolDisplayFormat.CSharpShortErrorMessageFormat );
+
+        public TExtension GetExtension<TExtension>()
+            where TExtension : IMetric
+            => this.Compilation.MetricManager.GetMetric<TExtension>( this );
     }
 }

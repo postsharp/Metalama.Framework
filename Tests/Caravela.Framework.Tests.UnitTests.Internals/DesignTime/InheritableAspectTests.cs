@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Impl.DesignTime.Pipeline;
+using Caravela.Framework.Impl.Testing;
 using Caravela.TestFramework;
 using Microsoft.CodeAnalysis.CSharp;
 using System.Collections.Generic;
@@ -85,7 +86,7 @@ public class Aspect : TypeAspect
             Assert.Equal( new[] { "T:C" }, compilationResult3!.GetInheritableAspectTargets( "Aspect" ).OrderBy( a => a ).ToArray() );
         }
 
-#if NET5_0
+#if NET5_0_OR_GREATER
         [Fact( Skip = "CLR internal error when unloading the domain" )]
 #else
         [Fact]

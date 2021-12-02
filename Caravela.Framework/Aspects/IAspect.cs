@@ -27,7 +27,7 @@ namespace Caravela.Framework.Aspects
         /// <i>without invoking the class constructor</i>.
         /// </remarks>
         void BuildAspectClass( IAspectClassBuilder builder )
-#if NET5_0
+#if NET5_0_OR_GREATER
         { }
 #else
             ;
@@ -48,7 +48,7 @@ namespace Caravela.Framework.Aspects
         /// </summary>
         /// <param name="builder">An object that allows the aspect to add advices, child aspects and validators.</param>
         void BuildAspect( IAspectBuilder<T> builder )
-#if NET5_0
+#if NET5_0_OR_GREATER
         { }
 #else
             ;

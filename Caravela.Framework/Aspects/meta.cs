@@ -73,7 +73,7 @@ namespace Caravela.Framework.Aspects
         [TemplateKeyword]
         public static IEnumerator<dynamic?> ProceedEnumerator() => throw CreateException();
 
-#if NET5_0
+#if NET5_0_OR_GREATER
         /// <summary>
         /// Synonym to <see cref="Proceed"/>, but the return type is exposed as a <c>IAsyncEnumerable&lt;dynamic?&gt;</c>.
         /// </summary>

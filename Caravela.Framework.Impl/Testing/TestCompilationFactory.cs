@@ -11,12 +11,12 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 
-namespace Caravela.TestFramework
+namespace Caravela.Framework.Impl.Testing
 {
     /// <summary>
     /// Utility class that creates a <see cref="CSharpCompilation"/>.
     /// </summary>
-    internal static class TestCompilationFactory
+    public static class TestCompilationFactory
     {
         public static CSharpCompilation CreateEmptyCSharpCompilation(
             string? name,
@@ -37,7 +37,7 @@ namespace Caravela.TestFramework
             IEnumerable<Assembly>? additionalAssemblies = null,
             bool addCaravelaReferences = true )
         {
-#if NET5_0
+#if NET5_0_OR_GREATER
             var standardLibrariesNames = new[] { "netstandard" };
 #else
             var standardLibrariesNames = new[] { "netstandard", "mscorlib" };

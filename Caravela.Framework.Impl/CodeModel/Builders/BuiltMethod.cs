@@ -80,6 +80,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public IMethod? OverriddenMethod => this.Compilation.Factory.GetDeclaration( this.MethodBuilder.OverriddenMethod );
 
+        string? IRef<IMethod>.ToSerializableId() => null;
+
         IMethod IRef<IMethod>.GetTarget( ICompilation compilation ) => (IMethod) this.GetForCompilation( compilation );
 
         ISymbol ISdkRef<IMethod>.GetSymbol( Compilation compilation ) => throw new NotSupportedException();
