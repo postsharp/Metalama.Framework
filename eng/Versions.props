@@ -41,7 +41,7 @@
     </PropertyGroup>
 
     <!-- Import overrides for the local build -->
-    <Import Project="../artifacts/private/Caravela.version.props" Condition="Exists('../artifacts/private/Caravela.version.props')" />
+    <Import Project="../artifacts/publish/private/Caravela.version.props" Condition="Exists('../artifacts/publish/private/Caravela.version.props')" />
     <Import Project="Dependencies.props" Condition="Exists('Dependencies.props')"/>
 
     
