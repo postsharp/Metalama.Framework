@@ -3,12 +3,11 @@
 
 namespace Caravela.Framework.Impl.Utilities
 {
-    internal enum ProcessKind
+    internal enum HostProduct
     {
-        Other,
         Compiler,
-        DevEnv,
-        RoslynCodeAnalysisService,
-        Rider
+        VisualStudio,
+        Rider,
+        Other
     }
 }

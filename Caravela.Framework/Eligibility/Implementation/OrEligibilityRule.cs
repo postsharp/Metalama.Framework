@@ -10,7 +10,7 @@ namespace Caravela.Framework.Eligibility.Implementation
 {
     internal class OrEligibilityRule<T> : IEligibilityRule<T>
     {
-        private ImmutableArray<IEligibilityRule<T>> _predicates;
+        private readonly ImmutableArray<IEligibilityRule<T>> _predicates;
 
         public OrEligibilityRule( ImmutableArray<IEligibilityRule<T>> predicates )
         {
