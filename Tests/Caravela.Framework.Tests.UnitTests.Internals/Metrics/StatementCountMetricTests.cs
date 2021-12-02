@@ -14,7 +14,7 @@ namespace Caravela.Framework.Tests.UnitTests.Metrics
         {
             using var testContext = this.CreateTestContext();
 
-            string code = @"
+            var code = @"
 class C
 {
   void M1()  { int k = 0; for ( int i = 0; i < 5; i++ ) {  k++; if ( k == 5 ) { k = 0; } for ( int j = 0; j < i; j++ ) { k++; }  } }

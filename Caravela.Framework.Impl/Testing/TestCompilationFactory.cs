@@ -37,7 +37,7 @@ namespace Caravela.Framework.Impl.Testing
             IEnumerable<Assembly>? additionalAssemblies = null,
             bool addCaravelaReferences = true )
         {
-#if NET5_0
+#if NET5_0_OR_GREATER
             var standardLibrariesNames = new[] { "netstandard" };
 #else
             var standardLibrariesNames = new[] { "netstandard", "mscorlib" };

@@ -47,7 +47,7 @@ namespace Caravela.LinqPad
         {
             var connectionData = new ConnectionData( cxInfo );
 
-            string source = $@"using System;
+            var source = $@"using System;
 using System;
 using System.Collections.Generic;
 using Caravela.LinqPad;
@@ -126,9 +126,9 @@ namespace {nameSpace}
             var elementTypeLookup = topLevelProps.ToLookup( tp => (Type) tp.Tag );
 
             // Populate the columns (properties) of each entity:
-            foreach ( ExplorerItem table in topLevelProps )
+            foreach ( var table in topLevelProps )
             {
-                Type parentType = (Type) table.Tag;
+                var parentType = (Type) table.Tag;
 
                 var props = GetProperties( parentType )
                     .OrderBy( p => (p.Name, p.PropertyType), PropertyComparer.Instance )

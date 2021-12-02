@@ -80,7 +80,7 @@ namespace Ns { class C {} }
             this._pipeline.TryGetConfiguration( this._compilation.PartialCompilation, NullDiagnosticAdder.Instance, true, CancellationToken.None, out _ );
         }
 
-#if NET5_0
+#if NET5_0_OR_GREATER
         [Theory]
 #else
         [Theory( Skip = "Skipped in .NET Framework (low value)" )]

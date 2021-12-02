@@ -2,9 +2,10 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Impl.CompileTime;
-using Caravela.Framework.Impl.Testing;
 using System.Diagnostics.CodeAnalysis;
-#if NET5_0
+
+#if NET5_0_OR_GREATER
+using Caravela.Framework.Impl.Testing;
 using Caravela.Framework.Impl.Utilities;
 using System;
 using System.Collections.Generic;
@@ -23,7 +24,7 @@ namespace Caravela.TestFramework
     /// </summary>
     public sealed class UnloadableCompileTimeDomain : CompileTimeDomain
     {
-#if NET5_0
+#if NET5_0_OR_GREATER
         private readonly AssemblyLoadContext _assemblyLoadContext;
         private readonly List<WeakReference> _loadedAssemblies = new();
 
@@ -57,13 +58,13 @@ namespace Caravela.TestFramework
             this.WaitForDisposal();
         }
 
-#if !NET5_0
+#if !NET5_0_OR_GREATER
 #pragma warning disable CA1822 // Can be made static
 #endif
         [ExcludeFromCodeCoverage]
         public void WaitForDisposal()
         {
-#if NET5_0
+#if NET5_0_OR_GREATER
             var waits = 0;
 
             while ( this._loadedAssemblies.Any( r => r.IsAlive ) )
@@ -92,7 +93,7 @@ namespace Caravela.TestFramework
             }
 #endif
         }
-#if !NET5_0
+#if !NET5_0_OR_GREATER
 #pragma warning restore CA1822 // Can be made static
 #endif
 
@@ -100,7 +101,7 @@ namespace Caravela.TestFramework
         {
             base.Dispose( disposing );
 
-#if NET5_0
+#if NET5_0_OR_GREATER
             this._assemblyLoadContext.Unload();
             TestExecutionContext.RegisterDisposeAction( this.WaitForDisposal );
 #endif

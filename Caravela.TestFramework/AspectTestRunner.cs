@@ -15,7 +15,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
-#if NET5_0
+#if NET5_0_OR_GREATER
 using Caravela.Framework.Code;
 using System.Reflection;
 using System.Runtime.Loader;
@@ -30,7 +30,7 @@ namespace Caravela.TestFramework
     {
         private int _runCount;
 
-#if NET5_0
+#if NET5_0_OR_GREATER
         private static readonly SemaphoreSlim _consoleLock = new( 1 );
 #endif
 
@@ -182,7 +182,7 @@ namespace Caravela.TestFramework
                         return false;
                     }
 
-#if NET5_0
+#if NET5_0_OR_GREATER
                     await ExecuteTestProgramAsync( testInput, testResult, peStream );
 #endif
                 }
@@ -195,7 +195,7 @@ namespace Caravela.TestFramework
             return true;
         }
 
-#if NET5_0
+#if NET5_0_OR_GREATER
         private static async Task ExecuteTestProgramAsync( TestInput testInput, TestResult testResult, MemoryStream peStream, MemoryStream? pdbStream = null )
         {
             if ( !testInput.Options.ExecuteProgram.GetValueOrDefault( true ) )

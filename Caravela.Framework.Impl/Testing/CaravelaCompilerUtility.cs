@@ -5,7 +5,7 @@ using Caravela.Framework.Impl.Utilities;
 using System;
 using System.Diagnostics;
 using System.IO;
-#if NET5_0
+#if NET5_0_OR_GREATER
 using System.Threading.Tasks;
 #endif
 
@@ -49,7 +49,7 @@ namespace Caravela.Framework.Impl.Testing
             var process = Process.Start( psi )!;
             var outputPromise = process.StandardOutput.ReadToEndAsync();
 
-#if NET5_0
+#if NET5_0_OR_GREATER
             var completion = process.WaitForExitAsync();
             Task.WhenAll( completion, outputPromise ).Wait();
 #else

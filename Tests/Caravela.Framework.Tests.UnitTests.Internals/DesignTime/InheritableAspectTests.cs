@@ -86,7 +86,7 @@ public class Aspect : TypeAspect
             Assert.Equal( new[] { "T:C" }, compilationResult3!.GetInheritableAspectTargets( "Aspect" ).OrderBy( a => a ).ToArray() );
         }
 
-#if NET5_0
+#if NET5_0_OR_GREATER
         [Fact( Skip = "CLR internal error when unloading the domain" )]
 #else
         [Fact]

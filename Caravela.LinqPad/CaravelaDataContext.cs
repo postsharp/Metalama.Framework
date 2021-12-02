@@ -12,9 +12,9 @@ namespace Caravela.LinqPad
     {
         // ReSharper disable once InconsistentNaming
         // ReSharper disable once MemberCanBePrivate.Global
-#pragma warning disable SA1401
+#pragma warning disable SA1401, IDE1006
         protected readonly Workspace workspace;
-#pragma warning restore SA1401
+#pragma warning restore SA1401, IDE1006
 
         public CaravelaDataContext( string path )
         {

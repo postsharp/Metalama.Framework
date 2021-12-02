@@ -5,7 +5,7 @@ using Caravela.Framework.RunTime;
 using System.Collections;
 using System.Collections.Generic;
 using Xunit;
-#if NET5_0
+#if NET5_0_OR_GREATER
 using System.Threading.Tasks;
 #endif
 
@@ -99,7 +99,7 @@ namespace Caravela.Framework.Tests.UnitTests.RunTime
             CompareGenericEnumerators( list.GetEnumerator(), buffered );
         }
 
-#if NET5_0
+#if NET5_0_OR_GREATER
         [Fact]
         public async Task BufferAsyncEnumerable()
         {
@@ -179,7 +179,7 @@ namespace Caravela.Framework.Tests.UnitTests.RunTime
             yield return 3;
         }
 
-#if NET5_0
+#if NET5_0_OR_GREATER
         private static async Task CompareAsyncEnumerators<T>( IAsyncEnumerator<T> a, IAsyncEnumerator<T> b )
         {
             while ( await a.MoveNextAsync() )

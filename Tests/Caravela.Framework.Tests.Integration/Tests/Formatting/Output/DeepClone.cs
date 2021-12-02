@@ -1,4 +1,4 @@
-// @RequiredConstant(NET5_0) - Return type covariance not supported in .NET Framework
+// @RequiredConstant(NET5_0_OR_GREATER) - Return type covariance not supported in .NET Framework
 
 using System;
 using System.Linq;
