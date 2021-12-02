@@ -35,5 +35,7 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
                 (InvokerOrder.Default, InvokerOperator.Default) => this.Final,
                 _ => throw new ArgumentOutOfRangeException()
             };
+
+        public override string ToString() => "Invokers";
     }
 }

@@ -11,6 +11,7 @@ using Caravela.Framework.Impl.CodeModel.Collections;
 using Caravela.Framework.Impl.CodeModel.References;
 using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.CompileTime;
+using Caravela.Framework.Impl.Metrics;
 using Caravela.Framework.Impl.Transformations;
 using Caravela.Framework.Impl.Utilities;
 using Caravela.Framework.Project;
@@ -22,7 +23,7 @@ using System.Linq;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    internal partial class CompilationModel : ICompilationInternal, IDeclarationImpl
+    internal partial class CompilationModel : SymbolBasedDeclaration, ICompilationInternal
     {
         public static CompilationModel CreateInitialInstance( IProject project, PartialCompilation compilation ) => new( project, compilation );
 
@@ -46,8 +47,6 @@ namespace Caravela.Framework.Impl.CodeModel
 
         private readonly ImmutableDictionaryOfArray<Ref<IDeclaration>, IAspectInstanceInternal> _aspects;
 
-        private readonly int _revision;
-
         private readonly DerivedTypeIndex _derivedTypes;
 
         private ImmutableDictionary<Ref<IDeclaration>, int> _depthsCache = ImmutableDictionary.Create<Ref<IDeclaration>, int>();
@@ -61,6 +60,8 @@ namespace Caravela.Framework.Impl.CodeModel
         public ReflectionMapper ReflectionMapper { get; }
 
         public ISymbolClassifier SymbolClassifier { get; }
+
+        public MetricManager MetricManager { get; }
 
         private CompilationModel( IProject project, PartialCompilation partialCompilation )
         {
@@ -87,6 +88,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
             this._aspects = ImmutableDictionaryOfArray<Ref<IDeclaration>, IAspectInstanceInternal>.Empty;
             this.SymbolClassifier = project.ServiceProvider.GetService<SymbolClassificationService>().GetClassifier( this.RoslynCompilation );
+            this.MetricManager = project.ServiceProvider.GetOptionalService<MetricManager>() ?? new MetricManager( project.ServiceProvider );
             this.EmptyGenericMap = new GenericMap( partialCompilation.Compilation );
         }
 
@@ -99,7 +101,7 @@ namespace Caravela.Framework.Impl.CodeModel
         {
             this._transformations = prototype._transformations.AddRange(
                 observableTransformations,
-                t => t.ContainingDeclaration.ToRef(),
+                t => t.ContainingDeclaration.ToTypedRef(),
                 t => t );
 
             // TODO: Performance. The next line essentially instantiates the complete code model. We should look at attributes without doing that. 
@@ -126,7 +128,7 @@ namespace Caravela.Framework.Impl.CodeModel
         private CompilationModel( CompilationModel prototype )
         {
             this.Project = prototype.Project;
-            this._revision = prototype._revision + 1;
+            this.Revision = prototype.Revision + 1;
 
             this._derivedTypes = prototype._derivedTypes;
             this.PartialCompilation = prototype.PartialCompilation;
@@ -138,6 +140,7 @@ namespace Caravela.Framework.Impl.CodeModel
             this._allMemberAttributesByTypeName = prototype._allMemberAttributesByTypeName;
             this._aspects = prototype._aspects;
             this.SymbolClassifier = prototype.SymbolClassifier;
+            this.MetricManager = prototype.MetricManager;
             this.EmptyGenericMap = prototype.EmptyGenericMap;
         }
 
@@ -170,7 +173,7 @@ namespace Caravela.Framework.Impl.CodeModel
                     .Select( t => new MemberRef<INamedType>( t, this.RoslynCompilation ) ) );
 
         [Memo]
-        public IAttributeList Attributes
+        public override IAttributeList Attributes
             => new AttributeList(
                 this,
                 this.RoslynCompilation.Assembly
@@ -179,8 +182,12 @@ namespace Caravela.Framework.Impl.CodeModel
                     .Where( a => a.AttributeConstructor != null )
                     .Select( a => new AttributeRef( a, Ref.FromSymbol( this.RoslynCompilation.Assembly, this.RoslynCompilation ) ) ) );
 
-        public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
+        public override DeclarationKind DeclarationKind => DeclarationKind.Compilation;
+
+        public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
             => this.RoslynCompilation.AssemblyName ?? "<Anonymous>";
+
+        public override CompilationModel Compilation => this;
 
         public Compilation RoslynCompilation => this.PartialCompilation.Compilation;
 
@@ -218,7 +225,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public IEnumerable<T> GetAspectsOf<T>( IDeclaration declaration )
             where T : IAspect
-            => this._aspects[declaration.ToRef()].Select( a => a.Aspect ).OfType<T>();
+            => this._aspects[declaration.ToTypedRef()].Select( a => a.Aspect ).OfType<T>();
 
         public IEnumerable<INamedType> GetDerivedTypes( INamedType baseType, bool deep )
             => this._derivedTypes.GetDerivedTypes( baseType.GetSymbol(), deep ).Select( t => this.Factory.GetNamedType( t ) );
@@ -226,7 +233,11 @@ namespace Caravela.Framework.Impl.CodeModel
         public IEnumerable<INamedType> GetDerivedTypes( Type baseType, bool deep )
             => this.GetDerivedTypes( (INamedType) this.Factory.GetTypeByReflectionType( baseType ), deep );
 
+        public int Revision { get; }
+
         // TODO: throw an exception when the caller tries to get aspects that have not been initialized yet.
+
+        public override DeclarationOrigin Origin => DeclarationOrigin.Source;
 
         IDeclaration? IDeclaration.ContainingDeclaration => null;
 
@@ -249,7 +260,7 @@ namespace Caravela.Framework.Impl.CodeModel
                 .Where( a => a.Type.Equals( type ) );
 
         internal ImmutableArray<IObservableTransformation> GetObservableTransformationsOnElement( IDeclaration declaration )
-            => this._transformations[declaration.ToRef()];
+            => this._transformations[declaration.ToTypedRef()];
 
         internal IEnumerable<(IDeclaration DeclaringDeclaration, ImmutableArray<IObservableTransformation> Transformations)> GetAllObservableTransformations(
             bool designTimeOnly )
@@ -269,7 +280,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         internal int GetDepth( IDeclaration declaration )
         {
-            var reference = declaration.ToRef();
+            var reference = declaration.ToTypedRef();
 
             if ( this._depthsCache.TryGetValue( reference, out var value ) )
             {
@@ -304,7 +315,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         internal int GetDepth( INamedType namedType )
         {
-            var reference = namedType.ToRef<IDeclaration>();
+            var reference = namedType.ToTypedRef<IDeclaration>();
 
             if ( this._depthsCache.TryGetValue( reference, out var depth ) )
             {
@@ -333,30 +344,30 @@ namespace Caravela.Framework.Impl.CodeModel
             return depth;
         }
 
-        Ref<IDeclaration> IDeclarationImpl.ToRef() => Ref.Compilation().As<IDeclaration>();
+        public override Ref<IDeclaration> ToRef() => Ref.Compilation( this.RoslynCompilation ).As<IDeclaration>();
 
-        ImmutableArray<SyntaxReference> IDeclarationImpl.DeclaringSyntaxReferences => ImmutableArray<SyntaxReference>.Empty;
+        public override ImmutableArray<SyntaxReference> DeclaringSyntaxReferences => ImmutableArray<SyntaxReference>.Empty;
 
-        IEnumerable<IDeclaration> IDeclarationImpl.GetDerivedDeclarations( bool deep ) => Enumerable.Empty<IDeclaration>();
+        public override IEnumerable<IDeclaration> GetDerivedDeclarations( bool deep = true ) => Enumerable.Empty<IDeclaration>();
 
         string IDisplayable.ToDisplayString( CodeDisplayFormat? format, CodeDisplayContext? context ) => this.RoslynCompilation.AssemblyName ?? "";
 
         [Memo]
-        public IAssembly DeclaringAssembly => this.Factory.GetAssembly( this.RoslynCompilation.Assembly );
+        public override IAssembly DeclaringAssembly => this.Factory.GetAssembly( this.RoslynCompilation.Assembly );
 
         DeclarationOrigin IDeclaration.Origin => DeclarationOrigin.Source;
 
-        ISymbol? ISdkDeclaration.Symbol => this.RoslynCompilation.Assembly;
+        public override ISymbol Symbol => this.RoslynCompilation.Assembly;
 
         IAttributeList IDeclaration.Attributes => throw new NotSupportedException();
 
         public string? Name => this.RoslynCompilation.AssemblyName;
 
-        public override string ToString() => $"{this.RoslynCompilation.AssemblyName}, rev={this._revision}";
+        public override string ToString() => $"{this.RoslynCompilation.AssemblyName}";
 
         public ICompilationHelpers Helpers { get; } = new CompilationHelpers();
 
-        IDeclaration IDeclarationInternal.OriginalDefinition => this;
+        public override IDeclaration OriginalDefinition => this;
 
         public GenericMap EmptyGenericMap { get; }
 
@@ -375,6 +386,8 @@ namespace Caravela.Framework.Impl.CodeModel
         [Memo]
         public IAssemblyIdentity Identity => new AssemblyIdentityModel( this.RoslynCompilation.Assembly.Identity );
 
-        Location? IDiagnosticLocationImpl.DiagnosticLocation => null;
+        public override Location? DiagnosticLocation => null;
+
+        public override bool CanBeInherited => false;
     }
 }

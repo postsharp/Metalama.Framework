@@ -5,12 +5,11 @@ using Caravela.Framework.Impl.Utilities;
 using System;
 using System.Diagnostics;
 using System.IO;
-using Xunit;
-#if NET5_0
+#if NET5_0_OR_GREATER
 using System.Threading.Tasks;
 #endif
 
-namespace Caravela.Framework.Tests.UnitTests.Utilities
+namespace Caravela.Framework.Impl.Testing
 {
     internal static class CaravelaCompilerUtility
     {
@@ -50,7 +49,7 @@ namespace Caravela.Framework.Tests.UnitTests.Utilities
             var process = Process.Start( psi )!;
             var outputPromise = process.StandardOutput.ReadToEndAsync();
 
-#if NET5_0
+#if NET5_0_OR_GREATER
             var completion = process.WaitForExitAsync();
             Task.WhenAll( completion, outputPromise ).Wait();
 #else
@@ -58,7 +57,10 @@ namespace Caravela.Framework.Tests.UnitTests.Utilities
             outputPromise.Wait();
 #endif
 
-            Assert.True( process.ExitCode == 0, outputPromise.Result );
+            if ( process.ExitCode != 0 )
+            {
+                throw new InvalidOperationException( outputPromise.Result );
+            }
 
             return Path.Combine( dir, "bin/Debug/net48/test.dll" );
         }

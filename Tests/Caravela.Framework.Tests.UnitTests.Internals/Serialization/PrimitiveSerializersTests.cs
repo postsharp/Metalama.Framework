@@ -118,7 +118,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization
             using var testContext = this.CreateSerializationTestContext( "" );
 
             Assert.Equal( "42F", testContext.Serialize<float>( 42 ).ToString() );
-#if NET5_0 // The result is slightly different in .NET Framework but there is probably no point to investigate.            
+#if NET5_0_OR_GREATER // The result is slightly different in .NET Framework but there is probably no point to investigate.            
             Assert.Equal( "3.1415927F", testContext.Serialize( 3.1415927F ).ToString() );
             Assert.Equal( "-3.402823E+38F", testContext.Serialize( -3.402823E+38F ).ToString() );
             Assert.Equal( "3.402823E+38F", testContext.Serialize( 3.402823E+38F ).ToString() );
@@ -137,7 +137,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization
             using var testContext = this.CreateSerializationTestContext( "" );
 
             Assert.Equal( "42", testContext.Serialize<double>( 42 ).ToString() );
-#if NET5_0 // The result is slightly different in .NET Framework but there is probably no point to investigate.
+#if NET5_0_OR_GREATER // The result is slightly different in .NET Framework but there is probably no point to investigate.
             Assert.Equal( "3.14159285", testContext.Serialize( 3.14159285 ).ToString() );
             Assert.Equal( "-3.402823E+38", testContext.Serialize( -3.402823E+38 ).ToString() );
             Assert.Equal( "3.402823E+38", testContext.Serialize( 3.402823E+38 ).ToString() );

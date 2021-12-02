@@ -15,7 +15,7 @@ namespace Caravela.Framework.Impl.ReflectionMocks
 
         public CompileTimeEventInfo( IEvent @event )
         {
-            this.Target = @event.ToRef();
+            this.Target = @event.ToTypedRef();
         }
 
         public static CompileTimeEventInfo Create( IEvent @event )

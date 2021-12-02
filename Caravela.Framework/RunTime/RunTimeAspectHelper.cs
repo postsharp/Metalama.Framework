@@ -6,7 +6,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-#if NET5_0
+#if NET5_0_OR_GREATER
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -126,7 +126,7 @@ namespace Caravela.Framework.RunTime
             }
         }
 
-#if NET5_0
+#if NET5_0_OR_GREATER
         /// <summary>
         /// Evaluates an <see cref="IAsyncEnumerable{T}"/> and stores the result into an <see cref="AsyncEnumerableList{T}"/>. If the enumerable is already
         /// an <see cref="AsyncEnumerableList{T}"/>, returns the input list.

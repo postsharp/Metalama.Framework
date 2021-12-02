@@ -83,7 +83,7 @@ namespace Caravela.Framework.Impl.Fabrics
                 };
 
                 // Creates the aggregate AspectInstance for the target declaration.
-                var aggregateInstance = new AspectInstance( aspect, target.ToRef(), aggregateClass, templateInstances, default );
+                var aggregateInstance = new AspectInstance( aspect, target.ToTypedRef(), aggregateClass, templateInstances, default );
 
                 yield return aggregateInstance;
             }

@@ -1,7 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-#if NET5_0
+#if NET5_0_OR_GREATER
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;

@@ -70,6 +70,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public PropertyInfo ToPropertyInfo() => this.PropertyBuilder.ToPropertyInfo();
 
+        string? IRef<IProperty>.ToSerializableId() => null;
+
         IProperty IRef<IProperty>.GetTarget( ICompilation compilation ) => (IProperty) this.GetForCompilation( compilation );
 
         ISymbol ISdkRef<IProperty>.GetSymbol( Compilation compilation ) => throw new NotSupportedException();

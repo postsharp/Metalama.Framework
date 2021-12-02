@@ -30,7 +30,7 @@ using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
 using RefKind = Caravela.Framework.Code.RefKind;
-#if NET5_0
+#if NET5_0_OR_GREATER
 using System.Runtime.Loader;
 #endif
 
@@ -197,7 +197,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
 
             buildTimeAssemblyStream.Seek( 0, SeekOrigin.Begin );
             buildTimeDebugStream.Seek( 0, SeekOrigin.Begin );
-#if NET5_0
+#if NET5_0_OR_GREATER
             var assemblyLoadContext = new AssemblyLoadContext( null, true );
 
             var assembly = assemblyLoadContext.LoadFromStream( buildTimeAssemblyStream, buildTimeDebugStream );
@@ -246,7 +246,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
             {
                 testResult.SetFailed( "Exception during template expansion: " + e.Message, e );
             }
-#if NET5_0
+#if NET5_0_OR_GREATER
             finally
             {
                 assemblyLoadContext.Unload();

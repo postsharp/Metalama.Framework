@@ -3,9 +3,9 @@
 
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
+using Caravela.Framework.Code.Collections;
 using Caravela.Framework.Code.SyntaxBuilders;
 using Caravela.Framework.Impl.CodeModel;
-using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.Formatting;
 using Caravela.Framework.Impl.Serialization;
 using Caravela.Framework.Impl.Templating.MetaModel;
