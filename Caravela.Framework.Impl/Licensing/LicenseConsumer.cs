@@ -14,13 +14,13 @@ namespace Caravela.Framework.Impl.Licensing
 
         public string? TargetTypeName => null;
 
-        public IDiagnosticsSink Diagnostics { get; }
+        public IBackstageDiagnosticSink Diagnostics { get; }
 
         public IDiagnosticsLocation? DiagnosticsLocation => null;
 
         public LicenseConsumer( IServiceProvider services )
         {
-            this.Diagnostics = services.GetRequiredService<IDiagnosticsSink>();
+            this.Diagnostics = services.GetRequiredService<IBackstageDiagnosticSink>();
         }
     }
 }

@@ -77,10 +77,16 @@ namespace Caravela.TestFramework
             using var testOptions = new TestProjectOptions();
 
             var diagnosticsSink = new TestDiagnosticsSink();
+
+            var services = new ServiceCollection();
+
+            var serviceProviderBuilder = new ServiceProviderBuilder(
+                ( type, service ) => services.AddService( type, service ),
+                () => services.GetServiceProvider() );
             
             // We can't add these services to the ServiceProviderFactory using the WithServices method
             // because the backstage interfaces do not inherit from IService.
-            var backstageServices = new BackstageServiceCollection()
+            serviceProviderBuilder
                 .AddSingleton<IBackstageDiagnosticSink>( diagnosticsSink )
                 
                 // This allows the retrieval of the service using its type name
@@ -89,7 +95,7 @@ namespace Caravela.TestFramework
             
             var serviceProvider =
                 ServiceProviderFactory.GetServiceProvider( testOptions )
-                    .WithNextProvider( backstageServices.ToServiceProvider() );
+                    .WithNextProvider( serviceProviderBuilder.ServiceProvider );
 
             var assemblyAssets = GetAssemblyAssets( this.GetType().Assembly );
 
