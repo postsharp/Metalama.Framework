@@ -1,7 +1,7 @@
 <Project>
 
-    <Import Project="eng\shared\build\AssemblyMetadata.targets" />
-    <Import Project="eng\shared\build\TeamCity.targets" />
+    <Import Sdk="PostSharp.Engineering.Sdk"  Project="AssemblyMetadata.targets" />
+    <Import Sdk="PostSharp.Engineering.Sdk"  Project="TeamCity.targets" />
 
     <ItemGroup>
         <!-- Specifically use the same version of Roslyn as we're using in Caravela Compiler -->
