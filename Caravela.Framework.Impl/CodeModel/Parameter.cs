@@ -66,5 +66,7 @@ namespace Caravela.Framework.Impl.CodeModel
             => this.ParameterSymbol.HasExplicitDefaultValue
                 ? new TypedConstant( this.Compilation.Factory.GetIType( this.Type ), this.ParameterSymbol.ExplicitDefaultValue )
                 : default;
+
+        public override string ToString() => this.DeclaringMember + "/" + this.Name;
     }
 }

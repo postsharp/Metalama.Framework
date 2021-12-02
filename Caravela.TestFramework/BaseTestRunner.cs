@@ -4,6 +4,7 @@
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Formatting;
 using Caravela.Framework.Impl.Pipeline;
+using Caravela.Framework.Impl.Testing;
 using Caravela.Framework.Project;
 using Caravela.TestFramework.Utilities;
 using Microsoft.CodeAnalysis;

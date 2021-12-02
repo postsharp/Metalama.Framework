@@ -1,7 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-#if NET5_0
+#if NET5_0_OR_GREATER
 using System;
 #endif
 
@@ -14,28 +14,28 @@ namespace Caravela.TestFramework.Utilities
     internal static class StringExtensions
     {
         public static string ReplaceOrdinal( this string s, string oldValue, string newValue )
-#if NET5_0
+#if NET5_0_OR_GREATER
             => s.Replace( oldValue, newValue, StringComparison.Ordinal );
 #else
             => s.Replace( oldValue, newValue );
 #endif
 
         public static bool ContainsOrdinal( this string s, string substring )
-#if NET5_0
+#if NET5_0_OR_GREATER
             => s.Contains( substring, StringComparison.Ordinal );
 #else
             => s.Contains( substring );
 #endif
 
         public static bool ContainsOrdinal( this string s, char c )
-#if NET5_0
+#if NET5_0_OR_GREATER
             => s.Contains( c, StringComparison.Ordinal );
 #else
             => s.IndexOf( c ) >= 0;
 #endif
 
         public static int IndexOfOrdinal( this string s, char c )
-#if NET5_0
+#if NET5_0_OR_GREATER
             => s.IndexOf( c, StringComparison.Ordinal );
 #else
             => s.IndexOf( c );

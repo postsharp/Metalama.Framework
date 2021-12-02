@@ -54,7 +54,7 @@ namespace Caravela.Framework.Impl.Aspects
 
             return new AttributeAspectInstance(
                 (IAspect) attributeInstance,
-                target.ToRef(),
+                target.ToTypedRef(),
                 (AspectClass) this.AspectClass,
                 this._attribute,
                 new AspectPredecessor( AspectPredecessorKind.Inherited, this ),

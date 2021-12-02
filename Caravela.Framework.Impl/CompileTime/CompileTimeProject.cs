@@ -3,6 +3,7 @@
 
 using Caravela.Compiler;
 using Caravela.Framework.Aspects;
+using Caravela.Framework.Code.Collections;
 using Caravela.Framework.Fabrics;
 using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.Diagnostics;

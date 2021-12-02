@@ -3,9 +3,9 @@
 
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
+using Caravela.Framework.Code.Collections;
 using Caravela.Framework.Eligibility;
 using Caravela.Framework.Impl.CodeModel;
-using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
 using System.Collections.Generic;
@@ -61,7 +61,7 @@ namespace Caravela.Framework.Impl.Aspects
 
                             var aspectInstance = ((AspectClass) aspectClass).CreateAspectInstanceFromAttribute(
                                 (IAspect) attributeInstance,
-                                targetDeclaration.ToRef(),
+                                targetDeclaration.ToTypedRef(),
                                 attribute,
                                 this._loader );
 

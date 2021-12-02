@@ -14,7 +14,7 @@ namespace Caravela.Framework.Impl.ReflectionMocks
 
         private CompileTimeReturnParameterInfo( IParameter returnParameter )
         {
-            this.Target = returnParameter.ToRef();
+            this.Target = returnParameter.ToTypedRef();
         }
 
         public static ParameterInfo Create( IParameter returnParameter )

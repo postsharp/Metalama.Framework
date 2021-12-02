@@ -6,5 +6,5 @@ using System;
 namespace Caravela.Framework.Impl.Utilities
 {
     [AttributeUsage( AttributeTargets.Property )]
-    internal class MemoAttribute : Attribute { }
+    public class MemoAttribute : Attribute { }
 }

@@ -20,7 +20,7 @@ namespace Caravela.Framework.Impl.Fabrics
     internal class FabricAspect<T> : IAspect<T>
         where T : class, IDeclaration
     {
-        private ImmutableArray<FabricTemplateClass> _templateClasses;
+        private readonly ImmutableArray<FabricTemplateClass> _templateClasses;
 
         public FabricAspect( ImmutableArray<FabricTemplateClass> templateClasses )
         {
@@ -38,7 +38,7 @@ namespace Caravela.Framework.Impl.Fabrics
 
             foreach ( var templateClass in this._templateClasses )
             {
-                var fabricInstance = new FabricInstance( templateClass.Driver, builder.Target.ToRef<IDeclaration>() );
+                var fabricInstance = new FabricInstance( templateClass.Driver, builder.Target.ToTypedRef<IDeclaration>() );
 
                 using ( internalBuilder.WithPredecessor( new AspectPredecessor( AspectPredecessorKind.Fabric, fabricInstance ) ) )
                 {

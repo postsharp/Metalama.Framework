@@ -2,12 +2,9 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
-using Caravela.Framework.Code.Collections;
 using Caravela.Framework.Impl.CodeModel.References;
 using Caravela.Framework.Impl.ReflectionMocks;
 using Microsoft.CodeAnalysis;
-using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Reflection;
 using RefKind = Microsoft.CodeAnalysis.RefKind;
@@ -15,7 +12,7 @@ using TypedConstant = Caravela.Framework.Code.TypedConstant;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    internal abstract class ReturnParameter : IParameter, IDeclarationImpl
+    internal abstract class ReturnParameter : BaseDeclaration, IParameter
     {
         protected abstract RefKind SymbolRefKind { get; }
 
@@ -23,7 +20,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public abstract IType Type { get; }
 
-        public string Name => throw new NotSupportedException( "Cannot get the name of a return parameter." );
+        public string Name => "<return>";
 
         public int Index => -1;
 
@@ -37,35 +34,34 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public virtual bool IsReturnParameter => true;
 
-        public IAssembly DeclaringAssembly => this.DeclaringMember.DeclaringAssembly;
+        IRef<IDeclaration> IDeclaration.ToRef()
+            => Ref.ReturnParameter( (IMethodSymbol) this.DeclaringMember.GetSymbol().AssertNotNull(), this.GetCompilationModel().RoslynCompilation );
+
+        public override IAssembly DeclaringAssembly => this.DeclaringMember.DeclaringAssembly;
 
         DeclarationOrigin IDeclaration.Origin => DeclarationOrigin.Source;
 
-        public IDeclaration? ContainingDeclaration => this.DeclaringMember;
+        public override IDeclaration? ContainingDeclaration => this.DeclaringMember;
 
-        public abstract IAttributeList Attributes { get; }
+        public override DeclarationKind DeclarationKind => DeclarationKind.Parameter;
 
-        public DeclarationKind DeclarationKind => DeclarationKind.Parameter;
+        public override CompilationModel Compilation => this.ContainingDeclaration?.GetCompilationModel() ?? throw new AssertionFailedException();
 
-        public ICompilation Compilation => this.ContainingDeclaration?.Compilation ?? throw new AssertionFailedException();
-
-        public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
+        public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
             => this.ContainingDeclaration!.ToDisplayString() + "@return";
 
         public abstract bool Equals( IDeclaration other );
 
-        Location? IDiagnosticLocationImpl.DiagnosticLocation => this.DeclaringMember.GetDiagnosticLocation();
+        public override Location? DiagnosticLocation => this.DeclaringMember.GetDiagnosticLocation();
 
         public abstract ISymbol? Symbol { get; }
 
-        public abstract Ref<IDeclaration> ToRef();
+        public override ImmutableArray<SyntaxReference> DeclaringSyntaxReferences => ((IDeclarationImpl) this.DeclaringMember).DeclaringSyntaxReferences;
 
-        public ImmutableArray<SyntaxReference> DeclaringSyntaxReferences => ((IDeclarationImpl) this.DeclaringMember).DeclaringSyntaxReferences;
+        public override bool CanBeInherited => ((IDeclarationImpl) this.DeclaringMember).CanBeInherited;
 
-        public bool CanBeInherited => ((IDeclarationImpl) this.DeclaringMember).CanBeInherited;
+        public override string ToString() => this.DeclaringMember + "/" + this.Name;
 
-        public abstract IEnumerable<IDeclaration> GetDerivedDeclarations( bool deep = true );
-
-        public abstract IDeclaration OriginalDefinition { get; }
+        public override DeclarationOrigin Origin => this.DeclaringMember.Origin;
     }
 }

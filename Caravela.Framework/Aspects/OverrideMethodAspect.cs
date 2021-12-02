@@ -26,7 +26,7 @@ namespace Caravela.Framework.Aspects
         {
             this.EnsureBuildAspectNotCalled();
 
-#if NET5_0
+#if NET5_0_OR_GREATER
             var templates = new MethodTemplateSelector(
                 nameof(this.OverrideMethod),
                 nameof(this.OverrideAsyncMethod),
@@ -103,7 +103,7 @@ namespace Caravela.Framework.Aspects
         [Abstract]
         public virtual IEnumerator<dynamic?> OverrideEnumeratorMethod() => throw new NotSupportedException();
 
-#if NET5_0
+#if NET5_0_OR_GREATER
         [Template]
         [Abstract]
         public virtual IAsyncEnumerable<dynamic?> OverrideAsyncEnumerableMethod() => throw new NotSupportedException();

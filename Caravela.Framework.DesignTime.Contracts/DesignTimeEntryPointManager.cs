@@ -74,7 +74,7 @@ namespace Caravela.Framework.DesignTime.Contracts
             {
                 var taskCancelled = new TaskCompletionSource<bool>();
 
-#if NET5_0
+#if NET5_0_OR_GREATER
                 await using ( cancellationToken.Register( () => taskCancelled.SetCanceled( cancellationToken ) ) )
 #else
                 using ( cancellationToken.Register( () => taskCancelled.SetCanceled() ) )

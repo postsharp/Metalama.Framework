@@ -5,6 +5,7 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Code.Collections;
 using Caravela.Framework.Impl.Aspects;
 using Caravela.Framework.Impl.CodeModel.Collections;
+using Caravela.Framework.Impl.CodeModel.References;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
@@ -28,6 +29,8 @@ namespace Caravela.Framework.Impl.CodeModel
         }
 
         public AttributeData AttributeData { get; }
+
+        IRef<IDeclaration> IDeclaration.ToRef() => new AttributeRef( this.AttributeData, ((IDeclarationImpl) this.ContainingDeclaration).ToRef() );
 
         public IAssembly DeclaringAssembly => this.ContainingDeclaration.DeclaringAssembly;
 

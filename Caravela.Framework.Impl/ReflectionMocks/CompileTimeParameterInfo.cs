@@ -14,7 +14,7 @@ namespace Caravela.Framework.Impl.ReflectionMocks
 
         private CompileTimeParameterInfo( IParameter parameter )
         {
-            this.Target = parameter.ToRef();
+            this.Target = parameter.ToTypedRef();
         }
 
         public static ParameterInfo Create( IParameter parameter ) => new CompileTimeParameterInfo( parameter );

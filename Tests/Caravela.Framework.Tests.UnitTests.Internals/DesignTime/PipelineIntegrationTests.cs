@@ -6,6 +6,7 @@ using Caravela.Framework.Impl.DesignTime.Pipeline;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Pipeline;
 using Caravela.Framework.Impl.Templating;
+using Caravela.Framework.Impl.Testing;
 using Caravela.Framework.Tests.UnitTests.Utilities;
 using Caravela.TestFramework;
 using Microsoft.CodeAnalysis;

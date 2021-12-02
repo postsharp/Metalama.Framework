@@ -105,6 +105,6 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public bool Equals( IType other ) => SymbolEqualityComparer.Default.Equals( this._typeSymbol, ((ITypeInternal) other).TypeSymbol );
 
-        public override string ToString() => this._typeSymbol.ToString();
+        public override string ToString() => this.ContainingDeclaration + "/" + this.Name;
     }
 }

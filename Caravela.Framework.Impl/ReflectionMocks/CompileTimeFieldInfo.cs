@@ -16,7 +16,7 @@ namespace Caravela.Framework.Impl.ReflectionMocks
 
         private CompileTimeFieldInfo( IField field )
         {
-            this.Target = field.ToRef();
+            this.Target = field.ToTypedRef();
         }
 
         public static FieldInfo Create( IField field ) => new CompileTimeFieldInfo( field );

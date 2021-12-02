@@ -1,4 +1,4 @@
-// @RequiredConstant(NET5_0)
+// @RequiredConstant(NET5_0_OR_GREATER)
 // In .NET Framework, INotifyPropertyChanged.PropertyChanged is not marked as nullable, so the output is slightly different.
 
 using System;

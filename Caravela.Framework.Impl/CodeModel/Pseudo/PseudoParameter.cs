@@ -15,7 +15,7 @@ using TypedConstant = Caravela.Framework.Code.TypedConstant;
 
 namespace Caravela.Framework.Impl.CodeModel.Pseudo
 {
-    internal sealed class PseudoParameter : IParameter, IDeclarationImpl
+    internal sealed class PseudoParameter : BaseDeclaration, IParameter
     {
         private readonly string? _name;
 
@@ -42,15 +42,15 @@ namespace Caravela.Framework.Impl.CodeModel.Pseudo
 
         public bool IsParams => false;
 
-        public DeclarationOrigin Origin => DeclarationOrigin.Source;
+        public override DeclarationOrigin Origin => DeclarationOrigin.Source;
 
-        public IDeclaration? ContainingDeclaration => this.DeclaringAccessor;
+        public override IDeclaration? ContainingDeclaration => this.DeclaringAccessor;
 
-        public IAttributeList Attributes => AttributeList.Empty;
+        public override IAttributeList Attributes => AttributeList.Empty;
 
-        public DeclarationKind DeclarationKind => DeclarationKind.Parameter;
+        public override DeclarationKind DeclarationKind => DeclarationKind.Parameter;
 
-        public ICompilation Compilation => this.DeclaringAccessor.Compilation;
+        public override CompilationModel Compilation => this.DeclaringAccessor.GetCompilationModel();
 
         public PseudoParameter( IMethod declaringAccessor, int index, IType type, string? name )
         {
@@ -60,26 +60,24 @@ namespace Caravela.Framework.Impl.CodeModel.Pseudo
             this._name = name;
         }
 
-        public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => throw new NotImplementedException();
+        public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => throw new NotImplementedException();
 
         public ParameterInfo ToParameterInfo() => throw new NotImplementedException();
 
         public bool IsReturnParameter => this.Index < 0;
 
-        ISymbol? ISdkDeclaration.Symbol => null;
+        public override Ref<IDeclaration> ToRef() => throw new NotImplementedException();
 
-        Ref<IDeclaration> IDeclarationImpl.ToRef() => throw new NotImplementedException();
+        public override ImmutableArray<SyntaxReference> DeclaringSyntaxReferences => ImmutableArray<SyntaxReference>.Empty;
 
-        ImmutableArray<SyntaxReference> IDeclarationImpl.DeclaringSyntaxReferences => ImmutableArray<SyntaxReference>.Empty;
+        public override bool CanBeInherited => ((IDeclarationImpl) this.DeclaringMember).CanBeInherited;
 
-        public bool CanBeInherited => ((IDeclarationImpl) this.DeclaringMember).CanBeInherited;
+        public override IEnumerable<IDeclaration> GetDerivedDeclarations( bool deep = true ) => throw new NotImplementedException();
 
-        public IEnumerable<IDeclaration> GetDerivedDeclarations( bool deep = true ) => throw new NotImplementedException();
+        public override IDeclaration OriginalDefinition => throw new NotImplementedException();
 
-        public IDeclaration OriginalDefinition => throw new NotImplementedException();
+        public override IAssembly DeclaringAssembly => this.DeclaringMember.DeclaringAssembly;
 
-        public IAssembly DeclaringAssembly => this.DeclaringMember.DeclaringAssembly;
-
-        public Location? DiagnosticLocation => this.DeclaringMember.GetDiagnosticLocation();
+        public override Location? DiagnosticLocation => this.DeclaringMember.GetDiagnosticLocation();
     }
 }

@@ -6,7 +6,7 @@ using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl.Diagnostics
 {
-    internal static class SeverityExtensions
+    public static class SeverityExtensions
     {
         public static DiagnosticSeverity ToRoslynSeverity( this Severity severity )
             => severity switch
@@ -15,6 +15,16 @@ namespace Caravela.Framework.Impl.Diagnostics
                 Severity.Hidden => DiagnosticSeverity.Hidden,
                 Severity.Info => DiagnosticSeverity.Info,
                 Severity.Warning => DiagnosticSeverity.Warning,
+                _ => throw new AssertionFailedException()
+            };
+
+        public static Severity ToOurSeverity( this DiagnosticSeverity severity )
+            => severity switch
+            {
+                DiagnosticSeverity.Error => Severity.Error,
+                DiagnosticSeverity.Hidden => Severity.Hidden,
+                DiagnosticSeverity.Info => Severity.Info,
+                DiagnosticSeverity.Warning => Severity.Warning,
                 _ => throw new AssertionFailedException()
             };
     }

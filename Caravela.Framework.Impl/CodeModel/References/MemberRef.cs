@@ -35,6 +35,8 @@ namespace Caravela.Framework.Impl.CodeModel.References
 
         public object? Target => this._underlying.Target;
 
+        public string? ToSerializableId() => this._underlying.ToSerializableId();
+
         public T GetTarget( ICompilation compilation ) => this._underlying.GetTarget( compilation );
 
         public ISymbol? GetSymbol( Compilation compilation ) => this._underlying.GetSymbol( compilation );

@@ -3,6 +3,7 @@
 
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
+using Caravela.Framework.Impl.Metrics;
 using Caravela.Framework.Impl.Serialization;
 using Caravela.Framework.Impl.Utilities;
 using Caravela.Framework.Project;
@@ -154,6 +155,7 @@ namespace Caravela.Framework.Impl.Pipeline
             serviceProvider = serviceProvider.WithServices( new SyntaxSerializationService( serviceProvider ), new CompileTimeTypeFactory() );
             serviceProvider = serviceProvider.WithServices( new SystemTypeResolver( serviceProvider ) );
             serviceProvider = serviceProvider.WithService( new UserCodeInvoker( serviceProvider ) );
+            serviceProvider = serviceProvider.WithMetricProviders();
 
             return serviceProvider;
         }

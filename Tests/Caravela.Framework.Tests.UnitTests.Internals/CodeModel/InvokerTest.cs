@@ -371,7 +371,7 @@ class TargetCode
                     property.Invokers.Final.SetValue( SyntaxFactory.IdentifierName( "a" ), SyntaxFactory.IdentifierName( "b" ) ),
                     @"((global::TargetCode)a).P = b" );
 
-#if NET5_0
+#if NET5_0_OR_GREATER
                 AssertEx.DynamicEquals(
                     property.Invokers.Final.GetValue( property.Invokers.Final.GetValue( thisExpression ) ),
                     @"((global::TargetCode)this).P.P" );
@@ -445,7 +445,7 @@ class TargetCode
                 AssertEx.DynamicEquals( @event.Invokers.Final.Add( thisExpression, parameterExpression ), @"((global::TargetCode)this).MyEvent += value" );
                 AssertEx.DynamicEquals( @event.Invokers.Final.Remove( thisExpression, parameterExpression ), @"((global::TargetCode)this).MyEvent -= value" );
 
-#if NET5_0
+#if NET5_0_OR_GREATER
                 AssertEx.DynamicEquals(
                     @event.Invokers.Final.Raise( thisExpression, parameterExpression, parameterExpression ),
                     @"((global::TargetCode)this).MyEvent?.Invoke((global::System.Object? )value, (global::System.EventArgs)value)" );
@@ -489,7 +489,7 @@ class TargetCode
                     @event.RemoveMethod.Invokers.Final.Invoke( thisExpression, parameterExpression ),
                     @"((global::TargetCode)this).MyEvent -= value" );
 
-#if NET5_0
+#if NET5_0_OR_GREATER
                 AssertEx.DynamicEquals(
                     @event.RaiseMethod?.Invokers.Final.Invoke( thisExpression, parameterExpression, parameterExpression ),
                     @"((global::TargetCode)this).MyEvent?.Invoke((global::System.Object? )value, (global::System.EventArgs)value)" );
