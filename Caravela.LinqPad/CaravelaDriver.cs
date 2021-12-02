@@ -165,7 +165,7 @@ namespace {nameSpace}
 
             if ( enumerableType != null )
             {
-                Type elementType = enumerableType.GetGenericArguments()[0];
+                var elementType = enumerableType.GetGenericArguments()[0];
 
                 if ( elementTypeLookup.Contains( elementType ) )
                 {
