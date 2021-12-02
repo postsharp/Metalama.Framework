@@ -22,9 +22,9 @@ namespace Caravela.Framework.Impl.DesignTime.CodeFixes
             if ( supportsHierarchicalItems )
             {
                 // If the IDE supports hierarchical items, we just reproduce the structure.
-                
+
                 var codeActions = this.Items.SelectMany( i => i.ToCodeActions( true, titlePrefix ) ).ToImmutableArray();
-                
+
                 if ( codeActions.IsDefaultOrEmpty )
                 {
                     return ImmutableArray<CodeAction>.Empty;
@@ -37,7 +37,7 @@ namespace Caravela.Framework.Impl.DesignTime.CodeFixes
             else
             {
                 // If the IDE does NOT support hierarchical items, we have to flatten the menu structure and recursively add title prefixes.
-                
+
                 var codeActions = new List<CodeAction>();
 
                 void ProcessMenu( CodeActionMenuModel menu, string prefix )

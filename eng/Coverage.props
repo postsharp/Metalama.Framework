@@ -1,5 +1,5 @@
 <Project>
-    <Import Project="shared\build\Coverage.props"/>
+    <Import Sdk="PostSharp.Engineering.Sdk" Project="Coverage.props"/>
     
       <PropertyGroup Condition="'$(CollectCoverage)'=='True'">
             <!-- Exclude non-implemented namespaces from test coverage analysis -->

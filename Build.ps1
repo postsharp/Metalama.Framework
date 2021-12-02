@@ -3,6 +3,6 @@ if ( $env:VisualStudioVersion -eq $null ) {
     Enter-VsDevShell -VsInstallPath "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\" -StartInPath $(Get-Location)
 }
 
-& dotnet run --project "$PSScriptRoot\eng\src\Build.csproj" -- $args
+& dotnet run --project "$PSScriptRoot\eng\src\BuildCaravela.csproj" -- $args
 exit $LASTEXITCODE
 

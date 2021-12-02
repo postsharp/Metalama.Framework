@@ -14,6 +14,7 @@
         <RoslynVersion>4.0.1</RoslynVersion>
         <!-- TODO: Change to public version. -->
         <CaravelaCompilerVersion>4.0.2001-dev-release-1</CaravelaCompilerVersion>
+        <PostSharpEngineeringVersion>1.0.1-preview</PostSharpEngineeringVersion>
         <MicrosoftCSharpVersion>4.7.0</MicrosoftCSharpVersion>
         <NewtonsoftJsonVersion>13.0.1</NewtonsoftJsonVersion>
         <SystemCollectionsImmutableVersion>5.0.0</SystemCollectionsImmutableVersion>
@@ -40,7 +41,7 @@
     </PropertyGroup>
 
     <!-- Import overrides for the local build -->
-    <Import Project="../artifacts/private/Caravela.version.props" Condition="Exists('../artifacts/private/Caravela.version.props')" />
+    <Import Project="../artifacts/publish/private/Caravela.version.props" Condition="Exists('../artifacts/publish/private/Caravela.version.props')" />
     <Import Project="Dependencies.props" Condition="Exists('Dependencies.props')"/>
 
     

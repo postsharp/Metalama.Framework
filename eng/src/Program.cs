@@ -6,7 +6,7 @@ using PostSharp.Engineering.BuildTools.Build.Model;
 using Spectre.Console.Cli;
 using System.Collections.Immutable;
 
-namespace Build
+namespace BuildCaravela
 {
     internal static class Program
     {
@@ -18,11 +18,9 @@ namespace Build
             // These packages are published to internal and private feeds.
             var publicPackages = new ParametricString[]
             {
-                "Caravela.Framework.$(PackageVersion).nupkg",
-                "Caravela.TestFramework.$(PackageVersion).nupkg",
+                "Caravela.Framework.$(PackageVersion).nupkg", "Caravela.TestFramework.$(PackageVersion).nupkg",
                 "Caravela.Framework.Redist.$(PackageVersion).nupkg",
-                "Caravela.Framework.Sdk.$(PackageVersion).nupkg",
-                "Caravela.Framework.Impl.$(PackageVersion).nupkg",
+                "Caravela.Framework.Sdk.$(PackageVersion).nupkg", "Caravela.Framework.Impl.$(PackageVersion).nupkg",
                 "Caravela.Framework.DesignTime.Contracts.$(PackageVersion).nupkg"
             };
 
@@ -30,17 +28,27 @@ namespace Build
                 Pattern.Empty.Add( publicPackages ),
                 privateSource,
                 publicSource );
-            
-            // Currently we have no private package in this product.
 
             var product = new Product
             {
                 ProductName = "Caravela",
                 Solutions = ImmutableArray.Create<Solution>(
-                    new DotNetSolution( "Caravela.sln" ) { SupportsTestCoverage = true, CanFormatCode = true },
-                    new DotNetSolution( "Tests\\Caravela.Framework.TestApp\\Caravela.Framework.TestApp.sln" ) { IsTestOnly = true } ),
+                    new DotNetSolution( "Caravela.sln" )
+                    {
+                        SupportsTestCoverage = true,
+                        CanFormatCode = true,
+                        FormatExclusions = ImmutableArray.Create(
+                            "Tests\\Caravela.Framework.Tests.Integration\\Tests\\**\\*",
+                            "Tests\\Caravela.Framework.Tests.Integration.Internals\\Tests\\**\\*" )
+                    },
+                    new DotNetSolution( "Tests\\Caravela.Framework.TestApp\\Caravela.Framework.TestApp.sln" )
+                    {
+                        IsTestOnly = true
+                    } ),
                 PublishingTargets = ImmutableArray.Create<PublishingTarget>( publicPublishing ),
-                Dependencies = ImmutableArray.Create( new ProductDependency( "Caravela.Compiler" ) )
+                Dependencies = ImmutableArray.Create(
+                    new ProductDependency( "Caravela.Compiler" ),
+                    new ProductDependency( "PostSharp.Engineering" ) )
             };
 
             var commandApp = new CommandApp();
