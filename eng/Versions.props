@@ -11,21 +11,31 @@
     
     <!-- Versions of dependencies -->
     <PropertyGroup>
-        <RoslynVersion>3.11.0</RoslynVersion>
-        <CaravelaCompilerVersion>3.11.1013-dev-debug-150</CaravelaCompilerVersion>
+        <RoslynVersion>4.0.1</RoslynVersion>
+        <!-- TODO: Change to public version. -->
+        <CaravelaCompilerVersion>4.0.2001-dev-release-1</CaravelaCompilerVersion>
         <MicrosoftCSharpVersion>4.7.0</MicrosoftCSharpVersion>
         <NewtonsoftJsonVersion>13.0.1</NewtonsoftJsonVersion>
         <SystemCollectionsImmutableVersion>5.0.0</SystemCollectionsImmutableVersion>
         <MicrosoftBclHashCodeVersion>1.1.1</MicrosoftBclHashCodeVersion>
         <SystemReflectionMetadataLoadContextVersion>4.7.2</SystemReflectionMetadataLoadContextVersion>
         <K4osHashxxHashVersion>1.0.6</K4osHashxxHashVersion>
-        <MicrosoftNETTestSdkVersion>16.11.0</MicrosoftNETTestSdkVersion>
+        <MicrosoftNETTestSdkVersion>17.0.0</MicrosoftNETTestSdkVersion>
         <xUnitVersion>2.4.1</xUnitVersion>
         <xUnitAbstractionsVersion>2.0.3</xUnitAbstractionsVersion>
         <CoverletVersion>3.1.0</CoverletVersion>
 
-        <!-- this cannot be called just "PostSharpVersion", because that conflicts with a property used by PostSharp -->
-        <PostSharpPackageVersion>6.8.7</PostSharpPackageVersion>
+        <!-- RoslynPad packages are no longer published to nuget.org, so we build and publish ourselves
+             from https://github.com/roslynpad/roslynpad to https://nuget.postsharp.net/feeds/caravela .
+             To build and publish from the RoslynPad repo:
+             - In Directory.Build.props, set EditorPackageVersion to the same as RoslynPackageVersion to avoid conflicts.
+             - Call `dotnet pack` from the `src` directory.
+             - Upload all .nupkg files to https://nuget.postsharp.net/feeds/caravela.
+             - Make sure that all RoslynPad* packages are of the same version on the feed. -->
+        <RoslynPadVersion>4.0.1</RoslynPadVersion>
+
+        <!-- This cannot be called just "PostSharpVersion", because that conflicts with a property used by PostSharp. -->
+        <PostSharpPackageVersion>6.9.12</PostSharpPackageVersion>
      
     </PropertyGroup>
 
