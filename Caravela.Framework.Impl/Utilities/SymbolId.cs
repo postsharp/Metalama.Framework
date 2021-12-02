@@ -9,6 +9,7 @@ using Microsoft.CodeAnalysis;
 using System.Threading;
 using SymbolKey = roslyn::Microsoft.CodeAnalysis.SymbolKey;
 using SymbolKeyExtensions = roslyn::Microsoft.CodeAnalysis.SymbolKeyExtensions;
+
 #pragma warning restore SA1516 // Elements should be separated by blank line
 
 namespace Caravela.Framework.Impl.Utilities
