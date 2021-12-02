@@ -9,7 +9,7 @@ using System.Collections.Concurrent;
 namespace Caravela.Framework.Impl.Metrics
 {
     /// <summary>
-    /// Manages the metric providers and route metric requests to them.
+    /// Manages the metric providers and routes metric requests to them.
     /// </summary>
     public sealed class MetricManager : IService
     {

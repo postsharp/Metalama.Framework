@@ -11,7 +11,7 @@ namespace Caravela.Framework.Metrics
     // ReSharper disable once UnusedTypeParameter
 
     /// <summary>
-    /// Base interface all metrics. This interface exists only for strong typing. It does not have any member.
+    /// Base interface for all metrics. This interface exists only for strong typing. It does not have any members.
     /// </summary>
     /// <remarks>
     /// When you implement you own metric, you also need to implement the <see cref="IMetricProvider{T}"/> interface,
