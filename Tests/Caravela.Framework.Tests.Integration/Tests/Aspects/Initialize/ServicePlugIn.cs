@@ -15,8 +15,7 @@ namespace Caravela.Framework.Tests.PublicPipeline.Aspects.Initialize.ServicePlug
             return meta.Proceed();
         }
     }
-    
-    [CompileTimeOnly]
+
     internal interface IMyService : IService
     {
         string Message { get; }

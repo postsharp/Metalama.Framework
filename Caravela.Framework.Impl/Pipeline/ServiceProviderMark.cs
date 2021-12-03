@@ -2,7 +2,6 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Project;
-using PostSharp.Backstage.Extensibility;
 
 namespace Caravela.Framework.Impl.Pipeline
 {
