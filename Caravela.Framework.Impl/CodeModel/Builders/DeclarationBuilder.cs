@@ -7,6 +7,7 @@ using Caravela.Framework.Code.DeclarationBuilders;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.CodeModel.References;
 using Caravela.Framework.Impl.Transformations;
+using Caravela.Framework.Metrics;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -57,6 +58,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public Ref<IDeclaration> ToRef() => Ref.FromBuilder( this );
 
+        IRef<IDeclaration> IDeclaration.ToRef() => this.ToRef();
+
         ISymbol? ISdkDeclaration.Symbol => null;
 
         public ImmutableArray<SyntaxReference> DeclaringSyntaxReferences
@@ -74,5 +77,9 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         // TODO: should we locate diagnostic on the aspect attribute?
         public Location? DiagnosticLocation => null;
+
+        public TExtension GetMetric<TExtension>()
+            where TExtension : IMetric
+            => this.GetCompilationModel().MetricManager.GetMetric<TExtension>( this );
     }
 }

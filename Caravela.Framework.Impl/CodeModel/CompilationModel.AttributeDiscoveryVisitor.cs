@@ -141,7 +141,5 @@ namespace Caravela.Framework.Impl.CodeModel
 
             public ImmutableDictionaryOfArray<string, AttributeRef> GetDiscoveredAttributes() => this._builder.ToImmutable();
         }
-
-        bool IDeclarationImpl.CanBeInherited => false;
     }
 }

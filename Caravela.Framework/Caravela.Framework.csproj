@@ -20,7 +20,7 @@
     <InternalsVisibleTo Include="Caravela.TestFramework" />
     <InternalsVisibleTo Include="Caravela.Framework.Tests.UnitTests.Internals" />
     <InternalsVisibleTo Include="Caravela.Framework.Tests.Integration.Internals" />
-    <InternalsVisibleTo Include="Caravela.Roslyn"/>
+    <InternalsVisibleTo Include="Caravela.Roslyn" />
     <InternalsVisibleTo Include="DynamicProxyGenAssembly2" Key="$(FakeItEasyKey)" LoadsWithinVisualStudio="false" />
     <PackageReference Include="Microsoft.CSharp" Version="$(MicrosoftCSharpVersion)" />
     <PackageReference Include="System.Collections.Immutable" Version="$(SystemCollectionsImmutableVersion)" />

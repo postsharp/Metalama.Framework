@@ -47,5 +47,5 @@ CaravelaVersion.props
 TestResults
 launchSettings.json
 .idea/workspace.xml
-eng/*.local
+/eng/tools
 Caravela.Import.props

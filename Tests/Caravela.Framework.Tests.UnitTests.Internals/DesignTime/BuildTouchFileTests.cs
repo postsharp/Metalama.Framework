@@ -3,6 +3,7 @@
 
 using Caravela.Framework.Impl;
 using Caravela.Framework.Impl.DesignTime.Pipeline;
+using Caravela.Framework.Impl.Testing;
 using Caravela.Framework.Tests.UnitTests.Utilities;
 using Caravela.TestFramework;
 using System;

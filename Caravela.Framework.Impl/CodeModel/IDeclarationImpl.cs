@@ -11,7 +11,7 @@ namespace Caravela.Framework.Impl.CodeModel
 {
     internal interface IDeclarationImpl : ISdkDeclaration, IDeclarationInternal, IDiagnosticLocationImpl
     {
-        Ref<IDeclaration> ToRef();
+        new Ref<IDeclaration> ToRef();
 
         /// <summary>
         /// Gets the <see cref="SyntaxReference"/> syntaxes that declare the current declaration.

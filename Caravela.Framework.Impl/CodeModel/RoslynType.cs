@@ -49,6 +49,6 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public bool Equals( IType other ) => this.Symbol.Equals( ((ITypeInternal) other).TypeSymbol );
 
-        public override string ToString() => this.Symbol.ToString();
+        public override string ToString() => this.Symbol.ToDisplayString( SymbolDisplayFormat.CSharpShortErrorMessageFormat );
     }
 }

@@ -15,6 +15,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
 
 namespace Caravela.Framework.Impl.CompileTime
 {
@@ -159,7 +160,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
             string dotnetPath;
 
-            if ( System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform( System.Runtime.InteropServices.OSPlatform.Windows ) )
+            if ( RuntimeInformation.IsOSPlatform( OSPlatform.Windows ) )
             {
                 dotnetPath = Environment.ExpandEnvironmentVariables( "%ProgramFiles%\\dotnet\\dotnet.exe" );
 
@@ -167,7 +168,7 @@ namespace Caravela.Framework.Impl.CompileTime
                 {
                     dotnetPath = Environment.ExpandEnvironmentVariables( "%ProgramFiles(x86)%\\dotnet\\dotnet.exe" );
                 }
-                
+
                 if ( !File.Exists( dotnetPath ) )
                 {
                     dotnetPath = "dotnet";

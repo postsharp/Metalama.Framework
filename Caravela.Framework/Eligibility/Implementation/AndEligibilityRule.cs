@@ -8,7 +8,7 @@ namespace Caravela.Framework.Eligibility.Implementation
 {
     internal class AndEligibilityRule<T> : IEligibilityRule<T>
     {
-        private ImmutableArray<IEligibilityRule<T>> _rules;
+        private readonly ImmutableArray<IEligibilityRule<T>> _rules;
 
         public AndEligibilityRule( ImmutableArray<IEligibilityRule<T>> rules )
         {

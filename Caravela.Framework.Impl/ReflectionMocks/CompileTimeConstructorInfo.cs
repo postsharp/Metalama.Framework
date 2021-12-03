@@ -16,7 +16,7 @@ namespace Caravela.Framework.Impl.ReflectionMocks
 
         private CompileTimeConstructorInfo( IConstructor method )
         {
-            this.Target = method.ToRef();
+            this.Target = method.ToTypedRef();
         }
 
         public static ConstructorInfo Create( IConstructor method ) => new CompileTimeConstructorInfo( method );

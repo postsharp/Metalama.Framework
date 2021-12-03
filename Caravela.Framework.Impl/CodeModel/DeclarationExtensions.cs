@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
+using Caravela.Framework.Code.Collections;
 using Caravela.Framework.Impl.CodeModel.References;
 using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.Diagnostics;
@@ -106,9 +107,9 @@ namespace Caravela.Framework.Impl.CodeModel
                 _ => symbol.GetAttributes().ToAttributeLinks( symbol, compilation )
             };
 
-        public static Ref<IDeclaration> ToRef( this ISymbol symbol, Compilation compilation ) => Ref.FromSymbol( symbol, compilation );
+        public static Ref<IDeclaration> ToTypedRef( this ISymbol symbol, Compilation compilation ) => Ref.FromSymbol( symbol, compilation );
 
-        public static Ref<T> ToRef<T>( this T declaration )
+        public static Ref<T> ToTypedRef<T>( this T declaration )
             where T : class, IDeclaration
             => ((IDeclarationImpl) declaration).ToRef().As<T>();
 

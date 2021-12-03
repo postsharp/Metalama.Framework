@@ -60,6 +60,14 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.Framework.CompileT
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Caravela.Framework.Tests.UnitTests", "Tests\Caravela.Framework.Tests.UnitTests\Caravela.Framework.Tests.UnitTests.csproj", "{62E8C6ED-B0E7-48E3-9C1C-345F46687E3C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Caravela.Framework.Workspaces", "Caravela.Framework.Workspaces\Caravela.Framework.Workspaces.csproj", "{8F215547-1833-486E-BC25-F403E89C8B4A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Caravela.Framework.Tests.Workspaces", "Tests\Caravela.Framework.Tests.Workspaces\Caravela.Framework.Tests.Workspaces.csproj", "{6B0B4099-06FA-408A-8230-5F952198245B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Caravela.LinqPad", "Caravela.LinqPad\Caravela.LinqPad.csproj", "{A651E922-244B-4EA3-B6C2-F609A5E66FC6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Caravela.LinqPad.Tests", "Tests\Caravela.LinqPad.Tests\Caravela.LinqPad.Tests.csproj", "{6615862D-D68E-48D5-B7EF-0C520C0E0ABD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -134,6 +142,22 @@ Global
 		{62E8C6ED-B0E7-48E3-9C1C-345F46687E3C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{62E8C6ED-B0E7-48E3-9C1C-345F46687E3C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{62E8C6ED-B0E7-48E3-9C1C-345F46687E3C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8F215547-1833-486E-BC25-F403E89C8B4A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8F215547-1833-486E-BC25-F403E89C8B4A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8F215547-1833-486E-BC25-F403E89C8B4A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8F215547-1833-486E-BC25-F403E89C8B4A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6B0B4099-06FA-408A-8230-5F952198245B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6B0B4099-06FA-408A-8230-5F952198245B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6B0B4099-06FA-408A-8230-5F952198245B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6B0B4099-06FA-408A-8230-5F952198245B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A651E922-244B-4EA3-B6C2-F609A5E66FC6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A651E922-244B-4EA3-B6C2-F609A5E66FC6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A651E922-244B-4EA3-B6C2-F609A5E66FC6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A651E922-244B-4EA3-B6C2-F609A5E66FC6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6615862D-D68E-48D5-B7EF-0C520C0E0ABD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6615862D-D68E-48D5-B7EF-0C520C0E0ABD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6615862D-D68E-48D5-B7EF-0C520C0E0ABD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6615862D-D68E-48D5-B7EF-0C520C0E0ABD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -147,6 +171,8 @@ Global
 		{FEB29B18-21EF-4A0F-92B8-E6C0F4B22FD0} = {E4A0A0FD-0EC6-45C6-92C3-1D81974EE32B}
 		{496B8623-F88E-4346-A192-DA18B19457A3} = {E4A0A0FD-0EC6-45C6-92C3-1D81974EE32B}
 		{62E8C6ED-B0E7-48E3-9C1C-345F46687E3C} = {E4A0A0FD-0EC6-45C6-92C3-1D81974EE32B}
+		{6B0B4099-06FA-408A-8230-5F952198245B} = {E4A0A0FD-0EC6-45C6-92C3-1D81974EE32B}
+		{6615862D-D68E-48D5-B7EF-0C520C0E0ABD} = {E4A0A0FD-0EC6-45C6-92C3-1D81974EE32B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {59CB4F2D-3547-4DDF-9712-7B3F95C1ED66}

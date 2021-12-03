@@ -92,6 +92,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public object? Target => throw new NotImplementedException();
 
+        public string? ToSerializableId() => throw new NotImplementedException();
+
         IMethod IRef<IMethod>.GetTarget( ICompilation compilation ) => (IMethod) this.GetForCompilation( compilation );
 
         ISymbol? ISdkRef<IMethod>.GetSymbol( Compilation compilation ) => this.GetSymbol();

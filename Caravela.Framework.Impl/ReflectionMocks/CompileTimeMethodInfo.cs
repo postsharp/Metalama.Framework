@@ -16,7 +16,7 @@ namespace Caravela.Framework.Impl.ReflectionMocks
 
         private CompileTimeMethodInfo( IMethod method )
         {
-            this.Target = method.ToRef();
+            this.Target = method.ToTypedRef();
         }
 
         public static MethodInfo Create( IMethod method )

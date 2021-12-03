@@ -1,4 +1,4 @@
-// @RequiredConstant(NET5_0) - The exception message string is slightly different in .NET Framework.
+// @RequiredConstant(NET5_0_OR_GREATER) - The exception message string is slightly different in .NET Framework.
 
 using Caravela.Framework.Aspects;
 using Caravela.TestFramework;

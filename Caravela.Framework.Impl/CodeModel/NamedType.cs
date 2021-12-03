@@ -234,7 +234,17 @@ namespace Caravela.Framework.Impl.CodeModel
                     return false;
                 }
 
-                return ((TypeDeclarationSyntax) syntaxReference.GetSyntax()).Modifiers.Any( m => m.Kind() == SyntaxKind.PartialKeyword );
+                var syntax = syntaxReference.GetSyntax();
+
+                var modifiers = syntax switch
+                {
+                    TypeDeclarationSyntax type => type.Modifiers,
+                    EnumDeclarationSyntax e => e.Modifiers,
+                    DelegateDeclarationSyntax d => d.Modifiers,
+                    _ => default
+                };
+
+                return modifiers.Any( m => m.Kind() == SyntaxKind.PartialKeyword );
             }
         }
 
@@ -399,8 +409,6 @@ namespace Caravela.Framework.Impl.CodeModel
         }
 
         public bool Equals( IType other ) => this.Compilation.InvariantComparer.Equals( this, other );
-
-        public override string ToString() => this.TypeSymbol.ToString();
 
         public bool IsSubclassOf( INamedType type )
         {

@@ -1,4 +1,5 @@
 // @IgnoredDiagnostic(CS1998)
+// @RequiredConstant(NET5_0)
 
 #if NET5_0
 using System;

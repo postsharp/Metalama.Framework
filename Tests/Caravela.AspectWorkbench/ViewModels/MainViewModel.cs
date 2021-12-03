@@ -5,6 +5,7 @@
 using Caravela.AspectWorkbench.Model;
 using Caravela.Framework.Impl.Formatting;
 using Caravela.Framework.Impl.Pipeline;
+using Caravela.Framework.Impl.Testing;
 using Caravela.Framework.Tests.Integration.Runners;
 using Caravela.TestFramework;
 using Microsoft.CodeAnalysis;
@@ -26,7 +27,7 @@ namespace Caravela.AspectWorkbench.ViewModels
     [NotifyPropertyChanged]
     public class MainViewModel
     {
-        private static readonly TestProjectProperties _projectProperties = new( null, ImmutableArray.Create( "NET5_0" ), "net5.0" );
+        private static readonly TestProjectProperties _projectProperties = new( null, ImmutableArray.Create( "NET5_0_OR_GREATER" ), "net5.0" );
         private TemplateTest? _currentTest;
 
         public string Title => this.CurrentPath == null ? "Aspect Workbench" : $"Aspect Workbench - {this.CurrentPath}";

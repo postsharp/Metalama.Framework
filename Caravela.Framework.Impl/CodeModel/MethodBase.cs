@@ -87,7 +87,5 @@ namespace Caravela.Framework.Impl.CodeModel
         public abstract System.Reflection.MethodBase ToMethodBase();
 
         public override MemberInfo ToMemberInfo() => this.ToMethodBase();
-
-        public override string ToString() => this.MethodSymbol.ToString();
     }
 }
