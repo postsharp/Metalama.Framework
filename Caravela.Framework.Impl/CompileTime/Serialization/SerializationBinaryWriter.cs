@@ -22,9 +22,9 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
 
         public void WriteCompressedInteger( Integer integer )
         {
-            ulong value = integer.AbsoluteValue;
-            bool isNegative = integer.IsNegative;
-            byte signBit = (byte) (isNegative ? 0x80 : 0);
+            var value = integer.AbsoluteValue;
+            var isNegative = integer.IsNegative;
+            var signBit = (byte) (isNegative ? 0x80 : 0);
 
 
             // For unsigned compressed integers, the top 3 bits of the header are used to store the integer lenghts.
@@ -79,7 +79,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
             }
             else
             {
-                byte[] bytes = Encoding.UTF8.GetBytes( value );
+                var bytes = Encoding.UTF8.GetBytes( value );
                 this.WriteCompressedInteger( bytes.Length );
                 this.writer.Write( bytes );
             }
@@ -105,7 +105,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
             else
             {
 
-                int lastDot = value.LastIndexOf( '.' );
+                var lastDot = value.LastIndexOf( '.' );
                 string name, scope;
 
                 if ( lastDot < 0 )
@@ -119,7 +119,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
                     scope = value.Substring( 0, lastDot );
                 }
 
-                byte[] bytes = Encoding.UTF8.GetBytes(name);
+                var bytes = Encoding.UTF8.GetBytes(name);
                 this.WriteCompressedInteger(bytes.Length);
                 this.writer.Write(bytes);
 

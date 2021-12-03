@@ -59,7 +59,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
         
         internal static MetaSerializationException CreateWithCause( string operation, Type type, Exception innerException, SerializationCause cause )
         {
-            List<string> causes = new List<string>();
+            var causes = new List<string>();
             while ( cause != null )
             {
                 causes.Add(cause.Description);
@@ -68,7 +68,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
 
             causes.Reverse();
 
-            string message = $"{operation} of {type.Name} failed. The order of deserialization was as follows:\n" + string.Join( "", causes.ToArray() );
+            var message = $"{operation} of {type.Name} failed. The order of deserialization was as follows:\n" + string.Join( "", causes.ToArray() );
             
             return new MetaSerializationException( message, innerException );
         }

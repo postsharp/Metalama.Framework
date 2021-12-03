@@ -7,7 +7,7 @@ using Xunit;
 
 namespace Caravela.Framework.Tests.UnitTests.CompileTime.MetaSerialization
 {
-    public class ReferenceTypeSerializerTests : MetaSerializerTestBase
+    public class ReferenceTypeTests : MetaSerializerTestBase
     {
         // Tests verify correctness of the generated serializer.
 

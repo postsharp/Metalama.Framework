@@ -40,14 +40,14 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
         {
             this.binaryWriter.WriteCompressedInteger( version );
 
-            SerializationCause cause = this.shouldReportExceptionCause ? SerializationCause.WithTypedValue( null, "root", obj.GetType() ) : null;
+            var cause = this.shouldReportExceptionCause ? SerializationCause.WithTypedValue( null, "root", obj.GetType() ) : null;
 
             this.serializationQueue.Enqueue(
                 new SerializationQueueItem<object>( obj, cause ) );
 
             while ( this.serializationQueue.Count > 0 )
             {
-                SerializationQueueItem<object> item = this.serializationQueue.Dequeue();
+                var item = this.serializationQueue.Dequeue();
 
                 this.WriteObject( item.Value, item.Cause );
             }
@@ -66,7 +66,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
 
         private ObjectInfo GetObjectInfo( object obj, SerializationCause cause )
         {
-            Type type = obj.GetType();
+            var type = obj.GetType();
 
             if ( type.IsValueType )
             {
@@ -78,7 +78,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
             {
                 this.CallOnSerialization(obj);
 
-                IMetaSerializer serializer = type.IsArray ? null : this.formatter.SerializerProvider.GetSerializer( type );
+                var serializer = type.IsArray ? null : this.formatter.SerializerProvider.GetSerializer( type );
 
                 objectInfo = new ObjectInfo( obj, this.objects.Count + 1, this.formatter );
 
@@ -159,7 +159,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
                     {
                         
                             // We don't have a MetadataEmitter, so write the type signature explicitly.
-                            Type genericTypeDefinition = type.IsGenericType && !type.IsGenericTypeDefinition ? type.GetGenericTypeDefinition() : type;
+                            var genericTypeDefinition = type.IsGenericType && !type.IsGenericTypeDefinition ? type.GetGenericTypeDefinition() : type;
                             this.binaryWriter.WriteByte( (byte) intrinsicType );
 
                         
@@ -173,10 +173,10 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
                                 this.WriteTypeName(genericTypeDefinition);
 
 
-                                    Type[] genericTypeArguments = type.GetGenericArguments();
+                                    var genericTypeArguments = type.GetGenericArguments();
 
                                     this.binaryWriter.WriteCompressedInteger( genericTypeArguments.Length );
-                                    foreach ( Type genericTypeArgument in genericTypeArguments )
+                                    foreach ( var genericTypeArgument in genericTypeArguments )
                                     {
                                         this.WriteType( genericTypeArgument, cause );
                                     }
@@ -236,7 +236,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
 
             if ( !this.typeNameCache.TryGetValue( type, out assemblyTypeName ) )
             {
-                Type surrogateType = this.GetSurrogateType( type );
+                var surrogateType = this.GetSurrogateType( type );
 
                 string typeName;
                 string assemblyName;
@@ -284,16 +284,16 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
 
             objectInfo.ConstructionDataWritten = true;
 
-            Type objectType = objectInfo.Object.GetType();
-            SerializationIntrinsicType intrinsicType = SerializationIntrinsicTypeExtensions.GetIntrinsicType( objectType );
+            var objectType = objectInfo.Object.GetType();
+            var intrinsicType = SerializationIntrinsicTypeExtensions.GetIntrinsicType( objectType );
 
             this.WriteType( objectType, cause, intrinsicType );
 
-            Array array = objectInfo.Object as Array;
+            var array = objectInfo.Object as Array;
 
             if (objectType.IsArray)
             {
-                for (int i = 0; i < objectType.GetArrayRank(); i++)
+                for (var i = 0; i < objectType.GetArrayRank(); i++)
                 {
                     this.binaryWriter.WriteCompressedInteger( array.GetLength( i ) );
                     this.binaryWriter.WriteCompressedInteger( array.GetLowerBound( i ) );
@@ -315,14 +315,14 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
 
             objectInfo.InitializationArgumentsWritten = true;
 
-            Type type = objectInfo.Object.GetType();
-            SerializationIntrinsicType intrinsicType = SerializationIntrinsicTypeExtensions.GetIntrinsicType( type );
+            var type = objectInfo.Object.GetType();
+            var intrinsicType = SerializationIntrinsicTypeExtensions.GetIntrinsicType( type );
 
-            Array array = objectInfo.Object as Array;
+            var array = objectInfo.Object as Array;
 
             if ( type.IsArray )
             {
-                int[] indices = new int[array.Rank];
+                var indices = new int[array.Rank];
                 this.WriteArrayElements( array, array.GetType().GetElementType(), indices, 0, cause );
             }
             else
@@ -336,8 +336,8 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
 
         private void WriteTypedValue( object value, bool writeInitializationDataInline, SerializationCause cause )
         {
-            Type type = value.GetType();
-            SerializationIntrinsicType intrinsicType = SerializationIntrinsicTypeExtensions.GetIntrinsicType( type, true );
+            var type = value.GetType();
+            var intrinsicType = SerializationIntrinsicTypeExtensions.GetIntrinsicType( type, true );
             this.WriteType( type, cause, intrinsicType );
 
             this.WriteValue( value, intrinsicType, writeInitializationDataInline, cause );
@@ -440,7 +440,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
 
         private void WriteObjectReference( object value, bool writeInitializationDataInline, SerializationCause cause )
         {
-            ObjectInfo objectInfo = this.GetObjectInfo( value, cause );
+            var objectInfo = this.GetObjectInfo( value, cause );
 
             this.binaryWriter.WriteCompressedInteger( objectInfo.ObjectId );
 
@@ -463,9 +463,9 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
 
         private void WriteStruct( object value, SerializationCause cause )
         {
-            Type type = value.GetType();
-            IMetaSerializer serializer = this.formatter.SerializerProvider.GetSerializer( type );
-            Arguments arguments = new Arguments( this.formatter );
+            var type = value.GetType();
+            var serializer = this.formatter.SerializerProvider.GetSerializer( type );
+            var arguments = new Arguments( this.formatter );
 
             this.TrySerialize( serializer, value, arguments, null, cause );
 
@@ -475,11 +475,11 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
 
         private void WriteArguments( Arguments arguments, bool writeInitializationArgumentsInline, SerializationCause cause, Type owningType )
         {
-            int count = 0;
+            var count = 0;
             
             if ( arguments.Values.Count > 0 )
             {
-                foreach ( KeyValuePair<string, object> argument in arguments.Values )
+                foreach ( var argument in arguments.Values )
                 {
                     if ( argument.Value != null )
                     {
@@ -492,7 +492,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
 
             if ( count > 0 )
             {
-                foreach ( KeyValuePair<string, object> argument in arguments.Values )
+                foreach ( var argument in arguments.Values )
                 {
                     if ( argument.Value == null )
                     {
@@ -500,7 +500,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
                     }
 
                     this.binaryWriter.WriteDottedString( argument.Key );
-                    SerializationCause newCause = this.shouldReportExceptionCause
+                    var newCause = this.shouldReportExceptionCause
                         ? SerializationCause.WithTypedValue( cause, argument.Key, owningType )
                         : cause;
                     this.WriteTypedValue( argument.Value, writeInitializationArgumentsInline,
@@ -518,7 +518,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
                 return;
             }
 
-            SerializationIntrinsicType intrinsicType = SerializationIntrinsicTypeExtensions.GetIntrinsicType( obj.GetType() );
+            var intrinsicType = SerializationIntrinsicTypeExtensions.GetIntrinsicType( obj.GetType() );
 
             switch ( intrinsicType )
             {
@@ -544,7 +544,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
 
                 case SerializationIntrinsicType.Class:
                 case SerializationIntrinsicType.Array:
-                    ObjectInfo objectInfo = this.GetObjectInfo( obj, cause );
+                    var objectInfo = this.GetObjectInfo( obj, cause );
 
                     if ( !objectInfo.ConstructionDataWritten )
                     {
@@ -567,12 +567,12 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
 
         private void WriteArrayElements( Array array, Type elementType, int[] indices, int currentDimension, SerializationCause cause )
         {
-            int length = array.GetLength( currentDimension );
-            int lowerBound = array.GetLowerBound( currentDimension );
+            var length = array.GetLength( currentDimension );
+            var lowerBound = array.GetLowerBound( currentDimension );
 
             if ( currentDimension + 1 < indices.Length )
             {
-                for ( int i = 0; i < length; i++ )
+                for ( var i = 0; i < length; i++ )
                 {
                     indices[currentDimension] = i;
                     this.WriteArrayElements( array, elementType, indices, currentDimension + 1, cause );
@@ -580,15 +580,15 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
             }
             else
             {
-                SerializationIntrinsicType elementIntrinsicType = SerializationIntrinsicTypeExtensions.GetIntrinsicType( elementType, true );
+                var elementIntrinsicType = SerializationIntrinsicTypeExtensions.GetIntrinsicType( elementType, true );
 
-                for ( int i = lowerBound; i < lowerBound + length; i++ )
+                for ( var i = lowerBound; i < lowerBound + length; i++ )
                 {
                     indices[currentDimension] = i;
-                    object value = array.GetValue( indices );
+                    var value = array.GetValue( indices );
 
                     // shouldn’t structs be written with type (inheritance is possible) 
-                    SerializationCause newCause = this.shouldReportExceptionCause ? SerializationCause.WithIndices( cause, i ) : cause;
+                    var newCause = this.shouldReportExceptionCause ? SerializationCause.WithIndices( cause, i ) : cause;
                     if ( elementType.IsValueType )
                     {
                         this.WriteValue( value, elementIntrinsicType, false, newCause );

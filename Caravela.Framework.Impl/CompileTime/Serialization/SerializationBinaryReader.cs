@@ -40,8 +40,8 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
             }
             else
             {
-                byte[] bytes = this.reader.ReadBytes( header );
-                string value = Encoding.UTF8.GetString( bytes, 0, bytes.Length );
+                var bytes = this.reader.ReadBytes( header );
+                var value = Encoding.UTF8.GetString( bytes, 0, bytes.Length );
                 this.strings.Add( this.strings.Count + 1, value );
                 return value;
             }
@@ -64,9 +64,9 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
             }
             else
             {
-                byte[] bytes = this.reader.ReadBytes(header);
-                string value = Encoding.UTF8.GetString(bytes, 0, bytes.Length);
-                DottedString parent = this.ReadDottedString();
+                var bytes = this.reader.ReadBytes(header);
+                var value = Encoding.UTF8.GetString(bytes, 0, bytes.Length);
+                var parent = this.ReadDottedString();
 
                 if (!parent.IsNull)
                 {
@@ -80,8 +80,8 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
 
         public Integer ReadCompressedInteger()
         {
-            byte header = this.reader.ReadByte();
-            bool isNegative = (header & 0x80) != 0;
+            var header = this.reader.ReadByte();
+            var isNegative = (header & 0x80) != 0;
             ulong value;
 
             switch ( header & 0x70 )

@@ -36,7 +36,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
                     return activator;
                 }
 
-                Assembly[] requiredAssembly = new Assembly[1];
+                var requiredAssembly = new Assembly[1];
                 ReflectionHelper.VisitTypeElements(
                     type,
                     t =>
@@ -86,7 +86,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
                 return activator;
             }
 
-            object[] attributes = assembly.GetCustomAttributes( typeof(MetaActivatorTypeAttribute), false );
+            var attributes = assembly.GetCustomAttributes( typeof(MetaActivatorTypeAttribute), false );
             if ( attributes.Length > 0 )
             {
                 activator = (IMetaActivator) Activator.CreateInstance( ((MetaActivatorTypeAttribute) attributes[0]).ActivatorType );

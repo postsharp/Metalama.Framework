@@ -8,7 +8,9 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
     internal interface IMetaSerializerGenerator
     {
         MemberDeclarationSyntax CreateDeserializingConstructor( MetaSerializableTypeInfo serializableType );
+
         CompilationUnitSyntax CreateActivatorCompilationUnit();
+
         TypeDeclarationSyntax CreateSerializerType( MetaSerializableTypeInfo serializedType );
     }
 }

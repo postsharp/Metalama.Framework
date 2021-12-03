@@ -5,7 +5,6 @@ using Caravela.Framework.Impl;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Serialization;
-using Caravela.TestFramework;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;

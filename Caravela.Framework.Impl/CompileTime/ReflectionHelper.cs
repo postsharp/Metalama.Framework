@@ -179,7 +179,7 @@ namespace Caravela.Framework.Impl.CompileTime
             else if ( type.IsGenericType && !type.IsGenericTypeDefinition )
             {
                 VisitTypeElements( type.GetGenericTypeDefinition(), visitor );
-                foreach ( Type genericArgument in type.GetGenericArguments() )
+                foreach ( var genericArgument in type.GetGenericArguments() )
                 {
                     VisitTypeElements( genericArgument, visitor );
                 }

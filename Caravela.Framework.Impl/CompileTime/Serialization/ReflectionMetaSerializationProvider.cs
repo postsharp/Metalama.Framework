@@ -72,12 +72,12 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
 
             this.inspectedTypes.Add(type, true);
 
-            bool hasSerializer = false;
+            var hasSerializer = false;
             try
             {
-                foreach (object attribute in type.GetCustomAttributes(false))
+                foreach (var attribute in type.GetCustomAttributes(false))
                 {
-                    MetaSerializerAttribute serializableAttribute = attribute as MetaSerializerAttribute;
+                    var serializableAttribute = attribute as MetaSerializerAttribute;
                     if (serializableAttribute != null && serializableAttribute.SerializerType != null )
                     {
                         hasSerializer = true;
@@ -85,7 +85,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
                         continue;
                     }
 
-                    ImportMetaSerializerAttribute importSerializerAttribute = attribute as ImportMetaSerializerAttribute;
+                    var importSerializerAttribute = attribute as ImportMetaSerializerAttribute;
                     if (importSerializerAttribute != null)
                     {
                         this.ProcessImport(importSerializerAttribute);
@@ -102,14 +102,14 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
             // For backward compatibility, we look for a by-convention class named "Serializer".
             if ( !hasSerializer )
             {
-                Type serializerType = type.GetNestedType( "Serializer", BindingFlags.Public | BindingFlags.NonPublic );
+                var serializerType = type.GetNestedType( "Serializer", BindingFlags.Public | BindingFlags.NonPublic );
                 if ( serializerType != null )
                 {
                     this.AddSerializer( type, serializerType, this.activatorProvider );
                 }
             }
             
-            Type baseType = type.BaseType;
+            var baseType = type.BaseType;
             if ( baseType != null )
             {
                 if (baseType.IsGenericType)

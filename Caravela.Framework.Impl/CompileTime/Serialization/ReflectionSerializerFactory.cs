@@ -43,14 +43,14 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
                 serializerTypeInstance = this.serializerType;
             }
 
-            IMetaActivator activator = this.activatorProvider != null ? this.activatorProvider.GetActivator( serializerTypeInstance ) : null;
-            object instance = activator != null ? activator.CreateInstance(serializerTypeInstance, MetaActivatorSecurityToken.Instance) : Activator.CreateInstance(serializerTypeInstance);
+            var activator = this.activatorProvider != null ? this.activatorProvider.GetActivator( serializerTypeInstance ) : null;
+            var instance = activator != null ? activator.CreateInstance(serializerTypeInstance, MetaActivatorSecurityToken.Instance) : Activator.CreateInstance(serializerTypeInstance);
 
-            IMetaSerializer serializer = instance as IMetaSerializer;
+            var serializer = instance as IMetaSerializer;
             if (serializer != null)
                 return serializer;
 
-            IMetaSerializerFactory serializerFactory = instance as IMetaSerializerFactory;
+            var serializerFactory = instance as IMetaSerializerFactory;
             if (serializerFactory != null)
                 return serializerFactory.CreateSerializer(objectType);
 

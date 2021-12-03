@@ -16,8 +16,8 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization.Serializers
         /// <exclude/>
         public override object CreateInstance( Type type, IArgumentsReader constructorArguments )
         {
-            T[] values = constructorArguments.GetValue<T[]>( keyName );
-            List<T> list = new List<T>(values.Length);
+            var values = constructorArguments.GetValue<T[]>( keyName );
+            var list = new List<T>(values.Length);
             list.AddRange( values );
 
             return list;
@@ -26,7 +26,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization.Serializers
         /// <exclude/>
         public override void SerializeObject( object obj, IArgumentsWriter constructorArguments, IArgumentsWriter initializationArguments )
         {
-            List<T> list = (List<T>)obj;
+            var list = (List<T>)obj;
 
             // we need to save arrays in constructorArguments because objects from initializationArguments can be not fully deserialized when DeserializeFields is called
             constructorArguments.SetValue( keyName, list.ToArray() );

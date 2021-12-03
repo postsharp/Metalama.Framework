@@ -25,7 +25,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization.Serializers
         /// <exclude/>
         public override void SerializeObject( object obj, IArgumentsWriter constructorArguments, IArgumentsWriter initializationArguments )
         {
-            CultureInfo info = (CultureInfo) obj;
+            var info = (CultureInfo) obj;
             constructorArguments.SetValue( "identifier", info.Name );
             constructorArguments.SetValue( "useUserOverride", info.UseUserOverride );
         }

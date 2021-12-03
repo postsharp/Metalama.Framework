@@ -26,9 +26,9 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
 
         public Type GetSurrogateType(Type objectType)
         {
-            for ( IMetaSerializerFactoryProvider currentProvider = this.provider; currentProvider != null; currentProvider = currentProvider.NextProvider )
+            for ( var currentProvider = this.provider; currentProvider != null; currentProvider = currentProvider.NextProvider )
             {
-                Type surrogateType = currentProvider.GetSurrogateType( objectType );
+                var surrogateType = currentProvider.GetSurrogateType( objectType );
                 if ( surrogateType != null ) return surrogateType;
             }
 
@@ -37,9 +37,9 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
 
         private void DiscoverSerializers( Type objectType )
         {
-            for ( IMetaSerializerFactoryProvider currentProvider = this.provider; currentProvider != null; currentProvider = currentProvider.NextProvider )
+            for ( var currentProvider = this.provider; currentProvider != null; currentProvider = currentProvider.NextProvider )
             {
-                IMetaSerializerDiscoverer serializerDiscoverer = currentProvider as IMetaSerializerDiscoverer;
+                var serializerDiscoverer = currentProvider as IMetaSerializerDiscoverer;
                 if ( serializerDiscoverer != null )
                     serializerDiscoverer.DiscoverSerializers( objectType );
             }
@@ -74,7 +74,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
 
                 this.DiscoverSerializers( objectType );
 
-                IMetaSerializerFactory serializerFactory = this.provider.GetSerializerFactory( objectType );
+                var serializerFactory = this.provider.GetSerializerFactory( objectType );
 
                 if ( serializerFactory == null )
                 {

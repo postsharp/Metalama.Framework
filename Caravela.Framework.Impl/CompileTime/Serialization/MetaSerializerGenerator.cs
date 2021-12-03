@@ -221,30 +221,51 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
                 List( members ) );
         }
 
-        private INamedTypeSymbol? GetBaseSerializer(INamedTypeSymbol targetType)
+        private INamedTypeSymbol GetBaseSerializer(ITypeSymbol targetType )
         {
-            if (targetType.BaseType == null)
-            {
-                throw new AssertionFailedException();
-            }
+            Invariant.Assert( targetType.BaseType != null);
 
             if ( targetType.IsValueType )
             {
-                return ((INamedTypeSymbol) this._context.ReflectionMapper.GetTypeSymbol( typeof( ValueTypeMetaSerializer<> ) )).Construct(targetType);
+                // Value type serializers are always based on ValueTypeMetaSerializer.
+                return ((INamedTypeSymbol) this._context.ReflectionMapper.GetTypeSymbol( typeof( ValueTypeMetaSerializer<> ) )).Construct( targetType );
             }
 
-            if (SymbolEqualityComparer.Default.Equals(targetType.BaseType, this._runtimeReflectionMapper.GetTypeSymbol(typeof(object))))
+            if ( targetType.BaseType.AllInterfaces.Contains( this._runtimeReflectionMapper.GetTypeSymbol(typeof(IMetaSerializable)), SymbolEqualityComparer.Default) )
             {
-                return (INamedTypeSymbol)this._context.ReflectionMapper.GetTypeSymbol( typeof( ReferenceTypeMetaSerializer ) );
-            }
+                // The base type should have a meta serializer.
 
-            // TODO: This should get a base serializer through a repository.
-            return targetType.BaseType.GetContainedSymbols().OfType<INamedTypeSymbol>().FirstOrDefault( x => StringComparer.Ordinal.Equals( x.Name, "MetaSerializer" ) );
+                // TODO: This lookup should go through a repository.
+                var baseMetaSerializer = targetType.BaseType.GetContainedSymbols().OfType<INamedTypeSymbol>().FirstOrDefault( x => StringComparer.Ordinal.Equals( x.Name, "MetaSerializer" ) );
+
+                if ( baseMetaSerializer != null )
+                {
+                    return baseMetaSerializer;
+                }
+                else
+                {
+                    if ( SymbolEqualityComparer.Default.Equals( targetType.ContainingAssembly, targetType.BaseType.ContainingAssembly ) )
+                    {
+                        // This serializer is to be generated, we will recursively look for it's base, which should have same semantics.
+                        return this.GetBaseSerializer(targetType.BaseType);
+                    }
+                    else
+                    {
+                        // TODO: This is probably assembly that was not processed.
+                        throw new AssertionFailedException();
+                    }
+                }
+            }
+            else
+            {
+                // This is first serializer in the hierarchy.
+                return (INamedTypeSymbol) this._context.ReflectionMapper.GetTypeSymbol( typeof( ReferenceTypeMetaSerializer ) );
+            }
         }
 
         private static ConstructorDeclarationSyntax CreateSerializerConstructor( MetaSerializableTypeInfo serializedType )
         {
-            // TODO: We probably don't need the constructor for anything.
+            // TODO: We probably don't need the constructor for anything, the base should have parameterless constructor.
             return ConstructorDeclaration(
                 List<AttributeListSyntax>(),
                 TokenList( Token( SyntaxKind.PublicKeyword ) ),
@@ -255,9 +276,9 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
                 null );
         }
 
-        private MethodDeclarationSyntax CreateCreateInstanceMethod( MetaSerializableTypeInfo serializedType, INamedTypeSymbol? baseSerializer )
+        private MethodDeclarationSyntax CreateCreateInstanceMethod( MetaSerializableTypeInfo serializedType, INamedTypeSymbol baseSerializer )
         {
-            var serializerBaseType = baseSerializer ?? this._context.ReflectionMapper.GetTypeSymbol( typeof( ReferenceTypeMetaSerializer ) ).AssertNotNull();
+            var serializerBaseType = baseSerializer;
             var createInstanceMethod = serializerBaseType.GetMembers().OfType<IMethodSymbol>().Single( x => x.Name == nameof( ReferenceTypeMetaSerializer.CreateInstance ) );
 
             Invariant.Assert( createInstanceMethod.Parameters.Length == 2 );

@@ -22,9 +22,9 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization.Serializers
         /// <exclude/>
         public override object CreateInstance( Type type, IArgumentsReader constructorArguments )
         {
-            byte comparerCode = constructorArguments.GetValue<byte>( comparerCodeName );
+            var comparerCode = constructorArguments.GetValue<byte>( comparerCodeName );
 
-            IEqualityComparer<TKey> comparer = constructorArguments.GetValue<IEqualityComparer<TKey>>( comparerName ) ??
+            var comparer = constructorArguments.GetValue<IEqualityComparer<TKey>>( comparerName ) ??
                                             (IEqualityComparer<TKey>)ComparerExtensions.GetComparerFromCode( comparerCode );
 
             Dictionary<TKey, TValue> dictionary;
@@ -38,10 +38,10 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization.Serializers
                 dictionary = new Dictionary<TKey, TValue>( comparer );
             }
 
-            TKey[] keys = constructorArguments.GetValue<TKey[]>( keysName );
-            TValue[] values = constructorArguments.GetValue<TValue[]>( valuesName );
+            var keys = constructorArguments.GetValue<TKey[]>( keysName );
+            var values = constructorArguments.GetValue<TValue[]>( valuesName );
 
-            for ( int idx = 0; idx < keys.Length; idx++ )
+            for ( var idx = 0; idx < keys.Length; idx++ )
             {
                 dictionary[keys[idx]] = values[idx];
             }
@@ -52,13 +52,13 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization.Serializers
         /// <exclude/>
         public override void SerializeObject( object obj, IArgumentsWriter constructorArguments, IArgumentsWriter initializationArguments )
         {
-            Dictionary<TKey, TValue> dictionary = (Dictionary<TKey, TValue>)obj;
-            TKey[] keys = new TKey[dictionary.Count];
-            TValue[] values = new TValue[dictionary.Count];
+            var dictionary = (Dictionary<TKey, TValue>)obj;
+            var keys = new TKey[dictionary.Count];
+            var values = new TValue[dictionary.Count];
             dictionary.Keys.CopyTo( keys, 0 );
             dictionary.Values.CopyTo( values, 0 );
 
-            byte comparerCode = ComparerExtensions.GetComparerCode( dictionary.Comparer );
+            var comparerCode = ComparerExtensions.GetComparerCode( dictionary.Comparer );
 
             // byte.MaxValue is a flag for custom comparer
             if ( comparerCode != byte.MaxValue )
