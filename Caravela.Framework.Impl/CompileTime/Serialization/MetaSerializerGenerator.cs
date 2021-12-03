@@ -170,13 +170,14 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
         }
 
         public TypeDeclarationSyntax CreateSerializerType( MetaSerializableTypeInfo serializableType )
-            {
+        {
             var members = new List<MemberDeclarationSyntax>();
 
+            // Base serializer - if it does not exist in runtime compilation, the top-most existing base type is returned.
             var baseSerializerType = this.GetBaseSerializer( serializableType.Type );
 
             // Check that the base serializer constructor is visible.
-            var baseCtor = baseSerializerType?.Constructors.SingleOrDefault( c => c.Parameters.Length == 0 );
+            var baseCtor = baseSerializerType.Constructors.SingleOrDefault( c => c.Parameters.Length == 0 );
 
             if ( baseCtor?.DeclaredAccessibility != Accessibility.Public && baseCtor?.DeclaredAccessibility != Accessibility.Protected)
             {
@@ -201,25 +202,28 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
                 members.Add( this.CreateReferenceTypeDeserializeMethod( serializableType, baseSerializerType ) );
             }
 
+            var baseType =
+                HasPendingBaseSerializer(serializableType.Type, baseSerializerType)
+                ? SimpleBaseType( CreatePendingMetaSerializerType( serializableType.Type.BaseType.AssertNotNull() ) )
+                : SimpleBaseType( this._context.SyntaxGenerator.Type( baseSerializerType ) );
+
             // TODO: CompilerGenerated attribute.
             return ClassDeclaration(
                 List<AttributeListSyntax>(),
                 TokenList( Token( SyntaxKind.PublicKeyword ) ),
                 Identifier( "MetaSerializer" ),
                 null,
-                BaseList( Token( SyntaxKind.ColonToken ), SingletonSeparatedList<BaseTypeSyntax>(
-                    baseSerializerType != null
-                    ? SimpleBaseType( this._context.SyntaxGenerator.Type( baseSerializerType ) )
-                    : serializableType.Type.IsValueType
-                        ? SimpleBaseType( 
-                            this._context.SyntaxGenerator.Type( 
-                                ((INamedTypeSymbol)this._context.ReflectionMapper.GetTypeSymbol(typeof(ValueTypeMetaSerializer<>))).Construct( serializableType.Type ) ) )
-                        : SimpleBaseType( 
-                            this._context.SyntaxGenerator.Type( 
-                                this._context.ReflectionMapper.GetTypeSymbol( typeof( ReferenceTypeMetaSerializer ) ) ) ) ) ),
+                BaseList( Token( SyntaxKind.ColonToken ), SingletonSeparatedList<BaseTypeSyntax>( baseType ) ),
                 List<TypeParameterConstraintClauseSyntax>(),
                 List( members ) );
+
+            TypeSyntax CreatePendingMetaSerializerType( ITypeSymbol declaringType )
+                => QualifiedName( (NameSyntax)this._context.SyntaxGenerator.Type( declaringType ), IdentifierName( "MetaSerializer" ) );
         }
+
+        private static bool HasPendingBaseSerializer( ITypeSymbol serializedType, ITypeSymbol baseSerializerSymbol )
+            => SymbolEqualityComparer.Default.Equals( serializedType.ContainingAssembly, serializedType.BaseType.AssertNotNull().ContainingAssembly )
+            && !SymbolEqualityComparer.Default.Equals( serializedType.BaseType, baseSerializerSymbol.ContainingType );
 
         private INamedTypeSymbol GetBaseSerializer(ITypeSymbol targetType )
         {
@@ -351,7 +355,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
 
             var body =
                 Block(
-                    baseSerializeMethod.IsAbstract 
+                    baseSerializeMethod.IsAbstract && !HasPendingBaseSerializer(serializedType.Type, baseSerializer)
                     ? EmptyStatement()
                     : ExpressionStatement(
                         InvocationExpression(
@@ -383,7 +387,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
 
             var body =
                 Block(
-                    baseDeserializeMethod.IsAbstract
+                    baseDeserializeMethod.IsAbstract && !HasPendingBaseSerializer( serializedType.Type, baseSerializer )
                     ? EmptyStatement()
                     : ExpressionStatement(
                         InvocationExpression(
