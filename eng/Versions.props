@@ -11,11 +11,11 @@
     
     <!-- Versions of dependencies -->
     <PropertyGroup>
-        <!-- This version should be alligned with the one comming from Caravela.Compiler. -->
+        <!-- This version should be aligned with the one coming from Caravela.Compiler. -->
         <RoslynVersion>4.0.1</RoslynVersion>
         <!-- TODO: Change to public version. -->
         <CaravelaCompilerVersion>4.0.2001-dev-release-6</CaravelaCompilerVersion>
-        <!-- This version should be alligned with the one comming from Caravela.Compiler. -->
+        <!-- This version should be aligned with the one coming from Caravela.Compiler. -->
         <!-- TODO: Change to public version. -->
         <PostSharpBackstageSettingsVersion>0.1.0.50-dev-debug</PostSharpBackstageSettingsVersion>
         <PostSharpEngineeringVersion>1.0.1-preview</PostSharpEngineeringVersion>
