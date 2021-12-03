@@ -22,7 +22,7 @@ namespace Caravela.Framework.Impl.Templating
                 if ( statement.GetLeadingTrivia().Any( t => t.IsKind( SyntaxKind.SkippedTokensTrivia ) ) ||
                      statement.GetTrailingTrivia().Any( t => t.IsKind( SyntaxKind.SkippedTokensTrivia ) ) )
                 {
-                    throw new ArgumentOutOfRangeException( nameof(statement), "The code can contain a single statement." );
+                    throw new ArgumentOutOfRangeException( nameof( statement ), "The code can contain a single statement." );
                 }
 
                 var missingTokens = statement.DescendantNodesAndTokens().Where( n => n.IsMissing ).ToList();
@@ -32,7 +32,7 @@ namespace Caravela.Framework.Impl.Templating
                     var missingToken = missingTokens.First();
 
                     throw new ArgumentOutOfRangeException(
-                        nameof(statement),
+                        nameof( statement ),
                         $"The code is missing a {missingToken.Kind()} at position {missingToken.SpanStart + 1}." );
                 }
             }

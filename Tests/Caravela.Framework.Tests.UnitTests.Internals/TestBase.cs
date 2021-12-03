@@ -55,7 +55,7 @@ namespace Caravela.Framework.Tests.UnitTests
             bool addCaravelaReferences = true,
             IEnumerable<string>? preprocessorSymbols = null )
         {
-            var additionalAssemblies = new[] { typeof(TestBase).Assembly };
+            var additionalAssemblies = new[] { typeof( TestBase ).Assembly };
 
             var parseOptions = new CSharpParseOptions( preprocessorSymbols: preprocessorSymbols );
 

@@ -40,7 +40,7 @@ namespace Caravela.Framework.Impl.CodeModel
                 IEventSymbol => DeclarationKind.Event,
                 ITypeSymbol => DeclarationKind.None,
                 IModuleSymbol => DeclarationKind.Compilation,
-                _ => throw new ArgumentException( nameof(symbol), $"Unexpected symbol: {symbol.GetType().Name}." )
+                _ => throw new ArgumentException( nameof( symbol ), $"Unexpected symbol: {symbol.GetType().Name}." )
             };
 
         /// <summary>

@@ -18,7 +18,6 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
         /// </summary>
         internal MetaSerializationBinder Binder { get; }
 
-
         internal MetaSerializerProvider SerializerProvider { get; }
 
         /// <summary>
@@ -63,7 +62,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
         /// </summary>
         /// <param name="stream">A <see cref="Stream"/> containing a serialized object graph.</param>
         /// <returns>The root object of the object graph serialized in <paramref name="stream"/>.</returns>
-        public object Deserialize( Stream stream )
+        public object? Deserialize( Stream stream )
         {
             try
             {

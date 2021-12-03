@@ -1,5 +1,5 @@
-﻿// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
-// source-available license. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using System;
 using System.Collections.Generic;
@@ -15,7 +15,6 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
 #endif
     public class MetaSerializationException : Exception
     {
-        //
         // For guidelines regarding the creation of new exception types, see
         //    http://msdn.microsoft.com/library/default.asp?url=/library/en-us/cpgenref/html/cpconerrorraisinghandlingguidelines.asp
         // and
@@ -23,14 +22,14 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
         //
 
         /// <summary>
-        /// Initializes a new <see cref="MetaSerializationException"/>.
+        /// Initializes a new instance of the <see cref="MetaSerializationException"/> class.
         /// </summary>
         public MetaSerializationException()
         {
         }
 
         /// <summary>
-        /// Initializes a new <see cref="MetaSerializationException"/> and specifies the message.
+        /// Initializes a new instance of the <see cref="MetaSerializationException"/> class and specifies the message.
         /// </summary>
         /// <param name="message">Message.</param>
         public MetaSerializationException( string message ) : base( message )
@@ -38,7 +37,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
         }
 
         /// <summary>
-        /// Initializes a new <see cref="MetaSerializationException"/> and specifies the message and inner exception.
+        /// Initializes a new instance of the <see cref="MetaSerializationException"/> class and specifies the message and inner exception.
         /// </summary>
         /// <param name="message">Message.</param>
         /// <param name="inner">Inner exception.</param>
@@ -47,7 +46,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
         }
 
         /// <summary>
-        /// Deserialization constructor.
+        /// Initializes a new instance of the <see cref="MetaSerializationException"/> class for deserialization purposes.
         /// </summary>
         /// <param name="info"></param>
         /// <param name="context"></param>
@@ -56,20 +55,20 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
             StreamingContext context ) : base( info, context )
         {
         }
-        
+
         internal static MetaSerializationException CreateWithCause( string operation, Type type, Exception innerException, SerializationCause cause )
         {
             var causes = new List<string>();
             while ( cause != null )
             {
-                causes.Add(cause.Description);
+                causes.Add( cause.Description );
                 cause = cause.Parent;
             }
 
             causes.Reverse();
 
             var message = $"{operation} of {type.Name} failed. The order of deserialization was as follows:\n" + string.Join( "", causes.ToArray() );
-            
+
             return new MetaSerializationException( message, innerException );
         }
     }

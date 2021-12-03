@@ -1,5 +1,5 @@
-// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
-// source-available license. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Impl.CompileTime.Serialization;
 using Caravela.Framework.Serialization;
@@ -8,7 +8,7 @@ using Xunit;
 
 namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serialization
 {
-    
+
     public class IntrinsicSerializationTests : SerializationTestsBase
     {
         [Fact]
@@ -86,21 +86,21 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serialization
         [Fact]
         public void TestDottedString_SimpleDottedWords()
         {
-            this.TestSerialization( (DottedString)"Simple.Dotted.Words" );
+            this.TestSerialization( (DottedString) "Simple.Dotted.Words" );
             this.TestSerialization( new DottedString[] { "A", "A.B", "A.B.C", "A", "A.B" } );
         }
 
         [Fact]
         public void TestDottedString_DottedWordsWithReservedNames()
         {
-            this.TestSerialization( (DottedString)"Simple.Dotted.Words, mscorlib" );
+            this.TestSerialization( (DottedString) "Simple.Dotted.Words, mscorlib" );
         }
 
         [Fact]
         public void TestDottedString_NullAndEmpty()
         {
-            this.TestSerialization( (DottedString)null );
-            this.TestSerialization( (DottedString)"" );
+            this.TestSerialization( (DottedString?) null );
+            this.TestSerialization( (DottedString) "" );
         }
 
         [Fact]
@@ -124,24 +124,24 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serialization
         [Fact]
         public void TestBoxedBoolean_False()
         {
-            this.TestSerialization( (object)false );
+            this.TestSerialization( (object) false );
         }
 
         [Fact]
         public void TestByte()
         {
-            this.TestSerialization( (byte)0 );
-            this.TestSerialization( (byte)1 );
-            this.TestSerialization( (byte)255 );
+            this.TestSerialization( (byte) 0 );
+            this.TestSerialization( (byte) 1 );
+            this.TestSerialization( (byte) 255 );
         }
 
         [Fact]
         public void TestChar()
         {
             this.TestSerialization( 'a' );
-            this.TestSerialization( (char)0 );
-            this.TestSerialization( (char)255 );
-            this.TestSerialization( (char)65511 );
+            this.TestSerialization( (char) 0 );
+            this.TestSerialization( (char) 255 );
+            this.TestSerialization( (char) 65511 );
         }
 
         [Fact]
@@ -167,7 +167,7 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serialization
         [Fact]
         public void TestString()
         {
-            this.TestSerialization( (string)null );
+            this.TestSerialization( (string?) null );
             this.TestSerialization( "test" );
             this.TestSerialization( string.Empty );
         }
@@ -185,6 +185,7 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serialization
             this.TestSerialization( double.PositiveInfinity );
         }
 
+        [Fact]
         public void TestSingle()
         {
             this.TestSerialization( 0.0f );
@@ -207,9 +208,9 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serialization
         [Fact]
         public void TestInt16()
         {
-            this.TestSerialization( Int16.MinValue );
-            this.TestSerialization( Int16.MaxValue );
-            this.TestSerialization( (short)0 );
+            this.TestSerialization( short.MinValue );
+            this.TestSerialization( short.MaxValue );
+            this.TestSerialization( (short) 0 );
         }
 
         [Fact]
@@ -227,50 +228,49 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serialization
         [Fact]
         public void TestInt64()
         {
-            this.TestSerialization( Int64.MinValue );
-            this.TestSerialization( Int64.MaxValue );
-            this.TestSerialization( (Int64)0 );
+            this.TestSerialization( long.MinValue );
+            this.TestSerialization( long.MaxValue );
+            this.TestSerialization( 0L );
         }
 
         [Fact]
         public void TestUInt16()
         {
-            this.TestSerialization( UInt16.MinValue );
-            this.TestSerialization( UInt16.MaxValue );
-            this.TestSerialization( (ushort)0 );
+            this.TestSerialization( ushort.MinValue );
+            this.TestSerialization( ushort.MaxValue );
+            this.TestSerialization( (ushort) 0 );
         }
 
         [Fact]
         public void TestUInt64()
         {
-            this.TestSerialization( UInt64.MinValue );
-            this.TestSerialization( UInt64.MaxValue );
-            this.TestSerialization( (UInt64)0 );
+            this.TestSerialization( ulong.MinValue );
+            this.TestSerialization( ulong.MaxValue );
+            this.TestSerialization( 0UL );
         }
 
         [Fact]
         public void TestUInt32()
         {
-            this.TestSerialization( UInt32.MinValue );
-            this.TestSerialization( UInt32.MaxValue );
-            this.TestSerialization( (UInt32)0 );
+            this.TestSerialization( uint.MinValue );
+            this.TestSerialization( uint.MaxValue );
+            this.TestSerialization( 0U );
         }
 
         [Fact]
         public void TestNullableInt()
         {
-            this.TestSerialization( (int?)0 );
-            this.TestSerialization( (int?)int.MaxValue );
-            this.TestSerialization( (int?)int.MinValue );
-            this.TestSerialization( (int?)null );
+            this.TestSerialization( (int?) 0 );
+            this.TestSerialization( (int?) int.MaxValue );
+            this.TestSerialization( (int?) int.MinValue );
+            this.TestSerialization( (int?) null );
         }
-
 
         [Fact]
         public void TestNullableEnum()
         {
-            this.TestSerialization((TypeCode?) TypeCode.Boolean);
-            this.TestSerialization((TypeCode?)null);
+            this.TestSerialization( (TypeCode?) TypeCode.Boolean );
+            this.TestSerialization( (TypeCode?) null );
         }
 
         [Fact]
@@ -295,18 +295,19 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serialization
         [Fact]
         public void TestArray_WithLowerBoundNEqZero()
         {
-            Array array = Array.CreateInstance(typeof(int), new[] { 5 }, new[] { 5 }); // int[5..10]
+            var array = Array.CreateInstance( typeof( int ), new[] { 5 }, new[] { 5 } ); // int[5..10]
 
-            array.SetValue(0, 5);
-            array.SetValue(1, 6);
-            array.SetValue(2, 7);
-            array.SetValue(3, 8);
-            array.SetValue(4, 9);
+            array.SetValue( 0, 5 );
+            array.SetValue( 1, 6 );
+            array.SetValue( 2, 7 );
+            array.SetValue( 3, 8 );
+            array.SetValue( 4, 9 );
 
-            this.TestSerialization(array);
+            this.TestSerialization( array );
         }
 #endif
-        //        [Fact]
+
+        // [Fact]
         //        public void TestArray_Generics()
         //        {
         //            TestValue( new[] {new Nullable<int>(4), new Nullable<int>(int.MinValue), new Nullable<int>(int.MaxValue)} );
@@ -327,50 +328,55 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serialization
         [Fact]
         public void TestBoxedIntrinsics()
         {
-            this.TestSerialization( (object)5 );
-            this.TestSerialization( (object)(-13.0) );
-            this.TestSerialization( (object)"test" );
-            this.TestSerialization( (object)DateTime.Now );
+            this.TestSerialization( (object) 5 );
+            this.TestSerialization( (object) -13.0 );
+            this.TestSerialization( (object) "test" );
+            this.TestSerialization( (object) DateTime.Now );
         }
 
-        [MetaSerializer( typeof(Serializator) )]
+        [MetaSerializer( typeof( Serializator ) )]
         public class SimpleType : IEquatable<SimpleType>
         {
-            public string Name { get; set; }
+            public string? Name { get; set; }
 
-            public bool Equals( SimpleType other )
+            public bool Equals( SimpleType? other )
             {
                 if ( ReferenceEquals( null, other ) )
                 {
                     return false;
                 }
+
                 if ( ReferenceEquals( this, other ) )
                 {
                     return true;
                 }
-                return string.Equals( this.Name, other.Name );
+
+                return StringComparer.Ordinal.Equals( this.Name, other.Name );
             }
 
-            public override bool Equals( object obj )
+            public override bool Equals( object? obj )
             {
                 if ( ReferenceEquals( null, obj ) )
                 {
                     return false;
                 }
+
                 if ( ReferenceEquals( this, obj ) )
                 {
                     return true;
                 }
+
                 if ( obj.GetType() != this.GetType() )
                 {
                     return false;
                 }
-                return this.Equals( (SimpleType)obj );
+
+                return this.Equals( (SimpleType) obj );
             }
 
             public override int GetHashCode()
             {
-                return (this.Name != null ? this.Name.GetHashCode() : 0);
+                return this.Name != null ? StringComparer.Ordinal.GetHashCode( this.Name ) : 0;
             }
 
             public class Serializator : ReferenceTypeMetaSerializer
@@ -382,12 +388,12 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serialization
 
                 public override void SerializeObject( object obj, IArgumentsWriter constructorArguments, IArgumentsWriter initializationArguments )
                 {
-                    initializationArguments.SetValue( "_", ((SimpleType)obj).Name );
+                    initializationArguments.SetValue( "_", ((SimpleType) obj).Name );
                 }
 
                 public override void DeserializeFields( object obj, IArgumentsReader initializationArguments )
                 {
-                    ((SimpleType)obj).Name = initializationArguments.GetValue<string>( "_" );
+                    ((SimpleType) obj).Name = initializationArguments.GetValue<string>( "_" );
                 }
             }
         }

@@ -39,9 +39,9 @@ namespace Caravela.Framework.Impl.CompileTime
             {
                 this._cancellationToken.ThrowIfCancellationRequested();
 
-                var declaredSymbol = (INamedTypeSymbol)this._semanticModel.GetDeclaredSymbol( node ).AssertNotNull();
+                var declaredSymbol = (INamedTypeSymbol) this._semanticModel.GetDeclaredSymbol( node ).AssertNotNull();
 
-                var serializableInterface = this._reflectionMapper.GetTypeSymbol(typeof(IMetaSerializable));
+                var serializableInterface = this._reflectionMapper.GetTypeSymbol( typeof( IMetaSerializable ) );
                 var nonSerializedAttribute = this._reflectionMapper.GetTypeSymbol( typeof( MetaNonSerializedAttribute ) );
 
                 if ( !declaredSymbol.AllInterfaces.Any( i => SymbolEqualityComparer.Default.Equals( i, serializableInterface ) ) )
@@ -49,7 +49,7 @@ namespace Caravela.Framework.Impl.CompileTime
                     return;
                 }
 
-                var innerVisitor = new CollectSerializableFieldsVisitor(this._semanticModel, this._reflectionMapper, this._cancellationToken);
+                var innerVisitor = new CollectSerializableFieldsVisitor( this._semanticModel, this._reflectionMapper, this._cancellationToken );
 
                 innerVisitor.Visit( node );
 

@@ -1,5 +1,5 @@
-// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
-// source-available license. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Serialization;
 using System;
@@ -10,26 +10,29 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
 {
     internal sealed class MetaSerializerProvider
     {
-        private readonly IMetaSerializerFactoryProvider provider;
-        private readonly MetaSerializerProvider next;
-        private readonly Dictionary<Type, IMetaSerializer> serializers = new Dictionary<Type, IMetaSerializer>(64);
-        private readonly object sync = new object();
-        
-        public MetaSerializerProvider(IMetaSerializerFactoryProvider provider)
+        private readonly IMetaSerializerFactoryProvider _provider;
+        private readonly MetaSerializerProvider? _next;
+        private readonly Dictionary<Type, IMetaSerializer> _serializers = new Dictionary<Type, IMetaSerializer>( 64 );
+        private readonly object _sync = new object();
+
+        public MetaSerializerProvider( IMetaSerializerFactoryProvider provider )
         {
-            this.provider = provider;
+            this._provider = provider;
             if ( provider.NextProvider != null )
             {
-                this.next = new MetaSerializerProvider( provider.NextProvider );
+                this._next = new MetaSerializerProvider( provider.NextProvider );
             }
         }
 
-        public Type GetSurrogateType(Type objectType)
+        public Type GetSurrogateType( Type objectType )
         {
-            for ( var currentProvider = this.provider; currentProvider != null; currentProvider = currentProvider.NextProvider )
+            for ( var currentProvider = this._provider; currentProvider != null; currentProvider = currentProvider.NextProvider )
             {
                 var surrogateType = currentProvider.GetSurrogateType( objectType );
-                if ( surrogateType != null ) return surrogateType;
+                if ( surrogateType != null )
+                {
+                    return surrogateType;
+                }
             }
 
             return objectType;
@@ -37,21 +40,22 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
 
         private void DiscoverSerializers( Type objectType )
         {
-            for ( var currentProvider = this.provider; currentProvider != null; currentProvider = currentProvider.NextProvider )
+            for ( var currentProvider = this._provider; currentProvider != null; currentProvider = currentProvider.NextProvider )
             {
                 var serializerDiscoverer = currentProvider as IMetaSerializerDiscoverer;
                 if ( serializerDiscoverer != null )
+                {
                     serializerDiscoverer.DiscoverSerializers( objectType );
+                }
             }
         }
 
-        public IMetaSerializer GetSerializer(Type objectType)
+        public IMetaSerializer GetSerializer( Type objectType )
         {
-            IMetaSerializer serializer;
 
-            if ( !this.TryGetSerializer( objectType, out  serializer))
+            if ( !this.TryGetSerializer( objectType, out var serializer ) )
             {
-                throw new MetaSerializationException(string.Format(CultureInfo.InvariantCulture, "Cannot find a serializer for type '{0}'.", objectType));
+                throw new MetaSerializationException( string.Format( CultureInfo.InvariantCulture, "Cannot find a serializer for type '{0}'.", objectType ) );
             }
 
             return serializer;
@@ -59,36 +63,35 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
 
         public bool TryGetSerializer( Type objectType, out IMetaSerializer serializer )
         {
-            if (objectType.HasElementType)
+            if ( objectType.HasElementType )
             {
-                throw new ArgumentOutOfRangeException(nameof(objectType));
+                throw new ArgumentOutOfRangeException( nameof( objectType ) );
             }
 
-            lock (this.sync)
+            lock ( this._sync )
             {
 
-                if ( this.serializers.TryGetValue( objectType, out serializer ) )
+                if ( this._serializers.TryGetValue( objectType, out serializer ) )
                 {
                     return true;
                 }
 
                 this.DiscoverSerializers( objectType );
 
-                var serializerFactory = this.provider.GetSerializerFactory( objectType );
+                var serializerFactory = this._provider.GetSerializerFactory( objectType );
 
                 if ( serializerFactory == null )
                 {
                     if ( objectType.IsGenericType )
                     {
-                        serializerFactory = this.provider.GetSerializerFactory( objectType.GetGenericTypeDefinition() );
-
+                        serializerFactory = this._provider.GetSerializerFactory( objectType.GetGenericTypeDefinition() );
                     }
 
                     if ( serializerFactory == null )
                     {
-                        if ( this.next != null )
+                        if ( this._next != null )
                         {
-                            return this.next.TryGetSerializer( objectType, out serializer );
+                            return this._next.TryGetSerializer( objectType, out serializer );
                         }
                         else
                         {
@@ -97,16 +100,12 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
                     }
                 }
 
-                
-                serializer = serializerFactory.CreateSerializer(objectType);
+                serializer = serializerFactory.CreateSerializer( objectType );
 
-                
-                this.serializers.Add( objectType, serializer );
+                this._serializers.Add( objectType, serializer );
 
                 return true;
             }
         }
-
-
     }
 }

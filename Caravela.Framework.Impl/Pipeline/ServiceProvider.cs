@@ -52,14 +52,14 @@ namespace Caravela.Framework.Impl.Pipeline
 
             foreach ( var interfaceType in interfaces )
             {
-                if ( typeof(IService).IsAssignableFrom( interfaceType ) && interfaceType != typeof(IService) )
+                if ( typeof( IService ).IsAssignableFrom( interfaceType ) && interfaceType != typeof( IService ) )
                 {
                     builder[interfaceType] = service;
                 }
             }
 
             for ( var cursorType = service.Metadata;
-                  cursorType != null && typeof(IService).IsAssignableFrom( cursorType );
+                  cursorType != null && typeof( IService ).IsAssignableFrom( cursorType );
                   cursorType = cursorType.BaseType )
             {
                 builder[cursorType] = service;

@@ -29,10 +29,10 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
         public T? GetInvoker( InvokerOrder order, InvokerOperator @operator )
             => (order, @operator) switch
             {
-                (InvokerOrder.Base, InvokerOperator.Conditional) => this.ConditionalBase,
-                (InvokerOrder.Base, InvokerOperator.Default) => this.Base,
-                (InvokerOrder.Default, InvokerOperator.Conditional) => this.ConditionalFinal,
-                (InvokerOrder.Default, InvokerOperator.Default) => this.Final,
+                (InvokerOrder.Base, InvokerOperator.Conditional ) => this.ConditionalBase,
+                (InvokerOrder.Base, InvokerOperator.Default ) => this.Base,
+                (InvokerOrder.Default, InvokerOperator.Conditional ) => this.ConditionalFinal,
+                (InvokerOrder.Default, InvokerOperator.Default ) => this.Final,
                 _ => throw new ArgumentOutOfRangeException()
             };
 

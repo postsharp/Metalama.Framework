@@ -12,13 +12,16 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
     internal class NamedTypeList : MemberOrNamedTypeList<INamedType, MemberRef<INamedType>>, INamedTypeList
     {
         public NamedTypeList( INamedType containingDeclaration, IEnumerable<MemberRef<INamedType>> sourceItems ) :
-            base( containingDeclaration, sourceItems ) { }
+            base( containingDeclaration, sourceItems )
+        { }
 
         public NamedTypeList( ICompilation containingDeclaration, IEnumerable<MemberRef<INamedType>> sourceItems ) :
-            base( containingDeclaration, sourceItems ) { }
+            base( containingDeclaration, sourceItems )
+        { }
 
         public NamedTypeList( INamespace containingDeclaration, IEnumerable<MemberRef<INamedType>> sourceItems ) :
-            base( containingDeclaration, sourceItems ) { }
+            base( containingDeclaration, sourceItems )
+        { }
 
         IReadOnlyList<INamedType> INamedTypeList.DerivedFrom( Type type ) => throw new NotImplementedException();
 

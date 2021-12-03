@@ -17,15 +17,15 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public bool CapturesCodeFixTitles { get; }
 
-        public static IExecutionScenario DesignTime { get; } = new ExecutionScenario( nameof(DesignTime), true, false, true, false );
+        public static IExecutionScenario DesignTime { get; } = new ExecutionScenario( nameof( DesignTime ), true, false, true, false );
 
-        public static IExecutionScenario Preview { get; } = new ExecutionScenario( nameof(Preview), true, true, false, false );
+        public static IExecutionScenario Preview { get; } = new ExecutionScenario( nameof( Preview ), true, true, false, false );
 
-        public static IExecutionScenario LiveTemplate { get; } = new ExecutionScenario( nameof(LiveTemplate), true, true, false, false );
+        public static IExecutionScenario LiveTemplate { get; } = new ExecutionScenario( nameof( LiveTemplate ), true, true, false, false );
 
-        public static IExecutionScenario CompileTime { get; } = new ExecutionScenario( nameof(CompileTime), false, true, false, false );
+        public static IExecutionScenario CompileTime { get; } = new ExecutionScenario( nameof( CompileTime ), false, true, false, false );
 
-        public static IExecutionScenario CodeFix { get; } = new ExecutionScenario( nameof(CodeFix), true, false, true, true );
+        public static IExecutionScenario CodeFix { get; } = new ExecutionScenario( nameof( CodeFix ), true, false, true, true );
 
         private ExecutionScenario(
             string name,

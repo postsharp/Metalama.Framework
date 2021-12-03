@@ -13,12 +13,12 @@ namespace Caravela.Framework.Tests.UnitTests.CodeModel
     public class CompileTimeTypeTests : TestBase
     {
         [Theory]
-        [InlineData( typeof(Task) )]
-        [InlineData( typeof(Task<>) )]
-        [InlineData( typeof(Task<int>) )]
-        [InlineData( typeof(Task[]) )]
-        [InlineData( typeof(Task<int>[]) )]
-        [InlineData( typeof(Task<int[]>) )]
+        [InlineData( typeof( Task ) )]
+        [InlineData( typeof( Task<> ) )]
+        [InlineData( typeof( Task<int> ) )]
+        [InlineData( typeof( Task[] ) )]
+        [InlineData( typeof( Task<int>[] ) )]
+        [InlineData( typeof( Task<int[]> ) )]
         public void Test( Type type )
         {
             using var testContext = this.CreateTestContext();

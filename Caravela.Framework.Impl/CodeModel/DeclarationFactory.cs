@@ -159,7 +159,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
             if ( compilationElement is not IDeclaration declaration )
             {
-                throw new ArgumentException( nameof(symbol), $"{symbol.Kind} is not a declaration" );
+                throw new ArgumentException( nameof( symbol ), $"{symbol.Kind} is not a declaration" );
             }
 
             return declaration;
@@ -247,14 +247,14 @@ namespace Caravela.Framework.Impl.CodeModel
                 return
                     specialType switch
                     {
-                        SpecialType.List_T => (INamedType) this.GetTypeByReflectionType( typeof(List<>) ),
-                        SpecialType.ValueTask => (INamedType) this.GetTypeByReflectionType( typeof(ValueTask) ),
-                        SpecialType.ValueTask_T => (INamedType) this.GetTypeByReflectionType( typeof(ValueTask<>) ),
-                        SpecialType.Task => (INamedType) this.GetTypeByReflectionType( typeof(Task) ),
-                        SpecialType.Task_T => (INamedType) this.GetTypeByReflectionType( typeof(Task<>) ),
+                        SpecialType.List_T => (INamedType) this.GetTypeByReflectionType( typeof( List<> ) ),
+                        SpecialType.ValueTask => (INamedType) this.GetTypeByReflectionType( typeof( ValueTask ) ),
+                        SpecialType.ValueTask_T => (INamedType) this.GetTypeByReflectionType( typeof( ValueTask<> ) ),
+                        SpecialType.Task => (INamedType) this.GetTypeByReflectionType( typeof( Task ) ),
+                        SpecialType.Task_T => (INamedType) this.GetTypeByReflectionType( typeof( Task<> ) ),
                         SpecialType.IAsyncEnumerable_T => this.GetTypeByReflectionName( "System.Collections.Generic.IAsyncEnumerable`1" ),
                         SpecialType.IAsyncEnumerator_T => this.GetTypeByReflectionName( "System.Collections.Generic.IAsyncEnumerator`1" ),
-                        _ => throw new ArgumentOutOfRangeException( nameof(specialType) )
+                        _ => throw new ArgumentOutOfRangeException( nameof( specialType ) )
                     };
             }
         }

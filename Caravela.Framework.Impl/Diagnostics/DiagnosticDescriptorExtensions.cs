@@ -41,7 +41,7 @@ namespace Caravela.Framework.Impl.Diagnostics
         {
             object[] argumentArray;
 
-            if ( typeof(T).Name.StartsWith( nameof(ValueTuple), StringComparison.OrdinalIgnoreCase ) )
+            if ( typeof( T ).Name.StartsWith( nameof( ValueTuple ), StringComparison.OrdinalIgnoreCase ) )
             {
                 argumentArray = ValueTupleAdapter.ToArray( arguments );
             }

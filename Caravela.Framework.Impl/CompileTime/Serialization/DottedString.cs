@@ -7,19 +7,18 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
 {
     /// <summary>
     /// Encapsulates dotted strings such as namespaces and type names, so their
-    /// serialization by <see cref="PortableFormatter"/> can be optimized.
+    /// serialization by <see cref="MetaFormatter"/> can be optimized.
     /// </summary>
     internal struct DottedString : IEquatable<DottedString>
     {
-        private readonly string value;
 
         /// <summary>
-        /// Initializes a new <see cref="DottedString"/>.
+        /// Initializes a new instance of the <see cref="DottedString"/> struct.
         /// </summary>
         /// <param name="value">Value.</param>
         public DottedString( string value )
         {
-            this.value = value;
+            this.Value = value;
         }
 
         /// <summary>
@@ -30,37 +29,29 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
         /// <summary>
         /// Determines whether the current <see cref="DottedString"/> represents a <c>null</c> string.
         /// </summary>
-        public bool IsNull
-        {
-            get { return this.value == null; }
-        }
+        public bool IsNull => this.Value == null;
 
         /// <summary>
         /// Gets the string encapsulated by the current <see cref="DottedString"/>.
         /// </summary>
-        public string Value
-        {
-            get { return this.value; }
-        }
+        public string Value { get; }
 
         /// <summary>
-        /// Converts a <see cref="DottedString"/> into a <see cref="String"/>.
+        /// Converts a <see cref="DottedString"/> into a <see cref="string"/>.
         /// </summary>
         /// <param name="dottedString">A <see cref="DottedString"/>.</param>
-        /// <returns>The <see cref="String"/> encapsulated by <paramref name="dottedString"/>.</returns>
+        /// <returns>The <see cref="string"/> encapsulated by <paramref name="dottedString"/>.</returns>
         public static implicit operator string( DottedString dottedString )
         {
             return dottedString.ToString();
         }
 
-#pragma warning disable CA2225 // Operator overloads have named alternates (there is a constructor)
         /// <summary>
-        /// Converts a <see cref="String"/> into a <see cref="DottedString"/>.
+        /// Converts a <see cref="string"/> into a <see cref="DottedString"/>.
         /// </summary>
-        /// <param name="str">A <see cref="String"/>.</param>
+        /// <param name="str">A <see cref="string"/>.</param>
         /// <returns>A <see cref="DottedString"/> encapsulating <paramref name="str"/>.</returns>
-        public static implicit operator DottedString( string str)
-#pragma warning restore CA2225 // Operator overloads have named alternates
+        public static implicit operator DottedString( string str )
         {
             return new DottedString( str );
         }
@@ -72,28 +63,32 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
         /// <returns><c>true</c> if the current <see cref="DottedString"/> equals <c>other</c>, otherwise <c>false</c>.</returns>
         public bool Equals( DottedString other )
         {
-            return string.Equals( this.value, other.value, StringComparison.Ordinal );
+            return string.Equals( this.Value, other.Value, StringComparison.Ordinal );
         }
 
         /// <inheritdoc />
         public override int GetHashCode()
         {
-            return this.value == null ? 0 : this.GetHashCode();
+            return this.Value == null ? 0 : this.GetHashCode();
         }
 
         /// <inheritdoc />
         public override bool Equals( object obj )
         {
-            if (obj is DottedString other)
-                return this.Equals(other);
+            if ( obj is DottedString other )
+            {
+                return this.Equals( other );
+            }
             else
+            {
                 return false;
+            }
         }
 
         /// <inheritdoc />
         public override string ToString()
         {
-            return this.value;
+            return this.Value;
         }
 
         /// <summary>
@@ -102,9 +97,9 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
         /// <param name="left"></param>
         /// <param name="right"></param>
         /// <returns></returns>
-        public static bool operator ==(DottedString left, DottedString right)
+        public static bool operator ==( DottedString left, DottedString right )
         {
-            return left.Equals(right);
+            return left.Equals( right );
         }
 
         /// <summary>
@@ -113,7 +108,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
         /// <param name="left"></param>
         /// <param name="right"></param>
         /// <returns></returns>
-        public static bool operator !=(DottedString left, DottedString right)
+        public static bool operator !=( DottedString left, DottedString right )
         {
             return !(left == right);
         }

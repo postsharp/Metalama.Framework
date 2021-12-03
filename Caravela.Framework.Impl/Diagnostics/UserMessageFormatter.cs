@@ -19,7 +19,7 @@ namespace Caravela.Framework.Impl.Diagnostics
 
         private UserMessageFormatter() : base( InvariantCulture.Name ) { }
 
-        public override object? GetFormat( Type formatType ) => formatType == typeof(ICustomFormatter) ? this : base.GetFormat( formatType );
+        public override object? GetFormat( Type formatType ) => formatType == typeof( ICustomFormatter ) ? this : base.GetFormat( formatType );
 
         public static string Format( FormattableString message ) => message.ToString( Instance );
 

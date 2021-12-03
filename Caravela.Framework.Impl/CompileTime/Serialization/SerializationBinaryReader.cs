@@ -1,5 +1,5 @@
-﻿// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
-// source-available license. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using System.Collections.Generic;
 using System.IO;
@@ -9,40 +9,42 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
 {
     internal sealed class SerializationBinaryReader
     {
-        private readonly BinaryReader reader;
-        private readonly Dictionary<int, string> strings = new Dictionary<int, string>();
-        private readonly Dictionary<int, string> dottedStrings = new Dictionary<int, string>();
+        private readonly BinaryReader _reader;
+        private readonly Dictionary<int, string> _strings = new Dictionary<int, string>();
+        private readonly Dictionary<int, string> _dottedStrings = new Dictionary<int, string>();
 
         public SerializationBinaryReader( BinaryReader reader )
         {
-            this.reader = reader;
+            this._reader = reader;
         }
 
         public byte ReadByte()
         {
-            return this.reader.ReadByte();
+            return this._reader.ReadByte();
         }
 
-
-        public string ReadString()
+        public string? ReadString()
         {
             int header = this.ReadCompressedInteger();
 
             if ( header == -1 )
+            {
                 return null;
-
+            }
             else if ( header < 0 )
             {
-                string s;
-                if ( !this.strings.TryGetValue( header, out s ) )
+                if ( !this._strings.TryGetValue( header, out var s ) )
+                {
                     throw new MetaSerializationException( "Invalid serialized stream: invalid string identifier." );
+                }
+
                 return s;
             }
             else
             {
-                var bytes = this.reader.ReadBytes( header );
+                var bytes = this._reader.ReadBytes( header );
                 var value = Encoding.UTF8.GetString( bytes, 0, bytes.Length );
-                this.strings.Add( this.strings.Count + 1, value );
+                this._strings.Add( this._strings.Count + 1, value );
                 return value;
             }
         }
@@ -51,60 +53,62 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
         {
             int header = this.ReadCompressedInteger();
 
-            if (header == -1)
+            if ( header == -1 )
             {
                 return null;
             }
-            else if (header < 0)
+            else if ( header < 0 )
             {
-                string s;
-                if (!this.dottedStrings.TryGetValue(-header, out s))
-                    throw new MetaSerializationException( "Invalid serialized stream: invalid string identifier.");
+                if ( !this._dottedStrings.TryGetValue( -header, out var s ) )
+                {
+                    throw new MetaSerializationException( "Invalid serialized stream: invalid string identifier." );
+                }
+
                 return s;
             }
             else
             {
-                var bytes = this.reader.ReadBytes(header);
-                var value = Encoding.UTF8.GetString(bytes, 0, bytes.Length);
+                var bytes = this._reader.ReadBytes( header );
+                var value = Encoding.UTF8.GetString( bytes, 0, bytes.Length );
                 var parent = this.ReadDottedString();
 
-                if (!parent.IsNull)
+                if ( !parent.IsNull )
                 {
                     value = parent + "." + value;
                 }
 
-                this.dottedStrings.Add(this.dottedStrings.Count + 2, value);
+                this._dottedStrings.Add( this._dottedStrings.Count + 2, value );
                 return value;
             }
         }
 
         public Integer ReadCompressedInteger()
         {
-            var header = this.reader.ReadByte();
+            var header = this._reader.ReadByte();
             var isNegative = (header & 0x80) != 0;
             ulong value;
 
             switch ( header & 0x70 )
             {
-                    // Unsigned
+                // Unsigned
                 case 0x00:
                     value = (ulong) (header & 0x0F);
                     break;
 
                 case 0x10:
-                    value = (uint) (header & 0x0F) << 8 | this.reader.ReadByte();
+                    value = ((uint) (header & 0x0F) << 8) | this._reader.ReadByte();
                     break;
 
                 case 0x20:
-                    value = (uint) (header & 0x0F) << 16 | this.reader.ReadUInt16();
+                    value = ((uint) (header & 0x0F) << 16) | this._reader.ReadUInt16();
                     break;
 
                 case 0x30:
-                    value = (ulong) (header & 0x0F) << 32 | this.reader.ReadUInt32();
+                    value = ((ulong) (header & 0x0F) << 32) | this._reader.ReadUInt32();
                     break;
 
                 case 0x40:
-                    value = ((ulong) (header & 0x0F) << 64) | this.reader.ReadUInt64();
+                    value = ((ulong) (header & 0x0F) << 64) | this._reader.ReadUInt64();
                     break;
 
                 default:
@@ -114,20 +118,19 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
             return new Integer( value, isNegative );
         }
 
-
         public double ReadDouble()
         {
-            return this.reader.ReadDouble();
+            return this._reader.ReadDouble();
         }
 
         public float ReadSingle()
         {
-            return this.reader.ReadSingle();
+            return this._reader.ReadSingle();
         }
 
         public sbyte ReadSByte()
         {
-            return this.reader.ReadSByte();
+            return this._reader.ReadSByte();
         }
     }
 }

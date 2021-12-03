@@ -16,7 +16,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
             [Memo]
             public override IType Type
             {
-                get => this.Compilation.Factory.GetTypeByReflectionType( typeof(void) );
+                get => this.Compilation.Factory.GetTypeByReflectionType( typeof( void ) );
                 set => throw new NotSupportedException( "Cannot directly change accessor's parameter type." );
             }
 

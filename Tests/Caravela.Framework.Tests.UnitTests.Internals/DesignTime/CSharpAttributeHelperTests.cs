@@ -506,16 +506,16 @@ namespace Test
         [Fact( Skip = "TODO #29087" )]
         public Task When_AttributeAppliedToAssembly_Then_AttributeIsAddedOnNewLineAfterLeadingCommentAsync()
         {
-// string syntax = @"// leading comment";
-//
-//             string expectedSyntax = @"// leading comment
-// [assembly: TestAttribute]";
-//
-//             SyntaxNode originalRoot = await this.GetSyntaxRootAsync(syntax);
-//
-//             SyntaxNode newRoot = await CSharpAttributeHelper.AddAttributeAsync( originalRoot, originalRoot, new AttributeDescription( "TestAttribute" ), this.cancellationTokenSource.Token );
-//
-//             Assert.Equal(expectedSyntax, newRoot.ToFullString());
+            // string syntax = @"// leading comment";
+            //
+            //             string expectedSyntax = @"// leading comment
+            // [assembly: TestAttribute]";
+            //
+            //             SyntaxNode originalRoot = await this.GetSyntaxRootAsync(syntax);
+            //
+            //             SyntaxNode newRoot = await CSharpAttributeHelper.AddAttributeAsync( originalRoot, originalRoot, new AttributeDescription( "TestAttribute" ), this.cancellationTokenSource.Token );
+            //
+            //             Assert.Equal(expectedSyntax, newRoot.ToFullString());
 
             return Task.CompletedTask;
         }
@@ -523,22 +523,22 @@ namespace Test
         [Fact( Skip = "TODO #29087" )]
         public Task When_AttributeAppliedToAssembly_Then_AttributeIsAddedOnNewLineAfterAlreadyExistingAttributesAsync()
         {
-// string syntax = @"// leading comment
-// // some comment
-// [assembly: TestAttribute]
-// // some other comment";
-//
-//             string expectedSyntax = @"// leading comment
-// // some comment
-// [assembly: TestAttribute]
-// // some other comment
-// [assembly: TestAttribute]";
-//
-//             SyntaxNode originalRoot = await this.GetSyntaxRootAsync(syntax);
-//
-//             SyntaxNode newRoot = await CSharpAttributeHelper.AddAttributeAsync( originalRoot, originalRoot, new AttributeDescription( "TestAttribute" ), this.cancellationTokenSource.Token );
-//
-//             Assert.Equal(expectedSyntax, newRoot.ToFullString());
+            // string syntax = @"// leading comment
+            // // some comment
+            // [assembly: TestAttribute]
+            // // some other comment";
+            //
+            //             string expectedSyntax = @"// leading comment
+            // // some comment
+            // [assembly: TestAttribute]
+            // // some other comment
+            // [assembly: TestAttribute]";
+            //
+            //             SyntaxNode originalRoot = await this.GetSyntaxRootAsync(syntax);
+            //
+            //             SyntaxNode newRoot = await CSharpAttributeHelper.AddAttributeAsync( originalRoot, originalRoot, new AttributeDescription( "TestAttribute" ), this.cancellationTokenSource.Token );
+            //
+            //             Assert.Equal(expectedSyntax, newRoot.ToFullString());
 
             return Task.CompletedTask;
         }

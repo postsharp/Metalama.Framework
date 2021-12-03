@@ -95,7 +95,8 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
                 syntax,
                 (ITypeSymbol) null!,
                 SyntaxGenerationContext.CreateDefault( serviceProvider, compilation.GetCompilationModel().RoslynCompilation ),
-                false ) { }
+                false )
+        { }
 
         internal static ExpressionSyntax GetSyntaxFromValue( object? value, ICompilation compilation, SyntaxGenerationContext generationContext )
             => FromValue( value, compilation, generationContext ).Syntax;
@@ -126,7 +127,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
                     else
                     {
                         throw new ArgumentOutOfRangeException(
-                            nameof(value),
+                            nameof( value ),
                             $"Cannot convert an instance of type {value.GetType().Name} to a run-time expression." );
                     }
             }

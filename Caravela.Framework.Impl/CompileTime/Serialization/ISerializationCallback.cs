@@ -19,5 +19,4 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
         /// </summary>
         void OnSerializing();
     }
-
 }

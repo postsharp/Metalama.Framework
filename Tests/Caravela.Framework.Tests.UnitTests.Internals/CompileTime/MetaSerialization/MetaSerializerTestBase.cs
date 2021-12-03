@@ -16,7 +16,7 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime.MetaSerialization
 {
     public class MetaSerializerTestBase : TestBase
     {
-        private protected CompileTimeProject CreateCompileTimeProject(CompileTimeDomain domain, TestContext testContext, string code )
+        private protected CompileTimeProject CreateCompileTimeProject( CompileTimeDomain domain, TestContext testContext, string code )
         {
             var runtimeCompilation = CreateCSharpCompilation(
                 code,
@@ -30,7 +30,7 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime.MetaSerialization
             return project!;
         }
 
-        private protected static Type GetMetaSerializerType(Type type)
+        private protected static Type GetMetaSerializerType( Type type )
         {
             var metaSerializerTypes =
                type.GetNestedTypes()
@@ -42,7 +42,7 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime.MetaSerialization
             return metaSerializerTypes[0];
         }
 
-        private protected static IMetaSerializer GetMetaSerializer(Type type)
+        private protected static IMetaSerializer GetMetaSerializer( Type type )
         {
             var metaSerializerType = GetMetaSerializerType( type );
             return (IMetaSerializer) Activator.CreateInstance( metaSerializerType ).AssertNotNull();
@@ -52,14 +52,14 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime.MetaSerialization
         {
             private (string Name, object? Value, string? Scope)[]? _data;
 
-            public virtual bool TryGetValue<T>( string name, [NotNullWhen(true)] out T value, string? scope = null )
+            public virtual bool TryGetValue<T>( string name, [NotNullWhen( true )] out T value, string? scope = null )
             {
-                var dataValue = 
+                var dataValue =
                     this._data.AssertNotNull()
-                    .Select(x => ((string Name, object? Value, string? Scope)?)x)
+                    .Select( x => ((string Name, object? Value, string? Scope)?) x )
                     .SingleOrDefault( d => StringComparer.Ordinal.Equals( d.Value.Name, name ) && StringComparer.Ordinal.Equals( d.Value.Scope, scope ) );
 
-                if (dataValue == null)
+                if ( dataValue == null )
                 {
                     value = default!;
                     return false;
@@ -71,7 +71,7 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime.MetaSerialization
 
             public virtual T GetValue<T>( string name, string? scope = null )
             {
-                if (!this.TryGetValue<T>( name, out var value, scope))
+                if ( !this.TryGetValue<T>( name, out var value, scope ) )
                 {
                     throw new InvalidOperationException();
                 }
@@ -79,7 +79,7 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime.MetaSerialization
                 return value;
             }
 
-            public void SetData( params (string Name, object? Value, string? Scope)[] data)
+            public void SetData( params (string Name, object? Value, string? Scope)[] data )
             {
                 this._data = data;
             }

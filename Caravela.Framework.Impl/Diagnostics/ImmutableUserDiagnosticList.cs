@@ -38,7 +38,8 @@ namespace Caravela.Framework.Impl.Diagnostics
             : this(
                 diagnostics ?? ImmutableArray<Diagnostic>.Empty,
                 suppressions ?? ImmutableArray<ScopedSuppression>.Empty,
-                codeFixes ?? ImmutableArray<CodeFixInstance>.Empty ) { }
+                codeFixes ?? ImmutableArray<CodeFixInstance>.Empty )
+        { }
 
         // Coverage: ignore (design time)
         internal ImmutableUserDiagnosticList(

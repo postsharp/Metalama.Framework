@@ -26,19 +26,19 @@ namespace Caravela.Framework.Impl.Serialization
 
             var creationExpression = ObjectCreationExpression( serializationContext.GetTypeSyntax( dictionaryType ) );
 
-            var defaultComparer = typeof(EqualityComparer<>)
+            var defaultComparer = typeof( EqualityComparer<> )
                 .MakeGenericType( keyType )
-                .GetProperty( nameof(EqualityComparer<int>.Default), BindingFlags.Public | BindingFlags.Static )
+                .GetProperty( nameof( EqualityComparer<int>.Default ), BindingFlags.Public | BindingFlags.Static )
                 .AssertNotNull()
                 .GetValue( null );
 
-            var actualComparer = typeof(Dictionary<,>)
+            var actualComparer = typeof( Dictionary<,> )
                 .MakeGenericType( keyType, valueType )
-                .GetProperty( nameof(Dictionary<int, int>.Comparer), BindingFlags.Public | BindingFlags.Instance )
+                .GetProperty( nameof( Dictionary<int, int>.Comparer ), BindingFlags.Public | BindingFlags.Instance )
                 .AssertNotNull()
                 .GetValue( dictionary );
 
-            if ( keyType == typeof(string) )
+            if ( keyType == typeof( string ) )
             {
                 string? comparerName = null;
 
@@ -88,7 +88,7 @@ namespace Caravela.Framework.Impl.Serialization
                 {
                     var comparerExpression = MemberAccessExpression(
                             SyntaxKind.SimpleMemberAccessExpression,
-                            serializationContext.GetTypeSyntax( typeof(StringComparer) ),
+                            serializationContext.GetTypeSyntax( typeof( StringComparer ) ),
                             IdentifierName( comparerName ) )
                         .NormalizeWhitespace();
 
@@ -131,10 +131,10 @@ namespace Caravela.Framework.Impl.Serialization
             return creationExpression;
         }
 
-        public override Type InputType => typeof(IReadOnlyDictionary<,>);
+        public override Type InputType => typeof( IReadOnlyDictionary<,> );
 
-        public override Type? OutputType => typeof(Dictionary<,>);
+        public override Type? OutputType => typeof( Dictionary<,> );
 
-        public override ImmutableArray<Type> AdditionalSupportedTypes => ImmutableArray.Create( typeof(IDictionary<,>) );
+        public override ImmutableArray<Type> AdditionalSupportedTypes => ImmutableArray.Create( typeof( IDictionary<,> ) );
     }
 }

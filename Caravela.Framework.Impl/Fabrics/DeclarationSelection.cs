@@ -52,11 +52,11 @@ namespace Caravela.Framework.Impl.Fabrics
         private AspectClass GetAspectClass<TAspect>()
             where TAspect : IAspect
         {
-            var aspectClass = this._aspectClasses[typeof(TAspect).FullName];
+            var aspectClass = this._aspectClasses[typeof( TAspect ).FullName];
 
             if ( aspectClass.IsAbstract )
             {
-                throw new ArgumentOutOfRangeException( nameof(TAspect), UserMessageFormatter.Format( $"'{typeof(TAspect)}' is an abstract type." ) );
+                throw new ArgumentOutOfRangeException( nameof( TAspect ), UserMessageFormatter.Format( $"'{typeof( TAspect )}' is an abstract type." ) );
             }
 
             return (AspectClass) aspectClass;

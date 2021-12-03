@@ -4,7 +4,6 @@
 using Caravela.Framework.Code;
 using Caravela.Framework.Code.DeclarationBuilders;
 using Caravela.Framework.Impl.CodeModel.Builders;
-using Caravela.Framework.Impl.Linking;
 using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
@@ -27,11 +26,11 @@ namespace Caravela.Framework.Impl.CodeModel.References
             where T : ICompilationElement
         {
             Invariant.Implies(
-                typeof(T) == typeof(IConstructor),
+                typeof( T ) == typeof( IConstructor ),
                 symbol.GetDeclarationKind() == DeclarationKind.Constructor );
 
             Invariant.Implies(
-                typeof(T) == typeof(IMethod),
+                typeof( T ) == typeof( IMethod ),
                 symbol.GetDeclarationKind() == DeclarationKind.Method );
 
             return symbol;
@@ -168,7 +167,7 @@ namespace Caravela.Framework.Impl.CodeModel.References
 
         public T GetTarget( ICompilation compilation ) => Resolve( this.Target, (CompilationModel) compilation, this.TargetKind );
 
-        public ( ImmutableArray<AttributeData> Attributes, ISymbol Symbol ) GetAttributeData( Compilation compilation )
+        public (ImmutableArray<AttributeData> Attributes, ISymbol Symbol) GetAttributeData( Compilation compilation )
         {
             if ( this.TargetKind == DeclarationRefTargetKind.Return )
             {

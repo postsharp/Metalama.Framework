@@ -2,9 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Microsoft.CodeAnalysis;
-using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace Caravela.Framework.Impl.CompileTime.Serialization
 {
@@ -23,7 +21,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
         /// </summary>
         public IReadOnlyList<ISymbol> SerializedMembers { get; }
 
-        public MetaSerializableTypeInfo(INamedTypeSymbol type, IReadOnlyList<ISymbol> serializedMembers)
+        public MetaSerializableTypeInfo( INamedTypeSymbol type, IReadOnlyList<ISymbol> serializedMembers )
         {
             this.Type = type;
             this.SerializedMembers = serializedMembers;

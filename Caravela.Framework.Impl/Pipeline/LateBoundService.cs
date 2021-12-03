@@ -24,6 +24,6 @@ namespace Caravela.Framework.Impl.Pipeline
 
         public static LateBoundService Create<T>( Func<IServiceProvider, T> func )
             where T : IService
-            => new( typeof(T), x => func( x ) );
+            => new( typeof( T ), x => func( x ) );
     }
 }

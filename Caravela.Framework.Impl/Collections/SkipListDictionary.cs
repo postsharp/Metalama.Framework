@@ -258,7 +258,7 @@ namespace Caravela.Framework.Impl.Collections
             return false;
         }
 
-        public TValue this[ TKey key ]
+        public TValue this[TKey key]
         {
             get => this.Get( key );
 
@@ -481,7 +481,7 @@ namespace Caravela.Framework.Impl.Collections
         {
             if ( index < 0 || index >= this.Count )
             {
-                throw new ArgumentOutOfRangeException( nameof(index) );
+                throw new ArgumentOutOfRangeException( nameof( index ) );
             }
 
             var node = this.GetNodeByIndex( index );
@@ -489,7 +489,7 @@ namespace Caravela.Framework.Impl.Collections
             return new KeyValuePair<TKey, TValue>( node.Key, node.Value );
         }
 
-        KeyValuePair<TKey, TValue> IList<KeyValuePair<TKey, TValue>>.this[ int index ]
+        KeyValuePair<TKey, TValue> IList<KeyValuePair<TKey, TValue>>.this[int index]
         {
             get => this.GetAt( index );
             set => throw new NotSupportedException();
@@ -524,7 +524,7 @@ namespace Caravela.Framework.Impl.Collections
             {
                 if ( height <= 0 )
                 {
-                    throw new ArgumentOutOfRangeException( nameof(height) );
+                    throw new ArgumentOutOfRangeException( nameof( height ) );
                 }
 
                 this.Neighbors = new NodeList( height );
@@ -622,7 +622,7 @@ namespace Caravela.Framework.Impl.Collections
                 {
                     if ( value == 0 )
                     {
-                        throw new ArgumentOutOfRangeException( nameof(value) );
+                        throw new ArgumentOutOfRangeException( nameof( value ) );
                     }
 
                     this._width = value;
@@ -642,7 +642,7 @@ namespace Caravela.Framework.Impl.Collections
             {
                 if ( height <= 0 )
                 {
-                    throw new ArgumentOutOfRangeException( nameof(height) );
+                    throw new ArgumentOutOfRangeException( nameof( height ) );
                 }
 
                 // Add the specified number of items
@@ -703,7 +703,7 @@ namespace Caravela.Framework.Impl.Collections
 
             public int Count => this._parent.Count;
 
-            public TValue this[ int index ]
+            public TValue this[int index]
             {
                 get => this._parent.GetAt( index ).Value;
                 set => throw new NotSupportedException();

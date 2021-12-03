@@ -19,7 +19,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
         {
             this.AssertFieldType(
                 "class Outer { class Inner { System.Collections.Generic.List<string> Target; } }",
-                typeof(List<string>),
+                typeof( List<string> ),
                 @"typeof(global::System.Collections.Generic.List<global::System.String>)" );
         }
 
@@ -28,7 +28,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
         {
             this.AssertFieldType(
                 "class Outer { class Inner { System.Collections.Generic.Dictionary<string[],int?> Target; } }",
-                typeof(Dictionary<string[], int?>),
+                typeof( Dictionary<string[], int?> ),
                 @"typeof(global::System.Collections.Generic.Dictionary<global::System.String[],global::System.Int32?>)" );
         }
 

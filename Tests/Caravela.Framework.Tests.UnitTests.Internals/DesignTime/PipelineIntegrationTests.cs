@@ -51,11 +51,11 @@ namespace Caravela.Framework.Tests.UnitTests.DesignTime
                         new[] { "netstandard", "System.Runtime" }
                             .Select(
                                 r => MetadataReference.CreateFromFile(
-                                    Path.Combine( Path.GetDirectoryName( typeof(object).Assembly.Location )!, r + ".dll" ) ) ) )
+                                    Path.Combine( Path.GetDirectoryName( typeof( object ).Assembly.Location )!, r + ".dll" ) ) ) )
                     .AddReferences(
-                        MetadataReference.CreateFromFile( typeof(object).Assembly.Location ),
-                        MetadataReference.CreateFromFile( typeof(DynamicAttribute).Assembly.Location ),
-                        MetadataReference.CreateFromFile( typeof(CompileTimeAttribute).Assembly.Location ) );
+                        MetadataReference.CreateFromFile( typeof( object ).Assembly.Location ),
+                        MetadataReference.CreateFromFile( typeof( DynamicAttribute ).Assembly.Location ),
+                        MetadataReference.CreateFromFile( typeof( CompileTimeAttribute ).Assembly.Location ) );
             }
 
             var compilation = CreateEmptyCompilation();

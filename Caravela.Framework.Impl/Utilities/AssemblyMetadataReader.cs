@@ -24,7 +24,7 @@ namespace Caravela.Framework.Impl.Utilities
         {
             this._assembly = assembly;
 
-            foreach ( var attribute in assembly.GetCustomAttributes( typeof(AssemblyMetadataAttribute) ).Cast<AssemblyMetadataAttribute>() )
+            foreach ( var attribute in assembly.GetCustomAttributes( typeof( AssemblyMetadataAttribute ) ).Cast<AssemblyMetadataAttribute>() )
             {
                 // In case of duplicates, we just ignore the first one. This happens with attributes describing package versions.
                 this._metadata[attribute.Key] = attribute.Value;
@@ -59,6 +59,6 @@ namespace Caravela.Framework.Impl.Utilities
             => MainInstance.Version.ToString( 4 ) + "-" +
                string.Join( "", MainInstance.ModuleId.ToByteArray().Take( 4 ).Select( i => i.ToString( "x2", CultureInfo.InvariantCulture ) ) );
 
-        public static AssemblyMetadataReader MainInstance => GetInstance( typeof(AssemblyMetadataReader).Assembly );
+        public static AssemblyMetadataReader MainInstance => GetInstance( typeof( AssemblyMetadataReader ).Assembly );
     }
 }

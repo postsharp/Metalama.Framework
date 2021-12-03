@@ -46,7 +46,7 @@ namespace Caravela.Framework.Impl.Advices
             if ( this.TemplateMember.ReturnParameter.Type.TypeKind == TypeKind.Dynamic )
             {
                 // Templates with dynamic return value result in object return type of the introduced member.
-                this.MemberBuilder.ReturnParameter.Type = this.MemberBuilder.Compilation.Factory.GetTypeByReflectionType( typeof(object) );
+                this.MemberBuilder.ReturnParameter.Type = this.MemberBuilder.Compilation.Factory.GetTypeByReflectionType( typeof( object ) );
             }
             else
             {

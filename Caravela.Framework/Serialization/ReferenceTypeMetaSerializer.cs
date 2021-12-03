@@ -30,7 +30,6 @@ namespace Caravela.Framework.Serialization
         /// <returns>An instance of type <paramref name="type"/> initialized using <paramref name="constructorArguments"/>.</returns>
         public abstract object CreateInstance( Type type, IArgumentsReader constructorArguments );
 
-
         /// <summary>
         /// Serializes an object.
         /// </summary>
@@ -38,7 +37,6 @@ namespace Caravela.Framework.Serialization
         /// <param name="constructorArguments">Gives access to arguments that will be passed to the <see cref="CreateInstance"/> method during deserialization.</param>
         /// <param name="initializationArguments">Gives access to arguments that will be passed to the <see cref="DeserializeFields"/> method during deserialization.</param>
         public abstract void SerializeObject( object obj, IArgumentsWriter constructorArguments, IArgumentsWriter initializationArguments );
-
 
         /// <summary>
         /// Completes the second phase of deserialization by setting fields and other properties.

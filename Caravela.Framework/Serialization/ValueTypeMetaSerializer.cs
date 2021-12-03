@@ -10,9 +10,8 @@ namespace Caravela.Framework.Serialization
     {
         bool IMetaSerializer.IsTwoPhase => false;
 
-
         /// <summary>
-        /// Serializes an object
+        /// Serializes an object.
         /// </summary>
         /// <param name="obj"></param>
         /// <param name="constructorArguments">Gives access to arguments that will be passed to the <see cref="DeserializeObject"/> method during deserialization.</param>

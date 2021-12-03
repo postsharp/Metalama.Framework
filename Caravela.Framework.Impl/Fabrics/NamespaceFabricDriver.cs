@@ -70,7 +70,8 @@ namespace Caravela.Framework.Impl.Fabrics
                 project,
                 fabricManager,
                 fabricInstance,
-                fabricInstance.TargetDeclaration.As<INamespace>() ) { }
+                fabricInstance.TargetDeclaration.As<INamespace>() )
+            { }
         }
     }
 }

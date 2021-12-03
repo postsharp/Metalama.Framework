@@ -52,7 +52,7 @@ namespace Caravela.Framework.Impl.CompileTime
                 TemplatingScope.Dynamic => "dynamic",
 
                 // We also throw an exception for Dynamic because a caller should convert dynamic to run-time or compile-time according to the context.
-                _ => throw new ArgumentOutOfRangeException( nameof(scope) )
+                _ => throw new ArgumentOutOfRangeException( nameof( scope ) )
             };
     }
 }

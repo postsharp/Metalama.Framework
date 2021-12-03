@@ -56,7 +56,8 @@ namespace Caravela.Framework.Impl.Transformations
             syntax,
             aspectLayerId,
             semantic,
-            declaration ) { }
+            declaration )
+        { }
 
         public IntroducedMember(
             OverriddenMember introduction,
@@ -69,7 +70,8 @@ namespace Caravela.Framework.Impl.Transformations
             syntax,
             aspectLayerId,
             semantic,
-            declaration ) { }
+            declaration )
+        { }
 
         protected IntroducedMember(
             IntroducedMember prototype,
@@ -79,7 +81,8 @@ namespace Caravela.Framework.Impl.Transformations
             syntax,
             prototype.AspectLayerId,
             prototype.Semantic,
-            prototype.Declaration ) { }
+            prototype.Declaration )
+        { }
 
         internal IntroducedMember(
             IMemberIntroduction introduction,

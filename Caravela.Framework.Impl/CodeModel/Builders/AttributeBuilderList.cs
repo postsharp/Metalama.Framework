@@ -11,6 +11,6 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
     {
         IEnumerator<IAttribute> IEnumerable<IAttribute>.GetEnumerator() => this.GetEnumerator();
 
-        IAttribute IReadOnlyList<IAttribute>.this[ int index ] => this[index];
+        IAttribute IReadOnlyList<IAttribute>.this[int index] => this[index];
     }
 }

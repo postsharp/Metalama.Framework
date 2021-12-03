@@ -1,10 +1,9 @@
-// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
-// source-available license. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Serialization;
 using System;
 
-namespace Caravela.Framework.Impl.CompileTime.Serialization
+namespace Caravela.Framework.Serialization
 {
     /// <summary>
     /// Custom attribute that, when applied to a serializable type, specifies that the serializer of this type has
@@ -16,11 +15,11 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
     /// For types whose source code you can modify, it is preferable to use <see cref="IMetaSerializable"/>.
     /// </para>
     /// </remarks>
-    [AttributeUsage(AttributeTargets.Class|AttributeTargets.Struct|AttributeTargets.Assembly, AllowMultiple = true)]
+    [AttributeUsage( AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Assembly, AllowMultiple = true )]
     public sealed class ImportMetaSerializerAttribute : Attribute
     {
         /// <summary>
-        /// Initializes a new <see cref="ImportMetaSerializerAttribute"/>.
+        /// Initializes a new instance of the <see cref="ImportMetaSerializerAttribute"/> class.
         /// </summary>
         /// <param name="objectType">Type of the object to be made serializable.</param>
         /// <param name="serializerType">Serializer type. This type must implement <see cref="IMetaSerializer"/> or <see cref="IMetaSerializerFactory"/>,
@@ -47,6 +46,5 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
         /// of generic type parameters as <see cref="ObjectType"/>, and have a compatible set of constraints.
         /// </remarks>
         public Type SerializerType { get; private set; }
-        
     }
 }

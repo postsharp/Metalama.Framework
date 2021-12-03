@@ -24,7 +24,7 @@ namespace Caravela.Framework.Impl.CodeModel
                 return attributeModel.AttributeData;
             }
 
-            throw new ArgumentOutOfRangeException( nameof(attribute), "This is not a source attribute." );
+            throw new ArgumentOutOfRangeException( nameof( attribute ), "This is not a source attribute." );
         }
 
         public static bool IsAccessor( this IMethod method )

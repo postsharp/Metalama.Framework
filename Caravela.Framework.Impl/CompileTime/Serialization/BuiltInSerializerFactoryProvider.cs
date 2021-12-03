@@ -1,18 +1,19 @@
-﻿// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
-// source-available license. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Impl.CompileTime.Serialization.Serializers;
+using Caravela.Framework.Serialization;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Reflection;
-using Caravela.Framework.Impl.CompileTime.Serialization.Serializers;
 
 namespace Caravela.Framework.Impl.CompileTime.Serialization
 {
     internal sealed class BuiltInSerializerFactoryProvider : MetaSerializerFactoryProvider
     {
-        public BuiltInSerializerFactoryProvider(ActivatorProvider activatorProvider)
-            : base( new ReflectionMetaSerializationProvider(activatorProvider), activatorProvider )
+        public BuiltInSerializerFactoryProvider( ActivatorProvider activatorProvider )
+            : base( new ReflectionMetaSerializationProvider( activatorProvider ), activatorProvider )
         {
             // intrinsic types
             this.AddSerializer<bool, BooleanSerializer>();
@@ -37,8 +38,8 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
             this.AddSerializer<CultureInfo, CultureInfoSerializer>();
 
             // collections
-            this.AddSerializer( typeof(List<>), typeof(ListSerializer<>) );
-            this.AddSerializer( typeof(Dictionary<,>), typeof(DictionarySerializer<,>) );
+            this.AddSerializer( typeof( List<> ), typeof( ListSerializer<> ) );
+            this.AddSerializer( typeof( Dictionary<,> ), typeof( DictionarySerializer<,> ) );
             this.MakeReadOnly();
         }
 
@@ -47,46 +48,46 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
             return GetAbstractReflectionType( objectType ) ?? objectType;
         }
 
-        public override IMetaSerializerFactory GetSerializerFactory( Type objectType )
+        public override IMetaSerializerFactory? GetSerializerFactory( Type objectType )
         {
             return base.GetSerializerFactory( GetAbstractReflectionType( objectType ) ?? objectType );
         }
 
-        public static Type GetAbstractReflectionType( Type type )
+        public static Type? GetAbstractReflectionType( Type type )
         {
             if ( typeof( MethodInfo ).IsAssignableFrom( type ) )
             {
-                return typeof(MethodInfo);
+                return typeof( MethodInfo );
             }
 
-            if ( typeof( ConstructorInfo ).IsAssignableFrom( type))
+            if ( typeof( ConstructorInfo ).IsAssignableFrom( type ) )
             {
-                return typeof(ConstructorInfo);
+                return typeof( ConstructorInfo );
             }
 
             if ( typeof( FieldInfo ).IsAssignableFrom( type ) )
             {
-                return typeof(FieldInfo);
+                return typeof( FieldInfo );
             }
 
             if ( typeof( Assembly ).IsAssignableFrom( type ) )
             {
-                return typeof(Assembly);
+                return typeof( Assembly );
             }
 
             if ( typeof( EventInfo ).IsAssignableFrom( type ) )
             {
-                return typeof(EventInfo);
+                return typeof( EventInfo );
             }
 
             if ( typeof( ParameterInfo ).IsAssignableFrom( type ) )
             {
-                return typeof(ParameterInfo);
+                return typeof( ParameterInfo );
             }
 
             if ( typeof( PropertyInfo ).IsAssignableFrom( type ) )
             {
-                return typeof(PropertyInfo);
+                return typeof( PropertyInfo );
             }
 
             return null;

@@ -58,7 +58,8 @@ namespace Caravela.Framework.Impl.DesignTime
         {
             Logger.Instance?.Write( $"DesignTimeAnalyzer.AnalyzeCompilation('{context.Compilation.AssemblyName}') started." );
 
-            try { }
+            try
+            { }
             catch ( Exception e )
             {
                 Logger.Instance?.Write( e.ToString() );

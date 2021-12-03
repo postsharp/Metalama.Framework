@@ -35,7 +35,7 @@ namespace Caravela.Framework.Impl.Templating
                     transformedNode =
                         node.CopyAnnotationsTo(
                             InvocationExpression(
-                                    this._rewriter._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.Proceed) ) )
+                                    this._rewriter._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof( TemplateSyntaxFactory.Proceed ) ) )
                                 .WithArgumentList( ArgumentList( SeparatedList( new[] { Argument( SyntaxFactoryEx.LiteralExpression( methodName ) ) } ) ) ) )!;
 
                     return true;

@@ -38,11 +38,11 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
                 return new RuntimeExpression(
                     array,
-                    this._parent.Compilation.Factory.GetTypeByReflectionType( typeof(object[]) ),
+                    this._parent.Compilation.Factory.GetTypeByReflectionType( typeof( object[] ) ),
                     syntaxGenerationContext );
             }
 
-            public IType Type => this._parent.Compilation.Factory.GetTypeByReflectionType( typeof(object[]) );
+            public IType Type => this._parent.Compilation.Factory.GetTypeByReflectionType( typeof( object[] ) );
 
             bool IExpression.IsAssignable => false;
 

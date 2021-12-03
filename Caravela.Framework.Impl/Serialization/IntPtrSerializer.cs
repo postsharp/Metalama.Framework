@@ -11,7 +11,7 @@ namespace Caravela.Framework.Impl.Serialization
     {
         public override ExpressionSyntax Serialize( IntPtr obj, SyntaxSerializationContext serializationContext )
         {
-            return SyntaxFactory.ObjectCreationExpression( serializationContext.GetTypeSyntax( typeof(IntPtr) ) )
+            return SyntaxFactory.ObjectCreationExpression( serializationContext.GetTypeSyntax( typeof( IntPtr ) ) )
                 .AddArgumentListArguments(
                     SyntaxFactory.Argument(
                         SyntaxFactory.LiteralExpression(

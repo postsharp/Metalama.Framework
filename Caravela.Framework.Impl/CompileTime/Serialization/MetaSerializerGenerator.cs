@@ -2,7 +2,6 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Impl.CodeModel;
-using Caravela.Framework.Impl.Utilities;
 using Caravela.Framework.Serialization;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -48,14 +47,14 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
             // TODO: Custom modifiers or ref on the parameter should produce an error too.
             Invariant.Assert(
                 baseCtors.Length > 1
-                && (baseCtors.Length == 0 
-                    || baseCtors[0].DeclaredAccessibility == Accessibility.Public 
+                && (baseCtors.Length == 0
+                    || baseCtors[0].DeclaredAccessibility == Accessibility.Public
                     || baseCtors[0].DeclaredAccessibility == Accessibility.Protected) );
 
             var baseCtor = baseCtors.SingleOrDefault();
             const string argumentReaderParameterName = "reader";
 
-            var body = 
+            var body =
                 this.CreateFieldDeserializationStatements( serializableType, ThisExpression(), IdentifierName( argumentReaderParameterName ), this.SelectConstructorDeserializedFields );
 
             // TODO: Browsability attributes.
@@ -83,7 +82,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
 
         public CompilationUnitSyntax CreateActivatorCompilationUnit()
         {
-            var createInstanceMethod = 
+            var createInstanceMethod =
                 this._context.ReflectionMapper.GetTypeSymbol( typeof( IMetaActivator ) )
                     .GetMembers().OfType<IMethodSymbol>().Single( x => x.Name == nameof( IMetaActivator.CreateInstance ) );
 
@@ -99,11 +98,11 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
                         Block(
                             ThrowStatement(
                                 ObjectCreationExpression(
-                                    this._context.SyntaxGenerator.Type( 
-                                        this._context.ReflectionMapper.GetTypeSymbol(typeof(SecurityException) ) ),
+                                    this._context.SyntaxGenerator.Type(
+                                        this._context.ReflectionMapper.GetTypeSymbol( typeof( SecurityException ) ) ),
                                     ArgumentList(
-                                        SeparatedList<ArgumentSyntax>()),
-                                    null) ) ) ),
+                                        SeparatedList<ArgumentSyntax>() ),
+                                    null ) ) ) ),
                     ReturnStatement(
                         InvocationExpression(
                             MemberAccessExpression(
@@ -144,10 +143,10 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
                null,
                BaseList(
                    Token( SyntaxKind.ColonToken ),
-                   SingletonSeparatedList<BaseTypeSyntax>( 
-                       SimpleBaseType( 
-                           this._context.SyntaxGenerator.Type( 
-                               this._context.ReflectionMapper.GetTypeSymbol( typeof(IMetaActivator ) ) ) ) ) ),
+                   SingletonSeparatedList<BaseTypeSyntax>(
+                       SimpleBaseType(
+                           this._context.SyntaxGenerator.Type(
+                               this._context.ReflectionMapper.GetTypeSymbol( typeof( IMetaActivator ) ) ) ) ) ),
                List<TypeParameterConstraintClauseSyntax>(),
                List<MemberDeclarationSyntax>( new[] { method } ) );
 
@@ -179,12 +178,12 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
             // Check that the base serializer constructor is visible.
             var baseCtor = baseSerializerType.Constructors.SingleOrDefault( c => c.Parameters.Length == 0 );
 
-            if ( baseCtor?.DeclaredAccessibility != Accessibility.Public && baseCtor?.DeclaredAccessibility != Accessibility.Protected)
+            if ( baseCtor?.DeclaredAccessibility != Accessibility.Public && baseCtor?.DeclaredAccessibility != Accessibility.Protected )
             {
                 // TODO: Error.
                 throw new AssertionFailedException();
 
-                //SerializationMessageSource.Instance.Write( this.parent.baseSerializerConstructor.GetMethodDefinition(), SeverityType.Error, "SR0011",
+                // SerializationMessageSource.Instance.Write( this.parent.baseSerializerConstructor.GetMethodDefinition(), SeverityType.Error, "SR0011",
                 //                                           this.parent.baseSerializerType, targetType );
             }
 
@@ -203,7 +202,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
             }
 
             var baseType =
-                HasPendingBaseSerializer(serializableType.Type, baseSerializerType)
+                HasPendingBaseSerializer( serializableType.Type, baseSerializerType )
                 ? SimpleBaseType( CreatePendingMetaSerializerType( serializableType.Type.BaseType.AssertNotNull() ) )
                 : SimpleBaseType( this._context.SyntaxGenerator.Type( baseSerializerType ) );
 
@@ -218,16 +217,16 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
                 List( members ) );
 
             TypeSyntax CreatePendingMetaSerializerType( ITypeSymbol declaringType )
-                => QualifiedName( (NameSyntax)this._context.SyntaxGenerator.Type( declaringType ), IdentifierName( "MetaSerializer" ) );
+                => QualifiedName( (NameSyntax) this._context.SyntaxGenerator.Type( declaringType ), IdentifierName( "MetaSerializer" ) );
         }
 
         private static bool HasPendingBaseSerializer( ITypeSymbol serializedType, ITypeSymbol baseSerializerSymbol )
             => SymbolEqualityComparer.Default.Equals( serializedType.ContainingAssembly, serializedType.BaseType.AssertNotNull().ContainingAssembly )
             && !SymbolEqualityComparer.Default.Equals( serializedType.BaseType, baseSerializerSymbol.ContainingType );
 
-        private INamedTypeSymbol GetBaseSerializer(ITypeSymbol targetType )
+        private INamedTypeSymbol GetBaseSerializer( ITypeSymbol targetType )
         {
-            Invariant.Assert( targetType.BaseType != null);
+            Invariant.Assert( targetType.BaseType != null );
 
             if ( targetType.IsValueType )
             {
@@ -235,7 +234,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
                 return ((INamedTypeSymbol) this._context.ReflectionMapper.GetTypeSymbol( typeof( ValueTypeMetaSerializer<> ) )).Construct( targetType );
             }
 
-            if ( targetType.BaseType.AllInterfaces.Contains( this._runtimeReflectionMapper.GetTypeSymbol(typeof(IMetaSerializable)), SymbolEqualityComparer.Default) )
+            if ( targetType.BaseType.AllInterfaces.Contains( this._runtimeReflectionMapper.GetTypeSymbol( typeof( IMetaSerializable ) ), SymbolEqualityComparer.Default ) )
             {
                 // The base type should have a meta serializer.
 
@@ -251,7 +250,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
                     if ( SymbolEqualityComparer.Default.Equals( targetType.ContainingAssembly, targetType.BaseType.ContainingAssembly ) )
                     {
                         // This serializer is to be generated, we will recursively look for it's base, which should have same semantics.
-                        return this.GetBaseSerializer(targetType.BaseType);
+                        return this.GetBaseSerializer( targetType.BaseType );
                     }
                     else
                     {
@@ -295,8 +294,8 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
                         ExpressionStatement(
                             ThrowExpression(
                                 ObjectCreationExpression(
-                                    this._context.SyntaxGenerator.Type( 
-                                        this._context.ReflectionMapper.GetTypeSymbol(typeof(InvalidOperationException))),
+                                    this._context.SyntaxGenerator.Type(
+                                        this._context.ReflectionMapper.GetTypeSymbol( typeof( InvalidOperationException ) ) ),
                                     ArgumentList(
                                         SingletonSeparatedList(
                                             Argument(
@@ -324,7 +323,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
                 body );
         }
 
-        private LocalDeclarationStatementSyntax CreateTypedLocalVariable(ITypeSymbol type, ExpressionSyntax untypedExpression, out string name)
+        private LocalDeclarationStatementSyntax CreateTypedLocalVariable( ITypeSymbol type, ExpressionSyntax untypedExpression, out string name )
         {
             const string typedVariableName = "typedObj";
 
@@ -355,20 +354,20 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
 
             var body =
                 Block(
-                    baseSerializeMethod.IsAbstract && !HasPendingBaseSerializer(serializedType.Type, baseSerializer)
+                    baseSerializeMethod.IsAbstract && !HasPendingBaseSerializer( serializedType.Type, baseSerializer )
                     ? EmptyStatement()
                     : ExpressionStatement(
                         InvocationExpression(
                             MemberAccessExpression(
                                 SyntaxKind.SimpleMemberAccessExpression,
                                 BaseExpression(),
-                                IdentifierName( nameof(ReferenceTypeMetaSerializer.SerializeObject) ) ),
-                            ArgumentList( SeparatedList( baseSerializeMethod.Parameters.Select (p => Argument(IdentifierName(p.Name) ) ) ) ) ) ),
+                                IdentifierName( nameof( ReferenceTypeMetaSerializer.SerializeObject ) ) ),
+                            ArgumentList( SeparatedList( baseSerializeMethod.Parameters.Select( p => Argument( IdentifierName( p.Name ) ) ) ) ) ) ),
                     localVariableDeclaration,
-                    this.CreateFieldSerializationStatements( 
-                        serializedType, 
-                        IdentifierName(localVariableName), 
-                        IdentifierName(baseSerializeMethod.Parameters[1].Name), 
+                    this.CreateFieldSerializationStatements(
+                        serializedType,
+                        IdentifierName( localVariableName ),
+                        IdentifierName( baseSerializeMethod.Parameters[1].Name ),
                         IdentifierName( baseSerializeMethod.Parameters[2].Name ) ) );
 
             return this.CreateOverrideMethod(
@@ -397,10 +396,10 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
                                 IdentifierName( nameof( ReferenceTypeMetaSerializer.DeserializeFields ) ) ),
                             ArgumentList( SeparatedList( baseDeserializeMethod.Parameters.Select( p => Argument( IdentifierName( p.Name ) ) ) ) ) ) ),
                     localVariableDeclaration,
-                    this.CreateFieldDeserializationStatements( 
-                        serializedType, 
-                        IdentifierName( localVariableName ), 
-                        IdentifierName( baseDeserializeMethod.Parameters[1].Name ), 
+                    this.CreateFieldDeserializationStatements(
+                        serializedType,
+                        IdentifierName( localVariableName ),
+                        IdentifierName( baseDeserializeMethod.Parameters[1].Name ),
                         this.SelectLateDeserializedFields ) );
 
             return this.CreateOverrideMethod(
@@ -437,14 +436,14 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
                         VariableDeclaration(
                             this._context.SyntaxGenerator.Type( serializedType.Type ),
                             SingletonSeparatedList( VariableDeclarator( Identifier( "o" ) ) ) ) ),
-                    this.CreateFieldDeserializationStatements( serializedType, IdentifierName("o"), IdentifierName(deserializeMethod.Parameters[0].Name), this.SelectLateDeserializedFields ) );
+                    this.CreateFieldDeserializationStatements( serializedType, IdentifierName( "o" ), IdentifierName( deserializeMethod.Parameters[0].Name ), this.SelectLateDeserializedFields ) );
 
             return this.CreateOverrideMethod(
                 baseSerializer.GetMembers().OfType<IMethodSymbol>().Single( x => x.Name == nameof( ReferenceTypeMetaSerializer.DeserializeFields ) ),
                 body );
         }
 
-        private MethodDeclarationSyntax CreateOverrideMethod(IMethodSymbol methodSymbol, BlockSyntax body )
+        private MethodDeclarationSyntax CreateOverrideMethod( IMethodSymbol methodSymbol, BlockSyntax body )
         {
             return MethodDeclaration(
                 List<AttributeListSyntax>(),
@@ -455,15 +454,15 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
                 null,
                 ParameterList(
                     SeparatedList(
-                        methodSymbol.Parameters.Select( p => Parameter( Identifier( p.Name )).WithType( this._context.SyntaxGenerator.Type( p.Type ) ) ) ) ),
+                        methodSymbol.Parameters.Select( p => Parameter( Identifier( p.Name ) ).WithType( this._context.SyntaxGenerator.Type( p.Type ) ) ) ) ),
                 List<TypeParameterConstraintClauseSyntax>(),
                 body,
                 null );
         }
 
-        private BlockSyntax CreateFieldSerializationStatements( 
-            MetaSerializableTypeInfo serializedType, 
-            ExpressionSyntax objectExpression, 
+        private BlockSyntax CreateFieldSerializationStatements(
+            MetaSerializableTypeInfo serializedType,
+            ExpressionSyntax objectExpression,
             ExpressionSyntax constructorArgumentsWriterExpression,
             ExpressionSyntax initializationArgumentsWriterExpression )
         {
@@ -476,7 +475,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
                         InvocationExpression(
                             MemberAccessExpression(
                                 SyntaxKind.SimpleMemberAccessExpression,
-                                this.ClassifyFieldOrProperty(member) == FieldOrPropertyDeserializationKind.Constructor
+                                this.ClassifyFieldOrProperty( member ) == FieldOrPropertyDeserializationKind.Constructor
                                 ? constructorArgumentsWriterExpression
                                 : initializationArgumentsWriterExpression,
                                 IdentifierName( nameof( IArgumentsWriter.SetValue ) ) ),
@@ -497,8 +496,8 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
             return Block( statements );
         }
 
-        private BlockSyntax CreateFieldDeserializationStatements( 
-            MetaSerializableTypeInfo serializedType, 
+        private BlockSyntax CreateFieldDeserializationStatements(
+            MetaSerializableTypeInfo serializedType,
             ExpressionSyntax targetExpression,
             ExpressionSyntax argumentsReaderExpression,
             Func<MetaSerializableTypeInfo, IEnumerable<ISymbol>> locationSelector )
@@ -545,9 +544,9 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
 
         private IEnumerable<ISymbol> SelectConstructorDeserializedFields( MetaSerializableTypeInfo serializableType )
         {
-            foreach (var serializedMember in serializableType.SerializedMembers)
+            foreach ( var serializedMember in serializableType.SerializedMembers )
             {
-                if (this.ClassifyFieldOrProperty(serializedMember) == FieldOrPropertyDeserializationKind.Constructor)
+                if ( this.ClassifyFieldOrProperty( serializedMember ) == FieldOrPropertyDeserializationKind.Constructor )
                 {
                     yield return serializedMember;
                 }
@@ -566,7 +565,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
             }
         }
 
-        private FieldOrPropertyDeserializationKind ClassifyFieldOrProperty(ISymbol symbol)
+        private FieldOrPropertyDeserializationKind ClassifyFieldOrProperty( ISymbol symbol )
         {
             // TODO: Cache?
 
@@ -607,28 +606,28 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
 
         private bool ContainsAnySerializableReferences( ITypeSymbol type )
         {
-            if (!type.IsValueType)
+            if ( !type.IsValueType )
             {
                 // Field of managed reference type contains a reference implicitly.
                 return true;
             }
 
-            foreach (var member in type.GetMembers().Where(m => !m.IsStatic && (m.Kind == SymbolKind.Field || m.Kind == SymbolKind.Property)))
+            foreach ( var member in type.GetMembers().Where( m => !m.IsStatic && (m.Kind == SymbolKind.Field || m.Kind == SymbolKind.Property) ) )
             {
-                if (member.GetAttributes().Any( a => SymbolEqualityComparer.Default.Equals(a.AttributeClass, this._runtimeReflectionMapper.GetTypeSymbol(typeof(MetaNonSerializedAttribute) ))))
+                if ( member.GetAttributes().Any( a => SymbolEqualityComparer.Default.Equals( a.AttributeClass, this._runtimeReflectionMapper.GetTypeSymbol( typeof( MetaNonSerializedAttribute ) ) ) ) )
                 {
                     continue;
                 }
 
-                if ( member is IFieldSymbol field)
+                if ( member is IFieldSymbol field )
                 {
-                    if ( this.ContainsAnySerializableReferences(field.Type) )
+                    if ( this.ContainsAnySerializableReferences( field.Type ) )
                     {
                         return true;
                     }
                 }
 
-                if ( member is IPropertySymbol property)
+                if ( member is IPropertySymbol property )
                 {
                     if ( this.ContainsAnySerializableReferences( property.Type ) )
                     {
@@ -641,7 +640,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
         }
 
         private enum FieldOrPropertyDeserializationKind
-        { 
+        {
             Constructor,
             Deserialize_MakeMutable,
             Deserialize,

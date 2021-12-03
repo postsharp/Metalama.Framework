@@ -31,7 +31,7 @@ namespace Caravela.Framework.Impl.Templating
             this._symbolClassifier = serviceProvider.GetService<SymbolClassificationService>().GetClassifier( runTimeCompilation );
 
             var reflectionMapper = serviceProvider.GetService<ReflectionMapperFactory>().GetInstance( runTimeCompilation );
-            this._metaType = reflectionMapper.GetTypeSymbol( typeof(meta) );
+            this._metaType = reflectionMapper.GetTypeSymbol( typeof( meta ) );
         }
 
         public bool RequiresCompileTimeExecution( ISymbol? symbol )
@@ -50,7 +50,7 @@ namespace Caravela.Framework.Impl.Templating
             };
 
         public bool IsRunTimeMethod( IMethodSymbol symbol )
-            => symbol.Name == nameof(meta.RunTime) &&
+            => symbol.Name == nameof( meta.RunTime ) &&
                symbol.ContainingType.GetDocumentationCommentId() == this._metaType.GetDocumentationCommentId();
 
         public bool IsRunTimeMethod( SyntaxNode node )
@@ -92,7 +92,7 @@ namespace Caravela.Framework.Impl.Templating
 
         public bool HasTemplateKeywordAttribute( ISymbol symbol )
             => symbol.GetAttributes()
-                .Any( a => a.AttributeClass != null && a.AttributeClass.AnyBaseType( t => t.Name == nameof(TemplateKeywordAttribute) ) );
+                .Any( a => a.AttributeClass != null && a.AttributeClass.AnyBaseType( t => t.Name == nameof( TemplateKeywordAttribute ) ) );
 #pragma warning restore CA1822
 
         /// <summary>
@@ -115,25 +115,25 @@ namespace Caravela.Framework.Impl.Templating
             {
                 switch ( symbol.Name )
                 {
-                    case nameof(meta.This):
+                    case nameof( meta.This ):
                         return MetaMemberKind.This;
 
-                    case nameof(meta.InsertComment):
+                    case nameof( meta.InsertComment ):
                         return MetaMemberKind.InsertComment;
 
-                    case nameof(meta.InsertStatement):
+                    case nameof( meta.InsertStatement ):
                         return MetaMemberKind.InsertStatement;
 
-                    case nameof(meta.Proceed):
+                    case nameof( meta.Proceed ):
                         return MetaMemberKind.Proceed;
 
-                    case nameof(meta.ProceedAsync):
+                    case nameof( meta.ProceedAsync ):
                         return MetaMemberKind.ProceedAsync;
 
-                    case nameof(meta.ProceedEnumerable):
+                    case nameof( meta.ProceedEnumerable ):
                         return MetaMemberKind.ProceedEnumerable;
 
-                    case nameof(meta.ProceedEnumerator):
+                    case nameof( meta.ProceedEnumerator ):
                         return MetaMemberKind.ProceedEnumerator;
 
                     case "ProceedAsyncEnumerable":

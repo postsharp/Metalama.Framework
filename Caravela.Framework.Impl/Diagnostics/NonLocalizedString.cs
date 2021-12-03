@@ -25,7 +25,7 @@ namespace Caravela.Framework.Impl.Diagnostics
 
         protected override int GetHash()
         {
-            var hashCode = default(HashCode);
+            var hashCode = default( HashCode );
             hashCode.Add( this._message );
 
             foreach ( var arg in this._arguments )

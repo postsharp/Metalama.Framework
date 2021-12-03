@@ -34,7 +34,7 @@ namespace Caravela.Framework.Impl.Transformations
         {
             var body =
                 Block(
-                    this.OverriddenDeclaration.ReturnType != this.OverriddenDeclaration.Compilation.TypeFactory.GetTypeByReflectionType( typeof(void) )
+                    this.OverriddenDeclaration.ReturnType != this.OverriddenDeclaration.Compilation.TypeFactory.GetTypeByReflectionType( typeof( void ) )
                         ? ReturnStatement( GetInvocationExpression() )
                         : ExpressionStatement( GetInvocationExpression() ) );
 

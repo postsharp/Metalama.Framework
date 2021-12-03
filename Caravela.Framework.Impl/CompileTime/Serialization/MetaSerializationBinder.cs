@@ -1,5 +1,5 @@
-// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
-// source-available license. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using System;
 
@@ -11,7 +11,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
     public class MetaSerializationBinder
     {
         // TODO: Remove.
-        //private readonly IReflectionBindingManagerService reflectionBindingManagerService;
+        // private readonly IReflectionBindingManagerService reflectionBindingManagerService;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MetaSerializationBinder"/> class.
@@ -19,10 +19,10 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
         public MetaSerializationBinder()
         {
             // TODO: Remove.
-            //if ( PostSharpEnvironment.IsPostSharpRunning )
-            //{
+            // if ( PostSharpEnvironment.IsPostSharpRunning )
+            // {
             //    this.reflectionBindingManagerService = PostSharpEnvironment.CurrentProject.GetService<IReflectionBindingManagerService>();
-            //}
+            // }
         }
 
         /// <summary>
@@ -42,18 +42,20 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
         /// <param name="type">The <see cref="Type"/>.</param>
         /// <param name="typeName">At output, the name of <paramref name="type"/>.</param>
         /// <param name="assemblyName">At output, the name of <paramref name="assemblyName"/>.</param>
-        public virtual void BindToName( Type type, out string typeName, out string assemblyName)
+        public virtual void BindToName( Type type, out string typeName, out string assemblyName )
         {
             typeName = type.FullName;
+
             // TODO: Remove.
-            //if ( this.reflectionBindingManagerService != null )
-            //{
+            // if ( this.reflectionBindingManagerService != null )
+            // {
             //    assemblyName = this.reflectionBindingManagerService.ResolveAssembly(type) ?? type.GetAssembly().FullName;
-            //}
-            //else
-            //{
-                assemblyName = type.Assembly.FullName;    
-            //}
+            // }
+            // else
+            // {
+            assemblyName = type.Assembly.FullName;
+
+            // }
         }
     }
 }

@@ -38,7 +38,7 @@ namespace Caravela.Framework.Impl.Metrics
 
         // TODO: implement caching. Currently the lifetime of IMetricProvider and MetricManager is not well defined.
         // When used from workspaces, caching should persist across queries, but should be cleared when Reload is called.
-        
+
         // TODO: not sure how to handle nested types. They can be included or excluded. Currently, they are included.
 
         /// <summary>
@@ -60,7 +60,7 @@ namespace Caravela.Framework.Impl.Metrics
 
         private T ComputeMetricForTypes( IEnumerable<INamedType> types )
         {
-            var aggregate = default(T);
+            var aggregate = default( T );
 
             foreach ( var t in types )
             {

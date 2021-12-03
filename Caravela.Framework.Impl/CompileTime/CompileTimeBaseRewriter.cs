@@ -36,7 +36,7 @@ namespace Caravela.Framework.Impl.CompileTime
             if ( method.Body == null && method.ExpressionBody == null )
             {
                 // Should not be called with an abstract method.
-                throw new ArgumentOutOfRangeException( nameof(method) );
+                throw new ArgumentOutOfRangeException( nameof( method ) );
             }
 
             return this.RewriteThrowNotSupported(
@@ -55,7 +55,7 @@ namespace Caravela.Framework.Impl.CompileTime
             if ( memberDeclaration.Modifiers.Any( x => x.Kind() == SyntaxKind.AbstractKeyword ) )
             {
                 // Should not be called with an abstract property.
-                throw new ArgumentOutOfRangeException( nameof(memberDeclaration) );
+                throw new ArgumentOutOfRangeException( nameof( memberDeclaration ) );
             }
 
             switch ( memberDeclaration )

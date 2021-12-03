@@ -1,5 +1,5 @@
-﻿// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
-// source-available license. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Serialization;
 using System;
@@ -7,7 +7,6 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 
 namespace Caravela.Framework.Impl.CompileTime.Serialization
@@ -30,18 +29,19 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
             this._binaryReader = new SerializationBinaryReader( new BinaryReader( stream ) );
         }
 
-        public object Deserialize()
+        public object? Deserialize()
         {
             int v = this._binaryReader.ReadCompressedInteger();
             if ( v > _version )
             {
                 throw new NotSupportedException( "Unsupported formatter version!" );
             }
-            
+
             var instanceId = 1;
             var rootObject = this.ReadObject( instanceId, true, null );
-            //TODO: Consider refactoring. Should actually call read type and then decide whether to read object or call ReadValue.
-            //But that's a lot of work. For now GetObjRef has a check to ignore instanceId for value types.
+
+            // TODO: Consider refactoring. Should actually call read type and then decide whether to read object or call ReadValue.
+            // But that's a lot of work. For now GetObjRef has a check to ignore instanceId for value types.
 
             for ( instanceId++; instanceId <= this._referenceTypeInstances.Count; instanceId++ )
             {
@@ -49,14 +49,14 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
             }
 
             ISerializationCallback? callback;
-            if ((callback = rootObject as ISerializationCallback) != null)
+            if ( (callback = rootObject as ISerializationCallback) != null )
             {
                 callback.OnDeserialized();
             }
 
             foreach ( var obj in this._referenceTypeInstances.Values )
             {
-                if ((callback = obj.Value.Value as ISerializationCallback) != null && !ReferenceEquals( callback, rootObject ))
+                if ( (callback = obj.Value.Value as ISerializationCallback) != null && !ReferenceEquals( callback, rootObject ) )
                 {
                     callback.OnDeserialized();
                 }
@@ -65,17 +65,19 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
             return rootObject;
         }
 
-        private object ReadObject( int instanceId, bool initializeObject, SerializationCause cause )
+        private object? ReadObject( int instanceId, bool initializeObject, SerializationCause? cause )
         {
             if ( this._referenceTypeInstances.TryGetValue( instanceId, out var item ) )
+            {
                 return item.Value.Value;
+            }
 
             var objRef = this.GetObjRef( instanceId, cause );
 
             return this.ReadObjectInternal( objRef, instanceId, initializeObject );
         }
 
-        private object ReadObjectInternal( ObjRef objRef, int instanceId, bool initializeObject )
+        private object? ReadObjectInternal( ObjRef objRef, int instanceId, bool initializeObject )
         {
             if ( objRef.Value == null )
             {
@@ -96,7 +98,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
             var item = this._referenceTypeInstances[instanceId];
 
             var objRef = item.Value;
-            
+
             // object could be initialized in constructionData block
             if ( objRef.IsInitialized )
             {
@@ -105,10 +107,10 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
 
             objRef.IsInitialized = true;
 
-            var type = objRef.Value.GetType();
+            var type = objRef.Value!.GetType();
             if ( type.IsArray )
             {
-                this.ReadArray( (Array)objRef.Value, item.Cause );
+                this.ReadArray( (Array) objRef.Value, item.Cause );
             }
             else
             {
@@ -116,9 +118,9 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
                 {
                     var fields = this.ReadInstanceFields( type, false, item.Cause );
 
-                    if ( objRef.Serializer.IsTwoPhase )
+                    if ( objRef.Serializer!.IsTwoPhase )
                     {
-                        this.TryDeserializeFields( objRef.Serializer, ref objRef.Value, fields, item.Cause );
+                        TryDeserializeFields( objRef!.Serializer, ref objRef.Value, fields, item.Cause );
                     }
                 }
                 else
@@ -128,7 +130,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
             }
         }
 
-        private void TryDeserializeFields( IMetaSerializer serializer, ref object value, InstanceFields fields, SerializationCause cause )
+        private static void TryDeserializeFields( IMetaSerializer serializer, ref object value, InstanceFields fields, SerializationCause cause )
         {
             try
             {
@@ -158,7 +160,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
                 var newCause = this._shouldReportExceptionCause ? SerializationCause.WithTypedValue( cause, fieldName, type ) : null;
                 var value = this.ReadTypedValue( initializeObjects, newCause );
 
-                fields.Values.Add( fieldName, value );
+                fields.Values!.Add( fieldName, value );
             }
 
             return fields;
@@ -166,7 +168,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
 
         private void ReadType( out Type type, out SerializationIntrinsicType intrinsicType )
         {
-            intrinsicType = (SerializationIntrinsicType)this._binaryReader.ReadByte();
+            intrinsicType = (SerializationIntrinsicType) this._binaryReader.ReadByte();
 
             switch ( intrinsicType )
             {
@@ -175,82 +177,84 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
                     break;
 
                 case SerializationIntrinsicType.Byte:
-                    type = typeof(byte);
+                    type = typeof( byte );
                     break;
 
                 case SerializationIntrinsicType.SByte:
-                    type = typeof(sbyte);
+                    type = typeof( sbyte );
                     break;
 
                 case SerializationIntrinsicType.Int16:
-                    type = typeof(short);
+                    type = typeof( short );
                     break;
 
                 case SerializationIntrinsicType.Int32:
-                    type = typeof(int);
+                    type = typeof( int );
                     break;
 
                 case SerializationIntrinsicType.Int64:
-                    type = typeof(long);
+                    type = typeof( long );
                     break;
 
                 case SerializationIntrinsicType.UInt16:
-                    type = typeof(ushort);
+                    type = typeof( ushort );
                     break;
 
                 case SerializationIntrinsicType.UInt32:
-                    type = typeof(uint);
+                    type = typeof( uint );
                     break;
 
                 case SerializationIntrinsicType.UInt64:
-                    type = typeof(ulong);
+                    type = typeof( ulong );
                     break;
 
                 case SerializationIntrinsicType.Single:
-                    type = typeof(float);
+                    type = typeof( float );
                     break;
 
                 case SerializationIntrinsicType.Double:
-                    type = typeof(double);
+                    type = typeof( double );
                     break;
 
                 case SerializationIntrinsicType.String:
-                    type = typeof(string);
+                    type = typeof( string );
                     break;
 
                 case SerializationIntrinsicType.DottedString:
-                    type = typeof(DottedString);
+                    type = typeof( DottedString );
                     break;
 
                 case SerializationIntrinsicType.Boolean:
-                    type = typeof(bool);
+                    type = typeof( bool );
                     break;
 
                 case SerializationIntrinsicType.Enum:
                     type = this.ReadNamedType();
                     if ( !type.IsEnum )
                     {
-                        throw new MetaSerializationException( string.Format(CultureInfo.InvariantCulture, "Type '{0}' is expected to be an enum type.", type ) );
+                        throw new MetaSerializationException( string.Format( CultureInfo.InvariantCulture, "Type '{0}' is expected to be an enum type.", type ) );
                     }
+
                     break;
 
                 case SerializationIntrinsicType.Struct:
                     type = this.ReadNamedType();
                     if ( !type.IsValueType )
                     {
-                        throw new MetaSerializationException( string.Format(CultureInfo.InvariantCulture, "Type '{0}' is expected to be a value type.", type ) );
+                        throw new MetaSerializationException( string.Format( CultureInfo.InvariantCulture, "Type '{0}' is expected to be a value type.", type ) );
                     }
+
                     break;
 
                 case SerializationIntrinsicType.Class:
                     type = this.ReadNamedType();
                     if ( type.IsValueType )
                     {
-                        throw new MetaSerializationException( string.Format(CultureInfo.InvariantCulture, "Type '{0}' is expected to be a reference type.", type ) );
+                        throw new MetaSerializationException( string.Format( CultureInfo.InvariantCulture, "Type '{0}' is expected to be a reference type.", type ) );
                     }
+
                     break;
 
-                
                 case SerializationIntrinsicType.Array:
                     int rank = this._binaryReader.ReadCompressedInteger();
                     Type elementType;
@@ -260,15 +264,15 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
                     break;
 
                 case SerializationIntrinsicType.Char:
-                    type = typeof(char);
+                    type = typeof( char );
                     break;
 
                 case SerializationIntrinsicType.ObjRef:
-                    type = typeof(object);
+                    type = typeof( object );
                     break;
 
                 case SerializationIntrinsicType.Type:
-                    type = typeof(Type);
+                    type = typeof( Type );
                     break;
 
                 case SerializationIntrinsicType.GenericTypeParameter:
@@ -280,10 +284,8 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
                     break;
 
                 default:
-                    throw new MetaSerializationException($"Invalid type: {intrinsicType}.");
+                    throw new MetaSerializationException( $"Invalid type: {intrinsicType}." );
             }
-
-         
         }
 
         private Type ReadNamedType()
@@ -300,17 +302,18 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
                 case SerializationIntrinsicTypeFlags.Generic:
                     {
                         var typeName = this.ReadTypeName();
-                        var genericType = this.GetType(typeName);
+                        var genericType = this.GetType( typeName );
                         int arity = this._binaryReader.ReadCompressedInteger();
 
-                        if (arity > 0)
+                        if ( arity > 0 )
                         {
                             var genericArguments = new Type[arity];
-                            for (var i = 0; i < arity; i++)
+                            for ( var i = 0; i < arity; i++ )
                             {
                                 genericArguments[i] = this.ReadType();
                             }
-                            return genericType.MakeGenericType(genericArguments);
+
+                            return genericType.MakeGenericType( genericArguments );
                         }
                         else
                         {
@@ -318,34 +321,28 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
                         }
                     }
 
-                    // TODO: Remove
-                    //case SerializationIntrinsicTypeFlags.MetadataIndex:
-                    //{
-                    //    int index = this.binaryReader.ReadCompressedInteger();
-                    //    return (Type) this.formatter.MetadataDispenser.GetMetadata( index );
-                    //}
+                // TODO: Remove
+                // case SerializationIntrinsicTypeFlags.MetadataIndex:
+                // {
+                //    int index = this.binaryReader.ReadCompressedInteger();
+                //    return (Type) this.formatter.MetadataDispenser.GetMetadata( index );
+                // }
 
                 default:
                     throw new MetaSerializationException();
             }
-            
         }
-
 
         private Type ReadType()
         {
-            Type type;
-            SerializationIntrinsicType intrinsicType;
-            this.ReadType( out type, out intrinsicType );
+            this.ReadType( out var type, out _ );
             return type;
         }
 
-        private object ReadTypedValue( bool initializeObjects, SerializationCause cause )
+        private object? ReadTypedValue( bool initializeObjects, SerializationCause cause )
         {
-            SerializationIntrinsicType intrinsicType;
-            Type type;
 
-            this.ReadType( out type, out intrinsicType );
+            this.ReadType( out var type, out var intrinsicType );
 
             if ( type == null )
             {
@@ -356,14 +353,14 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
             return value;
         }
 
-        private object ReadValue( SerializationIntrinsicType intrinsicType, Type type, bool initializeObject, SerializationCause cause )
+        private object? ReadValue( SerializationIntrinsicType intrinsicType, Type type, bool initializeObject, SerializationCause cause )
         {
             if ( intrinsicType == SerializationIntrinsicType.None )
             {
                 intrinsicType = SerializationIntrinsicTypeExtensions.GetIntrinsicType( type );
             }
 
-            object value;
+            object? value;
             switch ( intrinsicType )
             {
                 case SerializationIntrinsicType.Byte:
@@ -375,27 +372,27 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
                     break;
 
                 case SerializationIntrinsicType.Int16:
-                    value = (short)this._binaryReader.ReadCompressedInteger();
+                    value = (short) this._binaryReader.ReadCompressedInteger();
                     break;
 
                 case SerializationIntrinsicType.Int32:
-                    value = (int)this._binaryReader.ReadCompressedInteger();
+                    value = (int) this._binaryReader.ReadCompressedInteger();
                     break;
 
                 case SerializationIntrinsicType.Int64:
-                    value = (long)this._binaryReader.ReadCompressedInteger();
+                    value = (long) this._binaryReader.ReadCompressedInteger();
                     break;
 
                 case SerializationIntrinsicType.UInt16:
-                    value = (ushort)this._binaryReader.ReadCompressedInteger();
+                    value = (ushort) this._binaryReader.ReadCompressedInteger();
                     break;
 
                 case SerializationIntrinsicType.UInt32:
-                    value = (uint)this._binaryReader.ReadCompressedInteger();
+                    value = (uint) this._binaryReader.ReadCompressedInteger();
                     break;
 
                 case SerializationIntrinsicType.UInt64:
-                    value = (ulong)this._binaryReader.ReadCompressedInteger();
+                    value = (ulong) this._binaryReader.ReadCompressedInteger();
                     break;
 
                 case SerializationIntrinsicType.Single:
@@ -427,7 +424,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
                     break;
 
                 case SerializationIntrinsicType.Char:
-                    value = (char)this._binaryReader.ReadCompressedInteger();
+                    value = (char) this._binaryReader.ReadCompressedInteger();
                     break;
 
                 case SerializationIntrinsicType.Type:
@@ -436,13 +433,15 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
 
                 case SerializationIntrinsicType.Enum:
                     var enumValue = this._binaryReader.ReadCompressedInteger();
+
                     // explicite cast is needed due to check in Enum.ToObject (it throws if type is not numeric type)
-                    value = enumValue.IsNegative ? Enum.ToObject( type, (long)enumValue ) : Enum.ToObject( type, (ulong)enumValue );
+                    value = enumValue.IsNegative ? Enum.ToObject( type, (long) enumValue ) : Enum.ToObject( type, (ulong) enumValue );
                     break;
 
                 default:
-                    throw new ArgumentOutOfRangeException(nameof(intrinsicType));
+                    throw new ArgumentOutOfRangeException( nameof( intrinsicType ) );
             }
+
             return value;
         }
 
@@ -455,7 +454,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
 
         private Type ReadGenericMethodParameter()
         {
-            var declaringMethod = (MethodInfo)this.ReadMethod();
+            var declaringMethod = (MethodInfo) this.ReadMethod();
             int position = this._binaryReader.ReadCompressedInteger();
             return declaringMethod.GetGenericArguments()[position];
         }
@@ -467,8 +466,9 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
             var methodSignature = this._binaryReader.ReadString();
 
             throw new NotSupportedException();
+
             // TODO: Remove this method.
-            //return ReflectionHelper.GetMethod( methodName, methodSignature );
+            // return ReflectionHelper.GetMethod( methodName, methodSignature );
         }
 
         private Type GetType( AssemblyTypeName typeName )
@@ -524,20 +524,26 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
             return this.ReadObject( instanceId, initializeObject, cause );
         }
 
-        private ObjRef GetObjRef( int instanceId, SerializationCause cause )
+        private ObjRef GetObjRef( int instanceId, SerializationCause? cause )
         {
             if ( this._referenceTypeInstances.TryGetValue( instanceId, out var item ) )
+            {
                 return item.Value;
+            }
 
             // Create an uninitialized instance for this type.
             this.ReadType( out var type, out var intrinsicType );
 
             if ( cause == null && this._shouldReportExceptionCause )
+            {
                 // This is the root.
                 cause = SerializationCause.WithTypedValue( null, "root", type );
+            }
 
             if ( type == null )
+            {
                 return ObjRef.Empty;
+            }
 
             object value;
             IMetaSerializer serializer;
@@ -572,7 +578,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
 
             if ( !type.IsValueType )
             {
-                this._referenceTypeInstances.Add( instanceId, new SerializationQueueItem<ObjRef>(objRef, cause));
+                this._referenceTypeInstances.Add( instanceId, new SerializationQueueItem<ObjRef>( objRef, cause ) );
             }
             else
             {
@@ -602,8 +608,8 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
             var serializer = this._formatter.SerializerProvider.GetSerializer( type );
 
             var value = this.TryCreateInstance( serializer, type, fields, cause );
-            
-            this.TryDeserializeFields( serializer, ref value, fields, cause );
+
+            TryDeserializeFields( serializer, ref value, fields, cause );
 
             return value;
         }
@@ -617,76 +623,74 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
         {
             public static readonly InstanceFields Empty = new InstanceFields();
 
-            private readonly Type? type;
+            private readonly Type? _type;
 
-            public readonly Dictionary<string, object>? Values;
+            public Dictionary<string, object>? Values { get; }
 
-            private readonly MetaFormatter? formatter;
+            private readonly MetaFormatter? _formatter;
 
             private InstanceFields()
             {
-                this.type = null;
-                this.formatter = null;
+                this._type = null;
+                this._formatter = null;
                 this.Values = null;
             }
 
             public InstanceFields( Type type, MetaFormatter formatter, int capacity )
             {
-                this.type = type;
-                this.formatter = formatter;
+                this._type = type;
+                this._formatter = formatter;
                 this.Values = new Dictionary<string, object>( capacity, StringComparer.Ordinal );
             }
 
-            public bool TryGetValue<T>( string name, [MaybeNullWhen( false )] out T value, string? scope = null )
+            public bool TryGetValue<T>( string name, [MaybeNullWhen( false )] out T? value, string? scope = null )
             {
-                if (this.Values == null)
+                if ( this.Values == null )
                 {
-                    value = default(T)!;
+                    value = default;
                     return false;
                 }
 
-                object valueObj;
-
-                if (scope != null)
+                if ( scope != null )
                 {
                     name = scope + "." + name;
                 }
 
-                if (!this.Values.TryGetValue(name, out valueObj))
+                if ( !this.Values.TryGetValue( name, out var valueObj ) )
                 {
-                    value = default(T);
+                    value = default;
                     return false;
                 }
 
-                if (valueObj == null)
+                if ( valueObj == null )
                 {
-                    value = default(T);
+                    value = default;
                     return true;
                 }
 
-                IMetaSerializer serializer = null;
+                IMetaSerializer? serializer = null;
 
-                if (!typeof(T).HasElementType)
+                if ( !typeof( T ).HasElementType )
                 {
-                    this.formatter.SerializerProvider.TryGetSerializer(typeof(T), out serializer);
+                    this._formatter!.SerializerProvider.TryGetSerializer( typeof( T ), out serializer );
                 }
 
                 try
                 {
-                    if (serializer != null)
+                    if ( serializer != null )
                     {
-                        value = (T)serializer.Convert(valueObj, typeof(T));
+                        value = (T) serializer.Convert( valueObj, typeof( T ) );
                     }
                     else
                     {
-                        value = (T)valueObj;
-
+                        value = (T) valueObj;
                     }
+
                     return true;
                 }
-                catch (Exception e)
+                catch ( Exception e )
                 {
-                    #if LEGACY_REFLECTION_API
+#if LEGACY_REFLECTION_API
                     Type GetElementType(Type type)
                     {
                         if (type.HasElementType)
@@ -704,7 +708,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
                     }
 #endif
 
-                    string FormatTypeName(Type type)
+                    string FormatTypeName( Type type )
                     {
 #if LEGACY_REFLECTION_API
                         return type.AssemblyQualifiedName + " (" + GetElementType(type).Assembly.Location + ")";
@@ -713,41 +717,42 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
 #endif
                     }
 
-
                     throw new MetaSerializationException(
-                        string.Format(CultureInfo.InvariantCulture,
+                        string.Format( 
+                            CultureInfo.InvariantCulture,
                             "Error reading value of key '{0}' in type '{1}': cannot convert type '{2}' into '{3}': {4}",
                             name,
-                            this.type,
+                            this._type,
                             FormatTypeName( valueObj.GetType() ),
-                            FormatTypeName( typeof(T) ),
-                            e.Message),
-                        e);
+                            FormatTypeName( typeof( T ) ),
+                            e.Message ),
+                        e );
                 }
             }
 
             public T GetValue<T>( string name, string? scope = null )
             {
-                T value;
-                this.TryGetValue( name, out value, scope );
+                this.TryGetValue( name, out T value, scope );
                 return value;
             }
 
             // TODO: Remove
-            //public IMetadataDispenser MetadataDispenser { get { return this.formatter.MetadataDispenser;} }
+            // public IMetadataDispenser MetadataDispenser { get { return this.formatter.MetadataDispenser;} }
         }
 
         private class ObjRef
         {
             public static readonly ObjRef Empty = new ObjRef();
 
-            public object Value;
+#pragma warning disable SA1401 // Fields should be private
+            public object? Value;
+#pragma warning restore SA1401 // Fields should be private
 
-            public readonly SerializationIntrinsicType IntrinsicType;
+            public SerializationIntrinsicType IntrinsicType { get; }
 
-            public readonly IMetaSerializer Serializer;
+            public IMetaSerializer? Serializer { get; }
 
-            public bool IsInitialized;
+            public bool IsInitialized { get; set; }
 
             private ObjRef()
             {

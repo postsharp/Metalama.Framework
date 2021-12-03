@@ -48,7 +48,7 @@ namespace Caravela.Framework.Impl.Advices
             if ( declaration is not T typedSymbol )
             {
                 throw new InvalidOperationException(
-                    $"The template '{symbol}' is a {declaration.DeclarationKind} but it was expected to be an {typeof(T).Name}" );
+                    $"The template '{symbol}' is a {declaration.DeclarationKind} but it was expected to be an {typeof( T ).Name}" );
             }
 
             return Advices.TemplateMember.Create( typedSymbol, this.TemplateMember.TemplateInfo, this.SelectedKind, this.InterpretedKind );

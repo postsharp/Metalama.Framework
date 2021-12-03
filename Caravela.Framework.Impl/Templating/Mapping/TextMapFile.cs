@@ -93,7 +93,7 @@ namespace Caravela.Framework.Impl.Templating.Mapping
             if ( string.IsNullOrEmpty( targetSyntaxTree.FilePath ) )
             {
                 // We cannot create a map if it has no name.
-                throw new ArgumentOutOfRangeException( nameof(targetSyntaxTree), "The FilePath property must not be empty." );
+                throw new ArgumentOutOfRangeException( nameof( targetSyntaxTree ), "The FilePath property must not be empty." );
             }
 
             Visitor visitor = new( annotationMap );

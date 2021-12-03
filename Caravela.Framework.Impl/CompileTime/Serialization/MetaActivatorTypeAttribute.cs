@@ -1,5 +1,5 @@
-// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
-// source-available license. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using System;
 
@@ -8,7 +8,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
     /// <summary>
     /// Custom attribute that, when applied to an assembly, points to a type in the assembly implementing <see cref="IMetaActivator"/>.
     /// </summary>
-    [AttributeUsage(AttributeTargets.Assembly)]
+    [AttributeUsage( AttributeTargets.Assembly )]
     public sealed class MetaActivatorTypeAttribute : Attribute
     {
         /// <summary>

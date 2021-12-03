@@ -30,13 +30,13 @@ namespace Caravela.Framework.Impl.Templating
             public MemberAccessExpressionSyntax TemplateSyntaxFactoryMember( string name )
                 => SyntaxFactory.MemberAccessExpression(
                     SyntaxKind.SimpleMemberAccessExpression,
-                    this._metaSyntaxFactory.Type( typeof(TemplateSyntaxFactory) ),
+                    this._metaSyntaxFactory.Type( typeof( TemplateSyntaxFactory ) ),
                     SyntaxFactory.IdentifierName( name ) );
 
             public MemberAccessExpressionSyntax GenericTemplateSyntaxFactoryMember( string name, params TypeSyntax[] genericParameters )
                 => SyntaxFactory.MemberAccessExpression(
                     SyntaxKind.SimpleMemberAccessExpression,
-                    this._metaSyntaxFactory.Type( typeof(TemplateSyntaxFactory) ),
+                    this._metaSyntaxFactory.Type( typeof( TemplateSyntaxFactory ) ),
                     SyntaxFactory.GenericName( SyntaxFactory.Identifier( name ) )
                         .WithTypeArgumentList( SyntaxFactory.TypeArgumentList( SyntaxFactory.SeparatedList( genericParameters ) ) ) );
 
@@ -46,7 +46,7 @@ namespace Caravela.Framework.Impl.Templating
             /// <param name="hint"></param>
             /// <returns></returns>
             public ExpressionSyntax GetUniqueIdentifier( string hint )
-                => SyntaxFactory.InvocationExpression( this.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.GetUniqueIdentifier) ) )
+                => SyntaxFactory.InvocationExpression( this.TemplateSyntaxFactoryMember( nameof( TemplateSyntaxFactory.GetUniqueIdentifier ) ) )
                     .WithArgumentList(
                         SyntaxFactory.ArgumentList(
                             SyntaxFactory.SeparatedList<ArgumentSyntax>(

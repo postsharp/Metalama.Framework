@@ -19,7 +19,7 @@ namespace Caravela.Framework.Impl.Metrics
 
             public override StatementNumberMetric DefaultVisit( SyntaxNode node )
             {
-                var metric = default(StatementNumberMetric);
+                var metric = default( StatementNumberMetric );
 
                 foreach ( var child in node.ChildNodes() )
                 {
@@ -45,7 +45,7 @@ namespace Caravela.Framework.Impl.Metrics
 
             public override StatementNumberMetric VisitSwitchStatement( SwitchStatementSyntax node )
             {
-                var metric = default(StatementNumberMetric);
+                var metric = default( StatementNumberMetric );
 
                 metric.Value++;
 
@@ -62,7 +62,7 @@ namespace Caravela.Framework.Impl.Metrics
 
             public override StatementNumberMetric VisitBlock( BlockSyntax node )
             {
-                var metric = default(StatementNumberMetric);
+                var metric = default( StatementNumberMetric );
 
                 foreach ( var statement in node.Statements )
                 {

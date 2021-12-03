@@ -33,7 +33,7 @@ public class A : IMetaSerializable
             var type = project!.GetType( "A" );
             var metaSerializer = GetMetaSerializer( type );
 
-            dynamic instance = Activator.CreateInstance(type)!;
+            dynamic instance = Activator.CreateInstance( type )!;
             instance.Field = 13;
             instance.Property = 42;
 

@@ -1,5 +1,5 @@
-// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
-// source-available license. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using System;
 
@@ -37,7 +37,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
                 case SerializationIntrinsicType.GenericMethodParameter:
                     return false;
                 default:
-                    throw new ArgumentOutOfRangeException(nameof(intrinsicType));
+                    throw new ArgumentOutOfRangeException( nameof( intrinsicType ) );
             }
         }
 
@@ -99,7 +99,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
                     }
                     else if ( type.IsValueType )
                     {
-                        if ( type == typeof(DottedString) )
+                        if ( type == typeof( DottedString ) )
                         {
                             return SerializationIntrinsicType.DottedString;
                         }
@@ -110,7 +110,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
                     }
                     else
                     {
-                        if ( typeof(Type).IsAssignableFrom( type ) )
+                        if ( typeof( Type ).IsAssignableFrom( type ) )
                         {
                             return SerializationIntrinsicType.Type;
                         }
@@ -135,7 +135,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
                     return SerializationIntrinsicType.Struct;
 
                 default:
-                    throw new ArgumentOutOfRangeException(nameof(type));
+                    throw new ArgumentOutOfRangeException( nameof( type ) );
             }
         }
     }

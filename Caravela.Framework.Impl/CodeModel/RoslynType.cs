@@ -38,8 +38,8 @@ namespace Caravela.Framework.Impl.CodeModel
         public bool? IsNullable
             => (this.Symbol.IsReferenceType, this.Symbol.NullableAnnotation) switch
             {
-                (true, NullableAnnotation.Annotated) => true,
-                (true, NullableAnnotation.NotAnnotated) => false,
+                (true, NullableAnnotation.Annotated ) => true,
+                (true, NullableAnnotation.NotAnnotated ) => false,
                 _ => null
             };
 

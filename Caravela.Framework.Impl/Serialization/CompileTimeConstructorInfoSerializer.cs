@@ -13,7 +13,7 @@ namespace Caravela.Framework.Impl.Serialization
         public override ExpressionSyntax Serialize( CompileTimeConstructorInfo obj, SyntaxSerializationContext serializationContext )
             => SyntaxFactory.ParenthesizedExpression(
                 SyntaxFactory.CastExpression(
-                    serializationContext.GetTypeSyntax( typeof(ConstructorInfo) ),
+                    serializationContext.GetTypeSyntax( typeof( ConstructorInfo ) ),
                     SerializeMethodBase( obj, serializationContext ) ) );
 
         public CompileTimeConstructorInfoSerializer( SyntaxSerializationService service ) : base( service ) { }

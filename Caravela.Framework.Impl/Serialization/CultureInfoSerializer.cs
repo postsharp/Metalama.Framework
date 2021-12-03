@@ -13,7 +13,7 @@ namespace Caravela.Framework.Impl.Serialization
     {
         public override ExpressionSyntax Serialize( CultureInfo obj, SyntaxSerializationContext serializationContext )
         {
-            return ObjectCreationExpression( serializationContext.GetTypeSyntax( typeof(CultureInfo) ) )
+            return ObjectCreationExpression( serializationContext.GetTypeSyntax( typeof( CultureInfo ) ) )
                 .AddArgumentListArguments(
                     Argument(
                         LiteralExpression(

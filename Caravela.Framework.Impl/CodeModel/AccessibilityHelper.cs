@@ -23,7 +23,7 @@ namespace Caravela.Framework.Impl.CodeModel
                                                                                  | AccessibilityFlags.DerivedTypeOfAnyAssembly,
                 Accessibility.Public => AccessibilityFlags.SameType | AccessibilityFlags.AnyType | AccessibilityFlags.AnyTypeOfFriendAssembly
                                         | AccessibilityFlags.DerivedTypeOfAnyAssembly | AccessibilityFlags.DerivedTypeOfFriendAssembly,
-                _ => throw new ArgumentOutOfRangeException( nameof(accessibility) )
+                _ => throw new ArgumentOutOfRangeException( nameof( accessibility ) )
             };
 
         public static AccessibilityFlags GetResultingAccessibility( this ISymbol symbol )

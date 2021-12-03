@@ -1,5 +1,5 @@
-// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
-// source-available license. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using System;
 using System.Collections.Generic;
@@ -12,20 +12,18 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
     {
         private readonly BinaryWriter writer;
         private readonly Dictionary<string, int> strings = new Dictionary<string, int>( 64, StringComparer.Ordinal );
-        private readonly Dictionary<string, int> dottedStrings = new Dictionary<string, int>(64, StringComparer.Ordinal);
+        private readonly Dictionary<string, int> dottedStrings = new Dictionary<string, int>( 64, StringComparer.Ordinal );
 
         public SerializationBinaryWriter( BinaryWriter writer )
         {
             this.writer = writer;
         }
 
-
         public void WriteCompressedInteger( Integer integer )
         {
             var value = integer.AbsoluteValue;
             var isNegative = integer.IsNegative;
             var signBit = (byte) (isNegative ? 0x80 : 0);
-
 
             // For unsigned compressed integers, the top 3 bits of the header are used to store the integer lenghts.
             if ( (value & 0x0f) == value )
@@ -59,7 +57,6 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
             this.writer.Write( value );
         }
 
-
         public void WriteDouble( double value )
         {
             this.writer.Write( value );
@@ -67,13 +64,12 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
 
         public void WriteString( string value )
         {
-            int id;
 
             if ( value == null )
             {
                 this.WriteCompressedInteger( -1 );
             }
-            else if ( this.strings.TryGetValue( value, out id ) )
+            else if ( this.strings.TryGetValue( value, out var id ) )
             {
                 this.WriteCompressedInteger( -id );
             }
@@ -92,13 +88,12 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
 
         public void WriteDottedString( string value )
         {
-            int id;
 
             if ( value == null )
             {
                 this.WriteCompressedInteger( -1 );
             }
-            else if ( this.dottedStrings.TryGetValue( value, out id ) )
+            else if ( this.dottedStrings.TryGetValue( value, out var id ) )
             {
                 this.WriteCompressedInteger( -id );
             }
@@ -119,15 +114,15 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
                     scope = value.Substring( 0, lastDot );
                 }
 
-                var bytes = Encoding.UTF8.GetBytes(name);
-                this.WriteCompressedInteger(bytes.Length);
-                this.writer.Write(bytes);
+                var bytes = Encoding.UTF8.GetBytes( name );
+                this.WriteCompressedInteger( bytes.Length );
+                this.writer.Write( bytes );
 
                 this.WriteDottedString( scope );
 
-                this.dottedStrings.Add( value,this.dottedStrings.Count+2 );
+                this.dottedStrings.Add( value, this.dottedStrings.Count + 2 );
+            }
         }
-    }
 
         public void WriteSingle( float value )
         {

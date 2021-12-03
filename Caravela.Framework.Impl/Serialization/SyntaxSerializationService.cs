@@ -150,7 +150,7 @@ namespace Caravela.Framework.Impl.Serialization
             switch ( obj )
             {
                 case null:
-                    throw new ArgumentNullException( nameof(obj) );
+                    throw new ArgumentNullException( nameof( obj ) );
 
                 case Enum:
                     serializer = this._enumSerializer;
@@ -163,7 +163,7 @@ namespace Caravela.Framework.Impl.Serialization
                     return true;
 
                 default:
-                    return this.TryGetSerializer( obj.GetType(), typeof(T), out serializer );
+                    return this.TryGetSerializer( obj.GetType(), typeof( T ), out serializer );
             }
         }
 
@@ -223,7 +223,7 @@ namespace Caravela.Framework.Impl.Serialization
 
             if ( contractType.IsGenericType )
             {
-                if ( contractType.GetGenericTypeDefinition() == typeof(Nullable<>) )
+                if ( contractType.GetGenericTypeDefinition() == typeof( Nullable<> ) )
                 {
                     contractTypeDeclaration = contractType.GenericTypeArguments[0];
                 }

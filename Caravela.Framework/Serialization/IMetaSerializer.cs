@@ -45,9 +45,8 @@ namespace Caravela.Framework.Serialization
         /// </remarks>
         void DeserializeFields( ref object obj, IArgumentsReader initializationArguments );
 
-
         /// <summary>
-        /// Serializes an object
+        /// Serializes an object.
         /// </summary>
         /// <param name="obj"></param>
         /// <param name="constructorArguments">Gives access to arguments that will be passed to the <see cref="CreateInstance"/> method during deserialization.</param>

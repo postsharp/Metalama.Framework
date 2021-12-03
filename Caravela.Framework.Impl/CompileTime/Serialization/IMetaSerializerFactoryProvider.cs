@@ -1,6 +1,7 @@
-// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
-// source-available license. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Serialization;
 using System;
 
 namespace Caravela.Framework.Impl.CompileTime.Serialization
@@ -22,7 +23,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
         ///             be the type that will be deserialized.</para>
         /// <para>It is <i>not</i> the responsibility of this class to call the next provider (<see cref="NextProvider"/>).</para>
         /// </remarks>
-        Type GetSurrogateType( Type objectType );
+        Type? GetSurrogateType( Type objectType );
 
         /// <summary>
         /// Gets the instance of <see cref="IMetaSerializerFactory"/>.
@@ -34,11 +35,11 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
         /// <remarks>
         /// <para>It is <i>not</i> the responsibility of this class to call the next provider (<see cref="NextProvider"/>).</para>
         /// </remarks>
-        IMetaSerializerFactory GetSerializerFactory( Type objectType );
+        IMetaSerializerFactory? GetSerializerFactory( Type objectType );
 
         /// <summary>
         /// Gets the next provider in the chain.
         /// </summary>
-        IMetaSerializerFactoryProvider NextProvider { get; }
+        IMetaSerializerFactoryProvider? NextProvider { get; }
     }
 }

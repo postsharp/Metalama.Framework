@@ -33,7 +33,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
                 info =>
                 {
                     Assert.Equal( "Property", info.Name );
-                    Assert.Equal( typeof(int), info.PropertyType );
+                    Assert.Equal( typeof( int ), info.PropertyType );
                     Assert.Null( info.SetMethod );
                     Assert.NotNull( info.GetMethod );
                 } );
@@ -77,7 +77,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
                 info =>
                 {
                     Assert.Equal( "Property", info.Name );
-                    Assert.Equal( typeof(string), info.PropertyType );
+                    Assert.Equal( typeof( string ), info.PropertyType );
                     Assert.NotNull( info.SetMethod );
                     Assert.NotNull( info.GetMethod );
                 } );
@@ -99,7 +99,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
                 info =>
                 {
                     Assert.Equal( "Item", info.Name );
-                    Assert.Equal( typeof(string), info.PropertyType );
+                    Assert.Equal( typeof( string ), info.PropertyType );
                     Assert.Null( info.SetMethod );
                     Assert.NotNull( info.GetMethod );
                     Assert.Single( info.GetIndexParameters() );
@@ -114,7 +114,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
             using var testContext = this.CreateSerializationTestContext( code );
 
             var compilation = testContext.Compilation;
-            var stringType = (INamedType) compilation.Factory.GetTypeByReflectionType( typeof(string) );
+            var stringType = (INamedType) compilation.Factory.GetTypeByReflectionType( typeof( string ) );
             var properties = stringType.Properties;
             var property = properties.Single( p => p.Name == "this[]" );
             var serialized = testContext.Serialize( CompileTimeFieldOrPropertyInfo.Create( (Property) property ) ).ToString();
@@ -129,7 +129,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
                 info =>
                 {
                     Assert.Equal( "Chars", info.Name );
-                    Assert.Equal( typeof(char), info.PropertyType );
+                    Assert.Equal( typeof( char ), info.PropertyType );
                     Assert.Null( info.SetMethod );
                     Assert.NotNull( info.GetMethod );
                     Assert.Single( info.GetIndexParameters() );

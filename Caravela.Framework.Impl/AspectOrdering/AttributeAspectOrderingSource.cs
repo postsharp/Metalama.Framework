@@ -27,7 +27,7 @@ namespace Caravela.Framework.Impl.AspectOrdering
             var roslynCompilation = this._compilation;
 
             // Get compile-time level attributes of the current assembly and all referenced assemblies.
-            var orderAttributeName = typeof(AspectOrderAttribute).FullName;
+            var orderAttributeName = typeof( AspectOrderAttribute ).FullName;
 
             var attributes =
                 roslynCompilation.Assembly.Modules

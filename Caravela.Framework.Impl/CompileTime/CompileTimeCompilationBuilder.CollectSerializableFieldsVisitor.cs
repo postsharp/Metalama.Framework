@@ -38,7 +38,7 @@ namespace Caravela.Framework.Impl.CompileTime
             {
                 this._cancellationToken.ThrowIfCancellationRequested();
 
-                foreach (var declarator in node.Declaration.Variables)
+                foreach ( var declarator in node.Declaration.Variables )
                 {
                     var fieldSymbol = this._semanticModel.GetDeclaredSymbol( declarator ).AssertNotNull();
 
@@ -53,7 +53,7 @@ namespace Caravela.Framework.Impl.CompileTime
             {
                 var propertySymbol = this._semanticModel.GetDeclaredSymbol( node ).AssertNotNull();
 
-                if ( !propertySymbol.IsAutoProperty())
+                if ( !propertySymbol.IsAutoProperty() )
                 {
                     return;
                 }

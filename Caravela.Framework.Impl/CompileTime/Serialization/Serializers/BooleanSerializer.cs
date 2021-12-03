@@ -1,5 +1,5 @@
-// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
-// source-available license. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using System;
 using System.Globalization;
@@ -12,7 +12,5 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization.Serializers
         {
             return System.Convert.ToBoolean( value, CultureInfo.InvariantCulture );
         }
-
-        
     }
 }

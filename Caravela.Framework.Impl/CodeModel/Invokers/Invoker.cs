@@ -24,7 +24,7 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
             {
                 InvokerOrder.Base => AspectReferenceOrder.Base,
                 InvokerOrder.Default => AspectReferenceOrder.Final,
-                _ => throw new ArgumentOutOfRangeException( nameof(order), order, null )
+                _ => throw new ArgumentOutOfRangeException( nameof( order ), order, null )
             };
 
             this.AspectReference = new AspectReferenceSpecification(

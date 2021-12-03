@@ -32,6 +32,6 @@ namespace Caravela.Framework.Impl.Serialization
 
         public CompileTimeEventInfoSerializer( SyntaxSerializationService service ) : base( service ) { }
 
-        public override ImmutableArray<Type> AdditionalSupportedTypes => ImmutableArray.Create( typeof(MemberInfo) );
+        public override ImmutableArray<Type> AdditionalSupportedTypes => ImmutableArray.Create( typeof( MemberInfo ) );
     }
 }

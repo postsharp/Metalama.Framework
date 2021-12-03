@@ -1,5 +1,5 @@
-// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
-// source-available license. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Impl.CompileTime.Serialization;
 using System;
@@ -13,14 +13,14 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serialization
     {
         public T TestSerialization<T>( T instance, Func<T, T, bool> assert = null )
         {
-            MetaFormatter formatter = new MetaFormatter();
-            MemoryStream memoryStream = new MemoryStream();
+            var formatter = new MetaFormatter();
+            var memoryStream = new MemoryStream();
             formatter.Serialize( instance, memoryStream );
             memoryStream.Seek( 0, SeekOrigin.Begin );
-            T deserializedObject = (T)formatter.Deserialize( memoryStream );
+            var deserializedObject = (T) formatter.Deserialize( memoryStream );
 
-            ICollection orgCol = instance as ICollection;
-            ICollection newCol = deserializedObject as ICollection;
+            var orgCol = instance as ICollection;
+            var newCol = deserializedObject as ICollection;
 
             if ( assert != null )
             {
@@ -40,13 +40,13 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serialization
 
         public T SerializeDeserialize<T>( T value )
         {
-            MetaFormatter formatter = new MetaFormatter();
-            MemoryStream memoryStream = new MemoryStream();
-            
+            var formatter = new MetaFormatter();
+            var memoryStream = new MemoryStream();
+
             formatter.Serialize( value, memoryStream );
-            
+
             memoryStream.Seek( 0, SeekOrigin.Begin );
-            T deserialized = (T)formatter.Deserialize( memoryStream );
+            var deserialized = (T) formatter.Deserialize( memoryStream );
 
             return deserialized;
         }

@@ -20,7 +20,7 @@ namespace Caravela.Framework.Impl.CodeModel
                 MethodKind.PropertyGet => "get",
                 MethodKind.PropertySet => "set",
                 MethodKind.EventRaise => "raise",
-                _ => throw new ArgumentOutOfRangeException( nameof(methodKind) )
+                _ => throw new ArgumentOutOfRangeException( nameof( methodKind ) )
             };
     }
 }

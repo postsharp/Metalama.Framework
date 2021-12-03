@@ -14,17 +14,19 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
     {
         public ParameterList( IMethodBase containingDeclaration, IEnumerable<Ref<IParameter>> sourceItems ) : base(
             containingDeclaration,
-            sourceItems ) { }
+            sourceItems )
+        { }
 
         public ParameterList( IProperty containingDeclaration, IEnumerable<Ref<IParameter>> sourceItems ) : base(
             containingDeclaration,
-            sourceItems ) { }
+            sourceItems )
+        { }
 
         private ParameterList() { }
 
         public static ParameterList Empty { get; } = new();
 
-        public IParameter this[ string name ]
+        public IParameter this[string name]
         {
             get
             {
@@ -33,7 +35,7 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
                 if ( parameter == null )
                 {
                     throw new ArgumentOutOfRangeException(
-                        nameof(name),
+                        nameof( name ),
                         $"The method '{this.ContainingDeclaration}' does not contain a parameter named '{name}'" );
                 }
 

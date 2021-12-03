@@ -207,7 +207,7 @@ namespace Caravela.Framework.Impl.Utilities
             if ( symbol == null )
             {
                 return null;
-    }
+            }
             else if ( originalCompilation == compilation )
             {
                 return symbol;

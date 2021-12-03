@@ -44,7 +44,7 @@ namespace Caravela.Compiler
         private RunTimeAssemblyRewriter( Compilation runTimeCompilation, IServiceProvider serviceProvider )
             : base( runTimeCompilation, serviceProvider )
         {
-            this._aspectDriverSymbol = runTimeCompilation.GetTypeByMetadataName( typeof(IAspectDriver).FullName );
+            this._aspectDriverSymbol = runTimeCompilation.GetTypeByMetadataName( typeof( IAspectDriver ).FullName );
         }
 
         public static IPartialCompilation Rewrite( IPartialCompilation compilation, IServiceProvider serviceProvider )

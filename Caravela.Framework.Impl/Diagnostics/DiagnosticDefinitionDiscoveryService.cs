@@ -67,11 +67,11 @@ namespace Caravela.Framework.Impl.Diagnostics
             }
 
             return declaringTypes.GetFields( BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic )
-                .Where( f => typeof(T).IsAssignableFrom( f.FieldType ) )
+                .Where( f => typeof( T ).IsAssignableFrom( f.FieldType ) )
                 .Select( GetFieldValue )
                 .Concat(
                     declaringTypes.GetProperties( BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic )
-                        .Where( p => typeof(T).IsAssignableFrom( p.PropertyType ) )
+                        .Where( p => typeof( T ).IsAssignableFrom( p.PropertyType ) )
                         .Select( GetPropertyValue ) )
                 .WhereNotNull();
         }

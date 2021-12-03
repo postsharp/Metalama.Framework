@@ -65,7 +65,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
             if ( constructorSymbol == null )
             {
-                throw new ArgumentOutOfRangeException( nameof(attribute), "Cannot instantiate an invalid attribute." );
+                throw new ArgumentOutOfRangeException( nameof( attribute ), "Cannot instantiate an invalid attribute." );
             }
 
             var type = this._compileTimeTypeResolver.GetCompileTimeType( constructorSymbol.ContainingType, false );
@@ -231,7 +231,7 @@ namespace Caravela.Framework.Impl.CompileTime
                     return this.TranslateAttributeArgument( attribute, typedConstant, targetType, diagnosticAdder );
 
                 case ITypeSymbol type:
-                    if ( !targetType.IsAssignableFrom( typeof(Type) ) )
+                    if ( !targetType.IsAssignableFrom( typeof( Type ) ) )
                     {
                         // This should not happen because we don't process invalid values.
                         throw new AssertionFailedException( $"Cannot convert '{value.GetType().Name}' to '{targetType.Name}'." );
@@ -241,7 +241,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
                 case string str:
                     // Make sure we don't fall under the IEnumerable case.
-                    if ( !targetType.IsAssignableFrom( typeof(string) ) )
+                    if ( !targetType.IsAssignableFrom( typeof( string ) ) )
                     {
                         // This should not happen because we don't process invalid values.
                         throw new AssertionFailedException( $"Cannot convert '{value.GetType().Name}' to '{targetType.Name}'." );
@@ -253,7 +253,7 @@ namespace Caravela.Framework.Impl.CompileTime
                     // We cannot use generic collections here because array of value types are not convertible to arrays of objects.
 
                     var list = enumerable.ToReadOnlyList();
-                    var elementType = targetType.GetElementType() ?? typeof(object);
+                    var elementType = targetType.GetElementType() ?? typeof( object );
 
                     var count = 0;
 

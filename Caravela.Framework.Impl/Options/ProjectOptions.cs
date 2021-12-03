@@ -25,10 +25,12 @@ namespace Caravela.Framework.Impl.Options
         }
 
         public ProjectOptions( Microsoft.CodeAnalysis.Project project, ImmutableArray<object>? plugIns = null ) :
-            this( new OptionsAdapter( project.AnalyzerOptions.AnalyzerConfigOptionsProvider ), plugIns ) { }
+            this( new OptionsAdapter( project.AnalyzerOptions.AnalyzerConfigOptionsProvider ), plugIns )
+        { }
 
         public ProjectOptions( AnalyzerConfigOptionsProvider options, ImmutableArray<object>? plugIns = null ) :
-            this( new OptionsAdapter( options ), plugIns ) { }
+            this( new OptionsAdapter( options ), plugIns )
+        { }
 
         public ProjectOptions( AnalyzerConfigOptions options, ImmutableArray<object>? plugIns = null ) : this( new OptionsAdapter( options ), plugIns ) { }
 

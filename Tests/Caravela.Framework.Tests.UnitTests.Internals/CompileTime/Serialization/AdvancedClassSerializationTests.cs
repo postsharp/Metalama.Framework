@@ -1,4 +1,7 @@
-﻿using Caravela.Framework.Impl.CompileTime.Serialization;
+﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+
+using Caravela.Framework.Impl.CompileTime.Serialization;
 using Caravela.Framework.Serialization;
 using System;
 using System.IO;
@@ -12,26 +15,26 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serialization
         [Fact]
         public void CyclicGraph_Classes()
         {
-            Parent mother = new Parent("gall anonim");
-            Child ch1 = new Child { Mother = mother, Name = "ch1" };
-            Child ch2 = new Child { Mother = mother, Name = "ch2" };
+            var mother = new Parent( "gall anonim" );
+            var ch1 = new Child { Mother = mother, Name = "ch1" };
+            var ch2 = new Child { Mother = mother, Name = "ch2" };
             var ch3 = new Child { Mother = mother, Name = "ch3" };
             mother.Children = new Child[3];
             mother.Children[0] = ch1;
             mother.Children[1] = ch2;
             mother.Children[2] = ch3;
 
-            MetaFormatter formatter = new MetaFormatter();
-            MemoryStream memoryStream = new MemoryStream();
-            formatter.Serialize(mother, memoryStream);
-            memoryStream.Seek(0, SeekOrigin.Begin);
-            Parent deserializedObject = (Parent)formatter.Deserialize(memoryStream);
+            var formatter = new MetaFormatter();
+            var memoryStream = new MemoryStream();
+            formatter.Serialize( mother, memoryStream );
+            memoryStream.Seek( 0, SeekOrigin.Begin );
+            var deserializedObject = (Parent) formatter.Deserialize( memoryStream );
 
-            Assert.Equal(mother.Name, deserializedObject.Name);
-            Assert.Equal(mother.Children.Length, deserializedObject.Children.Length);
-            Assert.Same(deserializedObject, deserializedObject.Children[0].Mother);
-            Assert.Same(deserializedObject, deserializedObject.Children[1].Mother);
-            Assert.Same(deserializedObject, deserializedObject.Children[2].Mother);
+            Assert.Equal( mother.Name, deserializedObject.Name );
+            Assert.Equal( mother.Children.Length, deserializedObject.Children.Length );
+            Assert.Same( deserializedObject, deserializedObject.Children[0].Mother );
+            Assert.Same( deserializedObject, deserializedObject.Children[1].Mother );
+            Assert.Same( deserializedObject, deserializedObject.Children[2].Mother );
         }
 
         [Fact]
@@ -42,36 +45,36 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serialization
             brother.Sibling[0] = sister;
             sister.Sibling[0] = brother;
 
-            MetaFormatter formatter = new MetaFormatter();
-            MemoryStream memoryStream = new MemoryStream();
-            formatter.Serialize(brother, memoryStream);
-            memoryStream.Seek(0, SeekOrigin.Begin);
-            Child deserializedObject = (Child)formatter.Deserialize(memoryStream);
+            var formatter = new MetaFormatter();
+            var memoryStream = new MemoryStream();
+            formatter.Serialize( brother, memoryStream );
+            memoryStream.Seek( 0, SeekOrigin.Begin );
+            var deserializedObject = (Child) formatter.Deserialize( memoryStream );
 
-            Assert.NotNull(deserializedObject);
-            Assert.Equal(brother.Name, deserializedObject.Name);
-            Assert.Equal(brother.Sibling.Length, deserializedObject.Sibling.Length);
-            Assert.Equal(sister.Sibling.Length, deserializedObject.Sibling[0].Sibling.Length);
+            Assert.NotNull( deserializedObject );
+            Assert.Equal( brother.Name, deserializedObject.Name );
+            Assert.Equal( brother.Sibling.Length, deserializedObject.Sibling.Length );
+            Assert.Equal( sister.Sibling.Length, deserializedObject.Sibling[0].Sibling.Length );
 
-            Assert.Same(deserializedObject, deserializedObject.Sibling[0].Sibling[0]);
+            Assert.Same( deserializedObject, deserializedObject.Sibling[0].Sibling[0] );
         }
 
         [Fact]
         public void CyclicGraph_RelatedObjectsInArray_Arrays()
         {
-            Child[] children = new Child[2];
-            var brother = new Child {Sibling = new Child[1], Name = "James"};
-            var sister = new Child {Sibling = new Child[1], Name = "Joan"};
+            var children = new Child[2];
+            var brother = new Child { Sibling = new Child[1], Name = "James" };
+            var sister = new Child { Sibling = new Child[1], Name = "Joan" };
             brother.Sibling[0] = sister;
             sister.Sibling[0] = brother;
             children[0] = brother;
             children[1] = sister;
 
-            MetaFormatter formatter = new MetaFormatter();
-            MemoryStream memoryStream = new MemoryStream();
-            formatter.Serialize(children, memoryStream);
-            memoryStream.Seek(0, SeekOrigin.Begin);
-            Child[] deserializedObject = (Child[])formatter.Deserialize(memoryStream);
+            var formatter = new MetaFormatter();
+            var memoryStream = new MemoryStream();
+            formatter.Serialize( children, memoryStream );
+            memoryStream.Seek( 0, SeekOrigin.Begin );
+            var deserializedObject = (Child[]) formatter.Deserialize( memoryStream );
 
             Assert.NotNull( deserializedObject );
             Assert.Equal( children.Length, deserializedObject.Length );
@@ -87,23 +90,23 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serialization
         [Fact]
         public void CyclicGraph_ToSelf()
         {
-            Parent spouse1 = new Parent( "Mono" );
+            var spouse1 = new Parent( "Mono" );
             spouse1.Spouse = spouse1;
 
-            MetaFormatter formatter = new MetaFormatter();
-            MemoryStream memoryStream = new MemoryStream();
-            formatter.Serialize(spouse1, memoryStream);
-            memoryStream.Seek(0, SeekOrigin.Begin);
-            Parent deserializedObject = (Parent) formatter.Deserialize( memoryStream );
+            var formatter = new MetaFormatter();
+            var memoryStream = new MemoryStream();
+            formatter.Serialize( spouse1, memoryStream );
+            memoryStream.Seek( 0, SeekOrigin.Begin );
+            var deserializedObject = (Parent) formatter.Deserialize( memoryStream );
 
-            Assert.NotNull(deserializedObject);
-            Assert.NotNull(deserializedObject.Spouse);
-            Assert.Equal(spouse1.Name, deserializedObject.Name);
-            Assert.Equal(spouse1.Name, deserializedObject.Spouse.Name);
+            Assert.NotNull( deserializedObject );
+            Assert.NotNull( deserializedObject.Spouse );
+            Assert.Equal( spouse1.Name, deserializedObject.Name );
+            Assert.Equal( spouse1.Name, deserializedObject.Spouse.Name );
             Assert.Same( deserializedObject, deserializedObject.Spouse );
         }
 
-        [MetaSerializer( typeof(Serializer) )]
+        [MetaSerializer( typeof( Serializer ) )]
         public class Parent
         {
             public string Name;
@@ -143,7 +146,7 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serialization
             }
         }
 
-        [MetaSerializer( typeof(Serializer) )]
+        [MetaSerializer( typeof( Serializer ) )]
         public class Child
         {
             public string? Name { get; set; }
@@ -184,7 +187,7 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serialization
             }
         }
 
-        [MetaSerializer(typeof(Serializer))]
+        [MetaSerializer( typeof( Serializer ) )]
         public class IgnoringType
         {
 #pragma warning disable IDE0051 // Remove unused private members

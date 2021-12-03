@@ -23,7 +23,7 @@ namespace Caravela.Framework.Impl.Testing
 
             GlobalJsonWriter.TryWriteCurrentVersion( dir );
 
-            var metadataReader = AssemblyMetadataReader.GetInstance( typeof(CaravelaCompilerUtility).Assembly );
+            var metadataReader = AssemblyMetadataReader.GetInstance( typeof( CaravelaCompilerUtility ).Assembly );
 
             var csproj = $@"
 <Project Sdk='Microsoft.NET.Sdk'>

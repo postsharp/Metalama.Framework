@@ -71,7 +71,7 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
 
         public int Count => this.SourceItems.Length;
 
-        public TDeclaration this[ int index ]
+        public TDeclaration this[int index]
         {
             get
             {
@@ -95,6 +95,6 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
             }
         }
 
-        public override string ToString() => $"DeclarationList<{typeof(TDeclaration).Name}> Count={this.Count}";
+        public override string ToString() => $"DeclarationList<{typeof( TDeclaration ).Name}> Count={this.Count}";
     }
 }

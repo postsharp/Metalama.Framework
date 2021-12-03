@@ -4,7 +4,6 @@
 using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Reflection;
 using System.Text;
@@ -45,7 +44,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
         public static INamedTypeSymbol GetTypeByMetadataNameSafe( this Compilation compilation, string name )
             => compilation.GetTypeByMetadataName( name ) ?? throw new ArgumentOutOfRangeException(
-                nameof(name),
+                nameof( name ),
                 $"Cannot find a type '{name}' in compilation '{compilation.AssemblyName}" );
 
         /// <summary>

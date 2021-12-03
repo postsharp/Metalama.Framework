@@ -52,7 +52,7 @@ namespace Caravela.Framework.Impl.CodeModel
                     return conversion.IsImplicit && !conversion.IsBoxing && !conversion.IsUserDefined && !conversion.IsDynamic;
 
                 default:
-                    throw new ArgumentOutOfRangeException( nameof(kind) );
+                    throw new ArgumentOutOfRangeException( nameof( kind ) );
             }
         }
     }

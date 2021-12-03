@@ -42,7 +42,7 @@ namespace Caravela.Framework.Impl.Templating
 
         private static bool IsTemplate( ISymbol symbol )
             => symbol.GetAttributes()
-                .Any( a => a.AttributeClass?.Name == nameof(TemplateAttribute) || a.AttributeClass?.Name == nameof(InterfaceMemberAttribute) );
+                .Any( a => a.AttributeClass?.Name == nameof( TemplateAttribute ) || a.AttributeClass?.Name == nameof( InterfaceMemberAttribute ) );
 
         public override SyntaxNode? VisitMethodDeclaration( MethodDeclarationSyntax node )
         {

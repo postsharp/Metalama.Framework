@@ -29,7 +29,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
     public partial class DesignTimeAspectPipeline : AspectPipeline
     {
         private readonly ConditionalWeakTable<Compilation, CompilationResult> _compilationResultCache = new();
-        private static readonly string _sourceGeneratorAssemblyName = typeof(DesignTimeAspectPipelineFactory).Assembly.GetName().Name;
+        private static readonly string _sourceGeneratorAssemblyName = typeof( DesignTimeAspectPipelineFactory ).Assembly.GetName().Name;
 
         private readonly IFileSystemWatcher? _fileSystemWatcher;
 

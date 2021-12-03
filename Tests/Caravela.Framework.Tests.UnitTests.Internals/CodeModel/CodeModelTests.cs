@@ -177,7 +177,7 @@ interface I<T>
             Assert.True( m1.ReturnParameter.IsReturnParameter );
             Assert.False( m1.Parameters[0].IsReturnParameter );
 
-            Assert.Equal( 0, m1.Parameters.OfParameterType( typeof(int) ).First().Index );
+            Assert.Equal( 0, m1.Parameters.OfParameterType( typeof( int ) ).First().Index );
             Assert.Equal( 0, m1.Parameters.OfParameterType<int>().First().Index );
             Assert.Equal( 0, m1.Parameters.OfParameterType( compilation.Factory.GetSpecialType( SpecialType.Int32 ) ).First().Index );
 
@@ -279,13 +279,13 @@ class C
             var parameterType = Assert.Single( parameterTypes )!;
 
             Assert.Equal( "int[]", parameterType.ToString() );
-            Assert.True( parameterType.Is( typeof(int[]) ) );
-            Assert.False( parameterType.Is( typeof(int[,]) ) );
+            Assert.True( parameterType.Is( typeof( int[] ) ) );
+            Assert.False( parameterType.Is( typeof( int[,] ) ) );
 
             var arrayType = Assert.IsAssignableFrom<IArrayType>( parameterType );
 
             Assert.Equal( "int", arrayType.ElementType.ToString() );
-            Assert.True( arrayType.ElementType.Is( typeof(int) ) );
+            Assert.True( arrayType.ElementType.Is( typeof( int ) ) );
             Assert.Equal( 1, arrayType.Rank );
         }
 
@@ -528,16 +528,16 @@ class C
 
             Assert.Equal(
                 "List<T>.Enumerator",
-                compilation.Factory.GetTypeByReflectionType( typeof(List<>.Enumerator) ).ToString() );
+                compilation.Factory.GetTypeByReflectionType( typeof( List<>.Enumerator ) ).ToString() );
 
             Assert.Equal(
                 "Dictionary<int, string>",
-                compilation.Factory.GetTypeByReflectionType( typeof(Dictionary<int, string>) ).ToString() );
+                compilation.Factory.GetTypeByReflectionType( typeof( Dictionary<int, string> ) ).ToString() );
 
-            Assert.Equal( "int[][*,*]", compilation.Factory.GetTypeByReflectionType( typeof(int[][,]) ).ToString() );
-            Assert.Equal( "void*", compilation.Factory.GetTypeByReflectionType( typeof(void*) ).ToString() );
+            Assert.Equal( "int[][*,*]", compilation.Factory.GetTypeByReflectionType( typeof( int[][,] ) ).ToString() );
+            Assert.Equal( "void*", compilation.Factory.GetTypeByReflectionType( typeof( void* ) ).ToString() );
 
-            Assert.Throws<ArgumentException>( () => compilation.Factory.GetTypeByReflectionType( typeof(int).MakeByRefType() ) );
+            Assert.Throws<ArgumentException>( () => compilation.Factory.GetTypeByReflectionType( typeof( int ).MakeByRefType() ) );
         }
 
         [Fact]
@@ -613,15 +613,15 @@ class C<TC>
 
             var openTypeMethod = type.Methods.First();
             Assert.True( openTypeMethod.IsOpenGeneric );
-            var closedType = type.ConstructGenericInstance( typeof(string) );
+            var closedType = type.ConstructGenericInstance( typeof( string ) );
             Assert.False( closedType.IsOpenGeneric );
             var closedTypeMethod = closedType.Methods.First();
             Assert.True( closedTypeMethod.IsOpenGeneric );
-            var closedMethod = closedTypeMethod.ConstructGenericInstance( typeof(int) );
+            var closedMethod = closedTypeMethod.ConstructGenericInstance( typeof( int ) );
             Assert.False( closedMethod.IsOpenGeneric );
 
             Assert.Equal( "(TC, TM)", openTypeMethod.ReturnType.ToString() );
-            Assert.Throws<InvalidOperationException>( () => openTypeMethod.ConstructGenericInstance( typeof(int) ) );
+            Assert.Throws<InvalidOperationException>( () => openTypeMethod.ConstructGenericInstance( typeof( int ) ) );
             Assert.Equal( "(string, TM)", closedTypeMethod.ReturnType.ToString() );
             Assert.Equal( "(string, int)", closedMethod.ReturnType.ToString() );
         }
@@ -646,7 +646,7 @@ class Class<T>
             var compilation = testContext.CreateCompilationModel( code );
 
             var openType = compilation.Types.Single();
-            var typeInstance = openType.ConstructGenericInstance( typeof(string) );
+            var typeInstance = openType.ConstructGenericInstance( typeof( string ) );
 
             Assert.Equal( "string", openType.Fields.Single().ForTypeInstance( typeInstance ).Type.ToString() );
             Assert.Equal( "string", openType.Properties.Single().ForTypeInstance( typeInstance ).Type.ToString() );
@@ -702,11 +702,11 @@ class Parent<TParent>
             Assert.True( nonGenericMethodOnOpenNonGenericNestedType.IsOpenGeneric );
 
             // Attempt to create a generic instance of a nested type should fail when the parent type is an open generic.
-            Assert.Throws<InvalidOperationException>( () => genericNestedTypeOnOpenGenericParent.ConstructGenericInstance( typeof(int) ) );
+            Assert.Throws<InvalidOperationException>( () => genericNestedTypeOnOpenGenericParent.ConstructGenericInstance( typeof( int ) ) );
 
             // Creating a closed nested type.
-            var closedParentType = openParentType.ConstructGenericInstance( typeof(string) );
-            var closedGenericNestedType = closedParentType.NestedTypes.OfName( "NestedGeneric" ).Single().ConstructGenericInstance( typeof(int) );
+            var closedParentType = openParentType.ConstructGenericInstance( typeof( string ) );
+            var closedGenericNestedType = closedParentType.NestedTypes.OfName( "NestedGeneric" ).Single().ConstructGenericInstance( typeof( int ) );
             Assert.Equal( "int", closedGenericNestedType.TypeArguments[0].ToString() );
             Assert.False( closedGenericNestedType.IsOpenGeneric );
 
@@ -716,7 +716,7 @@ class Parent<TParent>
             Assert.Equal( "(string, int, TMethod)", openMethodOfClosedNestedType.ReturnType.ToString() );
 
             // Closed method in closed nested type.
-            var closedMethod = openMethodOfClosedNestedType.ConstructGenericInstance( typeof(long) );
+            var closedMethod = openMethodOfClosedNestedType.ConstructGenericInstance( typeof( long ) );
             Assert.Equal( "(string, int, long)", closedMethod.ReturnType.ToString() );
         }
 
@@ -854,7 +854,7 @@ class T2 {}
             Assert.Same( compilation.GlobalNamespace, compilation.GetNamespace( "" ) );
             Assert.Null( compilation.GetNamespace( "Ns1.NsX" ) );
 
-            var externalType = (INamedType) compilation.Factory.GetTypeByReflectionType( typeof(EventHandler) );
+            var externalType = (INamedType) compilation.Factory.GetTypeByReflectionType( typeof( EventHandler ) );
             Assert.True( externalType.IsExternal );
             Assert.Throws<InvalidOperationException>( () => externalType.Namespace );
         }

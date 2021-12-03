@@ -85,19 +85,19 @@ namespace Caravela.Framework.Impl.CompileTime
 
                 this._compileTimeTypeName = (NameSyntax)
                     this._syntaxGenerationContext.SyntaxGenerator.Type(
-                        this._syntaxGenerationContext.ReflectionMapper.GetTypeSymbol( typeof(CompileTimeType) ) );
+                        this._syntaxGenerationContext.ReflectionMapper.GetTypeSymbol( typeof( CompileTimeType ) ) );
 
                 this._originalNameTypeSyntax = (NameSyntax)
                     this._syntaxGenerationContext.SyntaxGenerator.Type(
-                        this._syntaxGenerationContext.ReflectionMapper.GetTypeSymbol( typeof(OriginalIdAttribute) ) );
+                        this._syntaxGenerationContext.ReflectionMapper.GetTypeSymbol( typeof( OriginalIdAttribute ) ) );
 
                 this._originalPathTypeSyntax = (NameSyntax)
                     this._syntaxGenerationContext.SyntaxGenerator.Type(
-                        this._syntaxGenerationContext.ReflectionMapper.GetTypeSymbol( typeof(OriginalPathAttribute) ) );
+                        this._syntaxGenerationContext.ReflectionMapper.GetTypeSymbol( typeof( OriginalPathAttribute ) ) );
 
                 var reflectionMapper = serviceProvider.GetService<ReflectionMapperFactory>().GetInstance( runTimeCompilation );
-                this._fabricType = reflectionMapper.GetTypeSymbol( typeof(Fabric) );
-                this._typeFabricType = reflectionMapper.GetTypeSymbol( typeof(TypeFabric) );
+                this._fabricType = reflectionMapper.GetTypeSymbol( typeof( Fabric ) );
+                this._typeFabricType = reflectionMapper.GetTypeSymbol( typeof( TypeFabric ) );
             }
 
             // TODO: assembly and module-level attributes?
@@ -193,7 +193,7 @@ namespace Caravela.Framework.Impl.CompileTime
                                                 this._diagnosticAdder.Report(
                                                     TemplatingDiagnosticDescriptors.RunTimeTypesCannotHaveCompileTimeTypesExceptClasses.CreateDiagnostic(
                                                         childSymbol.GetDiagnosticLocation(),
-                                                        (childSymbol, typeof(TypeFabric)) ) );
+                                                        (childSymbol, typeof( TypeFabric )) ) );
 
                                                 this.Success = false;
                                             }
@@ -250,7 +250,7 @@ namespace Caravela.Framework.Impl.CompileTime
                                 this._diagnosticAdder.Report(
                                     TemplatingDiagnosticDescriptors.RunTimeTypesCannotHaveCompileTimeTypesExceptClasses.CreateDiagnostic(
                                         childSymbol.GetDiagnosticLocation(),
-                                        (childSymbol, typeof(TypeFabric)) ) );
+                                        (childSymbol, typeof( TypeFabric )) ) );
 
                                 this.Success = false;
                             }
@@ -340,7 +340,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
                 foreach ( var implementedInterface in allImplementedInterfaces )
                 {
-                    if ( implementedInterface.Name is nameof(IAspect) or nameof(IEligible<IDeclaration>) or nameof(ProjectExtension) )
+                    if ( implementedInterface.Name is nameof( IAspect ) or nameof( IEligible<IDeclaration> ) or nameof( ProjectExtension ) )
                     {
                         foreach ( var member in implementedInterface.GetMembers() )
                         {
@@ -383,9 +383,9 @@ namespace Caravela.Framework.Impl.CompileTime
                 }
 
                 // Add serialization logic if the type is serializable and this is the primary declaration.
-                if ( this._serializableTypes.TryGetValue( symbol, out var serializableType ))
+                if ( this._serializableTypes.TryGetValue( symbol, out var serializableType ) )
                 {
-                    if (!serializableType.Type.GetMembers().Any(m => m is IMethodSymbol method && method.MethodKind == MethodKind.Constructor && method.GetPrimarySyntaxReference() != null))
+                    if ( !serializableType.Type.GetMembers().Any( m => m is IMethodSymbol method && method.MethodKind == MethodKind.Constructor && method.GetPrimarySyntaxReference() != null ) )
                     {
                         // There is no defined constructor, so we need to explicitly add parameterless contructor.
                         members.Add(
@@ -809,7 +809,7 @@ namespace Caravela.Framework.Impl.CompileTime
                             MemberAccessExpression(
                                 SyntaxKind.SimpleMemberAccessExpression,
                                 this._compileTimeTypeName,
-                                IdentifierName( nameof(CompileTimeType.GetCompileTimeType) ) );
+                                IdentifierName( nameof( CompileTimeType.GetCompileTimeType ) ) );
 
                         var invocation = InvocationExpression(
                             memberAccess,

@@ -42,12 +42,12 @@ namespace Caravela.Framework.Impl.DesignTime.Diagnostics
         /// </summary>
         public static ImmutableDictionary<string, DiagnosticDescriptor> StandardDiagnosticDescriptors { get; } = new DiagnosticDefinitionDiscoveryService()
             .GetDiagnosticDefinitions(
-                typeof(TemplatingDiagnosticDescriptors),
-                typeof(DesignTimeDiagnosticDescriptors),
-                typeof(GeneralDiagnosticDescriptors),
-                typeof(SerializationDiagnosticDescriptors),
-                typeof(AdviceDiagnosticDescriptors),
-                typeof(AspectLinkerDiagnosticDescriptors) )
+                typeof( TemplatingDiagnosticDescriptors ),
+                typeof( DesignTimeDiagnosticDescriptors ),
+                typeof( GeneralDiagnosticDescriptors ),
+                typeof( SerializationDiagnosticDescriptors ),
+                typeof( AdviceDiagnosticDescriptors ),
+                typeof( AspectLinkerDiagnosticDescriptors ) )
             .Select( d => d.ToRoslynDescriptor() )
             .ToImmutableDictionary( d => d.Id, d => d, StringComparer.CurrentCultureIgnoreCase );
 

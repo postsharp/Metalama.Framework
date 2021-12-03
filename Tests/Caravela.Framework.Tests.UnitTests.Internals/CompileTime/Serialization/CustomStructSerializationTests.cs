@@ -1,4 +1,6 @@
-using Caravela.Framework.Impl.CompileTime.Serialization;
+// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+
 using Caravela.Framework.Serialization;
 using System;
 using System.Collections.Generic;
@@ -6,56 +8,63 @@ using Xunit;
 
 namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serialization
 {
-    
+
     public class CustomStructSerializationTests : SerializationTestsBase
     {
-        
+
         [Fact]
         public void SerializeStruct_BasicTest()
         {
-            SimpleStruct s = new SimpleStruct(1, DateTime.Now);
-            s.StringValue = "Test";
-            s.NullableEnumField = TypeCode.Char;
-            TestSerialization( s );
+            var s = new SimpleStruct( 1, DateTime.Now )
+            {
+                StringValue = "Test",
+                NullableEnumField = TypeCode.Char
+            };
+            this.TestSerialization( s );
         }
 
         [Fact]
         public void SerializeStruct_BoxedStruct()
         {
-            SimpleStruct s = new SimpleStruct(1, DateTime.Now);
-            s.StringValue = "Test";
-            TestSerialization((object)s);
+            var s = new SimpleStruct( 1, DateTime.Now )
+            {
+                StringValue = "Test"
+            };
+            this.TestSerialization( (object) s );
         }
 
         [Fact]
         public void SerializeStruct_GenericStruct()
         {
-            GenericStruct<string> s = new GenericStruct<string>();
-            s.Value = "1";
-            TestSerialization( s );
+            var s = new GenericStruct<string>
+            {
+                Value = "1"
+            };
+            this.TestSerialization( s );
         }
 
         [Fact]
         public void SerializeStruct_NestedStructs()
         {
-            GenericStruct<SimpleStruct> s = new GenericStruct<SimpleStruct>();
-            s.Value = new SimpleStruct(5, DateTime.MinValue);
-            TestSerialization(s);
+            var s = new GenericStruct<SimpleStruct>
+            {
+                Value = new SimpleStruct( 5, DateTime.MinValue )
+            };
+            this.TestSerialization( s );
         }
 
         [Fact]
         public void SerializeStruct_WithObjectReferences()
         {
-            SimpleClass cls = new SimpleClass( 11 );
-            SimpleStruct str = new SimpleStruct( 1, DateTime.Now ) {SimpleClass = cls, SimpleClass2 = cls};
-            SimpleStruct str2 = TestSerialization( str );
+            var cls = new SimpleClass( 11 );
+            var str = new SimpleStruct( 1, DateTime.Now ) { SimpleClass = cls, SimpleClass2 = cls };
+            var str2 = this.TestSerialization( str );
             Assert.Same( str2.SimpleClass, str2.SimpleClass2 );
         }
 
-        #region GenericStruct
-
-        [MetaSerializer(typeof(GenericStructSerializer<>))]
+        [MetaSerializer( typeof( GenericStructSerializer<> ) )]
         public struct GenericStruct<T> : IEquatable<GenericStruct<T>>
+            where T : notnull
         {
             public T Value { get; set; }
 
@@ -63,47 +72,49 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serialization
 
             public bool Equals( GenericStruct<T> other )
             {
-                return EqualityComparer<T>.Default.Equals( Value, other.Value ) && string.Equals( StringValue, other.StringValue );
+                return EqualityComparer<T>.Default.Equals( this.Value, other.Value ) && StringComparer.Ordinal.Equals( this.StringValue, other.StringValue );
             }
 
-            public override bool Equals( object obj )
+            public override bool Equals( object? obj )
             {
-                if ( ReferenceEquals( null, obj ) ) return false;
-                return obj is GenericStruct<T> && Equals( (GenericStruct<T>) obj );
+                if ( ReferenceEquals( null, obj ) )
+                {
+                    return false;
+                }
+
+                return obj is GenericStruct<T> && this.Equals( (GenericStruct<T>) obj );
             }
 
             public override int GetHashCode()
             {
                 unchecked
                 {
-                    return (EqualityComparer<T>.Default.GetHashCode( Value )*397) ^ (StringValue != null ? StringValue.GetHashCode() : 0);
+                    return (EqualityComparer<T>.Default.GetHashCode( this.Value ) * 397) ^ (this.StringValue != null ? StringComparer.Ordinal.GetHashCode( this.StringValue ) : 0);
                 }
             }
         }
 
         public class GenericStructSerializer<T> : ValueTypeMetaSerializer<GenericStruct<T>>
+            where T : notnull
         {
-            public override void SerializeObject( GenericStruct<T> value, IArgumentsWriter writer )
+            public override void SerializeObject( GenericStruct<T> obj, IArgumentsWriter constructorArguments )
             {
-                writer.SetValue( "T", value.Value );
-                writer.SetValue( "s", value.StringValue );
+                constructorArguments.SetValue( "T", obj.Value );
+                constructorArguments.SetValue( "s", obj.StringValue );
             }
 
-            public override GenericStruct<T> DeserializeObject( IArgumentsReader reader )
+            public override GenericStruct<T> DeserializeObject( IArgumentsReader constructorArguments )
             {
-                GenericStruct<T> s = new GenericStruct<T>();
-                s.StringValue = reader.GetValue<string>( "s" );
-                s.Value = reader.GetValue<T>( "T" );
+                var s = new GenericStruct<T>
+                {
+                    StringValue = constructorArguments.GetValue<string>( "s" ),
+                    Value = constructorArguments.GetValue<T>( "T" )
+                };
                 return s;
             }
         }
 
-        #endregion
-
-
-        #region SimpleStruct
-
-        [MetaSerializer(typeof(SimpleStructSerializer))]
+        [MetaSerializer( typeof( SimpleStructSerializer ) )]
         public struct SimpleStruct : IEquatable<SimpleStruct>
         {
             public int IntValue { get; set; }
@@ -120,32 +131,36 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serialization
 
             public SimpleStruct( int intValue, DateTime timeValue ) : this()
             {
-                IntValue = intValue;
-                TimeValue = timeValue;
+                this.IntValue = intValue;
+                this.TimeValue = timeValue;
             }
 
             public bool Equals( SimpleStruct other )
             {
-                return IntValue == other.IntValue && string.Equals( StringValue, other.StringValue ) && TimeValue.Equals( other.TimeValue ) && Equals( SimpleClass, other.SimpleClass ) && 
-                    Equals( SimpleClass2, other.SimpleClass2 ) && Equals( NullableEnumField, other.NullableEnumField);
+                return this.IntValue == other.IntValue && StringComparer.Ordinal.Equals( this.StringValue, other.StringValue ) && this.TimeValue.Equals( other.TimeValue ) && Equals( this.SimpleClass, other.SimpleClass ) &&
+                    Equals( this.SimpleClass2, other.SimpleClass2 ) && Equals( this.NullableEnumField, other.NullableEnumField );
             }
 
-            public override bool Equals( object obj )
+            public override bool Equals( object? obj )
             {
-                if ( ReferenceEquals( null, obj ) ) return false;
-                return obj is SimpleStruct && Equals( (SimpleStruct) obj );
+                if ( ReferenceEquals( null, obj ) )
+                {
+                    return false;
+                }
+
+                return obj is SimpleStruct && this.Equals( (SimpleStruct) obj );
             }
 
             public override int GetHashCode()
             {
                 unchecked
                 {
-                    int hashCode = IntValue;
-                    hashCode = (hashCode*397) ^ (StringValue != null ? StringValue.GetHashCode() : 0);
-                    hashCode = (hashCode*397) ^ TimeValue.GetHashCode();
-                    hashCode = (hashCode*397) ^ (SimpleClass != null ? SimpleClass.GetHashCode() : 0);
-                    hashCode = (hashCode*397) ^ (SimpleClass2 != null ? SimpleClass2.GetHashCode() : 0);
-                    hashCode = (hashCode * 397) ^ (NullableEnumField != null ? NullableEnumField.GetHashCode() : 0);
+                    var hashCode = this.IntValue;
+                    hashCode = (hashCode * 397) ^ (this.StringValue != null ? StringComparer.Ordinal.GetHashCode( this.StringValue ) : 0);
+                    hashCode = (hashCode * 397) ^ this.TimeValue.GetHashCode();
+                    hashCode = (hashCode * 397) ^ (this.SimpleClass != null ? this.SimpleClass.GetHashCode() : 0);
+                    hashCode = (hashCode * 397) ^ (this.SimpleClass2 != null ? this.SimpleClass2.GetHashCode() : 0);
+                    hashCode = (hashCode * 397) ^ (this.NullableEnumField != null ? this.NullableEnumField.GetHashCode() : 0);
                     return hashCode;
                 }
             }
@@ -153,55 +168,77 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serialization
 
         public class SimpleStructSerializer : ValueTypeMetaSerializer<SimpleStruct>
         {
-            public override void SerializeObject( SimpleStruct value, IArgumentsWriter writer )
+            public override void SerializeObject( SimpleStruct obj, IArgumentsWriter constructorArguments )
             {
-                writer.SetValue("int", value.IntValue);
-                writer.SetValue("time", value.TimeValue);
-                writer.SetValue( "string", value.StringValue);
-                writer.SetValue( "cls", value.SimpleClass );
-                writer.SetValue("cls2", value.SimpleClass2);
-                writer.SetValue("ne", value.NullableEnumField);
+                constructorArguments.SetValue( "int", obj.IntValue );
+                constructorArguments.SetValue( "time", obj.TimeValue );
+                constructorArguments.SetValue( "string", obj.StringValue );
+                constructorArguments.SetValue( "cls", obj.SimpleClass );
+                constructorArguments.SetValue( "cls2", obj.SimpleClass2 );
+                constructorArguments.SetValue( "ne", obj.NullableEnumField );
             }
 
-            public override SimpleStruct DeserializeObject( IArgumentsReader reader )
+            public override SimpleStruct DeserializeObject( IArgumentsReader constructorArguments )
             {
-                SimpleStruct str = new SimpleStruct( reader.GetValue<int>( "int" ), reader.GetValue<DateTime>( "time" ) );
-                str.StringValue = reader.GetValue<string>( "string" );
-                str.SimpleClass = reader.GetValue<SimpleClass>( "cls" );
-                str.SimpleClass2 = reader.GetValue<SimpleClass>("cls2");
-                str.NullableEnumField = reader.GetValue<TypeCode?>("ne");
+                var str = new SimpleStruct( constructorArguments.GetValue<int>( "int" ), constructorArguments.GetValue<DateTime>( "time" ) )
+                {
+                    StringValue = constructorArguments.GetValue<string>( "string" ),
+                    SimpleClass = constructorArguments.GetValue<SimpleClass>( "cls" ),
+                    SimpleClass2 = constructorArguments.GetValue<SimpleClass>( "cls2" ),
+                    NullableEnumField = constructorArguments.GetValue<TypeCode?>( "ne" )
+                };
                 return str;
             }
         }
 
-        [MetaSerializer(typeof(SimpleClassSerializer))]
+        [MetaSerializer( typeof( SimpleClassSerializer ) )]
         public class SimpleClass : IEquatable<SimpleClass>
         {
             public int X { get; set; }
 
             public SimpleClass( int x )
             {
-                X = x;
+                this.X = x;
             }
 
-            public bool Equals( SimpleClass other )
+            public bool Equals( SimpleClass? other )
             {
-                if ( ReferenceEquals( null, other ) ) return false;
-                if ( ReferenceEquals( this, other ) ) return true;
-                return X == other.X;
+                if ( ReferenceEquals( null, other ) )
+                {
+                    return false;
+                }
+
+                if ( ReferenceEquals( this, other ) )
+                {
+                    return true;
+                }
+
+                return this.X == other.X;
             }
 
-            public override bool Equals( object obj )
+            public override bool Equals( object? obj )
             {
-                if ( ReferenceEquals( null, obj ) ) return false;
-                if ( ReferenceEquals( this, obj ) ) return true;
-                if ( obj.GetType() != this.GetType() ) return false;
-                return Equals( (SimpleClass) obj );
+                if ( ReferenceEquals( null, obj ) )
+                {
+                    return false;
+                }
+
+                if ( ReferenceEquals( this, obj ) )
+                {
+                    return true;
+                }
+
+                if ( obj.GetType() != this.GetType() )
+                {
+                    return false;
+                }
+
+                return this.Equals( (SimpleClass) obj );
             }
 
             public override int GetHashCode()
             {
-                return X;
+                return this.X;
             }
         }
 
@@ -217,10 +254,8 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serialization
 
             public override object CreateInstance( Type type, IArgumentsReader constructorArguments )
             {
-                return new SimpleClass(constructorArguments.GetValue<int>("x"));   
+                return new SimpleClass( constructorArguments.GetValue<int>( "x" ) );
             }
         }
-
-        #endregion
     }
 }

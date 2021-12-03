@@ -79,9 +79,9 @@ namespace Caravela.Framework.Impl.CodeModel
                             => SpecialType.IAsyncEnumerable_T,
                         "IAsyncEnumerator" when this.TypeSymbol.ContainingNamespace.ToDisplayString() == "System.Collections.Generic"
                             => SpecialType.IAsyncEnumerator_T,
-                        nameof(ValueTask) when this.TypeSymbol.ContainingNamespace.ToDisplayString() == "System.Threading.Tasks"
+                        nameof( ValueTask ) when this.TypeSymbol.ContainingNamespace.ToDisplayString() == "System.Threading.Tasks"
                             => SpecialType.ValueTask_T,
-                        nameof(Task) when this.TypeSymbol.ContainingNamespace.ToDisplayString() == "System.Threading.Tasks"
+                        nameof( Task ) when this.TypeSymbol.ContainingNamespace.ToDisplayString() == "System.Threading.Tasks"
                             => SpecialType.Task_T,
                         _ => SpecialType.None
                     };
@@ -95,9 +95,9 @@ namespace Caravela.Framework.Impl.CodeModel
             {
                 return this.TypeSymbol.Name switch
                 {
-                    nameof(ValueTask) when this.TypeSymbol.ContainingNamespace.ToDisplayString() == "System.Threading.Tasks"
+                    nameof( ValueTask ) when this.TypeSymbol.ContainingNamespace.ToDisplayString() == "System.Threading.Tasks"
                         => SpecialType.ValueTask,
-                    nameof(Task) when this.TypeSymbol.ContainingNamespace.ToDisplayString() == "System.Threading.Tasks"
+                    nameof( Task ) when this.TypeSymbol.ContainingNamespace.ToDisplayString() == "System.Threading.Tasks"
                         => SpecialType.Task,
                     _ => SpecialType.None
                 };

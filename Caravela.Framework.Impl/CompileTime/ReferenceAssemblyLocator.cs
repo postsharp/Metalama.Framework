@@ -118,7 +118,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
         private IEnumerable<string> GetSystemAssemblyPaths()
         {
-            var tempProjectDirectory = Path.Combine( this._cacheDirectory, nameof(ReferenceAssemblyLocator) );
+            var tempProjectDirectory = Path.Combine( this._cacheDirectory, nameof( ReferenceAssemblyLocator ) );
 
             using var mutex = MutexHelper.WithGlobalLock( tempProjectDirectory );
             var referenceAssemblyListFile = Path.Combine( tempProjectDirectory, "assemblies.txt" );
@@ -137,7 +137,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
             GlobalJsonWriter.TryWriteCurrentVersion( tempProjectDirectory );
 
-            var metadataReader = AssemblyMetadataReader.GetInstance( typeof(ReferenceAssemblyLocator).Assembly );
+            var metadataReader = AssemblyMetadataReader.GetInstance( typeof( ReferenceAssemblyLocator ).Assembly );
 
             // We don't add a reference to Microsoft.CSharp because this package is used to support dynamic code, and we don't want
             // dynamic code at compile time. We prefer compilation errors.
@@ -185,7 +185,10 @@ namespace Caravela.Framework.Impl.CompileTime
             var psi = new ProcessStartInfo( dotnetPath, "build -t:WriteReferenceAssemblies" )
             {
                 // We cannot call dotnet.exe with a \\?\-prefixed path because MSBuild would fail.
-                WorkingDirectory = tempProjectDirectory, UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true
+                WorkingDirectory = tempProjectDirectory,
+                UseShellExecute = false,
+                CreateNoWindow = true,
+                RedirectStandardOutput = true
             };
 
             var process = Process.Start( psi ).AssertNotNull();

@@ -14,13 +14,13 @@ namespace Caravela.Framework.Tests.UnitTests.RunTime
         [Fact]
         public void WithField()
         {
-            var field = this.GetType().GetField( nameof(this.MyField) )!;
+            var field = this.GetType().GetField( nameof( this.MyField ) )!;
             var fieldOrPropertyInfo = new FieldOrPropertyInfo( field );
             Assert.Equal( fieldOrPropertyInfo.DeclaringType, this.GetType() );
             Assert.Equal( fieldOrPropertyInfo.ReflectedType, this.GetType() );
             Assert.Equal( MemberTypes.Field, fieldOrPropertyInfo.MemberType );
-            Assert.Equal( nameof(this.MyField), fieldOrPropertyInfo.Name );
-            Assert.Equal( typeof(int), fieldOrPropertyInfo.ValueType );
+            Assert.Equal( nameof( this.MyField ), fieldOrPropertyInfo.Name );
+            Assert.Equal( typeof( int ), fieldOrPropertyInfo.ValueType );
             Assert.Equal( field, fieldOrPropertyInfo.AsField );
             Assert.Equal( field, fieldOrPropertyInfo.UnderlyingMemberInfo );
 
@@ -31,13 +31,13 @@ namespace Caravela.Framework.Tests.UnitTests.RunTime
         [Fact]
         public void WithProperty()
         {
-            var property = this.GetType().GetProperty( nameof(this.MyProperty) )!;
+            var property = this.GetType().GetProperty( nameof( this.MyProperty ) )!;
             var fieldOrPropertyInfo = new FieldOrPropertyInfo( property );
             Assert.Equal( fieldOrPropertyInfo.DeclaringType, this.GetType() );
             Assert.Equal( fieldOrPropertyInfo.ReflectedType, this.GetType() );
             Assert.Equal( MemberTypes.Property, fieldOrPropertyInfo.MemberType );
-            Assert.Equal( typeof(int), fieldOrPropertyInfo.ValueType );
-            Assert.Equal( nameof(this.MyProperty), fieldOrPropertyInfo.Name );
+            Assert.Equal( typeof( int ), fieldOrPropertyInfo.ValueType );
+            Assert.Equal( nameof( this.MyProperty ), fieldOrPropertyInfo.Name );
             Assert.Equal( property, fieldOrPropertyInfo.AsProperty );
             Assert.Equal( property, fieldOrPropertyInfo.UnderlyingMemberInfo );
 

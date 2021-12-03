@@ -1,7 +1,6 @@
-﻿// Copyright (c) SharpCrafters s.r.o. This file is not open source. It is released under a commercial
-// source-available license. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Impl.CompileTime.Serialization;
 using Caravela.Framework.Serialization;
 using System;
 using System.Collections;
@@ -10,7 +9,7 @@ using Xunit;
 
 namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serialization
 {
-    
+
     public class CollectionSerializersTests : SerializationTestsBase
     {
         [Fact]
@@ -22,7 +21,7 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serialization
         [Fact]
         public void ListSerializer_Strings()
         {
-            this.TestValue( new List<string> { string.Empty, null, "text", string.Empty, "2" } );
+            this.TestValue( new List<string?> { string.Empty, null, "text", string.Empty, "2" } );
         }
 
         [Fact]
@@ -41,25 +40,25 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serialization
         public void DictionarySerializer_StringsWithStrings()
         {
             this.TestValue(
-                new Dictionary<string, string>
+                new Dictionary<string, string?>
                     { { "a", "xx uu " }, { "óó&#@!`", " " }, { "b", null }, { string.Empty, "it is empty" }, { "very long and unpredictable text", "" } } );
         }
 
         [Fact]
         public void DictionarySerializer_IntsWithLists()
         {
-            Dictionary<int, List<SimpleType>> dictionary = new Dictionary<int, List<SimpleType>>
+            var dictionary = new Dictionary<int, List<SimpleType>>
                 {
                     { 1, new List<SimpleType> { new SimpleType { Name = "q" }, new SimpleType { Name = "w" } } },
                     { 2, new List<SimpleType> { new SimpleType { Name = "e" }, new SimpleType { Name = "r" }, new SimpleType { Name = "y" } } }
                 };
 
-            Dictionary<int, List<SimpleType>> deserialized = this.SerializeDeserialize( dictionary );
+            var deserialized = this.SerializeDeserialize( dictionary );
 
             Assert.NotNull( deserialized );
             Assert.Equal( dictionary.Count, deserialized.Count );
             Assert.Equal( dictionary.Keys, deserialized.Keys );
-            foreach ( KeyValuePair<int, List<SimpleType>> pair in dictionary )
+            foreach ( var pair in dictionary )
             {
                 Assert.Equal( pair.Value, deserialized[pair.Key] );
             }
@@ -68,9 +67,9 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serialization
         [Fact]
         public void DictionarySerializer_StringsWithArraysWithCycle()
         {
-            object[] a = new object[2];
-            object[] b = new object[2];
-            Dictionary<string, object[]> dictionary = new Dictionary<string, object[]>( 2 );
+            var a = new object[2];
+            var b = new object[2];
+            var dictionary = new Dictionary<string, object[]>( 2 );
 
             a[0] = new SimpleType { Name = "single" };
             a[1] = dictionary;
@@ -81,7 +80,7 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serialization
             dictionary["first"] = a;
             dictionary["second"] = b;
 
-            Dictionary<string, object[]> deserialized = this.SerializeDeserialize( dictionary );
+            var deserialized = this.SerializeDeserialize( dictionary );
 
             Assert.NotNull( deserialized );
             Assert.Equal( dictionary.Count, deserialized.Count );
@@ -94,12 +93,13 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serialization
         [Fact]
         public void DictionarySerializer_WithStringEqualityComparer()
         {
-            Dictionary<string, string> dictionary = new Dictionary<string, string>( StringComparer.OrdinalIgnoreCase );
+            var dictionary = new Dictionary<string, string>( StringComparer.OrdinalIgnoreCase )
+            {
+                ["first"] = "a",
+                ["second"] = "b"
+            };
 
-            dictionary["first"] = "a";
-            dictionary["second"] = "b";
-
-            Dictionary<string, string> deserialized = this.SerializeDeserialize( dictionary );
+            var deserialized = this.SerializeDeserialize( dictionary );
 
             Assert.NotNull( deserialized );
             Assert.Equal( dictionary.Count, deserialized.Count );
@@ -112,12 +112,13 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serialization
         [Fact]
         public void DictionarySerializer_WithCustomEqualityComparer()
         {
-            Dictionary<string, string> dictionary = new Dictionary<string, string>( new CustomEqualityComparer() );
+            var dictionary = new Dictionary<string, string>( new CustomEqualityComparer() )
+            {
+                ["first"] = "a",
+                ["second"] = "b"
+            };
 
-            dictionary["first"] = "a";
-            dictionary["second"] = "b";
-
-            Dictionary<string, string> deserialized = this.SerializeDeserialize( dictionary );
+            var deserialized = this.SerializeDeserialize( dictionary );
 
             Assert.NotNull( deserialized );
             Assert.Equal( dictionary.Count, deserialized.Count );
@@ -130,14 +131,16 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serialization
         [Fact]
         public void ClassSerializer_ClassContainingDictionary()
         {
-            TypeWithDictionary<int, string> typeWithDictionary = new TypeWithDictionary<int, string>();
-            typeWithDictionary.Dictionary = new Dictionary<int, string>();
+            var typeWithDictionary = new TypeWithDictionary<int, string>
+            {
+                Dictionary = new Dictionary<int, string>()
+            };
             typeWithDictionary.Dictionary.Add( 0, "0" );
             typeWithDictionary.Dictionary.Add( 1, "1" );
             typeWithDictionary.Dictionary.Add( 2, "2" );
             typeWithDictionary.Dictionary.Add( 3, "3" );
 
-            TypeWithDictionary<int, string> deserialized = this.SerializeDeserialize( typeWithDictionary );
+            var deserialized = this.SerializeDeserialize( typeWithDictionary );
 
             Assert.NotNull( deserialized );
             Assert.Equal( typeWithDictionary.Dictionary.Count, deserialized.Dictionary.Count );
@@ -149,20 +152,22 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serialization
         [Fact]
         public void LongLinkedListSerialization()
         {
-            LinkedListImpl ll = new LinkedListImpl();
-            ll.Head = new Node<int>( 1 );
-            Node<int> tail = ll.Head;
+            var ll = new LinkedListImpl
+            {
+                Head = new Node<int>( 1 )
+            };
+            var tail = ll.Head;
 
-            for ( int i = 2; i < 10000; i++ )
+            for ( var i = 2; i < 10000; i++ )
             {
                 tail.Next = new Node<int>( i );
                 tail = tail.Next;
             }
 
-            LinkedListImpl deserialized = this.SerializeDeserialize( ll );
+            var deserialized = this.SerializeDeserialize( ll );
 
             tail = ll.Head;
-            Node<int> deserializedTail = deserialized.Head;
+            var deserializedTail = deserialized.Head;
 
             while ( tail != null )
             {
@@ -172,51 +177,57 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serialization
             }
         }
 
-        private void TestValue<T>( T value ) where T : ICollection
+        private void TestValue<T>( T value ) 
+            where T : ICollection
         {
-            T deserialized = this.SerializeDeserialize( value );
+            var deserialized = this.SerializeDeserialize( value );
 
             Assert.Equal( value, deserialized );
         }
 
-        [MetaSerializer( typeof(Serializator) )]
+        [MetaSerializer( typeof( Serializator ) )]
         public class SimpleType : IEquatable<SimpleType>
         {
-            public string Name { get; set; }
+            public string? Name { get; set; }
 
-            public bool Equals( SimpleType other )
+            public bool Equals( SimpleType? other )
             {
                 if ( ReferenceEquals( null, other ) )
                 {
                     return false;
                 }
+
                 if ( ReferenceEquals( this, other ) )
                 {
                     return true;
                 }
-                return string.Equals( this.Name, other.Name );
+
+                return StringComparer.Ordinal.Equals( this.Name, other.Name );
             }
 
-            public override bool Equals( object obj )
+            public override bool Equals( object? obj )
             {
                 if ( ReferenceEquals( null, obj ) )
                 {
                     return false;
                 }
+
                 if ( ReferenceEquals( this, obj ) )
                 {
                     return true;
                 }
+
                 if ( obj.GetType() != this.GetType() )
                 {
                     return false;
                 }
-                return this.Equals( (SimpleType)obj );
+
+                return this.Equals( (SimpleType) obj );
             }
 
             public override int GetHashCode()
             {
-                return (this.Name != null ? this.Name.GetHashCode() : 0);
+                return this.Name != null ? StringComparer.Ordinal.GetHashCode( this.Name ) : 0;
             }
 
             public class Serializator : ReferenceTypeSerializer<SimpleType>
@@ -238,10 +249,10 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serialization
             }
         }
 
-        [MetaSerializer( typeof(Serializator) )]
+        [MetaSerializer( typeof( Serializator ) )]
         public class CustomEqualityComparer : IEqualityComparer<string>
         {
-            public bool Equals( string x, string y )
+            public bool Equals( string? x, string? y )
             {
                 if ( string.IsNullOrEmpty( x ) && string.IsNullOrEmpty( y ) )
                 {
@@ -253,7 +264,7 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serialization
                     return false;
                 }
 
-                return x.StartsWith( y[0].ToString() );
+                return x.StartsWith( y[0].ToString(), StringComparison.Ordinal );
             }
 
             public int GetHashCode( string obj )
@@ -281,44 +292,40 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serialization
                 {
                 }
 
-                public bool IsTwoPhase
-                {
-                    get
-                    {
-                        return false;
-                    }
-                }
+                public bool IsTwoPhase => false;
             }
         }
 
-        [MetaSerializer( typeof(Serializator<,>) )]
-        public class TypeWithDictionary<K, V>
+        [MetaSerializer( typeof( Serializator<,> ) )]
+        public class TypeWithDictionary<TKey, TValue>
+            where TKey : notnull
         {
-            public Dictionary<K, V> Dictionary { get; set; }
+            public Dictionary<TKey, TValue> Dictionary { get; set; }
         }
 
-        public class Serializator<K, V> : ReferenceTypeSerializer<TypeWithDictionary<K, V>>
+        public class Serializator<TKey, TValue> : ReferenceTypeSerializer<TypeWithDictionary<TKey, TValue>>
+            where TKey : notnull
         {
             public override object CreateInstance( Type type, IArgumentsReader constructorArguments )
             {
-                return new TypeWithDictionary<K, V>();
+                return new TypeWithDictionary<TKey, TValue>();
             }
 
-            public override void SerializeObject( TypeWithDictionary<K, V> obj, IArgumentsWriter constructorArguments, IArgumentsWriter initializationArguments )
+            public override void SerializeObject( TypeWithDictionary<TKey, TValue> obj, IArgumentsWriter constructorArguments, IArgumentsWriter initializationArguments )
             {
                 initializationArguments.SetValue( "_", obj.Dictionary );
             }
 
-            public override void DeserializeFields( TypeWithDictionary<K, V> obj, IArgumentsReader initializationArguments )
+            public override void DeserializeFields( TypeWithDictionary<TKey, TValue> obj, IArgumentsReader initializationArguments )
             {
-                obj.Dictionary = initializationArguments.GetValue<Dictionary<K, V>>( "_" );
+                obj.Dictionary = initializationArguments.GetValue<Dictionary<TKey, TValue>>( "_" );
             }
         }
 
-        [MetaSerializer( typeof(Serializer) )]
+        [MetaSerializer( typeof( Serializer ) )]
         public class LinkedListImpl
         {
-            public Node<int> Head { get; set; }
+            public Node<int>? Head { get; set; }
 
             // deliberately serializing object graph not array to test deep object graphs
             public class Serializer : ReferenceTypeSerializer<LinkedListImpl>
@@ -340,12 +347,13 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serialization
             }
         }
 
-        [MetaSerializer( typeof(Node<>.Serializer) )]
+        [MetaSerializer( typeof( Node<>.Serializer ) )]
         public class Node<T> : IEquatable<Node<T>>
+            where T : notnull
         {
             public T Value { get; set; }
 
-            public Node<T> Next { get; set; }
+            public Node<T>? Next { get; set; }
 
             public Node( T value )
             {
@@ -371,44 +379,45 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serialization
                 }
             }
 
-            #region IEquatable
-
-            public bool Equals( Node<T> other )
+            public bool Equals( Node<T>? other )
             {
                 if ( ReferenceEquals( null, other ) )
                 {
                     return false;
                 }
+
                 if ( ReferenceEquals( this, other ) )
                 {
                     return true;
                 }
+
                 return EqualityComparer<T>.Default.Equals( this.Value, other.Value );
             }
 
-            public override bool Equals( object obj )
+            public override bool Equals( object? obj )
             {
                 if ( ReferenceEquals( null, obj ) )
                 {
                     return false;
                 }
+
                 if ( ReferenceEquals( this, obj ) )
                 {
                     return true;
                 }
+
                 if ( obj.GetType() != this.GetType() )
                 {
                     return false;
                 }
-                return this.Equals( (Node<T>)obj );
+
+                return this.Equals( (Node<T>) obj );
             }
 
             public override int GetHashCode()
             {
                 return EqualityComparer<T>.Default.GetHashCode( this.Value );
             }
-
-            #endregion IEquatable
         }
     }
 }

@@ -12,7 +12,7 @@ namespace Caravela.Framework.Impl.Serialization
 {
     internal class EnumSerializer : ObjectSerializer
     {
-        private static readonly Type[] _unsignedTypes = { typeof(ushort), typeof(uint), typeof(ulong), typeof(byte) };
+        private static readonly Type[] _unsignedTypes = { typeof( ushort ), typeof( uint ), typeof( ulong ), typeof( byte ) };
 
         public override ExpressionSyntax Serialize( object obj, SyntaxSerializationContext serializationContext )
         {
@@ -44,7 +44,7 @@ namespace Caravela.Framework.Impl.Serialization
                         literal ) ) );
         }
 
-        public override Type InputType => typeof(Enum);
+        public override Type InputType => typeof( Enum );
 
         public override Type? OutputType => throw new NotSupportedException();
 

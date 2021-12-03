@@ -260,7 +260,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
                 // Check that the type is linked properly. An error here may be caused by a bug in 
                 // a handler of the AppDomain.AssemblyResolve event.
-                if ( type.GetInterfaces().Any( i => i.FullName == typeof(IAspect).FullName && !typeof(IAspect).IsAssignableFrom( i ) ) )
+                if ( type.GetInterfaces().Any( i => i.FullName == typeof( IAspect ).FullName && !typeof( IAspect ).IsAssignableFrom( i ) ) )
                 {
                     // There must have been some assembly version mismatch.
                     throw new AssertionFailedException( "Assembly version mismatch." );
@@ -270,11 +270,11 @@ namespace Caravela.Framework.Impl.CompileTime
             }
         }
 
-        public Type GetType(Type reflectionType) => this.GetType(reflectionType.FullName);
+        public Type GetType( Type reflectionType ) => this.GetType( reflectionType.FullName );
 
         public Type GetType( string reflectionName )
             => this.GetTypeOrNull( reflectionName ) ?? throw new ArgumentOutOfRangeException(
-                nameof(reflectionName),
+                nameof( reflectionName ),
                 $"Cannot find a type named '{reflectionName}' in the compile-time project '{this._compileTimeIdentity}'." );
 
         public CompileTimeFile? FindCodeFileFromTransformedPath( string transformedCodePath )
