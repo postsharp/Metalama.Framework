@@ -4,6 +4,7 @@
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Pipeline;
 using Caravela.Framework.Impl.Testing;
+using Caravela.Framework.Tests.UnitTests.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
@@ -150,6 +151,7 @@ class Expression
                 this.ProjectOptions = projectOptions ?? new TestProjectOptions();
 
                 this.ServiceProvider = ServiceProviderFactory.GetServiceProvider( this.ProjectOptions )
+                    .WithNextProvider( TestBackstageServiceProviderFactory.Create() )
                     .WithProjectScopedServices( TestCompilationFactory.GetMetadataReferences() )
                     .WithMark( ServiceProviderMark.Test );
 

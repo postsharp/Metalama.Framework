@@ -16,5 +16,13 @@
     <Import Sdk="PostSharp.Engineering.Sdk" Project="CodeQuality.props" />
     <Import Sdk="PostSharp.Engineering.Sdk" Project="SourceLink.props" />
 
+    <PropertyGroup>
+        <!--
+            Licensee: SharpCrafters s.r.o.
+            Product: Caravela
+            Namespace: Caravela
+        -->
+        <CaravelaLicense>1-ZEQQQQQQZEAEQCRCE4UW3UFEB4URXMHRB8KQBJJSB64LX7YQEUTZXJSRN4JUNTDAEAKZ2NUP6MCEBAXNKGL7VGZ48JHT6G3EGQREL8WQVM74EY4RC774B6HP6X5QQ35M5MZQQDEZJGP4Q8USJG4X6P2</CaravelaLicense>
+    </PropertyGroup>
 
 </Project>

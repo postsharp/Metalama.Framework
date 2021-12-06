@@ -3,6 +3,7 @@
 
 using Caravela.Framework.Impl.Pipeline;
 using Caravela.Framework.Impl.Testing;
+using Caravela.TestFramework.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -94,7 +95,9 @@ namespace Caravela.TestFramework.XunitFramework
                                 try
                                 {
                                     using var testOptions = new TestProjectOptions();
-                                    var serviceProvider = ServiceProviderFactory.GetServiceProvider( testOptions );
+                                    var serviceProvider = ServiceProviderFactory.GetServiceProvider( testOptions )
+                                        .WithNextProvider( TestBackstageServiceProviderFactory.Create() );
+
                                     var testInput = TestInput.FromFile( this._factory.ProjectProperties, directoryOptionsReader, testCase.UniqueID );
                                     testInput.Options.References.AddRange( references );
 

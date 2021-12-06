@@ -29,6 +29,7 @@
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="$(RoslynVersion)" />
     <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.Common" Version="$(RoslynVersion)" />
     <PackageReference Include="Caravela.Compiler.Sdk" Version="$(CaravelaCompilerVersion)" />
+    <PackageReference Include="PostSharp.Backstage.Settings" Version="$(PostSharpBackstageSettingsVersion)" PrivateAssets="all" />
     
     <PackageReference Include="Microsoft.Bcl.HashCode" Version="$(MicrosoftBclHashCodeVersion)" />
     <PackageReference Include="K4os.Hash.xxHash" Version="$(K4osHashxxHashVersion)" />

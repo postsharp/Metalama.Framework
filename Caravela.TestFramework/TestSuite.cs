@@ -72,7 +72,10 @@ namespace Caravela.TestFramework
         {
             var directory = this.GetDirectory( callerMemberName! );
             using var testOptions = new TestProjectOptions();
-            var serviceProvider = ServiceProviderFactory.GetServiceProvider( testOptions );
+
+            var serviceProvider =
+                ServiceProviderFactory.GetServiceProvider( testOptions )
+                    .WithNextProvider( TestBackstageServiceProviderFactory.Create() );
 
             var assemblyAssets = GetAssemblyAssets( this.GetType().Assembly );
 

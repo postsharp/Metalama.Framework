@@ -25,7 +25,8 @@ namespace Caravela.Framework.Impl.Pipeline
     {
         public void Execute( TransformerContext context )
         {
-            var serviceProvider = ServiceProviderFactory.GetServiceProvider();
+            var serviceProvider = ServiceProviderFactory.GetServiceProvider()
+                .WithNextProvider( context.Services );
 
             // Try.Caravela ships its own project options using the async-local service provider.
             var projectOptions = serviceProvider.GetOptionalService<IProjectOptions>();

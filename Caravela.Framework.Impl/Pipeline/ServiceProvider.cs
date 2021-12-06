@@ -21,15 +21,18 @@ namespace Caravela.Framework.Impl.Pipeline
     /// </summary>
     public class ServiceProvider : IServiceProvider
     {
+        private readonly IServiceProvider? _nextProvider;
+        
         // This field is not readonly because we use two-phase initialization to resolve the problem of cyclic dependencies.
         private ImmutableDictionary<Type, Lazy<IService, Type>> _services;
 
         public static ServiceProvider Empty { get; } =
-            new ServiceProvider( ImmutableDictionary<Type, Lazy<IService, Type>>.Empty ).WithMark( ServiceProviderMark.Other );
+            new ServiceProvider( ImmutableDictionary<Type, Lazy<IService, Type>>.Empty, null ).WithMark( ServiceProviderMark.Other );
 
-        private ServiceProvider( ImmutableDictionary<Type, Lazy<IService, Type>> services )
+        private ServiceProvider( ImmutableDictionary<Type, Lazy<IService, Type>> services, IServiceProvider? nextProvider )
         {
             this._services = services;
+            this._nextProvider = nextProvider;
         }
 
         /// <summary>
@@ -43,7 +46,7 @@ namespace Caravela.Framework.Impl.Pipeline
 
             AddService( service, builder );
 
-            return new ServiceProvider( builder.ToImmutable() );
+            return new ServiceProvider( builder.ToImmutable(), this._nextProvider );
         }
 
         private static void AddService( Lazy<IService, Type> service, ImmutableDictionary<Type, Lazy<IService, Type>>.Builder builder )
@@ -77,22 +80,12 @@ namespace Caravela.Framework.Impl.Pipeline
             return this.WithService( lazy );
         }
 
-        object? IServiceProvider.GetService( Type serviceType ) => this.GetService( serviceType );
+        object? IServiceProvider.GetService( Type serviceType ) => this.GetService( serviceType ) ?? this._nextProvider?.GetService( serviceType );
 
         /// <summary>
         /// Gets the implementation of a given service type.
         /// </summary>
-        public IService? GetService( Type serviceType )
-        {
-            if ( this._services.TryGetValue( serviceType, out var instance ) )
-            {
-                return instance.Value;
-            }
-            else
-            {
-                return null;
-            }
-        }
+        private IService? GetService( Type serviceType ) => this._services.TryGetValue( serviceType, out var instance ) ? instance.Value : null;
 
         /// <summary>
         /// Returns a new <see cref="ServiceProvider"/> where some given services have been added to the current <see cref="ServiceProvider"/>.
@@ -135,7 +128,7 @@ namespace Caravela.Framework.Impl.Pipeline
 
             // We need the reference to the new ServiceProvider before we know its content, so we're creating
             // an invalid object.
-            var serviceProvider = new ServiceProvider( null! );
+            var serviceProvider = new ServiceProvider( null!, null );
 
             var servicesBuilder = this._services.ToBuilder();
 
@@ -152,8 +145,7 @@ namespace Caravela.Framework.Impl.Pipeline
         /// <summary>
         /// Adds the services that have the same scope as the project processing itself.
         /// </summary>
-        /// <param name="metadataReferences"></param>
-        /// <returns>A list of resolved metadata references for the current project.</returns>
+        /// <param name="metadataReferences">A list of resolved metadata references for the current project.</param>
         public ServiceProvider WithProjectScopedServices( IEnumerable<MetadataReference> metadataReferences )
         {
             // ReflectionMapperFactory cannot be a global service because it keeps a reference from compilations to types of the
@@ -167,6 +159,15 @@ namespace Caravela.Framework.Impl.Pipeline
 
             return serviceProvider;
         }
+
+        /// <summary>
+        /// Adds the next service provider in a chain.
+        /// </summary>
+        /// <param name="nextProvider"></param>
+        /// <remarks>
+        /// When the current service provider fails to find a service, it will try to find it using the next provider in the chain.
+        /// </remarks>
+        public ServiceProvider WithNextProvider( IServiceProvider nextProvider ) => new ServiceProvider( this._services, nextProvider );
 
         public override string ToString()
         {

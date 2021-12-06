@@ -11,10 +11,15 @@
     
     <!-- Versions of dependencies -->
     <PropertyGroup>
+        <!-- This version should be aligned with the one coming from Caravela.Compiler. -->
         <RoslynVersion>4.0.1</RoslynVersion>
         <!-- TODO: Change to public version. -->
-        <CaravelaCompilerVersion>4.0.2001-dev-release-1</CaravelaCompilerVersion>
+        <CaravelaCompilerVersion>4.0.2001-dev-release-6</CaravelaCompilerVersion>
+        <!-- This version should be aligned with the one coming from Caravela.Compiler. -->
+        <!-- TODO: Change to public version. -->
+        <PostSharpBackstageSettingsVersion>0.1.0.50-dev-debug</PostSharpBackstageSettingsVersion>
         <PostSharpEngineeringVersion>1.0.1-preview</PostSharpEngineeringVersion>
+
         <MicrosoftCSharpVersion>4.7.0</MicrosoftCSharpVersion>
         <NewtonsoftJsonVersion>13.0.1</NewtonsoftJsonVersion>
         <SystemCollectionsImmutableVersion>5.0.0</SystemCollectionsImmutableVersion>
