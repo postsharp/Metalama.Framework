@@ -196,6 +196,12 @@ namespace Caravela.Framework.Impl.Utilities
                 _ => false
             };
 
+        public static IFieldSymbol? GetBackingField( this IPropertySymbol property )
+            => (IFieldSymbol?) property.ContainingType.GetMembers( $"<{property.Name}>k__BackingField" ).SingleOrDefault();
+
+        public static IFieldSymbol? GetBackingField( this IEventSymbol property )
+            => (IFieldSymbol?) property.ContainingType.GetMembers( $"<{property.Name}>k__BackingField" ).SingleOrDefault();
+
         public static ISymbol? Translate( this ISymbol? symbol, Compilation? originalCompilation, Compilation compilation )
         {
             if ( symbol == null )

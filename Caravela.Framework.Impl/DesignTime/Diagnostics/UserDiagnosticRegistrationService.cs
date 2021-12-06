@@ -65,7 +65,7 @@ namespace Caravela.Framework.Impl.DesignTime.Diagnostics
         /// Gets the list of supported diagnostic and suppression descriptors, as stored in the user profile.
         /// </summary>
         /// <returns></returns>
-        public ( ImmutableArray<DiagnosticDescriptor> Diagnostics, ImmutableArray<SuppressionDescriptor> Suppressions ) GetSupportedDescriptors()
+        public (ImmutableArray<DiagnosticDescriptor> Diagnostics, ImmutableArray<SuppressionDescriptor> Suppressions) GetSupportedDescriptors()
             => (this._registrationFile.Diagnostics.Values.Select( d => d.DiagnosticDescriptor() ).ToImmutableArray(),
                 this._registrationFile.Suppressions.Select( id => new SuppressionDescriptor( "Caravela." + id, id, "" ) ).ToImmutableArray());
 

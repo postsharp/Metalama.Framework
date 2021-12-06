@@ -310,7 +310,7 @@ Target.cs:
             var serviceProvider = ServiceProviderFactory.GetServiceProvider( projectOptions )
                 .WithNextProvider( TestBackstageServiceProviderFactory.Create() )
                 .WithProjectScopedServices( compilation.References );
-            
+
             var compileTimeAspectPipeline = new CompileTimeAspectPipeline( serviceProvider, true, domain );
             DiagnosticList compileDiagnostics = new();
             var pipelineResult = await compileTimeAspectPipeline.ExecuteAsync( compileDiagnostics, compilation5, default, CancellationToken.None );

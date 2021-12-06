@@ -3,7 +3,6 @@
 
 using Caravela.Framework.Impl.CompileTime;
 using System.Diagnostics.CodeAnalysis;
-
 #if NET5_0_OR_GREATER
 using Caravela.Framework.Impl.Testing;
 using Caravela.Framework.Impl.Utilities;

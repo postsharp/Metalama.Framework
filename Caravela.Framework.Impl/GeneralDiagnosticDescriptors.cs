@@ -101,7 +101,7 @@ namespace Caravela.Framework.Impl
             Error,
             "Cannot add an advice to a previous step of the compilation pipeline." );
 
-        public static readonly DiagnosticDefinition<(DeclarationKind ElementKind, ISymbol Symbol, ITypeSymbol AttributeType, string AdviceMethod )>
+        public static readonly DiagnosticDefinition<(DeclarationKind ElementKind, ISymbol Symbol, ITypeSymbol AttributeType, string AdviceMethod)>
             TemplateMemberMissesAttribute = new(
                 "CR0024",
                 "The template member does not have the expected custom attribute.",

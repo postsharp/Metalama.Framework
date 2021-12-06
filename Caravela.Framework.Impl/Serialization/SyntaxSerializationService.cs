@@ -7,7 +7,6 @@ using Caravela.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using PostSharp.Backstage.Extensibility;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;

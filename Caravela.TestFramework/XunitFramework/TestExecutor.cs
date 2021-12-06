@@ -95,6 +95,7 @@ namespace Caravela.TestFramework.XunitFramework
                                 try
                                 {
                                     using var testOptions = new TestProjectOptions();
+
                                     var serviceProvider = ServiceProviderFactory.GetServiceProvider( testOptions )
                                         .WithNextProvider( TestBackstageServiceProviderFactory.Create() );
 

@@ -17,7 +17,7 @@ namespace Caravela.TestFramework
         public void ReportWarning( string message, IDiagnosticsLocation? location = null ) => this._warnings.Add( (message, location) );
 
         public void ReportError( string message, IDiagnosticsLocation? location = null ) => this._errors.Add( (message, location) );
-        
+
         public IEnumerable<Diagnostic> EnumerateDiagnostics()
         {
             foreach ( var warning in this._warnings )
@@ -31,7 +31,7 @@ namespace Caravela.TestFramework
                     true,
                     1 );
             }
-            
+
             foreach ( var warning in this._errors )
             {
                 yield return Diagnostic.Create(

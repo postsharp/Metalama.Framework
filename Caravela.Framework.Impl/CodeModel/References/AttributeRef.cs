@@ -18,7 +18,7 @@ namespace Caravela.Framework.Impl.CodeModel.References
 
         public object? Target { get; private set; }
 
-        private ( AttributeData? Attribute, ISymbol? Parent ) ResolveAttributeData( AttributeSyntax attributeSyntax, Compilation compilation )
+        private (AttributeData? Attribute, ISymbol? Parent) ResolveAttributeData( AttributeSyntax attributeSyntax, Compilation compilation )
         {
             // Find the parent declaration.
             var resolved =

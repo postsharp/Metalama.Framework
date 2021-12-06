@@ -402,7 +402,7 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime
             Assert.Contains( diagnosticList, d => d.Id == AttributeDeserializerDiagnostics.CannotFindAttributeType.Id );
         }
 
-// ReSharper disable UnusedParameter.Local
+        // ReSharper disable UnusedParameter.Local
 #pragma warning disable SA1401
 #pragma warning disable CA1822
 

@@ -42,7 +42,7 @@ namespace Caravela.Framework.Impl.CompileTime
             }.ToImmutableDictionary( t => t.ReflectionType.Name, t => (t.ReflectionType.Namespace, t.Scope, t.MembersOnly) );
 
         private static readonly ImmutableDictionary<string, (TemplatingScope Scope, bool IncludeDescendants)> _wellKnownNamespaces =
-            new ( string Namespace, TemplatingScope Scope, bool IncludeDescendants)[]
+            new (string Namespace, TemplatingScope Scope, bool IncludeDescendants)[]
             {
                 ("System", TemplatingScope.Both, false),
                 ("System.Reflection", TemplatingScope.Both, true),
