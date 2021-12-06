@@ -174,6 +174,66 @@ public class B
         }
 
         [Fact]
+        public void InitOnlyReferenceTypeMembers()
+        {
+            // Verifies that IMetaSerializable type with init-only members can be serialized and deserialized (round-trip).
+            var code = @"
+using Caravela.Framework.Aspects;
+using Caravela.Framework.Serialization;
+[assembly: CompileTime]
+public class A : IMetaSerializable
+{
+    public B Property { get; init; }
+
+    public A(B property)
+    {
+        this.Property = property;
+    }
+}
+
+public class B
+{
+    public readonly int Field;
+
+    public B(int field)
+    {
+        this.Field = field;
+    }
+}
+";
+
+            using var domain = new UnloadableCompileTimeDomain();
+            using var testContext = this.CreateTestContext();
+
+            /* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+            Before:
+                        var project = this.CreateCompileTimeProject( domain, testContext, code );
+            After:
+                        var project = MetaSerializerTestBase.CreateCompileTimeProject( domain, testContext, code );
+            */
+            var project = CreateCompileTimeProject( domain, testContext, code );
+
+            var typeA = project!.GetType( "A" );
+            var typeB = project!.GetType( "B" );
+            var metaSerializer = GetMetaSerializer( typeA );
+
+            dynamic instanceB = Activator.CreateInstance( typeB, 42 )!;
+            dynamic instanceA = Activator.CreateInstance( typeA, instanceB )!;
+
+            var constructorArgumentsWriter = new TestArgumentsWriter();
+            var initializationArgumentsWriter = new TestArgumentsWriter();
+            metaSerializer.SerializeObject( instanceA, constructorArgumentsWriter, initializationArgumentsWriter );
+
+            var constructorArgumentsReader = constructorArgumentsWriter.ToReader();
+            var initializationArgumentsReader = initializationArgumentsWriter.ToReader();
+
+            dynamic deserialized = metaSerializer.CreateInstance( typeA, constructorArgumentsReader );
+            metaSerializer.DeserializeFields( ref deserialized, initializationArgumentsReader );
+
+            Assert.Equal( 42, deserialized.Property.Field );
+        }
+
+        [Fact]
         public void ExplicitParameterlessConstructor()
         {
             // Verifies that IMetaSerializable compile-time type with explicit parameterless constructor can be serialized and deserialized.
@@ -215,6 +275,112 @@ After:
 
             dynamic deserialized = metaSerializer.CreateInstance( type, constructorArgumentsReader );
             metaSerializer.DeserializeFields( ref deserialized, initializationArgumentsReader );
+        }
+
+        [Fact]
+        public void SimpleStruct()
+        {
+            // Verifies that IMetaSerializable readonly struct type can be serialized and deserialized (round-trip).
+            var code = @"
+using Caravela.Framework.Aspects;
+using Caravela.Framework.Serialization;
+[assembly: CompileTime]
+public struct A : IMetaSerializable
+{
+    public readonly int Field;
+    public int Property { get; }
+    public int MutableProperty { get; set; }
+
+    public A(int field, int property)
+    {
+        this.Field = field;
+        this.Property = property;
+        this.MutableProperty = 0;
+    }
+}
+";
+
+            using var domain = new UnloadableCompileTimeDomain();
+            using var testContext = this.CreateTestContext();
+
+            /* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+            Before:
+                        var project = this.CreateCompileTimeProject( domain, testContext, code );
+            After:
+                        var project = MetaSerializerTestBase.CreateCompileTimeProject( domain, testContext, code );
+            */
+            var project = CreateCompileTimeProject( domain, testContext, code );
+
+            var type = project!.GetType( "A" );
+            var metaSerializer = GetMetaSerializer( type );
+
+            dynamic instance = Activator.CreateInstance( type, 13, 27 )!;
+            instance.MutableProperty = 42;
+
+            var constructorArgumentsWriter = new TestArgumentsWriter();
+            var initializationArgumentsWriter = new TestArgumentsWriter();
+            metaSerializer.SerializeObject( instance, constructorArgumentsWriter, initializationArgumentsWriter );
+
+            var constructorArgumentsReader = constructorArgumentsWriter.ToReader();
+            var initializationArgumentsReader = initializationArgumentsWriter.ToReader();
+
+            dynamic deserialized = metaSerializer.CreateInstance( type, constructorArgumentsReader );
+            metaSerializer.DeserializeFields( ref deserialized, initializationArgumentsReader );
+
+            Assert.Equal( 13, deserialized.Field );
+            Assert.Equal( 27, deserialized.Property );
+            Assert.Equal( 42, deserialized.MutableProperty );
+        }
+
+        [Fact]
+        public void ReadonlyStruct()
+        {
+            // Verifies that IMetaSerializable readonly struct type can be serialized and deserialized (round-trip).
+            var code = @"
+using Caravela.Framework.Aspects;
+using Caravela.Framework.Serialization;
+[assembly: CompileTime]
+public readonly struct A : IMetaSerializable
+{
+    public readonly int Field;
+    public int Property { get; }
+
+    public A(int field, int property)
+    {
+        this.Field = field;
+        this.Property = property;
+    }
+}
+";
+
+            using var domain = new UnloadableCompileTimeDomain();
+            using var testContext = this.CreateTestContext();
+
+            /* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+            Before:
+                        var project = this.CreateCompileTimeProject( domain, testContext, code );
+            After:
+                        var project = MetaSerializerTestBase.CreateCompileTimeProject( domain, testContext, code );
+            */
+            var project = CreateCompileTimeProject( domain, testContext, code );
+
+            var type = project!.GetType( "A" );
+            var metaSerializer = GetMetaSerializer( type );
+
+            dynamic instance = Activator.CreateInstance( type, 13, 42 )!;
+
+            var constructorArgumentsWriter = new TestArgumentsWriter();
+            var initializationArgumentsWriter = new TestArgumentsWriter();
+            metaSerializer.SerializeObject( instance, constructorArgumentsWriter, initializationArgumentsWriter );
+
+            var constructorArgumentsReader = constructorArgumentsWriter.ToReader();
+            var initializationArgumentsReader = initializationArgumentsWriter.ToReader();
+
+            dynamic deserialized = metaSerializer.CreateInstance( type, constructorArgumentsReader );
+            metaSerializer.DeserializeFields( ref deserialized, initializationArgumentsReader );
+
+            Assert.Equal( 13, deserialized.Field );
+            Assert.Equal( 42, deserialized.Property );
         }
     }
 }

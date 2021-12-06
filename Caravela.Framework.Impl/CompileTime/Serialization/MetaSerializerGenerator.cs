@@ -77,7 +77,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
             return
                 ConstructorDeclaration(
                     List<AttributeListSyntax>(),
-                    TokenList( Token( SyntaxKind.ProtectedKeyword ) ),
+                    TokenList( serializableType.Type.IsValueType ? Token( SyntaxKind.PrivateKeyword ) : Token( SyntaxKind.ProtectedKeyword ) ),
                     Identifier( serializableType.Type.Name ),
                     ParameterList(
                         SingletonSeparatedList(
@@ -350,8 +350,8 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
             var body = this.CreateFieldSerializationStatements(
                 serializedType,
                 IdentifierName( serializeMethod.Parameters[0].Name ),
-                IdentifierName( serializeMethod.Parameters[1].Name ),
-                IdentifierName( serializeMethod.Parameters[2].Name ) );
+                IdentifierName( serializeMethod.Parameters[1].Name ), 
+                null );
 
             return this.CreateOverrideMethod(
                 serializeMethod,
@@ -368,18 +368,14 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
 
             var body =
                 Block(
-                    LocalDeclarationStatement(
-                        VariableDeclaration(
+                    ReturnStatement(
+                        ObjectCreationExpression(
                             this._context.SyntaxGenerator.Type( serializedType.Type ),
-                            SingletonSeparatedList( VariableDeclarator( Identifier( "o" ) ) ) ) ),
-                    this.CreateFieldDeserializationStatements(
-                        serializedType,
-                        IdentifierName( "o" ),
-                        IdentifierName( deserializeMethod.Parameters[0].Name ),
-                        this.SelectLateDeserializedFields ) );
+                            ArgumentList( SingletonSeparatedList( Argument( IdentifierName( deserializeMethod.Parameters[0].Name ) ) ) ),
+                            null ) ) );
 
             return this.CreateOverrideMethod(
-                baseSerializer.GetMembers().OfType<IMethodSymbol>().Single( x => x.Name == nameof(ReferenceTypeMetaSerializer.DeserializeFields) ),
+                baseSerializer.GetMembers().OfType<IMethodSymbol>().Single( x => x.Name == nameof(ValueTypeMetaSerializer<int>.DeserializeObject) ),
                 body );
         }
 
@@ -404,7 +400,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
             MetaSerializableTypeInfo serializedType,
             ExpressionSyntax objectExpression,
             ExpressionSyntax constructorArgumentsWriterExpression,
-            ExpressionSyntax initializationArgumentsWriterExpression )
+            ExpressionSyntax? initializationArgumentsWriterExpression )
         {
             var statements = new List<StatementSyntax>();
 
@@ -417,7 +413,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
                                 SyntaxKind.SimpleMemberAccessExpression,
                                 this.ClassifyFieldOrProperty( member ) == FieldOrPropertyDeserializationKind.Constructor
                                     ? constructorArgumentsWriterExpression
-                                    : initializationArgumentsWriterExpression,
+                                    : initializationArgumentsWriterExpression.AssertNotNull(),
                                 IdentifierName( nameof(IArgumentsWriter.SetValue) ) ),
                             ArgumentList(
                                 SeparatedList(
@@ -511,18 +507,18 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
             var (containingType, type, isReadOnly) = symbol switch
             {
                 IFieldSymbol field => (field.ContainingType, field.Type, field.IsReadOnly),
-                IPropertySymbol property => (property.ContainingType, property.Type, property.IsReadOnly),
+                IPropertySymbol property => (property.ContainingType, property.Type, property.IsReadOnly || property.SetMethod?.IsInitOnly == true),
                 _ => throw new AssertionFailedException()
             };
 
-            if ( isReadOnly )
+            if ( containingType.IsValueType )
             {
-                if ( containingType.IsValueType )
-                {
-                    // This field is declared in a value type type, so we can initialize all readonly fields in the ctor.
-                    return FieldOrPropertyDeserializationKind.Constructor;
-                }
-                else
+                // This field is declared in a value type type, so we can initialize all fields in the ctor.
+                return FieldOrPropertyDeserializationKind.Constructor;
+            }
+            else
+            {
+                if ( isReadOnly )
                 {
                     // The field is declared in a reference type type:
                     //   1) If the field is value type and contains any references, the field needs to be made mutable (reference targets may not yet be created).
@@ -536,10 +532,10 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
                         return FieldOrPropertyDeserializationKind.Constructor;
                     }
                 }
-            }
-            else
-            {
-                return FieldOrPropertyDeserializationKind.Deserialize;
+                else
+                {
+                    return FieldOrPropertyDeserializationKind.Deserialize;
+                }
             }
         }
 
@@ -584,8 +580,19 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
 
         private enum FieldOrPropertyDeserializationKind
         {
+            /// <summary>
+            /// Location is deserialized in the constructor.
+            /// </summary>
             Constructor,
+
+            /// <summary>
+            /// Location is deserialized in the deserialize method and needs to be made mutable. This is case of fields/properties that contain reference type fields and are readonly.
+            /// </summary>
             Deserialize_MakeMutable,
+
+            /// <summary>
+            /// Location is deserialized in the deserialize method.
+            /// </summary>
             Deserialize
         }
     }

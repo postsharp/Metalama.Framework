@@ -651,13 +651,16 @@ namespace Caravela.Framework.Impl.CompileTime
                             rewritten =
                                 rewrittenProperty.WithAccessorList(
                                     rewrittenProperty.AccessorList.WithAccessors(
-                                        rewrittenProperty.AccessorList.Accessors.Add(
-                                            AccessorDeclaration(
-                                                SyntaxKind.SetAccessorDeclaration,
-                                                List<AttributeListSyntax>(),
-                                                TokenList( Token( SyntaxKind.PrivateKeyword ) ),
-                                                null,
-                                                null ) ) ) );
+                                        List(
+                                            rewrittenProperty.AccessorList.Accessors
+                                            .Where( a => !a.IsKind( SyntaxKind.InitAccessorDeclaration ) )
+                                            .Append(
+                                                AccessorDeclaration(
+                                                    SyntaxKind.SetAccessorDeclaration,
+                                                    List<AttributeListSyntax>(),
+                                                    TokenList( Token( SyntaxKind.PrivateKeyword ) ),
+                                                    null,
+                                                    null ) ) ) ) );
                         }
 
                         yield return rewritten;
