@@ -728,9 +728,9 @@ namespace Caravela.Framework.Impl.CompileTime
                 {
                     var visitedNode = this.Visit( node );
 
-                    if (visitedNode != null)
+                    if ( visitedNode != null )
                     {
-                        yield return (MemberDeclarationSyntax)visitedNode;
+                        yield return (MemberDeclarationSyntax) visitedNode;
                     }
                 }
             }

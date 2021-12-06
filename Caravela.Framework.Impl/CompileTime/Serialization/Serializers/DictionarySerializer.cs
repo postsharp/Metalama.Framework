@@ -8,9 +8,9 @@ using System.Collections.Generic;
 namespace Caravela.Framework.Impl.CompileTime.Serialization.Serializers
 {
     /// <exclude/>
-    // This needs to be public because the type is instantiated from an activator in client assemblies.
     public sealed class DictionarySerializer<TKey, TValue> : ReferenceTypeMetaSerializer
     {
+        // This needs to be a public type because the type is instantiated from an activator in client assemblies.
         private const string _comparerCodeName = "c";
         private const string _comparerName = "d";
         private const string _keysName = "k";
