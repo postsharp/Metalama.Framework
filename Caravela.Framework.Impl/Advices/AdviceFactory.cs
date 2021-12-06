@@ -85,7 +85,7 @@ namespace Caravela.Framework.Impl.Advices
                 if ( required )
                 {
                     throw new ArgumentOutOfRangeException(
-                        nameof( templateName ),
+                        nameof(templateName),
                         $"A required template name was not provided for the template kind {templateKind}." );
                 }
                 else
@@ -102,7 +102,7 @@ namespace Caravela.Framework.Impl.Advices
 
                     throw GeneralDiagnosticDescriptors.MemberDoesNotHaveTemplateAttribute.CreateException(
                         (template.TemplateClass.FullName, templateName,
-                         templateKind == TemplateKind.Introduction ? nameof( IntroduceAttribute ) : nameof( TemplateAttribute )) );
+                         templateKind == TemplateKind.Introduction ? nameof(IntroduceAttribute) : nameof(TemplateAttribute)) );
                 }
 
                 if ( template.TemplateInfo.IsAbstract )
@@ -124,12 +124,12 @@ namespace Caravela.Framework.Impl.Advices
                 if ( expectedTemplateType != template.TemplateInfo.AttributeType )
                 {
                     var expectedAttribute = templateKind == TemplateKind.Introduction
-                        ? nameof( IntroduceAttribute )
-                        : nameof( TemplateAttribute );
+                        ? nameof(IntroduceAttribute)
+                        : nameof(TemplateAttribute);
 
                     var actualAttribute = template.TemplateInfo.AttributeType == TemplateAttributeType.Introduction
-                        ? nameof( IntroduceAttribute )
-                        : nameof( TemplateAttribute );
+                        ? nameof(IntroduceAttribute)
+                        : nameof(TemplateAttribute);
 
                     throw GeneralDiagnosticDescriptors.TemplateIsOfTheWrongType.CreateException(
                         (template.TemplateClass.FullName, templateName, expectedAttribute, actualAttribute) );

@@ -23,9 +23,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
         /// <summary>
         /// Initializes a new instance of the <see cref="MetaFormatter"/> class.
         /// </summary>
-        public MetaFormatter() : this( null, null )
-        {
-        }
+        public MetaFormatter() : this( null, null ) { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MetaFormatter"/> class.
@@ -43,7 +41,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
         /// </summary>
         /// <param name="obj">The object to serialize.</param>
         /// <param name="stream">The stream where <paramref name="obj"/> needs to be serialized.</param>
-        public void Serialize( object obj, Stream stream )
+        public void Serialize( object? obj, Stream stream )
         {
             try
             {
@@ -67,12 +65,14 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
             try
             {
                 var serializationReader = new SerializationReader( stream, this, shouldReportExceptionCause: false );
+
                 return serializationReader.Deserialize();
             }
             catch ( MetaSerializationException ) when ( stream.CanSeek )
             {
                 stream.Seek( 0, SeekOrigin.Begin );
                 var serializationReader = new SerializationReader( stream, this, shouldReportExceptionCause: true );
+
                 return serializationReader.Deserialize();
             }
         }

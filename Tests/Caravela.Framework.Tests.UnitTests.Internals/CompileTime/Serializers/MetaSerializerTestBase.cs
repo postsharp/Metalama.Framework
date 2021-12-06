@@ -26,7 +26,14 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serializers
             DiagnosticList diagnosticList = new();
 
             Assert.True(
-                compileTimeCompilationBuilder.TryGetCompileTimeProject( runtimeCompilation, null, Array.Empty<CompileTimeProject>(), diagnosticList, false, CancellationToken.None, out var project ),
+                compileTimeCompilationBuilder.TryGetCompileTimeProject(
+                    runtimeCompilation,
+                    null,
+                    Array.Empty<CompileTimeProject>(),
+                    diagnosticList,
+                    false,
+                    CancellationToken.None,
+                    out var project ),
                 string.Join( "\n", diagnosticList.Select( x => x.ToString() ) ) );
 
             return project!;
@@ -35,9 +42,9 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serializers
         private protected static Type GetMetaSerializerType( Type type )
         {
             var metaSerializerTypes =
-               type.GetNestedTypes()
-               .Where( nestedType => typeof( IMetaSerializer ).IsAssignableFrom( nestedType ) )
-               .ToArray();
+                type.GetNestedTypes()
+                    .Where( nestedType => typeof(IMetaSerializer).IsAssignableFrom( nestedType ) )
+                    .ToArray();
 
             Assert.Single( metaSerializerTypes );
 
@@ -47,6 +54,7 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serializers
         private protected static IMetaSerializer GetMetaSerializer( Type type )
         {
             var metaSerializerType = GetMetaSerializerType( type );
+
             return (IMetaSerializer) Activator.CreateInstance( metaSerializerType ).AssertNotNull();
         }
 
@@ -58,16 +66,20 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serializers
             {
                 var dataValue =
                     this._data.AssertNotNull()
-                    .Select( x => ((string Name, object? Value, string? Scope)?) x )
-                    .SingleOrDefault( d => StringComparer.Ordinal.Equals( d.AssertNotNull().Name, name ) && StringComparer.Ordinal.Equals( d.AssertNotNull().Scope, scope ) );
+                        .Select( x => ((string Name, object? Value, string? Scope)?) x )
+                        .SingleOrDefault(
+                            d => StringComparer.Ordinal.Equals( d.AssertNotNull().Name, name )
+                                 && StringComparer.Ordinal.Equals( d.AssertNotNull().Scope, scope ) );
 
                 if ( dataValue == null )
                 {
                     value = default!;
+
                     return false;
                 }
 
                 value = (T) dataValue.Value.Value!;
+
                 return true;
             }
 
@@ -97,7 +109,7 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serializers
 
         private protected class TestArgumentsWriter : IArgumentsWriter
         {
-            private List<(string Name, object? Value, string? Scope)> Data { get; } = new List<(string Name, object? Value, string? Scope)>();
+            private List<(string Name, object? Value, string? Scope)> Data { get; } = new();
 
             public virtual void SetValue( string name, object? value, string? scope = null )
             {
@@ -108,6 +120,7 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serializers
             {
                 var reader = new TestArgumentsReader();
                 reader.SetData( this.Data.ToArray() );
+
                 return reader;
             }
         }

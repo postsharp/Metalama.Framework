@@ -24,7 +24,7 @@ namespace Caravela.Framework.Impl.Formatting
 
         private XmlDocumentationReader()
         {
-            var documentationPath = Path.ChangeExtension( typeof( IAspect ).Assembly.Location, ".xml" );
+            var documentationPath = Path.ChangeExtension( typeof(IAspect).Assembly.Location, ".xml" );
 
             if ( File.Exists( documentationPath ) )
             {

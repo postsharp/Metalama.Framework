@@ -50,7 +50,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
                 {
                     Assert.Equal( "Target", info.DeclaringType!.Name );
                     Assert.Equal( "Method", info.Name );
-                    Assert.Equal( 42, info.MakeGenericMethod( typeof( int ) ).Invoke( null, new object[] { 21 } ) );
+                    Assert.Equal( 42, info.MakeGenericMethod( typeof(int) ).Invoke( null, new object[] { 21 } ) );
                 } );
         }
 

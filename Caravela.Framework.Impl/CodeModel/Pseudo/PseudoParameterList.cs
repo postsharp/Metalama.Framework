@@ -19,8 +19,8 @@ namespace Caravela.Framework.Impl.CodeModel.Pseudo
 
         IEnumerator<IParameter> IEnumerable<IParameter>.GetEnumerator() => this.GetEnumerator();
 
-        IParameter IReadOnlyList<IParameter>.this[int index] => this[index];
+        IParameter IReadOnlyList<IParameter>.this[ int index ] => this[index];
 
-        public IParameter this[string name] => this.Single<IParameter>( p => p.Name == name );
+        public IParameter this[ string name ] => this.Single<IParameter>( p => p.Name == name );
     }
 }

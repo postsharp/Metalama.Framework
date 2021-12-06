@@ -77,12 +77,15 @@ namespace Caravela.Framework.Impl.CompileTime
                 this._cancellationToken = cancellationToken;
                 this._currentContext = new Context( TemplatingScope.Both, this );
 
-                this._serializableTypes = 
-                    serializableTypes.ToDictionary<MetaSerializableTypeInfo, INamedTypeSymbol, MetaSerializableTypeInfo>( x => x.Type, x => x, SymbolEqualityComparer.Default );
+                this._serializableTypes =
+                    serializableTypes.ToDictionary<MetaSerializableTypeInfo, INamedTypeSymbol, MetaSerializableTypeInfo>(
+                        x => x.Type,
+                        x => x,
+                        SymbolEqualityComparer.Default );
 
-                this._serializableFieldsAndProperties = 
+                this._serializableFieldsAndProperties =
                     serializableTypes.SelectMany( x => x.SerializedMembers.Select( y => (Member: y, Type: x) ) )
-                    .ToDictionary(x => x.Member, x => x.Type, SymbolEqualityComparer.Default );
+                        .ToDictionary( x => x.Member, x => x.Type, SymbolEqualityComparer.Default );
 
                 this._syntaxGenerationContext = SyntaxGenerationContext.CreateDefault( serviceProvider, compileTimeCompilation );
 
@@ -91,19 +94,19 @@ namespace Caravela.Framework.Impl.CompileTime
 
                 this._compileTimeTypeName = (NameSyntax)
                     this._syntaxGenerationContext.SyntaxGenerator.Type(
-                        this._syntaxGenerationContext.ReflectionMapper.GetTypeSymbol( typeof( CompileTimeType ) ) );
+                        this._syntaxGenerationContext.ReflectionMapper.GetTypeSymbol( typeof(CompileTimeType) ) );
 
                 this._originalNameTypeSyntax = (NameSyntax)
                     this._syntaxGenerationContext.SyntaxGenerator.Type(
-                        this._syntaxGenerationContext.ReflectionMapper.GetTypeSymbol( typeof( OriginalIdAttribute ) ) );
+                        this._syntaxGenerationContext.ReflectionMapper.GetTypeSymbol( typeof(OriginalIdAttribute) ) );
 
                 this._originalPathTypeSyntax = (NameSyntax)
                     this._syntaxGenerationContext.SyntaxGenerator.Type(
-                        this._syntaxGenerationContext.ReflectionMapper.GetTypeSymbol( typeof( OriginalPathAttribute ) ) );
+                        this._syntaxGenerationContext.ReflectionMapper.GetTypeSymbol( typeof(OriginalPathAttribute) ) );
 
                 var reflectionMapper = serviceProvider.GetService<ReflectionMapperFactory>().GetInstance( runTimeCompilation );
-                this._fabricType = reflectionMapper.GetTypeSymbol( typeof( Fabric ) );
-                this._typeFabricType = reflectionMapper.GetTypeSymbol( typeof( TypeFabric ) );
+                this._fabricType = reflectionMapper.GetTypeSymbol( typeof(Fabric) );
+                this._typeFabricType = reflectionMapper.GetTypeSymbol( typeof(TypeFabric) );
             }
 
             // TODO: assembly and module-level attributes?
@@ -199,7 +202,7 @@ namespace Caravela.Framework.Impl.CompileTime
                                                 this._diagnosticAdder.Report(
                                                     TemplatingDiagnosticDescriptors.RunTimeTypesCannotHaveCompileTimeTypesExceptClasses.CreateDiagnostic(
                                                         childSymbol.GetDiagnosticLocation(),
-                                                        (childSymbol, typeof( TypeFabric )) ) );
+                                                        (childSymbol, typeof(TypeFabric)) ) );
 
                                                 this.Success = false;
                                             }
@@ -256,7 +259,7 @@ namespace Caravela.Framework.Impl.CompileTime
                                 this._diagnosticAdder.Report(
                                     TemplatingDiagnosticDescriptors.RunTimeTypesCannotHaveCompileTimeTypesExceptClasses.CreateDiagnostic(
                                         childSymbol.GetDiagnosticLocation(),
-                                        (childSymbol, typeof( TypeFabric )) ) );
+                                        (childSymbol, typeof(TypeFabric)) ) );
 
                                 this.Success = false;
                             }
@@ -314,6 +317,7 @@ namespace Caravela.Framework.Impl.CompileTime
                         {
                             case MethodDeclarationSyntax method:
                                 members.AddRange( this.VisitMethodDeclaration( method ).AssertNoneNull() );
+
                                 break;
 
                             case IndexerDeclarationSyntax:
@@ -323,18 +327,22 @@ namespace Caravela.Framework.Impl.CompileTime
 
                             case PropertyDeclarationSyntax property:
                                 members.AddRange( this.VisitBasePropertyDeclaration( property ).AssertNoneNull() );
+
                                 break;
 
                             case EventDeclarationSyntax @event:
                                 members.AddRange( this.VisitEventDeclaration( @event ).AssertNoneNull() );
+
                                 break;
 
                             case FieldDeclarationSyntax field:
                                 members.AddRange( this.VisitFieldDeclaration( field ).AssertNoneNull() );
+
                                 break;
 
                             default:
                                 members.Add( (MemberDeclarationSyntax) this.Visit( member ).AssertNotNull() );
+
                                 break;
                         }
                     }
@@ -346,7 +354,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
                 foreach ( var implementedInterface in allImplementedInterfaces )
                 {
-                    if ( implementedInterface.Name is nameof( IAspect ) or nameof( IEligible<IDeclaration> ) or nameof( ProjectExtension ) )
+                    if ( implementedInterface.Name is nameof(IAspect) or nameof(IEligible<IDeclaration>) or nameof(ProjectExtension) )
                     {
                         foreach ( var member in implementedInterface.GetMembers() )
                         {
@@ -391,19 +399,20 @@ namespace Caravela.Framework.Impl.CompileTime
                 // Add serialization logic if the type is serializable and this is the primary declaration.
                 if ( this._serializableTypes.TryGetValue( symbol, out var serializableType ) )
                 {
-                    if ( !serializableType.Type.GetMembers().Any( m => m is IMethodSymbol method && method.MethodKind == MethodKind.Constructor && method.GetPrimarySyntaxReference() != null ) )
+                    if ( !serializableType.Type.GetMembers()
+                        .Any( m => m is IMethodSymbol method && method.MethodKind == MethodKind.Constructor && method.GetPrimarySyntaxReference() != null ) )
                     {
                         // There is no defined constructor, so we need to explicitly add parameterless contructor.
                         members.Add(
                             ConstructorDeclaration(
-                                List<AttributeListSyntax>(),
-                                TokenList( Token( SyntaxKind.PublicKeyword ) ),
-                                Identifier( serializableType.Type.Name ),
-                                ParameterList(),
-                                null,
-                                Block(),
-                                null )
-                            .NormalizeWhitespace() );
+                                    List<AttributeListSyntax>(),
+                                    TokenList( Token( SyntaxKind.PublicKeyword ) ),
+                                    Identifier( serializableType.Type.Name ),
+                                    ParameterList(),
+                                    null,
+                                    Block(),
+                                    null )
+                                .NormalizeWhitespace() );
                     }
 
                     members.Add( this.MetaSerializerGenerator.CreateDeserializingConstructor( serializableType ).NormalizeWhitespace() );
@@ -621,6 +630,7 @@ namespace Caravela.Framework.Impl.CompileTime
                     if ( !propertyOrAccessorsAreTemplate )
                     {
                         var suppressReadOnly = false;
+
                         if ( this._serializableFieldsAndProperties.TryGetValue( propertySymbol, out var serializableTypeInfo ) )
                         {
                             suppressReadOnly = this.MetaSerializerGenerator.ShouldSuppressReadOnly( serializableTypeInfo, propertySymbol );
@@ -628,14 +638,17 @@ namespace Caravela.Framework.Impl.CompileTime
 
                         var rewritten = (BasePropertyDeclarationSyntax) this.Visit( node ).AssertNotNull();
 
-                        if (suppressReadOnly && rewritten is PropertyDeclarationSyntax rewrittenProperty)
+                        if ( suppressReadOnly && rewritten is PropertyDeclarationSyntax rewrittenProperty )
                         {
                             // If the property needs to have set accessor because of serialization, add it.
                             Invariant.Assert( rewrittenProperty.IsAutoPropertyDeclaration() );
                             Invariant.Assert( rewrittenProperty.AccessorList != null );
-                            Invariant.Assert( !rewrittenProperty.AccessorList!.Accessors.Any( a => a.IsKind( SyntaxKind.SetAccessorDeclaration ) || a.IsKind( SyntaxKind.InitAccessorDeclaration ) ) );
 
-                            rewritten = 
+                            Invariant.Assert(
+                                !rewrittenProperty.AccessorList!.Accessors.Any(
+                                    a => a.IsKind( SyntaxKind.SetAccessorDeclaration ) || a.IsKind( SyntaxKind.InitAccessorDeclaration ) ) );
+
+                            rewritten =
                                 rewrittenProperty.WithAccessorList(
                                     rewrittenProperty.AccessorList.WithAccessors(
                                         rewrittenProperty.AccessorList.Accessors.Add(
@@ -681,39 +694,44 @@ namespace Caravela.Framework.Impl.CompileTime
                 var unchangedVariables = new List<VariableDeclaratorSyntax>();
                 var nonReadOnlyVariables = new List<VariableDeclaratorSyntax>();
 
-                foreach (var declarator in node.Declaration.Variables)
+                foreach ( var declarator in node.Declaration.Variables )
                 {
-                    var fieldSymbol = (IFieldSymbol)this.RunTimeCompilation.GetSemanticModel( declarator.SyntaxTree ).GetDeclaredSymbol( declarator ).AssertNotNull();
+                    var fieldSymbol = (IFieldSymbol) this.RunTimeCompilation.GetSemanticModel( declarator.SyntaxTree )
+                        .GetDeclaredSymbol( declarator )
+                        .AssertNotNull();
 
-                    if (this._serializableFieldsAndProperties.TryGetValue(fieldSymbol, out var serializableType) 
-                        && this.MetaSerializerGenerator.ShouldSuppressReadOnly(serializableType, fieldSymbol))
+                    if ( this._serializableFieldsAndProperties.TryGetValue( fieldSymbol, out var serializableType )
+                         && this.MetaSerializerGenerator.ShouldSuppressReadOnly( serializableType, fieldSymbol ) )
                     {
                         // This field needs to have it's readonly modifier removed.
-                        nonReadOnlyVariables.Add( declarator );
+                        nonReadOnlyVariables.Add( (VariableDeclaratorSyntax) this.Visit( declarator ).AssertNotNull() );
                     }
                     else
                     {
-                        unchangedVariables.Add( declarator );
+                        unchangedVariables.Add( (VariableDeclaratorSyntax) this.Visit( declarator ).AssertNotNull() );
                     }
                 }
-                
-                if (nonReadOnlyVariables.Count > 0)
+
+                if ( nonReadOnlyVariables.Count > 0 )
                 {
                     if ( unchangedVariables.Count > 0 )
                     {
                         yield return
-                            node.WithDeclaration(
-                                node.Declaration.WithVariables( SeparatedList( unchangedVariables ) ) );
+                            node.WithDeclaration( node.Declaration.WithVariables( SeparatedList( unchangedVariables ) ) );
                     }
 
                     yield return
-                        node.WithDeclaration(
-                            node.Declaration.WithVariables( SeparatedList( nonReadOnlyVariables ) ) )
-                        .WithModifiers( TokenList( node.Modifiers.Where( t => !t.IsKind( SyntaxKind.ReadOnlyKeyword ) ) ) );
+                        node.WithDeclaration( node.Declaration.WithVariables( SeparatedList( nonReadOnlyVariables ) ) )
+                            .WithModifiers( TokenList( node.Modifiers.Where( t => !t.IsKind( SyntaxKind.ReadOnlyKeyword ) ) ) );
                 }
                 else
                 {
-                    yield return node;
+                    var visitedNode = this.Visit( node );
+
+                    if (visitedNode != null)
+                    {
+                        yield return (MemberDeclarationSyntax)visitedNode;
+                    }
                 }
             }
 
@@ -883,7 +901,7 @@ namespace Caravela.Framework.Impl.CompileTime
                             MemberAccessExpression(
                                 SyntaxKind.SimpleMemberAccessExpression,
                                 this._compileTimeTypeName,
-                                IdentifierName( nameof( CompileTimeType.GetCompileTimeType ) ) );
+                                IdentifierName( nameof(CompileTimeType.GetCompileTimeType) ) );
 
                         var invocation = InvocationExpression(
                             memberAccess,

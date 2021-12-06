@@ -26,7 +26,7 @@ namespace Caravela.Framework.Impl.Transformations
             IMethod overriddenMethod )
         {
             var runtimeAspectHelperType =
-                generationContext.SyntaxGenerator.Type( generationContext.ReflectionMapper.GetTypeSymbol( typeof( RunTimeAspectHelper ) ) );
+                generationContext.SyntaxGenerator.Type( generationContext.ReflectionMapper.GetTypeSymbol( typeof(RunTimeAspectHelper) ) );
 
             switch ( template.SelectedKind )
             {
@@ -46,7 +46,7 @@ namespace Caravela.Framework.Impl.Transformations
                                         SyntaxFactory.MemberAccessExpression(
                                             SyntaxKind.SimpleMemberAccessExpression,
                                             runtimeAspectHelperType,
-                                            SyntaxFactory.IdentifierName( nameof( RunTimeAspectHelper.Buffer ) ) ) )
+                                            SyntaxFactory.IdentifierName( nameof(RunTimeAspectHelper.Buffer) ) ) )
                                     .WithArgumentList(
                                         SyntaxFactory.ArgumentList( SyntaxFactory.SingletonSeparatedList( SyntaxFactory.Argument( invocationExpression ) ) ) )
                                     .WithAdditionalAnnotations( Simplifier.Annotation );
@@ -77,7 +77,7 @@ namespace Caravela.Framework.Impl.Transformations
                     }
 
                 case TemplateKind.Async when overriddenMethod.GetIteratorInfoImpl() is
-                { EnumerableKind: EnumerableKind.IAsyncEnumerable or EnumerableKind.IAsyncEnumerator }:
+                    { EnumerableKind: EnumerableKind.IAsyncEnumerable or EnumerableKind.IAsyncEnumerator }:
                     {
                         var expression = GenerateAwaitBufferAsync();
 
@@ -110,7 +110,7 @@ namespace Caravela.Framework.Impl.Transformations
                             SyntaxFactory.MemberAccessExpression(
                                 SyntaxKind.SimpleMemberAccessExpression,
                                 runtimeAspectHelperType,
-                                SyntaxFactory.IdentifierName( nameof( RunTimeAspectHelper.Buffer ) + "Async" ) ) )
+                                SyntaxFactory.IdentifierName( nameof(RunTimeAspectHelper.Buffer) + "Async" ) ) )
                         .WithArgumentList( arguments )
                         .WithAdditionalAnnotations( Simplifier.Annotation );
 

@@ -13,8 +13,7 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
     {
         public ConstructorList( Declaration? containingDeclaration, IEnumerable<MemberRef<IConstructor>> sourceItems ) : base(
             containingDeclaration,
-            sourceItems )
-        { }
+            sourceItems ) { }
 
         public IEnumerable<IConstructor> OfCompatibleSignature( IReadOnlyList<Type?>? argumentTypes )
         {

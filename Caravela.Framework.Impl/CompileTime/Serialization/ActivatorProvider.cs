@@ -13,13 +13,11 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
     /// </summary>
     internal sealed class ActivatorProvider
     {
-        private readonly object _sync = new object();
+        private readonly object _sync = new();
         private readonly Dictionary<Assembly, IMetaActivator?> _assemblyActivators = new();
         private readonly Dictionary<Type, IMetaActivator?> _typeActivators = new();
 
-        internal ActivatorProvider()
-        {
-        }
+        internal ActivatorProvider() { }
 
         /// <summary>
         /// Gets an instance of a given class implementing the <see cref="IMetaActivator"/> interface.
@@ -36,16 +34,16 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
                 }
 
                 var requiredAssembly = new Assembly[1];
+
                 ReflectionHelper.VisitTypeElements(
                     type,
                     t =>
                     {
                         if ( !t.IsPrimitive && !t.HasElementType && !(t.IsGenericType && !t.IsGenericTypeDefinition) &&
-                                !ReflectionHelper.IsPublic( t ) )
+                             !ReflectionHelper.IsPublic( t ) )
                         {
                             if ( requiredAssembly[0] != null && requiredAssembly[0] != t.Assembly )
                             {
-
                                 throw new MetaSerializationException(
                                     string.Format(
                                         CultureInfo.InvariantCulture,
@@ -59,12 +57,16 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
 
                 if ( requiredAssembly[0] != null && requiredAssembly[0] != this.GetType().Assembly )
                 {
-
                     activator = this.GetActivator( requiredAssembly[0] );
+
                     if ( activator == null )
                     {
                         throw new MetaSerializationException(
-                            string.Format( CultureInfo.InvariantCulture, "Cannot instantiate type '{0}' because assembly '{1}' does not have an IActivator.", type, requiredAssembly[0] ) );
+                            string.Format(
+                                CultureInfo.InvariantCulture,
+                                "Cannot instantiate type '{0}' because assembly '{1}' does not have an IActivator.",
+                                type,
+                                requiredAssembly[0] ) );
                     }
                 }
                 else
@@ -73,6 +75,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
                 }
 
                 this._typeActivators.Add( type, activator );
+
                 return activator;
             }
         }
@@ -84,7 +87,8 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
                 return activator;
             }
 
-            var attributes = assembly.GetCustomAttributes( typeof( MetaActivatorTypeAttribute ), false );
+            var attributes = assembly.GetCustomAttributes( typeof(MetaActivatorTypeAttribute), false );
+
             if ( attributes.Length > 0 )
             {
                 activator = (IMetaActivator) Activator.CreateInstance( ((MetaActivatorTypeAttribute) attributes[0]).ActivatorType );

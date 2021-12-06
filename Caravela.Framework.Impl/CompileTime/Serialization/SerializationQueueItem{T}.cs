@@ -3,7 +3,6 @@
 
 namespace Caravela.Framework.Impl.CompileTime.Serialization
 {
-
     internal sealed class SerializationQueueItem<T>
     {
         public SerializationQueueItem( T? o, SerializationCause? cause )

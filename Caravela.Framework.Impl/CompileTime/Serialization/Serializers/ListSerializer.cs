@@ -35,8 +35,6 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization.Serializers
         }
 
         /// <exclude/>
-        public override void DeserializeFields( object obj, IArgumentsReader initializationArguments )
-        {
-        }
+        public override void DeserializeFields( object obj, IArgumentsReader initializationArguments ) { }
     }
 }

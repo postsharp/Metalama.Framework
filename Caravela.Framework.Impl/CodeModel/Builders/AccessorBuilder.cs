@@ -34,11 +34,11 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public IParameterBuilder ReturnParameter
             => (containingDeclaration: this.ContainingDeclaration, this.MethodKind) switch
             {
-                (PropertyBuilder _, MethodKind.PropertyGet ) => new PropertyGetReturnParameter( this ),
-                (PropertyBuilder _, MethodKind.PropertySet ) => new VoidReturnParameter( this ),
-                (FieldBuilder _, MethodKind.PropertyGet ) => new PropertyGetReturnParameter( this ),
-                (FieldBuilder _, MethodKind.PropertySet ) => new VoidReturnParameter( this ),
-                (EventBuilder _, _ ) => new EventReturnParameter( this ),
+                (PropertyBuilder _, MethodKind.PropertyGet) => new PropertyGetReturnParameter( this ),
+                (PropertyBuilder _, MethodKind.PropertySet) => new VoidReturnParameter( this ),
+                (FieldBuilder _, MethodKind.PropertyGet) => new PropertyGetReturnParameter( this ),
+                (FieldBuilder _, MethodKind.PropertySet) => new VoidReturnParameter( this ),
+                (EventBuilder _, _) => new EventReturnParameter( this ),
                 _ => throw new AssertionFailedException()
             };
 
@@ -67,11 +67,11 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public IMethod? OverriddenMethod
             => (containingDeclaration: this.ContainingDeclaration, this.MethodKind) switch
             {
-                (PropertyBuilder propertyBuilder, MethodKind.PropertyGet ) => propertyBuilder.OverriddenProperty?.GetMethod.AssertNotNull(),
-                (PropertyBuilder propertyBuilder, MethodKind.PropertySet ) => propertyBuilder.OverriddenProperty?.SetMethod.AssertNotNull(),
-                (FieldBuilder _, _ ) => null,
-                (EventBuilder eventBuilder, MethodKind.EventAdd ) => eventBuilder.OverriddenEvent?.AddMethod.AssertNotNull(),
-                (EventBuilder eventBuilder, MethodKind.EventRemove ) => eventBuilder.OverriddenEvent?.RemoveMethod.AssertNotNull(),
+                (PropertyBuilder propertyBuilder, MethodKind.PropertyGet) => propertyBuilder.OverriddenProperty?.GetMethod.AssertNotNull(),
+                (PropertyBuilder propertyBuilder, MethodKind.PropertySet) => propertyBuilder.OverriddenProperty?.SetMethod.AssertNotNull(),
+                (FieldBuilder _, _) => null,
+                (EventBuilder eventBuilder, MethodKind.EventAdd) => eventBuilder.OverriddenEvent?.AddMethod.AssertNotNull(),
+                (EventBuilder eventBuilder, MethodKind.EventRemove) => eventBuilder.OverriddenEvent?.RemoveMethod.AssertNotNull(),
                 _ => throw new AssertionFailedException()
             };
 
@@ -85,12 +85,12 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
             => (this.ContainingMember, this.MethodKind) switch
             {
                 // TODO: Indexer parameters (need to have special IParameterList implementation that would mirror adding parameters to the indexer property).
-                (IProperty property, MethodKind.PropertyGet ) when property.Parameters.Count == 0 => new ParameterBuilderList(),
-                (IProperty property, MethodKind.PropertySet ) when property.Parameters.Count == 0 =>
+                (IProperty property, MethodKind.PropertyGet) when property.Parameters.Count == 0 => new ParameterBuilderList(),
+                (IProperty property, MethodKind.PropertySet) when property.Parameters.Count == 0 =>
                     new ParameterBuilderList( new[] { new PropertySetValueParameter( this, 0 ) } ),
-                (FieldBuilder _, MethodKind.PropertyGet ) => new ParameterBuilderList(),
-                (FieldBuilder _, MethodKind.PropertySet ) => new ParameterBuilderList( new[] { new PropertySetValueParameter( this, 0 ) } ),
-                (IEvent _, _ ) =>
+                (FieldBuilder _, MethodKind.PropertyGet) => new ParameterBuilderList(),
+                (FieldBuilder _, MethodKind.PropertySet) => new ParameterBuilderList( new[] { new PropertySetValueParameter( this, 0 ) } ),
+                (IEvent _, _) =>
                     new ParameterBuilderList( new[] { new EventValueParameter( this ) } ),
                 _ => throw new AssertionFailedException()
             };
@@ -217,14 +217,14 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public IReadOnlyList<IMethod> ExplicitInterfaceImplementations
             => (containingDeclaration: this.ContainingDeclaration, this.MethodKind) switch
             {
-                (PropertyBuilder propertyBuilder, MethodKind.PropertyGet )
+                (PropertyBuilder propertyBuilder, MethodKind.PropertyGet)
                     => propertyBuilder.ExplicitInterfaceImplementations.Select( p => p.GetMethod ).AssertNoneNull().ToArray(),
-                (PropertyBuilder propertyBuilder, MethodKind.PropertySet )
+                (PropertyBuilder propertyBuilder, MethodKind.PropertySet)
                     => propertyBuilder.ExplicitInterfaceImplementations.Select( p => p.SetMethod ).AssertNoneNull().ToArray(),
-                (FieldBuilder _, _ ) => Array.Empty<IMethod>(),
-                (EventBuilder eventBuilder, MethodKind.EventAdd )
+                (FieldBuilder _, _) => Array.Empty<IMethod>(),
+                (EventBuilder eventBuilder, MethodKind.EventAdd)
                     => eventBuilder.ExplicitInterfaceImplementations.Select( p => p.AddMethod ).AssertNoneNull().ToArray(),
-                (EventBuilder eventBuilder, MethodKind.EventRemove )
+                (EventBuilder eventBuilder, MethodKind.EventRemove)
                     => eventBuilder.ExplicitInterfaceImplementations.Select( p => p.RemoveMethod ).AssertNoneNull().ToArray(),
                 _ => throw new AssertionFailedException()
             };

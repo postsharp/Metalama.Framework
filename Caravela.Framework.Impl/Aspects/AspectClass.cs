@@ -38,8 +38,8 @@ namespace Caravela.Framework.Impl.Aspects
         private readonly IAspect? _prototypeAspectInstance; // Null for abstract classes.
         private IReadOnlyList<AspectLayer>? _layers;
 
-        private static readonly MethodInfo _tryInitializeEligibilityMethod = typeof( AspectClass ).GetMethod(
-            nameof( TryInitializeEligibility ),
+        private static readonly MethodInfo _tryInitializeEligibilityMethod = typeof(AspectClass).GetMethod(
+            nameof(TryInitializeEligibility),
             BindingFlags.Instance | BindingFlags.NonPublic );
 
         private ImmutableArray<KeyValuePair<Type, IEligibilityRule<IDeclaration>>> _eligibilityRules;
@@ -76,7 +76,7 @@ namespace Caravela.Framework.Impl.Aspects
 
         public bool IsInherited { get; private set; }
 
-        public bool IsAttribute => typeof( Attribute ).IsAssignableFrom( this.AspectType );
+        public bool IsAttribute => typeof(Attribute).IsAssignableFrom( this.AspectType );
 
         Type IAspectClass.Type => this.AspectType;
 
@@ -138,14 +138,14 @@ namespace Caravela.Framework.Impl.Aspects
                 // Add additional rules defined by the driver.
                 if ( this._aspectDriver is AspectDriver { EligibilityRule: { } eligibilityRule } )
                 {
-                    eligibilityRules.Add( new KeyValuePair<Type, IEligibilityRule<IDeclaration>>( typeof( IDeclaration ), eligibilityRule ) );
+                    eligibilityRules.Add( new KeyValuePair<Type, IEligibilityRule<IDeclaration>>( typeof(IDeclaration), eligibilityRule ) );
                 }
 
                 var eligibilitySuccess = true;
 
                 foreach ( var implementedInterface in this._prototypeAspectInstance.GetType()
                     .GetInterfaces()
-                    .Where( i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof( IEligible<> ) ) )
+                    .Where( i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IEligible<>) ) )
                 {
                     eligibilitySuccess &= (bool)
                         _tryInitializeEligibilityMethod.MakeGenericMethod( implementedInterface.GenericTypeArguments[0] )
@@ -191,7 +191,7 @@ namespace Caravela.Framework.Impl.Aspects
                     return false;
                 }
 
-                rules.Add( new KeyValuePair<Type, IEligibilityRule<IDeclaration>>( typeof( T ), ((IEligibilityBuilder<T>) builder).Build() ) );
+                rules.Add( new KeyValuePair<Type, IEligibilityRule<IDeclaration>>( typeof(T), ((IEligibilityBuilder<T>) builder).Build() ) );
             }
 
             return true;
@@ -236,7 +236,7 @@ namespace Caravela.Framework.Impl.Aspects
             }
             else
             {
-                var aspectInterfaceType = typeof( IAspect );
+                var aspectInterfaceType = typeof(IAspect);
 
                 if ( !aspectInterfaceType.IsAssignableFrom( aspectInterfaceType ) )
                 {
@@ -294,14 +294,14 @@ namespace Caravela.Framework.Impl.Aspects
         {
             var ourDeclarationInterface = symbol switch
             {
-                IMethodSymbol method when IsMethod( method.MethodKind ) => typeof( IMethod ),
-                IMethodSymbol method when IsConstructor( method.MethodKind ) => typeof( IConstructor ),
-                IPropertySymbol => typeof( IProperty ),
-                IEventSymbol => typeof( IEvent ),
-                IFieldSymbol => typeof( IField ),
-                ITypeSymbol { TypeKind: TypeKind.TypeParameter } => typeof( ITypeParameter ),
-                INamedTypeSymbol => typeof( INamedType ),
-                IParameterSymbol => typeof( IParameter ),
+                IMethodSymbol method when IsMethod( method.MethodKind ) => typeof(IMethod),
+                IMethodSymbol method when IsConstructor( method.MethodKind ) => typeof(IConstructor),
+                IPropertySymbol => typeof(IProperty),
+                IEventSymbol => typeof(IEvent),
+                IFieldSymbol => typeof(IField),
+                ITypeSymbol { TypeKind: TypeKind.TypeParameter } => typeof(ITypeParameter),
+                INamedTypeSymbol => typeof(INamedType),
+                IParameterSymbol => typeof(IParameter),
                 _ => null
             };
 
@@ -310,7 +310,7 @@ namespace Caravela.Framework.Impl.Aspects
                 return false;
             }
 
-            var aspectInterface = typeof( IAspect<> ).MakeGenericType( ourDeclarationInterface );
+            var aspectInterface = typeof(IAspect<>).MakeGenericType( ourDeclarationInterface );
 
             return aspectInterface.IsAssignableFrom( this.AspectType );
 

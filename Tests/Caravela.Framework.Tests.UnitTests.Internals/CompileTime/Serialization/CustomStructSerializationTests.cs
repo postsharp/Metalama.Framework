@@ -8,18 +8,12 @@ using Xunit;
 
 namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serialization
 {
-
     public class CustomStructSerializationTests : SerializationTestsBase
     {
-
         [Fact]
         public void SerializeStruct_BasicTest()
         {
-            var s = new SimpleStruct( 1, DateTime.Now )
-            {
-                StringValue = "Test",
-                NullableEnumField = TypeCode.Char
-            };
+            var s = new SimpleStruct( 1, DateTime.Now ) { StringValue = "Test", NullableEnumField = TypeCode.Char };
 
 /* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
@@ -33,10 +27,7 @@ After:
         [Fact]
         public void SerializeStruct_BoxedStruct()
         {
-            var s = new SimpleStruct( 1, DateTime.Now )
-            {
-                StringValue = "Test"
-            };
+            var s = new SimpleStruct( 1, DateTime.Now ) { StringValue = "Test" };
 
 /* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
@@ -50,10 +41,7 @@ After:
         [Fact]
         public void SerializeStruct_GenericStruct()
         {
-            var s = new GenericStruct<string>
-            {
-                Value = "1"
-            };
+            var s = new GenericStruct<string> { Value = "1" };
 
 /* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
@@ -67,10 +55,7 @@ After:
         [Fact]
         public void SerializeStruct_NestedStructs()
         {
-            var s = new GenericStruct<SimpleStruct>
-            {
-                Value = new SimpleStruct( 5, DateTime.MinValue )
-            };
+            var s = new GenericStruct<SimpleStruct> { Value = new SimpleStruct( 5, DateTime.MinValue ) };
 
 /* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
@@ -97,7 +82,7 @@ After:
             Assert.Same( str2.SimpleClass, str2.SimpleClass2 );
         }
 
-        [MetaSerializer( typeof( GenericStructSerializer<> ) )]
+        [MetaSerializer( typeof(GenericStructSerializer<>) )]
         public struct GenericStruct<T> : IEquatable<GenericStruct<T>>
             where T : notnull
         {
@@ -124,7 +109,8 @@ After:
             {
                 unchecked
                 {
-                    return (EqualityComparer<T>.Default.GetHashCode( this.Value ) * 397) ^ (this.StringValue != null ? StringComparer.Ordinal.GetHashCode( this.StringValue ) : 0);
+                    return (EqualityComparer<T>.Default.GetHashCode( this.Value ) * 397)
+                           ^ (this.StringValue != null ? StringComparer.Ordinal.GetHashCode( this.StringValue ) : 0);
                 }
             }
         }
@@ -141,16 +127,13 @@ After:
             public override GenericStruct<T> DeserializeObject( IArgumentsReader constructorArguments )
             {
                 // Assertion on nullability was added after the code import from PostSharp.
-                var s = new GenericStruct<T>
-                {
-                    StringValue = constructorArguments.GetValue<string>( "s" ),
-                    Value = constructorArguments.GetValue<T?>( "T" )!
-                };
+                var s = new GenericStruct<T> { StringValue = constructorArguments.GetValue<string>( "s" ), Value = constructorArguments.GetValue<T?>( "T" )! };
+
                 return s;
             }
         }
 
-        [MetaSerializer( typeof( SimpleStructSerializer ) )]
+        [MetaSerializer( typeof(SimpleStructSerializer) )]
         public struct SimpleStruct : IEquatable<SimpleStruct>
         {
             public int IntValue { get; set; }
@@ -173,8 +156,11 @@ After:
 
             public bool Equals( SimpleStruct other )
             {
-                return this.IntValue == other.IntValue && StringComparer.Ordinal.Equals( this.StringValue, other.StringValue ) && this.TimeValue.Equals( other.TimeValue ) && Equals( this.SimpleClass, other.SimpleClass ) &&
-                    Equals( this.SimpleClass2, other.SimpleClass2 ) && Equals( this.NullableEnumField, other.NullableEnumField );
+                return this.IntValue == other.IntValue && StringComparer.Ordinal.Equals( this.StringValue, other.StringValue )
+                                                       && this.TimeValue.Equals( other.TimeValue ) && Equals( this.SimpleClass, other.SimpleClass ) &&
+                                                       Equals( this.SimpleClass2, other.SimpleClass2 ) && Equals(
+                                                           this.NullableEnumField,
+                                                           other.NullableEnumField );
             }
 
             public override bool Equals( object? obj )
@@ -197,6 +183,7 @@ After:
                     hashCode = (hashCode * 397) ^ (this.SimpleClass != null ? this.SimpleClass.GetHashCode() : 0);
                     hashCode = (hashCode * 397) ^ (this.SimpleClass2 != null ? this.SimpleClass2.GetHashCode() : 0);
                     hashCode = (hashCode * 397) ^ (this.NullableEnumField != null ? this.NullableEnumField.GetHashCode() : 0);
+
                     return hashCode;
                 }
             }
@@ -223,11 +210,12 @@ After:
                     SimpleClass2 = constructorArguments.GetValue<SimpleClass>( "cls2" ),
                     NullableEnumField = constructorArguments.GetValue<TypeCode?>( "ne" )
                 };
+
                 return str;
             }
         }
 
-        [MetaSerializer( typeof( SimpleClassSerializer ) )]
+        [MetaSerializer( typeof(SimpleClassSerializer) )]
         public class SimpleClass : IEquatable<SimpleClass>
         {
             public int X { get; set; }
@@ -285,8 +273,7 @@ After:
                 constructorArguments.SetValue( "x", obj.X );
             }
 
-            public override void DeserializeFields( SimpleClass obj, IArgumentsReader initializationArguments )
-            { }
+            public override void DeserializeFields( SimpleClass obj, IArgumentsReader initializationArguments ) { }
 
             public override object CreateInstance( Type type, IArgumentsReader constructorArguments )
             {

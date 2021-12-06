@@ -31,7 +31,7 @@ namespace Caravela.Framework.Impl.CompileTime
                 this._reflectionMapper = reflectionMapper;
                 this._cancellationToken = cancellationToken;
                 this._serializableFieldsOrProperties = new List<ISymbol>();
-                this._nonSerializedAttribute = this._reflectionMapper.GetTypeSymbol( typeof( MetaNonSerializedAttribute ) );
+                this._nonSerializedAttribute = this._reflectionMapper.GetTypeSymbol( typeof(MetaNonSerializedAttribute) );
             }
 
             public override void VisitFieldDeclaration( FieldDeclarationSyntax node )

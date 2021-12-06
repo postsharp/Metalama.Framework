@@ -7,8 +7,9 @@ using System.Globalization;
 
 namespace Caravela.Framework.Impl.CompileTime.Serialization.Serializers
 {
-    /// <exclude/>
     // This needs to be public because the type is instantiated from an activator in client assemblies.
+
+    /// <exclude/>
     public class CultureInfoSerializer : ReferenceTypeMetaSerializer
     {
         /// <exclude/>
@@ -18,6 +19,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization.Serializers
             if (constructorArguments.TryGetValue( "useUserOverride", out bool useUserOverride ))
                 return new CultureInfo( constructorArguments.GetValue<string>( "identifier" ), useUserOverride );
 #endif
+
             // This is returned if we're running .NETStandard1.3 or useUserOverride was not set.
             return new CultureInfo( constructorArguments.GetValue<string>( "identifier" ) );
         }
@@ -31,8 +33,6 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization.Serializers
         }
 
         /// <exclude/>
-        public override void DeserializeFields( object obj, IArgumentsReader initializationArguments )
-        {
-        }
+        public override void DeserializeFields( object obj, IArgumentsReader initializationArguments ) { }
     }
 }

@@ -73,11 +73,11 @@ namespace Caravela.Framework.Impl.DesignTime
 
         public ICompilerService? GetCompilerService( Type type )
         {
-            if ( type.IsEquivalentTo( typeof( IClassificationService ) ) )
+            if ( type.IsEquivalentTo( typeof(IClassificationService) ) )
             {
                 return new ClassificationService( ServiceProviderFactory.GlobalProvider.WithProjectScopedServices( Enumerable.Empty<MetadataReference>() ) );
             }
-            else if ( type.IsEquivalentTo( typeof( ITransformationPreviewService ) ) )
+            else if ( type.IsEquivalentTo( typeof(ITransformationPreviewService) ) )
             {
                 return new TransformationPreviewService();
             }

@@ -60,7 +60,7 @@ namespace Caravela.Framework.Impl.Metrics
 
         private T ComputeMetricForTypes( IEnumerable<INamedType> types )
         {
-            var aggregate = default( T );
+            var aggregate = default(T);
 
             foreach ( var t in types )
             {

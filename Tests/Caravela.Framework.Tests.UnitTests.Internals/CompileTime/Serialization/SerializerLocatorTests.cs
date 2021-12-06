@@ -10,11 +10,10 @@ using Xunit;
 #pragma warning disable SA1106 // Code should not contain empty statements
 
 // attribute added for testing purposes
-[assembly: ImportMetaSerializer( typeof( SerializerLocatorTests.TypeWoSerializer ), typeof( SerializerLocatorTests.GenericSerializedClass<>.Serializer ) )]
+[assembly: ImportMetaSerializer( typeof(SerializerLocatorTests.TypeWoSerializer), typeof(SerializerLocatorTests.GenericSerializedClass<>.Serializer) )]
 
 namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serialization
 {
-
     public class SerializerLocatorTests
     {
         private readonly IMetaSerializerFactoryProvider _customSerializerProvider;
@@ -28,15 +27,19 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serialization
         [Fact]
         public void GetSerializerType_NonGenericCustomType()
         {
-            var serializerType = this._customSerializerProvider.GetSerializerFactory( typeof( SerializedClass ) )?.CreateSerializer( typeof( SerializedClass ) ).GetType();
+            var serializerType = this._customSerializerProvider.GetSerializerFactory( typeof(SerializedClass) )
+                ?.CreateSerializer( typeof(SerializedClass) )
+                .GetType();
 
-            Assert.Equal( typeof( SerializedClass.Serializer ), serializerType );
+            Assert.Equal( typeof(SerializedClass.Serializer), serializerType );
         }
 
         [Fact]
         public void GetSerializerType_GenericCustomTypeDefinition_NotNull()
         {
-            var serializerType = this._customSerializerProvider.GetSerializerFactory( typeof( GenericSerializedClass<> ) )?.CreateSerializer( typeof( GenericSerializedClass<int> ) ).GetType();
+            var serializerType = this._customSerializerProvider.GetSerializerFactory( typeof(GenericSerializedClass<>) )
+                ?.CreateSerializer( typeof(GenericSerializedClass<int>) )
+                .GetType();
 
             Assert.NotNull( serializerType );
         }
@@ -44,7 +47,7 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serialization
         [Fact]
         public void GetSerializerType_GenericCustomTypeInstance_Null()
         {
-            var serializerType = this._customSerializerProvider.GetSerializerFactory( typeof( GenericSerializedClass<string> ) );
+            var serializerType = this._customSerializerProvider.GetSerializerFactory( typeof(GenericSerializedClass<string>) );
 
             Assert.Null( serializerType );
         }
@@ -52,9 +55,16 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serialization
         [Fact]
         public void GetSerializerType_AskedTwice_TheSameObject()
         {
-            var serializerType1 = this._customSerializerProvider.GetSerializerFactory( typeof( GenericSerializedClass<> ) )?.CreateSerializer( typeof( GenericSerializedClass<string> ) ).GetType();
+            var serializerType1 = this._customSerializerProvider.GetSerializerFactory( typeof(GenericSerializedClass<>) )
+                ?.CreateSerializer( typeof(GenericSerializedClass<string>) )
+                .GetType();
+
             ;
-            var serializerType2 = this._customSerializerProvider.GetSerializerFactory( typeof( GenericSerializedClass<> ) )?.CreateSerializer( typeof( GenericSerializedClass<string> ) ).GetType();
+
+            var serializerType2 = this._customSerializerProvider.GetSerializerFactory( typeof(GenericSerializedClass<>) )
+                ?.CreateSerializer( typeof(GenericSerializedClass<string>) )
+                .GetType();
+
             ;
 
             Assert.Same( serializerType1, serializerType2 );
@@ -63,9 +73,16 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serialization
         [Fact]
         public void GetSerializerType_RespectsAssemblyImportAttributes()
         {
-            var assemblyImportedSerializerType = this._customSerializerProvider.GetSerializerFactory( typeof( TypeWoSerializer ) )?.CreateSerializer( typeof( GenericSerializedClass<string> ) ).GetType();
+            var assemblyImportedSerializerType = this._customSerializerProvider.GetSerializerFactory( typeof(TypeWoSerializer) )
+                ?.CreateSerializer( typeof(GenericSerializedClass<string>) )
+                .GetType();
+
             ; // NOTE: import is just over the namespace opening bracket
-            var classAttributeDerivedSerializerType = this._customSerializerProvider.GetSerializerFactory( typeof( GenericSerializedClass<> ) )?.CreateSerializer( typeof( GenericSerializedClass<string> ) ).GetType();
+
+            var classAttributeDerivedSerializerType = this._customSerializerProvider.GetSerializerFactory( typeof(GenericSerializedClass<>) )
+                ?.CreateSerializer( typeof(GenericSerializedClass<string>) )
+                .GetType();
+
             ;
 
             Assert.NotNull( classAttributeDerivedSerializerType );
@@ -76,10 +93,10 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serialization
         [Fact]
         public void GetSerializerType_HasManySerializers_Throws()
         {
-            Assert.Throws<MetaSerializationException>( () => this._customSerializerProvider.GetSerializerFactory( typeof( TypeWithManySerializers ) ) );
+            Assert.Throws<MetaSerializationException>( () => this._customSerializerProvider.GetSerializerFactory( typeof(TypeWithManySerializers) ) );
         }
 
-        [MetaSerializer( typeof( Serializer ) )]
+        [MetaSerializer( typeof(Serializer) )]
         public class SerializedClass
         {
             public class Serializer : ReferenceTypeSerializer<SerializedClass>
@@ -89,17 +106,13 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serialization
                     return new SerializedClass();
                 }
 
-                public override void SerializeObject( SerializedClass obj, IArgumentsWriter constructorArguments, IArgumentsWriter initializationArguments )
-                {
-                }
+                public override void SerializeObject( SerializedClass obj, IArgumentsWriter constructorArguments, IArgumentsWriter initializationArguments ) { }
 
-                public override void DeserializeFields( SerializedClass obj, IArgumentsReader initializationArguments )
-                {
-                }
+                public override void DeserializeFields( SerializedClass obj, IArgumentsReader initializationArguments ) { }
             }
         }
 
-        [MetaSerializer( typeof( GenericSerializedClass<>.Serializer ) )]
+        [MetaSerializer( typeof(GenericSerializedClass<>.Serializer) )]
         public class GenericSerializedClass<T>
         {
             public class Serializer : ReferenceTypeSerializer<GenericSerializedClass<T>>
@@ -109,22 +122,19 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serialization
                     return new GenericSerializedClass<T>();
                 }
 
-                public override void SerializeObject( GenericSerializedClass<T> obj, IArgumentsWriter constructorArguments, IArgumentsWriter initializationArguments )
-                {
-                }
+                public override void SerializeObject(
+                    GenericSerializedClass<T> obj,
+                    IArgumentsWriter constructorArguments,
+                    IArgumentsWriter initializationArguments ) { }
 
-                public override void DeserializeFields( GenericSerializedClass<T> obj, IArgumentsReader initializationArguments )
-                {
-                }
+                public override void DeserializeFields( GenericSerializedClass<T> obj, IArgumentsReader initializationArguments ) { }
             }
         }
 
-        internal class TypeWoSerializer
-        {
-        }
+        internal class TypeWoSerializer { }
 
-        [MetaSerializer( typeof( Serializer ) )]
-        [ImportMetaSerializer( typeof( TypeWithManySerializers ), typeof( SecondSerializer ) )]
+        [MetaSerializer( typeof(Serializer) )]
+        [ImportMetaSerializer( typeof(TypeWithManySerializers), typeof(SecondSerializer) )]
         public class TypeWithManySerializers
         {
             public class Serializer : ReferenceTypeSerializer<TypeWithManySerializers>
@@ -134,13 +144,12 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serialization
                     return new TypeWithManySerializers();
                 }
 
-                public override void SerializeObject( TypeWithManySerializers obj, IArgumentsWriter constructorArguments, IArgumentsWriter initializationArguments )
-                {
-                }
+                public override void SerializeObject(
+                    TypeWithManySerializers obj,
+                    IArgumentsWriter constructorArguments,
+                    IArgumentsWriter initializationArguments ) { }
 
-                public override void DeserializeFields( TypeWithManySerializers obj, IArgumentsReader initializationArguments )
-                {
-                }
+                public override void DeserializeFields( TypeWithManySerializers obj, IArgumentsReader initializationArguments ) { }
             }
 
             public class SecondSerializer : ReferenceTypeSerializer<TypeWithManySerializers>
@@ -150,13 +159,12 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serialization
                     return new TypeWithManySerializers();
                 }
 
-                public override void SerializeObject( TypeWithManySerializers obj, IArgumentsWriter constructorArguments, IArgumentsWriter initializationArguments )
-                {
-                }
+                public override void SerializeObject(
+                    TypeWithManySerializers obj,
+                    IArgumentsWriter constructorArguments,
+                    IArgumentsWriter initializationArguments ) { }
 
-                public override void DeserializeFields( TypeWithManySerializers obj, IArgumentsReader initializationArguments )
-                {
-                }
+                public override void DeserializeFields( TypeWithManySerializers obj, IArgumentsReader initializationArguments ) { }
             }
         }
     }

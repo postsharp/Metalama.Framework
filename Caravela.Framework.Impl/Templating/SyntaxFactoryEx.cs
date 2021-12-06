@@ -19,7 +19,7 @@ namespace Caravela.Framework.Impl.Templating
         public static LiteralExpressionSyntax Null => SyntaxFactory.LiteralExpression( SyntaxKind.NullLiteralExpression );
 
         public static ExpressionSyntax LiteralExpression( object? obj )
-            => LiteralExpressionOrNull( obj ) ?? throw new ArgumentOutOfRangeException( nameof( obj ) );
+            => LiteralExpressionOrNull( obj ) ?? throw new ArgumentOutOfRangeException( nameof(obj) );
 
         public static ExpressionSyntax? LiteralExpressionOrNull( object? obj )
             => obj switch

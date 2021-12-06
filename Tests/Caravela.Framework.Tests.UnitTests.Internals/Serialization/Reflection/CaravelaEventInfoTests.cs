@@ -33,7 +33,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
                 {
                     Assert.NotNull( info.AddMethod );
                     Assert.NotNull( info.RemoveMethod );
-                    Assert.Equal( typeof( Action ), info.EventHandlerType );
+                    Assert.Equal( typeof(Action), info.EventHandlerType );
                     Assert.Equal( "Target", info.DeclaringType!.Name );
                 } );
         }
@@ -55,7 +55,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
                 {
                     Assert.NotNull( info.AddMethod );
                     Assert.NotNull( info.RemoveMethod );
-                    Assert.Equal( typeof( Action ), info.EventHandlerType );
+                    Assert.Equal( typeof(Action), info.EventHandlerType );
                     Assert.Equal( "Target", info.DeclaringType!.Name );
                 } );
         }

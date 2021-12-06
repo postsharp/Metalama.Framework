@@ -26,7 +26,7 @@ namespace Caravela.Framework.Impl.Fabrics
         {
             if ( templateClasses.Any( c => c.Driver.Kind != FabricKind.Type ) )
             {
-                throw new ArgumentOutOfRangeException( nameof( templateClasses ), "Only type fabrics are supported." );
+                throw new ArgumentOutOfRangeException( nameof(templateClasses), "Only type fabrics are supported." );
             }
 
             this._templateClasses = templateClasses;

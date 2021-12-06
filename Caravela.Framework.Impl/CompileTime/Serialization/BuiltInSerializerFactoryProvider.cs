@@ -38,8 +38,8 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
             this.AddSerializer<CultureInfo, CultureInfoSerializer>();
 
             // collections
-            this.AddSerializer( typeof( List<> ), typeof( ListSerializer<> ) );
-            this.AddSerializer( typeof( Dictionary<,> ), typeof( DictionarySerializer<,> ) );
+            this.AddSerializer( typeof(List<>), typeof(ListSerializer<>) );
+            this.AddSerializer( typeof(Dictionary<,>), typeof(DictionarySerializer<,>) );
             this.MakeReadOnly();
         }
 
@@ -55,39 +55,39 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
 
         public static Type? GetAbstractReflectionType( Type type )
         {
-            if ( typeof( MethodInfo ).IsAssignableFrom( type ) )
+            if ( typeof(MethodInfo).IsAssignableFrom( type ) )
             {
-                return typeof( MethodInfo );
+                return typeof(MethodInfo);
             }
 
-            if ( typeof( ConstructorInfo ).IsAssignableFrom( type ) )
+            if ( typeof(ConstructorInfo).IsAssignableFrom( type ) )
             {
-                return typeof( ConstructorInfo );
+                return typeof(ConstructorInfo);
             }
 
-            if ( typeof( FieldInfo ).IsAssignableFrom( type ) )
+            if ( typeof(FieldInfo).IsAssignableFrom( type ) )
             {
-                return typeof( FieldInfo );
+                return typeof(FieldInfo);
             }
 
-            if ( typeof( Assembly ).IsAssignableFrom( type ) )
+            if ( typeof(Assembly).IsAssignableFrom( type ) )
             {
-                return typeof( Assembly );
+                return typeof(Assembly);
             }
 
-            if ( typeof( EventInfo ).IsAssignableFrom( type ) )
+            if ( typeof(EventInfo).IsAssignableFrom( type ) )
             {
-                return typeof( EventInfo );
+                return typeof(EventInfo);
             }
 
-            if ( typeof( ParameterInfo ).IsAssignableFrom( type ) )
+            if ( typeof(ParameterInfo).IsAssignableFrom( type ) )
             {
-                return typeof( ParameterInfo );
+                return typeof(ParameterInfo);
             }
 
-            if ( typeof( PropertyInfo ).IsAssignableFrom( type ) )
+            if ( typeof(PropertyInfo).IsAssignableFrom( type ) )
             {
-                return typeof( PropertyInfo );
+                return typeof(PropertyInfo);
             }
 
             return null;

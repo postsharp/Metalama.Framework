@@ -15,7 +15,7 @@ namespace Caravela.Framework.Impl.Serialization
         public override ExpressionSyntax Serialize( CompileTimeMethodInfo obj, SyntaxSerializationContext serializationContext )
             => ParenthesizedExpression(
                 CastExpression(
-                    serializationContext.GetTypeSyntax( typeof( MethodInfo ) ),
+                    serializationContext.GetTypeSyntax( typeof(MethodInfo) ),
                     SerializeMethodBase( obj, serializationContext ) ) );
     }
 }

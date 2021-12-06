@@ -44,10 +44,10 @@ namespace Caravela.Framework.Impl.Testing
 #endif
 
             var standardLibraries = standardLibrariesNames
-                .Select( r => MetadataReference.CreateFromFile( Path.Combine( Path.GetDirectoryName( typeof( object ).Assembly.Location )!, r + ".dll" ) ) )
+                .Select( r => MetadataReference.CreateFromFile( Path.Combine( Path.GetDirectoryName( typeof(object).Assembly.Location )!, r + ".dll" ) ) )
                 .ToList();
 
-            var caravelaLibraries = addCaravelaReferences ? new[] { typeof( IAspect ).Assembly, typeof( IAspectWeaver ).Assembly } : null;
+            var caravelaLibraries = addCaravelaReferences ? new[] { typeof(IAspect).Assembly, typeof(IAspectWeaver).Assembly } : null;
 
             var systemLibraries = AppDomain.CurrentDomain.GetAssemblies()
                 .Where(

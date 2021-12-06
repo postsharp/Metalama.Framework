@@ -37,8 +37,7 @@ namespace Caravela.Framework.Impl.Advices
             implementation,
             templateInfo,
             selectedKind,
-            selectedKind )
-        { }
+            selectedKind ) { }
 
         public TemplateMember( T? implementation, TemplateInfo templateInfo, TemplateKind selectedKind, TemplateKind interpretedKind )
         {

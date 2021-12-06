@@ -56,23 +56,23 @@ namespace Caravela.Framework.Impl.DesignTime.Diff
         {
             var newSyntaxTreeChangeKind = (this.SyntaxTreeChangeKind, newChange.SyntaxTreeChangeKind) switch
             {
-                (SyntaxTreeChangeKind.Added, SyntaxTreeChangeKind.Changed ) => SyntaxTreeChangeKind.Added,
-                (SyntaxTreeChangeKind.Added, SyntaxTreeChangeKind.Deleted ) => SyntaxTreeChangeKind.None,
-                (SyntaxTreeChangeKind.Added, SyntaxTreeChangeKind.Added ) => throw new AssertionFailedException(),
-                (_, SyntaxTreeChangeKind.Deleted ) => SyntaxTreeChangeKind.Deleted,
-                (SyntaxTreeChangeKind.Deleted, SyntaxTreeChangeKind.Added ) => SyntaxTreeChangeKind.Changed,
-                (SyntaxTreeChangeKind.Deleted, _ ) => throw new AssertionFailedException(),
-                (SyntaxTreeChangeKind.Changed, SyntaxTreeChangeKind.Changed ) => SyntaxTreeChangeKind.Changed,
+                (SyntaxTreeChangeKind.Added, SyntaxTreeChangeKind.Changed) => SyntaxTreeChangeKind.Added,
+                (SyntaxTreeChangeKind.Added, SyntaxTreeChangeKind.Deleted) => SyntaxTreeChangeKind.None,
+                (SyntaxTreeChangeKind.Added, SyntaxTreeChangeKind.Added) => throw new AssertionFailedException(),
+                (_, SyntaxTreeChangeKind.Deleted) => SyntaxTreeChangeKind.Deleted,
+                (SyntaxTreeChangeKind.Deleted, SyntaxTreeChangeKind.Added) => SyntaxTreeChangeKind.Changed,
+                (SyntaxTreeChangeKind.Deleted, _) => throw new AssertionFailedException(),
+                (SyntaxTreeChangeKind.Changed, SyntaxTreeChangeKind.Changed) => SyntaxTreeChangeKind.Changed,
                 _ => throw new AssertionFailedException()
             };
 
             var newCompileTimeChangeKind = (this.CompileTimeChangeKind, newChange.CompileTimeChangeKind) switch
             {
-                (_, CompileTimeChangeKind.None ) => this.CompileTimeChangeKind,
-                (CompileTimeChangeKind.None, _ ) => newChange.CompileTimeChangeKind,
-                (CompileTimeChangeKind.NewlyCompileTime, CompileTimeChangeKind.NoLongerCompileTime ) => CompileTimeChangeKind.None,
-                (CompileTimeChangeKind.NewlyCompileTime, _ ) => CompileTimeChangeKind.NewlyCompileTime,
-                (CompileTimeChangeKind.NoLongerCompileTime, CompileTimeChangeKind.NewlyCompileTime ) => CompileTimeChangeKind.None,
+                (_, CompileTimeChangeKind.None) => this.CompileTimeChangeKind,
+                (CompileTimeChangeKind.None, _) => newChange.CompileTimeChangeKind,
+                (CompileTimeChangeKind.NewlyCompileTime, CompileTimeChangeKind.NoLongerCompileTime) => CompileTimeChangeKind.None,
+                (CompileTimeChangeKind.NewlyCompileTime, _) => CompileTimeChangeKind.NewlyCompileTime,
+                (CompileTimeChangeKind.NoLongerCompileTime, CompileTimeChangeKind.NewlyCompileTime) => CompileTimeChangeKind.None,
 
                 _ => throw new AssertionFailedException()
             };

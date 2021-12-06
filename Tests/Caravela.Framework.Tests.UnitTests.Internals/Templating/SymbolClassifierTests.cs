@@ -155,8 +155,8 @@ class C
 
             var code = "class C {}";
             var compilation = testContext.CreateCompilationModel( code, addCaravelaReferences: false );
-            this.AssertScope( (INamedType) compilation.Factory.GetTypeByReflectionType( typeof( int ) ), TemplatingScope.Both );
-            this.AssertScope( (INamedType) compilation.Factory.GetTypeByReflectionType( typeof( Console ) ), TemplatingScope.RunTimeOnly );
+            this.AssertScope( (INamedType) compilation.Factory.GetTypeByReflectionType( typeof(int) ), TemplatingScope.Both );
+            this.AssertScope( (INamedType) compilation.Factory.GetTypeByReflectionType( typeof(Console) ), TemplatingScope.RunTimeOnly );
             this.AssertScope( compilation.Types.Single(), TemplatingScope.RunTimeOnly );
         }
     }

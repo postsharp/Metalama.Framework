@@ -28,7 +28,7 @@ namespace Caravela.Framework.Impl.CodeModel
             if ( serviceProviderMetadata != ServiceProviderMark.Project && serviceProviderMetadata != ServiceProviderMark.Test )
             {
                 // We should get a project-specific service provider here, except in unit tests, but not a global or pipeline one.
-                throw new ArgumentOutOfRangeException( nameof( serviceProvider ) );
+                throw new ArgumentOutOfRangeException( nameof(serviceProvider) );
             }
 
             this._projectOptions = serviceProvider.GetService<IProjectOptions>();
@@ -58,7 +58,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public T Extension<T>()
             where T : ProjectExtension, new()
-            => (T) this._extensions.GetOrAdd( typeof( T ), this.CreateProjectExtension );
+            => (T) this._extensions.GetOrAdd( typeof(T), this.CreateProjectExtension );
 
         private ProjectExtension CreateProjectExtension( Type t )
         {

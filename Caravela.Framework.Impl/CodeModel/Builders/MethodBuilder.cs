@@ -72,7 +72,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         IType IMethodBuilder.ReturnType
         {
             get => this.ReturnParameter.Type;
-            set => this.ReturnParameter.Type = value ?? throw new ArgumentNullException( nameof( value ) );
+            set => this.ReturnParameter.Type = value ?? throw new ArgumentNullException( nameof(value) );
         }
 
         IType IMethod.ReturnType => this.ReturnParameter.Type;
@@ -112,7 +112,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                     this,
                     -1,
                     null,
-                    this.Compilation.Factory.GetTypeByReflectionType( typeof( void ) ).AssertNotNull(),
+                    this.Compilation.Factory.GetTypeByReflectionType( typeof(void) ).AssertNotNull(),
                     RefKind.None );
         }
 
@@ -134,7 +134,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                     context.SyntaxGenerator.ConstraintClauses( this ),
                     Block(
                         List(
-                            !this.ReturnParameter.Type.Is( typeof( void ) )
+                            !this.ReturnParameter.Type.Is( typeof(void) )
                                 ? new[]
                                 {
                                     ReturnStatement(

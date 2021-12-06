@@ -26,7 +26,7 @@ namespace Caravela.Framework.Impl.CodeModel
         {
             if ( symbol.MethodKind == MethodKind.Constructor || symbol.MethodKind == MethodKind.StaticConstructor )
             {
-                throw new ArgumentOutOfRangeException( nameof( symbol ), "Cannot use the Method class with constructors." );
+                throw new ArgumentOutOfRangeException( nameof(symbol), "Cannot use the Method class with constructors." );
             }
         }
 

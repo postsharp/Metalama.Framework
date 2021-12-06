@@ -24,8 +24,7 @@ namespace Caravela.Framework.Impl.Fabrics
             base(
                 fabricManager,
                 fabric,
-                runTimeCompilation )
-        { }
+                runTimeCompilation ) { }
 
         public abstract bool TryExecute( IProject project, IDiagnosticAdder diagnosticAdder, [NotNullWhen( true )] out StaticFabricResult? result );
 
@@ -35,8 +34,7 @@ namespace Caravela.Framework.Impl.Fabrics
             private readonly List<IAspectSource> _aspectSources = new();
 
             protected StaticAmender( IProject project, FabricManager fabricManager, FabricInstance fabricInstance, in Ref<T> targetDeclaration ) :
-                base( project, fabricManager, fabricInstance, targetDeclaration )
-            { }
+                base( project, fabricManager, fabricInstance, targetDeclaration ) { }
 
             protected sealed override void AddAspectSource( IAspectSource aspectSource ) => this._aspectSources.Add( aspectSource );
 

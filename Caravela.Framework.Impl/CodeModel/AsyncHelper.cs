@@ -93,12 +93,12 @@ namespace Caravela.Framework.Impl.CodeModel
             }
 
             // The Task type does not have any AsyncMethodBuilder attribute so they need to be marked manually.
-            var isTask = returnType.OriginalDefinition.Name == nameof( Task )
+            var isTask = returnType.OriginalDefinition.Name == nameof(Task)
                          && returnType.OriginalDefinition.ContainingNamespace.ToDisplayString() == "System.Threading.Tasks";
 
             // Other types could have an AsyncMethodBuilderAttribute. 
             var hasBuilder = isTask ||
-                             returnType.OriginalDefinition.GetAttributes().Any( a => a.AttributeClass?.Name == nameof( AsyncMethodBuilderAttribute ) );
+                             returnType.OriginalDefinition.GetAttributes().Any( a => a.AttributeClass?.Name == nameof(AsyncMethodBuilderAttribute) );
 
             var awaiterType = getAwaiterMethod.ReturnType;
             var getResultMethod = awaiterType.GetMembers( "GetResult" ).OfType<IMethodSymbol>().FirstOrDefault( p => p.Parameters.Length == 0 );
@@ -120,7 +120,7 @@ namespace Caravela.Framework.Impl.CodeModel
             TypeSyntax? returnTypeSyntax,
             SyntaxGenerationContext generationContext )
             => method.IsAsync && method.ReturnsVoid
-                ? generationContext.SyntaxGenerator.Type( generationContext.ReflectionMapper.GetTypeSymbol( typeof( ValueTask ) ) )
+                ? generationContext.SyntaxGenerator.Type( generationContext.ReflectionMapper.GetTypeSymbol( typeof(ValueTask) ) )
                 : returnTypeSyntax ?? generationContext.SyntaxGenerator.Type( method.ReturnType );
 
         private record AsyncInfoSymbol( ITypeSymbol ResultType, bool HasMethodBuilder );

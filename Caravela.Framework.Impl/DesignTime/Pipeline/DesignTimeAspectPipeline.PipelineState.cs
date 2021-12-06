@@ -206,12 +206,12 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
                         {
                             switch (a, b)
                             {
-                                case (CompilationReference compilationReferenceA, CompilationReference compilationReferenceB ):
+                                case (CompilationReference compilationReferenceA, CompilationReference compilationReferenceB):
                                     // The way we compare in this case is naive, but we are processing cross-project dependencies through
                                     // a different mechanism.
                                     return compilationReferenceA.Compilation.AssemblyName == compilationReferenceB.Compilation.AssemblyName;
 
-                                case (PortableExecutableReference portableExecutableReferenceA, PortableExecutableReference portableExecutableReferenceB ):
+                                case (PortableExecutableReference portableExecutableReferenceA, PortableExecutableReference portableExecutableReferenceB):
                                     return portableExecutableReferenceA.FilePath == portableExecutableReferenceB.FilePath;
                             }
 

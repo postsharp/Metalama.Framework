@@ -15,7 +15,7 @@ namespace Caravela.Framework.Impl.Utilities
             {
                 return true;
             }
-            else if ( (x, y) is (CompileTimeType xWrapper, CompileTimeType yWrapper ) )
+            else if ( (x, y) is (CompileTimeType xWrapper, CompileTimeType yWrapper) )
             {
                 return xWrapper.Target.Equals( yWrapper.Target );
             }

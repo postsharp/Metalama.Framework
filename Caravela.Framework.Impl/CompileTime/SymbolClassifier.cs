@@ -73,10 +73,10 @@ namespace Caravela.Framework.Impl.CompileTime
             if ( compilation != null )
             {
                 this._compilation = compilation;
-                this._compileTimeAttribute = this._compilation.GetTypeByMetadataName( typeof( CompileTimeAttribute ).FullName ).AssertNotNull();
-                this._compileTimeOnlyAttribute = this._compilation.GetTypeByMetadataName( typeof( CompileTimeOnlyAttribute ).FullName ).AssertNotNull();
-                this._templateAttribute = this._compilation.GetTypeByMetadataName( typeof( TemplateAttribute ).FullName ).AssertNotNull();
-                this._ignoreUnlessOverriddenAttribute = this._compilation.GetTypeByMetadataName( typeof( AbstractAttribute ).FullName ).AssertNotNull();
+                this._compileTimeAttribute = this._compilation.GetTypeByMetadataName( typeof(CompileTimeAttribute).FullName ).AssertNotNull();
+                this._compileTimeOnlyAttribute = this._compilation.GetTypeByMetadataName( typeof(CompileTimeOnlyAttribute).FullName ).AssertNotNull();
+                this._templateAttribute = this._compilation.GetTypeByMetadataName( typeof(TemplateAttribute).FullName ).AssertNotNull();
+                this._ignoreUnlessOverriddenAttribute = this._compilation.GetTypeByMetadataName( typeof(AbstractAttribute).FullName ).AssertNotNull();
             }
 
             this._referenceAssemblyLocator = serviceProvider.GetService<ReferenceAssemblyLocator>();
@@ -144,10 +144,10 @@ namespace Caravela.Framework.Impl.CompileTime
         {
             switch ( templateAttribute.AttributeClass?.Name )
             {
-                case nameof( IntroduceAttribute ):
+                case nameof(IntroduceAttribute):
                     return new TemplateInfo( TemplateAttributeType.Introduction, templateAttribute );
 
-                case nameof( InterfaceMemberAttribute ):
+                case nameof(InterfaceMemberAttribute):
                     return new TemplateInfo( TemplateAttributeType.InterfaceMember, templateAttribute );
 
                 default:
@@ -302,12 +302,12 @@ namespace Caravela.Framework.Impl.CompileTime
                                     // Only a few well-known types can have dynamic generic arguments, other are unsupported.
                                     switch ( namedType.Name )
                                     {
-                                        case nameof( Task<object> ):
-                                        case nameof( ValueTask<object> ):
-                                        case nameof( IEnumerable<object> ):
-                                        case nameof( IEnumerator<object> ):
-                                        case nameof( IAsyncEnumerable<object> ):
-                                        case nameof( IAsyncEnumerator<object> ):
+                                        case nameof(Task<object>):
+                                        case nameof(ValueTask<object>):
+                                        case nameof(IEnumerable<object>):
+                                        case nameof(IEnumerator<object>):
+                                        case nameof(IAsyncEnumerable<object>):
+                                        case nameof(IAsyncEnumerator<object>):
                                             return TemplatingScope.Dynamic;
 
                                         default:

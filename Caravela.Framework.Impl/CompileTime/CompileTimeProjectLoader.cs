@@ -244,7 +244,7 @@ namespace Caravela.Framework.Impl.CompileTime
             }
 
             // LoadFromAssemblyPath throws for mscorlib
-            if ( Path.GetFileNameWithoutExtension( assemblyPath ) == typeof( object ).Assembly.GetName().Name )
+            if ( Path.GetFileNameWithoutExtension( assemblyPath ) == typeof(object).Assembly.GetName().Name )
             {
                 goto finish;
             }

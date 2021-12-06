@@ -12,7 +12,7 @@ namespace Caravela.Framework.Impl.Pipeline
     {
         private readonly ImmutableDictionary<string, IBoundAspectClass> _aspectClassesByName;
 
-        public IBoundAspectClass this[string typeName] => this._aspectClassesByName[typeName];
+        public IBoundAspectClass this[ string typeName ] => this._aspectClassesByName[typeName];
 
         public BoundAspectClassCollection( IEnumerable<IBoundAspectClass> aspectClasses )
         {

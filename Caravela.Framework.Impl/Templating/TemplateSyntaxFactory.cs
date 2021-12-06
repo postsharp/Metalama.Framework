@@ -347,7 +347,7 @@ namespace Caravela.Framework.Impl.Templating
                     return dynamicExpression.ToRunTimeExpression();
 
                 default:
-                    throw new ArgumentOutOfRangeException( nameof( expression ), $"Don't know how to extract the syntax from '{expression}'." );
+                    throw new ArgumentOutOfRangeException( nameof(expression), $"Don't know how to extract the syntax from '{expression}'." );
             }
         }
 

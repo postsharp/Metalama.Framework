@@ -17,8 +17,7 @@ namespace Caravela.Framework.Impl.DesignTime.CodeFixes
     internal class CodeFixPipelineStage : HighLevelPipelineStage
     {
         public CodeFixPipelineStage( CompileTimeProject compileTimeProject, IReadOnlyList<OrderedAspectLayer> aspectLayers, IServiceProvider serviceProvider ) :
-            base( compileTimeProject, aspectLayers, serviceProvider )
-        { }
+            base( compileTimeProject, aspectLayers, serviceProvider ) { }
 
         protected override PipelineStageResult GetStageResult(
             AspectPipelineConfiguration pipelineConfiguration,

@@ -17,11 +17,11 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         IEnumerator<IParameter> IEnumerable<IParameter>.GetEnumerator() => this.GetEnumerator();
 
-        IParameter IReadOnlyList<IParameter>.this[int index] => this[index];
+        IParameter IReadOnlyList<IParameter>.this[ int index ] => this[index];
 
         // This is to avoid ambiguities in extension methods because this class implements several IEnumerable<>
         public IList<IParameterBuilder> AsBuilderList => this;
 
-        public IParameter this[string name] => this.Single<IParameter>( p => p.Name == name );
+        public IParameter this[ string name ] => this.Single<IParameter>( p => p.Name == name );
     }
 }

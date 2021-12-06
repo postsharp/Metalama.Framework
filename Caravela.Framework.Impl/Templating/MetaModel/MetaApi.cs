@@ -43,25 +43,25 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         public IConstructor Constructor => throw new NotImplementedException();
 
-        public IMethodBase MethodBase => this._method ?? throw this.CreateInvalidOperationException( nameof( this.MethodBase ) );
+        public IMethodBase MethodBase => this._method ?? throw this.CreateInvalidOperationException( nameof(this.MethodBase) );
 
-        public IAdvisedField Field => this._fieldOrProperty as IAdvisedField ?? throw this.CreateInvalidOperationException( nameof( this.Field ) );
+        public IAdvisedField Field => this._fieldOrProperty as IAdvisedField ?? throw this.CreateInvalidOperationException( nameof(this.Field) );
 
-        public IAdvisedFieldOrProperty FieldOrProperty => this._fieldOrProperty ?? throw this.CreateInvalidOperationException( nameof( this.FieldOrProperty ) );
+        public IAdvisedFieldOrProperty FieldOrProperty => this._fieldOrProperty ?? throw this.CreateInvalidOperationException( nameof(this.FieldOrProperty) );
 
         public IDeclaration Declaration { get; }
 
-        public IMember Member => this.Declaration as IMember ?? throw this.CreateInvalidOperationException( nameof( this.Member ) );
+        public IMember Member => this.Declaration as IMember ?? throw this.CreateInvalidOperationException( nameof(this.Member) );
 
-        public IAdvisedMethod Method => this._method ?? throw this.CreateInvalidOperationException( nameof( this.Method ) );
+        public IAdvisedMethod Method => this._method ?? throw this.CreateInvalidOperationException( nameof(this.Method) );
 
-        public IAdvisedProperty Property => this._fieldOrProperty as IAdvisedProperty ?? throw this.CreateInvalidOperationException( nameof( this.Property ) );
+        public IAdvisedProperty Property => this._fieldOrProperty as IAdvisedProperty ?? throw this.CreateInvalidOperationException( nameof(this.Property) );
 
-        public IAdvisedEvent Event => this._event ?? throw this.CreateInvalidOperationException( nameof( this.Event ) );
+        public IAdvisedEvent Event => this._event ?? throw this.CreateInvalidOperationException( nameof(this.Event) );
 
-        public IAdvisedParameterList Parameters => this._method?.Parameters ?? throw this.CreateInvalidOperationException( nameof( this.Parameters ) );
+        public IAdvisedParameterList Parameters => this._method?.Parameters ?? throw this.CreateInvalidOperationException( nameof(this.Parameters) );
 
-        public INamedType Type => this._type ?? throw this.CreateInvalidOperationException( nameof( this.Type ) );
+        public INamedType Type => this._type ?? throw this.CreateInvalidOperationException( nameof(this.Type) );
 
         public ICompilation Compilation { get; }
 

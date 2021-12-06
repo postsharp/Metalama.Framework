@@ -10,8 +10,8 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
     internal sealed class SerializationBinaryReader
     {
         private readonly BinaryReader _reader;
-        private readonly Dictionary<int, string> _strings = new Dictionary<int, string>();
-        private readonly Dictionary<int, string> _dottedStrings = new Dictionary<int, string>();
+        private readonly Dictionary<int, string> _strings = new();
+        private readonly Dictionary<int, string> _dottedStrings = new();
 
         public SerializationBinaryReader( BinaryReader reader )
         {
@@ -45,6 +45,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
                 var bytes = this._reader.ReadBytes( header );
                 var value = Encoding.UTF8.GetString( bytes, 0, bytes.Length );
                 this._strings.Add( this._strings.Count + 1, value );
+
                 return value;
             }
         }
@@ -78,6 +79,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
                 }
 
                 this._dottedStrings.Add( this._dottedStrings.Count + 2, value );
+
                 return value;
             }
         }
@@ -93,22 +95,27 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
                 // Unsigned
                 case 0x00:
                     value = (ulong) (header & 0x0F);
+
                     break;
 
                 case 0x10:
                     value = ((uint) (header & 0x0F) << 8) | this._reader.ReadByte();
+
                     break;
 
                 case 0x20:
                     value = ((uint) (header & 0x0F) << 16) | this._reader.ReadUInt16();
+
                     break;
 
                 case 0x30:
                     value = ((ulong) (header & 0x0F) << 32) | this._reader.ReadUInt32();
+
                     break;
 
                 case 0x40:
                     value = ((ulong) (header & 0x0F) << 64) | this._reader.ReadUInt64();
+
                     break;
 
                 default:

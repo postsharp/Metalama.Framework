@@ -45,8 +45,8 @@ class C
 
             var compilation = testContext.CreateCompilationModel( code );
             var type = compilation.Types[0];
-            var intType = compilation.Factory.GetTypeByReflectionType( typeof( int ) );
-            var objectType = compilation.Factory.GetTypeByReflectionType( typeof( object ) );
+            var intType = compilation.Factory.GetTypeByReflectionType( typeof(int) );
+            var objectType = compilation.Factory.GetTypeByReflectionType( typeof(object) );
 
             var matchedMethods1 = type.Methods.OfCompatibleSignature( "Foo", argumentTypes: Array.Empty<IType>() );
             Assert.Equal( new[] { type.Methods[0] }, matchedMethods1 );
@@ -103,7 +103,7 @@ class C
 
             var compilation = testContext.CreateCompilationModel( code );
             var type = compilation.Types[0];
-            var intType = compilation.Factory.GetTypeByReflectionType( typeof( int ) );
+            var intType = compilation.Factory.GetTypeByReflectionType( typeof(int) );
 
             var matchedMethods1 = type.Methods.OfCompatibleSignature( "Foo", new[] { intType } );
             Assert.Equal( new[] { type.Methods[0], type.Methods[1] }, matchedMethods1 );
@@ -164,13 +164,13 @@ class C
 
             var matchedMethods1 = type.Methods.OfCompatibleSignature( "Foo", Array.Empty<IType>() ).ToArray();
             Assert.Equal( new[] { type.Methods[0] }, matchedMethods1 );
-            var matchedMethods2 = type.Methods.OfCompatibleSignature( "Foo", new[] { typeof( int ) } ).ToArray();
+            var matchedMethods2 = type.Methods.OfCompatibleSignature( "Foo", new[] { typeof(int) } ).ToArray();
             Assert.Equal( new[] { type.Methods[1], type.Methods[2] }, matchedMethods2 );
-            var matchedMethods3 = type.Methods.OfCompatibleSignature( "Foo", new[] { typeof( object ) } ).ToArray();
+            var matchedMethods3 = type.Methods.OfCompatibleSignature( "Foo", new[] { typeof(object) } ).ToArray();
             Assert.Equal( new[] { type.Methods[2] }, matchedMethods3 );
-            var matchedMethods4 = type.Methods.OfCompatibleSignature( "Foo", new[] { typeof( int ), typeof( int ) } ).ToArray();
+            var matchedMethods4 = type.Methods.OfCompatibleSignature( "Foo", new[] { typeof(int), typeof(int) } ).ToArray();
             Assert.Equal( new[] { type.Methods[3], type.Methods[4] }, matchedMethods4 );
-            var matchedMethods5 = type.Methods.OfCompatibleSignature( "Foo", new[] { typeof( object ), typeof( object ) } ).ToArray();
+            var matchedMethods5 = type.Methods.OfCompatibleSignature( "Foo", new[] { typeof(object), typeof(object) } ).ToArray();
             Assert.Equal( new[] { type.Methods[4] }, matchedMethods5 );
         }
 
@@ -257,10 +257,10 @@ class C
 
             var compilation = testContext.CreateCompilationModel( code );
             var type = compilation.Types[0];
-            var intType = compilation.Factory.GetTypeByReflectionType( typeof( int ) );
-            var objectType = compilation.Factory.GetTypeByReflectionType( typeof( object ) );
-            var intArrayType = compilation.Factory.GetTypeByReflectionType( typeof( int[] ) );
-            var objectArrayType = compilation.Factory.GetTypeByReflectionType( typeof( object[] ) );
+            var intType = compilation.Factory.GetTypeByReflectionType( typeof(int) );
+            var objectType = compilation.Factory.GetTypeByReflectionType( typeof(object) );
+            var intArrayType = compilation.Factory.GetTypeByReflectionType( typeof(int[]) );
+            var objectArrayType = compilation.Factory.GetTypeByReflectionType( typeof(object[]) );
 
             var matchedMethods1 = type.Methods.OfCompatibleSignature( "Foo", Array.Empty<IType>() );
             Assert.Equal( new[] { type.Methods[0], type.Methods[5], type.Methods[6] }, matchedMethods1 );

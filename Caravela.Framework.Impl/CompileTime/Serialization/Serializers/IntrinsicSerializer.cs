@@ -15,9 +15,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization.Serializers
             return constructorArguments.GetValue<T>( "_" )!;
         }
 
-        void IMetaSerializer.DeserializeFields( ref object obj, IArgumentsReader initializationArguments )
-        {
-        }
+        void IMetaSerializer.DeserializeFields( ref object obj, IArgumentsReader initializationArguments ) { }
 
         void IMetaSerializer.SerializeObject( object obj, IArgumentsWriter constructorArguments, IArgumentsWriter? initializationArguments )
         {

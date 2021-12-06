@@ -30,7 +30,7 @@ namespace Caravela.Framework.Impl.Metrics
         {
             var declarationImpl = (IDeclarationImpl) declaration;
 
-            var aggregate = default( T );
+            var aggregate = default(T);
 
             foreach ( var syntaxRef in declarationImpl.DeclaringSyntaxReferences )
             {

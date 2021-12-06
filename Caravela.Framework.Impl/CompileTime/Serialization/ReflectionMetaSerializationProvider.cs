@@ -11,10 +11,10 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
 {
     internal sealed class ReflectionMetaSerializationProvider : IMetaSerializerFactoryProvider, IMetaSerializerDiscoverer
     {
-        private readonly Dictionary<Type, IMetaSerializerFactory> _serializerTypes = new Dictionary<Type, IMetaSerializerFactory>();
-        private readonly Dictionary<Type, bool> _inspectedTypes = new Dictionary<Type, bool>();
-        private readonly Dictionary<Assembly, bool> _inspectedAssemblies = new Dictionary<Assembly, bool>();
-        private readonly object _sync = new object();
+        private readonly Dictionary<Type, IMetaSerializerFactory> _serializerTypes = new();
+        private readonly Dictionary<Type, bool> _inspectedTypes = new();
+        private readonly Dictionary<Assembly, bool> _inspectedAssemblies = new();
+        private readonly object _sync = new();
 
         public ReflectionMetaSerializationProvider( ActivatorProvider activatorProvider )
         {
@@ -57,12 +57,12 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
                 }
                 else
                 {
-                    throw new MetaSerializationException( 
-                        string.Format( 
-                            CultureInfo.InvariantCulture, 
+                    throw new MetaSerializationException(
+                        string.Format(
+                            CultureInfo.InvariantCulture,
                             "Cannot assign serializer '{0}' to type '{1}' where this type is already assigned to serializer '{2}'.",
-                            serializerType, 
-                            objectType, 
+                            serializerType,
+                            objectType,
                             existingSerializerType ) );
                 }
             }
@@ -80,19 +80,23 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
             this._inspectedTypes.Add( type, true );
 
             var hasSerializer = false;
+
             try
             {
                 foreach ( var attribute in type.GetCustomAttributes( false ) )
                 {
                     var serializableAttribute = attribute as MetaSerializerAttribute;
+
                     if ( serializableAttribute != null && serializableAttribute.SerializerType != null )
                     {
                         hasSerializer = true;
                         this.AddSerializer( type, serializableAttribute.SerializerType, this.ActivatorProvider );
+
                         continue;
                     }
 
                     var importSerializerAttribute = attribute as ImportMetaSerializerAttribute;
+
                     if ( importSerializerAttribute != null )
                     {
                         this.ProcessImport( importSerializerAttribute );
@@ -109,6 +113,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
             if ( !hasSerializer )
             {
                 var serializerType = type.GetNestedType( "Serializer", BindingFlags.Public | BindingFlags.NonPublic );
+
                 if ( serializerType != null )
                 {
                     this.AddSerializer( type, serializerType, this.ActivatorProvider );
@@ -116,6 +121,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
             }
 
             var baseType = type.BaseType;
+
             if ( baseType != null )
             {
                 if ( baseType.IsGenericType )
@@ -138,7 +144,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
 
             this._inspectedAssemblies.Add( assembly, true );
 
-            foreach ( ImportMetaSerializerAttribute attribute in assembly.GetCustomAttributes( typeof( ImportMetaSerializerAttribute ), false ) )
+            foreach ( ImportMetaSerializerAttribute attribute in assembly.GetCustomAttributes( typeof(ImportMetaSerializerAttribute), false ) )
             {
                 this.ProcessImport( attribute );
             }

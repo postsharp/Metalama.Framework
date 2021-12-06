@@ -13,7 +13,7 @@ namespace Caravela.Framework.Impl.Serialization
     {
         public override ExpressionSyntax Serialize( TimeSpan obj, SyntaxSerializationContext serializationContext )
         {
-            return ObjectCreationExpression( serializationContext.GetTypeSyntax( typeof( TimeSpan ) ) )
+            return ObjectCreationExpression( serializationContext.GetTypeSyntax( typeof(TimeSpan) ) )
                 .AddArgumentListArguments(
                     Argument(
                         LiteralExpression(

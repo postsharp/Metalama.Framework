@@ -45,7 +45,7 @@ namespace Caravela.Framework.Impl.Utilities
 
             switch (x, y)
             {
-                case (IMethodSymbol methodX, IMethodSymbol methodY ):
+                case (IMethodSymbol methodX, IMethodSymbol methodY):
                     if ( !MethodEquals( methodX, methodY, this._options ) )
                     {
                         return false;
@@ -53,7 +53,7 @@ namespace Caravela.Framework.Impl.Utilities
 
                     break;
 
-                case (IPropertySymbol propertyX, IPropertySymbol propertyY ):
+                case (IPropertySymbol propertyX, IPropertySymbol propertyY):
                     if ( !PropertyEquals( propertyX, propertyY, this._options ) )
                     {
                         return false;
@@ -61,7 +61,7 @@ namespace Caravela.Framework.Impl.Utilities
 
                     break;
 
-                case (IEventSymbol eventX, IEventSymbol eventY ):
+                case (IEventSymbol eventX, IEventSymbol eventY):
                     if ( !EventEquals( eventX, eventY, this._options ) )
                     {
                         return false;
@@ -69,7 +69,7 @@ namespace Caravela.Framework.Impl.Utilities
 
                     break;
 
-                case (IFieldSymbol fieldX, IFieldSymbol fieldY ):
+                case (IFieldSymbol fieldX, IFieldSymbol fieldY):
                     if ( !FieldEquals( fieldX, fieldY, this._options ) )
                     {
                         return false;
@@ -77,7 +77,7 @@ namespace Caravela.Framework.Impl.Utilities
 
                     break;
 
-                case (INamedTypeSymbol namedTypeX, INamedTypeSymbol namedTypeY ):
+                case (INamedTypeSymbol namedTypeX, INamedTypeSymbol namedTypeY):
                     if ( !NamedTypeEquals( namedTypeX, namedTypeY, this._options ) )
                     {
                         return false;
@@ -85,7 +85,7 @@ namespace Caravela.Framework.Impl.Utilities
 
                     break;
 
-                case (INamespaceSymbol namespaceX, INamespaceSymbol namespaceY ):
+                case (INamespaceSymbol namespaceX, INamespaceSymbol namespaceY):
                     if ( !StringComparer.Ordinal.Equals( namespaceX.Name, namespaceY.Name ) )
                     {
                         return false;
@@ -239,14 +239,14 @@ namespace Caravela.Framework.Impl.Utilities
 
             switch (typeX, typeY)
             {
-                case (ITypeParameterSymbol typeParamX, ITypeParameterSymbol typeParamY ):
+                case (ITypeParameterSymbol typeParamX, ITypeParameterSymbol typeParamY):
                     return StringComparer.Ordinal.Equals( typeParamX.Name, typeParamY.Name )
                            && typeParamX.TypeParameterKind == typeParamY.TypeParameterKind;
 
-                case (INamedTypeSymbol namedTypeX, INamedTypeSymbol namedTypeY ):
+                case (INamedTypeSymbol namedTypeX, INamedTypeSymbol namedTypeY):
                     return NamedTypeEquals( namedTypeX, namedTypeY, StructuralSymbolComparerOptions.Type );
 
-                case (IArrayTypeSymbol arrayTypeX, IArrayTypeSymbol arrayTypeY ):
+                case (IArrayTypeSymbol arrayTypeX, IArrayTypeSymbol arrayTypeY):
                     return arrayTypeX.Rank == arrayTypeY.Rank
                            && TypeEquals( arrayTypeX.ElementType, arrayTypeY.ElementType );
 
@@ -269,7 +269,7 @@ namespace Caravela.Framework.Impl.Utilities
 
                 switch (currentX, currentY)
                 {
-                    case (IMethodSymbol methodX, IMethodSymbol methodY ):
+                    case (IMethodSymbol methodX, IMethodSymbol methodY):
                         if ( !MethodEquals( methodX, methodY, StructuralSymbolComparerOptions.MethodSignature ) )
                         {
                             return false;
@@ -277,7 +277,7 @@ namespace Caravela.Framework.Impl.Utilities
 
                         break;
 
-                    case (INamedTypeSymbol namedTypeX, INamedTypeSymbol namedTypeY ):
+                    case (INamedTypeSymbol namedTypeX, INamedTypeSymbol namedTypeY):
                         if ( !NamedTypeEquals( namedTypeX, namedTypeY, StructuralSymbolComparerOptions.Type ) )
                         {
                             return false;
@@ -285,7 +285,7 @@ namespace Caravela.Framework.Impl.Utilities
 
                         break;
 
-                    case (INamespaceSymbol namespaceX, INamespaceSymbol namespaceY ):
+                    case (INamespaceSymbol namespaceX, INamespaceSymbol namespaceY):
                         if ( !StringComparer.Ordinal.Equals( namespaceX.Name, namespaceY.Name ) )
                         {
                             return false;
@@ -293,7 +293,7 @@ namespace Caravela.Framework.Impl.Utilities
 
                         break;
 
-                    case (IModuleSymbol _, IModuleSymbol _ ):
+                    case (IModuleSymbol _, IModuleSymbol _):
                         return true;
 
                     default:

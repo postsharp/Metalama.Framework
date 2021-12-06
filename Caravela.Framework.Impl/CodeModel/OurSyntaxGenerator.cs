@@ -33,7 +33,7 @@ namespace Caravela.Framework.Impl.CodeModel
         static OurSyntaxGenerator()
         {
             var referencedWorkspaceAssemblyName =
-                typeof( OurSyntaxGenerator ).Assembly.GetReferencedAssemblies()
+                typeof(OurSyntaxGenerator).Assembly.GetReferencedAssemblies()
                     .Single( a => string.Equals( a.Name, "Microsoft.CodeAnalysis.Workspaces", StringComparison.OrdinalIgnoreCase ) );
 
             var requiredWorkspaceImplementationAssemblyName = new AssemblyName(
@@ -418,7 +418,7 @@ namespace Caravela.Framework.Impl.CodeModel
                 }
             }
 
-            throw new ArgumentOutOfRangeException( nameof( value ), $"The value '{value}' cannot be converted to a custom attribute argument value." );
+            throw new ArgumentOutOfRangeException( nameof(value), $"The value '{value}' cannot be converted to a custom attribute argument value." );
         }
     }
 }

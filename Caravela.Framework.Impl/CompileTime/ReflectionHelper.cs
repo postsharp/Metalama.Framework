@@ -44,7 +44,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
         public static INamedTypeSymbol GetTypeByMetadataNameSafe( this Compilation compilation, string name )
             => compilation.GetTypeByMetadataName( name ) ?? throw new ArgumentOutOfRangeException(
-                nameof( name ),
+                nameof(name),
                 $"Cannot find a type '{name}' in compilation '{compilation.AssemblyName}" );
 
         /// <summary>
@@ -158,12 +158,12 @@ namespace Caravela.Framework.Impl.CompileTime
         {
             if ( typeName == null )
             {
-                throw new ArgumentNullException( nameof( assemblyName ) );
+                throw new ArgumentNullException( nameof(assemblyName) );
             }
 
             if ( typeName == null )
             {
-                throw new ArgumentNullException( nameof( assemblyName ) );
+                throw new ArgumentNullException( nameof(assemblyName) );
             }
 
             return typeName.Replace( ",", "\\," ) + ", " + assemblyName;
@@ -180,6 +180,7 @@ namespace Caravela.Framework.Impl.CompileTime
             else if ( type.IsGenericType && !type.IsGenericTypeDefinition )
             {
                 VisitTypeElements( type.GetGenericTypeDefinition(), visitor );
+
                 foreach ( var genericArgument in type.GetGenericArguments() )
                 {
                     VisitTypeElements( genericArgument, visitor );
@@ -213,7 +214,7 @@ namespace Caravela.Framework.Impl.CompileTime
                     return true;
 
                 default:
-                    throw new ArgumentOutOfRangeException( nameof( type ) );
+                    throw new ArgumentOutOfRangeException( nameof(type) );
             }
         }
 
@@ -243,7 +244,7 @@ namespace Caravela.Framework.Impl.CompileTime
                     return true;
 
                 default:
-                    throw new ArgumentOutOfRangeException( nameof( type ) );
+                    throw new ArgumentOutOfRangeException( nameof(type) );
             }
         }
     }

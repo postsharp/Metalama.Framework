@@ -10,7 +10,6 @@ using Xunit;
 
 namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serialization
 {
-
     public class AdvancedClassSerializationTests
     {
         [Fact]
@@ -107,7 +106,7 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serialization
             Assert.Same( deserializedObject, deserializedObject!.Spouse );
         }
 
-        [MetaSerializer( typeof( Serializer ) )]
+        [MetaSerializer( typeof(Serializer) )]
         public class Parent
         {
             public string Name { get; }
@@ -147,7 +146,7 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serialization
             }
         }
 
-        [MetaSerializer( typeof( Serializer ) )]
+        [MetaSerializer( typeof(Serializer) )]
         public class Child
         {
             public string? Name { get; set; }
@@ -188,17 +187,17 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serialization
             }
         }
 
-        [MetaSerializer( typeof( Serializer ) )]
+        [MetaSerializer( typeof(Serializer) )]
         public class IgnoringType
         {
-#pragma warning disable SA1401 // Fields should be private
+#pragma warning disable SA1401  // Fields should be private
 #pragma warning disable IDE0051 // Remove unused private members
             private const string _ignoredKey = "_n";
             private const string _importantKey = "_i";
 
             [MetaNonSerialized]
             public string? NoMatter;
-#pragma warning restore SA1401 // Fields should be private
+#pragma warning restore SA1401  // Fields should be private
 #pragma warning restore IDE0051 // Remove unused private members
 
             public int ImportantValue { get; set; }

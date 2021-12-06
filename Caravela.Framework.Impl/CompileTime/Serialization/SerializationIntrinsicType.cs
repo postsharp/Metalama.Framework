@@ -27,6 +27,6 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
         Type,
         GenericTypeParameter,
         GenericMethodParameter,
-        Enum,
+        Enum
     }
 }

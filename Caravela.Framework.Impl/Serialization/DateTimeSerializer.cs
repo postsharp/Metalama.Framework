@@ -15,7 +15,7 @@ namespace Caravela.Framework.Impl.Serialization
             return InvocationExpression(
                     MemberAccessExpression(
                         SyntaxKind.SimpleMemberAccessExpression,
-                        serializationContext.GetTypeSyntax( typeof( DateTime ) ),
+                        serializationContext.GetTypeSyntax( typeof(DateTime) ),
                         IdentifierName( "FromBinary" ) ) )
                 .AddArgumentListArguments(
                     Argument(

@@ -97,7 +97,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
             Invariant.Assert( hasGetter || hasSetter );
 
-            this.Type = targetType.Compilation.TypeFactory.GetTypeByReflectionType( typeof( object ) );
+            this.Type = targetType.Compilation.TypeFactory.GetTypeByReflectionType( typeof(object) );
 
             if ( hasGetter )
             {
@@ -179,13 +179,13 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
             {
                 switch (Getter: this.GetMethod, Setter: this.SetMethod)
                 {
-                    case (not null, not null ):
+                    case (not null, not null):
                         return AccessorList( List( new[] { GenerateGetAccessor(), GenerateSetAccessor() } ) );
 
-                    case (not null, null ):
+                    case (not null, null):
                         return AccessorList( List( new[] { GenerateGetAccessor() } ) );
 
-                    case (null, not null ):
+                    case (null, not null):
                         return AccessorList( List( new[] { GenerateSetAccessor() } ) );
 
                     default:

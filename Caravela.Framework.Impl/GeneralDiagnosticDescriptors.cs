@@ -174,7 +174,7 @@ namespace Caravela.Framework.Impl
         public static readonly DiagnosticDefinition<(string Layer1, string Layer2)> UnorderedLayers = new(
             "CR0035",
             _category,
-            "The aspect layers '{0}' and '{1}' are not strongly ordered. Add an [assembly: " + nameof( AspectOrderAttribute ) +
+            "The aspect layers '{0}' and '{1}' are not strongly ordered. Add an [assembly: " + nameof(AspectOrderAttribute) +
             "(...)] attribute to specify the order relationship between these two layers, otherwise the compilation will be non-deterministic.",
             Warning,
             "Two layers are not strongly ordered." );

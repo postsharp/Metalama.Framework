@@ -24,7 +24,7 @@ namespace Caravela.Framework.Impl.ReflectionMocks
         {
             if ( string.IsNullOrEmpty( fullName ) )
             {
-                throw new ArgumentNullException( nameof( fullName ) );
+                throw new ArgumentNullException( nameof(fullName) );
             }
 
             this.FullName = fullName;

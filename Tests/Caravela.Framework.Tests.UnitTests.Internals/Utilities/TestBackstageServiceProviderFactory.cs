@@ -24,7 +24,7 @@ namespace Caravela.Framework.Tests.UnitTests.Utilities
             var serviceProviderBuilder = new ServiceProviderBuilder(
                 ( type, service ) => services.AddService( type, service ),
                 () => services.GetServiceProvider() );
-            
+
             // We can't add these services to the ServiceProviderFactory using the WithServices method
             // because the backstage interfaces do not inherit from IService.
             serviceProviderBuilder

@@ -68,39 +68,39 @@ namespace Caravela.Framework.Impl.CompileTime
                 return false;
             }
 
-            if ( TryGetNamedArgument<string>( nameof( TemplateAttribute.Name ), out var name ) )
+            if ( TryGetNamedArgument<string>( nameof(TemplateAttribute.Name), out var name ) )
             {
                 attribute.Name = name;
             }
 
-            if ( TryGetNamedArgument<IntroductionScope>( nameof( TemplateAttribute.Scope ), out var scope ) )
+            if ( TryGetNamedArgument<IntroductionScope>( nameof(TemplateAttribute.Scope), out var scope ) )
             {
                 attribute.Scope = scope;
             }
 
-            if ( TryGetNamedArgument<OverrideStrategy>( nameof( TemplateAttribute.WhenExists ), out var overrideStrategy ) )
+            if ( TryGetNamedArgument<OverrideStrategy>( nameof(TemplateAttribute.WhenExists), out var overrideStrategy ) )
             {
                 attribute.WhenExists = overrideStrategy;
             }
 
-            if ( TryGetNamedArgument<bool>( nameof( TemplateAttribute.IsVirtual ), out var isVirtual ) )
+            if ( TryGetNamedArgument<bool>( nameof(TemplateAttribute.IsVirtual), out var isVirtual ) )
             {
                 attribute.IsVirtual = isVirtual;
             }
 
-            if ( TryGetNamedArgument<bool>( nameof( TemplateAttribute.IsSealed ), out var isSealed ) )
+            if ( TryGetNamedArgument<bool>( nameof(TemplateAttribute.IsSealed), out var isSealed ) )
             {
                 attribute.IsSealed = isSealed;
             }
 
-            if ( TryGetNamedArgument<Accessibility>( nameof( TemplateAttribute.Accessibility ), out var accessibility ) )
+            if ( TryGetNamedArgument<Accessibility>( nameof(TemplateAttribute.Accessibility), out var accessibility ) )
             {
                 attribute.Accessibility = accessibility;
             }
 
             if ( attributeType == TemplateAttributeType.InterfaceMember )
             {
-                if ( TryGetNamedArgument<bool>( nameof( InterfaceMemberAttribute.IsExplicit ), out var isExplicit ) )
+                if ( TryGetNamedArgument<bool>( nameof(InterfaceMemberAttribute.IsExplicit), out var isExplicit ) )
                 {
                     ((InterfaceMemberAttribute) attribute).IsExplicit = isExplicit;
                 }

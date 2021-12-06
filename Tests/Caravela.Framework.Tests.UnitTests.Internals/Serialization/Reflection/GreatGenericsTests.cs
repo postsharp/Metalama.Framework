@@ -90,8 +90,8 @@ class User {
                 instantiatedNested.Method( "Method21" ),
                 m =>
                 {
-                    Assert.Equal( typeof( float ), m.ReturnType );
-                    Assert.Equal( typeof( string ), m.GetParameters()[0].ParameterType );
+                    Assert.Equal( typeof(float), m.ReturnType );
+                    Assert.Equal( typeof(string), m.GetParameters()[0].ParameterType );
                 },
                 @"((global::System.Reflection.MethodInfo)global::System.Reflection.MethodBase.GetMethodFromHandle(global::Caravela.Compiler.Intrinsics.GetRuntimeMethodHandle(""M:Origin`1.NestedInOrigin`1.Method21(`0)~`1""), typeof(global::Origin<global::System.String>.NestedInOrigin<global::System.Single>).TypeHandle))" );
 
@@ -99,40 +99,40 @@ class User {
                 instantiatedNested.Constructors.Single(),
                 c =>
                 {
-                    Assert.Equal( typeof( string ), c.DeclaringType!.GenericTypeArguments[0] );
-                    Assert.Equal( typeof( float ), c.DeclaringType.GenericTypeArguments[1] );
-                    Assert.Equal( typeof( int ), c.DeclaringType.BaseType!.GenericTypeArguments[0] );
+                    Assert.Equal( typeof(string), c.DeclaringType!.GenericTypeArguments[0] );
+                    Assert.Equal( typeof(float), c.DeclaringType.GenericTypeArguments[1] );
+                    Assert.Equal( typeof(int), c.DeclaringType.BaseType!.GenericTypeArguments[0] );
                 },
                 @"((global::System.Reflection.ConstructorInfo)global::System.Reflection.MethodBase.GetMethodFromHandle(global::Caravela.Compiler.Intrinsics.GetRuntimeMethodHandle(""M:Origin`1.NestedInOrigin`1.#ctor""), typeof(global::Origin<global::System.String>.NestedInOrigin<global::System.Single>).TypeHandle))" );
 
             this.TestSerializable(
                 ((INamedType) instantiatedNested.ContainingDeclaration!).Method( "Method" ),
-                m => Assert.Equal( typeof( string ), m.ReturnType ),
+                m => Assert.Equal( typeof(string), m.ReturnType ),
                 @"((global::System.Reflection.MethodInfo)global::System.Reflection.MethodBase.GetMethodFromHandle(global::Caravela.Compiler.Intrinsics.GetRuntimeMethodHandle(""M:Origin`1.Method(`0)~`0""), typeof(global::Origin<global::System.String>).TypeHandle))" );
 
             this.TestSerializable(
                 instantiatedDescendant.Field( "Field" ),
-                ( FieldInfo f ) => Assert.Equal( typeof( float ), f.FieldType ),
+                ( FieldInfo f ) => Assert.Equal( typeof(float), f.FieldType ),
                 @"typeof(global::Descendant<global::System.Single>).GetField(""Field"", global::System.Reflection.BindingFlags.DeclaredOnly | global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Static | global::System.Reflection.BindingFlags.Instance)" );
 
             this.TestSerializable(
                 instantiatedBaseOrigin.Field( "Field" ),
-                ( FieldInfo f ) => Assert.Equal( typeof( int ), f.FieldType ),
+                ( FieldInfo f ) => Assert.Equal( typeof(int), f.FieldType ),
                 @"typeof(global::Origin<global::System.Int32>).GetField(""Field"", global::System.Reflection.BindingFlags.DeclaredOnly | global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Static | global::System.Reflection.BindingFlags.Instance)" );
 
             this.TestSerializable(
                 instantiatedBaseOrigin.Field( "privateField" ),
-                ( FieldInfo f ) => Assert.Equal( typeof( int ), f.FieldType ),
+                ( FieldInfo f ) => Assert.Equal( typeof(int), f.FieldType ),
                 @"typeof(global::Origin<global::System.Int32>).GetField(""privateField"", global::System.Reflection.BindingFlags.DeclaredOnly | global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Static | global::System.Reflection.BindingFlags.Instance)" );
 
             this.TestSerializable(
                 instantiatedBaseOrigin.Property( "Property" ),
-                ( PropertyInfo p ) => Assert.Equal( typeof( int ), p.PropertyType ),
+                ( PropertyInfo p ) => Assert.Equal( typeof(int), p.PropertyType ),
                 @"typeof(global::Origin<global::System.Int32>).GetProperty(""Property"", global::System.Reflection.BindingFlags.DeclaredOnly | global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Static | global::System.Reflection.BindingFlags.Instance)" );
 
             this.TestSerializable(
                 instantiatedBaseOrigin.Property( "privateProperty" ),
-                ( PropertyInfo p ) => Assert.Equal( typeof( int ), p.PropertyType ),
+                ( PropertyInfo p ) => Assert.Equal( typeof(int), p.PropertyType ),
                 @"typeof(global::Origin<global::System.Int32>).GetProperty(""privateProperty"", global::System.Reflection.BindingFlags.DeclaredOnly | global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Static | global::System.Reflection.BindingFlags.Instance)" );
 
             this.TestSerializable(
@@ -140,7 +140,7 @@ class User {
                 t =>
                 {
                     Assert.Equal( "Origin`1", t.Name );
-                    Assert.Equal( typeof( int ), t.GenericTypeArguments[0] );
+                    Assert.Equal( typeof(int), t.GenericTypeArguments[0] );
                 },
                 @"typeof(global::Origin<global::System.Int32>)" );
 
@@ -149,7 +149,7 @@ class User {
                 e =>
                 {
                     Assert.Equal( "Actioned", e.Name );
-                    Assert.Equal( typeof( Action<int> ), e.EventHandlerType );
+                    Assert.Equal( typeof(Action<int>), e.EventHandlerType );
                 },
                 @"typeof(global::Origin<global::System.Int32>).GetEvent(""Actioned"")" );
         }

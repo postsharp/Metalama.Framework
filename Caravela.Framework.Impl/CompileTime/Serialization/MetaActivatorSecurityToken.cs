@@ -10,6 +10,6 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
     {
         private MetaActivatorSecurityToken() { }
 
-        internal static readonly MetaActivatorSecurityToken Instance = new MetaActivatorSecurityToken();
+        internal static readonly MetaActivatorSecurityToken Instance = new();
     }
 }

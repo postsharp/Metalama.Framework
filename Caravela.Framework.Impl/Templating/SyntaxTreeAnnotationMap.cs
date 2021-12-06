@@ -137,7 +137,7 @@ namespace Caravela.Framework.Impl.Templating
             {
                 if ( semanticModel == null )
                 {
-                    throw new ArgumentNullException( nameof( semanticModel ), "'semanticModel' must be non-null when 'isTemplate' is true." );
+                    throw new ArgumentNullException( nameof(semanticModel), "'semanticModel' must be non-null when 'isTemplate' is true." );
                 }
 
                 // Get info from the semantic mode.

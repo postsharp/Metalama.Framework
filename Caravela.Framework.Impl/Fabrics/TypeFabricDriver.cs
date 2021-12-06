@@ -20,8 +20,7 @@ namespace Caravela.Framework.Impl.Fabrics
         public TypeFabricDriver( FabricManager fabricManager, Fabric fabric, Compilation runTimeCompilation ) : base(
             fabricManager,
             fabric,
-            runTimeCompilation )
-        { }
+            runTimeCompilation ) { }
 
         private ISymbol TargetSymbol => this.FabricSymbol.ContainingType;
 

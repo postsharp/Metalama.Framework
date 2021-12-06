@@ -12,11 +12,11 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serialization
 {
     public class SerializationTestsBase
     {
-        public static T? TestSerialization<T>( T instance, Func<T, T?, bool>? assert = null )
+        public static T? TestSerialization<T>( T? instance, Func<T?, T?, bool>? assert = null )
         {
             var formatter = new MetaFormatter();
             var memoryStream = new MemoryStream();
-            formatter.Serialize( instance ?? throw new AssertionFailedException(), memoryStream );
+            formatter.Serialize( instance, memoryStream );
             memoryStream.Seek( 0, SeekOrigin.Begin );
             var deserializedObject = (T?) formatter.Deserialize( memoryStream );
 

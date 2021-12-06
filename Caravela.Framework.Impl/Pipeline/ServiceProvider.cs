@@ -22,7 +22,7 @@ namespace Caravela.Framework.Impl.Pipeline
     public class ServiceProvider : IServiceProvider
     {
         private readonly IServiceProvider? _nextProvider;
-        
+
         // This field is not readonly because we use two-phase initialization to resolve the problem of cyclic dependencies.
         private ImmutableDictionary<Type, Lazy<IService, Type>> _services;
 
@@ -55,14 +55,14 @@ namespace Caravela.Framework.Impl.Pipeline
 
             foreach ( var interfaceType in interfaces )
             {
-                if ( typeof( IService ).IsAssignableFrom( interfaceType ) && interfaceType != typeof( IService ) )
+                if ( typeof(IService).IsAssignableFrom( interfaceType ) && interfaceType != typeof(IService) )
                 {
                     builder[interfaceType] = service;
                 }
             }
 
             for ( var cursorType = service.Metadata;
-                  cursorType != null && typeof( IService ).IsAssignableFrom( cursorType );
+                  cursorType != null && typeof(IService).IsAssignableFrom( cursorType );
                   cursorType = cursorType.BaseType )
             {
                 builder[cursorType] = service;
@@ -167,7 +167,7 @@ namespace Caravela.Framework.Impl.Pipeline
         /// <remarks>
         /// When the current service provider fails to find a service, it will try to find it using the next provider in the chain.
         /// </remarks>
-        public ServiceProvider WithNextProvider( IServiceProvider nextProvider ) => new ServiceProvider( this._services, nextProvider );
+        public ServiceProvider WithNextProvider( IServiceProvider nextProvider ) => new( this._services, nextProvider );
 
         public override string ToString()
         {

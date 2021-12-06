@@ -89,7 +89,7 @@ class TargetCode
                         new RuntimeExpression( generator.LiteralExpression( "x" ), compilation, serviceProvider ) ) );
 
                 // Test in/out.
-                var intType = compilation.Factory.GetTypeByReflectionType( typeof( int ) );
+                var intType = compilation.Factory.GetTypeByReflectionType( typeof(int) );
 
                 AssertEx.DynamicEquals(
                     byRefMethod.Invokers.Final.Invoke(
@@ -210,12 +210,12 @@ class TargetCode
                 serviceProvider ) )
             {
                 var type = compilation.Types.OfName( "TargetCode" ).Single();
-                var nestedType = type.NestedTypes.Single().ConstructGenericInstance( compilation.Factory.GetTypeByReflectionType( typeof( string ) ) );
+                var nestedType = type.NestedTypes.Single().ConstructGenericInstance( compilation.Factory.GetTypeByReflectionType( typeof(string) ) );
 
                 // Testing static members.
                 var staticGenericMethod = nestedType.Methods.OfName( "StaticGenericMethod" )
                     .Single()
-                    .ConstructGenericInstance( compilation.Factory.GetTypeByReflectionType( typeof( int ) ) );
+                    .ConstructGenericInstance( compilation.Factory.GetTypeByReflectionType( typeof(int) ) );
 
                 var staticNonGenericMethod = nestedType.Methods.OfName( "StaticNonGenericMethod" ).Single();
                 var staticField = nestedType.Fields.OfName( "StaticField" ).Single();
@@ -239,7 +239,7 @@ class TargetCode
 
                 var instanceGenericMethod = nestedType.Methods.OfName( "InstanceGenericMethod" )
                     .Single()
-                    .ConstructGenericInstance( compilation.Factory.GetTypeByReflectionType( typeof( int ) ) );
+                    .ConstructGenericInstance( compilation.Factory.GetTypeByReflectionType( typeof(int) ) );
 
                 var instanceNonGenericMethod = nestedType.Methods.OfName( "InstanceNonGenericMethod" ).Single();
                 var instanceField = nestedType.Fields.OfName( "InstanceField" ).Single();
@@ -334,7 +334,7 @@ class TargetCode
                 Assert.Equal( advisedParameterList[0], advisedParameterList["i"] );
                 Assert.Equal( advisedParameterList[1], advisedParameterList["j"] );
 
-                Assert.Equal( "i", Assert.Single( advisedParameterList.OfType( typeof( int ) ) )!.Name );
+                Assert.Equal( "i", Assert.Single( advisedParameterList.OfType( typeof(int) ) )!.Name );
             }
         }
 

@@ -40,7 +40,7 @@ namespace Caravela.Framework.Impl.Fabrics
 
         public bool IsAttribute => false;
 
-        public Type Type => typeof( Fabric );
+        public Type Type => typeof(Fabric);
 
         public FabricTopLevelAspectClass( IServiceProvider serviceProvider, Compilation compilation, CompileTimeProject project )
         {

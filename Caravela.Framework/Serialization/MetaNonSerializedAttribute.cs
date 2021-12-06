@@ -8,8 +8,6 @@ namespace Caravela.Framework.Serialization
     /// <summary>
     /// An attribute that marks a field of a type that implements <see cref="IMetaSerializable"/> as non-serialized.
     /// </summary>
-    [AttributeUsage(AttributeTargets.Field)]
-    internal class MetaNonSerializedAttribute : Attribute
-    {
-    }
+    [AttributeUsage( AttributeTargets.Field )]
+    internal class MetaNonSerializedAttribute : Attribute { }
 }

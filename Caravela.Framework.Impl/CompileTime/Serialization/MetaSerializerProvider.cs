@@ -12,12 +12,13 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
     {
         private readonly IMetaSerializerFactoryProvider _provider;
         private readonly MetaSerializerProvider? _next;
-        private readonly Dictionary<Type, IMetaSerializer> _serializers = new Dictionary<Type, IMetaSerializer>( 64 );
-        private readonly object _sync = new object();
+        private readonly Dictionary<Type, IMetaSerializer> _serializers = new( 64 );
+        private readonly object _sync = new();
 
         public MetaSerializerProvider( IMetaSerializerFactoryProvider provider )
         {
             this._provider = provider;
+
             if ( provider.NextProvider != null )
             {
                 this._next = new MetaSerializerProvider( provider.NextProvider );
@@ -29,6 +30,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
             for ( var currentProvider = this._provider; currentProvider != null; currentProvider = currentProvider.NextProvider )
             {
                 var surrogateType = currentProvider.GetSurrogateType( objectType );
+
                 if ( surrogateType != null )
                 {
                     return surrogateType;
@@ -43,6 +45,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
             for ( var currentProvider = this._provider; currentProvider != null; currentProvider = currentProvider.NextProvider )
             {
                 var serializerDiscoverer = currentProvider as IMetaSerializerDiscoverer;
+
                 if ( serializerDiscoverer != null )
                 {
                     serializerDiscoverer.DiscoverSerializers( objectType );
@@ -52,7 +55,6 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
 
         public IMetaSerializer GetSerializer( Type objectType )
         {
-
             if ( !this.TryGetSerializer( objectType, out var serializer ) )
             {
                 throw new MetaSerializationException( string.Format( CultureInfo.InvariantCulture, "Cannot find a serializer for type '{0}'.", objectType ) );
@@ -65,12 +67,11 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
         {
             if ( objectType.HasElementType )
             {
-                throw new ArgumentOutOfRangeException( nameof( objectType ) );
+                throw new ArgumentOutOfRangeException( nameof(objectType) );
             }
 
             lock ( this._sync )
             {
-
                 if ( this._serializers.TryGetValue( objectType, out serializer ) )
                 {
                     return true;

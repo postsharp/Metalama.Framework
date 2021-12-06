@@ -11,8 +11,8 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
     internal sealed class SerializationBinaryWriter
     {
         private readonly BinaryWriter _writer;
-        private readonly Dictionary<string, int> _strings = new Dictionary<string, int>( 64, StringComparer.Ordinal );
-        private readonly Dictionary<string, int> _dottedStrings = new Dictionary<string, int>( 64, StringComparer.Ordinal );
+        private readonly Dictionary<string, int> _strings = new( 64, StringComparer.Ordinal );
+        private readonly Dictionary<string, int> _dottedStrings = new( 64, StringComparer.Ordinal );
 
         public SerializationBinaryWriter( BinaryWriter writer )
         {
@@ -64,7 +64,6 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
 
         public void WriteString( string value )
         {
-
             if ( value == null )
             {
                 this.WriteCompressedInteger( -1 );
@@ -88,7 +87,6 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
 
         public void WriteDottedString( string? value )
         {
-
             if ( value == null )
             {
                 this.WriteCompressedInteger( -1 );
@@ -99,7 +97,6 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
             }
             else
             {
-
                 var lastDot = value.LastIndexOf( '.' );
                 string name;
                 string? scope;

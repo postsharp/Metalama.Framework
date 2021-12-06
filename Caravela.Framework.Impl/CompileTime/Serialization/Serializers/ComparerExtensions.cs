@@ -44,12 +44,16 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization.Serializers
             {
                 case 1:
                     return StringComparer.CurrentCulture;
+
                 case 2:
                     return StringComparer.CurrentCultureIgnoreCase;
+
                 case 3:
                     return StringComparer.Ordinal;
+
                 case 4:
                     return StringComparer.OrdinalIgnoreCase;
+
                 default:
                     return null;
             }

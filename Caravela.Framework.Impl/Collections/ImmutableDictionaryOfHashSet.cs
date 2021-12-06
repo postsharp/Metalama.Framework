@@ -63,9 +63,9 @@ namespace Caravela.Framework.Impl.Collections
             return builder.ToImmutable();
         }
 
-        IReadOnlyCollection<TValue> IReadOnlyMultiValueDictionary<TKey, TValue>.this[TKey key] => this[key];
+        IReadOnlyCollection<TValue> IReadOnlyMultiValueDictionary<TKey, TValue>.this[ TKey key ] => this[key];
 
-        public ImmutableHashSet<TValue> this[TKey key]
+        public ImmutableHashSet<TValue> this[ TKey key ]
         {
             get
             {

@@ -47,7 +47,7 @@ namespace Caravela.Framework.Impl.CompileTime
                     "namespace System.Runtime.CompilerServices { internal static class IsExternalInit {}}",
                     path: CompileTimeConstants.PredefinedTypesFileName ) );
 
-        private static readonly Guid _buildId = AssemblyMetadataReader.GetInstance( typeof( CompileTimeCompilationBuilder ).Assembly ).ModuleId;
+        private static readonly Guid _buildId = AssemblyMetadataReader.GetInstance( typeof(CompileTimeCompilationBuilder).Assembly ).ModuleId;
 
         public CompileTimeCompilationBuilder( IServiceProvider serviceProvider, CompileTimeDomain domain )
         {
@@ -61,7 +61,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
         private static ulong ComputeSourceHash( IReadOnlyList<SyntaxTree> compileTimeTrees, StringBuilder? log = null )
         {
-            log?.AppendLine( nameof( ComputeSourceHash ) );
+            log?.AppendLine( nameof(ComputeSourceHash) );
             XXH64 h = new();
 
             foreach ( var syntaxTree in compileTimeTrees.OrderBy( t => t.FilePath ) )
@@ -84,7 +84,7 @@ namespace Caravela.Framework.Impl.CompileTime
             ulong sourceHash,
             StringBuilder? log = null )
         {
-            log?.AppendLine( nameof( ComputeProjectHash ) );
+            log?.AppendLine( nameof(ComputeProjectHash) );
 
             XXH64 h = new();
             h.Update( _buildId );
@@ -231,7 +231,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
             if ( runTimeAssemblyName.StartsWith( prefix, StringComparison.Ordinal ) )
             {
-                throw new ArgumentOutOfRangeException( nameof( runTimeAssemblyName ) );
+                throw new ArgumentOutOfRangeException( nameof(runTimeAssemblyName) );
             }
 
             return $"{prefix}{runTimeAssemblyName}_{projectHash:x16}";
@@ -659,9 +659,9 @@ namespace Caravela.Framework.Impl.CompileTime
 
                         textMapDirectory.Write( outputPaths.Directory );
 
-                        var aspectType = compileTimeCompilation.GetTypeByMetadataName( typeof( IAspect ).FullName );
-                        var fabricType = compileTimeCompilation.GetTypeByMetadataName( typeof( Fabric ).FullName );
-                        var transitiveFabricType = compileTimeCompilation.GetTypeByMetadataName( typeof( TransitiveProjectFabric ).FullName );
+                        var aspectType = compileTimeCompilation.GetTypeByMetadataName( typeof(IAspect).FullName );
+                        var fabricType = compileTimeCompilation.GetTypeByMetadataName( typeof(Fabric).FullName );
+                        var transitiveFabricType = compileTimeCompilation.GetTypeByMetadataName( typeof(TransitiveProjectFabric).FullName );
 
                         var aspectTypes = compileTimeCompilation.Assembly
                             .GetTypes()
@@ -685,7 +685,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
                         var compilerPlugInTypes = compileTimeCompilation.Assembly
                             .GetTypes()
-                            .Where( t => t.GetAttributes().Any( a => a is { AttributeClass: { Name: nameof( CompilerPluginAttribute ) } } ) )
+                            .Where( t => t.GetAttributes().Any( a => a is { AttributeClass: { Name: nameof(CompilerPluginAttribute) } } ) )
                             .Select( t => t.GetReflectionName() )
                             .ToList();
 

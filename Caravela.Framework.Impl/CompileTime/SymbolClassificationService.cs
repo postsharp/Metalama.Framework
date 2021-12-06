@@ -29,7 +29,7 @@ namespace Caravela.Framework.Impl.CompileTime
                 compilation,
                 c =>
                 {
-                    var hasCaravelaReference = compilation.GetTypeByMetadataName( typeof( CompileTimeAttribute ).FullName ) != null;
+                    var hasCaravelaReference = compilation.GetTypeByMetadataName( typeof(CompileTimeAttribute).FullName ) != null;
 
                     return hasCaravelaReference ? new SymbolClassifier( this._serviceProvider, c ) : this._noCaravelaReferenceClassifier;
                 } );

@@ -116,8 +116,7 @@ namespace Caravela.Framework.Impl.Fabrics
                 project,
                 fabricManager,
                 fabricInstance,
-                Ref.Compilation( compilation ) )
-            { }
+                Ref.Compilation( compilation ) ) { }
         }
     }
 }

@@ -35,8 +35,9 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
                 case SerializationIntrinsicType.Type:
                 case SerializationIntrinsicType.GenericTypeParameter:
                     return false;
+
                 default:
-                    throw new ArgumentOutOfRangeException( nameof( intrinsicType ) );
+                    throw new ArgumentOutOfRangeException( nameof(intrinsicType) );
             }
         }
 
@@ -56,34 +57,49 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
             {
                 case TypeCode.Boolean:
                     return SerializationIntrinsicType.Boolean;
+
                 case TypeCode.Char:
                     return SerializationIntrinsicType.Char;
+
                 case TypeCode.SByte:
                     return SerializationIntrinsicType.SByte;
+
                 case TypeCode.Byte:
                     return SerializationIntrinsicType.Byte;
+
                 case TypeCode.Int16:
                     return SerializationIntrinsicType.Int16;
+
                 case TypeCode.UInt16:
                     return SerializationIntrinsicType.UInt16;
+
                 case TypeCode.Int32:
                     return SerializationIntrinsicType.Int32;
+
                 case TypeCode.UInt32:
                     return SerializationIntrinsicType.UInt32;
+
                 case TypeCode.Int64:
                     return SerializationIntrinsicType.Int64;
+
                 case TypeCode.UInt64:
                     return SerializationIntrinsicType.UInt64;
+
                 case TypeCode.Single:
                     return SerializationIntrinsicType.Single;
+
                 case TypeCode.Double:
                     return SerializationIntrinsicType.Double;
+
                 case TypeCode.Decimal:
                     return SerializationIntrinsicType.Struct;
+
                 case TypeCode.DateTime:
                     return SerializationIntrinsicType.Struct;
+
                 case TypeCode.String:
                     return SerializationIntrinsicType.String;
+
                 case TypeCode.Object:
                     if ( type.IsGenericParameter )
                     {
@@ -99,7 +115,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
                     }
                     else if ( type.IsValueType )
                     {
-                        if ( type == typeof( DottedString ) )
+                        if ( type == typeof(DottedString) )
                         {
                             return SerializationIntrinsicType.DottedString;
                         }
@@ -110,7 +126,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
                     }
                     else
                     {
-                        if ( typeof( Type ).IsAssignableFrom( type ) )
+                        if ( typeof(Type).IsAssignableFrom( type ) )
                         {
                             return SerializationIntrinsicType.Type;
                         }
@@ -135,7 +151,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
                     return SerializationIntrinsicType.Struct;
 
                 default:
-                    throw new ArgumentOutOfRangeException( nameof( type ) );
+                    throw new ArgumentOutOfRangeException( nameof(type) );
             }
         }
     }

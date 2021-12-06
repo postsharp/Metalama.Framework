@@ -7,7 +7,6 @@ using System.Collections.Generic;
 
 namespace Caravela.Framework.Impl.CompileTime.Serialization
 {
-
     /// <summary>
     /// Provides instances of the <see cref="IMetaSerializerFactory"/> interface for object types that have been previously registered
     /// using <see cref="AddSerializer"/>.
@@ -19,7 +18,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
         /// </summary>
         public static readonly MetaSerializerFactoryProvider BuiltIn = new BuiltInSerializerFactoryProvider( new ActivatorProvider() );
 
-        private readonly Dictionary<Type, IMetaSerializerFactory> _serializerTypes = new Dictionary<Type, IMetaSerializerFactory>( 64 );
+        private readonly Dictionary<Type, IMetaSerializerFactory> _serializerTypes = new( 64 );
         private readonly ActivatorProvider _activatorProvider;
 
         private bool _isReadOnly;
@@ -59,7 +58,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
         public void AddSerializer<TObject, TSerializer>()
             where TSerializer : IMetaSerializer, new()
         {
-            this.AddSerializer( typeof( TObject ), typeof( TSerializer ) );
+            this.AddSerializer( typeof(TObject), typeof(TSerializer) );
         }
 
         /// <summary>
@@ -74,9 +73,9 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
                 throw new InvalidOperationException();
             }
 
-            if ( !typeof( IMetaSerializer ).IsAssignableFrom( serializerType ) )
+            if ( !typeof(IMetaSerializer).IsAssignableFrom( serializerType ) )
             {
-                throw new ArgumentOutOfRangeException( nameof( serializerType ), "Type '{0}' does not implement ISerializer or IGenericSerializerFactory" );
+                throw new ArgumentOutOfRangeException( nameof(serializerType), "Type '{0}' does not implement ISerializer or IGenericSerializerFactory" );
             }
 
             this._serializerTypes.Add( objectType, new ReflectionMetaSerializerFactory( serializerType, this._activatorProvider ) );

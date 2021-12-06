@@ -25,7 +25,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
 
             if ( objectType.IsGenericTypeDefinition )
             {
-                throw new ArgumentOutOfRangeException( nameof( objectType ) );
+                throw new ArgumentOutOfRangeException( nameof(objectType) );
             }
 
             if ( this.SerializerType.IsGenericTypeDefinition )
@@ -37,10 +37,10 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
                 else
                 {
                     throw new MetaSerializationException(
-                        string.Format( 
+                        string.Format(
                             CultureInfo.InvariantCulture,
                             "The serializer type '{0}' is an open generic type, but it has a different number of generic parameters than '{1}'.",
-                            this.SerializerType, 
+                            this.SerializerType,
                             objectType ) );
                 }
             }
@@ -50,21 +50,27 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
             }
 
             var activator = this._activatorProvider?.GetActivator( serializerTypeInstance );
-            var instance = activator != null ? activator.CreateInstance( serializerTypeInstance, MetaActivatorSecurityToken.Instance ) : Activator.CreateInstance( serializerTypeInstance );
+
+            var instance = activator != null
+                ? activator.CreateInstance( serializerTypeInstance, MetaActivatorSecurityToken.Instance )
+                : Activator.CreateInstance( serializerTypeInstance );
 
             var serializer = instance as IMetaSerializer;
+
             if ( serializer != null )
             {
                 return serializer;
             }
 
             var serializerFactory = instance as IMetaSerializerFactory;
+
             if ( serializerFactory != null )
             {
                 return serializerFactory.CreateSerializer( objectType );
             }
 
-            throw new MetaSerializationException( string.Format( CultureInfo.InvariantCulture, "Type {0} must implement interface ISerializer or ISerializerFactory.", serializerTypeInstance ) );
+            throw new MetaSerializationException(
+                string.Format( CultureInfo.InvariantCulture, "Type {0} must implement interface ISerializer or ISerializerFactory.", serializerTypeInstance ) );
         }
     }
 }

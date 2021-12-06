@@ -13,8 +13,7 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
     {
         public NamespaceList( INamespace containingDeclaration, IEnumerable<Ref<INamespace>> sourceItems ) : base(
             containingDeclaration,
-            sourceItems )
-        { }
+            sourceItems ) { }
 
         private NamespaceList() { }
 

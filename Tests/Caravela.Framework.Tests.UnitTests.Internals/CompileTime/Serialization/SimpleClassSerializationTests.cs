@@ -18,7 +18,6 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serialization
         [Fact]
         public void TestClassWithString_SimpleWord()
         {
-
 /* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSimpleExplicitelySerializedClass( "SimpleText" );
@@ -31,7 +30,6 @@ After:
         [Fact]
         public void TestClassWithString_SimpleDottedWords()
         {
-
 /* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSimpleExplicitelySerializedClass( "Simple.Dotted.Words" );
@@ -44,7 +42,6 @@ After:
         [Fact]
         public void TestClassWithString_DottedWordsWithReservedNames()
         {
-
 /* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSimpleExplicitelySerializedClass( "Simple.Dotted.Words, mscorlib" );
@@ -57,7 +54,6 @@ After:
         [Fact]
         public void TestClassWithBoxedInt()
         {
-
 /* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSimpleExplicitelySerializedClass<object>( 1000 );
@@ -70,7 +66,6 @@ After:
         [Fact]
         public void TestClassWithBoxedBool()
         {
-
 /* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSimpleExplicitelySerializedClass<object>( false );
@@ -83,7 +78,6 @@ After:
         [Fact]
         public void TestClassWithBoxedStruct()
         {
-
 /* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSimpleExplicitelySerializedClass<object>( DateTime.Now );
@@ -96,7 +90,6 @@ After:
         [Fact]
         public void TestClassWithInt32_1000()
         {
-
 /* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSimpleExplicitelySerializedClass( 1000 );
@@ -109,7 +102,6 @@ After:
         [Fact]
         public void TestClassWithInt32_m1000()
         {
-
 /* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSimpleExplicitelySerializedClass( -1000 );
@@ -122,7 +114,6 @@ After:
         [Fact]
         public void TestClassWithInt32_1000000000()
         {
-
 /* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSimpleExplicitelySerializedClass( 1000000000 );
@@ -135,7 +126,6 @@ After:
         [Fact]
         public void TestClassWithInt32_m1000000000()
         {
-
 /* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSimpleExplicitelySerializedClass( -1000000000 );
@@ -148,7 +138,6 @@ After:
         [Fact]
         public void TestClassWithInt64_223372036854775807()
         {
-
 /* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSimpleExplicitelySerializedClass( 223372036854775807 );
@@ -161,7 +150,6 @@ After:
         [Fact]
         public void TestClassWithInt64_m223372036854775807()
         {
-
 /* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSimpleExplicitelySerializedClass( -223372036854775807 );
@@ -174,7 +162,6 @@ After:
         [Fact]
         public void TestClassWithDouble_1000()
         {
-
 /* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSimpleExplicitelySerializedClass( 1000d );
@@ -187,7 +174,6 @@ After:
         [Fact]
         public void TestClassWithDouble_m1000()
         {
-
 /* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSimpleExplicitelySerializedClass( -1000d );
@@ -200,7 +186,6 @@ After:
         [Fact]
         public void TestClassWithDouble_Max()
         {
-
 /* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSimpleExplicitelySerializedClass( double.MaxValue );
@@ -213,7 +198,6 @@ After:
         [Fact]
         public void TestClassWithDouble_Min()
         {
-
 /* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSimpleExplicitelySerializedClass( double.MinValue );
@@ -226,7 +210,6 @@ After:
         [Fact]
         public void TestClassWithStruct_DateTime()
         {
-
 /* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSimpleExplicitelySerializedClass( DateTime.Now );
@@ -239,7 +222,6 @@ After:
         [Fact]
         public void TestClasWithObjectMember_Nulled()
         {
-
 /* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSimpleExplicitelySerializedClass( (object?) null );
@@ -252,7 +234,6 @@ After:
         [Fact]
         public void TestClasWithStringMember_Nulled()
         {
-
 /* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSimpleExplicitelySerializedClass( (string?) null );
@@ -265,7 +246,6 @@ After:
         [Fact]
         public void TestClasWithClassMember_Nulled()
         {
-
 /* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSimpleExplicitelySerializedClass( (SimpleExplicitelySerializedClass<int>?) null );
@@ -278,7 +258,6 @@ After:
         [Fact]
         public void TestClasWithClassMember_NotNulled()
         {
-
 /* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSimpleExplicitelySerializedClass( new SimpleExplicitelySerializedClass<string>( "testing text" ) );
@@ -291,7 +270,6 @@ After:
         [Fact]
         public void TestClasWithEnum_SimpleValue()
         {
-
 /* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSimpleExplicitelySerializedClass( TestEnum.Value1 );
@@ -304,7 +282,6 @@ After:
         [Fact]
         public void TestClasWithEnum_NonZeroValue()
         {
-
 /* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSimpleExplicitelySerializedClass( TestEnum.Value2 );
@@ -317,7 +294,6 @@ After:
         [Fact]
         public void TestClasWithLongEnum_NonZeroValue()
         {
-
 /* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSimpleExplicitelySerializedClass( TestEnumWithLong.Value2 );
@@ -330,7 +306,6 @@ After:
         [Fact]
         public void TestClasWithByteEnum_NonZeroValue()
         {
-
 /* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSimpleExplicitelySerializedClass( TestEnumWithByte.Value2 );
@@ -343,7 +318,6 @@ After:
         [Fact]
         public void TestClasWithFlagsEnum_NonZeroValue()
         {
-
 /* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSimpleExplicitelySerializedClass( TestEnumWithFlags.Value2 );
@@ -356,7 +330,6 @@ After:
         [Fact]
         public void TestClasWithFlagsEnum_MultiValue()
         {
-
 /* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSimpleExplicitelySerializedClass( TestEnumWithFlags.Value1 | TestEnumWithFlags.Value2 );
@@ -369,7 +342,6 @@ After:
         [Fact]
         public void TestClassWithProperty_Int1()
         {
-
 /* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestExplicitlySerializedClass( (object) null, 1 );
@@ -382,7 +354,6 @@ After:
         [Fact]
         public void TestClassWithArray_Int()
         {
-
 /* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSimpleExplicitelySerializedClass( new[] { 1, 2, 3, 4 } );
@@ -414,7 +385,6 @@ After:
         [Fact]
         public void TestClassWithRank2Array()
         {
-
 /* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSimpleExplicitelySerializedClass( new[,] { { 1, 2 }, { 3, 4 } } );
@@ -427,7 +397,6 @@ After:
         [Fact]
         public void TestClassWithRank3Array()
         {
-
 /* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSimpleExplicitelySerializedClass( new[, ,] { { { 1 }, { 2 } }, { { 3 }, { 4 } } } );
@@ -441,7 +410,7 @@ After:
         public void TestClassWithMultidimensionalRank1Array()
         {
             // We're creating instance of type int[*], but actually get int[] -> and that's what were testing
-            var array = (Array?) Activator.CreateInstance( typeof( int ).MakeArrayType( 1 ), 2 );
+            var array = (Array?) Activator.CreateInstance( typeof(int).MakeArrayType( 1 ), 2 );
             array!.SetValue( 1, 0 );
             array!.SetValue( 2, 1 );
 
@@ -457,7 +426,6 @@ After:
         [Fact]
         public void TestClassWithValueAndProperty_Int1AndInt1()
         {
-
 /* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestExplicitlySerializedClass( 1, 1 );
@@ -470,7 +438,6 @@ After:
         [Fact]
         public void TestClassWithValueAndProperty_StringAndString()
         {
-
 /* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestExplicitlySerializedClass( "a field", "a property" );
@@ -483,7 +450,6 @@ After:
         [Fact]
         public void TestClassWithValueAndProperty_BothNulled()
         {
-
 /* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestExplicitlySerializedClass( (object?) null, (object?) null );
@@ -496,7 +462,6 @@ After:
         [Fact]
         public void TestClassWithNullableInt_NotNull()
         {
-
 /* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSerialization( new ExplicitlySerializedClass<int, int>( 5 ) { Nullable = 3 } );
@@ -526,14 +491,14 @@ After:
         public void GenericTypes_InArray()
         {
             var serializedClass = new SimpleExplicitelySerializedClass<DateTime>( DateTime.Today.AddDays( 10 ) );
-            var anotherSerializedClass = new SimpleExplicitelySerializedClass<DateTime>(
-                DateTime.Today.AddMonths( -10 ) );
+            var anotherSerializedClass = new SimpleExplicitelySerializedClass<DateTime>( DateTime.Today.AddMonths( -10 ) );
             var array = new[] { serializedClass, anotherSerializedClass };
 
             var formatter = new MetaFormatter();
             var memoryStream = new MemoryStream();
             formatter.Serialize( array, memoryStream );
             memoryStream.Seek( 0, SeekOrigin.Begin );
+
             var deserializedObject =
                 (SimpleExplicitelySerializedClass<DateTime>[]?) formatter.Deserialize( memoryStream );
 
@@ -552,7 +517,7 @@ After:
             memoryStream.Seek( 0, SeekOrigin.Begin );
             var deserializedObject = (SimpleExplicitelySerializedClass<T>?) formatter.Deserialize( memoryStream );
 
-            if ( typeof( T ).IsArray )
+            if ( typeof(T).IsArray )
             {
                 Assert.Equal( (ICollection?) initialObject.Value, (ICollection?) deserializedObject!.Value );
             }
@@ -564,14 +529,12 @@ After:
 
         private static void TestExplicitlySerializedClass<TForCtor, TForField>( TForCtor value, TForField property )
         {
-            var initialObject = new ExplicitlySerializedClass<TForCtor, TForField>( value )
-            {
-                Field = property
-            };
+            var initialObject = new ExplicitlySerializedClass<TForCtor, TForField>( value ) { Field = property };
             var formatter = new MetaFormatter();
             var memoryStream = new MemoryStream();
             formatter.Serialize( initialObject, memoryStream );
             memoryStream.Seek( 0, SeekOrigin.Begin );
+
             var deserializedObject =
                 (ExplicitlySerializedClass<TForCtor, TForField>?) formatter.Deserialize( memoryStream );
 
@@ -579,7 +542,7 @@ After:
             Assert.Equal( initialObject.Field, deserializedObject!.Field );
         }
 
-        [MetaSerializer( typeof( SimpleExplicitelySerializedClass<>.Serializer ) )]
+        [MetaSerializer( typeof(SimpleExplicitelySerializedClass<>.Serializer) )]
         public class SimpleExplicitelySerializedClass<T> : IEquatable<SimpleExplicitelySerializedClass<T>>
         {
 #pragma warning disable SA1401 // Fields should be private
@@ -638,28 +601,28 @@ After:
                     return new SimpleExplicitelySerializedClass<T>( constructorArguments.GetValue<T>( "_" )! );
                 }
 
-                public override void SerializeObject( SimpleExplicitelySerializedClass<T> obj, IArgumentsWriter constructorArguments, IArgumentsWriter initializationArguments )
+                public override void SerializeObject(
+                    SimpleExplicitelySerializedClass<T> obj,
+                    IArgumentsWriter constructorArguments,
+                    IArgumentsWriter initializationArguments )
                 {
                     constructorArguments.SetValue( "_", obj.Value );
                 }
 
-                public override void DeserializeFields( SimpleExplicitelySerializedClass<T> obj, IArgumentsReader initializationArguments )
-                {
-                }
+                public override void DeserializeFields( SimpleExplicitelySerializedClass<T> obj, IArgumentsReader initializationArguments ) { }
             }
         }
 
-        [MetaSerializer( typeof( ExplicitlySerializedClass<,>.Serializer ) )]
-        public class ExplicitlySerializedClass<TForCtor, TForField> : SimpleExplicitelySerializedClass<TForCtor>, IEquatable<ExplicitlySerializedClass<TForCtor, TForField>>
-        { 
+        [MetaSerializer( typeof(ExplicitlySerializedClass<,>.Serializer) )]
+        public class ExplicitlySerializedClass<TForCtor, TForField> : SimpleExplicitelySerializedClass<TForCtor>,
+                                                                      IEquatable<ExplicitlySerializedClass<TForCtor, TForField>>
+        {
             public TForField? Field { get; set; }
 
             public int? Nullable { get; set; }
 
             public ExplicitlySerializedClass( TForCtor value )
-                : base( value )
-            {
-            }
+                : base( value ) { }
 
             public bool Equals( ExplicitlySerializedClass<TForCtor, TForField>? other )
             {
@@ -703,6 +666,7 @@ After:
                     var hashCode = base.GetHashCode();
                     hashCode = (hashCode * 397) ^ EqualityComparer<TForField>.Default.GetHashCode( this.Field! );
                     hashCode = (hashCode * 397) ^ this.Nullable.GetHashCode();
+
                     return hashCode;
                 }
             }
@@ -717,7 +681,10 @@ After:
                     return new ExplicitlySerializedClass<TForCtor, TForField>( constructorArguments.GetValue<TForCtor>( _valueKey )! );
                 }
 
-                public override void SerializeObject( ExplicitlySerializedClass<TForCtor, TForField> obj, IArgumentsWriter constructorArguments, IArgumentsWriter initializationArguments )
+                public override void SerializeObject(
+                    ExplicitlySerializedClass<TForCtor, TForField> obj,
+                    IArgumentsWriter constructorArguments,
+                    IArgumentsWriter initializationArguments )
                 {
                     constructorArguments.SetValue( _valueKey, obj.Value );
                     initializationArguments.SetValue( _fieldKey, obj.Field );
@@ -745,14 +712,14 @@ After:
         {
             Value1,
 
-            Value2,
+            Value2
         }
 
         public enum TestEnumWithByte : byte
         {
             Value1,
 
-            Value2,
+            Value2
         }
 
         [Flags]
@@ -760,7 +727,7 @@ After:
         {
             Value1 = 0x01,
 
-            Value2 = 0x02,
+            Value2 = 0x02
         }
     }
 }

@@ -18,7 +18,7 @@ namespace Caravela.Framework.Impl.CodeModel
         {
             if ( symbol.MethodKind != MethodKind.Constructor && symbol.MethodKind != MethodKind.StaticConstructor )
             {
-                throw new ArgumentOutOfRangeException( nameof( symbol ), "The Constructor class must be used only with constructors." );
+                throw new ArgumentOutOfRangeException( nameof(symbol), "The Constructor class must be used only with constructors." );
             }
         }
 

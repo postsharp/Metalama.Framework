@@ -22,7 +22,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization.Serializers
             var comparerCode = constructorArguments.GetValue<byte>( _comparerCodeName );
 
             var comparer = constructorArguments.GetValue<IEqualityComparer<TKey>>( _comparerName ) ??
-                                            ComparerExtensions.GetComparerFromCode( comparerCode ) as IEqualityComparer<TKey>;
+                           ComparerExtensions.GetComparerFromCode( comparerCode ) as IEqualityComparer<TKey>;
 
             Dictionary<TKey, TValue> dictionary;
 
@@ -74,8 +74,6 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization.Serializers
         }
 
         /// <exclude/>
-        public override void DeserializeFields( object obj, IArgumentsReader initializationArguments )
-        {
-        }
+        public override void DeserializeFields( object obj, IArgumentsReader initializationArguments ) { }
     }
 }

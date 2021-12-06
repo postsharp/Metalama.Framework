@@ -31,6 +31,7 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serialization
 
             var formatter = new MetaFormatter( null, MetaSerializerFactoryProvider.BuiltIn );
             var memoryStream = new MemoryStream();
+
             try
             {
                 formatter.Serialize( references, memoryStream );
@@ -56,6 +57,7 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serialization
             var memoryStream = new MemoryStream();
             formatter.Serialize( references, memoryStream );
             memoryStream.Seek( 0, SeekOrigin.Begin );
+
             try
             {
                 formatter.Deserialize( memoryStream );
@@ -137,11 +139,12 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serialization
             public override long Seek( long offset, SeekOrigin loc )
             {
                 this.SeekCount++;
+
                 return base.Seek( offset, loc );
             }
         }
 
-        [MetaSerializer( typeof( Serializer ) )]
+        [MetaSerializer( typeof(Serializer) )]
         public class Base
         {
 #pragma warning disable SA1401 // Fields should be private
@@ -168,6 +171,7 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serialization
                 public override void DeserializeFields( Base obj, IArgumentsReader initializationArguments )
                 {
                     obj.Fail = initializationArguments.GetValue<Fail>( "Fail" );
+
                     if ( obj.Fail == Fail.Read )
                     {
                         throw new MetaSerializationException();
@@ -176,7 +180,7 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serialization
             }
         }
 
-        [MetaSerializer( typeof( Serializer ) )]
+        [MetaSerializer( typeof(Serializer) )]
         public class Child : Base, ISerializationCallback
         {
             public static int NSerialized { get; set; }
@@ -199,9 +203,7 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serialization
                 }
             }
 
-            public void OnDeserialized()
-            {
-            }
+            public void OnDeserialized() { }
 
             public void OnSerializing()
             {
@@ -209,11 +211,11 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serialization
             }
         }
 
-        [MetaSerializer( typeof( Serializer ) )]
+        [MetaSerializer( typeof(Serializer) )]
         public class ReferenceToChildren
         {
 #pragma warning disable SA1401 // Fields should be private
-            public List<Child> Children = new List<Child>();
+            public List<Child> Children = new();
 #pragma warning restore SA1401 // Fields should be private
 
             public class Serializer : ReferenceTypeSerializer<ReferenceToChildren>

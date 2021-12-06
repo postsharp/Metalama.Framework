@@ -24,26 +24,20 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
         /// <summary>
         /// Initializes a new instance of the <see cref="MetaSerializationException"/> class.
         /// </summary>
-        public MetaSerializationException()
-        {
-        }
+        public MetaSerializationException() { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MetaSerializationException"/> class and specifies the message.
         /// </summary>
         /// <param name="message">Message.</param>
-        public MetaSerializationException( string message ) : base( message )
-        {
-        }
+        public MetaSerializationException( string message ) : base( message ) { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MetaSerializationException"/> class and specifies the message and inner exception.
         /// </summary>
         /// <param name="message">Message.</param>
         /// <param name="inner">Inner exception.</param>
-        public MetaSerializationException( string message, Exception inner ) : base( message, inner )
-        {
-        }
+        public MetaSerializationException( string message, Exception inner ) : base( message, inner ) { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MetaSerializationException"/> class for deserialization purposes.
@@ -52,13 +46,12 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
         /// <param name="context"></param>
         protected MetaSerializationException(
             SerializationInfo info,
-            StreamingContext context ) : base( info, context )
-        {
-        }
+            StreamingContext context ) : base( info, context ) { }
 
         internal static MetaSerializationException CreateWithCause( string operation, Type type, Exception innerException, SerializationCause? cause )
         {
             var causes = new List<string>();
+
             while ( cause != null )
             {
                 causes.Add( cause.Description );

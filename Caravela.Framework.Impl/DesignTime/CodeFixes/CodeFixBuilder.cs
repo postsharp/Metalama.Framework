@@ -73,7 +73,7 @@ namespace Caravela.Framework.Impl.DesignTime.CodeFixes
 
             if ( targetSymbol == null )
             {
-                throw new ArgumentOutOfRangeException( nameof( targetDeclaration ), "The declaration is not declared in source." );
+                throw new ArgumentOutOfRangeException( nameof(targetDeclaration), "The declaration is not declared in source." );
             }
 
             var originalNode = targetDeclaration.GetPrimaryDeclaration().AssertNotNull();
@@ -164,7 +164,7 @@ namespace Caravela.Framework.Impl.DesignTime.CodeFixes
 
             if ( targetSymbol == null )
             {
-                throw new ArgumentOutOfRangeException( nameof( targetDeclaration ), "The declaration is not declared in source." );
+                throw new ArgumentOutOfRangeException( nameof(targetDeclaration), "The declaration is not declared in source." );
             }
 
             var aspectClass = (AspectClass) this._context.PipelineConfiguration.AspectClasses.Single( c => c.Type == aspect.GetType() );

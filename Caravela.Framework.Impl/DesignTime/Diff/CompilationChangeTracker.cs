@@ -176,10 +176,10 @@ namespace Caravela.Framework.Impl.DesignTime.Diff
         private static CompileTimeChangeKind GetCompileTimeChangeKind( bool oldValue, bool newValue )
             => (oldValue, newValue) switch
             {
-                (true, true ) => CompileTimeChangeKind.None,
-                (false, false ) => CompileTimeChangeKind.None,
-                (true, false ) => CompileTimeChangeKind.NoLongerCompileTime,
-                (false, true ) => CompileTimeChangeKind.NewlyCompileTime
+                (true, true) => CompileTimeChangeKind.None,
+                (false, false) => CompileTimeChangeKind.None,
+                (true, false) => CompileTimeChangeKind.NoLongerCompileTime,
+                (false, true) => CompileTimeChangeKind.NewlyCompileTime
             };
 
         /// <summary>

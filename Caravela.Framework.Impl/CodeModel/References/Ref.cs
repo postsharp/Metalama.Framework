@@ -26,11 +26,11 @@ namespace Caravela.Framework.Impl.CodeModel.References
             where T : ICompilationElement
         {
             Invariant.Implies(
-                typeof( T ) == typeof( IConstructor ),
+                typeof(T) == typeof(IConstructor),
                 symbol.GetDeclarationKind() == DeclarationKind.Constructor );
 
             Invariant.Implies(
-                typeof( T ) == typeof( IMethod ),
+                typeof(T) == typeof(IMethod),
                 symbol.GetDeclarationKind() == DeclarationKind.Method );
 
             return symbol;

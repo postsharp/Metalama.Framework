@@ -31,7 +31,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
             : base( parentAdvice, targetType, name )
         {
             this._isEventField = isEventField;
-            this.Type = (INamedType) targetType.Compilation.TypeFactory.GetTypeByReflectionType( typeof( EventHandler ) );
+            this.Type = (INamedType) targetType.Compilation.TypeFactory.GetTypeByReflectionType( typeof(EventHandler) );
         }
 
         public INamedType Type { get; set; }
@@ -113,14 +113,14 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
             {
                 switch (Adder: this.AddMethod, Remover: this.RemoveMethod)
                 {
-                    case (not null, not null ):
+                    case (not null, not null):
                         return AccessorList(
                             List( new[] { GenerateAccessor( SyntaxKind.AddAccessorDeclaration ), GenerateAccessor( SyntaxKind.RemoveAccessorDeclaration ) } ) );
 
-                    case (not null, null ):
+                    case (not null, null):
                         return AccessorList( List( new[] { GenerateAccessor( SyntaxKind.AddAccessorDeclaration ) } ) );
 
-                    case (null, not null ):
+                    case (null, not null):
                         return AccessorList( List( new[] { GenerateAccessor( SyntaxKind.RemoveAccessorDeclaration ) } ) );
 
                     default:

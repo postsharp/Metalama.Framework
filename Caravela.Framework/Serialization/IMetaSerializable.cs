@@ -6,7 +6,5 @@ namespace Caravela.Framework.Serialization
     /// <summary>
     /// Marks the implementing type as being serializable (TODO).
     /// </summary>
-    public interface IMetaSerializable
-    {
-    }
+    public interface IMetaSerializable { }
 }

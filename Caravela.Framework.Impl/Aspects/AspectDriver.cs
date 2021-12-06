@@ -126,7 +126,7 @@ namespace Caravela.Framework.Impl.Aspects
                 // TODO: should the diagnostic be applied to the attribute, if one exists?
 
                 // Get the code model type for the reflection type so we have better formatting of the diagnostic.
-                var interfaceType = this._reflectionMapper.GetTypeSymbol( typeof( IAspect<T> ) ).AssertNotNull();
+                var interfaceType = this._reflectionMapper.GetTypeSymbol( typeof(IAspect<T>) ).AssertNotNull();
 
                 var diagnostic =
                     GeneralDiagnosticDescriptors.AspectAppliedToIncorrectDeclaration.CreateDiagnostic(

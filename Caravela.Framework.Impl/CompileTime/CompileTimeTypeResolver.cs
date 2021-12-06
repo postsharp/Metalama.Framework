@@ -101,7 +101,7 @@ namespace Caravela.Framework.Impl.CompileTime
                     return this.GetCompileTimeNamedType( namedType, cancellationToken ) ?? null;
 
                 case IDynamicTypeSymbol:
-                    return typeof( object );
+                    return typeof(object);
 
                 case IPointerTypeSymbol pointerType:
                     {

@@ -24,7 +24,7 @@ namespace Caravela.Framework.Impl.Templating
             MethodInfo compiledTemplateMethodInfo )
         {
             this._userCodeInvoker = serviceProvider.GetService<UserCodeInvoker>();
-            this._templateMethod = compiledTemplateMethodInfo ?? throw new ArgumentNullException( nameof( compiledTemplateMethodInfo ) );
+            this._templateMethod = compiledTemplateMethodInfo ?? throw new ArgumentNullException( nameof(compiledTemplateMethodInfo) );
         }
 
         public bool TryExpandDeclaration(

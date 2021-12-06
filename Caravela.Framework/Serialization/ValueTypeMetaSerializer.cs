@@ -44,8 +44,6 @@ namespace Caravela.Framework.Serialization
         }
 
         /// <inheritdoc />
-        void IMetaSerializer.DeserializeFields( ref object o, IArgumentsReader initializationArguments )
-        {
-        }
+        void IMetaSerializer.DeserializeFields( ref object o, IArgumentsReader initializationArguments ) { }
     }
 }

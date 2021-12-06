@@ -34,8 +34,7 @@ namespace Caravela.Framework.Impl.DesignTime.Diff
             syntaxTreeChanges.ToImmutableDictionary( t => t.FilePath, t => t, StringComparer.Ordinal ),
             hasCompileTimeCodeChange,
             compilationToAnalyze,
-            isIncremental )
-        { }
+            isIncremental ) { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CompilationChanges"/> class.

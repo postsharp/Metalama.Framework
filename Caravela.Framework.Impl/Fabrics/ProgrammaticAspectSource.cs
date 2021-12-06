@@ -24,9 +24,9 @@ namespace Caravela.Framework.Impl.Fabrics
 
         public ProgrammaticAspectSource( IAspectClass aspectClass, Func<CompilationModel, IDiagnosticAdder, IEnumerable<AspectInstance>> getInstances )
         {
-            if ( aspectClass.FullName != typeof( TAspect ).FullName )
+            if ( aspectClass.FullName != typeof(TAspect).FullName )
             {
-                throw new ArgumentOutOfRangeException( nameof( aspectClass ) );
+                throw new ArgumentOutOfRangeException( nameof(aspectClass) );
             }
 
             this._getInstances = getInstances;

@@ -9,7 +9,6 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serializers
 {
     public class InheritanceTests : MetaSerializerTestBase
     {
-
         [Fact]
         public void BaseSerializerInTheSameAssembly()
         {

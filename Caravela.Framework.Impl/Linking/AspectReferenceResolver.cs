@@ -490,34 +490,34 @@ namespace Caravela.Framework.Impl.Linking
         {
             switch (referencedSymbol, resolvedSymbol)
             {
-                case (IMethodSymbol { MethodKind: MethodKind.Ordinary }, IMethodSymbol { MethodKind: MethodKind.Ordinary } ):
-                case (IMethodSymbol { MethodKind: MethodKind.ExplicitInterfaceImplementation }, IMethodSymbol { MethodKind: MethodKind.Ordinary } ):
+                case (IMethodSymbol { MethodKind: MethodKind.Ordinary }, IMethodSymbol { MethodKind: MethodKind.Ordinary }):
+                case (IMethodSymbol { MethodKind: MethodKind.ExplicitInterfaceImplementation }, IMethodSymbol { MethodKind: MethodKind.Ordinary }):
                 case (IMethodSymbol { MethodKind: MethodKind.ExplicitInterfaceImplementation },
-                    IMethodSymbol { MethodKind: MethodKind.ExplicitInterfaceImplementation } ):
-                case (IPropertySymbol, IPropertySymbol ):
-                case (IEventSymbol, IEventSymbol ):
-                case (IFieldSymbol, IFieldSymbol ):
+                    IMethodSymbol { MethodKind: MethodKind.ExplicitInterfaceImplementation }):
+                case (IPropertySymbol, IPropertySymbol):
+                case (IEventSymbol, IEventSymbol):
+                case (IFieldSymbol, IFieldSymbol):
                     return resolvedSymbol;
 
-                case (IMethodSymbol { MethodKind: MethodKind.PropertyGet }, IPropertySymbol ):
+                case (IMethodSymbol { MethodKind: MethodKind.PropertyGet }, IPropertySymbol):
                     // This seems to happen only in invalid compilations.
                     throw new AssertionFailedException( Justifications.CoverageMissing );
 
                 // return propertySymbol.GetMethod.AssertNotNull();
 
-                case (IMethodSymbol { MethodKind: MethodKind.PropertySet }, IPropertySymbol ):
+                case (IMethodSymbol { MethodKind: MethodKind.PropertySet }, IPropertySymbol):
                     // This seems to happen only in invalid compilations.
                     throw new AssertionFailedException( Justifications.CoverageMissing );
 
                 // return propertySymbol.SetMethod.AssertNotNull();
 
-                case (IMethodSymbol { MethodKind: MethodKind.EventAdd }, IEventSymbol ):
+                case (IMethodSymbol { MethodKind: MethodKind.EventAdd }, IEventSymbol):
                     // This seems to happen only in invalid compilations.
                     throw new AssertionFailedException( Justifications.CoverageMissing );
 
                 // return eventSymbol.AddMethod.AssertNotNull();
 
-                case (IMethodSymbol { MethodKind: MethodKind.EventRemove }, IEventSymbol ):
+                case (IMethodSymbol { MethodKind: MethodKind.EventRemove }, IEventSymbol):
                     // This seems to happen only in invalid compilations.
                     throw new AssertionFailedException( Justifications.CoverageMissing );
 

@@ -100,7 +100,7 @@ namespace Caravela.Framework.Impl.Templating
         {
             if ( scope != TemplatingScope.CompileTimeOnly && scope != TemplatingScope.RunTimeOnly )
             {
-                throw new ArgumentOutOfRangeException( nameof( scope ) );
+                throw new ArgumentOutOfRangeException( nameof(scope) );
             }
 
             if ( this._localScopes.TryGetValue( symbol, out _ ) )

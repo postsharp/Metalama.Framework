@@ -16,14 +16,14 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
 
         private readonly SerializationBinaryWriter _binaryWriter;
 
-        private readonly Queue<SerializationQueueItem<object>> _serializationQueue = new Queue<SerializationQueueItem<object>>();
+        private readonly Queue<SerializationQueueItem<object>> _serializationQueue = new();
 
         private readonly MetaFormatter _formatter;
         private readonly bool _shouldReportExceptionCause;
 
-        private readonly Dictionary<Type, AssemblyTypeName> _typeNameCache = new Dictionary<Type, AssemblyTypeName>();
-        private readonly Dictionary<Type, Type> _surrogateTypesCache = new Dictionary<Type, Type>();
-        private readonly Dictionary<object, ObjectInfo> _objects = new Dictionary<object, ObjectInfo>( new CanonicalComparer() );
+        private readonly Dictionary<Type, AssemblyTypeName> _typeNameCache = new();
+        private readonly Dictionary<Type, Type> _surrogateTypesCache = new();
+        private readonly Dictionary<object, ObjectInfo> _objects = new( new CanonicalComparer() );
 
         public SerializationWriter( Stream stream, MetaFormatter formatter, bool shouldReportExceptionCause )
         {
@@ -32,14 +32,14 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
             this._binaryWriter = new SerializationBinaryWriter( new BinaryWriter( stream ) );
         }
 
-        public void Serialize( object obj )
+        public void Serialize( object? obj )
         {
             this._binaryWriter.WriteCompressedInteger( _version );
 
-            var cause = this._shouldReportExceptionCause ? SerializationCause.WithTypedValue( null, "root", obj.GetType() ) : null;
+            // Assertion was added after importing code from PostSharp.
+            var cause = this._shouldReportExceptionCause ? SerializationCause.WithTypedValue( null, "root", obj.AssertNotNull().GetType() ) : null;
 
-            this._serializationQueue.Enqueue(
-                new SerializationQueueItem<object>( obj, cause ) );
+            this._serializationQueue.Enqueue( new SerializationQueueItem<object>( obj, cause ) );
 
             while ( this._serializationQueue.Count > 0 )
             {
@@ -54,6 +54,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
         private static void CallOnSerialization( object obj )
         {
             ISerializationCallback? callback;
+
             if ( (callback = obj as ISerializationCallback) != null )
             {
                 callback.OnSerializing();
@@ -66,7 +67,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
 
             if ( type.IsValueType )
             {
-                throw new ArgumentOutOfRangeException( nameof( obj ) );
+                throw new ArgumentOutOfRangeException( nameof(obj) );
             }
 
             if ( !this._objects.TryGetValue( obj, out var objectInfo ) )
@@ -88,7 +89,12 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
             return objectInfo;
         }
 
-        private static void TrySerialize( IMetaSerializer serializer, object obj, IArgumentsWriter constructorArguments, IArgumentsWriter initializationArguments, SerializationCause? cause )
+        private static void TrySerialize(
+            IMetaSerializer serializer,
+            object obj,
+            IArgumentsWriter constructorArguments,
+            IArgumentsWriter initializationArguments,
+            SerializationCause? cause )
         {
             try
             {
@@ -127,6 +133,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
                 case SerializationIntrinsicType.DottedString:
                 case SerializationIntrinsicType.Type:
                     this._binaryWriter.WriteByte( (byte) intrinsicType );
+
                     break;
 
                 case SerializationIntrinsicType.Enum:
@@ -151,12 +158,12 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
                     this._binaryWriter.WriteByte( (byte) intrinsicType );
                     this._binaryWriter.WriteCompressedInteger( type.GetArrayRank() );
                     this.WriteType( type.GetElementType(), cause );
+
                     break;
 
                 case SerializationIntrinsicType.Struct:
                 case SerializationIntrinsicType.Class:
                     {
-
                         // We don't have a MetadataEmitter, so write the type signature explicitly.
                         var genericTypeDefinition = type.IsGenericType && !type.IsGenericTypeDefinition ? type.GetGenericTypeDefinition() : type;
                         this._binaryWriter.WriteByte( (byte) intrinsicType );
@@ -173,6 +180,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
                             var genericTypeArguments = type.GetGenericArguments();
 
                             this._binaryWriter.WriteCompressedInteger( genericTypeArguments.Length );
+
                             foreach ( var genericTypeArgument in genericTypeArguments )
                             {
                                 this.WriteType( genericTypeArgument, cause );
@@ -199,10 +207,11 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
 
                 case SerializationIntrinsicType.GenericTypeParameter:
                     this.WriteGenericTypeParameter( type, cause );
+
                     break;
 
                 default:
-                    throw new ArgumentOutOfRangeException( nameof( type ) );
+                    throw new ArgumentOutOfRangeException( nameof(type) );
             }
         }
 
@@ -220,10 +229,9 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
 
         private void WriteTypeName( Type type )
         {
-
             if ( type.IsGenericType && !type.IsGenericTypeDefinition )
             {
-                throw new ArgumentOutOfRangeException( nameof( type ) );
+                throw new ArgumentOutOfRangeException( nameof(type) );
             }
 
             if ( !this._typeNameCache.TryGetValue( type, out var assemblyTypeName ) )
@@ -331,78 +339,96 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
             {
                 case SerializationIntrinsicType.Byte:
                     this._binaryWriter.WriteByte( (byte) value );
+
                     break;
 
                 case SerializationIntrinsicType.Int16:
                     this._binaryWriter.WriteCompressedInteger( (short) value );
+
                     break;
 
                 case SerializationIntrinsicType.UInt16:
                     this._binaryWriter.WriteCompressedInteger( (ushort) value );
+
                     break;
 
                 case SerializationIntrinsicType.Int32:
                     this._binaryWriter.WriteCompressedInteger( (int) value );
+
                     break;
 
                 case SerializationIntrinsicType.UInt32:
                     this._binaryWriter.WriteCompressedInteger( (uint) value );
+
                     break;
 
                 case SerializationIntrinsicType.Int64:
                     this._binaryWriter.WriteCompressedInteger( (long) value );
+
                     break;
 
                 case SerializationIntrinsicType.UInt64:
                     this._binaryWriter.WriteCompressedInteger( (ulong) value );
+
                     break;
 
                 case SerializationIntrinsicType.Single:
                     this._binaryWriter.WriteSingle( (float) value );
+
                     break;
 
                 case SerializationIntrinsicType.Double:
                     this._binaryWriter.WriteDouble( (double) value );
+
                     break;
 
                 case SerializationIntrinsicType.String:
                     this._binaryWriter.WriteString( (string) value );
+
                     break;
 
                 case SerializationIntrinsicType.DottedString:
                     this._binaryWriter.WriteDottedString( (DottedString) value );
+
                     break;
 
                 case SerializationIntrinsicType.Char:
                     this._binaryWriter.WriteCompressedInteger( (char) value );
+
                     break;
 
                 case SerializationIntrinsicType.Boolean:
                     this._binaryWriter.WriteByte( (byte) (((bool) value) ? 1 : 0) );
+
                     break;
 
                 case SerializationIntrinsicType.SByte:
                     this._binaryWriter.WriteSByte( (sbyte) value );
+
                     break;
 
                 case SerializationIntrinsicType.Struct:
                     this.WriteStruct( value, cause );
+
                     break;
 
                 case SerializationIntrinsicType.ObjRef:
                     this.WriteObjectReference( value, writeInitializationDataInline, cause );
+
                     break;
 
                 case SerializationIntrinsicType.Type:
                     this.WriteType( (Type) value, cause );
+
                     break;
 
                 case SerializationIntrinsicType.Enum:
                     this._binaryWriter.WriteCompressedInteger( Convert.ToInt64( value, CultureInfo.InvariantCulture ) );
+
                     break;
 
                 default:
-                    throw new ArgumentOutOfRangeException( nameof( intrinsicType ) );
+                    throw new ArgumentOutOfRangeException( nameof(intrinsicType) );
             }
         }
 
@@ -475,9 +501,11 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
                     }
 
                     this._binaryWriter.WriteDottedString( argument.Key );
+
                     var newCause = this._shouldReportExceptionCause
                         ? SerializationCause.WithTypedValue( cause, argument.Key, owningType )
                         : cause;
+
                     this.WriteTypedValue( argument.Value, writeInitializationArgumentsInline, newCause );
                 }
             }
@@ -485,10 +513,10 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
 
         private void WriteObject( object? obj, SerializationCause? cause )
         {
-
             if ( obj == null )
             {
                 this._binaryWriter.WriteByte( (byte) SerializationIntrinsicType.None );
+
                 return;
             }
 
@@ -514,6 +542,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
                 case SerializationIntrinsicType.Enum:
                 case SerializationIntrinsicType.Type:
                     this.WriteTypedValue( obj, false, cause );
+
                     break;
 
                 case SerializationIntrinsicType.Class:
@@ -563,6 +592,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
 
                     // shouldn’t structs be written with type (inheritance is possible) 
                     var newCause = this._shouldReportExceptionCause ? SerializationCause.WithIndices( cause, i ) : cause;
+
                     if ( elementType.IsValueType )
                     {
                         this.WriteValue( value, elementIntrinsicType, false, newCause );
@@ -640,7 +670,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
 
         private class ThrowingArguments : IArgumentsWriter
         {
-            public static readonly ThrowingArguments Instance = new ThrowingArguments();
+            public static readonly ThrowingArguments Instance = new();
 
             public void SetValue( string name, object? value, string? scope = null )
             {

@@ -67,7 +67,7 @@ namespace Caravela.Framework.Impl.Serialization
                             SyntaxFactory.Argument( returnTypeCreation ),
                             SyntaxFactory.Argument(
                                 SyntaxFactory.ArrayCreationExpression(
-                                        SyntaxFactory.ArrayType( serializationContext.GetTypeSyntax( typeof( Type ) ) )
+                                        SyntaxFactory.ArrayType( serializationContext.GetTypeSyntax( typeof(Type) ) )
                                             .WithRankSpecifiers(
                                                 SyntaxFactory.SingletonList(
                                                     SyntaxFactory.ArrayRankSpecifier(
@@ -81,6 +81,6 @@ namespace Caravela.Framework.Impl.Serialization
             }
         }
 
-        public override ImmutableArray<Type> AdditionalSupportedTypes => ImmutableArray.Create( typeof( MemberInfo ) );
+        public override ImmutableArray<Type> AdditionalSupportedTypes => ImmutableArray.Create( typeof(MemberInfo) );
     }
 }

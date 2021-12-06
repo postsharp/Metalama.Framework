@@ -35,7 +35,7 @@ namespace Caravela.Framework.Tests.UnitTests.Templating
         [Fact]
         public void OutOfContext()
         {
-            Assert.Throws<InvalidOperationException>( () => new ArrayBuilder( typeof( int ) ) );
+            Assert.Throws<InvalidOperationException>( () => new ArrayBuilder( typeof(int) ) );
             Assert.Throws<InvalidOperationException>( () => new ArrayBuilder() );
         }
     }

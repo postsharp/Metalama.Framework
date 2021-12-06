@@ -28,7 +28,7 @@ namespace Caravela.Framework.Impl.Formatting
             if ( tagName != null && tagValue == null )
             {
                 // Null tag values are not supported.
-                throw new ArgumentNullException( nameof( tagValue ) );
+                throw new ArgumentNullException( nameof(tagValue) );
             }
 
             var newClassification = classification != null && classification.Value > this.Classification ? classification.Value : this.Classification;
@@ -51,7 +51,7 @@ namespace Caravela.Framework.Impl.Formatting
             if ( tagName != null && tagValue == null )
             {
                 // Null tag values are not supported.
-                throw new ArgumentNullException( nameof( tagValue ) );
+                throw new ArgumentNullException( nameof(tagValue) );
             }
 
             if ( classification != null && classification.Value > this.Classification )

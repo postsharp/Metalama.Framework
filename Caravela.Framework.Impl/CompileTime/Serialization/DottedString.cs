@@ -11,7 +11,6 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
     /// </summary>
     internal struct DottedString : IEquatable<DottedString>
     {
-
         /// <summary>
         /// Initializes a new instance of the <see cref="DottedString"/> struct.
         /// </summary>
@@ -24,7 +23,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
         /// <summary>
         /// Gets an instance of <see cref="DottedString"/> representing a <c>null</c> string.
         /// </summary>
-        public static readonly DottedString Null = new DottedString( Null );
+        public static readonly DottedString Null = new( Null );
 
         /// <summary>
         /// Gets a value indicating whether the current <see cref="DottedString"/> represents a <c>null</c> string.
