@@ -8,15 +8,17 @@ using System.Collections.Generic;
 namespace Caravela.Framework.Impl.CompileTime.Serialization.Serializers
 {
     // This needs to be public because the type is instantiated from an activator in client assemblies.
+
     /// <exclude/>
     public sealed class ListSerializer<T> : ReferenceTypeMetaSerializer
     {
-        private const string keyName = "_";
+        private const string _keyName = "_";
 
         /// <exclude/>
         public override object CreateInstance( Type type, IArgumentsReader constructorArguments )
         {
-            var values = constructorArguments.GetValue<T[]>( keyName );
+            // Assertion on nullability was added after the code import from PostSharp.
+            var values = constructorArguments.GetValue<T[]>( _keyName ).AssertNotNull();
             var list = new List<T>( values.Length );
             list.AddRange( values );
 
@@ -29,7 +31,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization.Serializers
             var list = (List<T>) obj;
 
             // we need to save arrays in constructorArguments because objects from initializationArguments can be not fully deserialized when DeserializeFields is called
-            constructorArguments.SetValue( keyName, list.ToArray() );
+            constructorArguments.SetValue( _keyName, list.ToArray() );
         }
 
         /// <exclude/>

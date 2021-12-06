@@ -55,7 +55,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
 
             if ( header == -1 )
             {
-                return null;
+                return DottedString.Null;
             }
             else if ( header < 0 )
             {

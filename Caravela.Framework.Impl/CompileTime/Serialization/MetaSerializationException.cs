@@ -56,7 +56,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
         {
         }
 
-        internal static MetaSerializationException CreateWithCause( string operation, Type type, Exception innerException, SerializationCause cause )
+        internal static MetaSerializationException CreateWithCause( string operation, Type type, Exception innerException, SerializationCause? cause )
         {
             var causes = new List<string>();
             while ( cause != null )

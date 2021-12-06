@@ -27,6 +27,6 @@ namespace Caravela.Framework.Serialization
         /// <param name="name">Argument name.</param>
         /// <param name="scope">An optional prefix of <paramref name="name"/>, similar to a namespace.</param>
         /// <returns>The value of the argument named <paramref name="name"/> in the given optional <paramref name="scope"/>.</returns>
-        T GetValue<T>( string name, string? scope = null );
+        T? GetValue<T>( string name, string? scope = null );
     }
 }

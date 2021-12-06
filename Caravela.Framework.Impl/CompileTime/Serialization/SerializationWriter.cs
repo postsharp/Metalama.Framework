@@ -4,10 +4,8 @@
 using Caravela.Framework.Serialization;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
 using System.IO;
-using System.Reflection;
 using System.Runtime.CompilerServices;
 
 namespace Caravela.Framework.Impl.CompileTime.Serialization
@@ -53,16 +51,16 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
             this._binaryWriter.WriteByte( (byte) SerializationIntrinsicType.None );
         }
 
-        private void CallOnSerialization( object obj )
+        private static void CallOnSerialization( object obj )
         {
-            ISerializationCallback callback;
+            ISerializationCallback? callback;
             if ( (callback = obj as ISerializationCallback) != null )
             {
                 callback.OnSerializing();
             }
         }
 
-        private ObjectInfo GetObjectInfo( object obj, SerializationCause cause )
+        private ObjectInfo GetObjectInfo( object obj, SerializationCause? cause )
         {
             var type = obj.GetType();
 
@@ -73,7 +71,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
 
             if ( !this._objects.TryGetValue( obj, out var objectInfo ) )
             {
-                this.CallOnSerialization( obj );
+                CallOnSerialization( obj );
 
                 var serializer = type.IsArray ? null : this._formatter.SerializerProvider.GetSerializer( type );
 
@@ -81,7 +79,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
 
                 if ( !type.IsArray )
                 {
-                    this.TrySerialize( serializer, obj, objectInfo.ConstructorArguments, objectInfo.InitializationArguments, cause );
+                    TrySerialize( serializer.AssertNotNull(), obj, objectInfo.ConstructorArguments, objectInfo.InitializationArguments, cause );
                 }
 
                 this._objects.Add( obj, objectInfo );
@@ -90,7 +88,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
             return objectInfo;
         }
 
-        private void TrySerialize( IMetaSerializer serializer, object obj, IArgumentsWriter constructorArguments, IArgumentsWriter initializationArguments, SerializationCause cause )
+        private static void TrySerialize( IMetaSerializer serializer, object obj, IArgumentsWriter constructorArguments, IArgumentsWriter initializationArguments, SerializationCause? cause )
         {
             try
             {
@@ -102,7 +100,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
             }
         }
 
-        private void WriteType( Type type, SerializationCause cause, SerializationIntrinsicType intrinsicType = SerializationIntrinsicType.None )
+        private void WriteType( Type type, SerializationCause? cause, SerializationIntrinsicType intrinsicType = SerializationIntrinsicType.None )
         {
             if ( intrinsicType == SerializationIntrinsicType.None )
             {
@@ -203,10 +201,6 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
                     this.WriteGenericTypeParameter( type, cause );
                     break;
 
-                case SerializationIntrinsicType.GenericMethodParameter:
-                    this.WriteGenericMethodParameter( type, cause );
-                    break;
-
                 default:
                     throw new ArgumentOutOfRangeException( nameof( type ) );
             }
@@ -262,14 +256,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
             this._binaryWriter.WriteString( type.AssemblyName );
         }
 
-        private void WriteMethod( MethodBase method, SerializationCause cause )
-        {
-            this.WriteType( method.DeclaringType, cause );
-            this._binaryWriter.WriteString( method.Name );
-            this._binaryWriter.WriteString( method.ToString() );
-        }
-
-        private void WriteConstructionData( ObjectInfo objectInfo, SerializationCause cause )
+        private void WriteConstructionData( ObjectInfo objectInfo, SerializationCause? cause )
         {
             if ( objectInfo.ConstructionDataWritten )
             {
@@ -289,8 +276,8 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
             {
                 for ( var i = 0; i < objectType.GetArrayRank(); i++ )
                 {
-                    this._binaryWriter.WriteCompressedInteger( array.GetLength( i ) );
-                    this._binaryWriter.WriteCompressedInteger( array.GetLowerBound( i ) );
+                    this._binaryWriter.WriteCompressedInteger( array!.GetLength( i ) );
+                    this._binaryWriter.WriteCompressedInteger( array!.GetLowerBound( i ) );
                 }
             }
             else
@@ -301,7 +288,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
             }
         }
 
-        private void WriteInitializationData( ObjectInfo objectInfo, SerializationCause cause )
+        private void WriteInitializationData( ObjectInfo objectInfo, SerializationCause? cause )
         {
             if ( !objectInfo.ConstructionDataWritten || objectInfo.InitializationArgumentsWritten )
             {
@@ -317,7 +304,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
 
             if ( type.IsArray )
             {
-                var indices = new int[array.Rank];
+                var indices = new int[array!.Rank];
                 this.WriteArrayElements( array, array.GetType().GetElementType(), indices, 0, cause );
             }
             else
@@ -329,7 +316,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
             }
         }
 
-        private void WriteTypedValue( object value, bool writeInitializationDataInline, SerializationCause cause )
+        private void WriteTypedValue( object value, bool writeInitializationDataInline, SerializationCause? cause )
         {
             var type = value.GetType();
             var intrinsicType = SerializationIntrinsicTypeExtensions.GetIntrinsicType( type, true );
@@ -338,7 +325,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
             this.WriteValue( value, intrinsicType, writeInitializationDataInline, cause );
         }
 
-        private void WriteValue( object value, SerializationIntrinsicType intrinsicType, bool writeInitializationDataInline, SerializationCause cause )
+        private void WriteValue( object value, SerializationIntrinsicType intrinsicType, bool writeInitializationDataInline, SerializationCause? cause )
         {
             switch ( intrinsicType )
             {
@@ -419,21 +406,14 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
             }
         }
 
-        private void WriteGenericTypeParameter( Type type, SerializationCause cause )
+        private void WriteGenericTypeParameter( Type type, SerializationCause? cause )
         {
             this._binaryWriter.WriteByte( (byte) SerializationIntrinsicType.GenericTypeParameter );
             this.WriteType( type.DeclaringType, cause );
             this._binaryWriter.WriteCompressedInteger( type.GenericParameterPosition );
         }
 
-        private void WriteGenericMethodParameter( Type type, SerializationCause cause )
-        {
-            this._binaryWriter.WriteByte( (byte) SerializationIntrinsicType.GenericMethodParameter );
-            this.WriteMethod( type.DeclaringMethod, cause );
-            this._binaryWriter.WriteCompressedInteger( type.GenericParameterPosition );
-        }
-
-        private void WriteObjectReference( object value, bool writeInitializationDataInline, SerializationCause cause )
+        private void WriteObjectReference( object value, bool writeInitializationDataInline, SerializationCause? cause )
         {
             var objectInfo = this.GetObjectInfo( value, cause );
 
@@ -456,19 +436,19 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
             }
         }
 
-        private void WriteStruct( object value, SerializationCause cause )
+        private void WriteStruct( object value, SerializationCause? cause )
         {
             var type = value.GetType();
             var serializer = this._formatter.SerializerProvider.GetSerializer( type );
             var arguments = new Arguments();
 
-            this.TrySerialize( serializer, value, arguments, null, cause );
+            TrySerialize( serializer, value, arguments, ThrowingArguments.Instance, cause );
 
             // structs have one phase serializers so we have to write initialization data inline
             this.WriteArguments( arguments, true, cause, type );
         }
 
-        private void WriteArguments( Arguments arguments, bool writeInitializationArgumentsInline, SerializationCause cause, Type owningType )
+        private void WriteArguments( Arguments arguments, bool writeInitializationArgumentsInline, SerializationCause? cause, Type owningType )
         {
             var count = 0;
 
@@ -498,13 +478,12 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
                     var newCause = this._shouldReportExceptionCause
                         ? SerializationCause.WithTypedValue( cause, argument.Key, owningType )
                         : cause;
-                    this.WriteTypedValue( argument.Value, writeInitializationArgumentsInline,
-                                          newCause );
+                    this.WriteTypedValue( argument.Value, writeInitializationArgumentsInline, newCause );
                 }
             }
         }
 
-        private void WriteObject( object obj, SerializationCause cause )
+        private void WriteObject( object? obj, SerializationCause? cause )
         {
 
             if ( obj == null )
@@ -547,20 +526,20 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
                         this._serializationQueue.Enqueue( new SerializationQueueItem<object>( obj, cause ) );
                         this.WriteConstructionData( objectInfo, cause );
                     }
-                    else if ( objectInfo.ConstructionDataWritten && !objectInfo.InitializationArgumentsWritten ) // we can check this only in Array|Class because only these items get added on the queue from serialization code
+                    else if ( objectInfo.ConstructionDataWritten && !objectInfo.InitializationArgumentsWritten )
                     {
+                        // we can check this only in Array|Class because only these items get added on the queue from serialization code
                         this.WriteInitializationData( objectInfo, cause );
                     }
 
                     break;
 
                 default:
-                    Debug.Assert( false );
-                    break;
+                    throw new AssertionFailedException();
             }
         }
 
-        private void WriteArrayElements( Array array, Type elementType, int[] indices, int currentDimension, SerializationCause cause )
+        private void WriteArrayElements( Array array, Type elementType, int[] indices, int currentDimension, SerializationCause? cause )
         {
             var length = array.GetLength( currentDimension );
             var lowerBound = array.GetLowerBound( currentDimension );
@@ -656,6 +635,16 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
                 }
 
                 this.Values[name] = value;
+            }
+        }
+
+        private class ThrowingArguments : IArgumentsWriter
+        {
+            public static readonly ThrowingArguments Instance = new ThrowingArguments();
+
+            public void SetValue( string name, object? value, string? scope = null )
+            {
+                throw new NotSupportedException();
             }
         }
     }

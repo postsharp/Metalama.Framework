@@ -104,9 +104,7 @@ namespace Caravela.Framework.Impl
             }
 #endif
 
-#pragma warning disable 8629
             return obj.Value;
-#pragma warning restore 8629
         }
 
 #if !DEBUG

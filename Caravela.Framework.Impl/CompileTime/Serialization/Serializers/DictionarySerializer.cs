@@ -11,21 +11,18 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization.Serializers
     // This needs to be public because the type is instantiated from an activator in client assemblies.
     public sealed class DictionarySerializer<TKey, TValue> : ReferenceTypeMetaSerializer
     {
-        private const string comparerCodeName = "c";
-
-        private const string comparerName = "d";
-
-        private const string keysName = "k";
-
-        private const string valuesName = "v";
+        private const string _comparerCodeName = "c";
+        private const string _comparerName = "d";
+        private const string _keysName = "k";
+        private const string _valuesName = "v";
 
         /// <exclude/>
         public override object CreateInstance( Type type, IArgumentsReader constructorArguments )
         {
-            var comparerCode = constructorArguments.GetValue<byte>( comparerCodeName );
+            var comparerCode = constructorArguments.GetValue<byte>( _comparerCodeName );
 
-            var comparer = constructorArguments.GetValue<IEqualityComparer<TKey>>( comparerName ) ??
-                                            (IEqualityComparer<TKey>) ComparerExtensions.GetComparerFromCode( comparerCode );
+            var comparer = constructorArguments.GetValue<IEqualityComparer<TKey>>( _comparerName ) ??
+                                            ComparerExtensions.GetComparerFromCode( comparerCode ) as IEqualityComparer<TKey>;
 
             Dictionary<TKey, TValue> dictionary;
 
@@ -38,8 +35,9 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization.Serializers
                 dictionary = new Dictionary<TKey, TValue>( comparer );
             }
 
-            var keys = constructorArguments.GetValue<TKey[]>( keysName );
-            var values = constructorArguments.GetValue<TValue[]>( valuesName );
+            // Assertion on nullability was added after the code import from PostSharp.
+            var keys = constructorArguments.GetValue<TKey[]>( _keysName ).AssertNotNull();
+            var values = constructorArguments.GetValue<TValue[]>( _valuesName ).AssertNotNull();
 
             for ( var idx = 0; idx < keys.Length; idx++ )
             {
@@ -63,16 +61,16 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization.Serializers
             // byte.MaxValue is a flag for custom comparer
             if ( comparerCode != byte.MaxValue )
             {
-                constructorArguments.SetValue( comparerCodeName, comparerCode );
+                constructorArguments.SetValue( _comparerCodeName, comparerCode );
             }
             else
             {
-                constructorArguments.SetValue( comparerName, dictionary.Comparer );
+                constructorArguments.SetValue( _comparerName, dictionary.Comparer );
             }
 
             // we need to save arrays in constructorArguments because objects from initializationArguments can be not fully deserialized when DeserializeFields is called
-            constructorArguments.SetValue( keysName, keys );
-            constructorArguments.SetValue( valuesName, values );
+            constructorArguments.SetValue( _keysName, keys );
+            constructorArguments.SetValue( _valuesName, values );
         }
 
         /// <exclude/>

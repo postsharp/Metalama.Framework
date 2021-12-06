@@ -58,10 +58,12 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
                 else
                 {
                     throw new MetaSerializationException( 
-                        string.Format( CultureInfo.InvariantCulture, "Cannot assign serializer '{0}' to type '{1}' where this type is already assigned to serializer '{2}'.",
-                        serializerType, 
-                        objectType, 
-                        existingSerializerType ) );
+                        string.Format( 
+                            CultureInfo.InvariantCulture, 
+                            "Cannot assign serializer '{0}' to type '{1}' where this type is already assigned to serializer '{2}'.",
+                            serializerType, 
+                            objectType, 
+                            existingSerializerType ) );
                 }
             }
 

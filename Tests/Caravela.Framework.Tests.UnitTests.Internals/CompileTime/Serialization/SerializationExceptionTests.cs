@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Impl;
 using Caravela.Framework.Impl.CompileTime.Serialization;
 using Caravela.Framework.Serialization;
 using System;
@@ -229,7 +230,7 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serialization
 
                 public override void DeserializeFields( ReferenceToChildren obj, IArgumentsReader initializationArguments )
                 {
-                    obj.Children = initializationArguments.GetValue<List<Child>>( "Children" );
+                    obj.Children = initializationArguments.GetValue<List<Child>>( "Children" ).AssertNotNull();
                 }
             }
         }

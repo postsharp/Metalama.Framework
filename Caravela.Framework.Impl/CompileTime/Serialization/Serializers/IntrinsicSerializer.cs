@@ -12,21 +12,21 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization.Serializers
 
         object IMetaSerializer.CreateInstance( Type type, IArgumentsReader constructorArguments )
         {
-            return constructorArguments.GetValue<T>( "_" );
+            return constructorArguments.GetValue<T>( "_" )!;
         }
 
         void IMetaSerializer.DeserializeFields( ref object obj, IArgumentsReader initializationArguments )
         {
         }
 
-        void IMetaSerializer.SerializeObject( object obj, IArgumentsWriter constructorArguments, IArgumentsWriter initializationArguments )
+        void IMetaSerializer.SerializeObject( object obj, IArgumentsWriter constructorArguments, IArgumentsWriter? initializationArguments )
         {
             constructorArguments.SetValue( "_", (T) obj );
         }
 
         public bool IsTwoPhase => false;
 
-        protected void WriteType( SerializationBinaryWriter writer, SerializationIntrinsicType type )
+        protected static void WriteType( SerializationBinaryWriter writer, SerializationIntrinsicType type )
         {
             writer.WriteByte( (byte) type );
         }

@@ -25,7 +25,7 @@ namespace Caravela.Framework.Serialization
         public abstract T DeserializeObject( IArgumentsReader constructorArguments );
 
         /// <inheritdoc />
-        void IMetaSerializer.SerializeObject( object obj, IArgumentsWriter constructorArguments, IArgumentsWriter initializationArguments )
+        void IMetaSerializer.SerializeObject( object obj, IArgumentsWriter constructorArguments, IArgumentsWriter? initializationArguments )
         {
             var typedValue = (T) obj;
             this.SerializeObject( typedValue, constructorArguments );

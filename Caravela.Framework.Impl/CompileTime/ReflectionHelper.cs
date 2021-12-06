@@ -146,6 +146,7 @@ namespace Caravela.Framework.Impl.CompileTime
             return sb.ToString();
         }
 
+#pragma warning disable SA1629 // Documentation text should end with a period
         /// <summary>
         /// Gets a properly-escaped assembly-qualified type name from its components.
         /// </summary>
@@ -153,6 +154,7 @@ namespace Caravela.Framework.Impl.CompileTime
         /// <param name="assemblyName">The assembly name.</param>
         /// <returns>A string of the form <code>TypeName, AssemblyName</code>, where commas in <paramref name="typeName"/> have been properly escaped.</returns>
         public static string GetAssemblyQualifiedTypeName( string typeName, string assemblyName )
+#pragma warning restore SA1629 // Documentation text should end with a period
         {
             if ( typeName == null )
             {

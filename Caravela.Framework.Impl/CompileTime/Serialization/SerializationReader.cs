@@ -7,7 +7,6 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
-using System.Reflection;
 
 namespace Caravela.Framework.Impl.CompileTime.Serialization
 {
@@ -56,7 +55,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
 
             foreach ( var obj in this._referenceTypeInstances.Values )
             {
-                if ( (callback = obj.Value.Value as ISerializationCallback) != null && !ReferenceEquals( callback, rootObject ) )
+                if ( (callback = obj.Value.AssertNotNull().Value as ISerializationCallback) != null && !ReferenceEquals( callback, rootObject ) )
                 {
                     callback.OnDeserialized();
                 }
@@ -69,10 +68,10 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
         {
             if ( this._referenceTypeInstances.TryGetValue( instanceId, out var item ) )
             {
-                return item.Value.Value;
+                return item.Value.AssertNotNull().Value;
             }
 
-            var objRef = this.GetObjRef( instanceId, cause );
+            var objRef = this.GetObjRef( instanceId, cause! );
 
             return this.ReadObjectInternal( objRef, instanceId, initializeObject );
         }
@@ -97,7 +96,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
         {
             var item = this._referenceTypeInstances[instanceId];
 
-            var objRef = item.Value;
+            var objRef = item.Value.AssertNotNull();
 
             // object could be initialized in constructionData block
             if ( objRef.IsInitialized )
@@ -130,7 +129,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
             }
         }
 
-        private static void TryDeserializeFields( IMetaSerializer serializer, ref object value, InstanceFields fields, SerializationCause cause )
+        private static void TryDeserializeFields( IMetaSerializer serializer, ref object value, InstanceFields fields, SerializationCause? cause )
         {
             try
             {
@@ -142,7 +141,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
             }
         }
 
-        private InstanceFields ReadInstanceFields( Type type, bool initializeObjects, SerializationCause cause )
+        private InstanceFields ReadInstanceFields( Type type, bool initializeObjects, SerializationCause? cause )
         {
             int fieldCount = this._binaryReader.ReadCompressedInteger();
 
@@ -166,7 +165,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
             return fields;
         }
 
-        private void ReadType( out Type type, out SerializationIntrinsicType intrinsicType )
+        private void ReadType( out Type? type, out SerializationIntrinsicType intrinsicType )
         {
             intrinsicType = (SerializationIntrinsicType) this._binaryReader.ReadByte();
 
@@ -257,10 +256,11 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
 
                 case SerializationIntrinsicType.Array:
                     int rank = this._binaryReader.ReadCompressedInteger();
-                    Type elementType;
-                    SerializationIntrinsicType elementIntrinsicType;
-                    this.ReadType( out elementType, out elementIntrinsicType );
-                    type = rank == 1 ? elementType.MakeArrayType() : elementType.MakeArrayType( rank );
+                    Type? elementType;
+                    this.ReadType( out elementType, out _ );
+
+                    // Assertion on type nullability was added after code import from PostSharp.
+                    type = rank == 1 ? elementType.AssertNotNull().MakeArrayType() : elementType.AssertNotNull().MakeArrayType( rank );
                     break;
 
                 case SerializationIntrinsicType.Char:
@@ -277,10 +277,6 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
 
                 case SerializationIntrinsicType.GenericTypeParameter:
                     type = this.ReadGenericTypeParameter();
-                    break;
-
-                case SerializationIntrinsicType.GenericMethodParameter:
-                    type = this.ReadGenericMethodParameter();
                     break;
 
                 default:
@@ -310,7 +306,8 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
                             var genericArguments = new Type[arity];
                             for ( var i = 0; i < arity; i++ )
                             {
-                                genericArguments[i] = this.ReadType();
+                                // Assertion on nullability was added after the code import from PostSharp.
+                                genericArguments[i] = this.ReadType().AssertNotNull();
                             }
 
                             return genericType.MakeGenericType( genericArguments );
@@ -333,13 +330,13 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
             }
         }
 
-        private Type ReadType()
+        private Type? ReadType()
         {
             this.ReadType( out var type, out _ );
             return type;
         }
 
-        private object? ReadTypedValue( bool initializeObjects, SerializationCause cause )
+        private object? ReadTypedValue( bool initializeObjects, SerializationCause? cause )
         {
 
             this.ReadType( out var type, out var intrinsicType );
@@ -353,7 +350,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
             return value;
         }
 
-        private object? ReadValue( SerializationIntrinsicType intrinsicType, Type type, bool initializeObject, SerializationCause cause )
+        private object? ReadValue( SerializationIntrinsicType intrinsicType, Type type, bool initializeObject, SerializationCause? cause )
         {
             if ( intrinsicType == SerializationIntrinsicType.None )
             {
@@ -447,28 +444,10 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
 
         private Type ReadGenericTypeParameter()
         {
-            var declaringType = this.ReadType();
+            // Assertion on nullability was added after the code import from PostSharp.
+            var declaringType = this.ReadType().AssertNotNull();
             int position = this._binaryReader.ReadCompressedInteger();
             return declaringType.GetGenericArguments()[position];
-        }
-
-        private Type ReadGenericMethodParameter()
-        {
-            var declaringMethod = (MethodInfo) this.ReadMethod();
-            int position = this._binaryReader.ReadCompressedInteger();
-            return declaringMethod.GetGenericArguments()[position];
-        }
-
-        private MethodBase ReadMethod()
-        {
-            var declaringType = this.ReadType();
-            var methodName = this._binaryReader.ReadString();
-            var methodSignature = this._binaryReader.ReadString();
-
-            throw new NotSupportedException();
-
-            // TODO: Remove this method.
-            // return ReflectionHelper.GetMethod( methodName, methodSignature );
         }
 
         private Type GetType( AssemblyTypeName typeName )
@@ -476,14 +455,14 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
             return this._formatter.Binder.BindToType( typeName.TypeName, typeName.AssemblyName );
         }
 
-        private void ReadArray( Array array, SerializationCause cause )
+        private void ReadArray( Array array, SerializationCause? cause )
         {
             var indices = new int[array.Rank];
 
             this.ReadArrayElements( array, array.GetType().GetElementType(), indices, 0, cause );
         }
 
-        private void ReadArrayElements( Array array, Type elementType, int[] indices, int currentDimension, SerializationCause cause )
+        private void ReadArrayElements( Array array, Type elementType, int[] indices, int currentDimension, SerializationCause? cause )
         {
             var length = array.GetLength( currentDimension );
             var lowerBound = array.GetLowerBound( currentDimension );
@@ -517,7 +496,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
             }
         }
 
-        private object ReadObjRef( bool initializeObject, SerializationCause cause )
+        private object? ReadObjRef( bool initializeObject, SerializationCause? cause )
         {
             int instanceId = this._binaryReader.ReadCompressedInteger();
 
@@ -528,7 +507,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
         {
             if ( this._referenceTypeInstances.TryGetValue( instanceId, out var item ) )
             {
-                return item.Value;
+                return item.Value.AssertNotNull();
             }
 
             // Create an uninitialized instance for this type.
@@ -537,7 +516,8 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
             if ( cause == null && this._shouldReportExceptionCause )
             {
                 // This is the root.
-                cause = SerializationCause.WithTypedValue( null, "root", type );
+                // Assertion on nullability was added after the code import from PostSharp.
+                cause = SerializationCause.WithTypedValue( null, "root", type.AssertNotNull() );
             }
 
             if ( type == null )
@@ -546,7 +526,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
             }
 
             object value;
-            IMetaSerializer serializer;
+            IMetaSerializer? serializer;
             if ( intrinsicType == SerializationIntrinsicType.Array )
             {
                 var lengths = new int[type.GetArrayRank()];
@@ -566,11 +546,11 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
                 var fields = this.ReadInstanceFields( type, true, cause );
                 serializer = this._formatter.SerializerProvider.GetSerializer( type );
 
-                value = this.TryCreateInstance( serializer, type, fields, cause );
+                value = TryCreateInstance( serializer, type, fields, cause );
             }
             else
             {
-                value = this.ReadValue( intrinsicType, type, true, cause );
+                value = this.ReadValue( intrinsicType, type, true, cause ).AssertNotNull();
                 serializer = null;
             }
 
@@ -589,7 +569,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
             return objRef;
         }
 
-        private object TryCreateInstance( IMetaSerializer serializer, Type type, InstanceFields fields, SerializationCause cause )
+        private static object TryCreateInstance( IMetaSerializer serializer, Type type, InstanceFields fields, SerializationCause? cause )
         {
             try
             {
@@ -601,13 +581,13 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
             }
         }
 
-        private object ReadStruct( Type type, SerializationCause cause )
+        private object ReadStruct( Type type, SerializationCause? cause )
         {
             var fields = this.ReadInstanceFields( type, true, cause );
 
             var serializer = this._formatter.SerializerProvider.GetSerializer( type );
 
-            var value = this.TryCreateInstance( serializer, type, fields, cause );
+            var value = TryCreateInstance( serializer, type, fields, cause );
 
             TryDeserializeFields( serializer, ref value, fields, cause );
 
@@ -616,7 +596,8 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
 
         private AssemblyTypeName ReadTypeName()
         {
-            return new AssemblyTypeName( this._binaryReader.ReadDottedString(), this._binaryReader.ReadString() );
+            // Assertion on nullability was added after the code import from PostSharp.
+            return new AssemblyTypeName( this._binaryReader.ReadDottedString(), this._binaryReader.ReadString().AssertNotNull() );
         }
 
         private sealed class InstanceFields : IArgumentsReader
@@ -625,7 +606,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
 
             private readonly Type? _type;
 
-            public Dictionary<string, object>? Values { get; }
+            public Dictionary<string, object?>? Values { get; }
 
             private readonly MetaFormatter? _formatter;
 
@@ -640,7 +621,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
             {
                 this._type = type;
                 this._formatter = formatter;
-                this.Values = new Dictionary<string, object>( capacity, StringComparer.Ordinal );
+                this.Values = new Dictionary<string, object?>( capacity, StringComparer.Ordinal );
             }
 
             public bool TryGetValue<T>( string name, [MaybeNullWhen( false )] out T? value, string? scope = null )
@@ -708,7 +689,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
                     }
 #endif
 
-                    string FormatTypeName( Type type )
+                    static string FormatTypeName( Type type )
                     {
 #if LEGACY_REFLECTION_API
                         return type.AssemblyQualifiedName + " (" + GetElementType(type).Assembly.Location + ")";
@@ -730,9 +711,9 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
                 }
             }
 
-            public T GetValue<T>( string name, string? scope = null )
+            public T? GetValue<T>( string name, string? scope = null )
             {
-                this.TryGetValue( name, out T value, scope );
+                this.TryGetValue( name, out T? value, scope );
                 return value;
             }
 
@@ -759,7 +740,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
                 this.IntrinsicType = SerializationIntrinsicType.None;
             }
 
-            public ObjRef( object value, IMetaSerializer serializer, SerializationIntrinsicType intrinsicType )
+            public ObjRef( object value, IMetaSerializer? serializer, SerializationIntrinsicType intrinsicType )
             {
                 this.Value = value;
                 this.Serializer = serializer;

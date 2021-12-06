@@ -28,7 +28,7 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serialization
         [Fact]
         public void GetSerializerType_NonGenericCustomType()
         {
-            var serializerType = this._customSerializerProvider.GetSerializerFactory( typeof( SerializedClass ) ).CreateSerializer( typeof( SerializedClass ) ).GetType();
+            var serializerType = this._customSerializerProvider.GetSerializerFactory( typeof( SerializedClass ) )?.CreateSerializer( typeof( SerializedClass ) ).GetType();
 
             Assert.Equal( typeof( SerializedClass.Serializer ), serializerType );
         }
@@ -36,7 +36,7 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serialization
         [Fact]
         public void GetSerializerType_GenericCustomTypeDefinition_NotNull()
         {
-            var serializerType = this._customSerializerProvider.GetSerializerFactory( typeof( GenericSerializedClass<> ) ).CreateSerializer( typeof( GenericSerializedClass<int> ) ).GetType();
+            var serializerType = this._customSerializerProvider.GetSerializerFactory( typeof( GenericSerializedClass<> ) )?.CreateSerializer( typeof( GenericSerializedClass<int> ) ).GetType();
 
             Assert.NotNull( serializerType );
         }
@@ -52,9 +52,9 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serialization
         [Fact]
         public void GetSerializerType_AskedTwice_TheSameObject()
         {
-            var serializerType1 = this._customSerializerProvider.GetSerializerFactory( typeof( GenericSerializedClass<> ) ).CreateSerializer( typeof( GenericSerializedClass<string> ) ).GetType();
+            var serializerType1 = this._customSerializerProvider.GetSerializerFactory( typeof( GenericSerializedClass<> ) )?.CreateSerializer( typeof( GenericSerializedClass<string> ) ).GetType();
             ;
-            var serializerType2 = this._customSerializerProvider.GetSerializerFactory( typeof( GenericSerializedClass<> ) ).CreateSerializer( typeof( GenericSerializedClass<string> ) ).GetType();
+            var serializerType2 = this._customSerializerProvider.GetSerializerFactory( typeof( GenericSerializedClass<> ) )?.CreateSerializer( typeof( GenericSerializedClass<string> ) ).GetType();
             ;
 
             Assert.Same( serializerType1, serializerType2 );
@@ -63,9 +63,9 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serialization
         [Fact]
         public void GetSerializerType_RespectsAssemblyImportAttributes()
         {
-            var assemblyImportedSerializerType = this._customSerializerProvider.GetSerializerFactory( typeof( TypeWoSerializer ) ).CreateSerializer( typeof( GenericSerializedClass<string> ) ).GetType();
+            var assemblyImportedSerializerType = this._customSerializerProvider.GetSerializerFactory( typeof( TypeWoSerializer ) )?.CreateSerializer( typeof( GenericSerializedClass<string> ) ).GetType();
             ; // NOTE: import is just over the namespace opening bracket
-            var classAttributeDerivedSerializerType = this._customSerializerProvider.GetSerializerFactory( typeof( GenericSerializedClass<> ) ).CreateSerializer( typeof( GenericSerializedClass<string> ) ).GetType();
+            var classAttributeDerivedSerializerType = this._customSerializerProvider.GetSerializerFactory( typeof( GenericSerializedClass<> ) )?.CreateSerializer( typeof( GenericSerializedClass<string> ) ).GetType();
             ;
 
             Assert.NotNull( classAttributeDerivedSerializerType );

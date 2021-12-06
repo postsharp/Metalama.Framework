@@ -40,6 +40,7 @@ namespace Caravela.Framework.Impl.CompileTime
             private static readonly SyntaxAnnotation _hasCompileTimeCodeAnnotation = new( "Caravela_HasCompileTimeCode" );
             private readonly Compilation _compileTimeCompilation;
             private readonly IReadOnlyDictionary<INamedTypeSymbol, MetaSerializableTypeInfo> _serializableTypes;
+            private readonly IReadOnlyDictionary<ISymbol, MetaSerializableTypeInfo> _serializableFieldsAndProperties;
             private readonly IDiagnosticAdder _diagnosticAdder;
             private readonly TemplateCompiler _templateCompiler;
             private readonly CancellationToken _cancellationToken;
@@ -76,7 +77,12 @@ namespace Caravela.Framework.Impl.CompileTime
                 this._cancellationToken = cancellationToken;
                 this._currentContext = new Context( TemplatingScope.Both, this );
 
-                this._serializableTypes = serializableTypes.ToDictionary<MetaSerializableTypeInfo, INamedTypeSymbol, MetaSerializableTypeInfo>( x => x.Type, x => x, SymbolEqualityComparer.Default );
+                this._serializableTypes = 
+                    serializableTypes.ToDictionary<MetaSerializableTypeInfo, INamedTypeSymbol, MetaSerializableTypeInfo>( x => x.Type, x => x, SymbolEqualityComparer.Default );
+
+                this._serializableFieldsAndProperties = 
+                    serializableTypes.SelectMany( x => x.SerializedMembers.Select( y => (Member: y, Type: x) ) )
+                    .ToDictionary(x => x.Member, x => x.Type, SymbolEqualityComparer.Default );
 
                 this._syntaxGenerationContext = SyntaxGenerationContext.CreateDefault( serviceProvider, compileTimeCompilation );
 
@@ -308,7 +314,6 @@ namespace Caravela.Framework.Impl.CompileTime
                         {
                             case MethodDeclarationSyntax method:
                                 members.AddRange( this.VisitMethodDeclaration( method ).AssertNoneNull() );
-
                                 break;
 
                             case IndexerDeclarationSyntax:
@@ -318,17 +323,18 @@ namespace Caravela.Framework.Impl.CompileTime
 
                             case PropertyDeclarationSyntax property:
                                 members.AddRange( this.VisitBasePropertyDeclaration( property ).AssertNoneNull() );
-
                                 break;
 
                             case EventDeclarationSyntax @event:
                                 members.AddRange( this.VisitEventDeclaration( @event ).AssertNoneNull() );
+                                break;
 
+                            case FieldDeclarationSyntax field:
+                                members.AddRange( this.VisitFieldDeclaration( field ).AssertNoneNull() );
                                 break;
 
                             default:
                                 members.Add( (MemberDeclarationSyntax) this.Visit( member ).AssertNotNull() );
-
                                 break;
                         }
                     }
@@ -614,7 +620,34 @@ namespace Caravela.Framework.Impl.CompileTime
                 {
                     if ( !propertyOrAccessorsAreTemplate )
                     {
-                        yield return (BasePropertyDeclarationSyntax) this.Visit( node ).AssertNotNull();
+                        var suppressReadOnly = false;
+                        if ( this._serializableFieldsAndProperties.TryGetValue( propertySymbol, out var serializableTypeInfo ) )
+                        {
+                            suppressReadOnly = this.MetaSerializerGenerator.ShouldSuppressReadOnly( serializableTypeInfo, propertySymbol );
+                        }
+
+                        var rewritten = (BasePropertyDeclarationSyntax) this.Visit( node ).AssertNotNull();
+
+                        if (suppressReadOnly && rewritten is PropertyDeclarationSyntax rewrittenProperty)
+                        {
+                            // If the property needs to have set accessor because of serialization, add it.
+                            Invariant.Assert( rewrittenProperty.IsAutoPropertyDeclaration() );
+                            Invariant.Assert( rewrittenProperty.AccessorList != null );
+                            Invariant.Assert( !rewrittenProperty.AccessorList!.Accessors.Any( a => a.IsKind( SyntaxKind.SetAccessorDeclaration ) || a.IsKind( SyntaxKind.InitAccessorDeclaration ) ) );
+
+                            rewritten = 
+                                rewrittenProperty.WithAccessorList(
+                                    rewrittenProperty.AccessorList.WithAccessors(
+                                        rewrittenProperty.AccessorList.Accessors.Add(
+                                            AccessorDeclaration(
+                                                SyntaxKind.SetAccessorDeclaration,
+                                                List<AttributeListSyntax>(),
+                                                TokenList( Token( SyntaxKind.PrivateKeyword ) ),
+                                                null,
+                                                null ) ) ) );
+                        }
+
+                        yield return rewritten;
                     }
                     else if ( propertySymbol.IsOverride && propertySymbol.OverriddenProperty!.IsAbstract )
                     {
@@ -640,6 +673,47 @@ namespace Caravela.Framework.Impl.CompileTime
                 else
                 {
                     this.Success = false;
+                }
+            }
+
+            private new IEnumerable<MemberDeclarationSyntax> VisitFieldDeclaration( FieldDeclarationSyntax node )
+            {
+                var unchangedVariables = new List<VariableDeclaratorSyntax>();
+                var nonReadOnlyVariables = new List<VariableDeclaratorSyntax>();
+
+                foreach (var declarator in node.Declaration.Variables)
+                {
+                    var fieldSymbol = (IFieldSymbol)this.RunTimeCompilation.GetSemanticModel( declarator.SyntaxTree ).GetDeclaredSymbol( declarator ).AssertNotNull();
+
+                    if (this._serializableFieldsAndProperties.TryGetValue(fieldSymbol, out var serializableType) 
+                        && this.MetaSerializerGenerator.ShouldSuppressReadOnly(serializableType, fieldSymbol))
+                    {
+                        // This field needs to have it's readonly modifier removed.
+                        nonReadOnlyVariables.Add( declarator );
+                    }
+                    else
+                    {
+                        unchangedVariables.Add( declarator );
+                    }
+                }
+                
+                if (nonReadOnlyVariables.Count > 0)
+                {
+                    if ( unchangedVariables.Count > 0 )
+                    {
+                        yield return
+                            node.WithDeclaration(
+                                node.Declaration.WithVariables( SeparatedList( unchangedVariables ) ) );
+                    }
+
+                    yield return
+                        node.WithDeclaration(
+                            node.Declaration.WithVariables( SeparatedList( nonReadOnlyVariables ) ) )
+                        .WithModifiers( TokenList( node.Modifiers.Where( t => !t.IsKind( SyntaxKind.ReadOnlyKeyword ) ) ) );
+                }
+                else
+                {
+                    yield return node;
                 }
             }
 

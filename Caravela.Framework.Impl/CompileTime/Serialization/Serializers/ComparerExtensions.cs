@@ -38,7 +38,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization.Serializers
             return byte.MaxValue;
         }
 
-        public static IEqualityComparer<string> GetComparerFromCode( byte code )
+        public static IEqualityComparer<string>? GetComparerFromCode( byte code )
         {
             switch ( code )
             {

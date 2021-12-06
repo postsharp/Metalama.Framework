@@ -34,7 +34,6 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
                 case SerializationIntrinsicType.ObjRef:
                 case SerializationIntrinsicType.Type:
                 case SerializationIntrinsicType.GenericTypeParameter:
-                case SerializationIntrinsicType.GenericMethodParameter:
                     return false;
                 default:
                     throw new ArgumentOutOfRangeException( nameof( intrinsicType ) );
@@ -90,7 +89,8 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
                     {
                         if ( type.DeclaringMethod != null )
                         {
-                            return SerializationIntrinsicType.GenericMethodParameter;
+                            // Not supported.
+                            throw new AssertionFailedException();
                         }
                         else
                         {

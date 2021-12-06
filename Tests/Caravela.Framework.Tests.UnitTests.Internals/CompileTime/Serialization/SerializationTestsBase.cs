@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Impl;
 using Caravela.Framework.Impl.CompileTime.Serialization;
 using System;
 using System.Collections;
@@ -11,13 +12,13 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serialization
 {
     public class SerializationTestsBase
     {
-        public T TestSerialization<T>( T instance, Func<T, T, bool> assert = null )
+        public static T? TestSerialization<T>( T instance, Func<T, T?, bool>? assert = null )
         {
             var formatter = new MetaFormatter();
             var memoryStream = new MemoryStream();
-            formatter.Serialize( instance, memoryStream );
+            formatter.Serialize( instance ?? throw new AssertionFailedException(), memoryStream );
             memoryStream.Seek( 0, SeekOrigin.Begin );
-            var deserializedObject = (T) formatter.Deserialize( memoryStream );
+            var deserializedObject = (T?) formatter.Deserialize( memoryStream );
 
             var orgCol = instance as ICollection;
             var newCol = deserializedObject as ICollection;
@@ -38,15 +39,15 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serialization
             return deserializedObject;
         }
 
-        public T SerializeDeserialize<T>( T value )
+        public static T SerializeDeserialize<T>( T value )
         {
             var formatter = new MetaFormatter();
             var memoryStream = new MemoryStream();
 
-            formatter.Serialize( value, memoryStream );
+            formatter.Serialize( value!, memoryStream );
 
             memoryStream.Seek( 0, SeekOrigin.Begin );
-            var deserialized = (T) formatter.Deserialize( memoryStream );
+            var deserialized = (T) formatter.Deserialize( memoryStream ).AssertNotNull();
 
             return deserialized;
         }

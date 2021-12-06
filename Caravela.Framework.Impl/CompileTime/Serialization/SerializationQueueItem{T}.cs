@@ -6,14 +6,14 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
 
     internal sealed class SerializationQueueItem<T>
     {
-        public SerializationQueueItem( T o, SerializationCause cause )
+        public SerializationQueueItem( T? o, SerializationCause? cause )
         {
             this.Value = o;
             this.Cause = cause;
         }
 
-        public T Value { get; }
+        public T? Value { get; }
 
-        public SerializationCause Cause { get; }
+        public SerializationCause? Cause { get; }
     }
 }

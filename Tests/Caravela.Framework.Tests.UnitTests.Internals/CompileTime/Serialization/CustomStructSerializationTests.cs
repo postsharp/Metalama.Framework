@@ -20,7 +20,14 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serialization
                 StringValue = "Test",
                 NullableEnumField = TypeCode.Char
             };
+
+/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+Before:
             this.TestSerialization( s );
+After:
+            SerializationTestsBase.TestSerialization( s );
+*/
+            TestSerialization( s );
         }
 
         [Fact]
@@ -30,7 +37,14 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serialization
             {
                 StringValue = "Test"
             };
+
+/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+Before:
             this.TestSerialization( (object) s );
+After:
+            SerializationTestsBase.TestSerialization( (object) s );
+*/
+            TestSerialization( (object) s );
         }
 
         [Fact]
@@ -40,7 +54,14 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serialization
             {
                 Value = "1"
             };
+
+/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+Before:
             this.TestSerialization( s );
+After:
+            SerializationTestsBase.TestSerialization( s );
+*/
+            TestSerialization( s );
         }
 
         [Fact]
@@ -50,7 +71,14 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serialization
             {
                 Value = new SimpleStruct( 5, DateTime.MinValue )
             };
+
+/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+Before:
             this.TestSerialization( s );
+After:
+            SerializationTestsBase.TestSerialization( s );
+*/
+            TestSerialization( s );
         }
 
         [Fact]
@@ -58,7 +86,14 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serialization
         {
             var cls = new SimpleClass( 11 );
             var str = new SimpleStruct( 1, DateTime.Now ) { SimpleClass = cls, SimpleClass2 = cls };
+
+/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+Before:
             var str2 = this.TestSerialization( str );
+After:
+            var str2 = SerializationTestsBase.TestSerialization( str );
+*/
+            var str2 = TestSerialization( str );
             Assert.Same( str2.SimpleClass, str2.SimpleClass2 );
         }
 
@@ -68,7 +103,7 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serialization
         {
             public T Value { get; set; }
 
-            public string StringValue { get; set; }
+            public string? StringValue { get; set; }
 
             public bool Equals( GenericStruct<T> other )
             {
@@ -105,10 +140,11 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serialization
 
             public override GenericStruct<T> DeserializeObject( IArgumentsReader constructorArguments )
             {
+                // Assertion on nullability was added after the code import from PostSharp.
                 var s = new GenericStruct<T>
                 {
                     StringValue = constructorArguments.GetValue<string>( "s" ),
-                    Value = constructorArguments.GetValue<T>( "T" )
+                    Value = constructorArguments.GetValue<T?>( "T" )!
                 };
                 return s;
             }
@@ -119,15 +155,15 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serialization
         {
             public int IntValue { get; set; }
 
-            public string StringValue { get; set; }
+            public string? StringValue { get; set; }
 
             public DateTime TimeValue { get; set; }
 
             public TypeCode? NullableEnumField { get; set; }
 
-            public SimpleClass SimpleClass { get; set; }
+            public SimpleClass? SimpleClass { get; set; }
 
-            public SimpleClass SimpleClass2 { get; set; }
+            public SimpleClass? SimpleClass2 { get; set; }
 
             public SimpleStruct( int intValue, DateTime timeValue ) : this()
             {

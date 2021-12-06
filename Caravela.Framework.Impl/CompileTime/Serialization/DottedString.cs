@@ -27,7 +27,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
         public static readonly DottedString Null = new DottedString( Null );
 
         /// <summary>
-        /// Determines whether the current <see cref="DottedString"/> represents a <c>null</c> string.
+        /// Gets a value indicating whether the current <see cref="DottedString"/> represents a <c>null</c> string.
         /// </summary>
         public bool IsNull => this.Value == null;
 

@@ -10,13 +10,13 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
 {
     internal sealed class SerializationBinaryWriter
     {
-        private readonly BinaryWriter writer;
-        private readonly Dictionary<string, int> strings = new Dictionary<string, int>( 64, StringComparer.Ordinal );
-        private readonly Dictionary<string, int> dottedStrings = new Dictionary<string, int>( 64, StringComparer.Ordinal );
+        private readonly BinaryWriter _writer;
+        private readonly Dictionary<string, int> _strings = new Dictionary<string, int>( 64, StringComparer.Ordinal );
+        private readonly Dictionary<string, int> _dottedStrings = new Dictionary<string, int>( 64, StringComparer.Ordinal );
 
         public SerializationBinaryWriter( BinaryWriter writer )
         {
-            this.writer = writer;
+            this._writer = writer;
         }
 
         public void WriteCompressedInteger( Integer integer )
@@ -28,38 +28,38 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
             // For unsigned compressed integers, the top 3 bits of the header are used to store the integer lenghts.
             if ( (value & 0x0f) == value )
             {
-                this.writer.Write( (byte) (signBit | (byte) value) );
+                this._writer.Write( (byte) (signBit | (byte) value) );
             }
             else if ( (value & 0x0fff) == value )
             {
-                this.writer.Write( (byte) (0x10 | signBit | (byte) (value >> 8)) );
-                this.writer.Write( (byte) (value & 0xff) );
+                this._writer.Write( (byte) (0x10 | signBit | (byte) (value >> 8)) );
+                this._writer.Write( (byte) (value & 0xff) );
             }
             else if ( (value & 0x0fffff) == value )
             {
-                this.writer.Write( (byte) (0x20 | signBit | (byte) (value >> 16)) );
-                this.writer.Write( (ushort) (value & 0xffff) );
+                this._writer.Write( (byte) (0x20 | signBit | (byte) (value >> 16)) );
+                this._writer.Write( (ushort) (value & 0xffff) );
             }
             else if ( (value & 0x0fffffffff) == value )
             {
-                this.writer.Write( (byte) (0x30 | signBit | (byte) (value >> 32)) );
-                this.writer.Write( (uint) (value & 0xffffffff) );
+                this._writer.Write( (byte) (0x30 | signBit | (byte) (value >> 32)) );
+                this._writer.Write( (uint) (value & 0xffffffff) );
             }
             else
             {
-                this.writer.Write( (byte) (0x40 | signBit) );
-                this.writer.Write( value );
+                this._writer.Write( (byte) (0x40 | signBit) );
+                this._writer.Write( value );
             }
         }
 
         public void WriteByte( byte value )
         {
-            this.writer.Write( value );
+            this._writer.Write( value );
         }
 
         public void WriteDouble( double value )
         {
-            this.writer.Write( value );
+            this._writer.Write( value );
         }
 
         public void WriteString( string value )
@@ -69,7 +69,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
             {
                 this.WriteCompressedInteger( -1 );
             }
-            else if ( this.strings.TryGetValue( value, out var id ) )
+            else if ( this._strings.TryGetValue( value, out var id ) )
             {
                 this.WriteCompressedInteger( -id );
             }
@@ -77,23 +77,23 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
             {
                 var bytes = Encoding.UTF8.GetBytes( value );
                 this.WriteCompressedInteger( bytes.Length );
-                this.writer.Write( bytes );
+                this._writer.Write( bytes );
             }
         }
 
         public void WriteSByte( sbyte value )
         {
-            this.writer.Write( value );
+            this._writer.Write( value );
         }
 
-        public void WriteDottedString( string value )
+        public void WriteDottedString( string? value )
         {
 
             if ( value == null )
             {
                 this.WriteCompressedInteger( -1 );
             }
-            else if ( this.dottedStrings.TryGetValue( value, out var id ) )
+            else if ( this._dottedStrings.TryGetValue( value, out var id ) )
             {
                 this.WriteCompressedInteger( -id );
             }
@@ -101,7 +101,8 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
             {
 
                 var lastDot = value.LastIndexOf( '.' );
-                string name, scope;
+                string name;
+                string? scope;
 
                 if ( lastDot < 0 )
                 {
@@ -116,17 +117,17 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
 
                 var bytes = Encoding.UTF8.GetBytes( name );
                 this.WriteCompressedInteger( bytes.Length );
-                this.writer.Write( bytes );
+                this._writer.Write( bytes );
 
                 this.WriteDottedString( scope );
 
-                this.dottedStrings.Add( value, this.dottedStrings.Count + 2 );
+                this._dottedStrings.Add( value, this._dottedStrings.Count + 2 );
             }
         }
 
         public void WriteSingle( float value )
         {
-            this.writer.Write( value );
+            this._writer.Write( value );
         }
     }
 }

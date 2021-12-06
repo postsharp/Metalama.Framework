@@ -27,6 +27,18 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
             this._runtimeReflectionMapper = new ReflectionMapper( runtimeCompilation );
         }
 
+        public bool ShouldSuppressReadOnly( MetaSerializableTypeInfo serializableType, ISymbol memberSymbol )
+        {
+            var serializableTypeMember = serializableType.SerializedMembers.SingleOrDefault( x => SymbolEqualityComparer.Default.Equals( x, memberSymbol ) );
+
+            if ( serializableTypeMember == null )
+            {
+                return false;
+            }
+
+            return this.ClassifyFieldOrProperty( serializableTypeMember ) == FieldOrPropertyDeserializationKind.Deserialize_MakeMutable;
+        }
+
         public MemberDeclarationSyntax CreateDeserializingConstructor( MetaSerializableTypeInfo serializableType )
         {
             // Presume that base type is not null.

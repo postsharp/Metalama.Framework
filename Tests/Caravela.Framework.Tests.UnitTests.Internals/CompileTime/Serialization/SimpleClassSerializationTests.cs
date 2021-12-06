@@ -376,7 +376,7 @@ Before:
 After:
             SimpleClassSerializationTests.TestExplicitlySerializedClass( (object) null, 1 );
 */
-            TestExplicitlySerializedClass( (object) null, 1 );
+            TestExplicitlySerializedClass( (object?) null, 1 );
         }
 
         [Fact]
@@ -441,9 +441,9 @@ After:
         public void TestClassWithMultidimensionalRank1Array()
         {
             // We're creating instance of type int[*], but actually get int[] -> and that's what were testing
-            var array = (Array) Activator.CreateInstance( typeof( int ).MakeArrayType( 1 ), 2 );
-            array.SetValue( 1, 0 );
-            array.SetValue( 2, 1 );
+            var array = (Array?) Activator.CreateInstance( typeof( int ).MakeArrayType( 1 ), 2 );
+            array!.SetValue( 1, 0 );
+            array!.SetValue( 2, 1 );
 
 /* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
@@ -496,7 +496,14 @@ After:
         [Fact]
         public void TestClassWithNullableInt_NotNull()
         {
+
+/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+Before:
             this.TestSerialization( new ExplicitlySerializedClass<int, int>( 5 ) { Nullable = 3 } );
+After:
+            SerializationTestsBase.TestSerialization( new ExplicitlySerializedClass<int, int>( 5 ) { Nullable = 3 } );
+*/
+            TestSerialization( new ExplicitlySerializedClass<int, int>( 5 ) { Nullable = 3 } );
         }
 
         [Fact]
@@ -505,7 +512,14 @@ After:
             var array = new SimpleExplicitelySerializedClass<int>[3];
             array[0] = new SimpleExplicitelySerializedClass<int>( 5 );
             array[1] = new ExplicitlySerializedClass<int, string>( 2 );
+
+/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+Before:
             this.TestSerialization( array );
+After:
+            SerializationTestsBase.TestSerialization( array );
+*/
+            TestSerialization( array );
         }
 
         [Fact]
@@ -521,36 +535,34 @@ After:
             formatter.Serialize( array, memoryStream );
             memoryStream.Seek( 0, SeekOrigin.Begin );
             var deserializedObject =
-                (SimpleExplicitelySerializedClass<DateTime>[]) formatter.Deserialize( memoryStream );
+                (SimpleExplicitelySerializedClass<DateTime>[]?) formatter.Deserialize( memoryStream );
 
             Assert.NotNull( deserializedObject );
-            Assert.Equal( 2, deserializedObject.Length );
+            Assert.Equal( 2, deserializedObject!.Length );
             Assert.Equal( serializedClass, deserializedObject[0] );
             Assert.Equal( anotherSerializedClass, deserializedObject[1] );
         }
 
         private static void TestSimpleExplicitelySerializedClass<T>( T value )
-            where T : notnull
         {
             var initialObject = new SimpleExplicitelySerializedClass<T>( value );
             var formatter = new MetaFormatter();
             var memoryStream = new MemoryStream();
             formatter.Serialize( initialObject, memoryStream );
             memoryStream.Seek( 0, SeekOrigin.Begin );
-            var deserializedObject = (SimpleExplicitelySerializedClass<T>) formatter.Deserialize( memoryStream );
+            var deserializedObject = (SimpleExplicitelySerializedClass<T>?) formatter.Deserialize( memoryStream );
 
             if ( typeof( T ).IsArray )
             {
-                Assert.Equal( (ICollection?) initialObject.Value, (ICollection?) deserializedObject.Value );
+                Assert.Equal( (ICollection?) initialObject.Value, (ICollection?) deserializedObject!.Value );
             }
             else
             {
-                Assert.Equal( initialObject.Value, deserializedObject.Value );
+                Assert.Equal( initialObject.Value, deserializedObject!.Value );
             }
         }
 
         private static void TestExplicitlySerializedClass<TForCtor, TForField>( TForCtor value, TForField property )
-            where TForCtor : notnull
         {
             var initialObject = new ExplicitlySerializedClass<TForCtor, TForField>( value )
             {
@@ -561,15 +573,14 @@ After:
             formatter.Serialize( initialObject, memoryStream );
             memoryStream.Seek( 0, SeekOrigin.Begin );
             var deserializedObject =
-                (ExplicitlySerializedClass<TForCtor, TForField>) formatter.Deserialize( memoryStream );
+                (ExplicitlySerializedClass<TForCtor, TForField>?) formatter.Deserialize( memoryStream );
 
-            Assert.Equal( initialObject.Value, deserializedObject.Value );
-            Assert.Equal( initialObject.Field, deserializedObject.Field );
+            Assert.Equal( initialObject.Value, deserializedObject!.Value );
+            Assert.Equal( initialObject.Field, deserializedObject!.Field );
         }
 
         [MetaSerializer( typeof( SimpleExplicitelySerializedClass<>.Serializer ) )]
         public class SimpleExplicitelySerializedClass<T> : IEquatable<SimpleExplicitelySerializedClass<T>>
-            where T : notnull
         {
 #pragma warning disable SA1401 // Fields should be private
             public T Value;
@@ -617,14 +628,14 @@ After:
 
             public override int GetHashCode()
             {
-                return EqualityComparer<T>.Default.GetHashCode( this.Value );
+                return EqualityComparer<T>.Default.GetHashCode( this.Value! );
             }
 
             public class Serializer : ReferenceTypeSerializer<SimpleExplicitelySerializedClass<T>>
             {
                 public override object CreateInstance( Type type, IArgumentsReader constructorArguments )
                 {
-                    return new SimpleExplicitelySerializedClass<T>( constructorArguments.GetValue<T>( "_" ) );
+                    return new SimpleExplicitelySerializedClass<T>( constructorArguments.GetValue<T>( "_" )! );
                 }
 
                 public override void SerializeObject( SimpleExplicitelySerializedClass<T> obj, IArgumentsWriter constructorArguments, IArgumentsWriter initializationArguments )
@@ -640,16 +651,15 @@ After:
 
         [MetaSerializer( typeof( ExplicitlySerializedClass<,>.Serializer ) )]
         public class ExplicitlySerializedClass<TForCtor, TForField> : SimpleExplicitelySerializedClass<TForCtor>, IEquatable<ExplicitlySerializedClass<TForCtor, TForField>>
-            where TForCtor : notnull
-        {
+        { 
+            public TForField? Field { get; set; }
+
+            public int? Nullable { get; set; }
+
             public ExplicitlySerializedClass( TForCtor value )
                 : base( value )
             {
             }
-
-            public TForField Field { get; set; }
-
-            public int? Nullable { get; set; }
 
             public bool Equals( ExplicitlySerializedClass<TForCtor, TForField>? other )
             {
@@ -663,7 +673,7 @@ After:
                     return true;
                 }
 
-                return base.Equals( other ) && EqualityComparer<TForField>.Default.Equals( this.Field, other.Field ) && this.Nullable == other.Nullable;
+                return base.Equals( other ) && EqualityComparer<TForField>.Default.Equals( this.Field!, other.Field! ) && this.Nullable == other.Nullable;
             }
 
             public override bool Equals( object? obj )
@@ -691,7 +701,7 @@ After:
                 unchecked
                 {
                     var hashCode = base.GetHashCode();
-                    hashCode = (hashCode * 397) ^ EqualityComparer<TForField>.Default.GetHashCode( this.Field );
+                    hashCode = (hashCode * 397) ^ EqualityComparer<TForField>.Default.GetHashCode( this.Field! );
                     hashCode = (hashCode * 397) ^ this.Nullable.GetHashCode();
                     return hashCode;
                 }
@@ -704,7 +714,7 @@ After:
 
                 public override object CreateInstance( Type type, IArgumentsReader constructorArguments )
                 {
-                    return new ExplicitlySerializedClass<TForCtor, TForField>( constructorArguments.GetValue<TForCtor>( _valueKey ) );
+                    return new ExplicitlySerializedClass<TForCtor, TForField>( constructorArguments.GetValue<TForCtor>( _valueKey )! );
                 }
 
                 public override void SerializeObject( ExplicitlySerializedClass<TForCtor, TForField> obj, IArgumentsWriter constructorArguments, IArgumentsWriter initializationArguments )

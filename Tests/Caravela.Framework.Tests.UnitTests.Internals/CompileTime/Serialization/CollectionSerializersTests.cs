@@ -15,31 +15,66 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serialization
         [Fact]
         public void ListSerializer_Ints()
         {
+
+/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+Before:
             this.TestValue( new List<int> { 2, 10, 30, int.MinValue, int.MaxValue, -2, 0 } );
+After:
+            CollectionSerializersTests.TestValue( new List<int> { 2, 10, 30, int.MinValue, int.MaxValue, -2, 0 } );
+*/
+            TestValue( new List<int> { 2, 10, 30, int.MinValue, int.MaxValue, -2, 0 } );
         }
 
         [Fact]
         public void ListSerializer_Strings()
         {
+
+/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+Before:
             this.TestValue( new List<string?> { string.Empty, null, "text", string.Empty, "2" } );
+After:
+            CollectionSerializersTests.TestValue( new List<string?> { string.Empty, null, "text", string.Empty, "2" } );
+*/
+            TestValue( new List<string?> { string.Empty, null, "text", string.Empty, "2" } );
         }
 
         [Fact]
         public void ListSerializer_Classes()
         {
+
+/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+Before:
             this.TestValue( new List<SimpleType> { new SimpleType { Name = "X" }, new SimpleType { Name = "Y" } } );
+After:
+            CollectionSerializersTests.TestValue( new List<SimpleType> { new SimpleType { Name = "X" }, new SimpleType { Name = "Y" } } );
+*/
+            TestValue( new List<SimpleType> { new SimpleType { Name = "X" }, new SimpleType { Name = "Y" } } );
         }
 
         [Fact]
         public void DictionarySerializer_IntsWithInts()
         {
+
+/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+Before:
             this.TestValue( new Dictionary<int, int> { { 1, 1 }, { 2, 3 }, { 3, 5 }, { 4, 3 }, { 5, int.MinValue } } );
+After:
+            CollectionSerializersTests.TestValue( new Dictionary<int, int> { { 1, 1 }, { 2, 3 }, { 3, 5 }, { 4, 3 }, { 5, int.MinValue } } );
+*/
+            TestValue( new Dictionary<int, int> { { 1, 1 }, { 2, 3 }, { 3, 5 }, { 4, 3 }, { 5, int.MinValue } } );
         }
 
         [Fact]
         public void DictionarySerializer_StringsWithStrings()
         {
+
+/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+Before:
             this.TestValue(
+After:
+            CollectionSerializersTests.TestValue(
+*/
+            TestValue(
                 new Dictionary<string, string?>
                     { { "a", "xx uu " }, { "óó&#@!`", " " }, { "b", null }, { string.Empty, "it is empty" }, { "very long and unpredictable text", "" } } );
         }
@@ -53,7 +88,13 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serialization
                     { 2, new List<SimpleType> { new SimpleType { Name = "e" }, new SimpleType { Name = "r" }, new SimpleType { Name = "y" } } }
                 };
 
+/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+Before:
             var deserialized = this.SerializeDeserialize( dictionary );
+After:
+            var deserialized = SerializationTestsBase.SerializeDeserialize( dictionary );
+*/
+            var deserialized = SerializeDeserialize( dictionary );
 
             Assert.NotNull( deserialized );
             Assert.Equal( dictionary.Count, deserialized.Count );
@@ -67,9 +108,9 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serialization
         [Fact]
         public void DictionarySerializer_StringsWithArraysWithCycle()
         {
-            var a = new object[2];
-            var b = new object[2];
-            var dictionary = new Dictionary<string, object[]>( 2 );
+            var a = new object?[2];
+            var b = new object?[2];
+            var dictionary = new Dictionary<string, object?[]>( 2 );
 
             a[0] = new SimpleType { Name = "single" };
             a[1] = dictionary;
@@ -80,7 +121,13 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serialization
             dictionary["first"] = a;
             dictionary["second"] = b;
 
+/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+Before:
             var deserialized = this.SerializeDeserialize( dictionary );
+After:
+            var deserialized = SerializationTestsBase.SerializeDeserialize( dictionary );
+*/
+            var deserialized = SerializeDeserialize( dictionary );
 
             Assert.NotNull( deserialized );
             Assert.Equal( dictionary.Count, deserialized.Count );
@@ -99,7 +146,13 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serialization
                 ["second"] = "b"
             };
 
+/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+Before:
             var deserialized = this.SerializeDeserialize( dictionary );
+After:
+            var deserialized = SerializationTestsBase.SerializeDeserialize( dictionary );
+*/
+            var deserialized = SerializeDeserialize( dictionary );
 
             Assert.NotNull( deserialized );
             Assert.Equal( dictionary.Count, deserialized.Count );
@@ -118,7 +171,13 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serialization
                 ["second"] = "b"
             };
 
+/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+Before:
             var deserialized = this.SerializeDeserialize( dictionary );
+After:
+            var deserialized = SerializationTestsBase.SerializeDeserialize( dictionary );
+*/
+            var deserialized = SerializeDeserialize( dictionary );
 
             Assert.NotNull( deserialized );
             Assert.Equal( dictionary.Count, deserialized.Count );
@@ -140,10 +199,16 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serialization
             typeWithDictionary.Dictionary.Add( 2, "2" );
             typeWithDictionary.Dictionary.Add( 3, "3" );
 
+/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+Before:
             var deserialized = this.SerializeDeserialize( typeWithDictionary );
+After:
+            var deserialized = SerializationTestsBase.SerializeDeserialize( typeWithDictionary );
+*/
+            var deserialized = SerializeDeserialize( typeWithDictionary );
 
             Assert.NotNull( deserialized );
-            Assert.Equal( typeWithDictionary.Dictionary.Count, deserialized.Dictionary.Count );
+            Assert.Equal( typeWithDictionary.Dictionary.Count, deserialized!.Dictionary!.Count );
 
             Assert.Equal( typeWithDictionary.Dictionary.Keys, deserialized.Dictionary.Keys );
             Assert.Equal( typeWithDictionary.Dictionary.Values, deserialized.Dictionary.Values );
@@ -164,7 +229,13 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serialization
                 tail = tail.Next;
             }
 
+/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+Before:
             var deserialized = this.SerializeDeserialize( ll );
+After:
+            var deserialized = SerializationTestsBase.SerializeDeserialize( ll );
+*/
+            var deserialized = SerializeDeserialize( ll );
 
             tail = ll.Head;
             var deserializedTail = deserialized.Head;
@@ -173,14 +244,21 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serialization
             {
                 Assert.Equal( tail, deserializedTail );
                 tail = tail.Next;
-                deserializedTail = deserializedTail.Next;
+                deserializedTail = deserializedTail!.Next;
             }
         }
 
-        private void TestValue<T>( T value ) 
+        private static void TestValue<T>( T value ) 
             where T : ICollection
         {
+
+/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+Before:
             var deserialized = this.SerializeDeserialize( value );
+After:
+            var deserialized = SerializationTestsBase.SerializeDeserialize( value );
+*/
+            var deserialized = SerializeDeserialize( value );
 
             Assert.Equal( value, deserialized );
         }
@@ -264,7 +342,7 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serialization
                     return false;
                 }
 
-                return x.StartsWith( y[0].ToString(), StringComparison.Ordinal );
+                return x!.StartsWith( y![0].ToString(), StringComparison.Ordinal );
             }
 
             public int GetHashCode( string obj )
@@ -288,7 +366,7 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serialization
                 {
                 }
 
-                public void SerializeObject( object obj, IArgumentsWriter constructorArguments, IArgumentsWriter initializationArguments )
+                public void SerializeObject( object obj, IArgumentsWriter constructorArguments, IArgumentsWriter? initializationArguments )
                 {
                 }
 
@@ -300,7 +378,7 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serialization
         public class TypeWithDictionary<TKey, TValue>
             where TKey : notnull
         {
-            public Dictionary<TKey, TValue> Dictionary { get; set; }
+            public Dictionary<TKey, TValue>? Dictionary { get; set; }
         }
 
         public class Serializator<TKey, TValue> : ReferenceTypeSerializer<TypeWithDictionary<TKey, TValue>>
@@ -364,7 +442,7 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serialization
             {
                 public override object CreateInstance( Type type, IArgumentsReader constructorArguments )
                 {
-                    return new Node<T>( constructorArguments.GetValue<T>( "v" ) );
+                    return new Node<T>( constructorArguments.GetValue<T>( "v" )! );
                 }
 
                 public override void SerializeObject( Node<T> obj, IArgumentsWriter constructorArguments, IArgumentsWriter initializationArguments )

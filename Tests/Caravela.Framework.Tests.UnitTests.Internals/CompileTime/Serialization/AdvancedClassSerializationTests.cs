@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Impl;
 using Caravela.Framework.Impl.CompileTime.Serialization;
 using Caravela.Framework.Serialization;
 using System;
@@ -28,10 +29,10 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serialization
             var memoryStream = new MemoryStream();
             formatter.Serialize( mother, memoryStream );
             memoryStream.Seek( 0, SeekOrigin.Begin );
-            var deserializedObject = (Parent) formatter.Deserialize( memoryStream );
+            var deserializedObject = (Parent?) formatter.Deserialize( memoryStream );
 
-            Assert.Equal( mother.Name, deserializedObject.Name );
-            Assert.Equal( mother.Children.Length, deserializedObject.Children.Length );
+            Assert.Equal( mother.Name, deserializedObject!.Name );
+            Assert.Equal( mother.Children.Length, deserializedObject!.Children!.Length );
             Assert.Same( deserializedObject, deserializedObject.Children[0].Mother );
             Assert.Same( deserializedObject, deserializedObject.Children[1].Mother );
             Assert.Same( deserializedObject, deserializedObject.Children[2].Mother );
@@ -49,14 +50,14 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serialization
             var memoryStream = new MemoryStream();
             formatter.Serialize( brother, memoryStream );
             memoryStream.Seek( 0, SeekOrigin.Begin );
-            var deserializedObject = (Child) formatter.Deserialize( memoryStream );
+            var deserializedObject = (Child?) formatter.Deserialize( memoryStream );
 
             Assert.NotNull( deserializedObject );
-            Assert.Equal( brother.Name, deserializedObject.Name );
-            Assert.Equal( brother.Sibling.Length, deserializedObject.Sibling.Length );
-            Assert.Equal( sister.Sibling.Length, deserializedObject.Sibling[0].Sibling.Length );
+            Assert.Equal( brother.Name, deserializedObject!.Name );
+            Assert.Equal( brother.Sibling.Length, deserializedObject!.Sibling!.Length );
+            Assert.Equal( sister.Sibling.Length, deserializedObject!.Sibling![0]!.Sibling!.Length );
 
-            Assert.Same( deserializedObject, deserializedObject.Sibling[0].Sibling[0] );
+            Assert.Same( deserializedObject, deserializedObject!.Sibling![0]!.Sibling![0] );
         }
 
         [Fact]
@@ -74,17 +75,17 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serialization
             var memoryStream = new MemoryStream();
             formatter.Serialize( children, memoryStream );
             memoryStream.Seek( 0, SeekOrigin.Begin );
-            var deserializedObject = (Child[]) formatter.Deserialize( memoryStream );
+            var deserializedObject = (Child[]?) formatter.Deserialize( memoryStream );
 
             Assert.NotNull( deserializedObject );
-            Assert.Equal( children.Length, deserializedObject.Length );
+            Assert.Equal( children.Length, deserializedObject!.Length );
             Assert.Equal( children[0].Name, deserializedObject[0].Name );
             Assert.Equal( children[1].Name, deserializedObject[1].Name );
-            Assert.Equal( brother.Sibling.Length, deserializedObject[0].Sibling.Length );
-            Assert.Equal( sister.Sibling.Length, deserializedObject[1].Sibling.Length );
+            Assert.Equal( brother.Sibling.Length, deserializedObject![0]!.Sibling!.Length );
+            Assert.Equal( sister.Sibling.Length, deserializedObject![1]!.Sibling!.Length );
 
-            Assert.Same( deserializedObject[0], deserializedObject[1].Sibling[0] );
-            Assert.Same( deserializedObject[1], deserializedObject[0].Sibling[0] );
+            Assert.Same( deserializedObject[0], deserializedObject![1]!.Sibling![0] );
+            Assert.Same( deserializedObject[1], deserializedObject![0]!.Sibling![0] );
         }
 
         [Fact]
@@ -97,51 +98,51 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serialization
             var memoryStream = new MemoryStream();
             formatter.Serialize( spouse1, memoryStream );
             memoryStream.Seek( 0, SeekOrigin.Begin );
-            var deserializedObject = (Parent) formatter.Deserialize( memoryStream );
+            var deserializedObject = (Parent?) formatter.Deserialize( memoryStream );
 
             Assert.NotNull( deserializedObject );
-            Assert.NotNull( deserializedObject.Spouse );
-            Assert.Equal( spouse1.Name, deserializedObject.Name );
-            Assert.Equal( spouse1.Name, deserializedObject.Spouse.Name );
-            Assert.Same( deserializedObject, deserializedObject.Spouse );
+            Assert.NotNull( deserializedObject!.Spouse );
+            Assert.Equal( spouse1.Name, deserializedObject!.Name );
+            Assert.Equal( spouse1.Name, deserializedObject!.Spouse!.Name );
+            Assert.Same( deserializedObject, deserializedObject!.Spouse );
         }
 
         [MetaSerializer( typeof( Serializer ) )]
         public class Parent
         {
-            public string Name;
+            public string Name { get; }
 
-            public Parent Spouse { get; set; }
+            public Parent? Spouse { get; set; }
+
+            public Child[]? Children { get; set; }
 
             public Parent( string name )
             {
                 this.Name = name;
             }
 
-            public Child[] Children { get; set; }
-
             public class Serializer : ReferenceTypeSerializer<Parent>
             {
-                private const string childrenKey = "_ch";
-                private const string nameKey = "_";
-                private const string spouseKey = "_s";
+                private const string _childrenKey = "_ch";
+                private const string _nameKey = "_";
+                private const string _spouseKey = "_s";
 
                 public override object CreateInstance( Type type, IArgumentsReader constructorArguments )
                 {
-                    return new Parent( constructorArguments.GetValue<string>( nameKey ) );
+                    return new Parent( constructorArguments.GetValue<string>( _nameKey ).AssertNotNull() );
                 }
 
                 public override void SerializeObject( Parent obj, IArgumentsWriter constructorArguments, IArgumentsWriter initializationArguments )
                 {
-                    initializationArguments.SetValue( childrenKey, obj.Children );
-                    initializationArguments.SetValue( spouseKey, obj.Spouse );
-                    constructorArguments.SetValue( nameKey, obj.Name );
+                    initializationArguments.SetValue( _childrenKey, obj.Children );
+                    initializationArguments.SetValue( _spouseKey, obj.Spouse );
+                    constructorArguments.SetValue( _nameKey, obj.Name );
                 }
 
                 public override void DeserializeFields( Parent obj, IArgumentsReader initializationArguments )
                 {
-                    obj.Children = initializationArguments.GetValue<Child[]>( childrenKey );
-                    obj.Spouse = initializationArguments.GetValue<Parent>( spouseKey );
+                    obj.Children = initializationArguments.GetValue<Child[]>( _childrenKey );
+                    obj.Spouse = initializationArguments.GetValue<Parent>( _spouseKey );
                 }
             }
         }
@@ -190,11 +191,14 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serialization
         [MetaSerializer( typeof( Serializer ) )]
         public class IgnoringType
         {
+#pragma warning disable SA1401 // Fields should be private
 #pragma warning disable IDE0051 // Remove unused private members
             private const string _ignoredKey = "_n";
             private const string _importantKey = "_i";
 
-            [MetaNonSerialized] public string? NoMatter;
+            [MetaNonSerialized]
+            public string? NoMatter;
+#pragma warning restore SA1401 // Fields should be private
 #pragma warning restore IDE0051 // Remove unused private members
 
             public int ImportantValue { get; set; }
