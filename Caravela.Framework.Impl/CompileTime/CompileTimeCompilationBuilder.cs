@@ -180,15 +180,6 @@ namespace Caravela.Framework.Impl.CompileTime
             }
 
             compileTimeCompilation = compileTimeCompilation.AddSyntaxTrees( syntaxTrees.Select( t => t.TransformedTree ) );
-
-            // Adds MetaActivator type if there is any serializable type in the assembly.
-            if ( serializableTypes.Count > 0 )
-            {
-                var activatorCompilationUnit = produceCompileTimeCodeRewriter.MetaSerializerGenerator.CreateActivatorCompilationUnit();
-                var activatorTypeSyntaxTree = SyntaxFactory.SyntaxTree( activatorCompilationUnit.NormalizeWhitespace(), path: "MetaActivator.cs" );
-                compileTimeCompilation = compileTimeCompilation.AddSyntaxTrees( activatorTypeSyntaxTree );
-            }
-
             compileTimeCompilation = new RemoveInvalidUsingRewriter( compileTimeCompilation ).VisitTrees( compileTimeCompilation );
 
             if ( this._projectOptions is { FormatCompileTimeCode: true } && OutputCodeFormatter.CanFormat )

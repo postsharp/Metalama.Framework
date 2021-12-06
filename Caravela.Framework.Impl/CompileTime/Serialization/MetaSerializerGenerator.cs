@@ -9,7 +9,6 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.CompileTime.Serialization
@@ -91,85 +90,6 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
                         : null,
                     body,
                     null );
-        }
-
-        public CompilationUnitSyntax CreateActivatorCompilationUnit()
-        {
-            var createInstanceMethod =
-                this._context.ReflectionMapper.GetTypeSymbol( typeof(IMetaActivator) )
-                    .GetMembers()
-                    .OfType<IMethodSymbol>()
-                    .Single( x => x.Name == nameof(IMetaActivator.CreateInstance) );
-
-            Invariant.Assert( createInstanceMethod.Parameters.Length == 2 );
-
-            var body =
-                Block(
-                    IfStatement(
-                        BinaryExpression(
-                            SyntaxKind.EqualsExpression,
-                            IdentifierName( createInstanceMethod.Parameters[1].Name ),
-                            LiteralExpression( SyntaxKind.NullLiteralExpression ) ),
-                        Block(
-                            ThrowStatement(
-                                ObjectCreationExpression(
-                                    this._context.SyntaxGenerator.Type( this._context.ReflectionMapper.GetTypeSymbol( typeof(SecurityException) ) ),
-                                    ArgumentList( SeparatedList<ArgumentSyntax>() ),
-                                    null ) ) ) ),
-                    ReturnStatement(
-                        InvocationExpression(
-                            MemberAccessExpression(
-                                SyntaxKind.SimpleMemberAccessExpression,
-                                this._context.SyntaxGenerator.Type( this._context.ReflectionMapper.GetTypeSymbol( typeof(Activator) ) ),
-                                IdentifierName( nameof(Activator.CreateInstance) ) ),
-                            ArgumentList( SeparatedList( new[] { Argument( IdentifierName( createInstanceMethod.Parameters[0].Name ) ) } ) ) ) ) );
-
-            var method =
-                MethodDeclaration(
-                    List<AttributeListSyntax>(),
-                    TokenList( Token( SyntaxKind.PublicKeyword ) ),
-                    PredefinedType( Token( SyntaxKind.ObjectKeyword ) ),
-                    null,
-                    Identifier( createInstanceMethod.Name ),
-                    null,
-                    ParameterList(
-                        SeparatedList(
-                            new[]
-                            {
-                                Parameter( Identifier( createInstanceMethod.Parameters[0].Name ) )
-                                    .WithType( this._context.SyntaxGenerator.Type( createInstanceMethod.Parameters[0].Type ) ),
-                                Parameter( Identifier( createInstanceMethod.Parameters[1].Name ) )
-                                    .WithType( this._context.SyntaxGenerator.Type( createInstanceMethod.Parameters[1].Type ) )
-                            } ) ),
-                    List<TypeParameterConstraintClauseSyntax>(),
-                    body,
-                    null );
-
-            var typeDef = ClassDeclaration(
-                List<AttributeListSyntax>(),
-                TokenList( Token( SyntaxKind.PublicKeyword ) ),
-                Identifier( "MetaActivator" ),
-                null,
-                BaseList(
-                    Token( SyntaxKind.ColonToken ),
-                    SingletonSeparatedList<BaseTypeSyntax>(
-                        SimpleBaseType( this._context.SyntaxGenerator.Type( this._context.ReflectionMapper.GetTypeSymbol( typeof(IMetaActivator) ) ) ) ) ),
-                List<TypeParameterConstraintClauseSyntax>(),
-                List<MemberDeclarationSyntax>( new[] { method } ) );
-
-            return CompilationUnit(
-                List<ExternAliasDirectiveSyntax>(),
-                List<UsingDirectiveSyntax>(),
-                SingletonList(
-                    AttributeList(
-                        AttributeTargetSpecifier( Token( SyntaxKind.AssemblyKeyword ) ),
-                        SingletonSeparatedList(
-                            Attribute(
-                                (NameSyntax) this._context.SyntaxGenerator.Type(
-                                    this._context.ReflectionMapper.GetTypeSymbol( typeof(MetaActivatorTypeAttribute) ) ),
-                                AttributeArgumentList(
-                                    SingletonSeparatedList( AttributeArgument( TypeOfExpression( IdentifierName( "MetaActivator" ) ) ) ) ) ) ) ) ),
-                SingletonList<MemberDeclarationSyntax>( typeDef ) );
         }
 
         public TypeDeclarationSyntax CreateSerializerType( MetaSerializableTypeInfo serializableType )

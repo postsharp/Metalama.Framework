@@ -53,9 +53,9 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
 
         private static void CallOnSerialization( object obj )
         {
-            ISerializationCallback? callback;
+            IMetaSerializationCallback? callback;
 
-            if ( (callback = obj as ISerializationCallback) != null )
+            if ( (callback = obj as IMetaSerializationCallback) != null )
             {
                 callback.OnSerializing();
             }

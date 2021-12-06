@@ -12,8 +12,8 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
 {
     internal sealed class BuiltInSerializerFactoryProvider : MetaSerializerFactoryProvider
     {
-        public BuiltInSerializerFactoryProvider( ActivatorProvider activatorProvider )
-            : base( new ReflectionMetaSerializationProvider( activatorProvider ), activatorProvider )
+        public BuiltInSerializerFactoryProvider( )
+            : base( new ReflectionMetaSerializationProvider() )
         {
             // intrinsic types
             this.AddSerializer<bool, BooleanSerializer>();

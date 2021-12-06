@@ -5,7 +5,7 @@ using System;
 
 namespace Caravela.Framework.Impl.CompileTime.Serialization
 {
-    internal struct Integer
+    internal readonly struct Integer
     {
         public Integer( ulong absoluteValue, bool isNegative )
         {

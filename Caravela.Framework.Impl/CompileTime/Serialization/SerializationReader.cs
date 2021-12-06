@@ -48,16 +48,16 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
                 this.InitializeObject( instanceId );
             }
 
-            ISerializationCallback? callback;
+            IMetaSerializationCallback? callback;
 
-            if ( (callback = rootObject as ISerializationCallback) != null )
+            if ( (callback = rootObject as IMetaSerializationCallback) != null )
             {
                 callback.OnDeserialized();
             }
 
             foreach ( var obj in this._referenceTypeInstances.Values )
             {
-                if ( (callback = obj.Value.AssertNotNull().Value as ISerializationCallback) != null && !ReferenceEquals( callback, rootObject ) )
+                if ( (callback = obj.Value.AssertNotNull().Value as IMetaSerializationCallback) != null && !ReferenceEquals( callback, rootObject ) )
                 {
                     callback.OnDeserialized();
                 }

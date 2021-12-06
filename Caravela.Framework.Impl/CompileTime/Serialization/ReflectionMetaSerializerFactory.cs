@@ -9,14 +9,11 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
 {
     internal sealed class ReflectionMetaSerializerFactory : IMetaSerializerFactory
     {
-        private readonly ActivatorProvider? _activatorProvider;
-
         public Type SerializerType { get; }
 
-        public ReflectionMetaSerializerFactory( Type serializerType, ActivatorProvider? activatorProvider )
+        public ReflectionMetaSerializerFactory( Type serializerType )
         {
             this.SerializerType = serializerType;
-            this._activatorProvider = activatorProvider;
         }
 
         public IMetaSerializer CreateSerializer( Type objectType )
@@ -49,11 +46,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
                 serializerTypeInstance = this.SerializerType;
             }
 
-            var activator = this._activatorProvider?.GetActivator( serializerTypeInstance );
-
-            var instance = activator != null
-                ? activator.CreateInstance( serializerTypeInstance, MetaActivatorSecurityToken.Instance )
-                : Activator.CreateInstance( serializerTypeInstance );
+            var instance = Activator.CreateInstance( serializerTypeInstance );
 
             var serializer = instance as IMetaSerializer;
 

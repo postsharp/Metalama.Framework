@@ -181,7 +181,7 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serialization
         }
 
         [MetaSerializer( typeof(Serializer) )]
-        public class Child : Base, ISerializationCallback
+        public class Child : Base, IMetaSerializationCallback
         {
             public static int NSerialized { get; set; }
 

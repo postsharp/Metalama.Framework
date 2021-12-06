@@ -16,10 +16,9 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
         /// <summary>
         /// Gets the <see cref="MetaSerializerFactoryProvider"/> instance that supports built-in types.
         /// </summary>
-        public static readonly MetaSerializerFactoryProvider BuiltIn = new BuiltInSerializerFactoryProvider( new ActivatorProvider() );
+        public static readonly MetaSerializerFactoryProvider BuiltIn = new BuiltInSerializerFactoryProvider();
 
         private readonly Dictionary<Type, IMetaSerializerFactory> _serializerTypes = new( 64 );
-        private readonly ActivatorProvider _activatorProvider;
 
         private bool _isReadOnly;
 
@@ -44,9 +43,8 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
         /// </summary>
         /// <param name="nextProvider">The next provider in the chain, or <c>null</c> if there is none.</param>
         /// <param name="activatorProvider"></param>
-        public MetaSerializerFactoryProvider( IMetaSerializerFactoryProvider nextProvider, ActivatorProvider activatorProvider )
+        public MetaSerializerFactoryProvider( IMetaSerializerFactoryProvider nextProvider )
         {
-            this._activatorProvider = activatorProvider;
             this.NextProvider = nextProvider;
         }
 
@@ -78,7 +76,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
                 throw new ArgumentOutOfRangeException( nameof(serializerType), "Type '{0}' does not implement ISerializer or IGenericSerializerFactory" );
             }
 
-            this._serializerTypes.Add( objectType, new ReflectionMetaSerializerFactory( serializerType, this._activatorProvider ) );
+            this._serializerTypes.Add( objectType, new ReflectionMetaSerializerFactory( serializerType ) );
         }
 
         /// <inheritdoc />

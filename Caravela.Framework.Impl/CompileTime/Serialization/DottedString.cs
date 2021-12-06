@@ -9,7 +9,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
     /// Encapsulates dotted strings such as namespaces and type names, so their
     /// serialization by <see cref="MetaFormatter"/> can be optimized.
     /// </summary>
-    internal struct DottedString : IEquatable<DottedString>
+    internal readonly struct DottedString : IEquatable<DottedString>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="DottedString"/> struct.

@@ -16,12 +16,9 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
         private readonly Dictionary<Assembly, bool> _inspectedAssemblies = new();
         private readonly object _sync = new();
 
-        public ReflectionMetaSerializationProvider( ActivatorProvider activatorProvider )
+        public ReflectionMetaSerializationProvider()
         {
-            this.ActivatorProvider = activatorProvider;
         }
-
-        public ActivatorProvider ActivatorProvider { get; }
 
         public Type GetSurrogateType( Type objectType )
         {
@@ -46,7 +43,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
             }
         }
 
-        private void AddSerializer( Type objectType, Type serializerType, ActivatorProvider? activatorProvider )
+        private void AddSerializer( Type objectType, Type serializerType )
         {
             if ( this._serializerTypes.TryGetValue( objectType, out var existingSerializerType ) )
             {
@@ -67,7 +64,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
                 }
             }
 
-            this._serializerTypes.Add( objectType, new ReflectionMetaSerializerFactory( serializerType, activatorProvider ) );
+            this._serializerTypes.Add( objectType, new ReflectionMetaSerializerFactory( serializerType ) );
         }
 
         private void InspectType( Type type )
@@ -90,7 +87,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
                     if ( serializableAttribute != null && serializableAttribute.SerializerType != null )
                     {
                         hasSerializer = true;
-                        this.AddSerializer( type, serializableAttribute.SerializerType, this.ActivatorProvider );
+                        this.AddSerializer( type, serializableAttribute.SerializerType );
 
                         continue;
                     }
@@ -116,7 +113,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
 
                 if ( serializerType != null )
                 {
-                    this.AddSerializer( type, serializerType, this.ActivatorProvider );
+                    this.AddSerializer( type, serializerType );
                 }
             }
 
@@ -154,7 +151,7 @@ namespace Caravela.Framework.Impl.CompileTime.Serialization
         {
             if ( importSerializerAttribute.ObjectType != null && importSerializerAttribute.SerializerType != null )
             {
-                this.AddSerializer( importSerializerAttribute.ObjectType, importSerializerAttribute.SerializerType, null );
+                this.AddSerializer( importSerializerAttribute.ObjectType, importSerializerAttribute.SerializerType );
             }
         }
 
