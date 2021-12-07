@@ -48,8 +48,8 @@ namespace BuildCaravela
                     } ),
                 PublishingTargets = ImmutableArray.Create<PublishingTarget>( publicPublishing ),
                 Dependencies = ImmutableArray.Create(
-                    ProductVcsInfo.PostSharpEngineering,
-                    ProductVcsInfo.CaravelaCompiler )
+                    Dependencies.PostSharpEngineering,
+                    Dependencies.CaravelaCompiler )
             };
 
             var commandApp = new CommandApp();
