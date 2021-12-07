@@ -3,6 +3,7 @@
 
 using PostSharp.Engineering.BuildTools;
 using PostSharp.Engineering.BuildTools.Build.Model;
+using PostSharp.Engineering.BuildTools.Dependencies.Model;
 using Spectre.Console.Cli;
 using System.Collections.Immutable;
 
@@ -47,8 +48,8 @@ namespace BuildCaravela
                     } ),
                 PublishingTargets = ImmutableArray.Create<PublishingTarget>( publicPublishing ),
                 Dependencies = ImmutableArray.Create(
-                    new ProductDependency( "Caravela.Compiler" ),
-                    new ProductDependency( "PostSharp.Engineering" ) )
+                    ProductVcsInfo.PostSharpEngineering,
+                    ProductVcsInfo.CaravelaCompiler )
             };
 
             var commandApp = new CommandApp();
