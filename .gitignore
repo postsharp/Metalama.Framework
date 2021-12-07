@@ -50,3 +50,4 @@ launchSettings.json
 .idea/workspace.xml
 /eng/tools
 Caravela.Import.props
+/dependencies/
