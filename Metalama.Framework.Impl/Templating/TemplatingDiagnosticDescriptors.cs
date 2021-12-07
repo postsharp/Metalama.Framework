@@ -1,13 +1,13 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Code;
-using Caravela.Framework.Diagnostics;
+using Metalama.Framework.Code;
+using Metalama.Framework.Diagnostics;
 using Microsoft.CodeAnalysis;
 using System;
-using static Caravela.Framework.Diagnostics.Severity;
+using static Metalama.Framework.Diagnostics.Severity;
 
-namespace Caravela.Framework.Impl.Templating
+namespace Metalama.Framework.Impl.Templating
 {
 #pragma warning disable SA1118 // Allow multi-line parameters.
 
@@ -15,7 +15,7 @@ namespace Caravela.Framework.Impl.Templating
     {
         // Reserved range 100-199
 
-        private const string _category = "Caravela.Template";
+        private const string _category = "Metalama.Template";
 
         internal static readonly DiagnosticDefinition<(string Expression, string ParentExpression)>
             CannotReferenceRuntimeExpressionFromBuildTimeExpression
@@ -137,7 +137,7 @@ namespace Caravela.Framework.Impl.Templating
                 = new(
                     "CR0118",
                     "The compile-time type needs rebuild.",
-                    "The compile-time type '{0}' has been modified since the last build. Caravela will stop analyzing this solution until the "
+                    "The compile-time type '{0}' has been modified since the last build. Metalama will stop analyzing this solution until the "
                     + "next build and you may get errors related to the absence of generated source. "
                     + "To resume analysis, finish the work on all compile-time logic, then build the project (even if the run-time code still has issues).",
                     _category,
@@ -179,7 +179,7 @@ namespace Caravela.Framework.Impl.Templating
                     "CR0222",
                     "Error compiling the compile-time assembly.",
                     "The compile-time project could not be compiled. In most cases, this is due to a problem in your code and can be diagnosed " +
-                    "using the other reported errors. If, however, you believe this is due to a bug in Caravela, please report the issue and include diagnostic "
+                    "using the other reported errors. If, however, you believe this is due to a bug in Metalama, please report the issue and include diagnostic "
                     +
                     "information available in '{0}'.",
                     _category,

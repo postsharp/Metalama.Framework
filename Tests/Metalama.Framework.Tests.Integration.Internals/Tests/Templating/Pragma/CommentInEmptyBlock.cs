@@ -1,9 +1,9 @@
 #pragma warning disable CS0162 // Unreachable code detected
 
-using Caravela.Framework.Aspects;
-using Caravela.TestFramework;
+using Metalama.Framework.Aspects;
+using Metalama.TestFramework;
 
-namespace Caravela.Framework.Tests.Integration.Templating.Pragma.CommentInEmptyBlock
+namespace Metalama.Framework.Tests.Integration.Templating.Pragma.CommentInEmptyBlock
 {
     class Aspect
     {

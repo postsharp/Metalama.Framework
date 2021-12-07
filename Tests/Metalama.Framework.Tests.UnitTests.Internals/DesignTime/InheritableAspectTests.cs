@@ -1,16 +1,16 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Impl.DesignTime.Pipeline;
-using Caravela.Framework.Impl.Testing;
-using Caravela.TestFramework;
+using Metalama.Framework.Impl.DesignTime.Pipeline;
+using Metalama.Framework.Impl.Testing;
+using Metalama.TestFramework;
 using Microsoft.CodeAnalysis.CSharp;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using Xunit;
 
-namespace Caravela.Framework.Tests.UnitTests.DesignTime
+namespace Metalama.Framework.Tests.UnitTests.DesignTime
 {
     public class InheritableAspectTests : TestBase
     {
@@ -22,7 +22,7 @@ namespace Caravela.Framework.Tests.UnitTests.DesignTime
 
             // Initial compilation.
             var code1 = @"
-using Caravela.Framework.Aspects;
+using Metalama.Framework.Aspects;
 
 public class Aspect : TypeAspect
 {
@@ -50,7 +50,7 @@ public interface I {}
             using var domain = new UnloadableCompileTimeDomain();
 
             var aspectCode = @"
-using Caravela.Framework.Aspects;
+using Metalama.Framework.Aspects;
 
 public class Aspect : TypeAspect
 {
@@ -98,7 +98,7 @@ public class Aspect : TypeAspect
             using var factory = new TestDesignTimeAspectPipelineFactory( domain, options );
 
             var code1 = @"
-using Caravela.Framework.Aspects;
+using Metalama.Framework.Aspects;
 
 public class Aspect : TypeAspect
 {

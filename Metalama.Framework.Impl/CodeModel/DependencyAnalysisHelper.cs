@@ -6,7 +6,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
 
-namespace Caravela.Framework.Impl.CodeModel
+namespace Metalama.Framework.Impl.CodeModel
 {
     internal static class DependencyAnalysisHelper
     {

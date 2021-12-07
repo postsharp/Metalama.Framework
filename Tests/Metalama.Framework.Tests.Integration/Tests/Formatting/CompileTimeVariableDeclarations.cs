@@ -1,8 +1,8 @@
 ﻿using System;
-using Caravela.TestFramework;
-using Caravela.Framework.Aspects;
+using Metalama.TestFramework;
+using Metalama.Framework.Aspects;
 
-namespace Caravela.Framework.Tests.Integration.TestInputs.Highlighting.Declarations.CompileTimeVariableDeclarations
+namespace Metalama.Framework.Tests.Integration.TestInputs.Highlighting.Declarations.CompileTimeVariableDeclarations
 {
     [CompileTimeOnly]
     class CompileTimeClass

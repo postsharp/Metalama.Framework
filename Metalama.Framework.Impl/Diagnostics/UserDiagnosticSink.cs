@@ -1,19 +1,19 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Code;
-using Caravela.Framework.CodeFixes;
-using Caravela.Framework.Diagnostics;
-using Caravela.Framework.Impl.CodeModel;
-using Caravela.Framework.Impl.CompileTime;
-using Caravela.Framework.Impl.DesignTime.CodeFixes;
+using Metalama.Framework.Code;
+using Metalama.Framework.CodeFixes;
+using Metalama.Framework.Diagnostics;
+using Metalama.Framework.Impl.CodeModel;
+using Metalama.Framework.Impl.CompileTime;
+using Metalama.Framework.Impl.DesignTime.CodeFixes;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Text;
 
-namespace Caravela.Framework.Impl.Diagnostics
+namespace Metalama.Framework.Impl.Diagnostics
 {
     /// <summary>
     /// Implements the user-level <see cref="IDiagnosticSink"/> interface

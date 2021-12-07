@@ -4,7 +4,7 @@
 using System;
 using System.Collections.Immutable;
 
-namespace Caravela.Reactive
+namespace Metalama.Reactive
 {
     /// <summary>
     /// An immutable list of side values.

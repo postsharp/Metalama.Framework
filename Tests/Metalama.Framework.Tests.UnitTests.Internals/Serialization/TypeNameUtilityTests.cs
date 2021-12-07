@@ -1,14 +1,14 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Tests.UnitTests.Serialization.Assets;
+using Metalama.Framework.Tests.UnitTests.Serialization.Assets;
 using System;
 using System.Collections.Generic;
 using Xunit;
 
 // ReSharper disable BadListLineBreaks
 
-namespace Caravela.Framework.Tests.UnitTests.Serialization
+namespace Metalama.Framework.Tests.UnitTests.Serialization
 {
     // ReSharper disable UnusedTypeParameter
     // ReSharper disable ClassNeverInstantiated.Global
@@ -64,45 +64,45 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization
                 { "global::System.Int32[][][]", typeof(int[][][]) },
                 { "global::System.Int32[][][][]", typeof(int[][][][]) },
                 { "global::System.Int32[][][][][]", typeof(int[][][][][]) },
-                { "global::Caravela.Framework.Tests.UnitTests.Serialization.Assets.TestClass", typeof(TestClass) },
+                { "global::Metalama.Framework.Tests.UnitTests.Serialization.Assets.TestClass", typeof(TestClass) },
                 {
-                    "global::System.Collections.Generic.List<global::Caravela.Framework.Tests.UnitTests.Serialization.Assets.TestClass>",
+                    "global::System.Collections.Generic.List<global::Metalama.Framework.Tests.UnitTests.Serialization.Assets.TestClass>",
                     typeof(List<TestClass>)
                 },
                 {
-                    "global::System.Collections.Generic.Dictionary<global::Caravela.Framework.Tests.UnitTests.Serialization.Assets.TestClass,global::Caravela.Framework.Tests.UnitTests.Serialization.Assets.TestClass>",
+                    "global::System.Collections.Generic.Dictionary<global::Metalama.Framework.Tests.UnitTests.Serialization.Assets.TestClass,global::Metalama.Framework.Tests.UnitTests.Serialization.Assets.TestClass>",
                     typeof(Dictionary<TestClass, TestClass>)
                 },
                 {
-                    "global::System.Collections.Generic.Dictionary<global::System.String,global::Caravela.Framework.Tests.UnitTests.Serialization.Assets.TestClass>",
+                    "global::System.Collections.Generic.Dictionary<global::System.String,global::Metalama.Framework.Tests.UnitTests.Serialization.Assets.TestClass>",
                     typeof(Dictionary<string, TestClass>)
                 },
                 {
-                    "global::System.Collections.Generic.List<global::System.Collections.Generic.Dictionary<global::System.String,global::Caravela.Framework.Tests.UnitTests.Serialization.Assets.TestClass>>",
+                    "global::System.Collections.Generic.List<global::System.Collections.Generic.Dictionary<global::System.String,global::Metalama.Framework.Tests.UnitTests.Serialization.Assets.TestClass>>",
                     typeof(List<Dictionary<string, TestClass>>)
                 },
                 {
-                    "global::System.Collections.Generic.List<global::System.Collections.Generic.Dictionary<global::System.String,global::Caravela.Framework.Tests.UnitTests.Serialization.GenericTestClass<global::System.String>>>",
+                    "global::System.Collections.Generic.List<global::System.Collections.Generic.Dictionary<global::System.String,global::Metalama.Framework.Tests.UnitTests.Serialization.GenericTestClass<global::System.String>>>",
                     typeof(List<Dictionary<string, GenericTestClass<string>>>)
                 },
                 {
-                    "global::Caravela.Framework.Tests.UnitTests.Serialization.GenericTestClass<global::System.String>.SecondSubType<global::System.Decimal>",
+                    "global::Metalama.Framework.Tests.UnitTests.Serialization.GenericTestClass<global::System.String>.SecondSubType<global::System.Decimal>",
                     typeof(GenericTestClass<string>.SecondSubType<decimal>)
                 },
                 {
-                    "global::Caravela.Framework.Tests.UnitTests.Serialization.GenericTestClass<global::System.String>.SecondSubType",
+                    "global::Metalama.Framework.Tests.UnitTests.Serialization.GenericTestClass<global::System.String>.SecondSubType",
                     typeof(GenericTestClass<string>.SecondSubType)
                 },
                 {
-                    "global::Caravela.Framework.Tests.UnitTests.Serialization.GenericTestClass<global::System.String,global::System.Int32>.SecondSubType",
+                    "global::Metalama.Framework.Tests.UnitTests.Serialization.GenericTestClass<global::System.String,global::System.Int32>.SecondSubType",
                     typeof(GenericTestClass<string, int>.SecondSubType)
                 },
                 {
-                    "global::Caravela.Framework.Tests.UnitTests.Serialization.GenericTestClass<global::System.String,global::System.Collections.Generic.Dictionary<global::System.String,global::System.Int32>>.SecondSubType<global::System.String>",
+                    "global::Metalama.Framework.Tests.UnitTests.Serialization.GenericTestClass<global::System.String,global::System.Collections.Generic.Dictionary<global::System.String,global::System.Int32>>.SecondSubType<global::System.String>",
                     typeof(GenericTestClass<string, Dictionary<string, int>>.SecondSubType<string>)
                 },
                 {
-                    "global::Caravela.Framework.Tests.UnitTests.Serialization.GenericTestClass<global::System.String,global::System.Collections.Generic.Dictionary<global::System.String,global::System.Int32>>.SecondSubType<global::Caravela.Framework.Tests.UnitTests.Serialization.GenericTestClass<global::System.String,global::System.Collections.Generic.Dictionary<global::System.String,global::System.Int32>>>",
+                    "global::Metalama.Framework.Tests.UnitTests.Serialization.GenericTestClass<global::System.String,global::System.Collections.Generic.Dictionary<global::System.String,global::System.Int32>>.SecondSubType<global::Metalama.Framework.Tests.UnitTests.Serialization.GenericTestClass<global::System.String,global::System.Collections.Generic.Dictionary<global::System.String,global::System.Int32>>>",
                     typeof(GenericTestClass<string, Dictionary<string, int>>.SecondSubType<GenericTestClass<string, Dictionary<string, int>>>)
                 }
             };

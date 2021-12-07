@@ -1,7 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Impl.Utilities;
+using Metalama.Framework.Impl.Utilities;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -12,7 +12,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading;
 
-namespace Caravela.Framework.CompilerExtensions
+namespace Metalama.Framework.CompilerExtensions
 {
     /// <summary>
     /// Extract dependency assemblies packed as managed resources and provides instances of classes implemented by these dependencies.
@@ -26,10 +26,10 @@ namespace Caravela.Framework.CompilerExtensions
 
         private static string? _snapshotDirectory;
         private static volatile bool _initialized;
-        private static Assembly? _caravelaImplementationAssembly;
+        private static Assembly? _metalamaImplementationAssembly;
 
         /// <summary>
-        /// Creates an instance of a type of the <c>Caravela.Framework.Impl</c> assembly.
+        /// Creates an instance of a type of the <c>Metalama.Framework.Impl</c> assembly.
         /// </summary>
         public static object CreateInstance( string name )
         {
@@ -55,34 +55,34 @@ namespace Caravela.Framework.CompilerExtensions
                             ExtractEmbeddedAssemblies( currentAssembly );
 
                             // Load assemblies from the temp directory.
-                            AssemblyName? caravelaImplementationAssemblyName = null;
+                            AssemblyName? metalamaImplementationAssemblyName = null;
 
                             foreach ( var file in Directory.GetFiles( _snapshotDirectory, "*.dll" ) )
                             {
                                 // We don't load assemblies using Assembly.LoadFile here, because the assemblies may be loaded in
                                 // the main load context, or may be loaded later. We will use Assembly.LoadFile in last chance in the AssemblyResolve event.
-                                // This scenario is used in Caravela.Try.
+                                // This scenario is used in Metalama.Try.
 
                                 var assemblyName = AssemblyName.GetAssemblyName( file );
 
                                 // Index the assembly even if we did not load it ourselves.
                                 _embeddedAssemblies[assemblyName.Name] = (file, assemblyName);
 
-                                if ( assemblyName.Name == "Caravela.Framework.Impl" )
+                                if ( assemblyName.Name == "Metalama.Framework.Impl" )
                                 {
-                                    caravelaImplementationAssemblyName = assemblyName;
+                                    metalamaImplementationAssemblyName = assemblyName;
                                 }
                             }
 
                             // Attempt to use the main assembly in the default context. If it does not work, this will trigger an AssemblyResolve event.
-                            _caravelaImplementationAssembly = Assembly.Load( caravelaImplementationAssemblyName );
+                            _metalamaImplementationAssembly = Assembly.Load( metalamaImplementationAssemblyName );
 
                             _initialized = true;
                         }
                     }
                 }
 
-                var type = _caravelaImplementationAssembly!.GetType( name, true );
+                var type = _metalamaImplementationAssembly!.GetType( name, true );
 
                 return Activator.CreateInstance( type );
             }
@@ -123,7 +123,7 @@ namespace Caravela.Framework.CompilerExtensions
                 log.AppendLine( "----" );
 
                 // We cannot use MutexHelper because of dependencies on an embedded assembly.
-                using var extractMutex = new Mutex( false, "Global\\Caravela_Extract_" + AssemblyMetadataReader.BuildId );
+                using var extractMutex = new Mutex( false, "Global\\Metalama_Extract_" + AssemblyMetadataReader.BuildId );
                 extractMutex.WaitOne();
 
                 try

@@ -3,7 +3,7 @@
 
 using System.Diagnostics.CodeAnalysis;
 
-namespace Caravela.Reactive
+namespace Metalama.Reactive
 {
     /// <summary>
     /// Interface to be implemented by side values of reactive operators. Side values must be combinable.

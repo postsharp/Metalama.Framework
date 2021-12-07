@@ -8,7 +8,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 
-namespace Caravela.Framework.Impl
+namespace Metalama.Framework.Impl
 {
     [ExcludeFromCodeCoverage]
     public sealed class AssertionFailedException : Exception

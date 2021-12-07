@@ -1,8 +1,8 @@
-using Caravela.Framework.Code;
-using Caravela.TestFramework;
-using Caravela.Framework.Aspects;
+using Metalama.Framework.Code;
+using Metalama.TestFramework;
+using Metalama.Framework.Aspects;
 
-namespace Caravela.Framework.Tests.Integration.PatternMatching.PropertyPatternScopeMismatch
+namespace Metalama.Framework.Tests.Integration.PatternMatching.PropertyPatternScopeMismatch
 {
     class Aspect
     {

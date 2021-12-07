@@ -1,9 +1,9 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Code;
-using Caravela.Framework.Impl.Templating;
-using Caravela.Framework.Impl.Utilities;
+using Metalama.Framework.Code;
+using Metalama.Framework.Impl.Templating;
+using Metalama.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -16,9 +16,9 @@ using System.Linq;
 using System.Reflection;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 using SpecialType = Microsoft.CodeAnalysis.SpecialType;
-using VarianceKind = Caravela.Framework.Code.VarianceKind;
+using VarianceKind = Metalama.Framework.Code.VarianceKind;
 
-namespace Caravela.Framework.Impl.CodeModel
+namespace Metalama.Framework.Impl.CodeModel
 {
     internal partial class OurSyntaxGenerator
     {

@@ -1,11 +1,11 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Code;
-using Caravela.Framework.Diagnostics;
+using Metalama.Framework.Code;
+using Metalama.Framework.Diagnostics;
 using System;
 
-namespace Caravela.Framework.Aspects
+namespace Metalama.Framework.Aspects
 {
     /// <summary>
     /// An object used by the <see cref="IAspect{T}.BuildAspect"/> method of the aspect to provide advices, child

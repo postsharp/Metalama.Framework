@@ -1,13 +1,13 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Impl;
+using Metalama.Framework.Impl;
 using Microsoft.CodeAnalysis;
 using System.Collections;
 using System.Collections.Generic;
 using Xunit;
 
-namespace Caravela.Framework.Tests.UnitTests.Serialization
+namespace Metalama.Framework.Tests.UnitTests.Serialization
 {
     public class ListSerializerTests : SerializerTestsBase
     {

@@ -1,10 +1,10 @@
 // @Skipped
 
 using System;
-using Caravela.Framework.Aspects;
-using Caravela.TestFramework;
+using Metalama.Framework.Aspects;
+using Metalama.TestFramework;
 
-namespace Caravela.Framework.Tests.Integration.Templating.Syntax.ForTests.UseForVariableInCompileTimeExpresson
+namespace Metalama.Framework.Tests.Integration.Templating.Syntax.ForTests.UseForVariableInCompileTimeExpresson
 {
     [CompileTime]
     class Aspect

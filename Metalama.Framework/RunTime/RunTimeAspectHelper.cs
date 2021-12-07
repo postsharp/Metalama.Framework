@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 
 // ReSharper restore RedundantBlankLines, MissingBlankLines
 
-namespace Caravela.Framework.RunTime
+namespace Metalama.Framework.RunTime
 {
     /// <summary>
     /// Defines helper methods used by code transformed by aspects.

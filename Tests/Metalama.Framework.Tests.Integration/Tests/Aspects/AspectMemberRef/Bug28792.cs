@@ -1,10 +1,10 @@
 using System;
 using System.Linq;
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
 using Microsoft.Win32;
 
-namespace Caravela.Framework.Tests.Integration.Tests.Aspects.AspectMembersRef.Bug28792
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.AspectMembersRef.Bug28792
 {
     internal class RegistryStorageAttribute : TypeAspect
     {

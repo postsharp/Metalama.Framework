@@ -1,13 +1,13 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Aspects;
+using Metalama.Framework.Aspects;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 
-namespace Caravela.Framework.Impl.AspectOrdering
+namespace Metalama.Framework.Impl.AspectOrdering
 {
     internal class AspectOrderSpecification
     {

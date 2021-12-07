@@ -1,14 +1,14 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Impl.Utilities;
+using Metalama.Framework.Impl.Utilities;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 
-namespace Caravela.Framework.Impl.DesignTime.Diagnostics
+namespace Metalama.Framework.Impl.DesignTime.Diagnostics
 {
     /// <summary>
     /// A JSON-serializable file that contains user-defined diagnostic and suppression descriptors.

@@ -1,9 +1,9 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Impl.CodeModel;
-using Caravela.Framework.Impl.Utilities;
-using Caravela.Framework.Project;
+using Metalama.Framework.Impl.CodeModel;
+using Metalama.Framework.Impl.Utilities;
+using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -11,7 +11,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
 
-namespace Caravela.Framework.Impl.CompileTime
+namespace Metalama.Framework.Impl.CompileTime
 {
     /// <summary>
     /// Provides the <see cref="GetCompileTimeType"/> method, which maps a Roslyn <see cref="ITypeSymbol"/> to a reflection <see cref="Type"/>.

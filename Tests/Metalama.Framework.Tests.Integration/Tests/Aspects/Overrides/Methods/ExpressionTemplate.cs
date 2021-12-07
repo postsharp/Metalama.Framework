@@ -1,10 +1,10 @@
-﻿using Caravela.Framework.Aspects;
-using Caravela.TestFramework;
+﻿using Metalama.Framework.Aspects;
+using Metalama.TestFramework;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Caravela.Framework.Tests.Integration.Tests.Aspects.Overrides.Methods.ExpressionTemplate
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Overrides.Methods.ExpressionTemplate
 {
     internal class TestAttribute : OverrideMethodAspect
     {

@@ -3,7 +3,7 @@
 
 using System.Threading;
 
-namespace Caravela.Framework.TestApp.Test
+namespace Metalama.Framework.TestApp.Test
 {
     internal class Class1
     {

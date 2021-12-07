@@ -1,6 +1,6 @@
-using Caravela.Framework.Fabrics;
+using Metalama.Framework.Fabrics;
 
-namespace Caravela.Framework.Tests.Integration.Tests.Aspects.Fabrics.TransitiveProjectFabric
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Fabrics.TransitiveProjectFabric
 {
     public class  Fabric : ProjectFabric
     {

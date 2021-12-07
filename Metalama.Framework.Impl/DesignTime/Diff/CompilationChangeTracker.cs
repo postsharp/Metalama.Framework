@@ -1,7 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Impl.CompileTime;
+using Metalama.Framework.Impl.CompileTime;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -10,7 +10,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Threading;
 
-namespace Caravela.Framework.Impl.DesignTime.Diff
+namespace Metalama.Framework.Impl.DesignTime.Diff
 {
     /// <summary>
     /// Computes the changes between the last <see cref="Compilation"/> and a new one.
@@ -171,7 +171,7 @@ namespace Caravela.Framework.Impl.DesignTime.Diff
         }
 
         internal static bool IsGeneratedFile( SyntaxTree syntaxTree )
-            => syntaxTree.FilePath.StartsWith( "Caravela.Framework.CompilerExtensions", StringComparison.Ordinal );
+            => syntaxTree.FilePath.StartsWith( "Metalama.Framework.CompilerExtensions", StringComparison.Ordinal );
 
         private static CompileTimeChangeKind GetCompileTimeChangeKind( bool oldValue, bool newValue )
             => (oldValue, newValue) switch

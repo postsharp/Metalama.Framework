@@ -3,7 +3,7 @@
 
 using System;
 
-namespace Caravela.Framework.Eligibility.Implementation
+namespace Metalama.Framework.Eligibility.Implementation
 {
     internal class EligibilityRule<T> : IEligibilityRule<T>
     {

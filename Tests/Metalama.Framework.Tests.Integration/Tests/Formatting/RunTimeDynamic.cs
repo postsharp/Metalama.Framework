@@ -1,9 +1,9 @@
 using System;
-using Caravela.Framework.Aspects;
+using Metalama.Framework.Aspects;
 
 #pragma warning disable CS0067
 
-namespace Caravela.Framework.Tests.Integration.Tests.Formatting.RunTimeDynamic
+namespace Metalama.Framework.Tests.Integration.Tests.Formatting.RunTimeDynamic
 {
     class Aspect : OverrideMethodAspect
     {

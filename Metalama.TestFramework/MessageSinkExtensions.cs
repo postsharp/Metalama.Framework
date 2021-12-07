@@ -4,7 +4,7 @@
 using Xunit.Abstractions;
 using Xunit.Sdk;
 
-namespace Caravela.TestFramework
+namespace Metalama.TestFramework
 {
     internal static class MessageSinkExtensions
     {

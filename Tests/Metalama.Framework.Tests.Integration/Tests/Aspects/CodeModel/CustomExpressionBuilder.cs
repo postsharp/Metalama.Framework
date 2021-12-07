@@ -1,12 +1,12 @@
 using System;
 using System.Collections.Generic;
-using Caravela.Framework;
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
-using Caravela.Framework.Code.SyntaxBuilders;
-using IExpressionBuilder = Caravela.Framework.Code.SyntaxBuilders.IExpressionBuilder;
+using Metalama.Framework;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
+using Metalama.Framework.Code.SyntaxBuilders;
+using IExpressionBuilder = Metalama.Framework.Code.SyntaxBuilders.IExpressionBuilder;
 
-namespace Caravela.Framework.Tests.PublicPipeline.Aspects.CodeModel.CustomExpressionBuilder
+namespace Metalama.Framework.Tests.PublicPipeline.Aspects.CodeModel.CustomExpressionBuilder
 {
     class Aspect : OverrideMethodAspect
     {

@@ -1,13 +1,13 @@
 using System;
 using System.Collections.Generic;
-using Caravela.Framework;
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
-using Caravela.TestFramework;
+using Metalama.Framework;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
+using Metalama.TestFramework;
 
 #pragma warning disable CS8618
 
-namespace Caravela.Framework.Tests.InternalPipeline.Templating.Syntax.Invocation.RunTimeTargets
+namespace Metalama.Framework.Tests.InternalPipeline.Templating.Syntax.Invocation.RunTimeTargets
 {
     class Aspect : Attribute
     {

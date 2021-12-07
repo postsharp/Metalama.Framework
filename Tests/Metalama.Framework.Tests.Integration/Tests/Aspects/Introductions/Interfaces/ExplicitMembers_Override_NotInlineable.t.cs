@@ -1,12 +1,12 @@
 [Introduction]
     [Override]
-    public class TargetClass:global::Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.ExplicitMembers_Override_NotInlineable.IInterface    {
+    public class TargetClass:global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.ExplicitMembers_Override_NotInlineable.IInterface    {
 
 
 private global::System.Int32 _autoProperty;
 
 
-global::System.Int32 global::Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.ExplicitMembers_Override_NotInlineable.IInterface.AutoProperty
+global::System.Int32 global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.ExplicitMembers_Override_NotInlineable.IInterface.AutoProperty
 {get    {
         global::System.Console.WriteLine("This is overridden method.");
         _ = this.AutoProperty_Source;
@@ -44,7 +44,7 @@ set    {
     }
 }
 
-global::System.Int32 global::Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.ExplicitMembers_Override_NotInlineable.IInterface.Property
+global::System.Int32 global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.ExplicitMembers_Override_NotInlineable.IInterface.Property
 {get    {
         global::System.Console.WriteLine("This is overridden method.");
         _ = this.IInterface_Property_Introduction;
@@ -65,7 +65,7 @@ global::System.Int32 IInterface_InterfaceMethod_Introduction()
     return default(global::System.Int32);
 }
 
-global::System.Int32 global::Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.ExplicitMembers_Override_NotInlineable.IInterface.InterfaceMethod()
+global::System.Int32 global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.ExplicitMembers_Override_NotInlineable.IInterface.InterfaceMethod()
 {
     global::System.Console.WriteLine("This is overridden method.");
     _ = this.IInterface_InterfaceMethod_Introduction();
@@ -82,7 +82,7 @@ remove    {
     }
 }
 
-event global::System.EventHandler? global::Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.ExplicitMembers_Override_NotInlineable.IInterface.Event
+event global::System.EventHandler? global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.ExplicitMembers_Override_NotInlineable.IInterface.Event
 {add    {
         global::System.Console.WriteLine("This is overridden method.");
 this.IInterface_Event_Introduction+= value;
@@ -101,7 +101,7 @@ private global::System.EventHandler? _eventField;
 
 
 
-event global::System.EventHandler? global::Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.ExplicitMembers_Override_NotInlineable.IInterface.EventField
+event global::System.EventHandler? global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.ExplicitMembers_Override_NotInlineable.IInterface.EventField
 {add    {
         global::System.Console.WriteLine("This is overridden method.");
 this.EventField_Source+= value;

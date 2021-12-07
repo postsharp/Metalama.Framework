@@ -3,7 +3,7 @@
 
 using System.Reflection;
 
-namespace Caravela.Framework.Code
+namespace Metalama.Framework.Code
 {
     /// <summary>
     /// Represents a parameter of a method or property.

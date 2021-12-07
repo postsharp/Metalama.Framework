@@ -1,19 +1,19 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Code;
-using Caravela.Framework.Code.Collections;
-using Caravela.Framework.Code.DeclarationBuilders;
-using Caravela.Framework.Impl.Advices;
-using Caravela.Framework.Impl.CodeModel.References;
-using Caravela.Framework.Impl.Transformations;
-using Caravela.Framework.Metrics;
+using Metalama.Framework.Code;
+using Metalama.Framework.Code.Collections;
+using Metalama.Framework.Code.DeclarationBuilders;
+using Metalama.Framework.Impl.Advices;
+using Metalama.Framework.Impl.CodeModel.References;
+using Metalama.Framework.Impl.Transformations;
+using Metalama.Framework.Metrics;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 
-namespace Caravela.Framework.Impl.CodeModel.Builders
+namespace Metalama.Framework.Impl.CodeModel.Builders
 {
     /// <summary>
     /// Base class implementing <see cref="IDeclarationBuilder"/>. These classes are returned by introduction advices so the user can continue

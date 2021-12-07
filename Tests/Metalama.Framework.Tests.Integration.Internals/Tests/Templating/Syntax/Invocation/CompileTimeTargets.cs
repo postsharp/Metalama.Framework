@@ -1,12 +1,12 @@
 using System;
 using System.Collections.Generic;
-using Caravela.Framework;
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
-using Caravela.TestFramework;
+using Metalama.Framework;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
+using Metalama.TestFramework;
 
 
-namespace Caravela.Framework.Tests.InternalPipeline.Templating.Syntax.Invocation.CompileTimeTargets
+namespace Metalama.Framework.Tests.InternalPipeline.Templating.Syntax.Invocation.CompileTimeTargets
 {
     class Aspect : Attribute
     {

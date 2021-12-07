@@ -5,9 +5,9 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
-using Caravela.Reactive.Implementation;
+using Metalama.Reactive.Implementation;
 
-namespace Caravela.Reactive.Operators
+namespace Metalama.Reactive.Operators
 {
     internal class Group<TKey, TItem> : IReactiveGroup<TKey, TItem>, IReactiveObservable<IReactiveCollectionObserver<TItem>>
     {

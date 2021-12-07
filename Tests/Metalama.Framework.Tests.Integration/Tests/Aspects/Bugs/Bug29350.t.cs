@@ -1,7 +1,7 @@
 using System;
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
-using Caravela.Framework.Code.SyntaxBuilders;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
+using Metalama.Framework.Code.SyntaxBuilders;
 #pragma warning disable CS0067
 
 public class LogAttribute : OverrideMethodAspect

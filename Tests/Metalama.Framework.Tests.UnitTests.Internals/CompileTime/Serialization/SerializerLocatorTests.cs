@@ -1,9 +1,9 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Impl.CompileTime.Serialization;
-using Caravela.Framework.Serialization;
-using Caravela.Framework.Tests.UnitTests.CompileTime.Serialization;
+using Metalama.Framework.Impl.CompileTime.Serialization;
+using Metalama.Framework.Serialization;
+using Metalama.Framework.Tests.UnitTests.CompileTime.Serialization;
 using System;
 using Xunit;
 
@@ -12,7 +12,7 @@ using Xunit;
 // attribute added for testing purposes
 [assembly: ImportMetaSerializer( typeof(SerializerLocatorTests.TypeWoSerializer), typeof(SerializerLocatorTests.GenericSerializedClass<>.Serializer) )]
 
-namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serialization
+namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
 {
     public class SerializerLocatorTests
     {

@@ -1,15 +1,15 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Impl.Aspects;
-using Caravela.Framework.Impl.CodeModel;
-using Caravela.Framework.Impl.CompileTime;
-using Caravela.Framework.Impl.DesignTime.Diff;
-using Caravela.Framework.Impl.DesignTime.Refactoring;
-using Caravela.Framework.Impl.Diagnostics;
-using Caravela.Framework.Impl.Options;
-using Caravela.Framework.Impl.Pipeline;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Impl.Aspects;
+using Metalama.Framework.Impl.CodeModel;
+using Metalama.Framework.Impl.CompileTime;
+using Metalama.Framework.Impl.DesignTime.Diff;
+using Metalama.Framework.Impl.DesignTime.Refactoring;
+using Metalama.Framework.Impl.Diagnostics;
+using Metalama.Framework.Impl.Options;
+using Metalama.Framework.Impl.Pipeline;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Concurrent;
@@ -21,7 +21,7 @@ using System.Threading;
 
 // ReSharper disable InconsistentlySynchronizedField
 
-namespace Caravela.Framework.Impl.DesignTime.Pipeline
+namespace Metalama.Framework.Impl.DesignTime.Pipeline
 {
     /// <summary>
     /// Caches the <see cref="DesignTimeAspectPipeline"/> (so they can be reused between projects) and the
@@ -31,7 +31,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
     internal class DesignTimeAspectPipelineFactory : IDisposable, IInheritableAspectManifestProvider
     {
         // The project id is passed to a constant, because that's the only public way to push a property to a compilation.
-        public const string ProjectIdPreprocessorSymbolPrefix = "CaravelaProjectId_";
+        public const string ProjectIdPreprocessorSymbolPrefix = "MetalamaProjectId_";
 
         private readonly ConcurrentDictionary<string, DesignTimeAspectPipeline> _pipelinesByProjectId = new();
 

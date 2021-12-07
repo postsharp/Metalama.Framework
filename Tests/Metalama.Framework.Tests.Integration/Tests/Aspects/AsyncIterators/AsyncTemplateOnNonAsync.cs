@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
 
-namespace Caravela.Framework.Tests.Integration.Templating.Aspects.AsyncIterators.AsyncTemplateOnNonAsync
+namespace Metalama.Framework.Tests.Integration.Templating.Aspects.AsyncIterators.AsyncTemplateOnNonAsync
 {
     internal class Aspect : MethodAspect
     {

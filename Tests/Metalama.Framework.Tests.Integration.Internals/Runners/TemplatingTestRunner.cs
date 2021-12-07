@@ -1,20 +1,20 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Code;
-using Caravela.Framework.Impl;
-using Caravela.Framework.Impl.Advices;
-using Caravela.Framework.Impl.CodeModel;
-using Caravela.Framework.Impl.CompileTime;
-using Caravela.Framework.Impl.Diagnostics;
-using Caravela.Framework.Impl.Pipeline;
-using Caravela.Framework.Impl.Serialization;
-using Caravela.Framework.Impl.Templating;
-using Caravela.Framework.Impl.Templating.MetaModel;
-using Caravela.Framework.Impl.Utilities;
-using Caravela.Framework.Project;
-using Caravela.TestFramework;
-using Caravela.TestFramework.Utilities;
+using Metalama.Framework.Code;
+using Metalama.Framework.Impl;
+using Metalama.Framework.Impl.Advices;
+using Metalama.Framework.Impl.CodeModel;
+using Metalama.Framework.Impl.CompileTime;
+using Metalama.Framework.Impl.Diagnostics;
+using Metalama.Framework.Impl.Pipeline;
+using Metalama.Framework.Impl.Serialization;
+using Metalama.Framework.Impl.Templating;
+using Metalama.Framework.Impl.Templating.MetaModel;
+using Metalama.Framework.Impl.Utilities;
+using Metalama.Framework.Project;
+using Metalama.TestFramework;
+using Metalama.TestFramework.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -29,12 +29,12 @@ using System.Text;
 using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
-using RefKind = Caravela.Framework.Code.RefKind;
+using RefKind = Metalama.Framework.Code.RefKind;
 #if NET5_0_OR_GREATER
 using System.Runtime.Loader;
 #endif
 
-namespace Caravela.Framework.Tests.Integration.Runners
+namespace Metalama.Framework.Tests.Integration.Runners
 {
     /// <summary>
     /// Executes template integration tests by compiling and expanding a template method in the input source file.
@@ -167,7 +167,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
                 transformedTemplatePath,
                 Encoding.UTF8 );
 
-            // Compile the template. This would eventually need to be done by Caravela itself and not this test program.
+            // Compile the template. This would eventually need to be done by Metalama itself and not this test program.
             compileTimeCompilation = compileTimeCompilation.AddSyntaxTrees( newTransformedTemplateSyntaxTree );
 
             var buildTimeAssemblyStream = new MemoryStream();
@@ -266,8 +266,8 @@ namespace Caravela.Framework.Tests.Integration.Runners
             var templateInstance = Activator.CreateInstance( templateType )!;
 
             var targetType = assembly.GetTypes().Single( t => t.Name.Equals( "TargetCode", StringComparison.Ordinal ) );
-            var targetCaravelaType = compilation.Factory.GetTypeByReflectionName( targetType.FullName! );
-            var targetMethod = targetCaravelaType.Methods.Single( m => string.Equals( m.Name, "Method", StringComparison.Ordinal ) );
+            var targetMetalamaType = compilation.Factory.GetTypeByReflectionName( targetType.FullName! );
+            var targetMethod = targetMetalamaType.Methods.Single( m => string.Equals( m.Name, "Method", StringComparison.Ordinal ) );
 
             var diagnostics = new UserDiagnosticSink( targetMethod );
 

@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
-using Caravela.Framework.Eligibility;
-using Caravela.Framework.Policies;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
+using Metalama.Framework.Eligibility;
+using Metalama.Framework.Policies;
 
-namespace Caravela.Framework.TestApp.Aspects.Annotations
+namespace Metalama.Framework.TestApp.Aspects.Annotations
 {
     class CachedAttribute : OverrideMethodAspect
     {

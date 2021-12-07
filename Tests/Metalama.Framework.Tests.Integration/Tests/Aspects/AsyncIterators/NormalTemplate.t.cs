@@ -4,7 +4,7 @@ class TargetCode
         public async IAsyncEnumerable<int> AsyncEnumerable(int a)
 {
     global::System.Console.WriteLine("Before AsyncEnumerable");
-    var result = (await global::Caravela.Framework.RunTime.RunTimeAspectHelper.BufferAsync(this.AsyncEnumerable_Source(a)));
+    var result = (await global::Metalama.Framework.RunTime.RunTimeAspectHelper.BufferAsync(this.AsyncEnumerable_Source(a)));
     global::System.Console.WriteLine("After AsyncEnumerable");
     await foreach (var r in result)
     {
@@ -31,7 +31,7 @@ private async IAsyncEnumerable<int> AsyncEnumerable_Source(int a)
         public async IAsyncEnumerable<int> AsyncEnumerableCancellable(int a, [EnumeratorCancellation] CancellationToken token)
 {
     global::System.Console.WriteLine("Before AsyncEnumerableCancellable");
-    var result = (await global::Caravela.Framework.RunTime.RunTimeAspectHelper.BufferAsync(this.AsyncEnumerableCancellable_Source(a, token), token));
+    var result = (await global::Metalama.Framework.RunTime.RunTimeAspectHelper.BufferAsync(this.AsyncEnumerableCancellable_Source(a, token), token));
     global::System.Console.WriteLine("After AsyncEnumerableCancellable");
     await foreach (var r in result)
     {
@@ -58,7 +58,7 @@ private async IAsyncEnumerable<int> AsyncEnumerableCancellable_Source(int a, [En
         public async IAsyncEnumerator<int> AsyncEnumerator(int a)
 {
     global::System.Console.WriteLine("Before AsyncEnumerator");
-    var result = (await global::Caravela.Framework.RunTime.RunTimeAspectHelper.BufferAsync(this.AsyncEnumerator_Source(a)));
+    var result = (await global::Metalama.Framework.RunTime.RunTimeAspectHelper.BufferAsync(this.AsyncEnumerator_Source(a)));
     global::System.Console.WriteLine("After AsyncEnumerator");
     await using (result)
     {
@@ -88,7 +88,7 @@ private async IAsyncEnumerator<int> AsyncEnumerator_Source(int a)
         public async IAsyncEnumerator<int> AsyncEnumeratorCancellable(int a, CancellationToken token)
 {
     global::System.Console.WriteLine("Before AsyncEnumeratorCancellable");
-    var result = (await global::Caravela.Framework.RunTime.RunTimeAspectHelper.BufferAsync(this.AsyncEnumeratorCancellable_Source(a, token)));
+    var result = (await global::Metalama.Framework.RunTime.RunTimeAspectHelper.BufferAsync(this.AsyncEnumeratorCancellable_Source(a, token)));
     global::System.Console.WriteLine("After AsyncEnumeratorCancellable");
     await using (result)
     {

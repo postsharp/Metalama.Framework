@@ -1,12 +1,12 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Code;
-using Caravela.Framework.Impl.CodeModel;
-using Caravela.Framework.Metrics;
+using Metalama.Framework.Code;
+using Metalama.Framework.Impl.CodeModel;
+using Metalama.Framework.Metrics;
 using Microsoft.CodeAnalysis.CSharp;
 
-namespace Caravela.Framework.Impl.Metrics
+namespace Metalama.Framework.Impl.Metrics
 {
     /// <summary>
     /// An implementation of <see cref="IMetricProvider{T}"/> that is based on a <see cref="CSharpSyntaxVisitor"/>.

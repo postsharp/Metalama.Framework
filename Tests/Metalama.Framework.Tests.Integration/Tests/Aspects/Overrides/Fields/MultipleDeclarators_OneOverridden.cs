@@ -1,9 +1,9 @@
 using System;
 using System.Linq;
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
 
-namespace Caravela.Framework.IntegrationTests.Aspects.Overrides.Fields.MultipleDeclarators_OnePromoted
+namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Fields.MultipleDeclarators_OnePromoted
 {
     public class TestAttribute : TypeAspect
     {

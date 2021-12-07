@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
-using Caravela.Framework;
-using Caravela.Framework.Aspects;
-using Caravela.TestFramework;
+using Metalama.Framework;
+using Metalama.Framework.Aspects;
+using Metalama.TestFramework;
 
-namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Throw.ThrowCompileTimeExpression2
+namespace Metalama.Framework.Tests.Integration.Templating.Syntax.Throw.ThrowCompileTimeExpression2
 {
     class Aspect
     {

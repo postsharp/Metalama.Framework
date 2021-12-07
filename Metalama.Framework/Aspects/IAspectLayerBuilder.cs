@@ -1,15 +1,15 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Code;
-using Caravela.Framework.Diagnostics;
-using Caravela.Framework.Project;
-using Caravela.Framework.Validation;
+using Metalama.Framework.Code;
+using Metalama.Framework.Diagnostics;
+using Metalama.Framework.Project;
+using Metalama.Framework.Validation;
 using System;
 using System.Collections.Generic;
 using System.Threading;
 
-namespace Caravela.Framework.Aspects
+namespace Metalama.Framework.Aspects
 {
     /// <summary>
     /// An object used by the delegated passed to <see cref="IAspectBuilder{TAspectTarget}.SetAspectLayerBuildAction"/> method of the aspect to provide advices, child

@@ -1,14 +1,14 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Code.Collections;
-using Caravela.Framework.Project;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code.Collections;
+using Metalama.Framework.Project;
 using System;
 using System.Collections.Generic;
 
 // TODO: InternalImplement
-namespace Caravela.Framework.Code
+namespace Metalama.Framework.Code
 {
     /// <summary>
     /// Represents a set of types compiled together. See also <see cref="IProject"/>.
@@ -84,7 +84,7 @@ namespace Caravela.Framework.Code
         IEnumerable<INamedType> GetDerivedTypes( Type baseType, bool deep = true );
 
         /// <summary>
-        /// Gets the version of the current compilation in the Caravela pipeline. This number is only informational.
+        /// Gets the version of the current compilation in the Metalama pipeline. This number is only informational.
         /// </summary>
         int Revision { get; }
     }

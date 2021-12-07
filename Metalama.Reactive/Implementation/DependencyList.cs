@@ -5,7 +5,7 @@ using System;
 using System.Diagnostics;
 using System.Threading;
 
-namespace Caravela.Reactive.Implementation
+namespace Metalama.Reactive.Implementation
 {
     /// <summary>
     /// Implementation of <see cref="IReactiveCollector"/>. This is a mutable struct! Don't make it a property

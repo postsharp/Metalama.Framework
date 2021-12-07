@@ -1,11 +1,11 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Aspects;
+using Metalama.Framework.Aspects;
 
 #pragma warning disable SA1623
 
-namespace Caravela.Framework.Code
+namespace Metalama.Framework.Code
 {
     /// <summary>
     /// Defines the formatting options of <see cref="IDisplayable.ToDisplayString"/>. Only well-known instances of this classes,

@@ -1,11 +1,11 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.TestFramework;
+using Metalama.TestFramework;
 using System;
 using Xunit;
 
-namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serializers
+namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serializers
 {
     public class InheritanceTests : MetaSerializerTestBase
     {
@@ -15,8 +15,8 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serializers
             // Verifies that IMetaSerializable compile-time type with explicit parameterless constructor can be serialized and deserialized.
             // Generator should not inject parameterless constructor when it is already defined.
             var code = @"
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Serialization;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Serialization;
 [assembly: CompileTime]
 public class A : IMetaSerializable
 {
@@ -31,7 +31,7 @@ public class B : A
             using var domain = new UnloadableCompileTimeDomain();
             using var testContext = this.CreateTestContext();
 
-/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             var project = this.CreateCompileTimeProject( domain, testContext, code );
 After:

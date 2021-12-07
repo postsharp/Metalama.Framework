@@ -8,19 +8,19 @@ using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Caravela.Framework.DesignTime.Contracts
+namespace Metalama.Framework.DesignTime.Contracts
 {
     /// <summary>
     /// Exposes a global connection point between compiler assemblies, included in NuGet packages and loaded by Roslyn,
     /// and the UI assemblies, included in the VSX and loaded by Visual Studio. Compiler assemblies register
     /// themselves using <see cref="IDesignTimeEntryPointManager.RegisterServiceProvider"/> and UI assemblies get the
     /// interface using <see cref="IDesignTimeEntryPointManager.GetServiceProviderAsync"/>.
-    /// Since VS session can contain projects with several versions of Caravela, this class has the responsibility
+    /// Since VS session can contain projects with several versions of Metalama, this class has the responsibility
     /// to match versions.
     /// </summary>
     public class DesignTimeEntryPointManager : IDesignTimeEntryPointManager
     {
-        private const string _appDomainDataName = "Caravela.Framework.DesignTime.Contracts.DesignTimeEntryPointManager";
+        private const string _appDomainDataName = "Metalama.Framework.DesignTime.Contracts.DesignTimeEntryPointManager";
 
         private readonly ConcurrentDictionary<Version, Task<ICompilerServiceProvider>> _getProviderTasks = new();
 

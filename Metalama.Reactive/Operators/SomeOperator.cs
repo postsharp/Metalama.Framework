@@ -4,9 +4,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Caravela.Reactive.Implementation;
+using Metalama.Reactive.Implementation;
 
-namespace Caravela.Reactive.Operators
+namespace Metalama.Reactive.Operators
 {
     internal class SomeOperator<T> : ReactiveOperator<IEnumerable<T>, IReactiveCollectionObserver<T>, T, IReactiveObserver<T>>, IReactiveCollectionObserver<T>
     {

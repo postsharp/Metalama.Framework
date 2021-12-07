@@ -1,12 +1,12 @@
 using System;
 using System.Linq;
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
-using Caravela.Framework.Tests.Integration.Aspects.Initialize.AddChildAspect;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
+using Metalama.Framework.Tests.Integration.Aspects.Initialize.AddChildAspect;
 
 [assembly: AspectOrder( typeof(Aspect2), typeof(Aspect1) )]
 
-namespace Caravela.Framework.Tests.Integration.Aspects.Initialize.AddChildAspect
+namespace Metalama.Framework.Tests.Integration.Aspects.Initialize.AddChildAspect
 {
     internal class Aspect1 : TypeAspect
     {

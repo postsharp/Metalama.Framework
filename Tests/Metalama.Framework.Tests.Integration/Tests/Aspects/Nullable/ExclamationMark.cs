@@ -1,6 +1,6 @@
-using Caravela.Framework.Aspects;
+using Metalama.Framework.Aspects;
 
-namespace Caravela.Framework.Tests.PublicPipeline.Aspects.Nullable.ExclamationMark
+namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Nullable.ExclamationMark
 {
     internal class Aspect : TypeAspect
     {

@@ -3,7 +3,7 @@
 
 using System;
 
-namespace Caravela.Framework.Impl.Utilities
+namespace Metalama.Framework.Impl.Utilities
 {
     [AttributeUsage( AttributeTargets.Property )]
     public class MemoAttribute : Attribute { }

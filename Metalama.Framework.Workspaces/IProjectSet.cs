@@ -1,11 +1,11 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Code;
+using Metalama.Framework.Code;
 using System;
 using System.Collections.Immutable;
 
-namespace Caravela.Framework.Workspaces
+namespace Metalama.Framework.Workspaces
 {
     /// <summary>
     /// Represents a set of projects. An <see cref="IProjectSet"/> can include several instances of the <see cref="Project"/>
@@ -61,7 +61,7 @@ namespace Caravela.Framework.Workspaces
 
         /// <summary>
         /// Gets all diagnostics reported in the projects in the current <see cref="ProjectSet"/>. Note that the diagnostics reported
-        /// by Caravela are not yet included in this set.
+        /// by Metalama are not yet included in this set.
         /// </summary>
         ImmutableArray<IDiagnostic> Diagnostics { get; }
 

@@ -1,11 +1,11 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Code.Types;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code.Types;
 using System;
 
-namespace Caravela.Framework.Code
+namespace Metalama.Framework.Code
 {
     /// <summary>
     /// Allows to get instances of the <see cref="IType"/> interface or to test for type equality or inheritance.
@@ -24,7 +24,7 @@ namespace Caravela.Framework.Code
         /// For generic type definitions, this requires using <c>`</c>, e.g. to get <c>List&lt;T&gt;</c>, use <c>System.Collections.Generic.List`1</c>.
         /// </para>
         /// <para>
-        /// Constructed generic types (e.g. <c>List&lt;int&gt;</c>) are not supported, for those, use <see cref="GenericExtensions.ConstructGenericInstance(Caravela.Framework.Code.INamedType,Caravela.Framework.Code.IType[])"/>.
+        /// Constructed generic types (e.g. <c>List&lt;int&gt;</c>) are not supported, for those, use <see cref="GenericExtensions.ConstructGenericInstance(Metalama.Framework.Code.INamedType,Metalama.Framework.Code.IType[])"/>.
         /// </para>
         /// </remarks>
         INamedType GetTypeByReflectionName( string reflectionName );

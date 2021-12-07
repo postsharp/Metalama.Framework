@@ -1,13 +1,13 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.TestFramework.XunitFramework;
+using Metalama.TestFramework.XunitFramework;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using Xunit.Abstractions;
 
-namespace Caravela.TestFramework
+namespace Metalama.TestFramework
 {
     [ExcludeFromCodeCoverage]
     internal class AspectTestFrameworkVsImpl : ITestFramework, ISourceInformationProvider

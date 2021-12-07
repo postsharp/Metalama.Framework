@@ -1,5 +1,5 @@
 ﻿<!-- ReSharper disable once Xaml.PathError -->
-<Application x:Class="Caravela.AspectWorkbench.App"
+<Application x:Class="Metalama.AspectWorkbench.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              StartupUri="Views/MainWindow.xaml">

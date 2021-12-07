@@ -1,11 +1,11 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Code.Types;
+using Metalama.Framework.Code.Types;
 using Microsoft.CodeAnalysis;
-using TypeKind = Caravela.Framework.Code.TypeKind;
+using TypeKind = Metalama.Framework.Code.TypeKind;
 
-namespace Caravela.Framework.Impl.CodeModel
+namespace Metalama.Framework.Impl.CodeModel
 {
     internal class DynamicType : RoslynType<IDynamicTypeSymbol>, IDynamicType
     {

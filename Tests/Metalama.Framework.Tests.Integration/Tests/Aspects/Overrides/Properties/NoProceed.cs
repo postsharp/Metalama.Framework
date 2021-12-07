@@ -1,9 +1,9 @@
 ﻿using System;
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
-using Caravela.Framework.Eligibility;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
+using Metalama.Framework.Eligibility;
 
-namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.NoProceed
+namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.NoProceed
 {
     [AttributeUsage( AttributeTargets.Property, AllowMultiple = true )]
     public class OverrideAttribute : Attribute, IAspect<IProperty>

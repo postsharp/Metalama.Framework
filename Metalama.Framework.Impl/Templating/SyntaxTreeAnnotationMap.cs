@@ -12,7 +12,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 
-namespace Caravela.Framework.Impl.Templating
+namespace Metalama.Framework.Impl.Templating
 {
     /// <summary>
     /// Caches the <see cref="SemanticModel"/> of a syntax tree annotations (<see cref="SyntaxAnnotation"/>)

@@ -10,7 +10,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 #pragma warning disable SA1414 // Tuples should have element names.
 
-namespace Caravela.Framework.Impl.Serialization
+namespace Metalama.Framework.Impl.Serialization
 {
     internal abstract class ValueTupleSerializer : ObjectSerializer
     {

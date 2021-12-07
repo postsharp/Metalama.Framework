@@ -6,7 +6,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Threading;
 
-namespace Caravela.Framework.Impl.CompileTime
+namespace Metalama.Framework.Impl.CompileTime
 {
     internal partial class CompileTimeCompilationBuilder
     {

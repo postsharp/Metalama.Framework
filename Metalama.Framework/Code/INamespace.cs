@@ -1,9 +1,9 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Code.Collections;
+using Metalama.Framework.Code.Collections;
 
-namespace Caravela.Framework.Code
+namespace Metalama.Framework.Code
 {
     /// <summary>
     /// Represents a namespace inside the current compilation. Note that you cannot get the <see cref="INamespace"/>

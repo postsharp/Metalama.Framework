@@ -3,7 +3,7 @@
 
 using Microsoft.CodeAnalysis;
 
-namespace Caravela.Framework.CompilerExtensions
+namespace Metalama.Framework.CompilerExtensions
 {
     // ReSharper disable UnusedType.Global
 
@@ -14,7 +14,7 @@ namespace Caravela.Framework.CompilerExtensions
 
         public FacadeSourceGenerator()
         {
-            this._impl = (ISourceGenerator) ResourceExtractor.CreateInstance( "Caravela.Framework.Impl.DesignTime.DesignTimeSourceGenerator" );
+            this._impl = (ISourceGenerator) ResourceExtractor.CreateInstance( "Metalama.Framework.Impl.DesignTime.DesignTimeSourceGenerator" );
         }
 
         void ISourceGenerator.Execute( GeneratorExecutionContext context ) => this._impl.Execute( context );

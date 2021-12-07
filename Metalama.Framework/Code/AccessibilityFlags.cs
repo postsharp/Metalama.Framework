@@ -3,7 +3,7 @@
 
 using System;
 
-namespace Caravela.Framework.Code
+namespace Metalama.Framework.Code
 {
     [Flags]
     internal enum AccessibilityFlags

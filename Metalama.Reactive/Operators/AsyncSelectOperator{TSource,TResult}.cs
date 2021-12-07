@@ -6,9 +6,9 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Threading;
 using System.Threading.Tasks;
-using Caravela.Reactive.Implementation;
+using Metalama.Reactive.Implementation;
 
-namespace Caravela.Reactive.Operators
+namespace Metalama.Reactive.Operators
 {
     internal class AsyncSelectOperator<TSource, TResult> : AsyncReactiveCollectionOperator<TSource, TResult>
     {

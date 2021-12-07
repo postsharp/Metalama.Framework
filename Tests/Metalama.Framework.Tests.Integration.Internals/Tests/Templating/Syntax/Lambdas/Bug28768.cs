@@ -1,12 +1,12 @@
 using System;
 using System.Linq;
 using System.Collections.Generic;
-using Caravela.Framework;
-using Caravela.TestFramework;
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
+using Metalama.Framework;
+using Metalama.TestFramework;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
 
-namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Lambdas.Bug28768
+namespace Metalama.Framework.Tests.Integration.Templating.Syntax.Lambdas.Bug28768
 {
     class Aspect
     {

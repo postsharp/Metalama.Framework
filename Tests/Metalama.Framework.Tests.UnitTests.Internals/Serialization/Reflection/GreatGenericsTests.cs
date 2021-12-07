@@ -1,9 +1,9 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Code;
-using Caravela.Framework.Impl.CodeModel;
-using Caravela.Framework.Impl.ReflectionMocks;
+using Metalama.Framework.Code;
+using Metalama.Framework.Impl.CodeModel;
+using Metalama.Framework.Impl.ReflectionMocks;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,7 +14,7 @@ using Xunit.Abstractions;
 // ReSharper disable RedundantTypeArgumentsOfMethod
 // ReSharper disable ParameterOnlyUsedForPreconditionCheck.Local
 
-namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
+namespace Metalama.Framework.Tests.UnitTests.Serialization.Reflection
 {
     public class GreatGenericsTests : ReflectionTestBase
     {
@@ -65,7 +65,7 @@ class User {
                     Assert.Equal( "T2", m.ReturnType.Name );
                     Assert.Equal( "T1", m.GetParameters()[0].ParameterType.Name );
                 },
-                @"((global::System.Reflection.MethodInfo)global::System.Reflection.MethodBase.GetMethodFromHandle(global::Caravela.Compiler.Intrinsics.GetRuntimeMethodHandle(""M:Origin`1.NestedInOrigin`1.Method21(`0)~`1""), typeof(global::Origin<>.NestedInOrigin<>).TypeHandle))" );
+                @"((global::System.Reflection.MethodInfo)global::System.Reflection.MethodBase.GetMethodFromHandle(global::Metalama.Compiler.Intrinsics.GetRuntimeMethodHandle(""M:Origin`1.NestedInOrigin`1.Method21(`0)~`1""), typeof(global::Origin<>.NestedInOrigin<>).TypeHandle))" );
 
             this.TestSerializable(
                 descendant.BaseType!.Method( "Method21" ),
@@ -74,7 +74,7 @@ class User {
                     Assert.Equal( "T3", m.ReturnType.Name );
                     Assert.Equal( "String", m.GetParameters()[0].ParameterType.Name );
                 },
-                @"((global::System.Reflection.MethodInfo)global::System.Reflection.MethodBase.GetMethodFromHandle(global::Caravela.Compiler.Intrinsics.GetRuntimeMethodHandle(""M:Origin`1.NestedInOrigin`1.Method21(`0)~`1""), typeof(global::Origin<>.NestedInOrigin<>).TypeHandle))" );
+                @"((global::System.Reflection.MethodInfo)global::System.Reflection.MethodBase.GetMethodFromHandle(global::Metalama.Compiler.Intrinsics.GetRuntimeMethodHandle(""M:Origin`1.NestedInOrigin`1.Method21(`0)~`1""), typeof(global::Origin<>.NestedInOrigin<>).TypeHandle))" );
         }
 
         [Fact]
@@ -93,7 +93,7 @@ class User {
                     Assert.Equal( typeof(float), m.ReturnType );
                     Assert.Equal( typeof(string), m.GetParameters()[0].ParameterType );
                 },
-                @"((global::System.Reflection.MethodInfo)global::System.Reflection.MethodBase.GetMethodFromHandle(global::Caravela.Compiler.Intrinsics.GetRuntimeMethodHandle(""M:Origin`1.NestedInOrigin`1.Method21(`0)~`1""), typeof(global::Origin<global::System.String>.NestedInOrigin<global::System.Single>).TypeHandle))" );
+                @"((global::System.Reflection.MethodInfo)global::System.Reflection.MethodBase.GetMethodFromHandle(global::Metalama.Compiler.Intrinsics.GetRuntimeMethodHandle(""M:Origin`1.NestedInOrigin`1.Method21(`0)~`1""), typeof(global::Origin<global::System.String>.NestedInOrigin<global::System.Single>).TypeHandle))" );
 
             this.TestSerializable(
                 instantiatedNested.Constructors.Single(),
@@ -103,12 +103,12 @@ class User {
                     Assert.Equal( typeof(float), c.DeclaringType.GenericTypeArguments[1] );
                     Assert.Equal( typeof(int), c.DeclaringType.BaseType!.GenericTypeArguments[0] );
                 },
-                @"((global::System.Reflection.ConstructorInfo)global::System.Reflection.MethodBase.GetMethodFromHandle(global::Caravela.Compiler.Intrinsics.GetRuntimeMethodHandle(""M:Origin`1.NestedInOrigin`1.#ctor""), typeof(global::Origin<global::System.String>.NestedInOrigin<global::System.Single>).TypeHandle))" );
+                @"((global::System.Reflection.ConstructorInfo)global::System.Reflection.MethodBase.GetMethodFromHandle(global::Metalama.Compiler.Intrinsics.GetRuntimeMethodHandle(""M:Origin`1.NestedInOrigin`1.#ctor""), typeof(global::Origin<global::System.String>.NestedInOrigin<global::System.Single>).TypeHandle))" );
 
             this.TestSerializable(
                 ((INamedType) instantiatedNested.ContainingDeclaration!).Method( "Method" ),
                 m => Assert.Equal( typeof(string), m.ReturnType ),
-                @"((global::System.Reflection.MethodInfo)global::System.Reflection.MethodBase.GetMethodFromHandle(global::Caravela.Compiler.Intrinsics.GetRuntimeMethodHandle(""M:Origin`1.Method(`0)~`0""), typeof(global::Origin<global::System.String>).TypeHandle))" );
+                @"((global::System.Reflection.MethodInfo)global::System.Reflection.MethodBase.GetMethodFromHandle(global::Metalama.Compiler.Intrinsics.GetRuntimeMethodHandle(""M:Origin`1.Method(`0)~`0""), typeof(global::Origin<global::System.String>).TypeHandle))" );
 
             this.TestSerializable(
                 instantiatedDescendant.Field( "Field" ),
@@ -197,7 +197,7 @@ class User {
 
             this.TestExpression<T>(
                 compilation.RoslynCompilation.SyntaxTrees.First().ToString(),
-                CaravelaPropertyInfoTests.StripLocationInfo( testContext.Serialize( CompileTimeFieldOrPropertyInfo.Create( property ) ).ToString() ),
+                MetalamaPropertyInfoTests.StripLocationInfo( testContext.Serialize( CompileTimeFieldOrPropertyInfo.Create( property ) ).ToString() ),
                 withResult,
                 expectedCode );
         }

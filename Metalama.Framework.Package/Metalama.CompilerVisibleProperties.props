@@ -1,24 +1,24 @@
 <Project>
     <PropertyGroup>
-        <CaravelaCompilerVisiblePropertiesTargetsImported>True</CaravelaCompilerVisiblePropertiesTargetsImported>
+        <MetalamaCompilerVisiblePropertiesTargetsImported>True</MetalamaCompilerVisiblePropertiesTargetsImported>
     </PropertyGroup>
     <!-- Exports the properties to the compiler -->
     <ItemGroup>
-        <CompilerVisibleProperty Include="DebugCaravela" />
-        <CompilerVisibleProperty Include="DebugCaravelaAnalyzer" />
-        <CompilerVisibleProperty Include="DebugCaravelaIde" />
-        <CompilerVisibleProperty Include="CaravelaProjectId" />
-        <CompilerVisibleProperty Include="CaravelaBuildTouchFile" />
-        <CompilerVisibleProperty Include="CaravelaEnabled" />
-        <CompilerVisibleProperty Include="CaravelaFormatOutput" />
-        <CompilerVisibleProperty Include="CaravelaFormatCompileTimeCode" />
-        <CompilerVisibleProperty Include="CaravelaUserCodeTrusted" />
-        <CompilerVisibleProperty Include="CaravelaCompileTimeOnlyProject" />
+        <CompilerVisibleProperty Include="DebugMetalama" />
+        <CompilerVisibleProperty Include="DebugMetalamaAnalyzer" />
+        <CompilerVisibleProperty Include="DebugMetalamaIde" />
+        <CompilerVisibleProperty Include="MetalamaProjectId" />
+        <CompilerVisibleProperty Include="MetalamaBuildTouchFile" />
+        <CompilerVisibleProperty Include="MetalamaEnabled" />
+        <CompilerVisibleProperty Include="MetalamaFormatOutput" />
+        <CompilerVisibleProperty Include="MetalamaFormatCompileTimeCode" />
+        <CompilerVisibleProperty Include="MetalamaUserCodeTrusted" />
+        <CompilerVisibleProperty Include="MetalamaCompileTimeOnlyProject" />
         <CompilerVisibleProperty Include="AssemblyName" />
-        <CompilerVisibleProperty Include="CaravelaDesignTimeEnabled" />
-        <CompilerVisibleProperty Include="CaravelaAdditionalCompilationOutputDirectory" />
+        <CompilerVisibleProperty Include="MetalamaDesignTimeEnabled" />
+        <CompilerVisibleProperty Include="MetalamaAdditionalCompilationOutputDirectory" />
     </ItemGroup>
 
-    <!-- More properties are already exported by Caravela.Compiler and don't need to be exported a second time. -->
+    <!-- More properties are already exported by Metalama.Compiler and don't need to be exported a second time. -->
 
 </Project>

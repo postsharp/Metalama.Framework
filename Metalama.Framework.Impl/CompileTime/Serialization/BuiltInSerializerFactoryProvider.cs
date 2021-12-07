@@ -1,14 +1,14 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Impl.CompileTime.Serialization.Serializers;
-using Caravela.Framework.Serialization;
+using Metalama.Framework.Impl.CompileTime.Serialization.Serializers;
+using Metalama.Framework.Serialization;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Reflection;
 
-namespace Caravela.Framework.Impl.CompileTime.Serialization
+namespace Metalama.Framework.Impl.CompileTime.Serialization
 {
     internal sealed class BuiltInSerializerFactoryProvider : MetaSerializerFactoryProvider
     {

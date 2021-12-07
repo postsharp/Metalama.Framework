@@ -1,9 +1,9 @@
-using Caravela.Framework.Aspects;
-using Caravela.TestFramework;
+using Metalama.Framework.Aspects;
+using Metalama.TestFramework;
 
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
 
-namespace Caravela.Framework.Tests.Integration.Templating.Dynamic.DynamicReceiver
+namespace Metalama.Framework.Tests.Integration.Templating.Dynamic.DynamicReceiver
 {
     [CompileTime]
     class Aspect

@@ -8,7 +8,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Xml;
 
-namespace Caravela.Obfuscator
+namespace Metalama.Obfuscator
 {
     internal class ObfuscationTable
     {

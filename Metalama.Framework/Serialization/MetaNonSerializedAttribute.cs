@@ -3,7 +3,7 @@
 
 using System;
 
-namespace Caravela.Framework.Serialization
+namespace Metalama.Framework.Serialization
 {
     /// <summary>
     /// An attribute that marks a field of a type that implements <see cref="IMetaSerializable"/> as non-serialized.

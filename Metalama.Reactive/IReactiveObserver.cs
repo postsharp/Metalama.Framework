@@ -3,7 +3,7 @@
 
 using System;
 
-namespace Caravela.Reactive
+namespace Metalama.Reactive
 {
     /// <summary>
     /// A weakly-typed observer to a reactive object. Does not support incremental changes.

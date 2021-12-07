@@ -2,12 +2,12 @@
 
 using System;
 using System.Linq;
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
 
 #pragma warning disable CS0067, CS8618, CS8602, CS8603, CS0169
 
-namespace Caravela.Framework.Tests.Integration.Tests.Formatting.Output
+namespace Metalama.Framework.Tests.Integration.Tests.Formatting.Output
 {
     internal class DeepCloneAttribute : TypeAspect
     {

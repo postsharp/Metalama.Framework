@@ -1,11 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Caravela.Framework;
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
+using Metalama.Framework;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
 
-namespace Caravela.Framework.Tests.Integration.Aspects.Async.AsyncTemplate.Simple
+namespace Metalama.Framework.Tests.Integration.Aspects.Async.AsyncTemplate.Simple
 {
     class Aspect : OverrideMethodAspect
     {

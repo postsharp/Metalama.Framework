@@ -1,8 +1,8 @@
 using System;
-using Caravela.TestFramework;
-using Caravela.Framework.Aspects;
+using Metalama.TestFramework;
+using Metalama.Framework.Aspects;
 
-namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Switch.OldSwitchChangeCompileTimeVarInRunTime
+namespace Metalama.Framework.Tests.Integration.Templating.Syntax.Switch.OldSwitchChangeCompileTimeVarInRunTime
 {
     class Aspect
     {

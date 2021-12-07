@@ -1,13 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <!-- When updating TargetFrameworks, also update the AcceptTestOutput and AcceptTestHtml targets in Caravela.TestFramework.targets -->
+    <!-- When updating TargetFrameworks, also update the AcceptTestOutput and AcceptTestHtml targets in Metalama.TestFramework.targets -->
     <TargetFrameworks>net5.0;netframework4.8</TargetFrameworks>
-    <Description>Provides a base class AspectUnitTestBase that allows you to unit test Caravela aspects with xUnit.</Description>
+    <Description>Provides a base class AspectUnitTestBase that allows you to unit test Metalama aspects with xUnit.</Description>
   </PropertyGroup>
 
   <ItemGroup>
-    <!-- Workspaces is used in TestRunner, Workspaces.Lightweight is a dependency of Caravela.Framework.Impl -->
+    <!-- Workspaces is used in TestRunner, Workspaces.Lightweight is a dependency of Metalama.Framework.Impl -->
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="$(RoslynVersion)" />
     <PackageReference Include="xunit.assert" Version="$(xUnitVersion)" />
     <PackageReference Include="xunit.extensibility.core" Version="$(xUnitVersion)" />
@@ -16,16 +16,16 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Caravela.Framework.DesignTime.Contracts\Caravela.Framework.DesignTime.Contracts.csproj" />
-    <ProjectReference Include="..\Caravela.Framework.Impl\Caravela.Framework.Impl.csproj" />
-    <ProjectReference Include="..\Caravela.Framework.Sdk\Caravela.Framework.Sdk.csproj" />
-    <ProjectReference Include="..\Caravela.Framework\Caravela.Framework.csproj" />
+    <ProjectReference Include="..\Metalama.Framework.DesignTime.Contracts\Metalama.Framework.DesignTime.Contracts.csproj" />
+    <ProjectReference Include="..\Metalama.Framework.Impl\Metalama.Framework.Impl.csproj" />
+    <ProjectReference Include="..\Metalama.Framework.Sdk\Metalama.Framework.Sdk.csproj" />
+    <ProjectReference Include="..\Metalama.Framework\Metalama.Framework.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <InternalsVisibleTo Include="Caravela.Framework.Tests.Integration.Internals" />
-    <InternalsVisibleTo Include="Caravela.Framework.Tests.UnitTests.Internals" />
-    <InternalsVisibleTo Include="Caravela.AspectWorkbench" />
+    <InternalsVisibleTo Include="Metalama.Framework.Tests.Integration.Internals" />
+    <InternalsVisibleTo Include="Metalama.Framework.Tests.UnitTests.Internals" />
+    <InternalsVisibleTo Include="Metalama.AspectWorkbench" />
     <InternalsVisibleTo Include="DynamicProxyGenAssembly2" Key="$(FakeItEasyKey)" LoadsWithinVisualStudio="false" />
   </ItemGroup>
   
@@ -36,11 +36,11 @@
     </ItemGroup>
   
   <ItemGroup>
-    <None Include="Caravela.TestFramework.props">
+    <None Include="Metalama.TestFramework.props">
           <Pack>true</Pack>
           <PackagePath>build</PackagePath>
     </None>
-    <None Include="Caravela.TestFramework.targets">
+    <None Include="Metalama.TestFramework.targets">
       <Pack>true</Pack>
       <PackagePath>build</PackagePath>
     </None>

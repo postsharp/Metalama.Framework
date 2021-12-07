@@ -4,7 +4,7 @@
 using System;
 using System.Linq;
 
-namespace Caravela.Framework.Impl.Utilities
+namespace Metalama.Framework.Impl.Utilities
 {
     internal static class ExceptionHelper
     {

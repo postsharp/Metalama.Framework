@@ -13,11 +13,11 @@ private static int _static_AutoProperty;
         [Override]
         public static int Static_AutoProperty {get    {
         global::System.Console.WriteLine($"This is the overridden getter.");
-return global::Caravela.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.MethodTemplates.TargetClass._static_AutoProperty;    }
+return global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.MethodTemplates.TargetClass._static_AutoProperty;    }
     
 set    {
         global::System.Console.WriteLine($"This is the overridden setter.");
-global::Caravela.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.MethodTemplates.TargetClass._static_AutoProperty=value;    }
+global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.MethodTemplates.TargetClass._static_AutoProperty=value;    }
 }
 private int _autoProperty_Init;
         [Override]

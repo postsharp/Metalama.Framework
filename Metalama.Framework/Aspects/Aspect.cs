@@ -3,7 +3,7 @@
 
 using System;
 
-namespace Caravela.Framework.Aspects
+namespace Metalama.Framework.Aspects
 {
     /// <summary>
     /// A base class from aspects that can be applied as custom attributes. Aspects must implement a specific generic instance

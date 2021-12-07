@@ -1,8 +1,8 @@
 using System;
-using Caravela.Framework.Aspects;
-using Caravela.TestFramework;
+using Metalama.Framework.Aspects;
+using Metalama.TestFramework;
 
-namespace Caravela.Framework.Tests.Integration.Templating.UnsupportedSyntax.UnsafeNotSupported
+namespace Metalama.Framework.Tests.Integration.Templating.UnsupportedSyntax.UnsafeNotSupported
 {
     [CompileTime]
     class Aspect

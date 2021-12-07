@@ -1,11 +1,11 @@
 ﻿using System;
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
-using Caravela.Framework.Tests.Integration.TestInputs.Aspects.Order.IntroductionAndOverride;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
+using Metalama.Framework.Tests.Integration.TestInputs.Aspects.Order.IntroductionAndOverride;
 
 [assembly: AspectOrder( typeof(FirstAttribute), typeof(SecondAttribute), typeof(ThirdAttribute) )]
 
-namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Order.IntroductionAndOverride
+namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Order.IntroductionAndOverride
 {
     public class FirstAttribute : TypeAspect
     {

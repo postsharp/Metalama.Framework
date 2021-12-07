@@ -1,13 +1,13 @@
 ﻿using System;
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
-using Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.ImplicitMembers_Override;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
+using Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.ImplicitMembers_Override;
 
 [assembly: AspectOrder( typeof(OverrideAttribute), typeof(IntroductionAttribute) )]
 
 #pragma warning disable CS0067
 
-namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.ImplicitMembers_Override
+namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.ImplicitMembers_Override
 {
     /*
      * Simple case with explicit interface members for a single interface.

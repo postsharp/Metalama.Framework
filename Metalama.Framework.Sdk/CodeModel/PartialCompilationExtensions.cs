@@ -8,7 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 
-namespace Caravela.Framework.Impl.CodeModel
+namespace Metalama.Framework.Impl.CodeModel
 {
     /// <summary>
     /// Extension methods for the <see cref="IPartialCompilation"/> interface.

@@ -3,7 +3,7 @@
 
 using Microsoft.CodeAnalysis;
 
-namespace Caravela.Framework.Impl.Templating
+namespace Metalama.Framework.Impl.Templating
 {
     /// <summary>
     /// Annotates syntax nodes with <see cref="Location"/> annotations that can then be resolved by <see cref="ILocationAnnotationMap"/>.

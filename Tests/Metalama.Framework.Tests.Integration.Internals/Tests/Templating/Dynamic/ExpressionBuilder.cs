@@ -1,10 +1,10 @@
 using System;
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
-using Caravela.Framework.Code.SyntaxBuilders;
-using Caravela.TestFramework;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
+using Metalama.Framework.Code.SyntaxBuilders;
+using Metalama.TestFramework;
 
-namespace Caravela.Framework.Tests.Integration.Templating.Dynamic.DynamicExpressionBuilder
+namespace Metalama.Framework.Tests.Integration.Templating.Dynamic.DynamicExpressionBuilder
 {
     [CompileTime]
     internal class Aspect

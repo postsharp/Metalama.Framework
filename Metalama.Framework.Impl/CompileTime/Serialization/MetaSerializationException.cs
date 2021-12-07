@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
 
-namespace Caravela.Framework.Impl.CompileTime.Serialization
+namespace Metalama.Framework.Impl.CompileTime.Serialization
 {
     /// <summary>
     /// Exception thrown by the <see cref="MetaFormatter"/>.

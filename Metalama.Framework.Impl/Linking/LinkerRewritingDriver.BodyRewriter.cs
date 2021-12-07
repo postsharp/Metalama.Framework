@@ -8,7 +8,7 @@ using System.Linq;
 
 // TODO: A lot methods here are called multiple times. Optimize.
 
-namespace Caravela.Framework.Impl.Linking
+namespace Metalama.Framework.Impl.Linking
 {
     internal partial class LinkerRewritingDriver
     {

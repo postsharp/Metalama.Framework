@@ -3,7 +3,7 @@
 
 using System.Collections.Generic;
 
-namespace Caravela.Reactive.Operators
+namespace Metalama.Reactive.Operators
 {
     internal interface IGroupByOperator<TKey, TElement> : IReactiveSource<IEnumerable<IReactiveGroup<TKey, TElement>>>
     {

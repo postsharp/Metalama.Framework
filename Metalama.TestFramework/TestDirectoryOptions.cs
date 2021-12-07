@@ -4,10 +4,10 @@
 using Newtonsoft.Json;
 using System.IO;
 
-namespace Caravela.TestFramework
+namespace Metalama.TestFramework
 {
     /// <summary>
-    /// Represent the content of the <c>caravelaTests.json</c> file. This class is JSON-serializable.
+    /// Represent the content of the <c>metalamaTests.json</c> file. This class is JSON-serializable.
     /// </summary>
     public class TestDirectoryOptions : TestOptions
     {

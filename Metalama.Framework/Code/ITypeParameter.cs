@@ -3,7 +3,7 @@
 
 using System.Collections.Generic;
 
-namespace Caravela.Framework.Code
+namespace Metalama.Framework.Code
 {
     /// <summary>
     /// Represents a generic parameter of a method or type.

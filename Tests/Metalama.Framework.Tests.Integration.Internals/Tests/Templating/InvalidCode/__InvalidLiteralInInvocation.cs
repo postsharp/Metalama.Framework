@@ -1,8 +1,8 @@
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Code.SyntaxBuilders;
-using Caravela.Framework.Code;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code.SyntaxBuilders;
+using Metalama.Framework.Code;
 
-namespace Caravela.Framework.Tests.Integration.Tests.Templating.InvalidCode.InvalidLiteralInInvocation
+namespace Metalama.Framework.Tests.Integration.Tests.Templating.InvalidCode.InvalidLiteralInInvocation
 {
    
     public class EnrichExceptionAttribute : OverrideMethodAspect

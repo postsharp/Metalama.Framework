@@ -1,9 +1,9 @@
 ﻿using System;
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
-using Caravela.TestFramework;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
+using Metalama.TestFramework;
 
-namespace Caravela.Framework.IntegrationTests.Aspects.Invokers.Methods.AdvisedSource_FinalInvoker
+namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Methods.AdvisedSource_FinalInvoker
 {
     public class TestAttribute : OverrideMethodAspect
     {

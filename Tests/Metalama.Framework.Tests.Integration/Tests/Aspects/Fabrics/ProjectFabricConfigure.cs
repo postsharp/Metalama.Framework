@@ -1,9 +1,9 @@
 using System;
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Fabrics;
-using Caravela.Framework.Project;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Fabrics;
+using Metalama.Framework.Project;
 
-namespace Caravela.Framework.Tests.PublicPipeline.Aspects.Fabrics.ProjectFabricConfigure
+namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Fabrics.ProjectFabricConfigure
 {
     internal class Fabric : ProjectFabric
     {

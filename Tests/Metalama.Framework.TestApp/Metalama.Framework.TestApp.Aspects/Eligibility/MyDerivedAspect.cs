@@ -1,7 +1,7 @@
-﻿using Caravela.Framework.Code;
-using Caravela.Framework.Eligibility;
+﻿using Metalama.Framework.Code;
+using Metalama.Framework.Eligibility;
 
-namespace Caravela.Framework.TestApp.Aspects.Eligibility
+namespace Metalama.Framework.TestApp.Aspects.Eligibility
 {
     // Example of an aspect that restricts the eligibility of its parent (it cannot loosen it).
     public class MyDerivedAspect : MyAspect

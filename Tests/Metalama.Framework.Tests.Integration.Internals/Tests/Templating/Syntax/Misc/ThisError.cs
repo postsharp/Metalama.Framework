@@ -1,8 +1,8 @@
 using System;
-using Caravela.Framework.Aspects;
-using Caravela.TestFramework;
+using Metalama.Framework.Aspects;
+using Metalama.TestFramework;
 
-namespace Caravela.Framework.Tests.Integration.Tests.Templating.Syntax.Misc.ThisError
+namespace Metalama.Framework.Tests.Integration.Tests.Templating.Syntax.Misc.ThisError
 {
     class Aspect
     {

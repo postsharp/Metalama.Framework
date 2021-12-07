@@ -1,10 +1,10 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Aspects;
-using Caravela.Framework.TestApp.Library;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.TestApp.Library;
 
-namespace Caravela.Framework.TestApp.Aspects
+namespace Metalama.Framework.TestApp.Aspects
 {
     [CompileTime]
     public static class DebugInfo

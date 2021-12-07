@@ -4,10 +4,10 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using Caravela.Reactive.Operators;
-using Caravela.Reactive.Sources;
+using Metalama.Reactive.Operators;
+using Metalama.Reactive.Sources;
 
-namespace Caravela.Reactive
+namespace Metalama.Reactive
 {
     /// <summary>
     /// Extension methods for <see cref="IReactiveCollection{T}"/>.

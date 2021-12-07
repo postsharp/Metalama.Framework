@@ -1,6 +1,6 @@
-using Caravela.Framework.Aspects;
+using Metalama.Framework.Aspects;
 
-namespace Caravela.Framework.Tests.PublicPipeline.Aspects.Initialize.DuplicateMemberName2
+namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Initialize.DuplicateMemberName2
 {
     // Error: the base class already defines a template and this is not an override.
 

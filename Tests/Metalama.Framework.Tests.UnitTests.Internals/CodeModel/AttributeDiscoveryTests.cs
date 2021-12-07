@@ -4,7 +4,7 @@
 using System.Linq;
 using Xunit;
 
-namespace Caravela.Framework.Tests.UnitTests.CodeModel
+namespace Metalama.Framework.Tests.UnitTests.CodeModel
 {
     public class AttributeDiscoveryTests : TestBase
     {

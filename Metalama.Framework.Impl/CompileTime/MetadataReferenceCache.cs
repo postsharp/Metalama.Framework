@@ -6,7 +6,7 @@ using System;
 using System.Collections.Concurrent;
 using System.IO;
 
-namespace Caravela.Framework.Impl.CompileTime
+namespace Metalama.Framework.Impl.CompileTime
 {
     internal static class MetadataReferenceCache
     {

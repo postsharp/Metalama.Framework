@@ -1,21 +1,21 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Code.Collections;
-using Caravela.Framework.Diagnostics;
-using Caravela.Framework.Impl.AdditionalOutputs;
-using Caravela.Framework.Impl.AspectOrdering;
-using Caravela.Framework.Impl.Aspects;
-using Caravela.Framework.Impl.CodeModel;
-using Caravela.Framework.Impl.Collections;
-using Caravela.Framework.Impl.CompileTime;
-using Caravela.Framework.Impl.Diagnostics;
-using Caravela.Framework.Impl.Fabrics;
-using Caravela.Framework.Impl.Options;
-using Caravela.Framework.Impl.Sdk;
-using Caravela.Framework.Impl.Utilities;
-using Caravela.Framework.Project;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code.Collections;
+using Metalama.Framework.Diagnostics;
+using Metalama.Framework.Impl.AdditionalOutputs;
+using Metalama.Framework.Impl.AspectOrdering;
+using Metalama.Framework.Impl.Aspects;
+using Metalama.Framework.Impl.CodeModel;
+using Metalama.Framework.Impl.Collections;
+using Metalama.Framework.Impl.CompileTime;
+using Metalama.Framework.Impl.Diagnostics;
+using Metalama.Framework.Impl.Fabrics;
+using Metalama.Framework.Impl.Options;
+using Metalama.Framework.Impl.Sdk;
+using Metalama.Framework.Impl.Utilities;
+using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using MoreLinq;
 using System;
@@ -25,10 +25,10 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
 
-namespace Caravela.Framework.Impl.Pipeline
+namespace Metalama.Framework.Impl.Pipeline
 {
     /// <summary>
-    /// The base class for the main process of Caravela.
+    /// The base class for the main process of Metalama.
     /// </summary>
     public abstract class AspectPipeline : IDisposable
     {

@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Caravela.Framework.DesignTime.Contracts
+namespace Metalama.Framework.DesignTime.Contracts
 {
     /// <summary>
     /// Defines a method that allows to transform a single syntax tree in a compilation. This service

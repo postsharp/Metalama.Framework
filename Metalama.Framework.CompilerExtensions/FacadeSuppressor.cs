@@ -5,7 +5,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
 using System.Collections.Immutable;
 
-namespace Caravela.Framework.CompilerExtensions
+namespace Metalama.Framework.CompilerExtensions
 {
     // ReSharper disable UnusedType.Global
 
@@ -16,7 +16,7 @@ namespace Caravela.Framework.CompilerExtensions
 
         public FacadeSuppressor()
         {
-            this._impl = (DiagnosticSuppressor) ResourceExtractor.CreateInstance( "Caravela.Framework.Impl.DesignTime.DesignTimeDiagnosticSuppressor" );
+            this._impl = (DiagnosticSuppressor) ResourceExtractor.CreateInstance( "Metalama.Framework.Impl.DesignTime.DesignTimeDiagnosticSuppressor" );
         }
 
         public override void ReportSuppressions( SuppressionAnalysisContext context ) => this._impl.ReportSuppressions( context );

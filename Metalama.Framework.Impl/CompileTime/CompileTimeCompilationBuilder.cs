@@ -1,19 +1,19 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Fabrics;
-using Caravela.Framework.Impl.CodeModel;
-using Caravela.Framework.Impl.CompileTime.Serialization;
-using Caravela.Framework.Impl.Diagnostics;
-using Caravela.Framework.Impl.Formatting;
-using Caravela.Framework.Impl.Observers;
-using Caravela.Framework.Impl.Options;
-using Caravela.Framework.Impl.Sdk;
-using Caravela.Framework.Impl.Templating;
-using Caravela.Framework.Impl.Templating.Mapping;
-using Caravela.Framework.Impl.Utilities;
-using Caravela.Framework.Project;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Fabrics;
+using Metalama.Framework.Impl.CodeModel;
+using Metalama.Framework.Impl.CompileTime.Serialization;
+using Metalama.Framework.Impl.Diagnostics;
+using Metalama.Framework.Impl.Formatting;
+using Metalama.Framework.Impl.Observers;
+using Metalama.Framework.Impl.Options;
+using Metalama.Framework.Impl.Sdk;
+using Metalama.Framework.Impl.Templating;
+using Metalama.Framework.Impl.Templating.Mapping;
+using Metalama.Framework.Impl.Utilities;
+using Metalama.Framework.Project;
 using K4os.Hash.xxHash;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -26,7 +26,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 
-namespace Caravela.Framework.Impl.CompileTime
+namespace Metalama.Framework.Impl.CompileTime
 {
     /// <summary>
     /// This class is responsible for building a compile-time <see cref="Compilation"/> based on a run-time one.
@@ -218,7 +218,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
         private static string GetCompileTimeAssemblyName( string runTimeAssemblyName, ulong projectHash )
         {
-            const string prefix = "CaravelaCompileTime_";
+            const string prefix = "MetalamaCompileTime_";
 
             if ( runTimeAssemblyName.StartsWith( prefix, StringComparison.Ordinal ) )
             {
@@ -303,7 +303,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
                 if ( this._rewriter != null )
                 {
-                    // TryCaravela defines a binary rewriter to inject Unbreakable.
+                    // TryMetalama defines a binary rewriter to inject Unbreakable.
 
                     MemoryStream memoryStream = new();
                     emitResult = compileTimeCompilation.Emit( memoryStream, null, options: emitOptions, cancellationToken: cancellationToken );

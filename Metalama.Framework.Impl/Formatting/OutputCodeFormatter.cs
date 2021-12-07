@@ -1,7 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Impl.CodeModel;
+using Metalama.Framework.Impl.CodeModel;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Editing;
@@ -13,7 +13,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Caravela.Framework.Impl.Formatting
+namespace Metalama.Framework.Impl.Formatting
 {
     public static class OutputCodeFormatter
     {
@@ -21,7 +21,7 @@ namespace Caravela.Framework.Impl.Formatting
         /// Annotation used to mark locals and 'return;' statement that may be redundant. Currently we are not doing anything with them,
         /// but we could.
         /// </summary>
-        public static readonly SyntaxAnnotation PossibleRedundantAnnotation = new( "Caravela_PossibleRedundant" );
+        public static readonly SyntaxAnnotation PossibleRedundantAnnotation = new( "Metalama_PossibleRedundant" );
 
         public static async ValueTask<(Document Document, CompilationUnitSyntax Syntax)> FormatToDocumentAsync(
             Document document,
@@ -150,7 +150,7 @@ namespace Caravela.Framework.Impl.Formatting
         }
 
         // HACK: We cannot format the output if the current AppDomain does not contain the workspace assemblies.
-        // Code formatting is used by TryCaravela only now. Somehow TryCaravela also builds through the command line for some
+        // Code formatting is used by TryMetalama only now. Somehow TryMetalama also builds through the command line for some
         // initialization, which triggers an error because we don't ship all necessary assemblies.
 
         public static bool CanFormat => AppDomain.CurrentDomain.GetAssemblies().Any( a => a.GetName().Name == "Microsoft.CodeAnalysis.Workspaces" );

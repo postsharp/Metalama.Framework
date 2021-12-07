@@ -3,7 +3,7 @@
 
 using Microsoft.CodeAnalysis.Diagnostics;
 
-namespace Caravela.Framework.Impl.Options
+namespace Metalama.Framework.Impl.Options
 {
     /// <summary>
     /// Gives access to configuration options (typically values pulled from MSBuild). The

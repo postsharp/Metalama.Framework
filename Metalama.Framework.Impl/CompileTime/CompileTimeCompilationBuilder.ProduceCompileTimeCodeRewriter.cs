@@ -1,18 +1,18 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
-using Caravela.Framework.Code.Collections;
-using Caravela.Framework.Eligibility;
-using Caravela.Framework.Fabrics;
-using Caravela.Framework.Impl.CodeModel;
-using Caravela.Framework.Impl.CompileTime.Serialization;
-using Caravela.Framework.Impl.Diagnostics;
-using Caravela.Framework.Impl.ReflectionMocks;
-using Caravela.Framework.Impl.Templating;
-using Caravela.Framework.Impl.Utilities;
-using Caravela.Framework.Project;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
+using Metalama.Framework.Code.Collections;
+using Metalama.Framework.Eligibility;
+using Metalama.Framework.Fabrics;
+using Metalama.Framework.Impl.CodeModel;
+using Metalama.Framework.Impl.CompileTime.Serialization;
+using Metalama.Framework.Impl.Diagnostics;
+using Metalama.Framework.Impl.ReflectionMocks;
+using Metalama.Framework.Impl.Templating;
+using Metalama.Framework.Impl.Utilities;
+using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -25,7 +25,7 @@ using Accessibility = Microsoft.CodeAnalysis.Accessibility;
 using MethodKind = Microsoft.CodeAnalysis.MethodKind;
 using TypeKind = Microsoft.CodeAnalysis.TypeKind;
 
-namespace Caravela.Framework.Impl.CompileTime
+namespace Metalama.Framework.Impl.CompileTime
 {
     internal partial class CompileTimeCompilationBuilder
     {
@@ -37,7 +37,7 @@ namespace Caravela.Framework.Impl.CompileTime
         /// </summary>
         private sealed class ProduceCompileTimeCodeRewriter : CompileTimeBaseRewriter
         {
-            private static readonly SyntaxAnnotation _hasCompileTimeCodeAnnotation = new( "Caravela_HasCompileTimeCode" );
+            private static readonly SyntaxAnnotation _hasCompileTimeCodeAnnotation = new( "Metalama_HasCompileTimeCode" );
             private readonly Compilation _compileTimeCompilation;
             private readonly IReadOnlyDictionary<INamedTypeSymbol, MetaSerializableTypeInfo> _serializableTypes;
             private readonly IReadOnlyDictionary<ISymbol, MetaSerializableTypeInfo> _serializableFieldsAndProperties;

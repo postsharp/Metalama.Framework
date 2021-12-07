@@ -7,7 +7,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Text.RegularExpressions;
 using Xunit;
 
-namespace Caravela.Framework.Tests.Integration.Runners.Linker
+namespace Metalama.Framework.Tests.Integration.Runners.Linker
 {
     public class LinkerInlineAssertionWalker : CSharpSyntaxWalker
     {

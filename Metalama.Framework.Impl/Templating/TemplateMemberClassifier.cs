@@ -1,17 +1,17 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Impl.CodeModel;
-using Caravela.Framework.Impl.CompileTime;
-using Caravela.Framework.Impl.Utilities;
-using Caravela.Framework.Project;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Impl.CodeModel;
+using Metalama.Framework.Impl.CompileTime;
+using Metalama.Framework.Impl.Utilities;
+using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Linq;
 
-namespace Caravela.Framework.Impl.Templating
+namespace Metalama.Framework.Impl.Templating
 {
     /// <summary>
     /// Provides methods that tests for classifications of template members, for instance <see cref="IsRunTimeMethod(Microsoft.CodeAnalysis.IMethodSymbol)"/>.

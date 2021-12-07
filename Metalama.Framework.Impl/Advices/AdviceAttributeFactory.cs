@@ -1,18 +1,18 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
-using Caravela.Framework.Code.DeclarationBuilders;
-using Caravela.Framework.Impl.Aspects;
-using Caravela.Framework.Impl.CodeModel;
-using Caravela.Framework.Impl.CodeModel.Builders;
-using Caravela.Framework.Impl.CompileTime;
-using Caravela.Framework.Impl.Diagnostics;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
+using Metalama.Framework.Code.DeclarationBuilders;
+using Metalama.Framework.Impl.Aspects;
+using Metalama.Framework.Impl.CodeModel;
+using Metalama.Framework.Impl.CodeModel.Builders;
+using Metalama.Framework.Impl.CompileTime;
+using Metalama.Framework.Impl.Diagnostics;
 using System;
 using System.Diagnostics.CodeAnalysis;
 
-namespace Caravela.Framework.Impl.Advices
+namespace Metalama.Framework.Impl.Advices
 {
     internal static class AdviceAttributeFactory
     {

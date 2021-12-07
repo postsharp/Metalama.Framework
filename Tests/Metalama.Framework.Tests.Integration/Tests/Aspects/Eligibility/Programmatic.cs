@@ -1,14 +1,14 @@
 using System;
 using System.Collections.Generic;
-using Caravela.Framework;
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
-using Caravela.Framework.Eligibility;
-using Caravela.Framework.Tests.PublicPipeline.Aspects.Eligibility.Programmatic;
+using Metalama.Framework;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
+using Metalama.Framework.Eligibility;
+using Metalama.Framework.Tests.PublicPipeline.Aspects.Eligibility.Programmatic;
 
 [assembly: AspectOrder( typeof(Aspect2), typeof(Aspect1) )]
 
-namespace Caravela.Framework.Tests.PublicPipeline.Aspects.Eligibility.Programmatic
+namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Eligibility.Programmatic
 {
     class Aspect1 : TypeAspect
     {

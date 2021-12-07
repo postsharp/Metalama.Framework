@@ -1,10 +1,10 @@
 using System;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
 
-namespace Caravela.Framework.Tests.Integration.Aspects.Async.AsyncTemplate.AsyncTemplateOnYieldAwaitable
+namespace Metalama.Framework.Tests.Integration.Aspects.Async.AsyncTemplate.AsyncTemplateOnYieldAwaitable
 {
     internal class Aspect : MethodAspect
     {

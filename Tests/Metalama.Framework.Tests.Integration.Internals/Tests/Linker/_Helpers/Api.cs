@@ -1,4 +1,4 @@
-﻿namespace Caravela.Framework.Tests.Integration.Tests.Linker
+﻿namespace Metalama.Framework.Tests.Integration.Tests.Linker
 {
     public static class Api
     {

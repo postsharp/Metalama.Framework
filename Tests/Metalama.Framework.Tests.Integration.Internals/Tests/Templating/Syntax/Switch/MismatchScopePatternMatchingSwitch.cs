@@ -1,11 +1,11 @@
 using System;
 using System.Linq;
 using System.Collections.Generic;
-using Caravela.TestFramework;
-using Caravela.Framework.Code;
-using Caravela.Framework.Aspects;
+using Metalama.TestFramework;
+using Metalama.Framework.Code;
+using Metalama.Framework.Aspects;
 
-namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Switch.MismatchScopePatternMatchingSwitch
+namespace Metalama.Framework.Tests.Integration.Templating.Syntax.Switch.MismatchScopePatternMatchingSwitch
 {
     class Aspect
     {

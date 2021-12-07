@@ -5,7 +5,7 @@ using LINQPad;
 using System.Linq;
 using Xunit;
 
-namespace Caravela.LinqPad.Tests
+namespace Metalama.LinqPad.Tests
 {
     public class PropertyFormatterTests
     {

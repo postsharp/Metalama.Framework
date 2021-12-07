@@ -1,15 +1,15 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Impl.Diagnostics;
-using Caravela.Framework.Impl.ReflectionMocks;
+using Metalama.Framework.Impl.Diagnostics;
+using Metalama.Framework.Impl.ReflectionMocks;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Concurrent;
 using System.Globalization;
 using System.Linq;
 
-namespace Caravela.Framework.Impl.CodeModel
+namespace Metalama.Framework.Impl.CodeModel
 {
     /// <summary>
     /// Maps System.Reflection objects to Roslyn symbols.
@@ -72,7 +72,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
             if ( type.IsByRef )
             {
-                throw new ArgumentException( "Ref types cannot be represented as Caravela types." );
+                throw new ArgumentException( "Ref types cannot be represented as Metalama types." );
             }
 
             if ( type.IsArray )

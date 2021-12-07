@@ -5,7 +5,7 @@ using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Caravela.Framework.Impl.Templating
+namespace Metalama.Framework.Impl.Templating
 {
     internal class TemplateLexicalScope
     {

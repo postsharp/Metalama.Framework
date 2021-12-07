@@ -1,12 +1,12 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Serialization;
+using Metalama.Framework.Serialization;
 using System;
 using System.Collections.Generic;
 using Xunit;
 
-namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serialization
+namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
 {
     public class CustomStructSerializationTests : SerializationTestsBase
     {
@@ -15,7 +15,7 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serialization
         {
             var s = new SimpleStruct( 1, DateTime.Now ) { StringValue = "Test", NullableEnumField = TypeCode.Char };
 
-/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSerialization( s );
 After:
@@ -29,7 +29,7 @@ After:
         {
             var s = new SimpleStruct( 1, DateTime.Now ) { StringValue = "Test" };
 
-/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSerialization( (object) s );
 After:
@@ -43,7 +43,7 @@ After:
         {
             var s = new GenericStruct<string> { Value = "1" };
 
-/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSerialization( s );
 After:
@@ -57,7 +57,7 @@ After:
         {
             var s = new GenericStruct<SimpleStruct> { Value = new SimpleStruct( 5, DateTime.MinValue ) };
 
-/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSerialization( s );
 After:
@@ -72,7 +72,7 @@ After:
             var cls = new SimpleClass( 11 );
             var str = new SimpleStruct( 1, DateTime.Now ) { SimpleClass = cls, SimpleClass2 = cls };
 
-/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             var str2 = this.TestSerialization( str );
 After:

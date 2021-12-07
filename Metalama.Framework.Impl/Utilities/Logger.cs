@@ -6,7 +6,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Threading;
 
-namespace Caravela.Framework.Impl.Utilities
+namespace Metalama.Framework.Impl.Utilities
 {
     internal class Logger
     {

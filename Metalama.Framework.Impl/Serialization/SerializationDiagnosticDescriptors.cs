@@ -1,18 +1,18 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Diagnostics;
-using static Caravela.Framework.Diagnostics.Severity;
+using Metalama.Framework.Diagnostics;
+using static Metalama.Framework.Diagnostics.Severity;
 
 #pragma warning disable SA1118 // Allow multi-line parameters.
 
-namespace Caravela.Framework.Impl.Serialization
+namespace Metalama.Framework.Impl.Serialization
 {
     internal static class SerializationDiagnosticDescriptors
     {
         // Reserved range 200-299
 
-        private const string _category = "Caravela.Serialization";
+        private const string _category = "Metalama.Serialization";
 
         public static readonly DiagnosticDefinition<object> UnsupportedSerialization = new(
             "CR0200",

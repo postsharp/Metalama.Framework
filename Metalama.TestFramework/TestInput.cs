@@ -1,13 +1,13 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.TestFramework.Utilities;
+using Metalama.TestFramework.Utilities;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 
-namespace Caravela.TestFramework
+namespace Metalama.TestFramework
 {
     /// <summary>
     /// Represents the parameters of the integration test input.

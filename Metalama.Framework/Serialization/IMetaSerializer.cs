@@ -3,7 +3,7 @@
 
 using System;
 
-namespace Caravela.Framework.Serialization
+namespace Metalama.Framework.Serialization
 {
     /// <summary>
     /// Defines the semantics of an object serializer.

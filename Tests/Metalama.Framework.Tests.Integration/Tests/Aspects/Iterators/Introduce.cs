@@ -1,8 +1,8 @@
 using System.Collections.Generic;
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
 
-namespace Caravela.Framework.Tests.Integration.Aspects.Iterators.Introduce
+namespace Metalama.Framework.Tests.Integration.Aspects.Iterators.Introduce
 {
     internal class Aspect : TypeAspect
     {

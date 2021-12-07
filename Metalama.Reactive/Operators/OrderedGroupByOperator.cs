@@ -5,10 +5,10 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
-using Caravela.Reactive.Implementation;
+using Metalama.Reactive.Implementation;
 using MoreLinq;
 
-namespace Caravela.Reactive.Operators
+namespace Metalama.Reactive.Operators
 {
     internal class OrderedGroupByOperator<TSource, TKey, TElement> : ReactiveCollectionOperator<TSource, IReactiveGroup<TKey, TElement>>,
         IGroupByOperator<TKey, TElement>

@@ -7,11 +7,11 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 
-namespace Caravela.Framework.Impl
+namespace Metalama.Framework.Impl
 {
     /// <summary>
-    /// An exception thrown by Caravela, embedding a <see cref="Diagnostic"/>, thrown in a situation where
-    /// the responsibility can be put on the user. This exception type is typically not observed out of Caravela code,
+    /// An exception thrown by Metalama, embedding a <see cref="Diagnostic"/>, thrown in a situation where
+    /// the responsibility can be put on the user. This exception type is typically not observed out of Metalama code,
     ///  and should be handled properly.
     /// </summary>
     public sealed class DiagnosticException : Exception

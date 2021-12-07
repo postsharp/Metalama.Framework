@@ -1,15 +1,15 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Code;
-using Caravela.Framework.Eligibility;
-using Caravela.Framework.Fabrics;
-using Caravela.Framework.Impl.Aspects;
-using Caravela.Framework.Impl.CompileTime;
+using Metalama.Framework.Code;
+using Metalama.Framework.Eligibility;
+using Metalama.Framework.Fabrics;
+using Metalama.Framework.Impl.Aspects;
+using Metalama.Framework.Impl.CompileTime;
 using System;
 using System.Collections.Immutable;
 
-namespace Caravela.Framework.Impl.Fabrics
+namespace Metalama.Framework.Impl.Fabrics
 {
     /// <summary>
     /// An aspect class that aggregates all fabrics on a given declaration.

@@ -1,6 +1,6 @@
 [Introduction]
     [Override]
-    public class TargetClass:global::Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.ImplicitMembers_Override.IInterface    {
+    public class TargetClass:global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.ImplicitMembers_Override.IInterface    {
 
 
 private global::System.Int32 _autoProperty;

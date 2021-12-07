@@ -1,8 +1,8 @@
 using System;
-using Caravela.TestFramework;
-using Caravela.Framework.Aspects;
+using Metalama.TestFramework;
+using Metalama.Framework.Aspects;
 
-namespace Caravela.Framework.Tests.Integration.Templating.LocalVariables.NameClashCompileTimeIf
+namespace Metalama.Framework.Tests.Integration.Templating.LocalVariables.NameClashCompileTimeIf
 {
     [CompileTime]
     class Aspect

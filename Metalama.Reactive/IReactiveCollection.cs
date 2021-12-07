@@ -3,7 +3,7 @@
 
 using System.Collections.Generic;
 
-namespace Caravela.Reactive
+namespace Metalama.Reactive
 {
     /// <summary>
     /// A reactive <see cref="IEnumerable{T}"/>.

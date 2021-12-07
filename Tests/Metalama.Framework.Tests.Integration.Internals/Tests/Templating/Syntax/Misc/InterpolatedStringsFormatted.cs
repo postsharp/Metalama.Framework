@@ -2,12 +2,12 @@
 
 using System;
 using System.Linq;
-using Caravela.TestFramework;
-using Caravela.Framework.Aspects;
+using Metalama.TestFramework;
+using Metalama.Framework.Aspects;
 
 #pragma warning disable CS0169
 
-namespace Caravela.Framework.Tests.Integration.Templating.InterpolatedStringFormatted
+namespace Metalama.Framework.Tests.Integration.Templating.InterpolatedStringFormatted
 {
     class Aspect
     {

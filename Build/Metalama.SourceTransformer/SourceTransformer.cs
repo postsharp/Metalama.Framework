@@ -1,7 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Compiler;
+using Metalama.Compiler;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -10,7 +10,7 @@ using System.Collections.Generic;
 using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
-namespace Caravela.SourceTransformer
+namespace Metalama.SourceTransformer
 {
     [Transformer]
     internal class SourceTransformer : ISourceTransformer
@@ -254,7 +254,7 @@ namespace Caravela.SourceTransformer
                 "CMT001",
                 "Only expression-bodied properties are supported",
                 "Only expression-bodied properties are supported",
-                "Caravela.SourceTransformer",
+                "Metalama.SourceTransformer",
                 DiagnosticSeverity.Error,
                 true );
 
@@ -263,7 +263,7 @@ namespace Caravela.SourceTransformer
                 "CMT002",
                 "Static properties are not supported",
                 "Static properties are not supported",
-                "Caravela.SourceTransformer",
+                "Metalama.SourceTransformer",
                 DiagnosticSeverity.Error,
                 true );
 
@@ -272,7 +272,7 @@ namespace Caravela.SourceTransformer
                 "CMT004",
                 "Dynamic keyword forbidden",
                 "The 'dynamic' keyword is forbidden in this project",
-                "Caravela.SourceTransformer",
+                "Metalama.SourceTransformer",
                 DiagnosticSeverity.Error,
                 true );
     }

@@ -3,7 +3,7 @@
 
 using System.Collections.Generic;
 
-namespace Caravela.Framework.Aspects
+namespace Metalama.Framework.Aspects
 {
     /// <summary>
     /// A dictionary of tags that can be passed to an advise.

@@ -1,19 +1,19 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Impl.CompileTime.Serialization;
-using Caravela.Framework.Serialization;
+using Metalama.Framework.Impl.CompileTime.Serialization;
+using Metalama.Framework.Serialization;
 using System;
 using Xunit;
 
-namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serialization
+namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
 {
     public class IntrinsicSerializationTests : SerializationTestsBase
     {
         [Fact]
         public void TestInt32_0()
         {
-/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSerialization( 0 );
 After:
@@ -25,7 +25,7 @@ After:
         [Fact]
         public void TestInt32_1()
         {
-/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSerialization( 1 );
 After:
@@ -37,7 +37,7 @@ After:
         [Fact]
         public void TestInt32_m1()
         {
-/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSerialization( -1 );
 After:
@@ -49,7 +49,7 @@ After:
         [Fact]
         public void TestInt32_1000()
         {
-/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSerialization( 1000 );
 After:
@@ -61,7 +61,7 @@ After:
         [Fact]
         public void TestInt32_m1000()
         {
-/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSerialization( -1000 );
 After:
@@ -73,7 +73,7 @@ After:
         [Fact]
         public void TestInt32_100000()
         {
-/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSerialization( 100000 );
 After:
@@ -85,7 +85,7 @@ After:
         [Fact]
         public void TestInt32_m100000()
         {
-/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSerialization( -100000 );
 After:
@@ -97,7 +97,7 @@ After:
         [Fact]
         public void TestInt32_10000000()
         {
-/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSerialization( 10000000 );
 After:
@@ -109,7 +109,7 @@ After:
         [Fact]
         public void TestInt32_m10000000()
         {
-/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSerialization( -10000000 );
 After:
@@ -121,7 +121,7 @@ After:
         [Fact]
         public void TestInt32_Max()
         {
-/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSerialization( int.MaxValue );
 After:
@@ -133,7 +133,7 @@ After:
         [Fact]
         public void TestInt32_Min()
         {
-/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSerialization( int.MinValue );
 After:
@@ -145,7 +145,7 @@ After:
         [Fact]
         public void TestString_SimpleWords()
         {
-/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSerialization( "SimpleWords" );
 After:
@@ -157,7 +157,7 @@ After:
         [Fact]
         public void TestDottedString_SimpleDottedWords()
         {
-/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSerialization( (DottedString) "Simple.Dotted.Words" );
             this.TestSerialization( new DottedString[] { "A", "A.B", "A.B.C", "A", "A.B" } );
@@ -172,7 +172,7 @@ After:
         [Fact]
         public void TestDottedString_DottedWordsWithReservedNames()
         {
-/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSerialization( (DottedString) "Simple.Dotted.Words, mscorlib" );
 After:
@@ -184,7 +184,7 @@ After:
         [Fact]
         public void TestDottedString_NullAndEmpty()
         {
-/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSerialization( (DottedString?) null );
             this.TestSerialization( (DottedString) "" );
@@ -199,7 +199,7 @@ After:
         [Fact]
         public void TestStruct_DateTime()
         {
-/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSerialization( DateTime.Now );
 After:
@@ -211,7 +211,7 @@ After:
         [Fact]
         public void TestBoolean_True()
         {
-/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSerialization( true );
 After:
@@ -223,7 +223,7 @@ After:
         [Fact]
         public void TestBoolean_False()
         {
-/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSerialization( false );
 After:
@@ -235,7 +235,7 @@ After:
         [Fact]
         public void TestBoxedBoolean_False()
         {
-/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSerialization( (object) false );
 After:
@@ -247,7 +247,7 @@ After:
         [Fact]
         public void TestByte()
         {
-/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSerialization( (byte) 0 );
             this.TestSerialization( (byte) 1 );
@@ -265,7 +265,7 @@ After:
         [Fact]
         public void TestChar()
         {
-/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSerialization( 'a' );
             this.TestSerialization( (char) 0 );
@@ -286,7 +286,7 @@ After:
         [Fact]
         public void TestDateTime()
         {
-/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSerialization( DateTime.Now );
             this.TestSerialization( DateTime.MinValue );
@@ -304,7 +304,7 @@ After:
         [Fact]
         public void TestDecimal()
         {
-/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSerialization( decimal.Zero );
             this.TestSerialization( -99999999m );
@@ -334,7 +334,7 @@ After:
         [Fact]
         public void TestString()
         {
-/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSerialization( (string?) null );
             this.TestSerialization( "test" );
@@ -352,7 +352,7 @@ After:
         [Fact]
         public void TestDouble()
         {
-/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSerialization( 0.0 );
             this.TestSerialization( -1.0 );
@@ -385,7 +385,7 @@ After:
         [Fact]
         public void TestSingle()
         {
-/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSerialization( 0.0f );
             this.TestSerialization( -1.0f );
@@ -418,7 +418,7 @@ After:
         [Fact]
         public void TestGuid()
         {
-/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSerialization( Guid.Empty );
             this.TestSerialization( Guid.NewGuid() );
@@ -433,7 +433,7 @@ After:
         [Fact]
         public void TestInt16()
         {
-/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSerialization( short.MinValue );
             this.TestSerialization( short.MaxValue );
@@ -451,7 +451,7 @@ After:
         [Fact]
         public void TestInt64_223372036854775807()
         {
-/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSerialization( 223372036854775807 );
 After:
@@ -463,7 +463,7 @@ After:
         [Fact]
         public void TestInt64_m223372036854775807()
         {
-/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSerialization( -223372036854775807 );
 After:
@@ -475,7 +475,7 @@ After:
         [Fact]
         public void TestInt64()
         {
-/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSerialization( long.MinValue );
             this.TestSerialization( long.MaxValue );
@@ -493,7 +493,7 @@ After:
         [Fact]
         public void TestUInt16()
         {
-/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSerialization( ushort.MinValue );
             this.TestSerialization( ushort.MaxValue );
@@ -511,7 +511,7 @@ After:
         [Fact]
         public void TestUInt64()
         {
-/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSerialization( ulong.MinValue );
             this.TestSerialization( ulong.MaxValue );
@@ -529,7 +529,7 @@ After:
         [Fact]
         public void TestUInt32()
         {
-/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSerialization( uint.MinValue );
             this.TestSerialization( uint.MaxValue );
@@ -547,7 +547,7 @@ After:
         [Fact]
         public void TestNullableInt()
         {
-/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSerialization( (int?) 0 );
             this.TestSerialization( (int?) int.MaxValue );
@@ -568,7 +568,7 @@ After:
         [Fact]
         public void TestNullableEnum()
         {
-/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSerialization( (TypeCode?) TypeCode.Boolean );
             this.TestSerialization( (TypeCode?) null );
@@ -583,7 +583,7 @@ After:
         [Fact]
         public void TestArray_Ints()
         {
-/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSerialization( new[] { 1, int.MinValue, 9, int.MaxValue } );
 After:
@@ -595,7 +595,7 @@ After:
         [Fact]
         public void TestArray_Objects()
         {
-/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSerialization( new[] { new SimpleType(), new SimpleType(), new SimpleType(), new SimpleType() } );
 After:
@@ -607,7 +607,7 @@ After:
         [Fact]
         public void TestArray_Structs()
         {
-/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSerialization( new[] { DateTime.Now, DateTime.Today, DateTime.MinValue, DateTime.MaxValue } );
 After:
@@ -628,7 +628,7 @@ After:
             array.SetValue( 3, 8 );
             array.SetValue( 4, 9 );
 
-/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSerialization( array );
 After:
@@ -647,7 +647,7 @@ After:
         [Fact]
         public void TestArray_BoxedStructs()
         {
-/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSerialization( new object[] { DateTime.Now, 11, false, "test", 0.0 } );
 After:
@@ -659,7 +659,7 @@ After:
         [Fact]
         public void TestArray_WithNulls()
         {
-/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSerialization( new object[2] );
 After:
@@ -671,7 +671,7 @@ After:
         [Fact]
         public void TestBoxedIntrinsics()
         {
-/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSerialization( (object) 5 );
             this.TestSerialization( (object) -13.0 );

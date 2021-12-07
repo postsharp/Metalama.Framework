@@ -1,17 +1,17 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
-using Caravela.Framework.Code.Advised;
-using Caravela.Framework.Code.SyntaxBuilders;
-using Caravela.Framework.Diagnostics;
-using Caravela.Framework.Impl.Aspects;
-using Caravela.Framework.Impl.CodeModel;
-using Caravela.Framework.Impl.Diagnostics;
-using Caravela.Framework.Impl.Options;
-using Caravela.Framework.Impl.Pipeline;
-using Caravela.Framework.Project;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
+using Metalama.Framework.Code.Advised;
+using Metalama.Framework.Code.SyntaxBuilders;
+using Metalama.Framework.Diagnostics;
+using Metalama.Framework.Impl.Aspects;
+using Metalama.Framework.Impl.CodeModel;
+using Metalama.Framework.Impl.Diagnostics;
+using Metalama.Framework.Impl.Options;
+using Metalama.Framework.Impl.Pipeline;
+using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -21,9 +21,9 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
-using SpecialType = Caravela.Framework.Code.SpecialType;
+using SpecialType = Metalama.Framework.Code.SpecialType;
 
-namespace Caravela.Framework.Impl.Templating.MetaModel
+namespace Metalama.Framework.Impl.Templating.MetaModel
 {
     /// <summary>
     /// The implementation of <see cref="IMetaApi"/>.

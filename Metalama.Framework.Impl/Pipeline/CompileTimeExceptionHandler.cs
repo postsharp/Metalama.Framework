@@ -1,13 +1,13 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Impl.Diagnostics;
-using Caravela.Framework.Impl.Options;
+using Metalama.Framework.Impl.Diagnostics;
+using Metalama.Framework.Impl.Options;
 using Microsoft.CodeAnalysis;
 using System;
 using System.IO;
 
-namespace Caravela.Framework.Impl.Pipeline
+namespace Metalama.Framework.Impl.Pipeline
 {
     internal class CompileTimeExceptionHandler : ICompileTimeExceptionHandler
     {

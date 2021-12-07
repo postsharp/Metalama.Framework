@@ -1,22 +1,22 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
-using Caravela.Framework.Code.DeclarationBuilders;
-using Caravela.Framework.Impl.Aspects;
-using Caravela.Framework.Impl.CodeModel;
-using Caravela.Framework.Impl.CompileTime;
-using Caravela.Framework.Impl.Diagnostics;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
+using Metalama.Framework.Code.DeclarationBuilders;
+using Metalama.Framework.Impl.Aspects;
+using Metalama.Framework.Impl.CodeModel;
+using Metalama.Framework.Impl.CompileTime;
+using Metalama.Framework.Impl.Diagnostics;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Reflection;
-using TypeKind = Caravela.Framework.Code.TypeKind;
+using TypeKind = Metalama.Framework.Code.TypeKind;
 
-namespace Caravela.Framework.Impl.Advices
+namespace Metalama.Framework.Impl.Advices
 {
     [Obfuscation( Exclude = true )] // Not obfuscated to have a decent call stack in case of user exception.
     internal class AdviceFactory : IAdviceFactory

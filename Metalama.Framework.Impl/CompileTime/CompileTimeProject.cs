@@ -1,14 +1,14 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Compiler;
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Code.Collections;
-using Caravela.Framework.Fabrics;
-using Caravela.Framework.Impl.Collections;
-using Caravela.Framework.Impl.Diagnostics;
-using Caravela.Framework.Impl.Templating.Mapping;
-using Caravela.Framework.Project;
+using Metalama.Compiler;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code.Collections;
+using Metalama.Framework.Fabrics;
+using Metalama.Framework.Impl.Collections;
+using Metalama.Framework.Impl.Diagnostics;
+using Metalama.Framework.Impl.Templating.Mapping;
+using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -19,7 +19,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 
-namespace Caravela.Framework.Impl.CompileTime
+namespace Metalama.Framework.Impl.CompileTime
 {
     /// <summary>
     /// Represents the compile-time project extracted from a run-time project, including its

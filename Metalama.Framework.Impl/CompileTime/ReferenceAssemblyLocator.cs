@@ -1,12 +1,12 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Impl.Collections;
-using Caravela.Framework.Impl.Options;
-using Caravela.Framework.Impl.Sdk;
-using Caravela.Framework.Impl.Utilities;
-using Caravela.Framework.Project;
-using Caravela.Framework.RunTime;
+using Metalama.Framework.Impl.Collections;
+using Metalama.Framework.Impl.Options;
+using Metalama.Framework.Impl.Sdk;
+using Metalama.Framework.Impl.Utilities;
+using Metalama.Framework.Project;
+using Metalama.Framework.RunTime;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -17,7 +17,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 
-namespace Caravela.Framework.Impl.CompileTime
+namespace Metalama.Framework.Impl.CompileTime
 {
     /// <summary>
     /// Provides the location to the reference assemblies that are needed to create the compile-time projects.
@@ -25,18 +25,18 @@ namespace Caravela.Framework.Impl.CompileTime
     /// </summary>
     internal class ReferenceAssemblyLocator : IService
     {
-        private const string _compileTimeFrameworkAssemblyName = "Caravela.Framework";
+        private const string _compileTimeFrameworkAssemblyName = "Metalama.Framework";
         private readonly string _cacheDirectory;
 
         /// <summary>
-        /// Gets the name (without path and extension) of Caravela assemblies.
+        /// Gets the name (without path and extension) of Metalama assemblies.
         /// </summary>
-        private ImmutableArray<string> CaravelaImplementationAssemblyNames { get; } = ImmutableArray.Create(
-            "Caravela.Framework.Sdk",
-            "Caravela.Framework.Impl" );
+        private ImmutableArray<string> MetalamaImplementationAssemblyNames { get; } = ImmutableArray.Create(
+            "Metalama.Framework.Sdk",
+            "Metalama.Framework.Impl" );
 
         /// <summary>
-        /// Gets the name (without path and extension) of all standard assemblies, including Caravela, Roslyn and .NET standard.
+        /// Gets the name (without path and extension) of all standard assemblies, including Metalama, Roslyn and .NET standard.
         /// </summary>
         public ImmutableHashSet<string> StandardAssemblyNames { get; }
 
@@ -59,7 +59,7 @@ namespace Caravela.Framework.Impl.CompileTime
                || this.StandardAssemblyNames.Contains( assemblyName );
 
         /// <summary>
-        /// Gets the full path of all standard assemblies, including Caravela, Roslyn and .NET standard.
+        /// Gets the full path of all standard assemblies, including Metalama, Roslyn and .NET standard.
         /// </summary>
         public ImmutableArray<MetadataReference> StandardCompileTimeMetadataReferences { get; }
 
@@ -73,7 +73,7 @@ namespace Caravela.Framework.Impl.CompileTime
                 .Select( Path.GetFileNameWithoutExtension )
                 .ToImmutableHashSet( StringComparer.OrdinalIgnoreCase );
 
-            this.StandardAssemblyNames = this.CaravelaImplementationAssemblyNames
+            this.StandardAssemblyNames = this.MetalamaImplementationAssemblyNames
                 .Concat( _compileTimeFrameworkAssemblyName )
                 .Concat( this.SystemAssemblyPaths.Select( Path.GetFileNameWithoutExtension ) )
                 .ToImmutableHashSet( StringComparer.OrdinalIgnoreCase );
@@ -91,18 +91,18 @@ namespace Caravela.Framework.Impl.CompileTime
                     filePath: $"[{currentAssembly.Location}]{_compileTimeFrameworkAssemblyName}.dll" );
 
             // Get implementation assembly paths from the current AppDomain. We need to match our exact version number.
-            var caravelaImplementationPaths = AppDomain.CurrentDomain.GetAssemblies()
+            var metalamaImplementationPaths = AppDomain.CurrentDomain.GetAssemblies()
                 .Where( a => !a.IsDynamic ) // accessing Location of dynamic assemblies throws
                 .Where(
-                    a => this.CaravelaImplementationAssemblyNames.Contains( Path.GetFileNameWithoutExtension( a.Location ) ) &&
+                    a => this.MetalamaImplementationAssemblyNames.Contains( Path.GetFileNameWithoutExtension( a.Location ) ) &&
                          AssemblyName.GetAssemblyName( a.Location ).Version == currentAssembly.GetName().Version )
                 .Select( a => a.Location )
                 .ToList();
 
             // Assert that we found everything we need, because debugging is difficult when this step goes wrong.
-            foreach ( var assemblyName in this.CaravelaImplementationAssemblyNames )
+            foreach ( var assemblyName in this.MetalamaImplementationAssemblyNames )
             {
-                if ( !caravelaImplementationPaths.Any( a => a.EndsWith( assemblyName + ".dll", StringComparison.OrdinalIgnoreCase ) ) )
+                if ( !metalamaImplementationPaths.Any( a => a.EndsWith( assemblyName + ".dll", StringComparison.OrdinalIgnoreCase ) ) )
                 {
                     throw new AssertionFailedException( $"Cannot find {assemblyName}." );
                 }
@@ -110,7 +110,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
             this.StandardCompileTimeMetadataReferences =
                 this.SystemAssemblyPaths
-                    .Concat( caravelaImplementationPaths )
+                    .Concat( metalamaImplementationPaths )
                     .Select( MetadataReferenceCache.GetFromFile )
                     .Prepend( frameworkAssemblyReference )
                     .ToImmutableArray();

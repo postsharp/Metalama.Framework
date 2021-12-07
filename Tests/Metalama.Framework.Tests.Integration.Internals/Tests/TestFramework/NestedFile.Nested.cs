@@ -1,6 +1,6 @@
-using Caravela.Framework.Aspects;
+using Metalama.Framework.Aspects;
 
-namespace Caravela.Framework.Tests.Integration.Tests.TestFramework.NestedFile
+namespace Metalama.Framework.Tests.Integration.Tests.TestFramework.NestedFile
 {
     public class ImportedAspect : TypeAspect { }
 }

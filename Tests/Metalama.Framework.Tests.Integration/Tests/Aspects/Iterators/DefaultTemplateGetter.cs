@@ -4,12 +4,12 @@ using System;
 using System.Threading.Tasks;
 using System.Collections;
 using System.Collections.Generic;
-using Caravela.Framework;
-using Caravela.TestFramework;
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
+using Metalama.Framework;
+using Metalama.TestFramework;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
 
-namespace Caravela.Framework.Tests.Integration.Templating.Aspects.Iterators.DefaultTemplateGetter
+namespace Metalama.Framework.Tests.Integration.Templating.Aspects.Iterators.DefaultTemplateGetter
 {
     class Aspect : OverrideFieldOrPropertyAspect
     {

@@ -5,7 +5,7 @@ using System;
 using System.Runtime.InteropServices;
 using System.Threading;
 
-namespace Caravela.Reactive.Implementation
+namespace Metalama.Reactive.Implementation
 {
     /// <summary>
     /// A container for a value that must be changed atomically.

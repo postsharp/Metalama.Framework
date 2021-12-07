@@ -3,7 +3,7 @@
 
 using System;
 
-namespace Caravela.Framework.Impl.CompileTime.Serialization
+namespace Metalama.Framework.Impl.CompileTime.Serialization
 {
     internal static class SerializationIntrinsicTypeExtensions
     {

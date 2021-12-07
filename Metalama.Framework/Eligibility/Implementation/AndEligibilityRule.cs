@@ -4,7 +4,7 @@
 using System;
 using System.Collections.Immutable;
 
-namespace Caravela.Framework.Eligibility.Implementation
+namespace Metalama.Framework.Eligibility.Implementation
 {
     internal class AndEligibilityRule<T> : IEligibilityRule<T>
     {

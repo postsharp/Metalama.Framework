@@ -1,13 +1,13 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Diagnostics;
+using Metalama.Framework.Diagnostics;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 
-namespace Caravela.Framework.Impl.Diagnostics
+namespace Metalama.Framework.Impl.Diagnostics
 {
     internal static class DiagnosticDescriptorExtensions
     {

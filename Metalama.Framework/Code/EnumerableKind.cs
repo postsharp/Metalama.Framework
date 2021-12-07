@@ -3,7 +3,7 @@
 
 // ReSharper disable InconsistentNaming
 
-namespace Caravela.Framework.Code
+namespace Metalama.Framework.Code
 {
     /// <summary>
     /// Kinds of iterators.

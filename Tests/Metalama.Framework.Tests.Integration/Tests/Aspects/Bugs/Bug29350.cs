@@ -1,7 +1,7 @@
 using System;
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
-using Caravela.Framework.Code.SyntaxBuilders;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
+using Metalama.Framework.Code.SyntaxBuilders;
 
 public class LogAttribute : OverrideMethodAspect
 {

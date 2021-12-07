@@ -1,18 +1,18 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Code;
-using Caravela.Framework.Impl.Utilities;
+using Metalama.Framework.Code;
+using Metalama.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
-using SpecialType = Caravela.Framework.Code.SpecialType;
-using TypeKind = Caravela.Framework.Code.TypeKind;
-using VarianceKind = Caravela.Framework.Code.VarianceKind;
+using SpecialType = Metalama.Framework.Code.SpecialType;
+using TypeKind = Metalama.Framework.Code.TypeKind;
+using VarianceKind = Metalama.Framework.Code.VarianceKind;
 
-namespace Caravela.Framework.Impl.CodeModel
+namespace Metalama.Framework.Impl.CodeModel
 {
     internal class TypeParameter : Declaration, ITypeParameter, ITypeInternal
     {

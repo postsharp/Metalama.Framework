@@ -1,7 +1,7 @@
-using Caravela.TestFramework;
-using Caravela.Framework.Aspects;
+using Metalama.TestFramework;
+using Metalama.Framework.Aspects;
 
-namespace Caravela.Framework.Tests.Integration.TestInputs.Templating.NamespaceExpansion
+namespace Metalama.Framework.Tests.Integration.TestInputs.Templating.NamespaceExpansion
 {
     namespace FullyQualified
     {

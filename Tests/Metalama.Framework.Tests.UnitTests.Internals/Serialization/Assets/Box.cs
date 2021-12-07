@@ -3,7 +3,7 @@
 
 using System;
 
-namespace Caravela.Framework.Tests.UnitTests.Serialization.Assets
+namespace Metalama.Framework.Tests.UnitTests.Serialization.Assets
 {
     internal class Box<T>
     {

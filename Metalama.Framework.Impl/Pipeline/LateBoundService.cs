@@ -1,10 +1,10 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Project;
+using Metalama.Framework.Project;
 using System;
 
-namespace Caravela.Framework.Impl.Pipeline
+namespace Metalama.Framework.Impl.Pipeline
 {
     /// <summary>
     /// Represents the implementation of an <see cref="IService"/> that is lazily created and, therefore, can have circular dependencies

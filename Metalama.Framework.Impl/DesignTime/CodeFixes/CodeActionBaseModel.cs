@@ -4,7 +4,7 @@
 using Microsoft.CodeAnalysis.CodeActions;
 using System.Collections.Immutable;
 
-namespace Caravela.Framework.Impl.DesignTime.CodeFixes
+namespace Metalama.Framework.Impl.DesignTime.CodeFixes
 {
     /// <summary>
     /// Represents a code action or a code action menu.

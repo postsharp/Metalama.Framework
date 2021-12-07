@@ -4,9 +4,9 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using Caravela.Reactive.Implementation;
+using Metalama.Reactive.Implementation;
 
-namespace Caravela.Reactive.Operators
+namespace Metalama.Reactive.Operators
 {
     internal class SelectManyFromScalarOperator<TSource, TResult> : ReactiveOperator<TSource, IReactiveObserver<TSource>, IEnumerable<TResult>, IReactiveCollectionObserver<TResult>>,
         IReactiveCollection<TResult>

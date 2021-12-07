@@ -4,13 +4,13 @@ using System;
 using System.Threading.Tasks;
 using System.Collections;
 using System.Collections.Generic;
-using Caravela.Framework;
-using Caravela.TestFramework;
-using Caravela.Framework.Aspects;
+using Metalama.Framework;
+using Metalama.TestFramework;
+using Metalama.Framework.Aspects;
 
 // This is to test that there is actually no inlining, because it would break.
 
-namespace Caravela.Framework.Tests.Integration.Templating.Aspects.Iterators.Inlining
+namespace Metalama.Framework.Tests.Integration.Templating.Aspects.Iterators.Inlining
 {
     class Aspect : OverrideMethodAspect
     {

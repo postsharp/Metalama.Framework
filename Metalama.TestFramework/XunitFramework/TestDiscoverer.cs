@@ -1,7 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.TestFramework.Utilities;
+using Metalama.TestFramework.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -13,7 +13,7 @@ using Xunit;
 using Xunit.Abstractions;
 using Xunit.Sdk;
 
-namespace Caravela.TestFramework.XunitFramework
+namespace Metalama.TestFramework.XunitFramework
 {
     [Serializable]
     internal class TestDiscoverer : LongLivedMarshalByRefObject, ITestFrameworkDiscoverer
@@ -211,6 +211,6 @@ namespace Caravela.TestFramework.XunitFramework
 
         public string TargetFramework { get; }
 
-        string ITestFrameworkDiscoverer.TestFrameworkDisplayName => "Caravela";
+        string ITestFrameworkDiscoverer.TestFrameworkDisplayName => "Metalama";
     }
 }

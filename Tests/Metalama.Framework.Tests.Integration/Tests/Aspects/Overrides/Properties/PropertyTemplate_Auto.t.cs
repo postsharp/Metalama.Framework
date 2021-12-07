@@ -9,7 +9,7 @@ private static int _static_Property;
         [Override]
         public static int Static_Property {get    {
         global::System.Console.WriteLine("This is the overridden getter.");
-return global::Caravela.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.PropertyTemplate_Auto.TargetClass._static_Property;    }
+return global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.PropertyTemplate_Auto.TargetClass._static_Property;    }
 }
 private int _privateProperty;
         [Override]
@@ -55,11 +55,11 @@ private static int _static_PropertyWithSetter;
         [Override]
         public static int Static_PropertyWithSetter {get    {
         global::System.Console.WriteLine("This is the overridden getter.");
-return global::Caravela.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.PropertyTemplate_Auto.TargetClass._static_PropertyWithSetter;    }
+return global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.PropertyTemplate_Auto.TargetClass._static_PropertyWithSetter;    }
     
 set    {
         global::System.Console.WriteLine($"This is the overridden setter.");
-global::Caravela.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.PropertyTemplate_Auto.TargetClass._static_PropertyWithSetter=value;    }
+global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.PropertyTemplate_Auto.TargetClass._static_PropertyWithSetter=value;    }
 }
 private int _propertyWithRestrictedSetter;
         [Override]

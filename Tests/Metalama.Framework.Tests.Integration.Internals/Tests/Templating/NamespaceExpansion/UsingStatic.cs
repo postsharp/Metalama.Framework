@@ -1,10 +1,10 @@
 using System;
 
-using Caravela.Framework.Aspects;
+using Metalama.Framework.Aspects;
 using static System.Math;
-using Caravela.TestFramework;
+using Metalama.TestFramework;
 
-namespace Caravela.Framework.Tests.Integration.TestInputs.Templating.NamespaceExpansion
+namespace Metalama.Framework.Tests.Integration.TestInputs.Templating.NamespaceExpansion
 {
     namespace UsingStatic
     {

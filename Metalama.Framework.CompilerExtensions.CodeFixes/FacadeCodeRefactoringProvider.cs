@@ -6,7 +6,7 @@ using Microsoft.CodeAnalysis.CodeRefactorings;
 using System.Composition;
 using System.Threading.Tasks;
 
-namespace Caravela.Framework.CompilerExtensions
+namespace Metalama.Framework.CompilerExtensions
 {
     // ReSharper disable UnusedType.Global
 
@@ -18,7 +18,7 @@ namespace Caravela.Framework.CompilerExtensions
 
         public FacadeCodeRefactoringProvider()
         {
-            this._impl = (CodeRefactoringProvider) ResourceExtractor.CreateInstance( "Caravela.Framework.Impl.DesignTime.CentralCodeRefactoringProvider" );
+            this._impl = (CodeRefactoringProvider) ResourceExtractor.CreateInstance( "Metalama.Framework.Impl.DesignTime.CentralCodeRefactoringProvider" );
         }
 
         public override Task ComputeRefactoringsAsync( CodeRefactoringContext context ) => this._impl.ComputeRefactoringsAsync( context );

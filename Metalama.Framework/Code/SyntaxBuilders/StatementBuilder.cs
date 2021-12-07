@@ -1,13 +1,13 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Aspects;
+using Metalama.Framework.Aspects;
 
-namespace Caravela.Framework.Code.SyntaxBuilders
+namespace Metalama.Framework.Code.SyntaxBuilders
 {
     /// <summary>
     /// Allows to build a run-time statement that can be injected to run-time code using
-    /// <see cref="ToStatement"/> and <see cref="meta.InsertStatement(Caravela.Framework.Code.SyntaxBuilders.IStatement)"/>.
+    /// <see cref="ToStatement"/> and <see cref="meta.InsertStatement(Metalama.Framework.Code.SyntaxBuilders.IStatement)"/>.
     /// </summary>
     [CompileTimeOnly]
     public sealed class StatementBuilder : SyntaxBuilder
@@ -30,7 +30,7 @@ namespace Caravela.Framework.Code.SyntaxBuilders
 
         /// <summary>
         /// Converts the current <see cref="StatementBuilder"/> into an <see cref="IStatement"/> object, which can then
-        /// be inserted into run-time code using the <see cref="meta.InsertStatement(Caravela.Framework.Code.SyntaxBuilders.IStatement)"/>
+        /// be inserted into run-time code using the <see cref="meta.InsertStatement(Metalama.Framework.Code.SyntaxBuilders.IStatement)"/>
         /// method.
         /// </summary>
         public IStatement ToStatement() => meta.ParseStatement( this.StringBuilder.ToString() );

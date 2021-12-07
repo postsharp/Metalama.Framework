@@ -1,16 +1,16 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Impl.CodeModel;
-using Caravela.Framework.Impl.ReflectionMocks;
+using Metalama.Framework.Impl.CodeModel;
+using Metalama.Framework.Impl.ReflectionMocks;
 using System;
 using System.Linq;
 using System.Reflection;
 using Xunit;
 
-namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
+namespace Metalama.Framework.Tests.UnitTests.Serialization.Reflection
 {
-    public class CaravelaMethodInfoTests : SerializerTestsBase
+    public class MetalamaMethodInfoTests : SerializerTestsBase
     {
         [Fact]
         public void TestSerializationOfMethod()
@@ -19,7 +19,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
             var serialized = this.SerializeTargetDotMethod( code );
 
             Assert.Equal(
-                "((global::System.Reflection.MethodInfo)global::System.Reflection.MethodBase.GetMethodFromHandle(global::Caravela.Compiler.Intrinsics.GetRuntimeMethodHandle(\"M:Target.Method~System.Int32\")))",
+                "((global::System.Reflection.MethodInfo)global::System.Reflection.MethodBase.GetMethodFromHandle(global::Metalama.Compiler.Intrinsics.GetRuntimeMethodHandle(\"M:Target.Method~System.Int32\")))",
                 serialized );
 
             TestExpression<MethodInfo>(
@@ -40,7 +40,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
             var serialized = this.SerializeTargetDotMethod( code );
 
             Assert.Equal(
-                "((global::System.Reflection.MethodInfo)global::System.Reflection.MethodBase.GetMethodFromHandle(global::Caravela.Compiler.Intrinsics.GetRuntimeMethodHandle(\"M:Target.Method``1(``0)~``0\")))",
+                "((global::System.Reflection.MethodInfo)global::System.Reflection.MethodBase.GetMethodFromHandle(global::Metalama.Compiler.Intrinsics.GetRuntimeMethodHandle(\"M:Target.Method``1(``0)~``0\")))",
                 serialized );
 
             TestExpression<MethodInfo>(

@@ -1,17 +1,17 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Code;
-using Caravela.Framework.Impl.CodeModel;
-using Caravela.Framework.Impl.CodeModel.References;
-using Caravela.Framework.Impl.Utilities;
-using Caravela.Framework.Project;
+using Metalama.Framework.Code;
+using Metalama.Framework.Impl.CodeModel;
+using Metalama.Framework.Impl.CodeModel.References;
+using Metalama.Framework.Impl.Utilities;
+using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Globalization;
 using System.Reflection;
 
-namespace Caravela.Framework.Impl.ReflectionMocks
+namespace Metalama.Framework.Impl.ReflectionMocks
 {
     // This class must be public because it is referenced from compiled templates.
     public sealed class CompileTimeType : Type, ICompileTimeReflectionObject<IType>

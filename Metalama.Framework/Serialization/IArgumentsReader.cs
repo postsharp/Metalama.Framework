@@ -3,7 +3,7 @@
 
 using System.Diagnostics.CodeAnalysis;
 
-namespace Caravela.Framework.Serialization
+namespace Metalama.Framework.Serialization
 {
     /// <summary>
     /// Provides read access to the collection of deserialized arguments.

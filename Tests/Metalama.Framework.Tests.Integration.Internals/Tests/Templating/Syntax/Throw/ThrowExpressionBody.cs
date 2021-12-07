@@ -1,7 +1,7 @@
 using System;
-using Caravela.TestFramework;
+using Metalama.TestFramework;
 
-namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Throw.ThrowExpressionBody
+namespace Metalama.Framework.Tests.Integration.Templating.Syntax.Throw.ThrowExpressionBody
 {
     internal class Aspect
     {

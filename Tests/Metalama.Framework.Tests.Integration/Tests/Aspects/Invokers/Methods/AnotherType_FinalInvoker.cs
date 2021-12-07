@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Linq;
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
 
 #pragma warning disable CS0067
 
-namespace Caravela.Framework.IntegrationTests.Aspects.Invokers.Events.AnotherType_FinalInvoker
+namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Events.AnotherType_FinalInvoker
 {
     [AttributeUsage( AttributeTargets.Method )]
     public class TestAttribute : MethodAspect

@@ -4,11 +4,11 @@
 #pragma warning disable CS0219
 #endif
 
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
-using Caravela.Framework.Diagnostics;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
+using Metalama.Framework.Diagnostics;
 
-namespace Caravela.Framework.Tests.Integration.Aspects.Suppressions.OverrideMethod
+namespace Metalama.Framework.Tests.Integration.Aspects.Suppressions.OverrideMethod
 {
     public class SuppressWarningAttribute : TypeAspect
     {

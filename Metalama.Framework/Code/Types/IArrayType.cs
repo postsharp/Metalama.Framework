@@ -1,7 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-namespace Caravela.Framework.Code.Types
+namespace Metalama.Framework.Code.Types
 {
     /// <summary>
     /// Represents an array, e.g. <c>T[]</c>.

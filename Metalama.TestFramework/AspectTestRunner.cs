@@ -1,11 +1,11 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Impl.CompileTime;
-using Caravela.Framework.Impl.DesignTime.CodeFixes;
-using Caravela.Framework.Impl.Diagnostics;
-using Caravela.Framework.Impl.Pipeline;
-using Caravela.Framework.Impl.Testing;
+using Metalama.Framework.Impl.CompileTime;
+using Metalama.Framework.Impl.DesignTime.CodeFixes;
+using Metalama.Framework.Impl.Diagnostics;
+using Metalama.Framework.Impl.Pipeline;
+using Metalama.Framework.Impl.Testing;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -16,12 +16,12 @@ using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
 #if NET5_0_OR_GREATER
-using Caravela.Framework.Code;
+using Metalama.Framework.Code;
 using System.Reflection;
 using System.Runtime.Loader;
 #endif
 
-namespace Caravela.TestFramework
+namespace Metalama.TestFramework
 {
     /// <summary>
     /// Executes aspect integration tests by running the full aspect pipeline on the input source file.

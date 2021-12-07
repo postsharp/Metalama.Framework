@@ -1,6 +1,6 @@
 [Introduction]
     [Override]
-    public class TargetClass:global::Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.ImplicitMembers_Override_NotInlineable.IInterface    {
+    public class TargetClass:global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.ImplicitMembers_Override_NotInlineable.IInterface    {
 
 
 private global::System.Int32 _autoProperty;

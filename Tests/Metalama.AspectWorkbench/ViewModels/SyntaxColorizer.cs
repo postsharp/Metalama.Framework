@@ -2,8 +2,8 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 #pragma warning disable IDE0005
-using Caravela.Framework.DesignTime.Contracts;
-using Caravela.Framework.Impl.Formatting;
+using Metalama.Framework.DesignTime.Contracts;
+using Metalama.Framework.Impl.Formatting;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Classification;
 using System;
@@ -16,7 +16,7 @@ using System.Windows.Media;
 
 #pragma warning restore IDE0005
 
-namespace Caravela.AspectWorkbench.ViewModels
+namespace Metalama.AspectWorkbench.ViewModels
 {
     internal class SyntaxColorizer : FormattedCodeWriter
     {

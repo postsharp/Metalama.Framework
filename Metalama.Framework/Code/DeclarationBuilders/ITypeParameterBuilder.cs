@@ -3,7 +3,7 @@
 
 using System;
 
-namespace Caravela.Framework.Code.DeclarationBuilders
+namespace Metalama.Framework.Code.DeclarationBuilders
 {
     public interface ITypeParameterBuilder : IDeclarationBuilder, ITypeParameter
     {

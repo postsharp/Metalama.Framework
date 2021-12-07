@@ -13,7 +13,7 @@ using System.Globalization;
 using System.IO;
 using System.Reflection;
 
-namespace Caravela.Obfuscator
+namespace Metalama.Obfuscator
 {
     // ReSharper disable MemberCanBePrivate.Global
     // ReSharper disable UnusedAutoPropertyAccessor.Global

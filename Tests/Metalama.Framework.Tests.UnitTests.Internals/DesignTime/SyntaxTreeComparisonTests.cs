@@ -1,11 +1,11 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Impl.DesignTime.Diff;
+using Metalama.Framework.Impl.DesignTime.Diff;
 using Microsoft.CodeAnalysis.CSharp;
 using Xunit;
 
-namespace Caravela.Framework.Tests.UnitTests.DesignTime
+namespace Metalama.Framework.Tests.UnitTests.DesignTime
 {
     public class SyntaxTreeComparisonTests
     {
@@ -211,9 +211,9 @@ namespace Caravela.Framework.Tests.UnitTests.DesignTime
         [Fact]
         public void ChangeInCompileTimeCode()
         {
-            var syntaxTree1 = CSharpSyntaxTree.ParseText( "using Caravela.Framework.Aspects; class C { int M { get => 1; } }" );
+            var syntaxTree1 = CSharpSyntaxTree.ParseText( "using Metalama.Framework.Aspects; class C { int M { get => 1; } }" );
 
-            var syntaxTree2 = CSharpSyntaxTree.ParseText( "using Caravela.Framework.Aspects; class C { int M { get => 2; } }" );
+            var syntaxTree2 = CSharpSyntaxTree.ParseText( "using Metalama.Framework.Aspects; class C { int M { get => 2; } }" );
 
             Assert.True( CompilationChangeTracker.IsDifferent( syntaxTree1, syntaxTree2 ) );
         }

@@ -3,7 +3,7 @@
 
 using System.Collections.Generic;
 
-namespace Caravela.Framework.Impl.Linking
+namespace Metalama.Framework.Impl.Linking
 {
     /// <summary>
     /// Result of member analysis.

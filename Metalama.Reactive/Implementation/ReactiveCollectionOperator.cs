@@ -4,7 +4,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
-namespace Caravela.Reactive.Implementation
+namespace Metalama.Reactive.Implementation
 {
     /// <summary>
     /// A base implementation of <see cref="ReactiveOperator{TSource,TSourceObserver,TResult,TResultObserver}"/> for collection operators.

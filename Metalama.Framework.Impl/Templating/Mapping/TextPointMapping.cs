@@ -3,7 +3,7 @@
 
 using System.IO;
 
-namespace Caravela.Framework.Impl.Templating.Mapping
+namespace Metalama.Framework.Impl.Templating.Mapping
 {
     /// <summary>
     /// Represents a mapping between a source and a target <see cref="TextPoint"/>.

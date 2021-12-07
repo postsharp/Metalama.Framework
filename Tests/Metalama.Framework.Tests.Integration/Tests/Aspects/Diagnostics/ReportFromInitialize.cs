@@ -1,12 +1,12 @@
 ﻿// @IncludeAllSeverities
 
 using System;
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
-using Caravela.Framework.Diagnostics;
-using Caravela.TestFramework;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
+using Metalama.Framework.Diagnostics;
+using Metalama.TestFramework;
 
-namespace Caravela.Framework.Tests.Integration.Aspects.Diagnostics.ReportFromInitialize
+namespace Metalama.Framework.Tests.Integration.Aspects.Diagnostics.ReportFromInitialize
 {
     public class ErrorAttribute : OverrideMethodAspect
     {

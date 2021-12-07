@@ -2,12 +2,12 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using System;
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
-using Caravela.Framework.Diagnostics;
-using Caravela.Framework.TestApp.Aspects;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
+using Metalama.Framework.Diagnostics;
+using Metalama.Framework.TestApp.Aspects;
 
-namespace Caravela.Framework.TestApp
+namespace Metalama.Framework.TestApp
 {
     internal class PrintDebugInfoAspect : OverrideMethodAspect
     {

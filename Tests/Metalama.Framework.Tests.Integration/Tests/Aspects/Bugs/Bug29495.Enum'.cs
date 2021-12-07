@@ -1,6 +1,6 @@
-using Caravela.Framework.Aspects;
+using Metalama.Framework.Aspects;
 
-namespace Caravela.Framework.Tests.Integration.Aspects.Bugs.Bug29495
+namespace Metalama.Framework.Tests.Integration.Aspects.Bugs.Bug29495
 {
     [CompileTime]
     enum MyEnum

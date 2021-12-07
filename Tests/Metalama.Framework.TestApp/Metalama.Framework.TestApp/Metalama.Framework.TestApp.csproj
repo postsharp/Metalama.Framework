@@ -3,13 +3,13 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net5.0</TargetFramework>
-    <CaravelaEmitCompilerTransformedFiles>true</CaravelaEmitCompilerTransformedFiles>
-    <CaravelaDebugTransformedCode>true</CaravelaDebugTransformedCode>
+    <MetalamaEmitCompilerTransformedFiles>true</MetalamaEmitCompilerTransformedFiles>
+    <MetalamaDebugTransformedCode>true</MetalamaDebugTransformedCode>
     <EnforceCodeStyleInBuild>False</EnforceCodeStyleInBuild>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Caravela.Framework.TestApp.Aspects\Caravela.Framework.TestApp.Aspects.csproj" />
-    <PackageReference Include="Caravela.Framework" Version="$(CaravelaVersion)" />
+    <ProjectReference Include="..\Metalama.Framework.TestApp.Aspects\Metalama.Framework.TestApp.Aspects.csproj" />
+    <PackageReference Include="Metalama.Framework" Version="$(MetalamaVersion)" />
   </ItemGroup>
 </Project>

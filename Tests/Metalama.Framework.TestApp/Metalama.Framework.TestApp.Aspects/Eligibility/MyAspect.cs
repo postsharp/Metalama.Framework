@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
-using Caravela.Framework.Eligibility;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
+using Metalama.Framework.Eligibility;
 
-namespace Caravela.Framework.TestApp.Aspects.Eligibility
+namespace Metalama.Framework.TestApp.Aspects.Eligibility
 {
     // Example of an aspect with complex eligibility rules.
     public class MyAspect : Attribute, IAspect<IMethod>

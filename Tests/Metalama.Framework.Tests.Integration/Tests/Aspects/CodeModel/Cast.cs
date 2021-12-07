@@ -1,7 +1,7 @@
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
 
-namespace Caravela.Framework.IntegrationTests.Aspects.CodeModel.Cast
+namespace Metalama.Framework.IntegrationTests.Aspects.CodeModel.Cast
 {
     public class OverrideAttribute : OverrideMethodAspect
     {

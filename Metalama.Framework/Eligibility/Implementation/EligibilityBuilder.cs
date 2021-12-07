@@ -1,13 +1,13 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Code;
+using Metalama.Framework.Code;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 
 #pragma warning disable 618 // Not implemented.
 
-namespace Caravela.Framework.Eligibility.Implementation
+namespace Metalama.Framework.Eligibility.Implementation
 {
     internal class EligibilityBuilder<T> : IEligibilityBuilder<T>
         where T : class

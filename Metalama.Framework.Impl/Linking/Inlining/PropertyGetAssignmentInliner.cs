@@ -5,7 +5,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace Caravela.Framework.Impl.Linking.Inlining
+namespace Metalama.Framework.Impl.Linking.Inlining
 {
     internal class PropertyGetAssignmentInliner : PropertyGetInliner
     {

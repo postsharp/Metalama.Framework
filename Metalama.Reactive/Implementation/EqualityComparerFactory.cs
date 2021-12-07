@@ -4,7 +4,7 @@
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
-namespace Caravela.Reactive.Implementation
+namespace Metalama.Reactive.Implementation
 {
     public static class EqualityComparerFactory
     {

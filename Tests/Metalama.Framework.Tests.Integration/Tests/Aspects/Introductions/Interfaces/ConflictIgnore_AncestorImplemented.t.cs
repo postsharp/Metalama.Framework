@@ -1,6 +1,6 @@
     [Introduction]
     public class TargetClass :IBaseInterface
-,global::Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.ConflictIgnore_AncestorImplemented.IDerivedInterface    {
+,global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.ConflictIgnore_AncestorImplemented.IDerivedInterface    {
         public int Foo()
         {
             Console.WriteLine("This is original interface member.");

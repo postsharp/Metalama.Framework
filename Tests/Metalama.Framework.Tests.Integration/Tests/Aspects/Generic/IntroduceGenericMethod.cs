@@ -1,6 +1,6 @@
-using Caravela.Framework.Aspects;
+using Metalama.Framework.Aspects;
 
-namespace Caravela.Framework.Tests.PublicPipeline.Aspects.Generic.IntroduceGenericMethod
+namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Generic.IntroduceGenericMethod
 {
     internal class Aspect : TypeAspect
     {

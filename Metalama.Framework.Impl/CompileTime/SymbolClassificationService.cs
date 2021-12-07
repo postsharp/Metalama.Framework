@@ -1,24 +1,24 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Project;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Runtime.CompilerServices;
 
-namespace Caravela.Framework.Impl.CompileTime
+namespace Metalama.Framework.Impl.CompileTime
 {
     internal class SymbolClassificationService : IService
     {
         private readonly IServiceProvider _serviceProvider;
         private readonly ConditionalWeakTable<Compilation, ISymbolClassifier> _instances = new();
-        private readonly SymbolClassifier _noCaravelaReferenceClassifier;
+        private readonly SymbolClassifier _noMetalamaReferenceClassifier;
 
         public SymbolClassificationService( IServiceProvider serviceProvider )
         {
             this._serviceProvider = serviceProvider;
-            this._noCaravelaReferenceClassifier = new SymbolClassifier( serviceProvider, null );
+            this._noMetalamaReferenceClassifier = new SymbolClassifier( serviceProvider, null );
         }
 
         /// <summary>
@@ -29,9 +29,9 @@ namespace Caravela.Framework.Impl.CompileTime
                 compilation,
                 c =>
                 {
-                    var hasCaravelaReference = compilation.GetTypeByMetadataName( typeof(CompileTimeAttribute).FullName ) != null;
+                    var hasMetalamaReference = compilation.GetTypeByMetadataName( typeof(CompileTimeAttribute).FullName ) != null;
 
-                    return hasCaravelaReference ? new SymbolClassifier( this._serviceProvider, c ) : this._noCaravelaReferenceClassifier;
+                    return hasMetalamaReference ? new SymbolClassifier( this._serviceProvider, c ) : this._noMetalamaReferenceClassifier;
                 } );
     }
 }

@@ -1,9 +1,9 @@
 using System;
-using Caravela.TestFramework;
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
+using Metalama.TestFramework;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
 
-namespace Caravela.Framework.Tests.Integration.Aspects.Initialize.Constructor
+namespace Metalama.Framework.Tests.Integration.Aspects.Initialize.Constructor
 {
     class Aspect : OverrideMethodAspect
     {

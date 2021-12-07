@@ -5,7 +5,7 @@ using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Caravela.Framework.Impl.Diagnostics
+namespace Metalama.Framework.Impl.Diagnostics
 {
     internal static class DiagnosticListExtensions
     {

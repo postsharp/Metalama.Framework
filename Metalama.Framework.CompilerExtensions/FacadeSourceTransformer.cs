@@ -1,9 +1,9 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Compiler;
+using Metalama.Compiler;
 
-namespace Caravela.Framework.CompilerExtensions
+namespace Metalama.Framework.CompilerExtensions
 {
     // ReSharper disable UnusedType.Global
 
@@ -14,7 +14,7 @@ namespace Caravela.Framework.CompilerExtensions
 
         public FacadeSourceTransformer()
         {
-            this._impl = (ISourceTransformer) ResourceExtractor.CreateInstance( "Caravela.Framework.Impl.Pipeline.SourceTransformer" );
+            this._impl = (ISourceTransformer) ResourceExtractor.CreateInstance( "Metalama.Framework.Impl.Pipeline.SourceTransformer" );
         }
 
         public void Execute( TransformerContext context ) => this._impl.Execute( context );

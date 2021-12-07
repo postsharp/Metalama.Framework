@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
 
-namespace Caravela.TestFramework
+namespace Metalama.TestFramework
 {
     /// <summary>
     /// A set of test options, which can be included in the source text of tests using special comments like <c>// @ReportOutputWarnings</c>.
@@ -229,13 +229,13 @@ namespace Caravela.TestFramework
 
                     case "DesignTime":
                         this.TestRunnerFactoryType =
-                            "Caravela.Framework.Tests.Integration.Runners.DesignTimeTestRunnerFactory, Caravela.Framework.Tests.Integration";
+                            "Metalama.Framework.Tests.Integration.Runners.DesignTimeTestRunnerFactory, Metalama.Framework.Tests.Integration";
 
                         break;
 
                     case "LiveTemplate":
                         this.TestRunnerFactoryType =
-                            "Caravela.Framework.Tests.Integration.Runners.LiveTemplateTestRunnerFactory, Caravela.Framework.Tests.Integration.Internals";
+                            "Metalama.Framework.Tests.Integration.Runners.LiveTemplateTestRunnerFactory, Metalama.Framework.Tests.Integration.Internals";
 
                         break;
 
@@ -309,7 +309,7 @@ namespace Caravela.TestFramework
         }
 
         /// <summary>
-        /// Apply all relevant options for a test, both from the source code and from the <c>caravelaTests.config</c> file. 
+        /// Apply all relevant options for a test, both from the source code and from the <c>metalamaTests.config</c> file. 
         /// </summary>
         internal void ApplyOptions( string sourceCode, string path, TestDirectoryOptionsReader optionsReader )
         {

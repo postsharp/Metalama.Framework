@@ -1,12 +1,12 @@
-﻿using Caravela.Framework.Aspects;
-using Caravela.TestFramework;
+﻿using Metalama.Framework.Aspects;
+using Metalama.TestFramework;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
 #pragma warning disable CS0169
 
-namespace Caravela.Framework.Tests.Integration.Tests.Aspects.Samples.ImportService
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.ImportService
 {
     class ImportServiceAspect : OverrideFieldOrPropertyAspect
     {

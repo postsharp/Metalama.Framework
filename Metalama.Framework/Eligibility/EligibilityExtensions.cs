@@ -1,13 +1,13 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Code;
-using Caravela.Framework.Eligibility.Implementation;
-using Caravela.Framework.Project;
+using Metalama.Framework.Code;
+using Metalama.Framework.Eligibility.Implementation;
+using Metalama.Framework.Project;
 using System;
 using System.Linq;
 
-namespace Caravela.Framework.Eligibility
+namespace Metalama.Framework.Eligibility
 {
     /// <summary>
     /// Extension methods for <see cref="IEligibilityBuilder"/>.
@@ -146,7 +146,7 @@ namespace Caravela.Framework.Eligibility
 
                     var formattedAccessibilities = string.Join(
                         " or ",
-                        accessibilities.Select( a => string.Format( CaravelaExecutionContext.Current.FormatProvider, "{0}", a ) ) );
+                        accessibilities.Select( a => string.Format( MetalamaExecutionContext.Current.FormatProvider, "{0}", a ) ) );
 
                     return $"{member} must be {formattedAccessibilities}";
                 } );

@@ -1,8 +1,8 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Impl.CodeModel;
-using Caravela.Framework.Impl.ReflectionMocks;
+using Metalama.Framework.Impl.CodeModel;
+using Metalama.Framework.Impl.ReflectionMocks;
 using System.Linq;
 using System.Reflection;
 using Xunit;
@@ -10,9 +10,9 @@ using Xunit.Abstractions;
 
 // ReSharper disable ParameterOnlyUsedForPreconditionCheck.Local
 
-namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
+namespace Metalama.Framework.Tests.UnitTests.Serialization.Reflection
 {
-    public class CaravelaConstructorInfoTests : ReflectionTestBase
+    public class MetalamaConstructorInfoTests : ReflectionTestBase
     {
         [Fact]
         public void TestConstructor()
@@ -21,7 +21,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
             var serialized = this.SerializeConstructor( code );
 
             this.AssertEqual(
-                @"((global::System.Reflection.ConstructorInfo)global::System.Reflection.MethodBase.GetMethodFromHandle(global::Caravela.Compiler.Intrinsics.GetRuntimeMethodHandle(""M:Target.#ctor(System.Int32)"")))",
+                @"((global::System.Reflection.ConstructorInfo)global::System.Reflection.MethodBase.GetMethodFromHandle(global::Metalama.Compiler.Intrinsics.GetRuntimeMethodHandle(""M:Target.#ctor(System.Int32)"")))",
                 serialized );
 
             TestExpression<ConstructorInfo>(
@@ -41,7 +41,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
             var serialized = this.SerializeConstructor( code );
 
             this.AssertEqual(
-                @"((global::System.Reflection.ConstructorInfo)global::System.Reflection.MethodBase.GetMethodFromHandle(global::Caravela.Compiler.Intrinsics.GetRuntimeMethodHandle(""M:Target`1.#ctor(`0)""), typeof(global::Target<>).TypeHandle))",
+                @"((global::System.Reflection.ConstructorInfo)global::System.Reflection.MethodBase.GetMethodFromHandle(global::Metalama.Compiler.Intrinsics.GetRuntimeMethodHandle(""M:Target`1.#ctor(`0)""), typeof(global::Target<>).TypeHandle))",
                 serialized );
 
             TestExpression<ConstructorInfo>(
@@ -61,7 +61,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
             var serialized = this.SerializeConstructor( code );
 
             this.AssertEqual(
-                @"((global::System.Reflection.ConstructorInfo)global::System.Reflection.MethodBase.GetMethodFromHandle(global::Caravela.Compiler.Intrinsics.GetRuntimeMethodHandle(""M:Target.#ctor"")))",
+                @"((global::System.Reflection.ConstructorInfo)global::System.Reflection.MethodBase.GetMethodFromHandle(global::Metalama.Compiler.Intrinsics.GetRuntimeMethodHandle(""M:Target.#ctor"")))",
                 serialized );
 
             TestExpression<ConstructorInfo>(
@@ -90,6 +90,6 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
             return actual;
         }
 
-        public CaravelaConstructorInfoTests( ITestOutputHelper helper ) : base( helper ) { }
+        public MetalamaConstructorInfoTests( ITestOutputHelper helper ) : base( helper ) { }
     }
 }

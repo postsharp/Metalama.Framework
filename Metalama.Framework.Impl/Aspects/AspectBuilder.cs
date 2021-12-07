@@ -1,24 +1,24 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
-using Caravela.Framework.Diagnostics;
-using Caravela.Framework.Impl.Advices;
-using Caravela.Framework.Impl.CodeModel;
-using Caravela.Framework.Impl.Diagnostics;
-using Caravela.Framework.Impl.Fabrics;
-using Caravela.Framework.Impl.Pipeline;
-using Caravela.Framework.Impl.Utilities;
-using Caravela.Framework.Project;
-using Caravela.Framework.Validation;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
+using Metalama.Framework.Diagnostics;
+using Metalama.Framework.Impl.Advices;
+using Metalama.Framework.Impl.CodeModel;
+using Metalama.Framework.Impl.Diagnostics;
+using Metalama.Framework.Impl.Fabrics;
+using Metalama.Framework.Impl.Pipeline;
+using Metalama.Framework.Impl.Utilities;
+using Metalama.Framework.Project;
+using Metalama.Framework.Validation;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
 
-namespace Caravela.Framework.Impl.Aspects
+namespace Metalama.Framework.Impl.Aspects
 {
     internal class AspectBuilder<T> : IAspectBuilder<T>, IAspectBuilderInternal
         where T : class, IDeclaration

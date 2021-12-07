@@ -1,13 +1,13 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Project;
+using Metalama.Framework.Project;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 
-namespace Caravela.Framework.Code.DeclarationBuilders
+namespace Metalama.Framework.Code.DeclarationBuilders
 {
     /// <summary>
     /// Encapsulates the information necessary to create a custom attribute. 
@@ -68,7 +68,7 @@ namespace Caravela.Framework.Code.DeclarationBuilders
             IReadOnlyList<object?>? constructorArguments = null,
             IReadOnlyList<KeyValuePair<string, object?>>? namedArguments = null )
             => Create(
-                (INamedType) CaravelaExecutionContext.Current.Compilation.TypeFactory.GetTypeByReflectionType( attributeType ),
+                (INamedType) MetalamaExecutionContext.Current.Compilation.TypeFactory.GetTypeByReflectionType( attributeType ),
                 constructorArguments,
                 namedArguments );
 

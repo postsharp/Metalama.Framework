@@ -1,12 +1,12 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Impl.CompileTime;
-using Caravela.Framework.Project;
+using Metalama.Framework.Impl.CompileTime;
+using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
 
-namespace Caravela.Framework.Impl.Observers
+namespace Metalama.Framework.Impl.Observers
 {
     /// <summary>
     /// An interface that can be injected into the service provider to get callbacks from the <see cref="CompileTimeCompilationBuilder"/>

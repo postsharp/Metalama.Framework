@@ -1,9 +1,9 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Code;
-using Caravela.Framework.Impl.CodeModel;
-using Caravela.Framework.Impl.ReflectionMocks;
+using Metalama.Framework.Code;
+using Metalama.Framework.Impl.CodeModel;
+using Metalama.Framework.Impl.ReflectionMocks;
 using System.Linq;
 using System.Reflection;
 using Xunit;
@@ -11,11 +11,11 @@ using Xunit.Abstractions;
 
 // ReSharper disable ParameterOnlyUsedForPreconditionCheck.Local
 
-namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
+namespace Metalama.Framework.Tests.UnitTests.Serialization.Reflection
 {
-    public class CaravelaPropertyInfoTests : ReflectionTestBase
+    public class MetalamaPropertyInfoTests : ReflectionTestBase
     {
-        public CaravelaPropertyInfoTests( ITestOutputHelper helper ) : base( helper ) { }
+        public MetalamaPropertyInfoTests( ITestOutputHelper helper ) : base( helper ) { }
 
         [Fact]
         public void TestProperty()
@@ -24,7 +24,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
             var serialized = this.SerializeProperty( code );
 
             this.AssertEqual(
-                @"new global::Caravela.Framework.RunTime.FieldOrPropertyInfo(typeof(global::Target).GetProperty(""Property"", global::System.Reflection.BindingFlags.DeclaredOnly | global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Static | global::System.Reflection.BindingFlags.Instance))",
+                @"new global::Metalama.Framework.RunTime.FieldOrPropertyInfo(typeof(global::Target).GetProperty(""Property"", global::System.Reflection.BindingFlags.DeclaredOnly | global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Static | global::System.Reflection.BindingFlags.Instance))",
                 serialized );
 
             TestExpression<PropertyInfo>(
@@ -46,7 +46,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
             var serialized = this.SerializeProperty( code );
 
             this.AssertEqual(
-                @"new global::Caravela.Framework.RunTime.FieldOrPropertyInfo(typeof(global::Target<>).GetProperty(""Property"", global::System.Reflection.BindingFlags.DeclaredOnly | global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Static | global::System.Reflection.BindingFlags.Instance))",
+                @"new global::Metalama.Framework.RunTime.FieldOrPropertyInfo(typeof(global::Target<>).GetProperty(""Property"", global::System.Reflection.BindingFlags.DeclaredOnly | global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Static | global::System.Reflection.BindingFlags.Instance))",
                 serialized );
 
             TestExpression<PropertyInfo>(
@@ -68,7 +68,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
             var serialized = this.SerializeProperty( code );
 
             this.AssertEqual(
-                @"new global::Caravela.Framework.RunTime.FieldOrPropertyInfo(typeof(global::Target).GetProperty(""Property"", global::System.Reflection.BindingFlags.DeclaredOnly | global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Static | global::System.Reflection.BindingFlags.Instance))",
+                @"new global::Metalama.Framework.RunTime.FieldOrPropertyInfo(typeof(global::Target).GetProperty(""Property"", global::System.Reflection.BindingFlags.DeclaredOnly | global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Static | global::System.Reflection.BindingFlags.Instance))",
                 serialized );
 
             TestExpression<PropertyInfo>(
@@ -90,7 +90,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
             var serialized = this.SerializeIndexerWithTarget( code );
 
             this.AssertEqual(
-                @"new global::Caravela.Framework.RunTime.FieldOrPropertyInfo(typeof(global::Target).GetProperty(""Item"", typeof(global::System.String), new global::System.Type[]{typeof(global::System.Int32)}))",
+                @"new global::Metalama.Framework.RunTime.FieldOrPropertyInfo(typeof(global::Target).GetProperty(""Item"", typeof(global::System.String), new global::System.Type[]{typeof(global::System.Int32)}))",
                 serialized );
 
             TestExpression<PropertyInfo>(
@@ -120,7 +120,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
             var serialized = testContext.Serialize( CompileTimeFieldOrPropertyInfo.Create( (Property) property ) ).ToString();
 
             this.AssertEqual(
-                @"new global::Caravela.Framework.RunTime.FieldOrPropertyInfo(typeof(global::System.String).GetProperty(""Chars"", typeof(global::System.Char), new global::System.Type[]{typeof(global::System.Int32)}))",
+                @"new global::Metalama.Framework.RunTime.FieldOrPropertyInfo(typeof(global::System.String).GetProperty(""Chars"", typeof(global::System.Char), new global::System.Type[]{typeof(global::System.Int32)}))",
                 serialized );
 
             TestExpression<PropertyInfo>(
@@ -150,7 +150,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
 
         public static string StripLocationInfo( string serialized )
         {
-            const string prefix = "new global::Caravela.Framework.RunTime.FieldOrPropertyInfo(";
+            const string prefix = "new global::Metalama.Framework.RunTime.FieldOrPropertyInfo(";
 
             return serialized.Substring( prefix.Length, serialized.Length - prefix.Length - 1 );
         }

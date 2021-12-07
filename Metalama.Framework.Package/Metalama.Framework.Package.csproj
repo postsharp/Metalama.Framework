@@ -4,8 +4,8 @@
         <TargetFramework>netstandard2.0</TargetFramework>
         
         <!-- Packaging -->
-        <PackageId>Caravela.Framework</PackageId>
-        <PackageDescription>PostSharp project "Caravela". A tool for aspect-oriented programming (AOP) using templates written in pure C#.</PackageDescription>
+        <PackageId>Metalama.Framework</PackageId>
+        <PackageDescription>PostSharp project "Metalama". A tool for aspect-oriented programming (AOP) using templates written in pure C#.</PackageDescription>
         <IncludeBuildOutput>false</IncludeBuildOutput>
         <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);_AddAnalyzersToOutput</TargetsForTfmSpecificContentInPackage>
         
@@ -15,34 +15,34 @@
         <!-- Disable a warning saying that we have nothing under the lib folder. -->
         <NoWarn>NU5128</NoWarn>
 
-        <UseCaravelaCompiler>Public</UseCaravelaCompiler>
+        <UseMetalamaCompiler>Public</UseMetalamaCompiler>
         
-        <!-- Disable the customization done by Caravela.Compiler.Sdk -->
-        <CaravelaCompilerDisablePackCustomization>True</CaravelaCompilerDisablePackCustomization>
+        <!-- Disable the customization done by Metalama.Compiler.Sdk -->
+        <MetalamaCompilerDisablePackCustomization>True</MetalamaCompilerDisablePackCustomization>
     </PropertyGroup>
 
     <ItemGroup>
-      <None Update="Caravela.Framework.props">
+      <None Update="Metalama.Framework.props">
         <Pack>true</Pack>
         <PackagePath>buildTransitive</PackagePath>
       </None>
-      <None Update="Caravela.Framework.targets">
+      <None Update="Metalama.Framework.targets">
         <Pack>true</Pack>
         <PackagePath>buildTransitive</PackagePath>
       </None>
-      <None Update="Caravela.CompilerVisibleProperties.props">
+      <None Update="Metalama.CompilerVisibleProperties.props">
         <Pack>true</Pack>
         <PackagePath>buildTransitive</PackagePath>
       </None>
     </ItemGroup>
     
     <ItemGroup>
-    		<ProjectReference Include="..\Caravela.Framework.CompilerExtensions.CodeFixes\Caravela.Framework.CompilerExtensions.CodeFixes.csproj" PrivateAssets="all" />
-    		<ProjectReference Include="..\Caravela.Framework.CompilerExtensions\Caravela.Framework.CompilerExtensions.csproj" PrivateAssets="all" />
+    		<ProjectReference Include="..\Metalama.Framework.CompilerExtensions.CodeFixes\Metalama.Framework.CompilerExtensions.CodeFixes.csproj" PrivateAssets="all" />
+    		<ProjectReference Include="..\Metalama.Framework.CompilerExtensions\Metalama.Framework.CompilerExtensions.csproj" PrivateAssets="all" />
     		
             <!-- Adding PrivateAssets="none" here below is important otherwise PrivateAssets="all" will be transitively inherited from the ProjectReference above -->
 
-    		<ProjectReference Include="..\Caravela.Framework\Caravela.Framework.csproj" PrivateAssets="none" />
+    		<ProjectReference Include="..\Metalama.Framework\Metalama.Framework.csproj" PrivateAssets="none" />
     		
     		<PackageReference Include="Microsoft.CSharp" Version="$(MicrosoftCSharpVersion)" PrivateAssets="none" />
 </ItemGroup>
@@ -51,13 +51,13 @@
     
     <Target Name="_AddAnalyzersToOutput">
     		<ItemGroup>
-    			<TfmSpecificPackageFile Include="$(OutputPath)\Caravela.Framework.CompilerExtensions.dll" PackagePath="analyzers/dotnet/cs" />
-    			<TfmSpecificPackageFile Include="$(OutputPath)\Caravela.Framework.CompilerExtensions.CodeFixes.dll" PackagePath="analyzers/dotnet/cs" />
+    			<TfmSpecificPackageFile Include="$(OutputPath)\Metalama.Framework.CompilerExtensions.dll" PackagePath="analyzers/dotnet/cs" />
+    			<TfmSpecificPackageFile Include="$(OutputPath)\Metalama.Framework.CompilerExtensions.CodeFixes.dll" PackagePath="analyzers/dotnet/cs" />
     		</ItemGroup>
     	</Target>
 
 	
-	<Target Name="SetPackageContent" AfterTargets="CaravelaCompilerSetLibAssembliesInPackage">
+	<Target Name="SetPackageContent" AfterTargets="MetalamaCompilerSetLibAssembliesInPackage">
 		<ItemGroup>
 			<!-- remove everything from lib -->
 			<BuildOutputInPackage Remove="@(BuildOutputInPackage)" />

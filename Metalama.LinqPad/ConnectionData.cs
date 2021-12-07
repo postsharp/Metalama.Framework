@@ -7,7 +7,7 @@ using System.IO;
 using System.Runtime.CompilerServices;
 using System.Xml.Linq;
 
-namespace Caravela.LinqPad
+namespace Metalama.LinqPad
 {
     /// <summary>
     /// Represents a connection, i.e. contains information about the loaded project or solution.
@@ -63,7 +63,7 @@ namespace Caravela.LinqPad
         public void Save( IConnectionInfo connectionInfo )
         {
             connectionInfo.DisplayName = this.DisplayName;
-            connectionInfo.DriverData = new XElement( "CaravelaConnection", new XElement( "Project", this.Project ) );
+            connectionInfo.DriverData = new XElement( "MetalamaConnection", new XElement( "Project", this.Project ) );
             connectionInfo.Persist = this.Persist;
         }
 

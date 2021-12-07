@@ -1,13 +1,13 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.DesignTime.Contracts;
-using Caravela.Framework.Diagnostics;
-using Caravela.Framework.Impl.CompileTime;
-using Caravela.Framework.Impl.Diagnostics;
-using Caravela.Framework.Impl.Serialization;
-using Caravela.Framework.Impl.Utilities;
-using Caravela.Framework.Project;
+using Metalama.Framework.DesignTime.Contracts;
+using Metalama.Framework.Diagnostics;
+using Metalama.Framework.Impl.CompileTime;
+using Metalama.Framework.Impl.Diagnostics;
+using Metalama.Framework.Impl.Serialization;
+using Metalama.Framework.Impl.Utilities;
+using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -22,7 +22,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 #pragma warning disable SA1124 // Don't use regions
 
-namespace Caravela.Framework.Impl.Templating
+namespace Metalama.Framework.Impl.Templating
 {
     /// <summary>
     /// A <see cref="CSharpSyntaxRewriter"/> that adds annotation that distinguish compile-time from

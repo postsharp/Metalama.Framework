@@ -5,9 +5,9 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
-using Caravela.Reactive.Implementation;
+using Metalama.Reactive.Implementation;
 
-namespace Caravela.Reactive.Operators
+namespace Metalama.Reactive.Operators
 {
     internal class GroupByOperator<TSource, TKey, TElement> : ReactiveCollectionOperator<TSource, IReactiveGroup<TKey, TElement>>,
         IReactiveGroupBy<TKey, TElement>, IGroupByOperator<TKey, TElement>

@@ -1,9 +1,9 @@
 ﻿using System;
-using static Caravela.Framework.Tests.Integration.Tests.Linker.Api;
+using static Metalama.Framework.Tests.Integration.Tests.Linker.Api;
 
 #pragma warning disable CS0067
 
-namespace Caravela.Framework.Tests.Integration.Tests.Linker.EventFields.Overrides.Jump.EventHandler_NJ_FJ_NJ
+namespace Metalama.Framework.Tests.Integration.Tests.Linker.EventFields.Overrides.Jump.EventHandler_NJ_FJ_NJ
 {
     // <target>
     class Target

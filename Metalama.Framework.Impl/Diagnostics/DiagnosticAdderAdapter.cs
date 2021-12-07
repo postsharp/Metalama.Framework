@@ -4,7 +4,7 @@
 using Microsoft.CodeAnalysis;
 using System;
 
-namespace Caravela.Framework.Impl.Diagnostics
+namespace Metalama.Framework.Impl.Diagnostics
 {
     internal class DiagnosticAdderAdapter : IDiagnosticAdder
     {

@@ -4,7 +4,7 @@
 using System.Globalization;
 using Xunit;
 
-namespace Caravela.Framework.Tests.UnitTests.Serialization
+namespace Metalama.Framework.Tests.UnitTests.Serialization
 {
     public class CultureInfoSerializerTests : SerializerTestsBase
     {

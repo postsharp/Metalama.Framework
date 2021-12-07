@@ -1,11 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Caravela.Framework.Aspects;
-using Caravela.TestFramework;
-using Caravela.Framework.Code;
+using Metalama.Framework.Aspects;
+using Metalama.TestFramework;
+using Metalama.Framework.Code;
 
-namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Switch.CompileTimePatternMatchingSwitch
+namespace Metalama.Framework.Tests.Integration.Templating.Syntax.Switch.CompileTimePatternMatchingSwitch
 {
     [CompileTimeOnly]
     enum SwitchEnum

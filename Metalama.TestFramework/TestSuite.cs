@@ -1,10 +1,10 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Impl.Pipeline;
-using Caravela.Framework.Impl.Testing;
-using Caravela.TestFramework.Utilities;
-using Caravela.TestFramework.XunitFramework;
+using Metalama.Framework.Impl.Pipeline;
+using Metalama.Framework.Impl.Testing;
+using Metalama.TestFramework.Utilities;
+using Metalama.TestFramework.XunitFramework;
 using System;
 using System.IO;
 using System.Linq;
@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 using Xunit.Abstractions;
 using Xunit.Sdk;
 
-namespace Caravela.TestFramework
+namespace Metalama.TestFramework
 {
     /// <summary>
     /// A base class for test classes built using the current framework.

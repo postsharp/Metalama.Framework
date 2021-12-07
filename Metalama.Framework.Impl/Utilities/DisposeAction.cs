@@ -3,7 +3,7 @@
 
 using System;
 
-namespace Caravela.Framework.Impl.Utilities
+namespace Metalama.Framework.Impl.Utilities
 {
     internal readonly struct DisposeAction : IDisposable
     {

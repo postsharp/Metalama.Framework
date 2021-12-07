@@ -1,21 +1,21 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Impl;
-using Caravela.Framework.Impl.CodeModel;
-using Caravela.Framework.Impl.Diagnostics;
-using Caravela.Framework.Impl.Linking;
-using Caravela.Framework.Impl.Pipeline;
-using Caravela.Framework.Impl.Testing;
-using Caravela.Framework.Tests.Integration.Runners.Linker;
-using Caravela.TestFramework;
+using Metalama.Framework.Impl;
+using Metalama.Framework.Impl.CodeModel;
+using Metalama.Framework.Impl.Diagnostics;
+using Metalama.Framework.Impl.Linking;
+using Metalama.Framework.Impl.Pipeline;
+using Metalama.Framework.Impl.Testing;
+using Metalama.Framework.Tests.Integration.Runners.Linker;
+using Metalama.TestFramework;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using Xunit.Abstractions;
 
-namespace Caravela.Framework.Tests.Integration.Runners
+namespace Metalama.Framework.Tests.Integration.Runners
 {
     internal class LinkerTestRunner : BaseTestRunner
     {

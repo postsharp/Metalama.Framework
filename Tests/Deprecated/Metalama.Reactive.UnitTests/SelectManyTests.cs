@@ -1,8 +1,8 @@
 ﻿using System.Collections.Immutable;
-using Caravela.Reactive.Sources;
+using Metalama.Reactive.Sources;
 using Xunit;
 
-namespace Caravela.Reactive.UnitTests
+namespace Metalama.Reactive.UnitTests
 {
 
     public class SelectManyTests

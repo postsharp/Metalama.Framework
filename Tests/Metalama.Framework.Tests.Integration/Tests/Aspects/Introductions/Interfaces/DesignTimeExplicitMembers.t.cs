@@ -1,19 +1,19 @@
-namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.DesignTimeExplicitMembers
+namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.DesignTimeExplicitMembers
 {
-    partial class TargetClass : global::Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.DesignTimeExplicitMembers.IInterface
+    partial class TargetClass : global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.DesignTimeExplicitMembers.IInterface
     {
-        global::System.Int32 global::Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.DesignTimeExplicitMembers.IInterface.InterfaceMethod()
+        global::System.Int32 global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.DesignTimeExplicitMembers.IInterface.InterfaceMethod()
         {
             return default(global::System.Int32);
         }
     
-        global::System.Int32 global::Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.DesignTimeExplicitMembers.IInterface.AutoProperty
+        global::System.Int32 global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.DesignTimeExplicitMembers.IInterface.AutoProperty
         {
             get;
             set;
         }
     
-        global::System.Int32 global::Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.DesignTimeExplicitMembers.IInterface.Property
+        global::System.Int32 global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.DesignTimeExplicitMembers.IInterface.Property
         {
             get
             {
@@ -25,7 +25,7 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
             }
         }
     
-        event global::System.EventHandler global::Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.DesignTimeExplicitMembers.IInterface.EventField
+        event global::System.EventHandler global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.DesignTimeExplicitMembers.IInterface.EventField
         {
             add
             {
@@ -36,7 +36,7 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
             }
         }
     
-        event global::System.EventHandler global::Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.DesignTimeExplicitMembers.IInterface.Event
+        event global::System.EventHandler global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.DesignTimeExplicitMembers.IInterface.Event
         {
             add
             {

@@ -1,10 +1,10 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Code;
-using Caravela.Framework.Impl.CodeModel;
-using Caravela.Framework.Impl.ReflectionMocks;
-using Caravela.Framework.RunTime;
+using Metalama.Framework.Code;
+using Metalama.Framework.Impl.CodeModel;
+using Metalama.Framework.Impl.ReflectionMocks;
+using Metalama.Framework.RunTime;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -12,9 +12,9 @@ using System;
 using System.Collections.Immutable;
 using System.Reflection;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
-using MethodBase = Caravela.Framework.Impl.CodeModel.MethodBase;
+using MethodBase = Metalama.Framework.Impl.CodeModel.MethodBase;
 
-namespace Caravela.Framework.Impl.Serialization
+namespace Metalama.Framework.Impl.Serialization
 {
     internal class CompileTimeFieldOrPropertyInfoSerializer : ObjectSerializer<CompileTimeFieldOrPropertyInfo, FieldOrPropertyInfo>
     {

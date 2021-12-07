@@ -1,7 +1,7 @@
 ﻿using System;
-using Caravela.Framework.Aspects;
+using Metalama.Framework.Aspects;
 
-namespace Caravela.Framework.TestApp.Aspects.Validation
+namespace Metalama.Framework.TestApp.Aspects.Validation
 {
     [CompileTime]
     public class GreaterThanZeroAttribute : ValidateAttribute

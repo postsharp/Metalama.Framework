@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Caravela.Framework.Code.Collections
+namespace Metalama.Framework.Code.Collections
 {
     /// <summary>
     /// Extension methods for the <see cref="IParameterList"/> class.

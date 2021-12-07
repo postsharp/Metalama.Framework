@@ -3,7 +3,7 @@
 
 using System.IO;
 
-namespace Caravela.Framework.Impl.Utilities
+namespace Metalama.Framework.Impl.Utilities
 {
     internal class FileSystemWatcherEx : FileSystemWatcher, IFileSystemWatcher
     {

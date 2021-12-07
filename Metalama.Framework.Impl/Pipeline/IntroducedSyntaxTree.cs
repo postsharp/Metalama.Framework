@@ -3,7 +3,7 @@
 
 using Microsoft.CodeAnalysis;
 
-namespace Caravela.Framework.Impl.Pipeline
+namespace Metalama.Framework.Impl.Pipeline
 {
     public sealed class IntroducedSyntaxTree
     {

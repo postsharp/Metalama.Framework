@@ -1,7 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-namespace Caravela.Framework.Diagnostics
+namespace Metalama.Framework.Diagnostics
 {
     // ReSharper disable once UnusedTypeParameter
 
@@ -32,14 +32,14 @@ namespace Caravela.Framework.Diagnostics
         /// <param name="severity">The severity of the diagnostic.</param>
         /// <param name="messageFormat">The formatting string of the diagnostic message.</param>
         /// <param name="title">An optional short title for the diagnostic. If no value is provided for this parameter, <paramref name="messageFormat"/> is used.</param>
-        /// <param name="category">An optional category to which this diagnostic belong. The default value is <c>Caravela.User</c>.</param>
+        /// <param name="category">An optional category to which this diagnostic belong. The default value is <c>Metalama.User</c>.</param>
         public DiagnosticDefinition( string id, Severity severity, string messageFormat, string? title = null, string? category = null )
         {
             this.Severity = severity;
             this.Id = id;
             this.MessageFormat = messageFormat;
             this.Title = title ?? messageFormat;
-            this.Category = category ?? "Caravela.User";
+            this.Category = category ?? "Metalama.User";
         }
 
         /// <inheritdoc />

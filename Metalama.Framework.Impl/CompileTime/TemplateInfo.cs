@@ -1,13 +1,13 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Aspects;
+using Metalama.Framework.Aspects;
 using Microsoft.CodeAnalysis;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using Accessibility = Caravela.Framework.Code.Accessibility;
+using Accessibility = Metalama.Framework.Code.Accessibility;
 
-namespace Caravela.Framework.Impl.CompileTime
+namespace Metalama.Framework.Impl.CompileTime
 {
     internal class TemplateInfo
     {

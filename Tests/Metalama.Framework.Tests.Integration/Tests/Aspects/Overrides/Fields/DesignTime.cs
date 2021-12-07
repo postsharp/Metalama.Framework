@@ -3,9 +3,9 @@
 #pragma warning disable CS0169
 
 using System;
-using Caravela.Framework.Aspects;
+using Metalama.Framework.Aspects;
 
-namespace Caravela.Framework.Tests.PublicPipeline.Aspects.Overrides.Fields.DesignTime
+namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Overrides.Fields.DesignTime
 {
     internal class Aspect : OverrideFieldOrPropertyAspect
     {

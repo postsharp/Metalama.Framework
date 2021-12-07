@@ -1,6 +1,6 @@
-using Caravela.Framework.Aspects;
+using Metalama.Framework.Aspects;
 
-namespace Caravela.Framework.Tests.Integration.Aspects.Diagnostics.ExceptionInTemplate
+namespace Metalama.Framework.Tests.Integration.Aspects.Diagnostics.ExceptionInTemplate
 {
     class Aspect : OverrideMethodAspect
     {

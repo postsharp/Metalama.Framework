@@ -1,8 +1,8 @@
 using System;
-using Caravela.TestFramework;
-using Caravela.Framework.Aspects;
+using Metalama.TestFramework;
+using Metalama.Framework.Aspects;
 
-namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Tuples.RunTimeTuples2
+namespace Metalama.Framework.Tests.Integration.Templating.Syntax.Tuples.RunTimeTuples2
 {
     class Aspect
     {

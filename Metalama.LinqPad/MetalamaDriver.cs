@@ -1,10 +1,10 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Code;
-using Caravela.Framework.Impl;
-using Caravela.Framework.Impl.Pipeline;
-using Caravela.Framework.Workspaces;
+using Metalama.Framework.Code;
+using Metalama.Framework.Impl;
+using Metalama.Framework.Impl.Pipeline;
+using Metalama.Framework.Workspaces;
 using LINQPad;
 using LINQPad.Extensibility.DataContext;
 using System;
@@ -12,14 +12,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
-namespace Caravela.LinqPad
+namespace Metalama.LinqPad
 {
     /// <summary>
-    /// A LinqPad driver that lets you query Caravela workspaces.
+    /// A LinqPad driver that lets you query Metalama workspaces.
     /// </summary>
-    public sealed class CaravelaDriver : DynamicDataContextDriver
+    public sealed class MetalamaDriver : DynamicDataContextDriver
     {
-        public override string Name => "Caravela";
+        public override string Name => "Metalama";
 
         public override string Author => "PostSharp Technologies";
 
@@ -50,12 +50,12 @@ namespace Caravela.LinqPad
             var source = $@"using System;
 using System;
 using System.Collections.Generic;
-using Caravela.LinqPad;
+using Metalama.LinqPad;
 
 namespace {nameSpace}
 {{
     // The main typed data class. The user's queries subclass this, so they have easy access to all its members.
-	public class {typeName} : CaravelaDataContext
+	public class {typeName} : MetalamaDataContext
 	{{
 	    public {typeName}() : base( @""{connectionData.Project}"" )
 		{{
@@ -73,14 +73,14 @@ namespace {nameSpace}
         }
 
         public override IEnumerable<string> GetNamespacesToAdd( IConnectionInfo cxInfo )
-            => new[] { "Caravela.Framework.Workspaces", "Caravela.Framework.Code", "Caravela.Framework.Code.Collections" };
+            => new[] { "Metalama.Framework.Workspaces", "Metalama.Framework.Code", "Metalama.Framework.Code.Collections" };
 
         private static void Compile( string cSharpSourceCode, string outputFile )
         {
             List<string> assembliesToReference = new();
             assembliesToReference.AddRange( GetCoreFxReferenceAssemblies() );
-            assembliesToReference.Add( typeof(CaravelaDriver).Assembly.Location );
-            assembliesToReference.Add( typeof(CaravelaDataContext).Assembly.Location );
+            assembliesToReference.Add( typeof(MetalamaDriver).Assembly.Location );
+            assembliesToReference.Add( typeof(MetalamaDataContext).Assembly.Location );
             assembliesToReference.Add( typeof(IDeclaration).Assembly.Location );
             assembliesToReference.Add( typeof(AspectPipeline).Assembly.Location );
 

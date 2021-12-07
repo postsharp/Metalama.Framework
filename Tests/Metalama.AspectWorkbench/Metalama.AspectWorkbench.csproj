@@ -14,14 +14,14 @@
     <PackageReference Include="RoslynPad.Roslyn" Version="$(RoslynPadVersion)" />
     <PackageReference Include="Microsoft.CodeAnalysis.VisualBasic.Workspaces" Version="$(RoslynPadVersion)" />
     <PackageReference Include="Microsoft.CodeAnalysis.VisualBasic.Features" Version="$(RoslynPadVersion)" />
-    <PackageReference Include="Caravela.Compiler.Sdk" Version="$(CaravelaCompilerVersion)" />
+    <PackageReference Include="Metalama.Compiler.Sdk" Version="$(MetalamaCompilerVersion)" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Caravela.Framework.Impl\Caravela.Framework.Impl.csproj" />
-    <ProjectReference Include="..\..\Caravela.Framework\Caravela.Framework.csproj" />
-    <ProjectReference Include="..\Caravela.Framework.Tests.Integration\Caravela.Framework.Tests.Integration.csproj" />
-    <ProjectReference Include="..\Caravela.Framework.Tests.Integration.Internals\Caravela.Framework.Tests.Integration.Internals.csproj" />
+    <ProjectReference Include="..\..\Metalama.Framework.Impl\Metalama.Framework.Impl.csproj" />
+    <ProjectReference Include="..\..\Metalama.Framework\Metalama.Framework.csproj" />
+    <ProjectReference Include="..\Metalama.Framework.Tests.Integration\Metalama.Framework.Tests.Integration.csproj" />
+    <ProjectReference Include="..\Metalama.Framework.Tests.Integration.Internals\Metalama.Framework.Tests.Integration.Internals.csproj" />
   </ItemGroup>
   
   <!-- Disable this project when obfuscation is enabled -->

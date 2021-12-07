@@ -1,8 +1,8 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.AspectWorkbench.CodeEditor;
-using Caravela.AspectWorkbench.ViewModels;
+using Metalama.AspectWorkbench.CodeEditor;
+using Metalama.AspectWorkbench.ViewModels;
 using Microsoft.CodeAnalysis;
 using Microsoft.Win32;
 using PostSharp;
@@ -16,11 +16,11 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 
-namespace Caravela.AspectWorkbench.Views
+namespace Metalama.AspectWorkbench.Views
 {
     public partial class MainWindow
     {
-        private const string _testsProjectPath = @"c:\src\Caravela\Tests\Caravela.Templating.UnitTests\";
+        private const string _testsProjectPath = @"c:\src\Metalama\Tests\Metalama.Templating.UnitTests\";
         private const string _fileDialogueExt = ".cs";
         private const string _fileDialogueFilter = "C# Files (*.cs)|*.cs";
 

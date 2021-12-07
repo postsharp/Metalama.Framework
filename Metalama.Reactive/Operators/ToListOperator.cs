@@ -3,9 +3,9 @@
 
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using Caravela.Reactive.Implementation;
+using Metalama.Reactive.Implementation;
 
-namespace Caravela.Reactive.Operators
+namespace Metalama.Reactive.Operators
 {
     internal class ToListOperator<T> : ReactiveCollectionOperator<T, T>
     {

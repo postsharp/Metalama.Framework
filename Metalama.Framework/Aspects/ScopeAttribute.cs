@@ -3,7 +3,7 @@
 
 using System;
 
-namespace Caravela.Framework.Aspects
+namespace Metalama.Framework.Aspects
 {
     /// <summary>
     /// A base class for all custom attributes that influence the scope (compile-time or run-time) of the code

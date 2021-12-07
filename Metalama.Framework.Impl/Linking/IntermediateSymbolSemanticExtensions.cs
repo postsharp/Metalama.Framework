@@ -3,7 +3,7 @@
 
 using Microsoft.CodeAnalysis;
 
-namespace Caravela.Framework.Impl.Linking
+namespace Metalama.Framework.Impl.Linking
 {
     internal static class IntermediateSymbolSemanticExtensions
     {

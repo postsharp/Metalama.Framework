@@ -2,13 +2,13 @@
 
 using System;
 using System.Linq;
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
-using Caravela.Framework.IntegrationTests.Aspects.Invokers.Events.AdvisedIntroduction_FinalInvoker;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
+using Metalama.Framework.IntegrationTests.Aspects.Invokers.Events.AdvisedIntroduction_FinalInvoker;
 
 [assembly: AspectOrder( typeof(TestAttribute), typeof(TestIntroductionAttribute) )]
 
-namespace Caravela.Framework.IntegrationTests.Aspects.Invokers.Events.AdvisedIntroduction_FinalInvoker
+namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Events.AdvisedIntroduction_FinalInvoker
 {
     [AttributeUsage( AttributeTargets.Class )]
     public class TestIntroductionAttribute : TypeAspect

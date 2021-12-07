@@ -2,10 +2,10 @@
 
 using System;
 using System.Text;
-using Caravela.TestFramework;
-using Caravela.Framework.Aspects;
+using Metalama.TestFramework;
+using Metalama.Framework.Aspects;
 
-namespace Caravela.Framework.Tests.Integration.Templating.Syntax.New.NewInvalidType
+namespace Metalama.Framework.Tests.Integration.Templating.Syntax.New.NewInvalidType
 {
     class Aspect
     {

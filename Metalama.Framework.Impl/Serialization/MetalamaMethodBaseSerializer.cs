@@ -1,9 +1,9 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Compiler;
-using Caravela.Framework.Code;
-using Caravela.Framework.Impl.ReflectionMocks;
+using Metalama.Compiler;
+using Metalama.Framework.Code;
+using Metalama.Framework.Impl.ReflectionMocks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -11,13 +11,13 @@ using System;
 using System.Collections.Immutable;
 using System.Reflection;
 
-namespace Caravela.Framework.Impl.Serialization
+namespace Metalama.Framework.Impl.Serialization
 {
-    internal abstract class CaravelaMethodBaseSerializer<TInput, TOutput> : ObjectSerializer<TInput, TOutput>
+    internal abstract class MetalamaMethodBaseSerializer<TInput, TOutput> : ObjectSerializer<TInput, TOutput>
         where TInput : MethodBase, TOutput
         where TOutput : MethodBase
     {
-        public CaravelaMethodBaseSerializer( SyntaxSerializationService service ) : base( service ) { }
+        public MetalamaMethodBaseSerializer( SyntaxSerializationService service ) : base( service ) { }
 
         internal static ExpressionSyntax SerializeMethodBase(
             ICompileTimeReflectionObject<IMethodBase> method,

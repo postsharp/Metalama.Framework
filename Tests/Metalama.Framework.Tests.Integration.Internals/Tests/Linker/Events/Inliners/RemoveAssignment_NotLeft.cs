@@ -1,9 +1,9 @@
 ﻿using System;
-using static Caravela.Framework.Tests.Integration.Tests.Linker.Api;
+using static Metalama.Framework.Tests.Integration.Tests.Linker.Api;
 
 #pragma warning disable CS0067
 
-namespace Caravela.Framework.Tests.Integration.Tests.Linker.Events.Inliners.RemoveAssignment_NotLeft
+namespace Metalama.Framework.Tests.Integration.Tests.Linker.Events.Inliners.RemoveAssignment_NotLeft
 {
     // <target>
     public class Target

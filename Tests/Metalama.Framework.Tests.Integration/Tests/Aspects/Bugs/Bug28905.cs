@@ -1,7 +1,7 @@
 using System;
-using Caravela.Framework.Aspects;
+using Metalama.Framework.Aspects;
 
-namespace Caravela.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug28905
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug28905
 {
     internal class ImportAttribute : OverrideFieldOrPropertyAspect
     {

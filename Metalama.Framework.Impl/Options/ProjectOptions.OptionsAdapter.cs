@@ -4,7 +4,7 @@
 using Microsoft.CodeAnalysis.Diagnostics;
 using System;
 
-namespace Caravela.Framework.Impl.Options
+namespace Metalama.Framework.Impl.Options
 {
     public partial class ProjectOptions
     {

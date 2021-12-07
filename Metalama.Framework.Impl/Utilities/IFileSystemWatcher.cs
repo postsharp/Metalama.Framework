@@ -5,7 +5,7 @@ using System;
 using System.IO;
 using System.Reflection;
 
-namespace Caravela.Framework.Impl.Utilities
+namespace Metalama.Framework.Impl.Utilities
 {
     [Obfuscation( Exclude = true )]
     internal interface IFileSystemWatcher : IDisposable

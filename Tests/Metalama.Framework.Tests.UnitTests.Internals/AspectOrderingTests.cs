@@ -1,21 +1,21 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Impl;
-using Caravela.Framework.Impl.AspectOrdering;
-using Caravela.Framework.Impl.Aspects;
-using Caravela.Framework.Impl.CodeModel;
-using Caravela.Framework.Impl.Collections;
-using Caravela.Framework.Impl.CompileTime;
-using Caravela.Framework.Impl.Diagnostics;
-using Caravela.TestFramework;
+using Metalama.Framework.Impl;
+using Metalama.Framework.Impl.AspectOrdering;
+using Metalama.Framework.Impl.Aspects;
+using Metalama.Framework.Impl.CodeModel;
+using Metalama.Framework.Impl.Collections;
+using Metalama.Framework.Impl.CompileTime;
+using Metalama.Framework.Impl.Diagnostics;
+using Metalama.TestFramework;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
 using Xunit;
 
-namespace Caravela.Framework.Tests.UnitTests
+namespace Metalama.Framework.Tests.UnitTests
 {
     public class AspectOrderingTests : TestBase
     {
@@ -83,7 +83,7 @@ namespace Caravela.Framework.Tests.UnitTests
         public void OneSingleLayerAspect()
         {
             var code = @"
-using Caravela.Framework.Aspects;
+using Metalama.Framework.Aspects;
 class Aspect1 : TypeAspect 
 {
 }
@@ -97,7 +97,7 @@ class Aspect1 : TypeAspect
         public void OneDoubleLayerAspect()
         {
             var code = @"
-using Caravela.Framework.Aspects;
+using Metalama.Framework.Aspects;
 class Aspect1 : TypeAspect
 {
     public override void BuildAspectClass( IAspectClassBuilder builder ) 
@@ -115,7 +115,7 @@ class Aspect1 : TypeAspect
         public void TwoUnorderedDoubleLayerAspects()
         {
             var code = @"
-using Caravela.Framework.Aspects;
+using Metalama.Framework.Aspects;
 class Aspect1 : TypeAspect
 {
     public override void BuildAspectClass( IAspectClassBuilder builder ) 
@@ -141,7 +141,7 @@ class Aspect2 : TypeAspect
         public void ThreeOrderedSingleLayerAspects()
         {
             var code = @"
-using Caravela.Framework.Aspects;
+using Metalama.Framework.Aspects;
 
 [assembly: AspectOrder( typeof(Aspect2), typeof(Aspect1), typeof(Aspect3) ) ]
 
@@ -169,7 +169,7 @@ class Aspect2 : TypeAspect
         public void TwoOrderedDoubleLayerAspects()
         {
             var code = @"
-using Caravela.Framework.Aspects;
+using Metalama.Framework.Aspects;
 
 [assembly: AspectOrder( typeof(Aspect2), typeof(Aspect1) ) ]
 
@@ -198,7 +198,7 @@ class Aspect2 : TypeAspect
         public void TwoPartiallyOrderedDoubleLayerAspects()
         {
             var code = @"
-using Caravela.Framework.Aspects;
+using Metalama.Framework.Aspects;
 
 [assembly: AspectOrder( ""Aspect2"", ""Aspect1"" ) ]
 
@@ -227,7 +227,7 @@ class Aspect2  : TypeAspect
         public void TwoTotallyOrderedDoubleLayerAspects()
         {
             var code = @"
-using Caravela.Framework.Aspects;
+using Metalama.Framework.Aspects;
 
 [assembly: AspectOrder( ""Aspect2:Layer1"", ""Aspect1:Layer1"", ""Aspect2"", ""Aspect1"" ) ]
 
@@ -256,7 +256,7 @@ class Aspect2  : TypeAspect
         public void InheritedAspects()
         {
             var code = @"
-using Caravela.Framework.Aspects;
+using Metalama.Framework.Aspects;
 
 class Aspect1  : TypeAspect
 {
@@ -277,8 +277,8 @@ class Aspect2 : Aspect1 {}
         public void InvalidAspectName()
         {
             var code = @"
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Aspects;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Aspects;
 
 [assembly: AspectOrder( ""NonExistent1"", ""Aspect1"" ) ]
 
@@ -296,7 +296,7 @@ class Aspect1 : TypeAspect
         public void Cycle()
         {
             var code = @"
-using Caravela.Framework.Aspects;
+using Metalama.Framework.Aspects;
 
 [assembly: AspectOrder( typeof(Aspect2), typeof(Aspect1) ) ]
 [assembly: AspectOrder( typeof(Aspect1), typeof(Aspect2) ) ]
@@ -322,7 +322,7 @@ class Aspect2 : TypeAspect
             // therefore the sort algorithm goes to another branch.
 
             var code = @"
-using Caravela.Framework.Aspects;
+using Metalama.Framework.Aspects;
 
 [assembly: AspectOrder( typeof(Aspect2), typeof(Aspect1), typeof(Aspect3) ) ]
 [assembly: AspectOrder( typeof(Aspect1), typeof(Aspect2) ) ]

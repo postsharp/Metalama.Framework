@@ -1,15 +1,15 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Compiler;
-using Caravela.Framework.DesignTime.Contracts;
-using Caravela.Framework.Impl.CodeModel;
-using Caravela.Framework.Impl.DesignTime.Diff;
-using Caravela.Framework.Impl.DesignTime.Pipeline;
-using Caravela.Framework.Impl.Diagnostics;
-using Caravela.Framework.Impl.Options;
-using Caravela.Framework.Impl.Pipeline;
-using Caravela.Framework.Project;
+using Metalama.Compiler;
+using Metalama.Framework.DesignTime.Contracts;
+using Metalama.Framework.Impl.CodeModel;
+using Metalama.Framework.Impl.DesignTime.Diff;
+using Metalama.Framework.Impl.DesignTime.Pipeline;
+using Metalama.Framework.Impl.Diagnostics;
+using Metalama.Framework.Impl.Options;
+using Metalama.Framework.Impl.Pipeline;
+using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Immutable;
@@ -17,7 +17,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Caravela.Framework.Impl.DesignTime.Preview
+namespace Metalama.Framework.Impl.DesignTime.Preview
 {
     public class TransformationPreviewService : ITransformationPreviewService
     {

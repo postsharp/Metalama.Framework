@@ -1,15 +1,15 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
-using Caravela.Framework.Code.DeclarationBuilders;
-using Caravela.Framework.Validation;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
+using Metalama.Framework.Code.DeclarationBuilders;
+using Metalama.Framework.Validation;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Caravela.Framework.CodeFixes
+namespace Metalama.Framework.CodeFixes
 {
     /// <summary>
     /// Argument of the delegate passed to <see cref="CodeFix.Create"/>. Exposes methods that allow to modify the current solution. 

@@ -1,18 +1,18 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Code;
-using Caravela.Framework.Code.DeclarationBuilders;
-using Caravela.Framework.Impl.Advices;
-using Caravela.Framework.Impl.Transformations;
-using Caravela.Framework.Impl.Utilities;
+using Metalama.Framework.Code;
+using Metalama.Framework.Code.DeclarationBuilders;
+using Metalama.Framework.Impl.Advices;
+using Metalama.Framework.Impl.Transformations;
+using Metalama.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
-using Accessibility = Caravela.Framework.Code.Accessibility;
+using Accessibility = Metalama.Framework.Code.Accessibility;
 
-namespace Caravela.Framework.Impl.CodeModel.Builders
+namespace Metalama.Framework.Impl.CodeModel.Builders
 {
     internal abstract class MemberOrNamedTypeBuilder : DeclarationBuilder, IMemberOrNamedTypeBuilder, IMemberIntroduction, IObservableTransformation
     {

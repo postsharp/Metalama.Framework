@@ -1,8 +1,8 @@
 ﻿using System;
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
 
-namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.PropertySetTemplate
+namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.PropertySetTemplate
 {
     // Tests get-only property template.
 

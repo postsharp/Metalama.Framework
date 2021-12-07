@@ -1,12 +1,12 @@
 ﻿// @AddHtmlTitles
 
 using System;
-using Caravela.TestFramework;
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
-using Caravela.Framework.Eligibility;
+using Metalama.TestFramework;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
+using Metalama.Framework.Eligibility;
 
-namespace Caravela.Framework.Tests.Integration.TestInputs.Highlighting.IfStatements.HtmlTitles
+namespace Metalama.Framework.Tests.Integration.TestInputs.Highlighting.IfStatements.HtmlTitles
 {
     internal class RunTimeClass
     {

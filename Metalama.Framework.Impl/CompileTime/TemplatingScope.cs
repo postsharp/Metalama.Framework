@@ -1,9 +1,9 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Aspects;
+using Metalama.Framework.Aspects;
 
-namespace Caravela.Framework.Impl.CompileTime
+namespace Metalama.Framework.Impl.CompileTime
 {
     /// <summary>
     /// Defines where a symbol or an expression can be used, i.e. in compile-time code, in run-time code, or both.
@@ -27,7 +27,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
         /// <summary>
         /// The symbol can be used only at compile time. This is the case for the compile-time API of
-        /// Caravela, which is marked by <see cref="CompileTimeOnlyAttribute"/>.
+        /// Metalama, which is marked by <see cref="CompileTimeOnlyAttribute"/>.
         /// The node including all children nodes must be evaluated at compile time.
         /// </summary>
         CompileTimeOnly,

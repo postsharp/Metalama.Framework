@@ -7,7 +7,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Caravela.Framework.Impl.Diagnostics
+namespace Metalama.Framework.Impl.Diagnostics
 {
     public class DiagnosticList : IDiagnosticAdder, IReadOnlyList<Diagnostic>
     {

@@ -1,9 +1,9 @@
-using Caravela.Framework.Code;
-using Caravela.TestFramework;
-using Caravela.Framework.Aspects;
+using Metalama.Framework.Code;
+using Metalama.TestFramework;
+using Metalama.Framework.Aspects;
 
 // TODO: Change the namespace
-namespace Caravela.Framework.Tests.Integration.PatternMatching.PropertyPattern
+namespace Metalama.Framework.Tests.Integration.PatternMatching.PropertyPattern
 {
     class Aspect
     {

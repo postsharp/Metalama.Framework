@@ -4,7 +4,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Caravela.Reactive.Operators
+namespace Metalama.Reactive.Operators
 {
 
     internal sealed class SelectManyObservableOperator<TSource, TCollection, TResult> : SelectManyObservableOperatorBase<TSource, TCollection, TResult>

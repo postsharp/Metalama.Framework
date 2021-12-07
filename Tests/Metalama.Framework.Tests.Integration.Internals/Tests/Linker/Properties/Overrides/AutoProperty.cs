@@ -1,7 +1,7 @@
 ﻿using System;
-using static Caravela.Framework.Tests.Integration.Tests.Linker.Api;
+using static Metalama.Framework.Tests.Integration.Tests.Linker.Api;
 
-namespace Caravela.Framework.Tests.Integration.Tests.Linker.Properties.Overrides.AutoProperty
+namespace Metalama.Framework.Tests.Integration.Tests.Linker.Properties.Overrides.AutoProperty
 {
     // <target>
     class Target

@@ -1,24 +1,24 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
-using Caravela.Framework.Fabrics;
-using Caravela.Framework.Impl.Aspects;
-using Caravela.Framework.Impl.CodeModel;
-using Caravela.Framework.Impl.CodeModel.References;
-using Caravela.Framework.Impl.CompileTime;
-using Caravela.Framework.Impl.Diagnostics;
-using Caravela.Framework.Impl.Utilities;
-using Caravela.Framework.Project;
-using Caravela.Framework.Validation;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
+using Metalama.Framework.Fabrics;
+using Metalama.Framework.Impl.Aspects;
+using Metalama.Framework.Impl.CodeModel;
+using Metalama.Framework.Impl.CodeModel.References;
+using Metalama.Framework.Impl.CompileTime;
+using Metalama.Framework.Impl.Diagnostics;
+using Metalama.Framework.Impl.Utilities;
+using Metalama.Framework.Project;
+using Metalama.Framework.Validation;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
-namespace Caravela.Framework.Impl.Fabrics
+namespace Metalama.Framework.Impl.Fabrics
 {
     /// <summary>
     /// The base class for fabric drivers, which are responsible for ordering and executing fabrics.

@@ -1,6 +1,6 @@
-using Caravela.Framework.Aspects;
+using Metalama.Framework.Aspects;
 
-namespace Caravela.Framework.IntegrationTests.Aspects.AspectMemberRef.IntroducedMethodRef
+namespace Metalama.Framework.IntegrationTests.Aspects.AspectMemberRef.IntroducedMethodRef
 {
     public class RetryAttribute : TypeAspect
     {

@@ -1,13 +1,13 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
-using Caravela.Framework.CodeFixes;
-using Caravela.Framework.Validation;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
+using Metalama.Framework.CodeFixes;
+using Metalama.Framework.Validation;
 using System.Collections.Generic;
 
-namespace Caravela.Framework.Diagnostics
+namespace Metalama.Framework.Diagnostics
 {
     /// <summary>
     /// A sink that reports diagnostics reported from user code.

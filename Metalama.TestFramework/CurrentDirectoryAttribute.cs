@@ -1,8 +1,8 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.TestFramework.Utilities;
-using Caravela.TestFramework.XunitFramework;
+using Metalama.TestFramework.Utilities;
+using Metalama.TestFramework.XunitFramework;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
@@ -11,12 +11,12 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using Xunit.Sdk;
 
-namespace Caravela.TestFramework
+namespace Metalama.TestFramework
 {
     /// <summary>
     /// An implementation of <c>SyntaxAttribute</c> that generates test cases from files in the current directory. To be used with <c>[Theory]</c>.
     /// This attribute will not include subdirectories that contain a file named <c>_Runner.cs</c>, nor subdirectories that are covered by
-    /// another test method of the same class. It also takes into account the <c>caravelaTests.config</c> file.
+    /// another test method of the same class. It also takes into account the <c>metalamaTests.config</c> file.
     /// </summary>
     public sealed class CurrentDirectoryAttribute : DataAttribute
     {

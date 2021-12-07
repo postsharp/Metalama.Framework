@@ -1,54 +1,54 @@
 ﻿<Project>
 
 
-    <ItemGroup Condition="'$(CaravelaCompileTimeOnlyProject)'=='True'">
-        <AssemblyAttribute Include="Caravela.Framework.Aspects.CompileTimeOnlyAttribute" />
+    <ItemGroup Condition="'$(MetalamaCompileTimeOnlyProject)'=='True'">
+        <AssemblyAttribute Include="Metalama.Framework.Aspects.CompileTimeOnlyAttribute" />
     </ItemGroup>
 
     <PropertyGroup>
         <!-- This must be in .targets, not in .props, because it relies on other properties and
               is not meant to be overwritten -->
-        <CaravelaProjectId>$(AssemblyName.Replace(".",""))_$(CaravelaProjectIdSuffix)_$(Configuration.Replace(".",""))_$(TargetFramework.Replace(".",""))</CaravelaProjectId>
+        <MetalamaProjectId>$(AssemblyName.Replace(".",""))_$(MetalamaProjectIdSuffix)_$(Configuration.Replace(".",""))_$(TargetFramework.Replace(".",""))</MetalamaProjectId>
 
         <!-- This constant is used to identify the pipeline when we have only a compilation but no analyzer options -->
-        <DefineConstants>$(DefinedConstants);CaravelaProjectId_$(CaravelaProjectId)</DefineConstants>
+        <DefineConstants>$(DefinedConstants);MetalamaProjectId_$(MetalamaProjectId)</DefineConstants>
     </PropertyGroup>
 
-    <PropertyGroup Condition="'$(CaravelaEnabled)'!='False'">
-        <DefineConstants>$(DefineConstants);CARAVELA</DefineConstants>
+    <PropertyGroup Condition="'$(MetalamaEnabled)'!='False'">
+        <DefineConstants>$(DefineConstants);METALAMA</DefineConstants>
     </PropertyGroup>
 
     <!-- Auxiliary files. -->
     <PropertyGroup>
-        <CaravelaAdditionalCompilationOutputDirectory>$(MSBuildProjectDirectory)\$(IntermediateOutputPath)\caravela-aux\</CaravelaAdditionalCompilationOutputDirectory>
+        <MetalamaAdditionalCompilationOutputDirectory>$(MSBuildProjectDirectory)\$(IntermediateOutputPath)\metalama-aux\</MetalamaAdditionalCompilationOutputDirectory>
     </PropertyGroup>
 
     <!-- Design time fallback dependency that forces rerun of analyzers/source generators when changed. -->
     <PropertyGroup>
-        <CaravelaDesignTimeFallbackTouchFile>$(CaravelaAdditionalCompilationOutputDirectory)DesignTimeTouch\touch</CaravelaDesignTimeFallbackTouchFile>
+        <MetalamaDesignTimeFallbackTouchFile>$(MetalamaAdditionalCompilationOutputDirectory)DesignTimeTouch\touch</MetalamaDesignTimeFallbackTouchFile>
     </PropertyGroup>
 
     <ItemGroup Condition="'$(DesignTimeBuild)' == 'True'">
-        <AdditionalFiles Include="$(CaravelaDesignTimeFallbackTouchFile)" />
+        <AdditionalFiles Include="$(MetalamaDesignTimeFallbackTouchFile)" />
     </ItemGroup>
 
-    <Target Name="ExportCaravelaFrameworkProperties" BeforeTargets="PrepareForBuild">
+    <Target Name="ExportMetalamaFrameworkProperties" BeforeTargets="PrepareForBuild">
         <Error Text="The IntermediateOutputPath property is not defined." Condition="'$(IntermediateOutputPath)'==''" />
         <PropertyGroup>
-            <CaravelaBuildTouchFile>$(MSBuildProjectDirectory)\$(IntermediateOutputPath)CaravelaBuild.touch</CaravelaBuildTouchFile>
+            <MetalamaBuildTouchFile>$(MSBuildProjectDirectory)\$(IntermediateOutputPath)MetalamaBuild.touch</MetalamaBuildTouchFile>
         </PropertyGroup>
     </Target>
 
-    <Target Name="CreateCaravelaBuildTouchFile" BeforeTargets="BeforeCompile">
+    <Target Name="CreateMetalamaBuildTouchFile" BeforeTargets="BeforeCompile">
         <!-- We create a touch file with a new arbitrary content every time that the file is absent. This file is used to signal
-             the design-time Caravela pipeline that a build has started. When the design-time pipeline needs this information again, it will
+             the design-time Metalama pipeline that a build has started. When the design-time pipeline needs this information again, it will
              delete the file. It should do that only when the source code has changed (even if it is not saved). We don't overwrite an existing
              file because this would break incremental build -->
-        <WriteLinesToFile File="$(CaravelaBuildTouchFile)" Lines=">$([System.Guid]::NewGuid())"
-                          Condition="!Exists('$(CaravelaBuildTouchFile)')" />
+        <WriteLinesToFile File="$(MetalamaBuildTouchFile)" Lines=">$([System.Guid]::NewGuid())"
+                          Condition="!Exists('$(MetalamaBuildTouchFile)')" />
         <ItemGroup>
-            <AdditionalFiles Include="$(CaravelaBuildTouchFile)" />
-            <Clean Include="$(CaravelaBuildTouchFile)" />
+            <AdditionalFiles Include="$(MetalamaBuildTouchFile)" />
+            <Clean Include="$(MetalamaBuildTouchFile)" />
         </ItemGroup>
     </Target>
 </Project>

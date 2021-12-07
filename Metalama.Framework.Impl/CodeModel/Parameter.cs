@@ -1,18 +1,18 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Code;
-using Caravela.Framework.Impl.ReflectionMocks;
-using Caravela.Framework.Impl.Utilities;
+using Metalama.Framework.Code;
+using Metalama.Framework.Impl.ReflectionMocks;
+using Metalama.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using RefKind = Caravela.Framework.Code.RefKind;
-using TypedConstant = Caravela.Framework.Code.TypedConstant;
+using RefKind = Metalama.Framework.Code.RefKind;
+using TypedConstant = Metalama.Framework.Code.TypedConstant;
 
-namespace Caravela.Framework.Impl.CodeModel
+namespace Metalama.Framework.Impl.CodeModel
 {
     internal class Parameter : Declaration, IParameterImpl
     {

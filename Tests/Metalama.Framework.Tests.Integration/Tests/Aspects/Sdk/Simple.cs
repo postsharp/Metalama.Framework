@@ -1,11 +1,11 @@
 using System;
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Impl.Sdk;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Impl.Sdk;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace Caravela.Framework.Tests.PublicPipeline.Aspects.Sdk.Simple
+namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Sdk.Simple
 {
     internal class Aspect : MethodAspect { }
 

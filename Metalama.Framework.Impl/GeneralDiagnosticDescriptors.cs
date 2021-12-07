@@ -1,33 +1,33 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
-using Caravela.Framework.Code.DeclarationBuilders;
-using Caravela.Framework.Diagnostics;
-using Caravela.Framework.Impl.Utilities;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
+using Metalama.Framework.Code.DeclarationBuilders;
+using Metalama.Framework.Diagnostics;
+using Metalama.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
-using static Caravela.Framework.Diagnostics.Severity;
+using static Metalama.Framework.Diagnostics.Severity;
 
 #pragma warning disable SA1118
 
-namespace Caravela.Framework.Impl
+namespace Metalama.Framework.Impl
 {
     internal static class GeneralDiagnosticDescriptors
     {
         // Reserved range 0-99
 
-        private const string _category = "Caravela.General";
+        private const string _category = "Metalama.General";
 
         public static readonly DiagnosticDefinition<(string Message, string File)> UnhandledException =
             new(
                 "CR0001",
                 _category,
-                "Unexpected exception occurred in Caravela: {0} Exception details are in '{1}'. " +
+                "Unexpected exception occurred in Metalama: {0} Exception details are in '{1}'. " +
                 " Please report this issue at https://www.postsharp.net/support and attach this file to the ticket.",
                 Error,
-                "Unexpected exception in Caravela." );
+                "Unexpected exception in Metalama." );
 
         public static readonly
             DiagnosticDefinition<(string AspectType, DeclarationKind DeclarationKind, IDeclaration Declaration, ITypeSymbol InterfaceType)>
@@ -226,7 +226,7 @@ namespace Caravela.Framework.Impl
                     "CR0041",
                     "Exception in user code",
                     "'{0}' threw '{2}' when applied to '{1}': {3}. Exception details are in '{4}'. To attach a debugger to the compiler, use the " +
-                    " '-p:DebugCaravela=True' command-line option.",
+                    " '-p:DebugMetalama=True' command-line option.",
                     _category,
                     Error );
 
@@ -236,7 +236,7 @@ namespace Caravela.Framework.Impl
                     "CR0042",
                     "Exception in user code",
                     "'{0}' threw '{1}': {2}. Exception details are in '{3}'. To attach a debugger to the compiler, use the " +
-                    " '-p:DebugCaravela=True' command-line option.",
+                    " '-p:DebugMetalama=True' command-line option.",
                     _category,
                     Error );
 

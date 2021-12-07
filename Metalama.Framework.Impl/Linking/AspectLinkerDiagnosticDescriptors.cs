@@ -1,19 +1,19 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Diagnostics;
+using Metalama.Framework.Diagnostics;
 using Microsoft.CodeAnalysis;
-using static Caravela.Framework.Diagnostics.Severity;
+using static Metalama.Framework.Diagnostics.Severity;
 
 // ReSharper disable SA1118
 
-namespace Caravela.Framework.Impl.Linking
+namespace Metalama.Framework.Impl.Linking
 {
     internal static class AspectLinkerDiagnosticDescriptors
     {
         // Reserved range 600-599
 
-        private const string _category = "Caravela.Linker";
+        private const string _category = "Metalama.Linker";
 
         public static readonly DiagnosticDefinition<(string AspectType, ISymbol TargetDeclaration)>
             CannotUseBaseInvokerWithNonInstanceExpression = new(

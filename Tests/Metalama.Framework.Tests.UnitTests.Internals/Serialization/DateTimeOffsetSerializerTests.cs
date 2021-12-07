@@ -5,7 +5,7 @@ using System;
 using System.Globalization;
 using Xunit;
 
-namespace Caravela.Framework.Tests.UnitTests.Serialization
+namespace Metalama.Framework.Tests.UnitTests.Serialization
 {
     public class DateTimeOffsetSerializerTests : SerializerTestsBase
     {

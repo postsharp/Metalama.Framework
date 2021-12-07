@@ -1,11 +1,11 @@
-﻿using Caravela.Framework.Aspects;
-using Caravela.TestFramework;
+﻿using Metalama.Framework.Aspects;
+using Metalama.TestFramework;
 using System;
 using System.Collections.Generic;
 
 #pragma warning disable CS0067
 
-namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Overrides.EventFields.Simple
+namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.EventFields.Simple
 {
     public class OverrideAttribute : OverrideEventAspect
     {

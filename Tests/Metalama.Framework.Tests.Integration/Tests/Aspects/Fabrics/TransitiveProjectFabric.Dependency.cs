@@ -1,10 +1,10 @@
 using System;
 using System.Linq;
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Fabrics;
-using Caravela.Framework.Project;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Fabrics;
+using Metalama.Framework.Project;
 
-namespace Caravela.Framework.Tests.Integration.Tests.Aspects.Fabrics.TransitiveProjectFabric
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Fabrics.TransitiveProjectFabric
 {
     public class TransitiveFabric : Framework.Fabrics.TransitiveProjectFabric
     {

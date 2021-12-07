@@ -1,13 +1,13 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Diagnostics;
-using Caravela.Framework.Impl.CodeModel;
-using Caravela.Framework.Impl.Utilities;
+using Metalama.Framework.Diagnostics;
+using Metalama.Framework.Impl.CodeModel;
+using Metalama.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace Caravela.Framework.Impl.Diagnostics
+namespace Metalama.Framework.Impl.Diagnostics
 {
     /// <summary>
     /// Helper methods to work with diagnostics.

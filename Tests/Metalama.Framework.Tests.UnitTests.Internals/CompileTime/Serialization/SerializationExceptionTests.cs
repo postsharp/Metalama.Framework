@@ -1,15 +1,15 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Impl;
-using Caravela.Framework.Impl.CompileTime.Serialization;
-using Caravela.Framework.Serialization;
+using Metalama.Framework.Impl;
+using Metalama.Framework.Impl.CompileTime.Serialization;
+using Metalama.Framework.Serialization;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using Xunit;
 
-namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serialization
+namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
 {
     public enum Fail
     {

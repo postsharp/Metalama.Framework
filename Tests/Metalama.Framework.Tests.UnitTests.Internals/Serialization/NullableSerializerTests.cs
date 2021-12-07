@@ -5,7 +5,7 @@ using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using Xunit;
 
-namespace Caravela.Framework.Tests.UnitTests.Serialization
+namespace Metalama.Framework.Tests.UnitTests.Serialization
 {
     public class NullableSerializerTests : SerializerTestsBase
     {

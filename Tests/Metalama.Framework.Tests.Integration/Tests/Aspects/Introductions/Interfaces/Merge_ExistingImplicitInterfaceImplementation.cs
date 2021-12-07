@@ -1,10 +1,10 @@
 ﻿// @Skipped(Case for interface merge conflict resolution, not implemented.)
 
 using System;
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
 
-namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.ExistingImplicitInterfaceImplementation
+namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.ExistingImplicitInterfaceImplementation
 {
     /*
      * When the target class already explicitly implements the introduced interface (or it's subinterface), the implicit implementation should be overridden.

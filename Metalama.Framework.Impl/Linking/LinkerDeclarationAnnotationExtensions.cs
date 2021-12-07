@@ -5,11 +5,11 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Linq;
 
-namespace Caravela.Framework.Impl.Linking
+namespace Metalama.Framework.Impl.Linking
 {
     internal static class LinkerDeclarationAnnotationExtensions
     {
-        public const string AnnotationKind = "CaravelaAspectLinkerDeclarationNode";
+        public const string AnnotationKind = "MetalamaAspectLinkerDeclarationNode";
 
         public static LinkerDeclarationFlags GetLinkerDeclarationFlags( this SyntaxNode node )
         {

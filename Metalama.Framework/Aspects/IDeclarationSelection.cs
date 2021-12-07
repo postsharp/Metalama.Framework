@@ -1,13 +1,13 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Code;
-using Caravela.Framework.Eligibility;
-using Caravela.Framework.Validation;
+using Metalama.Framework.Code;
+using Metalama.Framework.Eligibility;
+using Metalama.Framework.Validation;
 using System;
 using System.Linq.Expressions;
 
-namespace Caravela.Framework.Aspects
+namespace Metalama.Framework.Aspects
 {
     /// <summary>
     /// Represents a set of declarations and offers the ability to add aspects and annotations to them.

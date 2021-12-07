@@ -5,7 +5,7 @@ using Microsoft.CodeAnalysis;
 using System.Runtime.InteropServices;
 using System.Threading;
 
-namespace Caravela.Framework.DesignTime.Contracts
+namespace Metalama.Framework.DesignTime.Contracts
 {
     /// <summary>
     /// Exposes a method <see cref="GetClassifiedTextSpans"/> that returns a set of <see cref="IClassifiedTextSpan"/>

@@ -1,13 +1,13 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Impl.CodeModel;
+using Metalama.Framework.Impl.CodeModel;
 using Microsoft.CodeAnalysis;
 using System.Linq;
 using Xunit;
-using MethodKind = Caravela.Framework.Code.MethodKind;
+using MethodKind = Metalama.Framework.Code.MethodKind;
 
-namespace Caravela.Framework.Tests.UnitTests.Diagnostics
+namespace Metalama.Framework.Tests.UnitTests.Diagnostics
 {
     public class DiagnosticLocationHelperTests : TestBase
     {

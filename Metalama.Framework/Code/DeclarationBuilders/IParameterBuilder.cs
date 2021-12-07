@@ -1,11 +1,11 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-namespace Caravela.Framework.Code.DeclarationBuilders
+namespace Metalama.Framework.Code.DeclarationBuilders
 {
     /// <summary>
     /// Allows to complete the construction of a parameter that has been created using e.g.
-    /// <see cref="IMethodBuilder.AddParameter(string,Caravela.Framework.Code.IType,Caravela.Framework.Code.RefKind,Caravela.Framework.Code.TypedConstant)"/>.
+    /// <see cref="IMethodBuilder.AddParameter(string,Metalama.Framework.Code.IType,Metalama.Framework.Code.RefKind,Metalama.Framework.Code.TypedConstant)"/>.
     /// </summary>
     public interface IParameterBuilder : IParameter, IDeclarationBuilder
     {

@@ -1,14 +1,14 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Validation;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Validation;
 
-namespace Caravela.Framework.Project
+namespace Metalama.Framework.Project
 {
     /// <summary>
     /// Exposes the properties of the scenarios in which an aspect, template, or fabric is being executed. The interface is accessible
-    /// from the <see cref="CaravelaExecutionContext"/> class.
+    /// from the <see cref="MetalamaExecutionContext"/> class.
     /// </summary>
     [CompileTimeOnly]
     [InternalImplement]
@@ -21,7 +21,7 @@ namespace Caravela.Framework.Project
         string Name { get; }
 
         /// <summary>
-        /// Gets a value indicating whether Caravela is currently executing at design time. 
+        /// Gets a value indicating whether Metalama is currently executing at design time. 
         /// </summary>
         bool IsDesignTime { get; }
 
@@ -35,7 +35,7 @@ namespace Caravela.Framework.Project
 
         /// <summary>
         /// Gets a value indicating whether the current execution context is interested by the implementation of code fixes. The only
-        /// situation when Caravela is interested by the code fix implementation is when the user actually selects a code fix, either
+        /// situation when Metalama is interested by the code fix implementation is when the user actually selects a code fix, either
         /// for preview or for execution. In other scenarios, the implementation is dropped. 
         /// </summary>
         bool CapturesCodeFixImplementations { get; }

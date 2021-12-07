@@ -1,14 +1,14 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Code;
-using Caravela.Framework.Code.DeclarationBuilders;
-using Caravela.Framework.Code.Invokers;
-using Caravela.Framework.Impl.Advices;
-using Caravela.Framework.Impl.CodeModel.Invokers;
-using Caravela.Framework.Impl.Linking;
-using Caravela.Framework.Impl.Transformations;
-using Caravela.Framework.Impl.Utilities;
+using Metalama.Framework.Code;
+using Metalama.Framework.Code.DeclarationBuilders;
+using Metalama.Framework.Code.Invokers;
+using Metalama.Framework.Impl.Advices;
+using Metalama.Framework.Impl.CodeModel.Invokers;
+using Metalama.Framework.Impl.Linking;
+using Metalama.Framework.Impl.Transformations;
+using Metalama.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -17,7 +17,7 @@ using System.Linq;
 using System.Reflection;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
-namespace Caravela.Framework.Impl.CodeModel.Builders
+namespace Metalama.Framework.Impl.CodeModel.Builders
 {
     internal class EventBuilder : MemberBuilder, IEventBuilder, IEventImpl
     {

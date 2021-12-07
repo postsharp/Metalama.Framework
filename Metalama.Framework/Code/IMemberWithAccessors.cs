@@ -3,7 +3,7 @@
 
 using System.Collections.Generic;
 
-namespace Caravela.Framework.Code
+namespace Metalama.Framework.Code
 {
     /// <summary>
     /// A base interface for <see cref="IProperty"/> and <see cref="IEvent"/>. Exposes <see cref="GetAccessor"/>.

@@ -1,8 +1,8 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.DesignTime.Contracts;
-using Caravela.Framework.Impl.CompileTime;
+using Metalama.Framework.DesignTime.Contracts;
+using Metalama.Framework.Impl.CompileTime;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -11,17 +11,17 @@ using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
-namespace Caravela.Framework.Impl.Templating
+namespace Metalama.Framework.Impl.Templating
 {
     internal static class SyntaxAnnotationExtensions
     {
-        public const string ScopeAnnotationKind = "Caravela_Scope";
-        private const string _targetScopeAnnotationKind = "Caravela_TargetScope";
-        private const string _proceedAnnotationKind = "Caravela_Proceed";
-        private const string _noIndentAnnotationKind = "Caravela_NoIndent";
-        private const string _colorAnnotationKind = "Caravela_Color";
-        private const string _templateAnnotationKind = "Caravela_Template";
-        private const string _scopeMismatchKind = "Caravela_ScopeMismatch";
+        public const string ScopeAnnotationKind = "Metalama_Scope";
+        private const string _targetScopeAnnotationKind = "Metalama_TargetScope";
+        private const string _proceedAnnotationKind = "Metalama_Proceed";
+        private const string _noIndentAnnotationKind = "Metalama_NoIndent";
+        private const string _colorAnnotationKind = "Metalama_Color";
+        private const string _templateAnnotationKind = "Metalama_Template";
+        private const string _scopeMismatchKind = "Metalama_ScopeMismatch";
         private const string _buildTimeAnnotationData = "buildTime";
         private const string _runTimeAnnotationData = "runTime";
         private const string _compileTimeReturningRunTimeOnlyAnnotationData = "compileTimeReturningRunTimeOnly";

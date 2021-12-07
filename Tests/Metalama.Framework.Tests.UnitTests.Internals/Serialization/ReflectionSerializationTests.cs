@@ -5,7 +5,7 @@ using System;
 using System.Reflection;
 using Xunit;
 
-namespace Caravela.Framework.Tests.UnitTests.Serialization
+namespace Metalama.Framework.Tests.UnitTests.Serialization
 {
     public class ReflectionSerializationTests : TestBase
     {
@@ -18,7 +18,7 @@ class C
     void M() {}
 }";
 
-            var expression = "System.Reflection.MethodBase.GetMethodFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeMethodHandle(\"M:C.M\"))";
+            var expression = "System.Reflection.MethodBase.GetMethodFromHandle(Metalama.Compiler.Intrinsics.GetRuntimeMethodHandle(\"M:C.M\"))";
 
             var methodInfo = (MethodInfo) ExecuteExpression( code, expression )!;
 
@@ -31,7 +31,7 @@ class C
             var code = "class Target { public static T Method<T>(T a) => (T)(object)(2*(int)(object)a); }";
 
             var serialized =
-                "System.Reflection.MethodBase.GetMethodFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeMethodHandle(\"M:Target.Method``1(``0)~``0\"))";
+                "System.Reflection.MethodBase.GetMethodFromHandle(Metalama.Compiler.Intrinsics.GetRuntimeMethodHandle(\"M:Target.Method``1(``0)~``0\"))";
 
             var methodInfo = (MethodInfo) ExecuteExpression( code, serialized )!;
             Assert.Equal( 42, methodInfo.MakeGenericMethod( typeof(int) ).Invoke( null, new object[] { 21 } ) );
@@ -44,8 +44,8 @@ class C
 
             var serialized = @"
 System.Reflection.FieldInfo.GetFieldFromHandle(
-    Caravela.Compiler.Intrinsics.GetRuntimeFieldHandle(""F:Target`1.f""),
-    Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Target`1""))";
+    Metalama.Compiler.Intrinsics.GetRuntimeFieldHandle(""F:Target`1.f""),
+    Metalama.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Target`1""))";
 
             var fieldInfo = (FieldInfo) ExecuteExpression( code, serialized )!;
             Assert.Equal( "f", fieldInfo.Name );
@@ -55,7 +55,7 @@ System.Reflection.FieldInfo.GetFieldFromHandle(
         public void TestGenericType()
         {
             var code = "class Target<T> { }";
-            var serialized = "System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(\"T:Target`1\"))";
+            var serialized = "System.Type.GetTypeFromHandle(Metalama.Compiler.Intrinsics.GetRuntimeTypeHandle(\"T:Target`1\"))";
             var type = (Type) ExecuteExpression( code, serialized )!;
             Assert.Equal( "Target`1", type.FullName );
         }

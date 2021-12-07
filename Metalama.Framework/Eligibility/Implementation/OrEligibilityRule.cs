@@ -1,12 +1,12 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Project;
+using Metalama.Framework.Project;
 using System;
 using System.Collections.Immutable;
 using System.Text;
 
-namespace Caravela.Framework.Eligibility.Implementation
+namespace Metalama.Framework.Eligibility.Implementation
 {
     internal class OrEligibilityRule<T> : IEligibilityRule<T>
     {
@@ -53,7 +53,7 @@ namespace Caravela.Framework.Eligibility.Implementation
                         stringBuilder.Append( " or " );
                     }
 
-                    stringBuilder.Append( justification.ToString( CaravelaExecutionContext.Current.FormatProvider ) );
+                    stringBuilder.Append( justification.ToString( MetalamaExecutionContext.Current.FormatProvider ) );
                 }
             }
 

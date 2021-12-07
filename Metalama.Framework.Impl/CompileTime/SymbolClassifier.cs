@@ -1,9 +1,9 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Impl.Utilities;
-using Caravela.Framework.Project;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Impl.Utilities;
+using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Concurrent;
@@ -13,7 +13,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 
-namespace Caravela.Framework.Impl.CompileTime
+namespace Metalama.Framework.Impl.CompileTime
 {
     /// <summary>
     /// The main implementation of <see cref="ISymbolClassifier"/>.
@@ -67,7 +67,7 @@ namespace Caravela.Framework.Impl.CompileTime
         /// Initializes a new instance of the <see cref="SymbolClassifier"/> class.
         /// </summary>
         /// <param name="serviceProvider">Service provider.</param>
-        /// <param name="compilation">The compilation, or null if the compilation has no reference to Caravela.</param>
+        /// <param name="compilation">The compilation, or null if the compilation has no reference to Metalama.</param>
         public SymbolClassifier( IServiceProvider serviceProvider, Compilation? compilation )
         {
             if ( compilation != null )

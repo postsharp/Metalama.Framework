@@ -1,16 +1,16 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
-using Caravela.Framework.Code.Collections;
-using Caravela.Framework.Code.SyntaxBuilders;
-using Caravela.Framework.Impl.CodeModel;
-using Caravela.Framework.Impl.Formatting;
-using Caravela.Framework.Impl.Serialization;
-using Caravela.Framework.Impl.Templating.MetaModel;
-using Caravela.Framework.Impl.Utilities;
-using Caravela.Framework.Project;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
+using Metalama.Framework.Code.Collections;
+using Metalama.Framework.Code.SyntaxBuilders;
+using Metalama.Framework.Impl.CodeModel;
+using Metalama.Framework.Impl.Formatting;
+using Metalama.Framework.Impl.Serialization;
+using Metalama.Framework.Impl.Templating.MetaModel;
+using Metalama.Framework.Impl.Utilities;
+using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -20,9 +20,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
-using SpecialType = Caravela.Framework.Code.SpecialType;
+using SpecialType = Metalama.Framework.Code.SpecialType;
 
-namespace Caravela.Framework.Impl.Templating
+namespace Metalama.Framework.Impl.Templating
 {
     // ReSharper disable UnusedMember.Global
 
@@ -33,7 +33,7 @@ namespace Caravela.Framework.Impl.Templating
     [Obfuscation( Exclude = true )]
     public static class TemplateSyntaxFactory
     {
-        private static readonly SyntaxAnnotation _flattenBlockAnnotation = new( "Caravela_Flatten" );
+        private static readonly SyntaxAnnotation _flattenBlockAnnotation = new( "Metalama_Flatten" );
 
         public static void AddStatement( List<StatementOrTrivia> list, StatementSyntax statement ) => list.Add( new StatementOrTrivia( statement, false ) );
 

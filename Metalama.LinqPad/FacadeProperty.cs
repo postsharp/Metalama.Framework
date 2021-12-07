@@ -3,7 +3,7 @@
 
 using System;
 
-namespace Caravela.LinqPad
+namespace Metalama.LinqPad
 {
     /// <summary>
     /// Represents a property in an <see cref="FacadeType"/>.

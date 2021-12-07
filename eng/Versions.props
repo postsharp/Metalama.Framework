@@ -4,18 +4,18 @@
     <Import Project="MainVersion.props" />
     
     <PropertyGroup>
-        <CaravelaVersion>$(MainVersion)$(PackageVersionSuffix)</CaravelaVersion>
-        <CaravelaAssemblyVersion>$(MainVersion)</CaravelaAssemblyVersion>
+        <MetalamaVersion>$(MainVersion)$(PackageVersionSuffix)</MetalamaVersion>
+        <MetalamaAssemblyVersion>$(MainVersion)</MetalamaAssemblyVersion>
     </PropertyGroup>
 
     
     <!-- Versions of dependencies -->
     <PropertyGroup>
-        <!-- This version should be aligned with the one coming from Caravela.Compiler. -->
+        <!-- This version should be aligned with the one coming from Metalama.Compiler. -->
         <RoslynVersion>4.0.1</RoslynVersion>
         <!-- TODO: Change to public version. -->
-        <CaravelaCompilerVersion>4.0.2001-dev-release-6</CaravelaCompilerVersion>
-        <!-- This version should be aligned with the one coming from Caravela.Compiler. -->
+        <MetalamaCompilerVersion>4.0.2001-dev-release-6</MetalamaCompilerVersion>
+        <!-- This version should be aligned with the one coming from Metalama.Compiler. -->
         <!-- TODO: Change to public version. -->
         <PostSharpBackstageSettingsVersion>0.1.0.50-dev-debug</PostSharpBackstageSettingsVersion>
         <PostSharpEngineeringVersion>1.0.1-preview</PostSharpEngineeringVersion>
@@ -46,14 +46,14 @@
     </PropertyGroup>
 
     <!-- Import overrides for the local build -->
-    <Import Project="../artifacts/publish/private/Caravela.version.props" Condition="Exists('../artifacts/publish/private/Caravela.version.props')" />
+    <Import Project="../artifacts/publish/private/Metalama.version.props" Condition="Exists('../artifacts/publish/private/Metalama.version.props')" />
     <Import Project="Dependencies.props" Condition="Exists('Dependencies.props')"/>
 
     
 
     <PropertyGroup>
-        <AssemblyVersion>$(CaravelaAssemblyVersion)</AssemblyVersion>
-        <Version>$(CaravelaVersion)</Version>
+        <AssemblyVersion>$(MetalamaAssemblyVersion)</AssemblyVersion>
+        <Version>$(MetalamaVersion)</Version>
     </PropertyGroup>
 
     

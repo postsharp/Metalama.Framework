@@ -1,10 +1,10 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Impl.CodeModel;
-using Caravela.Framework.Impl.Pipeline;
-using Caravela.Framework.Impl.Testing;
-using Caravela.Framework.Tests.UnitTests.Utilities;
+using Metalama.Framework.Impl.CodeModel;
+using Metalama.Framework.Impl.Pipeline;
+using Metalama.Framework.Impl.Testing;
+using Metalama.Framework.Tests.UnitTests.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
@@ -12,7 +12,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
-namespace Caravela.Framework.Tests.UnitTests
+namespace Metalama.Framework.Tests.UnitTests
 {
     public class TestBase
     {
@@ -36,7 +36,7 @@ namespace Caravela.Framework.Tests.UnitTests
             bool ignoreErrors = false,
             IEnumerable<MetadataReference>? additionalReferences = null,
             string? name = null,
-            bool addCaravelaReferences = true,
+            bool addMetalamaReferences = true,
             IEnumerable<string>? preprocessorSymbols = null )
             => CreateCSharpCompilation(
                 new Dictionary<string, string> { { Guid.NewGuid() + ".cs", code } },
@@ -44,7 +44,7 @@ namespace Caravela.Framework.Tests.UnitTests
                 ignoreErrors,
                 additionalReferences,
                 name,
-                addCaravelaReferences,
+                addMetalamaReferences,
                 preprocessorSymbols );
 
         protected static CSharpCompilation CreateCSharpCompilation(
@@ -53,7 +53,7 @@ namespace Caravela.Framework.Tests.UnitTests
             bool ignoreErrors = false,
             IEnumerable<MetadataReference>? additionalReferences = null,
             string? name = null,
-            bool addCaravelaReferences = true,
+            bool addMetalamaReferences = true,
             IEnumerable<string>? preprocessorSymbols = null )
         {
             var additionalAssemblies = new[] { typeof(TestBase).Assembly };
@@ -61,7 +61,7 @@ namespace Caravela.Framework.Tests.UnitTests
             var parseOptions = new CSharpParseOptions( preprocessorSymbols: preprocessorSymbols );
 
             var mainRoslynCompilation = TestCompilationFactory
-                .CreateEmptyCSharpCompilation( name, additionalAssemblies, addCaravelaReferences )
+                .CreateEmptyCSharpCompilation( name, additionalAssemblies, addMetalamaReferences )
                 .AddSyntaxTrees( code.Select( c => SyntaxFactory.ParseSyntaxTree( c.Value, path: c.Key, options: parseOptions ) ) );
 
             if ( dependentCode != null )
@@ -106,7 +106,7 @@ class Expression
     public static object Execute() => {expression};
 }}";
 
-            var assemblyPath = CaravelaCompilerUtility.CompileAssembly( context, expressionContainer );
+            var assemblyPath = MetalamaCompilerUtility.CompileAssembly( context, expressionContainer );
 
             var assembly = Assembly.LoadFile( assemblyPath );
 
@@ -169,14 +169,14 @@ class Expression
                 bool ignoreErrors = false,
                 IEnumerable<MetadataReference>? additionalReferences = null,
                 string? name = null,
-                bool addCaravelaReferences = true )
+                bool addMetalamaReferences = true )
                 => this.CreateCompilationModel(
                     new Dictionary<string, string> { { "test.cs", code } },
                     dependentCode,
                     ignoreErrors,
                     additionalReferences,
                     name,
-                    addCaravelaReferences );
+                    addMetalamaReferences );
 
             internal CompilationModel CreateCompilationModel(
                 IReadOnlyDictionary<string, string> code,
@@ -184,9 +184,9 @@ class Expression
                 bool ignoreErrors = false,
                 IEnumerable<MetadataReference>? additionalReferences = null,
                 string? name = null,
-                bool addCaravelaReferences = true )
+                bool addMetalamaReferences = true )
             {
-                var roslynCompilation = CreateCSharpCompilation( code, dependentCode, ignoreErrors, additionalReferences, name, addCaravelaReferences );
+                var roslynCompilation = CreateCSharpCompilation( code, dependentCode, ignoreErrors, additionalReferences, name, addMetalamaReferences );
 
                 return CompilationModel.CreateInitialInstance(
                     new ProjectModel( roslynCompilation, this.ServiceProvider ),

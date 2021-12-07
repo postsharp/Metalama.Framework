@@ -2,15 +2,15 @@
 //    CodeFix: Apply`
 using System;
 using System.Collections.Generic;
-using Caravela.Framework;
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
-using Caravela.Framework.Diagnostics;
-using Caravela.Framework.CodeFixes;
+using Metalama.Framework;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
+using Metalama.Framework.Diagnostics;
+using Metalama.Framework.CodeFixes;
 using System.ComponentModel;
-using Caravela.Framework.Tests.Integration.CodeFixes.ApplyAspect;
+using Metalama.Framework.Tests.Integration.CodeFixes.ApplyAspect;
 
-namespace Caravela.Framework.Tests.Integration.CodeFixes.ApplyAspect
+namespace Metalama.Framework.Tests.Integration.CodeFixes.ApplyAspect
 {
     class Aspect1 : MethodAspect
     {

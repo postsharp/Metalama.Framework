@@ -3,10 +3,10 @@
 
 using System.Linq;
 using System.Threading;
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
 
-namespace Caravela.Framework.TestApp
+namespace Metalama.Framework.TestApp
 {
     internal class CancelAspect : OverrideMethodAspect
     {

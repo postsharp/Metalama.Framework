@@ -112,11 +112,11 @@ private static global::System.Int32 _static_Field1;
 private static global::System.Int32 _static_Field
 {get    {
         global::System.Console.WriteLine("This is the overridden getter.");
-return global::Caravela.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.PropertyTemplate_Field.TargetClass._static_Field1;    }
+return global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.PropertyTemplate_Field.TargetClass._static_Field1;    }
     
 set    {
         global::System.Console.WriteLine($"This is the overridden setter.");
-global::Caravela.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.PropertyTemplate_Field.TargetClass._static_Field1=value;    }
+global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.PropertyTemplate_Field.TargetClass._static_Field1=value;    }
 }
 private static global::System.Int32 _static_InitializerField1 = 42;
     
@@ -125,11 +125,11 @@ private static global::System.Int32 _static_InitializerField1 = 42;
 private static global::System.Int32 _static_InitializerField
 {get    {
         global::System.Console.WriteLine("This is the overridden getter.");
-return global::Caravela.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.PropertyTemplate_Field.TargetClass._static_InitializerField1;    }
+return global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.PropertyTemplate_Field.TargetClass._static_InitializerField1;    }
     
 set    {
         global::System.Console.WriteLine($"This is the overridden setter.");
-global::Caravela.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.PropertyTemplate_Field.TargetClass._static_InitializerField1=value;    }
+global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.PropertyTemplate_Field.TargetClass._static_InitializerField1=value;    }
 }
         // Needs to change accesses in ctors to the newly defined backing field.
         // Linker needs to rewrite ctor bodies if there is any such field.

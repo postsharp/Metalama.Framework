@@ -1,18 +1,18 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Code;
-using Caravela.Framework.Code.Invokers;
-using Caravela.Framework.Impl.CodeModel.References;
-using Caravela.Framework.Impl.Utilities;
-using Caravela.Framework.RunTime;
+using Metalama.Framework.Code;
+using Metalama.Framework.Code.Invokers;
+using Metalama.Framework.Impl.CodeModel.References;
+using Metalama.Framework.Impl.Utilities;
+using Metalama.Framework.RunTime;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
-using MethodKind = Caravela.Framework.Code.MethodKind;
+using MethodKind = Metalama.Framework.Code.MethodKind;
 
-namespace Caravela.Framework.Impl.CodeModel.Builders
+namespace Metalama.Framework.Impl.CodeModel.Builders
 {
     internal class BuiltField : BuiltMember, IFieldImpl, IMemberRef<IField>
     {

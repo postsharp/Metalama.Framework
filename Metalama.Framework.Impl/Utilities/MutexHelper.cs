@@ -4,7 +4,7 @@
 using System;
 using System.Threading;
 
-namespace Caravela.Framework.Impl.Utilities
+namespace Metalama.Framework.Impl.Utilities
 {
     internal static class MutexHelper
     {
@@ -20,7 +20,7 @@ namespace Caravela.Framework.Impl.Utilities
 
         private static Mutex CreateGlobalMutex( string fullName )
         {
-            var mutexName = "Global\\Caravela_" + HashUtilities.HashString( fullName );
+            var mutexName = "Global\\Metalama_" + HashUtilities.HashString( fullName );
 
             Logger.Instance?.Write( $"  Mutex name: '{mutexName}'." );
 

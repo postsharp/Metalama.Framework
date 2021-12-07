@@ -1,7 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Impl.Collections;
+using Metalama.Framework.Impl.Collections;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +9,7 @@ using Xunit;
 
 #pragma warning disable IDE0028 // Collection initialization can be simplified. 
 
-namespace Caravela.Framework.Tests.UnitTests.Collections
+namespace Metalama.Framework.Tests.UnitTests.Collections
 {
     public class SkipListDictionaryTests
     {

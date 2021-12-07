@@ -1,7 +1,7 @@
 using System;
-using Caravela.Framework.Aspects;
+using Metalama.Framework.Aspects;
 
-namespace Caravela.Framework.IntegrationTests.TestFramework.Formatting.Introductions
+namespace Metalama.Framework.IntegrationTests.TestFramework.Formatting.Introductions
 {
     public class IntroductionAttribute : TypeAspect
     {

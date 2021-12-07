@@ -5,7 +5,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
-namespace Caravela.Framework.Impl.Serialization
+namespace Metalama.Framework.Impl.Serialization
 {
     internal class BoolSerializer : ObjectSerializer<bool>
     {

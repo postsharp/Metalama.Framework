@@ -1,12 +1,12 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Compiler;
+using Metalama.Compiler;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 
-namespace Caravela.Framework.Impl.CodeModel
+namespace Metalama.Framework.Impl.CodeModel
 {
     /// <summary>
     /// Represents a subset of a Roslyn <see cref="Microsoft.CodeAnalysis.Compilation"/>. The subset is limited
@@ -33,7 +33,7 @@ namespace Caravela.Framework.Impl.CodeModel
         /// <summary>
         /// Returns a copy of the current <see cref="IPartialCompilation"/> where the <see cref="SyntaxTrees"/> have been modified.
         /// </summary>
-        /// <seealso cref="PartialCompilationExtensions.UpdateSyntaxTrees(Caravela.Framework.Impl.CodeModel.IPartialCompilation,System.Func{Microsoft.CodeAnalysis.SyntaxTree,System.Threading.CancellationToken,Microsoft.CodeAnalysis.SyntaxTree},System.Threading.CancellationToken)"/>
+        /// <seealso cref="PartialCompilationExtensions.UpdateSyntaxTrees(Metalama.Framework.Impl.CodeModel.IPartialCompilation,System.Func{Microsoft.CodeAnalysis.SyntaxTree,System.Threading.CancellationToken,Microsoft.CodeAnalysis.SyntaxTree},System.Threading.CancellationToken)"/>
         /// <seealso cref="PartialCompilationExtensions.RewriteSyntaxTrees"/>
         IPartialCompilation WithSyntaxTreeModifications(
             IReadOnlyList<SyntaxTreeModification>? modifications = null,

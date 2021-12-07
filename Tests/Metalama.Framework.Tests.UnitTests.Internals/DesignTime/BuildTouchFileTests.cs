@@ -1,18 +1,18 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Impl;
-using Caravela.Framework.Impl.DesignTime.Pipeline;
-using Caravela.Framework.Impl.Testing;
-using Caravela.Framework.Tests.UnitTests.Utilities;
-using Caravela.TestFramework;
+using Metalama.Framework.Impl;
+using Metalama.Framework.Impl.DesignTime.Pipeline;
+using Metalama.Framework.Impl.Testing;
+using Metalama.Framework.Tests.UnitTests.Utilities;
+using Metalama.TestFramework;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using Xunit;
 
-namespace Caravela.Framework.Tests.UnitTests.DesignTime
+namespace Metalama.Framework.Tests.UnitTests.DesignTime
 {
     public class BuildTouchFileTests : TestBase
     {
@@ -31,8 +31,8 @@ namespace Caravela.Framework.Tests.UnitTests.DesignTime
         {
             const string aspectCodePart1 = @"
 using System;
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
 
     public class IntroductionAttribute : TypeAspect
     {

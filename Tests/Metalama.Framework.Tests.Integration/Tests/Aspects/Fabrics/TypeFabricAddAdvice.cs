@@ -1,8 +1,8 @@
 using System;
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Fabrics;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Fabrics;
 
-namespace Caravela.Framework.Tests.PublicPipeline.Aspects.Fabrics.TypeFabricAddAdvice
+namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Fabrics.TypeFabricAddAdvice
 {
     // <target>
     internal class TargetCode

@@ -1,14 +1,14 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Impl.DesignTime.Pipeline;
-using Caravela.TestFramework;
+using Metalama.Framework.Impl.DesignTime.Pipeline;
+using Metalama.TestFramework;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using Xunit;
 
-namespace Caravela.Framework.Tests.UnitTests.DesignTime
+namespace Metalama.Framework.Tests.UnitTests.DesignTime
 {
     public class UserDiagnosticRegistrationServiceTests : TestBase
     {
@@ -18,11 +18,11 @@ namespace Caravela.Framework.Tests.UnitTests.DesignTime
             this.TestUserDiagnosticsFileContent(
                 aspectCode: @"
 using System;
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
-using Caravela.Framework.Diagnostics;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
+using Metalama.Framework.Diagnostics;
 
-namespace Caravela.Framework.Tests.UnitTests.DesignTime.TestCode
+namespace Metalama.Framework.Tests.UnitTests.DesignTime.TestCode
 {
     internal class ReportErrorAttribute : MethodAspect
     {
@@ -42,7 +42,7 @@ namespace Caravela.Framework.Tests.UnitTests.DesignTime.TestCode
 
 using System;
 
-namespace Caravela.Framework.Tests.UnitTests.DesignTime.TestCode
+namespace Metalama.Framework.Tests.UnitTests.DesignTime.TestCode
 {
     internal class TargetCode
     {
@@ -56,8 +56,8 @@ namespace Caravela.Framework.Tests.UnitTests.DesignTime.TestCode
     ""MY001"": {
       ""Severity"": 3,
       ""Id"": ""MY001"",
-      ""Category"": ""Caravela.User"",
-      ""Title"": ""A Caravela user diagnostic.""
+      ""Category"": ""Metalama.User"",
+      ""Title"": ""A Metalama user diagnostic.""
     }
   },
   ""Suppressions"": []
@@ -70,11 +70,11 @@ namespace Caravela.Framework.Tests.UnitTests.DesignTime.TestCode
             this.TestUserDiagnosticsFileContent(
                 aspectCode: @"
 using System;
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
-using Caravela.Framework.Diagnostics;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
+using Metalama.Framework.Diagnostics;
 
-namespace Caravela.Framework.Tests.UnitTests.DesignTime.TestCode
+namespace Metalama.Framework.Tests.UnitTests.DesignTime.TestCode
 {
     internal class SuppressWarningAttribute : MethodAspect
     {
@@ -97,7 +97,7 @@ namespace Caravela.Framework.Tests.UnitTests.DesignTime.TestCode
 
 using System;
 
-namespace Caravela.Framework.Tests.UnitTests.DesignTime.TestCode
+namespace Metalama.Framework.Tests.UnitTests.DesignTime.TestCode
 {
     internal class TargetCode
     {
@@ -111,8 +111,8 @@ namespace Caravela.Framework.Tests.UnitTests.DesignTime.TestCode
     ""MY001"": {
       ""Severity"": 2,
       ""Id"": ""MY001"",
-      ""Category"": ""Caravela.User"",
-      ""Title"": ""A Caravela user diagnostic.""
+      ""Category"": ""Metalama.User"",
+      ""Title"": ""A Metalama user diagnostic.""
     }
   },
   ""Suppressions"": [

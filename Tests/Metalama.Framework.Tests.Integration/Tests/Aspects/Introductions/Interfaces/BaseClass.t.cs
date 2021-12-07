@@ -1,4 +1,4 @@
     [Introduction]
     public class TargetClass :BaseClass
-,global::Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.BaseClass.IInterface    {
+,global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.BaseClass.IInterface    {
     }

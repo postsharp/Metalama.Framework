@@ -11,11 +11,11 @@
         <RunAnalyzersDuringBuild>false</RunAnalyzersDuringBuild>
         <RunAnalyzersDuringLiveAnalysis>false</RunAnalyzersDuringLiveAnalysis>
         <IsPackable>false</IsPackable>
-        <RootNamespace>Caravela.RoslynImports</RootNamespace>
+        <RootNamespace>Metalama.RoslynImports</RootNamespace>
     </PropertyGroup>
     
     <PropertyGroup>
-        <RoslynDirectory>C:\src\Caravela.Compiler</RoslynDirectory>
+        <RoslynDirectory>C:\src\Metalama.Compiler</RoslynDirectory>
     </PropertyGroup>
     
     <ItemGroup>
@@ -23,9 +23,9 @@
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="$(RoslynVersion)" />
         
         <!-- This is only to import NullableAttribute, we get conflicts if we import the source -->
-        <ProjectReference Include="..\Caravela.Framework\Caravela.Framework.csproj" />
+        <ProjectReference Include="..\Metalama.Framework\Metalama.Framework.csproj" />
         
-        <InternalsVisibleTo Include="Caravela.Framework.Impl" />
+        <InternalsVisibleTo Include="Metalama.Framework.Impl" />
     </ItemGroup>
     
     <ItemGroup>

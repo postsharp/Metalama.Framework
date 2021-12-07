@@ -4,7 +4,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
-namespace Caravela.Framework.Aspects
+namespace Metalama.Framework.Aspects
 {
     /// <summary>
     /// Specifies the templates that must be used by the <see cref="IAdviceFactory.OverrideMethod"/> advice.

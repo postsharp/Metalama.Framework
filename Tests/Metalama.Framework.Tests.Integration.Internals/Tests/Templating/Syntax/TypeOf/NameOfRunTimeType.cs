@@ -1,10 +1,10 @@
 #pragma warning disable CS8600, CS8603
 using System;
-using Caravela.Framework.Code;
-using Caravela.TestFramework;
-using Caravela.Framework.Aspects;
+using Metalama.Framework.Code;
+using Metalama.TestFramework;
+using Metalama.Framework.Aspects;
 
-namespace Caravela.Framework.Tests.Integration.Templating.CSharpSyntax.TypeOf.NameOfRunTimeType
+namespace Metalama.Framework.Tests.Integration.Templating.CSharpSyntax.TypeOf.NameOfRunTimeType
 {
     [CompileTime]
     class Aspect

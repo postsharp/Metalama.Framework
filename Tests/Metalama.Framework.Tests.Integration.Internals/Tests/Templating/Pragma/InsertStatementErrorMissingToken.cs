@@ -1,9 +1,9 @@
 // @RequiredConstant(NET5_0_OR_GREATER) - The exception message string is slightly different in .NET Framework.
 
-using Caravela.Framework.Aspects;
-using Caravela.TestFramework;
+using Metalama.Framework.Aspects;
+using Metalama.TestFramework;
 
-namespace Caravela.Framework.Tests.Integration.Templating.Pragma.InsertStatementErrorMissingToken
+namespace Metalama.Framework.Tests.Integration.Templating.Pragma.InsertStatementErrorMissingToken
 {
     class Aspect
     {

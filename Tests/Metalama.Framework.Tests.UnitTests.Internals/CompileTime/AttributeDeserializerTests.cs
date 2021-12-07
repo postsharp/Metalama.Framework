@@ -1,11 +1,11 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Impl;
-using Caravela.Framework.Impl.CompileTime;
-using Caravela.Framework.Impl.Diagnostics;
-using Caravela.Framework.Impl.ReflectionMocks;
-using Caravela.TestFramework;
+using Metalama.Framework.Impl;
+using Metalama.Framework.Impl.CompileTime;
+using Metalama.Framework.Impl.Diagnostics;
+using Metalama.Framework.Impl.ReflectionMocks;
+using Metalama.TestFramework;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,7 +13,7 @@ using Xunit;
 
 #pragma warning disable CA1018 // Mark attributes with AttributeUsageAttribute
 
-namespace Caravela.Framework.Tests.UnitTests.CompileTime
+namespace Metalama.Framework.Tests.UnitTests.CompileTime
 {
     public class AttributeDeserializerTests : TestBase
     {
@@ -27,7 +27,7 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime
         {
             using var testContext = this.CreateTestContext();
 
-            var code = $@"[assembly: Caravela.Framework.Tests.UnitTests.CompileTime.AttributeDeserializerTests.TestAttribute( {property} = {value} )]"
+            var code = $@"[assembly: Metalama.Framework.Tests.UnitTests.CompileTime.AttributeDeserializerTests.TestAttribute( {property} = {value} )]"
                        + " enum RunTimeEnum { Value = 1}"
                        + " class GenericRunTimeType<T> {}"
                        + " struct GenericStruct {} "
@@ -62,7 +62,7 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime
         {
             using var testContext = this.CreateTestContext();
 
-            var code = $@"[assembly: Caravela.Framework.Tests.UnitTests.CompileTime.AttributeDeserializerTests.TestAttribute( Field = 5 )]";
+            var code = $@"[assembly: Metalama.Framework.Tests.UnitTests.CompileTime.AttributeDeserializerTests.TestAttribute( Field = 5 )]";
             var compilation = testContext.CreateCompilationModel( code );
 
             using UnloadableCompileTimeDomain domain = new();
@@ -95,19 +95,19 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime
                 TestEnum.A,
                 this.GetDeserializedProperty(
                     nameof(TestAttribute.EnumProperty),
-                    "Caravela.Framework.Tests.UnitTests.CompileTime.AttributeDeserializerTests.TestEnum.A" ) );
+                    "Metalama.Framework.Tests.UnitTests.CompileTime.AttributeDeserializerTests.TestEnum.A" ) );
 
             Assert.Equal(
                 TestEnum.A,
                 this.GetDeserializedProperty(
                     nameof(TestAttribute.ObjectProperty),
-                    "Caravela.Framework.Tests.UnitTests.CompileTime.AttributeDeserializerTests.TestEnum.A" ) );
+                    "Metalama.Framework.Tests.UnitTests.CompileTime.AttributeDeserializerTests.TestEnum.A" ) );
 
             Assert.Equal(
                 new[] { TestEnum.A },
                 this.GetDeserializedProperty(
                     nameof(TestAttribute.EnumArrayProperty),
-                    "new[]{Caravela.Framework.Tests.UnitTests.CompileTime.AttributeDeserializerTests.TestEnum.A}" ) );
+                    "new[]{Metalama.Framework.Tests.UnitTests.CompileTime.AttributeDeserializerTests.TestEnum.A}" ) );
         }
 
         [Fact]
@@ -119,7 +119,7 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime
                 typeof(TestEnum),
                 this.GetDeserializedProperty(
                     nameof(TestAttribute.TypeProperty),
-                    "typeof(Caravela.Framework.Tests.UnitTests.CompileTime.AttributeDeserializerTests.TestEnum)" ) );
+                    "typeof(Metalama.Framework.Tests.UnitTests.CompileTime.AttributeDeserializerTests.TestEnum)" ) );
 
             Assert.Null( this.GetDeserializedProperty( nameof(TestAttribute.TypeProperty), "null" ) );
 
@@ -127,13 +127,13 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime
                 new[] { typeof(TestEnum), typeof(int) },
                 this.GetDeserializedProperty(
                     nameof(TestAttribute.TypeArrayProperty),
-                    "new[]{typeof(Caravela.Framework.Tests.UnitTests.CompileTime.AttributeDeserializerTests.TestEnum),typeof(int)}" ) );
+                    "new[]{typeof(Metalama.Framework.Tests.UnitTests.CompileTime.AttributeDeserializerTests.TestEnum),typeof(int)}" ) );
 
             Assert.Equal(
                 new[] { typeof(TestEnum), typeof(int) },
                 this.GetDeserializedProperty(
                     nameof(TestAttribute.ObjectArrayProperty),
-                    "new[]{typeof(Caravela.Framework.Tests.UnitTests.CompileTime.AttributeDeserializerTests.TestEnum),typeof(int)}" ) );
+                    "new[]{typeof(Metalama.Framework.Tests.UnitTests.CompileTime.AttributeDeserializerTests.TestEnum),typeof(int)}" ) );
 
             Assert.Null( this.GetDeserializedProperty( nameof(TestAttribute.ObjectArrayProperty), "null" ) );
 
@@ -141,7 +141,7 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime
                 new[] { typeof(TestEnum), null },
                 this.GetDeserializedProperty(
                     nameof(TestAttribute.ObjectArrayProperty),
-                    "new[]{typeof(Caravela.Framework.Tests.UnitTests.CompileTime.AttributeDeserializerTests.TestEnum),null}" ) );
+                    "new[]{typeof(Metalama.Framework.Tests.UnitTests.CompileTime.AttributeDeserializerTests.TestEnum),null}" ) );
         }
 
         [Fact]
@@ -248,7 +248,7 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime
             {
                 using var testContext = this.CreateTestContext();
 
-                var code = $@"[assembly: Caravela.Framework.Tests.UnitTests.CompileTime.AttributeDeserializerTests.TestParamsAttribute( {args} )]";
+                var code = $@"[assembly: Metalama.Framework.Tests.UnitTests.CompileTime.AttributeDeserializerTests.TestParamsAttribute( {args} )]";
                 var compilation = testContext.CreateCompilationModel( code );
 
                 using UnloadableCompileTimeDomain domain = new();
@@ -289,7 +289,7 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime
         {
             using var testContext = this.CreateTestContext();
 
-            var code = $@"[assembly: Caravela.Framework.Tests.UnitTests.CompileTime.AttributeDeserializerTests.TestAttribute( InvalidProperty = 0 )]";
+            var code = $@"[assembly: Metalama.Framework.Tests.UnitTests.CompileTime.AttributeDeserializerTests.TestAttribute( InvalidProperty = 0 )]";
             var compilation = testContext.CreateCompilationModel( code, ignoreErrors: true );
 
             using UnloadableCompileTimeDomain domain = new();
@@ -307,8 +307,8 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime
         {
             using var testContext = this.CreateTestContext();
 
-            var code = $@"[assembly: Caravela.Framework.Tests.UnitTests.CompileTime.AttributeDeserializerTests.TestAttribute( 0 )] "
-                       + "[Caravela.Framework.Tests.UnitTests.CompileTime.AttributeDeserializerTests.TestAttribute( 0 )] class C {}";
+            var code = $@"[assembly: Metalama.Framework.Tests.UnitTests.CompileTime.AttributeDeserializerTests.TestAttribute( 0 )] "
+                       + "[Metalama.Framework.Tests.UnitTests.CompileTime.AttributeDeserializerTests.TestAttribute( 0 )] class C {}";
 
             var compilation = testContext.CreateCompilationModel( code, ignoreErrors: true );
 
@@ -321,7 +321,7 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime
         {
             using var testContext = this.CreateTestContext();
 
-            var code = @"[assembly: Caravela.Framework.Tests.UnitTests.CompileTime.AttributeDeserializerTests.TestAttribute( Int32Property = ""a"" )]";
+            var code = @"[assembly: Metalama.Framework.Tests.UnitTests.CompileTime.AttributeDeserializerTests.TestAttribute( Int32Property = ""a"" )]";
             var compilation = testContext.CreateCompilationModel( code, ignoreErrors: true );
 
             using UnloadableCompileTimeDomain domain = new();
@@ -339,7 +339,7 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime
         {
             using var testContext = this.CreateTestContext();
 
-            var code = @"[assembly: Caravela.Framework.Tests.UnitTests.CompileTime.AttributeDeserializerTests.TestAttribute( 0 )]";
+            var code = @"[assembly: Metalama.Framework.Tests.UnitTests.CompileTime.AttributeDeserializerTests.TestAttribute( 0 )]";
             var compilation = testContext.CreateCompilationModel( code, ignoreErrors: true );
 
             Assert.Empty( compilation.Attributes );
@@ -350,7 +350,7 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime
         {
             using var testContext = this.CreateTestContext();
 
-            var code = @"[assembly: Caravela.Framework.Tests.UnitTests.CompileTime.AttributeDeserializerTests.ThrowingAttribute( true )]";
+            var code = @"[assembly: Metalama.Framework.Tests.UnitTests.CompileTime.AttributeDeserializerTests.ThrowingAttribute( true )]";
             var compilation = testContext.CreateCompilationModel( code );
             var attribute = compilation.Attributes.Single();
 
@@ -369,7 +369,7 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime
         {
             using var testContext = this.CreateTestContext();
 
-            var code = @"[assembly: Caravela.Framework.Tests.UnitTests.CompileTime.AttributeDeserializerTests.ThrowingAttribute( false, Property = 0 )]";
+            var code = @"[assembly: Metalama.Framework.Tests.UnitTests.CompileTime.AttributeDeserializerTests.ThrowingAttribute( false, Property = 0 )]";
             var compilation = testContext.CreateCompilationModel( code );
             var attribute = compilation.Attributes.Single();
 

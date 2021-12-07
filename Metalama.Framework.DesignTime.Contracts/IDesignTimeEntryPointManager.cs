@@ -6,10 +6,10 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Caravela.Framework.DesignTime.Contracts
+namespace Metalama.Framework.DesignTime.Contracts
 {
     /// <summary>
-    /// Contract of the entry point of the API between the Caravela VSX and the Caravela analyzer, which can
+    /// Contract of the entry point of the API between the Metalama VSX and the Metalama analyzer, which can
     /// be both of different versions. This contract is strongly versioned. The reference to this API is stored
     /// on the <see cref="AppDomain"/> using <see cref="AppDomain.GetData"/> and <see cref="AppDomain.SetData"/>.
     /// </summary>
@@ -20,7 +20,7 @@ namespace Caravela.Framework.DesignTime.Contracts
         /// <summary>
         /// Gets the <see cref="ICompilerService"/> for a specific project. This method is called by the VSX.
         /// </summary>
-        /// <param name="version">Version of Caravela for which the service is required.</param>
+        /// <param name="version">Version of Metalama for which the service is required.</param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         ValueTask<ICompilerServiceProvider?> GetServiceProviderAsync( Version version, CancellationToken cancellationToken );

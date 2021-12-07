@@ -1,9 +1,9 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Project;
+using Metalama.Framework.Project;
 
-namespace Caravela.Framework.Code
+namespace Metalama.Framework.Code
 {
     /// <summary>
     /// Extension methods for the <see cref="IRef{T}"/> interface.
@@ -15,6 +15,6 @@ namespace Caravela.Framework.Code
         /// </summary>
         public static T GetTarget<T>( this IRef<T> reference )
             where T : class, ICompilationElement
-            => reference.GetTarget( CaravelaExecutionContext.Current.Compilation );
+            => reference.GetTarget( MetalamaExecutionContext.Current.Compilation );
     }
 }

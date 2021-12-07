@@ -1,12 +1,12 @@
 using System;
 using System.Collections.Generic;
-using Caravela.Framework;
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
+using Metalama.Framework;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
 
 #pragma warning disable CS0169
 
-namespace Caravela.Framework.Tests.PublicPipeline.Aspects.Overrides.Fields.BaseInvoker
+namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Overrides.Fields.BaseInvoker
 {
     class Aspect : OverrideFieldOrPropertyAspect
     {

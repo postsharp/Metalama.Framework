@@ -1,11 +1,11 @@
 ﻿using System;
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
-using Caravela.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Uninlineable;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
+using Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Uninlineable;
 
 [assembly: AspectOrder( typeof(FirstOverrideAttribute), typeof(SecondOverrideAttribute) )]
 
-namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Uninlineable
+namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Uninlineable
 {
     [AttributeUsage( AttributeTargets.Property, AllowMultiple = true )]
     public class FirstOverrideAttribute : PropertyAspect

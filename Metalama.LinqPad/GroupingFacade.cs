@@ -4,7 +4,7 @@
 using System.Collections.Immutable;
 using System.Linq;
 
-namespace Caravela.LinqPad
+namespace Metalama.LinqPad
 {
     /// <summary>
     /// A facade object (view-model) representing an <see cref="IGrouping{TKey,TElement}"/>. 

@@ -1,11 +1,11 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Serialization;
+using Metalama.Framework.Serialization;
 using System;
 using System.Collections.Generic;
 
-namespace Caravela.Framework.Impl.CompileTime.Serialization.Serializers
+namespace Metalama.Framework.Impl.CompileTime.Serialization.Serializers
 {
     /// <exclude/>
     public sealed class DictionarySerializer<TKey, TValue> : ReferenceTypeMetaSerializer

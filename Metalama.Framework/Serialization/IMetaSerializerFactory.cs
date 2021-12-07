@@ -3,7 +3,7 @@
 
 using System;
 
-namespace Caravela.Framework.Serialization
+namespace Metalama.Framework.Serialization
 {
     /// <summary>
     /// Defines a method <see cref="CreateSerializer"/>, which creates instances of the <see cref="IMetaSerializer"/> interface for

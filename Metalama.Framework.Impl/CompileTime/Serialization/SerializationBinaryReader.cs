@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
-namespace Caravela.Framework.Impl.CompileTime.Serialization
+namespace Metalama.Framework.Impl.CompileTime.Serialization
 {
     internal sealed class SerializationBinaryReader
     {

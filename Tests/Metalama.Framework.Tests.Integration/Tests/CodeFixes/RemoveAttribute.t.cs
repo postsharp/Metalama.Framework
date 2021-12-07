@@ -2,14 +2,14 @@
 //    CodeFix: Remove [My] from 'TargetCode'`
 using System;
 using System.Collections.Generic;
-using Caravela.Framework;
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
-using Caravela.Framework.Diagnostics;
-using Caravela.Framework.CodeFixes;
+using Metalama.Framework;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
+using Metalama.Framework.Diagnostics;
+using Metalama.Framework.CodeFixes;
 using System.ComponentModel;
 
-namespace Caravela.Framework.Tests.Integration.CodeFixes.RemoveAttribute
+namespace Metalama.Framework.Tests.Integration.CodeFixes.RemoveAttribute
 {
     class Aspect : MethodAspect
     {

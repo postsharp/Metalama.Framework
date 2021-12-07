@@ -1,8 +1,8 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Impl.CodeModel;
-using Caravela.Framework.Impl.ReflectionMocks;
+using Metalama.Framework.Impl.CodeModel;
+using Metalama.Framework.Impl.ReflectionMocks;
 using System.Linq;
 using System.Reflection;
 using Xunit;
@@ -10,9 +10,9 @@ using Xunit.Abstractions;
 
 // ReSharper disable ParameterOnlyUsedForPreconditionCheck.Local
 
-namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
+namespace Metalama.Framework.Tests.UnitTests.Serialization.Reflection
 {
-    public class CaravelaFieldInfoTests : ReflectionTestBase
+    public class MetalamaFieldInfoTests : ReflectionTestBase
     {
         [Fact]
         public void TestField()
@@ -23,12 +23,12 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
             // TODO: This should emit a call to Intrinsics.
 
             this.AssertEqual(
-                @"new global::Caravela.Framework.RunTime.FieldOrPropertyInfo(typeof(global::Target).GetField(""Field"", global::System.Reflection.BindingFlags.DeclaredOnly | global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Static | global::System.Reflection.BindingFlags.Instance))",
+                @"new global::Metalama.Framework.RunTime.FieldOrPropertyInfo(typeof(global::Target).GetField(""Field"", global::System.Reflection.BindingFlags.DeclaredOnly | global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Static | global::System.Reflection.BindingFlags.Instance))",
                 serialized );
 
             TestExpression<FieldInfo>(
                 code,
-                CaravelaPropertyInfoTests.StripLocationInfo( serialized ),
+                MetalamaPropertyInfoTests.StripLocationInfo( serialized ),
                 info =>
                 {
                     Assert.Equal( "Field", info.Name );
@@ -45,12 +45,12 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
             // TODO: This should emit a call to Intrinsics.
 
             this.AssertEqual(
-                @"new global::Caravela.Framework.RunTime.FieldOrPropertyInfo(typeof(global::Target<>).GetField(""Field"", global::System.Reflection.BindingFlags.DeclaredOnly | global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Static | global::System.Reflection.BindingFlags.Instance))",
+                @"new global::Metalama.Framework.RunTime.FieldOrPropertyInfo(typeof(global::Target<>).GetField(""Field"", global::System.Reflection.BindingFlags.DeclaredOnly | global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Static | global::System.Reflection.BindingFlags.Instance))",
                 serialized );
 
             TestExpression<FieldInfo>(
                 code,
-                CaravelaPropertyInfoTests.StripLocationInfo( serialized ),
+                MetalamaPropertyInfoTests.StripLocationInfo( serialized ),
                 info =>
                 {
                     Assert.Equal( "Field", info.Name );
@@ -69,6 +69,6 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
             return actual;
         }
 
-        public CaravelaFieldInfoTests( ITestOutputHelper helper ) : base( helper ) { }
+        public MetalamaFieldInfoTests( ITestOutputHelper helper ) : base( helper ) { }
     }
 }

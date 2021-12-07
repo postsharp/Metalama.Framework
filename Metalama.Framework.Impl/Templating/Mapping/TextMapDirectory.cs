@@ -1,7 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Code.Collections;
+using Metalama.Framework.Code.Collections;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Immutable;
@@ -9,7 +9,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 
-namespace Caravela.Framework.Impl.Templating.Mapping
+namespace Metalama.Framework.Impl.Templating.Mapping
 {
     /// <summary>
     /// Represents a set of <see cref="TextMapFile"/>.

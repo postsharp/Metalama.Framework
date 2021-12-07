@@ -1,6 +1,6 @@
-﻿using Caravela.Reactive.Sources;
+﻿using Metalama.Reactive.Sources;
 
-namespace Caravela.Reactive.UnitTests
+namespace Metalama.Reactive.UnitTests
 {
     internal class TestCompilation
     {

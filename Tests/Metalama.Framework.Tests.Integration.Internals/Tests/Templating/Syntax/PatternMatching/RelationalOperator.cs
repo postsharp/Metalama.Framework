@@ -1,8 +1,8 @@
-using Caravela.TestFramework;
-using Caravela.Framework.Aspects;
+using Metalama.TestFramework;
+using Metalama.Framework.Aspects;
 
 // TODO: Change the namespace
-namespace Caravela.Framework.Tests.Integration.PatternMatching.RelationalOperator
+namespace Metalama.Framework.Tests.Integration.PatternMatching.RelationalOperator
 {
     class Aspect
     {

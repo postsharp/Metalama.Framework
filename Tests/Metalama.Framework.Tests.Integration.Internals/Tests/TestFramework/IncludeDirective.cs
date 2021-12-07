@@ -1,11 +1,11 @@
 // @Include(Imported\Imported.cs)
 #pragma warning disable 169
 
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
-using Caravela.Framework.Tests.Integration.Tests.TestFramework.Imported;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
+using Metalama.Framework.Tests.Integration.Tests.TestFramework.Imported;
 
-namespace Caravela.Framework.Tests.Integration.Tests.TestFramework
+namespace Metalama.Framework.Tests.Integration.Tests.TestFramework
 {
     [ImportedAspect]
     public class IncludeDirective 

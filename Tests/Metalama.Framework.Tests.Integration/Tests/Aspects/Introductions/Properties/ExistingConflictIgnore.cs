@@ -1,6 +1,6 @@
-﻿using Caravela.Framework.Aspects;
+﻿using Metalama.Framework.Aspects;
 
-namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Properties.ExistingConflictIgnore
+namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Properties.ExistingConflictIgnore
 {
     public class IntroductionAttribute : TypeAspect
     {

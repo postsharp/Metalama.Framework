@@ -1,10 +1,10 @@
 ﻿// @LiveTemplate
 
 using System;
-using Caravela.Framework.Aspects;
-using Caravela.TestFramework;
+using Metalama.Framework.Aspects;
+using Metalama.TestFramework;
 
-namespace Caravela.Framework.IntegrationTests.LiveTemplates.LiveTemplate
+namespace Metalama.Framework.IntegrationTests.LiveTemplates.LiveTemplate
 {
     public class TestAspect : OverrideMethodAspect
     {

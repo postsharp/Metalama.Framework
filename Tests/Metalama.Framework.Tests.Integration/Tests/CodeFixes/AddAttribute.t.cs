@@ -2,14 +2,14 @@
 //    CodeFix: Add [My] to 'TargetCode.Method(int)'`
 using System;
 using System.Collections.Generic;
-using Caravela.Framework;
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
-using Caravela.Framework.Diagnostics;
-using Caravela.Framework.CodeFixes;
+using Metalama.Framework;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
+using Metalama.Framework.Diagnostics;
+using Metalama.Framework.CodeFixes;
 using System.ComponentModel;
 
-namespace Caravela.Framework.Tests.Integration.CodeFixes.AddAttribute
+namespace Metalama.Framework.Tests.Integration.CodeFixes.AddAttribute
 {
     class Aspect : MethodAspect
     {

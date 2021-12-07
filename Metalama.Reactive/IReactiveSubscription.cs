@@ -3,7 +3,7 @@
 
 using System;
 
-namespace Caravela.Reactive
+namespace Metalama.Reactive
 {
     /// <summary>
     /// Represents a subscription to an <see cref="IReactiveObservable{T}"/>. The main feature

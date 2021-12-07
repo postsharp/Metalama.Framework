@@ -1,7 +1,7 @@
 using System.Collections.Generic;
-using Caravela.TestFramework;
+using Metalama.TestFramework;
 
-namespace Caravela.Framework.Tests.Integration.Templating.Syntax.RunTimeOutVarArg
+namespace Metalama.Framework.Tests.Integration.Templating.Syntax.RunTimeOutVarArg
 {
     class Aspect
     {

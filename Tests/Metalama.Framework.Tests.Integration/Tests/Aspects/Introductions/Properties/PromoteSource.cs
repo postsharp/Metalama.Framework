@@ -1,11 +1,11 @@
 ﻿using System;
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
-using Caravela.TestFramework;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
+using Metalama.TestFramework;
 
 #pragma warning disable CS0169
 
-namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Properties.PromoteSource
+namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Properties.PromoteSource
 {
     [AttributeUsage(AttributeTargets.Field)]
     public class PromoteAttribute : FieldOrPropertyAspect

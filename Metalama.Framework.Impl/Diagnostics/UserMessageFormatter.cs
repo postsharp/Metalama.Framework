@@ -1,14 +1,14 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Code;
+using Metalama.Framework.Code;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Globalization;
 using System.Linq;
-using Accessibility = Caravela.Framework.Code.Accessibility;
+using Accessibility = Metalama.Framework.Code.Accessibility;
 
-namespace Caravela.Framework.Impl.Diagnostics
+namespace Metalama.Framework.Impl.Diagnostics
 {
     /// <summary>
     /// Formats arguments passed to a diagnostic.

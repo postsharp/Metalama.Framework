@@ -4,7 +4,7 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace Caravela.Framework.Impl.Linking.Inlining
+namespace Metalama.Framework.Impl.Linking.Inlining
 {
     /// <summary>
     /// Handles inlining of return statement which invokes an annotated expression.

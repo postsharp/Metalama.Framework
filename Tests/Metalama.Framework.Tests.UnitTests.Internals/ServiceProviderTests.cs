@@ -1,14 +1,14 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Impl.Options;
-using Caravela.Framework.Impl.Pipeline;
-using Caravela.Framework.Impl.Testing;
-using Caravela.Framework.Project;
+using Metalama.Framework.Impl.Options;
+using Metalama.Framework.Impl.Pipeline;
+using Metalama.Framework.Impl.Testing;
+using Metalama.Framework.Project;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace Caravela.Framework.Tests.UnitTests
+namespace Metalama.Framework.Tests.UnitTests
 {
     public class ServiceProviderTests
     {

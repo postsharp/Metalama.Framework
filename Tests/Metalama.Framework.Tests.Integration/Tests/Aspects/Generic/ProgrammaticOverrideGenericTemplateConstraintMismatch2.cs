@@ -1,8 +1,8 @@
 using System;
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
 
-namespace Caravela.Framework.Tests.PublicPipeline.Aspects.Generic.ProgrammaticOverrideGenericTemplateConstraintMismatch2
+namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Generic.ProgrammaticOverrideGenericTemplateConstraintMismatch2
 {
     internal class Aspect : MethodAspect
     {

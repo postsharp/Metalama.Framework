@@ -7,7 +7,7 @@ using System.IO;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Caravela.TestFramework.XunitFramework
+namespace Metalama.TestFramework.XunitFramework
 {
     internal class TestCase : LongLivedMarshalByRefObject, ITestCase, ISourceInformation
     {

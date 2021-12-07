@@ -1,12 +1,12 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Compiler;
-using Caravela.Framework.Impl.Collections;
-using Caravela.Framework.Impl.DesignTime.Diagnostics;
-using Caravela.Framework.Impl.DesignTime.Pipeline;
-using Caravela.Framework.Impl.Options;
-using Caravela.Framework.Impl.Utilities;
+using Metalama.Compiler;
+using Metalama.Framework.Impl.Collections;
+using Metalama.Framework.Impl.DesignTime.Diagnostics;
+using Metalama.Framework.Impl.DesignTime.Pipeline;
+using Metalama.Framework.Impl.Options;
+using Metalama.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Diagnostics;
@@ -19,7 +19,7 @@ using System.Threading;
 #pragma warning disable RS1001 // Missing diagnostic analyzer attribute.
 #pragma warning disable RS1022 // Remove access to our implementation types.
 
-namespace Caravela.Framework.Impl.DesignTime
+namespace Metalama.Framework.Impl.DesignTime
 {
     // ReSharper disable UnusedType.Global
 
@@ -33,7 +33,7 @@ namespace Caravela.Framework.Impl.DesignTime
 
         public override void ReportSuppressions( SuppressionAnalysisContext context )
         {
-            if ( CaravelaCompilerInfo.IsActive ||
+            if ( MetalamaCompilerInfo.IsActive ||
                  context.Compilation is not CSharpCompilation compilation )
             {
                 return;

@@ -1,19 +1,19 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
-using Caravela.Framework.Eligibility;
-using Caravela.Framework.Fabrics;
-using Caravela.Framework.Impl.AspectOrdering;
-using Caravela.Framework.Impl.Aspects;
-using Caravela.Framework.Impl.CompileTime;
-using Caravela.Framework.Impl.Sdk;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
+using Metalama.Framework.Eligibility;
+using Metalama.Framework.Fabrics;
+using Metalama.Framework.Impl.AspectOrdering;
+using Metalama.Framework.Impl.Aspects;
+using Metalama.Framework.Impl.CompileTime;
+using Metalama.Framework.Impl.Sdk;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Immutable;
 
-namespace Caravela.Framework.Impl.Fabrics
+namespace Metalama.Framework.Impl.Fabrics
 {
     /// <summary>
     /// The top-level aspect class integrating the fabrics feature in the aspect pipeline. It is used as an 'identity'

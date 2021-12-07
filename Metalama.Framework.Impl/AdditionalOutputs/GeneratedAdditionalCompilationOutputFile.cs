@@ -4,7 +4,7 @@
 using System;
 using System.IO;
 
-namespace Caravela.Framework.Impl.AdditionalOutputs
+namespace Metalama.Framework.Impl.AdditionalOutputs
 {
     internal class GeneratedAdditionalCompilationOutputFile : AdditionalCompilationOutputFile
     {

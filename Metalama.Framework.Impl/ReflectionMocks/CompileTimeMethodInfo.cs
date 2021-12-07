@@ -1,14 +1,14 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Code;
-using Caravela.Framework.Impl.CodeModel;
-using Caravela.Framework.Impl.CodeModel.References;
+using Metalama.Framework.Code;
+using Metalama.Framework.Impl.CodeModel;
+using Metalama.Framework.Impl.CodeModel.References;
 using System;
 using System.Globalization;
 using System.Reflection;
 
-namespace Caravela.Framework.Impl.ReflectionMocks
+namespace Metalama.Framework.Impl.ReflectionMocks
 {
     internal class CompileTimeMethodInfo : MethodInfo, ICompileTimeReflectionObject<IMethod>
     {

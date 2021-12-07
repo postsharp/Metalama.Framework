@@ -1,12 +1,12 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Impl;
-using Caravela.Framework.Impl.CodeModel;
-using Caravela.Framework.Impl.CompileTime;
-using Caravela.Framework.Impl.Diagnostics;
-using Caravela.TestFramework;
-using Caravela.TestFramework.Utilities;
+using Metalama.Framework.Impl;
+using Metalama.Framework.Impl.CodeModel;
+using Metalama.Framework.Impl.CompileTime;
+using Metalama.Framework.Impl.Diagnostics;
+using Metalama.TestFramework;
+using Metalama.TestFramework.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -17,7 +17,7 @@ using System.Linq;
 using System.Threading;
 using Xunit;
 
-namespace Caravela.Framework.Tests.UnitTests.CompileTime
+namespace Metalama.Framework.Tests.UnitTests.CompileTime
 {
     public class CompileTimeCompilationBuilderTests : TestBase
     {
@@ -59,8 +59,8 @@ namespace Foo
         {
             var code = @"
 using System;
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Fabrics;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Fabrics;
 
 [assembly: A(42, new[] { E.A }, new[] { typeof(C<int[]>.N<string>), typeof(C<>.N<>) }, P = 13)]
 [assembly: CompileTime]
@@ -114,7 +114,7 @@ class A : Attribute
             // This tests that we can create compile-time assemblies that have reference projects in the same solution with compile-time code.
 
             var referencedCode = @"
-using Caravela.Framework.Aspects;
+using Metalama.Framework.Aspects;
 [assembly: CompileTime]
 public class ReferencedClass
 {
@@ -123,7 +123,7 @@ public class ReferencedClass
 
             var referencingCode = @"
 
-using Caravela.Framework.Aspects;
+using Metalama.Framework.Aspects;
 [assembly: CompileTime]
 class ReferencingClass
 {
@@ -146,7 +146,7 @@ class ReferencingClass
             // This tests that we can create compile-time assemblies that have reference compiled assemblies (out of the solution) with compile-time code.
 
             var indirectlyReferencedCode = @"
-using Caravela.Framework.Aspects;
+using Metalama.Framework.Aspects;
 [assembly: CompileTime]
 public class ReferencedClass
 {
@@ -154,7 +154,7 @@ public class ReferencedClass
 ";
 
             var directlyReferencedCode = @"
-using Caravela.Framework.Aspects;
+using Metalama.Framework.Aspects;
 [assembly: CompileTime]
 public class MiddleClass
 {
@@ -164,7 +164,7 @@ public class MiddleClass
 
             var referencingCode = @"
 
-using Caravela.Framework.Aspects;
+using Metalama.Framework.Aspects;
 [assembly: CompileTime]
 class ReferencingClass
 {
@@ -243,7 +243,7 @@ class ReferencingClass
 
             string GenerateVersionedCode( int version )
                 => @"
-using Caravela.Framework.Aspects;
+using Metalama.Framework.Aspects;
 [assembly: CompileTime]
 public class VersionedClass
 {
@@ -253,7 +253,7 @@ public class VersionedClass
 
             var classA = @"
 
-using Caravela.Framework.Aspects;
+using Metalama.Framework.Aspects;
 [assembly: CompileTime]
 class A
 {
@@ -263,7 +263,7 @@ class A
 
             var classB = @"
 
-using Caravela.Framework.Aspects;
+using Metalama.Framework.Aspects;
 [assembly: CompileTime]
 class B
 {
@@ -336,7 +336,7 @@ class B
 
             var code = @"
 
-using Caravela.Framework.Fabrics;
+using Metalama.Framework.Fabrics;
 [CompileTime]
 class B
 {
@@ -361,7 +361,7 @@ class C
         public void CacheWithSameLoader()
         {
             var code = @"
-using Caravela.Framework.Aspects;
+using Metalama.Framework.Aspects;
 [assembly: CompileTime]
 public class ReferencedClass
 {
@@ -405,7 +405,7 @@ public class ReferencedClass
         public void CacheWithDifferentIdentityButSameCodeSameLoader()
         {
             var code = @"
-using Caravela.Framework.Aspects;
+using Metalama.Framework.Aspects;
 [assembly: CompileTime]
 public class ReferencedClass
 {
@@ -444,7 +444,7 @@ public class ReferencedClass
         public void CacheWithDifferentIdentityButSameCodeDifferentLoader()
         {
             var code = @"
-using Caravela.Framework.Aspects;
+using Metalama.Framework.Aspects;
 [assembly: CompileTime]
 public class ReferencedClass
 {
@@ -483,7 +483,7 @@ public class ReferencedClass
         public void CacheWithDifferentLoader()
         {
             var code = @"
-using Caravela.Framework.Aspects;
+using Metalama.Framework.Aspects;
 [assembly: CompileTime]
 public class ReferencedClass
 {
@@ -516,7 +516,7 @@ public class ReferencedClass
         public void CleanCacheAndDeserialize()
         {
             var referencedCode = @"
-using Caravela.Framework.Aspects;
+using Metalama.Framework.Aspects;
 [assembly: CompileTime]
 public class ReferencedClass
 {
@@ -525,7 +525,7 @@ public class ReferencedClass
 
             var referencingCode = @"
 
-using Caravela.Framework.Aspects;
+using Metalama.Framework.Aspects;
 [assembly: CompileTime]
 class ReferencingClass
 {
@@ -592,7 +592,7 @@ class ReferencingClass
             var loader = CompileTimeProjectLoader.Create( new CompileTimeDomain(), testContext.ServiceProvider );
 
             var referencedCode = @"
-using Caravela.Framework.Aspects;
+using Metalama.Framework.Aspects;
 [assembly: CompileTime]
 public class ReferencedClass
 {
@@ -664,7 +664,7 @@ public class ReferencedClass
         {
             var code = @"
 using System;
-using Caravela.Framework.Aspects;
+using Metalama.Framework.Aspects;
 
 [CompileTimeOnly]
 public class CompileTimeOnlyClass
@@ -688,17 +688,17 @@ public class RunTimeOnlyClass
 
             var expected = @"
 using System;
-using Caravela.Framework.Aspects;
+using Metalama.Framework.Aspects;
 
 [CompileTimeOnly]
 public class CompileTimeOnlyClass
 {
-   static global::System.Type Type1 = global::Caravela.Framework.Impl.ReflectionMocks.CompileTimeType.GetCompileTimeType(""1 (D \""RunTimeOnlyClass\"" (N \""\"" 0 (U (S \""test\"" 3) 2) 1) 0 0 (% 0) 0)"",""RunTimeOnlyClass"");
+   static global::System.Type Type1 = global::Metalama.Framework.Impl.ReflectionMocks.CompileTimeType.GetCompileTimeType(""1 (D \""RunTimeOnlyClass\"" (N \""\"" 0 (U (S \""test\"" 3) 2) 1) 0 0 (% 0) 0)"",""RunTimeOnlyClass"");
    static global::System.Type Type2 = typeof(global::CompileTimeOnlyClass);
    static string Name1 = ""RunTimeOnlyClass"";
    static string Name2 = ""CompileTimeOnlyClass"";
 
-   void Method() { var t = global::Caravela.Framework.Impl.ReflectionMocks.CompileTimeType.GetCompileTimeType(""1 (D \""RunTimeOnlyClass\"" (N \""\"" 0 (U (S \""test\"" 3) 2) 1) 0 0 (% 0) 0)"",""RunTimeOnlyClass""); }
+   void Method() { var t = global::Metalama.Framework.Impl.ReflectionMocks.CompileTimeType.GetCompileTimeType(""1 (D \""RunTimeOnlyClass\"" (N \""\"" 0 (U (S \""test\"" 3) 2) 1) 0 0 (% 0) 0)"",""RunTimeOnlyClass""); }
    string Property => ""RunTimeOnlyClass"";
 }
 ";
@@ -734,7 +734,7 @@ public class CompileTimeOnlyClass
 
             var code = @"
 using System;
-using Caravela.Framework.Aspects;
+using Metalama.Framework.Aspects;
 
 [CompileTimeOnly]
 public class Anything
@@ -757,7 +757,7 @@ public class Anything
 
             var code = @"
 using System;
-using Caravela.Framework.Aspects;
+using Metalama.Framework.Aspects;
 
 public class SomeRunTimeClass
 {
@@ -783,7 +783,7 @@ public class SomeRunTimeClass
 
             var code = @"
 using System;
-using Caravela.Framework.Aspects;
+using Metalama.Framework.Aspects;
 
 public class MyAspect : OverrideMethodAspect
 {
@@ -833,10 +833,10 @@ public class MyAspect : OverrideMethodAspect
                 testContext,
                 new Dictionary<string, string>
                 {
-                    ["BuildTime.cs"] = "class Aspect : Caravela.Framework.Aspects.MethodAspect {}",
+                    ["BuildTime.cs"] = "class Aspect : Metalama.Framework.Aspects.MethodAspect {}",
                     ["RunTime.cs"] = @"namespace Ns { class C {} } ",
                     ["Both.cs"] =
-                        "namespace Ns1 { class Aspect : Caravela.Framework.Aspects.MethodAspect {} } namespace Ns2 { class C {} }"
+                        "namespace Ns1 { class Aspect : Metalama.Framework.Aspects.MethodAspect {} } namespace Ns2 { class C {} }"
                 } );
 
             // Test that run-time-only trees are removed from the build-time compilation.
@@ -857,7 +857,7 @@ public class MyAspect : OverrideMethodAspect
 
             var code = @"
 using System;
-using Caravela.Framework.Fabrics;
+using Metalama.Framework.Fabrics;
 
 public class SomeClass
 {
@@ -880,8 +880,8 @@ namespace SomeNamespace
 
             var expected = @"
 using System;
-using Caravela.Framework.Fabrics;
-using Caravela.Framework.Impl.CompileTime;
+using Metalama.Framework.Fabrics;
+using Metalama.Framework.Impl.CompileTime;
 
 [OriginalPath(""main.cs"")]
 [OriginalId(""T:SomeClass.Fabric"")]

@@ -1,9 +1,9 @@
 ﻿using System;
-using Caravela.Framework.Aspects;
-using Caravela.TestFramework;
+using Metalama.Framework.Aspects;
+using Metalama.TestFramework;
 
 
-namespace Caravela.Framework.Tests.Integration.Aspects.Samples.SimpleLogging
+namespace Metalama.Framework.Tests.Integration.Aspects.Samples.SimpleLogging
 {
     public class LogAttribute : OverrideMethodAspect
     {

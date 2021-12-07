@@ -1,8 +1,8 @@
 using System;
 using System.Linq;
-using Caravela.Framework.Aspects;
+using Metalama.Framework.Aspects;
 
-namespace Caravela.Framework.Tests.Integration.Aspects.Bug28769
+namespace Metalama.Framework.Tests.Integration.Aspects.Bug28769
 {
  
     class ConvertToRunTimeAspect : OverrideMethodAspect

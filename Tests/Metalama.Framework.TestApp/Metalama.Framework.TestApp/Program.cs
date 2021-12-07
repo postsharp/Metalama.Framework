@@ -4,9 +4,9 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Caravela.Framework.TestApp.Aspects;
+using Metalama.Framework.TestApp.Aspects;
 
-namespace Caravela.Framework.TestApp
+namespace Metalama.Framework.TestApp
 {
     [IntroduceSomeMethodAspect("Foo", "Bar")]
     internal partial class Program

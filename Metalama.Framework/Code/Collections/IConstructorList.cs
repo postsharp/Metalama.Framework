@@ -4,7 +4,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Caravela.Framework.Code.Collections
+namespace Metalama.Framework.Code.Collections
 {
     /// <summary>
     /// Read-only list of <see cref="IConstructor"/>.
@@ -22,7 +22,7 @@ namespace Caravela.Framework.Code.Collections
         IEnumerable<IConstructor> OfCompatibleSignature( IReadOnlyList<Type?>? argumentTypes );
 
         /// <summary>
-        /// Gets a list of constructors with signatures compatible with specified constraints given using the Caravela API.
+        /// Gets a list of constructors with signatures compatible with specified constraints given using the Metalama API.
         /// </summary>
         /// <param name="argumentTypes">Constraint on types of arguments. <c>Null</c>items in the list signify any type.</param>
         /// <param name="refKinds">Constraint on reference kinds of arguments. <c>Null</c>items in the list signify any reference kind.</param>

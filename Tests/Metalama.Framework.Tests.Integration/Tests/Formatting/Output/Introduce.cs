@@ -1,9 +1,9 @@
 using System;
-using Caravela.Framework.Aspects;
+using Metalama.Framework.Aspects;
 
 #pragma warning disable CS8618, CS0067, CS0168
 
-namespace Caravela.Framework.Tests.Integration.Tests.Formatting.Introduce
+namespace Metalama.Framework.Tests.Integration.Tests.Formatting.Introduce
 {
     public class IntroduceAspect : TypeAspect
     {

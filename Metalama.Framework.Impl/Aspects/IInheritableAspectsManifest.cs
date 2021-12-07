@@ -3,7 +3,7 @@
 
 using System.Collections.Generic;
 
-namespace Caravela.Framework.Impl.Aspects
+namespace Metalama.Framework.Impl.Aspects
 {
     internal interface IInheritableAspectsManifest
     {

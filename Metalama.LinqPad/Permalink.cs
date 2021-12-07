@@ -1,10 +1,10 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Code;
+using Metalama.Framework.Code;
 using LINQPad;
 
-namespace Caravela.LinqPad
+namespace Metalama.LinqPad
 {
     /// <summary>
     /// Represents a hyperlink to an <see cref="IDeclaration"/>. When clicking on a hyperlink, a new query is opened, starting at

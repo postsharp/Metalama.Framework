@@ -6,11 +6,11 @@ using System;
 using System.Threading.Tasks;
 using System.Collections;
 using System.Collections.Generic;
-using Caravela.Framework;
-using Caravela.TestFramework;
-using Caravela.Framework.Aspects;
+using Metalama.Framework;
+using Metalama.TestFramework;
+using Metalama.Framework.Aspects;
 
-namespace Caravela.Framework.Tests.Integration.Templating.Aspects.AsyncIterators.AsyncIteratorTemplate
+namespace Metalama.Framework.Tests.Integration.Templating.Aspects.AsyncIterators.AsyncIteratorTemplate
 {
     class Aspect : OverrideMethodAspect
     {

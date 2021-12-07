@@ -1,9 +1,9 @@
 using System.ComponentModel;
-using Caravela.Framework.Aspects;
-using Caravela.TestFramework;
+using Metalama.Framework.Aspects;
+using Metalama.TestFramework;
 
 
-namespace Caravela.Framework.Tests.Integration.Templating.Dynamic.DynamicGreedyArguments
+namespace Metalama.Framework.Tests.Integration.Templating.Dynamic.DynamicGreedyArguments
 {
     [CompileTime]
     class Aspect

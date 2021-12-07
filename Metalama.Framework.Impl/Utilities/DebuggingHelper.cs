@@ -1,13 +1,13 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Compiler;
-using Caravela.Framework.Impl.Options;
+using Metalama.Compiler;
+using Metalama.Framework.Impl.Options;
 using System;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 
-namespace Caravela.Framework.Impl.Utilities
+namespace Metalama.Framework.Impl.Utilities
 {
     /// <summary>
     /// Exposes the <see cref="AttachDebugger"/> method.
@@ -31,11 +31,11 @@ namespace Caravela.Framework.Impl.Utilities
                 _ => ProcessKind.Other
             };
 
-        public static void RequireCaravelaCompiler()
+        public static void RequireMetalamaCompiler()
         {
-            if ( ProcessKind == ProcessKind.Compiler && !CaravelaCompilerInfo.IsActive )
+            if ( ProcessKind == ProcessKind.Compiler && !MetalamaCompilerInfo.IsActive )
             {
-                throw new AssertionFailedException( "Caravela is running in the vanilla C# compiler instead of the customized one." );
+                throw new AssertionFailedException( "Metalama is running in the vanilla C# compiler instead of the customized one." );
             }
         }
 

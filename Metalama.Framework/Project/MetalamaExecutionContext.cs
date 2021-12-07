@@ -4,12 +4,12 @@
 using System;
 using System.Threading;
 
-namespace Caravela.Framework.Project
+namespace Metalama.Framework.Project
 {
     /// <summary>
-    /// Exposes the current execution context of Caravela.
+    /// Exposes the current execution context of Metalama.
     /// </summary>
-    public static class CaravelaExecutionContext
+    public static class MetalamaExecutionContext
     {
         private static readonly AsyncLocal<IExecutionContext?> _current = new();
 

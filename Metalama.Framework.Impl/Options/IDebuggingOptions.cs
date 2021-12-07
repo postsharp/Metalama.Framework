@@ -1,9 +1,9 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Project;
+using Metalama.Framework.Project;
 
-namespace Caravela.Framework.Impl.Options
+namespace Metalama.Framework.Impl.Options
 {
     /// <summary>
     /// Exposes options allowing to attach a debugger to different compile-time or design-time processes.

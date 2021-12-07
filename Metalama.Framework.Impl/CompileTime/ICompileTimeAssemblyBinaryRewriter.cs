@@ -1,14 +1,14 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Project;
+using Metalama.Framework.Project;
 using System.IO;
 
-namespace Caravela.Framework.Impl.CompileTime
+namespace Metalama.Framework.Impl.CompileTime
 {
     /// <summary>
     /// Defines a method <see cref="Rewrite"/> called by the compile-time assembly builder
-    /// when emitting the binary compile-time assembly. This interface is used by TryCaravela.
+    /// when emitting the binary compile-time assembly. This interface is used by TryMetalama.
     /// </summary>
     public interface ICompileTimeAssemblyBinaryRewriter : IService
     {

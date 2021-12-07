@@ -1,9 +1,9 @@
 ﻿#pragma warning disable CS0067
 
 using System;
-using Caravela.Framework.Aspects;
+using Metalama.Framework.Aspects;
 
-namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Events.DeclarativeEvent
+namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Events.DeclarativeEvent
 {
     public class IntroductionAttribute : TypeAspect
     {

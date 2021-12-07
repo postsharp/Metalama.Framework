@@ -1,11 +1,11 @@
 using System;
 using System.Linq;
-using Caravela.Framework.Aspects;
-using Caravela.TestFramework;
+using Metalama.Framework.Aspects;
+using Metalama.TestFramework;
 
 #pragma warning disable CS0169, CS8618
 
-namespace Caravela.Framework.Tests.Integration.Tests.Templating.Dynamic.Cast
+namespace Metalama.Framework.Tests.Integration.Tests.Templating.Dynamic.Cast
 {
     [CompileTime]
     class Aspect

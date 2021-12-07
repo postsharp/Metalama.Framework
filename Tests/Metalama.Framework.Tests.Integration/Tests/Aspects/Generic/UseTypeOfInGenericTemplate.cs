@@ -1,7 +1,7 @@
 using System;
-using Caravela.Framework.Aspects;
+using Metalama.Framework.Aspects;
 
-namespace Caravela.Framework.Tests.PublicPipeline.Aspects.Generic.UseTypeOfInGenericTemplate
+namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Generic.UseTypeOfInGenericTemplate
 {
     internal class Aspect : TypeAspect
     {

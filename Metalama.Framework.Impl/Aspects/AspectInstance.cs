@@ -1,14 +1,14 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
-using Caravela.Framework.Eligibility;
-using Caravela.Framework.Impl.CodeModel;
-using Caravela.Framework.Impl.CodeModel.References;
-using Caravela.Framework.Impl.Diagnostics;
-using Caravela.Framework.Impl.Utilities;
-using Caravela.Framework.Project;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
+using Metalama.Framework.Eligibility;
+using Metalama.Framework.Impl.CodeModel;
+using Metalama.Framework.Impl.CodeModel.References;
+using Metalama.Framework.Impl.Diagnostics;
+using Metalama.Framework.Impl.Utilities;
+using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -16,7 +16,7 @@ using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 
-namespace Caravela.Framework.Impl.Aspects
+namespace Metalama.Framework.Impl.Aspects
 {
     /// <summary>
     /// Represents an instance of an aspect and its target declaration.

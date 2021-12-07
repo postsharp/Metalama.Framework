@@ -1,7 +1,7 @@
 ﻿using System;
-using Caravela.Framework.Aspects;
+using Metalama.Framework.Aspects;
 
-namespace Caravela.Framework.IntegrationTests.Aspects.Overrides.Methods.ConditionalAccess
+namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Methods.ConditionalAccess
 {
     // Tests single OverrideMethod aspect with trivial template on methods with trivial bodies.
 

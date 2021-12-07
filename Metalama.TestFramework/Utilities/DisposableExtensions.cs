@@ -3,7 +3,7 @@
 
 using System;
 
-namespace Caravela.TestFramework.Utilities
+namespace Metalama.TestFramework.Utilities
 {
     internal static class DisposableExtensions
     {

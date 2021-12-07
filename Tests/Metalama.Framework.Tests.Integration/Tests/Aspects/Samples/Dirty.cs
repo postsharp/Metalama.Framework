@@ -1,9 +1,9 @@
 ﻿using System.Linq;
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
-using Caravela.Framework.Diagnostics;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
+using Metalama.Framework.Diagnostics;
 
-namespace Caravela.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty
 {
     public class DirtyAttribute : TypeAspect
     {
@@ -52,7 +52,7 @@ namespace Caravela.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty
             }
 
             // TODO: This aspect is not complete. We should normally not set DirtyState to Clean after the object has been initialized,
-            // but this is not possible in the current version of Caravela.
+            // but this is not possible in the current version of Metalama.
         }
 
         [InterfaceMember]

@@ -4,7 +4,7 @@
 using System;
 using System.Reflection;
 
-namespace Caravela.Framework.RunTime
+namespace Metalama.Framework.RunTime
 {
     /// <summary>
     /// Represents a reflection <see cref="FieldInfo"/> or a <see cref="PropertyInfo"/>. 

@@ -4,7 +4,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Caravela.Framework.Impl.CompileTime.Serialization.Serializers
+namespace Metalama.Framework.Impl.CompileTime.Serialization.Serializers
 {
     internal static class ComparerExtensions
     {

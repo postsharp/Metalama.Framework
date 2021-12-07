@@ -8,7 +8,7 @@ using System.Globalization;
 using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
-namespace Caravela.Framework.Impl.Serialization
+namespace Metalama.Framework.Impl.Serialization
 {
     internal class EnumSerializer : ObjectSerializer
     {

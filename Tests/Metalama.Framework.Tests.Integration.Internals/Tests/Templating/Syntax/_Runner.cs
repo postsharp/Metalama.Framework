@@ -1,9 +1,9 @@
 using System.Threading.Tasks;
-using Caravela.TestFramework;
+using Metalama.TestFramework;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Caravela.Framework.Tests.Integration.Tests.Templating.Syntax
+namespace Metalama.Framework.Tests.Integration.Tests.Templating.Syntax
 {
     public class _Runner : TestSuite
     {

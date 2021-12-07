@@ -1,7 +1,7 @@
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
 
-namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Field.Programmatic
+namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Field.Programmatic
 {
     public class IntroductionAttribute : TypeAspect
     {

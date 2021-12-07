@@ -8,7 +8,7 @@ using System.Collections.Immutable;
 #pragma warning disable RS1026 // Enable concurrent execution
 #pragma warning disable RS1025 // Configure generated code analysis
 
-namespace Caravela.Framework.CompilerExtensions
+namespace Metalama.Framework.CompilerExtensions
 {
     // ReSharper disable UnusedType.Global
 
@@ -19,7 +19,7 @@ namespace Caravela.Framework.CompilerExtensions
 
         public FacadeDesignTimeAnalyzer()
         {
-            this._impl = (DiagnosticAnalyzer) ResourceExtractor.CreateInstance( "Caravela.Framework.Impl.DesignTime.DesignTimeAnalyzer" );
+            this._impl = (DiagnosticAnalyzer) ResourceExtractor.CreateInstance( "Metalama.Framework.Impl.DesignTime.DesignTimeAnalyzer" );
         }
 
         public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => this._impl.SupportedDiagnostics;

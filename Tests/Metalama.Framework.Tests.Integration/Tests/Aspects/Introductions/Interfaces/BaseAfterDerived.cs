@@ -1,10 +1,10 @@
 ﻿using System;
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
 
 #pragma warning disable CS0067
 
-namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.BaseAfterDerived
+namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.BaseAfterDerived
 {
     /*
      * Case with base interface being introduced after the derived interface (which is invalid).

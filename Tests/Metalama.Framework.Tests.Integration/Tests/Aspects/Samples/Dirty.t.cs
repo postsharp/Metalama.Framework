@@ -1,6 +1,6 @@
 [Dirty]
 public class TargetClass
-: global::Caravela.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty.IDirty
+: global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty.IDirty
 {
     private int _a; public int A
     {
@@ -11,15 +11,15 @@ public class TargetClass
 
         set
         {
-            this._a = value; if (this.DirtyState == global::Caravela.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty.DirtyState.Clean)
+            this._a = value; if (this.DirtyState == global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty.DirtyState.Clean)
             {
-                this.DirtyState = global::Caravela.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty.DirtyState.Dirty;
+                this.DirtyState = global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty.DirtyState.Dirty;
             }
         }
     }
 
 
-    public global::Caravela.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty.DirtyState DirtyState
+    public global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty.DirtyState DirtyState
     {
         get;
         protected set;

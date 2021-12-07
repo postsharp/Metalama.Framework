@@ -1,20 +1,20 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Serialization;
+using Metalama.Framework.Serialization;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using Xunit;
 
-namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serialization
+namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
 {
     public class CollectionSerializersTests : SerializationTestsBase
     {
         [Fact]
         public void ListSerializer_Ints()
         {
-/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestValue( new List<int> { 2, 10, 30, int.MinValue, int.MaxValue, -2, 0 } );
 After:
@@ -36,7 +36,7 @@ After:
         [Fact]
         public void ListSerializer_Strings()
         {
-/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestValue( new List<string?> { string.Empty, null, "text", string.Empty, "2" } );
 After:
@@ -56,7 +56,7 @@ After:
         [Fact]
         public void ListSerializer_Classes()
         {
-/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestValue( new List<SimpleType> { new SimpleType { Name = "X" }, new SimpleType { Name = "Y" } } );
 After:
@@ -68,7 +68,7 @@ After:
         [Fact]
         public void DictionarySerializer_IntsWithInts()
         {
-/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestValue( new Dictionary<int, int> { { 1, 1 }, { 2, 3 }, { 3, 5 }, { 4, 3 }, { 5, int.MinValue } } );
 After:
@@ -88,7 +88,7 @@ After:
         [Fact]
         public void DictionarySerializer_StringsWithStrings()
         {
-/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestValue(
 After:
@@ -114,7 +114,7 @@ After:
                 { 2, new List<SimpleType> { new() { Name = "e" }, new() { Name = "r" }, new() { Name = "y" } } }
             };
 
-/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             var deserialized = this.SerializeDeserialize( dictionary );
 After:
@@ -148,7 +148,7 @@ After:
             dictionary["first"] = a;
             dictionary["second"] = b;
 
-/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             var deserialized = this.SerializeDeserialize( dictionary );
 After:
@@ -169,7 +169,7 @@ After:
         {
             var dictionary = new Dictionary<string, string>( StringComparer.OrdinalIgnoreCase ) { ["first"] = "a", ["second"] = "b" };
 
-/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             var deserialized = this.SerializeDeserialize( dictionary );
 After:
@@ -190,7 +190,7 @@ After:
         {
             var dictionary = new Dictionary<string, string>( new CustomEqualityComparer() ) { ["first"] = "a", ["second"] = "b" };
 
-/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             var deserialized = this.SerializeDeserialize( dictionary );
 After:
@@ -215,7 +215,7 @@ After:
             typeWithDictionary.Dictionary.Add( 2, "2" );
             typeWithDictionary.Dictionary.Add( 3, "3" );
 
-/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             var deserialized = this.SerializeDeserialize( typeWithDictionary );
 After:
@@ -242,7 +242,7 @@ After:
                 tail = tail.Next;
             }
 
-/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             var deserialized = this.SerializeDeserialize( ll );
 After:
@@ -264,7 +264,7 @@ After:
         private static void TestValue<T>( T value )
             where T : ICollection
         {
-/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             var deserialized = this.SerializeDeserialize( value );
 After:

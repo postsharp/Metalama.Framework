@@ -1,16 +1,16 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Impl.Aspects;
-using Caravela.Framework.Impl.CodeModel;
-using Caravela.Framework.Impl.CompileTime;
-using Caravela.Framework.Impl.DesignTime.Diagnostics;
-using Caravela.Framework.Impl.DesignTime.Diff;
-using Caravela.Framework.Impl.Diagnostics;
-using Caravela.Framework.Impl.Options;
-using Caravela.Framework.Impl.Pipeline;
-using Caravela.Framework.Impl.Utilities;
-using Caravela.Framework.Project;
+using Metalama.Framework.Impl.Aspects;
+using Metalama.Framework.Impl.CodeModel;
+using Metalama.Framework.Impl.CompileTime;
+using Metalama.Framework.Impl.DesignTime.Diagnostics;
+using Metalama.Framework.Impl.DesignTime.Diff;
+using Metalama.Framework.Impl.Diagnostics;
+using Metalama.Framework.Impl.Options;
+using Metalama.Framework.Impl.Pipeline;
+using Metalama.Framework.Impl.Utilities;
+using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -19,7 +19,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Threading;
 
-namespace Caravela.Framework.Impl.DesignTime.Pipeline
+namespace Metalama.Framework.Impl.DesignTime.Pipeline
 {
     public partial class DesignTimeAspectPipeline
     {

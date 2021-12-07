@@ -1,6 +1,6 @@
-﻿using Caravela.Framework.TestApp.Aspects;
+﻿using Metalama.Framework.TestApp.Aspects;
 
-namespace Caravela.Framework.TestApp
+namespace Metalama.Framework.TestApp
 {
     partial class ClassWithInheritedAspect : IInterface
     {

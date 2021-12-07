@@ -1,13 +1,13 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Impl;
-using Caravela.Framework.Tests.UnitTests.Serialization.Assets;
+using Metalama.Framework.Impl;
+using Metalama.Framework.Tests.UnitTests.Serialization.Assets;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using Xunit;
 
-namespace Caravela.Framework.Tests.UnitTests.Serialization
+namespace Metalama.Framework.Tests.UnitTests.Serialization
 {
     public class ArrayTests : SerializerTestsBase
     {
@@ -18,7 +18,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization
             this.AssertSerialization( "new global::System.Int32[]{10, 20, 30}", new[] { 10, 20, 30 } );
 
             this.AssertSerialization(
-                "new global::Caravela.Framework.Tests.UnitTests.Serialization.Assets.Mars.Moon[]{global::Caravela.Framework.Tests.UnitTests.Serialization.Assets.Mars.Moon.Deimos}",
+                "new global::Metalama.Framework.Tests.UnitTests.Serialization.Assets.Mars.Moon[]{global::Metalama.Framework.Tests.UnitTests.Serialization.Assets.Mars.Moon.Deimos}",
                 new[] { Mars.Moon.Deimos } );
         }
 

@@ -1,11 +1,11 @@
 ﻿using System;
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
-using Caravela.Framework.Eligibility;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
+using Metalama.Framework.Eligibility;
 
 #pragma warning disable 618
 
-namespace Caravela.Framework.TestApp.Aspects.Validation
+namespace Metalama.Framework.TestApp.Aspects.Validation
 {
     // This file is a demo use of aspect markers and template subroutines.
 

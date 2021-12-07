@@ -1,12 +1,12 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Metrics;
-using Caravela.Framework.Project;
+using Metalama.Framework.Metrics;
+using Metalama.Framework.Project;
 using System;
 using System.Collections.Concurrent;
 
-namespace Caravela.Framework.Impl.Metrics
+namespace Metalama.Framework.Impl.Metrics
 {
     /// <summary>
     /// Manages the metric providers and routes metric requests to them.

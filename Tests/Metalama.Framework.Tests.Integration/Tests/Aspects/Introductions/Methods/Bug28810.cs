@@ -1,10 +1,10 @@
 using System;
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
 
 #pragma warning disable CS0169, CS8618
 
-namespace Caravela.Framework.Tests.Integration.Tests.Aspects.Introductions.Methods.Bug28810
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Methods.Bug28810
 {
     internal class DeepCloneAttribute : TypeAspect
     {

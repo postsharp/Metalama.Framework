@@ -1,9 +1,9 @@
 using System;
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Code.SyntaxBuilders;
-using Caravela.TestFramework;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code.SyntaxBuilders;
+using Metalama.TestFramework;
 
-namespace Caravela.Framework.Tests.Integration.Templating.Dynamic.DynamicArrayBuilder
+namespace Metalama.Framework.Tests.Integration.Templating.Dynamic.DynamicArrayBuilder
 {
     [CompileTime]
     internal class Aspect

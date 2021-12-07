@@ -3,7 +3,7 @@
 
 using System;
 
-namespace Caravela.Framework.Aspects
+namespace Metalama.Framework.Aspects
 {
     /// <summary>
     /// Custom attribute attribute that, when applied to a declaration, specifies that this declaration must not be

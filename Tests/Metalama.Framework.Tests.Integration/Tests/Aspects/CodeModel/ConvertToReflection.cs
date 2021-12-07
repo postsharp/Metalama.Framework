@@ -1,7 +1,7 @@
 using System.Collections.Generic;
-using Caravela.Framework.Aspects;
+using Metalama.Framework.Aspects;
 
-namespace Caravela.Framework.Tests.PublicPipeline.Aspects.CodeModel.ConvertToReflection
+namespace Metalama.Framework.Tests.PublicPipeline.Aspects.CodeModel.ConvertToReflection
 {
     // This tests serialization to reflection with types that cannot be constructed using a typeof.
 

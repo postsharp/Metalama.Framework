@@ -8,7 +8,7 @@ using System.Collections.Immutable;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Caravela.Framework.Impl.DesignTime.CodeFixes
+namespace Metalama.Framework.Impl.DesignTime.CodeFixes
 {
     /// <summary>
     /// Represent a leaf in a code action menu.

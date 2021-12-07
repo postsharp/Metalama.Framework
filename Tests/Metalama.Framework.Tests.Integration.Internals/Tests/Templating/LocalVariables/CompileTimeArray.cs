@@ -1,7 +1,7 @@
-using Caravela.Framework.Aspects;
-using Caravela.TestFramework;
+using Metalama.Framework.Aspects;
+using Metalama.TestFramework;
 
-namespace Caravela.Framework.Tests.Integration.Tests.Templating.LocalVariables.CompileTimeArray
+namespace Metalama.Framework.Tests.Integration.Tests.Templating.LocalVariables.CompileTimeArray
 {
     [CompileTime]
     class Aspect

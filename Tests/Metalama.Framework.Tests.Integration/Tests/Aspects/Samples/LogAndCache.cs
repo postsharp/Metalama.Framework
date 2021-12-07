@@ -1,14 +1,14 @@
 using System;
 using System.Text;
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
-using Caravela.Framework.IntegrationTests.Aspects.Overrides.Composition.LogAndCache;
-using Caravela.TestFramework;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
+using Metalama.Framework.IntegrationTests.Aspects.Overrides.Composition.LogAndCache;
+using Metalama.TestFramework;
 
 
 [assembly: AspectOrderAttribute(typeof(LogAttribute), typeof(CacheAttribute))]
 
-namespace Caravela.Framework.IntegrationTests.Aspects.Overrides.Composition.LogAndCache
+namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Composition.LogAndCache
 {
 
     // <target>

@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
-using Caravela.Framework.Eligibility;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
+using Metalama.Framework.Eligibility;
 
-namespace Caravela.Framework.TestApp.Aspects.Validation
+namespace Metalama.Framework.TestApp.Aspects.Validation
 {
 
     internal class ValidateAspect : IAspect<IMethod>, IAspect<IFieldOrProperty>

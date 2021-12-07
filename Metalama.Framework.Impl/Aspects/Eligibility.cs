@@ -1,9 +1,9 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Eligibility;
+using Metalama.Framework.Eligibility;
 
-namespace Caravela.Framework.Impl.Aspects
+namespace Metalama.Framework.Impl.Aspects
 {
     public readonly struct Eligibility
     {

@@ -3,7 +3,7 @@
 
 using System;
 
-namespace Caravela.Framework.Serialization
+namespace Metalama.Framework.Serialization
 {
     /// <summary>
     /// Custom attribute that, when applied to a type, specifies its serializer for use by the <see cref="IMetaSerializable"/>.

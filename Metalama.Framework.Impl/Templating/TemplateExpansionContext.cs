@@ -1,16 +1,16 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Code;
-using Caravela.Framework.Impl.Advices;
-using Caravela.Framework.Impl.Aspects;
-using Caravela.Framework.Impl.CodeModel;
-using Caravela.Framework.Impl.Diagnostics;
-using Caravela.Framework.Impl.Formatting;
-using Caravela.Framework.Impl.Linking;
-using Caravela.Framework.Impl.Serialization;
-using Caravela.Framework.Impl.Templating.MetaModel;
-using Caravela.Framework.Impl.Utilities;
+using Metalama.Framework.Code;
+using Metalama.Framework.Impl.Advices;
+using Metalama.Framework.Impl.Aspects;
+using Metalama.Framework.Impl.CodeModel;
+using Metalama.Framework.Impl.Diagnostics;
+using Metalama.Framework.Impl.Formatting;
+using Metalama.Framework.Impl.Linking;
+using Metalama.Framework.Impl.Serialization;
+using Metalama.Framework.Impl.Templating.MetaModel;
+using Metalama.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -18,9 +18,9 @@ using Microsoft.CodeAnalysis.Simplification;
 using System;
 using System.Threading;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
-using SpecialType = Caravela.Framework.Code.SpecialType;
+using SpecialType = Metalama.Framework.Code.SpecialType;
 
-namespace Caravela.Framework.Impl.Templating
+namespace Metalama.Framework.Impl.Templating
 {
     internal partial class TemplateExpansionContext : UserCodeExecutionContext
     {

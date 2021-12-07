@@ -4,9 +4,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using Caravela.Reactive.Implementation;
+using Metalama.Reactive.Implementation;
 
-namespace Caravela.Reactive.Sources
+namespace Metalama.Reactive.Sources
 {
 
     /// <summary>

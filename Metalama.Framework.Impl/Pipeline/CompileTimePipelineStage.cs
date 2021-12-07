@@ -1,22 +1,22 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Impl.AdditionalOutputs;
-using Caravela.Framework.Impl.AspectOrdering;
-using Caravela.Framework.Impl.Collections;
-using Caravela.Framework.Impl.CompileTime;
-using Caravela.Framework.Impl.DesignTime.Pipeline;
-using Caravela.Framework.Impl.Diagnostics;
-using Caravela.Framework.Impl.Linking;
-using Caravela.Framework.Impl.Options;
-using Caravela.Framework.Project;
+using Metalama.Framework.Impl.AdditionalOutputs;
+using Metalama.Framework.Impl.AspectOrdering;
+using Metalama.Framework.Impl.Collections;
+using Metalama.Framework.Impl.CompileTime;
+using Metalama.Framework.Impl.DesignTime.Pipeline;
+using Metalama.Framework.Impl.Diagnostics;
+using Metalama.Framework.Impl.Linking;
+using Metalama.Framework.Impl.Options;
+using Metalama.Framework.Project;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Threading;
 
-namespace Caravela.Framework.Impl.Pipeline
+namespace Metalama.Framework.Impl.Pipeline
 {
     /// <summary>
     /// The implementation of <see cref="HighLevelPipelineStage"/> used at compile time (not at design time).

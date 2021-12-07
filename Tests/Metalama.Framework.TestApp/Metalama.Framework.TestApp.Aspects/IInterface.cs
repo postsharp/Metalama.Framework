@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Caravela.Framework.TestApp.Aspects
+namespace Metalama.Framework.TestApp.Aspects
 {
     [InheritedAspect]
     public interface IInterface

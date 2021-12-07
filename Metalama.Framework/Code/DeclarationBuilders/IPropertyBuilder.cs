@@ -3,7 +3,7 @@
 
 using System;
 
-namespace Caravela.Framework.Code.DeclarationBuilders
+namespace Metalama.Framework.Code.DeclarationBuilders
 {
     /// <summary>
     /// Allows to complete the construction ofa property that has been created by an advice.
@@ -11,7 +11,7 @@ namespace Caravela.Framework.Code.DeclarationBuilders
     public interface IPropertyBuilder : IFieldOrPropertyBuilder, IProperty
     {
         /// <summary>
-        /// Gets or sets the <see cref="Caravela.Framework.Code.RefKind"/> of the property
+        /// Gets or sets the <see cref="Metalama.Framework.Code.RefKind"/> of the property
         /// (i.e. <see cref="Code.RefKind.Ref"/>, <see cref="Code.RefKind.Out"/>, ...).
         /// </summary>
         new RefKind RefKind { get; set; }

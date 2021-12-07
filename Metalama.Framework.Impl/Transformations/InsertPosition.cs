@@ -4,7 +4,7 @@
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 
-namespace Caravela.Framework.Impl.Transformations
+namespace Metalama.Framework.Impl.Transformations
 {
     internal readonly struct InsertPosition : IEquatable<InsertPosition>
     {

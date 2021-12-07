@@ -4,9 +4,9 @@
 using System;
 using System.Diagnostics;
 using System.Linq;
-using Caravela.Framework.Aspects;
+using Metalama.Framework.Aspects;
 
-namespace Caravela.Framework.TestApp.Library
+namespace Metalama.Framework.TestApp.Library
 {
     [CompileTime]
     public static class ProcessInfo

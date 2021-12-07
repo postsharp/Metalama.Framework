@@ -1,7 +1,7 @@
 [Introduction]
 internal class TargetClass
 {
-    public global::Caravela.Framework.IntegrationTests.Aspects.Introductions.Properties.DeclarativeRunTimeOnly.RunTimeOnlyClass? IntroducedProperty_Accessors
+    public global::Metalama.Framework.IntegrationTests.Aspects.Introductions.Properties.DeclarativeRunTimeOnly.RunTimeOnlyClass? IntroducedProperty_Accessors
     {
         get
         {

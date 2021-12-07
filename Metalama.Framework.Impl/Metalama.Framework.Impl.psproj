@@ -5,7 +5,7 @@
 
   <SearchPath Path="{$PostSharpSearchPath}" PathKind="Directory" />
 
-  <Using File="..\Build\Caravela.Obfuscator\Obfuscator.psplugin" />
+  <Using File="..\Build\Metalama.Obfuscator\Obfuscator.psplugin" />
   
   <Tasks>
 

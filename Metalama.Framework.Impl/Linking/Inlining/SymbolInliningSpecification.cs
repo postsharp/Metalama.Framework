@@ -3,7 +3,7 @@
 
 using System.Collections.Generic;
 
-namespace Caravela.Framework.Impl.Linking.Inlining
+namespace Metalama.Framework.Impl.Linking.Inlining
 {
     internal class SymbolInliningSpecification
     {

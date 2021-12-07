@@ -4,14 +4,14 @@
 using Microsoft.CodeAnalysis;
 using System.Linq;
 
-namespace Caravela.Framework.Impl.Aspects
+namespace Metalama.Framework.Impl.Aspects
 {
     /// <summary>
     /// Provides extension methods for handling of aspect reference annotations.
     /// </summary>
     internal static class AspectReferenceAnnotationExtensions
     {
-        public const string AnnotationKind = "CaravelaAspectReference";
+        public const string AnnotationKind = "MetalamaAspectReference";
 
         /// <summary>
         /// Gets a specification of aspect reference if it is present on the syntax node.

@@ -1,22 +1,22 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Code;
-using Caravela.Framework.Code.Collections;
-using Caravela.Framework.Code.Types;
-using Caravela.Framework.Impl;
-using Caravela.Framework.Tests.UnitTests.Utilities;
+using Metalama.Framework.Code;
+using Metalama.Framework.Code.Collections;
+using Metalama.Framework.Code.Types;
+using Metalama.Framework.Impl;
+using Metalama.Framework.Tests.UnitTests.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using Xunit;
-using static Caravela.Framework.Code.MethodKind;
-using static Caravela.Framework.Code.RefKind;
-using static Caravela.Framework.Code.TypeKind;
+using static Metalama.Framework.Code.MethodKind;
+using static Metalama.Framework.Code.RefKind;
+using static Metalama.Framework.Code.TypeKind;
 
 // ReSharper disable ParameterOnlyUsedForPreconditionCheck.Local
 
-namespace Caravela.Framework.Tests.UnitTests.CodeModel
+namespace Metalama.Framework.Tests.UnitTests.CodeModel
 {
     public class CodeModelTests : TestBase
     {
@@ -778,7 +778,7 @@ namespace Ns1
             using var testContext = this.CreateTestContext();
 
             var code = @"
-using Caravela.Framework.Aspects;
+using Metalama.Framework.Aspects;
 
 [CompileTimeOnly]
 class C { }

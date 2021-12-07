@@ -11,7 +11,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Caravela.Framework.Impl.DesignTime.Refactoring
+namespace Metalama.Framework.Impl.DesignTime.Refactoring
 {
     internal static class CSharpAttributeHelper
     {

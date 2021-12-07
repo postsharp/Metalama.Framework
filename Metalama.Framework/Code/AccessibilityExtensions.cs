@@ -3,7 +3,7 @@
 
 using System;
 
-namespace Caravela.Framework.Code
+namespace Metalama.Framework.Code
 {
     public static class AccessibilityExtensions
     {

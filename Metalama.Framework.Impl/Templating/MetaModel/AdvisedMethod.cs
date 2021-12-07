@@ -1,17 +1,17 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Code;
-using Caravela.Framework.Code.Advised;
-using Caravela.Framework.Code.Collections;
-using Caravela.Framework.Code.Invokers;
-using Caravela.Framework.Impl.CodeModel;
-using Caravela.Framework.Impl.Utilities;
+using Metalama.Framework.Code;
+using Metalama.Framework.Code.Advised;
+using Metalama.Framework.Code.Collections;
+using Metalama.Framework.Code.Invokers;
+using Metalama.Framework.Impl.CodeModel;
+using Metalama.Framework.Impl.Utilities;
 using System.Collections.Generic;
 using System.Reflection;
 using MethodBase = System.Reflection.MethodBase;
 
-namespace Caravela.Framework.Impl.Templating.MetaModel
+namespace Metalama.Framework.Impl.Templating.MetaModel
 {
     internal class AdvisedMethod : AdvisedMember<IMethodImpl>, IAdvisedMethod, IMethodImpl
     {

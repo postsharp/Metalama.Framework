@@ -4,7 +4,7 @@
 using System;
 using System.IO;
 
-namespace Caravela.TestFramework.Utilities
+namespace Metalama.TestFramework.Utilities
 {
     internal static class PathUtil
     {

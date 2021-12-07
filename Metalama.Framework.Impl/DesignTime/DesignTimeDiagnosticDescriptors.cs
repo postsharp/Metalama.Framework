@@ -1,26 +1,26 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Code;
-using Caravela.Framework.Diagnostics;
+using Metalama.Framework.Code;
+using Metalama.Framework.Diagnostics;
 using Microsoft.CodeAnalysis;
-using static Caravela.Framework.Diagnostics.Severity;
+using static Metalama.Framework.Diagnostics.Severity;
 
 #pragma warning disable SA1118
 
-namespace Caravela.Framework.Impl.DesignTime
+namespace Metalama.Framework.Impl.DesignTime
 {
     internal static class DesignTimeDiagnosticDescriptors
     {
         // Reserved range 300-319
 
-        private const string _category = "Caravela.DesignTime";
+        private const string _category = "Metalama.DesignTime";
 
         internal static readonly DiagnosticDefinition<(string Id, string Message)>
             UserError
                 = new(
                     "CR0301",
-                    "A Caravela user error.",
+                    "A Metalama user error.",
                     "{0}: {1} The diagnostic {0} was not defined in the user profile and has been replaced by a generic diagnostic ID.",
                     _category,
                     Error );
@@ -29,7 +29,7 @@ namespace Caravela.Framework.Impl.DesignTime
             UserWarning
                 = new(
                     "CR0302",
-                    "A Caravela user warning.",
+                    "A Metalama user warning.",
                     "{0}: {1} The diagnostic {0} was not defined in the user profile and has been replaced by a generic diagnostic ID. "
                     + "Please restart your IDE.",
                     _category,
@@ -39,7 +39,7 @@ namespace Caravela.Framework.Impl.DesignTime
             UserInfo
                 = new(
                     "CR0303",
-                    "A Caravela user info.",
+                    "A Metalama user info.",
                     "{0}: {1} The diagnostic {0} was not defined in the user profile and has been replaced by a generic diagnostic ID. "
                     + " Please restart your IDE.",
                     _category,
@@ -49,7 +49,7 @@ namespace Caravela.Framework.Impl.DesignTime
             UserHidden
                 = new(
                     "CR0304",
-                    "A Caravela user hidden message.",
+                    "A Metalama user hidden message.",
                     "{0}: {1} The diagnostic {0} was not defined in the user profile and has been replaced by a generic diagnostic ID."
                     + " Please restart your IDE.",
                     _category,

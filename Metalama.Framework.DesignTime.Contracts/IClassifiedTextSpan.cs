@@ -4,7 +4,7 @@
 using Microsoft.CodeAnalysis.Text;
 using System.Runtime.InteropServices;
 
-namespace Caravela.Framework.DesignTime.Contracts
+namespace Metalama.Framework.DesignTime.Contracts
 {
     [Guid( "32b13d94-f38d-4bdc-a5f6-7c6db08d8584" )]
     [ComImport]

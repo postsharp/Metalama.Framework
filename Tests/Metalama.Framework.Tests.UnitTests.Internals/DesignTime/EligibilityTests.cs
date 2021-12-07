@@ -1,19 +1,19 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Code;
-using Caravela.Framework.Impl;
-using Caravela.Framework.Impl.CodeModel;
-using Caravela.Framework.Impl.DesignTime.Pipeline;
-using Caravela.Framework.Impl.Diagnostics;
-using Caravela.TestFramework;
+using Metalama.Framework.Code;
+using Metalama.Framework.Impl;
+using Metalama.Framework.Impl.CodeModel;
+using Metalama.Framework.Impl.DesignTime.Pipeline;
+using Metalama.Framework.Impl.Diagnostics;
+using Metalama.TestFramework;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using Xunit;
 
-namespace Caravela.Framework.Tests.UnitTests.DesignTime
+namespace Metalama.Framework.Tests.UnitTests.DesignTime
 {
     public class EligibilityTests : TestBase, IDisposable
     {
@@ -26,9 +26,9 @@ namespace Caravela.Framework.Tests.UnitTests.DesignTime
         {
             var code = @"
 using System;
-using Caravela.Framework.Code;
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Eligibility;
+using Metalama.Framework.Code;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Eligibility;
 
 class MethodAspect : IAspect<IMethod> { }
 class StaticMethodAspect : IAspect<IMethod> { public void BuildEligibility( IEligibilityBuilder<IMethod> builder ) => builder.MustBeStatic(); }

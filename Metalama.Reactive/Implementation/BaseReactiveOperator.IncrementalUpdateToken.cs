@@ -4,7 +4,7 @@
 using System;
 using System.Diagnostics;
 
-namespace Caravela.Reactive.Implementation
+namespace Metalama.Reactive.Implementation
 {
     public partial class BaseReactiveOperator<TSource, TSourceObserver, TResult, TResultObserver>
     {

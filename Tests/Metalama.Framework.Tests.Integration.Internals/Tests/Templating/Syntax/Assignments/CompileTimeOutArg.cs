@@ -1,8 +1,8 @@
 using System.Collections.Generic;
-using Caravela.Framework.Aspects;
-using Caravela.TestFramework;
+using Metalama.Framework.Aspects;
+using Metalama.TestFramework;
 
-namespace Caravela.Framework.Tests.Integration.Templating.Syntax.CompileTimeOutArg
+namespace Metalama.Framework.Tests.Integration.Templating.Syntax.CompileTimeOutArg
 {
     class Aspect
     {

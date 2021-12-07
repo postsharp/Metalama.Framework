@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 
-namespace Caravela.Framework.Impl.Collections
+namespace Metalama.Framework.Impl.Collections
 {
     internal partial class ImmutableDictionaryOfArray<TKey, TValue>
     {

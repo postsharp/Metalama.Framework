@@ -3,7 +3,7 @@
 
 using System;
 
-namespace Caravela.Framework.Impl.Aspects
+namespace Metalama.Framework.Impl.Aspects
 {
     /// <summary>
     /// Provides flags on aspect reference, guiding the aspect linker.

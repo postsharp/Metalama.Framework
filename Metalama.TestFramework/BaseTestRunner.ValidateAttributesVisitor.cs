@@ -6,7 +6,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Xunit;
 
-namespace Caravela.TestFramework
+namespace Metalama.TestFramework
 {
     public abstract partial class BaseTestRunner
     {

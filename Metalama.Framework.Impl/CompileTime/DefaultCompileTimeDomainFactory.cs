@@ -3,7 +3,7 @@
 
 using System.Diagnostics.CodeAnalysis;
 
-namespace Caravela.Framework.Impl.CompileTime
+namespace Metalama.Framework.Impl.CompileTime
 {
     [ExcludeFromCodeCoverage] // Not used in tests.
     internal class DefaultCompileTimeDomainFactory : ICompileTimeDomainFactory

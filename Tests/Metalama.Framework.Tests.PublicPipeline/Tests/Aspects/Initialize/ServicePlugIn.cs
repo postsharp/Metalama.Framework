@@ -1,9 +1,9 @@
 using System;
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Impl.Sdk;
-using Caravela.Framework.Project;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Impl.Sdk;
+using Metalama.Framework.Project;
 
-namespace Caravela.Framework.Tests.PublicPipeline.Aspects.Initialize.ServicePlugIn
+namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Initialize.ServicePlugIn
 {
     internal class Aspect : OverrideMethodAspect
     {

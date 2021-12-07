@@ -1,7 +1,7 @@
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
 
-namespace Caravela.Framework.Tests.PublicPipeline.Aspects.Misc.CompileTimeDelegate
+namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Misc.CompileTimeDelegate
 {
     internal class Aspect : MethodAspect
     {

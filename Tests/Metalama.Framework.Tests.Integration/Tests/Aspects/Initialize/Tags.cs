@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
 
-namespace Caravela.Framework.Tests.Integration.Aspects.Initialize.Tags
+namespace Metalama.Framework.Tests.Integration.Aspects.Initialize.Tags
 {
     internal class Aspect : MethodAspect
     {

@@ -1,6 +1,6 @@
-using Caravela.Framework.Aspects;
+using Metalama.Framework.Aspects;
 
-namespace Caravela.Framework.Tests.Integration.Tests.Aspects.Inheritance.CrossAssembly
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Inheritance.CrossAssembly
 {
     public class Aspect : TypeAspect
     {

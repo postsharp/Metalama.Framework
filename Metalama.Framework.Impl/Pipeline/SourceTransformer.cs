@@ -1,11 +1,11 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Compiler;
-using Caravela.Framework.Impl.AdditionalOutputs;
-using Caravela.Framework.Impl.Diagnostics;
-using Caravela.Framework.Impl.Options;
-using Caravela.Framework.Project;
+using Metalama.Compiler;
+using Metalama.Framework.Impl.AdditionalOutputs;
+using Metalama.Framework.Impl.Diagnostics;
+using Metalama.Framework.Impl.Options;
+using Metalama.Framework.Project;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -15,10 +15,10 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Caravela.Framework.Impl.Pipeline
+namespace Metalama.Framework.Impl.Pipeline
 {
     /// <summary>
-    /// The main compile-time entry point of Caravela. An implementation of Caravela.Compiler's <see cref="ISourceTransformer"/>.
+    /// The main compile-time entry point of Metalama. An implementation of Metalama.Compiler's <see cref="ISourceTransformer"/>.
     /// </summary>
     [ExcludeFromCodeCoverage]
     public sealed class SourceTransformer : ISourceTransformer
@@ -28,7 +28,7 @@ namespace Caravela.Framework.Impl.Pipeline
             var serviceProvider = ServiceProviderFactory.GetServiceProvider()
                 .WithNextProvider( context.Services );
 
-            // Try.Caravela ships its own project options using the async-local service provider.
+            // Try.Metalama ships its own project options using the async-local service provider.
             var projectOptions = serviceProvider.GetOptionalService<IProjectOptions>();
 
             if ( projectOptions == null )

@@ -1,11 +1,11 @@
 ﻿using System;
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
-using Caravela.TestFramework;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
+using Metalama.TestFramework;
 
 #pragma warning disable CS0067
 
-namespace Caravela.Framework.IntegrationTests.Aspects.Invokers.Events.AdvisedSource_BaseInvoker
+namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Events.AdvisedSource_BaseInvoker
 {
     public class TestAttribute : OverrideEventAspect
     {

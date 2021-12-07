@@ -1,21 +1,21 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Impl.Advices;
-using Caravela.Framework.Impl.AspectOrdering;
-using Caravela.Framework.Impl.Aspects;
-using Caravela.Framework.Impl.CodeModel;
-using Caravela.Framework.Impl.Collections;
-using Caravela.Framework.Impl.DesignTime.CodeFixes;
-using Caravela.Framework.Impl.Diagnostics;
-using Caravela.Framework.Impl.Transformations;
+using Metalama.Framework.Impl.Advices;
+using Metalama.Framework.Impl.AspectOrdering;
+using Metalama.Framework.Impl.Aspects;
+using Metalama.Framework.Impl.CodeModel;
+using Metalama.Framework.Impl.Collections;
+using Metalama.Framework.Impl.DesignTime.CodeFixes;
+using Metalama.Framework.Impl.Diagnostics;
+using Metalama.Framework.Impl.Transformations;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 
-namespace Caravela.Framework.Impl.Pipeline
+namespace Metalama.Framework.Impl.Pipeline
 {
     /// <summary>
     /// Maintains the state of <see cref="HighLevelPipelineStage"/>, composed of several <see cref="PipelineStep"/>.

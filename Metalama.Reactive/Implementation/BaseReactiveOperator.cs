@@ -4,7 +4,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Caravela.Reactive.Implementation
+namespace Metalama.Reactive.Implementation
 {
     /// <summary>
     /// A base implementation of a reactive operation, i.e. a function that maps an input to an output

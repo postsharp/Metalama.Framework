@@ -1,9 +1,9 @@
 ﻿using System;
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
-using Caravela.TestFramework;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
+using Metalama.TestFramework;
 
-namespace Caravela.Framework.IntegrationTests.Aspects.Invokers.Properties.AdvisedSource_BaseInvoker
+namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Properties.AdvisedSource_BaseInvoker
 {
     public class TestAttribute : OverrideFieldOrPropertyAspect
     {

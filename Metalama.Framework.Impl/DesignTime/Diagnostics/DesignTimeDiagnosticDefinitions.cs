@@ -1,22 +1,22 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Compiler;
-using Caravela.Framework.Impl.Advices;
-using Caravela.Framework.Impl.Diagnostics;
-using Caravela.Framework.Impl.Linking;
-using Caravela.Framework.Impl.Options;
-using Caravela.Framework.Impl.Pipeline;
-using Caravela.Framework.Impl.Serialization;
-using Caravela.Framework.Impl.Templating;
-using Caravela.Framework.Project;
+using Metalama.Compiler;
+using Metalama.Framework.Impl.Advices;
+using Metalama.Framework.Impl.Diagnostics;
+using Metalama.Framework.Impl.Linking;
+using Metalama.Framework.Impl.Options;
+using Metalama.Framework.Impl.Pipeline;
+using Metalama.Framework.Impl.Serialization;
+using Metalama.Framework.Impl.Templating;
+using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
 
-namespace Caravela.Framework.Impl.DesignTime.Diagnostics
+namespace Metalama.Framework.Impl.DesignTime.Diagnostics
 {
     internal class DesignTimeDiagnosticDefinitions
     {
@@ -38,7 +38,7 @@ namespace Caravela.Framework.Impl.DesignTime.Diagnostics
             => LazyInitializer.EnsureInitialized( ref _instance, () => new DesignTimeDiagnosticDefinitions() )!;
 
         /// <summary>
-        /// Gets the set of <see cref="DiagnosticDescriptor"/> that are defined by Caravela itself.
+        /// Gets the set of <see cref="DiagnosticDescriptor"/> that are defined by Metalama itself.
         /// </summary>
         public static ImmutableDictionary<string, DiagnosticDescriptor> StandardDiagnosticDescriptors { get; } = new DiagnosticDefinitionDiscoveryService()
             .GetDiagnosticDefinitions(
@@ -53,7 +53,7 @@ namespace Caravela.Framework.Impl.DesignTime.Diagnostics
 
         private DesignTimeDiagnosticDefinitions()
         {
-            if ( !CaravelaCompilerInfo.IsActive )
+            if ( !MetalamaCompilerInfo.IsActive )
             {
                 CompilerServiceProvider.Initialize();
             }

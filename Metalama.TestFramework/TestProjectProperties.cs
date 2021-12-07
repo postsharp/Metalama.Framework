@@ -4,7 +4,7 @@
 using System;
 using System.Collections.Immutable;
 
-namespace Caravela.TestFramework
+namespace Metalama.TestFramework
 {
     // ReSharper disable once CommentTypo
 

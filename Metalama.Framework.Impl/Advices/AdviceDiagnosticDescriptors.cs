@@ -1,19 +1,19 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Code;
-using Caravela.Framework.Diagnostics;
-using static Caravela.Framework.Diagnostics.Severity;
+using Metalama.Framework.Code;
+using Metalama.Framework.Diagnostics;
+using static Metalama.Framework.Diagnostics.Severity;
 
 #pragma warning disable SA1118
 
-namespace Caravela.Framework.Impl.Advices
+namespace Metalama.Framework.Impl.Advices
 {
     internal static class AdviceDiagnosticDescriptors
     {
         // Reserved range 500-599
 
-        private const string _category = "Caravela.Advices";
+        private const string _category = "Metalama.Advices";
 
         public static readonly DiagnosticDefinition<(string AspectType, IDeclaration Member, IDeclaration TargetType, IDeclaration DeclaringType)>
             CannotIntroduceMemberAlreadyExists = new(

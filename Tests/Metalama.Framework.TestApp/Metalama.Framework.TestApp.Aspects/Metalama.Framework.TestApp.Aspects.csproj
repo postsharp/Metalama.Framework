@@ -2,9 +2,9 @@
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
-    <CaravelaExportAspects>true</CaravelaExportAspects>
-    <CaravelaEmitCompilerTransformedFiles>True</CaravelaEmitCompilerTransformedFiles>
-    <CaravelaDebugTransformedCode>True</CaravelaDebugTransformedCode>
+    <MetalamaExportAspects>true</MetalamaExportAspects>
+    <MetalamaEmitCompilerTransformedFiles>True</MetalamaEmitCompilerTransformedFiles>
+    <MetalamaDebugTransformedCode>True</MetalamaDebugTransformedCode>
   </PropertyGroup>
 
   <ItemGroup>
@@ -17,8 +17,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Caravela.Framework.TestApp.Library\Caravela.Framework.TestApp.Library.csproj" />
-    <PackageReference Include="Caravela.Framework" Version="$(CaravelaVersion)" />
+    <ProjectReference Include="..\Metalama.Framework.TestApp.Library\Metalama.Framework.TestApp.Library.csproj" />
+    <PackageReference Include="Metalama.Framework" Version="$(MetalamaVersion)" />
   </ItemGroup>
 
 </Project>

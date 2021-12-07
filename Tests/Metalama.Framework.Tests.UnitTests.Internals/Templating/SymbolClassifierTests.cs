@@ -1,16 +1,16 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Code;
-using Caravela.Framework.Impl.CodeModel;
-using Caravela.Framework.Impl.CompileTime;
-using Caravela.Framework.Project;
+using Metalama.Framework.Code;
+using Metalama.Framework.Impl.CodeModel;
+using Metalama.Framework.Impl.CompileTime;
+using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Linq;
 using Xunit;
 
-namespace Caravela.Framework.Tests.UnitTests.Templating
+namespace Metalama.Framework.Tests.UnitTests.Templating
 {
     public class SymbolClassifierTests : TestBase
     {
@@ -36,7 +36,7 @@ namespace Caravela.Framework.Tests.UnitTests.Templating
             using var testContext = this.CreateTestContext();
 
             var code = @"
-using Caravela.Framework.Aspects;
+using Metalama.Framework.Aspects;
 class C : TypeAspect 
 {
    void M() {}
@@ -61,7 +61,7 @@ class C : TypeAspect
             using var testContext = this.CreateTestContext();
 
             var code = @"
-using Caravela.Framework.Aspects;
+using Metalama.Framework.Aspects;
 
 class C 
 {
@@ -90,7 +90,7 @@ class D : System.IDisposable
             using var testContext = this.CreateTestContext();
 
             var code = @"
-using Caravela.Framework.Aspects;
+using Metalama.Framework.Aspects;
 [assembly: CompileTime]
 class C 
 {
@@ -106,7 +106,7 @@ class C
         public void MarkedAsCompileTimeOnly()
         {
             var code = @"
-using Caravela.Framework.Aspects;
+using Metalama.Framework.Aspects;
 
 [CompileTimeOnly]
 class C 
@@ -134,7 +134,7 @@ class C
             // We cannot use CompilationModel for this test because CompileTimeOnly are hidden from the model.
 
             var code = @"
-using Caravela.Framework.Aspects;
+using Metalama.Framework.Aspects;
 
 [CompileTime]
 class C 
@@ -149,12 +149,12 @@ class C
         }
 
         [Fact]
-        public void NoCaravelaReference()
+        public void NoMetalamaReference()
         {
             using var testContext = this.CreateTestContext();
 
             var code = "class C {}";
-            var compilation = testContext.CreateCompilationModel( code, addCaravelaReferences: false );
+            var compilation = testContext.CreateCompilationModel( code, addMetalamaReferences: false );
             this.AssertScope( (INamedType) compilation.Factory.GetTypeByReflectionType( typeof(int) ), TemplatingScope.Both );
             this.AssertScope( (INamedType) compilation.Factory.GetTypeByReflectionType( typeof(Console) ), TemplatingScope.RunTimeOnly );
             this.AssertScope( compilation.Types.Single(), TemplatingScope.RunTimeOnly );

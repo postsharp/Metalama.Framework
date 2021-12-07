@@ -1,9 +1,9 @@
-using Caravela.TestFramework;
-using Caravela.Framework.Aspects;
+using Metalama.TestFramework;
+using Metalama.Framework.Aspects;
 
 #pragma warning disable CS8632 // Cannot convert null literal to non-nullable reference type.
 
-namespace Caravela.Framework.Tests.Integration.TestInputs.MagicKeywords.GenericCompileTimeWithRunTimeTypeArg
+namespace Metalama.Framework.Tests.Integration.TestInputs.MagicKeywords.GenericCompileTimeWithRunTimeTypeArg
 {
     namespace UsingStatic
     {

@@ -1,4 +1,4 @@
-namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Properties.DesignTime
+namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Properties.DesignTime
 {
     partial class TargetClass
     {

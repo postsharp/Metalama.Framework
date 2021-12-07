@@ -1,10 +1,10 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Impl;
-using Caravela.Framework.Impl.Aspects;
-using Caravela.Framework.Impl.Transformations;
-using Caravela.Framework.Tests.Integration.Tests.Linker;
+using Metalama.Framework.Impl;
+using Metalama.Framework.Impl.Aspects;
+using Metalama.Framework.Impl.Transformations;
+using Metalama.Framework.Tests.Integration.Tests.Linker;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -16,7 +16,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 #pragma warning disable CA1305 // Specify IFormatProvider
 
-namespace Caravela.Framework.Tests.Integration.Runners.Linker
+namespace Metalama.Framework.Tests.Integration.Runners.Linker
 {
     internal partial class LinkerTestInputBuilder
     {

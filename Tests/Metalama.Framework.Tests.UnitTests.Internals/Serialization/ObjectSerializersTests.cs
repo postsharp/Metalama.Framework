@@ -1,15 +1,15 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Impl;
-using Caravela.Framework.Tests.UnitTests.Serialization.Assets;
+using Metalama.Framework.Impl;
+using Metalama.Framework.Tests.UnitTests.Serialization.Assets;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using Xunit;
 
 // ReSharper disable IdentifierTypo
 
-namespace Caravela.Framework.Tests.UnitTests.Serialization
+namespace Metalama.Framework.Tests.UnitTests.Serialization
 {
     public class ObjectSerializersTests : SerializerTestsBase
     {
@@ -76,39 +76,39 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization
         [Fact]
         public void TestEnumsBasic()
         {
-            this.AssertSerialization( "global::Caravela.Framework.Tests.UnitTests.Serialization.Assets.World.Venus", World.Venus );
-            this.AssertSerialization( "global::Caravela.Framework.Tests.UnitTests.Serialization.Assets.Mars.Moon.Phobos", Mars.Moon.Phobos );
+            this.AssertSerialization( "global::Metalama.Framework.Tests.UnitTests.Serialization.Assets.World.Venus", World.Venus );
+            this.AssertSerialization( "global::Metalama.Framework.Tests.UnitTests.Serialization.Assets.Mars.Moon.Phobos", Mars.Moon.Phobos );
         }
 
         [Fact]
         public void TestNegativeEnum()
         {
-            this.AssertSerialization( "(global::Caravela.Framework.Tests.UnitTests.Serialization.Assets.LongEnum)(-1L)", (LongEnum) (-1) );
+            this.AssertSerialization( "(global::Metalama.Framework.Tests.UnitTests.Serialization.Assets.LongEnum)(-1L)", (LongEnum) (-1) );
         }
 
         [Fact]
         public void TestEnumsFlags()
         {
             this.AssertSerialization(
-                "(global::Caravela.Framework.Tests.UnitTests.Serialization.Assets.WorldFeatures)(9UL)",
+                "(global::Metalama.Framework.Tests.UnitTests.Serialization.Assets.WorldFeatures)(9UL)",
                 WorldFeatures.Icy | WorldFeatures.Volcanic );
 
             this.AssertSerialization(
-                "(global::Caravela.Framework.Tests.UnitTests.Serialization.Assets.HumanFeatures)(9UL)",
+                "(global::Metalama.Framework.Tests.UnitTests.Serialization.Assets.HumanFeatures)(9UL)",
                 HumanFeatures.Tall | HumanFeatures.Wise );
 
-            this.AssertSerialization( "global::Caravela.Framework.Tests.UnitTests.Serialization.Assets.WorldFeatures.Icy", WorldFeatures.Icy );
+            this.AssertSerialization( "global::Metalama.Framework.Tests.UnitTests.Serialization.Assets.WorldFeatures.Icy", WorldFeatures.Icy );
         }
 
         [Fact]
         public void TestEnumsNestedInGenerics()
         {
             this.AssertSerialization(
-                "(global::Caravela.Framework.Tests.UnitTests.Serialization.Assets.Box<global::System.Int32>.Color)(12L)",
+                "(global::Metalama.Framework.Tests.UnitTests.Serialization.Assets.Box<global::System.Int32>.Color)(12L)",
                 Box<int>.Color.Blue | Box<int>.Color.Red );
 
             this.AssertSerialization(
-                "global::Caravela.Framework.Tests.UnitTests.Serialization.Assets.Box<global::System.Int32>.Color.Blue",
+                "global::Metalama.Framework.Tests.UnitTests.Serialization.Assets.Box<global::System.Int32>.Color.Blue",
                 Box<int>.Color.Blue );
         }
 
@@ -116,7 +116,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization
         public void TestEnumsTwiceNestedInGenerics()
         {
             this.AssertSerialization(
-                "global::Caravela.Framework.Tests.UnitTests.Serialization.Assets.Box<global::System.Int32>.InnerBox.Shiny.Yes",
+                "global::Metalama.Framework.Tests.UnitTests.Serialization.Assets.Box<global::System.Int32>.InnerBox.Shiny.Yes",
                 Box<int>.InnerBox.Shiny.Yes );
         }
 
@@ -135,7 +135,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization
         private void GenericMethod<TK>()
         {
             this.AssertSerialization(
-                "global::Caravela.Framework.Tests.UnitTests.Serialization.Assets.Box<global::System.Single>.Color.Blue",
+                "global::Metalama.Framework.Tests.UnitTests.Serialization.Assets.Box<global::System.Single>.Color.Blue",
                 Box<TK>.Color.Blue );
         }
     }

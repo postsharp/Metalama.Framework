@@ -3,7 +3,7 @@
 
 using System;
 
-namespace Caravela.Framework.Aspects
+namespace Metalama.Framework.Aspects
 {
     /// <summary>
     /// Custom attribute to be used besides <see cref="TemplateAttribute"/>, which means that the target method has no implementation and should be ignored.

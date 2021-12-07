@@ -1,27 +1,27 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
-using Caravela.Framework.Code.Collections;
-using Caravela.Framework.Eligibility;
-using Caravela.Framework.Eligibility.Implementation;
-using Caravela.Framework.Impl.Advices;
-using Caravela.Framework.Impl.CodeModel;
-using Caravela.Framework.Impl.CompileTime;
-using Caravela.Framework.Impl.Diagnostics;
-using Caravela.Framework.Impl.Pipeline;
-using Caravela.Framework.Impl.Sdk;
-using Caravela.Framework.Impl.Utilities;
-using Caravela.Framework.Project;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
+using Metalama.Framework.Code.Collections;
+using Metalama.Framework.Eligibility;
+using Metalama.Framework.Eligibility.Implementation;
+using Metalama.Framework.Impl.Advices;
+using Metalama.Framework.Impl.CodeModel;
+using Metalama.Framework.Impl.CompileTime;
+using Metalama.Framework.Impl.Diagnostics;
+using Metalama.Framework.Impl.Pipeline;
+using Metalama.Framework.Impl.Sdk;
+using Metalama.Framework.Impl.Utilities;
+using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
-using TypeKind = Caravela.Framework.Code.TypeKind;
+using TypeKind = Metalama.Framework.Code.TypeKind;
 
-namespace Caravela.Framework.Impl.Aspects
+namespace Metalama.Framework.Impl.Aspects
 {
     /// <summary>
     /// Executes aspects.

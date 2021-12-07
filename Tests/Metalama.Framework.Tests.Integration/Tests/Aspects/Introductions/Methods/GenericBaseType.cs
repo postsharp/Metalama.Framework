@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
-using Caravela.Framework.Aspects;
+using Metalama.Framework.Aspects;
 
-namespace Caravela.Framework.Tests.PublicPipeline.Aspects.Introductions.Methods.GenericBaseType
+namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Introductions.Methods.GenericBaseType
 {
     internal class Aspect : TypeAspect
     {

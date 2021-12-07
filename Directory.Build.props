@@ -10,7 +10,7 @@
     <Import Project="eng\Packaging.props" />
 
     <!-- Imports a script that exports a few MSBuild properties to the compiler. We try to import and not to copy to avoid duplication. -->
-    <Import Project="Caravela.Framework.Package\Caravela.CompilerVisibleProperties.props" />
+    <Import Project="Metalama.Framework.Package\Metalama.CompilerVisibleProperties.props" />
 
     <Import Sdk="PostSharp.Engineering.Sdk" Project="BuildOptions.props" />
     <Import Sdk="PostSharp.Engineering.Sdk" Project="CodeQuality.props" />
@@ -19,10 +19,10 @@
     <PropertyGroup>
         <!--
             Licensee: SharpCrafters s.r.o.
-            Product: Caravela
-            Namespace: Caravela
+            Product: Metalama
+            Namespace: Metalama
         -->
-        <CaravelaLicense>1-ZEQQQQQQZEAEQCRCE4UW3UFEB4URXMHRB8KQBJJSB64LX7YQEUTZXJSRN4JUNTDAEAKZ2NUP6MCEBAXNKGL7VGZ48JHT6G3EGQREL8WQVM74EY4RC774B6HP6X5QQ35M5MZQQDEZJGP4Q8USJG4X6P2</CaravelaLicense>
+        <MetalamaLicense>1-ZEQQQQQQZEAEQCRCE4UW3UFEB4URXMHRB8KQBJJSB64LX7YQEUTZXJSRN4JUNTDAEAKZ2NUP6MCEBAXNKGL7VGZ48JHT6G3EGQREL8WQVM74EY4RC774B6HP6X5QQ35M5MZQQDEZJGP4Q8USJG4X6P2</MetalamaLicense>
     </PropertyGroup>
 
 </Project>

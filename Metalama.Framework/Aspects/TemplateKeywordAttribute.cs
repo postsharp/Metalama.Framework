@@ -3,7 +3,7 @@
 
 using System;
 
-namespace Caravela.Framework.Aspects
+namespace Metalama.Framework.Aspects
 {
     /// <summary>
     /// Marks members that must be highlighted as "template keywords" in the IDE.

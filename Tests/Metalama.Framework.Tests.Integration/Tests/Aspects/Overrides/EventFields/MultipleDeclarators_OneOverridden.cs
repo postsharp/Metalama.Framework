@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Linq;
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
 
 #pragma warning disable CS0067
 
-namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Overrides.EventFields.MultipleDeclarators_OneOverridden
+namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.EventFields.MultipleDeclarators_OneOverridden
 {
     public class TestAttribute : TypeAspect
     {

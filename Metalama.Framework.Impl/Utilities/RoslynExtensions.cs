@@ -6,10 +6,10 @@ using Microsoft.CodeAnalysis.CSharp;
 using System;
 using System.Collections.Generic;
 
-namespace Caravela.Framework.Impl.Utilities
+namespace Metalama.Framework.Impl.Utilities
 {
     /// <summary>
-    /// Provides extension methods that are useful when writing code using Caravela SDK.
+    /// Provides extension methods that are useful when writing code using Metalama SDK.
     /// </summary>
     public static class RoslynExtensions
     {

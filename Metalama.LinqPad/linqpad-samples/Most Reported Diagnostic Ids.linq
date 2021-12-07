@@ -1,15 +1,15 @@
 <Query Kind="Expression">
-  <NuGetReference Prerelease="true">Caravela.LinqPad</NuGetReference>
-  <Namespace>Caravela.Framework.Workspaces</Namespace>
-  <Namespace>Caravela.Framework.Code</Namespace>
+  <NuGetReference Prerelease="true">Metalama.LinqPad</NuGetReference>
+  <Namespace>Metalama.Framework.Workspaces</Namespace>
+  <Namespace>Metalama.Framework.Code</Namespace>
 </Query>
 
 // For proper formatting of the dump output, add this to My Extensions as a top-level method:
-// public static object ToDump(object obj) => Caravela.LinqPad.CaravelaDumper.ToDump(obj);
+// public static object ToDump(object obj) => Metalama.LinqPad.MetalamaDumper.ToDump(obj);
 
-WorkspaceCollection.Default.Load(@"C:\src\caravela\Caravela.sln")
+WorkspaceCollection.Default.Load(@"C:\src\metalama\Metalama.sln")
     .Diagnostics
-	.Where(d => d.Severity >= Caravela.Framework.Diagnostics.Severity.Warning)
+	.Where(d => d.Severity >= Metalama.Framework.Diagnostics.Severity.Warning)
 	.GroupBy(g => g.Id)
 	.Select(x => new { Id = x.Key, Count = x.Count() })
 	.OrderByDescending(g => g.Count)

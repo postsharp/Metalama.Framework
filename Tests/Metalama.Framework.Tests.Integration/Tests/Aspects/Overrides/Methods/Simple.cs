@@ -1,8 +1,8 @@
 ﻿using System;
-using Caravela.Framework.Aspects;
-using Caravela.TestFramework;
+using Metalama.Framework.Aspects;
+using Metalama.TestFramework;
 
-namespace Caravela.Framework.IntegrationTests.Aspects.Overrides.Methods.Simple
+namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Methods.Simple
 {
     // Tests single OverrideMethod aspect with trivial template on methods with trivial bodies.
 

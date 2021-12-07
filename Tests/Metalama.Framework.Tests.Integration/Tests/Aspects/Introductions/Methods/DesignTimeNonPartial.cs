@@ -1,9 +1,9 @@
 // @DesignTime
 
 using System;
-using Caravela.Framework.Aspects;
+using Metalama.Framework.Aspects;
 
-namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Methods.DesignTimeNonPartial
+namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.DesignTimeNonPartial
 {
     public class IntroductionAttribute : TypeAspect
     {

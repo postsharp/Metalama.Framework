@@ -7,7 +7,7 @@ using Newtonsoft.Json;
 // ReSharper disable MemberCanBePrivate.Global
 #pragma warning disable 8618 // Property Id not initialized.
 
-namespace Caravela.Framework.Impl.Formatting
+namespace Metalama.Framework.Impl.Formatting
 {
     public class DiagnosticAnnotation
     {

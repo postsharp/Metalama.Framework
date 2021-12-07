@@ -5,7 +5,7 @@ using System;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Caravela.TestFramework.XunitFramework
+namespace Metalama.TestFramework.XunitFramework
 {
     internal class TestCollection : LongLivedMarshalByRefObject, ITestCollection, ITestAssembly
     {

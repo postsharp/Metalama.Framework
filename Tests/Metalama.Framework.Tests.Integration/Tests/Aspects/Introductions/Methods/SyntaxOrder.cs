@@ -1,13 +1,13 @@
 using System;
 using System.Linq;
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
-using Caravela.Framework.IntegrationTests.Aspects.Introductions.Methods.SyntaxOrder;
-using Caravela.TestFramework;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
+using Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.SyntaxOrder;
+using Metalama.TestFramework;
 
 [assembly: AspectOrder(typeof(Override4Attribute), typeof(Override3Attribute), typeof(Override2Attribute), typeof(Introduction2Attribute), typeof(Override1Attribute), typeof(Introduction1Attribute))]
 
-namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Methods.SyntaxOrder
+namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.SyntaxOrder
 {
     public class Introduction1Attribute : TypeAspect
     {

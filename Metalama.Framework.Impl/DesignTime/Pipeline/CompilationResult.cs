@@ -1,19 +1,19 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Impl.Aspects;
-using Caravela.Framework.Impl.CodeModel;
-using Caravela.Framework.Impl.Collections;
-using Caravela.Framework.Impl.DesignTime.Diff;
-using Caravela.Framework.Impl.Pipeline;
-using Caravela.Framework.Impl.Utilities;
+using Metalama.Framework.Impl.Aspects;
+using Metalama.Framework.Impl.CodeModel;
+using Metalama.Framework.Impl.Collections;
+using Metalama.Framework.Impl.DesignTime.Diff;
+using Metalama.Framework.Impl.Pipeline;
+using Metalama.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 
-namespace Caravela.Framework.Impl.DesignTime.Pipeline
+namespace Metalama.Framework.Impl.DesignTime.Pipeline
 {
     /// <summary>
     /// Caches the pipeline results for each syntax tree.

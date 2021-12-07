@@ -1,13 +1,13 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Impl.CompileTime;
-using Caravela.Framework.Impl.Options;
-using Caravela.Framework.Project;
+using Metalama.Framework.Impl.CompileTime;
+using Metalama.Framework.Impl.Options;
+using Metalama.Framework.Project;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 
-namespace Caravela.Framework.Impl.Pipeline
+namespace Metalama.Framework.Impl.Pipeline
 {
     public static class ServiceProviderFactory
     {
@@ -16,7 +16,7 @@ namespace Caravela.Framework.Impl.Pipeline
 
         /// <summary>
         /// Registers a global service, which will be available in the <see cref="GlobalProvider"/> provider and in all
-        /// instances returned by <see cref="GetServiceProvider"/>. This method is used by TryCaravela to register hooks.
+        /// instances returned by <see cref="GetServiceProvider"/>. This method is used by TryMetalama to register hooks.
         /// </summary>
         [ExcludeFromCodeCoverage]
         public static void AddGlobalService<T>( T service )
@@ -30,7 +30,7 @@ namespace Caravela.Framework.Impl.Pipeline
         /// Replaces the async-local <see cref="ServiceProvider"/> by a newly created provider, with a new instances
         /// of all services. This method must be called when the consumer needs to pass a different implementation
         /// of <see cref="IPathOptions"/> than the default one cannot call <see cref="GetServiceProvider"/>
-        /// because it does not control the calling point. A typical consumer of this method is TryCaravela.
+        /// because it does not control the calling point. A typical consumer of this method is TryMetalama.
         /// </summary>
         public static void InitializeAsyncLocalProvider( IPathOptions? directoryOptions = null )
         {

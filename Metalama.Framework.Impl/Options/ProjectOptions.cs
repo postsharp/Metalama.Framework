@@ -6,7 +6,7 @@ using System;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 
-namespace Caravela.Framework.Impl.Options
+namespace Metalama.Framework.Impl.Options
 {
     /// <summary>
     /// Default implementation of <see cref="IProjectOptions"/>, based on a <see cref="IProjectOptionsSource"/>
@@ -32,27 +32,27 @@ namespace Caravela.Framework.Impl.Options
 
         public ProjectOptions( AnalyzerConfigOptions options, ImmutableArray<object>? plugIns = null ) : this( new OptionsAdapter( options ), plugIns ) { }
 
-        public bool DebugCompilerProcess => this.GetBooleanOption( "DebugCaravela" );
+        public bool DebugCompilerProcess => this.GetBooleanOption( "DebugMetalama" );
 
-        public bool DebugAnalyzerProcess => this.GetBooleanOption( "DebugCaravelaAnalyzer" );
+        public bool DebugAnalyzerProcess => this.GetBooleanOption( "DebugMetalamaAnalyzer" );
 
-        public bool DebugIdeProcess => this.GetBooleanOption( "DebugCaravelaIde" );
+        public bool DebugIdeProcess => this.GetBooleanOption( "DebugMetalamaIde" );
 
-        public string ProjectId => this.GetStringOption( "CaravelaProjectId" ) ?? this._defaultProjectId;
+        public string ProjectId => this.GetStringOption( "MetalamaProjectId" ) ?? this._defaultProjectId;
 
-        public string? BuildTouchFile => this.GetStringOption( "CaravelaBuildTouchFile" );
+        public string? BuildTouchFile => this.GetStringOption( "MetalamaBuildTouchFile" );
 
         public string? AssemblyName => this.GetStringOption( "AssemblyName" );
 
         public ImmutableArray<object> PlugIns { get; }
 
-        public bool IsFrameworkEnabled => this.GetBooleanOption( "CaravelaEnabled", true ) && !this.GetBooleanOption( "CaravelaCompileTimeOnlyProject" );
+        public bool IsFrameworkEnabled => this.GetBooleanOption( "MetalamaEnabled", true ) && !this.GetBooleanOption( "MetalamaCompileTimeOnlyProject" );
 
-        public bool FormatOutput => this.GetBooleanOption( "CaravelaFormatOutput" );
+        public bool FormatOutput => this.GetBooleanOption( "MetalamaFormatOutput" );
 
-        public bool FormatCompileTimeCode => this.GetBooleanOption( "CaravelaFormatCompileTimeCode" );
+        public bool FormatCompileTimeCode => this.GetBooleanOption( "MetalamaFormatCompileTimeCode" );
 
-        public bool IsUserCodeTrusted => this.GetBooleanOption( "CaravelaUserCodeTrusted", true );
+        public bool IsUserCodeTrusted => this.GetBooleanOption( "MetalamaUserCodeTrusted", true );
 
         public string? ProjectPath => this.GetStringOption( "MSBuildProjectFullPath" );
 
@@ -60,9 +60,9 @@ namespace Caravela.Framework.Impl.Options
 
         public string? Configuration => this.GetStringOption( "TargetFramework" );
 
-        public bool IsDesignTimeEnabled => this.GetBooleanOption( "CaravelaDesignTimeEnabled", true );
+        public bool IsDesignTimeEnabled => this.GetBooleanOption( "MetalamaDesignTimeEnabled", true );
 
-        public string? AdditionalCompilationOutputDirectory => this.GetStringOption( "CaravelaAdditionalCompilationOutputDirectory" );
+        public string? AdditionalCompilationOutputDirectory => this.GetStringOption( "MetalamaAdditionalCompilationOutputDirectory" );
 
         public bool TryGetProperty( string name, [NotNullWhen( true )] out string? value )
         {

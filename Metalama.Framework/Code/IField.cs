@@ -3,7 +3,7 @@
 
 using System.Reflection;
 
-namespace Caravela.Framework.Code
+namespace Metalama.Framework.Code
 {
     /// <summary>
     /// Represents a field. Note that fields can be promoted to properties by aspects.

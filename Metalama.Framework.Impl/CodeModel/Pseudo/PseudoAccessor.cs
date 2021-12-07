@@ -1,24 +1,24 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Code;
-using Caravela.Framework.Code.Collections;
-using Caravela.Framework.Code.Invokers;
-using Caravela.Framework.Impl.CodeModel.Collections;
-using Caravela.Framework.Impl.CodeModel.Invokers;
-using Caravela.Framework.Impl.CodeModel.References;
-using Caravela.Framework.Impl.Utilities;
-using Caravela.Framework.Metrics;
+using Metalama.Framework.Code;
+using Metalama.Framework.Code.Collections;
+using Metalama.Framework.Code.Invokers;
+using Metalama.Framework.Impl.CodeModel.Collections;
+using Metalama.Framework.Impl.CodeModel.Invokers;
+using Metalama.Framework.Impl.CodeModel.References;
+using Metalama.Framework.Impl.Utilities;
+using Metalama.Framework.Metrics;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Reflection;
-using Accessibility = Caravela.Framework.Code.Accessibility;
-using MethodKind = Caravela.Framework.Code.MethodKind;
-using SpecialType = Caravela.Framework.Code.SpecialType;
+using Accessibility = Metalama.Framework.Code.Accessibility;
+using MethodKind = Metalama.Framework.Code.MethodKind;
+using SpecialType = Metalama.Framework.Code.SpecialType;
 
-namespace Caravela.Framework.Impl.CodeModel.Pseudo
+namespace Metalama.Framework.Impl.CodeModel.Pseudo
 {
     internal abstract class PseudoAccessor<T> : IMethodImpl
         where T : IMemberWithAccessors

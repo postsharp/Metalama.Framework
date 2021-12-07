@@ -1,8 +1,8 @@
 using System.Text;
-using Caravela.Framework.Aspects;
-using Caravela.TestFramework;
+using Metalama.Framework.Aspects;
+using Metalama.TestFramework;
 
-namespace Caravela.Framework.Tests.Integration.Templating.Syntax.SimpleCompileTimeAssignment
+namespace Metalama.Framework.Tests.Integration.Templating.Syntax.SimpleCompileTimeAssignment
 {
     class Aspect
     {

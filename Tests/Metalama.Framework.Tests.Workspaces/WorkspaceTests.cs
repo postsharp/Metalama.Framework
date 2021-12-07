@@ -1,13 +1,13 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Impl.Testing;
-using Caravela.Framework.Workspaces;
+using Metalama.Framework.Impl.Testing;
+using Metalama.Framework.Workspaces;
 using System.IO;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace Caravela.Framework.Tests.Workspaces
+namespace Metalama.Framework.Tests.Workspaces
 {
     public class WorkspaceTests : TestBase
     {

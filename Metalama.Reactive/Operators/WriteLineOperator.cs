@@ -3,9 +3,9 @@
 
 using System;
 using System.Collections.Generic;
-using Caravela.Reactive.Implementation;
+using Metalama.Reactive.Implementation;
 
-namespace Caravela.Reactive.Operators
+namespace Metalama.Reactive.Operators
 {
     internal class WriteLineOperator<T> : IReactiveCollectionObserver<T>, IReactiveCollector
     {

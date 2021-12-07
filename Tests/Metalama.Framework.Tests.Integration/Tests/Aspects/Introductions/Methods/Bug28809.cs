@@ -1,9 +1,9 @@
 using System.Collections.Generic;
 using System.ComponentModel;
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
 
-namespace Caravela.Framework.Tests.Integration.Tests.Aspects.Introductions.Methods.Bug28809
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Methods.Bug28809
 {
     internal class IntroducePropertyChangedAspect : TypeAspect
     {

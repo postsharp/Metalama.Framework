@@ -1,7 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Impl.Utilities;
+using Metalama.Framework.Impl.Utilities;
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -9,9 +9,9 @@ using System.IO;
 using System.Threading.Tasks;
 #endif
 
-namespace Caravela.Framework.Impl.Testing
+namespace Metalama.Framework.Impl.Testing
 {
-    internal static class CaravelaCompilerUtility
+    internal static class MetalamaCompilerUtility
     {
         public static string CompileAssembly( params string[] sourceFiles )
         {
@@ -23,7 +23,7 @@ namespace Caravela.Framework.Impl.Testing
 
             GlobalJsonWriter.TryWriteCurrentVersion( dir );
 
-            var metadataReader = AssemblyMetadataReader.GetInstance( typeof(CaravelaCompilerUtility).Assembly );
+            var metadataReader = AssemblyMetadataReader.GetInstance( typeof(MetalamaCompilerUtility).Assembly );
 
             var csproj = $@"
 <Project Sdk='Microsoft.NET.Sdk'>
@@ -32,8 +32,8 @@ namespace Caravela.Framework.Impl.Testing
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include='Caravela.Compiler.Sdk' Version='{metadataReader.GetPackageVersion( "Caravela.Compiler.Sdk" )}' />
-    <PackageReference Include='Caravela.Compiler' Version='{metadataReader.GetPackageVersion( "Caravela.Compiler" )}' />
+    <PackageReference Include='Metalama.Compiler.Sdk' Version='{metadataReader.GetPackageVersion( "Metalama.Compiler.Sdk" )}' />
+    <PackageReference Include='Metalama.Compiler' Version='{metadataReader.GetPackageVersion( "Metalama.Compiler" )}' />
   </ItemGroup>
 </Project>
 ";

@@ -3,7 +3,7 @@
 
 // ReSharper disable CommentTypo
 
-namespace Caravela.Framework.Code.Collections
+namespace Metalama.Framework.Code.Collections
 {
     /// <summary>
     /// Read-only list of <see cref="IProperty"/>.

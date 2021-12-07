@@ -10,7 +10,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 
-namespace Caravela.Framework.GenerateMetaSyntaxRewriter
+namespace Metalama.Framework.GenerateMetaSyntaxRewriter
 {
     internal class Program
     {
@@ -39,7 +39,7 @@ namespace Caravela.Framework.GenerateMetaSyntaxRewriter
             writer.WriteLine( "using Microsoft.CodeAnalysis.CSharp.Syntax;" );
             writer.WriteLine( "using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;" );
             writer.WriteLine();
-            writer.WriteLine( "namespace Caravela.Framework.Impl.Templating" );
+            writer.WriteLine( "namespace Metalama.Framework.Impl.Templating" );
             writer.WriteLine( "{" );
             writer.WriteLine( "\tpartial class MetaSyntaxRewriter" );
             writer.WriteLine( "\t{" );

@@ -5,10 +5,10 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System.Collections.Generic;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
-using Accessibility = Caravela.Framework.Code.Accessibility;
-using RefKind = Caravela.Framework.Code.RefKind;
+using Accessibility = Metalama.Framework.Code.Accessibility;
+using RefKind = Metalama.Framework.Code.RefKind;
 
-namespace Caravela.Framework.Impl.CodeModel.Builders
+namespace Metalama.Framework.Impl.CodeModel.Builders
 {
     internal static class BuilderHelpers
     {

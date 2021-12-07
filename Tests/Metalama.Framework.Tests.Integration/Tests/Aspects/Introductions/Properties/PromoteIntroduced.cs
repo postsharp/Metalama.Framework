@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Linq;
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
-using Caravela.Framework.IntegrationTests.Aspects.Introductions.Properties.PromoteIntroduced;
-using Caravela.TestFramework;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
+using Metalama.Framework.IntegrationTests.Aspects.Introductions.Properties.PromoteIntroduced;
+using Metalama.TestFramework;
 
 [assembly: AspectOrder(typeof(PromoteAttribute), typeof(IntroductionAttribute))]
 
-namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Properties.PromoteIntroduced
+namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Properties.PromoteIntroduced
 {
     [AttributeUsage(AttributeTargets.Class)]
     public class PromoteAttribute : TypeAspect

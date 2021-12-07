@@ -3,7 +3,7 @@
 
 using System.Collections.Generic;
 
-namespace Caravela.Reactive
+namespace Metalama.Reactive
 {
     /// <summary>
     /// An observer specialized for <see cref="IEnumerable{T}"/>. Supports notifications of changes

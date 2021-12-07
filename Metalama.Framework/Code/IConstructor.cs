@@ -3,7 +3,7 @@
 
 using System.Reflection;
 
-namespace Caravela.Framework.Code
+namespace Metalama.Framework.Code
 {
     /// <summary>
     /// Represents an instance constructor or a static constructor.

@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
-using Caravela.Framework;
-using Caravela.TestFramework;
-using Caravela.Framework.Aspects;
+using Metalama.Framework;
+using Metalama.TestFramework;
+using Metalama.Framework.Aspects;
 
-namespace Caravela.Framework.Tests.Integration.Aspects.Bugs.Bug18911
+namespace Metalama.Framework.Tests.Integration.Aspects.Bugs.Bug18911
 {
  public class EmptyOverrideFieldOrPropertyAttribute : OverrideFieldOrPropertyAspect
     {

@@ -3,7 +3,7 @@
 
 using System.IO;
 
-namespace Caravela.Framework.Impl.CompileTime.Serialization
+namespace Metalama.Framework.Impl.CompileTime.Serialization
 {
     internal class MetaFormatter
     {

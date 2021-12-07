@@ -1,13 +1,13 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Impl.Templating;
+using Metalama.Framework.Impl.Templating;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.Threading;
 using Xunit;
 
-namespace Caravela.Framework.Tests.UnitTests.Templating
+namespace Metalama.Framework.Tests.UnitTests.Templating
 {
     public class SemanticModelAnalyzerTests : TestBase
     {
@@ -18,7 +18,7 @@ namespace Caravela.Framework.Tests.UnitTests.Templating
 
             var compilation = CreateCSharpCompilation(
                 @"
-using Caravela.Framework.Code;
+using Metalama.Framework.Code;
 
 class X { void M() { IMethod m; } }
 
@@ -46,7 +46,7 @@ class X { void M() { IMethod m; } }
 
             var compilation = CreateCSharpCompilation(
                 @"
-class X : Caravela.Framework.Aspects.OverrideMethodAspect {  public override dynamic? OverrideMethod() { return null; } }
+class X : Metalama.Framework.Aspects.OverrideMethodAspect {  public override dynamic? OverrideMethod() { return null; } }
 
 " );
 

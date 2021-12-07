@@ -1,8 +1,8 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Impl.CodeModel;
-using Caravela.Framework.Impl.Sdk;
+using Metalama.Framework.Impl.CodeModel;
+using Metalama.Framework.Impl.Sdk;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -10,7 +10,7 @@ using System;
 using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
-namespace Caravela.Framework.Impl.CompileTime
+namespace Metalama.Framework.Impl.CompileTime
 {
     /// <summary>
     /// Rewrites a run-time syntax tree so that the implementation of compile-time-only methods is replaced
@@ -21,13 +21,13 @@ namespace Caravela.Framework.Impl.CompileTime
         private const string _intrinsics = @"
 using System;
 
-namespace Caravela.Compiler
+namespace Metalama.Compiler
 {
     internal static class Intrinsics
     {
-        public static RuntimeMethodHandle GetRuntimeMethodHandle(string documentationId) => throw new InvalidOperationException(""Code calling this method has to be compiled by the Caravela compiler."");
-        public static RuntimeFieldHandle GetRuntimeFieldHandle(string documentationId) => throw new InvalidOperationException(""Code calling this method has to be compiled by the Caravela compiler."");
-        public static RuntimeTypeHandle GetRuntimeTypeHandle(string documentationId) => throw new InvalidOperationException(""Code calling this method has to be compiled by the Caravela compiler."");
+        public static RuntimeMethodHandle GetRuntimeMethodHandle(string documentationId) => throw new InvalidOperationException(""Code calling this method has to be compiled by the Metalama compiler."");
+        public static RuntimeFieldHandle GetRuntimeFieldHandle(string documentationId) => throw new InvalidOperationException(""Code calling this method has to be compiled by the Metalama compiler."");
+        public static RuntimeTypeHandle GetRuntimeTypeHandle(string documentationId) => throw new InvalidOperationException(""Code calling this method has to be compiled by the Metalama compiler."");
     }
 }
 ";
@@ -53,7 +53,7 @@ namespace Caravela.Compiler
 
             var transformedCompilation = compilation.RewriteSyntaxTrees( rewriter );
 
-            if ( transformedCompilation.Compilation.GetTypeByMetadataName( "Caravela.Compiler.Intrinsics" ) == null )
+            if ( transformedCompilation.Compilation.GetTypeByMetadataName( "Metalama.Compiler.Intrinsics" ) == null )
             {
                 var instrinsicsSyntaxTree = _intrinsicsSyntaxTree.Value;
 
@@ -75,8 +75,8 @@ namespace Caravela.Compiler
             var symbol = this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node )!;
 
             // Special case: aspect weavers and other aspect drivers are preserved in the runtime assembly.
-            // This only happens if regular Caravela.Framework is referenced from the weaver project, which generally shouldn't happen.
-            // But it is a pattern used by Caravela.Samples for try.postsharp.net.
+            // This only happens if regular Metalama.Framework is referenced from the weaver project, which generally shouldn't happen.
+            // But it is a pattern used by Metalama.Samples for try.postsharp.net.
             if ( this._aspectDriverSymbol != null && symbol.AllInterfaces.Any( i => SymbolEqualityComparer.Default.Equals( i, this._aspectDriverSymbol ) ) )
             {
                 return node;

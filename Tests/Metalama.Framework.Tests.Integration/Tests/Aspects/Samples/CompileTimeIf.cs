@@ -1,13 +1,13 @@
-﻿using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
-using Caravela.Framework.Diagnostics;
-using Caravela.TestFramework;
+﻿using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
+using Metalama.Framework.Diagnostics;
+using Metalama.TestFramework;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Caravela.Framework.Tests.Integration.Tests.Aspects.Samples.CompileTimeIf
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.CompileTimeIf
 {
     internal class CompileTimeIfAttribute : OverrideMethodAspect
     {

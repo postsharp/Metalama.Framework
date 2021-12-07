@@ -3,9 +3,9 @@
 
 // ReSharper disable RedundantUsingDirective
 
-using Caravela.Framework.Aspects;
+using Metalama.Framework.Aspects;
 
-namespace Caravela.Framework.Impl.Templating
+namespace Metalama.Framework.Impl.Templating
 {
     internal enum MetaMemberKind
     {
@@ -25,7 +25,7 @@ namespace Caravela.Framework.Impl.Templating
         InsertComment,
 
         /// <summary>
-        /// The <see cref="meta.InsertStatement(Caravela.Framework.Code.SyntaxBuilders.IStatement)"/> method (or another overload).
+        /// The <see cref="meta.InsertStatement(Metalama.Framework.Code.SyntaxBuilders.IStatement)"/> method (or another overload).
         /// </summary>
         InsertStatement,
 

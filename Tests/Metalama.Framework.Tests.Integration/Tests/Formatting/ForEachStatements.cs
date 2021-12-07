@@ -1,10 +1,10 @@
 ﻿#pragma warning disable CS0649, CS8618
 
 using System.Collections.Generic;
-using Caravela.TestFramework;
-using Caravela.Framework.Aspects;
+using Metalama.TestFramework;
+using Metalama.Framework.Aspects;
 
-namespace Caravela.Framework.Tests.Integration.TestInputs.Highlighting.ForEachStatements.ForEachStatements
+namespace Metalama.Framework.Tests.Integration.TestInputs.Highlighting.ForEachStatements.ForEachStatements
 {
     class RunTimeClass
     {

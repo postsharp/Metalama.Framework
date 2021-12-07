@@ -1,15 +1,15 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Code;
-using Caravela.Framework.Code.SyntaxBuilders;
-using Caravela.Framework.Diagnostics;
-using Caravela.Framework.Validation;
+using Metalama.Framework.Code;
+using Metalama.Framework.Code.SyntaxBuilders;
+using Metalama.Framework.Diagnostics;
+using Metalama.Framework.Validation;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Caravela.Framework.Aspects
+namespace Metalama.Framework.Aspects
 {
     /// <summary>
     /// Exposes information about the declaration to which a template was applied.

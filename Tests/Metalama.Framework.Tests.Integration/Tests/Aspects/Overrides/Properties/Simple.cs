@@ -1,8 +1,8 @@
-﻿using Caravela.Framework.Aspects;
-using Caravela.TestFramework;
+﻿using Metalama.Framework.Aspects;
+using Metalama.TestFramework;
 using System;
 
-namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Simple
+namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Simple
 {
     public class OverrideAttribute : OverrideFieldOrPropertyAspect
     {

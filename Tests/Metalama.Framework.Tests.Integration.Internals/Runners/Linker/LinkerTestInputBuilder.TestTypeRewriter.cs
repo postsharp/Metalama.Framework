@@ -1,17 +1,17 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
-using Caravela.Framework.Code.DeclarationBuilders;
-using Caravela.Framework.Impl;
-using Caravela.Framework.Impl.Advices;
-using Caravela.Framework.Impl.Aspects;
-using Caravela.Framework.Impl.CodeModel;
-using Caravela.Framework.Impl.CodeModel.References;
-using Caravela.Framework.Impl.Diagnostics;
-using Caravela.Framework.Impl.Linking;
-using Caravela.Framework.Impl.Transformations;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
+using Metalama.Framework.Code.DeclarationBuilders;
+using Metalama.Framework.Impl;
+using Metalama.Framework.Impl.Advices;
+using Metalama.Framework.Impl.Aspects;
+using Metalama.Framework.Impl.CodeModel;
+using Metalama.Framework.Impl.CodeModel.References;
+using Metalama.Framework.Impl.Diagnostics;
+using Metalama.Framework.Impl.Linking;
+using Metalama.Framework.Impl.Transformations;
 using FakeItEasy;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -24,7 +24,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 // ReSharper disable SuspiciousTypeConversion.Global
 
-namespace Caravela.Framework.Tests.Integration.Runners.Linker
+namespace Metalama.Framework.Tests.Integration.Runners.Linker
 {
     internal partial class LinkerTestInputBuilder
     {

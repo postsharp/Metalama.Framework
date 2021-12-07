@@ -3,7 +3,7 @@
 
 using System;
 
-namespace Caravela.Framework.Aspects
+namespace Metalama.Framework.Aspects
 {
     /// <summary>
     /// An exception thrown by <see cref="IAdviceFactory"/> when compile-time code attempts to add a template

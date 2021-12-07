@@ -1,12 +1,12 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Impl.Diagnostics;
-using Caravela.Framework.Impl.Formatting;
-using Caravela.Framework.Impl.Pipeline;
-using Caravela.Framework.Impl.Testing;
-using Caravela.Framework.Project;
-using Caravela.TestFramework.Utilities;
+using Metalama.Framework.Impl.Diagnostics;
+using Metalama.Framework.Impl.Formatting;
+using Metalama.Framework.Impl.Pipeline;
+using Metalama.Framework.Impl.Testing;
+using Metalama.Framework.Project;
+using Metalama.TestFramework.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -25,7 +25,7 @@ using Xunit;
 using Xunit.Abstractions;
 using Document = Microsoft.CodeAnalysis.Document;
 
-namespace Caravela.TestFramework
+namespace Metalama.TestFramework
 {
     /// <summary>
     /// An abstract class for all template-base tests.
@@ -131,7 +131,7 @@ namespace Caravela.TestFramework
                 // Create parse options.
                 var preprocessorSymbols = testInput.ProjectProperties.PreprocessorSymbols
                     .Add( "TESTRUNNER" )
-                    .Add( "CARAVELA" );
+                    .Add( "METALAMA" );
 
                 var parseOptions = CSharpParseOptions.Default.WithPreprocessorSymbols( preprocessorSymbols );
 
@@ -209,7 +209,7 @@ namespace Caravela.TestFramework
                     }
                     else
                     {
-                        // Dependencies must be compiled separately using Caravela.
+                        // Dependencies must be compiled separately using Metalama.
                         var dependency = await this.CompileDependencyAsync( includedText, emptyProject, testResult );
 
                         if ( dependency == null )
@@ -249,7 +249,7 @@ namespace Caravela.TestFramework
         }
 
         /// <summary>
-        /// Compiles a dependency using the Caravela pipeline, emits a binary assembly, and returns a reference to it.
+        /// Compiles a dependency using the Metalama pipeline, emits a binary assembly, and returns a reference to it.
         /// </summary>
         private async Task<MetadataReference?> CompileDependencyAsync( string code, Project emptyProject, TestResult testResult )
         {
@@ -259,7 +259,7 @@ namespace Caravela.TestFramework
 
             using var domain = new UnloadableCompileTimeDomain();
 
-            // Transform with Caravela.
+            // Transform with Metalama.
             var pipeline = new CompileTimeAspectPipeline( this.BaseServiceProvider.WithProjectScopedServices( this.MetadataReferences ), true, domain );
 
             var compilation = (await project.GetCompilationAsync())!.WithAssemblyName( name );
@@ -563,7 +563,7 @@ namespace Caravela.TestFramework
                 if ( ns.ContainsOrdinal( "Microsoft.CSharp.RuntimeBinder" ) &&
                      string.Equals( typeName, "CSharpArgumentInfo", StringComparison.Ordinal ) )
                 {
-                    var directory = Path.Combine( Path.GetTempPath(), "Caravela", "InvalidAssemblies" );
+                    var directory = Path.Combine( Path.GetTempPath(), "Metalama", "InvalidAssemblies" );
 
                     if ( !Directory.Exists( directory ) )
                     {

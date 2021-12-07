@@ -5,7 +5,7 @@ using Microsoft.CodeAnalysis;
 using Newtonsoft.Json;
 using System.Reflection;
 
-namespace Caravela.Framework.Impl.DesignTime.Diagnostics
+namespace Metalama.Framework.Impl.DesignTime.Diagnostics
 {
     /// <summary>
     /// Represents a JSON-serializable user diagnostic for <see cref="UserDiagnosticRegistrationFile"/>.
@@ -27,7 +27,7 @@ namespace Caravela.Framework.Impl.DesignTime.Diagnostics
             this.Id = descriptor.Id;
             this.Severity = descriptor.DefaultSeverity;
             this.Category = descriptor.Category;
-            this.Title = "A Caravela user diagnostic.";
+            this.Title = "A Metalama user diagnostic.";
         }
 
         public DiagnosticDescriptor DiagnosticDescriptor() => new( this.Id, this.Title, "", this.Category, this.Severity, true );

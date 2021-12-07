@@ -1,9 +1,9 @@
 ﻿using System;
-using static Caravela.Framework.Tests.Integration.Tests.Linker.Api;
+using static Metalama.Framework.Tests.Integration.Tests.Linker.Api;
 
 #pragma warning disable CS0067
 
-namespace Caravela.Framework.Tests.Integration.Tests.Linker.EventFields.Linking.OverriddenLocalEvent
+namespace Metalama.Framework.Tests.Integration.Tests.Linker.EventFields.Linking.OverriddenLocalEvent
 {
     [PseudoLayerOrder("TestAspect0")]
     [PseudoLayerOrder("TestAspect1")]

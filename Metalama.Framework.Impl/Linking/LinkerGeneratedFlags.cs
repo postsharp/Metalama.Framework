@@ -3,7 +3,7 @@
 
 using System;
 
-namespace Caravela.Framework.Impl.Linking
+namespace Metalama.Framework.Impl.Linking
 {
     [Flags]
     internal enum LinkerGeneratedFlags

@@ -1,8 +1,8 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Impl.Sdk;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Impl.Sdk;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
@@ -11,7 +11,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 
-namespace Caravela.Framework.Impl.Testing
+namespace Metalama.Framework.Impl.Testing
 {
     /// <summary>
     /// Utility class that creates a <see cref="CSharpCompilation"/>.
@@ -21,8 +21,8 @@ namespace Caravela.Framework.Impl.Testing
         public static CSharpCompilation CreateEmptyCSharpCompilation(
             string? name,
             IEnumerable<Assembly> additionalAssemblies,
-            bool addCaravelaReferences = true )
-            => CreateEmptyCSharpCompilation( name, GetMetadataReferences( additionalAssemblies, addCaravelaReferences ) );
+            bool addMetalamaReferences = true )
+            => CreateEmptyCSharpCompilation( name, GetMetadataReferences( additionalAssemblies, addMetalamaReferences ) );
 
         public static CSharpCompilation CreateEmptyCSharpCompilation( string? name, IEnumerable<MetadataReference> metadataReferences )
             => CSharpCompilation.Create( name ?? "test_" + Guid.NewGuid() )
@@ -35,7 +35,7 @@ namespace Caravela.Framework.Impl.Testing
 
         public static IEnumerable<PortableExecutableReference> GetMetadataReferences(
             IEnumerable<Assembly>? additionalAssemblies = null,
-            bool addCaravelaReferences = true )
+            bool addMetalamaReferences = true )
         {
 #if NET5_0_OR_GREATER
             var standardLibrariesNames = new[] { "netstandard" };
@@ -47,13 +47,13 @@ namespace Caravela.Framework.Impl.Testing
                 .Select( r => MetadataReference.CreateFromFile( Path.Combine( Path.GetDirectoryName( typeof(object).Assembly.Location )!, r + ".dll" ) ) )
                 .ToList();
 
-            var caravelaLibraries = addCaravelaReferences ? new[] { typeof(IAspect).Assembly, typeof(IAspectWeaver).Assembly } : null;
+            var metalamaLibraries = addMetalamaReferences ? new[] { typeof(IAspect).Assembly, typeof(IAspectWeaver).Assembly } : null;
 
             var systemLibraries = AppDomain.CurrentDomain.GetAssemblies()
                 .Where(
                     a => !a.IsDynamic && a.FullName != null && a.FullName.StartsWith( "System", StringComparison.Ordinal )
                          && !string.IsNullOrEmpty( a.Location ) )
-                .Concat( caravelaLibraries ?? Enumerable.Empty<Assembly>() )
+                .Concat( metalamaLibraries ?? Enumerable.Empty<Assembly>() )
                 .Concat( additionalAssemblies ?? Enumerable.Empty<Assembly>() )
                 .Distinct()
                 .Select( a => MetadataReference.CreateFromFile( a.Location ) )

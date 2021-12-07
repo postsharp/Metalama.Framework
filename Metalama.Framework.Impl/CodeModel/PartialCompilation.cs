@@ -1,15 +1,15 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Compiler;
-using Caravela.Framework.Code.Collections;
-using Caravela.Framework.Impl.Utilities;
+using Metalama.Compiler;
+using Metalama.Framework.Code.Collections;
+using Metalama.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 
-namespace Caravela.Framework.Impl.CodeModel
+namespace Metalama.Framework.Impl.CodeModel
 {
     /// <summary>
     /// Represents a subset of a Roslyn <see cref="Microsoft.CodeAnalysis.Compilation"/>. The subset is limited
@@ -267,7 +267,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         /// <summary>
         /// Gets the compilation with respect to which the <see cref="ModifiedSyntaxTrees"/> collection has been constructed.
-        /// Typically, this is the argument of the <see cref="CreateComplete"/> or <see cref="CreatePartial(Microsoft.CodeAnalysis.Compilation,Microsoft.CodeAnalysis.SyntaxTree,System.Collections.Immutable.ImmutableArray{Caravela.Compiler.ManagedResource})"/>
+        /// Typically, this is the argument of the <see cref="CreateComplete"/> or <see cref="CreatePartial(Microsoft.CodeAnalysis.Compilation,Microsoft.CodeAnalysis.SyntaxTree,System.Collections.Immutable.ImmutableArray{Metalama.Compiler.ManagedResource})"/>
         /// method, ignoring any modification done by <see cref="Update"/>.
         /// </summary>
         public Compilation InitialCompilation { get; }

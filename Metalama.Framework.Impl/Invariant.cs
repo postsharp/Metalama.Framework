@@ -4,13 +4,13 @@
 #if !DEBUG
 using System.Runtime.CompilerServices;
 #else
-using Caravela.Framework.Impl.Collections;
+using Metalama.Framework.Impl.Collections;
 #endif
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 
-namespace Caravela.Framework.Impl
+namespace Metalama.Framework.Impl
 {
     /// <summary>
     /// A utility class that checks runtime invariant and throws <see cref="AssertionFailedException"/> in case of failure.

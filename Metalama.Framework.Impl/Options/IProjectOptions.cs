@@ -1,11 +1,11 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Impl.Pipeline;
+using Metalama.Framework.Impl.Pipeline;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 
-namespace Caravela.Framework.Impl.Options
+namespace Metalama.Framework.Impl.Options
 {
     /// <summary>
     /// Exposes project options (typically defined in MSBuild or .editorconfig) in a strongly-typed manner.
@@ -35,7 +35,7 @@ namespace Caravela.Framework.Impl.Options
         bool FormatCompileTimeCode { get; }
 
         /// <summary>
-        /// Gets a value indicating whether the user code processed by Caravela is trusted.
+        /// Gets a value indicating whether the user code processed by Metalama is trusted.
         /// </summary>
         bool IsUserCodeTrusted { get; }
 

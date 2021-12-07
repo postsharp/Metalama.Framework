@@ -5,7 +5,7 @@ internal class TargetCode
 {
     await global::System.Threading.Tasks.Task.Yield();
     global::System.Console.WriteLine("Before AsyncEnumerable");
-    var result = (await global::Caravela.Framework.RunTime.RunTimeAspectHelper.BufferAsync(this.AsyncEnumerable_Source(a)));
+    var result = (await global::Metalama.Framework.RunTime.RunTimeAspectHelper.BufferAsync(this.AsyncEnumerable_Source(a)));
     global::System.Console.WriteLine("After AsyncEnumerable");
     await global::System.Threading.Tasks.Task.Yield();
     await foreach (var r in result)

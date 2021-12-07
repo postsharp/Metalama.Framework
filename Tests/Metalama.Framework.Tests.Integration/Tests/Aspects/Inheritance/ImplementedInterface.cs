@@ -1,8 +1,8 @@
 using System;
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
 
-namespace Caravela.Framework.Tests.PublicPipeline.Aspects.Inheritance.ImplementedInterface
+namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Inheritance.ImplementedInterface
 {
     internal class Aspect : TypeAspect
     {

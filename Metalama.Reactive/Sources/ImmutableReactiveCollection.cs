@@ -4,7 +4,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Caravela.Reactive.Sources
+namespace Metalama.Reactive.Sources
 {
     /// <summary>
     /// Collection that implements the reactive interface, but does not actually ever change. Use

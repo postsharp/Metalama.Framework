@@ -1,13 +1,13 @@
 using System;
 using System.Linq;
 using System.Text;
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
-using Caravela.TestFramework;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
+using Metalama.TestFramework;
 
 #pragma warning disable CS0169, CS8618
 
-namespace Caravela.Framework.Tests.Integration.Tests.Templating.Syntax.Array.RunTimeArrayOfCompileTimeSize
+namespace Metalama.Framework.Tests.Integration.Tests.Templating.Syntax.Array.RunTimeArrayOfCompileTimeSize
 {
     class Aspect
     {

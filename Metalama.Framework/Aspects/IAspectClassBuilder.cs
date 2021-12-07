@@ -1,10 +1,10 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Validation;
+using Metalama.Framework.Validation;
 using System.Collections.Immutable;
 
-namespace Caravela.Framework.Aspects
+namespace Metalama.Framework.Aspects
 {
     /// <summary>
     /// An object used by implementations of the <see cref="IAspect.BuildAspectClass"/> method to set the static characteristics of

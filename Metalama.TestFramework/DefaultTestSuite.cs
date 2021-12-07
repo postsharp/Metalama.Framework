@@ -1,11 +1,11 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.TestFramework.XunitFramework;
+using Metalama.TestFramework.XunitFramework;
 using Xunit.Abstractions;
 using Xunit.Sdk;
 
-namespace Caravela.TestFramework
+namespace Metalama.TestFramework
 {
     /// <summary>
     /// The base class for the test suite that is automatically included in user projects.

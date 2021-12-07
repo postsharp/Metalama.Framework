@@ -4,7 +4,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
-namespace Caravela.Framework.Aspects
+namespace Metalama.Framework.Aspects
 {
     /// <summary>
     /// Specifies the templates that must be used for the <c>get</c> accessor by the <see cref="IAdviceFactory.OverrideFieldOrPropertyAccessors"/> advice.

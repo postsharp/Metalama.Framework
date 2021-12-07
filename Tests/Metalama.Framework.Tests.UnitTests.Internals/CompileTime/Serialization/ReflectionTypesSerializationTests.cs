@@ -1,19 +1,19 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Impl.CompileTime.Serialization;
+using Metalama.Framework.Impl.CompileTime.Serialization;
 using System;
 using System.Collections.Generic;
 using Xunit;
 
-namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serialization
+namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
 {
     public class ReflectionTypesSerializationTests : SerializationTestsBase
     {
         [Fact]
         public void TestTypeClass()
         {
-/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSerialization( typeof( DateTime ) );
             this.TestSerialization( typeof( Guid ) );
@@ -31,7 +31,7 @@ After:
         [Fact]
         public void TestTypeGenericClosed()
         {
-/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSerialization( typeof( Dictionary<string, string> ) );
 After:
@@ -43,7 +43,7 @@ After:
         [Fact]
         public void TestTypeGenericOpen()
         {
-/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSerialization( typeof( Dictionary<,> ) );
 After:
@@ -55,7 +55,7 @@ After:
         [Fact]
         public void TestTypeGenericTypeParameter()
         {
-/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSerialization( typeof( Dictionary<,> ).GetGenericArguments()[0] );
 After:
@@ -75,7 +75,7 @@ After:
         [Fact]
         public void TestTypeIntrinsics()
         {
-/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSerialization( typeof( byte ) );
             this.TestSerialization( typeof( sbyte ) );

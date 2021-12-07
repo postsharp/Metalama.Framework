@@ -1,18 +1,18 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.CodeFixes;
+using Metalama.Framework.CodeFixes;
 using Microsoft.CodeAnalysis;
 
-namespace Caravela.Framework.Impl.DesignTime.CodeFixes
+namespace Metalama.Framework.Impl.DesignTime.CodeFixes
 {
     /// <summary>
-    /// Represents a <see cref="Caravela.Framework.CodeFixes.CodeFix"/> that has been suggested for a diagnostic.
+    /// Represents a <see cref="Metalama.Framework.CodeFixes.CodeFix"/> that has been suggested for a diagnostic.
     /// </summary>
     public class CodeFixInstance
     {
         /// <summary>
-        /// Gets the suggested <see cref="Caravela.Framework.CodeFixes.CodeFix"/>.
+        /// Gets the suggested <see cref="Metalama.Framework.CodeFixes.CodeFix"/>.
         /// </summary>
         public CodeFix CodeFix { get; }
 

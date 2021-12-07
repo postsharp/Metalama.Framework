@@ -1,7 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Impl.DesignTime;
+using Metalama.Framework.Impl.DesignTime;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Classification;
 using System;
@@ -11,13 +11,13 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Caravela.Framework.Impl.Formatting
+namespace Metalama.Framework.Impl.Formatting
 {
     public abstract partial class FormattedCodeWriter
     {
         protected const string CSharpClassTagName = "csharp";
         protected const string DiagnosticTagName = "diagnostic";
-        private const string _diagnosticAnnotationName = "caravela-diagnostic";
+        private const string _diagnosticAnnotationName = "metalama-diagnostic";
 
         protected FormattedCodeWriter( IServiceProvider serviceProvider )
         {

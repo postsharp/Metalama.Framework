@@ -4,7 +4,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Caravela.Framework.Code.Advised
+namespace Metalama.Framework.Code.Advised
 {
     /// <summary>
     /// Represents the list of parameters of the method being overridden by the advice.

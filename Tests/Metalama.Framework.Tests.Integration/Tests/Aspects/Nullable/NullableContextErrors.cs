@@ -1,8 +1,8 @@
 #nullable disable
 
-using Caravela.Framework.Aspects;
+using Metalama.Framework.Aspects;
 
-namespace Caravela.Framework.Tests.PublicPipeline.Aspects.Nullable.NullableContextErrors
+namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Nullable.NullableContextErrors
 {
     internal class Aspect : TypeAspect
     {

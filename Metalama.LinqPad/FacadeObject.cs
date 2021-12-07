@@ -5,7 +5,7 @@ using LINQPad;
 using System;
 using System.Collections.Generic;
 
-namespace Caravela.LinqPad
+namespace Metalama.LinqPad
 {
     /// <summary>
     /// A facade object for non-trivial object. It exposes only the public properties and use <see cref="FacadePropertyFormatter"/>

@@ -3,7 +3,7 @@
 
 using System.Collections.Generic;
 
-namespace Caravela.Framework.Impl.Transformations
+namespace Metalama.Framework.Impl.Transformations
 {
     /// <summary>
     /// Represents an introduced member (but not a type), observable or not.

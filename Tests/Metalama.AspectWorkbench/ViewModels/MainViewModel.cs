@@ -2,12 +2,12 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 #pragma warning disable IDE0005
-using Caravela.AspectWorkbench.Model;
-using Caravela.Framework.Impl.Formatting;
-using Caravela.Framework.Impl.Pipeline;
-using Caravela.Framework.Impl.Testing;
-using Caravela.Framework.Tests.Integration.Runners;
-using Caravela.TestFramework;
+using Metalama.AspectWorkbench.Model;
+using Metalama.Framework.Impl.Formatting;
+using Metalama.Framework.Impl.Pipeline;
+using Metalama.Framework.Impl.Testing;
+using Metalama.Framework.Tests.Integration.Runners;
+using Metalama.TestFramework;
 using Microsoft.CodeAnalysis;
 using PostSharp.Patterns.Model;
 using System;
@@ -22,7 +22,7 @@ using System.Windows.Media;
 
 #pragma warning restore IDE0005
 
-namespace Caravela.AspectWorkbench.ViewModels
+namespace Metalama.AspectWorkbench.ViewModels
 {
     [NotifyPropertyChanged]
     public class MainViewModel

@@ -1,9 +1,9 @@
 using System;
-using Caravela.TestFramework;
-using Caravela.Framework.Aspects;
+using Metalama.TestFramework;
+using Metalama.Framework.Aspects;
 using MyMath = System.Math;
 
-namespace Caravela.Framework.Tests.Integration.TestInputs.Templating.Alias
+namespace Metalama.Framework.Tests.Integration.TestInputs.Templating.Alias
 {
     namespace UsingStatic
     {

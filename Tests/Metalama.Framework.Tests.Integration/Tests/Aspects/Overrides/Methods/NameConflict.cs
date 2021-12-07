@@ -1,11 +1,11 @@
-﻿using Caravela.Framework.Aspects;
-using Caravela.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Methods.NameConflict;
-using Caravela.TestFramework;
+﻿using Metalama.Framework.Aspects;
+using Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Methods.NameConflict;
+using Metalama.TestFramework;
 
 [assembly: AspectOrder(typeof(InnerOverrideAttribute), typeof(OuterOverrideAttribute))]
 #pragma warning disable CS0219
 
-namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Methods.NameConflict
+namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Methods.NameConflict
 {
     public class InnerOverrideAttribute : OverrideMethodAspect
     {

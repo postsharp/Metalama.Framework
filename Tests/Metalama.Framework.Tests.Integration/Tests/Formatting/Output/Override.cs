@@ -1,7 +1,7 @@
 using System;
-using Caravela.Framework.Aspects;
+using Metalama.Framework.Aspects;
 
-namespace Caravela.Framework.Tests.Integration.Tests.Formatting.Override
+namespace Metalama.Framework.Tests.Integration.Tests.Formatting.Override
 {
     public class OverrideAspect : OverrideMethodAspect
     {

@@ -1,11 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Xunit;
-using static Caravela.Reactive.UnitTests.TestGroupObserver.EventKind;
+using static Metalama.Reactive.UnitTests.TestGroupObserver.EventKind;
 
 // ReSharper disable ObjectCreationAsStatement
 
-namespace Caravela.Reactive.UnitTests
+namespace Metalama.Reactive.UnitTests
 {
     internal class TestGroupObserver : IReactiveCollectionObserver<IReactiveGroup<int, int>>
     {

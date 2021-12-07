@@ -1,16 +1,16 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Code;
-using Caravela.Framework.Impl.Aspects;
-using Caravela.Framework.Impl.CodeModel;
-using Caravela.Framework.Impl.Diagnostics;
-using Caravela.Framework.Impl.Pipeline;
-using Caravela.Framework.Project;
+using Metalama.Framework.Code;
+using Metalama.Framework.Impl.Aspects;
+using Metalama.Framework.Impl.CodeModel;
+using Metalama.Framework.Impl.Diagnostics;
+using Metalama.Framework.Impl.Pipeline;
+using Metalama.Framework.Project;
 using System;
 using System.Globalization;
 
-namespace Caravela.Framework.Impl.Utilities
+namespace Metalama.Framework.Impl.Utilities
 {
     /// <summary>
     /// Represents the context of execution of compile-time user code, when this code does not have another
@@ -21,21 +21,21 @@ namespace Caravela.Framework.Impl.Utilities
     {
         private IExecutionScenario? _executionScenario;
 
-        public static UserCodeExecutionContext Current => (UserCodeExecutionContext) CaravelaExecutionContext.Current ?? throw new InvalidOperationException();
+        public static UserCodeExecutionContext Current => (UserCodeExecutionContext) MetalamaExecutionContext.Current ?? throw new InvalidOperationException();
 
-        public static UserCodeExecutionContext? CurrentInternal => (UserCodeExecutionContext?) CaravelaExecutionContext.CurrentOrNull;
+        public static UserCodeExecutionContext? CurrentInternal => (UserCodeExecutionContext?) MetalamaExecutionContext.CurrentOrNull;
 
         internal static DisposeAction WithContext( UserCodeExecutionContext context )
         {
-            var oldContext = CaravelaExecutionContext.CurrentOrNull;
-            CaravelaExecutionContext.CurrentOrNull = context;
+            var oldContext = MetalamaExecutionContext.CurrentOrNull;
+            MetalamaExecutionContext.CurrentOrNull = context;
             var oldCulture = CultureInfo.CurrentCulture;
             CultureInfo.CurrentCulture = UserMessageFormatter.Instance;
 
             return new DisposeAction(
                 () =>
                 {
-                    CaravelaExecutionContext.CurrentOrNull = oldContext;
+                    MetalamaExecutionContext.CurrentOrNull = oldContext;
                     CultureInfo.CurrentCulture = oldCulture;
                 } );
         }

@@ -2,7 +2,7 @@
 
     <PropertyGroup>
         <TargetFramework>netstandard2.0</TargetFramework>
-        <RootNamespace>Caravela.Framework.CompilerExtensions</RootNamespace>
+        <RootNamespace>Metalama.Framework.CompilerExtensions</RootNamespace>
         <IsPackable>False</IsPackable>
     </PropertyGroup>
 
@@ -13,7 +13,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Caravela.Framework.CompilerExtensions\Caravela.Framework.CompilerExtensions.csproj" />
+      <ProjectReference Include="..\Metalama.Framework.CompilerExtensions\Metalama.Framework.CompilerExtensions.csproj" />
     </ItemGroup>
 
 </Project>

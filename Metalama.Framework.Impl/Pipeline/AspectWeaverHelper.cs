@@ -1,13 +1,13 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Impl.CodeModel;
-using Caravela.Framework.Impl.Sdk;
-using Caravela.Framework.Project;
+using Metalama.Framework.Impl.CodeModel;
+using Metalama.Framework.Impl.Sdk;
+using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
 
-namespace Caravela.Framework.Impl.Pipeline
+namespace Metalama.Framework.Impl.Pipeline
 {
     internal class AspectWeaverHelper : IAspectWeaverHelper
     {

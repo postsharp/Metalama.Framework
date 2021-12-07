@@ -1,12 +1,12 @@
 using System;
 using System.Threading.Tasks;
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
-using Caravela.Framework.Tests.Integration.Aspects.Async.AsyncTemplate.NonAsyncThenAsync;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
+using Metalama.Framework.Tests.Integration.Aspects.Async.AsyncTemplate.NonAsyncThenAsync;
 
 [assembly: AspectOrder( typeof(Aspect1), typeof(Aspect2) )]
 
-namespace Caravela.Framework.Tests.Integration.Aspects.Async.AsyncTemplate.NonAsyncThenAsync
+namespace Metalama.Framework.Tests.Integration.Aspects.Async.AsyncTemplate.NonAsyncThenAsync
 {
     internal class Aspect1 : MethodAspect
     {

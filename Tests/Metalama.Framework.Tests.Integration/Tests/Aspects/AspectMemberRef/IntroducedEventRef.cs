@@ -1,7 +1,7 @@
 using System.ComponentModel;
-using Caravela.Framework.Aspects;
+using Metalama.Framework.Aspects;
 
-namespace Caravela.Framework.IntegrationTests.Aspects.AspectMemberRef.IntroducedEventRef
+namespace Metalama.Framework.IntegrationTests.Aspects.AspectMemberRef.IntroducedEventRef
 {
     public class RetryAttribute : TypeAspect
     {

@@ -1,10 +1,10 @@
 using System;
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
-using Caravela.TestFramework;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
+using Metalama.TestFramework;
 
 
-namespace Caravela.Framework.Tests.Integration.Templating.Dynamic.Issue28709
+namespace Metalama.Framework.Tests.Integration.Templating.Dynamic.Issue28709
 {
     [CompileTime]
     class Aspect

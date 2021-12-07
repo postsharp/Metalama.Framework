@@ -3,7 +3,7 @@
 
 using System.Diagnostics;
 
-namespace Caravela.TestFramework.XunitFramework
+namespace Metalama.TestFramework.XunitFramework
 {
     internal static class StopWatchExtensions
     {

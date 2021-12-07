@@ -4,9 +4,9 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
-using Caravela.Reactive.Implementation;
+using Metalama.Reactive.Implementation;
 
-namespace Caravela.Reactive.Sources
+namespace Metalama.Reactive.Sources
 {
     /// <summary>
     /// An implementation of <see cref="IReactiveSource{T}"/> that has a single value exposed on a writable

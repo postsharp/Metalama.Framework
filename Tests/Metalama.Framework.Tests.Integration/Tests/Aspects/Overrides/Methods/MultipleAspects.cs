@@ -1,11 +1,11 @@
 ﻿using System;
-using Caravela.Framework.Aspects;
-using Caravela.Framework.IntegrationTests.Aspects.Overrides.Methods.Simple_TwoOverrides;
-using Caravela.TestFramework;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.IntegrationTests.Aspects.Overrides.Methods.Simple_TwoOverrides;
+using Metalama.TestFramework;
 
 [assembly: AspectOrder(typeof(OuterOverrideAttribute), typeof(InnerOverrideAttribute))]
 
-namespace Caravela.Framework.IntegrationTests.Aspects.Overrides.Methods.Simple_TwoOverrides
+namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Methods.Simple_TwoOverrides
 {
     // Tests two OverrideMethod aspect with trivial template on methods with trivial bodies.
 

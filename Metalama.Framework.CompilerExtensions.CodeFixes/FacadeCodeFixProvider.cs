@@ -7,7 +7,7 @@ using System.Collections.Immutable;
 using System.Composition;
 using System.Threading.Tasks;
 
-namespace Caravela.Framework.CompilerExtensions
+namespace Metalama.Framework.CompilerExtensions
 {
     // ReSharper disable UnusedType.Global
 
@@ -19,7 +19,7 @@ namespace Caravela.Framework.CompilerExtensions
 
         public FacadeCodeFixProvider()
         {
-            this._impl = (CodeFixProvider) ResourceExtractor.CreateInstance( "Caravela.Framework.Impl.DesignTime.CentralCodeFixProvider" );
+            this._impl = (CodeFixProvider) ResourceExtractor.CreateInstance( "Metalama.Framework.Impl.DesignTime.CentralCodeFixProvider" );
         }
 
         public override Task RegisterCodeFixesAsync( CodeFixContext context ) => this._impl.RegisterCodeFixesAsync( context );

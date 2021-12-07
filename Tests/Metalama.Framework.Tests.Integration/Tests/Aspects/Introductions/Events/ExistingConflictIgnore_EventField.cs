@@ -1,9 +1,9 @@
 ﻿using System;
-using Caravela.Framework.Aspects;
+using Metalama.Framework.Aspects;
 
 #pragma warning disable CS0067
 
-namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Events.ExistingConflictIgnore_EventField
+namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Events.ExistingConflictIgnore_EventField
 {
     public class IntroductionAttribute : TypeAspect
     {

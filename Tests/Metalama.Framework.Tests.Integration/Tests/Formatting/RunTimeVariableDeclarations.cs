@@ -1,10 +1,10 @@
 ﻿#pragma warning disable CS0219
 
 using System;
-using Caravela.TestFramework;
-using Caravela.Framework.Aspects;
+using Metalama.TestFramework;
+using Metalama.Framework.Aspects;
 
-namespace Caravela.Framework.Tests.Integration.TestInputs.Highlighting.Declarations.RunTimeVariableDeclarations
+namespace Metalama.Framework.Tests.Integration.TestInputs.Highlighting.Declarations.RunTimeVariableDeclarations
 {
     class RuntimeClass
     {

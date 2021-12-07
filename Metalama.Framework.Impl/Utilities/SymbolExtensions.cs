@@ -8,9 +8,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using RoslynSpecialType = Microsoft.CodeAnalysis.SpecialType;
-using SpecialType = Caravela.Framework.Code.SpecialType;
+using SpecialType = Metalama.Framework.Code.SpecialType;
 
-namespace Caravela.Framework.Impl.Utilities
+namespace Metalama.Framework.Impl.Utilities
 {
     internal static class SymbolExtensions
     {

@@ -3,7 +3,7 @@
 
 using System;
 
-namespace Caravela.Framework.Impl.CompileTime
+namespace Metalama.Framework.Impl.CompileTime
 {
     internal static class TemplatingScopeExtensions
     {

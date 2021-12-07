@@ -1,11 +1,11 @@
 ﻿// @Skipped(#28879 - Invokers.Base is null for an override aspect applied to a field)
 
 using System;
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
-using Caravela.TestFramework;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
+using Metalama.TestFramework;
 
-namespace Caravela.Framework.IntegrationTests.Aspects.Invokers.Fields.AdvisedSource_FinalInvoker
+namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Fields.AdvisedSource_FinalInvoker
 {
     public class TestAttribute : OverrideFieldOrPropertyAspect
     {

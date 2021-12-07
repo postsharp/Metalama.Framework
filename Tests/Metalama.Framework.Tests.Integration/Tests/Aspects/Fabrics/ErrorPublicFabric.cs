@@ -1,6 +1,6 @@
-using Caravela.Framework.Fabrics;
+using Metalama.Framework.Fabrics;
 
-namespace Caravela.Framework.Tests.PublicPipeline.Aspects.Fabrics.ErrorPublicFabric
+namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Fabrics.ErrorPublicFabric
 {
     // <target>
     internal class TargetCode

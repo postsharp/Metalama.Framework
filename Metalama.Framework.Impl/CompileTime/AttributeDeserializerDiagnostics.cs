@@ -1,18 +1,18 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Diagnostics;
+using Metalama.Framework.Diagnostics;
 using Microsoft.CodeAnalysis;
 using System;
-using static Caravela.Framework.Diagnostics.Severity;
+using static Metalama.Framework.Diagnostics.Severity;
 
-namespace Caravela.Framework.Impl.CompileTime
+namespace Metalama.Framework.Impl.CompileTime
 {
     internal static class AttributeDeserializerDiagnostics
     {
         // Reserved range 400-499
 
-        private const string _category = "Caravela.AttributeDeserializer";
+        private const string _category = "Metalama.AttributeDeserializer";
 
         internal static readonly DiagnosticDefinition<(Type ActualType, Type ExpectedType)>
             CannotReferenceCompileTimeOnly

@@ -4,7 +4,7 @@
 using Microsoft.CodeAnalysis;
 using System.Linq;
 
-namespace Caravela.Framework.Impl.Linking.Inlining
+namespace Metalama.Framework.Impl.Linking.Inlining
 {
     internal class InlinerProvider
     {

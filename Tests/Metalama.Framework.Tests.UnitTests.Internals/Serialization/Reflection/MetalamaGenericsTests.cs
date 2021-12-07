@@ -1,8 +1,8 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Impl;
-using Caravela.Framework.Impl.ReflectionMocks;
+using Metalama.Framework.Impl;
+using Metalama.Framework.Impl.ReflectionMocks;
 using System;
 using System.Linq;
 using System.Reflection;
@@ -11,11 +11,11 @@ using Xunit.Abstractions;
 
 // ReSharper disable ParameterOnlyUsedForPreconditionCheck.Local
 
-namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
+namespace Metalama.Framework.Tests.UnitTests.Serialization.Reflection
 {
-    public class CaravelaGenericsTests : ReflectionTestBase
+    public class MetalamaGenericsTests : ReflectionTestBase
     {
-        public CaravelaGenericsTests( ITestOutputHelper helper ) : base( helper ) { }
+        public MetalamaGenericsTests( ITestOutputHelper helper ) : base( helper ) { }
 
         [Fact]
         public void FieldInNestedType()
@@ -29,12 +29,12 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
                 .ToString();
 
             this.AssertEqual(
-                @"new global::Caravela.Framework.RunTime.FieldOrPropertyInfo(typeof(global::Target<>.Nested<>).GetField(""Field"", global::System.Reflection.BindingFlags.DeclaredOnly | global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Static | global::System.Reflection.BindingFlags.Instance))",
+                @"new global::Metalama.Framework.RunTime.FieldOrPropertyInfo(typeof(global::Target<>.Nested<>).GetField(""Field"", global::System.Reflection.BindingFlags.DeclaredOnly | global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Static | global::System.Reflection.BindingFlags.Instance))",
                 serialized );
 
             TestExpression<FieldInfo>(
                 code,
-                CaravelaPropertyInfoTests.StripLocationInfo( serialized ),
+                MetalamaPropertyInfoTests.StripLocationInfo( serialized ),
                 info =>
                 {
                     Assert.Equal( "Field", info.Name );
@@ -54,7 +54,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
                 .ToString();
 
             this.AssertEqual(
-                @"((global::System.Reflection.MethodInfo)global::System.Reflection.MethodBase.GetMethodFromHandle(global::Caravela.Compiler.Intrinsics.GetRuntimeMethodHandle(""M:Target`1.ReturnSelf~`0""), typeof(global::Target<>).TypeHandle))",
+                @"((global::System.Reflection.MethodInfo)global::System.Reflection.MethodBase.GetMethodFromHandle(global::Metalama.Compiler.Intrinsics.GetRuntimeMethodHandle(""M:Target`1.ReturnSelf~`0""), typeof(global::Target<>).TypeHandle))",
                 serialized );
 
             TestExpression<MethodInfo>(

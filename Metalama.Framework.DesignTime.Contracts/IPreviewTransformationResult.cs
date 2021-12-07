@@ -4,7 +4,7 @@
 using Microsoft.CodeAnalysis;
 using System.Runtime.InteropServices;
 
-namespace Caravela.Framework.DesignTime.Contracts
+namespace Metalama.Framework.DesignTime.Contracts
 {
     /// <summary>
     /// Result of the <see cref="ITransformationPreviewService.PreviewTransformationAsync"/> method.

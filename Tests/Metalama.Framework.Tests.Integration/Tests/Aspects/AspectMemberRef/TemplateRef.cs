@@ -1,7 +1,7 @@
-using Caravela.Framework.Aspects;
-using Caravela.TestFramework;
+using Metalama.Framework.Aspects;
+using Metalama.TestFramework;
 
-namespace Caravela.Framework.IntegrationTests.Aspects.AspectMemberRef.TemplateRef
+namespace Metalama.Framework.IntegrationTests.Aspects.AspectMemberRef.TemplateRef
 {
 
     public class RetryAttribute : OverrideMethodAspect

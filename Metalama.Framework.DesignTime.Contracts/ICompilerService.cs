@@ -3,7 +3,7 @@
 
 using System.Runtime.InteropServices;
 
-namespace Caravela.Framework.DesignTime.Contracts
+namespace Metalama.Framework.DesignTime.Contracts
 {
     /// <summary>
     /// Base interface for a implemented by the compiler part of the software (not the UI part) that

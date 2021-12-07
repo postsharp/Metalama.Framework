@@ -1,10 +1,10 @@
 using System;
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Tests.Integration.Tests.Formatting.CallStaticMethod.ChildNs;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Tests.Integration.Tests.Formatting.CallStaticMethod.ChildNs;
 
 #pragma warning disable CS0067
 
-namespace Caravela.Framework.Tests.Integration.Tests.Formatting.CallStaticMethod
+namespace Metalama.Framework.Tests.Integration.Tests.Formatting.CallStaticMethod
 {
     internal class Aspect : OverrideMethodAspect
     {

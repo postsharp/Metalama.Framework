@@ -1,7 +1,7 @@
-﻿using Caravela.TestFramework;
-using Caravela.Framework.Aspects;
+﻿using Metalama.TestFramework;
+using Metalama.Framework.Aspects;
 
-namespace Caravela.Framework.Tests.Integration.TestInputs.Highlighting.IfStatements.RunTimeIfCondition
+namespace Metalama.Framework.Tests.Integration.TestInputs.Highlighting.IfStatements.RunTimeIfCondition
 {
     class RunTimeClass
     {

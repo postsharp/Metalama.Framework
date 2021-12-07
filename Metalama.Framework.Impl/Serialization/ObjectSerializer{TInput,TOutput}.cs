@@ -4,7 +4,7 @@
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 
-namespace Caravela.Framework.Impl.Serialization
+namespace Metalama.Framework.Impl.Serialization
 {
     /// <summary>
     /// As <see cref="ObjectSerializer"/>, except strongly-typed.

@@ -4,7 +4,7 @@
 using System;
 using System.Globalization;
 
-namespace Caravela.Framework.Impl.CompileTime.Serialization.Serializers
+namespace Metalama.Framework.Impl.CompileTime.Serialization.Serializers
 {
     internal sealed class DottedStringSerializer : IntrinsicSerializer<DottedString>
     {

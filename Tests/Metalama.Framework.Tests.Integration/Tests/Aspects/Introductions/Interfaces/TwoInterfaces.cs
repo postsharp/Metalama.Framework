@@ -1,9 +1,9 @@
-﻿using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
+﻿using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
 
 #pragma warning disable CS0067
 
-namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.TwoInterfaces
+namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.TwoInterfaces
 {
     /*
      * Simple case with implicit interface members.

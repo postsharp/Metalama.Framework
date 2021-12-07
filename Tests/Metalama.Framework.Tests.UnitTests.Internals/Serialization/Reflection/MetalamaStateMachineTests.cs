@@ -1,17 +1,17 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Impl.ReflectionMocks;
+using Metalama.Framework.Impl.ReflectionMocks;
 using System.Linq;
 using System.Reflection;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
+namespace Metalama.Framework.Tests.UnitTests.Serialization.Reflection
 {
-    public class CaravelaStateMachineTests : ReflectionTestBase
+    public class MetalamaStateMachineTests : ReflectionTestBase
     {
-        public CaravelaStateMachineTests( ITestOutputHelper helper ) : base( helper ) { }
+        public MetalamaStateMachineTests( ITestOutputHelper helper ) : base( helper ) { }
 
         [Fact]
         public void TestEnumerable()
@@ -24,7 +24,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
                 .ToString();
 
             this.AssertEqual(
-                @"((global::System.Reflection.MethodInfo)global::System.Reflection.MethodBase.GetMethodFromHandle(global::Caravela.Compiler.Intrinsics.GetRuntimeMethodHandle(""M:Target.Method~System.Collections.Generic.IEnumerable{System.Int32}"")))",
+                @"((global::System.Reflection.MethodInfo)global::System.Reflection.MethodBase.GetMethodFromHandle(global::Metalama.Compiler.Intrinsics.GetRuntimeMethodHandle(""M:Target.Method~System.Collections.Generic.IEnumerable{System.Int32}"")))",
                 serialized );
 
             TestExpression<MethodInfo>( code, serialized, info => Assert.Equal( "Method", info.Name ) );
@@ -42,7 +42,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
                 .ToString();
 
             this.AssertEqual(
-                @"((global::System.Reflection.MethodInfo)global::System.Reflection.MethodBase.GetMethodFromHandle(global::Caravela.Compiler.Intrinsics.GetRuntimeMethodHandle(""M:Target.Method"")))",
+                @"((global::System.Reflection.MethodInfo)global::System.Reflection.MethodBase.GetMethodFromHandle(global::Metalama.Compiler.Intrinsics.GetRuntimeMethodHandle(""M:Target.Method"")))",
                 serialized );
 
             TestExpression<MethodInfo>( code, serialized, info => Assert.Equal( "Method", info.Name ) );

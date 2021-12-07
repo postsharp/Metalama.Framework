@@ -1,6 +1,6 @@
-using Caravela.Framework.Aspects;
+using Metalama.Framework.Aspects;
 
-namespace Caravela.Framework.Tests.PublicPipeline.Aspects.Initialize.DuplicateMemberName
+namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Initialize.DuplicateMemberName
 {
     internal class Aspect1 : MethodAspect
     {

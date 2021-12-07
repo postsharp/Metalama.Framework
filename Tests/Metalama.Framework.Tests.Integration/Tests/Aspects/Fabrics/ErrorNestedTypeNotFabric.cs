@@ -1,6 +1,6 @@
-using Caravela.Framework.Aspects;
+using Metalama.Framework.Aspects;
 
-namespace Caravela.Framework.Tests.PublicPipeline.Aspects.Fabrics.ErrorNestedTypeNotFabric
+namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Fabrics.ErrorNestedTypeNotFabric
 {
     // <target>
     internal class TargetCode

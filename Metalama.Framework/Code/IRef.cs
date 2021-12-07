@@ -1,7 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-namespace Caravela.Framework.Code
+namespace Metalama.Framework.Code
 {
     /// <summary>
     /// Represents a reference to a declaration that can be resolved using <see cref="GetTarget"/>,
@@ -14,7 +14,7 @@ namespace Caravela.Framework.Code
     {
         /// <summary>
         /// Returns a string that uniquely identifies the declaration represented by the current reference. This identifier can then be resolved using <see cref="ITypeFactory.GetDeclarationFromId"/>, even in
-        /// a different process or with a different version of Caravela than the one that created the id.
+        /// a different process or with a different version of Metalama than the one that created the id.
         /// </summary>
         /// <returns>A string, or <c>null</c> if the current reference cannot be serialized to a public id.</returns>
         string? ToSerializableId();

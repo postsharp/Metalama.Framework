@@ -1,6 +1,6 @@
-using Caravela.Framework.Aspects;
+using Metalama.Framework.Aspects;
 
-namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Field.Declarative
+namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Field.Declarative
 {
     public class IntroductionAttribute : TypeAspect
     {

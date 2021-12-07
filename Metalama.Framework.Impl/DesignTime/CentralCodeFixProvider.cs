@@ -1,12 +1,12 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Impl.DesignTime.CodeFixes;
-using Caravela.Framework.Impl.DesignTime.Diagnostics;
-using Caravela.Framework.Impl.DesignTime.Utilities;
-using Caravela.Framework.Impl.Diagnostics;
-using Caravela.Framework.Impl.Options;
-using Caravela.Framework.Impl.Utilities;
+using Metalama.Framework.Impl.DesignTime.CodeFixes;
+using Metalama.Framework.Impl.DesignTime.Diagnostics;
+using Metalama.Framework.Impl.DesignTime.Utilities;
+using Metalama.Framework.Impl.Diagnostics;
+using Metalama.Framework.Impl.Options;
+using Metalama.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeActions;
 using Microsoft.CodeAnalysis.CodeFixes;
@@ -21,14 +21,14 @@ using System.Threading;
 using System.Threading.Tasks;
 using CodeFixContext = Microsoft.CodeAnalysis.CodeFixes.CodeFixContext;
 
-namespace Caravela.Framework.Impl.DesignTime
+namespace Metalama.Framework.Impl.DesignTime
 {
     // ReSharper disable UnusedType.Global
 
     [ExcludeFromCodeCoverage]
     public class CentralCodeFixProvider : CodeFixProvider
     {
-        private const string _makePartialKey = "Caravela.MakePartial";
+        private const string _makePartialKey = "Metalama.MakePartial";
         private readonly DesignTimeDiagnosticDefinitions _designTimeDiagnosticDefinitions = DesignTimeDiagnosticDefinitions.GetInstance();
 
         public CentralCodeFixProvider()

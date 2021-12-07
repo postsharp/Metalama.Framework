@@ -1,10 +1,10 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Code;
-using Caravela.Framework.Impl;
-using Caravela.Framework.Impl.CodeModel;
-using Caravela.Framework.Impl.Pipeline;
+using Metalama.Framework.Code;
+using Metalama.Framework.Impl;
+using Metalama.Framework.Impl.CodeModel;
+using Metalama.Framework.Impl.Pipeline;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Locator;
 using Microsoft.CodeAnalysis.MSBuild;
@@ -15,7 +15,7 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Caravela.Framework.Workspaces
+namespace Metalama.Framework.Workspaces
 {
     /// <summary>
     /// Represents a set of projects. Workspaces can be created using the <see cref="WorkspaceCollection"/> class.  When projects target several frameworks,

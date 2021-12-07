@@ -1,8 +1,8 @@
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Code.SyntaxBuilders;
-using Caravela.TestFramework;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code.SyntaxBuilders;
+using Metalama.TestFramework;
 
-namespace Caravela.Framework.Tests.Integration.Templating.Pragma.StatementBuilderT
+namespace Metalama.Framework.Tests.Integration.Templating.Pragma.StatementBuilderT
 {
     class Aspect
     {

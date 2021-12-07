@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Caravela.Framework.RunTime
+namespace Metalama.Framework.RunTime
 {
     /// <summary>
     /// A <see cref="List{T}"/> that implements <see cref="IAsyncEnumerable{T}"/>. This class is used when a non-iterator template is applied

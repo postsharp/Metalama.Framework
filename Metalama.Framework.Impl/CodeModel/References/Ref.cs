@@ -1,15 +1,15 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Code;
-using Caravela.Framework.Code.DeclarationBuilders;
-using Caravela.Framework.Impl.CodeModel.Builders;
-using Caravela.Framework.Impl.Utilities;
+using Metalama.Framework.Code;
+using Metalama.Framework.Code.DeclarationBuilders;
+using Metalama.Framework.Impl.CodeModel.Builders;
+using Metalama.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Immutable;
 
-namespace Caravela.Framework.Impl.CodeModel.References
+namespace Metalama.Framework.Impl.CodeModel.References
 {
     /// <summary>
     /// Contains factory methods for the generic <see cref="Ref{T}"/>.

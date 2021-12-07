@@ -1,11 +1,11 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Impl.CodeModel;
-using Caravela.Framework.Impl.Serialization;
+using Metalama.Framework.Impl.CodeModel;
+using Metalama.Framework.Impl.Serialization;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace Caravela.Framework.Tests.UnitTests.Serialization
+namespace Metalama.Framework.Tests.UnitTests.Serialization
 {
     public abstract class SerializerTestsBase : TestBase
     {
@@ -22,7 +22,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization
                 this.Compilation = compilationModel;
 
                 // We need a syntax factory for an arbitrary compilation, but at least with standard references.
-                // Note that we cannot easily get a reference to Caravela.Compiler.Interfaces this way because we have a reference assembly.
+                // Note that we cannot easily get a reference to Metalama.Compiler.Interfaces this way because we have a reference assembly.
 
                 this.SerializationContext = new SyntaxSerializationContext( this.Compilation, OurSyntaxGenerator.Default );
 
@@ -34,7 +34,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization
                 this.Compilation = this.CreateCompilationModel( code );
 
                 // We need a syntax factory for an arbitrary compilation, but at least with standard references.
-                // Note that we cannot easily get a reference to Caravela.Compiler.Interfaces this way because we have a reference assembly.
+                // Note that we cannot easily get a reference to Metalama.Compiler.Interfaces this way because we have a reference assembly.
 
                 this.SerializationContext = new SyntaxSerializationContext( this.Compilation, OurSyntaxGenerator.Default );
 

@@ -1,7 +1,7 @@
 using System.Net.NetworkInformation;
-using Caravela.Framework.Aspects;
+using Metalama.Framework.Aspects;
 
-namespace Caravela.Framework.Tests.Integration.TestInputs.Highlighting.OverrideProperty
+namespace Metalama.Framework.Tests.Integration.TestInputs.Highlighting.OverrideProperty
 {
     public class MyOverride : OverrideFieldOrPropertyAspect
     {

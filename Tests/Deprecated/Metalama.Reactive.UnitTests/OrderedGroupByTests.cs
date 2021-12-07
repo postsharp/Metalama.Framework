@@ -1,11 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using Caravela.Reactive.Sources;
+using Metalama.Reactive.Sources;
 using ComparerExtensions;
 using Xunit;
-using static Caravela.Reactive.UnitTests.TestGroupObserver.EventKind;
+using static Metalama.Reactive.UnitTests.TestGroupObserver.EventKind;
 
-namespace Caravela.Reactive.UnitTests
+namespace Metalama.Reactive.UnitTests
 {
     public class OrderedGroupByTests
     {

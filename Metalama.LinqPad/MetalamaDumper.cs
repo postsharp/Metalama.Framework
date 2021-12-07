@@ -1,23 +1,23 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Code;
-using Caravela.Framework.Impl.CodeModel;
-using Caravela.Framework.Workspaces;
+using Metalama.Framework.Code;
+using Metalama.Framework.Impl.CodeModel;
+using Metalama.Framework.Workspaces;
 using System.Linq;
 
-namespace Caravela.LinqPad
+namespace Metalama.LinqPad
 {
     /// <summary>
-    /// Provides a <see cref="ToDump"/> method, which can be used to format object trees in the way that <see cref="CaravelaDriver"/> does,
-    /// but without using <see cref="CaravelaDriver"/>.
+    /// Provides a <see cref="ToDump"/> method, which can be used to format object trees in the way that <see cref="MetalamaDriver"/> does,
+    /// but without using <see cref="MetalamaDriver"/>.
     /// </summary>
-    public static class CaravelaDumper
+    public static class MetalamaDumper
     {
         private static readonly FacadeObjectFactory _facadeObjectFactory = new( GetWorkspaceExpression );
 
         /// <summary>
-        /// Formats object trees in the way that <see cref="CaravelaDriver"/> does but without using <see cref="CaravelaDriver"/>.
+        /// Formats object trees in the way that <see cref="MetalamaDriver"/> does but without using <see cref="MetalamaDriver"/>.
         /// </summary>
         public static object? ToDump( object? obj ) => _facadeObjectFactory.GetFacade( obj ) ?? obj;
 

@@ -10,8 +10,8 @@
 
   <PropertyGroup>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-    <DebugCaravelaAnalyzer>True</DebugCaravelaAnalyzer>
-	 <DebugCaravelaIde>False</DebugCaravelaIde>
+    <DebugMetalamaAnalyzer>True</DebugMetalamaAnalyzer>
+	 <DebugMetalamaIde>False</DebugMetalamaIde>
     <!-- Overwrite from the parent directory -->
     
   </PropertyGroup>
@@ -19,7 +19,7 @@
 
   <!-- Versions of dependencies -->
   <Target Name="ValidateVersion">
-    <Error Text="The ProductVersion property is not defined. Check that Directory.Build.props have been properly imported." Condition="'$(CaravelaVersion)'==''"/>
+    <Error Text="The ProductVersion property is not defined. Check that Directory.Build.props have been properly imported." Condition="'$(MetalamaVersion)'==''"/>
   </Target>
 
 </Project>

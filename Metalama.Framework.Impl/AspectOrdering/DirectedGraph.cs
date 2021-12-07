@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 #nullable enable
 
-namespace Caravela.Framework.Impl.AspectOrdering
+namespace Metalama.Framework.Impl.AspectOrdering
 {
     internal sealed class DirectedGraph
     {

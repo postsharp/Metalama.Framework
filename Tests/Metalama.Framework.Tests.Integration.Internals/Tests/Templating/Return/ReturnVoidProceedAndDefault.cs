@@ -1,9 +1,9 @@
 #pragma warning disable CS8600, CS8603
 using System;
-using Caravela.TestFramework;
-using Caravela.Framework.Aspects;
+using Metalama.TestFramework;
+using Metalama.Framework.Aspects;
 
-namespace Caravela.Framework.Tests.Integration.Templating.ReturnStatements.ReturnVoidProceedAndDefault
+namespace Metalama.Framework.Tests.Integration.Templating.ReturnStatements.ReturnVoidProceedAndDefault
 {
     [CompileTime]
     class Aspect

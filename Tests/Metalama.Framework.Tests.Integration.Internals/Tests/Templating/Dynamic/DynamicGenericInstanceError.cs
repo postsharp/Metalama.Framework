@@ -1,12 +1,12 @@
 using System;
 using System.Collections.Generic;
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Code.SyntaxBuilders;
-using Caravela.TestFramework;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code.SyntaxBuilders;
+using Metalama.TestFramework;
 
 #pragma warning disable CS0168
 
-namespace Caravela.Framework.Tests.Integration.Templating.Dynamic.DynamicGenericInstanceError
+namespace Metalama.Framework.Tests.Integration.Templating.Dynamic.DynamicGenericInstanceError
 {
     [CompileTime]
     internal class Aspect

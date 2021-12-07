@@ -8,10 +8,10 @@ using System.Reflection;
 using Xunit.Abstractions;
 using Xunit.Sdk;
 
-namespace Caravela.TestFramework
+namespace Metalama.TestFramework
 {
     /// <summary>
-    /// Implementation of a Xunit test framework for Caravela. Fall backs to the default XUnit framework in Resharper or Rider.
+    /// Implementation of a Xunit test framework for Metalama. Fall backs to the default XUnit framework in Resharper or Rider.
     /// </summary>
     [ExcludeFromCodeCoverage]
     public class AspectTestFramework : ITestFramework
@@ -20,7 +20,7 @@ namespace Caravela.TestFramework
 
         public AspectTestFramework( IMessageSink messageSink )
         {
-            const string debugEnvironmentVariable = "DebugCaravelaTestFramework";
+            const string debugEnvironmentVariable = "DebugMetalamaTestFramework";
 
             if ( !string.IsNullOrEmpty( Environment.GetEnvironmentVariable( debugEnvironmentVariable ) ) )
             {

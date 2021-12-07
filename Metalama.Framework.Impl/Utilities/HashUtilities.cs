@@ -6,7 +6,7 @@ using System.Collections.Immutable;
 using System.Globalization;
 using System.Text;
 
-namespace Caravela.Framework.Impl.Utilities
+namespace Metalama.Framework.Impl.Utilities
 {
     internal static class HashUtilities
     {

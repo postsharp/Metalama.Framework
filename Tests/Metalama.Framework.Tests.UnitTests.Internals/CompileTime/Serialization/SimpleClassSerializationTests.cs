@@ -1,8 +1,8 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Impl.CompileTime.Serialization;
-using Caravela.Framework.Serialization;
+using Metalama.Framework.Impl.CompileTime.Serialization;
+using Metalama.Framework.Serialization;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -11,14 +11,14 @@ using Xunit;
 
 #pragma warning disable SA1500 // Braces for multi-line statements should not share line
 
-namespace Caravela.Framework.Tests.UnitTests.CompileTime.Serialization
+namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
 {
     public class SimpleClassSerializationTests : SerializationTestsBase
     {
         [Fact]
         public void TestClassWithString_SimpleWord()
         {
-/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSimpleExplicitelySerializedClass( "SimpleText" );
 After:
@@ -30,7 +30,7 @@ After:
         [Fact]
         public void TestClassWithString_SimpleDottedWords()
         {
-/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSimpleExplicitelySerializedClass( "Simple.Dotted.Words" );
 After:
@@ -42,7 +42,7 @@ After:
         [Fact]
         public void TestClassWithString_DottedWordsWithReservedNames()
         {
-/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSimpleExplicitelySerializedClass( "Simple.Dotted.Words, mscorlib" );
 After:
@@ -54,7 +54,7 @@ After:
         [Fact]
         public void TestClassWithBoxedInt()
         {
-/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSimpleExplicitelySerializedClass<object>( 1000 );
 After:
@@ -66,7 +66,7 @@ After:
         [Fact]
         public void TestClassWithBoxedBool()
         {
-/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSimpleExplicitelySerializedClass<object>( false );
 After:
@@ -78,7 +78,7 @@ After:
         [Fact]
         public void TestClassWithBoxedStruct()
         {
-/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSimpleExplicitelySerializedClass<object>( DateTime.Now );
 After:
@@ -90,7 +90,7 @@ After:
         [Fact]
         public void TestClassWithInt32_1000()
         {
-/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSimpleExplicitelySerializedClass( 1000 );
 After:
@@ -102,7 +102,7 @@ After:
         [Fact]
         public void TestClassWithInt32_m1000()
         {
-/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSimpleExplicitelySerializedClass( -1000 );
 After:
@@ -114,7 +114,7 @@ After:
         [Fact]
         public void TestClassWithInt32_1000000000()
         {
-/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSimpleExplicitelySerializedClass( 1000000000 );
 After:
@@ -126,7 +126,7 @@ After:
         [Fact]
         public void TestClassWithInt32_m1000000000()
         {
-/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSimpleExplicitelySerializedClass( -1000000000 );
 After:
@@ -138,7 +138,7 @@ After:
         [Fact]
         public void TestClassWithInt64_223372036854775807()
         {
-/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSimpleExplicitelySerializedClass( 223372036854775807 );
 After:
@@ -150,7 +150,7 @@ After:
         [Fact]
         public void TestClassWithInt64_m223372036854775807()
         {
-/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSimpleExplicitelySerializedClass( -223372036854775807 );
 After:
@@ -162,7 +162,7 @@ After:
         [Fact]
         public void TestClassWithDouble_1000()
         {
-/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSimpleExplicitelySerializedClass( 1000d );
 After:
@@ -174,7 +174,7 @@ After:
         [Fact]
         public void TestClassWithDouble_m1000()
         {
-/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSimpleExplicitelySerializedClass( -1000d );
 After:
@@ -186,7 +186,7 @@ After:
         [Fact]
         public void TestClassWithDouble_Max()
         {
-/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSimpleExplicitelySerializedClass( double.MaxValue );
 After:
@@ -198,7 +198,7 @@ After:
         [Fact]
         public void TestClassWithDouble_Min()
         {
-/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSimpleExplicitelySerializedClass( double.MinValue );
 After:
@@ -210,7 +210,7 @@ After:
         [Fact]
         public void TestClassWithStruct_DateTime()
         {
-/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSimpleExplicitelySerializedClass( DateTime.Now );
 After:
@@ -222,7 +222,7 @@ After:
         [Fact]
         public void TestClasWithObjectMember_Nulled()
         {
-/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSimpleExplicitelySerializedClass( (object?) null );
 After:
@@ -234,7 +234,7 @@ After:
         [Fact]
         public void TestClasWithStringMember_Nulled()
         {
-/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSimpleExplicitelySerializedClass( (string?) null );
 After:
@@ -246,7 +246,7 @@ After:
         [Fact]
         public void TestClasWithClassMember_Nulled()
         {
-/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSimpleExplicitelySerializedClass( (SimpleExplicitelySerializedClass<int>?) null );
 After:
@@ -258,7 +258,7 @@ After:
         [Fact]
         public void TestClasWithClassMember_NotNulled()
         {
-/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSimpleExplicitelySerializedClass( new SimpleExplicitelySerializedClass<string>( "testing text" ) );
 After:
@@ -270,7 +270,7 @@ After:
         [Fact]
         public void TestClasWithEnum_SimpleValue()
         {
-/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSimpleExplicitelySerializedClass( TestEnum.Value1 );
 After:
@@ -282,7 +282,7 @@ After:
         [Fact]
         public void TestClasWithEnum_NonZeroValue()
         {
-/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSimpleExplicitelySerializedClass( TestEnum.Value2 );
 After:
@@ -294,7 +294,7 @@ After:
         [Fact]
         public void TestClasWithLongEnum_NonZeroValue()
         {
-/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSimpleExplicitelySerializedClass( TestEnumWithLong.Value2 );
 After:
@@ -306,7 +306,7 @@ After:
         [Fact]
         public void TestClasWithByteEnum_NonZeroValue()
         {
-/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSimpleExplicitelySerializedClass( TestEnumWithByte.Value2 );
 After:
@@ -318,7 +318,7 @@ After:
         [Fact]
         public void TestClasWithFlagsEnum_NonZeroValue()
         {
-/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSimpleExplicitelySerializedClass( TestEnumWithFlags.Value2 );
 After:
@@ -330,7 +330,7 @@ After:
         [Fact]
         public void TestClasWithFlagsEnum_MultiValue()
         {
-/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSimpleExplicitelySerializedClass( TestEnumWithFlags.Value1 | TestEnumWithFlags.Value2 );
 After:
@@ -342,7 +342,7 @@ After:
         [Fact]
         public void TestClassWithProperty_Int1()
         {
-/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestExplicitlySerializedClass( (object) null, 1 );
 After:
@@ -354,7 +354,7 @@ After:
         [Fact]
         public void TestClassWithArray_Int()
         {
-/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSimpleExplicitelySerializedClass( new[] { 1, 2, 3, 4 } );
 After:
@@ -373,7 +373,7 @@ After:
                 array[i] = i;
             }
 
-/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSimpleExplicitelySerializedClass( array );
 After:
@@ -385,7 +385,7 @@ After:
         [Fact]
         public void TestClassWithRank2Array()
         {
-/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSimpleExplicitelySerializedClass( new[,] { { 1, 2 }, { 3, 4 } } );
 After:
@@ -397,7 +397,7 @@ After:
         [Fact]
         public void TestClassWithRank3Array()
         {
-/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSimpleExplicitelySerializedClass( new[, ,] { { { 1 }, { 2 } }, { { 3 }, { 4 } } } );
 After:
@@ -414,7 +414,7 @@ After:
             array!.SetValue( 1, 0 );
             array!.SetValue( 2, 1 );
 
-/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSimpleExplicitelySerializedClass( (int[]) array );
 After:
@@ -426,7 +426,7 @@ After:
         [Fact]
         public void TestClassWithValueAndProperty_Int1AndInt1()
         {
-/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestExplicitlySerializedClass( 1, 1 );
 After:
@@ -438,7 +438,7 @@ After:
         [Fact]
         public void TestClassWithValueAndProperty_StringAndString()
         {
-/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestExplicitlySerializedClass( "a field", "a property" );
 After:
@@ -450,7 +450,7 @@ After:
         [Fact]
         public void TestClassWithValueAndProperty_BothNulled()
         {
-/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestExplicitlySerializedClass( (object?) null, (object?) null );
 After:
@@ -462,7 +462,7 @@ After:
         [Fact]
         public void TestClassWithNullableInt_NotNull()
         {
-/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSerialization( new ExplicitlySerializedClass<int, int>( 5 ) { Nullable = 3 } );
 After:
@@ -478,7 +478,7 @@ After:
             array[0] = new SimpleExplicitelySerializedClass<int>( 5 );
             array[1] = new ExplicitlySerializedClass<int, string>( 2 );
 
-/* Unmerged change from project 'Caravela.Framework.Tests.UnitTests.Internals (netframework4.8)'
+/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
             this.TestSerialization( array );
 After:

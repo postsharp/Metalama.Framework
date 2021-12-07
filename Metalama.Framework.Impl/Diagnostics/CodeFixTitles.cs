@@ -5,11 +5,11 @@ using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 
-namespace Caravela.Framework.Impl.Diagnostics
+namespace Metalama.Framework.Impl.Diagnostics
 {
     public readonly struct CodeFixTitles
     {
-        public const string DiagnosticPropertyKey = "Caravela.CodeFixes";
+        public const string DiagnosticPropertyKey = "Metalama.CodeFixes";
         public const char Separator = '\n';
 
         internal string? Value { get; }

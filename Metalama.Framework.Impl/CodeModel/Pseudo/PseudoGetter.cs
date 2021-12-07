@@ -1,11 +1,11 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Code;
-using Caravela.Framework.Code.Collections;
-using Caravela.Framework.Impl.CodeModel.Collections;
+using Metalama.Framework.Code;
+using Metalama.Framework.Code.Collections;
+using Metalama.Framework.Impl.CodeModel.Collections;
 
-namespace Caravela.Framework.Impl.CodeModel.Pseudo
+namespace Metalama.Framework.Impl.CodeModel.Pseudo
 {
     internal class PseudoGetter : PseudoAccessor<IFieldOrProperty>
     {

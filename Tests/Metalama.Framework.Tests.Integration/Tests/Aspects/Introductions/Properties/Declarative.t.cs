@@ -57,8 +57,8 @@ private static global::System.Int32 _introducedProperty_Auto_Static;
 
 public static global::System.Int32 IntroducedProperty_Auto_Static
 {get    {
-return global::Caravela.Framework.IntegrationTests.Aspects.Introductions.Properties.Declarative.TargetClass._introducedProperty_Auto_Static;    }
+return global::Metalama.Framework.IntegrationTests.Aspects.Introductions.Properties.Declarative.TargetClass._introducedProperty_Auto_Static;    }
 
 set    {
-global::Caravela.Framework.IntegrationTests.Aspects.Introductions.Properties.Declarative.TargetClass._introducedProperty_Auto_Static=value;    }
+global::Metalama.Framework.IntegrationTests.Aspects.Introductions.Properties.Declarative.TargetClass._introducedProperty_Auto_Static=value;    }
 }    }

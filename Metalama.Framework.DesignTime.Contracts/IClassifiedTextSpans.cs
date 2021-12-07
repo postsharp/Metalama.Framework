@@ -5,7 +5,7 @@ using Microsoft.CodeAnalysis.Text;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
-namespace Caravela.Framework.DesignTime.Contracts
+namespace Metalama.Framework.DesignTime.Contracts
 {
     // The type identifier cannot be modified even during refactoring.
 

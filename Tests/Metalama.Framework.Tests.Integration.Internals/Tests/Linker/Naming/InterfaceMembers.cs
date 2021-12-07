@@ -1,10 +1,10 @@
 ﻿using System;
-using static Caravela.Framework.Tests.Integration.Tests.Linker.Api;
+using static Metalama.Framework.Tests.Integration.Tests.Linker.Api;
 
 #pragma warning disable CS0067
 #pragma warning disable CS0649
 
-namespace Caravela.Framework.Tests.Integration.Tests.Linker.Naming.InterfaceMembers
+namespace Metalama.Framework.Tests.Integration.Tests.Linker.Naming.InterfaceMembers
 {    
     interface ITest
     {

@@ -1,11 +1,11 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Code;
+using Metalama.Framework.Code;
 using System;
 using System.Linq.Expressions;
 
-namespace Caravela.Framework.Aspects
+namespace Metalama.Framework.Aspects
 {
     // ReSharper disable once ClassNeverInstantiated.Global
 

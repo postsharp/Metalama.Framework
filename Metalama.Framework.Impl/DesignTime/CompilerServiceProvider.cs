@@ -1,17 +1,17 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.DesignTime.Contracts;
-using Caravela.Framework.Impl.DesignTime.Preview;
-using Caravela.Framework.Impl.Pipeline;
-using Caravela.Framework.Impl.Utilities;
+using Metalama.Framework.DesignTime.Contracts;
+using Metalama.Framework.Impl.DesignTime.Preview;
+using Metalama.Framework.Impl.Pipeline;
+using Metalama.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 
-namespace Caravela.Framework.Impl.DesignTime
+namespace Metalama.Framework.Impl.DesignTime
 {
     /// <summary>
     /// The implementation of <see cref="ICompilerServiceProvider"/>.
@@ -45,7 +45,7 @@ namespace Caravela.Framework.Impl.DesignTime
         {
             var pid = Process.GetCurrentProcess().Id;
 
-            var directory = Path.Combine( Path.GetTempPath(), "Caravela", "Logs" );
+            var directory = Path.Combine( Path.GetTempPath(), "Metalama", "Logs" );
 
             try
             {
@@ -59,7 +59,7 @@ namespace Caravela.Framework.Impl.DesignTime
                     } );
 
                 // The filename must be unique because several instances of the current assembly (of different versions) may be loaded in the process.
-                var textWriter = File.CreateText( Path.Combine( directory, $"Caravela.{Process.GetCurrentProcess().ProcessName}.{pid}.{Guid.NewGuid()}.log" ) );
+                var textWriter = File.CreateText( Path.Combine( directory, $"Metalama.{Process.GetCurrentProcess().ProcessName}.{pid}.{Guid.NewGuid()}.log" ) );
 
                 Logger.Initialize( textWriter );
             }

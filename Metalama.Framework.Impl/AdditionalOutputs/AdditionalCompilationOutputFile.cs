@@ -3,7 +3,7 @@
 
 using System.IO;
 
-namespace Caravela.Framework.Impl.AdditionalOutputs
+namespace Metalama.Framework.Impl.AdditionalOutputs
 {
     public abstract class AdditionalCompilationOutputFile
     {

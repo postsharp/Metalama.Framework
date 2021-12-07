@@ -1,7 +1,7 @@
 ﻿using System;
-using static Caravela.Framework.Tests.Integration.Tests.Linker.Api;
+using static Metalama.Framework.Tests.Integration.Tests.Linker.Api;
 
-namespace Caravela.Framework.Tests.Integration.Tests.Linker.Properties.Inliners.GetterLocalDeclaration_NotEqualType
+namespace Metalama.Framework.Tests.Integration.Tests.Linker.Properties.Inliners.GetterLocalDeclaration_NotEqualType
 {
     // <target>
     class Target

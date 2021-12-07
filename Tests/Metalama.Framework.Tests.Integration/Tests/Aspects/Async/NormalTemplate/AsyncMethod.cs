@@ -3,11 +3,11 @@
 using System;
 using System.Threading.Tasks;
 using System.Collections.Generic;
-using Caravela.Framework;
-using Caravela.TestFramework;
-using Caravela.Framework.Aspects;
+using Metalama.Framework;
+using Metalama.TestFramework;
+using Metalama.Framework.Aspects;
 
-namespace Caravela.Framework.Tests.Integration.Templating.Aspects.Async.NormalTemplateOnAsyncMethod
+namespace Metalama.Framework.Tests.Integration.Templating.Aspects.Async.NormalTemplateOnAsyncMethod
 {
     class Aspect : OverrideMethodAspect
     {

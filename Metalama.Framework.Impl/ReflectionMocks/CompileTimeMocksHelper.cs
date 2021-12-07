@@ -3,7 +3,7 @@
 
 using System;
 
-namespace Caravela.Framework.Impl.ReflectionMocks
+namespace Metalama.Framework.Impl.ReflectionMocks
 {
     internal static class CompileTimeMocksHelper
     {

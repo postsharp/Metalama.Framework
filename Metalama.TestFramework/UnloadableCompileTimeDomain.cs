@@ -1,11 +1,11 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Impl.CompileTime;
+using Metalama.Framework.Impl.CompileTime;
 using System.Diagnostics.CodeAnalysis;
 #if NET5_0_OR_GREATER
-using Caravela.Framework.Impl.Testing;
-using Caravela.Framework.Impl.Utilities;
+using Metalama.Framework.Impl.Testing;
+using Metalama.Framework.Impl.Utilities;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -15,7 +15,7 @@ using System.Runtime.Loader;
 using System.Threading;
 #endif
 
-namespace Caravela.TestFramework
+namespace Metalama.TestFramework
 {
     /// <summary>
     /// An implementation of <see cref="CompileTimeDomain"/> base on <c>AssemblyLoadContext</c> and able to unload
@@ -29,7 +29,7 @@ namespace Caravela.TestFramework
 
         public UnloadableCompileTimeDomain()
         {
-            this._assemblyLoadContext = new AssemblyLoadContext( "Caravela_" + Guid.NewGuid(), true );
+            this._assemblyLoadContext = new AssemblyLoadContext( "Metalama_" + Guid.NewGuid(), true );
         }
 
         protected override Assembly LoadAssembly( string path )

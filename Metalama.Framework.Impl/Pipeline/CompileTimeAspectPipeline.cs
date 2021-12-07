@@ -1,16 +1,16 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Compiler;
-using Caravela.Framework.Impl.AdditionalOutputs;
-using Caravela.Framework.Impl.Aspects;
-using Caravela.Framework.Impl.CodeModel;
-using Caravela.Framework.Impl.CompileTime;
-using Caravela.Framework.Impl.Diagnostics;
-using Caravela.Framework.Impl.Formatting;
-using Caravela.Framework.Impl.Licensing;
-using Caravela.Framework.Impl.Templating;
-using Caravela.Framework.Project;
+using Metalama.Compiler;
+using Metalama.Framework.Impl.AdditionalOutputs;
+using Metalama.Framework.Impl.Aspects;
+using Metalama.Framework.Impl.CodeModel;
+using Metalama.Framework.Impl.CompileTime;
+using Metalama.Framework.Impl.Diagnostics;
+using Metalama.Framework.Impl.Formatting;
+using Metalama.Framework.Impl.Licensing;
+using Metalama.Framework.Impl.Templating;
+using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using PostSharp.Backstage.Extensibility.Extensions;
 using PostSharp.Backstage.Licensing;
@@ -21,7 +21,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Caravela.Framework.Impl.Pipeline
+namespace Metalama.Framework.Impl.Pipeline
 {
     /// <summary>
     /// The implementation of <see cref="AspectPipeline"/> used at compile time.
@@ -55,7 +55,7 @@ namespace Caravela.Framework.Impl.Pipeline
         {
             var partialCompilation = PartialCompilation.CreateComplete( compilation );
 
-            // Skip if Caravela has been disabled for this project.
+            // Skip if Metalama has been disabled for this project.
             if ( !this.ProjectOptions.IsFrameworkEnabled )
             {
                 return new CompileTimeAspectPipelineResult(

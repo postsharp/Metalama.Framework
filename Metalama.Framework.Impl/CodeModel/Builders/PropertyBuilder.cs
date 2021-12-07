@@ -1,15 +1,15 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Code;
-using Caravela.Framework.Code.Collections;
-using Caravela.Framework.Code.DeclarationBuilders;
-using Caravela.Framework.Code.Invokers;
-using Caravela.Framework.Impl.Advices;
-using Caravela.Framework.Impl.CodeModel.Invokers;
-using Caravela.Framework.Impl.Transformations;
-using Caravela.Framework.Impl.Utilities;
-using Caravela.Framework.RunTime;
+using Metalama.Framework.Code;
+using Metalama.Framework.Code.Collections;
+using Metalama.Framework.Code.DeclarationBuilders;
+using Metalama.Framework.Code.Invokers;
+using Metalama.Framework.Impl.Advices;
+using Metalama.Framework.Impl.CodeModel.Invokers;
+using Metalama.Framework.Impl.Transformations;
+using Metalama.Framework.Impl.Utilities;
+using Metalama.Framework.RunTime;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -17,11 +17,11 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
-using MethodKind = Caravela.Framework.Code.MethodKind;
-using RefKind = Caravela.Framework.Code.RefKind;
-using TypedConstant = Caravela.Framework.Code.TypedConstant;
+using MethodKind = Metalama.Framework.Code.MethodKind;
+using RefKind = Metalama.Framework.Code.RefKind;
+using TypedConstant = Metalama.Framework.Code.TypedConstant;
 
-namespace Caravela.Framework.Impl.CodeModel.Builders
+namespace Metalama.Framework.Impl.CodeModel.Builders
 {
     internal class PropertyBuilder : MemberBuilder, IPropertyBuilder, IPropertyImpl
     {

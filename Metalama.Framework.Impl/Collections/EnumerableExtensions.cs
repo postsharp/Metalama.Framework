@@ -6,7 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Caravela.Framework.Impl.Collections
+namespace Metalama.Framework.Impl.Collections
 {
     /// <summary>
     /// Provides extension methods to the <see cref="IEnumerable{T}"/> and similar interfaces.

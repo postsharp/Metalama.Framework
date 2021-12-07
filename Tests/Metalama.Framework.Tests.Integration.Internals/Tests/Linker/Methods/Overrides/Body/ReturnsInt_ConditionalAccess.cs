@@ -1,9 +1,9 @@
 ﻿// @Skipped(Linker test preprocessing does not correctly support conditional access expressions)
 
 using System;
-using static Caravela.Framework.Tests.Integration.Tests.Linker.Api;
+using static Metalama.Framework.Tests.Integration.Tests.Linker.Api;
 
-namespace Caravela.Framework.Tests.Integration.Tests.Linker.Methods.Overrides.Body.ReturnsInt_ConditionalAccess
+namespace Metalama.Framework.Tests.Integration.Tests.Linker.Methods.Overrides.Body.ReturnsInt_ConditionalAccess
 {
     // <target>
     class Target

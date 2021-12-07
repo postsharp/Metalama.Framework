@@ -1,9 +1,9 @@
 using System;
-using Caravela.Framework.Aspects;
-using Caravela.TestFramework;
+using Metalama.Framework.Aspects;
+using Metalama.TestFramework;
 
 
-namespace Caravela.Framework.Tests.Integration.Templating.Dynamic.DynamicPropertyMember
+namespace Metalama.Framework.Tests.Integration.Templating.Dynamic.DynamicPropertyMember
 {
     [CompileTime]
     class Aspect

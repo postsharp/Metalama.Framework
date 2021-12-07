@@ -3,7 +3,7 @@
 
 using System;
 
-namespace Caravela.Framework.Impl.Aspects
+namespace Metalama.Framework.Impl.Aspects
 {
     /// <summary>
     /// Describes which version of the underlying semantic is referenced by the syntax node.

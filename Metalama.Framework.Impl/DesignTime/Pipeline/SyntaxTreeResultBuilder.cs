@@ -1,14 +1,14 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Code.Collections;
-using Caravela.Framework.Impl.CodeModel;
-using Caravela.Framework.Impl.Pipeline;
+using Metalama.Framework.Code.Collections;
+using Metalama.Framework.Impl.CodeModel;
+using Metalama.Framework.Impl.Pipeline;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
 using System.Linq;
 
-namespace Caravela.Framework.Impl.DesignTime.Pipeline
+namespace Metalama.Framework.Impl.DesignTime.Pipeline
 {
     /// <summary>
     /// Builds a <see cref="SyntaxTreeResult"/>.

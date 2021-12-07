@@ -5,7 +5,7 @@ using System;
 using System.Diagnostics;
 using System.Threading;
 
-namespace Caravela.Reactive.Implementation
+namespace Metalama.Reactive.Implementation
 {
 
     public abstract class ReactiveOperator<TSource, TSourceObserver, TResult, TResultObserver> :

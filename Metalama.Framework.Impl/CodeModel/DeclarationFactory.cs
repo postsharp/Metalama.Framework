@@ -1,24 +1,24 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Code;
-using Caravela.Framework.Code.DeclarationBuilders;
-using Caravela.Framework.Code.Types;
-using Caravela.Framework.Impl.CodeModel.Builders;
-using Caravela.Framework.Impl.CodeModel.References;
-using Caravela.Framework.Impl.CompileTime;
-using Caravela.Framework.Impl.Templating.MetaModel;
-using Caravela.Framework.Impl.Utilities;
-using Caravela.Framework.Project;
+using Metalama.Framework.Code;
+using Metalama.Framework.Code.DeclarationBuilders;
+using Metalama.Framework.Code.Types;
+using Metalama.Framework.Impl.CodeModel.Builders;
+using Metalama.Framework.Impl.CodeModel.References;
+using Metalama.Framework.Impl.CompileTime;
+using Metalama.Framework.Impl.Templating.MetaModel;
+using Metalama.Framework.Impl.Utilities;
+using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
-using SpecialType = Caravela.Framework.Code.SpecialType;
+using SpecialType = Metalama.Framework.Code.SpecialType;
 
-namespace Caravela.Framework.Impl.CodeModel
+namespace Metalama.Framework.Impl.CodeModel
 {
     /// <summary>
     /// Creates instances of <see cref="IDeclaration"/> for a given <see cref="CompilationModel"/>.

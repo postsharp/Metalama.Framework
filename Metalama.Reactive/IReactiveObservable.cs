@@ -3,7 +3,7 @@
 
 using System;
 
-namespace Caravela.Reactive
+namespace Metalama.Reactive
 {
     /// <summary>
     /// An observable is something to which observers (<see cref="IReactiveObserver"/>) can subscribe.

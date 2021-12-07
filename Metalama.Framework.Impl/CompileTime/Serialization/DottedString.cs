@@ -3,7 +3,7 @@
 
 using System;
 
-namespace Caravela.Framework.Impl.CompileTime.Serialization
+namespace Metalama.Framework.Impl.CompileTime.Serialization
 {
     /// <summary>
     /// Encapsulates dotted strings such as namespaces and type names, so their

@@ -1,7 +1,7 @@
 ﻿using System;
-using static Caravela.Framework.Tests.Integration.Tests.Linker.Api;
+using static Metalama.Framework.Tests.Integration.Tests.Linker.Api;
 
-namespace Caravela.Framework.Tests.Integration.Tests.Linker.Methods.Overrides.Jump.ReturnsInt_FJ
+namespace Metalama.Framework.Tests.Integration.Tests.Linker.Methods.Overrides.Jump.ReturnsInt_FJ
 {
     // <target>
     class Target

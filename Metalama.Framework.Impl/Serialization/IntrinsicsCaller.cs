@@ -6,12 +6,12 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Simplification;
 
-namespace Caravela.Framework.Impl.Serialization
+namespace Metalama.Framework.Impl.Serialization
 {
     internal class IntrinsicsCaller
     {
         /// <summary>
-        /// Returns <c>Caravela.Compiler.Intrinsics.methodName(documentationId)</c>.
+        /// Returns <c>Metalama.Compiler.Intrinsics.methodName(documentationId)</c>.
         /// </summary>
         /// <param name="methodName">GetRuntimeMethodHandle, GetRuntimeFieldHandle, or GetRuntimeTypeHandle.</param>
         /// <param name="documentationId">The string to pass to the method.</param>
@@ -29,7 +29,7 @@ namespace Caravela.Framework.Impl.Serialization
                                     SyntaxKind.SimpleMemberAccessExpression,
                                     SyntaxFactory.AliasQualifiedName(
                                         SyntaxFactory.IdentifierName( SyntaxFactory.Token( SyntaxKind.GlobalKeyword ) ),
-                                        SyntaxFactory.IdentifierName( "Caravela" ) ),
+                                        SyntaxFactory.IdentifierName( "Metalama" ) ),
                                     SyntaxFactory.IdentifierName( "Compiler" ) ),
                                 SyntaxFactory.IdentifierName( "Intrinsics" ) ),
                             SyntaxFactory.IdentifierName( methodName ) )

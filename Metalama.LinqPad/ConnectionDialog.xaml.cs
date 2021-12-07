@@ -6,7 +6,7 @@ using Microsoft.Win32;
 using System.IO;
 using System.Windows;
 
-namespace Caravela.LinqPad
+namespace Metalama.LinqPad
 {
     /// <summary>
     /// Interaction logic for ConnectionDialog.xaml.

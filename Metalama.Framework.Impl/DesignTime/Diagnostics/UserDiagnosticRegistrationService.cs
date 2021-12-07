@@ -1,9 +1,9 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Impl.DesignTime.Pipeline;
-using Caravela.Framework.Impl.Options;
-using Caravela.Framework.Impl.Utilities;
+using Metalama.Framework.Impl.DesignTime.Pipeline;
+using Metalama.Framework.Impl.Options;
+using Metalama.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -11,7 +11,7 @@ using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 
-namespace Caravela.Framework.Impl.DesignTime.Diagnostics
+namespace Metalama.Framework.Impl.DesignTime.Diagnostics
 {
     /// <summary>
     /// Allows to register user diagnostics and suppressions for storage in the user profile, and read this file.
@@ -67,7 +67,7 @@ namespace Caravela.Framework.Impl.DesignTime.Diagnostics
         /// <returns></returns>
         public (ImmutableArray<DiagnosticDescriptor> Diagnostics, ImmutableArray<SuppressionDescriptor> Suppressions) GetSupportedDescriptors()
             => (this._registrationFile.Diagnostics.Values.Select( d => d.DiagnosticDescriptor() ).ToImmutableArray(),
-                this._registrationFile.Suppressions.Select( id => new SuppressionDescriptor( "Caravela." + id, id, "" ) ).ToImmutableArray());
+                this._registrationFile.Suppressions.Select( id => new SuppressionDescriptor( "Metalama." + id, id, "" ) ).ToImmutableArray());
 
         /// <summary>
         /// Inspects a <see cref="DesignTimeAspectPipelineResult"/> and compares the reported or suppressed diagnostics to the list of supported diagnostics

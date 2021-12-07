@@ -2,9 +2,9 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using System;
-using Caravela.Framework.Aspects;
+using Metalama.Framework.Aspects;
 
-namespace Caravela.Framework.TestApp.Aspects
+namespace Metalama.Framework.TestApp.Aspects
 {
     public class SwallowExceptionsAspect : OverrideMethodAspect
     {
@@ -16,7 +16,7 @@ namespace Caravela.Framework.TestApp.Aspects
             }
             catch ( Exception ex )
             {
-                Console.WriteLine( "Caravela caught: " + ex );
+                Console.WriteLine( "Metalama caught: " + ex );
                 return default;
             }
         }

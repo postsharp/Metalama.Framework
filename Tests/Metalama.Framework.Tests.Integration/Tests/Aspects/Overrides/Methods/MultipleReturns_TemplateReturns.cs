@@ -1,8 +1,8 @@
 ﻿using System;
-using Caravela.Framework.Aspects;
-using Caravela.TestFramework;
+using Metalama.Framework.Aspects;
+using Metalama.TestFramework;
 
-namespace Caravela.Framework.IntegrationTests.Aspects.Overrides.Methods.MultipleReturns_TemplateReturns
+namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Methods.MultipleReturns_TemplateReturns
 {
     // Tests overrides where the target method contains multiple returns and template returns the result directly.
     // Template returns the result directly.

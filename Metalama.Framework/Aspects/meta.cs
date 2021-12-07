@@ -1,8 +1,8 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Code;
-using Caravela.Framework.Code.SyntaxBuilders;
+using Metalama.Framework.Code;
+using Metalama.Framework.Code.SyntaxBuilders;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 // ReSharper disable UnusedParameter.Global
 // ReSharper disable once InconsistentNaming
-namespace Caravela.Framework.Aspects
+namespace Metalama.Framework.Aspects
 {
     /// <summary>
     /// The entry point for the meta model, which can be used in templates to inspect the target code or access other
@@ -228,7 +228,7 @@ namespace Caravela.Framework.Aspects
 
         /// <summary>
         /// Inserts a statement into the target code, where the statement is given as a <see cref="string"/>.
-        /// Calling this overload is equivalent to calling the <see cref="InsertStatement(Caravela.Framework.Code.SyntaxBuilders.IStatement)"/> overload
+        /// Calling this overload is equivalent to calling the <see cref="InsertStatement(Metalama.Framework.Code.SyntaxBuilders.IStatement)"/> overload
         /// with the result of the <see cref="ParseStatement"/> method.
         /// </summary>
         [TemplateKeyword]
@@ -254,7 +254,7 @@ namespace Caravela.Framework.Aspects
 
         /// <summary>
         /// Parses a string containing a C# statement and returns an <see cref="IStatement"/>, which can be inserted into the run-time code
-        /// using <see cref="InsertStatement(Caravela.Framework.Code.SyntaxBuilders.IStatement)"/>. The string must contain a single statement,
+        /// using <see cref="InsertStatement(Metalama.Framework.Code.SyntaxBuilders.IStatement)"/>. The string must contain a single statement,
         /// and must be finished by a semicolon or a closing bracket.
         /// </summary>
         public static IStatement ParseStatement( string code ) => CurrentContext.CodeBuilder.ParseStatement( code );

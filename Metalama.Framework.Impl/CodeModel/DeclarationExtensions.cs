@@ -1,13 +1,13 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Code;
-using Caravela.Framework.Code.Collections;
-using Caravela.Framework.Impl.CodeModel.References;
-using Caravela.Framework.Impl.Collections;
-using Caravela.Framework.Impl.Diagnostics;
-using Caravela.Framework.Impl.Templating.MetaModel;
-using Caravela.Framework.Impl.Utilities;
+using Metalama.Framework.Code;
+using Metalama.Framework.Code.Collections;
+using Metalama.Framework.Impl.CodeModel.References;
+using Metalama.Framework.Impl.Collections;
+using Metalama.Framework.Impl.Diagnostics;
+using Metalama.Framework.Impl.Templating.MetaModel;
+using Metalama.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -15,12 +15,12 @@ using Microsoft.CodeAnalysis.Editing;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Accessibility = Caravela.Framework.Code.Accessibility;
-using DeclarationKind = Caravela.Framework.Code.DeclarationKind;
+using Accessibility = Metalama.Framework.Code.Accessibility;
+using DeclarationKind = Metalama.Framework.Code.DeclarationKind;
 using MethodKind = Microsoft.CodeAnalysis.MethodKind;
-using RefKind = Caravela.Framework.Code.RefKind;
+using RefKind = Metalama.Framework.Code.RefKind;
 
-namespace Caravela.Framework.Impl.CodeModel
+namespace Metalama.Framework.Impl.CodeModel
 {
     internal static class DeclarationExtensions
     {

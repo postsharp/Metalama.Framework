@@ -2,11 +2,11 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 #pragma warning disable IDE0005
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Impl.Sdk;
-using Caravela.Framework.Impl.Templating;
-using Caravela.Framework.Tests.Integration.Runners;
-using Caravela.TestFramework;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Impl.Sdk;
+using Metalama.Framework.Impl.Templating;
+using Metalama.Framework.Tests.Integration.Runners;
+using Metalama.TestFramework;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using RoslynPad.Roslyn;
@@ -20,7 +20,7 @@ using System.Runtime.CompilerServices;
 
 #pragma warning restore IDE0005
 
-namespace Caravela.AspectWorkbench.CodeEditor
+namespace Metalama.AspectWorkbench.CodeEditor
 {
     public class RoslynPadHost : RoslynHost
     {

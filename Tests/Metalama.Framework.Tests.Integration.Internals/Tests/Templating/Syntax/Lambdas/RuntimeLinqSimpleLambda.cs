@@ -1,8 +1,8 @@
-using Caravela.TestFramework;
+using Metalama.TestFramework;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Lambdas.RuntimeLinqSimpleLambda
+namespace Metalama.Framework.Tests.Integration.Templating.Syntax.Lambdas.RuntimeLinqSimpleLambda
 {
     class Aspect
     {

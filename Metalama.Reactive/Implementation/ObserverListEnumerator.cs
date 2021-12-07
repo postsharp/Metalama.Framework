@@ -4,7 +4,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
-namespace Caravela.Reactive.Implementation
+namespace Metalama.Reactive.Implementation
 {
     /// <summary>
     /// Represents an iterators returned by <see cref="ObserverList{T}"/>.

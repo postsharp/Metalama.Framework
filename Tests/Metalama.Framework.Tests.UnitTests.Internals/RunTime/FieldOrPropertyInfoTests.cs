@@ -1,13 +1,13 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.RunTime;
+using Metalama.Framework.RunTime;
 using System.Reflection;
 using Xunit;
 
 #pragma warning disable SA1401 // Fields should be private
 
-namespace Caravela.Framework.Tests.UnitTests.RunTime
+namespace Metalama.Framework.Tests.UnitTests.RunTime
 {
     public class FieldOrPropertyInfoTests
     {

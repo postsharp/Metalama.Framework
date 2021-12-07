@@ -2,7 +2,7 @@
 <PlugIn xmlns="http://schemas.postsharp.org/1.0/configuration">
   <TaskType	Name="Obfuscate"
       Phase="Generate"
-      Implementation="Caravela.Obfuscator.ObfuscateTask, Caravela.Obfuscator"
+      Implementation="Metalama.Obfuscator.ObfuscateTask, Metalama.Obfuscator"
 				>
     <Dependency TaskType="Compile" Required="false" Position="After"/>
   </TaskType>

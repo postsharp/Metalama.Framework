@@ -1,7 +1,7 @@
 using System;
-using Caravela.Framework.Aspects;
+using Metalama.Framework.Aspects;
 
-namespace Caravela.Framework.Tests.PublicPipeline.Aspects.Inheritance.ImplementedInterfaceMethod
+namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Inheritance.ImplementedInterfaceMethod
 {
     internal class Aspect : OverrideMethodAspect
     {

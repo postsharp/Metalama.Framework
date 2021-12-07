@@ -1,10 +1,10 @@
 using System;
-using Caravela.TestFramework;
-using Caravela.Framework.Aspects;
+using Metalama.TestFramework;
+using Metalama.Framework.Aspects;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Lambdas.LinqWithCompileTimeSimpleLambda
+namespace Metalama.Framework.Tests.Integration.Templating.Syntax.Lambdas.LinqWithCompileTimeSimpleLambda
 {
     class Aspect
     {

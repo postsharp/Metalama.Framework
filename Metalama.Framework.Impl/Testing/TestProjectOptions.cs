@@ -1,13 +1,13 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Impl.Options;
+using Metalama.Framework.Impl.Options;
 using System;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 
-namespace Caravela.Framework.Impl.Testing
+namespace Metalama.Framework.Impl.Testing
 {
     /// <summary>
     /// An implementation of <see cref="IProjectOptions"/> and <see cref="IPathOptions"/> that can be used in tests.
@@ -23,7 +23,7 @@ namespace Caravela.Framework.Impl.Testing
         public TestProjectOptions( ImmutableDictionary<string, string>? properties = null )
         {
             this._properties = properties ?? ImmutableDictionary<string, string>.Empty;
-            var baseDirectory = Path.Combine( Path.GetTempPath(), "Caravela", "Tests", Guid.NewGuid().ToString() );
+            var baseDirectory = Path.Combine( Path.GetTempPath(), "Metalama", "Tests", Guid.NewGuid().ToString() );
             this._baseDirectory = CreateDirectoryLazy( baseDirectory );
 
             var compileTimeProjectCacheDirectory = Path.Combine( this.BaseDirectory, "Cache" );

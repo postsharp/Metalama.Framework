@@ -4,7 +4,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Caravela.TestFramework.Utilities
+namespace Metalama.TestFramework.Utilities
 {
     /// <summary>
     /// Collection of services exposing an <see cref="IServiceProvider"/>.

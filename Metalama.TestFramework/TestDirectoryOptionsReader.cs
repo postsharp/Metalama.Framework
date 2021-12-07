@@ -5,10 +5,10 @@ using System;
 using System.Collections.Concurrent;
 using System.IO;
 
-namespace Caravela.TestFramework
+namespace Metalama.TestFramework
 {
     /// <summary>
-    /// Reads and caches the <c>caravelaTests.json</c> files.
+    /// Reads and caches the <c>metalamaTests.json</c> files.
     /// </summary>
     internal class TestDirectoryOptionsReader
     {
@@ -26,7 +26,7 @@ namespace Caravela.TestFramework
         private TestDirectoryOptions GetDirectoryOptionsImpl( string directory )
         {
             // Read the json file in the directory.
-            var optionsPath = Path.Combine( directory, "caravelaTests.json" );
+            var optionsPath = Path.Combine( directory, "metalamaTests.json" );
             var options = File.Exists( optionsPath ) ? TestDirectoryOptions.ReadFile( optionsPath ) : new TestDirectoryOptions();
 
             // Apply settings from the parent directory.

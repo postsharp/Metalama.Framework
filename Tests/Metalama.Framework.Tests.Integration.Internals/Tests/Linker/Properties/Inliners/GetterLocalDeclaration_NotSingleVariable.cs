@@ -1,9 +1,9 @@
 ﻿using System;
-using static Caravela.Framework.Tests.Integration.Tests.Linker.Api;
+using static Metalama.Framework.Tests.Integration.Tests.Linker.Api;
 
 #pragma warning disable CS0219
 
-namespace Caravela.Framework.Tests.Integration.Tests.Linker.Properties.Inliners.GetterLocalDeclaration_NotSingleVariable
+namespace Metalama.Framework.Tests.Integration.Tests.Linker.Properties.Inliners.GetterLocalDeclaration_NotSingleVariable
 {
     // <target>
     class Target

@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Caravela.Framework.Aspects;
+using Metalama.Framework.Aspects;
 
-namespace Caravela.Framework.TestApp.Aspects
+namespace Metalama.Framework.TestApp.Aspects
 {
     class InheritedAspect : TypeAspect
     {

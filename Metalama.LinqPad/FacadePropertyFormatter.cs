@@ -1,15 +1,15 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Diagnostics;
-using Caravela.Framework.Impl;
+using Metalama.Framework.Diagnostics;
+using Metalama.Framework.Impl;
 using LINQPad;
 using System;
 using System.Collections;
 using System.Linq;
 using System.Reflection;
 
-namespace Caravela.LinqPad
+namespace Metalama.LinqPad
 {
     /// <summary>
     /// A helper class used by <see cref="FacadeObject"/> to format property values into LinqPad view objects.

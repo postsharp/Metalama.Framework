@@ -9,16 +9,16 @@ internal class Targets
             private AutomaticallyCloneable? c;
 
 
-public virtual global::Caravela.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty.Targets.AutomaticallyCloneable Clone()
+public virtual global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty.Targets.AutomaticallyCloneable Clone()
 {
-    var clone = ((global::Caravela.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty.Targets.AutomaticallyCloneable)base.MemberwiseClone());
-    ((global::Caravela.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty.Targets.AutomaticallyCloneable)clone).b= ((global::Caravela.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty.ManuallyCloneable? )((global::System.ICloneable)this.b).Clone());
-    ((global::Caravela.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty.Targets.AutomaticallyCloneable)clone).c= ((global::Caravela.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty.Targets.AutomaticallyCloneable)((global::System.ICloneable)this.c).Clone());
-    return (global::Caravela.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty.Targets.AutomaticallyCloneable)clone;
+    var clone = ((global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty.Targets.AutomaticallyCloneable)base.MemberwiseClone());
+    ((global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty.Targets.AutomaticallyCloneable)clone).b= ((global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty.ManuallyCloneable? )((global::System.ICloneable)this.b).Clone());
+    ((global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty.Targets.AutomaticallyCloneable)clone).c= ((global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty.Targets.AutomaticallyCloneable)((global::System.ICloneable)this.c).Clone());
+    return (global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty.Targets.AutomaticallyCloneable)clone;
 }
-private global::Caravela.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty.Targets.AutomaticallyCloneable Clone_Source()
+private global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty.Targets.AutomaticallyCloneable Clone_Source()
 {
-    return default(global::Caravela.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty.Targets.AutomaticallyCloneable);
+    return default(global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty.Targets.AutomaticallyCloneable);
 }
 
 global::System.Object global::System.ICloneable.Clone()
@@ -32,10 +32,10 @@ global::System.Object global::System.ICloneable.Clone()
             private string d;
 
 
-public override global::Caravela.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty.Targets.Derived Clone()
+public override global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty.Targets.Derived Clone()
 {
-    var clone = ((global::Caravela.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty.Targets.Derived)base.Clone());
-    ((global::Caravela.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty.Targets.Derived)clone).d= ((global::System.String)((global::System.ICloneable)this.d).Clone());
-    return (global::Caravela.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty.Targets.Derived)clone;
+    var clone = ((global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty.Targets.Derived)base.Clone());
+    ((global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty.Targets.Derived)clone).d= ((global::System.String)((global::System.ICloneable)this.d).Clone());
+    return (global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty.Targets.Derived)clone;
 }        }
     }

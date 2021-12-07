@@ -3,7 +3,7 @@
 <Project>
 
 
-    <Target Name="CaravelaSdkSetAnalyzerAssembliesInPackage"
+    <Target Name="MetalamaSdkSetAnalyzerAssembliesInPackage"
             DependsOnTargets="ResolveReferences;BuiltProjectOutputGroup">
         <ItemGroup>
             <!-- include assemblies from the current project -->
@@ -17,9 +17,9 @@
 
     <!-- based on https://stackoverflow.com/a/56018426/41071 -->
     <PropertyGroup>
-        <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);CaravelaSdkSetLibAssembliesInPackage</TargetsForTfmSpecificBuildOutput>
+        <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);MetalamaSdkSetLibAssembliesInPackage</TargetsForTfmSpecificBuildOutput>
     </PropertyGroup>
-    <Target Name="CaravelaSdkSetLibAssembliesInPackage" DependsOnTargets="ResolveReferences">
+    <Target Name="MetalamaSdkSetLibAssembliesInPackage" DependsOnTargets="ResolveReferences">
         <ItemGroup>
             <!-- include assemblies from references -->
             <BuildOutputInPackage
@@ -29,7 +29,7 @@
         </ItemGroup>
     </Target>
 
-    <UsingTask TaskName="CaravelaSdkRewriteNuspec" TaskFactory="RoslynCodeTaskFactory"
+    <UsingTask TaskName="MetalamaSdkRewriteNuspec" TaskFactory="RoslynCodeTaskFactory"
                AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
         <ParameterGroup>
             <NuspecFile />
@@ -45,12 +45,12 @@
 
             foreach (var group in groups)
             {
-                var caravelaDependency = group.Elements(ns + "dependency").SingleOrDefault(e => e.Attribute("id").Value == "Caravela.Framework.Sdk");
+                var metalamaDependency = group.Elements(ns + "dependency").SingleOrDefault(e => e.Attribute("id").Value == "Metalama.Framework.Sdk");
                 
-                if (caravelaDependency != null)
+                if (metalamaDependency != null)
                 {
-                    caravelaDependency.Attribute("id").Value = "Caravela.Framework";
-                    caravelaDependency.Attribute("exclude")?.Remove();
+                    metalamaDependency.Attribute("id").Value = "Metalama.Framework";
+                    metalamaDependency.Attribute("exclude")?.Remove();
                 }
             }
 
@@ -61,7 +61,7 @@
     </UsingTask>
 
     <!-- based on https://github.com/NuGet/NuGet.Client/blob/1f3a4d9/src/NuGet.Core/NuGet.Build.Tasks.Pack/NuGet.Build.Tasks.Pack.targets#L195 -->
-    <Target Name="CaravelaSdkGenerateNuspec"
+    <Target Name="MetalamaSdkGenerateNuspec"
             DependsOnTargets="$(GenerateNuspecDependsOn);_CalculateInputsOutputsForPack;_GetProjectReferenceVersions;_InitializeNuspecRepositoryInformationProperties"
             Condition="$(IsPackable) == 'true'" Inputs="@(NuGetPackInput)" Outputs="@(NuGetPackOutput)">
         <PackTask PackItem="$(PackProjectInputFile)"
@@ -126,7 +126,7 @@
                   ContinueOnError="true" />
     </Target>
 
-    <Target Name="CaravelaSdkUpdateNuspec" DependsOnTargets="CaravelaSdkGenerateNuspec">
+    <Target Name="MetalamaSdkUpdateNuspec" DependsOnTargets="MetalamaSdkGenerateNuspec">
         <ItemGroup>
             <FilteredOutput Include="@(NuGetPackOutput)" Condition="%(Extension) == '.nuspec'" />
         </ItemGroup>
@@ -135,12 +135,12 @@
             <NuspecFileAbsolutePath>@(FilteredOutput)</NuspecFileAbsolutePath>
         </PropertyGroup>
 
-        <CaravelaSdkRewriteNuspec NuspecFile="$(NuspecFileAbsolutePath)" />
+        <MetalamaSdkRewriteNuspec NuspecFile="$(NuspecFileAbsolutePath)" />
 
     </Target>
 
     <PropertyGroup>
-        <BeforePack>$(BeforePack); CaravelaSdkSetAnalyzerAssembliesInPackage; CaravelaSdkUpdateNuspec</BeforePack>
+        <BeforePack>$(BeforePack); MetalamaSdkSetAnalyzerAssembliesInPackage; MetalamaSdkUpdateNuspec</BeforePack>
     </PropertyGroup>
 
 </Project>

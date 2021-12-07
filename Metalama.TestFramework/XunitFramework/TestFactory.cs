@@ -7,7 +7,7 @@ using System.Reflection;
 using Xunit.Abstractions;
 using Xunit.Sdk;
 
-namespace Caravela.TestFramework.XunitFramework
+namespace Metalama.TestFramework.XunitFramework
 {
     internal class TestFactory
     {

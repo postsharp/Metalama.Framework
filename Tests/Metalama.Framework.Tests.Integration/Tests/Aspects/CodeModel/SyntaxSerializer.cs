@@ -2,11 +2,11 @@
 
 using System.Linq;
 using System.Reflection;
-using Caravela.Framework.Aspects;
-using Caravela.TestFramework;
+using Metalama.Framework.Aspects;
+using Metalama.TestFramework;
 
 
-namespace Caravela.Framework.IntegrationTests.Aspects.CodeModel.SyntaxSerializer
+namespace Metalama.Framework.IntegrationTests.Aspects.CodeModel.SyntaxSerializer
 {
     // Tests override method attribute where target method body contains return from the middle of the method. which forces aspect linker to use jumps to inline the override.
     // Template stores the result into a variable.

@@ -4,9 +4,9 @@
 using Microsoft.CodeAnalysis;
 using System;
 
-namespace Caravela.Framework.Impl.Diagnostics
+namespace Metalama.Framework.Impl.Diagnostics
 {
-    // Public because of TryCaravela.
+    // Public because of TryMetalama.
     public sealed class NonLocalizedString : LocalizableString
     {
         private readonly string _message;

@@ -1,19 +1,19 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Code;
-using Caravela.Framework.Code.Invokers;
-using Caravela.Framework.Impl.CodeModel.Invokers;
-using Caravela.Framework.Impl.CodeModel.Pseudo;
-using Caravela.Framework.Impl.ReflectionMocks;
-using Caravela.Framework.Impl.Utilities;
+using Metalama.Framework.Code;
+using Metalama.Framework.Code.Invokers;
+using Metalama.Framework.Impl.CodeModel.Invokers;
+using Metalama.Framework.Impl.CodeModel.Pseudo;
+using Metalama.Framework.Impl.ReflectionMocks;
+using Metalama.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using MethodKind = Caravela.Framework.Code.MethodKind;
+using MethodKind = Metalama.Framework.Code.MethodKind;
 
-namespace Caravela.Framework.Impl.CodeModel
+namespace Metalama.Framework.Impl.CodeModel
 {
     internal class Event : Member, IEventImpl
     {

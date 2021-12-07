@@ -6,7 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
 
-namespace Caravela.Reactive.Implementation
+namespace Metalama.Reactive.Implementation
 {
     /// <summary>
     /// A base implementation for <see cref="IReactiveObservable{T}"/>.

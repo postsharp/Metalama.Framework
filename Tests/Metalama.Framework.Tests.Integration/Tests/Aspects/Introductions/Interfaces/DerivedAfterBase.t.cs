@@ -1,5 +1,5 @@
 [Introduction]
-    public class TargetClass:global::Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.DerivedAfterBase.IBaseInterface,global::Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.DerivedAfterBase.IDerivedInterface    {
+    public class TargetClass:global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.DerivedAfterBase.IBaseInterface,global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.DerivedAfterBase.IDerivedInterface    {
 
 
 public global::System.Int32 Bar()

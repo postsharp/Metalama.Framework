@@ -5,7 +5,7 @@ using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Immutable;
 
-namespace Caravela.Framework.Impl.CodeModel
+namespace Metalama.Framework.Impl.CodeModel
 {
     internal class GenericMap
     {

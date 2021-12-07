@@ -7,9 +7,9 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Simplification;
 using System;
 using System.Linq;
-using RefKind = Caravela.Framework.Code.RefKind;
+using RefKind = Metalama.Framework.Code.RefKind;
 
-namespace Caravela.Framework.Impl.Templating
+namespace Metalama.Framework.Impl.Templating
 {
     /// <summary>
     /// Helper methods that would ideally be in the <see cref="SyntaxFactory"/> class.

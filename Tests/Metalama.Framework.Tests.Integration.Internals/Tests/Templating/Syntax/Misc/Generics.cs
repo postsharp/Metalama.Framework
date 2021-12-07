@@ -1,8 +1,8 @@
 #pragma warning disable CS8600, CS8603, CS8618, CS0169, CS0067
-using Caravela.TestFramework;
-using Caravela.Framework.Aspects;
+using Metalama.TestFramework;
+using Metalama.Framework.Aspects;
 
-namespace Caravela.Framework.Tests.Integration.Templating.CSharpSyntax.Misc.Generics
+namespace Metalama.Framework.Tests.Integration.Templating.CSharpSyntax.Misc.Generics
 {
     [CompileTime]
     class Aspect

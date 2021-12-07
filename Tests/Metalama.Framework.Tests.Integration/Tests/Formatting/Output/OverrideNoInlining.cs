@@ -1,10 +1,10 @@
 using System;
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Tests.Integration.Tests.Formatting.OverrideNoInlining;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Tests.Integration.Tests.Formatting.OverrideNoInlining;
 
 [assembly: AspectOrder(typeof(MyOverrideMethod), typeof(MyOverrideProperty))]
 
-namespace Caravela.Framework.Tests.Integration.Tests.Formatting.OverrideNoInlining
+namespace Metalama.Framework.Tests.Integration.Tests.Formatting.OverrideNoInlining
 {
     public class MyOverrideMethod : OverrideMethodAspect
     {

@@ -1,15 +1,15 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Code.Collections;
-using Caravela.Framework.Impl.Options;
+using Metalama.Framework.Code.Collections;
+using Metalama.Framework.Impl.Options;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
-namespace Caravela.Framework.Workspaces
+namespace Metalama.Framework.Workspaces
 {
     /// <summary>
     /// The implement of <see cref="IProjectOptions"/> used by <see cref="Workspace"/>.

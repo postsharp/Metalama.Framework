@@ -1,8 +1,8 @@
 using System;
-using Caravela.Framework.Aspects;
-using Caravela.TestFramework;
+using Metalama.Framework.Aspects;
+using Metalama.TestFramework;
 
-namespace Caravela.Framework.Tests.Integration.Tests.Formatting.MetaRunTime
+namespace Metalama.Framework.Tests.Integration.Tests.Formatting.MetaRunTime
 {
    
     [CompileTime]

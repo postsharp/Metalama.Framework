@@ -5,9 +5,9 @@ using System;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
-using Caravela.Reactive.Implementation;
+using Metalama.Reactive.Implementation;
 
-namespace Caravela.Reactive
+namespace Metalama.Reactive
 {
     /// <summary>
     /// A token passed to <see cref="IReactiveSource{T}.GetValue"/> or <see cref="IReactiveSource{T}.GetVersionedValue"/>.

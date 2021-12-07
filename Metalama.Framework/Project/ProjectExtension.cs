@@ -1,9 +1,9 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Aspects;
+using Metalama.Framework.Aspects;
 
-namespace Caravela.Framework.Project
+namespace Metalama.Framework.Project
 {
     /// <summary>
     /// An base class that must be implemented by classes that want to extend <see cref="IProject"/> with project-local configuration data using

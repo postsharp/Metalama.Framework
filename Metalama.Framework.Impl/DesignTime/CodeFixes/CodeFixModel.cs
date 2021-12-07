@@ -4,10 +4,10 @@
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
 
-namespace Caravela.Framework.Impl.DesignTime.CodeFixes
+namespace Metalama.Framework.Impl.DesignTime.CodeFixes
 {
     /// <summary>
-    /// Represents a <see cref="Caravela.Framework.Impl.DesignTime.CodeFixes.CodeActionModel"/> and the set of diagnostics to which it is attached. 
+    /// Represents a <see cref="Metalama.Framework.Impl.DesignTime.CodeFixes.CodeActionModel"/> and the set of diagnostics to which it is attached. 
     /// </summary>
     internal record CodeFixModel( CodeActionBaseModel CodeAction, ImmutableArray<Diagnostic> Diagnostic );
 }

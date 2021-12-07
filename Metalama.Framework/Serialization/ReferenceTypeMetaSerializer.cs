@@ -3,7 +3,7 @@
 
 using System;
 
-namespace Caravela.Framework.Serialization
+namespace Metalama.Framework.Serialization
 {
     public abstract class ReferenceTypeMetaSerializer : IMetaSerializer
     {

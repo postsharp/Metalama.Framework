@@ -3,7 +3,7 @@
 
 using System;
 
-namespace Caravela.Framework.Eligibility.Implementation
+namespace Metalama.Framework.Eligibility.Implementation
 {
     [Obsolete( "Not implemented." )]
     internal class CastEligibilityRule<TIn, TOut> : IEligibilityRule<TOut>

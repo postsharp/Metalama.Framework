@@ -1,7 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-namespace Caravela.Framework.Code.DeclarationBuilders
+namespace Metalama.Framework.Code.DeclarationBuilders
 {
     /// <summary>
     /// Allows to complete the construction of a field or property that has been created by an advice.

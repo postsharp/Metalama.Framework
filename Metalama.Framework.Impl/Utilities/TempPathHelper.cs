@@ -4,7 +4,7 @@
 using System;
 using System.IO;
 
-namespace Caravela.Framework.Impl.Utilities
+namespace Metalama.Framework.Impl.Utilities
 {
     internal static class TempPathHelper
     {
@@ -18,6 +18,6 @@ namespace Caravela.Framework.Impl.Utilities
         }
 
         public static string GetTempPath( string purpose, Guid? guid = null )
-            => Path.Combine( _tempPath, "Caravela", purpose, _version, guid?.ToString() ?? "" );
+            => Path.Combine( _tempPath, "Metalama", purpose, _version, guid?.ToString() ?? "" );
     }
 }

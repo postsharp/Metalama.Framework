@@ -3,7 +3,7 @@
 
 // ReSharper disable InconsistentNaming
 
-namespace Caravela.Framework.Aspects
+namespace Metalama.Framework.Aspects
 {
     /// <summary>
     /// Enumeration of the kind of templates that were specified by the user using <see cref="GetterTemplateSelector"/> or

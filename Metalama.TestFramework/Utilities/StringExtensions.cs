@@ -5,7 +5,7 @@
 using System;
 #endif
 
-namespace Caravela.TestFramework.Utilities
+namespace Metalama.TestFramework.Utilities
 {
     /// <summary>
     /// Extension methods to <see cref="string"/> to cope with the absence of a few methods in .NET Framework and

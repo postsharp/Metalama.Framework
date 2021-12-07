@@ -4,7 +4,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Caravela.Reactive.Operators
+namespace Metalama.Reactive.Operators
 {
     internal class ToAsyncOperator<TValue, TObserver> : IAsyncReactiveSource<TValue, TObserver>, IReactiveObservable<TObserver>
          where TObserver : IReactiveObserver<TValue>

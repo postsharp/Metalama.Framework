@@ -1,11 +1,11 @@
-﻿using Caravela.Framework.Aspects;
-using Caravela.TestFramework;
+﻿using Metalama.Framework.Aspects;
+using Metalama.TestFramework;
 using System;
 
 #pragma warning disable CS0169
 #pragma warning disable CS0414
 
-namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.PropertyTemplate_Set
+namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.PropertyTemplate_Set
 {
     // Tests single OverrideProperty aspect on set-only properties.
 

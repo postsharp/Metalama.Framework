@@ -8,7 +8,7 @@ that is functionally equal to the original compilation if executed (NOTE: this m
 
 The second step analyzes the intermediate compilation using it's `SemanticModel`s. The goal is to count references and method body analysis, which is information used during the next step.
 
-The third step is to link all syntax introduced by the the first step together, inlining and prettifying what is possible to produce the final compilation, which is the output of Caravela.
+The third step is to link all syntax introduced by the the first step together, inlining and prettifying what is possible to produce the final compilation, which is the output of Metalama.
 
 Step 1 - Introduction (`LinkerIntroductionStep` class):
  * Execute every transformation, each of which results in a set of `IntroducedMember` objects. This uses `LinkerProceedImplementationFactory`, `LinkerProceedImpl`, `LinkerLexicalScope` and `LinkerIntroductionNameProvides` to create `MemberIntroductionContext` object, which is consumed by transformations.
@@ -32,7 +32,7 @@ Step 3 - Linking (`LinkerLinkingStep` class):
 
 ## Testing:
 
-Linker unit tests are facilitated by a set of rewriters, which based on the input code produce the full linker input (see `Tests\Caravela.Framework.Tests.UnitTests\Linker\Helpers\LinkerTestBase.cs` for explanation).
+Linker unit tests are facilitated by a set of rewriters, which based on the input code produce the full linker input (see `Tests\Metalama.Framework.Tests.UnitTests\Linker\Helpers\LinkerTestBase.cs` for explanation).
 This is mainly intended to bypass aspect framework and template engine, to test linker-specific scenarios in a very concise manner.
 
 It currently takes a form of unit tests, but may be in the future adapted to the regular integration test format (even though it is not necessary).

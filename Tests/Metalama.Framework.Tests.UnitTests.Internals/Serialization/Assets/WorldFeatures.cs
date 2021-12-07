@@ -5,7 +5,7 @@ using System;
 
 // ReSharper disable IdentifierTypo
 
-namespace Caravela.Framework.Tests.UnitTests.Serialization.Assets
+namespace Metalama.Framework.Tests.UnitTests.Serialization.Assets
 {
     [Flags]
     internal enum WorldFeatures : ulong

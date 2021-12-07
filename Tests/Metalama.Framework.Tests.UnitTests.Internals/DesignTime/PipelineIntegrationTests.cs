@@ -1,14 +1,14 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Impl.DesignTime.Pipeline;
-using Caravela.Framework.Impl.Diagnostics;
-using Caravela.Framework.Impl.Pipeline;
-using Caravela.Framework.Impl.Templating;
-using Caravela.Framework.Impl.Testing;
-using Caravela.Framework.Tests.UnitTests.Utilities;
-using Caravela.TestFramework;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Impl.DesignTime.Pipeline;
+using Metalama.Framework.Impl.Diagnostics;
+using Metalama.Framework.Impl.Pipeline;
+using Metalama.Framework.Impl.Templating;
+using Metalama.Framework.Impl.Testing;
+using Metalama.Framework.Tests.UnitTests.Utilities;
+using Metalama.TestFramework;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
@@ -24,7 +24,7 @@ using Xunit.Abstractions;
 
 #pragma warning disable CA1307 // Specify StringComparison for clarity
 
-namespace Caravela.Framework.Tests.UnitTests.DesignTime
+namespace Metalama.Framework.Tests.UnitTests.DesignTime
 {
     public class PipelineIntegrationTests
     {
@@ -167,10 +167,10 @@ F1.cs:
             var assemblyName = "test_" + Guid.NewGuid();
 
             var aspectCode = @"
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
-using Caravela.Framework.Diagnostics;
-using Caravela.Framework.Eligibility;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
+using Metalama.Framework.Diagnostics;
+using Metalama.Framework.Eligibility;
 
 class MyAspect : MethodAspect
 {
@@ -344,10 +344,10 @@ Target.cs:
             var assemblyName = "test_" + Guid.NewGuid();
 
             var aspectCode = @"
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
-using Caravela.Framework.Diagnostics;
-using Caravela.Framework.Eligibility;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
+using Metalama.Framework.Diagnostics;
+using Metalama.Framework.Eligibility;
 
 class MyAspect : TypeAspect
 {

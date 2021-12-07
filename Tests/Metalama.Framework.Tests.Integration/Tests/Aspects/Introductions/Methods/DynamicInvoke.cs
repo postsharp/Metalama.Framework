@@ -1,7 +1,7 @@
 using System;
-using Caravela.Framework.Aspects;
+using Metalama.Framework.Aspects;
 
-namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Methods.DynamicInvoke
+namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.DynamicInvoke
 {
     public class IntroductionAttribute : TypeAspect
     {

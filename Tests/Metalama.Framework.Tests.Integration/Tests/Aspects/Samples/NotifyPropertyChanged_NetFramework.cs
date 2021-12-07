@@ -4,12 +4,12 @@
 using System;
 using System.ComponentModel;
 using System.Linq;
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
 
 #pragma warning disable CS0067
 
-namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Samples.NotifyPropertyChanged_NetFramework
+namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Samples.NotifyPropertyChanged_NetFramework
 {
     [AttributeUsage( AttributeTargets.Class )]
     public class NotifyPropertyChangedAttribute : TypeAspect

@@ -2,13 +2,13 @@
 
     <PropertyGroup>
         <TargetFramework>net6.0</TargetFramework>
-        <RootNamespace>Caravela.Framework.Workspaces</RootNamespace>
-        <UseCaravelaCompiler>Private</UseCaravelaCompiler>
+        <RootNamespace>Metalama.Framework.Workspaces</RootNamespace>
+        <UseMetalamaCompiler>Private</UseMetalamaCompiler>
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Caravela.Framework.Impl\Caravela.Framework.Impl.csproj" />
-      <ProjectReference Include="..\Caravela.Framework\Caravela.Framework.csproj" />
+      <ProjectReference Include="..\Metalama.Framework.Impl\Metalama.Framework.Impl.csproj" />
+      <ProjectReference Include="..\Metalama.Framework\Metalama.Framework.csproj" />
     </ItemGroup>
 
     <ItemGroup>
@@ -18,7 +18,7 @@
       <PackageReference Include="Microsoft.Build.Framework" Version="17.0.0" ExcludeAssets="runtime" />
       
        <!-- The following references handle [Memo] -->
-          <ProjectReference Include="..\Build\Caravela.SourceTransformer\Caravela.SourceTransformer.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+          <ProjectReference Include="..\Build\Metalama.SourceTransformer\Metalama.SourceTransformer.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
           
     </ItemGroup>
     

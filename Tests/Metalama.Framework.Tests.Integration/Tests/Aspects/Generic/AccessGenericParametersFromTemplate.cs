@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
-using Caravela.Framework;
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
+using Metalama.Framework;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
 
-namespace Caravela.Framework.Tests.PublicPipeline.Aspects.Generic.AccessGenericParametersFromTemplate
+namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Generic.AccessGenericParametersFromTemplate
 {
     class Aspect : OverrideMethodAspect
     {

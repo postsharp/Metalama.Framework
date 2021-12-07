@@ -2,14 +2,14 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Collections.Generic;
-using Caravela.Framework;
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
-using Caravela.Framework.Code.SyntaxBuilders;
-using Caravela.Framework.CodeFixes;
+using Metalama.Framework;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
+using Metalama.Framework.Code.SyntaxBuilders;
+using Metalama.Framework.CodeFixes;
 
 
-namespace Caravela.Framework.Tests.Integration.CodeFixes.MultiSteps
+namespace Metalama.Framework.Tests.Integration.CodeFixes.MultiSteps
 {
   
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
