@@ -5,7 +5,7 @@
         
         <!-- Packaging -->
         <PackageId>Metalama.Framework</PackageId>
-        <PackageDescription>PostSharp project "Metalama". A tool for aspect-oriented programming (AOP) using templates written in pure C#.</PackageDescription>
+        <PackageDescription>Metalama. A tool for aspect-oriented programming (AOP) using templates written in pure C#.</PackageDescription>
         <IncludeBuildOutput>false</IncludeBuildOutput>
         <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);_AddAnalyzersToOutput</TargetsForTfmSpecificContentInPackage>
         
