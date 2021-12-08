@@ -18,9 +18,9 @@ namespace Caravela.Framework.Tests.Workspaces
 
             var projectPath = Path.Combine( testContext.ProjectOptions.BaseDirectory, "Project.csproj" );
             var codePath = Path.Combine( testContext.ProjectOptions.BaseDirectory, "Code.cs" );
-            
-            await File.WriteAllTextAsync( 
-                projectPath, 
+
+            await File.WriteAllTextAsync(
+                projectPath,
                 @"
 <Project Sdk=""Microsoft.NET.Sdk"">
     <PropertyGroup>
@@ -30,7 +30,7 @@ namespace Caravela.Framework.Tests.Workspaces
 " );
 
             await File.WriteAllTextAsync( codePath, "class MyClass {}" );
-            
+
             var workspaceCollection = new WorkspaceCollection();
 
             using var workspace = await workspaceCollection.LoadAsync( projectPath );
@@ -46,9 +46,9 @@ namespace Caravela.Framework.Tests.Workspaces
 
             var projectPath = Path.Combine( testContext.ProjectOptions.BaseDirectory, "Project.csproj" );
             var codePath = Path.Combine( testContext.ProjectOptions.BaseDirectory, "Code.cs" );
-            
-            await File.WriteAllTextAsync( 
-                projectPath, 
+
+            await File.WriteAllTextAsync(
+                projectPath,
                 @"
 <Project Sdk=""Microsoft.NET.Sdk"">
     <PropertyGroup>
@@ -58,7 +58,7 @@ namespace Caravela.Framework.Tests.Workspaces
 " );
 
             await File.WriteAllTextAsync( codePath, "class MyClass {}" );
-            
+
             var workspaceCollection = new WorkspaceCollection();
 
             using var workspace = await workspaceCollection.LoadAsync( projectPath );

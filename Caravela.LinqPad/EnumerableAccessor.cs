@@ -24,7 +24,7 @@ namespace Caravela.LinqPad
                            ?? type.GetProperty( "Length", BindingFlags.Instance | BindingFlags.Public )?.GetMethod;
 
             // TODO: use a compiled Lambda expression.
-            
+
             if ( this._getter != null && this._getter.ReturnType != typeof(int) )
             {
                 this._getter = null;

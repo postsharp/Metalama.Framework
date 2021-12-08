@@ -238,6 +238,9 @@ namespace Caravela.TestFramework
                         testResult.SetFailed( "The initial compilation failed." );
                     }
                 }
+
+                var diagnosticsSink = this.BaseServiceProvider.GetService<TestDiagnosticsSink>();
+                testResult.PipelineDiagnostics.Report( diagnosticsSink.EnumerateDiagnostics() );
             }
             finally
             {

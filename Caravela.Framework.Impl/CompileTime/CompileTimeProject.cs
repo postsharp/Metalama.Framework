@@ -270,6 +270,8 @@ namespace Caravela.Framework.Impl.CompileTime
             }
         }
 
+        public Type GetType( Type reflectionType ) => this.GetType( reflectionType.FullName );
+
         public Type GetType( string reflectionName )
             => this.GetTypeOrNull( reflectionName ) ?? throw new ArgumentOutOfRangeException(
                 nameof(reflectionName),

@@ -12,6 +12,7 @@
     <PackageReference Include="xunit.assert" Version="$(xUnitVersion)" />
     <PackageReference Include="xunit.extensibility.core" Version="$(xUnitVersion)" />
     <PackageReference Include="xunit.extensibility.execution" Version="$(xUnitVersion)" />
+    <PackageReference Include="PostSharp.Backstage.Settings" Version="$(PostSharpBackstageSettingsVersion)" />
   </ItemGroup>
 
   <ItemGroup>

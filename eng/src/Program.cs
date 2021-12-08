@@ -32,7 +32,8 @@ var product = new Product
         "Caravela.Framework.DesignTime.Contracts.$(PackageVersion).nupkg" ),
     Dependencies = ImmutableArray.Create(
         Dependencies.PostSharpEngineering,
-        Dependencies.CaravelaCompiler )
+        Dependencies.CaravelaCompiler,
+		Dependencies.PostSharpBackstageSettings )
 };
 
 var commandApp = new CommandApp();

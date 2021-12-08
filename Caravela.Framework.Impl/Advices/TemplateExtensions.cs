@@ -8,7 +8,7 @@ namespace Caravela.Framework.Impl.Advices
 {
     internal static class TemplateExtensions
     {
-        public static ( TemplateMember<IMethod> Get, TemplateMember<IMethod> Set ) GetAccessorTemplates( this in TemplateMember<IProperty> propertyTemplate )
+        public static (TemplateMember<IMethod> Get, TemplateMember<IMethod> Set) GetAccessorTemplates( this in TemplateMember<IProperty> propertyTemplate )
         {
             if ( propertyTemplate.IsNotNull )
             {

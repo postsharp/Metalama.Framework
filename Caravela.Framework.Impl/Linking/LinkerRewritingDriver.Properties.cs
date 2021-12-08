@@ -34,7 +34,7 @@ namespace Caravela.Framework.Impl.Linking
                 var members = new List<MemberDeclarationSyntax>();
                 var lastOverride = (IPropertySymbol) this._introductionRegistry.GetLastOverride( symbol );
 
-                if ( IsAutoPropertyDeclaration( propertyDeclaration )
+                if ( propertyDeclaration.IsAutoPropertyDeclaration()
                      && this._analysisRegistry.IsReachable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Default ) ) )
                 {
                     // Backing field for auto property.
@@ -183,18 +183,13 @@ namespace Caravela.Framework.Impl.Linking
                             IdentifierName( "value" ) ) ) )
                 .AddGeneratedCodeAnnotation();
 
-        private static bool IsAutoPropertyDeclaration( PropertyDeclarationSyntax propertyDeclaration )
-            => propertyDeclaration.ExpressionBody == null
-               && propertyDeclaration.AccessorList?.Accessors.All( x => x.Body == null && x.ExpressionBody == null ) == true
-               && propertyDeclaration.Modifiers.All( x => x.Kind() != SyntaxKind.AbstractKeyword );
-
         private static MemberDeclarationSyntax GetOriginalImplProperty(
             PropertyDeclarationSyntax property,
             IPropertySymbol symbol,
             SyntaxGenerationContext generationContext )
         {
             var accessorList =
-                IsAutoPropertyDeclaration( property )
+                property.IsAutoPropertyDeclaration()
                     ? AccessorList(
                             List(
                                 new[]
@@ -222,7 +217,7 @@ namespace Caravela.Framework.Impl.Linking
         private static MemberDeclarationSyntax GetEmptyImplProperty( PropertyDeclarationSyntax property, IPropertySymbol symbol )
         {
             var accessorList =
-                IsAutoPropertyDeclaration( property )
+                property.IsAutoPropertyDeclaration()
                     ? AccessorList(
                             List(
                                 new[]

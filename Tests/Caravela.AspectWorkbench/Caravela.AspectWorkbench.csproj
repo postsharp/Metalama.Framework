@@ -12,9 +12,9 @@
     <PackageReference Include="PostSharp.Patterns.Model" Version="6.10.4-rc" />
     <PackageReference Include="RoslynPad.Editor.Windows" Version="$(RoslynPadVersion)" />
     <PackageReference Include="RoslynPad.Roslyn" Version="$(RoslynPadVersion)" />
-	<PackageReference Include="Microsoft.CodeAnalysis.VisualBasic.Workspaces" Version="$(RoslynPadVersion)" />
-	<PackageReference Include="Microsoft.CodeAnalysis.VisualBasic.Features" Version="$(RoslynPadVersion)" />
-	<PackageReference Include="Caravela.Compiler.Sdk" Version="$(CaravelaCompilerVersion)" />
+    <PackageReference Include="Microsoft.CodeAnalysis.VisualBasic.Workspaces" Version="$(RoslynPadVersion)" />
+    <PackageReference Include="Microsoft.CodeAnalysis.VisualBasic.Features" Version="$(RoslynPadVersion)" />
+    <PackageReference Include="Caravela.Compiler.Sdk" Version="$(CaravelaCompilerVersion)" />
   </ItemGroup>
 
   <ItemGroup>
