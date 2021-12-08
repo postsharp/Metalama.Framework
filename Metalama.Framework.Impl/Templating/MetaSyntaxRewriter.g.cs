@@ -8,7 +8,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
-namespace Caravela.Framework.Impl.Templating
+namespace Metalama.Framework.Impl.Templating
 {
 	partial class MetaSyntaxRewriter
 	{
@@ -111,7 +111,7 @@ namespace Caravela.Framework.Impl.Templating
 		{
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(AnonymousMethodExpression))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
-			Argument(this.Transform(node.AsyncKeyword)).WithLeadingTrivia(this.GetIndentation()),
+			Argument(this.Transform(node.Modifiers)).WithLeadingTrivia(this.GetIndentation()),
 			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.DelegateKeyword)).WithLeadingTrivia(this.GetIndentation()),
 			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
@@ -881,62 +881,6 @@ namespace Caravela.Framework.Impl.Templating
 			return result;
 		}
 		[ExcludeFromCodeCoverage]
-		public override SyntaxNode VisitCheckedExpression( CheckedExpressionSyntax node )
-		{
-			switch ( this.GetTransformationKind( node ) ) 
-			{
-				case TransformationKind.Transform: 
-					return this.TransformCheckedExpression( node );
-				default: 
-					return base.VisitCheckedExpression( node );
-			}
-		}
-		[ExcludeFromCodeCoverage]
-		protected virtual ExpressionSyntax TransformCheckedExpression( CheckedExpressionSyntax node)
-		{
-			this.Indent();
-			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(CheckedExpression))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
-			Argument(this.Transform(node.Kind())).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
-			Argument(this.Transform(node.Keyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
-			Argument(this.Transform(node.OpenParenToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
-			Argument(this.Transform(node.Expression)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
-			Argument(this.Transform(node.CloseParenToken)).WithLeadingTrivia(this.GetIndentation()),
-			})));
-			this.Unindent();
-			return result;
-		}
-		[ExcludeFromCodeCoverage]
-		public override SyntaxNode VisitCheckedStatement( CheckedStatementSyntax node )
-		{
-			switch ( this.GetTransformationKind( node ) ) 
-			{
-				case TransformationKind.Transform: 
-					return this.TransformCheckedStatement( node );
-				default: 
-					return base.VisitCheckedStatement( node );
-			}
-		}
-		[ExcludeFromCodeCoverage]
-		protected virtual ExpressionSyntax TransformCheckedStatement( CheckedStatementSyntax node)
-		{
-			this.Indent();
-			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(CheckedStatement))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
-			Argument(this.Transform(node.Kind())).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
-			Argument(this.Transform(node.AttributeLists)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
-			Argument(this.Transform(node.Keyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
-			Argument(this.Transform(node.Block)).WithLeadingTrivia(this.GetIndentation()),
-			})));
-			this.Unindent();
-			return result;
-		}
-		[ExcludeFromCodeCoverage]
 		public override SyntaxNode VisitClassDeclaration( ClassDeclarationSyntax node )
 		{
 			switch ( this.GetTransformationKind( node ) ) 
@@ -1239,6 +1183,8 @@ namespace Caravela.Framework.Impl.Templating
 			Argument(this.Transform(node.Modifiers)).WithLeadingTrivia(this.GetIndentation()),
 			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.ImplicitOrExplicitKeyword)).WithLeadingTrivia(this.GetIndentation()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
+			Argument(this.Transform(node.ExplicitInterfaceSpecifier)).WithLeadingTrivia(this.GetIndentation()),
 			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.OperatorKeyword)).WithLeadingTrivia(this.GetIndentation()),
 			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
@@ -2083,6 +2029,29 @@ namespace Caravela.Framework.Impl.Templating
 			return result;
 		}
 		[ExcludeFromCodeCoverage]
+		public override SyntaxNode VisitExpressionColon( ExpressionColonSyntax node )
+		{
+			switch ( this.GetTransformationKind( node ) ) 
+			{
+				case TransformationKind.Transform: 
+					return this.TransformExpressionColon( node );
+				default: 
+					return base.VisitExpressionColon( node );
+			}
+		}
+		[ExcludeFromCodeCoverage]
+		protected virtual ExpressionSyntax TransformExpressionColon( ExpressionColonSyntax node)
+		{
+			this.Indent();
+			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(ExpressionColon))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
+			Argument(this.Transform(node.Expression)).WithLeadingTrivia(this.GetIndentation()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
+			Argument(this.Transform(node.ColonToken)).WithLeadingTrivia(this.GetIndentation()),
+			})));
+			this.Unindent();
+			return result;
+		}
+		[ExcludeFromCodeCoverage]
 		public override SyntaxNode VisitExpressionStatement( ExpressionStatementSyntax node )
 		{
 			switch ( this.GetTransformationKind( node ) ) 
@@ -2157,6 +2126,41 @@ namespace Caravela.Framework.Impl.Templating
 			Argument(this.Transform(node.Declaration)).WithLeadingTrivia(this.GetIndentation()),
 			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.SemicolonToken)).WithLeadingTrivia(this.GetIndentation()),
+			})));
+			this.Unindent();
+			return result;
+		}
+		[ExcludeFromCodeCoverage]
+		public override SyntaxNode VisitFileScopedNamespaceDeclaration( FileScopedNamespaceDeclarationSyntax node )
+		{
+			switch ( this.GetTransformationKind( node ) ) 
+			{
+				case TransformationKind.Transform: 
+					return this.TransformFileScopedNamespaceDeclaration( node );
+				default: 
+					return base.VisitFileScopedNamespaceDeclaration( node );
+			}
+		}
+		[ExcludeFromCodeCoverage]
+		protected virtual ExpressionSyntax TransformFileScopedNamespaceDeclaration( FileScopedNamespaceDeclarationSyntax node)
+		{
+			this.Indent();
+			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(FileScopedNamespaceDeclaration))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
+			Argument(this.Transform(node.AttributeLists)).WithLeadingTrivia(this.GetIndentation()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
+			Argument(this.Transform(node.Modifiers)).WithLeadingTrivia(this.GetIndentation()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
+			Argument(this.Transform(node.NamespaceKeyword)).WithLeadingTrivia(this.GetIndentation()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
+			Argument(this.Transform(node.Name)).WithLeadingTrivia(this.GetIndentation()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
+			Argument(this.Transform(node.SemicolonToken)).WithLeadingTrivia(this.GetIndentation()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
+			Argument(this.Transform(node.Externs)).WithLeadingTrivia(this.GetIndentation()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
+			Argument(this.Transform(node.Usings)).WithLeadingTrivia(this.GetIndentation()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
+			Argument(this.Transform(node.Members)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
 			return result;
@@ -2609,6 +2613,62 @@ namespace Caravela.Framework.Impl.Templating
 			Argument(this.Transform(node.ByKeyword)).WithLeadingTrivia(this.GetIndentation()),
 			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.ByExpression)).WithLeadingTrivia(this.GetIndentation()),
+			})));
+			this.Unindent();
+			return result;
+		}
+		[ExcludeFromCodeCoverage]
+		public override SyntaxNode VisitCheckedExpression( CheckedExpressionSyntax node )
+		{
+			switch ( this.GetTransformationKind( node ) ) 
+			{
+				case TransformationKind.Transform: 
+					return this.TransformCheckedExpression( node );
+				default: 
+					return base.VisitCheckedExpression( node );
+			}
+		}
+		[ExcludeFromCodeCoverage]
+		protected virtual ExpressionSyntax TransformCheckedExpression( CheckedExpressionSyntax node)
+		{
+			this.Indent();
+			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(CheckedExpression))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
+			Argument(this.Transform(node.Kind())).WithLeadingTrivia(this.GetIndentation()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
+			Argument(this.Transform(node.Keyword)).WithLeadingTrivia(this.GetIndentation()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
+			Argument(this.Transform(node.OpenParenToken)).WithLeadingTrivia(this.GetIndentation()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
+			Argument(this.Transform(node.Expression)).WithLeadingTrivia(this.GetIndentation()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
+			Argument(this.Transform(node.CloseParenToken)).WithLeadingTrivia(this.GetIndentation()),
+			})));
+			this.Unindent();
+			return result;
+		}
+		[ExcludeFromCodeCoverage]
+		public override SyntaxNode VisitCheckedStatement( CheckedStatementSyntax node )
+		{
+			switch ( this.GetTransformationKind( node ) ) 
+			{
+				case TransformationKind.Transform: 
+					return this.TransformCheckedStatement( node );
+				default: 
+					return base.VisitCheckedStatement( node );
+			}
+		}
+		[ExcludeFromCodeCoverage]
+		protected virtual ExpressionSyntax TransformCheckedStatement( CheckedStatementSyntax node)
+		{
+			this.Indent();
+			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(CheckedStatement))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
+			Argument(this.Transform(node.Kind())).WithLeadingTrivia(this.GetIndentation()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
+			Argument(this.Transform(node.AttributeLists)).WithLeadingTrivia(this.GetIndentation()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
+			Argument(this.Transform(node.Keyword)).WithLeadingTrivia(this.GetIndentation()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
+			Argument(this.Transform(node.Block)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
 			return result;
@@ -3241,6 +3301,35 @@ namespace Caravela.Framework.Impl.Templating
 			return result;
 		}
 		[ExcludeFromCodeCoverage]
+		public override SyntaxNode VisitLineDirectivePosition( LineDirectivePositionSyntax node )
+		{
+			switch ( this.GetTransformationKind( node ) ) 
+			{
+				case TransformationKind.Transform: 
+					return this.TransformLineDirectivePosition( node );
+				default: 
+					return base.VisitLineDirectivePosition( node );
+			}
+		}
+		[ExcludeFromCodeCoverage]
+		protected virtual ExpressionSyntax TransformLineDirectivePosition( LineDirectivePositionSyntax node)
+		{
+			this.Indent();
+			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(LineDirectivePosition))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
+			Argument(this.Transform(node.OpenParenToken)).WithLeadingTrivia(this.GetIndentation()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
+			Argument(this.Transform(node.Line)).WithLeadingTrivia(this.GetIndentation()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
+			Argument(this.Transform(node.CommaToken)).WithLeadingTrivia(this.GetIndentation()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
+			Argument(this.Transform(node.Character)).WithLeadingTrivia(this.GetIndentation()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
+			Argument(this.Transform(node.CloseParenToken)).WithLeadingTrivia(this.GetIndentation()),
+			})));
+			this.Unindent();
+			return result;
+		}
+		[ExcludeFromCodeCoverage]
 		public override SyntaxNode VisitLineDirectiveTrivia( LineDirectiveTriviaSyntax node )
 		{
 			switch ( this.GetTransformationKind( node ) ) 
@@ -3261,6 +3350,43 @@ namespace Caravela.Framework.Impl.Templating
 			Argument(this.Transform(node.LineKeyword)).WithLeadingTrivia(this.GetIndentation()),
 			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Line)).WithLeadingTrivia(this.GetIndentation()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
+			Argument(this.Transform(node.File)).WithLeadingTrivia(this.GetIndentation()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
+			Argument(this.Transform(node.EndOfDirectiveToken)).WithLeadingTrivia(this.GetIndentation()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
+			Argument(this.Transform(node.IsActive)).WithLeadingTrivia(this.GetIndentation()),
+			})));
+			this.Unindent();
+			return result;
+		}
+		[ExcludeFromCodeCoverage]
+		public override SyntaxNode VisitLineSpanDirectiveTrivia( LineSpanDirectiveTriviaSyntax node )
+		{
+			switch ( this.GetTransformationKind( node ) ) 
+			{
+				case TransformationKind.Transform: 
+					return this.TransformLineSpanDirectiveTrivia( node );
+				default: 
+					return base.VisitLineSpanDirectiveTrivia( node );
+			}
+		}
+		[ExcludeFromCodeCoverage]
+		protected virtual ExpressionSyntax TransformLineSpanDirectiveTrivia( LineSpanDirectiveTriviaSyntax node)
+		{
+			this.Indent();
+			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(LineSpanDirectiveTrivia))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
+			Argument(this.Transform(node.HashToken)).WithLeadingTrivia(this.GetIndentation()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
+			Argument(this.Transform(node.LineKeyword)).WithLeadingTrivia(this.GetIndentation()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
+			Argument(this.Transform(node.Start)).WithLeadingTrivia(this.GetIndentation()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
+			Argument(this.Transform(node.MinusToken)).WithLeadingTrivia(this.GetIndentation()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
+			Argument(this.Transform(node.End)).WithLeadingTrivia(this.GetIndentation()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
+			Argument(this.Transform(node.CharacterOffset)).WithLeadingTrivia(this.GetIndentation()),
 			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.File)).WithLeadingTrivia(this.GetIndentation()),
 			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
@@ -3795,6 +3921,8 @@ namespace Caravela.Framework.Impl.Templating
 			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.ReturnType)).WithLeadingTrivia(this.GetIndentation()),
 			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
+			Argument(this.Transform(node.ExplicitInterfaceSpecifier)).WithLeadingTrivia(this.GetIndentation()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.OperatorKeyword)).WithLeadingTrivia(this.GetIndentation()),
 			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.OperatorToken)).WithLeadingTrivia(this.GetIndentation()),
@@ -3978,7 +4106,11 @@ namespace Caravela.Framework.Impl.Templating
 		{
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(ParenthesizedLambdaExpression))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
-			Argument(this.Transform(node.AsyncKeyword)).WithLeadingTrivia(this.GetIndentation()),
+			Argument(this.Transform(node.AttributeLists)).WithLeadingTrivia(this.GetIndentation()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
+			Argument(this.Transform(node.Modifiers)).WithLeadingTrivia(this.GetIndentation()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
+			Argument(this.Transform(node.ReturnType)).WithLeadingTrivia(this.GetIndentation()),
 			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.ParameterList)).WithLeadingTrivia(this.GetIndentation()),
 			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
@@ -4477,11 +4609,15 @@ namespace Caravela.Framework.Impl.Templating
 		{
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(RecordDeclaration))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
+			Argument(this.Transform(node.Kind())).WithLeadingTrivia(this.GetIndentation()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.AttributeLists)).WithLeadingTrivia(this.GetIndentation()),
 			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Modifiers)).WithLeadingTrivia(this.GetIndentation()),
 			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Keyword)).WithLeadingTrivia(this.GetIndentation()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
+			Argument(this.Transform(node.ClassOrStructKeyword)).WithLeadingTrivia(this.GetIndentation()),
 			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Identifier)).WithLeadingTrivia(this.GetIndentation()),
 			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
@@ -4830,7 +4966,9 @@ namespace Caravela.Framework.Impl.Templating
 		{
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(SimpleLambdaExpression))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
-			Argument(this.Transform(node.AsyncKeyword)).WithLeadingTrivia(this.GetIndentation()),
+			Argument(this.Transform(node.AttributeLists)).WithLeadingTrivia(this.GetIndentation()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
+			Argument(this.Transform(node.Modifiers)).WithLeadingTrivia(this.GetIndentation()),
 			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Parameter)).WithLeadingTrivia(this.GetIndentation()),
 			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
@@ -4994,7 +5132,7 @@ namespace Caravela.Framework.Impl.Templating
 		{
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(Subpattern))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
-			Argument(this.Transform(node.NameColon)).WithLeadingTrivia(this.GetIndentation()),
+			Argument(this.Transform(node.ExpressionColon)).WithLeadingTrivia(this.GetIndentation()),
 			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Pattern)).WithLeadingTrivia(this.GetIndentation()),
 			})));
@@ -5573,6 +5711,8 @@ namespace Caravela.Framework.Impl.Templating
 		{
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(UsingDirective))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
+			Argument(this.Transform(node.GlobalKeyword)).WithLeadingTrivia(this.GetIndentation()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.UsingKeyword)).WithLeadingTrivia(this.GetIndentation()),
 			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.StaticKeyword)).WithLeadingTrivia(this.GetIndentation()),
@@ -6190,6 +6330,31 @@ namespace Caravela.Framework.Impl.Templating
 	partial class MetaSyntaxFactoryImpl
 	{
 		[ExcludeFromCodeCoverage]
+		public InvocationExpressionSyntax AccessorDeclaration(ExpressionSyntax @kind, ExpressionSyntax @attributeLists, ExpressionSyntax @modifiers, ExpressionSyntax @keyword, ExpressionSyntax @body, ExpressionSyntax @expressionBody, ExpressionSyntax @semicolonToken)
+			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "AccessorDeclaration" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
+				SyntaxFactory.Argument( @kind ), 
+				SyntaxFactory.Argument( @attributeLists ), 
+				SyntaxFactory.Argument( @modifiers ), 
+				SyntaxFactory.Argument( @keyword ), 
+				SyntaxFactory.Argument( @body ), 
+				SyntaxFactory.Argument( @expressionBody ), 
+				SyntaxFactory.Argument( @semicolonToken )})));
+
+		[ExcludeFromCodeCoverage]
+		public InvocationExpressionSyntax AccessorDeclaration(ExpressionSyntax @kind, ExpressionSyntax @attributeLists, ExpressionSyntax @modifiers, ExpressionSyntax @body, ExpressionSyntax @expressionBody)
+			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "AccessorDeclaration" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
+				SyntaxFactory.Argument( @kind ), 
+				SyntaxFactory.Argument( @attributeLists ), 
+				SyntaxFactory.Argument( @modifiers ), 
+				SyntaxFactory.Argument( @body ), 
+				SyntaxFactory.Argument( @expressionBody )})));
+
+		[ExcludeFromCodeCoverage]
+		public InvocationExpressionSyntax AccessorDeclaration(ExpressionSyntax @kind)
+			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "AccessorDeclaration" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
+				SyntaxFactory.Argument( @kind )})));
+
+		[ExcludeFromCodeCoverage]
 		public InvocationExpressionSyntax AccessorDeclaration1(ExpressionSyntax @kind, ExpressionSyntax @attributeLists, ExpressionSyntax @modifiers, ExpressionSyntax @expressionBody)
 			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "AccessorDeclaration" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
 				SyntaxFactory.Argument( @kind ), 
@@ -6232,31 +6397,6 @@ namespace Caravela.Framework.Impl.Templating
 				SyntaxFactory.Argument( @body )})));
 
 		[ExcludeFromCodeCoverage]
-		public InvocationExpressionSyntax AccessorDeclaration(ExpressionSyntax @kind, ExpressionSyntax @attributeLists, ExpressionSyntax @modifiers, ExpressionSyntax @keyword, ExpressionSyntax @body, ExpressionSyntax @expressionBody, ExpressionSyntax @semicolonToken)
-			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "AccessorDeclaration" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
-				SyntaxFactory.Argument( @kind ), 
-				SyntaxFactory.Argument( @attributeLists ), 
-				SyntaxFactory.Argument( @modifiers ), 
-				SyntaxFactory.Argument( @keyword ), 
-				SyntaxFactory.Argument( @body ), 
-				SyntaxFactory.Argument( @expressionBody ), 
-				SyntaxFactory.Argument( @semicolonToken )})));
-
-		[ExcludeFromCodeCoverage]
-		public InvocationExpressionSyntax AccessorDeclaration(ExpressionSyntax @kind, ExpressionSyntax @attributeLists, ExpressionSyntax @modifiers, ExpressionSyntax @body, ExpressionSyntax @expressionBody)
-			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "AccessorDeclaration" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
-				SyntaxFactory.Argument( @kind ), 
-				SyntaxFactory.Argument( @attributeLists ), 
-				SyntaxFactory.Argument( @modifiers ), 
-				SyntaxFactory.Argument( @body ), 
-				SyntaxFactory.Argument( @expressionBody )})));
-
-		[ExcludeFromCodeCoverage]
-		public InvocationExpressionSyntax AccessorDeclaration(ExpressionSyntax @kind)
-			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "AccessorDeclaration" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
-				SyntaxFactory.Argument( @kind )})));
-
-		[ExcludeFromCodeCoverage]
 		public InvocationExpressionSyntax AccessorList(ExpressionSyntax @openBraceToken, ExpressionSyntax @accessors, ExpressionSyntax @closeBraceToken)
 			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "AccessorList" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
 				SyntaxFactory.Argument( @openBraceToken ), 
@@ -6282,6 +6422,24 @@ namespace Caravela.Framework.Impl.Templating
 				SyntaxFactory.Argument( @name )})));
 
 		[ExcludeFromCodeCoverage]
+		public InvocationExpressionSyntax AnonymousMethodExpression1(ExpressionSyntax @asyncKeyword, ExpressionSyntax @delegateKeyword, ExpressionSyntax @parameterList, ExpressionSyntax @block, ExpressionSyntax @expressionBody)
+			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "AnonymousMethodExpression" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
+				SyntaxFactory.Argument( @asyncKeyword ), 
+				SyntaxFactory.Argument( @delegateKeyword ), 
+				SyntaxFactory.Argument( @parameterList ), 
+				SyntaxFactory.Argument( @block ), 
+				SyntaxFactory.Argument( @expressionBody )})));
+
+		[ExcludeFromCodeCoverage]
+		public InvocationExpressionSyntax AnonymousMethodExpression2(ExpressionSyntax @modifiers, ExpressionSyntax @delegateKeyword, ExpressionSyntax @parameterList, ExpressionSyntax @block, ExpressionSyntax @expressionBody)
+			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "AnonymousMethodExpression" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
+				SyntaxFactory.Argument( @modifiers ), 
+				SyntaxFactory.Argument( @delegateKeyword ), 
+				SyntaxFactory.Argument( @parameterList ), 
+				SyntaxFactory.Argument( @block ), 
+				SyntaxFactory.Argument( @expressionBody )})));
+
+		[ExcludeFromCodeCoverage]
 		public InvocationExpressionSyntax AnonymousMethodExpression(ExpressionSyntax @body)
 			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "AnonymousMethodExpression" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
 				SyntaxFactory.Argument( @body )})));
@@ -6303,24 +6461,6 @@ namespace Caravela.Framework.Impl.Templating
 		[ExcludeFromCodeCoverage]
 		public InvocationExpressionSyntax AnonymousMethodExpression()
 			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "AnonymousMethodExpression" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{})));
-
-		[ExcludeFromCodeCoverage]
-		public InvocationExpressionSyntax AnonymousMethodExpression1(ExpressionSyntax @asyncKeyword, ExpressionSyntax @delegateKeyword, ExpressionSyntax @parameterList, ExpressionSyntax @block, ExpressionSyntax @expressionBody)
-			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "AnonymousMethodExpression" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
-				SyntaxFactory.Argument( @asyncKeyword ), 
-				SyntaxFactory.Argument( @delegateKeyword ), 
-				SyntaxFactory.Argument( @parameterList ), 
-				SyntaxFactory.Argument( @block ), 
-				SyntaxFactory.Argument( @expressionBody )})));
-
-		[ExcludeFromCodeCoverage]
-		public InvocationExpressionSyntax AnonymousMethodExpression2(ExpressionSyntax @modifiers, ExpressionSyntax @delegateKeyword, ExpressionSyntax @parameterList, ExpressionSyntax @block, ExpressionSyntax @expressionBody)
-			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "AnonymousMethodExpression" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
-				SyntaxFactory.Argument( @modifiers ), 
-				SyntaxFactory.Argument( @delegateKeyword ), 
-				SyntaxFactory.Argument( @parameterList ), 
-				SyntaxFactory.Argument( @block ), 
-				SyntaxFactory.Argument( @expressionBody )})));
 
 		[ExcludeFromCodeCoverage]
 		public InvocationExpressionSyntax AnonymousObjectCreationExpression(ExpressionSyntax @newKeyword, ExpressionSyntax @openBraceToken, ExpressionSyntax @initializers, ExpressionSyntax @closeBraceToken)
@@ -6632,18 +6772,6 @@ namespace Caravela.Framework.Impl.Templating
 				SyntaxFactory.Argument( @right )})));
 
 		[ExcludeFromCodeCoverage]
-		public InvocationExpressionSyntax Block(params ExpressionSyntax[] @statements)
-			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "Block" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{}))				.AddArguments( @statements.Select( p => SyntaxFactory.Argument( p ) ).ToArray() )
-);
-
-		[ExcludeFromCodeCoverage]
-		public InvocationExpressionSyntax Block(ExpressionSyntax @openBraceToken, ExpressionSyntax @statements, ExpressionSyntax @closeBraceToken)
-			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "Block" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
-				SyntaxFactory.Argument( @openBraceToken ), 
-				SyntaxFactory.Argument( @statements ), 
-				SyntaxFactory.Argument( @closeBraceToken )})));
-
-		[ExcludeFromCodeCoverage]
 		public InvocationExpressionSyntax Block(ExpressionSyntax @attributeLists, ExpressionSyntax @openBraceToken, ExpressionSyntax @statements, ExpressionSyntax @closeBraceToken)
 			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "Block" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
 				SyntaxFactory.Argument( @attributeLists ), 
@@ -6656,6 +6784,18 @@ namespace Caravela.Framework.Impl.Templating
 			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "Block" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
 				SyntaxFactory.Argument( @attributeLists ), 
 				SyntaxFactory.Argument( @statements )})));
+
+		[ExcludeFromCodeCoverage]
+		public InvocationExpressionSyntax Block(params ExpressionSyntax[] @statements)
+			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "Block" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{}))				.AddArguments( @statements.Select( p => SyntaxFactory.Argument( p ) ).ToArray() )
+);
+
+		[ExcludeFromCodeCoverage]
+		public InvocationExpressionSyntax Block(ExpressionSyntax @openBraceToken, ExpressionSyntax @statements, ExpressionSyntax @closeBraceToken)
+			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "Block" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
+				SyntaxFactory.Argument( @openBraceToken ), 
+				SyntaxFactory.Argument( @statements ), 
+				SyntaxFactory.Argument( @closeBraceToken )})));
 
 		[ExcludeFromCodeCoverage]
 		public InvocationExpressionSyntax BracketedArgumentList(ExpressionSyntax @openBracketToken, ExpressionSyntax @arguments, ExpressionSyntax @closeBracketToken)
@@ -6682,16 +6822,6 @@ namespace Caravela.Framework.Impl.Templating
 				SyntaxFactory.Argument( @parameters )})));
 
 		[ExcludeFromCodeCoverage]
-		public InvocationExpressionSyntax BreakStatement(ExpressionSyntax @breakKeyword, ExpressionSyntax @semicolonToken)
-			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "BreakStatement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
-				SyntaxFactory.Argument( @breakKeyword ), 
-				SyntaxFactory.Argument( @semicolonToken )})));
-
-		[ExcludeFromCodeCoverage]
-		public InvocationExpressionSyntax BreakStatement()
-			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "BreakStatement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{})));
-
-		[ExcludeFromCodeCoverage]
 		public InvocationExpressionSyntax BreakStatement(ExpressionSyntax @attributeLists, ExpressionSyntax @breakKeyword, ExpressionSyntax @semicolonToken)
 			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "BreakStatement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
 				SyntaxFactory.Argument( @attributeLists ), 
@@ -6702,6 +6832,16 @@ namespace Caravela.Framework.Impl.Templating
 		public InvocationExpressionSyntax BreakStatement(ExpressionSyntax @attributeLists)
 			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "BreakStatement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
 				SyntaxFactory.Argument( @attributeLists )})));
+
+		[ExcludeFromCodeCoverage]
+		public InvocationExpressionSyntax BreakStatement()
+			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "BreakStatement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{})));
+
+		[ExcludeFromCodeCoverage]
+		public InvocationExpressionSyntax BreakStatement(ExpressionSyntax @breakKeyword, ExpressionSyntax @semicolonToken)
+			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "BreakStatement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
+				SyntaxFactory.Argument( @breakKeyword ), 
+				SyntaxFactory.Argument( @semicolonToken )})));
 
 		[ExcludeFromCodeCoverage]
 		public InvocationExpressionSyntax CasePatternSwitchLabel(ExpressionSyntax @keyword, ExpressionSyntax @pattern, ExpressionSyntax @whenClause, ExpressionSyntax @colonToken)
@@ -6725,11 +6865,6 @@ namespace Caravela.Framework.Impl.Templating
 				SyntaxFactory.Argument( @colonToken )})));
 
 		[ExcludeFromCodeCoverage]
-		public InvocationExpressionSyntax CaseSwitchLabel(ExpressionSyntax @value)
-			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "CaseSwitchLabel" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
-				SyntaxFactory.Argument( @value )})));
-
-		[ExcludeFromCodeCoverage]
 		public InvocationExpressionSyntax CaseSwitchLabel(ExpressionSyntax @keyword, ExpressionSyntax @value, ExpressionSyntax @colonToken)
 			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "CaseSwitchLabel" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
 				SyntaxFactory.Argument( @keyword ), 
@@ -6741,6 +6876,11 @@ namespace Caravela.Framework.Impl.Templating
 			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "CaseSwitchLabel" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
 				SyntaxFactory.Argument( @value ), 
 				SyntaxFactory.Argument( @colonToken )})));
+
+		[ExcludeFromCodeCoverage]
+		public InvocationExpressionSyntax CaseSwitchLabel(ExpressionSyntax @value)
+			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "CaseSwitchLabel" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
+				SyntaxFactory.Argument( @value )})));
 
 		[ExcludeFromCodeCoverage]
 		public InvocationExpressionSyntax CastExpression(ExpressionSyntax @openParenToken, ExpressionSyntax @type, ExpressionSyntax @closeParenToken, ExpressionSyntax @expression)
@@ -6808,49 +6948,6 @@ namespace Caravela.Framework.Impl.Templating
 				SyntaxFactory.Argument( @filterExpression )})));
 
 		[ExcludeFromCodeCoverage]
-		public InvocationExpressionSyntax CheckedExpression(ExpressionSyntax @kind, ExpressionSyntax @keyword, ExpressionSyntax @openParenToken, ExpressionSyntax @expression, ExpressionSyntax @closeParenToken)
-			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "CheckedExpression" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
-				SyntaxFactory.Argument( @kind ), 
-				SyntaxFactory.Argument( @keyword ), 
-				SyntaxFactory.Argument( @openParenToken ), 
-				SyntaxFactory.Argument( @expression ), 
-				SyntaxFactory.Argument( @closeParenToken )})));
-
-		[ExcludeFromCodeCoverage]
-		public InvocationExpressionSyntax CheckedExpression(ExpressionSyntax @kind, ExpressionSyntax @expression)
-			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "CheckedExpression" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
-				SyntaxFactory.Argument( @kind ), 
-				SyntaxFactory.Argument( @expression )})));
-
-		[ExcludeFromCodeCoverage]
-		public InvocationExpressionSyntax CheckedStatement1(ExpressionSyntax @kind, ExpressionSyntax @attributeLists, ExpressionSyntax @block)
-			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "CheckedStatement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
-				SyntaxFactory.Argument( @kind ), 
-				SyntaxFactory.Argument( @attributeLists ), 
-				SyntaxFactory.Argument( @block )})));
-
-		[ExcludeFromCodeCoverage]
-		public InvocationExpressionSyntax CheckedStatement2(ExpressionSyntax @kind, ExpressionSyntax @keyword, ExpressionSyntax @block)
-			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "CheckedStatement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
-				SyntaxFactory.Argument( @kind ), 
-				SyntaxFactory.Argument( @keyword ), 
-				SyntaxFactory.Argument( @block )})));
-
-		[ExcludeFromCodeCoverage]
-		public InvocationExpressionSyntax CheckedStatement(ExpressionSyntax @kind, ExpressionSyntax @attributeLists, ExpressionSyntax @keyword, ExpressionSyntax @block)
-			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "CheckedStatement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
-				SyntaxFactory.Argument( @kind ), 
-				SyntaxFactory.Argument( @attributeLists ), 
-				SyntaxFactory.Argument( @keyword ), 
-				SyntaxFactory.Argument( @block )})));
-
-		[ExcludeFromCodeCoverage]
-		public InvocationExpressionSyntax CheckedStatement(ExpressionSyntax @kind, ExpressionSyntax @block)
-			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "CheckedStatement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
-				SyntaxFactory.Argument( @kind ), 
-				SyntaxFactory.Argument( @block )})));
-
-		[ExcludeFromCodeCoverage]
 		public InvocationExpressionSyntax ClassDeclaration(ExpressionSyntax @attributeLists, ExpressionSyntax @modifiers, ExpressionSyntax @keyword, ExpressionSyntax @identifier, ExpressionSyntax @typeParameterList, ExpressionSyntax @baseList, ExpressionSyntax @constraintClauses, ExpressionSyntax @openBraceToken, ExpressionSyntax @members, ExpressionSyntax @closeBraceToken, ExpressionSyntax @semicolonToken)
 			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "ClassDeclaration" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
 				SyntaxFactory.Argument( @attributeLists ), 
@@ -6882,12 +6979,6 @@ namespace Caravela.Framework.Impl.Templating
 				SyntaxFactory.Argument( @identifier )})));
 
 		[ExcludeFromCodeCoverage]
-		public InvocationExpressionSyntax ClassOrStructConstraint(ExpressionSyntax @kind, ExpressionSyntax @classOrStructKeyword)
-			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "ClassOrStructConstraint" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
-				SyntaxFactory.Argument( @kind ), 
-				SyntaxFactory.Argument( @classOrStructKeyword )})));
-
-		[ExcludeFromCodeCoverage]
 		public InvocationExpressionSyntax ClassOrStructConstraint(ExpressionSyntax @kind, ExpressionSyntax @classOrStructKeyword, ExpressionSyntax @questionToken)
 			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "ClassOrStructConstraint" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
 				SyntaxFactory.Argument( @kind ), 
@@ -6898,6 +6989,12 @@ namespace Caravela.Framework.Impl.Templating
 		public InvocationExpressionSyntax ClassOrStructConstraint(ExpressionSyntax @kind)
 			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "ClassOrStructConstraint" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
 				SyntaxFactory.Argument( @kind )})));
+
+		[ExcludeFromCodeCoverage]
+		public InvocationExpressionSyntax ClassOrStructConstraint(ExpressionSyntax @kind, ExpressionSyntax @classOrStructKeyword)
+			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "ClassOrStructConstraint" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
+				SyntaxFactory.Argument( @kind ), 
+				SyntaxFactory.Argument( @classOrStructKeyword )})));
 
 		[ExcludeFromCodeCoverage]
 		public InvocationExpressionSyntax Comment(ExpressionSyntax @text)
@@ -6971,24 +7068,16 @@ namespace Caravela.Framework.Impl.Templating
 			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "ConstructorConstraint" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{})));
 
 		[ExcludeFromCodeCoverage]
-		public InvocationExpressionSyntax ConstructorDeclaration1(ExpressionSyntax @attributeLists, ExpressionSyntax @modifiers, ExpressionSyntax @identifier, ExpressionSyntax @parameterList, ExpressionSyntax @initializer, ExpressionSyntax @expressionBody)
+		public InvocationExpressionSyntax ConstructorDeclaration(ExpressionSyntax @attributeLists, ExpressionSyntax @modifiers, ExpressionSyntax @identifier, ExpressionSyntax @parameterList, ExpressionSyntax @initializer, ExpressionSyntax @body, ExpressionSyntax @expressionBody, ExpressionSyntax @semicolonToken)
 			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "ConstructorDeclaration" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
 				SyntaxFactory.Argument( @attributeLists ), 
 				SyntaxFactory.Argument( @modifiers ), 
 				SyntaxFactory.Argument( @identifier ), 
 				SyntaxFactory.Argument( @parameterList ), 
 				SyntaxFactory.Argument( @initializer ), 
-				SyntaxFactory.Argument( @expressionBody )})));
-
-		[ExcludeFromCodeCoverage]
-		public InvocationExpressionSyntax ConstructorDeclaration2(ExpressionSyntax @attributeLists, ExpressionSyntax @modifiers, ExpressionSyntax @identifier, ExpressionSyntax @parameterList, ExpressionSyntax @initializer, ExpressionSyntax @body)
-			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "ConstructorDeclaration" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
-				SyntaxFactory.Argument( @attributeLists ), 
-				SyntaxFactory.Argument( @modifiers ), 
-				SyntaxFactory.Argument( @identifier ), 
-				SyntaxFactory.Argument( @parameterList ), 
-				SyntaxFactory.Argument( @initializer ), 
-				SyntaxFactory.Argument( @body )})));
+				SyntaxFactory.Argument( @body ), 
+				SyntaxFactory.Argument( @expressionBody ), 
+				SyntaxFactory.Argument( @semicolonToken )})));
 
 		[ExcludeFromCodeCoverage]
 		public InvocationExpressionSyntax ConstructorDeclaration1(ExpressionSyntax @attributeLists, ExpressionSyntax @modifiers, ExpressionSyntax @identifier, ExpressionSyntax @parameterList, ExpressionSyntax @initializer, ExpressionSyntax @expressionBody, ExpressionSyntax @semicolonToken)
@@ -7024,21 +7113,29 @@ namespace Caravela.Framework.Impl.Templating
 				SyntaxFactory.Argument( @semicolonToken )})));
 
 		[ExcludeFromCodeCoverage]
-		public InvocationExpressionSyntax ConstructorDeclaration(ExpressionSyntax @attributeLists, ExpressionSyntax @modifiers, ExpressionSyntax @identifier, ExpressionSyntax @parameterList, ExpressionSyntax @initializer, ExpressionSyntax @body, ExpressionSyntax @expressionBody, ExpressionSyntax @semicolonToken)
+		public InvocationExpressionSyntax ConstructorDeclaration(ExpressionSyntax @identifier)
+			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "ConstructorDeclaration" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
+				SyntaxFactory.Argument( @identifier )})));
+
+		[ExcludeFromCodeCoverage]
+		public InvocationExpressionSyntax ConstructorDeclaration1(ExpressionSyntax @attributeLists, ExpressionSyntax @modifiers, ExpressionSyntax @identifier, ExpressionSyntax @parameterList, ExpressionSyntax @initializer, ExpressionSyntax @expressionBody)
 			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "ConstructorDeclaration" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
 				SyntaxFactory.Argument( @attributeLists ), 
 				SyntaxFactory.Argument( @modifiers ), 
 				SyntaxFactory.Argument( @identifier ), 
 				SyntaxFactory.Argument( @parameterList ), 
 				SyntaxFactory.Argument( @initializer ), 
-				SyntaxFactory.Argument( @body ), 
-				SyntaxFactory.Argument( @expressionBody ), 
-				SyntaxFactory.Argument( @semicolonToken )})));
+				SyntaxFactory.Argument( @expressionBody )})));
 
 		[ExcludeFromCodeCoverage]
-		public InvocationExpressionSyntax ConstructorDeclaration(ExpressionSyntax @identifier)
+		public InvocationExpressionSyntax ConstructorDeclaration2(ExpressionSyntax @attributeLists, ExpressionSyntax @modifiers, ExpressionSyntax @identifier, ExpressionSyntax @parameterList, ExpressionSyntax @initializer, ExpressionSyntax @body)
 			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "ConstructorDeclaration" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
-				SyntaxFactory.Argument( @identifier )})));
+				SyntaxFactory.Argument( @attributeLists ), 
+				SyntaxFactory.Argument( @modifiers ), 
+				SyntaxFactory.Argument( @identifier ), 
+				SyntaxFactory.Argument( @parameterList ), 
+				SyntaxFactory.Argument( @initializer ), 
+				SyntaxFactory.Argument( @body )})));
 
 		[ExcludeFromCodeCoverage]
 		public InvocationExpressionSyntax ConstructorInitializer(ExpressionSyntax @kind, ExpressionSyntax @colonToken, ExpressionSyntax @thisOrBaseKeyword, ExpressionSyntax @argumentList)
@@ -7053,12 +7150,6 @@ namespace Caravela.Framework.Impl.Templating
 			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "ConstructorInitializer" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
 				SyntaxFactory.Argument( @kind ), 
 				SyntaxFactory.Argument( @argumentList )})));
-
-		[ExcludeFromCodeCoverage]
-		public InvocationExpressionSyntax ContinueStatement(ExpressionSyntax @continueKeyword, ExpressionSyntax @semicolonToken)
-			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "ContinueStatement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
-				SyntaxFactory.Argument( @continueKeyword ), 
-				SyntaxFactory.Argument( @semicolonToken )})));
 
 		[ExcludeFromCodeCoverage]
 		public InvocationExpressionSyntax ContinueStatement(ExpressionSyntax @attributeLists, ExpressionSyntax @continueKeyword, ExpressionSyntax @semicolonToken)
@@ -7077,7 +7168,39 @@ namespace Caravela.Framework.Impl.Templating
 			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "ContinueStatement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{})));
 
 		[ExcludeFromCodeCoverage]
-		public InvocationExpressionSyntax ConversionOperatorDeclaration(ExpressionSyntax @attributeLists, ExpressionSyntax @modifiers, ExpressionSyntax @implicitOrExplicitKeyword, ExpressionSyntax @operatorKeyword, ExpressionSyntax @type, ExpressionSyntax @parameterList, ExpressionSyntax @body, ExpressionSyntax @semicolonToken)
+		public InvocationExpressionSyntax ContinueStatement(ExpressionSyntax @continueKeyword, ExpressionSyntax @semicolonToken)
+			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "ContinueStatement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
+				SyntaxFactory.Argument( @continueKeyword ), 
+				SyntaxFactory.Argument( @semicolonToken )})));
+
+		[ExcludeFromCodeCoverage]
+		public InvocationExpressionSyntax ConversionOperatorDeclaration(ExpressionSyntax @attributeLists, ExpressionSyntax @modifiers, ExpressionSyntax @implicitOrExplicitKeyword, ExpressionSyntax @explicitInterfaceSpecifier, ExpressionSyntax @operatorKeyword, ExpressionSyntax @type, ExpressionSyntax @parameterList, ExpressionSyntax @body, ExpressionSyntax @expressionBody, ExpressionSyntax @semicolonToken)
+			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "ConversionOperatorDeclaration" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
+				SyntaxFactory.Argument( @attributeLists ), 
+				SyntaxFactory.Argument( @modifiers ), 
+				SyntaxFactory.Argument( @implicitOrExplicitKeyword ), 
+				SyntaxFactory.Argument( @explicitInterfaceSpecifier ), 
+				SyntaxFactory.Argument( @operatorKeyword ), 
+				SyntaxFactory.Argument( @type ), 
+				SyntaxFactory.Argument( @parameterList ), 
+				SyntaxFactory.Argument( @body ), 
+				SyntaxFactory.Argument( @expressionBody ), 
+				SyntaxFactory.Argument( @semicolonToken )})));
+
+		[ExcludeFromCodeCoverage]
+		public InvocationExpressionSyntax ConversionOperatorDeclaration1(ExpressionSyntax @attributeLists, ExpressionSyntax @modifiers, ExpressionSyntax @implicitOrExplicitKeyword, ExpressionSyntax @explicitInterfaceSpecifier, ExpressionSyntax @type, ExpressionSyntax @parameterList, ExpressionSyntax @body, ExpressionSyntax @expressionBody)
+			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "ConversionOperatorDeclaration" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
+				SyntaxFactory.Argument( @attributeLists ), 
+				SyntaxFactory.Argument( @modifiers ), 
+				SyntaxFactory.Argument( @implicitOrExplicitKeyword ), 
+				SyntaxFactory.Argument( @explicitInterfaceSpecifier ), 
+				SyntaxFactory.Argument( @type ), 
+				SyntaxFactory.Argument( @parameterList ), 
+				SyntaxFactory.Argument( @body ), 
+				SyntaxFactory.Argument( @expressionBody )})));
+
+		[ExcludeFromCodeCoverage]
+		public InvocationExpressionSyntax ConversionOperatorDeclaration2(ExpressionSyntax @attributeLists, ExpressionSyntax @modifiers, ExpressionSyntax @implicitOrExplicitKeyword, ExpressionSyntax @operatorKeyword, ExpressionSyntax @type, ExpressionSyntax @parameterList, ExpressionSyntax @body, ExpressionSyntax @semicolonToken)
 			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "ConversionOperatorDeclaration" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
 				SyntaxFactory.Argument( @attributeLists ), 
 				SyntaxFactory.Argument( @modifiers ), 
@@ -7087,6 +7210,12 @@ namespace Caravela.Framework.Impl.Templating
 				SyntaxFactory.Argument( @parameterList ), 
 				SyntaxFactory.Argument( @body ), 
 				SyntaxFactory.Argument( @semicolonToken )})));
+
+		[ExcludeFromCodeCoverage]
+		public InvocationExpressionSyntax ConversionOperatorDeclaration(ExpressionSyntax @implicitOrExplicitKeyword, ExpressionSyntax @type)
+			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "ConversionOperatorDeclaration" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
+				SyntaxFactory.Argument( @implicitOrExplicitKeyword ), 
+				SyntaxFactory.Argument( @type )})));
 
 		[ExcludeFromCodeCoverage]
 		public InvocationExpressionSyntax ConversionOperatorDeclaration(ExpressionSyntax @attributeLists, ExpressionSyntax @modifiers, ExpressionSyntax @implicitOrExplicitKeyword, ExpressionSyntax @operatorKeyword, ExpressionSyntax @type, ExpressionSyntax @parameterList, ExpressionSyntax @body, ExpressionSyntax @expressionBody, ExpressionSyntax @semicolonToken)
@@ -7111,12 +7240,6 @@ namespace Caravela.Framework.Impl.Templating
 				SyntaxFactory.Argument( @parameterList ), 
 				SyntaxFactory.Argument( @body ), 
 				SyntaxFactory.Argument( @expressionBody )})));
-
-		[ExcludeFromCodeCoverage]
-		public InvocationExpressionSyntax ConversionOperatorDeclaration(ExpressionSyntax @implicitOrExplicitKeyword, ExpressionSyntax @type)
-			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "ConversionOperatorDeclaration" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
-				SyntaxFactory.Argument( @implicitOrExplicitKeyword ), 
-				SyntaxFactory.Argument( @type )})));
 
 		[ExcludeFromCodeCoverage]
 		public InvocationExpressionSyntax ConversionOperatorMemberCref(ExpressionSyntax @implicitOrExplicitKeyword, ExpressionSyntax @operatorKeyword, ExpressionSyntax @type, ExpressionSyntax @parameters)
@@ -7209,10 +7332,6 @@ namespace Caravela.Framework.Impl.Templating
 				SyntaxFactory.Argument( @type )})));
 
 		[ExcludeFromCodeCoverage]
-		public InvocationExpressionSyntax DefaultSwitchLabel()
-			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "DefaultSwitchLabel" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{})));
-
-		[ExcludeFromCodeCoverage]
 		public InvocationExpressionSyntax DefaultSwitchLabel(ExpressionSyntax @keyword, ExpressionSyntax @colonToken)
 			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "DefaultSwitchLabel" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
 				SyntaxFactory.Argument( @keyword ), 
@@ -7222,6 +7341,10 @@ namespace Caravela.Framework.Impl.Templating
 		public InvocationExpressionSyntax DefaultSwitchLabel(ExpressionSyntax @colonToken)
 			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "DefaultSwitchLabel" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
 				SyntaxFactory.Argument( @colonToken )})));
+
+		[ExcludeFromCodeCoverage]
+		public InvocationExpressionSyntax DefaultSwitchLabel()
+			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "DefaultSwitchLabel" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{})));
 
 		[ExcludeFromCodeCoverage]
 		public InvocationExpressionSyntax DefineDirectiveTrivia(ExpressionSyntax @hashToken, ExpressionSyntax @defineKeyword, ExpressionSyntax @name, ExpressionSyntax @endOfDirectiveToken, ExpressionSyntax @isActive)
@@ -7269,6 +7392,33 @@ namespace Caravela.Framework.Impl.Templating
 				SyntaxFactory.Argument( @identifier )})));
 
 		[ExcludeFromCodeCoverage]
+		public InvocationExpressionSyntax DestructorDeclaration(ExpressionSyntax @attributeLists, ExpressionSyntax @modifiers, ExpressionSyntax @tildeToken, ExpressionSyntax @identifier, ExpressionSyntax @parameterList, ExpressionSyntax @body, ExpressionSyntax @expressionBody, ExpressionSyntax @semicolonToken)
+			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "DestructorDeclaration" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
+				SyntaxFactory.Argument( @attributeLists ), 
+				SyntaxFactory.Argument( @modifiers ), 
+				SyntaxFactory.Argument( @tildeToken ), 
+				SyntaxFactory.Argument( @identifier ), 
+				SyntaxFactory.Argument( @parameterList ), 
+				SyntaxFactory.Argument( @body ), 
+				SyntaxFactory.Argument( @expressionBody ), 
+				SyntaxFactory.Argument( @semicolonToken )})));
+
+		[ExcludeFromCodeCoverage]
+		public InvocationExpressionSyntax DestructorDeclaration(ExpressionSyntax @attributeLists, ExpressionSyntax @modifiers, ExpressionSyntax @identifier, ExpressionSyntax @parameterList, ExpressionSyntax @body, ExpressionSyntax @expressionBody)
+			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "DestructorDeclaration" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
+				SyntaxFactory.Argument( @attributeLists ), 
+				SyntaxFactory.Argument( @modifiers ), 
+				SyntaxFactory.Argument( @identifier ), 
+				SyntaxFactory.Argument( @parameterList ), 
+				SyntaxFactory.Argument( @body ), 
+				SyntaxFactory.Argument( @expressionBody )})));
+
+		[ExcludeFromCodeCoverage]
+		public InvocationExpressionSyntax DestructorDeclaration(ExpressionSyntax @identifier)
+			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "DestructorDeclaration" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
+				SyntaxFactory.Argument( @identifier )})));
+
+		[ExcludeFromCodeCoverage]
 		public InvocationExpressionSyntax DestructorDeclaration1(ExpressionSyntax @attributeLists, ExpressionSyntax @modifiers, ExpressionSyntax @identifier, ExpressionSyntax @parameterList, ExpressionSyntax @expressionBody)
 			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "DestructorDeclaration" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
 				SyntaxFactory.Argument( @attributeLists ), 
@@ -7307,33 +7457,6 @@ namespace Caravela.Framework.Impl.Templating
 				SyntaxFactory.Argument( @parameterList ), 
 				SyntaxFactory.Argument( @body ), 
 				SyntaxFactory.Argument( @semicolonToken )})));
-
-		[ExcludeFromCodeCoverage]
-		public InvocationExpressionSyntax DestructorDeclaration(ExpressionSyntax @attributeLists, ExpressionSyntax @modifiers, ExpressionSyntax @tildeToken, ExpressionSyntax @identifier, ExpressionSyntax @parameterList, ExpressionSyntax @body, ExpressionSyntax @expressionBody, ExpressionSyntax @semicolonToken)
-			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "DestructorDeclaration" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
-				SyntaxFactory.Argument( @attributeLists ), 
-				SyntaxFactory.Argument( @modifiers ), 
-				SyntaxFactory.Argument( @tildeToken ), 
-				SyntaxFactory.Argument( @identifier ), 
-				SyntaxFactory.Argument( @parameterList ), 
-				SyntaxFactory.Argument( @body ), 
-				SyntaxFactory.Argument( @expressionBody ), 
-				SyntaxFactory.Argument( @semicolonToken )})));
-
-		[ExcludeFromCodeCoverage]
-		public InvocationExpressionSyntax DestructorDeclaration(ExpressionSyntax @attributeLists, ExpressionSyntax @modifiers, ExpressionSyntax @identifier, ExpressionSyntax @parameterList, ExpressionSyntax @body, ExpressionSyntax @expressionBody)
-			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "DestructorDeclaration" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
-				SyntaxFactory.Argument( @attributeLists ), 
-				SyntaxFactory.Argument( @modifiers ), 
-				SyntaxFactory.Argument( @identifier ), 
-				SyntaxFactory.Argument( @parameterList ), 
-				SyntaxFactory.Argument( @body ), 
-				SyntaxFactory.Argument( @expressionBody )})));
-
-		[ExcludeFromCodeCoverage]
-		public InvocationExpressionSyntax DestructorDeclaration(ExpressionSyntax @identifier)
-			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "DestructorDeclaration" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
-				SyntaxFactory.Argument( @identifier )})));
 
 		[ExcludeFromCodeCoverage]
 		public InvocationExpressionSyntax DisabledText(ExpressionSyntax @text)
@@ -7382,17 +7505,6 @@ namespace Caravela.Framework.Impl.Templating
 				SyntaxFactory.Argument( @content )})));
 
 		[ExcludeFromCodeCoverage]
-		public InvocationExpressionSyntax DoStatement(ExpressionSyntax @doKeyword, ExpressionSyntax @statement, ExpressionSyntax @whileKeyword, ExpressionSyntax @openParenToken, ExpressionSyntax @condition, ExpressionSyntax @closeParenToken, ExpressionSyntax @semicolonToken)
-			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "DoStatement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
-				SyntaxFactory.Argument( @doKeyword ), 
-				SyntaxFactory.Argument( @statement ), 
-				SyntaxFactory.Argument( @whileKeyword ), 
-				SyntaxFactory.Argument( @openParenToken ), 
-				SyntaxFactory.Argument( @condition ), 
-				SyntaxFactory.Argument( @closeParenToken ), 
-				SyntaxFactory.Argument( @semicolonToken )})));
-
-		[ExcludeFromCodeCoverage]
 		public InvocationExpressionSyntax DoStatement(ExpressionSyntax @attributeLists, ExpressionSyntax @doKeyword, ExpressionSyntax @statement, ExpressionSyntax @whileKeyword, ExpressionSyntax @openParenToken, ExpressionSyntax @condition, ExpressionSyntax @closeParenToken, ExpressionSyntax @semicolonToken)
 			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "DoStatement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
 				SyntaxFactory.Argument( @attributeLists ), 
@@ -7416,6 +7528,17 @@ namespace Caravela.Framework.Impl.Templating
 			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "DoStatement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
 				SyntaxFactory.Argument( @statement ), 
 				SyntaxFactory.Argument( @condition )})));
+
+		[ExcludeFromCodeCoverage]
+		public InvocationExpressionSyntax DoStatement(ExpressionSyntax @doKeyword, ExpressionSyntax @statement, ExpressionSyntax @whileKeyword, ExpressionSyntax @openParenToken, ExpressionSyntax @condition, ExpressionSyntax @closeParenToken, ExpressionSyntax @semicolonToken)
+			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "DoStatement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
+				SyntaxFactory.Argument( @doKeyword ), 
+				SyntaxFactory.Argument( @statement ), 
+				SyntaxFactory.Argument( @whileKeyword ), 
+				SyntaxFactory.Argument( @openParenToken ), 
+				SyntaxFactory.Argument( @condition ), 
+				SyntaxFactory.Argument( @closeParenToken ), 
+				SyntaxFactory.Argument( @semicolonToken )})));
 
 		[ExcludeFromCodeCoverage]
 		public InvocationExpressionSyntax ElasticEndOfLine(ExpressionSyntax @text)
@@ -7493,6 +7616,12 @@ namespace Caravela.Framework.Impl.Templating
 				SyntaxFactory.Argument( @branchTaken )})));
 
 		[ExcludeFromCodeCoverage]
+		public InvocationExpressionSyntax EmptyStatement(ExpressionSyntax @attributeLists, ExpressionSyntax @semicolonToken)
+			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "EmptyStatement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
+				SyntaxFactory.Argument( @attributeLists ), 
+				SyntaxFactory.Argument( @semicolonToken )})));
+
+		[ExcludeFromCodeCoverage]
 		public InvocationExpressionSyntax EmptyStatement1(ExpressionSyntax @attributeLists)
 			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "EmptyStatement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
 				SyntaxFactory.Argument( @attributeLists )})));
@@ -7500,12 +7629,6 @@ namespace Caravela.Framework.Impl.Templating
 		[ExcludeFromCodeCoverage]
 		public InvocationExpressionSyntax EmptyStatement2(ExpressionSyntax @semicolonToken)
 			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "EmptyStatement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
-				SyntaxFactory.Argument( @semicolonToken )})));
-
-		[ExcludeFromCodeCoverage]
-		public InvocationExpressionSyntax EmptyStatement(ExpressionSyntax @attributeLists, ExpressionSyntax @semicolonToken)
-			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "EmptyStatement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
-				SyntaxFactory.Argument( @attributeLists ), 
 				SyntaxFactory.Argument( @semicolonToken )})));
 
 		[ExcludeFromCodeCoverage]
@@ -7550,6 +7673,19 @@ namespace Caravela.Framework.Impl.Templating
 				SyntaxFactory.Argument( @isActive )})));
 
 		[ExcludeFromCodeCoverage]
+		public InvocationExpressionSyntax EnumDeclaration(ExpressionSyntax @attributeLists, ExpressionSyntax @modifiers, ExpressionSyntax @enumKeyword, ExpressionSyntax @identifier, ExpressionSyntax @baseList, ExpressionSyntax @openBraceToken, ExpressionSyntax @members, ExpressionSyntax @closeBraceToken, ExpressionSyntax @semicolonToken)
+			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "EnumDeclaration" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
+				SyntaxFactory.Argument( @attributeLists ), 
+				SyntaxFactory.Argument( @modifiers ), 
+				SyntaxFactory.Argument( @enumKeyword ), 
+				SyntaxFactory.Argument( @identifier ), 
+				SyntaxFactory.Argument( @baseList ), 
+				SyntaxFactory.Argument( @openBraceToken ), 
+				SyntaxFactory.Argument( @members ), 
+				SyntaxFactory.Argument( @closeBraceToken ), 
+				SyntaxFactory.Argument( @semicolonToken )})));
+
+		[ExcludeFromCodeCoverage]
 		public InvocationExpressionSyntax EnumDeclaration(ExpressionSyntax @attributeLists, ExpressionSyntax @modifiers, ExpressionSyntax @identifier, ExpressionSyntax @baseList, ExpressionSyntax @members)
 			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "EnumDeclaration" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
 				SyntaxFactory.Argument( @attributeLists ), 
@@ -7564,26 +7700,6 @@ namespace Caravela.Framework.Impl.Templating
 				SyntaxFactory.Argument( @identifier )})));
 
 		[ExcludeFromCodeCoverage]
-		public InvocationExpressionSyntax EnumDeclaration(ExpressionSyntax @attributeLists, ExpressionSyntax @modifiers, ExpressionSyntax @enumKeyword, ExpressionSyntax @identifier, ExpressionSyntax @baseList, ExpressionSyntax @openBraceToken, ExpressionSyntax @members, ExpressionSyntax @closeBraceToken, ExpressionSyntax @semicolonToken)
-			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "EnumDeclaration" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
-				SyntaxFactory.Argument( @attributeLists ), 
-				SyntaxFactory.Argument( @modifiers ), 
-				SyntaxFactory.Argument( @enumKeyword ), 
-				SyntaxFactory.Argument( @identifier ), 
-				SyntaxFactory.Argument( @baseList ), 
-				SyntaxFactory.Argument( @openBraceToken ), 
-				SyntaxFactory.Argument( @members ), 
-				SyntaxFactory.Argument( @closeBraceToken ), 
-				SyntaxFactory.Argument( @semicolonToken )})));
-
-		[ExcludeFromCodeCoverage]
-		public InvocationExpressionSyntax EnumMemberDeclaration(ExpressionSyntax @attributeLists, ExpressionSyntax @identifier, ExpressionSyntax @equalsValue)
-			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "EnumMemberDeclaration" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
-				SyntaxFactory.Argument( @attributeLists ), 
-				SyntaxFactory.Argument( @identifier ), 
-				SyntaxFactory.Argument( @equalsValue )})));
-
-		[ExcludeFromCodeCoverage]
 		public InvocationExpressionSyntax EnumMemberDeclaration(ExpressionSyntax @attributeLists, ExpressionSyntax @modifiers, ExpressionSyntax @identifier, ExpressionSyntax @equalsValue)
 			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "EnumMemberDeclaration" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
 				SyntaxFactory.Argument( @attributeLists ), 
@@ -7595,6 +7711,13 @@ namespace Caravela.Framework.Impl.Templating
 		public InvocationExpressionSyntax EnumMemberDeclaration(ExpressionSyntax @identifier)
 			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "EnumMemberDeclaration" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
 				SyntaxFactory.Argument( @identifier )})));
+
+		[ExcludeFromCodeCoverage]
+		public InvocationExpressionSyntax EnumMemberDeclaration(ExpressionSyntax @attributeLists, ExpressionSyntax @identifier, ExpressionSyntax @equalsValue)
+			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "EnumMemberDeclaration" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
+				SyntaxFactory.Argument( @attributeLists ), 
+				SyntaxFactory.Argument( @identifier ), 
+				SyntaxFactory.Argument( @equalsValue )})));
 
 		[ExcludeFromCodeCoverage]
 		public InvocationExpressionSyntax EqualsValueClause(ExpressionSyntax @equalsToken, ExpressionSyntax @value)
@@ -7619,28 +7742,6 @@ namespace Caravela.Framework.Impl.Templating
 		public InvocationExpressionSyntax ErrorDirectiveTrivia(ExpressionSyntax @isActive)
 			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "ErrorDirectiveTrivia" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
 				SyntaxFactory.Argument( @isActive )})));
-
-		[ExcludeFromCodeCoverage]
-		public InvocationExpressionSyntax EventDeclaration1(ExpressionSyntax @attributeLists, ExpressionSyntax @modifiers, ExpressionSyntax @eventKeyword, ExpressionSyntax @type, ExpressionSyntax @explicitInterfaceSpecifier, ExpressionSyntax @identifier, ExpressionSyntax @accessorList)
-			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "EventDeclaration" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
-				SyntaxFactory.Argument( @attributeLists ), 
-				SyntaxFactory.Argument( @modifiers ), 
-				SyntaxFactory.Argument( @eventKeyword ), 
-				SyntaxFactory.Argument( @type ), 
-				SyntaxFactory.Argument( @explicitInterfaceSpecifier ), 
-				SyntaxFactory.Argument( @identifier ), 
-				SyntaxFactory.Argument( @accessorList )})));
-
-		[ExcludeFromCodeCoverage]
-		public InvocationExpressionSyntax EventDeclaration2(ExpressionSyntax @attributeLists, ExpressionSyntax @modifiers, ExpressionSyntax @eventKeyword, ExpressionSyntax @type, ExpressionSyntax @explicitInterfaceSpecifier, ExpressionSyntax @identifier, ExpressionSyntax @semicolonToken)
-			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "EventDeclaration" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
-				SyntaxFactory.Argument( @attributeLists ), 
-				SyntaxFactory.Argument( @modifiers ), 
-				SyntaxFactory.Argument( @eventKeyword ), 
-				SyntaxFactory.Argument( @type ), 
-				SyntaxFactory.Argument( @explicitInterfaceSpecifier ), 
-				SyntaxFactory.Argument( @identifier ), 
-				SyntaxFactory.Argument( @semicolonToken )})));
 
 		[ExcludeFromCodeCoverage]
 		public InvocationExpressionSyntax EventDeclaration(ExpressionSyntax @attributeLists, ExpressionSyntax @modifiers, ExpressionSyntax @eventKeyword, ExpressionSyntax @type, ExpressionSyntax @explicitInterfaceSpecifier, ExpressionSyntax @identifier, ExpressionSyntax @accessorList, ExpressionSyntax @semicolonToken)
@@ -7669,6 +7770,28 @@ namespace Caravela.Framework.Impl.Templating
 			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "EventDeclaration" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
 				SyntaxFactory.Argument( @type ), 
 				SyntaxFactory.Argument( @identifier )})));
+
+		[ExcludeFromCodeCoverage]
+		public InvocationExpressionSyntax EventDeclaration1(ExpressionSyntax @attributeLists, ExpressionSyntax @modifiers, ExpressionSyntax @eventKeyword, ExpressionSyntax @type, ExpressionSyntax @explicitInterfaceSpecifier, ExpressionSyntax @identifier, ExpressionSyntax @accessorList)
+			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "EventDeclaration" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
+				SyntaxFactory.Argument( @attributeLists ), 
+				SyntaxFactory.Argument( @modifiers ), 
+				SyntaxFactory.Argument( @eventKeyword ), 
+				SyntaxFactory.Argument( @type ), 
+				SyntaxFactory.Argument( @explicitInterfaceSpecifier ), 
+				SyntaxFactory.Argument( @identifier ), 
+				SyntaxFactory.Argument( @accessorList )})));
+
+		[ExcludeFromCodeCoverage]
+		public InvocationExpressionSyntax EventDeclaration2(ExpressionSyntax @attributeLists, ExpressionSyntax @modifiers, ExpressionSyntax @eventKeyword, ExpressionSyntax @type, ExpressionSyntax @explicitInterfaceSpecifier, ExpressionSyntax @identifier, ExpressionSyntax @semicolonToken)
+			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "EventDeclaration" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
+				SyntaxFactory.Argument( @attributeLists ), 
+				SyntaxFactory.Argument( @modifiers ), 
+				SyntaxFactory.Argument( @eventKeyword ), 
+				SyntaxFactory.Argument( @type ), 
+				SyntaxFactory.Argument( @explicitInterfaceSpecifier ), 
+				SyntaxFactory.Argument( @identifier ), 
+				SyntaxFactory.Argument( @semicolonToken )})));
 
 		[ExcludeFromCodeCoverage]
 		public InvocationExpressionSyntax EventFieldDeclaration(ExpressionSyntax @attributeLists, ExpressionSyntax @modifiers, ExpressionSyntax @eventKeyword, ExpressionSyntax @declaration, ExpressionSyntax @semicolonToken)
@@ -7703,6 +7826,19 @@ namespace Caravela.Framework.Impl.Templating
 				SyntaxFactory.Argument( @name )})));
 
 		[ExcludeFromCodeCoverage]
+		public InvocationExpressionSyntax ExpressionColon(ExpressionSyntax @expression, ExpressionSyntax @colonToken)
+			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "ExpressionColon" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
+				SyntaxFactory.Argument( @expression ), 
+				SyntaxFactory.Argument( @colonToken )})));
+
+		[ExcludeFromCodeCoverage]
+		public InvocationExpressionSyntax ExpressionStatement(ExpressionSyntax @attributeLists, ExpressionSyntax @expression, ExpressionSyntax @semicolonToken)
+			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "ExpressionStatement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
+				SyntaxFactory.Argument( @attributeLists ), 
+				SyntaxFactory.Argument( @expression ), 
+				SyntaxFactory.Argument( @semicolonToken )})));
+
+		[ExcludeFromCodeCoverage]
 		public InvocationExpressionSyntax ExpressionStatement1(ExpressionSyntax @expression, ExpressionSyntax @semicolonToken)
 			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "ExpressionStatement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
 				SyntaxFactory.Argument( @expression ), 
@@ -7713,13 +7849,6 @@ namespace Caravela.Framework.Impl.Templating
 			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "ExpressionStatement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
 				SyntaxFactory.Argument( @attributeLists ), 
 				SyntaxFactory.Argument( @expression )})));
-
-		[ExcludeFromCodeCoverage]
-		public InvocationExpressionSyntax ExpressionStatement(ExpressionSyntax @attributeLists, ExpressionSyntax @expression, ExpressionSyntax @semicolonToken)
-			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "ExpressionStatement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
-				SyntaxFactory.Argument( @attributeLists ), 
-				SyntaxFactory.Argument( @expression ), 
-				SyntaxFactory.Argument( @semicolonToken )})));
 
 		[ExcludeFromCodeCoverage]
 		public InvocationExpressionSyntax ExpressionStatement(ExpressionSyntax @expression)
@@ -7760,6 +7889,33 @@ namespace Caravela.Framework.Impl.Templating
 				SyntaxFactory.Argument( @declaration )})));
 
 		[ExcludeFromCodeCoverage]
+		public InvocationExpressionSyntax FileScopedNamespaceDeclaration(ExpressionSyntax @attributeLists, ExpressionSyntax @modifiers, ExpressionSyntax @namespaceKeyword, ExpressionSyntax @name, ExpressionSyntax @semicolonToken, ExpressionSyntax @externs, ExpressionSyntax @usings, ExpressionSyntax @members)
+			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "FileScopedNamespaceDeclaration" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
+				SyntaxFactory.Argument( @attributeLists ), 
+				SyntaxFactory.Argument( @modifiers ), 
+				SyntaxFactory.Argument( @namespaceKeyword ), 
+				SyntaxFactory.Argument( @name ), 
+				SyntaxFactory.Argument( @semicolonToken ), 
+				SyntaxFactory.Argument( @externs ), 
+				SyntaxFactory.Argument( @usings ), 
+				SyntaxFactory.Argument( @members )})));
+
+		[ExcludeFromCodeCoverage]
+		public InvocationExpressionSyntax FileScopedNamespaceDeclaration(ExpressionSyntax @attributeLists, ExpressionSyntax @modifiers, ExpressionSyntax @name, ExpressionSyntax @externs, ExpressionSyntax @usings, ExpressionSyntax @members)
+			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "FileScopedNamespaceDeclaration" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
+				SyntaxFactory.Argument( @attributeLists ), 
+				SyntaxFactory.Argument( @modifiers ), 
+				SyntaxFactory.Argument( @name ), 
+				SyntaxFactory.Argument( @externs ), 
+				SyntaxFactory.Argument( @usings ), 
+				SyntaxFactory.Argument( @members )})));
+
+		[ExcludeFromCodeCoverage]
+		public InvocationExpressionSyntax FileScopedNamespaceDeclaration(ExpressionSyntax @name)
+			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "FileScopedNamespaceDeclaration" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
+				SyntaxFactory.Argument( @name )})));
+
+		[ExcludeFromCodeCoverage]
 		public InvocationExpressionSyntax FinallyClause(ExpressionSyntax @finallyKeyword, ExpressionSyntax @block)
 			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "FinallyClause" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
 				SyntaxFactory.Argument( @finallyKeyword ), 
@@ -7769,15 +7925,6 @@ namespace Caravela.Framework.Impl.Templating
 		public InvocationExpressionSyntax FinallyClause(ExpressionSyntax @block)
 			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "FinallyClause" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
 				SyntaxFactory.Argument( @block )})));
-
-		[ExcludeFromCodeCoverage]
-		public InvocationExpressionSyntax FixedStatement(ExpressionSyntax @fixedKeyword, ExpressionSyntax @openParenToken, ExpressionSyntax @declaration, ExpressionSyntax @closeParenToken, ExpressionSyntax @statement)
-			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "FixedStatement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
-				SyntaxFactory.Argument( @fixedKeyword ), 
-				SyntaxFactory.Argument( @openParenToken ), 
-				SyntaxFactory.Argument( @declaration ), 
-				SyntaxFactory.Argument( @closeParenToken ), 
-				SyntaxFactory.Argument( @statement )})));
 
 		[ExcludeFromCodeCoverage]
 		public InvocationExpressionSyntax FixedStatement(ExpressionSyntax @attributeLists, ExpressionSyntax @fixedKeyword, ExpressionSyntax @openParenToken, ExpressionSyntax @declaration, ExpressionSyntax @closeParenToken, ExpressionSyntax @statement)
@@ -7803,27 +7950,11 @@ namespace Caravela.Framework.Impl.Templating
 				SyntaxFactory.Argument( @statement )})));
 
 		[ExcludeFromCodeCoverage]
-		public InvocationExpressionSyntax ForEachStatement(ExpressionSyntax @forEachKeyword, ExpressionSyntax @openParenToken, ExpressionSyntax @type, ExpressionSyntax @identifier, ExpressionSyntax @inKeyword, ExpressionSyntax @expression, ExpressionSyntax @closeParenToken, ExpressionSyntax @statement)
-			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "ForEachStatement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
-				SyntaxFactory.Argument( @forEachKeyword ), 
+		public InvocationExpressionSyntax FixedStatement(ExpressionSyntax @fixedKeyword, ExpressionSyntax @openParenToken, ExpressionSyntax @declaration, ExpressionSyntax @closeParenToken, ExpressionSyntax @statement)
+			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "FixedStatement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
+				SyntaxFactory.Argument( @fixedKeyword ), 
 				SyntaxFactory.Argument( @openParenToken ), 
-				SyntaxFactory.Argument( @type ), 
-				SyntaxFactory.Argument( @identifier ), 
-				SyntaxFactory.Argument( @inKeyword ), 
-				SyntaxFactory.Argument( @expression ), 
-				SyntaxFactory.Argument( @closeParenToken ), 
-				SyntaxFactory.Argument( @statement )})));
-
-		[ExcludeFromCodeCoverage]
-		public InvocationExpressionSyntax ForEachStatement(ExpressionSyntax @awaitKeyword, ExpressionSyntax @forEachKeyword, ExpressionSyntax @openParenToken, ExpressionSyntax @type, ExpressionSyntax @identifier, ExpressionSyntax @inKeyword, ExpressionSyntax @expression, ExpressionSyntax @closeParenToken, ExpressionSyntax @statement)
-			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "ForEachStatement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
-				SyntaxFactory.Argument( @awaitKeyword ), 
-				SyntaxFactory.Argument( @forEachKeyword ), 
-				SyntaxFactory.Argument( @openParenToken ), 
-				SyntaxFactory.Argument( @type ), 
-				SyntaxFactory.Argument( @identifier ), 
-				SyntaxFactory.Argument( @inKeyword ), 
-				SyntaxFactory.Argument( @expression ), 
+				SyntaxFactory.Argument( @declaration ), 
 				SyntaxFactory.Argument( @closeParenToken ), 
 				SyntaxFactory.Argument( @statement )})));
 
@@ -7859,23 +7990,25 @@ namespace Caravela.Framework.Impl.Templating
 				SyntaxFactory.Argument( @statement )})));
 
 		[ExcludeFromCodeCoverage]
-		public InvocationExpressionSyntax ForEachVariableStatement(ExpressionSyntax @forEachKeyword, ExpressionSyntax @openParenToken, ExpressionSyntax @variable, ExpressionSyntax @inKeyword, ExpressionSyntax @expression, ExpressionSyntax @closeParenToken, ExpressionSyntax @statement)
-			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "ForEachVariableStatement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
+		public InvocationExpressionSyntax ForEachStatement(ExpressionSyntax @forEachKeyword, ExpressionSyntax @openParenToken, ExpressionSyntax @type, ExpressionSyntax @identifier, ExpressionSyntax @inKeyword, ExpressionSyntax @expression, ExpressionSyntax @closeParenToken, ExpressionSyntax @statement)
+			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "ForEachStatement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
 				SyntaxFactory.Argument( @forEachKeyword ), 
 				SyntaxFactory.Argument( @openParenToken ), 
-				SyntaxFactory.Argument( @variable ), 
+				SyntaxFactory.Argument( @type ), 
+				SyntaxFactory.Argument( @identifier ), 
 				SyntaxFactory.Argument( @inKeyword ), 
 				SyntaxFactory.Argument( @expression ), 
 				SyntaxFactory.Argument( @closeParenToken ), 
 				SyntaxFactory.Argument( @statement )})));
 
 		[ExcludeFromCodeCoverage]
-		public InvocationExpressionSyntax ForEachVariableStatement(ExpressionSyntax @awaitKeyword, ExpressionSyntax @forEachKeyword, ExpressionSyntax @openParenToken, ExpressionSyntax @variable, ExpressionSyntax @inKeyword, ExpressionSyntax @expression, ExpressionSyntax @closeParenToken, ExpressionSyntax @statement)
-			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "ForEachVariableStatement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
+		public InvocationExpressionSyntax ForEachStatement(ExpressionSyntax @awaitKeyword, ExpressionSyntax @forEachKeyword, ExpressionSyntax @openParenToken, ExpressionSyntax @type, ExpressionSyntax @identifier, ExpressionSyntax @inKeyword, ExpressionSyntax @expression, ExpressionSyntax @closeParenToken, ExpressionSyntax @statement)
+			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "ForEachStatement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
 				SyntaxFactory.Argument( @awaitKeyword ), 
 				SyntaxFactory.Argument( @forEachKeyword ), 
 				SyntaxFactory.Argument( @openParenToken ), 
-				SyntaxFactory.Argument( @variable ), 
+				SyntaxFactory.Argument( @type ), 
+				SyntaxFactory.Argument( @identifier ), 
 				SyntaxFactory.Argument( @inKeyword ), 
 				SyntaxFactory.Argument( @expression ), 
 				SyntaxFactory.Argument( @closeParenToken ), 
@@ -7910,25 +8043,25 @@ namespace Caravela.Framework.Impl.Templating
 				SyntaxFactory.Argument( @statement )})));
 
 		[ExcludeFromCodeCoverage]
-		public InvocationExpressionSyntax ForStatement(ExpressionSyntax @declaration, ExpressionSyntax @initializers, ExpressionSyntax @condition, ExpressionSyntax @incrementors, ExpressionSyntax @statement)
-			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "ForStatement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
-				SyntaxFactory.Argument( @declaration ), 
-				SyntaxFactory.Argument( @initializers ), 
-				SyntaxFactory.Argument( @condition ), 
-				SyntaxFactory.Argument( @incrementors ), 
+		public InvocationExpressionSyntax ForEachVariableStatement(ExpressionSyntax @forEachKeyword, ExpressionSyntax @openParenToken, ExpressionSyntax @variable, ExpressionSyntax @inKeyword, ExpressionSyntax @expression, ExpressionSyntax @closeParenToken, ExpressionSyntax @statement)
+			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "ForEachVariableStatement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
+				SyntaxFactory.Argument( @forEachKeyword ), 
+				SyntaxFactory.Argument( @openParenToken ), 
+				SyntaxFactory.Argument( @variable ), 
+				SyntaxFactory.Argument( @inKeyword ), 
+				SyntaxFactory.Argument( @expression ), 
+				SyntaxFactory.Argument( @closeParenToken ), 
 				SyntaxFactory.Argument( @statement )})));
 
 		[ExcludeFromCodeCoverage]
-		public InvocationExpressionSyntax ForStatement(ExpressionSyntax @forKeyword, ExpressionSyntax @openParenToken, ExpressionSyntax @declaration, ExpressionSyntax @initializers, ExpressionSyntax @firstSemicolonToken, ExpressionSyntax @condition, ExpressionSyntax @secondSemicolonToken, ExpressionSyntax @incrementors, ExpressionSyntax @closeParenToken, ExpressionSyntax @statement)
-			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "ForStatement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
-				SyntaxFactory.Argument( @forKeyword ), 
+		public InvocationExpressionSyntax ForEachVariableStatement(ExpressionSyntax @awaitKeyword, ExpressionSyntax @forEachKeyword, ExpressionSyntax @openParenToken, ExpressionSyntax @variable, ExpressionSyntax @inKeyword, ExpressionSyntax @expression, ExpressionSyntax @closeParenToken, ExpressionSyntax @statement)
+			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "ForEachVariableStatement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
+				SyntaxFactory.Argument( @awaitKeyword ), 
+				SyntaxFactory.Argument( @forEachKeyword ), 
 				SyntaxFactory.Argument( @openParenToken ), 
-				SyntaxFactory.Argument( @declaration ), 
-				SyntaxFactory.Argument( @initializers ), 
-				SyntaxFactory.Argument( @firstSemicolonToken ), 
-				SyntaxFactory.Argument( @condition ), 
-				SyntaxFactory.Argument( @secondSemicolonToken ), 
-				SyntaxFactory.Argument( @incrementors ), 
+				SyntaxFactory.Argument( @variable ), 
+				SyntaxFactory.Argument( @inKeyword ), 
+				SyntaxFactory.Argument( @expression ), 
 				SyntaxFactory.Argument( @closeParenToken ), 
 				SyntaxFactory.Argument( @statement )})));
 
@@ -7960,6 +8093,29 @@ namespace Caravela.Framework.Impl.Templating
 		[ExcludeFromCodeCoverage]
 		public InvocationExpressionSyntax ForStatement(ExpressionSyntax @statement)
 			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "ForStatement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
+				SyntaxFactory.Argument( @statement )})));
+
+		[ExcludeFromCodeCoverage]
+		public InvocationExpressionSyntax ForStatement(ExpressionSyntax @declaration, ExpressionSyntax @initializers, ExpressionSyntax @condition, ExpressionSyntax @incrementors, ExpressionSyntax @statement)
+			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "ForStatement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
+				SyntaxFactory.Argument( @declaration ), 
+				SyntaxFactory.Argument( @initializers ), 
+				SyntaxFactory.Argument( @condition ), 
+				SyntaxFactory.Argument( @incrementors ), 
+				SyntaxFactory.Argument( @statement )})));
+
+		[ExcludeFromCodeCoverage]
+		public InvocationExpressionSyntax ForStatement(ExpressionSyntax @forKeyword, ExpressionSyntax @openParenToken, ExpressionSyntax @declaration, ExpressionSyntax @initializers, ExpressionSyntax @firstSemicolonToken, ExpressionSyntax @condition, ExpressionSyntax @secondSemicolonToken, ExpressionSyntax @incrementors, ExpressionSyntax @closeParenToken, ExpressionSyntax @statement)
+			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "ForStatement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
+				SyntaxFactory.Argument( @forKeyword ), 
+				SyntaxFactory.Argument( @openParenToken ), 
+				SyntaxFactory.Argument( @declaration ), 
+				SyntaxFactory.Argument( @initializers ), 
+				SyntaxFactory.Argument( @firstSemicolonToken ), 
+				SyntaxFactory.Argument( @condition ), 
+				SyntaxFactory.Argument( @secondSemicolonToken ), 
+				SyntaxFactory.Argument( @incrementors ), 
+				SyntaxFactory.Argument( @closeParenToken ), 
 				SyntaxFactory.Argument( @statement )})));
 
 		[ExcludeFromCodeCoverage]
@@ -7996,15 +8152,15 @@ namespace Caravela.Framework.Impl.Templating
 				SyntaxFactory.Argument( @managedOrUnmanagedKeyword )})));
 
 		[ExcludeFromCodeCoverage]
+		public InvocationExpressionSyntax FunctionPointerParameter(ExpressionSyntax @type)
+			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "FunctionPointerParameter" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
+				SyntaxFactory.Argument( @type )})));
+
+		[ExcludeFromCodeCoverage]
 		public InvocationExpressionSyntax FunctionPointerParameter(ExpressionSyntax @attributeLists, ExpressionSyntax @modifiers, ExpressionSyntax @type)
 			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "FunctionPointerParameter" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
 				SyntaxFactory.Argument( @attributeLists ), 
 				SyntaxFactory.Argument( @modifiers ), 
-				SyntaxFactory.Argument( @type )})));
-
-		[ExcludeFromCodeCoverage]
-		public InvocationExpressionSyntax FunctionPointerParameter(ExpressionSyntax @type)
-			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "FunctionPointerParameter" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
 				SyntaxFactory.Argument( @type )})));
 
 		[ExcludeFromCodeCoverage]
@@ -8132,22 +8288,6 @@ namespace Caravela.Framework.Impl.Templating
 				SyntaxFactory.Argument( @statement )})));
 
 		[ExcludeFromCodeCoverage]
-		public InvocationExpressionSyntax GotoStatement(ExpressionSyntax @kind, ExpressionSyntax @caseOrDefaultKeyword, ExpressionSyntax @expression)
-			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "GotoStatement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
-				SyntaxFactory.Argument( @kind ), 
-				SyntaxFactory.Argument( @caseOrDefaultKeyword ), 
-				SyntaxFactory.Argument( @expression )})));
-
-		[ExcludeFromCodeCoverage]
-		public InvocationExpressionSyntax GotoStatement(ExpressionSyntax @kind, ExpressionSyntax @gotoKeyword, ExpressionSyntax @caseOrDefaultKeyword, ExpressionSyntax @expression, ExpressionSyntax @semicolonToken)
-			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "GotoStatement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
-				SyntaxFactory.Argument( @kind ), 
-				SyntaxFactory.Argument( @gotoKeyword ), 
-				SyntaxFactory.Argument( @caseOrDefaultKeyword ), 
-				SyntaxFactory.Argument( @expression ), 
-				SyntaxFactory.Argument( @semicolonToken )})));
-
-		[ExcludeFromCodeCoverage]
 		public InvocationExpressionSyntax GotoStatement(ExpressionSyntax @kind, ExpressionSyntax @attributeLists, ExpressionSyntax @gotoKeyword, ExpressionSyntax @caseOrDefaultKeyword, ExpressionSyntax @expression, ExpressionSyntax @semicolonToken)
 			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "GotoStatement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
 				SyntaxFactory.Argument( @kind ), 
@@ -8172,6 +8312,22 @@ namespace Caravela.Framework.Impl.Templating
 				SyntaxFactory.Argument( @expression )})));
 
 		[ExcludeFromCodeCoverage]
+		public InvocationExpressionSyntax GotoStatement(ExpressionSyntax @kind, ExpressionSyntax @caseOrDefaultKeyword, ExpressionSyntax @expression)
+			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "GotoStatement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
+				SyntaxFactory.Argument( @kind ), 
+				SyntaxFactory.Argument( @caseOrDefaultKeyword ), 
+				SyntaxFactory.Argument( @expression )})));
+
+		[ExcludeFromCodeCoverage]
+		public InvocationExpressionSyntax GotoStatement(ExpressionSyntax @kind, ExpressionSyntax @gotoKeyword, ExpressionSyntax @caseOrDefaultKeyword, ExpressionSyntax @expression, ExpressionSyntax @semicolonToken)
+			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "GotoStatement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
+				SyntaxFactory.Argument( @kind ), 
+				SyntaxFactory.Argument( @gotoKeyword ), 
+				SyntaxFactory.Argument( @caseOrDefaultKeyword ), 
+				SyntaxFactory.Argument( @expression ), 
+				SyntaxFactory.Argument( @semicolonToken )})));
+
+		[ExcludeFromCodeCoverage]
 		public InvocationExpressionSyntax GroupClause(ExpressionSyntax @groupKeyword, ExpressionSyntax @groupExpression, ExpressionSyntax @byKeyword, ExpressionSyntax @byExpression)
 			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "GroupClause" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
 				SyntaxFactory.Argument( @groupKeyword ), 
@@ -8186,13 +8342,47 @@ namespace Caravela.Framework.Impl.Templating
 				SyntaxFactory.Argument( @byExpression )})));
 
 		[ExcludeFromCodeCoverage]
-		public InvocationExpressionSyntax Identifier(ExpressionSyntax @leading, ExpressionSyntax @contextualKind, ExpressionSyntax @text, ExpressionSyntax @valueText, ExpressionSyntax @trailing)
-			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "Identifier" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
-				SyntaxFactory.Argument( @leading ), 
-				SyntaxFactory.Argument( @contextualKind ), 
-				SyntaxFactory.Argument( @text ), 
-				SyntaxFactory.Argument( @valueText ), 
-				SyntaxFactory.Argument( @trailing )})));
+		public InvocationExpressionSyntax CheckedExpression(ExpressionSyntax @kind, ExpressionSyntax @keyword, ExpressionSyntax @openParenToken, ExpressionSyntax @expression, ExpressionSyntax @closeParenToken)
+			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "CheckedExpression" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
+				SyntaxFactory.Argument( @kind ), 
+				SyntaxFactory.Argument( @keyword ), 
+				SyntaxFactory.Argument( @openParenToken ), 
+				SyntaxFactory.Argument( @expression ), 
+				SyntaxFactory.Argument( @closeParenToken )})));
+
+		[ExcludeFromCodeCoverage]
+		public InvocationExpressionSyntax CheckedExpression(ExpressionSyntax @kind, ExpressionSyntax @expression)
+			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "CheckedExpression" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
+				SyntaxFactory.Argument( @kind ), 
+				SyntaxFactory.Argument( @expression )})));
+
+		[ExcludeFromCodeCoverage]
+		public InvocationExpressionSyntax CheckedStatement(ExpressionSyntax @kind, ExpressionSyntax @attributeLists, ExpressionSyntax @keyword, ExpressionSyntax @block)
+			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "CheckedStatement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
+				SyntaxFactory.Argument( @kind ), 
+				SyntaxFactory.Argument( @attributeLists ), 
+				SyntaxFactory.Argument( @keyword ), 
+				SyntaxFactory.Argument( @block )})));
+
+		[ExcludeFromCodeCoverage]
+		public InvocationExpressionSyntax CheckedStatement1(ExpressionSyntax @kind, ExpressionSyntax @attributeLists, ExpressionSyntax @block)
+			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "CheckedStatement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
+				SyntaxFactory.Argument( @kind ), 
+				SyntaxFactory.Argument( @attributeLists ), 
+				SyntaxFactory.Argument( @block )})));
+
+		[ExcludeFromCodeCoverage]
+		public InvocationExpressionSyntax CheckedStatement2(ExpressionSyntax @kind, ExpressionSyntax @keyword, ExpressionSyntax @block)
+			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "CheckedStatement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
+				SyntaxFactory.Argument( @kind ), 
+				SyntaxFactory.Argument( @keyword ), 
+				SyntaxFactory.Argument( @block )})));
+
+		[ExcludeFromCodeCoverage]
+		public InvocationExpressionSyntax CheckedStatement(ExpressionSyntax @kind, ExpressionSyntax @block)
+			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "CheckedStatement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
+				SyntaxFactory.Argument( @kind ), 
+				SyntaxFactory.Argument( @block )})));
 
 		[ExcludeFromCodeCoverage]
 		public InvocationExpressionSyntax Identifier(ExpressionSyntax @text)
@@ -8204,6 +8394,15 @@ namespace Caravela.Framework.Impl.Templating
 			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "Identifier" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
 				SyntaxFactory.Argument( @leading ), 
 				SyntaxFactory.Argument( @text ), 
+				SyntaxFactory.Argument( @trailing )})));
+
+		[ExcludeFromCodeCoverage]
+		public InvocationExpressionSyntax Identifier(ExpressionSyntax @leading, ExpressionSyntax @contextualKind, ExpressionSyntax @text, ExpressionSyntax @valueText, ExpressionSyntax @trailing)
+			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "Identifier" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
+				SyntaxFactory.Argument( @leading ), 
+				SyntaxFactory.Argument( @contextualKind ), 
+				SyntaxFactory.Argument( @text ), 
+				SyntaxFactory.Argument( @valueText ), 
 				SyntaxFactory.Argument( @trailing )})));
 
 		[ExcludeFromCodeCoverage]
@@ -8236,23 +8435,6 @@ namespace Caravela.Framework.Impl.Templating
 				SyntaxFactory.Argument( @conditionValue )})));
 
 		[ExcludeFromCodeCoverage]
-		public InvocationExpressionSyntax IfStatement(ExpressionSyntax @condition, ExpressionSyntax @statement, ExpressionSyntax @else)
-			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "IfStatement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
-				SyntaxFactory.Argument( @condition ), 
-				SyntaxFactory.Argument( @statement ), 
-				SyntaxFactory.Argument( @else )})));
-
-		[ExcludeFromCodeCoverage]
-		public InvocationExpressionSyntax IfStatement(ExpressionSyntax @ifKeyword, ExpressionSyntax @openParenToken, ExpressionSyntax @condition, ExpressionSyntax @closeParenToken, ExpressionSyntax @statement, ExpressionSyntax @else)
-			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "IfStatement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
-				SyntaxFactory.Argument( @ifKeyword ), 
-				SyntaxFactory.Argument( @openParenToken ), 
-				SyntaxFactory.Argument( @condition ), 
-				SyntaxFactory.Argument( @closeParenToken ), 
-				SyntaxFactory.Argument( @statement ), 
-				SyntaxFactory.Argument( @else )})));
-
-		[ExcludeFromCodeCoverage]
 		public InvocationExpressionSyntax IfStatement(ExpressionSyntax @attributeLists, ExpressionSyntax @ifKeyword, ExpressionSyntax @openParenToken, ExpressionSyntax @condition, ExpressionSyntax @closeParenToken, ExpressionSyntax @statement, ExpressionSyntax @else)
 			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "IfStatement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
 				SyntaxFactory.Argument( @attributeLists ), 
@@ -8276,6 +8458,23 @@ namespace Caravela.Framework.Impl.Templating
 			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "IfStatement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
 				SyntaxFactory.Argument( @condition ), 
 				SyntaxFactory.Argument( @statement )})));
+
+		[ExcludeFromCodeCoverage]
+		public InvocationExpressionSyntax IfStatement(ExpressionSyntax @condition, ExpressionSyntax @statement, ExpressionSyntax @else)
+			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "IfStatement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
+				SyntaxFactory.Argument( @condition ), 
+				SyntaxFactory.Argument( @statement ), 
+				SyntaxFactory.Argument( @else )})));
+
+		[ExcludeFromCodeCoverage]
+		public InvocationExpressionSyntax IfStatement(ExpressionSyntax @ifKeyword, ExpressionSyntax @openParenToken, ExpressionSyntax @condition, ExpressionSyntax @closeParenToken, ExpressionSyntax @statement, ExpressionSyntax @else)
+			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "IfStatement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
+				SyntaxFactory.Argument( @ifKeyword ), 
+				SyntaxFactory.Argument( @openParenToken ), 
+				SyntaxFactory.Argument( @condition ), 
+				SyntaxFactory.Argument( @closeParenToken ), 
+				SyntaxFactory.Argument( @statement ), 
+				SyntaxFactory.Argument( @else )})));
 
 		[ExcludeFromCodeCoverage]
 		public InvocationExpressionSyntax ImplicitArrayCreationExpression(ExpressionSyntax @newKeyword, ExpressionSyntax @openBracketToken, ExpressionSyntax @commas, ExpressionSyntax @closeBracketToken, ExpressionSyntax @initializer)
@@ -8349,16 +8548,6 @@ namespace Caravela.Framework.Impl.Templating
 				SyntaxFactory.Argument( @type )})));
 
 		[ExcludeFromCodeCoverage]
-		public InvocationExpressionSyntax IndexerDeclaration(ExpressionSyntax @attributeLists, ExpressionSyntax @modifiers, ExpressionSyntax @type, ExpressionSyntax @explicitInterfaceSpecifier, ExpressionSyntax @parameterList, ExpressionSyntax @accessorList)
-			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "IndexerDeclaration" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
-				SyntaxFactory.Argument( @attributeLists ), 
-				SyntaxFactory.Argument( @modifiers ), 
-				SyntaxFactory.Argument( @type ), 
-				SyntaxFactory.Argument( @explicitInterfaceSpecifier ), 
-				SyntaxFactory.Argument( @parameterList ), 
-				SyntaxFactory.Argument( @accessorList )})));
-
-		[ExcludeFromCodeCoverage]
 		public InvocationExpressionSyntax IndexerDeclaration(ExpressionSyntax @attributeLists, ExpressionSyntax @modifiers, ExpressionSyntax @type, ExpressionSyntax @explicitInterfaceSpecifier, ExpressionSyntax @thisKeyword, ExpressionSyntax @parameterList, ExpressionSyntax @accessorList, ExpressionSyntax @expressionBody, ExpressionSyntax @semicolonToken)
 			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "IndexerDeclaration" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
 				SyntaxFactory.Argument( @attributeLists ), 
@@ -8386,6 +8575,16 @@ namespace Caravela.Framework.Impl.Templating
 		public InvocationExpressionSyntax IndexerDeclaration(ExpressionSyntax @type)
 			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "IndexerDeclaration" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
 				SyntaxFactory.Argument( @type )})));
+
+		[ExcludeFromCodeCoverage]
+		public InvocationExpressionSyntax IndexerDeclaration(ExpressionSyntax @attributeLists, ExpressionSyntax @modifiers, ExpressionSyntax @type, ExpressionSyntax @explicitInterfaceSpecifier, ExpressionSyntax @parameterList, ExpressionSyntax @accessorList)
+			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "IndexerDeclaration" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
+				SyntaxFactory.Argument( @attributeLists ), 
+				SyntaxFactory.Argument( @modifiers ), 
+				SyntaxFactory.Argument( @type ), 
+				SyntaxFactory.Argument( @explicitInterfaceSpecifier ), 
+				SyntaxFactory.Argument( @parameterList ), 
+				SyntaxFactory.Argument( @accessorList )})));
 
 		[ExcludeFromCodeCoverage]
 		public InvocationExpressionSyntax IndexerMemberCref(ExpressionSyntax @thisKeyword, ExpressionSyntax @parameters)
@@ -8581,6 +8780,14 @@ namespace Caravela.Framework.Impl.Templating
 				SyntaxFactory.Argument( @identifier )})));
 
 		[ExcludeFromCodeCoverage]
+		public InvocationExpressionSyntax LabeledStatement(ExpressionSyntax @attributeLists, ExpressionSyntax @identifier, ExpressionSyntax @colonToken, ExpressionSyntax @statement)
+			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "LabeledStatement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
+				SyntaxFactory.Argument( @attributeLists ), 
+				SyntaxFactory.Argument( @identifier ), 
+				SyntaxFactory.Argument( @colonToken ), 
+				SyntaxFactory.Argument( @statement )})));
+
+		[ExcludeFromCodeCoverage]
 		public InvocationExpressionSyntax LabeledStatement1(ExpressionSyntax @attributeLists, ExpressionSyntax @identifier, ExpressionSyntax @statement)
 			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "LabeledStatement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
 				SyntaxFactory.Argument( @attributeLists ), 
@@ -8590,14 +8797,6 @@ namespace Caravela.Framework.Impl.Templating
 		[ExcludeFromCodeCoverage]
 		public InvocationExpressionSyntax LabeledStatement2(ExpressionSyntax @identifier, ExpressionSyntax @colonToken, ExpressionSyntax @statement)
 			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "LabeledStatement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
-				SyntaxFactory.Argument( @identifier ), 
-				SyntaxFactory.Argument( @colonToken ), 
-				SyntaxFactory.Argument( @statement )})));
-
-		[ExcludeFromCodeCoverage]
-		public InvocationExpressionSyntax LabeledStatement(ExpressionSyntax @attributeLists, ExpressionSyntax @identifier, ExpressionSyntax @colonToken, ExpressionSyntax @statement)
-			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "LabeledStatement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
-				SyntaxFactory.Argument( @attributeLists ), 
 				SyntaxFactory.Argument( @identifier ), 
 				SyntaxFactory.Argument( @colonToken ), 
 				SyntaxFactory.Argument( @statement )})));
@@ -8623,6 +8822,21 @@ namespace Caravela.Framework.Impl.Templating
 				SyntaxFactory.Argument( @expression )})));
 
 		[ExcludeFromCodeCoverage]
+		public InvocationExpressionSyntax LineDirectivePosition(ExpressionSyntax @openParenToken, ExpressionSyntax @line, ExpressionSyntax @commaToken, ExpressionSyntax @character, ExpressionSyntax @closeParenToken)
+			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "LineDirectivePosition" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
+				SyntaxFactory.Argument( @openParenToken ), 
+				SyntaxFactory.Argument( @line ), 
+				SyntaxFactory.Argument( @commaToken ), 
+				SyntaxFactory.Argument( @character ), 
+				SyntaxFactory.Argument( @closeParenToken )})));
+
+		[ExcludeFromCodeCoverage]
+		public InvocationExpressionSyntax LineDirectivePosition(ExpressionSyntax @line, ExpressionSyntax @character)
+			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "LineDirectivePosition" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
+				SyntaxFactory.Argument( @line ), 
+				SyntaxFactory.Argument( @character )})));
+
+		[ExcludeFromCodeCoverage]
 		public InvocationExpressionSyntax LineDirectiveTrivia(ExpressionSyntax @hashToken, ExpressionSyntax @lineKeyword, ExpressionSyntax @line, ExpressionSyntax @file, ExpressionSyntax @endOfDirectiveToken, ExpressionSyntax @isActive)
 			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "LineDirectiveTrivia" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
 				SyntaxFactory.Argument( @hashToken ), 
@@ -8643,6 +8857,36 @@ namespace Caravela.Framework.Impl.Templating
 		public InvocationExpressionSyntax LineDirectiveTrivia(ExpressionSyntax @line, ExpressionSyntax @isActive)
 			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "LineDirectiveTrivia" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
 				SyntaxFactory.Argument( @line ), 
+				SyntaxFactory.Argument( @isActive )})));
+
+		[ExcludeFromCodeCoverage]
+		public InvocationExpressionSyntax LineSpanDirectiveTrivia(ExpressionSyntax @hashToken, ExpressionSyntax @lineKeyword, ExpressionSyntax @start, ExpressionSyntax @minusToken, ExpressionSyntax @end, ExpressionSyntax @characterOffset, ExpressionSyntax @file, ExpressionSyntax @endOfDirectiveToken, ExpressionSyntax @isActive)
+			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "LineSpanDirectiveTrivia" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
+				SyntaxFactory.Argument( @hashToken ), 
+				SyntaxFactory.Argument( @lineKeyword ), 
+				SyntaxFactory.Argument( @start ), 
+				SyntaxFactory.Argument( @minusToken ), 
+				SyntaxFactory.Argument( @end ), 
+				SyntaxFactory.Argument( @characterOffset ), 
+				SyntaxFactory.Argument( @file ), 
+				SyntaxFactory.Argument( @endOfDirectiveToken ), 
+				SyntaxFactory.Argument( @isActive )})));
+
+		[ExcludeFromCodeCoverage]
+		public InvocationExpressionSyntax LineSpanDirectiveTrivia(ExpressionSyntax @start, ExpressionSyntax @end, ExpressionSyntax @characterOffset, ExpressionSyntax @file, ExpressionSyntax @isActive)
+			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "LineSpanDirectiveTrivia" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
+				SyntaxFactory.Argument( @start ), 
+				SyntaxFactory.Argument( @end ), 
+				SyntaxFactory.Argument( @characterOffset ), 
+				SyntaxFactory.Argument( @file ), 
+				SyntaxFactory.Argument( @isActive )})));
+
+		[ExcludeFromCodeCoverage]
+		public InvocationExpressionSyntax LineSpanDirectiveTrivia(ExpressionSyntax @start, ExpressionSyntax @end, ExpressionSyntax @file, ExpressionSyntax @isActive)
+			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "LineSpanDirectiveTrivia" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
+				SyntaxFactory.Argument( @start ), 
+				SyntaxFactory.Argument( @end ), 
+				SyntaxFactory.Argument( @file ), 
 				SyntaxFactory.Argument( @isActive )})));
 
 		[ExcludeFromCodeCoverage]
@@ -8703,6 +8947,16 @@ namespace Caravela.Framework.Impl.Templating
 				SyntaxFactory.Argument( @isActive )})));
 
 		[ExcludeFromCodeCoverage]
+		public InvocationExpressionSyntax LocalDeclarationStatement(ExpressionSyntax @attributeLists, ExpressionSyntax @awaitKeyword, ExpressionSyntax @usingKeyword, ExpressionSyntax @modifiers, ExpressionSyntax @declaration, ExpressionSyntax @semicolonToken)
+			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "LocalDeclarationStatement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
+				SyntaxFactory.Argument( @attributeLists ), 
+				SyntaxFactory.Argument( @awaitKeyword ), 
+				SyntaxFactory.Argument( @usingKeyword ), 
+				SyntaxFactory.Argument( @modifiers ), 
+				SyntaxFactory.Argument( @declaration ), 
+				SyntaxFactory.Argument( @semicolonToken )})));
+
+		[ExcludeFromCodeCoverage]
 		public InvocationExpressionSyntax LocalDeclarationStatement1(ExpressionSyntax @attributeLists, ExpressionSyntax @modifiers, ExpressionSyntax @declaration)
 			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "LocalDeclarationStatement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
 				SyntaxFactory.Argument( @attributeLists ), 
@@ -8715,6 +8969,11 @@ namespace Caravela.Framework.Impl.Templating
 				SyntaxFactory.Argument( @modifiers ), 
 				SyntaxFactory.Argument( @declaration ), 
 				SyntaxFactory.Argument( @semicolonToken )})));
+
+		[ExcludeFromCodeCoverage]
+		public InvocationExpressionSyntax LocalDeclarationStatement(ExpressionSyntax @declaration)
+			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "LocalDeclarationStatement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
+				SyntaxFactory.Argument( @declaration )})));
 
 		[ExcludeFromCodeCoverage]
 		public InvocationExpressionSyntax LocalDeclarationStatement(ExpressionSyntax @awaitKeyword, ExpressionSyntax @usingKeyword, ExpressionSyntax @modifiers, ExpressionSyntax @declaration, ExpressionSyntax @semicolonToken)
@@ -8732,23 +8991,9 @@ namespace Caravela.Framework.Impl.Templating
 				SyntaxFactory.Argument( @declaration )})));
 
 		[ExcludeFromCodeCoverage]
-		public InvocationExpressionSyntax LocalDeclarationStatement(ExpressionSyntax @attributeLists, ExpressionSyntax @awaitKeyword, ExpressionSyntax @usingKeyword, ExpressionSyntax @modifiers, ExpressionSyntax @declaration, ExpressionSyntax @semicolonToken)
-			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "LocalDeclarationStatement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
-				SyntaxFactory.Argument( @attributeLists ), 
-				SyntaxFactory.Argument( @awaitKeyword ), 
-				SyntaxFactory.Argument( @usingKeyword ), 
-				SyntaxFactory.Argument( @modifiers ), 
-				SyntaxFactory.Argument( @declaration ), 
-				SyntaxFactory.Argument( @semicolonToken )})));
-
-		[ExcludeFromCodeCoverage]
-		public InvocationExpressionSyntax LocalDeclarationStatement(ExpressionSyntax @declaration)
-			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "LocalDeclarationStatement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
-				SyntaxFactory.Argument( @declaration )})));
-
-		[ExcludeFromCodeCoverage]
-		public InvocationExpressionSyntax LocalFunctionStatement(ExpressionSyntax @modifiers, ExpressionSyntax @returnType, ExpressionSyntax @identifier, ExpressionSyntax @typeParameterList, ExpressionSyntax @parameterList, ExpressionSyntax @constraintClauses, ExpressionSyntax @body, ExpressionSyntax @expressionBody)
+		public InvocationExpressionSyntax LocalFunctionStatement(ExpressionSyntax @attributeLists, ExpressionSyntax @modifiers, ExpressionSyntax @returnType, ExpressionSyntax @identifier, ExpressionSyntax @typeParameterList, ExpressionSyntax @parameterList, ExpressionSyntax @constraintClauses, ExpressionSyntax @body, ExpressionSyntax @expressionBody, ExpressionSyntax @semicolonToken)
 			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "LocalFunctionStatement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
+				SyntaxFactory.Argument( @attributeLists ), 
 				SyntaxFactory.Argument( @modifiers ), 
 				SyntaxFactory.Argument( @returnType ), 
 				SyntaxFactory.Argument( @identifier ), 
@@ -8756,7 +9001,8 @@ namespace Caravela.Framework.Impl.Templating
 				SyntaxFactory.Argument( @parameterList ), 
 				SyntaxFactory.Argument( @constraintClauses ), 
 				SyntaxFactory.Argument( @body ), 
-				SyntaxFactory.Argument( @expressionBody )})));
+				SyntaxFactory.Argument( @expressionBody ), 
+				SyntaxFactory.Argument( @semicolonToken )})));
 
 		[ExcludeFromCodeCoverage]
 		public InvocationExpressionSyntax LocalFunctionStatement1(ExpressionSyntax @attributeLists, ExpressionSyntax @modifiers, ExpressionSyntax @returnType, ExpressionSyntax @identifier, ExpressionSyntax @typeParameterList, ExpressionSyntax @parameterList, ExpressionSyntax @constraintClauses, ExpressionSyntax @body, ExpressionSyntax @expressionBody)
@@ -8785,9 +9031,14 @@ namespace Caravela.Framework.Impl.Templating
 				SyntaxFactory.Argument( @semicolonToken )})));
 
 		[ExcludeFromCodeCoverage]
-		public InvocationExpressionSyntax LocalFunctionStatement(ExpressionSyntax @attributeLists, ExpressionSyntax @modifiers, ExpressionSyntax @returnType, ExpressionSyntax @identifier, ExpressionSyntax @typeParameterList, ExpressionSyntax @parameterList, ExpressionSyntax @constraintClauses, ExpressionSyntax @body, ExpressionSyntax @expressionBody, ExpressionSyntax @semicolonToken)
+		public InvocationExpressionSyntax LocalFunctionStatement(ExpressionSyntax @returnType, ExpressionSyntax @identifier)
 			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "LocalFunctionStatement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
-				SyntaxFactory.Argument( @attributeLists ), 
+				SyntaxFactory.Argument( @returnType ), 
+				SyntaxFactory.Argument( @identifier )})));
+
+		[ExcludeFromCodeCoverage]
+		public InvocationExpressionSyntax LocalFunctionStatement(ExpressionSyntax @modifiers, ExpressionSyntax @returnType, ExpressionSyntax @identifier, ExpressionSyntax @typeParameterList, ExpressionSyntax @parameterList, ExpressionSyntax @constraintClauses, ExpressionSyntax @body, ExpressionSyntax @expressionBody)
+			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "LocalFunctionStatement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
 				SyntaxFactory.Argument( @modifiers ), 
 				SyntaxFactory.Argument( @returnType ), 
 				SyntaxFactory.Argument( @identifier ), 
@@ -8795,23 +9046,7 @@ namespace Caravela.Framework.Impl.Templating
 				SyntaxFactory.Argument( @parameterList ), 
 				SyntaxFactory.Argument( @constraintClauses ), 
 				SyntaxFactory.Argument( @body ), 
-				SyntaxFactory.Argument( @expressionBody ), 
-				SyntaxFactory.Argument( @semicolonToken )})));
-
-		[ExcludeFromCodeCoverage]
-		public InvocationExpressionSyntax LocalFunctionStatement(ExpressionSyntax @returnType, ExpressionSyntax @identifier)
-			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "LocalFunctionStatement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
-				SyntaxFactory.Argument( @returnType ), 
-				SyntaxFactory.Argument( @identifier )})));
-
-		[ExcludeFromCodeCoverage]
-		public InvocationExpressionSyntax LockStatement(ExpressionSyntax @lockKeyword, ExpressionSyntax @openParenToken, ExpressionSyntax @expression, ExpressionSyntax @closeParenToken, ExpressionSyntax @statement)
-			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "LockStatement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
-				SyntaxFactory.Argument( @lockKeyword ), 
-				SyntaxFactory.Argument( @openParenToken ), 
-				SyntaxFactory.Argument( @expression ), 
-				SyntaxFactory.Argument( @closeParenToken ), 
-				SyntaxFactory.Argument( @statement )})));
+				SyntaxFactory.Argument( @expressionBody )})));
 
 		[ExcludeFromCodeCoverage]
 		public InvocationExpressionSyntax LockStatement(ExpressionSyntax @attributeLists, ExpressionSyntax @lockKeyword, ExpressionSyntax @openParenToken, ExpressionSyntax @expression, ExpressionSyntax @closeParenToken, ExpressionSyntax @statement)
@@ -8834,6 +9069,15 @@ namespace Caravela.Framework.Impl.Templating
 		public InvocationExpressionSyntax LockStatement(ExpressionSyntax @expression, ExpressionSyntax @statement)
 			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "LockStatement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
 				SyntaxFactory.Argument( @expression ), 
+				SyntaxFactory.Argument( @statement )})));
+
+		[ExcludeFromCodeCoverage]
+		public InvocationExpressionSyntax LockStatement(ExpressionSyntax @lockKeyword, ExpressionSyntax @openParenToken, ExpressionSyntax @expression, ExpressionSyntax @closeParenToken, ExpressionSyntax @statement)
+			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "LockStatement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
+				SyntaxFactory.Argument( @lockKeyword ), 
+				SyntaxFactory.Argument( @openParenToken ), 
+				SyntaxFactory.Argument( @expression ), 
+				SyntaxFactory.Argument( @closeParenToken ), 
 				SyntaxFactory.Argument( @statement )})));
 
 		[ExcludeFromCodeCoverage]
@@ -8876,6 +9120,21 @@ namespace Caravela.Framework.Impl.Templating
 				SyntaxFactory.Argument( @name )})));
 
 		[ExcludeFromCodeCoverage]
+		public InvocationExpressionSyntax MethodDeclaration(ExpressionSyntax @attributeLists, ExpressionSyntax @modifiers, ExpressionSyntax @returnType, ExpressionSyntax @explicitInterfaceSpecifier, ExpressionSyntax @identifier, ExpressionSyntax @typeParameterList, ExpressionSyntax @parameterList, ExpressionSyntax @constraintClauses, ExpressionSyntax @body, ExpressionSyntax @expressionBody, ExpressionSyntax @semicolonToken)
+			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "MethodDeclaration" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
+				SyntaxFactory.Argument( @attributeLists ), 
+				SyntaxFactory.Argument( @modifiers ), 
+				SyntaxFactory.Argument( @returnType ), 
+				SyntaxFactory.Argument( @explicitInterfaceSpecifier ), 
+				SyntaxFactory.Argument( @identifier ), 
+				SyntaxFactory.Argument( @typeParameterList ), 
+				SyntaxFactory.Argument( @parameterList ), 
+				SyntaxFactory.Argument( @constraintClauses ), 
+				SyntaxFactory.Argument( @body ), 
+				SyntaxFactory.Argument( @expressionBody ), 
+				SyntaxFactory.Argument( @semicolonToken )})));
+
+		[ExcludeFromCodeCoverage]
 		public InvocationExpressionSyntax MethodDeclaration1(ExpressionSyntax @attributeLists, ExpressionSyntax @modifiers, ExpressionSyntax @returnType, ExpressionSyntax @explicitInterfaceSpecifier, ExpressionSyntax @identifier, ExpressionSyntax @typeParameterList, ExpressionSyntax @parameterList, ExpressionSyntax @constraintClauses, ExpressionSyntax @body, ExpressionSyntax @expressionBody)
 			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "MethodDeclaration" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
 				SyntaxFactory.Argument( @attributeLists ), 
@@ -8901,21 +9160,6 @@ namespace Caravela.Framework.Impl.Templating
 				SyntaxFactory.Argument( @parameterList ), 
 				SyntaxFactory.Argument( @constraintClauses ), 
 				SyntaxFactory.Argument( @body ), 
-				SyntaxFactory.Argument( @semicolonToken )})));
-
-		[ExcludeFromCodeCoverage]
-		public InvocationExpressionSyntax MethodDeclaration(ExpressionSyntax @attributeLists, ExpressionSyntax @modifiers, ExpressionSyntax @returnType, ExpressionSyntax @explicitInterfaceSpecifier, ExpressionSyntax @identifier, ExpressionSyntax @typeParameterList, ExpressionSyntax @parameterList, ExpressionSyntax @constraintClauses, ExpressionSyntax @body, ExpressionSyntax @expressionBody, ExpressionSyntax @semicolonToken)
-			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "MethodDeclaration" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
-				SyntaxFactory.Argument( @attributeLists ), 
-				SyntaxFactory.Argument( @modifiers ), 
-				SyntaxFactory.Argument( @returnType ), 
-				SyntaxFactory.Argument( @explicitInterfaceSpecifier ), 
-				SyntaxFactory.Argument( @identifier ), 
-				SyntaxFactory.Argument( @typeParameterList ), 
-				SyntaxFactory.Argument( @parameterList ), 
-				SyntaxFactory.Argument( @constraintClauses ), 
-				SyntaxFactory.Argument( @body ), 
-				SyntaxFactory.Argument( @expressionBody ), 
 				SyntaxFactory.Argument( @semicolonToken )})));
 
 		[ExcludeFromCodeCoverage]
@@ -8970,26 +9214,6 @@ namespace Caravela.Framework.Impl.Templating
 				SyntaxFactory.Argument( @name )})));
 
 		[ExcludeFromCodeCoverage]
-		public InvocationExpressionSyntax NamespaceDeclaration(ExpressionSyntax @name, ExpressionSyntax @externs, ExpressionSyntax @usings, ExpressionSyntax @members)
-			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "NamespaceDeclaration" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
-				SyntaxFactory.Argument( @name ), 
-				SyntaxFactory.Argument( @externs ), 
-				SyntaxFactory.Argument( @usings ), 
-				SyntaxFactory.Argument( @members )})));
-
-		[ExcludeFromCodeCoverage]
-		public InvocationExpressionSyntax NamespaceDeclaration(ExpressionSyntax @namespaceKeyword, ExpressionSyntax @name, ExpressionSyntax @openBraceToken, ExpressionSyntax @externs, ExpressionSyntax @usings, ExpressionSyntax @members, ExpressionSyntax @closeBraceToken, ExpressionSyntax @semicolonToken)
-			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "NamespaceDeclaration" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
-				SyntaxFactory.Argument( @namespaceKeyword ), 
-				SyntaxFactory.Argument( @name ), 
-				SyntaxFactory.Argument( @openBraceToken ), 
-				SyntaxFactory.Argument( @externs ), 
-				SyntaxFactory.Argument( @usings ), 
-				SyntaxFactory.Argument( @members ), 
-				SyntaxFactory.Argument( @closeBraceToken ), 
-				SyntaxFactory.Argument( @semicolonToken )})));
-
-		[ExcludeFromCodeCoverage]
 		public InvocationExpressionSyntax NamespaceDeclaration(ExpressionSyntax @attributeLists, ExpressionSyntax @modifiers, ExpressionSyntax @namespaceKeyword, ExpressionSyntax @name, ExpressionSyntax @openBraceToken, ExpressionSyntax @externs, ExpressionSyntax @usings, ExpressionSyntax @members, ExpressionSyntax @closeBraceToken, ExpressionSyntax @semicolonToken)
 			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "NamespaceDeclaration" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
 				SyntaxFactory.Argument( @attributeLists ), 
@@ -9017,6 +9241,26 @@ namespace Caravela.Framework.Impl.Templating
 		public InvocationExpressionSyntax NamespaceDeclaration(ExpressionSyntax @name)
 			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "NamespaceDeclaration" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
 				SyntaxFactory.Argument( @name )})));
+
+		[ExcludeFromCodeCoverage]
+		public InvocationExpressionSyntax NamespaceDeclaration(ExpressionSyntax @name, ExpressionSyntax @externs, ExpressionSyntax @usings, ExpressionSyntax @members)
+			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "NamespaceDeclaration" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
+				SyntaxFactory.Argument( @name ), 
+				SyntaxFactory.Argument( @externs ), 
+				SyntaxFactory.Argument( @usings ), 
+				SyntaxFactory.Argument( @members )})));
+
+		[ExcludeFromCodeCoverage]
+		public InvocationExpressionSyntax NamespaceDeclaration(ExpressionSyntax @namespaceKeyword, ExpressionSyntax @name, ExpressionSyntax @openBraceToken, ExpressionSyntax @externs, ExpressionSyntax @usings, ExpressionSyntax @members, ExpressionSyntax @closeBraceToken, ExpressionSyntax @semicolonToken)
+			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "NamespaceDeclaration" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
+				SyntaxFactory.Argument( @namespaceKeyword ), 
+				SyntaxFactory.Argument( @name ), 
+				SyntaxFactory.Argument( @openBraceToken ), 
+				SyntaxFactory.Argument( @externs ), 
+				SyntaxFactory.Argument( @usings ), 
+				SyntaxFactory.Argument( @members ), 
+				SyntaxFactory.Argument( @closeBraceToken ), 
+				SyntaxFactory.Argument( @semicolonToken )})));
 
 		[ExcludeFromCodeCoverage]
 		public InvocationExpressionSyntax NodeOrTokenList()
@@ -9100,7 +9344,33 @@ namespace Caravela.Framework.Impl.Templating
 			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "OmittedTypeArgument" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{})));
 
 		[ExcludeFromCodeCoverage]
-		public InvocationExpressionSyntax OperatorDeclaration(ExpressionSyntax @attributeLists, ExpressionSyntax @modifiers, ExpressionSyntax @returnType, ExpressionSyntax @operatorKeyword, ExpressionSyntax @operatorToken, ExpressionSyntax @parameterList, ExpressionSyntax @body, ExpressionSyntax @semicolonToken)
+		public InvocationExpressionSyntax OperatorDeclaration(ExpressionSyntax @attributeLists, ExpressionSyntax @modifiers, ExpressionSyntax @returnType, ExpressionSyntax @explicitInterfaceSpecifier, ExpressionSyntax @operatorKeyword, ExpressionSyntax @operatorToken, ExpressionSyntax @parameterList, ExpressionSyntax @body, ExpressionSyntax @expressionBody, ExpressionSyntax @semicolonToken)
+			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "OperatorDeclaration" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
+				SyntaxFactory.Argument( @attributeLists ), 
+				SyntaxFactory.Argument( @modifiers ), 
+				SyntaxFactory.Argument( @returnType ), 
+				SyntaxFactory.Argument( @explicitInterfaceSpecifier ), 
+				SyntaxFactory.Argument( @operatorKeyword ), 
+				SyntaxFactory.Argument( @operatorToken ), 
+				SyntaxFactory.Argument( @parameterList ), 
+				SyntaxFactory.Argument( @body ), 
+				SyntaxFactory.Argument( @expressionBody ), 
+				SyntaxFactory.Argument( @semicolonToken )})));
+
+		[ExcludeFromCodeCoverage]
+		public InvocationExpressionSyntax OperatorDeclaration1(ExpressionSyntax @attributeLists, ExpressionSyntax @modifiers, ExpressionSyntax @returnType, ExpressionSyntax @explicitInterfaceSpecifier, ExpressionSyntax @operatorToken, ExpressionSyntax @parameterList, ExpressionSyntax @body, ExpressionSyntax @expressionBody)
+			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "OperatorDeclaration" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
+				SyntaxFactory.Argument( @attributeLists ), 
+				SyntaxFactory.Argument( @modifiers ), 
+				SyntaxFactory.Argument( @returnType ), 
+				SyntaxFactory.Argument( @explicitInterfaceSpecifier ), 
+				SyntaxFactory.Argument( @operatorToken ), 
+				SyntaxFactory.Argument( @parameterList ), 
+				SyntaxFactory.Argument( @body ), 
+				SyntaxFactory.Argument( @expressionBody )})));
+
+		[ExcludeFromCodeCoverage]
+		public InvocationExpressionSyntax OperatorDeclaration2(ExpressionSyntax @attributeLists, ExpressionSyntax @modifiers, ExpressionSyntax @returnType, ExpressionSyntax @operatorKeyword, ExpressionSyntax @operatorToken, ExpressionSyntax @parameterList, ExpressionSyntax @body, ExpressionSyntax @semicolonToken)
 			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "OperatorDeclaration" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
 				SyntaxFactory.Argument( @attributeLists ), 
 				SyntaxFactory.Argument( @modifiers ), 
@@ -9110,6 +9380,12 @@ namespace Caravela.Framework.Impl.Templating
 				SyntaxFactory.Argument( @parameterList ), 
 				SyntaxFactory.Argument( @body ), 
 				SyntaxFactory.Argument( @semicolonToken )})));
+
+		[ExcludeFromCodeCoverage]
+		public InvocationExpressionSyntax OperatorDeclaration(ExpressionSyntax @returnType, ExpressionSyntax @operatorToken)
+			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "OperatorDeclaration" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
+				SyntaxFactory.Argument( @returnType ), 
+				SyntaxFactory.Argument( @operatorToken )})));
 
 		[ExcludeFromCodeCoverage]
 		public InvocationExpressionSyntax OperatorDeclaration(ExpressionSyntax @attributeLists, ExpressionSyntax @modifiers, ExpressionSyntax @returnType, ExpressionSyntax @operatorKeyword, ExpressionSyntax @operatorToken, ExpressionSyntax @parameterList, ExpressionSyntax @body, ExpressionSyntax @expressionBody, ExpressionSyntax @semicolonToken)
@@ -9134,12 +9410,6 @@ namespace Caravela.Framework.Impl.Templating
 				SyntaxFactory.Argument( @parameterList ), 
 				SyntaxFactory.Argument( @body ), 
 				SyntaxFactory.Argument( @expressionBody )})));
-
-		[ExcludeFromCodeCoverage]
-		public InvocationExpressionSyntax OperatorDeclaration(ExpressionSyntax @returnType, ExpressionSyntax @operatorToken)
-			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "OperatorDeclaration" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
-				SyntaxFactory.Argument( @returnType ), 
-				SyntaxFactory.Argument( @operatorToken )})));
 
 		[ExcludeFromCodeCoverage]
 		public InvocationExpressionSyntax OperatorMemberCref(ExpressionSyntax @operatorKeyword, ExpressionSyntax @operatorToken, ExpressionSyntax @parameters)
@@ -9222,6 +9492,31 @@ namespace Caravela.Framework.Impl.Templating
 				SyntaxFactory.Argument( @expression )})));
 
 		[ExcludeFromCodeCoverage]
+		public InvocationExpressionSyntax ParenthesizedLambdaExpression(ExpressionSyntax @attributeLists, ExpressionSyntax @modifiers, ExpressionSyntax @returnType, ExpressionSyntax @parameterList, ExpressionSyntax @arrowToken, ExpressionSyntax @block, ExpressionSyntax @expressionBody)
+			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "ParenthesizedLambdaExpression" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
+				SyntaxFactory.Argument( @attributeLists ), 
+				SyntaxFactory.Argument( @modifiers ), 
+				SyntaxFactory.Argument( @returnType ), 
+				SyntaxFactory.Argument( @parameterList ), 
+				SyntaxFactory.Argument( @arrowToken ), 
+				SyntaxFactory.Argument( @block ), 
+				SyntaxFactory.Argument( @expressionBody )})));
+
+		[ExcludeFromCodeCoverage]
+		public InvocationExpressionSyntax ParenthesizedLambdaExpression(ExpressionSyntax @attributeLists, ExpressionSyntax @modifiers, ExpressionSyntax @returnType, ExpressionSyntax @parameterList, ExpressionSyntax @block, ExpressionSyntax @expressionBody)
+			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "ParenthesizedLambdaExpression" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
+				SyntaxFactory.Argument( @attributeLists ), 
+				SyntaxFactory.Argument( @modifiers ), 
+				SyntaxFactory.Argument( @returnType ), 
+				SyntaxFactory.Argument( @parameterList ), 
+				SyntaxFactory.Argument( @block ), 
+				SyntaxFactory.Argument( @expressionBody )})));
+
+		[ExcludeFromCodeCoverage]
+		public InvocationExpressionSyntax ParenthesizedLambdaExpression()
+			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "ParenthesizedLambdaExpression" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{})));
+
+		[ExcludeFromCodeCoverage]
 		public InvocationExpressionSyntax ParenthesizedLambdaExpression(ExpressionSyntax @body)
 			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "ParenthesizedLambdaExpression" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
 				SyntaxFactory.Argument( @body )})));
@@ -9249,7 +9544,16 @@ namespace Caravela.Framework.Impl.Templating
 				SyntaxFactory.Argument( @expressionBody )})));
 
 		[ExcludeFromCodeCoverage]
-		public InvocationExpressionSyntax ParenthesizedLambdaExpression1(ExpressionSyntax @asyncKeyword, ExpressionSyntax @parameterList, ExpressionSyntax @arrowToken, ExpressionSyntax @block, ExpressionSyntax @expressionBody)
+		public InvocationExpressionSyntax ParenthesizedLambdaExpression1(ExpressionSyntax @attributeLists, ExpressionSyntax @modifiers, ExpressionSyntax @parameterList, ExpressionSyntax @block, ExpressionSyntax @expressionBody)
+			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "ParenthesizedLambdaExpression" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
+				SyntaxFactory.Argument( @attributeLists ), 
+				SyntaxFactory.Argument( @modifiers ), 
+				SyntaxFactory.Argument( @parameterList ), 
+				SyntaxFactory.Argument( @block ), 
+				SyntaxFactory.Argument( @expressionBody )})));
+
+		[ExcludeFromCodeCoverage]
+		public InvocationExpressionSyntax ParenthesizedLambdaExpression2(ExpressionSyntax @asyncKeyword, ExpressionSyntax @parameterList, ExpressionSyntax @arrowToken, ExpressionSyntax @block, ExpressionSyntax @expressionBody)
 			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "ParenthesizedLambdaExpression" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
 				SyntaxFactory.Argument( @asyncKeyword ), 
 				SyntaxFactory.Argument( @parameterList ), 
@@ -9258,7 +9562,7 @@ namespace Caravela.Framework.Impl.Templating
 				SyntaxFactory.Argument( @expressionBody )})));
 
 		[ExcludeFromCodeCoverage]
-		public InvocationExpressionSyntax ParenthesizedLambdaExpression2(ExpressionSyntax @modifiers, ExpressionSyntax @parameterList, ExpressionSyntax @arrowToken, ExpressionSyntax @block, ExpressionSyntax @expressionBody)
+		public InvocationExpressionSyntax ParenthesizedLambdaExpression3(ExpressionSyntax @modifiers, ExpressionSyntax @parameterList, ExpressionSyntax @arrowToken, ExpressionSyntax @block, ExpressionSyntax @expressionBody)
 			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "ParenthesizedLambdaExpression" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
 				SyntaxFactory.Argument( @modifiers ), 
 				SyntaxFactory.Argument( @parameterList ), 
@@ -9272,10 +9576,6 @@ namespace Caravela.Framework.Impl.Templating
 				SyntaxFactory.Argument( @parameterList ), 
 				SyntaxFactory.Argument( @block ), 
 				SyntaxFactory.Argument( @expressionBody )})));
-
-		[ExcludeFromCodeCoverage]
-		public InvocationExpressionSyntax ParenthesizedLambdaExpression()
-			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "ParenthesizedLambdaExpression" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{})));
 
 		[ExcludeFromCodeCoverage]
 		public InvocationExpressionSyntax ParenthesizedPattern(ExpressionSyntax @openParenToken, ExpressionSyntax @pattern, ExpressionSyntax @closeParenToken)
@@ -9592,16 +9892,6 @@ namespace Caravela.Framework.Impl.Templating
 				SyntaxFactory.Argument( @type )})));
 
 		[ExcludeFromCodeCoverage]
-		public InvocationExpressionSyntax PropertyDeclaration(ExpressionSyntax @attributeLists, ExpressionSyntax @modifiers, ExpressionSyntax @type, ExpressionSyntax @explicitInterfaceSpecifier, ExpressionSyntax @identifier, ExpressionSyntax @accessorList)
-			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "PropertyDeclaration" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
-				SyntaxFactory.Argument( @attributeLists ), 
-				SyntaxFactory.Argument( @modifiers ), 
-				SyntaxFactory.Argument( @type ), 
-				SyntaxFactory.Argument( @explicitInterfaceSpecifier ), 
-				SyntaxFactory.Argument( @identifier ), 
-				SyntaxFactory.Argument( @accessorList )})));
-
-		[ExcludeFromCodeCoverage]
 		public InvocationExpressionSyntax PropertyDeclaration(ExpressionSyntax @attributeLists, ExpressionSyntax @modifiers, ExpressionSyntax @type, ExpressionSyntax @explicitInterfaceSpecifier, ExpressionSyntax @identifier, ExpressionSyntax @accessorList, ExpressionSyntax @expressionBody, ExpressionSyntax @initializer, ExpressionSyntax @semicolonToken)
 			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "PropertyDeclaration" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
 				SyntaxFactory.Argument( @attributeLists ), 
@@ -9631,6 +9921,16 @@ namespace Caravela.Framework.Impl.Templating
 			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "PropertyDeclaration" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
 				SyntaxFactory.Argument( @type ), 
 				SyntaxFactory.Argument( @identifier )})));
+
+		[ExcludeFromCodeCoverage]
+		public InvocationExpressionSyntax PropertyDeclaration(ExpressionSyntax @attributeLists, ExpressionSyntax @modifiers, ExpressionSyntax @type, ExpressionSyntax @explicitInterfaceSpecifier, ExpressionSyntax @identifier, ExpressionSyntax @accessorList)
+			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "PropertyDeclaration" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
+				SyntaxFactory.Argument( @attributeLists ), 
+				SyntaxFactory.Argument( @modifiers ), 
+				SyntaxFactory.Argument( @type ), 
+				SyntaxFactory.Argument( @explicitInterfaceSpecifier ), 
+				SyntaxFactory.Argument( @identifier ), 
+				SyntaxFactory.Argument( @accessorList )})));
 
 		[ExcludeFromCodeCoverage]
 		public InvocationExpressionSyntax PropertyPatternClause(ExpressionSyntax @openBraceToken, ExpressionSyntax @subpatterns, ExpressionSyntax @closeBraceToken)
@@ -9719,6 +10019,45 @@ namespace Caravela.Framework.Impl.Templating
 			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "RangeExpression" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{})));
 
 		[ExcludeFromCodeCoverage]
+		public InvocationExpressionSyntax RecordDeclaration(ExpressionSyntax @kind, ExpressionSyntax @attributeLists, ExpressionSyntax @modifiers, ExpressionSyntax @keyword, ExpressionSyntax @classOrStructKeyword, ExpressionSyntax @identifier, ExpressionSyntax @typeParameterList, ExpressionSyntax @parameterList, ExpressionSyntax @baseList, ExpressionSyntax @constraintClauses, ExpressionSyntax @openBraceToken, ExpressionSyntax @members, ExpressionSyntax @closeBraceToken, ExpressionSyntax @semicolonToken)
+			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "RecordDeclaration" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
+				SyntaxFactory.Argument( @kind ), 
+				SyntaxFactory.Argument( @attributeLists ), 
+				SyntaxFactory.Argument( @modifiers ), 
+				SyntaxFactory.Argument( @keyword ), 
+				SyntaxFactory.Argument( @classOrStructKeyword ), 
+				SyntaxFactory.Argument( @identifier ), 
+				SyntaxFactory.Argument( @typeParameterList ), 
+				SyntaxFactory.Argument( @parameterList ), 
+				SyntaxFactory.Argument( @baseList ), 
+				SyntaxFactory.Argument( @constraintClauses ), 
+				SyntaxFactory.Argument( @openBraceToken ), 
+				SyntaxFactory.Argument( @members ), 
+				SyntaxFactory.Argument( @closeBraceToken ), 
+				SyntaxFactory.Argument( @semicolonToken )})));
+
+		[ExcludeFromCodeCoverage]
+		public InvocationExpressionSyntax RecordDeclaration(ExpressionSyntax @kind, ExpressionSyntax @attributeLists, ExpressionSyntax @modifiers, ExpressionSyntax @keyword, ExpressionSyntax @identifier, ExpressionSyntax @typeParameterList, ExpressionSyntax @parameterList, ExpressionSyntax @baseList, ExpressionSyntax @constraintClauses, ExpressionSyntax @members)
+			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "RecordDeclaration" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
+				SyntaxFactory.Argument( @kind ), 
+				SyntaxFactory.Argument( @attributeLists ), 
+				SyntaxFactory.Argument( @modifiers ), 
+				SyntaxFactory.Argument( @keyword ), 
+				SyntaxFactory.Argument( @identifier ), 
+				SyntaxFactory.Argument( @typeParameterList ), 
+				SyntaxFactory.Argument( @parameterList ), 
+				SyntaxFactory.Argument( @baseList ), 
+				SyntaxFactory.Argument( @constraintClauses ), 
+				SyntaxFactory.Argument( @members )})));
+
+		[ExcludeFromCodeCoverage]
+		public InvocationExpressionSyntax RecordDeclaration(ExpressionSyntax @kind, ExpressionSyntax @keyword, ExpressionSyntax @identifier)
+			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "RecordDeclaration" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
+				SyntaxFactory.Argument( @kind ), 
+				SyntaxFactory.Argument( @keyword ), 
+				SyntaxFactory.Argument( @identifier )})));
+
+		[ExcludeFromCodeCoverage]
 		public InvocationExpressionSyntax RecordDeclaration(ExpressionSyntax @attributeLists, ExpressionSyntax @modifiers, ExpressionSyntax @keyword, ExpressionSyntax @identifier, ExpressionSyntax @typeParameterList, ExpressionSyntax @parameterList, ExpressionSyntax @baseList, ExpressionSyntax @constraintClauses, ExpressionSyntax @openBraceToken, ExpressionSyntax @members, ExpressionSyntax @closeBraceToken, ExpressionSyntax @semicolonToken)
 			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "RecordDeclaration" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
 				SyntaxFactory.Argument( @attributeLists ), 
@@ -9792,12 +10131,6 @@ namespace Caravela.Framework.Impl.Templating
 				SyntaxFactory.Argument( @expression )})));
 
 		[ExcludeFromCodeCoverage]
-		public InvocationExpressionSyntax RefType(ExpressionSyntax @refKeyword, ExpressionSyntax @type)
-			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "RefType" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
-				SyntaxFactory.Argument( @refKeyword ), 
-				SyntaxFactory.Argument( @type )})));
-
-		[ExcludeFromCodeCoverage]
 		public InvocationExpressionSyntax RefType(ExpressionSyntax @refKeyword, ExpressionSyntax @readOnlyKeyword, ExpressionSyntax @type)
 			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "RefType" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
 				SyntaxFactory.Argument( @refKeyword ), 
@@ -9807,6 +10140,12 @@ namespace Caravela.Framework.Impl.Templating
 		[ExcludeFromCodeCoverage]
 		public InvocationExpressionSyntax RefType(ExpressionSyntax @type)
 			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "RefType" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
+				SyntaxFactory.Argument( @type )})));
+
+		[ExcludeFromCodeCoverage]
+		public InvocationExpressionSyntax RefType(ExpressionSyntax @refKeyword, ExpressionSyntax @type)
+			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "RefType" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
+				SyntaxFactory.Argument( @refKeyword ), 
 				SyntaxFactory.Argument( @type )})));
 
 		[ExcludeFromCodeCoverage]
@@ -9858,13 +10197,6 @@ namespace Caravela.Framework.Impl.Templating
 				SyntaxFactory.Argument( @expression )})));
 
 		[ExcludeFromCodeCoverage]
-		public InvocationExpressionSyntax ReturnStatement(ExpressionSyntax @returnKeyword, ExpressionSyntax @expression, ExpressionSyntax @semicolonToken)
-			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "ReturnStatement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
-				SyntaxFactory.Argument( @returnKeyword ), 
-				SyntaxFactory.Argument( @expression ), 
-				SyntaxFactory.Argument( @semicolonToken )})));
-
-		[ExcludeFromCodeCoverage]
 		public InvocationExpressionSyntax ReturnStatement(ExpressionSyntax @attributeLists, ExpressionSyntax @returnKeyword, ExpressionSyntax @expression, ExpressionSyntax @semicolonToken)
 			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "ReturnStatement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
 				SyntaxFactory.Argument( @attributeLists ), 
@@ -9882,6 +10214,13 @@ namespace Caravela.Framework.Impl.Templating
 		public InvocationExpressionSyntax ReturnStatement(ExpressionSyntax @expression)
 			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "ReturnStatement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
 				SyntaxFactory.Argument( @expression )})));
+
+		[ExcludeFromCodeCoverage]
+		public InvocationExpressionSyntax ReturnStatement(ExpressionSyntax @returnKeyword, ExpressionSyntax @expression, ExpressionSyntax @semicolonToken)
+			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "ReturnStatement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
+				SyntaxFactory.Argument( @returnKeyword ), 
+				SyntaxFactory.Argument( @expression ), 
+				SyntaxFactory.Argument( @semicolonToken )})));
 
 		[ExcludeFromCodeCoverage]
 		public InvocationExpressionSyntax SelectClause(ExpressionSyntax @selectKeyword, ExpressionSyntax @expression)
@@ -9945,6 +10284,48 @@ namespace Caravela.Framework.Impl.Templating
 				SyntaxFactory.Argument( @type )})));
 
 		[ExcludeFromCodeCoverage]
+		public InvocationExpressionSyntax SimpleLambdaExpression(ExpressionSyntax @attributeLists, ExpressionSyntax @modifiers, ExpressionSyntax @parameter, ExpressionSyntax @arrowToken, ExpressionSyntax @block, ExpressionSyntax @expressionBody)
+			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "SimpleLambdaExpression" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
+				SyntaxFactory.Argument( @attributeLists ), 
+				SyntaxFactory.Argument( @modifiers ), 
+				SyntaxFactory.Argument( @parameter ), 
+				SyntaxFactory.Argument( @arrowToken ), 
+				SyntaxFactory.Argument( @block ), 
+				SyntaxFactory.Argument( @expressionBody )})));
+
+		[ExcludeFromCodeCoverage]
+		public InvocationExpressionSyntax SimpleLambdaExpression1(ExpressionSyntax @attributeLists, ExpressionSyntax @modifiers, ExpressionSyntax @parameter, ExpressionSyntax @block, ExpressionSyntax @expressionBody)
+			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "SimpleLambdaExpression" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
+				SyntaxFactory.Argument( @attributeLists ), 
+				SyntaxFactory.Argument( @modifiers ), 
+				SyntaxFactory.Argument( @parameter ), 
+				SyntaxFactory.Argument( @block ), 
+				SyntaxFactory.Argument( @expressionBody )})));
+
+		[ExcludeFromCodeCoverage]
+		public InvocationExpressionSyntax SimpleLambdaExpression2(ExpressionSyntax @asyncKeyword, ExpressionSyntax @parameter, ExpressionSyntax @arrowToken, ExpressionSyntax @block, ExpressionSyntax @expressionBody)
+			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "SimpleLambdaExpression" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
+				SyntaxFactory.Argument( @asyncKeyword ), 
+				SyntaxFactory.Argument( @parameter ), 
+				SyntaxFactory.Argument( @arrowToken ), 
+				SyntaxFactory.Argument( @block ), 
+				SyntaxFactory.Argument( @expressionBody )})));
+
+		[ExcludeFromCodeCoverage]
+		public InvocationExpressionSyntax SimpleLambdaExpression3(ExpressionSyntax @modifiers, ExpressionSyntax @parameter, ExpressionSyntax @arrowToken, ExpressionSyntax @block, ExpressionSyntax @expressionBody)
+			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "SimpleLambdaExpression" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
+				SyntaxFactory.Argument( @modifiers ), 
+				SyntaxFactory.Argument( @parameter ), 
+				SyntaxFactory.Argument( @arrowToken ), 
+				SyntaxFactory.Argument( @block ), 
+				SyntaxFactory.Argument( @expressionBody )})));
+
+		[ExcludeFromCodeCoverage]
+		public InvocationExpressionSyntax SimpleLambdaExpression(ExpressionSyntax @parameter)
+			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "SimpleLambdaExpression" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
+				SyntaxFactory.Argument( @parameter )})));
+
+		[ExcludeFromCodeCoverage]
 		public InvocationExpressionSyntax SimpleLambdaExpression(ExpressionSyntax @parameter, ExpressionSyntax @body)
 			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "SimpleLambdaExpression" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
 				SyntaxFactory.Argument( @parameter ), 
@@ -9967,34 +10348,11 @@ namespace Caravela.Framework.Impl.Templating
 				SyntaxFactory.Argument( @expressionBody )})));
 
 		[ExcludeFromCodeCoverage]
-		public InvocationExpressionSyntax SimpleLambdaExpression1(ExpressionSyntax @asyncKeyword, ExpressionSyntax @parameter, ExpressionSyntax @arrowToken, ExpressionSyntax @block, ExpressionSyntax @expressionBody)
-			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "SimpleLambdaExpression" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
-				SyntaxFactory.Argument( @asyncKeyword ), 
-				SyntaxFactory.Argument( @parameter ), 
-				SyntaxFactory.Argument( @arrowToken ), 
-				SyntaxFactory.Argument( @block ), 
-				SyntaxFactory.Argument( @expressionBody )})));
-
-		[ExcludeFromCodeCoverage]
-		public InvocationExpressionSyntax SimpleLambdaExpression2(ExpressionSyntax @modifiers, ExpressionSyntax @parameter, ExpressionSyntax @arrowToken, ExpressionSyntax @block, ExpressionSyntax @expressionBody)
-			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "SimpleLambdaExpression" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
-				SyntaxFactory.Argument( @modifiers ), 
-				SyntaxFactory.Argument( @parameter ), 
-				SyntaxFactory.Argument( @arrowToken ), 
-				SyntaxFactory.Argument( @block ), 
-				SyntaxFactory.Argument( @expressionBody )})));
-
-		[ExcludeFromCodeCoverage]
 		public InvocationExpressionSyntax SimpleLambdaExpression(ExpressionSyntax @parameter, ExpressionSyntax @block, ExpressionSyntax @expressionBody)
 			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "SimpleLambdaExpression" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
 				SyntaxFactory.Argument( @parameter ), 
 				SyntaxFactory.Argument( @block ), 
 				SyntaxFactory.Argument( @expressionBody )})));
-
-		[ExcludeFromCodeCoverage]
-		public InvocationExpressionSyntax SimpleLambdaExpression(ExpressionSyntax @parameter)
-			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "SimpleLambdaExpression" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
-				SyntaxFactory.Argument( @parameter )})));
 
 		[ExcludeFromCodeCoverage]
 		public InvocationExpressionSyntax SingletonList<TNode>(ExpressionSyntax @node)
@@ -10034,6 +10392,13 @@ namespace Caravela.Framework.Impl.Templating
 			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "SkippedTokensTrivia" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{})));
 
 		[ExcludeFromCodeCoverage]
+		public InvocationExpressionSyntax StackAllocArrayCreationExpression(ExpressionSyntax @stackAllocKeyword, ExpressionSyntax @type, ExpressionSyntax @initializer)
+			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "StackAllocArrayCreationExpression" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
+				SyntaxFactory.Argument( @stackAllocKeyword ), 
+				SyntaxFactory.Argument( @type ), 
+				SyntaxFactory.Argument( @initializer )})));
+
+		[ExcludeFromCodeCoverage]
 		public InvocationExpressionSyntax StackAllocArrayCreationExpression1(ExpressionSyntax @type, ExpressionSyntax @initializer)
 			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "StackAllocArrayCreationExpression" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
 				SyntaxFactory.Argument( @type ), 
@@ -10044,13 +10409,6 @@ namespace Caravela.Framework.Impl.Templating
 			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "StackAllocArrayCreationExpression" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
 				SyntaxFactory.Argument( @stackAllocKeyword ), 
 				SyntaxFactory.Argument( @type )})));
-
-		[ExcludeFromCodeCoverage]
-		public InvocationExpressionSyntax StackAllocArrayCreationExpression(ExpressionSyntax @stackAllocKeyword, ExpressionSyntax @type, ExpressionSyntax @initializer)
-			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "StackAllocArrayCreationExpression" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
-				SyntaxFactory.Argument( @stackAllocKeyword ), 
-				SyntaxFactory.Argument( @type ), 
-				SyntaxFactory.Argument( @initializer )})));
 
 		[ExcludeFromCodeCoverage]
 		public InvocationExpressionSyntax StackAllocArrayCreationExpression(ExpressionSyntax @type)
@@ -10089,7 +10447,13 @@ namespace Caravela.Framework.Impl.Templating
 				SyntaxFactory.Argument( @identifier )})));
 
 		[ExcludeFromCodeCoverage]
-		public InvocationExpressionSyntax Subpattern(ExpressionSyntax @nameColon, ExpressionSyntax @pattern)
+		public InvocationExpressionSyntax Subpattern1(ExpressionSyntax @expressionColon, ExpressionSyntax @pattern)
+			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "Subpattern" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
+				SyntaxFactory.Argument( @expressionColon ), 
+				SyntaxFactory.Argument( @pattern )})));
+
+		[ExcludeFromCodeCoverage]
+		public InvocationExpressionSyntax Subpattern2(ExpressionSyntax @nameColon, ExpressionSyntax @pattern)
 			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "Subpattern" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
 				SyntaxFactory.Argument( @nameColon ), 
 				SyntaxFactory.Argument( @pattern )})));
@@ -10151,6 +10515,18 @@ namespace Caravela.Framework.Impl.Templating
 			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "SwitchSection" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{})));
 
 		[ExcludeFromCodeCoverage]
+		public InvocationExpressionSyntax SwitchStatement(ExpressionSyntax @attributeLists, ExpressionSyntax @switchKeyword, ExpressionSyntax @openParenToken, ExpressionSyntax @expression, ExpressionSyntax @closeParenToken, ExpressionSyntax @openBraceToken, ExpressionSyntax @sections, ExpressionSyntax @closeBraceToken)
+			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "SwitchStatement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
+				SyntaxFactory.Argument( @attributeLists ), 
+				SyntaxFactory.Argument( @switchKeyword ), 
+				SyntaxFactory.Argument( @openParenToken ), 
+				SyntaxFactory.Argument( @expression ), 
+				SyntaxFactory.Argument( @closeParenToken ), 
+				SyntaxFactory.Argument( @openBraceToken ), 
+				SyntaxFactory.Argument( @sections ), 
+				SyntaxFactory.Argument( @closeBraceToken )})));
+
+		[ExcludeFromCodeCoverage]
 		public InvocationExpressionSyntax SwitchStatement(ExpressionSyntax @expression, ExpressionSyntax @sections)
 			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "SwitchStatement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
 				SyntaxFactory.Argument( @expression ), 
@@ -10164,18 +10540,6 @@ namespace Caravela.Framework.Impl.Templating
 		[ExcludeFromCodeCoverage]
 		public InvocationExpressionSyntax SwitchStatement(ExpressionSyntax @switchKeyword, ExpressionSyntax @openParenToken, ExpressionSyntax @expression, ExpressionSyntax @closeParenToken, ExpressionSyntax @openBraceToken, ExpressionSyntax @sections, ExpressionSyntax @closeBraceToken)
 			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "SwitchStatement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
-				SyntaxFactory.Argument( @switchKeyword ), 
-				SyntaxFactory.Argument( @openParenToken ), 
-				SyntaxFactory.Argument( @expression ), 
-				SyntaxFactory.Argument( @closeParenToken ), 
-				SyntaxFactory.Argument( @openBraceToken ), 
-				SyntaxFactory.Argument( @sections ), 
-				SyntaxFactory.Argument( @closeBraceToken )})));
-
-		[ExcludeFromCodeCoverage]
-		public InvocationExpressionSyntax SwitchStatement(ExpressionSyntax @attributeLists, ExpressionSyntax @switchKeyword, ExpressionSyntax @openParenToken, ExpressionSyntax @expression, ExpressionSyntax @closeParenToken, ExpressionSyntax @openBraceToken, ExpressionSyntax @sections, ExpressionSyntax @closeBraceToken)
-			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "SwitchStatement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
-				SyntaxFactory.Argument( @attributeLists ), 
 				SyntaxFactory.Argument( @switchKeyword ), 
 				SyntaxFactory.Argument( @openParenToken ), 
 				SyntaxFactory.Argument( @expression ), 
@@ -10219,13 +10583,6 @@ namespace Caravela.Framework.Impl.Templating
 				SyntaxFactory.Argument( @expression )})));
 
 		[ExcludeFromCodeCoverage]
-		public InvocationExpressionSyntax ThrowStatement(ExpressionSyntax @throwKeyword, ExpressionSyntax @expression, ExpressionSyntax @semicolonToken)
-			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "ThrowStatement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
-				SyntaxFactory.Argument( @throwKeyword ), 
-				SyntaxFactory.Argument( @expression ), 
-				SyntaxFactory.Argument( @semicolonToken )})));
-
-		[ExcludeFromCodeCoverage]
 		public InvocationExpressionSyntax ThrowStatement(ExpressionSyntax @attributeLists, ExpressionSyntax @throwKeyword, ExpressionSyntax @expression, ExpressionSyntax @semicolonToken)
 			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "ThrowStatement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
 				SyntaxFactory.Argument( @attributeLists ), 
@@ -10243,6 +10600,13 @@ namespace Caravela.Framework.Impl.Templating
 		public InvocationExpressionSyntax ThrowStatement(ExpressionSyntax @expression)
 			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "ThrowStatement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
 				SyntaxFactory.Argument( @expression )})));
+
+		[ExcludeFromCodeCoverage]
+		public InvocationExpressionSyntax ThrowStatement(ExpressionSyntax @throwKeyword, ExpressionSyntax @expression, ExpressionSyntax @semicolonToken)
+			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "ThrowStatement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
+				SyntaxFactory.Argument( @throwKeyword ), 
+				SyntaxFactory.Argument( @expression ), 
+				SyntaxFactory.Argument( @semicolonToken )})));
 
 		[ExcludeFromCodeCoverage]
 		public InvocationExpressionSyntax Token(ExpressionSyntax @kind)
@@ -10299,8 +10663,10 @@ namespace Caravela.Framework.Impl.Templating
 );
 
 		[ExcludeFromCodeCoverage]
-		public InvocationExpressionSyntax TryStatement(ExpressionSyntax @block, ExpressionSyntax @catches, ExpressionSyntax @finally)
+		public InvocationExpressionSyntax TryStatement(ExpressionSyntax @attributeLists, ExpressionSyntax @tryKeyword, ExpressionSyntax @block, ExpressionSyntax @catches, ExpressionSyntax @finally)
 			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "TryStatement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
+				SyntaxFactory.Argument( @attributeLists ), 
+				SyntaxFactory.Argument( @tryKeyword ), 
 				SyntaxFactory.Argument( @block ), 
 				SyntaxFactory.Argument( @catches ), 
 				SyntaxFactory.Argument( @finally )})));
@@ -10322,18 +10688,16 @@ namespace Caravela.Framework.Impl.Templating
 				SyntaxFactory.Argument( @finally )})));
 
 		[ExcludeFromCodeCoverage]
-		public InvocationExpressionSyntax TryStatement(ExpressionSyntax @attributeLists, ExpressionSyntax @tryKeyword, ExpressionSyntax @block, ExpressionSyntax @catches, ExpressionSyntax @finally)
-			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "TryStatement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
-				SyntaxFactory.Argument( @attributeLists ), 
-				SyntaxFactory.Argument( @tryKeyword ), 
-				SyntaxFactory.Argument( @block ), 
-				SyntaxFactory.Argument( @catches ), 
-				SyntaxFactory.Argument( @finally )})));
-
-		[ExcludeFromCodeCoverage]
 		public InvocationExpressionSyntax TryStatement(ExpressionSyntax @catches)
 			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "TryStatement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
 				SyntaxFactory.Argument( @catches )})));
+
+		[ExcludeFromCodeCoverage]
+		public InvocationExpressionSyntax TryStatement(ExpressionSyntax @block, ExpressionSyntax @catches, ExpressionSyntax @finally)
+			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "TryStatement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
+				SyntaxFactory.Argument( @block ), 
+				SyntaxFactory.Argument( @catches ), 
+				SyntaxFactory.Argument( @finally )})));
 
 		[ExcludeFromCodeCoverage]
 		public InvocationExpressionSyntax TupleElement(ExpressionSyntax @type, ExpressionSyntax @identifier)
@@ -10502,6 +10866,13 @@ namespace Caravela.Framework.Impl.Templating
 				SyntaxFactory.Argument( @isActive )})));
 
 		[ExcludeFromCodeCoverage]
+		public InvocationExpressionSyntax UnsafeStatement(ExpressionSyntax @attributeLists, ExpressionSyntax @unsafeKeyword, ExpressionSyntax @block)
+			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "UnsafeStatement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
+				SyntaxFactory.Argument( @attributeLists ), 
+				SyntaxFactory.Argument( @unsafeKeyword ), 
+				SyntaxFactory.Argument( @block )})));
+
+		[ExcludeFromCodeCoverage]
 		public InvocationExpressionSyntax UnsafeStatement1(ExpressionSyntax @attributeLists, ExpressionSyntax @block)
 			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "UnsafeStatement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
 				SyntaxFactory.Argument( @attributeLists ), 
@@ -10514,26 +10885,14 @@ namespace Caravela.Framework.Impl.Templating
 				SyntaxFactory.Argument( @block )})));
 
 		[ExcludeFromCodeCoverage]
-		public InvocationExpressionSyntax UnsafeStatement(ExpressionSyntax @attributeLists, ExpressionSyntax @unsafeKeyword, ExpressionSyntax @block)
-			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "UnsafeStatement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
-				SyntaxFactory.Argument( @attributeLists ), 
-				SyntaxFactory.Argument( @unsafeKeyword ), 
-				SyntaxFactory.Argument( @block )})));
-
-		[ExcludeFromCodeCoverage]
 		public InvocationExpressionSyntax UnsafeStatement(ExpressionSyntax @block)
 			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "UnsafeStatement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
 				SyntaxFactory.Argument( @block )})));
 
 		[ExcludeFromCodeCoverage]
-		public InvocationExpressionSyntax UsingDirective(ExpressionSyntax @alias, ExpressionSyntax @name)
+		public InvocationExpressionSyntax UsingDirective(ExpressionSyntax @globalKeyword, ExpressionSyntax @usingKeyword, ExpressionSyntax @staticKeyword, ExpressionSyntax @alias, ExpressionSyntax @name, ExpressionSyntax @semicolonToken)
 			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "UsingDirective" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
-				SyntaxFactory.Argument( @alias ), 
-				SyntaxFactory.Argument( @name )})));
-
-		[ExcludeFromCodeCoverage]
-		public InvocationExpressionSyntax UsingDirective(ExpressionSyntax @usingKeyword, ExpressionSyntax @staticKeyword, ExpressionSyntax @alias, ExpressionSyntax @name, ExpressionSyntax @semicolonToken)
-			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "UsingDirective" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
+				SyntaxFactory.Argument( @globalKeyword ), 
 				SyntaxFactory.Argument( @usingKeyword ), 
 				SyntaxFactory.Argument( @staticKeyword ), 
 				SyntaxFactory.Argument( @alias ), 
@@ -10551,6 +10910,46 @@ namespace Caravela.Framework.Impl.Templating
 		public InvocationExpressionSyntax UsingDirective(ExpressionSyntax @name)
 			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "UsingDirective" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
 				SyntaxFactory.Argument( @name )})));
+
+		[ExcludeFromCodeCoverage]
+		public InvocationExpressionSyntax UsingDirective(ExpressionSyntax @alias, ExpressionSyntax @name)
+			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "UsingDirective" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
+				SyntaxFactory.Argument( @alias ), 
+				SyntaxFactory.Argument( @name )})));
+
+		[ExcludeFromCodeCoverage]
+		public InvocationExpressionSyntax UsingDirective(ExpressionSyntax @usingKeyword, ExpressionSyntax @staticKeyword, ExpressionSyntax @alias, ExpressionSyntax @name, ExpressionSyntax @semicolonToken)
+			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "UsingDirective" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
+				SyntaxFactory.Argument( @usingKeyword ), 
+				SyntaxFactory.Argument( @staticKeyword ), 
+				SyntaxFactory.Argument( @alias ), 
+				SyntaxFactory.Argument( @name ), 
+				SyntaxFactory.Argument( @semicolonToken )})));
+
+		[ExcludeFromCodeCoverage]
+		public InvocationExpressionSyntax UsingStatement(ExpressionSyntax @attributeLists, ExpressionSyntax @awaitKeyword, ExpressionSyntax @usingKeyword, ExpressionSyntax @openParenToken, ExpressionSyntax @declaration, ExpressionSyntax @expression, ExpressionSyntax @closeParenToken, ExpressionSyntax @statement)
+			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "UsingStatement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
+				SyntaxFactory.Argument( @attributeLists ), 
+				SyntaxFactory.Argument( @awaitKeyword ), 
+				SyntaxFactory.Argument( @usingKeyword ), 
+				SyntaxFactory.Argument( @openParenToken ), 
+				SyntaxFactory.Argument( @declaration ), 
+				SyntaxFactory.Argument( @expression ), 
+				SyntaxFactory.Argument( @closeParenToken ), 
+				SyntaxFactory.Argument( @statement )})));
+
+		[ExcludeFromCodeCoverage]
+		public InvocationExpressionSyntax UsingStatement(ExpressionSyntax @attributeLists, ExpressionSyntax @declaration, ExpressionSyntax @expression, ExpressionSyntax @statement)
+			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "UsingStatement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
+				SyntaxFactory.Argument( @attributeLists ), 
+				SyntaxFactory.Argument( @declaration ), 
+				SyntaxFactory.Argument( @expression ), 
+				SyntaxFactory.Argument( @statement )})));
+
+		[ExcludeFromCodeCoverage]
+		public InvocationExpressionSyntax UsingStatement(ExpressionSyntax @statement)
+			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "UsingStatement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
+				SyntaxFactory.Argument( @statement )})));
 
 		[ExcludeFromCodeCoverage]
 		public InvocationExpressionSyntax UsingStatement(ExpressionSyntax @usingKeyword, ExpressionSyntax @openParenToken, ExpressionSyntax @declaration, ExpressionSyntax @expression, ExpressionSyntax @closeParenToken, ExpressionSyntax @statement)
@@ -10578,31 +10977,6 @@ namespace Caravela.Framework.Impl.Templating
 			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "UsingStatement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
 				SyntaxFactory.Argument( @declaration ), 
 				SyntaxFactory.Argument( @expression ), 
-				SyntaxFactory.Argument( @statement )})));
-
-		[ExcludeFromCodeCoverage]
-		public InvocationExpressionSyntax UsingStatement(ExpressionSyntax @attributeLists, ExpressionSyntax @awaitKeyword, ExpressionSyntax @usingKeyword, ExpressionSyntax @openParenToken, ExpressionSyntax @declaration, ExpressionSyntax @expression, ExpressionSyntax @closeParenToken, ExpressionSyntax @statement)
-			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "UsingStatement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
-				SyntaxFactory.Argument( @attributeLists ), 
-				SyntaxFactory.Argument( @awaitKeyword ), 
-				SyntaxFactory.Argument( @usingKeyword ), 
-				SyntaxFactory.Argument( @openParenToken ), 
-				SyntaxFactory.Argument( @declaration ), 
-				SyntaxFactory.Argument( @expression ), 
-				SyntaxFactory.Argument( @closeParenToken ), 
-				SyntaxFactory.Argument( @statement )})));
-
-		[ExcludeFromCodeCoverage]
-		public InvocationExpressionSyntax UsingStatement(ExpressionSyntax @attributeLists, ExpressionSyntax @declaration, ExpressionSyntax @expression, ExpressionSyntax @statement)
-			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "UsingStatement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
-				SyntaxFactory.Argument( @attributeLists ), 
-				SyntaxFactory.Argument( @declaration ), 
-				SyntaxFactory.Argument( @expression ), 
-				SyntaxFactory.Argument( @statement )})));
-
-		[ExcludeFromCodeCoverage]
-		public InvocationExpressionSyntax UsingStatement(ExpressionSyntax @statement)
-			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "UsingStatement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
 				SyntaxFactory.Argument( @statement )})));
 
 		[ExcludeFromCodeCoverage]
@@ -10683,15 +11057,6 @@ namespace Caravela.Framework.Impl.Templating
 				SyntaxFactory.Argument( @condition )})));
 
 		[ExcludeFromCodeCoverage]
-		public InvocationExpressionSyntax WhileStatement(ExpressionSyntax @whileKeyword, ExpressionSyntax @openParenToken, ExpressionSyntax @condition, ExpressionSyntax @closeParenToken, ExpressionSyntax @statement)
-			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "WhileStatement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
-				SyntaxFactory.Argument( @whileKeyword ), 
-				SyntaxFactory.Argument( @openParenToken ), 
-				SyntaxFactory.Argument( @condition ), 
-				SyntaxFactory.Argument( @closeParenToken ), 
-				SyntaxFactory.Argument( @statement )})));
-
-		[ExcludeFromCodeCoverage]
 		public InvocationExpressionSyntax WhileStatement(ExpressionSyntax @attributeLists, ExpressionSyntax @whileKeyword, ExpressionSyntax @openParenToken, ExpressionSyntax @condition, ExpressionSyntax @closeParenToken, ExpressionSyntax @statement)
 			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "WhileStatement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
 				SyntaxFactory.Argument( @attributeLists ), 
@@ -10715,6 +11080,15 @@ namespace Caravela.Framework.Impl.Templating
 				SyntaxFactory.Argument( @statement )})));
 
 		[ExcludeFromCodeCoverage]
+		public InvocationExpressionSyntax WhileStatement(ExpressionSyntax @whileKeyword, ExpressionSyntax @openParenToken, ExpressionSyntax @condition, ExpressionSyntax @closeParenToken, ExpressionSyntax @statement)
+			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "WhileStatement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
+				SyntaxFactory.Argument( @whileKeyword ), 
+				SyntaxFactory.Argument( @openParenToken ), 
+				SyntaxFactory.Argument( @condition ), 
+				SyntaxFactory.Argument( @closeParenToken ), 
+				SyntaxFactory.Argument( @statement )})));
+
+		[ExcludeFromCodeCoverage]
 		public InvocationExpressionSyntax Whitespace(ExpressionSyntax @text)
 			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "Whitespace" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
 				SyntaxFactory.Argument( @text )})));
@@ -10726,16 +11100,16 @@ namespace Caravela.Framework.Impl.Templating
 				SyntaxFactory.Argument( @elastic )})));
 
 		[ExcludeFromCodeCoverage]
-		public InvocationExpressionSyntax WithExpression(ExpressionSyntax @expression, ExpressionSyntax @initializer)
-			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "WithExpression" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
-				SyntaxFactory.Argument( @expression ), 
-				SyntaxFactory.Argument( @initializer )})));
-
-		[ExcludeFromCodeCoverage]
 		public InvocationExpressionSyntax WithExpression(ExpressionSyntax @expression, ExpressionSyntax @withKeyword, ExpressionSyntax @initializer)
 			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "WithExpression" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
 				SyntaxFactory.Argument( @expression ), 
 				SyntaxFactory.Argument( @withKeyword ), 
+				SyntaxFactory.Argument( @initializer )})));
+
+		[ExcludeFromCodeCoverage]
+		public InvocationExpressionSyntax WithExpression(ExpressionSyntax @expression, ExpressionSyntax @initializer)
+			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "WithExpression" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
+				SyntaxFactory.Argument( @expression ), 
 				SyntaxFactory.Argument( @initializer )})));
 
 		[ExcludeFromCodeCoverage]
@@ -10763,6 +11137,23 @@ namespace Caravela.Framework.Impl.Templating
 				SyntaxFactory.Argument( @textTokens )})));
 
 		[ExcludeFromCodeCoverage]
+		public InvocationExpressionSyntax XmlCrefAttribute(ExpressionSyntax @name, ExpressionSyntax @equalsToken, ExpressionSyntax @startQuoteToken, ExpressionSyntax @cref, ExpressionSyntax @endQuoteToken)
+			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "XmlCrefAttribute" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
+				SyntaxFactory.Argument( @name ), 
+				SyntaxFactory.Argument( @equalsToken ), 
+				SyntaxFactory.Argument( @startQuoteToken ), 
+				SyntaxFactory.Argument( @cref ), 
+				SyntaxFactory.Argument( @endQuoteToken )})));
+
+		[ExcludeFromCodeCoverage]
+		public InvocationExpressionSyntax XmlCrefAttribute(ExpressionSyntax @name, ExpressionSyntax @startQuoteToken, ExpressionSyntax @cref, ExpressionSyntax @endQuoteToken)
+			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "XmlCrefAttribute" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
+				SyntaxFactory.Argument( @name ), 
+				SyntaxFactory.Argument( @startQuoteToken ), 
+				SyntaxFactory.Argument( @cref ), 
+				SyntaxFactory.Argument( @endQuoteToken )})));
+
+		[ExcludeFromCodeCoverage]
 		public InvocationExpressionSyntax XmlCrefAttribute(ExpressionSyntax @cref)
 			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "XmlCrefAttribute" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
 				SyntaxFactory.Argument( @cref )})));
@@ -10774,21 +11165,11 @@ namespace Caravela.Framework.Impl.Templating
 				SyntaxFactory.Argument( @quoteKind )})));
 
 		[ExcludeFromCodeCoverage]
-		public InvocationExpressionSyntax XmlCrefAttribute(ExpressionSyntax @name, ExpressionSyntax @startQuoteToken, ExpressionSyntax @cref, ExpressionSyntax @endQuoteToken)
-			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "XmlCrefAttribute" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
-				SyntaxFactory.Argument( @name ), 
-				SyntaxFactory.Argument( @startQuoteToken ), 
-				SyntaxFactory.Argument( @cref ), 
-				SyntaxFactory.Argument( @endQuoteToken )})));
-
-		[ExcludeFromCodeCoverage]
-		public InvocationExpressionSyntax XmlCrefAttribute(ExpressionSyntax @name, ExpressionSyntax @equalsToken, ExpressionSyntax @startQuoteToken, ExpressionSyntax @cref, ExpressionSyntax @endQuoteToken)
-			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "XmlCrefAttribute" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
-				SyntaxFactory.Argument( @name ), 
-				SyntaxFactory.Argument( @equalsToken ), 
-				SyntaxFactory.Argument( @startQuoteToken ), 
-				SyntaxFactory.Argument( @cref ), 
-				SyntaxFactory.Argument( @endQuoteToken )})));
+		public InvocationExpressionSyntax XmlElement(ExpressionSyntax @startTag, ExpressionSyntax @content, ExpressionSyntax @endTag)
+			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "XmlElement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
+				SyntaxFactory.Argument( @startTag ), 
+				SyntaxFactory.Argument( @content ), 
+				SyntaxFactory.Argument( @endTag )})));
 
 		[ExcludeFromCodeCoverage]
 		public InvocationExpressionSyntax XmlElement1(ExpressionSyntax @startTag, ExpressionSyntax @endTag)
@@ -10807,13 +11188,6 @@ namespace Caravela.Framework.Impl.Templating
 			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "XmlElement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
 				SyntaxFactory.Argument( @localName ), 
 				SyntaxFactory.Argument( @content )})));
-
-		[ExcludeFromCodeCoverage]
-		public InvocationExpressionSyntax XmlElement(ExpressionSyntax @startTag, ExpressionSyntax @content, ExpressionSyntax @endTag)
-			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "XmlElement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
-				SyntaxFactory.Argument( @startTag ), 
-				SyntaxFactory.Argument( @content ), 
-				SyntaxFactory.Argument( @endTag )})));
 
 		[ExcludeFromCodeCoverage]
 		public InvocationExpressionSyntax XmlElementEndTag(ExpressionSyntax @lessThanSlashToken, ExpressionSyntax @name, ExpressionSyntax @greaterThanToken)
@@ -10847,16 +11221,6 @@ namespace Caravela.Framework.Impl.Templating
 				SyntaxFactory.Argument( @name )})));
 
 		[ExcludeFromCodeCoverage]
-		public InvocationExpressionSyntax XmlEmptyElement1(ExpressionSyntax @name)
-			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "XmlEmptyElement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
-				SyntaxFactory.Argument( @name )})));
-
-		[ExcludeFromCodeCoverage]
-		public InvocationExpressionSyntax XmlEmptyElement2(ExpressionSyntax @localName)
-			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "XmlEmptyElement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
-				SyntaxFactory.Argument( @localName )})));
-
-		[ExcludeFromCodeCoverage]
 		public InvocationExpressionSyntax XmlEmptyElement(ExpressionSyntax @lessThanToken, ExpressionSyntax @name, ExpressionSyntax @attributes, ExpressionSyntax @slashGreaterThanToken)
 			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "XmlEmptyElement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
 				SyntaxFactory.Argument( @lessThanToken ), 
@@ -10869,6 +11233,16 @@ namespace Caravela.Framework.Impl.Templating
 			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "XmlEmptyElement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
 				SyntaxFactory.Argument( @name ), 
 				SyntaxFactory.Argument( @attributes )})));
+
+		[ExcludeFromCodeCoverage]
+		public InvocationExpressionSyntax XmlEmptyElement1(ExpressionSyntax @name)
+			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "XmlEmptyElement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
+				SyntaxFactory.Argument( @name )})));
+
+		[ExcludeFromCodeCoverage]
+		public InvocationExpressionSyntax XmlEmptyElement2(ExpressionSyntax @localName)
+			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "XmlEmptyElement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
+				SyntaxFactory.Argument( @localName )})));
 
 		[ExcludeFromCodeCoverage]
 		public InvocationExpressionSyntax XmlEntity(ExpressionSyntax @leading, ExpressionSyntax @text, ExpressionSyntax @value, ExpressionSyntax @trailing)
@@ -10913,11 +11287,6 @@ namespace Caravela.Framework.Impl.Templating
 				SyntaxFactory.Argument( @localName )})));
 
 		[ExcludeFromCodeCoverage]
-		public InvocationExpressionSyntax XmlNameAttribute(ExpressionSyntax @parameterName)
-			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "XmlNameAttribute" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
-				SyntaxFactory.Argument( @parameterName )})));
-
-		[ExcludeFromCodeCoverage]
 		public InvocationExpressionSyntax XmlNameAttribute(ExpressionSyntax @name, ExpressionSyntax @equalsToken, ExpressionSyntax @startQuoteToken, ExpressionSyntax @identifier, ExpressionSyntax @endQuoteToken)
 			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "XmlNameAttribute" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
 				SyntaxFactory.Argument( @name ), 
@@ -10933,6 +11302,11 @@ namespace Caravela.Framework.Impl.Templating
 				SyntaxFactory.Argument( @startQuoteToken ), 
 				SyntaxFactory.Argument( @identifier ), 
 				SyntaxFactory.Argument( @endQuoteToken )})));
+
+		[ExcludeFromCodeCoverage]
+		public InvocationExpressionSyntax XmlNameAttribute(ExpressionSyntax @parameterName)
+			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "XmlNameAttribute" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
+				SyntaxFactory.Argument( @parameterName )})));
 
 		[ExcludeFromCodeCoverage]
 		public InvocationExpressionSyntax XmlNewLine(ExpressionSyntax @text)
@@ -11050,32 +11424,6 @@ namespace Caravela.Framework.Impl.Templating
 			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "XmlText" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{})));
 
 		[ExcludeFromCodeCoverage]
-		public InvocationExpressionSyntax XmlTextAttribute1(ExpressionSyntax @name, params ExpressionSyntax[] @textTokens)
-			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "XmlTextAttribute" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
-				SyntaxFactory.Argument( @name )}))				.AddArguments( @textTokens.Select( p => SyntaxFactory.Argument( p ) ).ToArray() )
-);
-
-		[ExcludeFromCodeCoverage]
-		public InvocationExpressionSyntax XmlTextAttribute2(ExpressionSyntax @name, ExpressionSyntax @value)
-			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "XmlTextAttribute" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
-				SyntaxFactory.Argument( @name ), 
-				SyntaxFactory.Argument( @value )})));
-
-		[ExcludeFromCodeCoverage]
-		public InvocationExpressionSyntax XmlTextAttribute1(ExpressionSyntax @name, ExpressionSyntax @startQuoteToken, ExpressionSyntax @endQuoteToken)
-			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "XmlTextAttribute" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
-				SyntaxFactory.Argument( @name ), 
-				SyntaxFactory.Argument( @startQuoteToken ), 
-				SyntaxFactory.Argument( @endQuoteToken )})));
-
-		[ExcludeFromCodeCoverage]
-		public InvocationExpressionSyntax XmlTextAttribute2(ExpressionSyntax @name, ExpressionSyntax @quoteKind, ExpressionSyntax @textTokens)
-			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "XmlTextAttribute" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
-				SyntaxFactory.Argument( @name ), 
-				SyntaxFactory.Argument( @quoteKind ), 
-				SyntaxFactory.Argument( @textTokens )})));
-
-		[ExcludeFromCodeCoverage]
 		public InvocationExpressionSyntax XmlTextAttribute(ExpressionSyntax @name, ExpressionSyntax @equalsToken, ExpressionSyntax @startQuoteToken, ExpressionSyntax @textTokens, ExpressionSyntax @endQuoteToken)
 			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "XmlTextAttribute" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
 				SyntaxFactory.Argument( @name ), 
@@ -11093,12 +11441,30 @@ namespace Caravela.Framework.Impl.Templating
 				SyntaxFactory.Argument( @endQuoteToken )})));
 
 		[ExcludeFromCodeCoverage]
-		public InvocationExpressionSyntax XmlTextLiteral(ExpressionSyntax @leading, ExpressionSyntax @text, ExpressionSyntax @value, ExpressionSyntax @trailing)
-			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "XmlTextLiteral" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
-				SyntaxFactory.Argument( @leading ), 
-				SyntaxFactory.Argument( @text ), 
-				SyntaxFactory.Argument( @value ), 
-				SyntaxFactory.Argument( @trailing )})));
+		public InvocationExpressionSyntax XmlTextAttribute1(ExpressionSyntax @name, ExpressionSyntax @startQuoteToken, ExpressionSyntax @endQuoteToken)
+			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "XmlTextAttribute" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
+				SyntaxFactory.Argument( @name ), 
+				SyntaxFactory.Argument( @startQuoteToken ), 
+				SyntaxFactory.Argument( @endQuoteToken )})));
+
+		[ExcludeFromCodeCoverage]
+		public InvocationExpressionSyntax XmlTextAttribute2(ExpressionSyntax @name, ExpressionSyntax @quoteKind, ExpressionSyntax @textTokens)
+			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "XmlTextAttribute" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
+				SyntaxFactory.Argument( @name ), 
+				SyntaxFactory.Argument( @quoteKind ), 
+				SyntaxFactory.Argument( @textTokens )})));
+
+		[ExcludeFromCodeCoverage]
+		public InvocationExpressionSyntax XmlTextAttribute1(ExpressionSyntax @name, params ExpressionSyntax[] @textTokens)
+			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "XmlTextAttribute" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
+				SyntaxFactory.Argument( @name )}))				.AddArguments( @textTokens.Select( p => SyntaxFactory.Argument( p ) ).ToArray() )
+);
+
+		[ExcludeFromCodeCoverage]
+		public InvocationExpressionSyntax XmlTextAttribute2(ExpressionSyntax @name, ExpressionSyntax @value)
+			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "XmlTextAttribute" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
+				SyntaxFactory.Argument( @name ), 
+				SyntaxFactory.Argument( @value )})));
 
 		[ExcludeFromCodeCoverage]
 		public InvocationExpressionSyntax XmlTextLiteral(ExpressionSyntax @value)
@@ -11110,6 +11476,14 @@ namespace Caravela.Framework.Impl.Templating
 			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "XmlTextLiteral" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
 				SyntaxFactory.Argument( @text ), 
 				SyntaxFactory.Argument( @value )})));
+
+		[ExcludeFromCodeCoverage]
+		public InvocationExpressionSyntax XmlTextLiteral(ExpressionSyntax @leading, ExpressionSyntax @text, ExpressionSyntax @value, ExpressionSyntax @trailing)
+			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "XmlTextLiteral" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
+				SyntaxFactory.Argument( @leading ), 
+				SyntaxFactory.Argument( @text ), 
+				SyntaxFactory.Argument( @value ), 
+				SyntaxFactory.Argument( @trailing )})));
 
 		[ExcludeFromCodeCoverage]
 		public InvocationExpressionSyntax XmlTextNewLine(ExpressionSyntax @text)
@@ -11146,15 +11520,6 @@ namespace Caravela.Framework.Impl.Templating
 );
 
 		[ExcludeFromCodeCoverage]
-		public InvocationExpressionSyntax YieldStatement(ExpressionSyntax @kind, ExpressionSyntax @yieldKeyword, ExpressionSyntax @returnOrBreakKeyword, ExpressionSyntax @expression, ExpressionSyntax @semicolonToken)
-			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "YieldStatement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
-				SyntaxFactory.Argument( @kind ), 
-				SyntaxFactory.Argument( @yieldKeyword ), 
-				SyntaxFactory.Argument( @returnOrBreakKeyword ), 
-				SyntaxFactory.Argument( @expression ), 
-				SyntaxFactory.Argument( @semicolonToken )})));
-
-		[ExcludeFromCodeCoverage]
 		public InvocationExpressionSyntax YieldStatement(ExpressionSyntax @kind, ExpressionSyntax @attributeLists, ExpressionSyntax @yieldKeyword, ExpressionSyntax @returnOrBreakKeyword, ExpressionSyntax @expression, ExpressionSyntax @semicolonToken)
 			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "YieldStatement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
 				SyntaxFactory.Argument( @kind ), 
@@ -11176,6 +11541,15 @@ namespace Caravela.Framework.Impl.Templating
 			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "YieldStatement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
 				SyntaxFactory.Argument( @kind ), 
 				SyntaxFactory.Argument( @expression )})));
+
+		[ExcludeFromCodeCoverage]
+		public InvocationExpressionSyntax YieldStatement(ExpressionSyntax @kind, ExpressionSyntax @yieldKeyword, ExpressionSyntax @returnOrBreakKeyword, ExpressionSyntax @expression, ExpressionSyntax @semicolonToken)
+			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "YieldStatement" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
+				SyntaxFactory.Argument( @kind ), 
+				SyntaxFactory.Argument( @yieldKeyword ), 
+				SyntaxFactory.Argument( @returnOrBreakKeyword ), 
+				SyntaxFactory.Argument( @expression ), 
+				SyntaxFactory.Argument( @semicolonToken )})));
 
 }
 }
