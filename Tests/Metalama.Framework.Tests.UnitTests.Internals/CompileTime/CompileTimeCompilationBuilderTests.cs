@@ -880,8 +880,8 @@ namespace SomeNamespace
 
             var expected = @"
 using System;
-using Metalama.Framework.Fabrics;
 using Metalama.Framework.Engine.CompileTime;
+using Metalama.Framework.Fabrics;
 
 [OriginalPath(""main.cs"")]
 [OriginalId(""T:SomeClass.Fabric"")]
