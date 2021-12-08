@@ -1,7 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-namespace Metalama.Framework.Impl.Linking
+namespace Metalama.Framework.Engine.Linking
 {
     /// <summary>
     /// Described semantics of a symbol in intermediate compilation. This allows to differentiate between versions of override targets.

@@ -3,13 +3,13 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Impl.CodeModel;
-using Metalama.Framework.Impl.CompileTime;
+using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Project;
 using System;
 using System.Linq;
 
-namespace Metalama.Framework.Impl.Advices
+namespace Metalama.Framework.Engine.Advices
 {
     internal readonly struct TemplateMemberRef
     {

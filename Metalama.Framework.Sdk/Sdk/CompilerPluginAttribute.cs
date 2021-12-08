@@ -3,7 +3,7 @@
 
 using System;
 
-namespace Metalama.Framework.Impl.Sdk
+namespace Metalama.Framework.Engine.Sdk
 {
     // IMPORTANT: If you rename this class, or move it to a different namespace, you also have to update 
     // src\Compilers\Core\Portable\DiagnosticAnalyzer\AnalyzerFileReference.cs in the Metalama.Compiler repo.

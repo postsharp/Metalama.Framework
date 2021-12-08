@@ -4,7 +4,7 @@
 using System;
 using System.Globalization;
 
-namespace Metalama.Framework.Impl.CompileTime.Serialization.Serializers
+namespace Metalama.Framework.Engine.CompileTime.Serialization.Serializers
 {
     internal sealed class SingleSerializer : IntrinsicSerializer<float>
     {

@@ -2,7 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Aspects;
-using Metalama.Framework.Impl.CodeModel;
+using Metalama.Framework.Engine.CodeModel;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.IO;
@@ -11,7 +11,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
 
-namespace Metalama.Framework.Impl.Formatting
+namespace Metalama.Framework.Engine.Formatting
 {
     internal class XmlDocumentationReader
     {

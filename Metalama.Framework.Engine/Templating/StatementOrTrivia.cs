@@ -8,7 +8,7 @@ using System;
 using System.Linq;
 using System.Reflection;
 
-namespace Metalama.Framework.Impl.Templating
+namespace Metalama.Framework.Engine.Templating
 {
     [Obfuscation( Exclude = true )]
     public readonly struct StatementOrTrivia

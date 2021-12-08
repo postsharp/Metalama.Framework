@@ -2,13 +2,13 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Impl.CodeModel.References;
+using Metalama.Framework.Engine.CodeModel.References;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Threading;
 
-namespace Metalama.Framework.Impl.CodeModel.Collections
+namespace Metalama.Framework.Engine.CodeModel.Collections
 {
     internal abstract class DeclarationList<TDeclaration, TSource> : IReadOnlyList<TDeclaration>
         where TDeclaration : class, IDeclaration

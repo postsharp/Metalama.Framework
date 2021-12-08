@@ -4,7 +4,7 @@
 using Metalama.Framework.Code;
 using System.Reflection;
 
-namespace Metalama.Framework.Impl.CodeModel.References
+namespace Metalama.Framework.Engine.CodeModel.References
 {
     /// <summary>
     /// A specialization of <see cref="ISdkRef{T}"/> that exposes a <see cref="Name"/> property.

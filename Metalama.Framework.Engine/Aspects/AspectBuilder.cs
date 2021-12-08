@@ -4,12 +4,12 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
-using Metalama.Framework.Impl.Advices;
-using Metalama.Framework.Impl.CodeModel;
-using Metalama.Framework.Impl.Diagnostics;
-using Metalama.Framework.Impl.Fabrics;
-using Metalama.Framework.Impl.Pipeline;
-using Metalama.Framework.Impl.Utilities;
+using Metalama.Framework.Engine.Advices;
+using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Fabrics;
+using Metalama.Framework.Engine.Pipeline;
+using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Project;
 using Metalama.Framework.Validation;
 using System;
@@ -18,7 +18,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
 
-namespace Metalama.Framework.Impl.Aspects
+namespace Metalama.Framework.Engine.Aspects
 {
     internal class AspectBuilder<T> : IAspectBuilder<T>, IAspectBuilderInternal
         where T : class, IDeclaration

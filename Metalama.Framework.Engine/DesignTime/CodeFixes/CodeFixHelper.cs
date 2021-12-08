@@ -1,10 +1,10 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Metalama.Framework.Impl.CodeModel;
-using Metalama.Framework.Impl.Diagnostics;
-using Metalama.Framework.Impl.Formatting;
-using Metalama.Framework.Impl.Utilities;
+using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Formatting;
+using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System.Collections.Immutable;
@@ -12,7 +12,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Metalama.Framework.Impl.DesignTime.CodeFixes
+namespace Metalama.Framework.Engine.DesignTime.CodeFixes
 {
     /// <summary>
     /// Helper methods used by different implementations of code fixes.

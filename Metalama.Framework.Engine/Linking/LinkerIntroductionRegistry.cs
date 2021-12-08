@@ -3,10 +3,10 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
-using Metalama.Framework.Impl.CodeModel;
-using Metalama.Framework.Impl.CodeModel.Builders;
-using Metalama.Framework.Impl.Transformations;
-using Metalama.Framework.Impl.Utilities;
+using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.Builders;
+using Metalama.Framework.Engine.Transformations;
+using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -15,7 +15,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using MethodKind = Microsoft.CodeAnalysis.MethodKind;
 
-namespace Metalama.Framework.Impl.Linking
+namespace Metalama.Framework.Engine.Linking
 {
     /// <summary>
     /// Stores information about introductions and intermediate compilation.

@@ -4,7 +4,7 @@
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 
-namespace Metalama.Framework.Impl.CompileTime.Serialization
+namespace Metalama.Framework.Engine.CompileTime.Serialization
 {
     /// <summary>
     /// Describes serializable type, serializer of which needs to be emitted in this compilation.

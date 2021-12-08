@@ -7,7 +7,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Linq;
 using SpecialType = Microsoft.CodeAnalysis.SpecialType;
 
-namespace Metalama.Framework.Impl.CodeModel
+namespace Metalama.Framework.Engine.CodeModel
 {
     internal static partial class IteratorHelper
     {

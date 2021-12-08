@@ -3,10 +3,10 @@
 
 using Metalama.Framework.DesignTime.Contracts;
 using Metalama.Framework.Diagnostics;
-using Metalama.Framework.Impl.CompileTime;
-using Metalama.Framework.Impl.Diagnostics;
-using Metalama.Framework.Impl.Serialization;
-using Metalama.Framework.Impl.Utilities;
+using Metalama.Framework.Engine.CompileTime;
+using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Serialization;
+using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -22,7 +22,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 #pragma warning disable SA1124 // Don't use regions
 
-namespace Metalama.Framework.Impl.Templating
+namespace Metalama.Framework.Engine.Templating
 {
     /// <summary>
     /// A <see cref="CSharpSyntaxRewriter"/> that adds annotation that distinguish compile-time from

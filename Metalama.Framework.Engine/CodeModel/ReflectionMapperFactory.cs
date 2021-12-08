@@ -5,7 +5,7 @@ using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System.Runtime.CompilerServices;
 
-namespace Metalama.Framework.Impl.CodeModel
+namespace Metalama.Framework.Engine.CodeModel
 {
     internal class ReflectionMapperFactory : IService
     {

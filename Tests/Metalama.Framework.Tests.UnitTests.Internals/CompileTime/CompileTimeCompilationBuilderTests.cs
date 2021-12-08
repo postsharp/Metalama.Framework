@@ -1,10 +1,10 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Metalama.Framework.Impl;
-using Metalama.Framework.Impl.CodeModel;
-using Metalama.Framework.Impl.CompileTime;
-using Metalama.Framework.Impl.Diagnostics;
+using Metalama.Framework.Engine;
+using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CompileTime;
+using Metalama.Framework.Engine.Diagnostics;
 using Metalama.TestFramework;
 using Metalama.TestFramework.Utilities;
 using Microsoft.CodeAnalysis;
@@ -693,12 +693,12 @@ using Metalama.Framework.Aspects;
 [CompileTimeOnly]
 public class CompileTimeOnlyClass
 {
-   static global::System.Type Type1 = global::Metalama.Framework.Impl.ReflectionMocks.CompileTimeType.GetCompileTimeType(""1 (D \""RunTimeOnlyClass\"" (N \""\"" 0 (U (S \""test\"" 3) 2) 1) 0 0 (% 0) 0)"",""RunTimeOnlyClass"");
+   static global::System.Type Type1 = global::Metalama.Framework.Engine.ReflectionMocks.CompileTimeType.GetCompileTimeType(""1 (D \""RunTimeOnlyClass\"" (N \""\"" 0 (U (S \""test\"" 3) 2) 1) 0 0 (% 0) 0)"",""RunTimeOnlyClass"");
    static global::System.Type Type2 = typeof(global::CompileTimeOnlyClass);
    static string Name1 = ""RunTimeOnlyClass"";
    static string Name2 = ""CompileTimeOnlyClass"";
 
-   void Method() { var t = global::Metalama.Framework.Impl.ReflectionMocks.CompileTimeType.GetCompileTimeType(""1 (D \""RunTimeOnlyClass\"" (N \""\"" 0 (U (S \""test\"" 3) 2) 1) 0 0 (% 0) 0)"",""RunTimeOnlyClass""); }
+   void Method() { var t = global::Metalama.Framework.Engine.ReflectionMocks.CompileTimeType.GetCompileTimeType(""1 (D \""RunTimeOnlyClass\"" (N \""\"" 0 (U (S \""test\"" 3) 2) 1) 0 0 (% 0) 0)"",""RunTimeOnlyClass""); }
    string Property => ""RunTimeOnlyClass"";
 }
 ";
@@ -881,7 +881,7 @@ namespace SomeNamespace
             var expected = @"
 using System;
 using Metalama.Framework.Fabrics;
-using Metalama.Framework.Impl.CompileTime;
+using Metalama.Framework.Engine.CompileTime;
 
 [OriginalPath(""main.cs"")]
 [OriginalId(""T:SomeClass.Fabric"")]

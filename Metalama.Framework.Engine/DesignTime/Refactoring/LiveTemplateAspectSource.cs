@@ -3,15 +3,15 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Impl.Aspects;
-using Metalama.Framework.Impl.CodeModel;
-using Metalama.Framework.Impl.Diagnostics;
+using Metalama.Framework.Engine.Aspects;
+using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Diagnostics;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Threading;
 
-namespace Metalama.Framework.Impl.DesignTime.Refactoring
+namespace Metalama.Framework.Engine.DesignTime.Refactoring
 {
     /// <summary>
     /// A fake instance of <see cref="IAspectSource"/> to avoid having to support null sources.

@@ -5,7 +5,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Linq.Expressions;
 
-namespace Metalama.Framework.Impl.Diagnostics
+namespace Metalama.Framework.Engine.Diagnostics
 {
     /// <summary>
     /// Provides a method <see cref="ToArray"/> that converts a tuple into an array.

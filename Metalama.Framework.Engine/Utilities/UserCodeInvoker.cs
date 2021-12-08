@@ -1,9 +1,9 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Metalama.Framework.Impl.CompileTime;
-using Metalama.Framework.Impl.Diagnostics;
-using Metalama.Framework.Impl.Options;
+using Metalama.Framework.Engine.CompileTime;
+using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -16,7 +16,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 
-namespace Metalama.Framework.Impl.Utilities
+namespace Metalama.Framework.Engine.Utilities
 {
     /// <summary>
     /// Invokes some user code, handles exceptions, switches the <see cref="UserCodeExecutionContext"/>,

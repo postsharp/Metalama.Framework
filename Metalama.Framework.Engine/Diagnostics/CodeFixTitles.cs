@@ -5,7 +5,7 @@ using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 
-namespace Metalama.Framework.Impl.Diagnostics
+namespace Metalama.Framework.Engine.Diagnostics
 {
     public readonly struct CodeFixTitles
     {

@@ -5,14 +5,14 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Eligibility;
 using Metalama.Framework.Fabrics;
-using Metalama.Framework.Impl.Aspects;
-using Metalama.Framework.Impl.CodeModel;
+using Metalama.Framework.Engine.Aspects;
+using Metalama.Framework.Engine.CodeModel;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 
-namespace Metalama.Framework.Impl.Fabrics
+namespace Metalama.Framework.Engine.Fabrics
 {
     /// <summary>
     /// An implementation of <see cref="IAspect"/> that invokes all fabrics on the declaration.

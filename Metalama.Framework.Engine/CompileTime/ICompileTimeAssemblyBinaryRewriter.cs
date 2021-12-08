@@ -4,7 +4,7 @@
 using Metalama.Framework.Project;
 using System.IO;
 
-namespace Metalama.Framework.Impl.CompileTime
+namespace Metalama.Framework.Engine.CompileTime
 {
     /// <summary>
     /// Defines a method <see cref="Rewrite"/> called by the compile-time assembly builder

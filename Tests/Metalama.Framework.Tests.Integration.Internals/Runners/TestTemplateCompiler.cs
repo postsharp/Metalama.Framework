@@ -1,9 +1,9 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Metalama.Framework.Impl;
-using Metalama.Framework.Impl.Diagnostics;
-using Metalama.Framework.Impl.Templating;
+using Metalama.Framework.Engine;
+using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Templating;
 using Metalama.TestFramework;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;

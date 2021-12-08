@@ -2,12 +2,12 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Impl.CodeModel.References;
+using Metalama.Framework.Engine.CodeModel.References;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 
-namespace Metalama.Framework.Impl.CodeModel
+namespace Metalama.Framework.Engine.CodeModel
 {
     internal interface IDeclarationImpl : ISdkDeclaration, IDeclarationInternal, IDiagnosticLocationImpl
     {

@@ -3,11 +3,11 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Impl.CodeModel;
-using Metalama.Framework.Impl.CompileTime;
-using Metalama.Framework.Impl.Diagnostics;
-using Metalama.Framework.Impl.Fabrics;
-using Metalama.Framework.Impl.Templating;
+using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CompileTime;
+using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Fabrics;
+using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
@@ -16,7 +16,7 @@ using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 
-namespace Metalama.Framework.Impl.Aspects
+namespace Metalama.Framework.Engine.Aspects
 {
     /// <summary>
     /// A base class for <see cref="AspectClass"/> and <see cref="FabricTemplateClass"/>. Represents an aspect, but does not

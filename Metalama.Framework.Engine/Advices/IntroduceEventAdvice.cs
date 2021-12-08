@@ -4,16 +4,16 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
-using Metalama.Framework.Impl.Aspects;
-using Metalama.Framework.Impl.CodeModel;
-using Metalama.Framework.Impl.CodeModel.Builders;
-using Metalama.Framework.Impl.Diagnostics;
-using Metalama.Framework.Impl.Transformations;
-using Metalama.Framework.Impl.Utilities;
+using Metalama.Framework.Engine.Aspects;
+using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.Builders;
+using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Transformations;
+using Metalama.Framework.Engine.Utilities;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Metalama.Framework.Impl.Advices
+namespace Metalama.Framework.Engine.Advices
 {
     internal class IntroduceEventAdvice : IntroduceMemberAdvice<IEvent, EventBuilder>
     {

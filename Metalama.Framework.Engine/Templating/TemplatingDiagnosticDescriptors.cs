@@ -7,7 +7,7 @@ using Microsoft.CodeAnalysis;
 using System;
 using static Metalama.Framework.Diagnostics.Severity;
 
-namespace Metalama.Framework.Impl.Templating
+namespace Metalama.Framework.Engine.Templating
 {
 #pragma warning disable SA1118 // Allow multi-line parameters.
 

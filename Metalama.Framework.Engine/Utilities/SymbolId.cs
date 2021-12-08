@@ -12,7 +12,7 @@ using SymbolKeyExtensions = roslyn::Microsoft.CodeAnalysis.SymbolKeyExtensions;
 
 #pragma warning restore SA1516 // Elements should be separated by blank line
 
-namespace Metalama.Framework.Impl.Utilities
+namespace Metalama.Framework.Engine.Utilities
 {
     /// <summary>
     /// An identifier of an <see cref="ISymbol"/> that works across compilations, but not across different versions of Roslyn.  

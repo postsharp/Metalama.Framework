@@ -4,7 +4,7 @@
 using Metalama.Framework.Serialization;
 using System;
 
-namespace Metalama.Framework.Impl.CompileTime.Serialization
+namespace Metalama.Framework.Engine.CompileTime.Serialization
 {
     /// <summary>
     /// Provides instances of the <see cref="IMetaSerializerFactory"/> interface given the object type.

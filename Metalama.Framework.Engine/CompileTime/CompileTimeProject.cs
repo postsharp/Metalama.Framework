@@ -5,9 +5,9 @@ using Metalama.Compiler;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Fabrics;
-using Metalama.Framework.Impl.Collections;
-using Metalama.Framework.Impl.Diagnostics;
-using Metalama.Framework.Impl.Templating.Mapping;
+using Metalama.Framework.Engine.Collections;
+using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Templating.Mapping;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
@@ -19,7 +19,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 
-namespace Metalama.Framework.Impl.CompileTime
+namespace Metalama.Framework.Engine.CompileTime
 {
     /// <summary>
     /// Represents the compile-time project extracted from a run-time project, including its

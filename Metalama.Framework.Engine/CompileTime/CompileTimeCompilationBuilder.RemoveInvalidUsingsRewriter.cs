@@ -5,7 +5,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace Metalama.Framework.Impl.CompileTime
+namespace Metalama.Framework.Engine.CompileTime
 {
     internal partial class CompileTimeCompilationBuilder
     {

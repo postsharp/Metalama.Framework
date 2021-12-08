@@ -1,7 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Metalama.Framework.Impl.CompileTime;
+using Metalama.Framework.Engine.CompileTime;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
@@ -10,7 +10,7 @@ using System.IO;
 using System.Reflection.Metadata;
 using System.Reflection.PortableExecutable;
 
-namespace Metalama.Framework.Impl.Utilities
+namespace Metalama.Framework.Engine.Utilities
 {
     internal static class ManagedResourceReader
     {

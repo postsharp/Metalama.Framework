@@ -3,11 +3,11 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
-using Metalama.Framework.Impl.Aspects;
-using Metalama.Framework.Impl.CodeModel.Collections;
-using Metalama.Framework.Impl.CodeModel.References;
-using Metalama.Framework.Impl.Diagnostics;
-using Metalama.Framework.Impl.Utilities;
+using Metalama.Framework.Engine.Aspects;
+using Metalama.Framework.Engine.CodeModel.Collections;
+using Metalama.Framework.Engine.CodeModel.References;
+using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -15,7 +15,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using TypedConstant = Metalama.Framework.Code.TypedConstant;
 
-namespace Metalama.Framework.Impl.CodeModel
+namespace Metalama.Framework.Engine.CodeModel
 {
     internal class Attribute : IAttributeImpl
     {

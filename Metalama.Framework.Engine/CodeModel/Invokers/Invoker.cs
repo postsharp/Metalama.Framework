@@ -3,11 +3,11 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Invokers;
-using Metalama.Framework.Impl.Aspects;
-using Metalama.Framework.Impl.Utilities;
+using Metalama.Framework.Engine.Aspects;
+using Metalama.Framework.Engine.Utilities;
 using System;
 
-namespace Metalama.Framework.Impl.CodeModel.Invokers
+namespace Metalama.Framework.Engine.CodeModel.Invokers
 {
     internal abstract class Invoker : IInvoker
     {

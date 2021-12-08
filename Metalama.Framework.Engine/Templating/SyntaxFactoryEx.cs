@@ -9,7 +9,7 @@ using System;
 using System.Linq;
 using RefKind = Metalama.Framework.Code.RefKind;
 
-namespace Metalama.Framework.Impl.Templating
+namespace Metalama.Framework.Engine.Templating
 {
     /// <summary>
     /// Helper methods that would ideally be in the <see cref="SyntaxFactory"/> class.

@@ -1,7 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Metalama.Framework.Impl.CodeModel;
+using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Serialization;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -11,7 +11,7 @@ using System.Collections.Generic;
 using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
-namespace Metalama.Framework.Impl.CompileTime.Serialization
+namespace Metalama.Framework.Engine.CompileTime.Serialization
 {
     internal class MetaSerializerGenerator : IMetaSerializerGenerator
     {

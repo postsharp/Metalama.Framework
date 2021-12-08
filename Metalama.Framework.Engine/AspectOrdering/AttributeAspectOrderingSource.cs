@@ -3,13 +3,13 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code.Collections;
-using Metalama.Framework.Impl.CompileTime;
-using Metalama.Framework.Impl.Diagnostics;
+using Metalama.Framework.Engine.CompileTime;
+using Metalama.Framework.Engine.Diagnostics;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Metalama.Framework.Impl.AspectOrdering
+namespace Metalama.Framework.Engine.AspectOrdering
 {
     internal class AttributeAspectOrderingSource : IAspectOrderingSource
     {

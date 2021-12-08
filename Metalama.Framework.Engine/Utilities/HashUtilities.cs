@@ -6,7 +6,7 @@ using System.Collections.Immutable;
 using System.Globalization;
 using System.Text;
 
-namespace Metalama.Framework.Impl.Utilities
+namespace Metalama.Framework.Engine.Utilities
 {
     internal static class HashUtilities
     {

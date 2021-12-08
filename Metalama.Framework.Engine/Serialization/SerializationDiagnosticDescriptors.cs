@@ -6,7 +6,7 @@ using static Metalama.Framework.Diagnostics.Severity;
 
 #pragma warning disable SA1118 // Allow multi-line parameters.
 
-namespace Metalama.Framework.Impl.Serialization
+namespace Metalama.Framework.Engine.Serialization
 {
     internal static class SerializationDiagnosticDescriptors
     {

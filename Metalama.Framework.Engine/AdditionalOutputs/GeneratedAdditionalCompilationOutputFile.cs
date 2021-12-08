@@ -4,7 +4,7 @@
 using System;
 using System.IO;
 
-namespace Metalama.Framework.Impl.AdditionalOutputs
+namespace Metalama.Framework.Engine.AdditionalOutputs
 {
     internal class GeneratedAdditionalCompilationOutputFile : AdditionalCompilationOutputFile
     {

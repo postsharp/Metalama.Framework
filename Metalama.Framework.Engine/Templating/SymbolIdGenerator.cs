@@ -8,7 +8,7 @@ using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Threading;
 
-namespace Metalama.Framework.Impl.Templating
+namespace Metalama.Framework.Engine.Templating
 {
     internal sealed class SymbolIdGenerator
     {

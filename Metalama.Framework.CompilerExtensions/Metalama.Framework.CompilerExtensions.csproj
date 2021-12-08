@@ -12,11 +12,11 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <Compile Include="..\Metalama.Framework.Impl\AssertionFailedException.cs" Link="Utilities\AssertionFailedException.cs" />
-	  <Compile Include="..\Metalama.Framework.Impl\Utilities\AssemblyMetadataReader.cs" Link="Utilities\AssemblyMetadataReader.cs" />
-	  <Compile Include="..\Metalama.Framework.Impl\Utilities\RetryHelper.cs" Link="Utilities\RetryHelper.cs" />
-	  <Compile Include="..\Metalama.Framework.Impl\Utilities\TempPathHelper.cs" Link="Utilities\TempPathHelper.cs" />
-	  <Compile Include="..\Metalama.Framework.Impl\Utilities\Logger.cs" Link="Utilities\Logger.cs" />
+	  <Compile Include="..\Metalama.Framework.Engine\AssertionFailedException.cs" Link="Utilities\AssertionFailedException.cs" />
+	  <Compile Include="..\Metalama.Framework.Engine\Utilities\AssemblyMetadataReader.cs" Link="Utilities\AssemblyMetadataReader.cs" />
+	  <Compile Include="..\Metalama.Framework.Engine\Utilities\RetryHelper.cs" Link="Utilities\RetryHelper.cs" />
+	  <Compile Include="..\Metalama.Framework.Engine\Utilities\TempPathHelper.cs" Link="Utilities\TempPathHelper.cs" />
+	  <Compile Include="..\Metalama.Framework.Engine\Utilities\Logger.cs" Link="Utilities\Logger.cs" />
 	</ItemGroup>
 
 
@@ -56,7 +56,7 @@
         <EmbeddedResource Include="$(PkgMetalama_RoslynUtilities)\lib\netstandard2.0\Metalama.RoslynUtilities.dll" Link="Resources\Metalama.RoslynUtilities.dll" />
 
 
-		<EmbeddedResource Include="..\Metalama.Framework.Impl\bin\$(Configuration)\$(TargetFramework)\Metalama.Framework.Impl.dll" Link="Resources\Metalama.Framework.Impl.dll" />
+		<EmbeddedResource Include="..\Metalama.Framework.Engine\bin\$(Configuration)\$(TargetFramework)\Metalama.Framework.Engine.dll" Link="Resources\Metalama.Framework.Engine.dll" />
 		<EmbeddedResource Include="..\Metalama.Framework.DesignTime.Contracts\bin\$(Configuration)\$(TargetFramework)\Metalama.Framework.DesignTime.Contracts.dll" Link="Resources\Metalama.Framework.DesignTime.Contracts.dll" />
 		<EmbeddedResource Include="..\Metalama.Framework.Sdk\bin\$(Configuration)\$(TargetFramework)\Metalama.Framework.Sdk.dll" Link="Resources\Metalama.Framework.Sdk.dll" />
 		<EmbeddedResource Include="..\Metalama.Framework\bin\$(Configuration)\$(TargetFramework)\Metalama.Framework.dll" Link="Resources\Metalama.Framework.dll" />

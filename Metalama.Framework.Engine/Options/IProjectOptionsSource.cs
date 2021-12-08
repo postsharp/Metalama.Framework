@@ -3,7 +3,7 @@
 
 using Microsoft.CodeAnalysis.Diagnostics;
 
-namespace Metalama.Framework.Impl.Options
+namespace Metalama.Framework.Engine.Options
 {
     /// <summary>
     /// Gives access to configuration options (typically values pulled from MSBuild). The

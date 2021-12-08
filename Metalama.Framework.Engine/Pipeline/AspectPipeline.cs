@@ -4,17 +4,17 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Diagnostics;
-using Metalama.Framework.Impl.AdditionalOutputs;
-using Metalama.Framework.Impl.AspectOrdering;
-using Metalama.Framework.Impl.Aspects;
-using Metalama.Framework.Impl.CodeModel;
-using Metalama.Framework.Impl.Collections;
-using Metalama.Framework.Impl.CompileTime;
-using Metalama.Framework.Impl.Diagnostics;
-using Metalama.Framework.Impl.Fabrics;
-using Metalama.Framework.Impl.Options;
-using Metalama.Framework.Impl.Sdk;
-using Metalama.Framework.Impl.Utilities;
+using Metalama.Framework.Engine.AdditionalOutputs;
+using Metalama.Framework.Engine.AspectOrdering;
+using Metalama.Framework.Engine.Aspects;
+using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Collections;
+using Metalama.Framework.Engine.CompileTime;
+using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Fabrics;
+using Metalama.Framework.Engine.Options;
+using Metalama.Framework.Engine.Sdk;
+using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using MoreLinq;
@@ -25,7 +25,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
 
-namespace Metalama.Framework.Impl.Pipeline
+namespace Metalama.Framework.Engine.Pipeline
 {
     /// <summary>
     /// The base class for the main process of Metalama.

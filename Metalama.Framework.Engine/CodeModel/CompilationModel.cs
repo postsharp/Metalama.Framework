@@ -5,15 +5,15 @@ using Metalama.Compiler;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
-using Metalama.Framework.Impl.Aspects;
-using Metalama.Framework.Impl.CodeModel.Builders;
-using Metalama.Framework.Impl.CodeModel.Collections;
-using Metalama.Framework.Impl.CodeModel.References;
-using Metalama.Framework.Impl.Collections;
-using Metalama.Framework.Impl.CompileTime;
-using Metalama.Framework.Impl.Metrics;
-using Metalama.Framework.Impl.Transformations;
-using Metalama.Framework.Impl.Utilities;
+using Metalama.Framework.Engine.Aspects;
+using Metalama.Framework.Engine.CodeModel.Builders;
+using Metalama.Framework.Engine.CodeModel.Collections;
+using Metalama.Framework.Engine.CodeModel.References;
+using Metalama.Framework.Engine.Collections;
+using Metalama.Framework.Engine.CompileTime;
+using Metalama.Framework.Engine.Metrics;
+using Metalama.Framework.Engine.Transformations;
+using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
@@ -21,7 +21,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 
-namespace Metalama.Framework.Impl.CodeModel
+namespace Metalama.Framework.Engine.CodeModel
 {
     internal partial class CompilationModel : SymbolBasedDeclaration, ICompilationInternal
     {

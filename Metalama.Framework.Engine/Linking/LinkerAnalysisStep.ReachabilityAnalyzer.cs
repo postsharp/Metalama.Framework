@@ -5,7 +5,7 @@ using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Metalama.Framework.Impl.Linking
+namespace Metalama.Framework.Engine.Linking
 {
     internal partial class LinkerAnalysisStep
     {

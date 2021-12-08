@@ -3,12 +3,12 @@
 
 using Metalama.Compiler;
 using Metalama.Framework.Code.Collections;
-using Metalama.Framework.Impl.Utilities;
+using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 
-namespace Metalama.Framework.Impl.CodeModel
+namespace Metalama.Framework.Engine.CodeModel
 {
     public abstract partial class PartialCompilation
     {

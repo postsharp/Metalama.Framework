@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 
-namespace Metalama.Framework.Impl.AspectOrdering
+namespace Metalama.Framework.Engine.AspectOrdering
 {
     internal class AspectOrderSpecification
     {

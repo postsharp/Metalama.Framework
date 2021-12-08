@@ -3,10 +3,10 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
-using Metalama.Framework.Impl.Utilities;
+using Metalama.Framework.Engine.Utilities;
 using System.Reflection;
 
-namespace Metalama.Framework.Impl.CodeModel.Builders
+namespace Metalama.Framework.Engine.CodeModel.Builders
 {
     internal class BuiltParameter : BuiltDeclaration, IParameterImpl
     {

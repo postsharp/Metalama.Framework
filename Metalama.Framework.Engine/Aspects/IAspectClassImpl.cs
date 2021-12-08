@@ -4,10 +4,10 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Eligibility;
-using Metalama.Framework.Impl.CompileTime;
+using Metalama.Framework.Engine.CompileTime;
 using System.Collections.Immutable;
 
-namespace Metalama.Framework.Impl.Aspects
+namespace Metalama.Framework.Engine.Aspects
 {
     /// <summary>
     /// Exposes the semantics of an aspect class used by the implementation of the aspect.

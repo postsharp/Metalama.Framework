@@ -4,13 +4,13 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
-using Metalama.Framework.Impl.Aspects;
-using Metalama.Framework.Impl.CodeModel;
-using Metalama.Framework.Impl.CodeModel.Builders;
-using Metalama.Framework.Impl.Diagnostics;
+using Metalama.Framework.Engine.Aspects;
+using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.Builders;
+using Metalama.Framework.Engine.Diagnostics;
 using System.Collections.Generic;
 
-namespace Metalama.Framework.Impl.Advices
+namespace Metalama.Framework.Engine.Advices
 {
     internal abstract class IntroduceMemberAdvice<TMember, TBuilder> : Advice
         where TMember : class, IMemberOrNamedType

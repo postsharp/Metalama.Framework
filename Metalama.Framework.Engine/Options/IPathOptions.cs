@@ -3,7 +3,7 @@
 
 using Metalama.Framework.Project;
 
-namespace Metalama.Framework.Impl.Options
+namespace Metalama.Framework.Engine.Options
 {
     public interface IPathOptions : IService
     {

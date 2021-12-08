@@ -4,13 +4,13 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.DeclarationBuilders;
-using Metalama.Framework.Impl.CodeModel.Collections;
-using Metalama.Framework.Impl.Transformations;
+using Metalama.Framework.Engine.CodeModel.Collections;
+using Metalama.Framework.Engine.Transformations;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 
-namespace Metalama.Framework.Impl.CodeModel.Builders
+namespace Metalama.Framework.Engine.CodeModel.Builders
 {
     internal class AttributeBuilder : DeclarationBuilder, IAttribute, IObservableTransformation
     {

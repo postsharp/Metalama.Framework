@@ -1,10 +1,10 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Metalama.Framework.Impl.Collections;
-using Metalama.Framework.Impl.Options;
-using Metalama.Framework.Impl.Sdk;
-using Metalama.Framework.Impl.Utilities;
+using Metalama.Framework.Engine.Collections;
+using Metalama.Framework.Engine.Options;
+using Metalama.Framework.Engine.Sdk;
+using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Project;
 using Metalama.Framework.RunTime;
 using Microsoft.CodeAnalysis;
@@ -17,7 +17,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 
-namespace Metalama.Framework.Impl.CompileTime
+namespace Metalama.Framework.Engine.CompileTime
 {
     /// <summary>
     /// Provides the location to the reference assemblies that are needed to create the compile-time projects.
@@ -33,7 +33,7 @@ namespace Metalama.Framework.Impl.CompileTime
         /// </summary>
         private ImmutableArray<string> MetalamaImplementationAssemblyNames { get; } = ImmutableArray.Create(
             "Metalama.Framework.Sdk",
-            "Metalama.Framework.Impl" );
+            "Metalama.Framework.Engine" );
 
         /// <summary>
         /// Gets the name (without path and extension) of all standard assemblies, including Metalama, Roslyn and .NET standard.

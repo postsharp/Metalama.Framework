@@ -4,7 +4,7 @@
 using Metalama.Framework.Code;
 using System;
 
-namespace Metalama.Framework.Impl.CodeModel
+namespace Metalama.Framework.Engine.CodeModel
 {
     internal static class AccessorHelper
     {

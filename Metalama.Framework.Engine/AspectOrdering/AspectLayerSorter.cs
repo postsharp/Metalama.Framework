@@ -2,14 +2,14 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Code.Collections;
-using Metalama.Framework.Impl.Collections;
-using Metalama.Framework.Impl.Diagnostics;
+using Metalama.Framework.Engine.Collections;
+using Metalama.Framework.Engine.Diagnostics;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 
-namespace Metalama.Framework.Impl.AspectOrdering
+namespace Metalama.Framework.Engine.AspectOrdering
 {
     /// <summary>
     /// Compares and sorts dependency objects.

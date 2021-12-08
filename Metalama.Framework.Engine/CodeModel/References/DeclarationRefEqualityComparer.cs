@@ -5,7 +5,7 @@ using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
-namespace Metalama.Framework.Impl.CodeModel.References
+namespace Metalama.Framework.Engine.CodeModel.References
 {
     /// <summary>
     /// An implementation of <see cref="IEqualityComparer{T}"/> that can compare implementations of <see cref="IRefImpl"/>.

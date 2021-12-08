@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 
-namespace Metalama.Framework.Impl.CompileTime
+namespace Metalama.Framework.Engine.CompileTime
 {
     /// <summary>
     /// Exposes the list of diagnostics and suppressions defined in the project.

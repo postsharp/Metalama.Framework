@@ -3,12 +3,12 @@
 
 // ReSharper disable RedundantUsingDirective
 
-using Metalama.Framework.Impl.CodeModel;
-using Metalama.Framework.Impl.CompileTime;
-using Metalama.Framework.Impl.Diagnostics;
-using Metalama.Framework.Impl.Serialization;
-using Metalama.Framework.Impl.Templating.MetaModel;
-using Metalama.Framework.Impl.Utilities;
+using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CompileTime;
+using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Serialization;
+using Metalama.Framework.Engine.Templating.MetaModel;
+using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -20,7 +20,7 @@ using System.Linq;
 using System.Threading;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
-namespace Metalama.Framework.Impl.Templating
+namespace Metalama.Framework.Engine.Templating
 {
     /// <summary>
     /// Compiles the source code of a template, annotated with <see cref="TemplateAnnotator"/>,

@@ -5,10 +5,10 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Code.Invokers;
-using Metalama.Framework.Impl.CodeModel.Collections;
-using Metalama.Framework.Impl.CodeModel.Invokers;
-using Metalama.Framework.Impl.CodeModel.References;
-using Metalama.Framework.Impl.Utilities;
+using Metalama.Framework.Engine.CodeModel.Collections;
+using Metalama.Framework.Engine.CodeModel.Invokers;
+using Metalama.Framework.Engine.CodeModel.References;
+using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -16,7 +16,7 @@ using System.Linq;
 using System.Reflection;
 using MethodKind = Metalama.Framework.Code.MethodKind;
 
-namespace Metalama.Framework.Impl.CodeModel.Builders
+namespace Metalama.Framework.Engine.CodeModel.Builders
 {
     internal class BuiltMethod : BuiltMember, IMethodImpl, IMemberRef<IMethod>
     {

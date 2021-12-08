@@ -6,7 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 
-namespace Metalama.Framework.Impl.CompileTime.Serialization
+namespace Metalama.Framework.Engine.CompileTime.Serialization
 {
     internal sealed class MetaSerializerProvider
     {

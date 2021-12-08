@@ -3,7 +3,7 @@
 
 using System.Collections.Generic;
 
-namespace Metalama.Framework.Impl.Linking
+namespace Metalama.Framework.Engine.Linking
 {
     /// <summary>
     /// Result of member analysis.

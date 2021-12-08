@@ -1,11 +1,11 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Metalama.Framework.Impl.Pipeline;
+using Metalama.Framework.Engine.Pipeline;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 
-namespace Metalama.Framework.Impl.Options
+namespace Metalama.Framework.Engine.Options
 {
     /// <summary>
     /// Exposes project options (typically defined in MSBuild or .editorconfig) in a strongly-typed manner.

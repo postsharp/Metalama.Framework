@@ -2,8 +2,8 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Impl.CodeModel;
-using Metalama.Framework.Impl.ReflectionMocks;
+using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.RunTime;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -12,9 +12,9 @@ using System;
 using System.Collections.Immutable;
 using System.Reflection;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
-using MethodBase = Metalama.Framework.Impl.CodeModel.MethodBase;
+using MethodBase = Metalama.Framework.Engine.CodeModel.MethodBase;
 
-namespace Metalama.Framework.Impl.Serialization
+namespace Metalama.Framework.Engine.Serialization
 {
     internal class CompileTimeFieldOrPropertyInfoSerializer : ObjectSerializer<CompileTimeFieldOrPropertyInfo, FieldOrPropertyInfo>
     {

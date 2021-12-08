@@ -3,7 +3,7 @@
 
 using System;
 
-namespace Metalama.Framework.Impl.CompileTime.Serialization
+namespace Metalama.Framework.Engine.CompileTime.Serialization
 {
     internal static class SerializationIntrinsicTypeExtensions
     {

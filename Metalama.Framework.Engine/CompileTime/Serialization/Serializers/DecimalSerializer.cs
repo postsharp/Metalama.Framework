@@ -3,7 +3,7 @@
 
 using Metalama.Framework.Serialization;
 
-namespace Metalama.Framework.Impl.CompileTime.Serialization.Serializers
+namespace Metalama.Framework.Engine.CompileTime.Serialization.Serializers
 {
     internal sealed class DecimalSerializer : ValueTypeMetaSerializer<decimal>
     {

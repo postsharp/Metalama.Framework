@@ -3,7 +3,7 @@
 
 using System;
 
-namespace Metalama.Framework.Impl.Aspects
+namespace Metalama.Framework.Engine.Aspects
 {
     /// <summary>
     /// Provides flags on aspect reference, guiding the aspect linker.

@@ -4,7 +4,7 @@
 using Microsoft.CodeAnalysis;
 using System.Linq;
 
-namespace Metalama.Framework.Impl.Linking.Inlining
+namespace Metalama.Framework.Engine.Linking.Inlining
 {
     internal class InlinerProvider
     {

@@ -4,13 +4,13 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Fabrics;
-using Metalama.Framework.Impl.Aspects;
-using Metalama.Framework.Impl.CodeModel;
-using Metalama.Framework.Impl.Utilities;
+using Metalama.Framework.Engine.Aspects;
+using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
 
-namespace Metalama.Framework.Impl.Fabrics
+namespace Metalama.Framework.Engine.Fabrics
 {
     /// <summary>
     /// Implementation of <see cref="FabricAspect{T}"/> for type-level fabrics.

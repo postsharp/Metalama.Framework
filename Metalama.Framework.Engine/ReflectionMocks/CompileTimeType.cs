@@ -2,16 +2,16 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Impl.CodeModel;
-using Metalama.Framework.Impl.CodeModel.References;
-using Metalama.Framework.Impl.Utilities;
+using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.References;
+using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Globalization;
 using System.Reflection;
 
-namespace Metalama.Framework.Impl.ReflectionMocks
+namespace Metalama.Framework.Engine.ReflectionMocks
 {
     // This class must be public because it is referenced from compiled templates.
     public sealed class CompileTimeType : Type, ICompileTimeReflectionObject<IType>

@@ -3,9 +3,9 @@
 
 #pragma warning disable IDE0005
 using Metalama.AspectWorkbench.Model;
-using Metalama.Framework.Impl.Formatting;
-using Metalama.Framework.Impl.Pipeline;
-using Metalama.Framework.Impl.Testing;
+using Metalama.Framework.Engine.Formatting;
+using Metalama.Framework.Engine.Pipeline;
+using Metalama.Framework.Engine.Testing;
 using Metalama.Framework.Tests.Integration.Runners;
 using Metalama.TestFramework;
 using Microsoft.CodeAnalysis;

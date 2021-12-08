@@ -2,13 +2,13 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Fabrics;
-using Metalama.Framework.Impl.Diagnostics;
+using Metalama.Framework.Engine.Diagnostics;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Linq.Expressions;
 using System.Reflection;
 
-namespace Metalama.Framework.Impl.Utilities
+namespace Metalama.Framework.Engine.Utilities
 {
     /// <summary>
     /// Encapsulates an executable member of user code, which can be given as a reflection <see cref="MemberInfo"/>,

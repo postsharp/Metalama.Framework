@@ -5,7 +5,7 @@ using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System.Threading;
 
-namespace Metalama.Framework.Impl.Aspects
+namespace Metalama.Framework.Engine.Aspects
 {
     internal interface IInheritableAspectManifestProvider : IService
     {

@@ -4,13 +4,13 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Advised;
 using Metalama.Framework.Code.Invokers;
-using Metalama.Framework.Impl.CodeModel;
-using Metalama.Framework.Impl.Diagnostics;
+using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.RunTime;
 using System;
 using System.Collections.Generic;
 
-namespace Metalama.Framework.Impl.Templating.MetaModel
+namespace Metalama.Framework.Engine.Templating.MetaModel
 {
     internal class AdvisedFieldOrProperty<T> : AdvisedMember<T>, IAdvisedFieldOrProperty
         where T : IFieldOrProperty, IDeclarationImpl

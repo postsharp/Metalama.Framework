@@ -10,7 +10,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
-namespace Metalama.Framework.Impl.Serialization
+namespace Metalama.Framework.Engine.Serialization
 {
     internal class ListSerializer : ObjectSerializer
     {

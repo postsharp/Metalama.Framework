@@ -2,13 +2,13 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Impl.CodeModel;
-using Metalama.Framework.Impl.CodeModel.Builders;
-using Metalama.Framework.Impl.Templating;
-using Metalama.Framework.Impl.Transformations;
+using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.Builders;
+using Metalama.Framework.Engine.Templating;
+using Metalama.Framework.Engine.Transformations;
 using System.Collections.Generic;
 
-namespace Metalama.Framework.Impl.Linking
+namespace Metalama.Framework.Engine.Linking
 {
     internal sealed class LexicalScopeFactory : ITemplateLexicalScopeProvider
     {

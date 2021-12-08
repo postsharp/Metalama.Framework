@@ -2,7 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Impl.CodeModel;
+using Metalama.Framework.Engine.CodeModel;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;

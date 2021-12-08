@@ -4,9 +4,9 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
-using Metalama.Framework.Impl.Advices;
+using Metalama.Framework.Engine.Advices;
 
-namespace Metalama.Framework.Impl.CodeModel.Builders
+namespace Metalama.Framework.Engine.CodeModel.Builders
 {
     internal abstract class MemberBuilder : MemberOrNamedTypeBuilder, IMemberBuilder, IMemberImpl
     {

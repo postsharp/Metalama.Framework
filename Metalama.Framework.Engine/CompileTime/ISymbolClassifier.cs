@@ -3,7 +3,7 @@
 
 using Microsoft.CodeAnalysis;
 
-namespace Metalama.Framework.Impl.CompileTime
+namespace Metalama.Framework.Engine.CompileTime
 {
     /// <summary>
     /// Determines the kind of symbol: template, <see cref="TemplatingScope.CompileTimeOnly"/>,

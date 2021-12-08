@@ -4,7 +4,7 @@
 using Metalama.Framework.Project;
 using System.Collections.Immutable;
 
-namespace Metalama.Framework.Impl.AdditionalOutputs
+namespace Metalama.Framework.Engine.AdditionalOutputs
 {
     public interface IAdditionalOutputFileProvider : IService
     {

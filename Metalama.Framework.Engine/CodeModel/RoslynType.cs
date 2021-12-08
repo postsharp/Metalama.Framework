@@ -2,14 +2,14 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Impl.Diagnostics;
-using Metalama.Framework.Impl.Utilities;
+using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
 using SpecialType = Metalama.Framework.Code.SpecialType;
 using TypeKind = Metalama.Framework.Code.TypeKind;
 
-namespace Metalama.Framework.Impl.CodeModel
+namespace Metalama.Framework.Engine.CodeModel
 {
     internal abstract class RoslynType<T> : ITypeInternal
         where T : ITypeSymbol

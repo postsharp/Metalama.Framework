@@ -4,11 +4,11 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Code.Types;
-using Metalama.Framework.Impl.CodeModel.Builders;
-using Metalama.Framework.Impl.CodeModel.References;
-using Metalama.Framework.Impl.CompileTime;
-using Metalama.Framework.Impl.Templating.MetaModel;
-using Metalama.Framework.Impl.Utilities;
+using Metalama.Framework.Engine.CodeModel.Builders;
+using Metalama.Framework.Engine.CodeModel.References;
+using Metalama.Framework.Engine.CompileTime;
+using Metalama.Framework.Engine.Templating.MetaModel;
+using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
@@ -18,7 +18,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 using SpecialType = Metalama.Framework.Code.SpecialType;
 
-namespace Metalama.Framework.Impl.CodeModel
+namespace Metalama.Framework.Engine.CodeModel
 {
     /// <summary>
     /// Creates instances of <see cref="IDeclaration"/> for a given <see cref="CompilationModel"/>.

@@ -8,7 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
-namespace Metalama.Framework.Impl.Templating
+namespace Metalama.Framework.Engine.Templating
 {
     /// <summary>
     /// A <see cref="CSharpSyntaxRewriter"/> that flattens blocks from the output of <see cref="TemplateCompiler"/>.

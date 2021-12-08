@@ -3,7 +3,7 @@
 
 using System.IO;
 
-namespace Metalama.Framework.Impl.Utilities
+namespace Metalama.Framework.Engine.Utilities
 {
     internal class FileSystemWatcherEx : FileSystemWatcher, IFileSystemWatcher
     {

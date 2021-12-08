@@ -3,9 +3,9 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
-using Metalama.Framework.Impl.CodeModel;
-using Metalama.Framework.Impl.Diagnostics;
-using Metalama.Framework.Impl.Utilities;
+using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 
 namespace Metalama.Framework.Workspaces

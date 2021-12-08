@@ -3,12 +3,12 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Impl.CodeModel;
-using Metalama.Framework.Impl.Diagnostics;
-using Metalama.Framework.Impl.Templating.MetaModel;
+using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Templating.MetaModel;
 using System;
 
-namespace Metalama.Framework.Impl.Templating
+namespace Metalama.Framework.Engine.Templating
 {
     internal partial class TemplateExpansionContext
     {

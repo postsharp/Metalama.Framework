@@ -1,11 +1,11 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Metalama.Framework.Impl.ReflectionMocks;
+using Metalama.Framework.Engine.ReflectionMocks;
 using System;
 using System.Collections.Generic;
 
-namespace Metalama.Framework.Impl.Utilities
+namespace Metalama.Framework.Engine.Utilities
 {
     internal class ReflectionTypeComparer : IEqualityComparer<Type>
     {

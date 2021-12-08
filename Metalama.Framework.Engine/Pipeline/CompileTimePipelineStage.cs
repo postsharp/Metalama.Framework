@@ -1,14 +1,14 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Metalama.Framework.Impl.AdditionalOutputs;
-using Metalama.Framework.Impl.AspectOrdering;
-using Metalama.Framework.Impl.Collections;
-using Metalama.Framework.Impl.CompileTime;
-using Metalama.Framework.Impl.DesignTime.Pipeline;
-using Metalama.Framework.Impl.Diagnostics;
-using Metalama.Framework.Impl.Linking;
-using Metalama.Framework.Impl.Options;
+using Metalama.Framework.Engine.AdditionalOutputs;
+using Metalama.Framework.Engine.AspectOrdering;
+using Metalama.Framework.Engine.Collections;
+using Metalama.Framework.Engine.CompileTime;
+using Metalama.Framework.Engine.DesignTime.Pipeline;
+using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Linking;
+using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Project;
 using System;
 using System.Collections.Generic;
@@ -16,7 +16,7 @@ using System.IO;
 using System.Text;
 using System.Threading;
 
-namespace Metalama.Framework.Impl.Pipeline
+namespace Metalama.Framework.Engine.Pipeline
 {
     /// <summary>
     /// The implementation of <see cref="HighLevelPipelineStage"/> used at compile time (not at design time).

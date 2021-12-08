@@ -2,16 +2,16 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Aspects;
-using Metalama.Framework.Impl.CodeModel;
-using Metalama.Framework.Impl.CompileTime;
-using Metalama.Framework.Impl.Utilities;
+using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CompileTime;
+using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Linq;
 
-namespace Metalama.Framework.Impl.Templating
+namespace Metalama.Framework.Engine.Templating
 {
     /// <summary>
     /// Provides methods that tests for classifications of template members, for instance <see cref="IsRunTimeMethod(Microsoft.CodeAnalysis.IMethodSymbol)"/>.

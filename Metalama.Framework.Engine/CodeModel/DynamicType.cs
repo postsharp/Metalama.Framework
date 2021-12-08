@@ -5,7 +5,7 @@ using Metalama.Framework.Code.Types;
 using Microsoft.CodeAnalysis;
 using TypeKind = Metalama.Framework.Code.TypeKind;
 
-namespace Metalama.Framework.Impl.CodeModel
+namespace Metalama.Framework.Engine.CodeModel
 {
     internal class DynamicType : RoslynType<IDynamicTypeSymbol>, IDynamicType
     {

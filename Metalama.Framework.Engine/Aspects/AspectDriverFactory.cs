@@ -1,16 +1,16 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Metalama.Framework.Impl.CompileTime;
-using Metalama.Framework.Impl.Diagnostics;
-using Metalama.Framework.Impl.Sdk;
+using Metalama.Framework.Engine.CompileTime;
+using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Sdk;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Reflection;
 
-namespace Metalama.Framework.Impl.Aspects
+namespace Metalama.Framework.Engine.Aspects
 {
     /// <summary>
     /// Creates instances of <see cref="IAspectDriver"/> for a given <see cref="AspectClass"/>.

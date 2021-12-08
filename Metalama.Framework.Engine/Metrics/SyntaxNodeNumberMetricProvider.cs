@@ -3,7 +3,7 @@
 
 using Metalama.Framework.Metrics;
 
-namespace Metalama.Framework.Impl.Metrics
+namespace Metalama.Framework.Engine.Metrics
 {
     /// <summary>
     /// A prototype implementation of <see cref="StatementNumberMetric"/>.

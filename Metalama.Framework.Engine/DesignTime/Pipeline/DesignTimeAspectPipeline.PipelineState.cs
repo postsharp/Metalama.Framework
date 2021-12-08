@@ -1,15 +1,15 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Metalama.Framework.Impl.Aspects;
-using Metalama.Framework.Impl.CodeModel;
-using Metalama.Framework.Impl.CompileTime;
-using Metalama.Framework.Impl.DesignTime.Diagnostics;
-using Metalama.Framework.Impl.DesignTime.Diff;
-using Metalama.Framework.Impl.Diagnostics;
-using Metalama.Framework.Impl.Options;
-using Metalama.Framework.Impl.Pipeline;
-using Metalama.Framework.Impl.Utilities;
+using Metalama.Framework.Engine.Aspects;
+using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CompileTime;
+using Metalama.Framework.Engine.DesignTime.Diagnostics;
+using Metalama.Framework.Engine.DesignTime.Diff;
+using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Options;
+using Metalama.Framework.Engine.Pipeline;
+using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
@@ -19,7 +19,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Threading;
 
-namespace Metalama.Framework.Impl.DesignTime.Pipeline
+namespace Metalama.Framework.Engine.DesignTime.Pipeline
 {
     public partial class DesignTimeAspectPipeline
     {

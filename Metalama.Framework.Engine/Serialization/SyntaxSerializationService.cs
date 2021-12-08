@@ -1,8 +1,8 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Metalama.Framework.Impl.CodeModel;
-using Metalama.Framework.Impl.Diagnostics;
+using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -15,7 +15,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
-namespace Metalama.Framework.Impl.Serialization
+namespace Metalama.Framework.Engine.Serialization
 {
     /// <summary>
     /// Serializes objects into Roslyn creation expressions that would create those objects. You can register additional serializers with an instance of this class

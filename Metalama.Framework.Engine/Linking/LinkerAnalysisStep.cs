@@ -1,11 +1,11 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Metalama.Framework.Impl.Linking.Inlining;
+using Metalama.Framework.Engine.Linking.Inlining;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Metalama.Framework.Impl.Linking
+namespace Metalama.Framework.Engine.Linking
 {
     /// <summary>
     /// Analysis step of the linker, main goal of which is to produce LinkerAnalysisRegistry.

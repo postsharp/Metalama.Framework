@@ -5,15 +5,15 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Eligibility;
 using Metalama.Framework.Fabrics;
-using Metalama.Framework.Impl.AspectOrdering;
-using Metalama.Framework.Impl.Aspects;
-using Metalama.Framework.Impl.CompileTime;
-using Metalama.Framework.Impl.Sdk;
+using Metalama.Framework.Engine.AspectOrdering;
+using Metalama.Framework.Engine.Aspects;
+using Metalama.Framework.Engine.CompileTime;
+using Metalama.Framework.Engine.Sdk;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Immutable;
 
-namespace Metalama.Framework.Impl.Fabrics
+namespace Metalama.Framework.Engine.Fabrics
 {
     /// <summary>
     /// The top-level aspect class integrating the fabrics feature in the aspect pipeline. It is used as an 'identity'

@@ -2,12 +2,12 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Compiler;
-using Metalama.Framework.Impl.Options;
+using Metalama.Framework.Engine.Options;
 using System;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 
-namespace Metalama.Framework.Impl.Utilities
+namespace Metalama.Framework.Engine.Utilities
 {
     /// <summary>
     /// Exposes the <see cref="AttachDebugger"/> method.

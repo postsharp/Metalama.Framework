@@ -2,9 +2,9 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Impl.CodeModel.References;
+using Metalama.Framework.Engine.CodeModel.References;
 
-namespace Metalama.Framework.Impl.Transformations
+namespace Metalama.Framework.Engine.Transformations
 {
     internal interface IReplaceMember : IObservableTransformation
     {

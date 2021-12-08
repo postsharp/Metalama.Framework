@@ -6,11 +6,11 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Advised;
 using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.Diagnostics;
-using Metalama.Framework.Impl.Aspects;
-using Metalama.Framework.Impl.CodeModel;
-using Metalama.Framework.Impl.Diagnostics;
-using Metalama.Framework.Impl.Options;
-using Metalama.Framework.Impl.Pipeline;
+using Metalama.Framework.Engine.Aspects;
+using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Options;
+using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -23,7 +23,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using SpecialType = Metalama.Framework.Code.SpecialType;
 
-namespace Metalama.Framework.Impl.Templating.MetaModel
+namespace Metalama.Framework.Engine.Templating.MetaModel
 {
     /// <summary>
     /// The implementation of <see cref="IMetaApi"/>.

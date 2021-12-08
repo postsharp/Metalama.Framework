@@ -2,14 +2,14 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Aspects;
-using Metalama.Framework.Impl.Aspects;
-using Metalama.Framework.Impl.CodeModel;
-using Metalama.Framework.Impl.CompileTime;
-using Metalama.Framework.Impl.DesignTime.Diff;
-using Metalama.Framework.Impl.DesignTime.Refactoring;
-using Metalama.Framework.Impl.Diagnostics;
-using Metalama.Framework.Impl.Options;
-using Metalama.Framework.Impl.Pipeline;
+using Metalama.Framework.Engine.Aspects;
+using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CompileTime;
+using Metalama.Framework.Engine.DesignTime.Diff;
+using Metalama.Framework.Engine.DesignTime.Refactoring;
+using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Options;
+using Metalama.Framework.Engine.Pipeline;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Concurrent;
@@ -21,7 +21,7 @@ using System.Threading;
 
 // ReSharper disable InconsistentlySynchronizedField
 
-namespace Metalama.Framework.Impl.DesignTime.Pipeline
+namespace Metalama.Framework.Engine.DesignTime.Pipeline
 {
     /// <summary>
     /// Caches the <see cref="DesignTimeAspectPipeline"/> (so they can be reused between projects) and the

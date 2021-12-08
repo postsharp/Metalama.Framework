@@ -2,8 +2,8 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.DesignTime.Contracts;
-using Metalama.Framework.Impl.Formatting;
-using Metalama.Framework.Impl.Pipeline;
+using Metalama.Framework.Engine.Formatting;
+using Metalama.Framework.Engine.Pipeline;
 using Metalama.TestFramework;
 using Microsoft.CodeAnalysis;
 using System;

@@ -3,7 +3,7 @@
 
 using Microsoft.CodeAnalysis;
 
-namespace Metalama.Framework.Impl.Templating
+namespace Metalama.Framework.Engine.Templating
 {
     internal partial class MetaSyntaxRewriter
     {

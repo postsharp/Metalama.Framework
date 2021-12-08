@@ -4,7 +4,7 @@
 using System.Diagnostics;
 using System.Threading;
 
-namespace Metalama.Framework.Impl.DesignTime.Utilities
+namespace Metalama.Framework.Engine.DesignTime.Utilities
 {
     internal static class CancellationTokenExtensions
     {

@@ -5,7 +5,7 @@ using Metalama.Framework.DesignTime.Contracts;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 
-namespace Metalama.Framework.Impl.Formatting
+namespace Metalama.Framework.Engine.Formatting
 {
     public sealed partial class TextSpanClassifier
     {

@@ -25,7 +25,7 @@
         <!-- This is only to import NullableAttribute, we get conflicts if we import the source -->
         <ProjectReference Include="..\Metalama.Framework\Metalama.Framework.csproj" />
         
-        <InternalsVisibleTo Include="Metalama.Framework.Impl" />
+        <InternalsVisibleTo Include="Metalama.Framework.Engine" />
     </ItemGroup>
     
     <ItemGroup>

@@ -6,12 +6,12 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Eligibility;
 using Metalama.Framework.Fabrics;
-using Metalama.Framework.Impl.CodeModel;
-using Metalama.Framework.Impl.CompileTime.Serialization;
-using Metalama.Framework.Impl.Diagnostics;
-using Metalama.Framework.Impl.ReflectionMocks;
-using Metalama.Framework.Impl.Templating;
-using Metalama.Framework.Impl.Utilities;
+using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CompileTime.Serialization;
+using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.ReflectionMocks;
+using Metalama.Framework.Engine.Templating;
+using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -25,7 +25,7 @@ using Accessibility = Microsoft.CodeAnalysis.Accessibility;
 using MethodKind = Microsoft.CodeAnalysis.MethodKind;
 using TypeKind = Microsoft.CodeAnalysis.TypeKind;
 
-namespace Metalama.Framework.Impl.CompileTime
+namespace Metalama.Framework.Engine.CompileTime
 {
     internal partial class CompileTimeCompilationBuilder
     {

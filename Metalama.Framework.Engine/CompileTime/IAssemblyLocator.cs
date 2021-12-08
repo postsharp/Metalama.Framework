@@ -5,7 +5,7 @@ using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System.Diagnostics.CodeAnalysis;
 
-namespace Metalama.Framework.Impl.CompileTime
+namespace Metalama.Framework.Engine.CompileTime
 {
     /// <summary>
     /// Exposes a method <see cref="TryFindAssembly"/>, which must try to find an assembly that of a given identity.

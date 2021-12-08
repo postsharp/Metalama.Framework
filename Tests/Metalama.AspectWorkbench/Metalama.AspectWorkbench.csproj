@@ -18,7 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Metalama.Framework.Impl\Metalama.Framework.Impl.csproj" />
+    <ProjectReference Include="..\..\Metalama.Framework.Engine\Metalama.Framework.Engine.csproj" />
     <ProjectReference Include="..\..\Metalama.Framework\Metalama.Framework.csproj" />
     <ProjectReference Include="..\Metalama.Framework.Tests.Integration\Metalama.Framework.Tests.Integration.csproj" />
     <ProjectReference Include="..\Metalama.Framework.Tests.Integration.Internals\Metalama.Framework.Tests.Integration.Internals.csproj" />

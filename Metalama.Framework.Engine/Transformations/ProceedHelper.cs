@@ -4,9 +4,9 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
-using Metalama.Framework.Impl.Advices;
-using Metalama.Framework.Impl.CodeModel;
-using Metalama.Framework.Impl.Templating.MetaModel;
+using Metalama.Framework.Engine.Advices;
+using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Templating.MetaModel;
 using Metalama.Framework.RunTime;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -15,7 +15,7 @@ using Microsoft.CodeAnalysis.Simplification;
 using System.Linq;
 using System.Threading;
 
-namespace Metalama.Framework.Impl.Transformations
+namespace Metalama.Framework.Engine.Transformations
 {
     internal static class ProceedHelper
     {

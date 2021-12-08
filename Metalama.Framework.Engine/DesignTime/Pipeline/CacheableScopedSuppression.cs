@@ -2,11 +2,11 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Diagnostics;
-using Metalama.Framework.Impl.CodeModel;
-using Metalama.Framework.Impl.Diagnostics;
+using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Diagnostics;
 using Microsoft.CodeAnalysis;
 
-namespace Metalama.Framework.Impl.DesignTime.Pipeline
+namespace Metalama.Framework.Engine.DesignTime.Pipeline
 {
     /// <summary>
     /// A compilation-independent version of <see cref="ScopedSuppression"/>, which stores the symbol id instead of the <see cref="ISymbol"/> itself.

@@ -4,7 +4,7 @@
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 
-namespace Metalama.Framework.Impl.Diagnostics
+namespace Metalama.Framework.Engine.Diagnostics
 {
     public static class DiagnosticAdderExtensions
     {

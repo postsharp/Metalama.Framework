@@ -1,11 +1,11 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Metalama.Framework.Impl.Pipeline;
+using Metalama.Framework.Engine.Pipeline;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
 
-namespace Metalama.Framework.Impl.DesignTime.Pipeline
+namespace Metalama.Framework.Engine.DesignTime.Pipeline
 {
     /// <summary>
     /// Represents the content of <see cref="DesignTimeAspectPipelineResult"/>, but only the items that relate to a single <see cref="Microsoft.CodeAnalysis.SyntaxTree"/>.

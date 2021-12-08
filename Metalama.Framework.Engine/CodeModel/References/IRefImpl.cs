@@ -2,9 +2,9 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Impl.CodeModel.Builders;
+using Metalama.Framework.Engine.CodeModel.Builders;
 
-namespace Metalama.Framework.Impl.CodeModel.References
+namespace Metalama.Framework.Engine.CodeModel.References
 {
     /// <summary>
     /// A weakly typed base for <see cref="ISdkRef{T}"/>.

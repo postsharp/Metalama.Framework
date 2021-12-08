@@ -3,7 +3,7 @@
 
 using Metalama.Compiler;
 using Metalama.Framework.Aspects;
-using Metalama.Framework.Impl.CodeModel;
+using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -12,7 +12,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 
-namespace Metalama.Framework.Impl.Sdk
+namespace Metalama.Framework.Engine.Sdk
 {
     /// <summary>
     /// Context for the <see cref="IAspectWeaver"/>.

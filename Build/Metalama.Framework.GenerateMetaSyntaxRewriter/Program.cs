@@ -39,7 +39,7 @@ namespace Metalama.Framework.GenerateMetaSyntaxRewriter
             writer.WriteLine( "using Microsoft.CodeAnalysis.CSharp.Syntax;" );
             writer.WriteLine( "using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;" );
             writer.WriteLine();
-            writer.WriteLine( "namespace Metalama.Framework.Impl.Templating" );
+            writer.WriteLine( "namespace Metalama.Framework.Engine.Templating" );
             writer.WriteLine( "{" );
             writer.WriteLine( "\tpartial class MetaSyntaxRewriter" );
             writer.WriteLine( "\t{" );

@@ -5,7 +5,7 @@ using Metalama.Framework.DesignTime.Contracts;
 using Microsoft.CodeAnalysis.Text;
 using System.Collections.Immutable;
 
-namespace Metalama.Framework.Impl.Formatting
+namespace Metalama.Framework.Engine.Formatting
 {
     /// <summary>
     /// Represents a <see cref="TextSpan"/> and its <see cref="TextSpanClassification"/>.

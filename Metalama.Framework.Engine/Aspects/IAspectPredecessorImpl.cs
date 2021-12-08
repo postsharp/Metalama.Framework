@@ -6,7 +6,7 @@ using Metalama.Framework.Code;
 using Microsoft.CodeAnalysis;
 using System;
 
-namespace Metalama.Framework.Impl.Aspects
+namespace Metalama.Framework.Engine.Aspects
 {
     internal interface IAspectPredecessorImpl : IAspectPredecessor
     {

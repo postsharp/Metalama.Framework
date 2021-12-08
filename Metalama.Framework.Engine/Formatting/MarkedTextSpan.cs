@@ -6,7 +6,7 @@ using Microsoft.CodeAnalysis.Text;
 using System;
 using System.Collections.Immutable;
 
-namespace Metalama.Framework.Impl.Formatting
+namespace Metalama.Framework.Engine.Formatting
 {
     public readonly struct MarkedTextSpan
     {

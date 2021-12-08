@@ -7,7 +7,7 @@ using static Metalama.Framework.Diagnostics.Severity;
 
 // ReSharper disable SA1118
 
-namespace Metalama.Framework.Impl.Linking
+namespace Metalama.Framework.Engine.Linking
 {
     internal static class AspectLinkerDiagnosticDescriptors
     {

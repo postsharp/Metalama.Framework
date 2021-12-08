@@ -2,13 +2,13 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Impl.CodeModel;
-using Metalama.Framework.Impl.CodeModel.References;
+using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.References;
 using System;
 using System.Globalization;
 using System.Reflection;
 
-namespace Metalama.Framework.Impl.ReflectionMocks
+namespace Metalama.Framework.Engine.ReflectionMocks
 {
     internal class CompileTimeConstructorInfo : ConstructorInfo, ICompileTimeReflectionObject<IConstructor>
     {

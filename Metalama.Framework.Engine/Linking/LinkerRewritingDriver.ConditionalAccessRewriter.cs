@@ -9,7 +9,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 // TODO: A lot methods here are called multiple times. Optimize.
 // TODO: Split into a subclass for each declaration type?
 
-namespace Metalama.Framework.Impl.Linking
+namespace Metalama.Framework.Engine.Linking
 {
     internal partial class LinkerRewritingDriver
     {

@@ -3,16 +3,16 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
-using Metalama.Framework.Impl.CodeModel.Collections;
-using Metalama.Framework.Impl.CodeModel.References;
-using Metalama.Framework.Impl.Utilities;
+using Metalama.Framework.Engine.CodeModel.Collections;
+using Metalama.Framework.Engine.CodeModel.References;
+using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 
-namespace Metalama.Framework.Impl.CodeModel.Builders
+namespace Metalama.Framework.Engine.CodeModel.Builders
 {
     /// <summary>
     /// The base class for the read-only facade of introduced declarations, represented by <see cref="DeclarationBuilder"/>. Facades

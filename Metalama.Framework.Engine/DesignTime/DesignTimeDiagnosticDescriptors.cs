@@ -8,7 +8,7 @@ using static Metalama.Framework.Diagnostics.Severity;
 
 #pragma warning disable SA1118
 
-namespace Metalama.Framework.Impl.DesignTime
+namespace Metalama.Framework.Engine.DesignTime
 {
     internal static class DesignTimeDiagnosticDescriptors
     {

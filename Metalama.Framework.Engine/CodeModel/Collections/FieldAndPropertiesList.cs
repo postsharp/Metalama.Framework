@@ -7,7 +7,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Metalama.Framework.Impl.CodeModel.Collections
+namespace Metalama.Framework.Engine.CodeModel.Collections
 {
     internal class FieldAndPropertiesList : IFieldOrPropertyList
     {

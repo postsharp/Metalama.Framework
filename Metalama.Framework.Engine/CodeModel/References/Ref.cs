@@ -3,13 +3,13 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
-using Metalama.Framework.Impl.CodeModel.Builders;
-using Metalama.Framework.Impl.Utilities;
+using Metalama.Framework.Engine.CodeModel.Builders;
+using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Immutable;
 
-namespace Metalama.Framework.Impl.CodeModel.References
+namespace Metalama.Framework.Engine.CodeModel.References
 {
     /// <summary>
     /// Contains factory methods for the generic <see cref="Ref{T}"/>.

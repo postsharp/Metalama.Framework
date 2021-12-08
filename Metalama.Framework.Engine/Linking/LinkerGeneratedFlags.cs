@@ -3,7 +3,7 @@
 
 using System;
 
-namespace Metalama.Framework.Impl.Linking
+namespace Metalama.Framework.Engine.Linking
 {
     [Flags]
     internal enum LinkerGeneratedFlags

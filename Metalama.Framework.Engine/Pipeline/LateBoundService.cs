@@ -4,7 +4,7 @@
 using Metalama.Framework.Project;
 using System;
 
-namespace Metalama.Framework.Impl.Pipeline
+namespace Metalama.Framework.Engine.Pipeline
 {
     /// <summary>
     /// Represents the implementation of an <see cref="IService"/> that is lazily created and, therefore, can have circular dependencies

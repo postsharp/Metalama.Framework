@@ -3,8 +3,8 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Invokers;
-using Metalama.Framework.Impl.CodeModel.References;
-using Metalama.Framework.Impl.Utilities;
+using Metalama.Framework.Engine.CodeModel.References;
+using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.RunTime;
 using Microsoft.CodeAnalysis;
 using System;
@@ -12,7 +12,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using MethodKind = Metalama.Framework.Code.MethodKind;
 
-namespace Metalama.Framework.Impl.CodeModel.Builders
+namespace Metalama.Framework.Engine.CodeModel.Builders
 {
     internal class BuiltField : BuiltMember, IFieldImpl, IMemberRef<IField>
     {

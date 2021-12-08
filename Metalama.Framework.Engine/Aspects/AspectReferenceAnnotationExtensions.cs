@@ -4,7 +4,7 @@
 using Microsoft.CodeAnalysis;
 using System.Linq;
 
-namespace Metalama.Framework.Impl.Aspects
+namespace Metalama.Framework.Engine.Aspects
 {
     /// <summary>
     /// Provides extension methods for handling of aspect reference annotations.

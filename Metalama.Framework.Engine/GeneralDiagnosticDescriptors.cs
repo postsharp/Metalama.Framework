@@ -5,14 +5,14 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Diagnostics;
-using Metalama.Framework.Impl.Utilities;
+using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
 using static Metalama.Framework.Diagnostics.Severity;
 
 #pragma warning disable SA1118
 
-namespace Metalama.Framework.Impl
+namespace Metalama.Framework.Engine
 {
     internal static class GeneralDiagnosticDescriptors
     {

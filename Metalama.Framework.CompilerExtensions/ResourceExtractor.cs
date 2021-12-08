@@ -1,7 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Metalama.Framework.Impl.Utilities;
+using Metalama.Framework.Engine.Utilities;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -29,7 +29,7 @@ namespace Metalama.Framework.CompilerExtensions
         private static Assembly? _metalamaImplementationAssembly;
 
         /// <summary>
-        /// Creates an instance of a type of the <c>Metalama.Framework.Impl</c> assembly.
+        /// Creates an instance of a type of the <c>Metalama.Framework.Engine</c> assembly.
         /// </summary>
         public static object CreateInstance( string name )
         {
@@ -68,7 +68,7 @@ namespace Metalama.Framework.CompilerExtensions
                                 // Index the assembly even if we did not load it ourselves.
                                 _embeddedAssemblies[assemblyName.Name] = (file, assemblyName);
 
-                                if ( assemblyName.Name == "Metalama.Framework.Impl" )
+                                if ( assemblyName.Name == "Metalama.Framework.Engine" )
                                 {
                                     metalamaImplementationAssemblyName = assemblyName;
                                 }

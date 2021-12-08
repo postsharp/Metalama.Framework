@@ -3,7 +3,7 @@
 
 using System.IO;
 
-namespace Metalama.Framework.Impl.AdditionalOutputs
+namespace Metalama.Framework.Engine.AdditionalOutputs
 {
     public abstract class AdditionalCompilationOutputFile
     {

@@ -4,7 +4,7 @@
 using Microsoft.CodeAnalysis;
 using System;
 
-namespace Metalama.Framework.Impl.Linking
+namespace Metalama.Framework.Engine.Linking
 {
     internal readonly struct IntermediateSymbolSemantic : IEquatable<IntermediateSymbolSemantic>
     {

@@ -2,11 +2,11 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Compiler;
-using Metalama.Framework.Impl.Advices;
-using Metalama.Framework.Impl.Transformations;
+using Metalama.Framework.Engine.Advices;
+using Metalama.Framework.Engine.Transformations;
 using System;
 
-namespace Metalama.Framework.Impl.CodeModel.Builders
+namespace Metalama.Framework.Engine.CodeModel.Builders
 {
     internal class ManagedResourceBuilder : INonObservableTransformation
     {

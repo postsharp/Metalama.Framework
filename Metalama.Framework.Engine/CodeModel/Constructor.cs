@@ -2,7 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Impl.ReflectionMocks;
+using Metalama.Framework.Engine.ReflectionMocks;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -10,7 +10,7 @@ using System.Linq;
 using System.Reflection;
 using MethodKind = Microsoft.CodeAnalysis.MethodKind;
 
-namespace Metalama.Framework.Impl.CodeModel
+namespace Metalama.Framework.Engine.CodeModel
 {
     internal class Constructor : MethodBase, IConstructor
     {

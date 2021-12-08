@@ -8,7 +8,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 using Accessibility = Metalama.Framework.Code.Accessibility;
 using RefKind = Metalama.Framework.Code.RefKind;
 
-namespace Metalama.Framework.Impl.CodeModel.Builders
+namespace Metalama.Framework.Engine.CodeModel.Builders
 {
     internal static class BuilderHelpers
     {

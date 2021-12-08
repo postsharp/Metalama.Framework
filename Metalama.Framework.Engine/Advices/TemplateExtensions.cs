@@ -4,7 +4,7 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
-namespace Metalama.Framework.Impl.Advices
+namespace Metalama.Framework.Engine.Advices
 {
     internal static class TemplateExtensions
     {

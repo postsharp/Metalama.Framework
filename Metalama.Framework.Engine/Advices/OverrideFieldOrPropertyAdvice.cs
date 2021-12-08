@@ -2,13 +2,13 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Impl.Aspects;
-using Metalama.Framework.Impl.CodeModel.Builders;
-using Metalama.Framework.Impl.Diagnostics;
-using Metalama.Framework.Impl.Transformations;
+using Metalama.Framework.Engine.Aspects;
+using Metalama.Framework.Engine.CodeModel.Builders;
+using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Transformations;
 using System.Collections.Generic;
 
-namespace Metalama.Framework.Impl.Advices
+namespace Metalama.Framework.Engine.Advices
 {
     internal class OverrideFieldOrPropertyAdvice : OverrideMemberAdvice<IFieldOrProperty>
     {

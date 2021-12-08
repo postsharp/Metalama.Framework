@@ -2,16 +2,16 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.DesignTime.Contracts;
-using Metalama.Framework.Impl.DesignTime.Preview;
-using Metalama.Framework.Impl.Pipeline;
-using Metalama.Framework.Impl.Utilities;
+using Metalama.Framework.Engine.DesignTime.Preview;
+using Metalama.Framework.Engine.Pipeline;
+using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 
-namespace Metalama.Framework.Impl.DesignTime
+namespace Metalama.Framework.Engine.DesignTime
 {
     /// <summary>
     /// The implementation of <see cref="ICompilerServiceProvider"/>.

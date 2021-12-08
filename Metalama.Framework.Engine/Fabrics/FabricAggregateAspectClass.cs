@@ -4,12 +4,12 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Eligibility;
 using Metalama.Framework.Fabrics;
-using Metalama.Framework.Impl.Aspects;
-using Metalama.Framework.Impl.CompileTime;
+using Metalama.Framework.Engine.Aspects;
+using Metalama.Framework.Engine.CompileTime;
 using System;
 using System.Collections.Immutable;
 
-namespace Metalama.Framework.Impl.Fabrics
+namespace Metalama.Framework.Engine.Fabrics
 {
     /// <summary>
     /// An aspect class that aggregates all fabrics on a given declaration.

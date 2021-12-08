@@ -4,7 +4,7 @@
 using Metalama.Framework.Code;
 using System.Linq;
 
-namespace Metalama.Framework.Impl.CodeModel
+namespace Metalama.Framework.Engine.CodeModel
 {
     internal static class GenericParameterExtensions
     {

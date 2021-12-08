@@ -3,11 +3,11 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Types;
-using Metalama.Framework.Impl.Utilities;
+using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using TypeKind = Metalama.Framework.Code.TypeKind;
 
-namespace Metalama.Framework.Impl.CodeModel
+namespace Metalama.Framework.Engine.CodeModel
 {
     internal class ArrayType : RoslynType<IArrayTypeSymbol>, IArrayType
     {

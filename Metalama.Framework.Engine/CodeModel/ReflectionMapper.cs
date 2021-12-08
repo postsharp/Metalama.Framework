@@ -1,15 +1,15 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Metalama.Framework.Impl.Diagnostics;
-using Metalama.Framework.Impl.ReflectionMocks;
+using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.ReflectionMocks;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Concurrent;
 using System.Globalization;
 using System.Linq;
 
-namespace Metalama.Framework.Impl.CodeModel
+namespace Metalama.Framework.Engine.CodeModel
 {
     /// <summary>
     /// Maps System.Reflection objects to Roslyn symbols.

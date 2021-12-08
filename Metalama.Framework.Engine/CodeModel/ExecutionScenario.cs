@@ -3,7 +3,7 @@
 
 using Metalama.Framework.Project;
 
-namespace Metalama.Framework.Impl.CodeModel
+namespace Metalama.Framework.Engine.CodeModel
 {
     internal class ExecutionScenario : IExecutionScenario
     {

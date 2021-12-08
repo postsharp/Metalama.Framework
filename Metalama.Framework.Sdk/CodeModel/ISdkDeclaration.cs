@@ -5,7 +5,7 @@ using Metalama.Framework.Code;
 using Microsoft.CodeAnalysis;
 using System;
 
-namespace Metalama.Framework.Impl.CodeModel
+namespace Metalama.Framework.Engine.CodeModel
 {
     /// <summary>
     /// Extends the user-level <see cref="IDeclaration"/> interface with a <see cref="Symbol"/> property exposing the Roslyn <see cref="ISymbol"/>. 

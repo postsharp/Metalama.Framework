@@ -5,7 +5,7 @@ using Metalama.Framework.Serialization;
 using System;
 using System.Collections.Generic;
 
-namespace Metalama.Framework.Impl.CompileTime.Serialization.Serializers
+namespace Metalama.Framework.Engine.CompileTime.Serialization.Serializers
 {
     /// <exclude/>
     public sealed class DictionarySerializer<TKey, TValue> : ReferenceTypeMetaSerializer

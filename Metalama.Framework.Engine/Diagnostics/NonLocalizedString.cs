@@ -4,7 +4,7 @@
 using Microsoft.CodeAnalysis;
 using System;
 
-namespace Metalama.Framework.Impl.Diagnostics
+namespace Metalama.Framework.Engine.Diagnostics
 {
     // Public because of TryMetalama.
     public sealed class NonLocalizedString : LocalizableString

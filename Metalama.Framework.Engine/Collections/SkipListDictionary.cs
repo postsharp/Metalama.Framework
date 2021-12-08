@@ -8,7 +8,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Text;
 
-namespace Metalama.Framework.Impl.Collections
+namespace Metalama.Framework.Engine.Collections
 {
     /// <summary>
     /// Represents a SkipList.  A SkipList is a combination of a BST and a sorted link list, providing

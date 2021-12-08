@@ -3,7 +3,7 @@
 
 using Metalama.Framework.Aspects;
 
-namespace Metalama.Framework.Impl.CompileTime
+namespace Metalama.Framework.Engine.CompileTime
 {
     /// <summary>
     /// Defines where a symbol or an expression can be used, i.e. in compile-time code, in run-time code, or both.

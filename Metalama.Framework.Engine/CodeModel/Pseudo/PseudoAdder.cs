@@ -3,9 +3,9 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
-using Metalama.Framework.Impl.Utilities;
+using Metalama.Framework.Engine.Utilities;
 
-namespace Metalama.Framework.Impl.CodeModel.Pseudo
+namespace Metalama.Framework.Engine.CodeModel.Pseudo
 {
     internal class PseudoAdder : PseudoAccessor<Event>
     {

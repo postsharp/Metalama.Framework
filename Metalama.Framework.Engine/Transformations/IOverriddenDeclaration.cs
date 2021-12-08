@@ -3,7 +3,7 @@
 
 using Metalama.Framework.Code;
 
-namespace Metalama.Framework.Impl.Transformations
+namespace Metalama.Framework.Engine.Transformations
 {
     internal interface IOverriddenDeclaration
     {

@@ -4,10 +4,10 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.Invokers;
-using Metalama.Framework.Impl.CodeModel.Collections;
-using Metalama.Framework.Impl.CodeModel.Invokers;
-using Metalama.Framework.Impl.CodeModel.References;
-using Metalama.Framework.Impl.Utilities;
+using Metalama.Framework.Engine.CodeModel.Collections;
+using Metalama.Framework.Engine.CodeModel.Invokers;
+using Metalama.Framework.Engine.CodeModel.References;
+using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Metrics;
 using Microsoft.CodeAnalysis;
 using System;
@@ -18,7 +18,7 @@ using Accessibility = Metalama.Framework.Code.Accessibility;
 using MethodKind = Metalama.Framework.Code.MethodKind;
 using SpecialType = Metalama.Framework.Code.SpecialType;
 
-namespace Metalama.Framework.Impl.CodeModel.Pseudo
+namespace Metalama.Framework.Engine.CodeModel.Pseudo
 {
     internal abstract class PseudoAccessor<T> : IMethodImpl
         where T : IMemberWithAccessors

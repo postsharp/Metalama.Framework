@@ -4,7 +4,7 @@
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 
-namespace Metalama.Framework.Impl.Serialization
+namespace Metalama.Framework.Engine.Serialization
 {
     /// <summary>
     /// As <see cref="ObjectSerializer"/>, except strongly-typed.

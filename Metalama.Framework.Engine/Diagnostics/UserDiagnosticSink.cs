@@ -4,16 +4,16 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.CodeFixes;
 using Metalama.Framework.Diagnostics;
-using Metalama.Framework.Impl.CodeModel;
-using Metalama.Framework.Impl.CompileTime;
-using Metalama.Framework.Impl.DesignTime.CodeFixes;
+using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CompileTime;
+using Metalama.Framework.Engine.DesignTime.CodeFixes;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Text;
 
-namespace Metalama.Framework.Impl.Diagnostics
+namespace Metalama.Framework.Engine.Diagnostics
 {
     /// <summary>
     /// Implements the user-level <see cref="IDiagnosticSink"/> interface

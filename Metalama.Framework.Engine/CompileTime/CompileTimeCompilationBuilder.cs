@@ -3,16 +3,16 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Fabrics;
-using Metalama.Framework.Impl.CodeModel;
-using Metalama.Framework.Impl.CompileTime.Serialization;
-using Metalama.Framework.Impl.Diagnostics;
-using Metalama.Framework.Impl.Formatting;
-using Metalama.Framework.Impl.Observers;
-using Metalama.Framework.Impl.Options;
-using Metalama.Framework.Impl.Sdk;
-using Metalama.Framework.Impl.Templating;
-using Metalama.Framework.Impl.Templating.Mapping;
-using Metalama.Framework.Impl.Utilities;
+using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CompileTime.Serialization;
+using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Formatting;
+using Metalama.Framework.Engine.Observers;
+using Metalama.Framework.Engine.Options;
+using Metalama.Framework.Engine.Sdk;
+using Metalama.Framework.Engine.Templating;
+using Metalama.Framework.Engine.Templating.Mapping;
+using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Project;
 using K4os.Hash.xxHash;
 using Microsoft.CodeAnalysis;
@@ -26,7 +26,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 
-namespace Metalama.Framework.Impl.CompileTime
+namespace Metalama.Framework.Engine.CompileTime
 {
     /// <summary>
     /// This class is responsible for building a compile-time <see cref="Compilation"/> based on a run-time one.

@@ -3,11 +3,11 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
-using Metalama.Framework.Impl.CodeModel.References;
-using Metalama.Framework.Impl.Collections;
-using Metalama.Framework.Impl.Diagnostics;
-using Metalama.Framework.Impl.Templating.MetaModel;
-using Metalama.Framework.Impl.Utilities;
+using Metalama.Framework.Engine.CodeModel.References;
+using Metalama.Framework.Engine.Collections;
+using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Templating.MetaModel;
+using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -20,7 +20,7 @@ using DeclarationKind = Metalama.Framework.Code.DeclarationKind;
 using MethodKind = Microsoft.CodeAnalysis.MethodKind;
 using RefKind = Metalama.Framework.Code.RefKind;
 
-namespace Metalama.Framework.Impl.CodeModel
+namespace Metalama.Framework.Engine.CodeModel
 {
     internal static class DeclarationExtensions
     {

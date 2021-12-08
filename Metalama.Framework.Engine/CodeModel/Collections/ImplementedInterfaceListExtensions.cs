@@ -4,7 +4,7 @@
 using Metalama.Framework.Code;
 using System.Collections.Generic;
 
-namespace Metalama.Framework.Impl.CodeModel.Collections
+namespace Metalama.Framework.Engine.CodeModel.Collections
 {
     internal static class ImplementedInterfaceListExtensions
     {

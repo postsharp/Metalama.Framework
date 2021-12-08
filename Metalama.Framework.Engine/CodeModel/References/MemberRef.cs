@@ -5,7 +5,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Microsoft.CodeAnalysis;
 
-namespace Metalama.Framework.Impl.CodeModel.References
+namespace Metalama.Framework.Engine.CodeModel.References
 {
     /// <summary>
     /// The implementation of <see cref="IMemberRef{T}"/>.

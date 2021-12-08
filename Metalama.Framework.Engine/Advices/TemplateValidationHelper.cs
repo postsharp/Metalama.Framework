@@ -4,13 +4,13 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
-using Metalama.Framework.Impl.CodeModel;
-using Metalama.Framework.Impl.Diagnostics;
+using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Diagnostics;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
-namespace Metalama.Framework.Impl.Advices
+namespace Metalama.Framework.Engine.Advices
 {
     [Obfuscation( Exclude = true )] // Not obfuscated to have a decent call stack in case of user exception.
     internal static class TemplateValidationHelper

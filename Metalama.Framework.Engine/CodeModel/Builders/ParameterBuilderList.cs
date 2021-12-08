@@ -7,7 +7,7 @@ using Metalama.Framework.Code.DeclarationBuilders;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Metalama.Framework.Impl.CodeModel.Builders
+namespace Metalama.Framework.Engine.CodeModel.Builders
 {
     internal class ParameterBuilderList : List<IParameterBuilder>, IParameterList
     {

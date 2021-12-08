@@ -16,7 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <InternalsVisibleTo Include="Metalama.Framework.Impl" />
+    <InternalsVisibleTo Include="Metalama.Framework.Engine" />
     <InternalsVisibleTo Include="Metalama.TestFramework" />
     <InternalsVisibleTo Include="Metalama.Framework.Tests.UnitTests.Internals" />
     <InternalsVisibleTo Include="Metalama.Framework.Tests.Integration.Internals" />

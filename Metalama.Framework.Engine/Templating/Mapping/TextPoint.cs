@@ -4,7 +4,7 @@
 using Microsoft.CodeAnalysis.Text;
 using System.IO;
 
-namespace Metalama.Framework.Impl.Templating.Mapping
+namespace Metalama.Framework.Engine.Templating.Mapping
 {
     /// <summary>
     /// Represent a position in a text file.

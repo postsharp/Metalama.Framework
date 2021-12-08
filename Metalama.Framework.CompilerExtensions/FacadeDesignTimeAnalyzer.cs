@@ -19,7 +19,7 @@ namespace Metalama.Framework.CompilerExtensions
 
         public FacadeDesignTimeAnalyzer()
         {
-            this._impl = (DiagnosticAnalyzer) ResourceExtractor.CreateInstance( "Metalama.Framework.Impl.DesignTime.DesignTimeAnalyzer" );
+            this._impl = (DiagnosticAnalyzer) ResourceExtractor.CreateInstance( "Metalama.Framework.Engine.DesignTime.DesignTimeAnalyzer" );
         }
 
         public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => this._impl.SupportedDiagnostics;

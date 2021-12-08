@@ -4,7 +4,7 @@
 using Metalama.Framework.Code;
 using Microsoft.CodeAnalysis;
 
-namespace Metalama.Framework.Impl.CodeModel.References
+namespace Metalama.Framework.Engine.CodeModel.References
 {
     /// <summary>
     /// Represents a reference to a declaration that can be resolved using <see cref="IRef{T}.GetTarget"/>.

@@ -2,12 +2,12 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Impl.Aspects;
-using Metalama.Framework.Impl.CodeModel;
-using Metalama.Framework.Impl.Utilities;
+using Metalama.Framework.Engine.Aspects;
+using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Utilities;
 using System.Reflection;
 
-namespace Metalama.Framework.Impl.Templating.MetaModel
+namespace Metalama.Framework.Engine.Templating.MetaModel
 {
     internal abstract class AdvisedMember<T> : AdvisedDeclaration<T>, IMember
         where T : IMember, IDeclarationImpl

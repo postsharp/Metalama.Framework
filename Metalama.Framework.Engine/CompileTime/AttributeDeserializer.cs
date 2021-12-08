@@ -2,10 +2,10 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Impl.CodeModel;
-using Metalama.Framework.Impl.Collections;
-using Metalama.Framework.Impl.Diagnostics;
-using Metalama.Framework.Impl.Utilities;
+using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Collections;
+using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
@@ -18,7 +18,7 @@ using Attribute = System.Attribute;
 using TypedConstant = Microsoft.CodeAnalysis.TypedConstant;
 using TypeKind = Microsoft.CodeAnalysis.TypeKind;
 
-namespace Metalama.Framework.Impl.CompileTime
+namespace Metalama.Framework.Engine.CompileTime
 {
     internal class AttributeDeserializer
     {

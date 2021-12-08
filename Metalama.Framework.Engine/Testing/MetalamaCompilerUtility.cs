@@ -1,7 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Metalama.Framework.Impl.Utilities;
+using Metalama.Framework.Engine.Utilities;
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -9,7 +9,7 @@ using System.IO;
 using System.Threading.Tasks;
 #endif
 
-namespace Metalama.Framework.Impl.Testing
+namespace Metalama.Framework.Engine.Testing
 {
     internal static class MetalamaCompilerUtility
     {

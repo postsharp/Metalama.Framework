@@ -10,8 +10,8 @@
          
          
          <!-- The following classes have a lot of gaps but these are in general trivial methods. We don't want to spend effort on this now. -->
-         <Exclude>$(Exclude),[Metalama.Framework.Impl]Metalama.Framework.Impl.CodeModel.Builders.*</Exclude>
-         <Exclude>$(Exclude),[Metalama.TestFramework.Impl]Metalama.Framework.Impl.Templating.MetaModel.Advised*</Exclude>
+         <Exclude>$(Exclude),[Metalama.Framework.Engine]Metalama.Framework.Engine.CodeModel.Builders.*</Exclude>
+         <Exclude>$(Exclude),[Metalama.TestFramework.Impl]Metalama.Framework.Engine.Templating.MetaModel.Advised*</Exclude>
 
       </PropertyGroup>  
             

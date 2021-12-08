@@ -4,7 +4,7 @@
 using Metalama.Framework.Code.Invokers;
 using System;
 
-namespace Metalama.Framework.Impl.CodeModel.Invokers
+namespace Metalama.Framework.Engine.CodeModel.Invokers
 {
     internal class InvokerFactory<T> : IInvokerFactory<T>
         where T : class, IInvoker

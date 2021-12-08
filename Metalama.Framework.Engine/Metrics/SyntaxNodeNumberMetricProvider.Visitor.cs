@@ -5,7 +5,7 @@ using Metalama.Framework.Metrics;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 
-namespace Metalama.Framework.Impl.Metrics
+namespace Metalama.Framework.Engine.Metrics
 {
     internal partial class SyntaxNodeNumberMetricProvider
     {

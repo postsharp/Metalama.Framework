@@ -4,7 +4,7 @@
 using Metalama.Framework.Code;
 using System.Collections.Generic;
 
-namespace Metalama.Framework.Impl.CodeModel
+namespace Metalama.Framework.Engine.CodeModel
 {
     internal interface ITypeInternal : ISdkType { }
 

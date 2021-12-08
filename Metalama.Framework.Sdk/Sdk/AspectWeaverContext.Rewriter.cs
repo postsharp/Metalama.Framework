@@ -6,7 +6,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Immutable;
 
-namespace Metalama.Framework.Impl.Sdk
+namespace Metalama.Framework.Engine.Sdk
 {
     public sealed partial class AspectWeaverContext
     {

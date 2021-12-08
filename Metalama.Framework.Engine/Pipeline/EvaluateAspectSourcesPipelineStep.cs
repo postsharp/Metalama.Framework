@@ -2,15 +2,15 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Eligibility;
-using Metalama.Framework.Impl.AspectOrdering;
-using Metalama.Framework.Impl.Aspects;
-using Metalama.Framework.Impl.CodeModel;
+using Metalama.Framework.Engine.AspectOrdering;
+using Metalama.Framework.Engine.Aspects;
+using Metalama.Framework.Engine.CodeModel;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
 
-namespace Metalama.Framework.Impl.Pipeline
+namespace Metalama.Framework.Engine.Pipeline
 {
     /// <summary>
     /// The <see cref="PipelineStage"/> that evaluates aspect sources and adds aspect instances to other steps. This step runs

@@ -2,10 +2,10 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Impl.CodeModel;
+using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Project;
 
-namespace Metalama.Framework.Impl.Observers
+namespace Metalama.Framework.Engine.Observers
 {
     /// <summary>
     /// An interface that can be injected into the service provider to get callbacks from the aspect pipeline when the initial <see cref="ICompilation"/> is created.

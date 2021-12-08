@@ -3,7 +3,7 @@
 
 using Metalama.Framework.Project;
 
-namespace Metalama.Framework.Impl.Pipeline
+namespace Metalama.Framework.Engine.Pipeline
 {
     internal record AspectPipelineDescription( IExecutionScenario ExecutionScenario, bool IsTest ) : IService;
 }

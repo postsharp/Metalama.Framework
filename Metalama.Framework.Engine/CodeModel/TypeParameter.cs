@@ -2,7 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Impl.Utilities;
+using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -12,7 +12,7 @@ using SpecialType = Metalama.Framework.Code.SpecialType;
 using TypeKind = Metalama.Framework.Code.TypeKind;
 using VarianceKind = Metalama.Framework.Code.VarianceKind;
 
-namespace Metalama.Framework.Impl.CodeModel
+namespace Metalama.Framework.Engine.CodeModel
 {
     internal class TypeParameter : Declaration, ITypeParameter, ITypeInternal
     {

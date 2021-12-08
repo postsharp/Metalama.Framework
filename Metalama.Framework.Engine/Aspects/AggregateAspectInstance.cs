@@ -3,14 +3,14 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Impl.CodeModel.References;
+using Metalama.Framework.Engine.CodeModel.References;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 
-namespace Metalama.Framework.Impl.Aspects
+namespace Metalama.Framework.Engine.Aspects
 {
     internal sealed class AggregateAspectInstance : IAspectInstanceInternal
     {

@@ -4,7 +4,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.RunTime;
 
-namespace Metalama.Framework.Impl.ReflectionMocks
+namespace Metalama.Framework.Engine.ReflectionMocks
 {
     internal class CompileTimeFieldOrPropertyInfo : FieldOrPropertyInfo
     {

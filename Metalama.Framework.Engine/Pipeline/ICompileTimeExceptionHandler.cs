@@ -5,7 +5,7 @@ using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
 
-namespace Metalama.Framework.Impl.Pipeline
+namespace Metalama.Framework.Engine.Pipeline
 {
     public interface ICompileTimeExceptionHandler : IService
     {

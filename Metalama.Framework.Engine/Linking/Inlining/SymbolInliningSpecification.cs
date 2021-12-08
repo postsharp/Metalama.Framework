@@ -3,7 +3,7 @@
 
 using System.Collections.Generic;
 
-namespace Metalama.Framework.Impl.Linking.Inlining
+namespace Metalama.Framework.Engine.Linking.Inlining
 {
     internal class SymbolInliningSpecification
     {

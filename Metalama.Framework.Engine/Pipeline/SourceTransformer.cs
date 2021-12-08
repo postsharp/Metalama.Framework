@@ -2,9 +2,9 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Compiler;
-using Metalama.Framework.Impl.AdditionalOutputs;
-using Metalama.Framework.Impl.Diagnostics;
-using Metalama.Framework.Impl.Options;
+using Metalama.Framework.Engine.AdditionalOutputs;
+using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Project;
 using System;
 using System.Collections.Generic;
@@ -15,7 +15,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Metalama.Framework.Impl.Pipeline
+namespace Metalama.Framework.Engine.Pipeline
 {
     /// <summary>
     /// The main compile-time entry point of Metalama. An implementation of Metalama.Compiler's <see cref="ISourceTransformer"/>.

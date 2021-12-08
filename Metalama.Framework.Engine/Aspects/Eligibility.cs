@@ -3,7 +3,7 @@
 
 using Metalama.Framework.Eligibility;
 
-namespace Metalama.Framework.Impl.Aspects
+namespace Metalama.Framework.Engine.Aspects
 {
     public readonly struct Eligibility
     {

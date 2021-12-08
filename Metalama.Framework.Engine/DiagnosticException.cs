@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 
-namespace Metalama.Framework.Impl
+namespace Metalama.Framework.Engine
 {
     /// <summary>
     /// An exception thrown by Metalama, embedding a <see cref="Diagnostic"/>, thrown in a situation where

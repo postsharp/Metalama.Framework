@@ -6,7 +6,7 @@ using Metalama.Framework.Project;
 using System;
 using System.Collections.Concurrent;
 
-namespace Metalama.Framework.Impl.Metrics
+namespace Metalama.Framework.Engine.Metrics
 {
     /// <summary>
     /// Manages the metric providers and routes metric requests to them.

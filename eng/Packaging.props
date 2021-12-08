@@ -24,7 +24,7 @@
         <ShippedFile Include="$(PackageOutputPath)\Metalama.TestFramework.$(Version).nupkg" />
         <ShippedFile Include="$(PackageOutputPath)\Metalama.Framework.Redist.$(Version).nupkg" />
         <ShippedFile Include="$(PackageOutputPath)\Metalama.Framework.Sdk.$(Version).nupkg" />
-        <ShippedFile Include="$(PackageOutputPath)\Metalama.Framework.Impl.$(Version).nupkg" />
+        <ShippedFile Include="$(PackageOutputPath)\Metalama.Framework.Engine.$(Version).nupkg" />
         <ShippedFile Include="$(PackageOutputPath)\Metalama.Framework.DesignTime.Contracts.$(Version).nupkg" />
     </ItemGroup>
 

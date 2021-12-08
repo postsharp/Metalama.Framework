@@ -3,13 +3,13 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Advised;
-using Metalama.Framework.Impl.CodeModel;
+using Metalama.Framework.Engine.CodeModel;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Metalama.Framework.Impl.Templating.MetaModel
+namespace Metalama.Framework.Engine.Templating.MetaModel
 {
     internal partial class AdvisedParameterList : IAdvisedParameterList, IAdviseParameterValueList
     {

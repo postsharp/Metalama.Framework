@@ -6,7 +6,7 @@ using Microsoft.CodeAnalysis;
 using System;
 using Accessibility = Microsoft.CodeAnalysis.Accessibility;
 
-namespace Metalama.Framework.Impl.CodeModel
+namespace Metalama.Framework.Engine.CodeModel
 {
     internal static class AccessibilityHelper
     {

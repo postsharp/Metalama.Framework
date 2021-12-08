@@ -6,7 +6,7 @@ using System;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 
-namespace Metalama.Framework.Impl.Options
+namespace Metalama.Framework.Engine.Options
 {
     /// <summary>
     /// Default implementation of <see cref="IProjectOptions"/>, based on a <see cref="IProjectOptionsSource"/>

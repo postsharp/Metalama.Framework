@@ -1,9 +1,9 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Metalama.Framework.Impl.DesignTime.Pipeline;
-using Metalama.Framework.Impl.Options;
-using Metalama.Framework.Impl.Utilities;
+using Metalama.Framework.Engine.DesignTime.Pipeline;
+using Metalama.Framework.Engine.Options;
+using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -11,7 +11,7 @@ using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 
-namespace Metalama.Framework.Impl.DesignTime.Diagnostics
+namespace Metalama.Framework.Engine.DesignTime.Diagnostics
 {
     /// <summary>
     /// Allows to register user diagnostics and suppressions for storage in the user profile, and read this file.

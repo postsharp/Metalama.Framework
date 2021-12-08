@@ -3,7 +3,7 @@
 
 using Microsoft.CodeAnalysis;
 
-namespace Metalama.Framework.Impl.Linking.Inlining
+namespace Metalama.Framework.Engine.Linking.Inlining
 {
     /// <summary>
     /// Allows for one kind of inlining of aspect references.

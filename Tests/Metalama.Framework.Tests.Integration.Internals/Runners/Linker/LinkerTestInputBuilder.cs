@@ -3,14 +3,14 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
-using Metalama.Framework.Impl;
-using Metalama.Framework.Impl.AspectOrdering;
-using Metalama.Framework.Impl.CodeModel;
-using Metalama.Framework.Impl.CodeModel.References;
-using Metalama.Framework.Impl.Diagnostics;
-using Metalama.Framework.Impl.Linking;
-using Metalama.Framework.Impl.Transformations;
-using Metalama.Framework.Impl.Utilities;
+using Metalama.Framework.Engine;
+using Metalama.Framework.Engine.AspectOrdering;
+using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.References;
+using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Linking;
+using Metalama.Framework.Engine.Transformations;
+using Metalama.Framework.Engine.Utilities;
 using Metalama.TestFramework;
 using Metalama.TestFramework.Utilities;
 using FakeItEasy;

@@ -2,12 +2,12 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Compiler;
-using Metalama.Framework.Impl.DesignTime.Diagnostics;
-using Metalama.Framework.Impl.DesignTime.Pipeline;
-using Metalama.Framework.Impl.Diagnostics;
-using Metalama.Framework.Impl.Options;
-using Metalama.Framework.Impl.Templating;
-using Metalama.Framework.Impl.Utilities;
+using Metalama.Framework.Engine.DesignTime.Diagnostics;
+using Metalama.Framework.Engine.DesignTime.Pipeline;
+using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Options;
+using Metalama.Framework.Engine.Templating;
+using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
 using System;
@@ -21,7 +21,7 @@ using System.Linq;
 #pragma warning disable RS1001 // Missing diagnostic analyzer attribute.
 #pragma warning disable RS1022 // Remove access to our implementation types 
 
-namespace Metalama.Framework.Impl.DesignTime
+namespace Metalama.Framework.Engine.DesignTime
 {
     /// <summary>
     /// Our implementation of <see cref="DiagnosticAnalyzer"/>. It reports all diagnostics that we produce.

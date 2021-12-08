@@ -3,13 +3,13 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Types;
-using Metalama.Framework.Impl.CodeModel.References;
+using Metalama.Framework.Engine.CodeModel.References;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 
-namespace Metalama.Framework.Impl.CodeModel.Collections
+namespace Metalama.Framework.Engine.CodeModel.Collections
 {
     internal abstract class MethodBaseList<T> : MemberOrNamedTypeList<T, MemberRef<T>>
         where T : class, IMethodBase

@@ -5,10 +5,10 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Code.Invokers;
-using Metalama.Framework.Impl.Advices;
-using Metalama.Framework.Impl.CodeModel.Invokers;
-using Metalama.Framework.Impl.Transformations;
-using Metalama.Framework.Impl.Utilities;
+using Metalama.Framework.Engine.Advices;
+using Metalama.Framework.Engine.CodeModel.Invokers;
+using Metalama.Framework.Engine.Transformations;
+using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.RunTime;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -21,7 +21,7 @@ using MethodKind = Metalama.Framework.Code.MethodKind;
 using RefKind = Metalama.Framework.Code.RefKind;
 using TypedConstant = Metalama.Framework.Code.TypedConstant;
 
-namespace Metalama.Framework.Impl.CodeModel.Builders
+namespace Metalama.Framework.Engine.CodeModel.Builders
 {
     internal class PropertyBuilder : MemberBuilder, IPropertyBuilder, IPropertyImpl
     {

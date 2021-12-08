@@ -6,13 +6,13 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Eligibility;
 using Metalama.Framework.Eligibility.Implementation;
-using Metalama.Framework.Impl.Advices;
-using Metalama.Framework.Impl.CodeModel;
-using Metalama.Framework.Impl.CompileTime;
-using Metalama.Framework.Impl.Diagnostics;
-using Metalama.Framework.Impl.Pipeline;
-using Metalama.Framework.Impl.Sdk;
-using Metalama.Framework.Impl.Utilities;
+using Metalama.Framework.Engine.Advices;
+using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CompileTime;
+using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Pipeline;
+using Metalama.Framework.Engine.Sdk;
+using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
@@ -21,7 +21,7 @@ using System.Linq;
 using System.Threading;
 using TypeKind = Metalama.Framework.Code.TypeKind;
 
-namespace Metalama.Framework.Impl.Aspects
+namespace Metalama.Framework.Engine.Aspects
 {
     /// <summary>
     /// Executes aspects.

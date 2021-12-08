@@ -3,7 +3,7 @@
 
 using Metalama.Framework.Aspects;
 
-namespace Metalama.Framework.Impl.Sdk
+namespace Metalama.Framework.Engine.Sdk
 {
     /// <summary>
     /// Aspect weavers are responsible for applying low-level aspects to the Roslyn transformation. They

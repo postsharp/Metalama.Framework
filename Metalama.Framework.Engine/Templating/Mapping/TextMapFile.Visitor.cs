@@ -1,11 +1,11 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Metalama.Framework.Impl.Collections;
+using Metalama.Framework.Engine.Collections;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 
-namespace Metalama.Framework.Impl.Templating.Mapping
+namespace Metalama.Framework.Engine.Templating.Mapping
 {
     internal partial class TextMapFile
     {

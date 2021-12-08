@@ -2,15 +2,15 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Impl.CodeModel.References;
-using Metalama.Framework.Impl.ReflectionMocks;
+using Metalama.Framework.Engine.CodeModel.References;
+using Metalama.Framework.Engine.ReflectionMocks;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
 using System.Reflection;
 using RefKind = Microsoft.CodeAnalysis.RefKind;
 using TypedConstant = Metalama.Framework.Code.TypedConstant;
 
-namespace Metalama.Framework.Impl.CodeModel
+namespace Metalama.Framework.Engine.CodeModel
 {
     internal abstract class ReturnParameter : BaseDeclaration, IParameter
     {

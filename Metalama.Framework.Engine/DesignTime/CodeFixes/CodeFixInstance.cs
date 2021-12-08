@@ -4,7 +4,7 @@
 using Metalama.Framework.CodeFixes;
 using Microsoft.CodeAnalysis;
 
-namespace Metalama.Framework.Impl.DesignTime.CodeFixes
+namespace Metalama.Framework.Engine.DesignTime.CodeFixes
 {
     /// <summary>
     /// Represents a <see cref="Metalama.Framework.CodeFixes.CodeFix"/> that has been suggested for a diagnostic.

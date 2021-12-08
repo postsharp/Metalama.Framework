@@ -1,6 +1,6 @@
 using System;
 using Metalama.Framework.Aspects;
-using Metalama.Framework.Impl.Sdk;
+using Metalama.Framework.Engine.Sdk;
 using Metalama.Framework.Project;
 
 namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Initialize.ServicePlugIn

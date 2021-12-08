@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <!-- Workspaces is used in TestRunner, Workspaces.Lightweight is a dependency of Metalama.Framework.Impl -->
+    <!-- Workspaces is used in TestRunner, Workspaces.Lightweight is a dependency of Metalama.Framework.Engine -->
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="$(RoslynVersion)" />
     <PackageReference Include="xunit.assert" Version="$(xUnitVersion)" />
     <PackageReference Include="xunit.extensibility.core" Version="$(xUnitVersion)" />
@@ -17,7 +17,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Metalama.Framework.DesignTime.Contracts\Metalama.Framework.DesignTime.Contracts.csproj" />
-    <ProjectReference Include="..\Metalama.Framework.Impl\Metalama.Framework.Impl.csproj" />
+    <ProjectReference Include="..\Metalama.Framework.Engine\Metalama.Framework.Engine.csproj" />
     <ProjectReference Include="..\Metalama.Framework.Sdk\Metalama.Framework.Sdk.csproj" />
     <ProjectReference Include="..\Metalama.Framework\Metalama.Framework.csproj" />
   </ItemGroup>

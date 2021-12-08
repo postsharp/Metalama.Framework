@@ -1,12 +1,12 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Metalama.Framework.Impl.DesignTime.CodeFixes;
+using Metalama.Framework.Engine.DesignTime.CodeFixes;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 
-namespace Metalama.Framework.Impl.Diagnostics
+namespace Metalama.Framework.Engine.Diagnostics
 {
     public readonly struct ImmutableUserDiagnosticList
     {

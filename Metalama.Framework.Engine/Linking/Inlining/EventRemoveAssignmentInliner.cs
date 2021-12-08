@@ -6,7 +6,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 
-namespace Metalama.Framework.Impl.Linking.Inlining
+namespace Metalama.Framework.Engine.Linking.Inlining
 {
     internal class EventRemoveAssignmentInliner : EventInliner
     {

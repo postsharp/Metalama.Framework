@@ -4,7 +4,7 @@
 using Metalama.Framework.Code;
 using System;
 
-namespace Metalama.Framework.Impl.CodeModel.Builders
+namespace Metalama.Framework.Engine.CodeModel.Builders
 {
     internal partial class AccessorBuilder
     {

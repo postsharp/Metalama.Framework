@@ -4,11 +4,11 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Code.Invokers;
-using Metalama.Framework.Impl.Advices;
-using Metalama.Framework.Impl.CodeModel.Invokers;
-using Metalama.Framework.Impl.Linking;
-using Metalama.Framework.Impl.Transformations;
-using Metalama.Framework.Impl.Utilities;
+using Metalama.Framework.Engine.Advices;
+using Metalama.Framework.Engine.CodeModel.Invokers;
+using Metalama.Framework.Engine.Linking;
+using Metalama.Framework.Engine.Transformations;
+using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -17,7 +17,7 @@ using System.Linq;
 using System.Reflection;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
-namespace Metalama.Framework.Impl.CodeModel.Builders
+namespace Metalama.Framework.Engine.CodeModel.Builders
 {
     internal class EventBuilder : MemberBuilder, IEventBuilder, IEventImpl
     {

@@ -4,7 +4,7 @@
 using Microsoft.CodeAnalysis;
 using System;
 
-namespace Metalama.Framework.Impl.Diagnostics
+namespace Metalama.Framework.Engine.Diagnostics
 {
     internal class DiagnosticAdderAdapter : IDiagnosticAdder
     {

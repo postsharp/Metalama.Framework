@@ -5,7 +5,7 @@
     <PackageDescription>
       Metalama SDK. A tool for custom source code modifying extensions using the Roslyn API. More powerful than source generators.
     </PackageDescription>
-    <RootNamespace>Metalama.Framework.Impl</RootNamespace>
+    <RootNamespace>Metalama.Framework.Engine</RootNamespace>
     <!-- This is to prevent the Metalama.Compiler.Sdk package to change our nuspec --> 
     <MetalamaCompilerDisablePackCustomization>True</MetalamaCompilerDisablePackCustomization>
     
@@ -15,7 +15,7 @@
     <None Include="build\Metalama.Framework.Sdk.targets" Pack="true" PackagePath="buildTransitive" />
     <None Include="build\Metalama.Framework.Sdk.props" Pack="true" PackagePath="buildTransitive" />
 
-    <InternalsVisibleTo Include="Metalama.Framework.Impl" />
+    <InternalsVisibleTo Include="Metalama.Framework.Engine" />
     <InternalsVisibleTo Include="Metalama.Framework.Tests.UnitTests.Internals" />
     <InternalsVisibleTo Include="Metalama.Framework.Tests.Integration.Internals" />
     <InternalsVisibleTo Include="DynamicProxyGenAssembly2" Key="$(FakeItEasyKey)" LoadsWithinVisualStudio="false" />

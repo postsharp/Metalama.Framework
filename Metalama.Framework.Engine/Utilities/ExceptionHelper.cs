@@ -4,7 +4,7 @@
 using System;
 using System.Linq;
 
-namespace Metalama.Framework.Impl.Utilities
+namespace Metalama.Framework.Engine.Utilities
 {
     internal static class ExceptionHelper
     {

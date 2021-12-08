@@ -1,14 +1,14 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Metalama.Framework.Impl.Options;
-using Metalama.Framework.Impl.Pipeline;
+using Metalama.Framework.Engine.Options;
+using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Project;
 using System;
 using System.Collections.Immutable;
 using System.IO;
 
-namespace Metalama.Framework.Impl.AdditionalOutputs
+namespace Metalama.Framework.Engine.AdditionalOutputs
 {
     internal class AdditionalCompilationOutputFileProvider : IAdditionalOutputFileProvider
     {

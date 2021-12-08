@@ -1,11 +1,11 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Metalama.Framework.Impl.Utilities;
+using Metalama.Framework.Engine.Utilities;
 using System;
 using System.IO;
 
-namespace Metalama.Framework.Impl.Options
+namespace Metalama.Framework.Engine.Options
 {
     /// <summary>
     /// A default implementation of <see cref="IPathOptions"/>.

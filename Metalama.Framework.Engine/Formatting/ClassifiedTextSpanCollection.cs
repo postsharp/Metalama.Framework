@@ -2,14 +2,14 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.DesignTime.Contracts;
-using Metalama.Framework.Impl.Collections;
+using Metalama.Framework.Engine.Collections;
 using Microsoft.CodeAnalysis.Text;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Metalama.Framework.Impl.Formatting
+namespace Metalama.Framework.Engine.Formatting
 {
     /// <summary>
     /// A set of <see cref="TextSpan"/>.

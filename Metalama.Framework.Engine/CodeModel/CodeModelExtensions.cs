@@ -4,7 +4,7 @@
 using Metalama.Framework.Code;
 using Microsoft.CodeAnalysis;
 
-namespace Metalama.Framework.Impl.CodeModel
+namespace Metalama.Framework.Engine.CodeModel
 {
     public static class CodeModelExtensions
     {

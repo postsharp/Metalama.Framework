@@ -6,7 +6,7 @@ using PostSharp.Backstage.Extensibility.Extensions;
 using PostSharp.Backstage.Licensing.Consumption;
 using System;
 
-namespace Metalama.Framework.Impl.Licensing
+namespace Metalama.Framework.Engine.Licensing
 {
     internal class LicenseConsumer : ILicenseConsumer
     {

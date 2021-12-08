@@ -3,7 +3,7 @@
 
 using Metalama.Compiler;
 using Metalama.Framework.Code;
-using Metalama.Framework.Impl.ReflectionMocks;
+using Metalama.Framework.Engine.ReflectionMocks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -11,7 +11,7 @@ using System;
 using System.Collections.Immutable;
 using System.Reflection;
 
-namespace Metalama.Framework.Impl.Serialization
+namespace Metalama.Framework.Engine.Serialization
 {
     internal abstract class MetalamaMethodBaseSerializer<TInput, TOutput> : ObjectSerializer<TInput, TOutput>
         where TInput : MethodBase, TOutput

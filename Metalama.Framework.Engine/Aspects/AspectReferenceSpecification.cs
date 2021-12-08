@@ -3,7 +3,7 @@
 
 using System;
 
-namespace Metalama.Framework.Impl.Aspects
+namespace Metalama.Framework.Engine.Aspects
 {
     /// <summary>
     /// Describes which version of the underlying semantic is referenced by the syntax node.

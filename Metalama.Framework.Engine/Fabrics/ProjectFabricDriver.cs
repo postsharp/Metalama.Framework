@@ -3,17 +3,17 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Fabrics;
-using Metalama.Framework.Impl.CodeModel;
-using Metalama.Framework.Impl.CodeModel.References;
-using Metalama.Framework.Impl.Diagnostics;
-using Metalama.Framework.Impl.Utilities;
+using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.References;
+using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 
-namespace Metalama.Framework.Impl.Fabrics
+namespace Metalama.Framework.Engine.Fabrics
 {
     /// <summary>
     /// Implementation of <see cref="FabricAspect{T}"/> for project-level fabrics.

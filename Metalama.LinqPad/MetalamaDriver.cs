@@ -4,8 +4,8 @@
 using LINQPad;
 using LINQPad.Extensibility.DataContext;
 using Metalama.Framework.Code;
-using Metalama.Framework.Impl;
-using Metalama.Framework.Impl.Pipeline;
+using Metalama.Framework.Engine;
+using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Workspaces;
 using System;
 using System.Collections.Generic;

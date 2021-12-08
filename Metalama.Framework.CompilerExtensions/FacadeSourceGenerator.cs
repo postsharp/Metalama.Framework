@@ -14,7 +14,7 @@ namespace Metalama.Framework.CompilerExtensions
 
         public FacadeSourceGenerator()
         {
-            this._impl = (ISourceGenerator) ResourceExtractor.CreateInstance( "Metalama.Framework.Impl.DesignTime.DesignTimeSourceGenerator" );
+            this._impl = (ISourceGenerator) ResourceExtractor.CreateInstance( "Metalama.Framework.Engine.DesignTime.DesignTimeSourceGenerator" );
         }
 
         void ISourceGenerator.Execute( GeneratorExecutionContext context ) => this._impl.Execute( context );

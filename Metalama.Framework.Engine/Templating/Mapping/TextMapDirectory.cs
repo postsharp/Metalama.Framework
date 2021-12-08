@@ -9,7 +9,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 
-namespace Metalama.Framework.Impl.Templating.Mapping
+namespace Metalama.Framework.Engine.Templating.Mapping
 {
     /// <summary>
     /// Represents a set of <see cref="TextMapFile"/>.

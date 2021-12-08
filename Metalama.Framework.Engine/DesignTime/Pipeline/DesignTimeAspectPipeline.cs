@@ -3,13 +3,13 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Eligibility;
-using Metalama.Framework.Impl.Aspects;
-using Metalama.Framework.Impl.CodeModel;
-using Metalama.Framework.Impl.CompileTime;
-using Metalama.Framework.Impl.DesignTime.Diff;
-using Metalama.Framework.Impl.Diagnostics;
-using Metalama.Framework.Impl.Pipeline;
-using Metalama.Framework.Impl.Utilities;
+using Metalama.Framework.Engine.Aspects;
+using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CompileTime;
+using Metalama.Framework.Engine.DesignTime.Diff;
+using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Pipeline;
+using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
@@ -20,7 +20,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
 
-namespace Metalama.Framework.Impl.DesignTime.Pipeline
+namespace Metalama.Framework.Engine.DesignTime.Pipeline
 {
     /// <summary>
     /// The design-time implementation of <see cref="AspectPipeline"/>.

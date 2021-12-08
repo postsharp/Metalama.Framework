@@ -5,7 +5,7 @@
 
 using Metalama.Framework.Aspects;
 
-namespace Metalama.Framework.Impl.Templating
+namespace Metalama.Framework.Engine.Templating
 {
     internal enum MetaMemberKind
     {

@@ -3,7 +3,7 @@
 
 using Metalama.Framework.Project;
 
-namespace Metalama.Framework.Impl.CompileTime
+namespace Metalama.Framework.Engine.CompileTime
 {
     /// <summary>
     /// Gets an instance of <see cref="CompileTimeDomain"/>.

@@ -3,7 +3,7 @@
 
 using Metalama.Framework.Code;
 
-namespace Metalama.Framework.Impl.Templating.MetaModel
+namespace Metalama.Framework.Engine.Templating.MetaModel
 {
     /// <summary>
     /// Interface implemented by the return value of compile-time methods returning a <c>dynamic</c>

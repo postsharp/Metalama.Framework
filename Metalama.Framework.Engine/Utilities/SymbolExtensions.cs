@@ -10,7 +10,7 @@ using System.Linq;
 using RoslynSpecialType = Microsoft.CodeAnalysis.SpecialType;
 using SpecialType = Metalama.Framework.Code.SpecialType;
 
-namespace Metalama.Framework.Impl.Utilities
+namespace Metalama.Framework.Engine.Utilities
 {
     internal static class SymbolExtensions
     {

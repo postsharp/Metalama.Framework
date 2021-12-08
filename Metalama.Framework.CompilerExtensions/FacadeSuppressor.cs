@@ -16,7 +16,7 @@ namespace Metalama.Framework.CompilerExtensions
 
         public FacadeSuppressor()
         {
-            this._impl = (DiagnosticSuppressor) ResourceExtractor.CreateInstance( "Metalama.Framework.Impl.DesignTime.DesignTimeDiagnosticSuppressor" );
+            this._impl = (DiagnosticSuppressor) ResourceExtractor.CreateInstance( "Metalama.Framework.Engine.DesignTime.DesignTimeDiagnosticSuppressor" );
         }
 
         public override void ReportSuppressions( SuppressionAnalysisContext context ) => this._impl.ReportSuppressions( context );

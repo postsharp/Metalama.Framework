@@ -3,8 +3,8 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
-using Metalama.Framework.Impl.CodeModel.Collections;
-using Metalama.Framework.Impl.CodeModel.References;
+using Metalama.Framework.Engine.CodeModel.Collections;
+using Metalama.Framework.Engine.CodeModel.References;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -13,7 +13,7 @@ using System.Reflection;
 using RefKind = Metalama.Framework.Code.RefKind;
 using TypedConstant = Metalama.Framework.Code.TypedConstant;
 
-namespace Metalama.Framework.Impl.CodeModel.Pseudo
+namespace Metalama.Framework.Engine.CodeModel.Pseudo
 {
     internal sealed class PseudoParameter : BaseDeclaration, IParameter
     {

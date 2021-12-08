@@ -3,7 +3,7 @@
 
 using System;
 
-namespace Metalama.Framework.Impl.Sdk
+namespace Metalama.Framework.Engine.Sdk
 {
     /// <summary>
     /// Custom attribute that, when applied to a type implementing <see cref="IAspectWeaver"/>, exports this type

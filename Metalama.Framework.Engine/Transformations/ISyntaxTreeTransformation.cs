@@ -3,7 +3,7 @@
 
 using Microsoft.CodeAnalysis;
 
-namespace Metalama.Framework.Impl.Transformations
+namespace Metalama.Framework.Engine.Transformations
 {
     /// <summary>
     /// Represents any introduction to the code model that modifies a syntax tree. 

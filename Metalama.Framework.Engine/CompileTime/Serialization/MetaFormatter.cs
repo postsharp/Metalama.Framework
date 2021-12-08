@@ -3,7 +3,7 @@
 
 using System.IO;
 
-namespace Metalama.Framework.Impl.CompileTime.Serialization
+namespace Metalama.Framework.Engine.CompileTime.Serialization
 {
     internal class MetaFormatter
     {

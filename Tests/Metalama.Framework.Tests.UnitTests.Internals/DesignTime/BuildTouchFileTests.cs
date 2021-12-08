@@ -1,9 +1,9 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Metalama.Framework.Impl;
-using Metalama.Framework.Impl.DesignTime.Pipeline;
-using Metalama.Framework.Impl.Testing;
+using Metalama.Framework.Engine;
+using Metalama.Framework.Engine.DesignTime.Pipeline;
+using Metalama.Framework.Engine.Testing;
 using Metalama.Framework.Tests.UnitTests.Utilities;
 using Metalama.TestFramework;
 using System;

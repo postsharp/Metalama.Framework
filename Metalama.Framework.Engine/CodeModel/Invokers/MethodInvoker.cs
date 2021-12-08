@@ -3,16 +3,16 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Invokers;
-using Metalama.Framework.Impl.Aspects;
-using Metalama.Framework.Impl.Diagnostics;
-using Metalama.Framework.Impl.Templating;
-using Metalama.Framework.Impl.Templating.MetaModel;
+using Metalama.Framework.Engine.Aspects;
+using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Templating;
+using Metalama.Framework.Engine.Templating.MetaModel;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Linq;
 
-namespace Metalama.Framework.Impl.CodeModel.Invokers
+namespace Metalama.Framework.Engine.CodeModel.Invokers
 {
     internal class MethodInvoker : Invoker, IMethodInvoker
     {

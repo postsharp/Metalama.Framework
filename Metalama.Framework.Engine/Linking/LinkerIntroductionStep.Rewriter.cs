@@ -2,13 +2,13 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Impl.AspectOrdering;
-using Metalama.Framework.Impl.Aspects;
-using Metalama.Framework.Impl.CodeModel;
-using Metalama.Framework.Impl.Collections;
-using Metalama.Framework.Impl.Diagnostics;
-using Metalama.Framework.Impl.Formatting;
-using Metalama.Framework.Impl.Transformations;
+using Metalama.Framework.Engine.AspectOrdering;
+using Metalama.Framework.Engine.Aspects;
+using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Collections;
+using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Formatting;
+using Metalama.Framework.Engine.Transformations;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -18,7 +18,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
-namespace Metalama.Framework.Impl.Linking
+namespace Metalama.Framework.Engine.Linking
 {
     internal partial class LinkerIntroductionStep
     {

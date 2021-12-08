@@ -1,8 +1,8 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Metalama.Framework.Impl;
-using Metalama.Framework.Impl.CompileTime.Serialization;
+using Metalama.Framework.Engine;
+using Metalama.Framework.Engine.CompileTime.Serialization;
 using System;
 using System.Collections;
 using System.IO;

@@ -1,13 +1,13 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Metalama.Framework.Impl.Options;
+using Metalama.Framework.Engine.Options;
 using System;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 
-namespace Metalama.Framework.Impl.Testing
+namespace Metalama.Framework.Engine.Testing
 {
     /// <summary>
     /// An implementation of <see cref="IProjectOptions"/> and <see cref="IPathOptions"/> that can be used in tests.

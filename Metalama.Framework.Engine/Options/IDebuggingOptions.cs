@@ -3,7 +3,7 @@
 
 using Metalama.Framework.Project;
 
-namespace Metalama.Framework.Impl.Options
+namespace Metalama.Framework.Engine.Options
 {
     /// <summary>
     /// Exposes options allowing to attach a debugger to different compile-time or design-time processes.

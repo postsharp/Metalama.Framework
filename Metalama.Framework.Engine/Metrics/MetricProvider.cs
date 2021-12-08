@@ -6,7 +6,7 @@ using Metalama.Framework.Metrics;
 using System;
 using System.Collections.Generic;
 
-namespace Metalama.Framework.Impl.Metrics
+namespace Metalama.Framework.Engine.Metrics
 {
     /// <summary>
     /// The default implementation of <see cref="IMetricProvider{T}"/>.

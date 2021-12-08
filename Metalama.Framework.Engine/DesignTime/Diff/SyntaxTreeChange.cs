@@ -3,7 +3,7 @@
 
 using Microsoft.CodeAnalysis;
 
-namespace Metalama.Framework.Impl.DesignTime.Diff
+namespace Metalama.Framework.Engine.DesignTime.Diff
 {
     /// <summary>
     /// Represents a change between two versions of a <see cref="SyntaxTree"/>.

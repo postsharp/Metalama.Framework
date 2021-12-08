@@ -2,12 +2,12 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Impl.Aspects;
+using Metalama.Framework.Engine.Aspects;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
-namespace Metalama.Framework.Impl.Templating.MetaModel
+namespace Metalama.Framework.Engine.Templating.MetaModel
 {
     /// <summary>
     /// An implementation of <see cref="IUserExpression"/> that represents <c>this</c> and allows to access its instance members dynamically.

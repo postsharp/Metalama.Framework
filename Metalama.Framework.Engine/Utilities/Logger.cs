@@ -6,7 +6,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Threading;
 
-namespace Metalama.Framework.Impl.Utilities
+namespace Metalama.Framework.Engine.Utilities
 {
     internal class Logger
     {

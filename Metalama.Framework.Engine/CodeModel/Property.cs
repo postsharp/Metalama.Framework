@@ -4,11 +4,11 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.Invokers;
-using Metalama.Framework.Impl.CodeModel.Collections;
-using Metalama.Framework.Impl.CodeModel.Invokers;
-using Metalama.Framework.Impl.CodeModel.References;
-using Metalama.Framework.Impl.ReflectionMocks;
-using Metalama.Framework.Impl.Utilities;
+using Metalama.Framework.Engine.CodeModel.Collections;
+using Metalama.Framework.Engine.CodeModel.Invokers;
+using Metalama.Framework.Engine.CodeModel.References;
+using Metalama.Framework.Engine.ReflectionMocks;
+using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.RunTime;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
@@ -17,7 +17,7 @@ using System.Reflection;
 using MethodKind = Metalama.Framework.Code.MethodKind;
 using RefKind = Metalama.Framework.Code.RefKind;
 
-namespace Metalama.Framework.Impl.CodeModel
+namespace Metalama.Framework.Engine.CodeModel
 {
     internal sealed class Property : Member, IPropertyImpl
     {

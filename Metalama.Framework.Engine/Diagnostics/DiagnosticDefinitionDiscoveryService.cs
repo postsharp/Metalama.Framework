@@ -3,15 +3,15 @@
 
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Diagnostics;
-using Metalama.Framework.Impl.Pipeline;
-using Metalama.Framework.Impl.Utilities;
+using Metalama.Framework.Engine.Pipeline;
+using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Project;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
-namespace Metalama.Framework.Impl.Diagnostics
+namespace Metalama.Framework.Engine.Diagnostics
 {
     internal class DiagnosticDefinitionDiscoveryService : IService
     {

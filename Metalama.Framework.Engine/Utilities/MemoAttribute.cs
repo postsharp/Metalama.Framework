@@ -3,7 +3,7 @@
 
 using System;
 
-namespace Metalama.Framework.Impl.Utilities
+namespace Metalama.Framework.Engine.Utilities
 {
     [AttributeUsage( AttributeTargets.Property )]
     public class MemoAttribute : Attribute { }

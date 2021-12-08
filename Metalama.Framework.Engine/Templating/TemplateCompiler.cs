@@ -1,10 +1,10 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Metalama.Framework.Impl.Diagnostics;
-using Metalama.Framework.Impl.Observers;
-using Metalama.Framework.Impl.Serialization;
-using Metalama.Framework.Impl.Utilities;
+using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Observers;
+using Metalama.Framework.Engine.Serialization;
+using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -13,7 +13,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
 
-namespace Metalama.Framework.Impl.Templating
+namespace Metalama.Framework.Engine.Templating
 {
     internal class TemplateCompiler
     {

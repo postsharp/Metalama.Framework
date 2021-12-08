@@ -4,7 +4,7 @@
 using Metalama.Framework.Code;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace Metalama.Framework.Impl.Transformations
+namespace Metalama.Framework.Engine.Transformations
 {
     internal interface IIntroducedInterface : ISyntaxTreeTransformation, IObservableTransformation
     {

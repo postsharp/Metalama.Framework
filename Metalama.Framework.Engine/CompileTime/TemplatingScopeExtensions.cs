@@ -3,7 +3,7 @@
 
 using System;
 
-namespace Metalama.Framework.Impl.CompileTime
+namespace Metalama.Framework.Engine.CompileTime
 {
     internal static class TemplatingScopeExtensions
     {

@@ -1,12 +1,12 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Metalama.Framework.Impl.DesignTime.CodeFixes;
-using Metalama.Framework.Impl.DesignTime.Diagnostics;
-using Metalama.Framework.Impl.DesignTime.Utilities;
-using Metalama.Framework.Impl.Diagnostics;
-using Metalama.Framework.Impl.Options;
-using Metalama.Framework.Impl.Utilities;
+using Metalama.Framework.Engine.DesignTime.CodeFixes;
+using Metalama.Framework.Engine.DesignTime.Diagnostics;
+using Metalama.Framework.Engine.DesignTime.Utilities;
+using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Options;
+using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeActions;
 using Microsoft.CodeAnalysis.CodeFixes;
@@ -21,7 +21,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using CodeFixContext = Microsoft.CodeAnalysis.CodeFixes.CodeFixContext;
 
-namespace Metalama.Framework.Impl.DesignTime
+namespace Metalama.Framework.Engine.DesignTime
 {
     // ReSharper disable UnusedType.Global
 

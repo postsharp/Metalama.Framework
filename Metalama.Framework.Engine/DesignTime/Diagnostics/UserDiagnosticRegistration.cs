@@ -5,7 +5,7 @@ using Microsoft.CodeAnalysis;
 using Newtonsoft.Json;
 using System.Reflection;
 
-namespace Metalama.Framework.Impl.DesignTime.Diagnostics
+namespace Metalama.Framework.Engine.DesignTime.Diagnostics
 {
     /// <summary>
     /// Represents a JSON-serializable user diagnostic for <see cref="UserDiagnosticRegistrationFile"/>.

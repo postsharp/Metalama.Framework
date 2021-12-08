@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 
-namespace Metalama.Framework.Impl.DesignTime.Diff
+namespace Metalama.Framework.Engine.DesignTime.Diff
 {
     /// <summary>
     /// Represents changes between two instances of the <see cref="Microsoft.CodeAnalysis.Compilation"/> class.

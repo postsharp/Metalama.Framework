@@ -2,13 +2,13 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Compiler;
-using Metalama.Framework.Impl.Advices;
-using Metalama.Framework.Impl.Diagnostics;
-using Metalama.Framework.Impl.Linking;
-using Metalama.Framework.Impl.Options;
-using Metalama.Framework.Impl.Pipeline;
-using Metalama.Framework.Impl.Serialization;
-using Metalama.Framework.Impl.Templating;
+using Metalama.Framework.Engine.Advices;
+using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Linking;
+using Metalama.Framework.Engine.Options;
+using Metalama.Framework.Engine.Pipeline;
+using Metalama.Framework.Engine.Serialization;
+using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
@@ -16,7 +16,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
 
-namespace Metalama.Framework.Impl.DesignTime.Diagnostics
+namespace Metalama.Framework.Engine.DesignTime.Diagnostics
 {
     internal class DesignTimeDiagnosticDefinitions
     {

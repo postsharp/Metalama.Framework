@@ -7,7 +7,7 @@ using static Metalama.Framework.Diagnostics.Severity;
 
 #pragma warning disable SA1118
 
-namespace Metalama.Framework.Impl.Advices
+namespace Metalama.Framework.Engine.Advices
 {
     internal static class AdviceDiagnosticDescriptors
     {

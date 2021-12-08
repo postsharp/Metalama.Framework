@@ -3,7 +3,7 @@
 
 using System.Collections.Generic;
 
-namespace Metalama.Framework.Impl.Aspects
+namespace Metalama.Framework.Engine.Aspects
 {
     internal interface IInheritableAspectsManifest
     {

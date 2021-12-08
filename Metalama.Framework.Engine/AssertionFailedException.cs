@@ -8,7 +8,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 
-namespace Metalama.Framework.Impl
+namespace Metalama.Framework.Engine
 {
     [ExcludeFromCodeCoverage]
     public sealed class AssertionFailedException : Exception

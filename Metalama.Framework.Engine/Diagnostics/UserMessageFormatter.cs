@@ -8,7 +8,7 @@ using System.Globalization;
 using System.Linq;
 using Accessibility = Metalama.Framework.Code.Accessibility;
 
-namespace Metalama.Framework.Impl.Diagnostics
+namespace Metalama.Framework.Engine.Diagnostics
 {
     /// <summary>
     /// Formats arguments passed to a diagnostic.

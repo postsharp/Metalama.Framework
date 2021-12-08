@@ -2,11 +2,11 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Aspects;
-using Metalama.Framework.Impl.DesignTime.Pipeline;
-using Metalama.Framework.Impl.Diagnostics;
-using Metalama.Framework.Impl.Pipeline;
-using Metalama.Framework.Impl.Templating;
-using Metalama.Framework.Impl.Testing;
+using Metalama.Framework.Engine.DesignTime.Pipeline;
+using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Pipeline;
+using Metalama.Framework.Engine.Templating;
+using Metalama.Framework.Engine.Testing;
 using Metalama.Framework.Tests.UnitTests.Utilities;
 using Metalama.TestFramework;
 using Microsoft.CodeAnalysis;

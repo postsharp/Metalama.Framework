@@ -4,7 +4,7 @@
 using Metalama.Framework.Serialization;
 using System;
 
-namespace Metalama.Framework.Impl.CompileTime.Serialization.Serializers
+namespace Metalama.Framework.Engine.CompileTime.Serialization.Serializers
 {
     internal sealed class DateTimeSerializer : ValueTypeMetaSerializer<DateTime>
     {

@@ -4,7 +4,7 @@
 using Metalama.Framework.Code;
 using System;
 
-namespace Metalama.Framework.Impl.Diagnostics
+namespace Metalama.Framework.Engine.Diagnostics
 {
     internal partial class UserDiagnosticSink
     {

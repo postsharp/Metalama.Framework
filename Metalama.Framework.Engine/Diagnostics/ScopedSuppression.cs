@@ -4,7 +4,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
 
-namespace Metalama.Framework.Impl.Diagnostics
+namespace Metalama.Framework.Engine.Diagnostics
 {
     /// <summary>
     /// Represents the suppression of a diagnostic of a given id in a given scope.

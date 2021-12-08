@@ -4,7 +4,7 @@
 using System;
 using System.Linq;
 
-namespace Metalama.Framework.Impl.CompileTime.Serialization
+namespace Metalama.Framework.Engine.CompileTime.Serialization
 {
     internal class SerializationCause
     {

@@ -1,8 +1,8 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Metalama.Framework.Impl.CodeModel;
-using Metalama.Framework.Impl.Serialization;
+using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Serialization;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Metalama.Framework.Tests.UnitTests.Serialization

@@ -4,7 +4,7 @@
 using Metalama.Framework.Project;
 using System;
 
-namespace Metalama.Framework.Impl.Utilities
+namespace Metalama.Framework.Engine.Utilities
 {
     /// <summary>
     /// Defines a method <see cref="Invoke{T}"/> that is invoked when user-written code must be invoked.

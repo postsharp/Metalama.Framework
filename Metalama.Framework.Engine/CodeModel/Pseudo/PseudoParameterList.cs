@@ -6,7 +6,7 @@ using Metalama.Framework.Code.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Metalama.Framework.Impl.CodeModel.Pseudo
+namespace Metalama.Framework.Engine.CodeModel.Pseudo
 {
     internal class PseudoParameterList : List<PseudoParameter>, IParameterList
     {

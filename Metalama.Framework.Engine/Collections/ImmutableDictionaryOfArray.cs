@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 
-namespace Metalama.Framework.Impl.Collections
+namespace Metalama.Framework.Engine.Collections
 {
     internal partial class ImmutableDictionaryOfArray<TKey, TValue> : IReadOnlyMultiValueDictionary<TKey, TValue>
         where TKey : notnull

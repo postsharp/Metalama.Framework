@@ -5,11 +5,11 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.SyntaxBuilders;
-using Metalama.Framework.Impl.CodeModel;
-using Metalama.Framework.Impl.Formatting;
-using Metalama.Framework.Impl.Serialization;
-using Metalama.Framework.Impl.Templating.MetaModel;
-using Metalama.Framework.Impl.Utilities;
+using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Formatting;
+using Metalama.Framework.Engine.Serialization;
+using Metalama.Framework.Engine.Templating.MetaModel;
+using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -22,7 +22,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using SpecialType = Metalama.Framework.Code.SpecialType;
 
-namespace Metalama.Framework.Impl.Templating
+namespace Metalama.Framework.Engine.Templating
 {
     // ReSharper disable UnusedMember.Global
 

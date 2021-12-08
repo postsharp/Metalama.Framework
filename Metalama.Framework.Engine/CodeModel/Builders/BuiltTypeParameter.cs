@@ -5,7 +5,7 @@ using Metalama.Framework.Code;
 using System;
 using System.Collections.Generic;
 
-namespace Metalama.Framework.Impl.CodeModel.Builders
+namespace Metalama.Framework.Engine.CodeModel.Builders
 {
     internal class BuiltTypeParameter : BuiltDeclaration, ITypeParameter
     {

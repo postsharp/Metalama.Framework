@@ -6,7 +6,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace Metalama.Framework.Impl.Metrics
+namespace Metalama.Framework.Engine.Metrics
 {
     internal partial class StatementNumberMetricProvider
     {

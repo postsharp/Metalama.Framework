@@ -20,7 +20,7 @@ namespace BuildMetalama
             {
                 "Metalama.Framework.$(PackageVersion).nupkg", "Metalama.TestFramework.$(PackageVersion).nupkg",
                 "Metalama.Framework.Redist.$(PackageVersion).nupkg",
-                "Metalama.Framework.Sdk.$(PackageVersion).nupkg", "Metalama.Framework.Impl.$(PackageVersion).nupkg",
+                "Metalama.Framework.Sdk.$(PackageVersion).nupkg", "Metalama.Framework.Engine.$(PackageVersion).nupkg",
                 "Metalama.Framework.DesignTime.Contracts.$(PackageVersion).nupkg"
             };
 

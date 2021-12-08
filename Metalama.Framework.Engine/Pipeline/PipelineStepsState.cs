@@ -1,21 +1,21 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Metalama.Framework.Impl.Advices;
-using Metalama.Framework.Impl.AspectOrdering;
-using Metalama.Framework.Impl.Aspects;
-using Metalama.Framework.Impl.CodeModel;
-using Metalama.Framework.Impl.Collections;
-using Metalama.Framework.Impl.DesignTime.CodeFixes;
-using Metalama.Framework.Impl.Diagnostics;
-using Metalama.Framework.Impl.Transformations;
+using Metalama.Framework.Engine.Advices;
+using Metalama.Framework.Engine.AspectOrdering;
+using Metalama.Framework.Engine.Aspects;
+using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Collections;
+using Metalama.Framework.Engine.DesignTime.CodeFixes;
+using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Transformations;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 
-namespace Metalama.Framework.Impl.Pipeline
+namespace Metalama.Framework.Engine.Pipeline
 {
     /// <summary>
     /// Maintains the state of <see cref="HighLevelPipelineStage"/>, composed of several <see cref="PipelineStep"/>.

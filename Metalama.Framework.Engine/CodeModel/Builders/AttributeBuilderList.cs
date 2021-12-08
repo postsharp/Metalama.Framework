@@ -5,7 +5,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using System.Collections.Generic;
 
-namespace Metalama.Framework.Impl.CodeModel.Builders
+namespace Metalama.Framework.Engine.CodeModel.Builders
 {
     internal class AttributeBuilderList : List<AttributeBuilder>, IAttributeList
     {

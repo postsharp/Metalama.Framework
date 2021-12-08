@@ -7,7 +7,7 @@ using Microsoft.CodeAnalysis;
 using System;
 using System.Runtime.CompilerServices;
 
-namespace Metalama.Framework.Impl.CompileTime
+namespace Metalama.Framework.Engine.CompileTime
 {
     internal class SymbolClassificationService : IService
     {

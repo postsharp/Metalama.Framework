@@ -3,7 +3,7 @@
 
 using Metalama.Framework.Project;
 
-namespace Metalama.Framework.Impl.Pipeline
+namespace Metalama.Framework.Engine.Pipeline
 {
     /// <summary>
     /// A diagnostic mark that can be added to a <see cref="ServiceProvider"/> using the <see cref="ServiceProvider.WithMark"/> method.

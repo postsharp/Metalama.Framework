@@ -3,12 +3,12 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Advised;
-using Metalama.Framework.Impl.CodeModel;
+using Metalama.Framework.Engine.CodeModel;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
 using System.Reflection;
 
-namespace Metalama.Framework.Impl.Templating.MetaModel
+namespace Metalama.Framework.Engine.Templating.MetaModel
 {
     internal class AdvisedParameter : AdvisedDeclaration<IParameterImpl>, IAdvisedParameter
     {

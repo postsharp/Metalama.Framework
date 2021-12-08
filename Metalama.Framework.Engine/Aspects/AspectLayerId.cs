@@ -2,12 +2,12 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Aspects;
-using Metalama.Framework.Impl.AspectOrdering;
-using Metalama.Framework.Impl.Utilities;
+using Metalama.Framework.Engine.AspectOrdering;
+using Metalama.Framework.Engine.Utilities;
 using System;
 using System.Linq;
 
-namespace Metalama.Framework.Impl.Aspects
+namespace Metalama.Framework.Engine.Aspects
 {
     /// <summary>
     /// Represents the identity of an aspect layer.

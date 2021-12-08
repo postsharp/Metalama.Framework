@@ -6,7 +6,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using System.Collections.Generic;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
-namespace Metalama.Framework.Impl.Utilities
+namespace Metalama.Framework.Engine.Utilities
 {
     internal static class SymbolModifiersHelper
     {

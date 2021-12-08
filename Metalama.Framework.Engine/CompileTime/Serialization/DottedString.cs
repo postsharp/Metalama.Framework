@@ -3,7 +3,7 @@
 
 using System;
 
-namespace Metalama.Framework.Impl.CompileTime.Serialization
+namespace Metalama.Framework.Engine.CompileTime.Serialization
 {
     /// <summary>
     /// Encapsulates dotted strings such as namespaces and type names, so their

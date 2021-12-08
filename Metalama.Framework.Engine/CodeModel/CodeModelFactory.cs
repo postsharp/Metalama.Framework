@@ -7,7 +7,7 @@ using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Immutable;
 
-namespace Metalama.Framework.Impl.CodeModel
+namespace Metalama.Framework.Engine.CodeModel
 {
     public static class CodeModelFactory
     {

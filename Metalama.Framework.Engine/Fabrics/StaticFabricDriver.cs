@@ -3,16 +3,16 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Fabrics;
-using Metalama.Framework.Impl.Aspects;
-using Metalama.Framework.Impl.CodeModel.References;
-using Metalama.Framework.Impl.Diagnostics;
+using Metalama.Framework.Engine.Aspects;
+using Metalama.Framework.Engine.CodeModel.References;
+using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 
-namespace Metalama.Framework.Impl.Fabrics
+namespace Metalama.Framework.Engine.Fabrics
 {
     /// <summary>
     /// The base class for <see cref="ProjectFabricDriver"/> and <see cref="NamespaceFabricDriver"/>,

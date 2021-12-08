@@ -5,7 +5,7 @@ using Metalama.Framework.Code;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Metalama.Framework.Impl.CodeModel
+namespace Metalama.Framework.Engine.CodeModel
 {
     internal abstract class Member : MemberOrNamedType, IMember
     {

@@ -3,15 +3,15 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Invokers;
-using Metalama.Framework.Impl.Aspects;
-using Metalama.Framework.Impl.Templating;
-using Metalama.Framework.Impl.Templating.MetaModel;
+using Metalama.Framework.Engine.Aspects;
+using Metalama.Framework.Engine.Templating;
+using Metalama.Framework.Engine.Templating.MetaModel;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
-namespace Metalama.Framework.Impl.CodeModel.Invokers
+namespace Metalama.Framework.Engine.CodeModel.Invokers
 {
     internal class FieldOrPropertyInvoker : Invoker, IFieldOrPropertyInvoker
     {

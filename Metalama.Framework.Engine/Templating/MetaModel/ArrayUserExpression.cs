@@ -3,11 +3,11 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.SyntaxBuilders;
-using Metalama.Framework.Impl.CodeModel;
+using Metalama.Framework.Engine.CodeModel;
 using System;
 using System.Linq;
 
-namespace Metalama.Framework.Impl.Templating.MetaModel
+namespace Metalama.Framework.Engine.Templating.MetaModel
 {
     internal class ArrayUserExpression : IUserExpression
     {

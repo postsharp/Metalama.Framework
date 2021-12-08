@@ -4,13 +4,13 @@
 #if !DEBUG
 using System.Runtime.CompilerServices;
 #else
-using Metalama.Framework.Impl.Collections;
+using Metalama.Framework.Engine.Collections;
 #endif
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 
-namespace Metalama.Framework.Impl
+namespace Metalama.Framework.Engine
 {
     /// <summary>
     /// A utility class that checks runtime invariant and throws <see cref="AssertionFailedException"/> in case of failure.

@@ -2,7 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Aspects;
-using Metalama.Framework.Impl.Sdk;
+using Metalama.Framework.Engine.Sdk;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
@@ -11,7 +11,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 
-namespace Metalama.Framework.Impl.Testing
+namespace Metalama.Framework.Engine.Testing
 {
     /// <summary>
     /// Utility class that creates a <see cref="CSharpCompilation"/>.

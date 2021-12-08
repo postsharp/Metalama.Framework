@@ -3,7 +3,7 @@
 
 using Metalama.Framework.Code;
 
-namespace Metalama.Framework.Impl.CodeModel
+namespace Metalama.Framework.Engine.CodeModel
 {
     internal class CompilationHelpers : ICompilationHelpers
     {

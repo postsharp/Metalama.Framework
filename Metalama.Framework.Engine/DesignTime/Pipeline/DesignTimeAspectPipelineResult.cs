@@ -1,17 +1,17 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Metalama.Framework.Impl.Aspects;
-using Metalama.Framework.Impl.Diagnostics;
-using Metalama.Framework.Impl.Pipeline;
+using Metalama.Framework.Engine.Aspects;
+using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Pipeline;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 
-namespace Metalama.Framework.Impl.DesignTime.Pipeline
+namespace Metalama.Framework.Engine.DesignTime.Pipeline
 {
     /// <summary>
-    /// Results produced by <see cref="Metalama.Framework.Impl.DesignTime.Pipeline.DesignTimeAspectPipeline"/>.
+    /// Results produced by <see cref="Metalama.Framework.Engine.DesignTime.Pipeline.DesignTimeAspectPipeline"/>.
     /// </summary>
     /// <param name="Success">Determines whether the pipeline was successful.</param>
     /// <param name="InputSyntaxTrees">The syntax trees for which the pipeline was executed.</param>

@@ -4,16 +4,16 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.DeclarationBuilders;
-using Metalama.Framework.Impl.Advices;
-using Metalama.Framework.Impl.CodeModel.References;
-using Metalama.Framework.Impl.Transformations;
+using Metalama.Framework.Engine.Advices;
+using Metalama.Framework.Engine.CodeModel.References;
+using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Metrics;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 
-namespace Metalama.Framework.Impl.CodeModel.Builders
+namespace Metalama.Framework.Engine.CodeModel.Builders
 {
     /// <summary>
     /// Base class implementing <see cref="IDeclarationBuilder"/>. These classes are returned by introduction advices so the user can continue

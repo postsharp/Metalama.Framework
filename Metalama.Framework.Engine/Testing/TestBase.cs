@@ -2,8 +2,8 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Impl.CodeModel;
-using Metalama.Framework.Impl.Pipeline;
+using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Pipeline;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
@@ -11,7 +11,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
-namespace Metalama.Framework.Impl.Testing
+namespace Metalama.Framework.Engine.Testing
 {
     public class TestBase
     {

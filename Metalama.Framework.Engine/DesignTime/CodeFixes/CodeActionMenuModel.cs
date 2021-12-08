@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 
-namespace Metalama.Framework.Impl.DesignTime.CodeFixes
+namespace Metalama.Framework.Engine.DesignTime.CodeFixes
 {
     /// <summary>
     /// Represents a code action menu, with children items.

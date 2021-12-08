@@ -1,12 +1,12 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Metalama.Framework.Impl.Templating.Mapping;
+using Metalama.Framework.Engine.Templating.Mapping;
 using Microsoft.CodeAnalysis.Text;
 using System.Collections.Immutable;
 using System.Reflection;
 
-namespace Metalama.Framework.Impl.CompileTime
+namespace Metalama.Framework.Engine.CompileTime
 {
     /// <summary>
     /// Represents a file in a <see cref="CompileTimeProject"/>. This class is serialized

@@ -4,7 +4,7 @@
 using Microsoft.CodeAnalysis.Diagnostics;
 using System;
 
-namespace Metalama.Framework.Impl.Options
+namespace Metalama.Framework.Engine.Options
 {
     public partial class ProjectOptions
     {
