@@ -23,7 +23,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public ProjectModel( Compilation compilation, IServiceProvider serviceProvider )
         {
-            var serviceProviderMetadata = serviceProvider.GetService<ServiceProviderMark>();
+            var serviceProviderMetadata = serviceProvider.GetRequiredService<ServiceProviderMark>();
 
             if ( serviceProviderMetadata != ServiceProviderMark.Project && serviceProviderMetadata != ServiceProviderMark.Test )
             {
@@ -31,7 +31,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 throw new ArgumentOutOfRangeException( nameof(serviceProvider) );
             }
 
-            this._projectOptions = serviceProvider.GetService<IProjectOptions>();
+            this._projectOptions = serviceProvider.GetRequiredService<IProjectOptions>();
             var anySyntaxTree = compilation.SyntaxTrees.FirstOrDefault();
 
             this.PreprocessorSymbols =

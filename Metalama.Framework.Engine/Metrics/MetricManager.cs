@@ -41,6 +41,6 @@ namespace Metalama.Framework.Engine.Metrics
 
         private object? GetExtensionProvider<T>()
             where T : IMetric
-            => this._serviceProvider.GetOptionalService<IMetricProvider<T>>();
+            => this._serviceProvider.GetService<IMetricProvider<T>>();
     }
 }

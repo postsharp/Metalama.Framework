@@ -49,7 +49,7 @@ namespace Metalama.Framework.Engine.Fabrics
             else
             {
                 this.FabricSymbol = (INamedTypeSymbol)
-                    fabricManager.ServiceProvider.GetService<ReflectionMapperFactory>().GetInstance( runTimeCompilation ).GetTypeSymbol( fabric.GetType() );
+                    fabricManager.ServiceProvider.GetRequiredService<ReflectionMapperFactory>().GetInstance( runTimeCompilation ).GetTypeSymbol( fabric.GetType() );
             }
         }
 

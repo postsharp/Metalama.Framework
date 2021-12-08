@@ -28,9 +28,9 @@ namespace Metalama.Framework.Engine.Templating
             IServiceProvider serviceProvider )
         {
             this._syntaxTreeAnnotationMap = syntaxTreeAnnotationMap;
-            this._symbolClassifier = serviceProvider.GetService<SymbolClassificationService>().GetClassifier( runTimeCompilation );
+            this._symbolClassifier = serviceProvider.GetRequiredService<SymbolClassificationService>().GetClassifier( runTimeCompilation );
 
-            var reflectionMapper = serviceProvider.GetService<ReflectionMapperFactory>().GetInstance( runTimeCompilation );
+            var reflectionMapper = serviceProvider.GetRequiredService<ReflectionMapperFactory>().GetInstance( runTimeCompilation );
             this._metaType = reflectionMapper.GetTypeSymbol( typeof(meta) );
         }
 

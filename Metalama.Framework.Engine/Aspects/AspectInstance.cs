@@ -81,7 +81,7 @@ namespace Metalama.Framework.Engine.Aspects
             in AspectPredecessor predecessor,
             [NotNullWhen( true )] out AspectInstance? aspectInstance )
         {
-            var userCodeInvoker = serviceProvider.GetService<UserCodeInvoker>();
+            var userCodeInvoker = serviceProvider.GetRequiredService<UserCodeInvoker>();
             var aspectFunc = aspectExpression.Compile();
 
             var executionContext = new UserCodeExecutionContext( serviceProvider, diagnosticAdder, UserCodeMemberInfo.FromExpression( aspectExpression ) );

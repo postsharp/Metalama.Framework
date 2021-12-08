@@ -193,7 +193,7 @@ namespace Metalama.Framework.Engine.Transformations
                     metaApi,
                     (CompilationModel) this.OverriddenDeclaration.Compilation,
                     context.LexicalScopeProvider.GetLexicalScope( accessor ),
-                    context.ServiceProvider.GetService<SyntaxSerializationService>(),
+                    context.ServiceProvider.GetRequiredService<SyntaxSerializationService>(),
                     context.SyntaxGenerationContext,
                     default,
                     proceedExpression,

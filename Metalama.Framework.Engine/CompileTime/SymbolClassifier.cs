@@ -79,7 +79,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 this._ignoreUnlessOverriddenAttribute = this._compilation.GetTypeByMetadataName( typeof(AbstractAttribute).FullName ).AssertNotNull();
             }
 
-            this._referenceAssemblyLocator = serviceProvider.GetService<ReferenceAssemblyLocator>();
+            this._referenceAssemblyLocator = serviceProvider.GetRequiredService<ReferenceAssemblyLocator>();
         }
 
         public TemplateInfo GetTemplateInfo( ISymbol symbol ) => this.GetTemplateInfo( symbol, false );

@@ -28,12 +28,12 @@ namespace Metalama.Framework.Engine.Utilities
 
         public UserCodeInvoker( IServiceProvider serviceProvider )
         {
-            this._hook = serviceProvider.GetOptionalService<IUserCodeInvokerHook>();
+            this._hook = serviceProvider.GetService<IUserCodeInvokerHook>();
         }
 
         private static bool OnException( Exception e, in UserCodeExecutionContext context )
         {
-            var compileTimeProject = context.ServiceProvider.GetOptionalService<CompileTimeProject>();
+            var compileTimeProject = context.ServiceProvider.GetService<CompileTimeProject>();
 
             var userException = e switch
             {
@@ -86,7 +86,7 @@ namespace Metalama.Framework.Engine.Utilities
             {
                 var location = exactLocation ?? context.InvokedMember.GetDiagnosticLocation() ?? Location.None;
 
-                var pathOptions = context.ServiceProvider.GetOptionalService<IPathOptions>();
+                var pathOptions = context.ServiceProvider.GetService<IPathOptions>();
                 var reportFile = pathOptions?.GetNewCrashReportPath();
 
                 if ( reportFile != null )

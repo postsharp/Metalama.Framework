@@ -26,10 +26,10 @@ namespace Metalama.Framework.Engine.Templating
         {
             this._syntaxTreeAnnotationMap = new SyntaxTreeAnnotationMap( runTimeCompilation );
             this._serviceProvider = serviceProvider;
-            var syntaxSerializationService = serviceProvider.GetService<SyntaxSerializationService>();
+            var syntaxSerializationService = serviceProvider.GetRequiredService<SyntaxSerializationService>();
             this._serializableTypes = syntaxSerializationService.GetSerializableTypes( runTimeCompilation );
 
-            this._observer = serviceProvider.GetOptionalService<ITemplateCompilerObserver>();
+            this._observer = serviceProvider.GetService<ITemplateCompilerObserver>();
         }
 
         public ILocationAnnotationMapBuilder LocationAnnotationMap => this._syntaxTreeAnnotationMap;

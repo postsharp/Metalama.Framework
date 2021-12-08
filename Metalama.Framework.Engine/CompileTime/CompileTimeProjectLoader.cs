@@ -43,9 +43,9 @@ namespace Metalama.Framework.Engine.CompileTime
             this._domain = domain;
             this._serviceProvider = serviceProvider;
             this._builder = new CompileTimeCompilationBuilder( serviceProvider, domain );
-            this._runTimeAssemblyLocator = serviceProvider.GetService<IAssemblyLocator>();
+            this._runTimeAssemblyLocator = serviceProvider.GetRequiredService<IAssemblyLocator>();
             this.AttributeDeserializer = new AttributeDeserializer( serviceProvider, this );
-            this._systemTypeResolver = serviceProvider.GetService<SystemTypeResolver>();
+            this._systemTypeResolver = serviceProvider.GetRequiredService<SystemTypeResolver>();
         }
 
         /// <summary>
@@ -230,7 +230,7 @@ namespace Metalama.Framework.Engine.CompileTime
             var assemblyIdentity = AssemblyName.GetAssemblyName( assemblyPath ).ToAssemblyIdentity();
 
             // If the assembly is a standard one, there is no need to analyze.
-            if ( this._serviceProvider.GetService<ReferenceAssemblyLocator>().StandardAssemblyNames.Contains( assemblyIdentity.Name ) )
+            if ( this._serviceProvider.GetRequiredService<ReferenceAssemblyLocator>().StandardAssemblyNames.Contains( assemblyIdentity.Name ) )
             {
                 compileTimeProject = null;
 

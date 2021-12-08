@@ -21,7 +21,7 @@ namespace Metalama.Framework.Engine.AdditionalOutputs
 
         public ImmutableArray<AdditionalCompilationOutputFile> GetAdditionalCompilationOutputFiles()
         {
-            var projectOptions = this._serviceProvider.GetOptionalService<IProjectOptions>();
+            var projectOptions = this._serviceProvider.GetService<IProjectOptions>();
 
             if ( projectOptions == null || projectOptions.AdditionalCompilationOutputDirectory == null )
             {

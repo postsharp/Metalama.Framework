@@ -44,7 +44,7 @@ namespace Metalama.Framework.Engine.Pipeline
         {
             var compilation = CompilationModel.CreateInitialInstance( input.Project, input.Compilation );
 
-            this.ServiceProvider.GetOptionalService<ICompilationModelObserver>()?.OnInitialCompilationModelCreated( compilation );
+            this.ServiceProvider.GetService<ICompilationModelObserver>()?.OnInitialCompilationModelCreated( compilation );
 
             var pipelineStepsState = new PipelineStepsState(
                 this._aspectLayers,

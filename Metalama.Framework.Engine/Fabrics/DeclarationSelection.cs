@@ -68,7 +68,7 @@ namespace Metalama.Framework.Engine.Fabrics
             where TAspect : Attribute, IAspect<T>
         {
             var aspectClass = this.GetAspectClass<TAspect>();
-            var userCodeInvoker = this._serviceProvider.GetService<UserCodeInvoker>();
+            var userCodeInvoker = this._serviceProvider.GetRequiredService<UserCodeInvoker>();
             var executionContext = UserCodeExecutionContext.Current;
 
             this.RegisterAspectSource(
@@ -114,7 +114,7 @@ namespace Metalama.Framework.Engine.Fabrics
             where TAspect : Attribute, IAspect<T>
         {
             var aspectClass = this.GetAspectClass<TAspect>();
-            var userCodeInvoker = this._serviceProvider.GetService<UserCodeInvoker>();
+            var userCodeInvoker = this._serviceProvider.GetRequiredService<UserCodeInvoker>();
             var executionContext = UserCodeExecutionContext.Current;
 
             this.RegisterAspectSource(
@@ -149,7 +149,7 @@ namespace Metalama.Framework.Engine.Fabrics
         {
             var aspectClass = this.GetAspectClass<TAspect>();
 
-            var userCodeInvoker = this._serviceProvider.GetService<UserCodeInvoker>();
+            var userCodeInvoker = this._serviceProvider.GetRequiredService<UserCodeInvoker>();
             var executionContext = UserCodeExecutionContext.Current;
 
             this.RegisterAspectSource(

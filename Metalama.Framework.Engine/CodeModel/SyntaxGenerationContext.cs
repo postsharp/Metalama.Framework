@@ -18,7 +18,7 @@ namespace Metalama.Framework.Engine.CodeModel
         public IServiceProvider ServiceProvider { get; }
 
         [Memo]
-        public ReflectionMapper ReflectionMapper => this.ServiceProvider.GetService<ReflectionMapperFactory>().GetInstance( this.Compilation );
+        public ReflectionMapper ReflectionMapper => this.ServiceProvider.GetRequiredService<ReflectionMapperFactory>().GetInstance( this.Compilation );
 
         private SyntaxGenerationContext( IServiceProvider serviceProvider, Compilation compilation, OurSyntaxGenerator syntaxGenerator )
         {

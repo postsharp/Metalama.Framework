@@ -102,7 +102,7 @@ namespace Metalama.Framework.Engine.Aspects
             this.DisplayName = this.ShortName = AttributeRef.GetShortName( aspectTypeSymbol.Name );
             this.IsAbstract = aspectTypeSymbol.IsAbstract;
             this.Project = project;
-            this._userCodeInvoker = serviceProvider.GetService<UserCodeInvoker>();
+            this._userCodeInvoker = serviceProvider.GetRequiredService<UserCodeInvoker>();
             this.DiagnosticLocation = aspectTypeSymbol.GetDiagnosticLocation();
             this.AspectType = aspectType;
             this._prototypeAspectInstance = prototype;

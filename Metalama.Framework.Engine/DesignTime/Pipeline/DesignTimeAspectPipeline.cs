@@ -79,7 +79,7 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
                 return;
             }
 
-            var fileSystemWatcherFactory = this.ServiceProvider.GetOptionalService<IFileSystemWatcherFactory>() ?? new FileSystemWatcherFactory();
+            var fileSystemWatcherFactory = this.ServiceProvider.GetService<IFileSystemWatcherFactory>() ?? new FileSystemWatcherFactory();
             this._fileSystemWatcher = fileSystemWatcherFactory.Create( watchedDirectory, watchedFilter );
             this._fileSystemWatcher.IncludeSubdirectories = false;
 

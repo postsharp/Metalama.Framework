@@ -103,7 +103,7 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
         [ExcludeFromCodeCoverage]
         public void DebugBreak()
         {
-            var trustOptions = this._common.ServiceProvider.GetService<IProjectOptions>();
+            var trustOptions = this._common.ServiceProvider.GetRequiredService<IProjectOptions>();
 
             if ( !trustOptions.IsUserCodeTrusted )
             {
@@ -221,7 +221,7 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
             this.Compilation = declaration.Compilation;
             this._common = common;
 
-            var serviceProviderMark = this._common.ServiceProvider.GetService<ServiceProviderMark>();
+            var serviceProviderMark = this._common.ServiceProvider.GetRequiredService<ServiceProviderMark>();
 
             if ( serviceProviderMark != ServiceProviderMark.Project && serviceProviderMark != ServiceProviderMark.Test )
             {

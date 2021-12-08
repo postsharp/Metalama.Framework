@@ -20,7 +20,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
         protected CompileTimeBaseRewriter( Compilation runTimeCompilation, IServiceProvider serviceProvider )
         {
-            this.SymbolClassifier = serviceProvider.GetService<SymbolClassificationService>().GetClassifier( runTimeCompilation );
+            this.SymbolClassifier = serviceProvider.GetRequiredService<SymbolClassificationService>().GetClassifier( runTimeCompilation );
             this.RunTimeCompilation = runTimeCompilation;
         }
 

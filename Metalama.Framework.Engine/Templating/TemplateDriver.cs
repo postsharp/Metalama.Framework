@@ -23,7 +23,7 @@ namespace Metalama.Framework.Engine.Templating
             IServiceProvider serviceProvider,
             MethodInfo compiledTemplateMethodInfo )
         {
-            this._userCodeInvoker = serviceProvider.GetService<UserCodeInvoker>();
+            this._userCodeInvoker = serviceProvider.GetRequiredService<UserCodeInvoker>();
             this._templateMethod = compiledTemplateMethodInfo ?? throw new ArgumentNullException( nameof(compiledTemplateMethodInfo) );
         }
 

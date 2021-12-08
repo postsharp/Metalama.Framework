@@ -55,7 +55,7 @@ namespace Metalama.Framework.Engine.Templating
             SerializableTypes serializableTypes,
             CancellationToken cancellationToken )
         {
-            this._symbolScopeClassifier = serviceProvider.GetService<SymbolClassificationService>().GetClassifier( compilation );
+            this._symbolScopeClassifier = serviceProvider.GetRequiredService<SymbolClassificationService>().GetClassifier( compilation );
             this._syntaxTreeAnnotationMap = syntaxTreeAnnotationMap;
             this._diagnosticAdder = diagnosticAdder;
             this._serializableTypes = serializableTypes;

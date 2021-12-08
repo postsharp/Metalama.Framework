@@ -389,6 +389,6 @@ namespace Metalama.Framework.Engine.CodeModel
         private Compilation Compilation => this._compilationModel.RoslynCompilation;
 
         public Type GetReflectionType( ITypeSymbol typeSymbol )
-            => this._compilationModel.Project.ServiceProvider.GetService<SystemTypeResolver>().GetCompileTimeType( typeSymbol, true ).AssertNotNull();
+            => this._compilationModel.Project.ServiceProvider.GetRequiredService<SystemTypeResolver>().GetCompileTimeType( typeSymbol, true ).AssertNotNull();
     }
 }

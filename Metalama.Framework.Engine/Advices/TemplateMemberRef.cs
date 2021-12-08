@@ -38,7 +38,7 @@ namespace Metalama.Framework.Engine.Advices
                 return default;
             }
 
-            var classifier = serviceProvider.GetService<SymbolClassificationService>().GetClassifier( compilation.RoslynCompilation );
+            var classifier = serviceProvider.GetRequiredService<SymbolClassificationService>().GetClassifier( compilation.RoslynCompilation );
 
             var type = compilation.RoslynCompilation.GetTypeByMetadataNameSafe( this.TemplateMember.TemplateClass.FullName );
             var symbol = type.GetMembers( this.TemplateMember.Name ).Single( m => !classifier.GetTemplateInfo( m ).IsNone );

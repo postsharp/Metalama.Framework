@@ -21,7 +21,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
             // TODO: Remove.
             // if ( PostSharpEnvironment.IsPostSharpRunning )
             // {
-            //    this.reflectionBindingManagerService = PostSharpEnvironment.CurrentProject.GetService<IReflectionBindingManagerService>();
+            //    this.reflectionBindingManagerService = PostSharpEnvironment.CurrentProject.GetRequiredService<IReflectionBindingManagerService>();
             // }
         }
 

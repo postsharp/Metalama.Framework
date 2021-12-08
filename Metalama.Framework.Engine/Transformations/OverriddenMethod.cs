@@ -62,7 +62,7 @@ namespace Metalama.Framework.Engine.Transformations
                     metaApi,
                     (CompilationModel) this.OverriddenDeclaration.Compilation,
                     context.LexicalScopeProvider.GetLexicalScope( this.OverriddenDeclaration ),
-                    context.ServiceProvider.GetService<SyntaxSerializationService>(),
+                    context.ServiceProvider.GetRequiredService<SyntaxSerializationService>(),
                     context.SyntaxGenerationContext,
                     this.Template,
                     proceedExpression,

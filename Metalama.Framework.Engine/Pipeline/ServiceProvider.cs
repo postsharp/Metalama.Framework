@@ -171,7 +171,7 @@ namespace Metalama.Framework.Engine.Pipeline
 
         public override string ToString()
         {
-            var mark = this.GetOptionalService<ServiceProviderMark>();
+            var mark = this.GetService<ServiceProviderMark>();
 
             return $"ServiceProvider Mark='{mark}', Entries={this._services.Count}";
         }

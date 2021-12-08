@@ -30,7 +30,7 @@ namespace Metalama.Framework.Engine.CompileTime
         {
             this._serviceProvider = serviceProvider;
             this._compileTimeTypeResolver = compileTimeTypeResolver;
-            this._userCodeInvoker = serviceProvider.GetService<UserCodeInvoker>();
+            this._userCodeInvoker = serviceProvider.GetRequiredService<UserCodeInvoker>();
         }
 
         // Coverage: ignore

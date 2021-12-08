@@ -9,7 +9,7 @@ namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Initialize.ServicePlug
     {
         public override dynamic? OverrideMethod()
         {
-            var myService = meta.Target.Project.ServiceProvider.GetService<IMyService>();
+            var myService = meta.Target.Project.ServiceProvider.GetRequiredService<IMyService>();
             Console.WriteLine( myService.Message );
 
             return meta.Proceed();

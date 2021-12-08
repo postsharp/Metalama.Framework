@@ -65,7 +65,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
         public ReferenceAssemblyLocator( IServiceProvider serviceProvider )
         {
-            this._cacheDirectory = serviceProvider.GetService<IPathOptions>().AssemblyLocatorCacheDirectory;
+            this._cacheDirectory = serviceProvider.GetRequiredService<IPathOptions>().AssemblyLocatorCacheDirectory;
 
             this.SystemAssemblyPaths = this.GetSystemAssemblyPaths().ToImmutableArray();
 

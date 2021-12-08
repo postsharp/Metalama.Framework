@@ -58,7 +58,7 @@ namespace Metalama.Framework.Engine.DesignTime.Diagnostics
                 CompilerServiceProvider.Initialize();
             }
 
-            var directoryOptions = ServiceProviderFactory.GetServiceProvider().GetService<IPathOptions>();
+            var directoryOptions = ServiceProviderFactory.GetServiceProvider().GetRequiredService<IPathOptions>();
             var userDefinedDescriptors = UserDiagnosticRegistrationService.GetInstance( directoryOptions ).GetSupportedDescriptors();
 
             // The file may contain system descriptors by mistake. We must remove them otherwise we will have some duplicate key issue.

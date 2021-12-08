@@ -67,7 +67,7 @@ namespace Metalama.Framework.Engine.DesignTime.Preview
 
             // For preview, we need to override a few options, especially to enable code formatting.
             var previewServiceProvider = designTimeConfiguration.ServiceProvider.WithService(
-                new PreviewProjectOptions( designTimeConfiguration.ServiceProvider.GetService<IProjectOptions>() ) );
+                new PreviewProjectOptions( designTimeConfiguration.ServiceProvider.GetRequiredService<IProjectOptions>() ) );
 
             var previewConfiguration = designTimeConfiguration.WithServiceProvider( previewServiceProvider );
 

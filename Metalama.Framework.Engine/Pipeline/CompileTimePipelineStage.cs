@@ -53,7 +53,7 @@ namespace Metalama.Framework.Engine.Pipeline
 
             var linkerResult = linker.ToResult();
 
-            var projectOptions = this.ServiceProvider.GetOptionalService<IProjectOptions>();
+            var projectOptions = this.ServiceProvider.GetService<IProjectOptions>();
             IReadOnlyList<AdditionalCompilationOutputFile>? additionalCompilationOutputFiles = null;
 
             if ( projectOptions != null && !projectOptions.IsDesignTimeEnabled )

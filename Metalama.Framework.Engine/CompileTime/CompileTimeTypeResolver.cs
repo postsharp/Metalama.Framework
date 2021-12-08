@@ -24,7 +24,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
         protected CompileTimeTypeResolver( IServiceProvider serviceProvider )
         {
-            this._compileTimeTypeFactory = serviceProvider.GetService<CompileTimeTypeFactory>();
+            this._compileTimeTypeFactory = serviceProvider.GetRequiredService<CompileTimeTypeFactory>();
         }
 
         /// <summary>

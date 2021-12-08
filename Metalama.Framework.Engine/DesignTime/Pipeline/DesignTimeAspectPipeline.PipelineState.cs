@@ -410,7 +410,7 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
                         pipelineResult?.Diagnostics.CodeFixes ),
                     pipelineResult?.ExternallyInheritableAspects ?? ImmutableArray<AttributeAspectInstance>.Empty );
 
-                var directoryOptions = state._pipeline.ServiceProvider.GetService<IPathOptions>();
+                var directoryOptions = state._pipeline.ServiceProvider.GetRequiredService<IPathOptions>();
                 UserDiagnosticRegistrationService.GetInstance( directoryOptions ).RegisterDescriptors( result );
 
                 state = state.SetResult( compilation, result );

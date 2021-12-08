@@ -18,7 +18,7 @@ namespace Metalama.Framework.Engine.Templating
 
             public MetaSyntaxFactoryImpl( IServiceProvider serviceProvider, Compilation compileTimeCompilation )
             {
-                this._reflectionMapper = serviceProvider.GetService<ReflectionMapperFactory>().GetInstance( compileTimeCompilation );
+                this._reflectionMapper = serviceProvider.GetRequiredService<ReflectionMapperFactory>().GetInstance( compileTimeCompilation );
             }
 
             public TypeSyntax Type( Type type ) => OurSyntaxGenerator.CompileTime.Type( this._reflectionMapper.GetTypeSymbol( type ) );

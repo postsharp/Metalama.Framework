@@ -24,7 +24,7 @@ namespace Metalama.Framework.Engine.Diagnostics
         public DiagnosticDefinitionDiscoveryService( IServiceProvider serviceProvider )
         {
             this._serviceProvider = serviceProvider;
-            this._userCodeInvoker = serviceProvider.GetService<UserCodeInvoker>();
+            this._userCodeInvoker = serviceProvider.GetRequiredService<UserCodeInvoker>();
         }
 
         public IEnumerable<IDiagnosticDefinition> GetDiagnosticDefinitions( params Type[] type )

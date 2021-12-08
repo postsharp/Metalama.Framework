@@ -54,6 +54,6 @@ namespace Metalama.Framework.Engine.Pipeline
                     this.ServiceProvider,
                     codeFixFilter );
 
-        public UserCodeInvoker UserCodeInvoker => this.ServiceProvider.GetService<UserCodeInvoker>();
+        public UserCodeInvoker UserCodeInvoker => this.ServiceProvider.GetRequiredService<UserCodeInvoker>();
     }
 }

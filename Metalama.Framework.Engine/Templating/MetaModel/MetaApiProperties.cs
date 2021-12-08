@@ -26,6 +26,6 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
         IAspectInstance AspectInstance,
         IServiceProvider ServiceProvider )
     {
-        public AspectPipelineDescription PipelineDescription { get; } = ServiceProvider.GetService<AspectPipelineDescription>();
+        public AspectPipelineDescription PipelineDescription { get; } = ServiceProvider.GetRequiredService<AspectPipelineDescription>();
     }
 }

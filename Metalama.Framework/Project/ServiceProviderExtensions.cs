@@ -6,6 +6,8 @@ using System;
 
 namespace Metalama.Framework.Project
 {
+    // API in line with Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions class.
+    
     /// <summary>
     /// Provides extensions methods to the <see cref="IServiceProvider"/> interface.
     /// </summary>
@@ -16,7 +18,7 @@ namespace Metalama.Framework.Project
         /// <summary>
         /// Gets a service or throws an <see cref="InvalidOperationException"/> if the requested service has not been registered.
         /// </summary>
-        public static T GetService<T>( this IServiceProvider serviceProvider )
+        public static T GetRequiredService<T>( this IServiceProvider serviceProvider )
             where T : class, IService
         {
             var service = (T?) serviceProvider.GetService( typeof(T) );
@@ -32,7 +34,7 @@ namespace Metalama.Framework.Project
         /// <summary>
         /// Gets a service or returns <c>null</c> if the requested service has not been registered.
         /// </summary>
-        public static T? GetOptionalService<T>( this IServiceProvider serviceProvider )
+        public static T? GetService<T>( this IServiceProvider serviceProvider )
             where T : class
             => (T?) serviceProvider.GetService( typeof(T) );
     }

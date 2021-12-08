@@ -22,16 +22,16 @@ namespace Metalama.Framework.Tests.UnitTests
             ServiceProviderFactory.InitializeAsyncLocalProvider( myOptions );
             Assert.True( ServiceProviderFactory.HasAsyncLocalProvider );
 
-            Assert.Same( myOptions, ServiceProviderFactory.GetServiceProvider().GetService<IPathOptions>() );
+            Assert.Same( myOptions, ServiceProviderFactory.GetServiceProvider().GetRequiredService<IPathOptions>() );
 
             await Task.Yield();
 
             Assert.True( ServiceProviderFactory.HasAsyncLocalProvider );
-            Assert.Same( myOptions, ServiceProviderFactory.GetServiceProvider().GetService<IPathOptions>() );
+            Assert.Same( myOptions, ServiceProviderFactory.GetServiceProvider().GetRequiredService<IPathOptions>() );
 
             ServiceProviderFactory.AddAsyncLocalService( new TestService() );
 
-            _ = ServiceProviderFactory.GetServiceProvider().GetService<TestService>();
+            _ = ServiceProviderFactory.GetServiceProvider().GetRequiredService<TestService>();
 
             ServiceProviderFactory.ResetAsyncLocalProvider();
 

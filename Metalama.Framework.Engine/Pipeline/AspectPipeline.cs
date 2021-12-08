@@ -58,7 +58,7 @@ namespace Metalama.Framework.Engine.Pipeline
             bool isTest,
             CompileTimeDomain? domain )
         {
-            this.ProjectOptions = serviceProvider.GetService<IProjectOptions>();
+            this.ProjectOptions = serviceProvider.GetRequiredService<IProjectOptions>();
 
             this.ServiceProvider = serviceProvider
                 .WithServices( this.ProjectOptions.PlugIns.OfType<IService>() )
@@ -72,7 +72,7 @@ namespace Metalama.Framework.Engine.Pipeline
             else
             {
                 // Coverage: Ignore (tests always provide a domain).
-                this._domain = this.ServiceProvider.GetService<ICompileTimeDomainFactory>().CreateDomain();
+                this._domain = this.ServiceProvider.GetRequiredService<ICompileTimeDomainFactory>().CreateDomain();
                 this._ownsDomain = true;
             }
         }
@@ -123,7 +123,7 @@ namespace Metalama.Framework.Engine.Pipeline
                 // in ProjectOptions.PlugIns and in CompileTimeProjects.PlugInTypes. So, we do not load the plug ins found by CompileTimeProjects.PlugInTypes
                 // if they are already provided by ProjectOptions.PlugIns.
 
-                var invoker = this.ServiceProvider.GetService<UserCodeInvoker>();
+                var invoker = this.ServiceProvider.GetRequiredService<UserCodeInvoker>();
 
                 var loadedPlugInsTypes = this.ProjectOptions.PlugIns.Select( t => t.GetType().FullName ).ToImmutableArray();
 
@@ -289,7 +289,7 @@ namespace Metalama.Framework.Engine.Pipeline
 
         private protected virtual ImmutableArray<AdditionalCompilationOutputFile> GetAdditionalCompilationOutputFiles( ServiceProvider serviceProvider )
         {
-            var provider = serviceProvider.GetOptionalService<IAdditionalOutputFileProvider>();
+            var provider = serviceProvider.GetService<IAdditionalOutputFileProvider>();
 
             if ( provider == null )
             {

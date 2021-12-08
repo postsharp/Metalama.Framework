@@ -38,7 +38,7 @@ namespace Metalama.Framework.Engine.Aspects
         public AspectDriver( IServiceProvider serviceProvider, IAspectClassImpl aspectClass, Compilation compilation )
         {
             this._serviceProvider = serviceProvider;
-            this._reflectionMapper = serviceProvider.GetService<ReflectionMapperFactory>().GetInstance( compilation );
+            this._reflectionMapper = serviceProvider.GetRequiredService<ReflectionMapperFactory>().GetInstance( compilation );
             this._aspectClass = aspectClass;
 
             // Introductions must have a deterministic order because of testing.
@@ -176,7 +176,7 @@ namespace Metalama.Framework.Engine.Aspects
                 compilationModelRevision,
                 targetDeclaration );
 
-            if ( !this._serviceProvider.GetService<UserCodeInvoker>().TryInvoke( () => aspectOfT.BuildAspect( aspectBuilder ), executionContext ) )
+            if ( !this._serviceProvider.GetRequiredService<UserCodeInvoker>().TryInvoke( () => aspectOfT.BuildAspect( aspectBuilder ), executionContext ) )
             {
                 aspectInstance.Skip();
 

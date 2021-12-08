@@ -67,7 +67,7 @@ namespace Metalama.Framework.Engine.CodeModel
         {
             this.PartialCompilation = partialCompilation;
             this.Project = project;
-            this.ReflectionMapper = project.ServiceProvider.GetService<ReflectionMapperFactory>().GetInstance( this.RoslynCompilation );
+            this.ReflectionMapper = project.ServiceProvider.GetRequiredService<ReflectionMapperFactory>().GetInstance( this.RoslynCompilation );
             this.InvariantComparer = new DeclarationEqualityComparer( this.ReflectionMapper, this.RoslynCompilation );
             this._derivedTypes = partialCompilation.DerivedTypes;
 
@@ -87,8 +87,8 @@ namespace Metalama.Framework.Engine.CodeModel
             this._allMemberAttributesByTypeName = attributeDiscoveryVisitor.GetDiscoveredAttributes();
 
             this._aspects = ImmutableDictionaryOfArray<Ref<IDeclaration>, IAspectInstanceInternal>.Empty;
-            this.SymbolClassifier = project.ServiceProvider.GetService<SymbolClassificationService>().GetClassifier( this.RoslynCompilation );
-            this.MetricManager = project.ServiceProvider.GetOptionalService<MetricManager>() ?? new MetricManager( project.ServiceProvider );
+            this.SymbolClassifier = project.ServiceProvider.GetRequiredService<SymbolClassificationService>().GetClassifier( this.RoslynCompilation );
+            this.MetricManager = project.ServiceProvider.GetService<MetricManager>() ?? new MetricManager( project.ServiceProvider );
             this.EmptyGenericMap = new GenericMap( partialCompilation.Compilation );
         }
 

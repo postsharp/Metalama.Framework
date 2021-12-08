@@ -55,7 +55,7 @@ namespace Metalama.Framework.Engine.Utilities
         public CompilationModel? Compilation { get; }
 
         public IExecutionScenario ExecutionScenario
-            => this._executionScenario ??= this.ServiceProvider.GetService<AspectPipelineDescription>().ExecutionScenario;
+            => this._executionScenario ??= this.ServiceProvider.GetRequiredService<AspectPipelineDescription>().ExecutionScenario;
 
         ICompilation IExecutionContext.Compilation
             => this.Compilation ?? throw new InvalidOperationException( "There is no compilation in the current execution context" );

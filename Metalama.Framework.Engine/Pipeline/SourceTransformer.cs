@@ -29,7 +29,7 @@ namespace Metalama.Framework.Engine.Pipeline
                 .WithNextProvider( context.Services );
 
             // Try.Metalama ships its own project options using the async-local service provider.
-            var projectOptions = serviceProvider.GetOptionalService<IProjectOptions>();
+            var projectOptions = serviceProvider.GetService<IProjectOptions>();
 
             if ( projectOptions == null )
             {
@@ -65,7 +65,7 @@ namespace Metalama.Framework.Engine.Pipeline
             {
                 var mustRethrow = true;
 
-                ServiceProviderFactory.AsyncLocalProvider.GetOptionalService<ICompileTimeExceptionHandler>()
+                ServiceProviderFactory.AsyncLocalProvider.GetService<ICompileTimeExceptionHandler>()
                     ?.ReportException( e, context.ReportDiagnostic, out mustRethrow );
 
                 if ( mustRethrow )

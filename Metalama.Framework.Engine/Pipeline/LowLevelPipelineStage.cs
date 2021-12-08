@@ -74,7 +74,7 @@ namespace Metalama.Framework.Engine.Pipeline
                 diagnostics,
                 UserCodeMemberInfo.FromDelegate( new Action<AspectWeaverContext>( this._aspectWeaver.Transform ) ) );
 
-            if ( !this.ServiceProvider.GetService<UserCodeInvoker>().TryInvoke( () => this._aspectWeaver.Transform( context ), executionContext ) )
+            if ( !this.ServiceProvider.GetRequiredService<UserCodeInvoker>().TryInvoke( () => this._aspectWeaver.Transform( context ), executionContext ) )
             {
                 result = null;
 

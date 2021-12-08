@@ -106,7 +106,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
             }
 
             var serviceProvider = testResult.ProjectScopedServiceProvider;
-            var assemblyLocator = serviceProvider.GetService<ReferenceAssemblyLocator>();
+            var assemblyLocator = serviceProvider.GetRequiredService<ReferenceAssemblyLocator>();
 
             // Create an empty compilation (just with references) for the compile-time project.
             var compileTimeCompilation = CSharpCompilation.Create(
@@ -315,7 +315,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
                         metaApi,
                         compilation,
                         lexicalScope,
-                        serviceProvider.GetService<SyntaxSerializationService>(),
+                        serviceProvider.GetRequiredService<SyntaxSerializationService>(),
                         syntaxGenerationContext,
                         template,
                         proceedExpression,

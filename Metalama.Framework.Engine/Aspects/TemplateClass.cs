@@ -90,7 +90,7 @@ namespace Metalama.Framework.Engine.Aspects
                 return ImmutableDictionary<string, TemplateClassMember>.Empty;
             }
 
-            var symbolClassifier = this.ServiceProvider.GetService<SymbolClassificationService>().GetClassifier( compilation );
+            var symbolClassifier = this.ServiceProvider.GetRequiredService<SymbolClassificationService>().GetClassifier( compilation );
 
             var members = this.BaseClass?.Members.ToBuilder()
                           ?? ImmutableDictionary.CreateBuilder<string, TemplateClassMember>( StringComparer.Ordinal );

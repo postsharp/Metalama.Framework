@@ -50,7 +50,7 @@ namespace Metalama.Framework.Engine.Templating
                 this._semanticModel = semanticModel;
                 this._reportDiagnostic = reportDiagnostic;
                 this._serviceProvider = serviceProvider;
-                this._classifier = this._serviceProvider.GetService<SymbolClassificationService>().GetClassifier( semanticModel.Compilation );
+                this._classifier = this._serviceProvider.GetRequiredService<SymbolClassificationService>().GetClassifier( semanticModel.Compilation );
 
                 this._isCompileTimeTreeOutdated = isCompileTimeTreeOutdated;
                 this._isDesignTime = isDesignTime;

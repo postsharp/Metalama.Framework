@@ -21,7 +21,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
         public SystemTypeResolver( IServiceProvider serviceProvider ) : base( serviceProvider )
         {
-            this._referenceAssemblyLocator = serviceProvider.GetService<ReferenceAssemblyLocator>();
+            this._referenceAssemblyLocator = serviceProvider.GetRequiredService<ReferenceAssemblyLocator>();
         }
 
         protected virtual bool IsStandardAssemblyName( string assemblyName ) => this._referenceAssemblyLocator.IsStandardAssemblyName( assemblyName );

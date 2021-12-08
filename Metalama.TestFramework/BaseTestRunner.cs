@@ -239,7 +239,7 @@ namespace Metalama.TestFramework
                     }
                 }
 
-                var diagnosticsSink = this.BaseServiceProvider.GetService<TestDiagnosticsSink>();
+                var diagnosticsSink = this.BaseServiceProvider.GetRequiredService<TestDiagnosticsSink>();
                 testResult.PipelineDiagnostics.Report( diagnosticsSink.EnumerateDiagnostics() );
             }
             finally
@@ -278,7 +278,7 @@ namespace Metalama.TestFramework
             }
 
             // Emit the binary assembly.
-            var testOptions = this.BaseServiceProvider.GetService<TestProjectOptions>();
+            var testOptions = this.BaseServiceProvider.GetRequiredService<TestProjectOptions>();
             var outputPath = Path.Combine( testOptions.BaseDirectory, name + ".dll" );
 
             var emitResult = pipelineResult.ResultingCompilation.Compilation.Emit(

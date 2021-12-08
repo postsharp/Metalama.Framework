@@ -51,12 +51,12 @@ namespace Metalama.Framework.Engine.CompileTime
 
         public CompileTimeCompilationBuilder( IServiceProvider serviceProvider, CompileTimeDomain domain )
         {
-            this._pathOptions = serviceProvider.GetService<IPathOptions>();
+            this._pathOptions = serviceProvider.GetRequiredService<IPathOptions>();
             this._serviceProvider = serviceProvider;
             this._domain = domain;
-            this._observer = serviceProvider.GetOptionalService<ICompileTimeCompilationBuilderObserver>();
-            this._rewriter = serviceProvider.GetOptionalService<ICompileTimeAssemblyBinaryRewriter>();
-            this._projectOptions = serviceProvider.GetOptionalService<IProjectOptions>();
+            this._observer = serviceProvider.GetService<ICompileTimeCompilationBuilderObserver>();
+            this._rewriter = serviceProvider.GetService<ICompileTimeAssemblyBinaryRewriter>();
+            this._projectOptions = serviceProvider.GetService<IProjectOptions>();
         }
 
         private static ulong ComputeSourceHash( IReadOnlyList<SyntaxTree> compileTimeTrees, StringBuilder? log = null )
@@ -232,7 +232,7 @@ namespace Metalama.Framework.Engine.CompileTime
             string assemblyName,
             IEnumerable<CompileTimeProject> referencedProjects )
         {
-            var assemblyLocator = this._serviceProvider.GetService<ReferenceAssemblyLocator>();
+            var assemblyLocator = this._serviceProvider.GetRequiredService<ReferenceAssemblyLocator>();
 
             var standardReferences = assemblyLocator.StandardCompileTimeMetadataReferences;
 
@@ -448,7 +448,7 @@ namespace Metalama.Framework.Engine.CompileTime
             CancellationToken cancellationToken )
         {
             List<SyntaxTree> compileTimeTrees = new();
-            var classifier = this._serviceProvider.GetService<SymbolClassificationService>().GetClassifier( runTimeCompilation );
+            var classifier = this._serviceProvider.GetRequiredService<SymbolClassificationService>().GetClassifier( runTimeCompilation );
 
             var trees = compileTimeTreesHint ?? runTimeCompilation.SyntaxTrees;
 

@@ -23,7 +23,7 @@ namespace Metalama.Framework.Tests.UnitTests.Templating
         {
             using var testContext = this.CreateTestContext();
 
-            var classifier = testContext.ServiceProvider.GetService<SymbolClassificationService>()
+            var classifier = testContext.ServiceProvider.GetRequiredService<SymbolClassificationService>()
                 .GetClassifier( compilation );
 
             var actualScope = classifier.GetTemplatingScope( symbol );

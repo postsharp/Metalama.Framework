@@ -35,7 +35,7 @@ namespace Metalama.Framework.Engine.Fabrics
             this.AspectClasses = aspectClasses;
         }
 
-        public UserCodeInvoker UserCodeInvoker => this.ServiceProvider.GetService<UserCodeInvoker>();
+        public UserCodeInvoker UserCodeInvoker => this.ServiceProvider.GetRequiredService<UserCodeInvoker>();
 
         public CompileTimeProject CompileTimeProject { get; }
 
