@@ -1,12 +1,12 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using LINQPad;
+using LINQPad.Extensibility.DataContext;
 using Metalama.Framework.Code;
 using Metalama.Framework.Impl;
 using Metalama.Framework.Impl.Pipeline;
 using Metalama.Framework.Workspaces;
-using LINQPad;
-using LINQPad.Extensibility.DataContext;
 using System;
 using System.Collections.Generic;
 using System.Linq;
