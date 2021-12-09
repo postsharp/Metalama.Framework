@@ -12,20 +12,20 @@ using System.IO;
 
 var product = new Product
 {
-                ProductName = "Metalama",
+    ProductName = "Metalama",
     Solutions = ImmutableArray.Create<Solution>(
                     new DotNetSolution( "Metalama.sln" )
-        {
-            SupportsTestCoverage = true,
-            CanFormatCode = true,
-            FormatExclusions = ImmutableArray.Create(
+                    {
+                        SupportsTestCoverage = true,
+                        CanFormatCode = true,
+                        FormatExclusions = ImmutableArray.Create(
                             "Tests\\Metalama.Framework.Tests.Integration\\Tests\\**\\*",
                             "Tests\\Metalama.Framework.Tests.Integration.Internals\\Tests\\**\\*" )
-        },
+                    },
                     new DotNetSolution( "Tests\\Metalama.Framework.TestApp\\Metalama.Framework.TestApp.sln" )
-        {
-            IsTestOnly = true
-        } ),
+                    {
+                        IsTestOnly = true
+                    } ),
     PublicArtifacts = Pattern.Create(
         "Metalama.Framework.$(PackageVersion).nupkg",
         "Metalama.TestFramework.$(PackageVersion).nupkg",
