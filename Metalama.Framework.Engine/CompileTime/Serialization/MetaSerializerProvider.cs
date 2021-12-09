@@ -10,12 +10,12 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
 {
     internal sealed class MetaSerializerProvider
     {
-        private readonly IMetaSerializerFactoryProvider _provider;
+        private readonly ISerializerFactoryProvider _provider;
         private readonly MetaSerializerProvider? _next;
         private readonly Dictionary<Type, ISerializer> _serializers = new( 64 );
         private readonly object _sync = new();
 
-        public MetaSerializerProvider( IMetaSerializerFactoryProvider provider )
+        public MetaSerializerProvider( ISerializerFactoryProvider provider )
         {
             this._provider = provider;
 
@@ -44,7 +44,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
         {
             for ( var currentProvider = this._provider; currentProvider != null; currentProvider = currentProvider.NextProvider )
             {
-                if ( currentProvider is IMetaSerializerDiscoverer serializerDiscoverer )
+                if ( currentProvider is ISerializerDiscoverer serializerDiscoverer )
                 {
                     serializerDiscoverer.DiscoverSerializers( objectType );
                 }
@@ -55,7 +55,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
         {
             if ( !this.TryGetSerializer( objectType, out var serializer ) )
             {
-                throw new MetaSerializationException( string.Format( CultureInfo.InvariantCulture, "Cannot find a serializer for type '{0}'.", objectType ) );
+                throw new LamaSerializationException( string.Format( CultureInfo.InvariantCulture, "Cannot find a serializer for type '{0}'.", objectType ) );
             }
 
             return serializer;

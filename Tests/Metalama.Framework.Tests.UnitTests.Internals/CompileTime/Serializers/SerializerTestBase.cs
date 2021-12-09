@@ -51,7 +51,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serializers
             return metaSerializerTypes[0];
         }
 
-        private protected static ISerializer GetMetaSerializer( Type type )
+        private protected static ISerializer GetSerializer( Type type )
         {
             var metaSerializerType = GetMetaSerializerType( type );
 

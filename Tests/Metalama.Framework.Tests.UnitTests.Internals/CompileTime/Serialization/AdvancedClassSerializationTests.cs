@@ -26,7 +26,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
             mother.Children[1] = ch2;
             mother.Children[2] = ch3;
 
-            var formatter = new MetaFormatter();
+            var formatter = new LamaFormatter();
             var memoryStream = new MemoryStream();
             formatter.Serialize( mother, memoryStream );
             memoryStream.Seek( 0, SeekOrigin.Begin );
@@ -47,7 +47,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
             brother.Sibling[0] = sister;
             sister.Sibling[0] = brother;
 
-            var formatter = new MetaFormatter();
+            var formatter = new LamaFormatter();
             var memoryStream = new MemoryStream();
             formatter.Serialize( brother, memoryStream );
             memoryStream.Seek( 0, SeekOrigin.Begin );
@@ -72,7 +72,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
             children[0] = brother;
             children[1] = sister;
 
-            var formatter = new MetaFormatter();
+            var formatter = new LamaFormatter();
             var memoryStream = new MemoryStream();
             formatter.Serialize( children, memoryStream );
             memoryStream.Seek( 0, SeekOrigin.Begin );
@@ -99,7 +99,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
             var spouse1 = new Parent( "Mono" );
             spouse1.Spouse = spouse1;
 
-            var formatter = new MetaFormatter();
+            var formatter = new LamaFormatter();
             var memoryStream = new MemoryStream();
             formatter.Serialize( spouse1, memoryStream );
             memoryStream.Seek( 0, SeekOrigin.Begin );

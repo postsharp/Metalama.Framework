@@ -9,7 +9,7 @@ using System.Reflection;
 
 namespace Metalama.Framework.Engine.CompileTime.Serialization
 {
-    internal sealed class ReflectionMetaSerializationProvider : IMetaSerializerFactoryProvider, IMetaSerializerDiscoverer
+    internal sealed class ReflectionSerializationProvider : ISerializerFactoryProvider, ISerializerDiscoverer
     {
         private readonly Dictionary<Type, ISerializerFactory> _serializerTypes = new();
         private readonly Dictionary<Type, bool> _inspectedTypes = new();
@@ -50,7 +50,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
                 }
                 else
                 {
-                    throw new MetaSerializationException(
+                    throw new LamaSerializationException(
                         string.Format(
                             CultureInfo.InvariantCulture,
                             "Cannot assign serializer '{0}' to type '{1}' where this type is already assigned to serializer '{2}'.",
@@ -148,7 +148,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
             }
         }
 
-        public IMetaSerializerFactoryProvider? NextProvider => null;
+        public ISerializerFactoryProvider? NextProvider => null;
 
         public void DiscoverSerializers( Type objectType )
         {

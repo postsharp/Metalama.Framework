@@ -18,10 +18,10 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
 
         private readonly SerializationBinaryReader _binaryReader;
 
-        private readonly MetaFormatter _formatter;
+        private readonly LamaFormatter _formatter;
         private readonly bool _shouldReportExceptionCause;
 
-        internal SerializationReader( Stream stream, MetaFormatter formatter, bool shouldReportExceptionCause )
+        internal SerializationReader( Stream stream, LamaFormatter formatter, bool shouldReportExceptionCause )
         {
             this._formatter = formatter;
             this._shouldReportExceptionCause = shouldReportExceptionCause;
@@ -138,9 +138,9 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
             {
                 serializer.DeserializeFields( ref value, fields );
             }
-            catch ( MetaSerializationException exception )
+            catch ( LamaSerializationException exception )
             {
-                throw MetaSerializationException.CreateWithCause( "Deserialization", value.GetType(), exception, cause );
+                throw LamaSerializationException.CreateWithCause( "Deserialization", value.GetType(), exception, cause );
             }
         }
 
@@ -249,7 +249,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
 
                     if ( !type.IsEnum )
                     {
-                        throw new MetaSerializationException(
+                        throw new LamaSerializationException(
                             string.Format( CultureInfo.InvariantCulture, "Type '{0}' is expected to be an enum type.", type ) );
                     }
 
@@ -260,7 +260,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
 
                     if ( !type.IsValueType )
                     {
-                        throw new MetaSerializationException(
+                        throw new LamaSerializationException(
                             string.Format( CultureInfo.InvariantCulture, "Type '{0}' is expected to be a value type.", type ) );
                     }
 
@@ -271,7 +271,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
 
                     if ( type.IsValueType )
                     {
-                        throw new MetaSerializationException(
+                        throw new LamaSerializationException(
                             string.Format( CultureInfo.InvariantCulture, "Type '{0}' is expected to be a reference type.", type ) );
                     }
 
@@ -307,7 +307,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
                     break;
 
                 default:
-                    throw new MetaSerializationException( $"Invalid type: {intrinsicType}." );
+                    throw new LamaSerializationException( $"Invalid type: {intrinsicType}." );
             }
         }
 
@@ -356,7 +356,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
                 // }
 
                 default:
-                    throw new MetaSerializationException();
+                    throw new LamaSerializationException();
             }
         }
 
@@ -629,9 +629,9 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
             {
                 return serializer.CreateInstance( type, fields );
             }
-            catch ( MetaSerializationException exception )
+            catch ( LamaSerializationException exception )
             {
-                throw MetaSerializationException.CreateWithCause( "Deserialization", type, exception, cause );
+                throw LamaSerializationException.CreateWithCause( "Deserialization", type, exception, cause );
             }
         }
 
@@ -662,7 +662,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
 
             public Dictionary<string, object?>? Values { get; }
 
-            private readonly MetaFormatter? _formatter;
+            private readonly LamaFormatter? _formatter;
 
             private InstanceFields()
             {
@@ -671,7 +671,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
                 this.Values = null;
             }
 
-            public InstanceFields( Type type, MetaFormatter formatter, int capacity )
+            public InstanceFields( Type type, LamaFormatter formatter, int capacity )
             {
                 this._type = type;
                 this._formatter = formatter;
@@ -755,7 +755,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
 #endif
                     }
 
-                    throw new MetaSerializationException(
+                    throw new LamaSerializationException(
                         string.Format(
                             CultureInfo.InvariantCulture,
                             "Error reading value of key '{0}' in type '{1}': cannot convert type '{2}' into '{3}': {4}",

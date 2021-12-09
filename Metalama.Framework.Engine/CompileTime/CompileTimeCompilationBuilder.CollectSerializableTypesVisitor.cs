@@ -23,16 +23,16 @@ namespace Metalama.Framework.Engine.CompileTime
             private readonly SemanticModel _semanticModel;
             private readonly ReflectionMapper _reflectionMapper;
             private readonly CancellationToken _cancellationToken;
-            private readonly List<MetaSerializableTypeInfo> _serializableTypes;
+            private readonly List<SerializableTypeInfo> _serializableTypes;
 
-            public IReadOnlyList<MetaSerializableTypeInfo> SerializableTypes => this._serializableTypes;
+            public IReadOnlyList<SerializableTypeInfo> SerializableTypes => this._serializableTypes;
 
             public CollectSerializableTypesVisitor( SemanticModel semanticModel, ReflectionMapper reflectionMapper, CancellationToken cancellationToken )
             {
                 this._semanticModel = semanticModel;
                 this._reflectionMapper = reflectionMapper;
                 this._cancellationToken = cancellationToken;
-                this._serializableTypes = new List<MetaSerializableTypeInfo>();
+                this._serializableTypes = new List<SerializableTypeInfo>();
             }
 
             private void VisitTypeDeclaration( SyntaxNode node )
@@ -52,7 +52,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
                 innerVisitor.Visit( node );
 
-                this._serializableTypes.Add( new MetaSerializableTypeInfo( declaredSymbol, innerVisitor.SerializableFieldsOrProperties ) );
+                this._serializableTypes.Add( new SerializableTypeInfo( declaredSymbol, innerVisitor.SerializableFieldsOrProperties ) );
             }
 
             public override void VisitClassDeclaration( ClassDeclarationSyntax node ) => this.VisitTypeDeclaration( node );

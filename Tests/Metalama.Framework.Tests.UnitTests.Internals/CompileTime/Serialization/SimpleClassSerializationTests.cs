@@ -494,7 +494,7 @@ After:
             var anotherSerializedClass = new SimpleExplicitlySerializedClass<DateTime>( DateTime.Today.AddMonths( -10 ) );
             var array = new[] { serializedClass, anotherSerializedClass };
 
-            var formatter = new MetaFormatter();
+            var formatter = new LamaFormatter();
             var memoryStream = new MemoryStream();
             formatter.Serialize( array, memoryStream );
             memoryStream.Seek( 0, SeekOrigin.Begin );
@@ -511,7 +511,7 @@ After:
         private static void TestSimpleExplicitlySerializedClass<T>( T value )
         {
             var initialObject = new SimpleExplicitlySerializedClass<T>( value );
-            var formatter = new MetaFormatter();
+            var formatter = new LamaFormatter();
             var memoryStream = new MemoryStream();
             formatter.Serialize( initialObject, memoryStream );
             memoryStream.Seek( 0, SeekOrigin.Begin );
@@ -530,7 +530,7 @@ After:
         private static void TestExplicitlySerializedClass<TForCtor, TForField>( TForCtor value, TForField property )
         {
             var initialObject = new ExplicitlySerializedClass<TForCtor, TForField>( value ) { Field = property };
-            var formatter = new MetaFormatter();
+            var formatter = new LamaFormatter();
             var memoryStream = new MemoryStream();
             formatter.Serialize( initialObject, memoryStream );
             memoryStream.Seek( 0, SeekOrigin.Begin );

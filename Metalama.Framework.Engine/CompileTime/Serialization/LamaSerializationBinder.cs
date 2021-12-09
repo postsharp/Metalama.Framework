@@ -6,9 +6,9 @@ using System;
 namespace Metalama.Framework.Engine.CompileTime.Serialization
 {
     /// <summary>
-    /// Binds types to names and names to types. Used by the <see cref="MetaFormatter"/>.
+    /// Binds types to names and names to types. Used by the <see cref="LamaFormatter"/>.
     /// </summary>
-    public class MetaSerializationBinder
+    internal class LamaSerializationBinder
     {
         /// <summary>
         /// Gets a <see cref="Type"/> given a type name and an assembly name.

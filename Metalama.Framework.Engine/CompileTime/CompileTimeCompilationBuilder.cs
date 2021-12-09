@@ -461,14 +461,14 @@ namespace Metalama.Framework.Engine.CompileTime
             return compileTimeTrees;
         }
 
-        private static IReadOnlyList<MetaSerializableTypeInfo> GetSerializableTypes(
+        private static IReadOnlyList<SerializableTypeInfo> GetSerializableTypes(
             Compilation runTimeCompilation,
             IReadOnlyList<SyntaxTree> compileTimeSyntaxTrees,
             CancellationToken cancellationToken )
         {
             // TODO: Check that the mapper is not already registered.
             var reflectionMapper = new ReflectionMapper( runTimeCompilation );
-            var allSerializableTypes = new List<MetaSerializableTypeInfo>();
+            var allSerializableTypes = new List<SerializableTypeInfo>();
 
             foreach ( var tree in compileTimeSyntaxTrees )
             {

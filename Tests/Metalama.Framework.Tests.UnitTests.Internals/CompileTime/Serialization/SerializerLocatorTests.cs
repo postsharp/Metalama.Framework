@@ -16,12 +16,12 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
 {
     public class SerializerLocatorTests
     {
-        private readonly IMetaSerializerFactoryProvider _customSerializerProvider;
+        private readonly ISerializerFactoryProvider _customSerializerProvider;
 
         public SerializerLocatorTests()
         {
-            Assert.NotNull( MetaSerializerFactoryProvider.BuiltIn.NextProvider );
-            this._customSerializerProvider = MetaSerializerFactoryProvider.BuiltIn.NextProvider!;
+            Assert.NotNull( SerializerFactoryProvider.BuiltIn.NextProvider );
+            this._customSerializerProvider = SerializerFactoryProvider.BuiltIn.NextProvider!;
         }
 
         [Fact]
@@ -87,7 +87,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
         [Fact]
         public void GetSerializerType_HasManySerializers_Throws()
         {
-            Assert.Throws<MetaSerializationException>( () => this._customSerializerProvider.GetSerializerFactory( typeof(TypeWithManySerializers) ) );
+            Assert.Throws<LamaSerializationException>( () => this._customSerializerProvider.GetSerializerFactory( typeof(TypeWithManySerializers) ) );
         }
 
         [Serializer( typeof(Serializer) )]

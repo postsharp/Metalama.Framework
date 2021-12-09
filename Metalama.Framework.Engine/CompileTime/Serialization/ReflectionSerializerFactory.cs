@@ -33,7 +33,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
                 }
                 else
                 {
-                    throw new MetaSerializationException(
+                    throw new LamaSerializationException(
                         string.Format(
                             CultureInfo.InvariantCulture,
                             "The serializer type '{0}' is an open generic type, but it has a different number of generic parameters than '{1}'.",
@@ -52,7 +52,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
             {
                 ISerializer serializer => serializer,
                 ISerializerFactory serializerFactory => serializerFactory.CreateSerializer( objectType ),
-                _ => throw new MetaSerializationException(
+                _ => throw new LamaSerializationException(
                     string.Format(
                         CultureInfo.InvariantCulture,
                         "Type {0} must implement interface ISerializer or ISerializerFactory.",

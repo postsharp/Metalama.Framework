@@ -9,7 +9,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
     /// <summary>
     /// Describes serializable type, serializer of which needs to be emitted in this compilation.
     /// </summary>
-    internal class MetaSerializableTypeInfo
+    internal class SerializableTypeInfo
     {
         /// <summary>
         /// Gets the serializable type.
@@ -21,7 +21,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
         /// </summary>
         public IReadOnlyList<ISymbol> SerializedMembers { get; }
 
-        public MetaSerializableTypeInfo( INamedTypeSymbol type, IReadOnlyList<ISymbol> serializedMembers )
+        public SerializableTypeInfo( INamedTypeSymbol type, IReadOnlyList<ISymbol> serializedMembers )
         {
             this.Type = type;
             this.SerializedMembers = serializedMembers;

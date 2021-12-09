@@ -29,14 +29,14 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
                 new ReferenceToChildren { Children = { new Child { Fail = Fail.None }, new Child { Fail = Fail.Write } } }
             };
 
-            var formatter = new MetaFormatter( null, MetaSerializerFactoryProvider.BuiltIn );
+            var formatter = new LamaFormatter( null, SerializerFactoryProvider.BuiltIn );
             var memoryStream = new MemoryStream();
 
             try
             {
                 formatter.Serialize( references, memoryStream );
             }
-            catch ( MetaSerializationException ex )
+            catch ( LamaSerializationException ex )
             {
                 Assert.Contains( "Child", ex.Message, StringComparison.Ordinal );
                 Assert.Contains( "ReferenceToChildren[]::root[1].ReferenceToChildren::Children", ex.Message, StringComparison.Ordinal );
@@ -53,7 +53,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
                 new ReferenceToChildren { Children = { new Child { Fail = Fail.None }, new Child { Fail = Fail.Read } } }
             };
 
-            var formatter = new MetaFormatter( null, MetaSerializerFactoryProvider.BuiltIn );
+            var formatter = new LamaFormatter( null, SerializerFactoryProvider.BuiltIn );
             var memoryStream = new MemoryStream();
             formatter.Serialize( references, memoryStream );
             memoryStream.Seek( 0, SeekOrigin.Begin );
@@ -62,7 +62,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
             {
                 formatter.Deserialize( memoryStream );
             }
-            catch ( MetaSerializationException ex )
+            catch ( LamaSerializationException ex )
             {
                 Assert.Contains( "Child", ex.Message, StringComparison.Ordinal );
                 Assert.Contains( "ReferenceToChildren[]::root[1].ReferenceToChildren::Children", ex.Message, StringComparison.Ordinal );
@@ -73,14 +73,14 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
         [Fact]
         public void TestFormatterSerializeFail()
         {
-            var formatter = new MetaFormatter();
+            var formatter = new LamaFormatter();
             Child.NSerialized = 0;
 
             try
             {
                 formatter.Serialize( new Child { Fail = Fail.Write }, Stream.Null );
             }
-            catch ( MetaSerializationException ex )
+            catch ( LamaSerializationException ex )
             {
                 Assert.EndsWith( "Child::root", ex.Message, StringComparison.Ordinal );
                 Assert.Equal( 2, Child.NSerialized );
@@ -90,7 +90,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
         [Fact]
         public void TestFormatterSerializeSuccess()
         {
-            var formatter = new MetaFormatter();
+            var formatter = new LamaFormatter();
             Child.NSerialized = 0;
 
             formatter.Serialize( new Child { Fail = Fail.None }, Stream.Null );
@@ -100,7 +100,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
         [Fact]
         public void TestFormatterDeserializeFail()
         {
-            var formatter = new MetaFormatter();
+            var formatter = new LamaFormatter();
             var stream = new SeekCountingMemoryStream();
             formatter.Serialize( new Child { Fail = Fail.Read }, stream );
             stream.Seek( 0, SeekOrigin.Begin );
@@ -109,7 +109,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
             {
                 formatter.Deserialize( stream );
             }
-            catch ( MetaSerializationException ex )
+            catch ( LamaSerializationException ex )
             {
                 Assert.EndsWith( "Child::root", ex.Message, StringComparison.Ordinal );
 
@@ -121,7 +121,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
         [Fact]
         public void TestFormatterDeserializeSuccess()
         {
-            var formatter = new MetaFormatter();
+            var formatter = new LamaFormatter();
             var stream = new SeekCountingMemoryStream();
             formatter.Serialize( new Child { Fail = Fail.None }, stream );
             stream.Seek( 0, SeekOrigin.Begin );
@@ -162,7 +162,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
                 {
                     if ( obj.Fail == Fail.Write )
                     {
-                        throw new MetaSerializationException();
+                        throw new LamaSerializationException();
                     }
 
                     initializationArguments.SetValue( "Fail", obj.Fail );
@@ -174,7 +174,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
 
                     if ( obj.Fail == Fail.Read )
                     {
-                        throw new MetaSerializationException();
+                        throw new LamaSerializationException();
                     }
                 }
             }

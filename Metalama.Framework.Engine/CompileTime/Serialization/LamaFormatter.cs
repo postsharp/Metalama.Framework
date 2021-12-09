@@ -5,35 +5,35 @@ using System.IO;
 
 namespace Metalama.Framework.Engine.CompileTime.Serialization
 {
-    internal class MetaFormatter
+    internal class LamaFormatter
     {
         /// <summary>
-        /// Gets or sets the default <see cref="MetaSerializationBinder"/> that is used by a <see cref="MetaFormatter"/> to bind types to/from type names if no
-        /// <see cref="MetaSerializationBinder"/> is specified.
+        /// Gets or sets the default <see cref="LamaSerializationBinder"/> that is used by a <see cref="LamaFormatter"/> to bind types to/from type names if no
+        /// <see cref="LamaSerializationBinder"/> is specified.
         /// </summary>
-        public static MetaSerializationBinder? DefaultBinder { get; set; }
+        public static LamaSerializationBinder? DefaultBinder { get; set; }
 
         /// <summary>
-        /// Gets the <see cref="MetaSerializationBinder"/> used by the current <see cref="MetaFormatter"/> to bind types to/from type names.
+        /// Gets the <see cref="LamaSerializationBinder"/> used by the current <see cref="LamaFormatter"/> to bind types to/from type names.
         /// </summary>
-        internal MetaSerializationBinder Binder { get; }
+        internal LamaSerializationBinder Binder { get; }
 
         internal MetaSerializerProvider SerializerProvider { get; }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="MetaFormatter"/> class.
+        /// Initializes a new instance of the <see cref="LamaFormatter"/> class.
         /// </summary>
-        public MetaFormatter() : this( null, null ) { }
+        public LamaFormatter() : this( null, null ) { }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="MetaFormatter"/> class.
+        /// Initializes a new instance of the <see cref="LamaFormatter"/> class.
         /// </summary>
-        /// <param name="binder">A <see cref="MetaSerializationBinder"/> customizing bindings between types and type names, or <c>null</c> to use the default implementation.</param>
-        /// <param name="serializerProvider">A custom implementation of <see cref="IMetaSerializerFactoryProvider"/>, or <c>null</c> to use the default implementation.</param>
-        public MetaFormatter( MetaSerializationBinder? binder, IMetaSerializerFactoryProvider? serializerProvider )
+        /// <param name="binder">A <see cref="LamaSerializationBinder"/> customizing bindings between types and type names, or <c>null</c> to use the default implementation.</param>
+        /// <param name="serializerProvider">A custom implementation of <see cref="ISerializerFactoryProvider"/>, or <c>null</c> to use the default implementation.</param>
+        public LamaFormatter( LamaSerializationBinder? binder, ISerializerFactoryProvider? serializerProvider )
         {
-            this.Binder = binder ?? DefaultBinder ?? new MetaSerializationBinder();
-            this.SerializerProvider = new MetaSerializerProvider( serializerProvider ?? MetaSerializerFactoryProvider.BuiltIn );
+            this.Binder = binder ?? DefaultBinder ?? new LamaSerializationBinder();
+            this.SerializerProvider = new MetaSerializerProvider( serializerProvider ?? SerializerFactoryProvider.BuiltIn );
         }
 
         /// <summary>
@@ -48,7 +48,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
                 var serializationWriter = new SerializationWriter( stream, this, shouldReportExceptionCause: false );
                 serializationWriter.Serialize( obj );
             }
-            catch ( MetaSerializationException )
+            catch ( LamaSerializationException )
             {
                 var serializationWriter = new SerializationWriter( Stream.Null, this, shouldReportExceptionCause: true );
                 serializationWriter.Serialize( obj );
@@ -68,7 +68,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
 
                 return serializationReader.Deserialize();
             }
-            catch ( MetaSerializationException ) when ( stream.CanSeek )
+            catch ( LamaSerializationException ) when ( stream.CanSeek )
             {
                 stream.Seek( 0, SeekOrigin.Begin );
                 var serializationReader = new SerializationReader( stream, this, shouldReportExceptionCause: true );

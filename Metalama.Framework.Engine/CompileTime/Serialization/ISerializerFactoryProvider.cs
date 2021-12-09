@@ -9,8 +9,8 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
     /// <summary>
     /// Provides instances of the <see cref="ISerializerFactory"/> interface given the object type.
     /// </summary>
-    /// <seealso cref="IMetaSerializerDiscoverer"/>
-    internal interface IMetaSerializerFactoryProvider
+    /// <seealso cref="ISerializerDiscoverer"/>
+    internal interface ISerializerFactoryProvider
     {
         /// <summary>
         /// Gets the surrogate type for a given object type. 
@@ -40,6 +40,6 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
         /// <summary>
         /// Gets the next provider in the chain.
         /// </summary>
-        IMetaSerializerFactoryProvider? NextProvider { get; }
+        ISerializerFactoryProvider? NextProvider { get; }
     }
 }

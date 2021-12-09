@@ -10,10 +10,10 @@ using System.Reflection;
 
 namespace Metalama.Framework.Engine.CompileTime.Serialization
 {
-    internal sealed class BuiltInSerializerFactoryProvider : MetaSerializerFactoryProvider
+    internal sealed class BuiltInSerializerFactoryProvider : SerializerFactoryProvider
     {
         public BuiltInSerializerFactoryProvider()
-            : base( new ReflectionMetaSerializationProvider() )
+            : base( new ReflectionSerializationProvider() )
         {
             // intrinsic types
             this.AddSerializer<bool, BooleanSerializer>();

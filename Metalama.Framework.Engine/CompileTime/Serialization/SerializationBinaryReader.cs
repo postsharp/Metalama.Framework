@@ -39,7 +39,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
                         // ReSharper disable once ConditionIsAlwaysTrueOrFalse
                         if ( index < 0 || index > this._strings.Count )
                         {
-                            throw new MetaSerializationException( "Invalid serialized stream: invalid string identifier." );
+                            throw new LamaSerializationException( "Invalid serialized stream: invalid string identifier." );
                         }
 
                         return this._strings[index];
@@ -72,7 +72,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
                         // ReSharper disable once ConditionIsAlwaysTrueOrFalse
                         if ( index < 0 || index > this._dottedStrings.Count )
                         {
-                            throw new MetaSerializationException( "Invalid serialized stream: invalid string identifier." );
+                            throw new LamaSerializationException( "Invalid serialized stream: invalid string identifier." );
                         }
 
                         return this._dottedStrings[index];
@@ -131,7 +131,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
                     break;
 
                 default:
-                    throw new MetaSerializationException();
+                    throw new LamaSerializationException();
             }
 
             return new Integer( value, isNegative );

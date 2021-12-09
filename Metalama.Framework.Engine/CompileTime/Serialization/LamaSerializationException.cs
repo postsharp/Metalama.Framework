@@ -8,41 +8,41 @@ using System.Runtime.Serialization;
 namespace Metalama.Framework.Engine.CompileTime.Serialization
 {
     /// <summary>
-    /// Exception thrown by the <see cref="MetaFormatter"/>.
+    /// Exception thrown by the <see cref="LamaFormatter"/>.
     /// </summary>
 #if SERIALIZABLE
     [Serializable]
 #endif
-    public class MetaSerializationException : Exception
+    public class LamaSerializationException : Exception
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="MetaSerializationException"/> class.
+        /// Initializes a new instance of the <see cref="LamaSerializationException"/> class.
         /// </summary>
-        public MetaSerializationException() { }
+        public LamaSerializationException() { }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="MetaSerializationException"/> class and specifies the message.
+        /// Initializes a new instance of the <see cref="LamaSerializationException"/> class and specifies the message.
         /// </summary>
         /// <param name="message">Message.</param>
-        public MetaSerializationException( string message ) : base( message ) { }
+        public LamaSerializationException( string message ) : base( message ) { }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="MetaSerializationException"/> class and specifies the message and inner exception.
+        /// Initializes a new instance of the <see cref="LamaSerializationException"/> class and specifies the message and inner exception.
         /// </summary>
         /// <param name="message">Message.</param>
         /// <param name="inner">Inner exception.</param>
-        public MetaSerializationException( string message, Exception inner ) : base( message, inner ) { }
+        public LamaSerializationException( string message, Exception inner ) : base( message, inner ) { }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="MetaSerializationException"/> class for deserialization purposes.
+        /// Initializes a new instance of the <see cref="LamaSerializationException"/> class for deserialization purposes.
         /// </summary>
         /// <param name="info"></param>
         /// <param name="context"></param>
-        protected MetaSerializationException(
+        protected LamaSerializationException(
             SerializationInfo info,
             StreamingContext context ) : base( info, context ) { }
 
-        internal static MetaSerializationException CreateWithCause( string operation, Type type, Exception innerException, SerializationCause? cause )
+        internal static LamaSerializationException CreateWithCause( string operation, Type type, Exception innerException, SerializationCause? cause )
         {
             var causes = new List<string>();
 
@@ -56,7 +56,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
 
             var message = $"{operation} of {type.Name} failed. The order of deserialization was as follows:\n" + string.Join( "", causes.ToArray() );
 
-            return new MetaSerializationException( message, innerException );
+            return new LamaSerializationException( message, innerException );
         }
     }
 }

@@ -13,19 +13,19 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.CompileTime.Serialization
 {
-    internal class MetaSerializerGenerator : IMetaSerializerGenerator
+    internal class SerializerGenerator : ISerializerGenerator
     {
         private readonly SyntaxGenerationContext _context;
         private readonly ReflectionMapper _runtimeReflectionMapper;
 
-        public MetaSerializerGenerator( Compilation runtimeCompilation, SyntaxGenerationContext context )
+        public SerializerGenerator( Compilation runtimeCompilation, SyntaxGenerationContext context )
         {
             this._context = context;
 
             this._runtimeReflectionMapper = new ReflectionMapper( runtimeCompilation );
         }
 
-        public bool ShouldSuppressReadOnly( MetaSerializableTypeInfo serializableType, ISymbol memberSymbol )
+        public bool ShouldSuppressReadOnly( SerializableTypeInfo serializableType, ISymbol memberSymbol )
         {
             var serializableTypeMember = serializableType.SerializedMembers.SingleOrDefault( x => SymbolEqualityComparer.Default.Equals( x, memberSymbol ) );
 
@@ -37,7 +37,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
             return this.ClassifyFieldOrProperty( serializableTypeMember ) == FieldOrPropertyDeserializationKind.Deserialize_MakeMutable;
         }
 
-        public MemberDeclarationSyntax CreateDeserializingConstructor( MetaSerializableTypeInfo serializableType )
+        public MemberDeclarationSyntax CreateDeserializingConstructor( SerializableTypeInfo serializableType )
         {
             // Presume that base type is not null.
             var baseConstructors =
@@ -92,7 +92,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
                     null );
         }
 
-        public TypeDeclarationSyntax CreateSerializerType( MetaSerializableTypeInfo serializableType )
+        public TypeDeclarationSyntax CreateSerializerType( SerializableTypeInfo serializableType )
         {
             var members = new List<MemberDeclarationSyntax>();
 
@@ -207,7 +207,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
                 null );
         }
 
-        private MethodDeclarationSyntax CreateCreateInstanceMethod( MetaSerializableTypeInfo serializedType, INamedTypeSymbol baseSerializer )
+        private MethodDeclarationSyntax CreateCreateInstanceMethod( SerializableTypeInfo serializedType, INamedTypeSymbol baseSerializer )
         {
             var serializerBaseType = baseSerializer;
 
@@ -271,7 +271,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
                                         untypedExpression ) ) ) ) ) );
         }
 
-        private MethodDeclarationSyntax CreateReferenceTypeSerializeMethod( MetaSerializableTypeInfo serializedType, INamedTypeSymbol baseSerializer )
+        private MethodDeclarationSyntax CreateReferenceTypeSerializeMethod( SerializableTypeInfo serializedType, INamedTypeSymbol baseSerializer )
         {
             var baseSerializeMethod = baseSerializer.GetMembers()
                 .OfType<IMethodSymbol>()
@@ -305,7 +305,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
                 body );
         }
 
-        private MethodDeclarationSyntax CreateReferenceTypeDeserializeMethod( MetaSerializableTypeInfo serializedType, INamedTypeSymbol baseSerializer )
+        private MethodDeclarationSyntax CreateReferenceTypeDeserializeMethod( SerializableTypeInfo serializedType, INamedTypeSymbol baseSerializer )
         {
             var baseDeserializeMethod = baseSerializer.GetMembers()
                 .OfType<IMethodSymbol>()
@@ -339,7 +339,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
                 body );
         }
 
-        private MethodDeclarationSyntax CreateValueTypeSerializeMethod( MetaSerializableTypeInfo serializedType, INamedTypeSymbol baseSerializer )
+        private MethodDeclarationSyntax CreateValueTypeSerializeMethod( SerializableTypeInfo serializedType, INamedTypeSymbol baseSerializer )
         {
             var serializeMethod = baseSerializer.GetMembers()
                 .OfType<IMethodSymbol>()
@@ -358,7 +358,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
                 body );
         }
 
-        private MethodDeclarationSyntax CreateValueTypeDeserializeMethod( MetaSerializableTypeInfo serializedType, INamedTypeSymbol baseSerializer )
+        private MethodDeclarationSyntax CreateValueTypeDeserializeMethod( SerializableTypeInfo serializedType, INamedTypeSymbol baseSerializer )
         {
             var deserializeMethod = baseSerializer.GetMembers()
                 .OfType<IMethodSymbol>()
@@ -397,7 +397,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
         }
 
         private BlockSyntax CreateFieldSerializationStatements(
-            MetaSerializableTypeInfo serializedType,
+            SerializableTypeInfo serializedType,
             ExpressionSyntax objectExpression,
             ExpressionSyntax constructorArgumentsWriterExpression,
             ExpressionSyntax? initializationArgumentsWriterExpression )
@@ -433,10 +433,10 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
         }
 
         private BlockSyntax CreateFieldDeserializationStatements(
-            MetaSerializableTypeInfo serializedType,
+            SerializableTypeInfo serializedType,
             ExpressionSyntax targetExpression,
             ExpressionSyntax argumentsReaderExpression,
-            Func<MetaSerializableTypeInfo, IEnumerable<ISymbol>> locationSelector )
+            Func<SerializableTypeInfo, IEnumerable<ISymbol>> locationSelector )
         {
             var statements = new List<StatementSyntax>();
 
@@ -477,7 +477,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
             return Block( statements );
         }
 
-        private IEnumerable<ISymbol> SelectConstructorDeserializedFields( MetaSerializableTypeInfo serializableType )
+        private IEnumerable<ISymbol> SelectConstructorDeserializedFields( SerializableTypeInfo serializableType )
         {
             foreach ( var serializedMember in serializableType.SerializedMembers )
             {
@@ -488,7 +488,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
             }
         }
 
-        private IEnumerable<ISymbol> SelectLateDeserializedFields( MetaSerializableTypeInfo serializableType )
+        private IEnumerable<ISymbol> SelectLateDeserializedFields( SerializableTypeInfo serializableType )
         {
             foreach ( var serializedMember in serializableType.SerializedMembers )
             {

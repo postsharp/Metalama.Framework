@@ -18,14 +18,14 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
 
         private readonly Queue<SerializationQueueItem<object>> _serializationQueue = new();
 
-        private readonly MetaFormatter _formatter;
+        private readonly LamaFormatter _formatter;
         private readonly bool _shouldReportExceptionCause;
 
         private readonly Dictionary<Type, AssemblyTypeName> _typeNameCache = new();
         private readonly Dictionary<Type, Type> _surrogateTypesCache = new();
         private readonly Dictionary<object, ObjectInfo> _objects = new( new CanonicalComparer() );
 
-        public SerializationWriter( Stream stream, MetaFormatter formatter, bool shouldReportExceptionCause )
+        public SerializationWriter( Stream stream, LamaFormatter formatter, bool shouldReportExceptionCause )
         {
             this._formatter = formatter;
             this._shouldReportExceptionCause = shouldReportExceptionCause;
@@ -102,7 +102,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
             }
             catch ( Exception exception )
             {
-                throw MetaSerializationException.CreateWithCause( "Serialization", obj.GetType(), exception, cause );
+                throw LamaSerializationException.CreateWithCause( "Serialization", obj.GetType(), exception, cause );
             }
         }
 

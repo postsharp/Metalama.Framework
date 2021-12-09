@@ -7,7 +7,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
 {
     /// <summary>
     /// Encapsulates dotted strings such as namespaces and type names, so their
-    /// serialization by <see cref="MetaFormatter"/> can be optimized.
+    /// serialization by <see cref="LamaFormatter"/> can be optimized.
     /// </summary>
     internal readonly struct DottedString : IEquatable<DottedString>
     {

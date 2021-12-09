@@ -14,7 +14,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
     {
         public static T? TestSerialization<T>( T? instance, Func<T?, T?, bool>? assert = null )
         {
-            var formatter = new MetaFormatter();
+            var formatter = new LamaFormatter();
             var memoryStream = new MemoryStream();
             formatter.Serialize( instance, memoryStream );
             memoryStream.Seek( 0, SeekOrigin.Begin );
@@ -40,7 +40,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
 
         public static T SerializeDeserialize<T>( T value )
         {
-            var formatter = new MetaFormatter();
+            var formatter = new LamaFormatter();
             var memoryStream = new MemoryStream();
 
             formatter.Serialize( value!, memoryStream );

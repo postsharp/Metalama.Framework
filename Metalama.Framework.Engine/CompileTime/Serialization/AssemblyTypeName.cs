@@ -3,7 +3,7 @@
 
 namespace Metalama.Framework.Engine.CompileTime.Serialization
 {
-    internal struct AssemblyTypeName
+    internal readonly struct AssemblyTypeName
     {
         public AssemblyTypeName( string typeName, string assemblyName )
         {

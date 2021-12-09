@@ -11,22 +11,22 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
     /// Provides instances of the <see cref="ISerializerFactory"/> interface for object types that have been previously registered
     /// using <see cref="AddSerializer"/>.
     /// </summary>
-    internal class MetaSerializerFactoryProvider : IMetaSerializerFactoryProvider
+    internal class SerializerFactoryProvider : ISerializerFactoryProvider
     {
         /// <summary>
-        /// Gets the <see cref="MetaSerializerFactoryProvider"/> instance that supports built-in types.
+        /// Gets the <see cref="SerializerFactoryProvider"/> instance that supports built-in types.
         /// </summary>
-        public static readonly MetaSerializerFactoryProvider BuiltIn = new BuiltInSerializerFactoryProvider();
+        public static readonly SerializerFactoryProvider BuiltIn = new BuiltInSerializerFactoryProvider();
 
         private readonly Dictionary<Type, ISerializerFactory> _serializerTypes = new( 64 );
 
         private bool _isReadOnly;
 
         /// <inheritdoc />
-        public IMetaSerializerFactoryProvider? NextProvider { get; }
+        public ISerializerFactoryProvider? NextProvider { get; }
 
         /// <summary>
-        /// Forbids further changes in the current <see cref="MetaSerializerFactoryProvider"/>.
+        /// Forbids further changes in the current <see cref="SerializerFactoryProvider"/>.
         /// </summary>
         public void MakeReadOnly()
         {
@@ -39,11 +39,11 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="MetaSerializerFactoryProvider"/> class.
+        /// Initializes a new instance of the <see cref="SerializerFactoryProvider"/> class.
         /// </summary>
         /// <param name="nextProvider">The next provider in the chain, or <c>null</c> if there is none.</param>
         /// <param name="activatorProvider"></param>
-        public MetaSerializerFactoryProvider( IMetaSerializerFactoryProvider nextProvider )
+        public SerializerFactoryProvider( ISerializerFactoryProvider nextProvider )
         {
             this.NextProvider = nextProvider;
         }

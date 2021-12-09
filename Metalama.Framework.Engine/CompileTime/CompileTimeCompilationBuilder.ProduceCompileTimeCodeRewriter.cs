@@ -39,8 +39,8 @@ namespace Metalama.Framework.Engine.CompileTime
         {
             private static readonly SyntaxAnnotation _hasCompileTimeCodeAnnotation = new( "Metalama_HasCompileTimeCode" );
             private readonly Compilation _compileTimeCompilation;
-            private readonly IReadOnlyDictionary<INamedTypeSymbol, MetaSerializableTypeInfo> _serializableTypes;
-            private readonly IReadOnlyDictionary<ISymbol, MetaSerializableTypeInfo> _serializableFieldsAndProperties;
+            private readonly IReadOnlyDictionary<INamedTypeSymbol, SerializableTypeInfo> _serializableTypes;
+            private readonly IReadOnlyDictionary<ISymbol, SerializableTypeInfo> _serializableFieldsAndProperties;
             private readonly IDiagnosticAdder _diagnosticAdder;
             private readonly TemplateCompiler _templateCompiler;
             private readonly CancellationToken _cancellationToken;
@@ -50,7 +50,7 @@ namespace Metalama.Framework.Engine.CompileTime
             private readonly NameSyntax _originalPathTypeSyntax;
             private readonly ITypeSymbol _fabricType;
             private readonly ITypeSymbol _typeFabricType;
-            private readonly IMetaSerializerGenerator _metaSerializerGenerator;
+            private readonly ISerializerGenerator _serializerGenerator;
             private Context _currentContext;
             private HashSet<string>? _currentTypeTemplateNames;
             private string? _currentTypeName;
@@ -62,7 +62,7 @@ namespace Metalama.Framework.Engine.CompileTime
             public ProduceCompileTimeCodeRewriter(
                 Compilation runTimeCompilation,
                 Compilation compileTimeCompilation,
-                IReadOnlyList<MetaSerializableTypeInfo> serializableTypes,
+                IReadOnlyList<SerializableTypeInfo> serializableTypes,
                 IDiagnosticAdder diagnosticAdder,
                 TemplateCompiler templateCompiler,
                 IServiceProvider serviceProvider,
@@ -76,7 +76,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 this._currentContext = new Context( TemplatingScope.Both, this );
 
                 this._serializableTypes =
-                    serializableTypes.ToDictionary<MetaSerializableTypeInfo, INamedTypeSymbol, MetaSerializableTypeInfo>(
+                    serializableTypes.ToDictionary<SerializableTypeInfo, INamedTypeSymbol, SerializableTypeInfo>(
                         x => x.Type,
                         x => x,
                         SymbolEqualityComparer.Default );
@@ -88,7 +88,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 this._syntaxGenerationContext = SyntaxGenerationContext.CreateDefault( serviceProvider, compileTimeCompilation );
 
                 // TODO: This should be probably injected as a service, but we are creating the generation context here.
-                this._metaSerializerGenerator = new MetaSerializerGenerator( runTimeCompilation, this._syntaxGenerationContext );
+                this._serializerGenerator = new SerializerGenerator( runTimeCompilation, this._syntaxGenerationContext );
 
                 this._compileTimeTypeName = (NameSyntax)
                     this._syntaxGenerationContext.SyntaxGenerator.Type(
@@ -427,8 +427,8 @@ namespace Metalama.Framework.Engine.CompileTime
                                 .NormalizeWhitespace() );
                     }
 
-                    members.Add( this._metaSerializerGenerator.CreateDeserializingConstructor( serializableType ).NormalizeWhitespace() );
-                    members.Add( this._metaSerializerGenerator.CreateSerializerType( serializableType ).NormalizeWhitespace() );
+                    members.Add( this._serializerGenerator.CreateDeserializingConstructor( serializableType ).NormalizeWhitespace() );
+                    members.Add( this._serializerGenerator.CreateSerializerType( serializableType ).NormalizeWhitespace() );
                 }
 
                 var transformedNode = node.WithMembers( List( members ) ).WithAdditionalAnnotations( _hasCompileTimeCodeAnnotation );
@@ -645,7 +645,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
                         if ( this._serializableFieldsAndProperties.TryGetValue( propertySymbol, out var serializableTypeInfo ) )
                         {
-                            suppressReadOnly = this._metaSerializerGenerator.ShouldSuppressReadOnly( serializableTypeInfo, propertySymbol );
+                            suppressReadOnly = this._serializerGenerator.ShouldSuppressReadOnly( serializableTypeInfo, propertySymbol );
                         }
 
                         var rewritten = (BasePropertyDeclarationSyntax) this.Visit( node ).AssertNotNull();
@@ -716,7 +716,7 @@ namespace Metalama.Framework.Engine.CompileTime
                         .AssertNotNull();
 
                     if ( this._serializableFieldsAndProperties.TryGetValue( fieldSymbol, out var serializableType )
-                         && this._metaSerializerGenerator.ShouldSuppressReadOnly( serializableType, fieldSymbol ) )
+                         && this._serializerGenerator.ShouldSuppressReadOnly( serializableType, fieldSymbol ) )
                     {
                         // This field needs to have it's readonly modifier removed.
                         nonReadOnlyVariables.Add( (VariableDeclaratorSyntax) this.Visit( declarator ).AssertNotNull() );

@@ -40,7 +40,7 @@ After:
             var project = CreateCompileTimeProject( domain, testContext, code );
 
             var type = project.GetType( "B" );
-            var metaSerializer = GetMetaSerializer( type );
+            var serializer = GetSerializer( type );
 
             dynamic instance = Activator.CreateInstance( type )!;
             instance.BaseField = 13;
@@ -48,13 +48,13 @@ After:
 
             var constructorArgumentsWriter = new TestArgumentsWriter();
             var initializationArgumentsWriter = new TestArgumentsWriter();
-            metaSerializer.SerializeObject( instance, constructorArgumentsWriter, initializationArgumentsWriter );
+            serializer.SerializeObject( instance, constructorArgumentsWriter, initializationArgumentsWriter );
 
             var constructorArgumentsReader = constructorArgumentsWriter.ToReader();
             var initializationArgumentsReader = initializationArgumentsWriter.ToReader();
 
-            dynamic deserialized = metaSerializer.CreateInstance( type, constructorArgumentsReader );
-            metaSerializer.DeserializeFields( ref deserialized, initializationArgumentsReader );
+            dynamic deserialized = serializer.CreateInstance( type, constructorArgumentsReader );
+            serializer.DeserializeFields( ref deserialized, initializationArgumentsReader );
 
             Assert.Equal( 13, deserialized.BaseField );
             Assert.Equal( 42, deserialized.DerivedField );

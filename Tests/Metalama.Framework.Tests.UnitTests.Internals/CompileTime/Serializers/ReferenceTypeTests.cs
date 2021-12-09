@@ -38,7 +38,7 @@ After:
             var project = CreateCompileTimeProject( domain, testContext, code );
 
             var type = project.GetType( "A" );
-            var metaSerializer = GetMetaSerializer( type );
+            var metaSerializer = GetSerializer( type );
 
             dynamic instance = Activator.CreateInstance( type )!;
             instance.Field = 13;
@@ -91,7 +91,7 @@ After:
             var project = CreateCompileTimeProject( domain, testContext, code );
 
             var type = project.GetType( "A" );
-            var metaSerializer = GetMetaSerializer( type );
+            var metaSerializer = GetSerializer( type );
 
             dynamic instance = Activator.CreateInstance( type, 13, 42 )!;
 
@@ -153,7 +153,7 @@ public class B
 
             var typeA = project.GetType( "A" );
             var typeB = project.GetType( "B" );
-            var metaSerializer = GetMetaSerializer( typeA );
+            var metaSerializer = GetSerializer( typeA );
 
             dynamic instanceB1 = Activator.CreateInstance( typeB, 13 )!;
             dynamic instanceB2 = Activator.CreateInstance( typeB, 42 )!;
@@ -214,7 +214,7 @@ public class B
 
             var typeA = project.GetType( "A" );
             var typeB = project.GetType( "B" );
-            var metaSerializer = GetMetaSerializer( typeA );
+            var metaSerializer = GetSerializer( typeA );
 
             dynamic instanceB = Activator.CreateInstance( typeB, 42 )!;
             var instanceA = Activator.CreateInstance( typeA, instanceB )!;
@@ -261,7 +261,7 @@ After:
             var project = CreateCompileTimeProject( domain, testContext, code );
 
             var type = project.GetType( "A" );
-            var metaSerializer = GetMetaSerializer( type );
+            var metaSerializer = GetSerializer( type );
 
             dynamic instance = Activator.CreateInstance( type )!;
 
@@ -311,7 +311,7 @@ public struct A : ILamaSerializable
             var project = CreateCompileTimeProject( domain, testContext, code );
 
             var type = project.GetType( "A" );
-            var metaSerializer = GetMetaSerializer( type );
+            var metaSerializer = GetSerializer( type );
 
             dynamic instance = Activator.CreateInstance( type, 13, 27 )!;
             instance.MutableProperty = 42;
@@ -364,7 +364,7 @@ public readonly struct A : ILamaSerializable
             var project = CreateCompileTimeProject( domain, testContext, code );
 
             var type = project.GetType( "A" );
-            var metaSerializer = GetMetaSerializer( type );
+            var metaSerializer = GetSerializer( type );
 
             dynamic instance = Activator.CreateInstance( type, 13, 42 )!;
 
