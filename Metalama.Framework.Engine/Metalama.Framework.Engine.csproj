@@ -1,0 +1,89 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <MetalamaCompilerDisablePackCustomization>True</MetalamaCompilerDisablePackCustomization>
+    <UseMetalamaCompiler>Private</UseMetalamaCompiler>
+  </PropertyGroup>
+
+  <ItemGroup>
+    
+    <!-- We have to embed the compile-time build of Metalama.Framework so we can reference it to create
+         the compile-time assembly. See ReferenceAssemblyLocator                                           -->
+    <EmbeddedResource Include="..\Metalama.Framework.CompileTime\bin\$(Configuration)\netstandard2.0\Metalama.Framework.dll">
+        <LogicalName>Metalama.Framework.dll</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Remove="ServiceProvider\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+	  <!-- We cannot use InternalsVisibleTo for Metalama.TestFramework because of obfuscation in the release build. -->
+    <InternalsVisibleTo Include="Metalama.Framework.Tests.UnitTests.Internals" />
+    <InternalsVisibleTo Include="Metalama.Framework.Tests.Integration.Internals" />
+    <InternalsVisibleTo Include="Metalama.Framework.CompilerAddIn" />
+    <InternalsVisibleTo Include="DynamicProxyGenAssembly2" Key="$(FakeItEasyKey)" LoadsWithinVisualStudio="false" />
+    </ItemGroup>
+    
+   <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="$(RoslynVersion)" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.Common" Version="$(RoslynVersion)" />
+    <PackageReference Include="Metalama.Compiler.Sdk" Version="$(MetalamaCompilerVersion)" />
+    <PackageReference Include="PostSharp.Backstage.Settings" Version="$(PostSharpBackstageSettingsVersion)" PrivateAssets="all" />
+    
+    <PackageReference Include="Microsoft.Bcl.HashCode" Version="$(MicrosoftBclHashCodeVersion)" />
+    <PackageReference Include="K4os.Hash.xxHash" Version="$(K4osHashxxHashVersion)" />
+    <PackageReference Include="Microsoft.CSharp" Version="$(MicrosoftCSharpVersion)" />
+    <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonVersion)" />
+    <PackageReference Include="System.Runtime.Serialization.Formatters" Version="4.3.0" />
+    <ProjectReference Include="..\Metalama.Framework.DesignTime.Contracts\Metalama.Framework.DesignTime.Contracts.csproj" />
+    <ProjectReference Include="..\Metalama.Framework\Metalama.Framework.csproj" />
+    <ProjectReference Include="..\Metalama.Framework.Sdk\Metalama.Framework.Sdk.csproj" />
+    
+    <!-- Reference PostSharp for obfuscation -->
+    <PackageReference Include="PostSharp" Version="$(PostSharpPackageVersion)" PrivateAssets="all" Condition="'$(Obfuscate)' == 'True'" />
+    <ProjectReference Include="..\Build\Metalama.Obfuscator\Metalama.Obfuscator.csproj" ReferenceOutputAssembly="false" Condition="'$(Obfuscate)' == 'True'" />
+    
+    <!-- The following references handle [Memo] -->
+    <ProjectReference Include="..\Build\Metalama.SourceTransformer\Metalama.SourceTransformer.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    
+    
+    <!-- Metalama.RoslynUtilities is embedded in the current package to having to publish Metalama.RoslynUtilities as public package
+         (which would be usable from the current project anyway.
+          
+         We use an assembly alias to avoid conflicts with nullable attribute classes,
+       -->
+    <PackageReference Include="Metalama.RoslynUtilities" Version="$(MetalamaCompilerVersion)" PrivateAssets="all" Aliases="roslyn">
+            <GeneratePathProperty>true</GeneratePathProperty>
+     </PackageReference>
+     <None Include="$(PkgMetalama_RoslynUtilities)\lib\netstandard2.0\Metalama.RoslynUtilities.dll" Pack="true" PackagePath="lib\netstandard2.0" CopyToOutputDirectory="Always" />
+    
+  </ItemGroup>
+    
+   <ItemGroup>
+     <Compile Include="..\IsExternalInit.cs">
+       <Link>SystemTypes\IsExternalInit.cs</Link>
+     </Compile>
+     <Compile Remove="ServiceProvider\**" />
+     <Compile Remove="CodeModel\Builders\BuiltGenericParameter.cs" />
+   </ItemGroup>
+    
+   <ItemGroup>
+     <None Remove="ServiceProvider\**" />
+   </ItemGroup>
+  
+  <!-- Obfuscation -->
+  <PropertyGroup>
+    <PostSharpProperties>
+      ObfuscateMapFile=$(MSBuildThisFileDirectory)\bin\$(Configuration)\$(TargetFramework)\$(AssemblyName).obmap;
+      ObfuscateRootPath=$(MSBuildThisFileDirectory)
+    </PostSharpProperties>
+    <PostSharpSearchPath>$(MSBuildThisFileDirectory)..\Build\Metalama.Obfuscator\bin\$(Configuration)\netstandard2.0</PostSharpSearchPath>
+    <PostSharpDisabledMessages>PS0131</PostSharpDisabledMessages>
+  </PropertyGroup>
+
+  <Target Name="NoPackWithoutObfuscate" BeforeTargets="Pack">
+    <Error Condition="'$(Configuration)' == 'Release' AND '$(Obfuscate)' != 'True'" Text="Not allowed to create Release package without obfuscation, use '-p:Obfuscate=True'." />
+  </Target>
+
+</Project>

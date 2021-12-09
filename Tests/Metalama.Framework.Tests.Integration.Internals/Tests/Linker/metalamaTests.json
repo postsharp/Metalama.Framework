@@ -1,0 +1,3 @@
+{
+    "TestRunnerFactoryType": "Metalama.Framework.Tests.Integration.Runners.LinkerTestRunnerFactory, Metalama.Framework.Tests.Integration.Internals"
+}

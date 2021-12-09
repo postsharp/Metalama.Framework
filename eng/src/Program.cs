@@ -6,7 +6,7 @@ using PostSharp.Engineering.BuildTools.Build.Model;
 using Spectre.Console.Cli;
 using System.Collections.Immutable;
 
-namespace BuildCaravela
+namespace BuildMetalama
 {
     internal static class Program
     {
@@ -18,10 +18,10 @@ namespace BuildCaravela
             // These packages are published to internal and private feeds.
             var publicPackages = new ParametricString[]
             {
-                "Caravela.Framework.$(PackageVersion).nupkg", "Caravela.TestFramework.$(PackageVersion).nupkg",
-                "Caravela.Framework.Redist.$(PackageVersion).nupkg",
-                "Caravela.Framework.Sdk.$(PackageVersion).nupkg", "Caravela.Framework.Impl.$(PackageVersion).nupkg",
-                "Caravela.Framework.DesignTime.Contracts.$(PackageVersion).nupkg"
+                "Metalama.Framework.$(PackageVersion).nupkg", "Metalama.TestFramework.$(PackageVersion).nupkg",
+                "Metalama.Framework.Redist.$(PackageVersion).nupkg",
+                "Metalama.Framework.Sdk.$(PackageVersion).nupkg", "Metalama.Framework.Engine.$(PackageVersion).nupkg",
+                "Metalama.Framework.DesignTime.Contracts.$(PackageVersion).nupkg"
             };
 
             var publicPublishing = new NugetPublishTarget(
@@ -31,23 +31,23 @@ namespace BuildCaravela
 
             var product = new Product
             {
-                ProductName = "Caravela",
+                ProductName = "Metalama",
                 Solutions = ImmutableArray.Create<Solution>(
-                    new DotNetSolution( "Caravela.sln" )
+                    new DotNetSolution( "Metalama.sln" )
                     {
                         SupportsTestCoverage = true,
                         CanFormatCode = true,
                         FormatExclusions = ImmutableArray.Create(
-                            "Tests\\Caravela.Framework.Tests.Integration\\Tests\\**\\*",
-                            "Tests\\Caravela.Framework.Tests.Integration.Internals\\Tests\\**\\*" )
+                            "Tests\\Metalama.Framework.Tests.Integration\\Tests\\**\\*",
+                            "Tests\\Metalama.Framework.Tests.Integration.Internals\\Tests\\**\\*" )
                     },
-                    new DotNetSolution( "Tests\\Caravela.Framework.TestApp\\Caravela.Framework.TestApp.sln" )
+                    new DotNetSolution( "Tests\\Metalama.Framework.TestApp\\Metalama.Framework.TestApp.sln" )
                     {
                         IsTestOnly = true
                     } ),
                 PublishingTargets = ImmutableArray.Create<PublishingTarget>( publicPublishing ),
                 Dependencies = ImmutableArray.Create(
-                    new ProductDependency( "Caravela.Compiler" ),
+                    new ProductDependency( "Metalama.Compiler" ),
                     new ProductDependency( "PostSharp.Engineering" ),
                     new ProductDependency( "PostSharp.Backstage.Settings" ) )
             };

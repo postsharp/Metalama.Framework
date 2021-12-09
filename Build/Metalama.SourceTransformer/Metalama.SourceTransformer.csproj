@@ -1,0 +1,15 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <RootNamespace>Metalama.SourceTransformer</RootNamespace>
+    <!-- The next line does not seem to work. -->
+    <ProduceReferenceAssembly>True</ProduceReferenceAssembly>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Metalama.Compiler.Sdk" Version="$(MetalamaCompilerVersion)" />
+  </ItemGroup>
+
+  
+</Project>

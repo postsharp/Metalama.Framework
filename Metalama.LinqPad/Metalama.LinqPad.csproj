@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net6.0-windows</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <UseWpf>true</UseWpf>
+        <RootNamespace>Metalama.LinqPad</RootNamespace>
+         <ImplicitUsings>disable</ImplicitUsings> 
+         <PackageTags>$(PackageTags) linqpaddriver linqpad-samples</PackageTags>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="LINQPad.Reference" Version="1.2.0-beta" />
+      <ProjectReference Include="..\Metalama.Framework.Workspaces\Metalama.Framework.Workspaces.csproj" />
+      <ProjectReference Include="..\Metalama.Framework.Engine\Metalama.Framework.Engine.csproj" />
+      
+      <InternalsVisibleTo Include="Metalama.LinqPad.Tests" />
+    </ItemGroup>
+
+   <ItemGroup>
+        <None Include="linqpad-samples/*.linq" Pack="True" PackagePath="linqpad-samples" />
+    </ItemGroup>
+
+
+</Project>

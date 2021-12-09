@@ -1,0 +1,7 @@
+<Project>
+    <PropertyGroup>
+        <!-- The effect of the MetalamaCompileTimeOnlyProject property is to define an assembly-level
+             CompileTimeOnlyAttribute and to disable Metalama framework for the whole project -->
+        <MetalamaCompileTimeOnlyProject>True</MetalamaCompileTimeOnlyProject>
+    </PropertyGroup>
+</Project>

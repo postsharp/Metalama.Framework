@@ -3,8 +3,8 @@
     <!-- Properties of NuGet packages-->
     <PropertyGroup>
         <Authors>PostSharp Technologies</Authors>
-        <PackageProjectUrl>https://github.com/postsharp/Caravela</PackageProjectUrl>
-        <PackageTags>PostSharp Caravela AOP</PackageTags>
+        <PackageProjectUrl>https://github.com/postsharp/Metalama</PackageProjectUrl>
+        <PackageTags>PostSharp Metalama AOP</PackageTags>
         <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
         <PackageIcon>PostSharpIcon.png</PackageIcon>
         <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
@@ -20,12 +20,12 @@
     <!-- This is the list of files that can be published to the public nuget.org -->
     <!-- To avoid unintended publishing of artefacts, all items must be explicitly specified without wildcard -->
     <ItemGroup>
-        <ShippedFile Include="$(PackageOutputPath)\Caravela.Framework.$(Version).nupkg" />
-        <ShippedFile Include="$(PackageOutputPath)\Caravela.TestFramework.$(Version).nupkg" />
-        <ShippedFile Include="$(PackageOutputPath)\Caravela.Framework.Redist.$(Version).nupkg" />
-        <ShippedFile Include="$(PackageOutputPath)\Caravela.Framework.Sdk.$(Version).nupkg" />
-        <ShippedFile Include="$(PackageOutputPath)\Caravela.Framework.Impl.$(Version).nupkg" />
-        <ShippedFile Include="$(PackageOutputPath)\Caravela.Framework.DesignTime.Contracts.$(Version).nupkg" />
+        <ShippedFile Include="$(PackageOutputPath)\Metalama.Framework.$(Version).nupkg" />
+        <ShippedFile Include="$(PackageOutputPath)\Metalama.TestFramework.$(Version).nupkg" />
+        <ShippedFile Include="$(PackageOutputPath)\Metalama.Framework.Redist.$(Version).nupkg" />
+        <ShippedFile Include="$(PackageOutputPath)\Metalama.Framework.Sdk.$(Version).nupkg" />
+        <ShippedFile Include="$(PackageOutputPath)\Metalama.Framework.Engine.$(Version).nupkg" />
+        <ShippedFile Include="$(PackageOutputPath)\Metalama.Framework.DesignTime.Contracts.$(Version).nupkg" />
     </ItemGroup>
 
 </Project>

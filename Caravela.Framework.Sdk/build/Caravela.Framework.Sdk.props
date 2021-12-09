@@ -1,7 +1,0 @@
-<Project>
-    <PropertyGroup>
-        <!-- The effect of the CaravelaCompileTimeOnlyProject property is to define an assembly-level
-             CompileTimeOnlyAttribute and to disable Caravela framework for the whole project -->
-        <CaravelaCompileTimeOnlyProject>True</CaravelaCompileTimeOnlyProject>
-    </PropertyGroup>
-</Project>
