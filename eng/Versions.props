@@ -14,12 +14,9 @@
         <!-- This version should be aligned with the one coming from Metalama.Compiler. -->
         <RoslynVersion>4.0.1</RoslynVersion>
         <!-- TODO: Change to public version. -->
-        <MetalamaCompilerVersion>4.0.2001-dev-release-10</MetalamaCompilerVersion>
-        <!-- This version should be aligned with the one coming from Metalama.Compiler. -->
-        <!-- TODO: Change to public version. -->
-        <PostSharpBackstageSettingsVersion>0.1.0.56-dev-debug</PostSharpBackstageSettingsVersion>
-        <PostSharpEngineeringVersion>1.0.1-preview</PostSharpEngineeringVersion>
-
+        <MetalamaCompilerVersion>branch:master</MetalamaCompilerVersion>
+        <PostSharpEngineeringVersion>1.0.15-preview</PostSharpEngineeringVersion>
+        <PostSharpBackstageSettingsVersion>branch:master</PostSharpBackstageSettingsVersion>
         <MicrosoftCSharpVersion>4.7.0</MicrosoftCSharpVersion>
         <NewtonsoftJsonVersion>13.0.1</NewtonsoftJsonVersion>
         <SystemCollectionsImmutableVersion>5.0.0</SystemCollectionsImmutableVersion>
@@ -46,10 +43,7 @@
     </PropertyGroup>
 
     <!-- Import overrides for the local build -->
-    <Import Project="../artifacts/publish/private/Metalama.version.props" Condition="Exists('../artifacts/publish/private/Metalama.version.props')" />
-    <Import Project="Dependencies.props" Condition="Exists('Dependencies.props')"/>
-
-    
+    <Import Project="Versions.g.props" Condition="Exists('Versions.g.props')" />
 
     <PropertyGroup>
         <AssemblyVersion>$(MetalamaAssemblyVersion)</AssemblyVersion>

@@ -2,37 +2,18 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using PostSharp.Engineering.BuildTools;
+using PostSharp.Engineering.BuildTools.Build;
 using PostSharp.Engineering.BuildTools.Build.Model;
+using PostSharp.Engineering.BuildTools.Dependencies.Model;
+using PostSharp.Engineering.BuildTools.Utilities;
 using Spectre.Console.Cli;
 using System.Collections.Immutable;
+using System.IO;
 
-namespace BuildMetalama
+var product = new Product
 {
-    internal static class Program
-    {
-        private static int Main( string[] args )
-        {
-            var privateSource = new NugetSource( "%INTERNAL_NUGET_PUSH_URL%", "%INTERNAL_NUGET_API_KEY%" );
-            var publicSource = new NugetSource( "https://api.nuget.org/v3/index.json", "%NUGET_ORG_API_KEY%" );
-
-            // These packages are published to internal and private feeds.
-            var publicPackages = new ParametricString[]
-            {
-                "Metalama.Framework.$(PackageVersion).nupkg", "Metalama.TestFramework.$(PackageVersion).nupkg",
-                "Metalama.Framework.Redist.$(PackageVersion).nupkg",
-                "Metalama.Framework.Sdk.$(PackageVersion).nupkg", "Metalama.Framework.Engine.$(PackageVersion).nupkg",
-                "Metalama.Framework.DesignTime.Contracts.$(PackageVersion).nupkg"
-            };
-
-            var publicPublishing = new NugetPublishTarget(
-                Pattern.Empty.Add( publicPackages ),
-                privateSource,
-                publicSource );
-
-            var product = new Product
-            {
-                ProductName = "Metalama",
-                Solutions = ImmutableArray.Create<Solution>(
+    ProductName = "Metalama",
+    Solutions = ImmutableArray.Create<Solution>(
                     new DotNetSolution( "Metalama.sln" )
                     {
                         SupportsTestCoverage = true,
@@ -45,17 +26,58 @@ namespace BuildMetalama
                     {
                         IsTestOnly = true
                     } ),
-                PublishingTargets = ImmutableArray.Create<PublishingTarget>( publicPublishing ),
-                Dependencies = ImmutableArray.Create(
-                    new ProductDependency( "Metalama.Compiler" ),
-                    new ProductDependency( "PostSharp.Engineering" ),
-                    new ProductDependency( "PostSharp.Backstage.Settings" ) )
-            };
+    PublicArtifacts = Pattern.Create(
+        "Metalama.Framework.$(PackageVersion).nupkg",
+        "Metalama.TestFramework.$(PackageVersion).nupkg",
+        "Metalama.Framework.Redist.$(PackageVersion).nupkg",
+        "Metalama.Framework.Sdk.$(PackageVersion).nupkg",
+        "Metalama.Framework.Engine.$(PackageVersion).nupkg",
+        "Metalama.Framework.DesignTime.Contracts.$(PackageVersion).nupkg" ),
+    Dependencies = ImmutableArray.Create(
+        Dependencies.PostSharpEngineering,
+        Dependencies.MetalamaCompiler,
+        Dependencies.PostSharpBackstageSettings )
+};
 
-            var commandApp = new CommandApp();
-            commandApp.AddProductCommands( product );
+product.PrepareCompleted += OnPrepareCompleted;
 
-            return commandApp.Run( args );
-        }
+var commandApp = new CommandApp();
+
+commandApp.AddProductCommands( product );
+
+return commandApp.Run( args );
+
+static bool OnPrepareCompleted( (BuildContext Context, BaseBuildSettings Settings) arg )
+{
+    arg.Context.Console.WriteHeading( "Generating code" );
+
+    var generatorDirectory = Path.Combine( arg.Context.RepoDirectory, "Build", "Metalama.Framework.GenerateMetaSyntaxRewriter" );
+    var project = new DotNetSolution( Path.Combine( generatorDirectory, "Metalama.Framework.GenerateMetaSyntaxRewriter.csproj" ) );
+
+    if ( !project.Restore( arg.Context, new BuildSettings() ) )
+    {
+        return false;
     }
+
+    if ( !project.Build( arg.Context, new BuildSettings() ) )
+    {
+        return false;
+    }
+
+    var toolDirectory = Path.Combine( generatorDirectory, "bin", "Debug", "net48" );
+    var toolPath = Path.Combine( toolDirectory, "Metalama.Framework.GenerateMetaSyntaxRewriter.exe" );
+    if ( !ToolInvocationHelper.InvokeTool( arg.Context.Console, toolPath, "", toolDirectory ) )
+    {
+        return false;
+    }
+
+    var targetFile = Path.Combine( arg.Context.RepoDirectory, "Metalama.Framework.Engine", "Templating", "MetaSyntaxRewriter.g.cs" );
+    if ( File.Exists( targetFile ) )
+    {
+        File.Delete( targetFile );
+    }
+
+    File.Copy( Path.Combine( toolDirectory, "MetaSyntaxRewriter.g.cs" ), targetFile );
+
+    return true;
 }
