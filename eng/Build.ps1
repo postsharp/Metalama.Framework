@@ -56,6 +56,6 @@ if ( $Sign ) {
 $arguments += "--zip"
 
 Write-Host "Update your command line to the new format. The new arguments are: $arguments"
-& dotnet run --project .\eng\src\BuildCaravela.csproj -- $arguments
+& dotnet run --project .\eng\src\BuildMetalama.csproj -- $arguments
 
 exit $LASTEXITCODE

@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+     <Import Project="..\..\eng\Coverage.props" />
+   
+   
+     <PropertyGroup>
+       <TargetFramework>net6.0-windows</TargetFramework>
+       <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+       <RootNamespace>Metalama.LinqPad.Tests</RootNamespace>
+     </PropertyGroup>
+   
+     <ItemGroup>
+       <PackageReference Include="LINQPad.Runtime" Version="6.14.10" />
+       <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftNETTestSdkVersion)" />
+       <PackageReference Include="xunit" Version="$(xUnitVersion)" />
+       <PackageReference Include="xunit.runner.visualstudio" Version="$(xUnitVersion)" />
+       <ProjectReference Include="..\..\Metalama.LinqPad\Metalama.LinqPad.csproj" />
+       <PackageReference Include="Metalama.Compiler.Sdk" Version="$(MetalamaCompilerVersion)" />
+     </ItemGroup>
+   
+     
+</Project>

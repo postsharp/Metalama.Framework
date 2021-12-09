@@ -7,36 +7,35 @@ using PostSharp.Engineering.BuildTools.Build.Model;
 using PostSharp.Engineering.BuildTools.Dependencies.Model;
 using PostSharp.Engineering.BuildTools.Utilities;
 using Spectre.Console.Cli;
-using System;
 using System.Collections.Immutable;
 using System.IO;
 
 var product = new Product
 {
-    ProductName = "Caravela",
+                ProductName = "Metalama",
     Solutions = ImmutableArray.Create<Solution>(
-        new DotNetSolution( "Caravela.sln" )
+                    new DotNetSolution( "Metalama.sln" )
         {
             SupportsTestCoverage = true,
             CanFormatCode = true,
             FormatExclusions = ImmutableArray.Create(
-                "Tests\\Caravela.Framework.Tests.Integration\\Tests\\**\\*",
-                "Tests\\Caravela.Framework.Tests.Integration.Internals\\Tests\\**\\*" )
+                            "Tests\\Metalama.Framework.Tests.Integration\\Tests\\**\\*",
+                            "Tests\\Metalama.Framework.Tests.Integration.Internals\\Tests\\**\\*" )
         },
-        new DotNetSolution( "Tests\\Caravela.Framework.TestApp\\Caravela.Framework.TestApp.sln" )
+                    new DotNetSolution( "Tests\\Metalama.Framework.TestApp\\Metalama.Framework.TestApp.sln" )
         {
             IsTestOnly = true
         } ),
     PublicArtifacts = Pattern.Create(
-        "Caravela.Framework.$(PackageVersion).nupkg",
-        "Caravela.TestFramework.$(PackageVersion).nupkg",
-        "Caravela.Framework.Redist.$(PackageVersion).nupkg",
-        "Caravela.Framework.Sdk.$(PackageVersion).nupkg",
-        "Caravela.Framework.Impl.$(PackageVersion).nupkg",
-        "Caravela.Framework.DesignTime.Contracts.$(PackageVersion).nupkg" ),
+        "Metalama.Framework.$(PackageVersion).nupkg",
+        "Metalama.TestFramework.$(PackageVersion).nupkg",
+        "Metalama.Framework.Redist.$(PackageVersion).nupkg",
+        "Metalama.Framework.Sdk.$(PackageVersion).nupkg",
+        "Metalama.Framework.Engine.$(PackageVersion).nupkg",
+        "Metalama.Framework.DesignTime.Contracts.$(PackageVersion).nupkg" ),
     Dependencies = ImmutableArray.Create(
         Dependencies.PostSharpEngineering,
-        Dependencies.CaravelaCompiler,
+        Dependencies.MetalamaCompiler,
         Dependencies.PostSharpBackstageSettings )
 };
 
@@ -52,8 +51,8 @@ static bool OnPrepareCompleted( (BuildContext Context, BaseBuildSettings Setting
 {
     arg.Context.Console.WriteHeading( "Generating code" );
 
-    var generatorDirectory = Path.Combine( arg.Context.RepoDirectory, "Build", "Caravela.Framework.GenerateMetaSyntaxRewriter" );
-    var project = new DotNetSolution( Path.Combine( generatorDirectory, "Caravela.Framework.GenerateMetaSyntaxRewriter.csproj" ) );
+    var generatorDirectory = Path.Combine( arg.Context.RepoDirectory, "Build", "Metalama.Framework.GenerateMetaSyntaxRewriter" );
+    var project = new DotNetSolution( Path.Combine( generatorDirectory, "Metalama.Framework.GenerateMetaSyntaxRewriter.csproj" ) );
 
     if ( !project.Restore( arg.Context, new BuildSettings() ) )
     {
@@ -66,13 +65,13 @@ static bool OnPrepareCompleted( (BuildContext Context, BaseBuildSettings Setting
     }
 
     var toolDirectory = Path.Combine( generatorDirectory, "bin", "Debug", "net48" );
-    var toolPath = Path.Combine( toolDirectory, "Caravela.Framework.GenerateMetaSyntaxRewriter.exe" );
+    var toolPath = Path.Combine( toolDirectory, "Metalama.Framework.GenerateMetaSyntaxRewriter.exe" );
     if ( !ToolInvocationHelper.InvokeTool( arg.Context.Console, toolPath, "", toolDirectory ) )
     {
         return false;
     }
 
-    var targetFile = Path.Combine( arg.Context.RepoDirectory, "Caravela.Framework.Impl", "Templating", "MetaSyntaxRewriter.g.cs" );
+    var targetFile = Path.Combine( arg.Context.RepoDirectory, "Metalama.Framework.Engine", "Templating", "MetaSyntaxRewriter.g.cs" );
     if ( File.Exists( targetFile ) )
     {
         File.Delete( targetFile );

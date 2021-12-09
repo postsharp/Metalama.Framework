@@ -1,0 +1,34 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <PackageDescription>
+      Metalama SDK. A tool for custom source code modifying extensions using the Roslyn API. More powerful than source generators.
+    </PackageDescription>
+    <RootNamespace>Metalama.Framework.Engine</RootNamespace>
+    <!-- This is to prevent the Metalama.Compiler.Sdk package to change our nuspec --> 
+    <MetalamaCompilerDisablePackCustomization>True</MetalamaCompilerDisablePackCustomization>
+    
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="build\Metalama.Framework.Sdk.targets" Pack="true" PackagePath="buildTransitive" />
+    <None Include="build\Metalama.Framework.Sdk.props" Pack="true" PackagePath="buildTransitive" />
+
+    <InternalsVisibleTo Include="Metalama.Framework.Engine" />
+    <InternalsVisibleTo Include="Metalama.Framework.Tests.UnitTests.Internals" />
+    <InternalsVisibleTo Include="Metalama.Framework.Tests.Integration.Internals" />
+    <InternalsVisibleTo Include="DynamicProxyGenAssembly2" Key="$(FakeItEasyKey)" LoadsWithinVisualStudio="false" />
+        
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="$(RoslynVersion)" />
+    <PackageReference Include="Metalama.Compiler.Sdk" Version="$(MetalamaCompilerVersion)" />
+    
+    <!-- We don't want Metalama to customize the build of SDK projects, so we have to list private assets.
+         Note that this is not sufficient because SDK projects will likely transitively import Metalama.Framework,
+         so we have the MetalamaCompileTimeOnlyProject property defined in Metalama.Framework.Sdk.props.
+     -->
+    <ProjectReference Include="..\Metalama.Framework\Metalama.Framework.csproj" PrivateAssets="Analyzers;Build;BuildTransitive" />
+    
+  </ItemGroup>
+
+</Project>

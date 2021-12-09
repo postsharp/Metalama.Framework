@@ -4,17 +4,17 @@
     <Import Project="MainVersion.props" />
     
     <PropertyGroup>
-        <CaravelaVersion>$(MainVersion)$(PackageVersionSuffix)</CaravelaVersion>
-        <CaravelaAssemblyVersion>$(MainVersion)</CaravelaAssemblyVersion>
+        <MetalamaVersion>$(MainVersion)$(PackageVersionSuffix)</MetalamaVersion>
+        <MetalamaAssemblyVersion>$(MainVersion)</MetalamaAssemblyVersion>
     </PropertyGroup>
 
     
     <!-- Versions of dependencies -->
     <PropertyGroup>
-        <!-- This version should be aligned with the one coming from Caravela.Compiler. -->
+        <!-- This version should be aligned with the one coming from Metalama.Compiler. -->
         <RoslynVersion>4.0.1</RoslynVersion>
         <!-- TODO: Change to public version. -->
-        <CaravelaCompilerVersion>branch:master</CaravelaCompilerVersion>
+        <MetalamaCompilerVersion>branch:master</MetalamaCompilerVersion>
         <PostSharpEngineeringVersion>1.0.10-preview</PostSharpEngineeringVersion>
         <PostSharpBackstageSettingsVersion>branch:master</PostSharpBackstageSettingsVersion>
         <MicrosoftCSharpVersion>4.7.0</MicrosoftCSharpVersion>
@@ -46,8 +46,8 @@
     <Import Project="Versions.g.props" Condition="Exists('Versions.g.props')" />
 
     <PropertyGroup>
-        <AssemblyVersion>$(CaravelaAssemblyVersion)</AssemblyVersion>
-        <Version>$(CaravelaVersion)</Version>
+        <AssemblyVersion>$(MetalamaAssemblyVersion)</AssemblyVersion>
+        <Version>$(MetalamaVersion)</Version>
     </PropertyGroup>
 
     

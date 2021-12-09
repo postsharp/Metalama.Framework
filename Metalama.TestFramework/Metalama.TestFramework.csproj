@@ -1,0 +1,50 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!-- When updating TargetFrameworks, also update the AcceptTestOutput and AcceptTestHtml targets in Metalama.TestFramework.targets -->
+    <TargetFrameworks>net5.0;netframework4.8</TargetFrameworks>
+    <Description>Provides a base class AspectUnitTestBase that allows you to unit test Metalama aspects with xUnit.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Workspaces is used in TestRunner, Workspaces.Lightweight is a dependency of Metalama.Framework.Engine -->
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="$(RoslynVersion)" />
+    <PackageReference Include="xunit.assert" Version="$(xUnitVersion)" />
+    <PackageReference Include="xunit.extensibility.core" Version="$(xUnitVersion)" />
+    <PackageReference Include="xunit.extensibility.execution" Version="$(xUnitVersion)" />
+    <PackageReference Include="PostSharp.Backstage.Settings" Version="$(PostSharpBackstageSettingsVersion)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Metalama.Framework.DesignTime.Contracts\Metalama.Framework.DesignTime.Contracts.csproj" />
+    <ProjectReference Include="..\Metalama.Framework.Engine\Metalama.Framework.Engine.csproj" />
+    <ProjectReference Include="..\Metalama.Framework.Sdk\Metalama.Framework.Sdk.csproj" />
+    <ProjectReference Include="..\Metalama.Framework\Metalama.Framework.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Metalama.Framework.Tests.Integration.Internals" />
+    <InternalsVisibleTo Include="Metalama.Framework.Tests.UnitTests.Internals" />
+    <InternalsVisibleTo Include="Metalama.AspectWorkbench" />
+    <InternalsVisibleTo Include="DynamicProxyGenAssembly2" Key="$(FakeItEasyKey)" LoadsWithinVisualStudio="false" />
+  </ItemGroup>
+  
+  <ItemGroup>
+      <Compile Include="..\IsExternalInit.cs">
+             <Link>SystemTypes\IsExternalInit.cs</Link>
+       </Compile>
+    </ItemGroup>
+  
+  <ItemGroup>
+    <None Include="Metalama.TestFramework.props">
+          <Pack>true</Pack>
+          <PackagePath>build</PackagePath>
+    </None>
+    <None Include="Metalama.TestFramework.targets">
+      <Pack>true</Pack>
+      <PackagePath>build</PackagePath>
+    </None>
+    </ItemGroup>
+  
+
+</Project>

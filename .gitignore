@@ -43,10 +43,10 @@ _ReSharper*/
 /tools/
 **/inspectcode.xml
 /.local
-/eng/CaravelaVersion.props
-CaravelaVersion.props
+/eng/MetalamaVersion.props
+MetalamaVersion.props
 TestResults
 launchSettings.json
 .idea/workspace.xml
 /eng/tools
-Caravela.Import.props
+Metalama.Import.props
