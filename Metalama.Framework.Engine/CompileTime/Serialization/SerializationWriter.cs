@@ -76,7 +76,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
 
                 var serializer = type.IsArray ? null : this._formatter.SerializerProvider.GetSerializer( type );
 
-                objectInfo = new ObjectInfo( obj, this._objects.Count + 1, this._formatter );
+                objectInfo = new ObjectInfo( obj, this._objects.Count + 1 );
 
                 if ( !type.IsArray )
                 {
@@ -251,7 +251,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
         {
             if ( !this._surrogateTypesCache.TryGetValue( type, out var surrogateType ) )
             {
-                surrogateType = this._formatter.SerializerProvider.GetSurrogateType( type ) ?? type;
+                surrogateType = this._formatter.SerializerProvider.GetSurrogateType( type );
                 this._surrogateTypesCache.Add( type, surrogateType );
             }
 
@@ -285,7 +285,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
                 for ( var i = 0; i < objectType.GetArrayRank(); i++ )
                 {
                     this._binaryWriter.WriteCompressedInteger( array!.GetLength( i ) );
-                    this._binaryWriter.WriteCompressedInteger( array!.GetLowerBound( i ) );
+                    this._binaryWriter.WriteCompressedInteger( array.GetLowerBound( i ) );
                 }
             }
             else
@@ -398,7 +398,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
                     break;
 
                 case SerializationIntrinsicType.Boolean:
-                    this._binaryWriter.WriteByte( (byte) (((bool) value) ? 1 : 0) );
+                    this._binaryWriter.WriteByte( (byte) ((bool) value ? 1 : 0) );
 
                     break;
 
@@ -624,7 +624,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
 
             public bool InitializationArgumentsWritten { get; set; }
 
-            public ObjectInfo( object o, int objectId, MetaFormatter formatter )
+            public ObjectInfo( object o, int objectId )
             {
                 this.InitializationArguments = new Arguments();
                 this.ConstructorArguments = new Arguments();

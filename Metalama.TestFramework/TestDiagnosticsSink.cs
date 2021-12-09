@@ -23,7 +23,7 @@ namespace Metalama.TestFramework
             foreach ( var warning in this._warnings )
             {
                 yield return Diagnostic.Create(
-                    "TSTWRN",
+                    "TEST",
                     "Metalama Test Framework",
                     new NonLocalizedString( warning.Message ),
                     DiagnosticSeverity.Warning,
@@ -35,7 +35,7 @@ namespace Metalama.TestFramework
             foreach ( var warning in this._errors )
             {
                 yield return Diagnostic.Create(
-                    "TSTWRN",
+                    "TEST",
                     "Metalama Test Framework",
                     new NonLocalizedString( warning.Message ),
                     DiagnosticSeverity.Error,

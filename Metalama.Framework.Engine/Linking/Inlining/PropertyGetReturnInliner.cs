@@ -28,8 +28,8 @@ namespace Metalama.Framework.Engine.Linking.Inlining
                 ?? (IPropertySymbol) ((aspectReference.ResolvedSemantic.Symbol as IMethodSymbol)?.AssociatedSymbol).AssertNotNull();
 
             if ( !SymbolEqualityComparer.Default.Equals(
-                propertySymbol.Type,
-                ((IMethodSymbol) aspectReference.ContainingSymbol).ReturnType ) )
+                    propertySymbol.Type,
+                    ((IMethodSymbol) aspectReference.ContainingSymbol).ReturnType ) )
             {
                 return false;
             }

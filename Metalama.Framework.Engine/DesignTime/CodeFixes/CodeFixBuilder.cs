@@ -170,14 +170,14 @@ namespace Metalama.Framework.Engine.DesignTime.CodeFixes
             var aspectClass = (AspectClass) this._context.PipelineConfiguration.AspectClasses.Single( c => c.Type == aspect.GetType() );
 
             if ( !this._context.PipelineFactory.TryApplyAspectToCode(
-                this._context.ProjectOptions,
-                aspectClass,
-                aspect,
-                compilation,
-                targetSymbol,
-                this.CancellationToken,
-                out var resultCompilation,
-                out var diagnostics ) )
+                    this._context.ProjectOptions,
+                    aspectClass,
+                    aspect,
+                    compilation,
+                    targetSymbol,
+                    this.CancellationToken,
+                    out var resultCompilation,
+                    out var diagnostics ) )
             {
                 this._solution = await CodeFixHelper.ReportDiagnosticsAsCommentsAsync(
                     targetSymbol,

@@ -23,7 +23,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
         /// <summary>
         /// Gets an instance of <see cref="DottedString"/> representing a <c>null</c> string.
         /// </summary>
-        public static readonly DottedString Null = new( Null );
+        public static readonly DottedString Null = new( null! );
 
         /// <summary>
         /// Gets a value indicating whether the current <see cref="DottedString"/> represents a <c>null</c> string.

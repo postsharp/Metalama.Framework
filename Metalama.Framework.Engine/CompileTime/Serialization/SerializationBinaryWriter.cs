@@ -10,6 +10,10 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
 {
     internal sealed class SerializationBinaryWriter
     {
+        // We use 2 as the first index for cached strings or dotted strings because indexes are stored as negative values, and
+        // 0 represents an empty string, and -1 represents a null string.
+        public const int FirstStringIndex = 2;
+        
         private readonly BinaryWriter _writer;
         private readonly Dictionary<string, int> _strings = new( 64, StringComparer.Ordinal );
         private readonly Dictionary<string, int> _dottedStrings = new( 64, StringComparer.Ordinal );
@@ -25,7 +29,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
             var isNegative = integer.IsNegative;
             var signBit = (byte) (isNegative ? 0x80 : 0);
 
-            // For unsigned compressed integers, the top 3 bits of the header are used to store the integer lenghts.
+            // For unsigned compressed integers, the top 3 bits of the header are used to store the integer lengths.
             if ( (value & 0x0f) == value )
             {
                 this._writer.Write( (byte) (signBit | (byte) value) );
@@ -62,7 +66,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
             this._writer.Write( value );
         }
 
-        public void WriteString( string value )
+        public void WriteString( string? value )
         {
             if ( value == null )
             {
@@ -77,6 +81,8 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
                 var bytes = Encoding.UTF8.GetBytes( value );
                 this.WriteCompressedInteger( bytes.Length );
                 this._writer.Write( bytes );
+                
+                this._strings.Add( value, this._strings.Count + FirstStringIndex );
             }
         }
 
@@ -118,7 +124,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
 
                 this.WriteDottedString( scope );
 
-                this._dottedStrings.Add( value, this._dottedStrings.Count + 2 );
+                this._dottedStrings.Add( value, this._dottedStrings.Count + FirstStringIndex );
             }
         }
 

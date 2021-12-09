@@ -100,7 +100,7 @@ namespace Metalama.Framework.Engine.Utilities
             }
 
             if ( (categories & ModifierCategories.ReadOnly) != 0 && member is IMethod { IsReadOnly: true } or
-                IField { Writeability: Writeability.ConstructorOnly } )
+                    IField { Writeability: Writeability.ConstructorOnly } )
             {
                 tokens.Add( Token( SyntaxKind.ReadOnlyKeyword ) );
             }

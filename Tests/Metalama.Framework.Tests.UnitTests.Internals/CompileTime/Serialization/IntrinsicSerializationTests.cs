@@ -689,7 +689,7 @@ After:
             TestSerialization( (object) DateTime.Now );
         }
 
-        [MetaSerializer( typeof(Serializator) )]
+        [MetaSerializer( typeof(Serializer) )]
         public class SimpleType : IEquatable<SimpleType>
         {
             public string? Name { get; set; }
@@ -731,10 +731,13 @@ After:
 
             public override int GetHashCode()
             {
-                return this.Name != null ? StringComparer.Ordinal.GetHashCode( this.Name ) : 0;
+                // ReSharper disable once NonReadonlyMemberInGetHashCode
+                var name = this.Name;
+
+                return name != null ? StringComparer.Ordinal.GetHashCode( name ) : 0;
             }
 
-            public class Serializator : ReferenceTypeMetaSerializer
+            public class Serializer : ReferenceTypeMetaSerializer
             {
                 public override object CreateInstance( Type type, IArgumentsReader constructorArguments )
                 {

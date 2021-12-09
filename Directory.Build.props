@@ -24,8 +24,8 @@
         -->
         <MetalamaLicense>1-ZEQQQQQQZEAEQCRCE4UW3UFEB4URXMHRB8KQBJJSB64LX7YQEUTZXJSRN4JUNTDAEAKZ2NUP6MCEBAXNKGL7VGZ48JHT6G3EGQREL8WQVM74EY4RC774B6HP6X5QQ35M5MZQQDEZJGP4Q8USJG4X6P2</MetalamaLicense>
     </PropertyGroup>
-    
-    
+
+
     <!-- Include the package version in metadata. -->
     <Target Name="AddAssemblyMetadata"
             BeforeTargets="GenerateAdditionalSources"

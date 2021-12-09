@@ -20,14 +20,13 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
             memoryStream.Seek( 0, SeekOrigin.Begin );
             var deserializedObject = (T?) formatter.Deserialize( memoryStream );
 
-            var orgCol = instance as ICollection;
             var newCol = deserializedObject as ICollection;
 
             if ( assert != null )
             {
                 assert( instance, deserializedObject );
             }
-            else if ( orgCol != null )
+            else if ( instance is ICollection orgCol )
             {
                 Assert.Equal( orgCol, newCol );
             }

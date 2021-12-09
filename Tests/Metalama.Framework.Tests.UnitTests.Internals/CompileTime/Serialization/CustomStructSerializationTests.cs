@@ -102,7 +102,7 @@ After:
                     return false;
                 }
 
-                return obj is GenericStruct<T> && this.Equals( (GenericStruct<T>) obj );
+                return obj is GenericStruct<T> @struct && this.Equals( @struct );
             }
 
             public override int GetHashCode()
@@ -170,7 +170,7 @@ After:
                     return false;
                 }
 
-                return obj is SimpleStruct && this.Equals( (SimpleStruct) obj );
+                return obj is SimpleStruct @struct && this.Equals( @struct );
             }
 
             public override int GetHashCode()
@@ -262,6 +262,7 @@ After:
 
             public override int GetHashCode()
             {
+                // ReSharper disable once NonReadonlyMemberInGetHashCode
                 return this.X;
             }
         }

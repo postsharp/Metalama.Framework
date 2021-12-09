@@ -144,8 +144,8 @@ namespace Metalama.Framework.Engine.Aspects
                 var eligibilitySuccess = true;
 
                 foreach ( var implementedInterface in this._prototypeAspectInstance.GetType()
-                    .GetInterfaces()
-                    .Where( i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IEligible<>) ) )
+                             .GetInterfaces()
+                             .Where( i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IEligible<>) ) )
                 {
                     eligibilitySuccess &= (bool)
                         _tryInitializeEligibilityMethod.MakeGenericMethod( implementedInterface.GenericTypeArguments[0] )

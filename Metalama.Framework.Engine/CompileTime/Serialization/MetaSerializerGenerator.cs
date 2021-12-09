@@ -40,7 +40,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
         public MemberDeclarationSyntax CreateDeserializingConstructor( MetaSerializableTypeInfo serializableType )
         {
             // Presume that base type is not null.
-            var baseCtors =
+            var baseConstructors =
                 serializableType.Type.BaseType.AssertNotNull()
                     .GetMembers()
                     .OfType<IMethodSymbol>()
@@ -58,12 +58,12 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
             // TODO: This should become an error.
             // TODO: Custom modifiers or ref on the parameter should produce an error too.
             Invariant.Assert(
-                baseCtors.Length > 1
-                && (baseCtors.Length == 0
-                    || baseCtors[0].DeclaredAccessibility == Accessibility.Public
-                    || baseCtors[0].DeclaredAccessibility == Accessibility.Protected) );
+                baseConstructors.Length > 1
+                && (baseConstructors.Length == 0
+                    || baseConstructors[0].DeclaredAccessibility == Accessibility.Public
+                    || baseConstructors[0].DeclaredAccessibility == Accessibility.Protected) );
 
-            var baseCtor = baseCtors.SingleOrDefault();
+            var baseCtor = baseConstructors.SingleOrDefault();
             const string argumentReaderParameterName = "reader";
 
             var body =
@@ -111,7 +111,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
                 //                                           this.parent.baseSerializerType, targetType );
             }
 
-            members.Add( CreateSerializerConstructor( serializableType ) );
+            members.Add( CreateSerializerConstructor() );
 
             if ( serializableType.Type.IsValueType )
             {
@@ -159,8 +159,8 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
             }
 
             if ( targetType.BaseType.AllInterfaces.Contains(
-                this._runtimeReflectionMapper.GetTypeSymbol( typeof(IMetaSerializable) ),
-                SymbolEqualityComparer.Default ) )
+                    this._runtimeReflectionMapper.GetTypeSymbol( typeof(IMetaSerializable) ),
+                    SymbolEqualityComparer.Default ) )
             {
                 // The base type should have a meta serializer.
 
@@ -194,7 +194,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
             }
         }
 
-        private static ConstructorDeclarationSyntax CreateSerializerConstructor( MetaSerializableTypeInfo serializedType )
+        private static ConstructorDeclarationSyntax CreateSerializerConstructor()
         {
             // TODO: We probably don't need the constructor for anything, the base should have parameterless constructor.
             return ConstructorDeclaration(
@@ -350,7 +350,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
             var body = this.CreateFieldSerializationStatements(
                 serializedType,
                 IdentifierName( serializeMethod.Parameters[0].Name ),
-                IdentifierName( serializeMethod.Parameters[1].Name ), 
+                IdentifierName( serializeMethod.Parameters[1].Name ),
                 null );
 
             return this.CreateOverrideMethod(
@@ -585,6 +585,8 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
             /// </summary>
             Constructor,
 
+            // ReSharper disable once InconsistentNaming
+            
             /// <summary>
             /// Location is deserialized in the deserialize method and needs to be made mutable. This is case of fields/properties that contain reference type fields and are readonly.
             /// </summary>

@@ -95,12 +95,12 @@ namespace Metalama.Framework.Engine.Pipeline
 
             // Prepare the compile-time assembly.
             if ( !loader.TryGetCompileTimeProjectFromCompilation(
-                roslynCompilation,
-                compileTimeTreesHint,
-                diagnosticAdder,
-                false,
-                cancellationToken,
-                out var compileTimeProject ) )
+                    roslynCompilation,
+                    compileTimeTreesHint,
+                    diagnosticAdder,
+                    false,
+                    cancellationToken,
+                    out var compileTimeProject ) )
             {
                 configuration = null;
 

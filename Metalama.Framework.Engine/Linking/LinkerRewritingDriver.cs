@@ -494,8 +494,8 @@ namespace Metalama.Framework.Engine.Linking
         private ExpressionSyntax GetLinkedExpression( ResolvedAspectReference aspectReference )
         {
             if ( !SymbolEqualityComparer.Default.Equals(
-                aspectReference.ResolvedSemantic.Symbol.ContainingType,
-                aspectReference.ResolvedSemantic.Symbol.ContainingType ) )
+                    aspectReference.ResolvedSemantic.Symbol.ContainingType,
+                    aspectReference.ResolvedSemantic.Symbol.ContainingType ) )
             {
                 throw new AssertionFailedException();
             }
@@ -537,8 +537,8 @@ namespace Metalama.Framework.Engine.Linking
                     // The reference expression is member access.
 
                     if ( SymbolEqualityComparer.Default.Equals(
-                        aspectReference.ContainingSymbol.ContainingType,
-                        targetSymbol.ContainingType ) )
+                            aspectReference.ContainingSymbol.ContainingType,
+                            targetSymbol.ContainingType ) )
                     {
                         if ( aspectReference.OriginalSymbol.IsInterfaceMemberImplementation() )
                         {
@@ -625,8 +625,8 @@ namespace Metalama.Framework.Engine.Linking
 
                 case ConditionalAccessExpressionSyntax conditionalAccessExpression:
                     if ( SymbolEqualityComparer.Default.Equals(
-                        aspectReference.ContainingSymbol.ContainingType,
-                        targetSymbol.ContainingType ) )
+                            aspectReference.ContainingSymbol.ContainingType,
+                            targetSymbol.ContainingType ) )
                     {
                         if ( aspectReference.OriginalSymbol.IsInterfaceMemberImplementation() )
                         {

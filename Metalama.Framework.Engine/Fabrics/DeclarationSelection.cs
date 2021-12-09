@@ -81,9 +81,9 @@ namespace Metalama.Framework.Engine.Fabrics
                         item =>
                         {
                             if ( !userCodeInvoker.TryInvoke(
-                                () => createAspect( item ),
-                                executionContext.WithDiagnosticAdder( diagnostics ),
-                                out var expression ) )
+                                    () => createAspect( item ),
+                                    executionContext.WithDiagnosticAdder( diagnostics ),
+                                    out var expression ) )
                             {
                                 return null;
                             }
@@ -91,13 +91,13 @@ namespace Metalama.Framework.Engine.Fabrics
                             var lambda = Expression.Lambda<Func<IAspect>>( expression!.Body, Array.Empty<ParameterExpression>() );
 
                             if ( !AspectInstance.TryCreateInstance(
-                                this._serviceProvider,
-                                diagnostics,
-                                lambda,
-                                item.ToTypedRef<IDeclaration>(),
-                                aspectClass,
-                                this._predecessor,
-                                out var aspectInstance ) )
+                                    this._serviceProvider,
+                                    diagnostics,
+                                    lambda,
+                                    item.ToTypedRef<IDeclaration>(),
+                                    aspectClass,
+                                    this._predecessor,
+                                    out var aspectInstance ) )
                             {
                                 return null;
                             }
@@ -127,9 +127,9 @@ namespace Metalama.Framework.Engine.Fabrics
                         t =>
                         {
                             if ( !userCodeInvoker.TryInvoke(
-                                () => createAspect( t ),
-                                executionContext.WithDiagnosticAdder( diagnosticAdder ),
-                                out var aspect ) )
+                                    () => createAspect( t ),
+                                    executionContext.WithDiagnosticAdder( diagnosticAdder ),
+                                    out var aspect ) )
                             {
                                 return null;
                             }
@@ -164,9 +164,9 @@ namespace Metalama.Framework.Engine.Fabrics
                             t =>
                             {
                                 if ( !userCodeInvoker.TryInvoke(
-                                    () => new TAspect(),
-                                    executionContext.WithDiagnosticAdder( diagnosticAdder ),
-                                    out var aspect ) )
+                                        () => new TAspect(),
+                                        executionContext.WithDiagnosticAdder( diagnosticAdder ),
+                                        out var aspect ) )
                                 {
                                     return null;
                                 }

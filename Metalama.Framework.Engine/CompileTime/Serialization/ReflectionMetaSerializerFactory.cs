@@ -48,22 +48,16 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
 
             var instance = Activator.CreateInstance( serializerTypeInstance );
 
-            var serializer = instance as IMetaSerializer;
-
-            if ( serializer != null )
+            return instance switch
             {
-                return serializer;
-            }
-
-            var serializerFactory = instance as IMetaSerializerFactory;
-
-            if ( serializerFactory != null )
-            {
-                return serializerFactory.CreateSerializer( objectType );
-            }
-
-            throw new MetaSerializationException(
-                string.Format( CultureInfo.InvariantCulture, "Type {0} must implement interface ISerializer or ISerializerFactory.", serializerTypeInstance ) );
+                IMetaSerializer serializer => serializer,
+                IMetaSerializerFactory serializerFactory => serializerFactory.CreateSerializer( objectType ),
+                _ => throw new MetaSerializationException(
+                    string.Format(
+                        CultureInfo.InvariantCulture,
+                        "Type {0} must implement interface ISerializer or ISerializerFactory.",
+                        serializerTypeInstance ) )
+            };
         }
     }
 }

@@ -81,7 +81,7 @@ namespace Metalama.Framework.Workspaces
                 case 0:
                     throw new InvalidOperationException( "The current ProjectSet does not contain a project with matching path and target framework." );
 
-                case >1:
+                case > 1:
                     throw new InvalidOperationException( "The project targets several frameworks. Specify the target framework." );
             }
 

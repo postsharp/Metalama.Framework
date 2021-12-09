@@ -4,11 +4,11 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Eligibility;
-using Metalama.Framework.Fabrics;
 using Metalama.Framework.Engine.AspectOrdering;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Sdk;
+using Metalama.Framework.Fabrics;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Immutable;

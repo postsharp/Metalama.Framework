@@ -377,6 +377,7 @@ namespace Metalama.Framework.Engine.Templating
         public static ExpressionSyntax StringLiteralExpression( string? value ) => SyntaxFactoryEx.LiteralExpression( value );
 
         public static Type GetCompileTimeType( string id, string name )
-            => TemplateExpansionContext.Current.SyntaxGenerationContext.ServiceProvider.GetRequiredService<CompileTimeTypeFactory>().Get( new SymbolId( id ), name );
+            => TemplateExpansionContext.Current.SyntaxGenerationContext.ServiceProvider.GetRequiredService<CompileTimeTypeFactory>()
+                .Get( new SymbolId( id ), name );
     }
 }

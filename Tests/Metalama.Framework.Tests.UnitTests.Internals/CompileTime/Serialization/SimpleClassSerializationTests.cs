@@ -20,11 +20,11 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
         {
 /* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
-            this.TestSimpleExplicitelySerializedClass( "SimpleText" );
+            this.TestSimpleExplicitlySerializedClass( "SimpleText" );
 After:
-            SimpleClassSerializationTests.TestSimpleExplicitelySerializedClass( "SimpleText" );
+            SimpleClassSerializationTests.TestSimpleExplicitlySerializedClass( "SimpleText" );
 */
-            TestSimpleExplicitelySerializedClass( "SimpleText" );
+            TestSimpleExplicitlySerializedClass( "SimpleText" );
         }
 
         [Fact]
@@ -32,11 +32,11 @@ After:
         {
 /* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
-            this.TestSimpleExplicitelySerializedClass( "Simple.Dotted.Words" );
+            this.TestSimpleExplicitlySerializedClass( "Simple.Dotted.Words" );
 After:
-            SimpleClassSerializationTests.TestSimpleExplicitelySerializedClass( "Simple.Dotted.Words" );
+            SimpleClassSerializationTests.TestSimpleExplicitlySerializedClass( "Simple.Dotted.Words" );
 */
-            TestSimpleExplicitelySerializedClass( "Simple.Dotted.Words" );
+            TestSimpleExplicitlySerializedClass( "Simple.Dotted.Words" );
         }
 
         [Fact]
@@ -44,11 +44,11 @@ After:
         {
 /* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
-            this.TestSimpleExplicitelySerializedClass( "Simple.Dotted.Words, mscorlib" );
+            this.TestSimpleExplicitlySerializedClass( "Simple.Dotted.Words, mscorlib" );
 After:
-            SimpleClassSerializationTests.TestSimpleExplicitelySerializedClass( "Simple.Dotted.Words, mscorlib" );
+            SimpleClassSerializationTests.TestSimpleExplicitlySerializedClass( "Simple.Dotted.Words, mscorlib" );
 */
-            TestSimpleExplicitelySerializedClass( "Simple.Dotted.Words, mscorlib" );
+            TestSimpleExplicitlySerializedClass( "Simple.Dotted.Words, mscorlib" );
         }
 
         [Fact]
@@ -56,11 +56,11 @@ After:
         {
 /* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
-            this.TestSimpleExplicitelySerializedClass<object>( 1000 );
+            this.TestSimpleExplicitlySerializedClass<object>( 1000 );
 After:
-            SimpleClassSerializationTests.TestSimpleExplicitelySerializedClass<object>( 1000 );
+            SimpleClassSerializationTests.TestSimpleExplicitlySerializedClass<object>( 1000 );
 */
-            TestSimpleExplicitelySerializedClass<object>( 1000 );
+            TestSimpleExplicitlySerializedClass<object>( 1000 );
         }
 
         [Fact]
@@ -68,11 +68,11 @@ After:
         {
 /* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
-            this.TestSimpleExplicitelySerializedClass<object>( false );
+            this.TestSimpleExplicitlySerializedClass<object>( false );
 After:
-            SimpleClassSerializationTests.TestSimpleExplicitelySerializedClass<object>( false );
+            SimpleClassSerializationTests.TestSimpleExplicitlySerializedClass<object>( false );
 */
-            TestSimpleExplicitelySerializedClass<object>( false );
+            TestSimpleExplicitlySerializedClass<object>( false );
         }
 
         [Fact]
@@ -80,11 +80,11 @@ After:
         {
 /* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
-            this.TestSimpleExplicitelySerializedClass<object>( DateTime.Now );
+            this.TestSimpleExplicitlySerializedClass<object>( DateTime.Now );
 After:
-            SimpleClassSerializationTests.TestSimpleExplicitelySerializedClass<object>( DateTime.Now );
+            SimpleClassSerializationTests.TestSimpleExplicitlySerializedClass<object>( DateTime.Now );
 */
-            TestSimpleExplicitelySerializedClass<object>( DateTime.Now );
+            TestSimpleExplicitlySerializedClass<object>( DateTime.Now );
         }
 
         [Fact]
@@ -92,11 +92,11 @@ After:
         {
 /* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
-            this.TestSimpleExplicitelySerializedClass( 1000 );
+            this.TestSimpleExplicitlySerializedClass( 1000 );
 After:
-            SimpleClassSerializationTests.TestSimpleExplicitelySerializedClass( 1000 );
+            SimpleClassSerializationTests.TestSimpleExplicitlySerializedClass( 1000 );
 */
-            TestSimpleExplicitelySerializedClass( 1000 );
+            TestSimpleExplicitlySerializedClass( 1000 );
         }
 
         [Fact]
@@ -104,11 +104,11 @@ After:
         {
 /* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
-            this.TestSimpleExplicitelySerializedClass( -1000 );
+            this.TestSimpleExplicitlySerializedClass( -1000 );
 After:
-            SimpleClassSerializationTests.TestSimpleExplicitelySerializedClass( -1000 );
+            SimpleClassSerializationTests.TestSimpleExplicitlySerializedClass( -1000 );
 */
-            TestSimpleExplicitelySerializedClass( -1000 );
+            TestSimpleExplicitlySerializedClass( -1000 );
         }
 
         [Fact]
@@ -116,11 +116,11 @@ After:
         {
 /* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
-            this.TestSimpleExplicitelySerializedClass( 1000000000 );
+            this.TestSimpleExplicitlySerializedClass( 1000000000 );
 After:
-            SimpleClassSerializationTests.TestSimpleExplicitelySerializedClass( 1000000000 );
+            SimpleClassSerializationTests.TestSimpleExplicitlySerializedClass( 1000000000 );
 */
-            TestSimpleExplicitelySerializedClass( 1000000000 );
+            TestSimpleExplicitlySerializedClass( 1000000000 );
         }
 
         [Fact]
@@ -128,11 +128,11 @@ After:
         {
 /* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
-            this.TestSimpleExplicitelySerializedClass( -1000000000 );
+            this.TestSimpleExplicitlySerializedClass( -1000000000 );
 After:
-            SimpleClassSerializationTests.TestSimpleExplicitelySerializedClass( -1000000000 );
+            SimpleClassSerializationTests.TestSimpleExplicitlySerializedClass( -1000000000 );
 */
-            TestSimpleExplicitelySerializedClass( -1000000000 );
+            TestSimpleExplicitlySerializedClass( -1000000000 );
         }
 
         [Fact]
@@ -140,11 +140,11 @@ After:
         {
 /* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
-            this.TestSimpleExplicitelySerializedClass( 223372036854775807 );
+            this.TestSimpleExplicitlySerializedClass( 223372036854775807 );
 After:
-            SimpleClassSerializationTests.TestSimpleExplicitelySerializedClass( 223372036854775807 );
+            SimpleClassSerializationTests.TestSimpleExplicitlySerializedClass( 223372036854775807 );
 */
-            TestSimpleExplicitelySerializedClass( 223372036854775807 );
+            TestSimpleExplicitlySerializedClass( 223372036854775807 );
         }
 
         [Fact]
@@ -152,11 +152,11 @@ After:
         {
 /* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
-            this.TestSimpleExplicitelySerializedClass( -223372036854775807 );
+            this.TestSimpleExplicitlySerializedClass( -223372036854775807 );
 After:
-            SimpleClassSerializationTests.TestSimpleExplicitelySerializedClass( -223372036854775807 );
+            SimpleClassSerializationTests.TestSimpleExplicitlySerializedClass( -223372036854775807 );
 */
-            TestSimpleExplicitelySerializedClass( -223372036854775807 );
+            TestSimpleExplicitlySerializedClass( -223372036854775807 );
         }
 
         [Fact]
@@ -164,11 +164,11 @@ After:
         {
 /* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
-            this.TestSimpleExplicitelySerializedClass( 1000d );
+            this.TestSimpleExplicitlySerializedClass( 1000d );
 After:
-            SimpleClassSerializationTests.TestSimpleExplicitelySerializedClass( 1000d );
+            SimpleClassSerializationTests.TestSimpleExplicitlySerializedClass( 1000d );
 */
-            TestSimpleExplicitelySerializedClass( 1000d );
+            TestSimpleExplicitlySerializedClass( 1000d );
         }
 
         [Fact]
@@ -176,11 +176,11 @@ After:
         {
 /* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
-            this.TestSimpleExplicitelySerializedClass( -1000d );
+            this.TestSimpleExplicitlySerializedClass( -1000d );
 After:
-            SimpleClassSerializationTests.TestSimpleExplicitelySerializedClass( -1000d );
+            SimpleClassSerializationTests.TestSimpleExplicitlySerializedClass( -1000d );
 */
-            TestSimpleExplicitelySerializedClass( -1000d );
+            TestSimpleExplicitlySerializedClass( -1000d );
         }
 
         [Fact]
@@ -188,11 +188,11 @@ After:
         {
 /* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
-            this.TestSimpleExplicitelySerializedClass( double.MaxValue );
+            this.TestSimpleExplicitlySerializedClass( double.MaxValue );
 After:
-            SimpleClassSerializationTests.TestSimpleExplicitelySerializedClass( double.MaxValue );
+            SimpleClassSerializationTests.TestSimpleExplicitlySerializedClass( double.MaxValue );
 */
-            TestSimpleExplicitelySerializedClass( double.MaxValue );
+            TestSimpleExplicitlySerializedClass( double.MaxValue );
         }
 
         [Fact]
@@ -200,11 +200,11 @@ After:
         {
 /* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
-            this.TestSimpleExplicitelySerializedClass( double.MinValue );
+            this.TestSimpleExplicitlySerializedClass( double.MinValue );
 After:
-            SimpleClassSerializationTests.TestSimpleExplicitelySerializedClass( double.MinValue );
+            SimpleClassSerializationTests.TestSimpleExplicitlySerializedClass( double.MinValue );
 */
-            TestSimpleExplicitelySerializedClass( double.MinValue );
+            TestSimpleExplicitlySerializedClass( double.MinValue );
         }
 
         [Fact]
@@ -212,59 +212,59 @@ After:
         {
 /* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
-            this.TestSimpleExplicitelySerializedClass( DateTime.Now );
+            this.TestSimpleExplicitlySerializedClass( DateTime.Now );
 After:
-            SimpleClassSerializationTests.TestSimpleExplicitelySerializedClass( DateTime.Now );
+            SimpleClassSerializationTests.TestSimpleExplicitlySerializedClass( DateTime.Now );
 */
-            TestSimpleExplicitelySerializedClass( DateTime.Now );
+            TestSimpleExplicitlySerializedClass( DateTime.Now );
         }
 
         [Fact]
-        public void TestClasWithObjectMember_Nulled()
+        public void TestClasWithObjectMember_Null()
         {
 /* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
-            this.TestSimpleExplicitelySerializedClass( (object?) null );
+            this.TestSimpleExplicitlySerializedClass( (object?) null );
 After:
-            SimpleClassSerializationTests.TestSimpleExplicitelySerializedClass( (object?) null );
+            SimpleClassSerializationTests.TestSimpleExplicitlySerializedClass( (object?) null );
 */
-            TestSimpleExplicitelySerializedClass( (object?) null );
+            TestSimpleExplicitlySerializedClass( (object?) null );
         }
 
         [Fact]
-        public void TestClasWithStringMember_Nulled()
+        public void TestClasWithStringMember_Null()
         {
 /* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
-            this.TestSimpleExplicitelySerializedClass( (string?) null );
+            this.TestSimpleExplicitlySerializedClass( (string?) null );
 After:
-            SimpleClassSerializationTests.TestSimpleExplicitelySerializedClass( (string?) null );
+            SimpleClassSerializationTests.TestSimpleExplicitlySerializedClass( (string?) null );
 */
-            TestSimpleExplicitelySerializedClass( (string?) null );
+            TestSimpleExplicitlySerializedClass( (string?) null );
         }
 
         [Fact]
-        public void TestClasWithClassMember_Nulled()
+        public void TestClasWithClassMember_Null()
         {
 /* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
-            this.TestSimpleExplicitelySerializedClass( (SimpleExplicitelySerializedClass<int>?) null );
+            this.TestSimpleExplicitlySerializedClass( (SimpleExplicitlySerializedClass<int>?) null );
 After:
-            SimpleClassSerializationTests.TestSimpleExplicitelySerializedClass( (SimpleExplicitelySerializedClass<int>?) null );
+            SimpleClassSerializationTests.TestSimpleExplicitlySerializedClass( (SimpleExplicitlySerializedClass<int>?) null );
 */
-            TestSimpleExplicitelySerializedClass( (SimpleExplicitelySerializedClass<int>?) null );
+            TestSimpleExplicitlySerializedClass( (SimpleExplicitlySerializedClass<int>?) null );
         }
 
         [Fact]
-        public void TestClasWithClassMember_NotNulled()
+        public void TestClasWithClassMember_NotNull()
         {
 /* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
-            this.TestSimpleExplicitelySerializedClass( new SimpleExplicitelySerializedClass<string>( "testing text" ) );
+            this.TestSimpleExplicitlySerializedClass( new SimpleExplicitlySerializedClass<string>( "testing text" ) );
 After:
-            SimpleClassSerializationTests.TestSimpleExplicitelySerializedClass( new SimpleExplicitelySerializedClass<string>( "testing text" ) );
+            SimpleClassSerializationTests.TestSimpleExplicitlySerializedClass( new SimpleExplicitlySerializedClass<string>( "testing text" ) );
 */
-            TestSimpleExplicitelySerializedClass( new SimpleExplicitelySerializedClass<string>( "testing text" ) );
+            TestSimpleExplicitlySerializedClass( new SimpleExplicitlySerializedClass<string>( "testing text" ) );
         }
 
         [Fact]
@@ -272,11 +272,11 @@ After:
         {
 /* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
-            this.TestSimpleExplicitelySerializedClass( TestEnum.Value1 );
+            this.TestSimpleExplicitlySerializedClass( TestEnum.Value1 );
 After:
-            SimpleClassSerializationTests.TestSimpleExplicitelySerializedClass( TestEnum.Value1 );
+            SimpleClassSerializationTests.TestSimpleExplicitlySerializedClass( TestEnum.Value1 );
 */
-            TestSimpleExplicitelySerializedClass( TestEnum.Value1 );
+            TestSimpleExplicitlySerializedClass( TestEnum.Value1 );
         }
 
         [Fact]
@@ -284,11 +284,11 @@ After:
         {
 /* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
-            this.TestSimpleExplicitelySerializedClass( TestEnum.Value2 );
+            this.TestSimpleExplicitlySerializedClass( TestEnum.Value2 );
 After:
-            SimpleClassSerializationTests.TestSimpleExplicitelySerializedClass( TestEnum.Value2 );
+            SimpleClassSerializationTests.TestSimpleExplicitlySerializedClass( TestEnum.Value2 );
 */
-            TestSimpleExplicitelySerializedClass( TestEnum.Value2 );
+            TestSimpleExplicitlySerializedClass( TestEnum.Value2 );
         }
 
         [Fact]
@@ -296,11 +296,11 @@ After:
         {
 /* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
-            this.TestSimpleExplicitelySerializedClass( TestEnumWithLong.Value2 );
+            this.TestSimpleExplicitlySerializedClass( TestEnumWithLong.Value2 );
 After:
-            SimpleClassSerializationTests.TestSimpleExplicitelySerializedClass( TestEnumWithLong.Value2 );
+            SimpleClassSerializationTests.TestSimpleExplicitlySerializedClass( TestEnumWithLong.Value2 );
 */
-            TestSimpleExplicitelySerializedClass( TestEnumWithLong.Value2 );
+            TestSimpleExplicitlySerializedClass( TestEnumWithLong.Value2 );
         }
 
         [Fact]
@@ -308,11 +308,11 @@ After:
         {
 /* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
-            this.TestSimpleExplicitelySerializedClass( TestEnumWithByte.Value2 );
+            this.TestSimpleExplicitlySerializedClass( TestEnumWithByte.Value2 );
 After:
-            SimpleClassSerializationTests.TestSimpleExplicitelySerializedClass( TestEnumWithByte.Value2 );
+            SimpleClassSerializationTests.TestSimpleExplicitlySerializedClass( TestEnumWithByte.Value2 );
 */
-            TestSimpleExplicitelySerializedClass( TestEnumWithByte.Value2 );
+            TestSimpleExplicitlySerializedClass( TestEnumWithByte.Value2 );
         }
 
         [Fact]
@@ -320,11 +320,11 @@ After:
         {
 /* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
-            this.TestSimpleExplicitelySerializedClass( TestEnumWithFlags.Value2 );
+            this.TestSimpleExplicitlySerializedClass( TestEnumWithFlags.Value2 );
 After:
-            SimpleClassSerializationTests.TestSimpleExplicitelySerializedClass( TestEnumWithFlags.Value2 );
+            SimpleClassSerializationTests.TestSimpleExplicitlySerializedClass( TestEnumWithFlags.Value2 );
 */
-            TestSimpleExplicitelySerializedClass( TestEnumWithFlags.Value2 );
+            TestSimpleExplicitlySerializedClass( TestEnumWithFlags.Value2 );
         }
 
         [Fact]
@@ -332,11 +332,11 @@ After:
         {
 /* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
-            this.TestSimpleExplicitelySerializedClass( TestEnumWithFlags.Value1 | TestEnumWithFlags.Value2 );
+            this.TestSimpleExplicitlySerializedClass( TestEnumWithFlags.Value1 | TestEnumWithFlags.Value2 );
 After:
-            SimpleClassSerializationTests.TestSimpleExplicitelySerializedClass( TestEnumWithFlags.Value1 | TestEnumWithFlags.Value2 );
+            SimpleClassSerializationTests.TestSimpleExplicitlySerializedClass( TestEnumWithFlags.Value1 | TestEnumWithFlags.Value2 );
 */
-            TestSimpleExplicitelySerializedClass( TestEnumWithFlags.Value1 | TestEnumWithFlags.Value2 );
+            TestSimpleExplicitlySerializedClass( TestEnumWithFlags.Value1 | TestEnumWithFlags.Value2 );
         }
 
         [Fact]
@@ -356,11 +356,11 @@ After:
         {
 /* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
-            this.TestSimpleExplicitelySerializedClass( new[] { 1, 2, 3, 4 } );
+            this.TestSimpleExplicitlySerializedClass( new[] { 1, 2, 3, 4 } );
 After:
-            SimpleClassSerializationTests.TestSimpleExplicitelySerializedClass( new[] { 1, 2, 3, 4 } );
+            SimpleClassSerializationTests.TestSimpleExplicitlySerializedClass( new[] { 1, 2, 3, 4 } );
 */
-            TestSimpleExplicitelySerializedClass( new[] { 1, 2, 3, 4 } );
+            TestSimpleExplicitlySerializedClass( new[] { 1, 2, 3, 4 } );
         }
 
         [Fact]
@@ -375,11 +375,11 @@ After:
 
 /* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
-            this.TestSimpleExplicitelySerializedClass( array );
+            this.TestSimpleExplicitlySerializedClass( array );
 After:
-            SimpleClassSerializationTests.TestSimpleExplicitelySerializedClass( array );
+            SimpleClassSerializationTests.TestSimpleExplicitlySerializedClass( array );
 */
-            TestSimpleExplicitelySerializedClass( array );
+            TestSimpleExplicitlySerializedClass( array );
         }
 
         [Fact]
@@ -387,11 +387,11 @@ After:
         {
 /* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
-            this.TestSimpleExplicitelySerializedClass( new[,] { { 1, 2 }, { 3, 4 } } );
+            this.TestSimpleExplicitlySerializedClass( new[,] { { 1, 2 }, { 3, 4 } } );
 After:
-            SimpleClassSerializationTests.TestSimpleExplicitelySerializedClass( new[,] { { 1, 2 }, { 3, 4 } } );
+            SimpleClassSerializationTests.TestSimpleExplicitlySerializedClass( new[,] { { 1, 2 }, { 3, 4 } } );
 */
-            TestSimpleExplicitelySerializedClass( new[,] { { 1, 2 }, { 3, 4 } } );
+            TestSimpleExplicitlySerializedClass( new[,] { { 1, 2 }, { 3, 4 } } );
         }
 
         [Fact]
@@ -399,11 +399,11 @@ After:
         {
 /* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
-            this.TestSimpleExplicitelySerializedClass( new[, ,] { { { 1 }, { 2 } }, { { 3 }, { 4 } } } );
+            this.TestSimpleExplicitlySerializedClass( new[, ,] { { { 1 }, { 2 } }, { { 3 }, { 4 } } } );
 After:
-            SimpleClassSerializationTests.TestSimpleExplicitelySerializedClass( new[, ,] { { { 1 }, { 2 } }, { { 3 }, { 4 } } } );
+            SimpleClassSerializationTests.TestSimpleExplicitlySerializedClass( new[, ,] { { { 1 }, { 2 } }, { { 3 }, { 4 } } } );
 */
-            TestSimpleExplicitelySerializedClass( new[,,] { { { 1 }, { 2 } }, { { 3 }, { 4 } } } );
+            TestSimpleExplicitlySerializedClass( new[,,] { { { 1 }, { 2 } }, { { 3 }, { 4 } } } );
         }
 
         [Fact]
@@ -412,15 +412,15 @@ After:
             // We're creating instance of type int[*], but actually get int[] -> and that's what were testing
             var array = (Array?) Activator.CreateInstance( typeof(int).MakeArrayType( 1 ), 2 );
             array!.SetValue( 1, 0 );
-            array!.SetValue( 2, 1 );
+            array.SetValue( 2, 1 );
 
 /* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
-            this.TestSimpleExplicitelySerializedClass( (int[]) array );
+            this.TestSimpleExplicitlySerializedClass( (int[]) array );
 After:
-            SimpleClassSerializationTests.TestSimpleExplicitelySerializedClass( (int[]) array );
+            SimpleClassSerializationTests.TestSimpleExplicitlySerializedClass( (int[]) array );
 */
-            TestSimpleExplicitelySerializedClass( (int[]) array );
+            TestSimpleExplicitlySerializedClass( (int[]) array );
         }
 
         [Fact]
@@ -448,7 +448,7 @@ After:
         }
 
         [Fact]
-        public void TestClassWithValueAndProperty_BothNulled()
+        public void TestClassWithValueAndProperty_BothNull()
         {
 /* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
 Before:
@@ -474,8 +474,8 @@ After:
         [Fact]
         public void TestHeterogeneousArrayOfReferenceTypeObjects()
         {
-            var array = new SimpleExplicitelySerializedClass<int>[3];
-            array[0] = new SimpleExplicitelySerializedClass<int>( 5 );
+            var array = new SimpleExplicitlySerializedClass<int>[3];
+            array[0] = new SimpleExplicitlySerializedClass<int>( 5 );
             array[1] = new ExplicitlySerializedClass<int, string>( 2 );
 
 /* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
@@ -490,8 +490,8 @@ After:
         [Fact]
         public void GenericTypes_InArray()
         {
-            var serializedClass = new SimpleExplicitelySerializedClass<DateTime>( DateTime.Today.AddDays( 10 ) );
-            var anotherSerializedClass = new SimpleExplicitelySerializedClass<DateTime>( DateTime.Today.AddMonths( -10 ) );
+            var serializedClass = new SimpleExplicitlySerializedClass<DateTime>( DateTime.Today.AddDays( 10 ) );
+            var anotherSerializedClass = new SimpleExplicitlySerializedClass<DateTime>( DateTime.Today.AddMonths( -10 ) );
             var array = new[] { serializedClass, anotherSerializedClass };
 
             var formatter = new MetaFormatter();
@@ -500,7 +500,7 @@ After:
             memoryStream.Seek( 0, SeekOrigin.Begin );
 
             var deserializedObject =
-                (SimpleExplicitelySerializedClass<DateTime>[]?) formatter.Deserialize( memoryStream );
+                (SimpleExplicitlySerializedClass<DateTime>[]?) formatter.Deserialize( memoryStream );
 
             Assert.NotNull( deserializedObject );
             Assert.Equal( 2, deserializedObject!.Length );
@@ -508,14 +508,14 @@ After:
             Assert.Equal( anotherSerializedClass, deserializedObject[1] );
         }
 
-        private static void TestSimpleExplicitelySerializedClass<T>( T value )
+        private static void TestSimpleExplicitlySerializedClass<T>( T value )
         {
-            var initialObject = new SimpleExplicitelySerializedClass<T>( value );
+            var initialObject = new SimpleExplicitlySerializedClass<T>( value );
             var formatter = new MetaFormatter();
             var memoryStream = new MemoryStream();
             formatter.Serialize( initialObject, memoryStream );
             memoryStream.Seek( 0, SeekOrigin.Begin );
-            var deserializedObject = (SimpleExplicitelySerializedClass<T>?) formatter.Deserialize( memoryStream );
+            var deserializedObject = (SimpleExplicitlySerializedClass<T>?) formatter.Deserialize( memoryStream );
 
             if ( typeof(T).IsArray )
             {
@@ -539,22 +539,22 @@ After:
                 (ExplicitlySerializedClass<TForCtor, TForField>?) formatter.Deserialize( memoryStream );
 
             Assert.Equal( initialObject.Value, deserializedObject!.Value );
-            Assert.Equal( initialObject.Field, deserializedObject!.Field );
+            Assert.Equal( initialObject.Field, deserializedObject.Field );
         }
 
-        [MetaSerializer( typeof(SimpleExplicitelySerializedClass<>.Serializer) )]
-        public class SimpleExplicitelySerializedClass<T> : IEquatable<SimpleExplicitelySerializedClass<T>>
+        [MetaSerializer( typeof(SimpleExplicitlySerializedClass<>.Serializer) )]
+        public class SimpleExplicitlySerializedClass<T> : IEquatable<SimpleExplicitlySerializedClass<T>>
         {
 #pragma warning disable SA1401 // Fields should be private
             public T Value;
 #pragma warning restore SA1401 // Fields should be private
 
-            public SimpleExplicitelySerializedClass( T value )
+            public SimpleExplicitlySerializedClass( T value )
             {
                 this.Value = value;
             }
 
-            public bool Equals( SimpleExplicitelySerializedClass<T>? other )
+            public bool Equals( SimpleExplicitlySerializedClass<T>? other )
             {
                 if ( ReferenceEquals( null, other ) )
                 {
@@ -586,35 +586,36 @@ After:
                     return false;
                 }
 
-                return this.Equals( (SimpleExplicitelySerializedClass<T>) obj );
+                return this.Equals( (SimpleExplicitlySerializedClass<T>) obj );
             }
 
             public override int GetHashCode()
             {
+                // ReSharper disable once NonReadonlyMemberInGetHashCode
                 return EqualityComparer<T>.Default.GetHashCode( this.Value! );
             }
 
-            public class Serializer : ReferenceTypeSerializer<SimpleExplicitelySerializedClass<T>>
+            public class Serializer : ReferenceTypeSerializer<SimpleExplicitlySerializedClass<T>>
             {
                 public override object CreateInstance( Type type, IArgumentsReader constructorArguments )
                 {
-                    return new SimpleExplicitelySerializedClass<T>( constructorArguments.GetValue<T>( "_" )! );
+                    return new SimpleExplicitlySerializedClass<T>( constructorArguments.GetValue<T>( "_" )! );
                 }
 
                 public override void SerializeObject(
-                    SimpleExplicitelySerializedClass<T> obj,
+                    SimpleExplicitlySerializedClass<T> obj,
                     IArgumentsWriter constructorArguments,
                     IArgumentsWriter initializationArguments )
                 {
                     constructorArguments.SetValue( "_", obj.Value );
                 }
 
-                public override void DeserializeFields( SimpleExplicitelySerializedClass<T> obj, IArgumentsReader initializationArguments ) { }
+                public override void DeserializeFields( SimpleExplicitlySerializedClass<T> obj, IArgumentsReader initializationArguments ) { }
             }
         }
 
         [MetaSerializer( typeof(ExplicitlySerializedClass<,>.Serializer) )]
-        public class ExplicitlySerializedClass<TForCtor, TForField> : SimpleExplicitelySerializedClass<TForCtor>,
+        public class ExplicitlySerializedClass<TForCtor, TForField> : SimpleExplicitlySerializedClass<TForCtor>,
                                                                       IEquatable<ExplicitlySerializedClass<TForCtor, TForField>>
         {
             public TForField? Field { get; set; }
@@ -663,10 +664,14 @@ After:
             {
                 unchecked
                 {
+                    // ReSharper disable NonReadonlyMemberInGetHashCode
+
                     var hashCode = base.GetHashCode();
                     hashCode = (hashCode * 397) ^ EqualityComparer<TForField>.Default.GetHashCode( this.Field! );
                     hashCode = (hashCode * 397) ^ this.Nullable.GetHashCode();
 
+                    // ReSharper restore NonReadonlyMemberInGetHashCode
+                    
                     return hashCode;
                 }
             }

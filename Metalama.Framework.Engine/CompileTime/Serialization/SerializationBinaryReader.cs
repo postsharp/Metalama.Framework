@@ -10,8 +10,8 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
     internal sealed class SerializationBinaryReader
     {
         private readonly BinaryReader _reader;
-        private readonly Dictionary<int, string> _strings = new();
-        private readonly Dictionary<int, string> _dottedStrings = new();
+        private readonly List<string> _strings = new();
+        private readonly List<string> _dottedStrings = new();
 
         public SerializationBinaryReader( BinaryReader reader )
         {
@@ -27,26 +27,32 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
         {
             int header = this.ReadCompressedInteger();
 
-            if ( header == -1 )
+            switch ( header )
             {
-                return null;
-            }
-            else if ( header < 0 )
-            {
-                if ( !this._strings.TryGetValue( header, out var s ) )
-                {
-                    throw new MetaSerializationException( "Invalid serialized stream: invalid string identifier." );
-                }
+                case -1:
+                    return null;
 
-                return s;
-            }
-            else
-            {
-                var bytes = this._reader.ReadBytes( header );
-                var value = Encoding.UTF8.GetString( bytes, 0, bytes.Length );
-                this._strings.Add( this._strings.Count + 1, value );
+                case < 0:
+                    {
+                        var index = -header - SerializationBinaryWriter.FirstStringIndex;
+                
+                        // ReSharper disable once ConditionIsAlwaysTrueOrFalse
+                        if ( index < 0 || index > this._strings.Count )
+                        {
+                            throw new MetaSerializationException( "Invalid serialized stream: invalid string identifier." );
+                        }
 
-                return value;
+                        return this._strings[index];
+                    }
+
+                default:
+                    {
+                        var bytes = this._reader.ReadBytes( header );
+                        var value = Encoding.UTF8.GetString( bytes, 0, bytes.Length );
+                        this._strings.Add( value );
+
+                        return value;
+                    }
             }
         }
 
@@ -54,33 +60,39 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
         {
             int header = this.ReadCompressedInteger();
 
-            if ( header == -1 )
+            switch ( header )
             {
-                return DottedString.Null;
-            }
-            else if ( header < 0 )
-            {
-                if ( !this._dottedStrings.TryGetValue( -header, out var s ) )
-                {
-                    throw new MetaSerializationException( "Invalid serialized stream: invalid string identifier." );
-                }
+                case -1:
+                    return DottedString.Null;
 
-                return s;
-            }
-            else
-            {
-                var bytes = this._reader.ReadBytes( header );
-                var value = Encoding.UTF8.GetString( bytes, 0, bytes.Length );
-                var parent = this.ReadDottedString();
+                case < 0:
+                    {
+                        var index = -header - SerializationBinaryWriter.FirstStringIndex;
+                
+                        // ReSharper disable once ConditionIsAlwaysTrueOrFalse
+                        if ( index < 0 || index > this._dottedStrings.Count )
+                        {
+                            throw new MetaSerializationException( "Invalid serialized stream: invalid string identifier." );
+                        }
 
-                if ( !parent.IsNull )
-                {
-                    value = parent + "." + value;
-                }
+                        return this._dottedStrings[index];
+                    }
 
-                this._dottedStrings.Add( this._dottedStrings.Count + 2, value );
+                default:
+                    {
+                        var bytes = this._reader.ReadBytes( header );
+                        var value = Encoding.UTF8.GetString( bytes, 0, bytes.Length );
+                        var parent = this.ReadDottedString();
 
-                return value;
+                        if ( !parent.IsNull )
+                        {
+                            value = parent + "." + value;
+                        }
+
+                        this._dottedStrings.Add( value );
+
+                        return value;
+                    }
             }
         }
 
@@ -114,7 +126,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
                     break;
 
                 case 0x40:
-                    value = ((ulong) (header & 0x0F) << 64) | this._reader.ReadUInt64();
+                    value = this._reader.ReadUInt64();
 
                     break;
 

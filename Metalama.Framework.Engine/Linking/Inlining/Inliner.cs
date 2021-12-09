@@ -32,8 +32,8 @@ namespace Metalama.Framework.Engine.Linking.Inlining
         public virtual bool CanInline( ResolvedAspectReference aspectReference, SemanticModel semanticModel )
         {
             if ( !SymbolEqualityComparer.Default.Equals(
-                aspectReference.ContainingSymbol.ContainingType,
-                aspectReference.ResolvedSemantic.Symbol.ContainingType ) )
+                    aspectReference.ContainingSymbol.ContainingType,
+                    aspectReference.ResolvedSemantic.Symbol.ContainingType ) )
             {
                 return false;
             }

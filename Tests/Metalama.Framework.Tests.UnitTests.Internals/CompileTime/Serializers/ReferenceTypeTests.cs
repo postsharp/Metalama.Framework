@@ -37,7 +37,7 @@ After:
 */
             var project = CreateCompileTimeProject( domain, testContext, code );
 
-            var type = project!.GetType( "A" );
+            var type = project.GetType( "A" );
             var metaSerializer = GetMetaSerializer( type );
 
             dynamic instance = Activator.CreateInstance( type )!;
@@ -90,7 +90,7 @@ After:
 */
             var project = CreateCompileTimeProject( domain, testContext, code );
 
-            var type = project!.GetType( "A" );
+            var type = project.GetType( "A" );
             var metaSerializer = GetMetaSerializer( type );
 
             dynamic instance = Activator.CreateInstance( type, 13, 42 )!;
@@ -151,13 +151,13 @@ public class B
             */
             var project = CreateCompileTimeProject( domain, testContext, code );
 
-            var typeA = project!.GetType( "A" );
-            var typeB = project!.GetType( "B" );
+            var typeA = project.GetType( "A" );
+            var typeB = project.GetType( "B" );
             var metaSerializer = GetMetaSerializer( typeA );
 
             dynamic instanceB1 = Activator.CreateInstance( typeB, 13 )!;
             dynamic instanceB2 = Activator.CreateInstance( typeB, 42 )!;
-            dynamic instanceA = Activator.CreateInstance( typeA, instanceB1, instanceB2 )!;
+            var instanceA = Activator.CreateInstance( typeA, instanceB1, instanceB2 )!;
 
             var constructorArgumentsWriter = new TestArgumentsWriter();
             var initializationArgumentsWriter = new TestArgumentsWriter();
@@ -181,6 +181,7 @@ public class B
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Serialization;
 [assembly: CompileTime]
+
 public class A : IMetaSerializable
 {
     public B Property { get; init; }
@@ -201,24 +202,22 @@ public class B
     }
 }
 ";
+            
+#if NETFRAMEWORK
+            code += "namespace System.Runtime.CompilerServices { internal static class IsExternalInit {}}";
+#endif
 
             using var domain = new UnloadableCompileTimeDomain();
             using var testContext = this.CreateTestContext();
 
-            /* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
-            Before:
-                        var project = this.CreateCompileTimeProject( domain, testContext, code );
-            After:
-                        var project = MetaSerializerTestBase.CreateCompileTimeProject( domain, testContext, code );
-            */
             var project = CreateCompileTimeProject( domain, testContext, code );
 
-            var typeA = project!.GetType( "A" );
-            var typeB = project!.GetType( "B" );
+            var typeA = project.GetType( "A" );
+            var typeB = project.GetType( "B" );
             var metaSerializer = GetMetaSerializer( typeA );
 
             dynamic instanceB = Activator.CreateInstance( typeB, 42 )!;
-            dynamic instanceA = Activator.CreateInstance( typeA, instanceB )!;
+            var instanceA = Activator.CreateInstance( typeA, instanceB )!;
 
             var constructorArgumentsWriter = new TestArgumentsWriter();
             var initializationArgumentsWriter = new TestArgumentsWriter();
@@ -261,7 +260,7 @@ After:
 */
             var project = CreateCompileTimeProject( domain, testContext, code );
 
-            var type = project!.GetType( "A" );
+            var type = project.GetType( "A" );
             var metaSerializer = GetMetaSerializer( type );
 
             dynamic instance = Activator.CreateInstance( type )!;
@@ -311,7 +310,7 @@ public struct A : IMetaSerializable
             */
             var project = CreateCompileTimeProject( domain, testContext, code );
 
-            var type = project!.GetType( "A" );
+            var type = project.GetType( "A" );
             var metaSerializer = GetMetaSerializer( type );
 
             dynamic instance = Activator.CreateInstance( type, 13, 27 )!;
@@ -364,7 +363,7 @@ public readonly struct A : IMetaSerializable
             */
             var project = CreateCompileTimeProject( domain, testContext, code );
 
-            var type = project!.GetType( "A" );
+            var type = project.GetType( "A" );
             var metaSerializer = GetMetaSerializer( type );
 
             dynamic instance = Activator.CreateInstance( type, 13, 42 )!;

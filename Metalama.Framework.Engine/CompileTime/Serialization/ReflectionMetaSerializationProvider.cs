@@ -16,10 +16,6 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
         private readonly Dictionary<Assembly, bool> _inspectedAssemblies = new();
         private readonly object _sync = new();
 
-        public ReflectionMetaSerializationProvider()
-        {
-        }
-
         public Type GetSurrogateType( Type objectType )
         {
             throw new NotImplementedException();
@@ -82,21 +78,18 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
             {
                 foreach ( var attribute in type.GetCustomAttributes( false ) )
                 {
-                    var serializableAttribute = attribute as MetaSerializerAttribute;
-
-                    if ( serializableAttribute != null && serializableAttribute.SerializerType != null )
+                    switch ( attribute )
                     {
-                        hasSerializer = true;
-                        this.AddSerializer( type, serializableAttribute.SerializerType );
+                        case MetaSerializerAttribute { SerializerType: { } } serializableAttribute:
+                            hasSerializer = true;
+                            this.AddSerializer( type, serializableAttribute.SerializerType );
 
-                        continue;
-                    }
+                            continue;
 
-                    var importSerializerAttribute = attribute as ImportMetaSerializerAttribute;
+                        case ImportMetaSerializerAttribute importSerializerAttribute:
+                            this.ProcessImport( importSerializerAttribute );
 
-                    if ( importSerializerAttribute != null )
-                    {
-                        this.ProcessImport( importSerializerAttribute );
+                            break;
                     }
                 }
             }

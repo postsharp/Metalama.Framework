@@ -177,9 +177,9 @@ namespace Metalama.Framework.Engine.Serialization
                 return true;
             }
             else if ( concreteTypeDeclaration.BaseType != null && this.TryGetSerializer(
-                concreteTypeDeclaration.BaseType,
-                contractTypeDeclaration,
-                out serializer ) )
+                         concreteTypeDeclaration.BaseType,
+                         contractTypeDeclaration,
+                         out serializer ) )
             {
                 return true;
             }

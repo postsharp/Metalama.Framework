@@ -122,7 +122,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
 
                     if ( objRef.Serializer!.IsTwoPhase )
                     {
-                        TryDeserializeFields( objRef!.Serializer, ref objRef.Value, fields, item.Cause );
+                        TryDeserializeFields( objRef.Serializer, ref objRef.Value, fields, item.Cause );
                     }
                 }
                 else
@@ -279,8 +279,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
 
                 case SerializationIntrinsicType.Array:
                     int rank = this._binaryReader.ReadCompressedInteger();
-                    Type? elementType;
-                    this.ReadType( out elementType, out _ );
+                    this.ReadType( out var elementType, out _ );
 
                     // Assertion on type nullability was added after code import from PostSharp.
                     type = rank == 1 ? elementType.AssertNotNull().MakeArrayType() : elementType.AssertNotNull().MakeArrayType( rank );
@@ -481,7 +480,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
                 case SerializationIntrinsicType.Enum:
                     var enumValue = this._binaryReader.ReadCompressedInteger();
 
-                    // explicite cast is needed due to check in Enum.ToObject (it throws if type is not numeric type)
+                    // explicit cast is needed due to check in Enum.ToObject (it throws if type is not numeric type)
                     value = enumValue.IsNegative ? Enum.ToObject( type, (long) enumValue ) : Enum.ToObject( type, (ulong) enumValue );
 
                     break;
@@ -679,7 +678,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
                 this.Values = new Dictionary<string, object?>( capacity, StringComparer.Ordinal );
             }
 
-            public bool TryGetValue<T>( string name, [MaybeNullWhen( false )] out T? value, string? scope = null )
+            public bool TryGetValue<T>( string name, [MaybeNullWhen( false )] out T value, string? scope = null )
             {
                 if ( this.Values == null )
                 {
@@ -702,7 +701,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
 
                 if ( valueObj == null )
                 {
-                    value = default;
+                    value = default!;
 
                     return true;
                 }

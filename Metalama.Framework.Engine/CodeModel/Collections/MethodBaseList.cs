@@ -74,13 +74,13 @@ namespace Metalama.Framework.Engine.CodeModel.Collections
                 while ( currentType != null )
                 {
                     foreach ( var candidate in GetCandidates(
-                        this.GetMemberListForType( currentType ),
-                        payload,
-                        name,
-                        argumentCount,
-                        argumentGetter,
-                        isStatic,
-                        compilation ) )
+                                 this.GetMemberListForType( currentType ),
+                                 payload,
+                                 name,
+                                 argumentCount,
+                                 argumentGetter,
+                                 isStatic,
+                                 compilation ) )
                     {
                         if ( collectedMethods.Add( candidate ) )
                         {

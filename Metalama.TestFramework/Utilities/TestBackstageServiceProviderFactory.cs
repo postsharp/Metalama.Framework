@@ -33,7 +33,7 @@ namespace Metalama.TestFramework.Utilities
                 .AddSingleton<IBackstageDiagnosticSink>( diagnosticsSink )
 
                 // This allows the retrieval of the service using its type name
-                .AddSingleton<TestDiagnosticsSink>( diagnosticsSink )
+                .AddSingleton( diagnosticsSink )
                 .AddSingleton<ILicenseConsumptionManager>( new DummyLicenseConsumptionManager() );
 
             return serviceProviderBuilder.ServiceProvider;

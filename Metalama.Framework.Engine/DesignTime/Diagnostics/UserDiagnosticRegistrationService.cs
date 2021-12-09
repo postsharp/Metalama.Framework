@@ -118,7 +118,7 @@ namespace Metalama.Framework.Engine.DesignTime.Diagnostics
             }
 
             foreach ( var diagnostic in pipelineResult.Diagnostics.ReportedDiagnostics.Select( d => d.Descriptor )
-                .Distinct( DiagnosticDescriptorComparer.Instance ) )
+                         .Distinct( DiagnosticDescriptorComparer.Instance ) )
             {
                 if ( !DesignTimeDiagnosticDefinitions.StandardDiagnosticDescriptors.ContainsKey( diagnostic.Id )
                      && !this._registrationFile.Diagnostics.ContainsKey( diagnostic.Id ) )

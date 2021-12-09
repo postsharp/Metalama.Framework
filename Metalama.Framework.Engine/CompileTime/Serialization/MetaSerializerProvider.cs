@@ -44,9 +44,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
         {
             for ( var currentProvider = this._provider; currentProvider != null; currentProvider = currentProvider.NextProvider )
             {
-                var serializerDiscoverer = currentProvider as IMetaSerializerDiscoverer;
-
-                if ( serializerDiscoverer != null )
+                if ( currentProvider is IMetaSerializerDiscoverer serializerDiscoverer )
                 {
                     serializerDiscoverer.DiscoverSerializers( objectType );
                 }

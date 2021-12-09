@@ -134,7 +134,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
 
         private class SeekCountingMemoryStream : MemoryStream
         {
-            public int SeekCount { get; set; }
+            public int SeekCount { get; private set; }
 
             public override long Seek( long offset, SeekOrigin loc )
             {

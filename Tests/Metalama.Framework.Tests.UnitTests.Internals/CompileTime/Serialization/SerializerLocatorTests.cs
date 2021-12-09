@@ -59,13 +59,9 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
                 ?.CreateSerializer( typeof(GenericSerializedClass<string>) )
                 .GetType();
 
-            ;
-
             var serializerType2 = this._customSerializerProvider.GetSerializerFactory( typeof(GenericSerializedClass<>) )
                 ?.CreateSerializer( typeof(GenericSerializedClass<string>) )
                 .GetType();
-
-            ;
 
             Assert.Same( serializerType1, serializerType2 );
         }
@@ -77,13 +73,11 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
                 ?.CreateSerializer( typeof(GenericSerializedClass<string>) )
                 .GetType();
 
-            ; // NOTE: import is just over the namespace opening bracket
+            // NOTE: import is just over the namespace opening bracket
 
             var classAttributeDerivedSerializerType = this._customSerializerProvider.GetSerializerFactory( typeof(GenericSerializedClass<>) )
                 ?.CreateSerializer( typeof(GenericSerializedClass<string>) )
                 .GetType();
-
-            ;
 
             Assert.NotNull( classAttributeDerivedSerializerType );
             Assert.NotNull( assemblyImportedSerializerType );

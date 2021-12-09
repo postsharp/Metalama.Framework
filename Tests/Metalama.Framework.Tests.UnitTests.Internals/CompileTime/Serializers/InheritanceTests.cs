@@ -39,7 +39,7 @@ After:
 */
             var project = CreateCompileTimeProject( domain, testContext, code );
 
-            var type = project!.GetType( "B" );
+            var type = project.GetType( "B" );
             var metaSerializer = GetMetaSerializer( type );
 
             dynamic instance = Activator.CreateInstance( type )!;

@@ -12,7 +12,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
 {
     internal sealed class BuiltInSerializerFactoryProvider : MetaSerializerFactoryProvider
     {
-        public BuiltInSerializerFactoryProvider( )
+        public BuiltInSerializerFactoryProvider()
             : base( new ReflectionMetaSerializationProvider() )
         {
             // intrinsic types

@@ -53,10 +53,10 @@ namespace Metalama.Framework.Engine.DesignTime
 
                 // Execute the pipeline.
                 if ( !DesignTimeAspectPipelineFactory.Instance.TryExecute(
-                    projectOptions,
-                    compilation,
-                    context.CancellationToken,
-                    out var compilationResult ) )
+                        projectOptions,
+                        compilation,
+                        context.CancellationToken,
+                        out var compilationResult ) )
                 {
                     Logger.Instance?.Write( $"DesignTimeSourceGenerator.Execute('{compilation.AssemblyName}'): the pipeline failed." );
 
@@ -96,9 +96,9 @@ namespace Metalama.Framework.Engine.DesignTime
             var sourcesCount = 0;
 
             foreach ( var file in provider.GetAdditionalCompilationOutputFiles()
-                .Where(
-                    f => f.Kind == AdditionalCompilationOutputFileKind.DesignTimeGeneratedCode
-                         && StringComparer.Ordinal.Equals( Path.GetExtension( f.Path ), ".cs" ) ) )
+                         .Where(
+                             f => f.Kind == AdditionalCompilationOutputFileKind.DesignTimeGeneratedCode
+                                  && StringComparer.Ordinal.Equals( Path.GetExtension( f.Path ), ".cs" ) ) )
             {
                 using var stream = file.GetStream();
                 context.AddSource( Path.GetFileName( file.Path ), SourceText.From( stream ) );

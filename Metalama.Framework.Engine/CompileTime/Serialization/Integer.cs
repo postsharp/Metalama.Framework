@@ -84,10 +84,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
                 throw new InvalidCastException();
             }
 
-            checked
-            {
-                return integer.AbsoluteValue;
-            }
+            return integer.AbsoluteValue;
         }
 
         public static implicit operator Integer( int integer )

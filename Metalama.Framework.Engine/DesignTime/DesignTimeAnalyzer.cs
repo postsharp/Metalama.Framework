@@ -88,10 +88,10 @@ namespace Metalama.Framework.Engine.DesignTime
                 var compilation = context.SemanticModel.Compilation;
 
                 if ( !DesignTimeAspectPipelineFactory.Instance.TryExecute(
-                    projectOptions,
-                    compilation,
-                    context.CancellationToken,
-                    out var compilationResult ) )
+                        projectOptions,
+                        compilation,
+                        context.CancellationToken,
+                        out var compilationResult ) )
                 {
                     Logger.Instance?.Write( $"DesignTimeAnalyzer.AnalyzeSemanticModel('{syntaxTreeFilePath}'): the pipeline failed." );
 
@@ -112,7 +112,7 @@ namespace Metalama.Framework.Engine.DesignTime
 
                 // If we have unsupported suppressions, a diagnostic here because a Suppressor cannot report.
                 foreach ( var suppression in result.Suppressions.Where(
-                    s => !this._designTimeDiagnosticDefinitions.SupportedSuppressionDescriptors.ContainsKey( s.Definition.SuppressedDiagnosticId ) ) )
+                             s => !this._designTimeDiagnosticDefinitions.SupportedSuppressionDescriptors.ContainsKey( s.Definition.SuppressedDiagnosticId ) ) )
                 {
                     foreach ( var symbol in DocumentationCommentId.GetSymbolsForDeclarationId( suppression.SymbolId, compilation ) )
                     {

@@ -7,6 +7,8 @@ using System.Collections;
 using System.Collections.Generic;
 using Xunit;
 
+// ReSharper disable StringLiteralTypo
+
 namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
 {
     public class CollectionSerializersTests : SerializationTestsBase
@@ -224,7 +226,7 @@ After:
             var deserialized = SerializeDeserialize( typeWithDictionary );
 
             Assert.NotNull( deserialized );
-            Assert.Equal( typeWithDictionary.Dictionary.Count, deserialized!.Dictionary!.Count );
+            Assert.Equal( typeWithDictionary.Dictionary.Count, deserialized.Dictionary!.Count );
 
             Assert.Equal( typeWithDictionary.Dictionary.Keys, deserialized.Dictionary.Keys );
             Assert.Equal( typeWithDictionary.Dictionary.Values, deserialized.Dictionary.Values );
@@ -275,7 +277,7 @@ After:
             Assert.Equal( value, deserialized );
         }
 
-        [MetaSerializer( typeof(Serializator) )]
+        [MetaSerializer( typeof(Serializer) )]
         public class SimpleType : IEquatable<SimpleType>
         {
             public string? Name { get; set; }
@@ -317,10 +319,13 @@ After:
 
             public override int GetHashCode()
             {
-                return this.Name != null ? StringComparer.Ordinal.GetHashCode( this.Name ) : 0;
+                // ReSharper disable once NonReadonlyMemberInGetHashCode
+                var name = this.Name;
+
+                return name != null ? StringComparer.Ordinal.GetHashCode( name ) : 0;
             }
 
-            public class Serializator : ReferenceTypeSerializer<SimpleType>
+            public class Serializer : ReferenceTypeSerializer<SimpleType>
             {
                 public override object CreateInstance( Type type, IArgumentsReader constructorArguments )
                 {
@@ -339,7 +344,7 @@ After:
             }
         }
 
-        [MetaSerializer( typeof(Serializator) )]
+        [MetaSerializer( typeof(Serializer) )]
         public class CustomEqualityComparer : IEqualityComparer<string>
         {
             public bool Equals( string? x, string? y )
@@ -354,7 +359,10 @@ After:
                     return false;
                 }
 
+                // ReSharper disable RedundantSuppressNullableWarningExpression
                 return x!.StartsWith( y![0].ToString(), StringComparison.Ordinal );
+                
+                // ReSharper restore RedundantSuppressNullableWarningExpression
             }
 
             public int GetHashCode( string obj )
@@ -362,7 +370,7 @@ After:
                 return string.IsNullOrEmpty( obj ) ? 0 : obj[0];
             }
 
-            public class Serializator : IMetaSerializer
+            public class Serializer : IMetaSerializer
             {
                 public object Convert( object value, Type targetType )
                 {
@@ -382,14 +390,14 @@ After:
             }
         }
 
-        [MetaSerializer( typeof(Serializator<,>) )]
+        [MetaSerializer( typeof(Serializer<,>) )]
         public class TypeWithDictionary<TKey, TValue>
             where TKey : notnull
         {
             public Dictionary<TKey, TValue>? Dictionary { get; set; }
         }
 
-        public class Serializator<TKey, TValue> : ReferenceTypeSerializer<TypeWithDictionary<TKey, TValue>>
+        public class Serializer<TKey, TValue> : ReferenceTypeSerializer<TypeWithDictionary<TKey, TValue>>
             where TKey : notnull
         {
             public override object CreateInstance( Type type, IArgumentsReader constructorArguments )
@@ -505,6 +513,7 @@ After:
 
             public override int GetHashCode()
             {
+                // ReSharper disable once NonReadonlyMemberInGetHashCode
                 return EqualityComparer<T>.Default.GetHashCode( this.Value );
             }
         }

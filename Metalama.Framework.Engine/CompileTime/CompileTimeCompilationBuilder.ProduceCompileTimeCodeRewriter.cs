@@ -5,13 +5,13 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Eligibility;
-using Metalama.Framework.Fabrics;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime.Serialization;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Fabrics;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -50,6 +50,7 @@ namespace Metalama.Framework.Engine.CompileTime
             private readonly NameSyntax _originalPathTypeSyntax;
             private readonly ITypeSymbol _fabricType;
             private readonly ITypeSymbol _typeFabricType;
+            private readonly IMetaSerializerGenerator _metaSerializerGenerator;
             private Context _currentContext;
             private HashSet<string>? _currentTypeTemplateNames;
             private string? _currentTypeName;
@@ -57,9 +58,6 @@ namespace Metalama.Framework.Engine.CompileTime
             public bool Success { get; private set; } = true;
 
             public bool FoundCompileTimeCode { get; private set; }
-
-            // TODO: Having this available outside is probably wrong.
-            public IMetaSerializerGenerator MetaSerializerGenerator { get; }
 
             public ProduceCompileTimeCodeRewriter(
                 Compilation runTimeCompilation,
@@ -90,7 +88,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 this._syntaxGenerationContext = SyntaxGenerationContext.CreateDefault( serviceProvider, compileTimeCompilation );
 
                 // TODO: This should be probably injected as a service, but we are creating the generation context here.
-                this.MetaSerializerGenerator = new MetaSerializerGenerator( runTimeCompilation, this._syntaxGenerationContext );
+                this._metaSerializerGenerator = new MetaSerializerGenerator( runTimeCompilation, this._syntaxGenerationContext );
 
                 this._compileTimeTypeName = (NameSyntax)
                     this._syntaxGenerationContext.SyntaxGenerator.Type(
@@ -276,6 +274,19 @@ namespace Metalama.Framework.Engine.CompileTime
 
             private IEnumerable<MemberDeclarationSyntax> VisitTypeDeclaration( TypeDeclarationSyntax node )
             {
+                // Eliminate System.Runtime.CompilerServices.IsExternalInit.
+                if ( node.Identifier.Text == "IsExternalInit" )
+                {
+                    var semanticModel = this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree );
+
+                    if ( semanticModel.GetDeclaredSymbol( node ) is { } type
+                         && type.ContainingNamespace.ToDisplayString() == "System.Runtime.CompilerServices" )
+                    {
+                        // We are inserting this type anyway, so skip it if we find it in user code.
+                        return Array.Empty<MemberDeclarationSyntax>();
+                    }
+                }
+
                 this._cancellationToken.ThrowIfCancellationRequested();
 
                 var symbol = this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node ).AssertNotNull();
@@ -400,9 +411,10 @@ namespace Metalama.Framework.Engine.CompileTime
                 if ( this._serializableTypes.TryGetValue( symbol, out var serializableType ) )
                 {
                     if ( !serializableType.Type.GetMembers()
-                        .Any( m => m is IMethodSymbol method && method.MethodKind == MethodKind.Constructor && method.GetPrimarySyntaxReference() != null ) )
+                            .Any(
+                                m => m is IMethodSymbol method && method.MethodKind == MethodKind.Constructor && method.GetPrimarySyntaxReference() != null ) )
                     {
-                        // There is no defined constructor, so we need to explicitly add parameterless contructor.
+                        // There is no defined constructor, so we need to explicitly add parameterless constructor.
                         members.Add(
                             ConstructorDeclaration(
                                     List<AttributeListSyntax>(),
@@ -415,8 +427,8 @@ namespace Metalama.Framework.Engine.CompileTime
                                 .NormalizeWhitespace() );
                     }
 
-                    members.Add( this.MetaSerializerGenerator.CreateDeserializingConstructor( serializableType ).NormalizeWhitespace() );
-                    members.Add( this.MetaSerializerGenerator.CreateSerializerType( serializableType ).NormalizeWhitespace() );
+                    members.Add( this._metaSerializerGenerator.CreateDeserializingConstructor( serializableType ).NormalizeWhitespace() );
+                    members.Add( this._metaSerializerGenerator.CreateSerializerType( serializableType ).NormalizeWhitespace() );
                 }
 
                 var transformedNode = node.WithMembers( List( members ) ).WithAdditionalAnnotations( _hasCompileTimeCodeAnnotation );
@@ -633,7 +645,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
                         if ( this._serializableFieldsAndProperties.TryGetValue( propertySymbol, out var serializableTypeInfo ) )
                         {
-                            suppressReadOnly = this.MetaSerializerGenerator.ShouldSuppressReadOnly( serializableTypeInfo, propertySymbol );
+                            suppressReadOnly = this._metaSerializerGenerator.ShouldSuppressReadOnly( serializableTypeInfo, propertySymbol );
                         }
 
                         var rewritten = (BasePropertyDeclarationSyntax) this.Visit( node ).AssertNotNull();
@@ -653,14 +665,14 @@ namespace Metalama.Framework.Engine.CompileTime
                                     rewrittenProperty.AccessorList.WithAccessors(
                                         List(
                                             rewrittenProperty.AccessorList.Accessors
-                                            .Where( a => !a.IsKind( SyntaxKind.InitAccessorDeclaration ) )
-                                            .Append(
-                                                AccessorDeclaration(
-                                                    SyntaxKind.SetAccessorDeclaration,
-                                                    List<AttributeListSyntax>(),
-                                                    TokenList( Token( SyntaxKind.PrivateKeyword ) ),
-                                                    null,
-                                                    null ) ) ) ) );
+                                                .Where( a => !a.IsKind( SyntaxKind.InitAccessorDeclaration ) )
+                                                .Append(
+                                                    AccessorDeclaration(
+                                                        SyntaxKind.SetAccessorDeclaration,
+                                                        List<AttributeListSyntax>(),
+                                                        TokenList( Token( SyntaxKind.PrivateKeyword ) ),
+                                                        null,
+                                                        null ) ) ) ) );
                         }
 
                         yield return rewritten;
@@ -704,7 +716,7 @@ namespace Metalama.Framework.Engine.CompileTime
                         .AssertNotNull();
 
                     if ( this._serializableFieldsAndProperties.TryGetValue( fieldSymbol, out var serializableType )
-                         && this.MetaSerializerGenerator.ShouldSuppressReadOnly( serializableType, fieldSymbol ) )
+                         && this._metaSerializerGenerator.ShouldSuppressReadOnly( serializableType, fieldSymbol ) )
                     {
                         // This field needs to have it's readonly modifier removed.
                         nonReadOnlyVariables.Add( (VariableDeclaratorSyntax) this.Visit( declarator ).AssertNotNull() );

@@ -8,6 +8,8 @@ using System;
 using System.IO;
 using Xunit;
 
+// ReSharper disable UnusedMember.Local
+
 namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
 {
     public class AdvancedClassSerializationTests
@@ -15,7 +17,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
         [Fact]
         public void CyclicGraph_Classes()
         {
-            var mother = new Parent( "gall anonim" );
+            var mother = new Parent( "no name" );
             var ch1 = new Child { Mother = mother, Name = "ch1" };
             var ch2 = new Child { Mother = mother, Name = "ch2" };
             var ch3 = new Child { Mother = mother, Name = "ch3" };
@@ -31,7 +33,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
             var deserializedObject = (Parent?) formatter.Deserialize( memoryStream );
 
             Assert.Equal( mother.Name, deserializedObject!.Name );
-            Assert.Equal( mother.Children.Length, deserializedObject!.Children!.Length );
+            Assert.Equal( mother.Children.Length, deserializedObject.Children!.Length );
             Assert.Same( deserializedObject, deserializedObject.Children[0].Mother );
             Assert.Same( deserializedObject, deserializedObject.Children[1].Mother );
             Assert.Same( deserializedObject, deserializedObject.Children[2].Mother );
@@ -53,10 +55,10 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
 
             Assert.NotNull( deserializedObject );
             Assert.Equal( brother.Name, deserializedObject!.Name );
-            Assert.Equal( brother.Sibling.Length, deserializedObject!.Sibling!.Length );
-            Assert.Equal( sister.Sibling.Length, deserializedObject!.Sibling![0]!.Sibling!.Length );
+            Assert.Equal( brother.Sibling.Length, deserializedObject.Sibling!.Length );
+            Assert.Equal( sister.Sibling.Length, deserializedObject.Sibling![0].Sibling!.Length );
 
-            Assert.Same( deserializedObject, deserializedObject!.Sibling![0]!.Sibling![0] );
+            Assert.Same( deserializedObject, deserializedObject.Sibling![0].Sibling![0] );
         }
 
         [Fact]
@@ -80,11 +82,15 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
             Assert.Equal( children.Length, deserializedObject!.Length );
             Assert.Equal( children[0].Name, deserializedObject[0].Name );
             Assert.Equal( children[1].Name, deserializedObject[1].Name );
-            Assert.Equal( brother.Sibling.Length, deserializedObject![0]!.Sibling!.Length );
-            Assert.Equal( sister.Sibling.Length, deserializedObject![1]!.Sibling!.Length );
+            Assert.Equal( brother.Sibling.Length, deserializedObject[0].Sibling!.Length );
 
-            Assert.Same( deserializedObject[0], deserializedObject![1]!.Sibling![0] );
-            Assert.Same( deserializedObject[1], deserializedObject![0]!.Sibling![0] );
+            if ( deserializedObject != null )
+            {
+                Assert.Equal( sister.Sibling.Length, deserializedObject[1].Sibling!.Length );
+
+                Assert.Same( deserializedObject[0], deserializedObject[1].Sibling![0] );
+                Assert.Same( deserializedObject[1], deserializedObject[0].Sibling![0] );
+            }
         }
 
         [Fact]
@@ -101,9 +107,9 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
 
             Assert.NotNull( deserializedObject );
             Assert.NotNull( deserializedObject!.Spouse );
-            Assert.Equal( spouse1.Name, deserializedObject!.Name );
-            Assert.Equal( spouse1.Name, deserializedObject!.Spouse!.Name );
-            Assert.Same( deserializedObject, deserializedObject!.Spouse );
+            Assert.Equal( spouse1.Name, deserializedObject.Name );
+            Assert.Equal( spouse1.Name, deserializedObject.Spouse!.Name );
+            Assert.Same( deserializedObject, deserializedObject.Spouse );
         }
 
         [MetaSerializer( typeof(Serializer) )]

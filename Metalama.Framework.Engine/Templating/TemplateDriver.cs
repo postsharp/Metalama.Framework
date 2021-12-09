@@ -39,9 +39,9 @@ namespace Metalama.Framework.Engine.Templating
             using ( meta.WithContext( templateExpansionContext.MetaApi ) )
             {
                 if ( !this._userCodeInvoker.TryInvoke(
-                    () => (SyntaxNode) this._templateMethod.Invoke( templateExpansionContext.TemplateInstance, Array.Empty<object>() ),
-                    templateExpansionContext,
-                    out var output ) )
+                        () => (SyntaxNode) this._templateMethod.Invoke( templateExpansionContext.TemplateInstance, Array.Empty<object>() ),
+                        templateExpansionContext,
+                        out var output ) )
                 {
                     block = null;
 

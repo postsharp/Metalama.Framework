@@ -158,9 +158,9 @@ namespace Metalama.Framework.Engine.Advices
                                          existingDeclaration.DeclaringType) ) );
                         }
                         else if ( !compilation.InvariantComparer.Is(
-                            this.Builder.ReturnType,
-                            existingDeclaration.ReturnType,
-                            ConversionKind.ImplicitReference ) )
+                                     this.Builder.ReturnType,
+                                     existingDeclaration.ReturnType,
+                                     ConversionKind.ImplicitReference ) )
                         {
                             return
                                 AdviceResult.Create(

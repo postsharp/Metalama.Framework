@@ -163,8 +163,8 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
 
             // Update transformations to reflect the input compilation.
             foreach ( var transformation in rewriter.ObservableTransformations.Cast<object>()
-                .Concat( rewriter.NonObservableTransformations )
-                .Concat( rewriter.ReplacedTransformations ) )
+                         .Concat( rewriter.NonObservableTransformations )
+                         .Concat( rewriter.ReplacedTransformations ) )
             {
                 var containingNodeId = ((ITestTransformation) transformation).ContainingNodeId;
                 var insertPositionNodeId = ((ITestTransformation) transformation).InsertPositionNodeId;

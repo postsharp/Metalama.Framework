@@ -18,7 +18,7 @@ namespace Metalama.Framework.Serialization
         /// <param name="value">At output, set to the value of the argument named <paramref name="name"/> in the given optional <paramref name="scope"/>.</param>
         /// <param name="scope">An optional prefix of <paramref name="name"/>, similar to a namespace.</param>
         /// <returns><c>true</c> if the value is defined, otherwise <c>false</c>.</returns>
-        bool TryGetValue<T>( string name, [MaybeNullWhen( false )] out T? value, string? scope = null );
+        bool TryGetValue<T>( string name, [MaybeNullWhen( false )] out T value, string? scope = null );
 
         /// <summary>
         /// Reads a value from the collection, and throws an exception if the value does not exist.

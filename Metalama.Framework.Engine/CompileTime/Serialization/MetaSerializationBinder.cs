@@ -10,21 +10,6 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
     /// </summary>
     public class MetaSerializationBinder
     {
-        // TODO: Remove.
-        // private readonly IReflectionBindingManagerService reflectionBindingManagerService;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="MetaSerializationBinder"/> class.
-        /// </summary>
-        public MetaSerializationBinder()
-        {
-            // TODO: Remove.
-            // if ( PostSharpEnvironment.IsPostSharpRunning )
-            // {
-            //    this.reflectionBindingManagerService = PostSharpEnvironment.CurrentProject.GetRequiredService<IReflectionBindingManagerService>();
-            // }
-        }
-
         /// <summary>
         /// Gets a <see cref="Type"/> given a type name and an assembly name.
         /// </summary>

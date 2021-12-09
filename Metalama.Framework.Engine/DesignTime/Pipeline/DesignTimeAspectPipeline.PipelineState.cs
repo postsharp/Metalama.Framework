@@ -331,11 +331,11 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
                     var compileTimeTrees = GetCompileTimeSyntaxTrees( ref state, compilation.Compilation, cancellationToken );
 
                     if ( !state._pipeline.TryInitialize(
-                        diagnosticAdder,
-                        compilation,
-                        compileTimeTrees,
-                        cancellationToken,
-                        out configuration ) )
+                            diagnosticAdder,
+                            compilation,
+                            compileTimeTrees,
+                            cancellationToken,
+                            out configuration ) )
                     {
                         // A failure here means an error or a cache miss.
 

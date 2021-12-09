@@ -1,8 +1,8 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using K4os.Hash.xxHash;
 using Metalama.Framework.Aspects;
-using Metalama.Framework.Fabrics;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime.Serialization;
 using Metalama.Framework.Engine.Diagnostics;
@@ -13,8 +13,8 @@ using Metalama.Framework.Engine.Sdk;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.Mapping;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Fabrics;
 using Metalama.Framework.Project;
-using K4os.Hash.xxHash;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Emit;
@@ -113,8 +113,7 @@ namespace Metalama.Framework.Engine.CompileTime
             IDiagnosticAdder diagnosticSink,
             CancellationToken cancellationToken,
             out Compilation? compileTimeCompilation,
-            out ILocationAnnotationMap? locationAnnotationMap,
-            out Dictionary<string, SyntaxTree>? syntaxTreeMap )
+            out ILocationAnnotationMap? locationAnnotationMap )
         {
             locationAnnotationMap = null;
 
@@ -122,7 +121,6 @@ namespace Metalama.Framework.Engine.CompileTime
             if ( treesWithCompileTimeCode.Count == 0 )
             {
                 compileTimeCompilation = null;
-                syntaxTreeMap = null;
 
                 return true;
             }
@@ -160,8 +158,6 @@ namespace Metalama.Framework.Engine.CompileTime
                           SourceTree: t) )
                 .ToList();
 
-            syntaxTreeMap = syntaxTrees.ToDictionary( t => t.TransformedTree.FilePath, t => t.SourceTree );
-
             locationAnnotationMap = templateCompiler.LocationAnnotationMap;
 
             if ( !produceCompileTimeCodeRewriter.Success )
@@ -174,7 +170,6 @@ namespace Metalama.Framework.Engine.CompileTime
                 // This happens if all compile-time code is illegitimate, i.e. was reported as an error and stripped.
 
                 compileTimeCompilation = null;
-                syntaxTreeMap = null;
 
                 return true;
             }
@@ -570,12 +565,12 @@ namespace Metalama.Framework.Engine.CompileTime
                 this.GetPreCacheProjectInfo( runTimeCompilation, sourceTreesWithCompileTimeCode, referencedProjects );
 
             if ( !this.TryGetCompileTimeProjectFromCache(
-                runTimeCompilation,
-                referencedProjects,
-                outputPaths,
-                compileTimeAssemblyName,
-                projectHash,
-                out project ) )
+                    runTimeCompilation,
+                    referencedProjects,
+                    outputPaths,
+                    compileTimeAssemblyName,
+                    projectHash,
+                    out project ) )
             {
                 if ( cacheOnly )
                 {
@@ -589,12 +584,12 @@ namespace Metalama.Framework.Engine.CompileTime
                 {
                     // Do a second cache lookup within the lock.
                     if ( this.TryGetCompileTimeProjectFromCache(
-                        runTimeCompilation,
-                        referencedProjects,
-                        outputPaths,
-                        compileTimeAssemblyName,
-                        projectHash,
-                        out project ) )
+                            runTimeCompilation,
+                            referencedProjects,
+                            outputPaths,
+                            compileTimeAssemblyName,
+                            projectHash,
+                            out project ) )
                     {
                         // Coverage: ignore (this depends on a multi-threaded condition)
                         return true;
@@ -602,15 +597,14 @@ namespace Metalama.Framework.Engine.CompileTime
 
                     // Generate the C# compilation.
                     if ( !this.TryCreateCompileTimeCompilation(
-                        runTimeCompilation,
-                        sourceTreesWithCompileTimeCode,
-                        referencedProjects,
-                        projectHash,
-                        diagnosticSink,
-                        cancellationToken,
-                        out var compileTimeCompilation,
-                        out var locationAnnotationMap,
-                        out _ ) )
+                            runTimeCompilation,
+                            sourceTreesWithCompileTimeCode,
+                            referencedProjects,
+                            projectHash,
+                            diagnosticSink,
+                            cancellationToken,
+                            out var compileTimeCompilation,
+                            out var locationAnnotationMap ) )
                     {
                         project = null;
 
