@@ -10,7 +10,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization.Serializers
     // This needs to be public because the type is instantiated from an activator in client assemblies.
 
     /// <exclude/>
-    public sealed class ListSerializer<T> : ReferenceTypeMetaSerializer
+    public sealed class ListSerializer<T> : ReferenceTypeSerializer
     {
         private const string _keyName = "_";
 

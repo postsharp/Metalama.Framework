@@ -5,7 +5,7 @@ using Metalama.Framework.Serialization;
 
 namespace Metalama.Framework.Engine.CompileTime.Serialization.Serializers
 {
-    internal sealed class DecimalSerializer : ValueTypeMetaSerializer<decimal>
+    internal sealed class DecimalSerializer : ValueTypeSerializer<decimal>
     {
         public override void SerializeObject( decimal value, IArgumentsWriter writer )
         {

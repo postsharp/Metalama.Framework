@@ -6,7 +6,7 @@ using System;
 
 namespace Metalama.Framework.Engine.CompileTime.Serialization.Serializers
 {
-    internal sealed class DateTimeSerializer : ValueTypeMetaSerializer<DateTime>
+    internal sealed class DateTimeSerializer : ValueTypeSerializer<DateTime>
     {
         public override void SerializeObject( DateTime value, IArgumentsWriter writer )
         {

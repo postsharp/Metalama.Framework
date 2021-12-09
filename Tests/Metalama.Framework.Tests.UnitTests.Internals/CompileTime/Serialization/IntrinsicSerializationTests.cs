@@ -689,7 +689,7 @@ After:
             TestSerialization( (object) DateTime.Now );
         }
 
-        [MetaSerializer( typeof(Serializer) )]
+        [Serializer( typeof(Serializer) )]
         public class SimpleType : IEquatable<SimpleType>
         {
             public string? Name { get; set; }
@@ -737,7 +737,7 @@ After:
                 return name != null ? StringComparer.Ordinal.GetHashCode( name ) : 0;
             }
 
-            public class Serializer : ReferenceTypeMetaSerializer
+            public class Serializer : ReferenceTypeSerializer
             {
                 public override object CreateInstance( Type type, IArgumentsReader constructorArguments )
                 {

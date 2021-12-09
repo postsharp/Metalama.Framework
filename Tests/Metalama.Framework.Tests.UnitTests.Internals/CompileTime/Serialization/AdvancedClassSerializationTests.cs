@@ -112,7 +112,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
             Assert.Same( deserializedObject, deserializedObject.Spouse );
         }
 
-        [MetaSerializer( typeof(Serializer) )]
+        [Serializer( typeof(Serializer) )]
         public class Parent
         {
             public string Name { get; }
@@ -152,7 +152,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
             }
         }
 
-        [MetaSerializer( typeof(Serializer) )]
+        [Serializer( typeof(Serializer) )]
         public class Child
         {
             public string? Name { get; set; }
@@ -193,7 +193,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
             }
         }
 
-        [MetaSerializer( typeof(Serializer) )]
+        [Serializer( typeof(Serializer) )]
         public class IgnoringType
         {
 #pragma warning disable SA1401  // Fields should be private
@@ -201,7 +201,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
             private const string _ignoredKey = "_n";
             private const string _importantKey = "_i";
 
-            [MetaNonSerialized]
+            [LamaNonSerialized]
             public string? NoMatter;
 #pragma warning restore SA1401  // Fields should be private
 #pragma warning restore IDE0051 // Remove unused private members

@@ -10,7 +10,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization.Serializers
     // This needs to be public because the type is instantiated from an activator in client assemblies.
 
     /// <exclude/>
-    public class CultureInfoSerializer : ReferenceTypeMetaSerializer
+    public class CultureInfoSerializer : ReferenceTypeSerializer
     {
         /// <exclude/>
         public override object CreateInstance( Type type, IArgumentsReader constructorArguments )

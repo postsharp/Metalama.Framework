@@ -6,18 +6,18 @@ using System;
 
 namespace Metalama.Framework.Engine.CompileTime.Serialization.Serializers
 {
-    internal abstract class IntrinsicSerializer<T> : IMetaSerializer
+    internal abstract class IntrinsicSerializer<T> : ISerializer
     {
         public abstract object Convert( object value, Type targetType );
 
-        object IMetaSerializer.CreateInstance( Type type, IArgumentsReader constructorArguments )
+        object ISerializer.CreateInstance( Type type, IArgumentsReader constructorArguments )
         {
             return constructorArguments.GetValue<T>( "_" )!;
         }
 
-        void IMetaSerializer.DeserializeFields( ref object obj, IArgumentsReader initializationArguments ) { }
+        void ISerializer.DeserializeFields( ref object obj, IArgumentsReader initializationArguments ) { }
 
-        void IMetaSerializer.SerializeObject( object obj, IArgumentsWriter constructorArguments, IArgumentsWriter? initializationArguments )
+        void ISerializer.SerializeObject( object obj, IArgumentsWriter constructorArguments, IArgumentsWriter? initializationArguments )
         {
             constructorArguments.SetValue( "_", (T) obj );
         }

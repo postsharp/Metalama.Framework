@@ -5,7 +5,7 @@ using Metalama.Framework.Serialization;
 
 namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
 {
-    public abstract class ReferenceTypeSerializer<T> : ReferenceTypeMetaSerializer
+    public abstract class ReferenceTypeSerializer<T> : ReferenceTypeSerializer
     {
         public override void SerializeObject( object obj, IArgumentsWriter constructorArguments, IArgumentsWriter initializationArguments )
         {

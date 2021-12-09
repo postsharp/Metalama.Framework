@@ -12,7 +12,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
     {
         private readonly IMetaSerializerFactoryProvider _provider;
         private readonly MetaSerializerProvider? _next;
-        private readonly Dictionary<Type, IMetaSerializer> _serializers = new( 64 );
+        private readonly Dictionary<Type, ISerializer> _serializers = new( 64 );
         private readonly object _sync = new();
 
         public MetaSerializerProvider( IMetaSerializerFactoryProvider provider )
@@ -51,7 +51,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
             }
         }
 
-        public IMetaSerializer GetSerializer( Type objectType )
+        public ISerializer GetSerializer( Type objectType )
         {
             if ( !this.TryGetSerializer( objectType, out var serializer ) )
             {
@@ -61,7 +61,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
             return serializer;
         }
 
-        public bool TryGetSerializer( Type objectType, out IMetaSerializer serializer )
+        public bool TryGetSerializer( Type objectType, out ISerializer serializer )
         {
             if ( objectType.HasElementType )
             {

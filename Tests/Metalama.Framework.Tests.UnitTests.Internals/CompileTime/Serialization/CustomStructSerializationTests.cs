@@ -82,7 +82,7 @@ After:
             Assert.Same( str2.SimpleClass, str2.SimpleClass2 );
         }
 
-        [MetaSerializer( typeof(GenericStructSerializer<>) )]
+        [Serializer( typeof(GenericStructSerializer<>) )]
         public struct GenericStruct<T> : IEquatable<GenericStruct<T>>
             where T : notnull
         {
@@ -115,7 +115,7 @@ After:
             }
         }
 
-        public class GenericStructSerializer<T> : ValueTypeMetaSerializer<GenericStruct<T>>
+        public class GenericStructSerializer<T> : ValueTypeSerializer<GenericStruct<T>>
             where T : notnull
         {
             public override void SerializeObject( GenericStruct<T> obj, IArgumentsWriter constructorArguments )
@@ -133,7 +133,7 @@ After:
             }
         }
 
-        [MetaSerializer( typeof(SimpleStructSerializer) )]
+        [Serializer( typeof(SimpleStructSerializer) )]
         public struct SimpleStruct : IEquatable<SimpleStruct>
         {
             public int IntValue { get; set; }
@@ -189,7 +189,7 @@ After:
             }
         }
 
-        public class SimpleStructSerializer : ValueTypeMetaSerializer<SimpleStruct>
+        public class SimpleStructSerializer : ValueTypeSerializer<SimpleStruct>
         {
             public override void SerializeObject( SimpleStruct obj, IArgumentsWriter constructorArguments )
             {
@@ -215,7 +215,7 @@ After:
             }
         }
 
-        [MetaSerializer( typeof(SimpleClassSerializer) )]
+        [Serializer( typeof(SimpleClassSerializer) )]
         public class SimpleClass : IEquatable<SimpleClass>
         {
             public int X { get; set; }

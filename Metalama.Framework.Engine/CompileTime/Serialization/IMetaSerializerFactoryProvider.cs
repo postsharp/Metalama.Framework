@@ -7,7 +7,7 @@ using System;
 namespace Metalama.Framework.Engine.CompileTime.Serialization
 {
     /// <summary>
-    /// Provides instances of the <see cref="IMetaSerializerFactory"/> interface given the object type.
+    /// Provides instances of the <see cref="ISerializerFactory"/> interface given the object type.
     /// </summary>
     /// <seealso cref="IMetaSerializerDiscoverer"/>
     internal interface IMetaSerializerFactoryProvider
@@ -26,16 +26,16 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
         Type? GetSurrogateType( Type objectType );
 
         /// <summary>
-        /// Gets the instance of <see cref="IMetaSerializerFactory"/>.
+        /// Gets the instance of <see cref="ISerializerFactory"/>.
         /// </summary>
         /// <param name="objectType">Type of object being serialized or deserialized. If a surrogate type has been specified during serialization,
         /// this parameter is set to the surrogate type during deserialization.</param>
-        /// <returns>An instance of <see cref="IMetaSerializerFactory"/> able to serialize or deserialize <paramref name="objectType"/>, or <c>null</c>
+        /// <returns>An instance of <see cref="ISerializerFactory"/> able to serialize or deserialize <paramref name="objectType"/>, or <c>null</c>
         /// if there is no known serializer factory for this object. </returns>
         /// <remarks>
         /// <para>It is <i>not</i> the responsibility of this class to call the next provider (<see cref="NextProvider"/>).</para>
         /// </remarks>
-        IMetaSerializerFactory? GetSerializerFactory( Type objectType );
+        ISerializerFactory? GetSerializerFactory( Type objectType );
 
         /// <summary>
         /// Gets the next provider in the chain.

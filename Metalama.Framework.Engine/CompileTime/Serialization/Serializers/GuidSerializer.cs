@@ -6,7 +6,7 @@ using System;
 
 namespace Metalama.Framework.Engine.CompileTime.Serialization.Serializers
 {
-    internal sealed class GuidSerializer : ValueTypeMetaSerializer<Guid>
+    internal sealed class GuidSerializer : ValueTypeSerializer<Guid>
     {
         public override void SerializeObject( Guid value, IArgumentsWriter writer )
         {

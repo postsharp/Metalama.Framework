@@ -542,7 +542,7 @@ After:
             Assert.Equal( initialObject.Field, deserializedObject.Field );
         }
 
-        [MetaSerializer( typeof(SimpleExplicitlySerializedClass<>.Serializer) )]
+        [Serializer( typeof(SimpleExplicitlySerializedClass<>.Serializer) )]
         public class SimpleExplicitlySerializedClass<T> : IEquatable<SimpleExplicitlySerializedClass<T>>
         {
 #pragma warning disable SA1401 // Fields should be private
@@ -614,7 +614,7 @@ After:
             }
         }
 
-        [MetaSerializer( typeof(ExplicitlySerializedClass<,>.Serializer) )]
+        [Serializer( typeof(ExplicitlySerializedClass<,>.Serializer) )]
         public class ExplicitlySerializedClass<TForCtor, TForField> : SimpleExplicitlySerializedClass<TForCtor>,
                                                                       IEquatable<ExplicitlySerializedClass<TForCtor, TForField>>
         {

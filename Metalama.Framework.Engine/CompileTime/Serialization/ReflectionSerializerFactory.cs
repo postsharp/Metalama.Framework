@@ -7,16 +7,16 @@ using System.Globalization;
 
 namespace Metalama.Framework.Engine.CompileTime.Serialization
 {
-    internal sealed class ReflectionMetaSerializerFactory : IMetaSerializerFactory
+    internal sealed class ReflectionSerializerFactory : ISerializerFactory
     {
         public Type SerializerType { get; }
 
-        public ReflectionMetaSerializerFactory( Type serializerType )
+        public ReflectionSerializerFactory( Type serializerType )
         {
             this.SerializerType = serializerType;
         }
 
-        public IMetaSerializer CreateSerializer( Type objectType )
+        public ISerializer CreateSerializer( Type objectType )
         {
             Type serializerTypeInstance;
 
@@ -50,8 +50,8 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
 
             return instance switch
             {
-                IMetaSerializer serializer => serializer,
-                IMetaSerializerFactory serializerFactory => serializerFactory.CreateSerializer( objectType ),
+                ISerializer serializer => serializer,
+                ISerializerFactory serializerFactory => serializerFactory.CreateSerializer( objectType ),
                 _ => throw new MetaSerializationException(
                     string.Format(
                         CultureInfo.InvariantCulture,

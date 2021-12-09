@@ -277,7 +277,7 @@ After:
             Assert.Equal( value, deserialized );
         }
 
-        [MetaSerializer( typeof(Serializer) )]
+        [Serializer( typeof(Serializer) )]
         public class SimpleType : IEquatable<SimpleType>
         {
             public string? Name { get; set; }
@@ -344,7 +344,7 @@ After:
             }
         }
 
-        [MetaSerializer( typeof(Serializer) )]
+        [Serializer( typeof(Serializer) )]
         public class CustomEqualityComparer : IEqualityComparer<string>
         {
             public bool Equals( string? x, string? y )
@@ -370,7 +370,7 @@ After:
                 return string.IsNullOrEmpty( obj ) ? 0 : obj[0];
             }
 
-            public class Serializer : IMetaSerializer
+            public class Serializer : ISerializer
             {
                 public object Convert( object value, Type targetType )
                 {
@@ -390,7 +390,7 @@ After:
             }
         }
 
-        [MetaSerializer( typeof(Serializer<,>) )]
+        [Serializer( typeof(Serializer<,>) )]
         public class TypeWithDictionary<TKey, TValue>
             where TKey : notnull
         {
@@ -419,7 +419,7 @@ After:
             }
         }
 
-        [MetaSerializer( typeof(Serializer) )]
+        [Serializer( typeof(Serializer) )]
         public class LinkedListImpl
         {
             public Node<int>? Head { get; set; }
@@ -444,7 +444,7 @@ After:
             }
         }
 
-        [MetaSerializer( typeof(Node<>.Serializer) )]
+        [Serializer( typeof(Node<>.Serializer) )]
         public class Node<T> : IEquatable<Node<T>>
             where T : notnull
         {

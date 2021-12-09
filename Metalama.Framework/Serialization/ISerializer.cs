@@ -8,7 +8,7 @@ namespace Metalama.Framework.Serialization
     /// <summary>
     /// Defines the semantics of an object serializer.
     /// </summary>
-    public interface IMetaSerializer
+    public interface ISerializer
     {
         /// <summary>
         /// Converts a value into a given target type.

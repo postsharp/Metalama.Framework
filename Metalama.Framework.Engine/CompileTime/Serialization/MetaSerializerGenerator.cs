@@ -155,11 +155,11 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
             if ( targetType.IsValueType )
             {
                 // Value type serializers are always based on ValueTypeMetaSerializer.
-                return ((INamedTypeSymbol) this._context.ReflectionMapper.GetTypeSymbol( typeof(ValueTypeMetaSerializer<>) )).Construct( targetType );
+                return ((INamedTypeSymbol) this._context.ReflectionMapper.GetTypeSymbol( typeof(ValueTypeSerializer<>) )).Construct( targetType );
             }
 
             if ( targetType.BaseType.AllInterfaces.Contains(
-                    this._runtimeReflectionMapper.GetTypeSymbol( typeof(IMetaSerializable) ),
+                    this._runtimeReflectionMapper.GetTypeSymbol( typeof(ILamaSerializable) ),
                     SymbolEqualityComparer.Default ) )
             {
                 // The base type should have a meta serializer.
@@ -190,7 +190,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
             else
             {
                 // This is first serializer in the hierarchy.
-                return (INamedTypeSymbol) this._context.ReflectionMapper.GetTypeSymbol( typeof(ReferenceTypeMetaSerializer) );
+                return (INamedTypeSymbol) this._context.ReflectionMapper.GetTypeSymbol( typeof(ReferenceTypeSerializer) );
             }
         }
 
@@ -213,7 +213,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
 
             var createInstanceMethod = serializerBaseType.GetMembers()
                 .OfType<IMethodSymbol>()
-                .Single( x => x.Name == nameof(ReferenceTypeMetaSerializer.CreateInstance) );
+                .Single( x => x.Name == nameof(ReferenceTypeSerializer.CreateInstance) );
 
             Invariant.Assert( createInstanceMethod.Parameters.Length == 2 );
 
@@ -275,7 +275,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
         {
             var baseSerializeMethod = baseSerializer.GetMembers()
                 .OfType<IMethodSymbol>()
-                .Single( x => x.Name == nameof(ReferenceTypeMetaSerializer.SerializeObject) );
+                .Single( x => x.Name == nameof(ReferenceTypeSerializer.SerializeObject) );
 
             Invariant.Assert( baseSerializeMethod.Parameters.Length == 3 );
 
@@ -291,7 +291,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
                                 MemberAccessExpression(
                                     SyntaxKind.SimpleMemberAccessExpression,
                                     BaseExpression(),
-                                    IdentifierName( nameof(ReferenceTypeMetaSerializer.SerializeObject) ) ),
+                                    IdentifierName( nameof(ReferenceTypeSerializer.SerializeObject) ) ),
                                 ArgumentList( SeparatedList( baseSerializeMethod.Parameters.Select( p => Argument( IdentifierName( p.Name ) ) ) ) ) ) ),
                     localVariableDeclaration,
                     this.CreateFieldSerializationStatements(
@@ -309,7 +309,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
         {
             var baseDeserializeMethod = baseSerializer.GetMembers()
                 .OfType<IMethodSymbol>()
-                .Single( x => x.Name == nameof(ReferenceTypeMetaSerializer.DeserializeFields) );
+                .Single( x => x.Name == nameof(ReferenceTypeSerializer.DeserializeFields) );
 
             Invariant.Assert( baseDeserializeMethod.Parameters.Length == 1 );
 
@@ -325,7 +325,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
                                 MemberAccessExpression(
                                     SyntaxKind.SimpleMemberAccessExpression,
                                     BaseExpression(),
-                                    IdentifierName( nameof(ReferenceTypeMetaSerializer.DeserializeFields) ) ),
+                                    IdentifierName( nameof(ReferenceTypeSerializer.DeserializeFields) ) ),
                                 ArgumentList( SeparatedList( baseDeserializeMethod.Parameters.Select( p => Argument( IdentifierName( p.Name ) ) ) ) ) ) ),
                     localVariableDeclaration,
                     this.CreateFieldDeserializationStatements(
@@ -335,7 +335,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
                         this.SelectLateDeserializedFields ) );
 
             return this.CreateOverrideMethod(
-                baseSerializer.GetMembers().OfType<IMethodSymbol>().Single( x => x.Name == nameof(ReferenceTypeMetaSerializer.DeserializeFields) ),
+                baseSerializer.GetMembers().OfType<IMethodSymbol>().Single( x => x.Name == nameof(ReferenceTypeSerializer.DeserializeFields) ),
                 body );
         }
 
@@ -343,7 +343,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
         {
             var serializeMethod = baseSerializer.GetMembers()
                 .OfType<IMethodSymbol>()
-                .Single( x => x.Name == nameof(ValueTypeMetaSerializer<int>.SerializeObject) );
+                .Single( x => x.Name == nameof(ValueTypeSerializer<int>.SerializeObject) );
 
             Invariant.Assert( serializeMethod.Parameters.Length == 2 );
 
@@ -362,7 +362,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
         {
             var deserializeMethod = baseSerializer.GetMembers()
                 .OfType<IMethodSymbol>()
-                .Single( x => x.Name == nameof(ValueTypeMetaSerializer<int>.DeserializeObject) );
+                .Single( x => x.Name == nameof(ValueTypeSerializer<int>.DeserializeObject) );
 
             Invariant.Assert( deserializeMethod.Parameters.Length == 1 );
 
@@ -375,7 +375,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
                             null ) ) );
 
             return this.CreateOverrideMethod(
-                baseSerializer.GetMembers().OfType<IMethodSymbol>().Single( x => x.Name == nameof(ValueTypeMetaSerializer<int>.DeserializeObject) ),
+                baseSerializer.GetMembers().OfType<IMethodSymbol>().Single( x => x.Name == nameof(ValueTypeSerializer<int>.DeserializeObject) ),
                 body );
         }
 
@@ -553,7 +553,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
                     .Any(
                         a => SymbolEqualityComparer.Default.Equals(
                             a.AttributeClass,
-                            this._runtimeReflectionMapper.GetTypeSymbol( typeof(MetaNonSerializedAttribute) ) ) ) )
+                            this._runtimeReflectionMapper.GetTypeSymbol( typeof(LamaNonSerializedAttribute) ) ) ) )
                 {
                     continue;
                 }

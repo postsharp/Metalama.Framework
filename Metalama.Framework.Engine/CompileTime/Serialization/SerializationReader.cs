@@ -48,16 +48,16 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
                 this.InitializeObject( instanceId );
             }
 
-            IMetaSerializationCallback? callback;
+            ILamaSerializationCallback? callback;
 
-            if ( (callback = rootObject as IMetaSerializationCallback) != null )
+            if ( (callback = rootObject as ILamaSerializationCallback) != null )
             {
                 callback.OnDeserialized();
             }
 
             foreach ( var obj in this._referenceTypeInstances.Values )
             {
-                if ( (callback = obj.Value.AssertNotNull().Value as IMetaSerializationCallback) != null && !ReferenceEquals( callback, rootObject ) )
+                if ( (callback = obj.Value.AssertNotNull().Value as ILamaSerializationCallback) != null && !ReferenceEquals( callback, rootObject ) )
                 {
                     callback.OnDeserialized();
                 }
@@ -132,7 +132,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
             }
         }
 
-        private static void TryDeserializeFields( IMetaSerializer serializer, ref object value, InstanceFields fields, SerializationCause? cause )
+        private static void TryDeserializeFields( ISerializer serializer, ref object value, InstanceFields fields, SerializationCause? cause )
         {
             try
             {
@@ -578,7 +578,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
             }
 
             object value;
-            IMetaSerializer? serializer;
+            ISerializer? serializer;
 
             if ( intrinsicType == SerializationIntrinsicType.Array )
             {
@@ -623,7 +623,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
             return objRef;
         }
 
-        private static object TryCreateInstance( IMetaSerializer serializer, Type type, InstanceFields fields, SerializationCause? cause )
+        private static object TryCreateInstance( ISerializer serializer, Type type, InstanceFields fields, SerializationCause? cause )
         {
             try
             {
@@ -706,7 +706,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
                     return true;
                 }
 
-                IMetaSerializer? serializer = null;
+                ISerializer? serializer = null;
 
                 if ( !typeof(T).HasElementType )
                 {
@@ -789,7 +789,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
 
             public SerializationIntrinsicType IntrinsicType { get; }
 
-            public IMetaSerializer? Serializer { get; }
+            public ISerializer? Serializer { get; }
 
             public bool IsInitialized { get; set; }
 
@@ -798,7 +798,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
                 this.IntrinsicType = SerializationIntrinsicType.None;
             }
 
-            public ObjRef( object value, IMetaSerializer? serializer, SerializationIntrinsicType intrinsicType )
+            public ObjRef( object value, ISerializer? serializer, SerializationIntrinsicType intrinsicType )
             {
                 this.Value = value;
                 this.Serializer = serializer;

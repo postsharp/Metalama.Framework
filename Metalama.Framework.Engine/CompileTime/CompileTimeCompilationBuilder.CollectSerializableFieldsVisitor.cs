@@ -29,7 +29,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 this._semanticModel = semanticModel;
                 this._cancellationToken = cancellationToken;
                 this._serializableFieldsOrProperties = new List<ISymbol>();
-                this._nonSerializedAttribute = reflectionMapper.GetTypeSymbol( typeof(MetaNonSerializedAttribute) );
+                this._nonSerializedAttribute = reflectionMapper.GetTypeSymbol( typeof(LamaNonSerializedAttribute) );
             }
 
             public override void VisitFieldDeclaration( FieldDeclarationSyntax node )

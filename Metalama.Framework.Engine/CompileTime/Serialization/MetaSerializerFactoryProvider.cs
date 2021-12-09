@@ -8,7 +8,7 @@ using System.Collections.Generic;
 namespace Metalama.Framework.Engine.CompileTime.Serialization
 {
     /// <summary>
-    /// Provides instances of the <see cref="IMetaSerializerFactory"/> interface for object types that have been previously registered
+    /// Provides instances of the <see cref="ISerializerFactory"/> interface for object types that have been previously registered
     /// using <see cref="AddSerializer"/>.
     /// </summary>
     internal class MetaSerializerFactoryProvider : IMetaSerializerFactoryProvider
@@ -18,7 +18,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
         /// </summary>
         public static readonly MetaSerializerFactoryProvider BuiltIn = new BuiltInSerializerFactoryProvider();
 
-        private readonly Dictionary<Type, IMetaSerializerFactory> _serializerTypes = new( 64 );
+        private readonly Dictionary<Type, ISerializerFactory> _serializerTypes = new( 64 );
 
         private bool _isReadOnly;
 
@@ -54,7 +54,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
         /// <typeparam name="TObject">Type of the serialized object.</typeparam>
         /// <typeparam name="TSerializer">Type of the serializer.</typeparam>
         public void AddSerializer<TObject, TSerializer>()
-            where TSerializer : IMetaSerializer, new()
+            where TSerializer : ISerializer, new()
         {
             this.AddSerializer( typeof(TObject), typeof(TSerializer) );
         }
@@ -63,7 +63,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
         /// Maps an object type to a serializer type.
         /// </summary>
         /// <param name="objectType">Type of the serialized object.</param>
-        /// <param name="serializerType">Type of the serializer (must be derived from <see cref="IMetaSerializer"/>).</param>
+        /// <param name="serializerType">Type of the serializer (must be derived from <see cref="ISerializer"/>).</param>
         public void AddSerializer( Type objectType, Type serializerType )
         {
             if ( this._isReadOnly )
@@ -71,12 +71,12 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
                 throw new InvalidOperationException();
             }
 
-            if ( !typeof(IMetaSerializer).IsAssignableFrom( serializerType ) )
+            if ( !typeof(ISerializer).IsAssignableFrom( serializerType ) )
             {
                 throw new ArgumentOutOfRangeException( nameof(serializerType), "Type '{0}' does not implement ISerializer or IGenericSerializerFactory" );
             }
 
-            this._serializerTypes.Add( objectType, new ReflectionMetaSerializerFactory( serializerType ) );
+            this._serializerTypes.Add( objectType, new ReflectionSerializerFactory( serializerType ) );
         }
 
         /// <inheritdoc />
@@ -86,7 +86,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
         }
 
         /// <inheritdoc />
-        public virtual IMetaSerializerFactory? GetSerializerFactory( Type objectType )
+        public virtual ISerializerFactory? GetSerializerFactory( Type objectType )
         {
             if ( this._serializerTypes.TryGetValue( objectType, out var serializerType ) )
             {

@@ -5,19 +5,19 @@ using System;
 
 namespace Metalama.Framework.Serialization
 {
-    public abstract class ReferenceTypeMetaSerializer : IMetaSerializer
+    public abstract class ReferenceTypeSerializer : ISerializer
     {
         /// <inheritdoc />
-        bool IMetaSerializer.IsTwoPhase => true;
+        bool ISerializer.IsTwoPhase => true;
 
         /// <inheritdoc />
-        void IMetaSerializer.DeserializeFields( ref object obj, IArgumentsReader initializationArguments )
+        void ISerializer.DeserializeFields( ref object obj, IArgumentsReader initializationArguments )
         {
             this.DeserializeFields( obj, initializationArguments );
         }
 
         /// <inheritdoc />
-        void IMetaSerializer.SerializeObject( object obj, IArgumentsWriter constructorArguments, IArgumentsWriter initializationArguments )
+        void ISerializer.SerializeObject( object obj, IArgumentsWriter constructorArguments, IArgumentsWriter initializationArguments )
         {
             this.SerializeObject( obj, constructorArguments, initializationArguments );
         }

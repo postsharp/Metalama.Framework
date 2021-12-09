@@ -5,10 +5,10 @@ using System;
 
 namespace Metalama.Framework.Serialization
 {
-    public abstract class ValueTypeMetaSerializer<T> : IMetaSerializer
+    public abstract class ValueTypeSerializer<T> : ISerializer
         where T : struct
     {
-        bool IMetaSerializer.IsTwoPhase => false;
+        bool ISerializer.IsTwoPhase => false;
 
         /// <summary>
         /// Serializes an object.
@@ -25,7 +25,7 @@ namespace Metalama.Framework.Serialization
         public abstract T DeserializeObject( IArgumentsReader constructorArguments );
 
         /// <inheritdoc />
-        void IMetaSerializer.SerializeObject( object obj, IArgumentsWriter constructorArguments, IArgumentsWriter initializationArguments )
+        void ISerializer.SerializeObject( object obj, IArgumentsWriter constructorArguments, IArgumentsWriter initializationArguments )
         {
             var typedValue = (T) obj;
             this.SerializeObject( typedValue, constructorArguments );
@@ -38,12 +38,12 @@ namespace Metalama.Framework.Serialization
         }
 
         /// <inheritdoc />
-        object IMetaSerializer.CreateInstance( Type type, IArgumentsReader constructorArguments )
+        object ISerializer.CreateInstance( Type type, IArgumentsReader constructorArguments )
         {
             return this.DeserializeObject( constructorArguments );
         }
 
         /// <inheritdoc />
-        void IMetaSerializer.DeserializeFields( ref object o, IArgumentsReader initializationArguments ) { }
+        void ISerializer.DeserializeFields( ref object o, IArgumentsReader initializationArguments ) { }
     }
 }

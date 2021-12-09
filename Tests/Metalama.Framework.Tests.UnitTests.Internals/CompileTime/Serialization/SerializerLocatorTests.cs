@@ -10,7 +10,7 @@ using Xunit;
 #pragma warning disable SA1106 // Code should not contain empty statements
 
 // attribute added for testing purposes
-[assembly: ImportMetaSerializer( typeof(SerializerLocatorTests.TypeWoSerializer), typeof(SerializerLocatorTests.GenericSerializedClass<>.Serializer) )]
+[assembly: ImportSerializer( typeof(SerializerLocatorTests.TypeWoSerializer), typeof(SerializerLocatorTests.GenericSerializedClass<>.Serializer) )]
 
 namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
 {
@@ -90,7 +90,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
             Assert.Throws<MetaSerializationException>( () => this._customSerializerProvider.GetSerializerFactory( typeof(TypeWithManySerializers) ) );
         }
 
-        [MetaSerializer( typeof(Serializer) )]
+        [Serializer( typeof(Serializer) )]
         public class SerializedClass
         {
             public class Serializer : ReferenceTypeSerializer<SerializedClass>
@@ -106,7 +106,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
             }
         }
 
-        [MetaSerializer( typeof(GenericSerializedClass<>.Serializer) )]
+        [Serializer( typeof(GenericSerializedClass<>.Serializer) )]
         public class GenericSerializedClass<T>
         {
             public class Serializer : ReferenceTypeSerializer<GenericSerializedClass<T>>
@@ -127,8 +127,8 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
 
         internal class TypeWoSerializer { }
 
-        [MetaSerializer( typeof(Serializer) )]
-        [ImportMetaSerializer( typeof(TypeWithManySerializers), typeof(SecondSerializer) )]
+        [Serializer( typeof(Serializer) )]
+        [ImportSerializer( typeof(TypeWithManySerializers), typeof(SecondSerializer) )]
         public class TypeWithManySerializers
         {
             public class Serializer : ReferenceTypeSerializer<TypeWithManySerializers>

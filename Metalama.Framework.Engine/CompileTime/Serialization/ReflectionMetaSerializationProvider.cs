@@ -11,7 +11,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
 {
     internal sealed class ReflectionMetaSerializationProvider : IMetaSerializerFactoryProvider, IMetaSerializerDiscoverer
     {
-        private readonly Dictionary<Type, IMetaSerializerFactory> _serializerTypes = new();
+        private readonly Dictionary<Type, ISerializerFactory> _serializerTypes = new();
         private readonly Dictionary<Type, bool> _inspectedTypes = new();
         private readonly Dictionary<Assembly, bool> _inspectedAssemblies = new();
         private readonly object _sync = new();
@@ -21,7 +21,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
             throw new NotImplementedException();
         }
 
-        public IMetaSerializerFactory? GetSerializerFactory( Type objectType )
+        public ISerializerFactory? GetSerializerFactory( Type objectType )
         {
             // If we have a generic type instance, we return null and wait to be called a second time with the generic type definition.
             if ( objectType.IsGenericType && !objectType.IsGenericTypeDefinition )
@@ -60,7 +60,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
                 }
             }
 
-            this._serializerTypes.Add( objectType, new ReflectionMetaSerializerFactory( serializerType ) );
+            this._serializerTypes.Add( objectType, new ReflectionSerializerFactory( serializerType ) );
         }
 
         private void InspectType( Type type )
@@ -80,13 +80,13 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
                 {
                     switch ( attribute )
                     {
-                        case MetaSerializerAttribute { SerializerType: { } } serializableAttribute:
+                        case SerializerAttribute { SerializerType: { } } serializableAttribute:
                             hasSerializer = true;
                             this.AddSerializer( type, serializableAttribute.SerializerType );
 
                             continue;
 
-                        case ImportMetaSerializerAttribute importSerializerAttribute:
+                        case ImportSerializerAttribute importSerializerAttribute:
                             this.ProcessImport( importSerializerAttribute );
 
                             break;
@@ -134,13 +134,13 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
 
             this._inspectedAssemblies.Add( assembly, true );
 
-            foreach ( ImportMetaSerializerAttribute attribute in assembly.GetCustomAttributes( typeof(ImportMetaSerializerAttribute), false ) )
+            foreach ( ImportSerializerAttribute attribute in assembly.GetCustomAttributes( typeof(ImportSerializerAttribute), false ) )
             {
                 this.ProcessImport( attribute );
             }
         }
 
-        private void ProcessImport( ImportMetaSerializerAttribute importSerializerAttribute )
+        private void ProcessImport( ImportSerializerAttribute importSerializerAttribute )
         {
             if ( importSerializerAttribute.ObjectType != null && importSerializerAttribute.SerializerType != null )
             {

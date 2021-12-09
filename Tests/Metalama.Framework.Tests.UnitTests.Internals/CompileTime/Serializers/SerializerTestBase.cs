@@ -14,7 +14,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serializers
 {
-    public class MetaSerializerTestBase : TestBase
+    public class SerializerTestBase : TestBase
     {
         private protected static CompileTimeProject CreateCompileTimeProject( CompileTimeDomain domain, TestContext testContext, string code )
         {
@@ -43,7 +43,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serializers
         {
             var metaSerializerTypes =
                 type.GetNestedTypes()
-                    .Where( nestedType => typeof(IMetaSerializer).IsAssignableFrom( nestedType ) )
+                    .Where( nestedType => typeof(ISerializer).IsAssignableFrom( nestedType ) )
                     .ToArray();
 
             Assert.Single( metaSerializerTypes );
@@ -51,11 +51,11 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serializers
             return metaSerializerTypes[0];
         }
 
-        private protected static IMetaSerializer GetMetaSerializer( Type type )
+        private protected static ISerializer GetMetaSerializer( Type type )
         {
             var metaSerializerType = GetMetaSerializerType( type );
 
-            return (IMetaSerializer) Activator.CreateInstance( metaSerializerType ).AssertNotNull();
+            return (ISerializer) Activator.CreateInstance( metaSerializerType ).AssertNotNull();
         }
 
         private protected class TestArgumentsReader : IArgumentsReader

@@ -144,7 +144,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
             }
         }
 
-        [MetaSerializer( typeof(Serializer) )]
+        [Serializer( typeof(Serializer) )]
         public class Base
         {
 #pragma warning disable SA1401 // Fields should be private
@@ -180,8 +180,8 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
             }
         }
 
-        [MetaSerializer( typeof(Serializer) )]
-        public class Child : Base, IMetaSerializationCallback
+        [Serializer( typeof(Serializer) )]
+        public class Child : Base, ILamaSerializationCallback
         {
             public static int NSerialized { get; set; }
 
@@ -211,7 +211,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
             }
         }
 
-        [MetaSerializer( typeof(Serializer) )]
+        [Serializer( typeof(Serializer) )]
         public class ReferenceToChildren
         {
 #pragma warning disable SA1401 // Fields should be private

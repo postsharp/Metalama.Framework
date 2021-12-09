@@ -6,7 +6,7 @@ using System;
 
 namespace Metalama.Framework.Engine.CompileTime.Serialization.Serializers
 {
-    internal sealed class TimeSpanSerializer : ValueTypeMetaSerializer<TimeSpan>
+    internal sealed class TimeSpanSerializer : ValueTypeSerializer<TimeSpan>
     {
         public override void SerializeObject( TimeSpan value, IArgumentsWriter writer )
         {

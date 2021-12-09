@@ -7,18 +7,18 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serializers
 {
-    public class InheritanceTests : MetaSerializerTestBase
+    public class InheritanceTests : SerializerTestBase
     {
         [Fact]
         public void BaseSerializerInTheSameAssembly()
         {
-            // Verifies that IMetaSerializable compile-time type with explicit parameterless constructor can be serialized and deserialized.
+            // Verifies that ILamaSerializable compile-time type with explicit parameterless constructor can be serialized and deserialized.
             // Generator should not inject parameterless constructor when it is already defined.
             var code = @"
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Serialization;
 [assembly: CompileTime]
-public class A : IMetaSerializable
+public class A : ILamaSerializable
 {
     public int BaseField;
 }

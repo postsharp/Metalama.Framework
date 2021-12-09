@@ -7,19 +7,19 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serializers
 {
-    public class ReferenceTypeTests : MetaSerializerTestBase
+    public class ReferenceTypeTests : SerializerTestBase
     {
         // Tests verify correctness of the generated serializer.
 
         [Fact]
         public void MutableMembers()
         {
-            // Verifies that IMetaSerializable type with mutable members can be serialized and deserialized (round-trip).
+            // Verifies that ILamaSerializable type with mutable members can be serialized and deserialized (round-trip).
             var code = @"
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Serialization;
 [assembly: CompileTime]
-public class A : IMetaSerializable
+public class A : ILamaSerializable
 {
     public int Field;
     public int Property { get; set; }
@@ -61,12 +61,12 @@ After:
         [Fact]
         public void ReadOnlyValueTypeMembers()
         {
-            // Verifies that IMetaSerializable type with read-only members can be serialized and deserialized (round-trip).
+            // Verifies that ILamaSerializable type with read-only members can be serialized and deserialized (round-trip).
             var code = @"
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Serialization;
 [assembly: CompileTime]
-public class A : IMetaSerializable
+public class A : ILamaSerializable
 {
     public readonly int Field;
     public int Property { get; }
@@ -112,12 +112,12 @@ After:
         [Fact]
         public void ReadOnlyReferenceTypeMembers()
         {
-            // Verifies that IMetaSerializable type with read-only members can be serialized and deserialized (round-trip).
+            // Verifies that ILamaSerializable type with read-only members can be serialized and deserialized (round-trip).
             var code = @"
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Serialization;
 [assembly: CompileTime]
-public class A : IMetaSerializable
+public class A : ILamaSerializable
 {
     public readonly B Field;
     public B Property { get; }
@@ -176,13 +176,13 @@ public class B
         [Fact]
         public void InitOnlyReferenceTypeMembers()
         {
-            // Verifies that IMetaSerializable type with init-only members can be serialized and deserialized (round-trip).
+            // Verifies that ILamaSerializable type with init-only members can be serialized and deserialized (round-trip).
             var code = @"
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Serialization;
 [assembly: CompileTime]
 
-public class A : IMetaSerializable
+public class A : ILamaSerializable
 {
     public B Property { get; init; }
 
@@ -235,13 +235,13 @@ public class B
         [Fact]
         public void ExplicitParameterlessConstructor()
         {
-            // Verifies that IMetaSerializable compile-time type with explicit parameterless constructor can be serialized and deserialized.
+            // Verifies that ILamaSerializable compile-time type with explicit parameterless constructor can be serialized and deserialized.
             // Generator should not inject parameterless constructor when it is already defined.
             var code = @"
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Serialization;
 [assembly: CompileTime]
-public class A : IMetaSerializable
+public class A : ILamaSerializable
 {
     public A()
     {
@@ -279,12 +279,12 @@ After:
         [Fact]
         public void SimpleStruct()
         {
-            // Verifies that IMetaSerializable readonly struct type can be serialized and deserialized (round-trip).
+            // Verifies that ILamaSerializable readonly struct type can be serialized and deserialized (round-trip).
             var code = @"
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Serialization;
 [assembly: CompileTime]
-public struct A : IMetaSerializable
+public struct A : ILamaSerializable
 {
     public readonly int Field;
     public int Property { get; }
@@ -334,12 +334,12 @@ public struct A : IMetaSerializable
         [Fact]
         public void ReadonlyStruct()
         {
-            // Verifies that IMetaSerializable readonly struct type can be serialized and deserialized (round-trip).
+            // Verifies that ILamaSerializable readonly struct type can be serialized and deserialized (round-trip).
             var code = @"
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Serialization;
 [assembly: CompileTime]
-public readonly struct A : IMetaSerializable
+public readonly struct A : ILamaSerializable
 {
     public readonly int Field;
     public int Property { get; }

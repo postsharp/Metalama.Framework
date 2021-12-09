@@ -48,7 +48,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
             return GetAbstractReflectionType( objectType ) ?? objectType;
         }
 
-        public override IMetaSerializerFactory? GetSerializerFactory( Type objectType )
+        public override ISerializerFactory? GetSerializerFactory( Type objectType )
         {
             return base.GetSerializerFactory( GetAbstractReflectionType( objectType ) ?? objectType );
         }

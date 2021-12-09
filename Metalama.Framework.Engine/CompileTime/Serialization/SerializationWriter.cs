@@ -53,9 +53,9 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
 
         private static void CallOnSerialization( object obj )
         {
-            IMetaSerializationCallback? callback;
+            ILamaSerializationCallback? callback;
 
-            if ( (callback = obj as IMetaSerializationCallback) != null )
+            if ( (callback = obj as ILamaSerializationCallback) != null )
             {
                 callback.OnSerializing();
             }
@@ -90,7 +90,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
         }
 
         private static void TrySerialize(
-            IMetaSerializer serializer,
+            ISerializer serializer,
             object obj,
             IArgumentsWriter constructorArguments,
             IArgumentsWriter initializationArguments,
