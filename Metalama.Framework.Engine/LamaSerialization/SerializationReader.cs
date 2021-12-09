@@ -8,7 +8,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
 
-namespace Metalama.Framework.Engine.CompileTime.Serialization
+namespace Metalama.Framework.Engine.LamaSerialization
 {
     internal sealed class SerializationReader
     {

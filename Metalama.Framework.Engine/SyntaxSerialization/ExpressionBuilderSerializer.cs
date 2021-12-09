@@ -6,7 +6,7 @@ using Metalama.Framework.Engine.Templating.MetaModel;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 
-namespace Metalama.Framework.Engine.Serialization
+namespace Metalama.Framework.Engine.SyntaxSerialization
 {
     internal class ExpressionBuilderSerializer : ObjectSerializer<IExpressionBuilder>
     {

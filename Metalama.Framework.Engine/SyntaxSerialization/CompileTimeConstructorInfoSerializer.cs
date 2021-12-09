@@ -6,7 +6,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Reflection;
 
-namespace Metalama.Framework.Engine.Serialization
+namespace Metalama.Framework.Engine.SyntaxSerialization
 {
     internal class CompileTimeConstructorInfoSerializer : MetalamaMethodBaseSerializer<CompileTimeConstructorInfo, ConstructorInfo>
     {

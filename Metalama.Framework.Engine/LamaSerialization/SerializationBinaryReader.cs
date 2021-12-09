@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
-namespace Metalama.Framework.Engine.CompileTime.Serialization
+namespace Metalama.Framework.Engine.LamaSerialization
 {
     internal sealed class SerializationBinaryReader
     {

@@ -4,9 +4,9 @@
 using K4os.Hash.xxHash;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.CompileTime.Serialization;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Formatting;
+using Metalama.Framework.Engine.LamaSerialization;
 using Metalama.Framework.Engine.Observers;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Sdk;

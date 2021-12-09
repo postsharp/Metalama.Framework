@@ -4,7 +4,7 @@
 using Metalama.Framework.Serialization;
 using System;
 
-namespace Metalama.Framework.Engine.CompileTime.Serialization.Serializers
+namespace Metalama.Framework.Engine.LamaSerialization.Serializers
 {
     internal sealed class GuidSerializer : ValueTypeSerializer<Guid>
     {

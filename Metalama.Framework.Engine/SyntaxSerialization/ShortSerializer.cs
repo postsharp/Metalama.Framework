@@ -4,7 +4,7 @@
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace Metalama.Framework.Engine.Serialization
+namespace Metalama.Framework.Engine.SyntaxSerialization
 {
     internal class ShortSerializer : ObjectSerializer<short>
     {

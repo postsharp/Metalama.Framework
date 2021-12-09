@@ -7,7 +7,7 @@ using System;
 using System.Collections.Immutable;
 using System.Runtime.CompilerServices;
 
-namespace Metalama.Framework.Engine.Serialization
+namespace Metalama.Framework.Engine.SyntaxSerialization
 {
     /// <summary>
     /// An object serializer can be registered with <see cref="SyntaxSerializationService"/> to serialize objects of a specific type into Roslyn creation expressions.

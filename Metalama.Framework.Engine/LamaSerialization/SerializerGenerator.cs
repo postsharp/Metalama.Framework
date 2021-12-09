@@ -11,7 +11,7 @@ using System.Collections.Generic;
 using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
-namespace Metalama.Framework.Engine.CompileTime.Serialization
+namespace Metalama.Framework.Engine.LamaSerialization
 {
     internal class SerializerGenerator : ISerializerGenerator
     {

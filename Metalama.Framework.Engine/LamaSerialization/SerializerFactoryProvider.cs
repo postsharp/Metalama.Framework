@@ -5,7 +5,7 @@ using Metalama.Framework.Serialization;
 using System;
 using System.Collections.Generic;
 
-namespace Metalama.Framework.Engine.CompileTime.Serialization
+namespace Metalama.Framework.Engine.LamaSerialization
 {
     /// <summary>
     /// Provides instances of the <see cref="ISerializerFactory"/> interface for object types that have been previously registered

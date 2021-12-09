@@ -4,7 +4,7 @@
 using System;
 using System.Globalization;
 
-namespace Metalama.Framework.Engine.CompileTime.Serialization.Serializers
+namespace Metalama.Framework.Engine.LamaSerialization.Serializers
 {
     internal sealed class ByteSerializer : IntrinsicSerializer<byte>
     {

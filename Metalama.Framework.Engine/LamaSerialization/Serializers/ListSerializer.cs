@@ -5,7 +5,7 @@ using Metalama.Framework.Serialization;
 using System;
 using System.Collections.Generic;
 
-namespace Metalama.Framework.Engine.CompileTime.Serialization.Serializers
+namespace Metalama.Framework.Engine.LamaSerialization.Serializers
 {
     // This needs to be public because the type is instantiated from an activator in client assemblies.
 

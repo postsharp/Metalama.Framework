@@ -1,14 +1,14 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Metalama.Framework.Engine.CompileTime.Serialization.Serializers;
+using Metalama.Framework.Engine.LamaSerialization.Serializers;
 using Metalama.Framework.Serialization;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Reflection;
 
-namespace Metalama.Framework.Engine.CompileTime.Serialization
+namespace Metalama.Framework.Engine.LamaSerialization
 {
     internal sealed class BuiltInSerializerFactoryProvider : SerializerFactoryProvider
     {

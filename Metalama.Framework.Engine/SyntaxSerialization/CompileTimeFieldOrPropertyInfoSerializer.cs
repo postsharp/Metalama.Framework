@@ -14,7 +14,7 @@ using System.Reflection;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 using MethodBase = Metalama.Framework.Engine.CodeModel.MethodBase;
 
-namespace Metalama.Framework.Engine.Serialization
+namespace Metalama.Framework.Engine.SyntaxSerialization
 {
     internal class CompileTimeFieldOrPropertyInfoSerializer : ObjectSerializer<CompileTimeFieldOrPropertyInfo, FieldOrPropertyInfo>
     {

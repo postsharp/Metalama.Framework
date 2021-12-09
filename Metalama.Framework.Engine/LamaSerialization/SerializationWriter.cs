@@ -8,7 +8,7 @@ using System.Globalization;
 using System.IO;
 using System.Runtime.CompilerServices;
 
-namespace Metalama.Framework.Engine.CompileTime.Serialization
+namespace Metalama.Framework.Engine.LamaSerialization
 {
     internal class SerializationWriter
     {

@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Reflection;
 
-namespace Metalama.Framework.Engine.CompileTime.Serialization
+namespace Metalama.Framework.Engine.LamaSerialization
 {
     internal sealed class ReflectionSerializationProvider : ISerializerFactoryProvider, ISerializerDiscoverer
     {

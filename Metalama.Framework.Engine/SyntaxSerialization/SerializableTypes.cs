@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 
-namespace Metalama.Framework.Engine.Serialization
+namespace Metalama.Framework.Engine.SyntaxSerialization
 {
     /// <summary>
     /// Contains the set of types that can be serialized by <see cref="SyntaxSerializationService"/>. This class can be used to

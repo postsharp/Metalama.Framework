@@ -5,7 +5,7 @@ using Metalama.Framework.DesignTime.Contracts;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
-using Metalama.Framework.Engine.Serialization;
+using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;

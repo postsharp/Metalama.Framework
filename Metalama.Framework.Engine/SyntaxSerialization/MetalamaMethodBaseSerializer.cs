@@ -11,7 +11,7 @@ using System;
 using System.Collections.Immutable;
 using System.Reflection;
 
-namespace Metalama.Framework.Engine.Serialization
+namespace Metalama.Framework.Engine.SyntaxSerialization
 {
     internal abstract class MetalamaMethodBaseSerializer<TInput, TOutput> : ObjectSerializer<TInput, TOutput>
         where TInput : MethodBase, TOutput

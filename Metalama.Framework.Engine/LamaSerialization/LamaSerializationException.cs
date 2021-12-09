@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
 
-namespace Metalama.Framework.Engine.CompileTime.Serialization
+namespace Metalama.Framework.Engine.LamaSerialization
 {
     /// <summary>
     /// Exception thrown by the <see cref="LamaFormatter"/>.
