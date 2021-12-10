@@ -27,21 +27,27 @@ namespace Metalama.Framework.Engine.LamaSerialization
 
         public bool ShouldSuppressReadOnly( SerializableTypeInfo serializableType, ISymbol memberSymbol )
         {
-            var serializableTypeMember = serializableType.SerializedMembers.SingleOrDefault( x => SymbolEqualityComparer.Default.Equals( x, memberSymbol ) );
-
-            if ( serializableTypeMember == null )
-            {
-                return false;
-            }
+            var serializableTypeMember = serializableType.SerializedMembers.Single( x => SymbolEqualityComparer.Default.Equals( x, memberSymbol ) );
 
             return this.ClassifyFieldOrProperty( serializableTypeMember ) == FieldOrPropertyDeserializationKind.Deserialize_MakeMutable;
         }
 
         public MemberDeclarationSyntax CreateDeserializingConstructor( SerializableTypeInfo serializableType )
         {
+            var baseType = serializableType.Type.BaseType.AssertNotNull();
+
+            while ( SymbolEqualityComparer.Default.Equals(
+                    serializableType.Type.ContainingAssembly,
+                    baseType.ContainingAssembly) )
+            {
+                // The base type is in the same assembly, we have to walk back to get to the first type that is not in this assembly.
+                // All ancestor types in this assembly will have their attributes generated.
+                baseType = baseType.BaseType.AssertNotNull();
+            }
+
             // Presume that base type is not null.
             var baseConstructors =
-                serializableType.Type.BaseType.AssertNotNull()
+                baseType.AssertNotNull()
                     .GetMembers()
                     .OfType<IMethodSymbol>()
                     .Where(
@@ -50,7 +56,7 @@ namespace Metalama.Framework.Engine.LamaSerialization
                             && x.Parameters.Length == 1
                             && SymbolEqualityComparer.Default.Equals(
                                 x.Parameters[0].Type,
-                                this._runtimeReflectionMapper.GetTypeSymbol( typeof(IArgumentsReader) ) )
+                                this._runtimeReflectionMapper.GetTypeSymbol( typeof( IArgumentsReader ) ) )
                             && x.Parameters[0].CustomModifiers.Length == 0
                             && x.Parameters[0].RefCustomModifiers.Length == 0 )
                     .ToArray();
@@ -58,12 +64,16 @@ namespace Metalama.Framework.Engine.LamaSerialization
             // TODO: This should become an error.
             // TODO: Custom modifiers or ref on the parameter should produce an error too.
             Invariant.Assert(
-                baseConstructors.Length > 1
-                && (baseConstructors.Length == 0
-                    || baseConstructors[0].DeclaredAccessibility == Accessibility.Public
-                    || baseConstructors[0].DeclaredAccessibility == Accessibility.Protected) );
+                baseConstructors.Length == 0
+                || (baseConstructors.Length == 1
+                    && (
+                        baseConstructors[0].DeclaredAccessibility == Accessibility.Public
+                        || baseConstructors[0].DeclaredAccessibility == Accessibility.Protected)) );
 
-            var baseCtor = baseConstructors.SingleOrDefault();
+            var hasDeserializingBaseConstructor =
+                baseConstructors.Length == 1
+                || baseType != serializableType.Type.BaseType.AssertNotNull();
+
             const string argumentReaderParameterName = "reader";
 
             var body =
@@ -83,7 +93,7 @@ namespace Metalama.Framework.Engine.LamaSerialization
                         SingletonSeparatedList(
                             Parameter( Identifier( argumentReaderParameterName ) )
                                 .WithType( this._context.SyntaxGenerator.Type( this._context.ReflectionMapper.GetTypeSymbol( typeof(IArgumentsReader) ) ) ) ) ),
-                    baseCtor != null
+                    hasDeserializingBaseConstructor
                         ? ConstructorInitializer(
                             SyntaxKind.BaseConstructorInitializer,
                             ArgumentList( SingletonSeparatedList( Argument( IdentifierName( argumentReaderParameterName ) ) ) ) )
@@ -223,17 +233,16 @@ namespace Metalama.Framework.Engine.LamaSerialization
             {
                 body =
                     Block(
-                        ExpressionStatement(
-                            ThrowExpression(
-                                ObjectCreationExpression(
-                                    this._context.SyntaxGenerator.Type( this._context.ReflectionMapper.GetTypeSymbol( typeof(InvalidOperationException) ) ),
-                                    ArgumentList(
-                                        SingletonSeparatedList(
-                                            Argument(
-                                                LiteralExpression(
-                                                    SyntaxKind.StringLiteralExpression,
-                                                    Literal( "Attempting to instantiate abstract class." ) ) ) ) ),
-                                    null ) ) ) );
+                        ThrowStatement(
+                            ObjectCreationExpression(
+                                this._context.SyntaxGenerator.Type( this._context.ReflectionMapper.GetTypeSymbol( typeof(InvalidOperationException) ) ),
+                                ArgumentList(
+                                    SingletonSeparatedList(
+                                        Argument(
+                                            LiteralExpression(
+                                                SyntaxKind.StringLiteralExpression,
+                                                Literal( "Attempting to instantiate abstract class." ) ) ) ) ),
+                                null ) ) );
             }
             else
             {
@@ -311,7 +320,7 @@ namespace Metalama.Framework.Engine.LamaSerialization
                 .OfType<IMethodSymbol>()
                 .Single( x => x.Name == nameof(ReferenceTypeSerializer.DeserializeFields) );
 
-            Invariant.Assert( baseDeserializeMethod.Parameters.Length == 1 );
+            Invariant.Assert( baseDeserializeMethod.Parameters.Length == 2 );
 
             var localVariableDeclaration =
                 this.CreateTypedLocalVariable( serializedType.Type, IdentifierName( baseDeserializeMethod.Parameters[0].Name ), out var localVariableName );

@@ -27,7 +27,7 @@ namespace Metalama.Framework.Engine
 #endif
         public static void Assert( [DoesNotReturnIf( false )] bool condition )
         {
-#if !DEBUG
+#if DEBUG
             if ( !condition )
             {
                 throw new AssertionFailedException();
@@ -40,7 +40,7 @@ namespace Metalama.Framework.Engine
 #endif
         public static void Implies( bool premise, bool conclusion )
         {
-#if !DEBUG
+#if DEBUG
             if ( premise && !conclusion )
             {
                 throw new AssertionFailedException();

@@ -15,13 +15,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
         {
             var s = new SimpleStruct( 1, DateTime.Now ) { StringValue = "Test", NullableEnumField = TypeCode.Char };
 
-/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
-Before:
-            this.TestSerialization( s );
-After:
-            SerializationTestsBase.TestSerialization( s );
-*/
-            this.TestSerialization( s );
+            TestSerialization( s );
         }
 
         [Fact]
@@ -29,13 +23,7 @@ After:
         {
             var s = new SimpleStruct( 1, DateTime.Now ) { StringValue = "Test" };
 
-/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
-Before:
-            this.TestSerialization( (object) s );
-After:
-            SerializationTestsBase.TestSerialization( (object) s );
-*/
-            this.TestSerialization( (object) s );
+            TestSerialization( (object) s );
         }
 
         [Fact]
@@ -43,13 +31,7 @@ After:
         {
             var s = new GenericStruct<string> { Value = "1" };
 
-/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
-Before:
-            this.TestSerialization( s );
-After:
-            SerializationTestsBase.TestSerialization( s );
-*/
-            this.TestSerialization( s );
+            TestSerialization( s );
         }
 
         [Fact]
@@ -57,13 +39,7 @@ After:
         {
             var s = new GenericStruct<SimpleStruct> { Value = new SimpleStruct( 5, DateTime.MinValue ) };
 
-/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
-Before:
-            this.TestSerialization( s );
-After:
-            SerializationTestsBase.TestSerialization( s );
-*/
-            this.TestSerialization( s );
+            TestSerialization( s );
         }
 
         [Fact]
@@ -72,12 +48,6 @@ After:
             var cls = new SimpleClass( 11 );
             var str = new SimpleStruct( 1, DateTime.Now ) { SimpleClass = cls, SimpleClass2 = cls };
 
-/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
-Before:
-            var str2 = this.TestSerialization( str );
-After:
-            var str2 = SerializationTestsBase.TestSerialization( str );
-*/
             var str2 = this.TestSerialization( str );
             Assert.Same( str2.SimpleClass, str2.SimpleClass2 );
         }

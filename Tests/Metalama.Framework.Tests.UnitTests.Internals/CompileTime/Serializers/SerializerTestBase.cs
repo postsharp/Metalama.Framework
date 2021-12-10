@@ -48,7 +48,14 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serializers
 
             Assert.Single( metaSerializerTypes );
 
-            return metaSerializerTypes[0];
+            if ( metaSerializerTypes[0].IsGenericTypeDefinition )
+            {
+                return metaSerializerTypes[0].MakeGenericType( type.GenericTypeArguments );
+            }
+            else
+            {
+                return metaSerializerTypes[0];
+            }
         }
 
         private protected static ISerializer GetSerializer( Type type )
