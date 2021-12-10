@@ -50,8 +50,7 @@ namespace Metalama.Framework.Engine.Pipeline
             // Gets aspects that can be inherited.
             var inheritableAspectInstances = aspectInstances
                 .Where(
-                    a => a.Eligibility.IncludesAll( EligibleScenarios.Inheritance ) && a.AspectInstance.AspectClass.IsInherited
-                                                                                    && a.AspectInstance is AttributeAspectInstance )
+                    a => a.Eligibility.IncludesAll( EligibleScenarios.Inheritance ) && a.AspectInstance.AspectClass.IsInherited )
                 .ToList();
 
             // Gets aspects that have been inherited by the source. 
@@ -69,7 +68,7 @@ namespace Metalama.Framework.Engine.Pipeline
             // Index these aspects. 
             pipelineStepsState.AddAspectInstances( concreteAspectInstances );
             pipelineStepsState.AddAspectInstances( inheritedAspectInstancesInProject );
-            pipelineStepsState.AddInheritableAspectInstances( inheritableAspectInstances.Select( x => (AttributeAspectInstance) x.AspectInstance ).ToList() );
+            pipelineStepsState.AddInheritableAspectInstances( inheritableAspectInstances.Select( x => x.AspectInstance ).ToList() );
 
             return compilation.WithAspectInstances( concreteAspectInstances.Select( x => x.AspectInstance ).ToImmutableArray() );
         }

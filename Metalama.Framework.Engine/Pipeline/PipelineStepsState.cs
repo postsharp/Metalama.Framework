@@ -234,7 +234,7 @@ namespace Metalama.Framework.Engine.Pipeline
             }
         }
 
-        public void AddInheritableAspectInstances( IReadOnlyList<AttributeAspectInstance> inheritedAspectInstances )
+        public void AddInheritableAspectInstances( IReadOnlyList<AspectInstance> inheritedAspectInstances )
         {
             this._inheritableAspectInstances.AddRange( inheritedAspectInstances );
         }

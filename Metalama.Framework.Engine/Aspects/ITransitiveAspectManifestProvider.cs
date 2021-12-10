@@ -7,8 +7,8 @@ using System.Threading;
 
 namespace Metalama.Framework.Engine.Aspects
 {
-    internal interface IInheritableAspectManifestProvider : IService
+    internal interface ITransitiveAspectManifestProvider : IService
     {
-        ITransitiveAspectsManifest? GetInheritableAspectsManifest( Compilation compilationReferenceCompilation, CancellationToken cancellationToken );
+        ITransitiveAspectsManifest? GetTransitiveAspectsManifest( Compilation compilationReferenceCompilation, CancellationToken cancellationToken );
     }
 }

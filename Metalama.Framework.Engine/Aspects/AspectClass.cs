@@ -200,12 +200,12 @@ namespace Metalama.Framework.Engine.Aspects
         /// <summary>
         /// Creates a new  <see cref="AspectInstance"/> from a custom attribute.
         /// </summary>
-        public AttributeAspectInstance CreateAspectInstanceFromAttribute(
+        public AspectInstance CreateAspectInstanceFromAttribute(
             IAspect aspect,
             in Ref<IDeclaration> target,
             IAttribute attribute,
             CompileTimeProjectLoader loader )
-            => new( aspect, target, this, attribute );
+            => new( aspect, target, this, new AspectPredecessor( AspectPredecessorKind.Attribute, attribute ) );
 
         /// <summary>
         /// Creates a new <see cref="AspectInstance"/> by using the default constructor of the current class.

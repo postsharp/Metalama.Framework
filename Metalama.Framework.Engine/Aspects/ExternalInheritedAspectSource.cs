@@ -33,7 +33,7 @@ namespace Metalama.Framework.Engine.Aspects
             IServiceProvider serviceProvider,
             CancellationToken cancellationToken )
         {
-            var inheritableAspectProvider = serviceProvider.GetService<IInheritableAspectManifestProvider>();
+            var inheritableAspectProvider = serviceProvider.GetService<ITransitiveAspectManifestProvider>();
 
             var inheritedAspectsBuilder = ImmutableDictionaryOfArray<IAspectClass, InheritableAspectInstance>.CreateBuilder();
             var aspectClassesByName = aspectClasses.ToDictionary( t => t.FullName, t => t );
@@ -56,7 +56,7 @@ namespace Metalama.Framework.Engine.Aspects
                         break;
 
                     case CompilationReference compilationReference:
-                        manifest = inheritableAspectProvider?.GetInheritableAspectsManifest( compilationReference.Compilation, cancellationToken );
+                        manifest = inheritableAspectProvider?.GetTransitiveAspectsManifest( compilationReference.Compilation, cancellationToken );
 
                         break;
 
