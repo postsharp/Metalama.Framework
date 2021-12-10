@@ -13,27 +13,27 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
         [Fact]
         public void TestTypeClass()
         {
-            TestSerialization( typeof(DateTime) );
-            TestSerialization( typeof(Guid) );
-            TestSerialization( typeof(IntrinsicSerializationTests) );
+            this.TestSerialization( typeof(DateTime) );
+            this.TestSerialization( typeof(Guid) );
+            this.TestSerialization( typeof(IntrinsicSerializationTests) );
         }
 
         [Fact]
         public void TestTypeGenericClosed()
         {
-            TestSerialization( typeof(Dictionary<string, string>) );
+            this.TestSerialization( typeof(Dictionary<string, string>) );
         }
 
         [Fact]
         public void TestTypeGenericOpen()
         {
-            TestSerialization( typeof(Dictionary<,>) );
+            this.TestSerialization( typeof(Dictionary<,>) );
         }
 
         [Fact]
         public void TestTypeGenericTypeParameter()
         {
-            TestSerialization( typeof(Dictionary<,>).GetGenericArguments()[0] );
+            this.TestSerialization( typeof(Dictionary<,>).GetGenericArguments()[0] );
         }
 
 #pragma warning disable SA1401 // Fields should be private
@@ -47,23 +47,23 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
         [Fact]
         public void TestTypeIntrinsics()
         {
-            TestSerialization( typeof(byte) );
-            TestSerialization( typeof(sbyte) );
-            TestSerialization( typeof(short) );
-            TestSerialization( typeof(ushort) );
-            TestSerialization( typeof(int) );
-            TestSerialization( typeof(uint) );
-            TestSerialization( typeof(long) );
-            TestSerialization( typeof(ulong) );
-            TestSerialization( typeof(float) );
-            TestSerialization( typeof(double) );
-            TestSerialization( typeof(string) );
-            TestSerialization( typeof(DottedString) );
-            TestSerialization( typeof(char) );
-            TestSerialization( typeof(object) );
-            TestSerialization( typeof(void) );
-            TestSerialization( typeof(Type) );
-            TestSerialization( typeof(ValueType) );
+            this.TestSerialization( typeof(byte) );
+            this.TestSerialization( typeof(sbyte) );
+            this.TestSerialization( typeof(short) );
+            this.TestSerialization( typeof(ushort) );
+            this.TestSerialization( typeof(int) );
+            this.TestSerialization( typeof(uint) );
+            this.TestSerialization( typeof(long) );
+            this.TestSerialization( typeof(ulong) );
+            this.TestSerialization( typeof(float) );
+            this.TestSerialization( typeof(double) );
+            this.TestSerialization( typeof(string) );
+            this.TestSerialization( typeof(DottedString) );
+            this.TestSerialization( typeof(char) );
+            this.TestSerialization( typeof(object) );
+            this.TestSerialization( typeof(void) );
+            this.TestSerialization( typeof(Type) );
+            this.TestSerialization( typeof(ValueType) );
         }
 
         public class ReflectionTestClass

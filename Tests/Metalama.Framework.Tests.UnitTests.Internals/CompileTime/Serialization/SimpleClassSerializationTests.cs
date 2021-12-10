@@ -18,175 +18,175 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
         [Fact]
         public void TestClassWithString_SimpleWord()
         {
-            TestSimpleExplicitlySerializedClass( "SimpleText" );
+            this.TestSimpleExplicitlySerializedClass( "SimpleText" );
         }
 
         [Fact]
         public void TestClassWithString_SimpleDottedWords()
         {
-            TestSimpleExplicitlySerializedClass( "Simple.Dotted.Words" );
+            this.TestSimpleExplicitlySerializedClass( "Simple.Dotted.Words" );
         }
 
         [Fact]
         public void TestClassWithString_DottedWordsWithReservedNames()
         {
-            TestSimpleExplicitlySerializedClass( "Simple.Dotted.Words, mscorlib" );
+            this.TestSimpleExplicitlySerializedClass( "Simple.Dotted.Words, mscorlib" );
         }
 
         [Fact]
         public void TestClassWithBoxedInt()
         {
-            TestSimpleExplicitlySerializedClass<object>( 1000 );
+            this.TestSimpleExplicitlySerializedClass<object>( 1000 );
         }
 
         [Fact]
         public void TestClassWithBoxedBool()
         {
-            TestSimpleExplicitlySerializedClass<object>( false );
+            this.TestSimpleExplicitlySerializedClass<object>( false );
         }
 
         [Fact]
         public void TestClassWithBoxedStruct()
         {
-            TestSimpleExplicitlySerializedClass<object>( DateTime.Now );
+            this.TestSimpleExplicitlySerializedClass<object>( DateTime.Now );
         }
 
         [Fact]
         public void TestClassWithInt32_1000()
         {
-            TestSimpleExplicitlySerializedClass( 1000 );
+            this.TestSimpleExplicitlySerializedClass( 1000 );
         }
 
         [Fact]
         public void TestClassWithInt32_m1000()
         {
-            TestSimpleExplicitlySerializedClass( -1000 );
+            this.TestSimpleExplicitlySerializedClass( -1000 );
         }
 
         [Fact]
         public void TestClassWithInt32_1000000000()
         {
-            TestSimpleExplicitlySerializedClass( 1000000000 );
+            this.TestSimpleExplicitlySerializedClass( 1000000000 );
         }
 
         [Fact]
         public void TestClassWithInt32_m1000000000()
         {
-            TestSimpleExplicitlySerializedClass( -1000000000 );
+            this.TestSimpleExplicitlySerializedClass( -1000000000 );
         }
 
         [Fact]
         public void TestClassWithInt64_223372036854775807()
         {
-            TestSimpleExplicitlySerializedClass( 223372036854775807 );
+            this.TestSimpleExplicitlySerializedClass( 223372036854775807 );
         }
 
         [Fact]
         public void TestClassWithInt64_m223372036854775807()
         {
-            TestSimpleExplicitlySerializedClass( -223372036854775807 );
+            this.TestSimpleExplicitlySerializedClass( -223372036854775807 );
         }
 
         [Fact]
         public void TestClassWithDouble_1000()
         {
-            TestSimpleExplicitlySerializedClass( 1000d );
+            this.TestSimpleExplicitlySerializedClass( 1000d );
         }
 
         [Fact]
         public void TestClassWithDouble_m1000()
         {
-            TestSimpleExplicitlySerializedClass( -1000d );
+            this.TestSimpleExplicitlySerializedClass( -1000d );
         }
 
         [Fact]
         public void TestClassWithDouble_Max()
         {
-            TestSimpleExplicitlySerializedClass( double.MaxValue );
+            this.TestSimpleExplicitlySerializedClass( double.MaxValue );
         }
 
         [Fact]
         public void TestClassWithDouble_Min()
         {
-            TestSimpleExplicitlySerializedClass( double.MinValue );
+            this.TestSimpleExplicitlySerializedClass( double.MinValue );
         }
 
         [Fact]
         public void TestClassWithStruct_DateTime()
         {
-            TestSimpleExplicitlySerializedClass( DateTime.Now );
+            this.TestSimpleExplicitlySerializedClass( DateTime.Now );
         }
 
         [Fact]
         public void TestClasWithObjectMember_Null()
         {
-            TestSimpleExplicitlySerializedClass( (object?) null );
+            this.TestSimpleExplicitlySerializedClass( (object?) null );
         }
 
         [Fact]
         public void TestClasWithStringMember_Null()
         {
-            TestSimpleExplicitlySerializedClass( (string?) null );
+            this.TestSimpleExplicitlySerializedClass( (string?) null );
         }
 
         [Fact]
         public void TestClasWithClassMember_Null()
         {
-            TestSimpleExplicitlySerializedClass( (SimpleExplicitlySerializedClass<int>?) null );
+            this.TestSimpleExplicitlySerializedClass( (SimpleExplicitlySerializedClass<int>?) null );
         }
 
         [Fact]
         public void TestClasWithClassMember_NotNull()
         {
-            TestSimpleExplicitlySerializedClass( new SimpleExplicitlySerializedClass<string>( "testing text" ) );
+            this.TestSimpleExplicitlySerializedClass( new SimpleExplicitlySerializedClass<string>( "testing text" ) );
         }
 
         [Fact]
         public void TestClasWithEnum_SimpleValue()
         {
-            TestSimpleExplicitlySerializedClass( TestEnum.Value1 );
+            this.TestSimpleExplicitlySerializedClass( TestEnum.Value1 );
         }
 
         [Fact]
         public void TestClasWithEnum_NonZeroValue()
         {
-            TestSimpleExplicitlySerializedClass( TestEnum.Value2 );
+            this.TestSimpleExplicitlySerializedClass( TestEnum.Value2 );
         }
 
         [Fact]
         public void TestClasWithLongEnum_NonZeroValue()
         {
-            TestSimpleExplicitlySerializedClass( TestEnumWithLong.Value2 );
+            this.TestSimpleExplicitlySerializedClass( TestEnumWithLong.Value2 );
         }
 
         [Fact]
         public void TestClasWithByteEnum_NonZeroValue()
         {
-            TestSimpleExplicitlySerializedClass( TestEnumWithByte.Value2 );
+            this.TestSimpleExplicitlySerializedClass( TestEnumWithByte.Value2 );
         }
 
         [Fact]
         public void TestClasWithFlagsEnum_NonZeroValue()
         {
-            TestSimpleExplicitlySerializedClass( TestEnumWithFlags.Value2 );
+            this.TestSimpleExplicitlySerializedClass( TestEnumWithFlags.Value2 );
         }
 
         [Fact]
         public void TestClasWithFlagsEnum_MultiValue()
         {
-            TestSimpleExplicitlySerializedClass( TestEnumWithFlags.Value1 | TestEnumWithFlags.Value2 );
+            this.TestSimpleExplicitlySerializedClass( TestEnumWithFlags.Value1 | TestEnumWithFlags.Value2 );
         }
 
         [Fact]
         public void TestClassWithProperty_Int1()
         {
-            TestExplicitlySerializedClass( (object?) null, 1 );
+            this.TestExplicitlySerializedClass( (object?) null, 1 );
         }
 
         [Fact]
         public void TestClassWithArray_Int()
         {
-            TestSimpleExplicitlySerializedClass( new[] { 1, 2, 3, 4 } );
+            this.TestSimpleExplicitlySerializedClass( new[] { 1, 2, 3, 4 } );
         }
 
         [Fact]
@@ -199,19 +199,19 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
                 array[i] = i;
             }
 
-            TestSimpleExplicitlySerializedClass( array );
+            this.TestSimpleExplicitlySerializedClass( array );
         }
 
         [Fact]
         public void TestClassWithRank2Array()
         {
-            TestSimpleExplicitlySerializedClass( new[,] { { 1, 2 }, { 3, 4 } } );
+            this.TestSimpleExplicitlySerializedClass( new[,] { { 1, 2 }, { 3, 4 } } );
         }
 
         [Fact]
         public void TestClassWithRank3Array()
         {
-            TestSimpleExplicitlySerializedClass( new[,,] { { { 1 }, { 2 } }, { { 3 }, { 4 } } } );
+            this.TestSimpleExplicitlySerializedClass( new[,,] { { { 1 }, { 2 } }, { { 3 }, { 4 } } } );
         }
 
         [Fact]
@@ -222,31 +222,31 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
             array!.SetValue( 1, 0 );
             array.SetValue( 2, 1 );
 
-            TestSimpleExplicitlySerializedClass( (int[]) array );
+            this.TestSimpleExplicitlySerializedClass( (int[]) array );
         }
 
         [Fact]
         public void TestClassWithValueAndProperty_Int1AndInt1()
         {
-            TestExplicitlySerializedClass( 1, 1 );
+            this.TestExplicitlySerializedClass( 1, 1 );
         }
 
         [Fact]
         public void TestClassWithValueAndProperty_StringAndString()
         {
-            TestExplicitlySerializedClass( "a field", "a property" );
+            this.TestExplicitlySerializedClass( "a field", "a property" );
         }
 
         [Fact]
         public void TestClassWithValueAndProperty_BothNull()
         {
-            TestExplicitlySerializedClass( (object?) null, (object?) null );
+            this.TestExplicitlySerializedClass( (object?) null, (object?) null );
         }
 
         [Fact]
         public void TestClassWithNullableInt_NotNull()
         {
-            TestSerialization( new ExplicitlySerializedClass<int, int>( 5 ) { Nullable = 3 } );
+            this.TestSerialization( new ExplicitlySerializedClass<int, int>( 5 ) { Nullable = 3 } );
         }
 
         [Fact]
@@ -256,7 +256,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
             array[0] = new SimpleExplicitlySerializedClass<int>( 5 );
             array[1] = new ExplicitlySerializedClass<int, string>( 2 );
 
-            TestSerialization( array );
+            this.TestSerialization( array );
         }
 
         [Fact]
@@ -266,7 +266,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
             var anotherSerializedClass = new SimpleExplicitlySerializedClass<DateTime>( DateTime.Today.AddMonths( -10 ) );
             var array = new[] { serializedClass, anotherSerializedClass };
 
-            var formatter = new LamaFormatter();
+            var formatter = LamaFormatter.CreateTestInstance( this.ServiceProvider );
             var memoryStream = new MemoryStream();
             formatter.Serialize( array, memoryStream );
             memoryStream.Seek( 0, SeekOrigin.Begin );
@@ -280,10 +280,10 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
             Assert.Equal( anotherSerializedClass, deserializedObject[1] );
         }
 
-        private static void TestSimpleExplicitlySerializedClass<T>( T value )
+        private void TestSimpleExplicitlySerializedClass<T>( T value )
         {
             var initialObject = new SimpleExplicitlySerializedClass<T>( value );
-            var formatter = new LamaFormatter();
+            var formatter = LamaFormatter.CreateTestInstance( this.ServiceProvider );
             var memoryStream = new MemoryStream();
             formatter.Serialize( initialObject, memoryStream );
             memoryStream.Seek( 0, SeekOrigin.Begin );
@@ -299,10 +299,10 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
             }
         }
 
-        private static void TestExplicitlySerializedClass<TForCtor, TForField>( TForCtor value, TForField property )
+        private void TestExplicitlySerializedClass<TForCtor, TForField>( TForCtor value, TForField property )
         {
             var initialObject = new ExplicitlySerializedClass<TForCtor, TForField>( value ) { Field = property };
-            var formatter = new LamaFormatter();
+            var formatter = LamaFormatter.CreateTestInstance( this.ServiceProvider );
             var memoryStream = new MemoryStream();
             formatter.Serialize( initialObject, memoryStream );
             memoryStream.Seek( 0, SeekOrigin.Begin );
@@ -314,7 +314,6 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
             Assert.Equal( initialObject.Field, deserializedObject.Field );
         }
 
-        [Serializer( typeof(SimpleExplicitlySerializedClass<>.Serializer) )]
         public class SimpleExplicitlySerializedClass<T> : IEquatable<SimpleExplicitlySerializedClass<T>>
         {
 #pragma warning disable SA1401 // Fields should be private
@@ -386,7 +385,6 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
             }
         }
 
-        [Serializer( typeof(ExplicitlySerializedClass<,>.Serializer) )]
         public class ExplicitlySerializedClass<TForCtor, TForField> : SimpleExplicitlySerializedClass<TForCtor>,
                                                                       IEquatable<ExplicitlySerializedClass<TForCtor, TForField>>
         {

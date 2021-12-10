@@ -16,7 +16,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
         [Fact]
         public void ListSerializer_Ints()
         {
-            TestValue(
+            this.TestValue(
                 new List<int>
                 {
                     2,
@@ -32,7 +32,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
         [Fact]
         public void ListSerializer_Strings()
         {
-            TestValue(
+            this.TestValue(
                 new List<string?>
                 {
                     string.Empty,
@@ -46,13 +46,13 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
         [Fact]
         public void ListSerializer_Classes()
         {
-            TestValue( new List<SimpleType> { new() { Name = "X" }, new() { Name = "Y" } } );
+            this.TestValue( new List<SimpleType> { new() { Name = "X" }, new() { Name = "Y" } } );
         }
 
         [Fact]
         public void DictionarySerializer_IntsWithInts()
         {
-            TestValue(
+            this.TestValue(
                 new Dictionary<int, int>
                 {
                     { 1, 1 },
@@ -66,7 +66,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
         [Fact]
         public void DictionarySerializer_StringsWithStrings()
         {
-            TestValue(
+            this.TestValue(
                 new Dictionary<string, string?>
                 {
                     { "a", "xx uu " },
@@ -86,7 +86,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
                 { 2, new List<SimpleType> { new() { Name = "e" }, new() { Name = "r" }, new() { Name = "y" } } }
             };
 
-            var deserialized = SerializeDeserialize( dictionary );
+            var deserialized = this.SerializeDeserialize( dictionary );
 
             Assert.NotNull( deserialized );
             Assert.Equal( dictionary.Count, deserialized.Count );
@@ -114,7 +114,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
             dictionary["first"] = a;
             dictionary["second"] = b;
 
-            var deserialized = SerializeDeserialize( dictionary );
+            var deserialized = this.SerializeDeserialize( dictionary );
 
             Assert.NotNull( deserialized );
             Assert.Equal( dictionary.Count, deserialized.Count );
@@ -129,7 +129,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
         {
             var dictionary = new Dictionary<string, string>( StringComparer.OrdinalIgnoreCase ) { ["first"] = "a", ["second"] = "b" };
 
-            var deserialized = SerializeDeserialize( dictionary );
+            var deserialized = this.SerializeDeserialize( dictionary );
 
             Assert.NotNull( deserialized );
             Assert.Equal( dictionary.Count, deserialized.Count );
@@ -144,7 +144,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
         {
             var dictionary = new Dictionary<string, string>( new CustomEqualityComparer() ) { ["first"] = "a", ["second"] = "b" };
 
-            var deserialized = SerializeDeserialize( dictionary );
+            var deserialized = this.SerializeDeserialize( dictionary );
 
             Assert.NotNull( deserialized );
             Assert.Equal( dictionary.Count, deserialized.Count );
@@ -163,7 +163,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
             typeWithDictionary.Dictionary.Add( 2, "2" );
             typeWithDictionary.Dictionary.Add( 3, "3" );
 
-            var deserialized = SerializeDeserialize( typeWithDictionary );
+            var deserialized = this.SerializeDeserialize( typeWithDictionary );
 
             Assert.NotNull( deserialized );
             Assert.Equal( typeWithDictionary.Dictionary.Count, deserialized.Dictionary!.Count );
@@ -184,7 +184,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
                 tail = tail.Next;
             }
 
-            var deserialized = SerializeDeserialize( ll );
+            var deserialized = this.SerializeDeserialize( ll );
 
             tail = ll.Head;
             var deserializedTail = deserialized.Head;
@@ -200,7 +200,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
         private void TestValue<T>( T value )
             where T : ICollection
         {
-            var deserialized = SerializeDeserialize( value );
+            var deserialized = this.SerializeDeserialize( value );
 
             Assert.Equal( value, deserialized );
         }

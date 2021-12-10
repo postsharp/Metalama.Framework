@@ -15,7 +15,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
         {
             var s = new SimpleStruct( 1, DateTime.Now ) { StringValue = "Test", NullableEnumField = TypeCode.Char };
 
-            TestSerialization( s );
+            this.TestSerialization( s );
         }
 
         [Fact]
@@ -23,7 +23,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
         {
             var s = new SimpleStruct( 1, DateTime.Now ) { StringValue = "Test" };
 
-            TestSerialization( (object) s );
+            this.TestSerialization( (object) s );
         }
 
         [Fact]
@@ -31,7 +31,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
         {
             var s = new GenericStruct<string> { Value = "1" };
 
-            TestSerialization( s );
+            this.TestSerialization( s );
         }
 
         [Fact]
@@ -39,7 +39,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
         {
             var s = new GenericStruct<SimpleStruct> { Value = new SimpleStruct( 5, DateTime.MinValue ) };
 
-            TestSerialization( s );
+            this.TestSerialization( s );
         }
 
         [Fact]

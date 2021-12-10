@@ -13,281 +13,281 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
         [Fact]
         public void TestInt32_0()
         {
-            TestSerialization( 0 );
+            this.TestSerialization( 0 );
         }
 
         [Fact]
         public void TestInt32_1()
         {
-            TestSerialization( 1 );
+            this.TestSerialization( 1 );
         }
 
         [Fact]
         public void TestInt32_m1()
         {
-            TestSerialization( -1 );
+            this.TestSerialization( -1 );
         }
 
         [Fact]
         public void TestInt32_1000()
         {
-            TestSerialization( 1000 );
+            this.TestSerialization( 1000 );
         }
 
         [Fact]
         public void TestInt32_m1000()
         {
-            TestSerialization( -1000 );
+            this.TestSerialization( -1000 );
         }
 
         [Fact]
         public void TestInt32_100000()
         {
-            TestSerialization( 100000 );
+            this.TestSerialization( 100000 );
         }
 
         [Fact]
         public void TestInt32_m100000()
         {
-            TestSerialization( -100000 );
+            this.TestSerialization( -100000 );
         }
 
         [Fact]
         public void TestInt32_10000000()
         {
-            TestSerialization( 10000000 );
+            this.TestSerialization( 10000000 );
         }
 
         [Fact]
         public void TestInt32_m10000000()
         {
-            TestSerialization( -10000000 );
+            this.TestSerialization( -10000000 );
         }
 
         [Fact]
         public void TestInt32_Max()
         {
-            TestSerialization( int.MaxValue );
+            this.TestSerialization( int.MaxValue );
         }
 
         [Fact]
         public void TestInt32_Min()
         {
-            TestSerialization( int.MinValue );
+            this.TestSerialization( int.MinValue );
         }
 
         [Fact]
         public void TestString_SimpleWords()
         {
-            TestSerialization( "SimpleWords" );
+            this.TestSerialization( "SimpleWords" );
         }
 
         [Fact]
         public void TestDottedString_SimpleDottedWords()
         {
-            TestSerialization( (DottedString) "Simple.Dotted.Words" );
-            TestSerialization( new DottedString[] { "A", "A.B", "A.B.C", "A", "A.B" } );
+            this.TestSerialization( (DottedString) "Simple.Dotted.Words" );
+            this.TestSerialization( new DottedString[] { "A", "A.B", "A.B.C", "A", "A.B" } );
         }
 
         [Fact]
         public void TestDottedString_DottedWordsWithReservedNames()
         {
-            TestSerialization( (DottedString) "Simple.Dotted.Words, mscorlib" );
+            this.TestSerialization( (DottedString) "Simple.Dotted.Words, mscorlib" );
         }
 
         [Fact]
         public void TestDottedString_NullAndEmpty()
         {
-            TestSerialization( (DottedString?) null );
-            TestSerialization( (DottedString) "" );
+            this.TestSerialization( (DottedString?) null );
+            this.TestSerialization( (DottedString) "" );
         }
 
         [Fact]
         public void TestStruct_DateTime()
         {
-            TestSerialization( DateTime.Now );
+            this.TestSerialization( DateTime.Now );
         }
 
         [Fact]
         public void TestBoolean_True()
         {
-            TestSerialization( true );
+            this.TestSerialization( true );
         }
 
         [Fact]
         public void TestBoolean_False()
         {
-            TestSerialization( false );
+            this.TestSerialization( false );
         }
 
         [Fact]
         public void TestBoxedBoolean_False()
         {
-            TestSerialization( (object) false );
+            this.TestSerialization( (object) false );
         }
 
         [Fact]
         public void TestByte()
         {
-            TestSerialization( (byte) 0 );
-            TestSerialization( (byte) 1 );
-            TestSerialization( (byte) 255 );
+            this.TestSerialization( (byte) 0 );
+            this.TestSerialization( (byte) 1 );
+            this.TestSerialization( (byte) 255 );
         }
 
         [Fact]
         public void TestChar()
         {
-            TestSerialization( 'a' );
-            TestSerialization( (char) 0 );
-            TestSerialization( (char) 255 );
-            TestSerialization( (char) 65511 );
+            this.TestSerialization( 'a' );
+            this.TestSerialization( (char) 0 );
+            this.TestSerialization( (char) 255 );
+            this.TestSerialization( (char) 65511 );
         }
 
         [Fact]
         public void TestDateTime()
         {
-            TestSerialization( DateTime.Now );
-            TestSerialization( DateTime.MinValue );
-            TestSerialization( DateTime.MaxValue );
+            this.TestSerialization( DateTime.Now );
+            this.TestSerialization( DateTime.MinValue );
+            this.TestSerialization( DateTime.MaxValue );
         }
 
         [Fact]
         public void TestDecimal()
         {
-            TestSerialization( decimal.Zero );
-            TestSerialization( -99999999m );
-            TestSerialization( 999999m );
-            TestSerialization( decimal.MaxValue );
-            TestSerialization( decimal.MinValue );
-            TestSerialization( decimal.One );
-            TestSerialization( decimal.MinusOne );
+            this.TestSerialization( decimal.Zero );
+            this.TestSerialization( -99999999m );
+            this.TestSerialization( 999999m );
+            this.TestSerialization( decimal.MaxValue );
+            this.TestSerialization( decimal.MinValue );
+            this.TestSerialization( decimal.One );
+            this.TestSerialization( decimal.MinusOne );
         }
 
         [Fact]
         public void TestString()
         {
-            TestSerialization( (string?) null );
-            TestSerialization( "test" );
-            TestSerialization( string.Empty );
+            this.TestSerialization( (string?) null );
+            this.TestSerialization( "test" );
+            this.TestSerialization( string.Empty );
         }
 
         [Fact]
         public void TestDouble()
         {
-            TestSerialization( 0.0 );
-            TestSerialization( -1.0 );
-            TestSerialization( 1.0 );
-            TestSerialization( double.MinValue );
-            TestSerialization( double.MaxValue );
-            TestSerialization( double.NaN );
-            TestSerialization( double.NegativeInfinity );
-            TestSerialization( double.PositiveInfinity );
+            this.TestSerialization( 0.0 );
+            this.TestSerialization( -1.0 );
+            this.TestSerialization( 1.0 );
+            this.TestSerialization( double.MinValue );
+            this.TestSerialization( double.MaxValue );
+            this.TestSerialization( double.NaN );
+            this.TestSerialization( double.NegativeInfinity );
+            this.TestSerialization( double.PositiveInfinity );
         }
 
         [Fact]
         public void TestSingle()
         {
-            TestSerialization( 0.0f );
-            TestSerialization( -1.0f );
-            TestSerialization( 1.0f );
-            TestSerialization( float.MinValue );
-            TestSerialization( float.MaxValue );
-            TestSerialization( float.NaN );
-            TestSerialization( float.NegativeInfinity );
-            TestSerialization( float.PositiveInfinity );
+            this.TestSerialization( 0.0f );
+            this.TestSerialization( -1.0f );
+            this.TestSerialization( 1.0f );
+            this.TestSerialization( float.MinValue );
+            this.TestSerialization( float.MaxValue );
+            this.TestSerialization( float.NaN );
+            this.TestSerialization( float.NegativeInfinity );
+            this.TestSerialization( float.PositiveInfinity );
         }
 
         [Fact]
         public void TestGuid()
         {
-            TestSerialization( Guid.Empty );
-            TestSerialization( Guid.NewGuid() );
+            this.TestSerialization( Guid.Empty );
+            this.TestSerialization( Guid.NewGuid() );
         }
 
         [Fact]
         public void TestInt16()
         {
-            TestSerialization( short.MinValue );
-            TestSerialization( short.MaxValue );
-            TestSerialization( (short) 0 );
+            this.TestSerialization( short.MinValue );
+            this.TestSerialization( short.MaxValue );
+            this.TestSerialization( (short) 0 );
         }
 
         [Fact]
         public void TestInt64_223372036854775807()
         {
-            TestSerialization( 223372036854775807 );
+            this.TestSerialization( 223372036854775807 );
         }
 
         [Fact]
         public void TestInt64_m223372036854775807()
         {
-            TestSerialization( -223372036854775807 );
+            this.TestSerialization( -223372036854775807 );
         }
 
         [Fact]
         public void TestInt64()
         {
-            TestSerialization( long.MinValue );
-            TestSerialization( long.MaxValue );
-            TestSerialization( 0L );
+            this.TestSerialization( long.MinValue );
+            this.TestSerialization( long.MaxValue );
+            this.TestSerialization( 0L );
         }
 
         [Fact]
         public void TestUInt16()
         {
-            TestSerialization( ushort.MinValue );
-            TestSerialization( ushort.MaxValue );
-            TestSerialization( (ushort) 0 );
+            this.TestSerialization( ushort.MinValue );
+            this.TestSerialization( ushort.MaxValue );
+            this.TestSerialization( (ushort) 0 );
         }
 
         [Fact]
         public void TestUInt64()
         {
-            TestSerialization( ulong.MinValue );
-            TestSerialization( ulong.MaxValue );
-            TestSerialization( 0UL );
+            this.TestSerialization( ulong.MinValue );
+            this.TestSerialization( ulong.MaxValue );
+            this.TestSerialization( 0UL );
         }
 
         [Fact]
         public void TestUInt32()
         {
-            TestSerialization( uint.MinValue );
-            TestSerialization( uint.MaxValue );
-            TestSerialization( 0U );
+            this.TestSerialization( uint.MinValue );
+            this.TestSerialization( uint.MaxValue );
+            this.TestSerialization( 0U );
         }
 
         [Fact]
         public void TestNullableInt()
         {
-            TestSerialization( (int?) 0 );
-            TestSerialization( (int?) int.MaxValue );
-            TestSerialization( (int?) int.MinValue );
-            TestSerialization( (int?) null );
+            this.TestSerialization( (int?) 0 );
+            this.TestSerialization( (int?) int.MaxValue );
+            this.TestSerialization( (int?) int.MinValue );
+            this.TestSerialization( (int?) null );
         }
 
         [Fact]
         public void TestNullableEnum()
         {
-            TestSerialization( (TypeCode?) TypeCode.Boolean );
-            TestSerialization( (TypeCode?) null );
+            this.TestSerialization( (TypeCode?) TypeCode.Boolean );
+            this.TestSerialization( (TypeCode?) null );
         }
 
         [Fact]
         public void TestArray_Ints()
         {
-            TestSerialization( new[] { 1, int.MinValue, 9, int.MaxValue } );
+            this.TestSerialization( new[] { 1, int.MinValue, 9, int.MaxValue } );
         }
 
         [Fact]
         public void TestArray_Objects()
         {
-            TestSerialization( new[] { new SimpleType(), new SimpleType(), new SimpleType(), new SimpleType() } );
+            this.TestSerialization( new[] { new SimpleType(), new SimpleType(), new SimpleType(), new SimpleType() } );
         }
 
         [Fact]
         public void TestArray_Structs()
         {
-            TestSerialization( new[] { DateTime.Now, DateTime.Today, DateTime.MinValue, DateTime.MaxValue } );
+            this.TestSerialization( new[] { DateTime.Now, DateTime.Today, DateTime.MinValue, DateTime.MaxValue } );
         }
 
 #if !SILVERLIGHT
@@ -302,7 +302,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
             array.SetValue( 3, 8 );
             array.SetValue( 4, 9 );
 
-            TestSerialization( array );
+            this.TestSerialization( array );
         }
 #endif
 
@@ -315,25 +315,24 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
         [Fact]
         public void TestArray_BoxedStructs()
         {
-            TestSerialization( new object[] { DateTime.Now, 11, false, "test", 0.0 } );
+            this.TestSerialization( new object[] { DateTime.Now, 11, false, "test", 0.0 } );
         }
 
         [Fact]
         public void TestArray_WithNulls()
         {
-            TestSerialization( new object[2] );
+            this.TestSerialization( new object[2] );
         }
 
         [Fact]
         public void TestBoxedIntrinsics()
         {
-            TestSerialization( (object) 5 );
-            TestSerialization( (object) -13.0 );
-            TestSerialization( (object) "test" );
-            TestSerialization( (object) DateTime.Now );
+            this.TestSerialization( (object) 5 );
+            this.TestSerialization( (object) -13.0 );
+            this.TestSerialization( (object) "test" );
+            this.TestSerialization( (object) DateTime.Now );
         }
 
-        [Serializer( typeof(Serializer) )]
         public class SimpleType : IEquatable<SimpleType>
         {
             public string? Name { get; set; }
