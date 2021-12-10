@@ -26,7 +26,7 @@ namespace Metalama.Framework.Engine.Aspects
     internal class ExternalInheritedAspectSource : IAspectSource
     {
         private readonly ImmutableDictionaryOfArray<IAspectClass, InheritableAspectInstance> _inheritedAspects;
-        
+
         public ExternalInheritedAspectSource(
             Compilation compilation,
             ImmutableArray<IAspectClass> aspectClasses,
@@ -34,8 +34,7 @@ namespace Metalama.Framework.Engine.Aspects
             CancellationToken cancellationToken )
         {
             var inheritableAspectProvider = serviceProvider.GetService<IInheritableAspectManifestProvider>();
-            var compileTimeProject = serviceProvider.GetRequiredService<CompileTimeProject>();
-
+            
             var inheritedAspectsBuilder = ImmutableDictionaryOfArray<IAspectClass, InheritableAspectInstance>.CreateBuilder();
             var aspectClassesByName = aspectClasses.ToDictionary( t => t.FullName, t => t );
 
@@ -100,19 +99,18 @@ namespace Metalama.Framework.Engine.Aspects
                 {
                     continue;
                 }
-                
+
                 var baseDeclaration = compilation.Factory.GetDeclaration( targetSymbol );
-                
+
                 // We need to provide instances on the first level of derivation only because the caller will add to the next levels.
 
                 foreach ( var derived in ((IDeclarationImpl) baseDeclaration).GetDerivedDeclarations( false ) )
                 {
-                
                     yield return new AspectInstance(
                         inheritedAspectInstance.Aspect,
                         derived.ToTypedRef(),
                         (AspectClass) aspectClass,
-                        new AspectPredecessor(AspectPredecessorKind.Inherited, inheritedAspectInstance) );
+                        new AspectPredecessor( AspectPredecessorKind.Inherited, inheritedAspectInstance ) );
                 }
             }
         }

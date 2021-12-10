@@ -29,7 +29,7 @@ namespace Metalama.Framework.Engine.Aspects
         public IAspect Aspect { get; }
 
         IAspectClass IAspectInstance.AspectClass => this.AspectClass;
-        
+
         public IAspectClassImpl AspectClass { get; }
 
         IRef<IDeclaration> IAspectInstance.TargetDeclaration => this.TargetDeclaration;
@@ -140,6 +140,10 @@ namespace Metalama.Framework.Engine.Aspects
         }
 
         public AspectInstance CreateDerivedInstance( IDeclaration target )
-            => new AspectInstance( this.Aspect,  ((IDeclarationImpl)target).ToRef() ,(AspectClass) this.AspectClass, new AspectPredecessor( AspectPredecessorKind.Inherited, this ) );
+            => new(
+                this.Aspect,
+                ((IDeclarationImpl) target).ToRef(),
+                (AspectClass) this.AspectClass,
+                new AspectPredecessor( AspectPredecessorKind.Inherited, this ) );
     }
 }

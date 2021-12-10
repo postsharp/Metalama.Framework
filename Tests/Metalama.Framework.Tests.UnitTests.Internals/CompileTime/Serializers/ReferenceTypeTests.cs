@@ -202,7 +202,7 @@ public class B
     }
 }
 ";
-            
+
 #if NETFRAMEWORK
             code += "namespace System.Runtime.CompilerServices { internal static class IsExternalInit {}}";
 #endif

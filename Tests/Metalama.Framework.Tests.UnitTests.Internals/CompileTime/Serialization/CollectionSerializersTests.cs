@@ -22,7 +22,7 @@ Before:
 After:
             CollectionSerializersTests.TestValue( new List<int> { 2, 10, 30, int.MinValue, int.MaxValue, -2, 0 } );
 */
-this.TestValue(
+            this.TestValue(
                 new List<int>
                 {
                     2,
@@ -44,7 +44,7 @@ Before:
 After:
             CollectionSerializersTests.TestValue( new List<string?> { string.Empty, null, "text", string.Empty, "2" } );
 */
-this.TestValue(
+            this.TestValue(
                 new List<string?>
                 {
                     string.Empty,
@@ -64,7 +64,7 @@ Before:
 After:
             CollectionSerializersTests.TestValue( new List<SimpleType> { new SimpleType { Name = "X" }, new SimpleType { Name = "Y" } } );
 */
-this.TestValue( new List<SimpleType> { new() { Name = "X" }, new() { Name = "Y" } } );
+            this.TestValue( new List<SimpleType> { new() { Name = "X" }, new() { Name = "Y" } } );
         }
 
         [Fact]
@@ -76,7 +76,7 @@ Before:
 After:
             CollectionSerializersTests.TestValue( new Dictionary<int, int> { { 1, 1 }, { 2, 3 }, { 3, 5 }, { 4, 3 }, { 5, int.MinValue } } );
 */
-this.TestValue(
+            this.TestValue(
                 new Dictionary<int, int>
                 {
                     { 1, 1 },
@@ -96,7 +96,7 @@ Before:
 After:
             CollectionSerializersTests.TestValue(
 */
-this.TestValue(
+            this.TestValue(
                 new Dictionary<string, string?>
                 {
                     { "a", "xx uu " },
@@ -359,7 +359,7 @@ After:
 
                 // ReSharper disable RedundantSuppressNullableWarningExpression
                 return x!.StartsWith( y![0].ToString(), StringComparison.Ordinal );
-                
+
                 // ReSharper restore RedundantSuppressNullableWarningExpression
             }
 
@@ -392,7 +392,6 @@ After:
             where TKey : notnull
         {
             public Dictionary<TKey, TValue>? Dictionary { get; set; }
-
 
             public class Serializer : ReferenceTypeSerializer<TypeWithDictionary<TKey, TValue>>
             {

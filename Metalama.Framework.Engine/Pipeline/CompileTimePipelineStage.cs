@@ -73,7 +73,7 @@ namespace Metalama.Framework.Engine.Pipeline
                 null,
                 pipelineStepsResult.Diagnostics.Concat( linkerResult.Diagnostics ),
                 pipelineStepsResult.ExternalAspectSources,
-                input.ExternallyInheritableAspects.AddRange( pipelineStepsResult.InheritableAspectInstances.Select( i=>new InheritableAspectInstance( i ) ) ),
+                input.ExternallyInheritableAspects.AddRange( pipelineStepsResult.InheritableAspectInstances.Select( i => new InheritableAspectInstance( i ) ) ),
                 additionalCompilationOutputFiles: additionalCompilationOutputFiles != null
                     ? input.AdditionalCompilationOutputFiles.AddRange( additionalCompilationOutputFiles )
                     : input.AdditionalCompilationOutputFiles );

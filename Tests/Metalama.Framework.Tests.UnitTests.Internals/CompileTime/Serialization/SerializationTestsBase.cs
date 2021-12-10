@@ -3,7 +3,6 @@
 
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.LamaSerialization;
-using Metalama.Framework.Engine.Pipeline;
 using System;
 using System.Collections;
 using System.IO;
@@ -13,10 +12,11 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
 {
     public class SerializationTestsBase
     {
-        protected readonly IServiceProvider _serviceProvider = ServiceProvider.Empty.WithService( new BuiltInSerializerFactoryProvider() );
-        public  T? TestSerialization<T>( T? instance, Func<T?, T?, bool>? assert = null )
+        protected IServiceProvider ServiceProvider { get; } = Engine.Pipeline.ServiceProvider.Empty.WithService( new BuiltInSerializerFactoryProvider() );
+
+        public T? TestSerialization<T>( T? instance, Func<T?, T?, bool>? assert = null )
         {
-            var formatter = LamaFormatter.CreateTestInstance(this._serviceProvider);
+            var formatter = LamaFormatter.CreateTestInstance( this.ServiceProvider );
             var memoryStream = new MemoryStream();
             formatter.Serialize( instance, memoryStream );
             memoryStream.Seek( 0, SeekOrigin.Begin );
@@ -42,7 +42,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
 
         public T SerializeDeserialize<T>( T value )
         {
-            var formatter = LamaFormatter.CreateTestInstance(this._serviceProvider);
+            var formatter = LamaFormatter.CreateTestInstance( this.ServiceProvider );
             var memoryStream = new MemoryStream();
 
             formatter.Serialize( value!, memoryStream );

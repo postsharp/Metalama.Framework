@@ -280,10 +280,10 @@ namespace Metalama.Framework.Engine.CompileTime
             {
                 throw new InvalidOperationException( $"Cannot find the compile-time assembly 'P{runTimeAssemblyName}'." );
             }
-            
+
             return project.GetType( reflectionName );
         }
-        
+
         public Type GetType( string reflectionName )
             => this.GetTypeOrNull( reflectionName ) ?? throw new ArgumentOutOfRangeException(
                 nameof(reflectionName),

@@ -11,7 +11,6 @@ namespace Metalama.Framework.Engine.LamaSerialization
     /// </summary>
     internal class LamaSerializationBinder
     {
-       
         /// <summary>
         /// Gets a <see cref="Type"/> given a type name and an assembly name.
         /// </summary>

@@ -22,7 +22,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
     public class SerializationExceptionTests
     {
         private readonly IServiceProvider _serviceProvider = ServiceProvider.Empty.WithService( new BuiltInSerializerFactoryProvider() );
-        
+
         [Fact]
         public void TestWriteException()
         {
@@ -32,7 +32,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
                 new ReferenceToChildren { Children = { new Child { Fail = Fail.None }, new Child { Fail = Fail.Write } } }
             };
 
-            var formatter = LamaFormatter.CreateTestInstance(this._serviceProvider);
+            var formatter = LamaFormatter.CreateTestInstance( this._serviceProvider );
             var memoryStream = new MemoryStream();
 
             try
@@ -56,7 +56,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
                 new ReferenceToChildren { Children = { new Child { Fail = Fail.None }, new Child { Fail = Fail.Read } } }
             };
 
-            var formatter =  LamaFormatter.CreateTestInstance(this._serviceProvider);
+            var formatter = LamaFormatter.CreateTestInstance( this._serviceProvider );
             var memoryStream = new MemoryStream();
             formatter.Serialize( references, memoryStream );
             memoryStream.Seek( 0, SeekOrigin.Begin );
@@ -76,7 +76,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
         [Fact]
         public void TestFormatterSerializeFail()
         {
-            var formatter = LamaFormatter.CreateTestInstance(this._serviceProvider);
+            var formatter = LamaFormatter.CreateTestInstance( this._serviceProvider );
             Child.NSerialized = 0;
 
             try
@@ -93,7 +93,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
         [Fact]
         public void TestFormatterSerializeSuccess()
         {
-            var formatter = LamaFormatter.CreateTestInstance(this._serviceProvider);
+            var formatter = LamaFormatter.CreateTestInstance( this._serviceProvider );
             Child.NSerialized = 0;
 
             formatter.Serialize( new Child { Fail = Fail.None }, Stream.Null );
@@ -103,7 +103,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
         [Fact]
         public void TestFormatterDeserializeFail()
         {
-            var formatter = LamaFormatter.CreateTestInstance(this._serviceProvider);
+            var formatter = LamaFormatter.CreateTestInstance( this._serviceProvider );
             var stream = new SeekCountingMemoryStream();
             formatter.Serialize( new Child { Fail = Fail.Read }, stream );
             stream.Seek( 0, SeekOrigin.Begin );
@@ -124,7 +124,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
         [Fact]
         public void TestFormatterDeserializeSuccess()
         {
-            var formatter = LamaFormatter.CreateTestInstance(this._serviceProvider);
+            var formatter = LamaFormatter.CreateTestInstance( this._serviceProvider );
             var stream = new SeekCountingMemoryStream();
             formatter.Serialize( new Child { Fail = Fail.None }, stream );
             stream.Seek( 0, SeekOrigin.Begin );

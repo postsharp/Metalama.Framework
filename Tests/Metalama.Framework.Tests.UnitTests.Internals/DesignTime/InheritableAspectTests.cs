@@ -37,7 +37,7 @@ public interface I {}
             Assert.True( pipeline.TryExecute( compilation1.RoslynCompilation, CancellationToken.None, out var compilationResult1 ) );
 
             Assert.Equal( new[] { "Aspect" }, compilationResult1!.InheritableAspectTypes.ToArray() );
-            Assert.Equal( new[] { "T:I" }, compilationResult1.GetInheritedAspects( "Aspect" ).Select( i=>i.TargetDeclaration.ToSerializableId() ).ToArray() );
+            Assert.Equal( new[] { "T:I" }, compilationResult1.GetInheritedAspects( "Aspect" ).Select( i => i.TargetDeclaration.ToSerializableId() ).ToArray() );
         }
 
         [Fact]
@@ -63,20 +63,29 @@ public class Aspect : TypeAspect, IInheritedAspect
 
             var pipeline = new DesignTimeAspectPipeline( testContext.ServiceProvider, domain, compilation1.RoslynCompilation.References, true );
             Assert.True( pipeline.TryExecute( compilation1.RoslynCompilation, CancellationToken.None, out var compilationResult1 ) );
-            Assert.Equal( new[] { "T:I" }, compilationResult1!.GetInheritedAspects( "Aspect" ).Select( i=>i.TargetDeclaration.ToSerializableId() ).ToArray() );
+
+            Assert.Equal(
+                new[] { "T:I" },
+                compilationResult1!.GetInheritedAspects( "Aspect" ).Select( i => i.TargetDeclaration.ToSerializableId() ).ToArray() );
 
             // Add a target class.
             var targetTree2 = CSharpSyntaxTree.ParseText( "[Aspect] interface I {} [Aspect] class C {}", path: "target.cs" );
 
             var compilation2 = testContext.CreateCompilationModel( compilation1.RoslynCompilation.ReplaceSyntaxTree( targetTree1, targetTree2 ) );
             Assert.True( pipeline.TryExecute( compilation2.RoslynCompilation, CancellationToken.None, out var compilationResult2 ) );
-            Assert.Equal( new[] { "T:C", "T:I" }, compilationResult2!.GetInheritedAspects( "Aspect" ).Select( i=>i.TargetDeclaration.ToSerializableId() ).OrderBy( a => a ).ToArray() );
+
+            Assert.Equal(
+                new[] { "T:C", "T:I" },
+                compilationResult2!.GetInheritedAspects( "Aspect" ).Select( i => i.TargetDeclaration.ToSerializableId() ).OrderBy( a => a ).ToArray() );
 
             // Remove a target
-            var targetTree3 = CSharpSyntaxTree.ParseText( "[Aspect] class C {}", path: "target.cs"  );
+            var targetTree3 = CSharpSyntaxTree.ParseText( "[Aspect] class C {}", path: "target.cs" );
             var compilation3 = testContext.CreateCompilationModel( compilation2.RoslynCompilation.ReplaceSyntaxTree( targetTree2, targetTree3 ) );
             Assert.True( pipeline.TryExecute( compilation3.RoslynCompilation, CancellationToken.None, out var compilationResult3 ) );
-            Assert.Equal( new[] { "T:C" }, compilationResult3!.GetInheritedAspects( "Aspect" ).Select( i=>i.TargetDeclaration.ToSerializableId() ).OrderBy( a => a ).ToArray() );
+
+            Assert.Equal(
+                new[] { "T:C" },
+                compilationResult3!.GetInheritedAspects( "Aspect" ).Select( i => i.TargetDeclaration.ToSerializableId() ).OrderBy( a => a ).ToArray() );
         }
 
 #if NET5_0_OR_GREATER

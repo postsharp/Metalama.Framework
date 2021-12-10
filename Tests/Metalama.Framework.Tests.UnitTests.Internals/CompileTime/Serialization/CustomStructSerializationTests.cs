@@ -21,7 +21,7 @@ Before:
 After:
             SerializationTestsBase.TestSerialization( s );
 */
-            TestSerialization( s );
+            this.TestSerialization( s );
         }
 
         [Fact]
@@ -35,7 +35,7 @@ Before:
 After:
             SerializationTestsBase.TestSerialization( (object) s );
 */
-            TestSerialization( (object) s );
+            this.TestSerialization( (object) s );
         }
 
         [Fact]
@@ -49,7 +49,7 @@ Before:
 After:
             SerializationTestsBase.TestSerialization( s );
 */
-            TestSerialization( s );
+            this.TestSerialization( s );
         }
 
         [Fact]
@@ -63,7 +63,7 @@ Before:
 After:
             SerializationTestsBase.TestSerialization( s );
 */
-            TestSerialization( s );
+            this.TestSerialization( s );
         }
 
         [Fact]
@@ -78,7 +78,7 @@ Before:
 After:
             var str2 = SerializationTestsBase.TestSerialization( str );
 */
-            var str2 = TestSerialization( str );
+            var str2 = this.TestSerialization( str );
             Assert.Same( str2.SimpleClass, str2.SimpleClass2 );
         }
 
@@ -112,7 +112,6 @@ After:
                            ^ (this.StringValue != null ? StringComparer.Ordinal.GetHashCode( this.StringValue ) : 0);
                 }
             }
-
 
             public class Serializer : ValueTypeSerializer<GenericStruct<T>>
             {
@@ -188,7 +187,6 @@ After:
                     return hashCode;
                 }
             }
-
 
             public class Serializer : ValueTypeSerializer<SimpleStruct>
             {
@@ -266,7 +264,6 @@ After:
                 // ReSharper disable once NonReadonlyMemberInGetHashCode
                 return this.X;
             }
-
 
             public class SimpleClassSerializer : ReferenceTypeSerializer<SimpleClass>
             {

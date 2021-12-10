@@ -586,7 +586,7 @@ namespace Metalama.Framework.Engine.LamaSerialization
             Constructor,
 
             // ReSharper disable once InconsistentNaming
-            
+
             /// <summary>
             /// Location is deserialized in the deserialize method and needs to be made mutable. This is case of fields/properties that contain reference type fields and are readonly.
             /// </summary>

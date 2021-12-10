@@ -11,6 +11,7 @@ namespace Metalama.Framework.Engine.Aspects;
 
 public partial class InheritableAspectInstance
 {
+    // ReSharper disable once UnusedType.Local
     private class Serializer : ReferenceTypeSerializer
     {
         public override object CreateInstance( Type type, IArgumentsReader constructorArguments ) => new InheritableAspectInstance();

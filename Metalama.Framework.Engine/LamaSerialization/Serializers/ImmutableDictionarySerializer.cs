@@ -1,3 +1,6 @@
+// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+
 using Metalama.Framework.Serialization;
 using System;
 using System.Collections.Generic;
@@ -6,7 +9,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.LamaSerialization.Serializers;
 
-internal sealed class ImmutableDictionarySerializer<TKey, TValue> : ReferenceTypeSerializer 
+internal sealed class ImmutableDictionarySerializer<TKey, TValue> : ReferenceTypeSerializer
     where TKey : notnull
 {
     // This needs to be a public type because the type is instantiated from an activator in client assemblies.
@@ -25,7 +28,6 @@ internal sealed class ImmutableDictionarySerializer<TKey, TValue> : ReferenceTyp
 
         var builder = ImmutableDictionary.CreateBuilder<TKey, TValue>( comparer );
 
-        
         // Assertion on nullability was added after the code import from PostSharp.
         var keys = constructorArguments.GetValue<TKey[]>( _keysName ).AssertNotNull();
         var values = constructorArguments.GetValue<TValue[]>( _valuesName ).AssertNotNull();
@@ -44,8 +46,7 @@ internal sealed class ImmutableDictionarySerializer<TKey, TValue> : ReferenceTyp
         var dictionary = (ImmutableDictionary<TKey, TValue>) obj;
         var keys = dictionary.Keys.ToArray();
         var values = dictionary.Values.ToArray();
-            
-            
+
         var comparerCode = ComparerExtensions.GetComparerCode( dictionary.KeyComparer );
 
         // byte.MaxValue is a flag for custom comparer

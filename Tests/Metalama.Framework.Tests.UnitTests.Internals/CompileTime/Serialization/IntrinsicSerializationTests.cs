@@ -19,7 +19,7 @@ Before:
 After:
             SerializationTestsBase.TestSerialization( 0 );
 */
-            TestSerialization( 0 );
+            this.TestSerialization( 0 );
         }
 
         [Fact]
@@ -31,7 +31,7 @@ Before:
 After:
             SerializationTestsBase.TestSerialization( 1 );
 */
-            TestSerialization( 1 );
+            this.TestSerialization( 1 );
         }
 
         [Fact]
@@ -43,7 +43,7 @@ Before:
 After:
             SerializationTestsBase.TestSerialization( -1 );
 */
-            TestSerialization( -1 );
+            this.TestSerialization( -1 );
         }
 
         [Fact]
@@ -55,7 +55,7 @@ Before:
 After:
             SerializationTestsBase.TestSerialization( 1000 );
 */
-            TestSerialization( 1000 );
+            this.TestSerialization( 1000 );
         }
 
         [Fact]
@@ -67,7 +67,7 @@ Before:
 After:
             SerializationTestsBase.TestSerialization( -1000 );
 */
-            TestSerialization( -1000 );
+            this.TestSerialization( -1000 );
         }
 
         [Fact]
@@ -79,7 +79,7 @@ Before:
 After:
             SerializationTestsBase.TestSerialization( 100000 );
 */
-            TestSerialization( 100000 );
+            this.TestSerialization( 100000 );
         }
 
         [Fact]
@@ -91,7 +91,7 @@ Before:
 After:
             SerializationTestsBase.TestSerialization( -100000 );
 */
-            TestSerialization( -100000 );
+            this.TestSerialization( -100000 );
         }
 
         [Fact]
@@ -103,7 +103,7 @@ Before:
 After:
             SerializationTestsBase.TestSerialization( 10000000 );
 */
-            TestSerialization( 10000000 );
+            this.TestSerialization( 10000000 );
         }
 
         [Fact]
@@ -115,7 +115,7 @@ Before:
 After:
             SerializationTestsBase.TestSerialization( -10000000 );
 */
-            TestSerialization( -10000000 );
+            this.TestSerialization( -10000000 );
         }
 
         [Fact]
@@ -127,7 +127,7 @@ Before:
 After:
             SerializationTestsBase.TestSerialization( int.MaxValue );
 */
-            TestSerialization( int.MaxValue );
+            this.TestSerialization( int.MaxValue );
         }
 
         [Fact]
@@ -139,7 +139,7 @@ Before:
 After:
             SerializationTestsBase.TestSerialization( int.MinValue );
 */
-            TestSerialization( int.MinValue );
+            this.TestSerialization( int.MinValue );
         }
 
         [Fact]
@@ -151,7 +151,7 @@ Before:
 After:
             SerializationTestsBase.TestSerialization( "SimpleWords" );
 */
-            TestSerialization( "SimpleWords" );
+            this.TestSerialization( "SimpleWords" );
         }
 
         [Fact]
@@ -165,8 +165,8 @@ After:
             SerializationTestsBase.TestSerialization( (DottedString) "Simple.Dotted.Words" );
             SerializationTestsBase.TestSerialization( new DottedString[] { "A", "A.B", "A.B.C", "A", "A.B" } );
 */
-            TestSerialization( (DottedString) "Simple.Dotted.Words" );
-            TestSerialization( new DottedString[] { "A", "A.B", "A.B.C", "A", "A.B" } );
+            this.TestSerialization( (DottedString) "Simple.Dotted.Words" );
+            this.TestSerialization( new DottedString[] { "A", "A.B", "A.B.C", "A", "A.B" } );
         }
 
         [Fact]
@@ -178,7 +178,7 @@ Before:
 After:
             SerializationTestsBase.TestSerialization( (DottedString) "Simple.Dotted.Words, mscorlib" );
 */
-            TestSerialization( (DottedString) "Simple.Dotted.Words, mscorlib" );
+            this.TestSerialization( (DottedString) "Simple.Dotted.Words, mscorlib" );
         }
 
         [Fact]
@@ -192,8 +192,8 @@ After:
             SerializationTestsBase.TestSerialization( (DottedString?) null );
             SerializationTestsBase.TestSerialization( (DottedString) "" );
 */
-            TestSerialization( (DottedString?) null );
-            TestSerialization( (DottedString) "" );
+            this.TestSerialization( (DottedString?) null );
+            this.TestSerialization( (DottedString) "" );
         }
 
         [Fact]
@@ -205,7 +205,7 @@ Before:
 After:
             SerializationTestsBase.TestSerialization( DateTime.Now );
 */
-            TestSerialization( DateTime.Now );
+            this.TestSerialization( DateTime.Now );
         }
 
         [Fact]
@@ -217,7 +217,7 @@ Before:
 After:
             SerializationTestsBase.TestSerialization( true );
 */
-            TestSerialization( true );
+            this.TestSerialization( true );
         }
 
         [Fact]
@@ -229,7 +229,7 @@ Before:
 After:
             SerializationTestsBase.TestSerialization( false );
 */
-            TestSerialization( false );
+            this.TestSerialization( false );
         }
 
         [Fact]
@@ -241,7 +241,7 @@ Before:
 After:
             SerializationTestsBase.TestSerialization( (object) false );
 */
-            TestSerialization( (object) false );
+            this.TestSerialization( (object) false );
         }
 
         [Fact]
@@ -257,9 +257,9 @@ After:
             SerializationTestsBase.TestSerialization( (byte) 1 );
             SerializationTestsBase.TestSerialization( (byte) 255 );
 */
-            TestSerialization( (byte) 0 );
-            TestSerialization( (byte) 1 );
-            TestSerialization( (byte) 255 );
+            this.TestSerialization( (byte) 0 );
+            this.TestSerialization( (byte) 1 );
+            this.TestSerialization( (byte) 255 );
         }
 
         [Fact]
@@ -277,10 +277,10 @@ After:
             SerializationTestsBase.TestSerialization( (char) 255 );
             SerializationTestsBase.TestSerialization( (char) 65511 );
 */
-            TestSerialization( 'a' );
-            TestSerialization( (char) 0 );
-            TestSerialization( (char) 255 );
-            TestSerialization( (char) 65511 );
+            this.TestSerialization( 'a' );
+            this.TestSerialization( (char) 0 );
+            this.TestSerialization( (char) 255 );
+            this.TestSerialization( (char) 65511 );
         }
 
         [Fact]
@@ -296,9 +296,9 @@ After:
             SerializationTestsBase.TestSerialization( DateTime.MinValue );
             SerializationTestsBase.TestSerialization( DateTime.MaxValue );
 */
-            TestSerialization( DateTime.Now );
-            TestSerialization( DateTime.MinValue );
-            TestSerialization( DateTime.MaxValue );
+            this.TestSerialization( DateTime.Now );
+            this.TestSerialization( DateTime.MinValue );
+            this.TestSerialization( DateTime.MaxValue );
         }
 
         [Fact]
@@ -322,13 +322,13 @@ After:
             SerializationTestsBase.TestSerialization( decimal.One );
             SerializationTestsBase.TestSerialization( decimal.MinusOne );
 */
-            TestSerialization( decimal.Zero );
-            TestSerialization( -99999999m );
-            TestSerialization( 999999m );
-            TestSerialization( decimal.MaxValue );
-            TestSerialization( decimal.MinValue );
-            TestSerialization( decimal.One );
-            TestSerialization( decimal.MinusOne );
+            this.TestSerialization( decimal.Zero );
+            this.TestSerialization( -99999999m );
+            this.TestSerialization( 999999m );
+            this.TestSerialization( decimal.MaxValue );
+            this.TestSerialization( decimal.MinValue );
+            this.TestSerialization( decimal.One );
+            this.TestSerialization( decimal.MinusOne );
         }
 
         [Fact]
@@ -344,9 +344,9 @@ After:
             SerializationTestsBase.TestSerialization( "test" );
             SerializationTestsBase.TestSerialization( string.Empty );
 */
-            TestSerialization( (string?) null );
-            TestSerialization( "test" );
-            TestSerialization( string.Empty );
+            this.TestSerialization( (string?) null );
+            this.TestSerialization( "test" );
+            this.TestSerialization( string.Empty );
         }
 
         [Fact]
@@ -372,14 +372,14 @@ After:
             SerializationTestsBase.TestSerialization( double.NegativeInfinity );
             SerializationTestsBase.TestSerialization( double.PositiveInfinity );
 */
-            TestSerialization( 0.0 );
-            TestSerialization( -1.0 );
-            TestSerialization( 1.0 );
-            TestSerialization( double.MinValue );
-            TestSerialization( double.MaxValue );
-            TestSerialization( double.NaN );
-            TestSerialization( double.NegativeInfinity );
-            TestSerialization( double.PositiveInfinity );
+            this.TestSerialization( 0.0 );
+            this.TestSerialization( -1.0 );
+            this.TestSerialization( 1.0 );
+            this.TestSerialization( double.MinValue );
+            this.TestSerialization( double.MaxValue );
+            this.TestSerialization( double.NaN );
+            this.TestSerialization( double.NegativeInfinity );
+            this.TestSerialization( double.PositiveInfinity );
         }
 
         [Fact]
@@ -405,14 +405,14 @@ After:
             SerializationTestsBase.TestSerialization( float.NegativeInfinity );
             SerializationTestsBase.TestSerialization( float.PositiveInfinity );
 */
-            TestSerialization( 0.0f );
-            TestSerialization( -1.0f );
-            TestSerialization( 1.0f );
-            TestSerialization( float.MinValue );
-            TestSerialization( float.MaxValue );
-            TestSerialization( float.NaN );
-            TestSerialization( float.NegativeInfinity );
-            TestSerialization( float.PositiveInfinity );
+            this.TestSerialization( 0.0f );
+            this.TestSerialization( -1.0f );
+            this.TestSerialization( 1.0f );
+            this.TestSerialization( float.MinValue );
+            this.TestSerialization( float.MaxValue );
+            this.TestSerialization( float.NaN );
+            this.TestSerialization( float.NegativeInfinity );
+            this.TestSerialization( float.PositiveInfinity );
         }
 
         [Fact]
@@ -426,8 +426,8 @@ After:
             SerializationTestsBase.TestSerialization( Guid.Empty );
             SerializationTestsBase.TestSerialization( Guid.NewGuid() );
 */
-            TestSerialization( Guid.Empty );
-            TestSerialization( Guid.NewGuid() );
+            this.TestSerialization( Guid.Empty );
+            this.TestSerialization( Guid.NewGuid() );
         }
 
         [Fact]
@@ -443,9 +443,9 @@ After:
             SerializationTestsBase.TestSerialization( short.MaxValue );
             SerializationTestsBase.TestSerialization( (short) 0 );
 */
-            TestSerialization( short.MinValue );
-            TestSerialization( short.MaxValue );
-            TestSerialization( (short) 0 );
+            this.TestSerialization( short.MinValue );
+            this.TestSerialization( short.MaxValue );
+            this.TestSerialization( (short) 0 );
         }
 
         [Fact]
@@ -457,7 +457,7 @@ Before:
 After:
             SerializationTestsBase.TestSerialization( 223372036854775807 );
 */
-            TestSerialization( 223372036854775807 );
+            this.TestSerialization( 223372036854775807 );
         }
 
         [Fact]
@@ -469,7 +469,7 @@ Before:
 After:
             SerializationTestsBase.TestSerialization( -223372036854775807 );
 */
-            TestSerialization( -223372036854775807 );
+            this.TestSerialization( -223372036854775807 );
         }
 
         [Fact]
@@ -485,9 +485,9 @@ After:
             SerializationTestsBase.TestSerialization( long.MaxValue );
             SerializationTestsBase.TestSerialization( 0L );
 */
-            TestSerialization( long.MinValue );
-            TestSerialization( long.MaxValue );
-            TestSerialization( 0L );
+            this.TestSerialization( long.MinValue );
+            this.TestSerialization( long.MaxValue );
+            this.TestSerialization( 0L );
         }
 
         [Fact]
@@ -503,9 +503,9 @@ After:
             SerializationTestsBase.TestSerialization( ushort.MaxValue );
             SerializationTestsBase.TestSerialization( (ushort) 0 );
 */
-            TestSerialization( ushort.MinValue );
-            TestSerialization( ushort.MaxValue );
-            TestSerialization( (ushort) 0 );
+            this.TestSerialization( ushort.MinValue );
+            this.TestSerialization( ushort.MaxValue );
+            this.TestSerialization( (ushort) 0 );
         }
 
         [Fact]
@@ -521,9 +521,9 @@ After:
             SerializationTestsBase.TestSerialization( ulong.MaxValue );
             SerializationTestsBase.TestSerialization( 0UL );
 */
-            TestSerialization( ulong.MinValue );
-            TestSerialization( ulong.MaxValue );
-            TestSerialization( 0UL );
+            this.TestSerialization( ulong.MinValue );
+            this.TestSerialization( ulong.MaxValue );
+            this.TestSerialization( 0UL );
         }
 
         [Fact]
@@ -539,9 +539,9 @@ After:
             SerializationTestsBase.TestSerialization( uint.MaxValue );
             SerializationTestsBase.TestSerialization( 0U );
 */
-            TestSerialization( uint.MinValue );
-            TestSerialization( uint.MaxValue );
-            TestSerialization( 0U );
+            this.TestSerialization( uint.MinValue );
+            this.TestSerialization( uint.MaxValue );
+            this.TestSerialization( 0U );
         }
 
         [Fact]
@@ -559,10 +559,10 @@ After:
             SerializationTestsBase.TestSerialization( (int?) int.MinValue );
             SerializationTestsBase.TestSerialization( (int?) null );
 */
-            TestSerialization( (int?) 0 );
-            TestSerialization( (int?) int.MaxValue );
-            TestSerialization( (int?) int.MinValue );
-            TestSerialization( (int?) null );
+            this.TestSerialization( (int?) 0 );
+            this.TestSerialization( (int?) int.MaxValue );
+            this.TestSerialization( (int?) int.MinValue );
+            this.TestSerialization( (int?) null );
         }
 
         [Fact]
@@ -576,8 +576,8 @@ After:
             SerializationTestsBase.TestSerialization( (TypeCode?) TypeCode.Boolean );
             SerializationTestsBase.TestSerialization( (TypeCode?) null );
 */
-            TestSerialization( (TypeCode?) TypeCode.Boolean );
-            TestSerialization( (TypeCode?) null );
+            this.TestSerialization( (TypeCode?) TypeCode.Boolean );
+            this.TestSerialization( (TypeCode?) null );
         }
 
         [Fact]
@@ -589,7 +589,7 @@ Before:
 After:
             SerializationTestsBase.TestSerialization( new[] { 1, int.MinValue, 9, int.MaxValue } );
 */
-            TestSerialization( new[] { 1, int.MinValue, 9, int.MaxValue } );
+            this.TestSerialization( new[] { 1, int.MinValue, 9, int.MaxValue } );
         }
 
         [Fact]
@@ -601,7 +601,7 @@ Before:
 After:
             SerializationTestsBase.TestSerialization( new[] { new SimpleType(), new SimpleType(), new SimpleType(), new SimpleType() } );
 */
-            TestSerialization( new[] { new SimpleType(), new SimpleType(), new SimpleType(), new SimpleType() } );
+            this.TestSerialization( new[] { new SimpleType(), new SimpleType(), new SimpleType(), new SimpleType() } );
         }
 
         [Fact]
@@ -613,7 +613,7 @@ Before:
 After:
             SerializationTestsBase.TestSerialization( new[] { DateTime.Now, DateTime.Today, DateTime.MinValue, DateTime.MaxValue } );
 */
-            TestSerialization( new[] { DateTime.Now, DateTime.Today, DateTime.MinValue, DateTime.MaxValue } );
+            this.TestSerialization( new[] { DateTime.Now, DateTime.Today, DateTime.MinValue, DateTime.MaxValue } );
         }
 
 #if !SILVERLIGHT
@@ -634,7 +634,7 @@ Before:
 After:
             SerializationTestsBase.TestSerialization( array );
 */
-            TestSerialization( array );
+            this.TestSerialization( array );
         }
 #endif
 
@@ -653,7 +653,7 @@ Before:
 After:
             SerializationTestsBase.TestSerialization( new object[] { DateTime.Now, 11, false, "test", 0.0 } );
 */
-            TestSerialization( new object[] { DateTime.Now, 11, false, "test", 0.0 } );
+            this.TestSerialization( new object[] { DateTime.Now, 11, false, "test", 0.0 } );
         }
 
         [Fact]
@@ -665,7 +665,7 @@ Before:
 After:
             SerializationTestsBase.TestSerialization( new object[2] );
 */
-            TestSerialization( new object[2] );
+            this.TestSerialization( new object[2] );
         }
 
         [Fact]
@@ -683,10 +683,10 @@ After:
             SerializationTestsBase.TestSerialization( (object) "test" );
             SerializationTestsBase.TestSerialization( (object) DateTime.Now );
 */
-            TestSerialization( (object) 5 );
-            TestSerialization( (object) -13.0 );
-            TestSerialization( (object) "test" );
-            TestSerialization( (object) DateTime.Now );
+            this.TestSerialization( (object) 5 );
+            this.TestSerialization( (object) -13.0 );
+            this.TestSerialization( (object) "test" );
+            this.TestSerialization( (object) DateTime.Now );
         }
 
         public class SimpleType : IEquatable<SimpleType>

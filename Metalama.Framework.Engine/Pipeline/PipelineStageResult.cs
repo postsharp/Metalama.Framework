@@ -10,7 +10,6 @@ using Metalama.Framework.Engine.Diagnostics;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Linq;
 
 namespace Metalama.Framework.Engine.Pipeline
 {

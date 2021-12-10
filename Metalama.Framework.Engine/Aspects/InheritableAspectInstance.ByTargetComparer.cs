@@ -16,24 +16,19 @@ public partial class InheritableAspectInstance
     {
         public static ByTargetComparer Instance { get; } = new();
 
-        public bool Equals( InheritableAspectInstance x, InheritableAspectInstance y )
+        public bool Equals( InheritableAspectInstance? x, InheritableAspectInstance? y )
         {
-            if (ReferenceEquals( x, y ))
+            if ( ReferenceEquals( x, y ) )
             {
                 return true;
             }
 
-            if (ReferenceEquals( x, null ))
+            if ( x == null || y == null )
             {
                 return false;
             }
 
-            if (ReferenceEquals( y, null ))
-            {
-                return false;
-            }
-
-            if (x.GetType() != y.GetType())
+            if ( x.GetType() != y.GetType() )
             {
                 return false;
             }

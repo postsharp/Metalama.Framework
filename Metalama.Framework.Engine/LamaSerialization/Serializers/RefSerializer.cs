@@ -14,7 +14,8 @@ internal class RefSerializer<T> : ValueTypeSerializer<Ref<T>>
 
     public override Ref<T> DeserializeObject( IArgumentsReader constructorArguments )
     {
-        var id = constructorArguments.GetValue<string>( "id" );
-        return Ref.FromSerializedId<T>(  id );
+        var id = constructorArguments.GetValue<string>( "id" ).AssertNotNull();
+
+        return Ref.FromSerializedId<T>( id );
     }
 }

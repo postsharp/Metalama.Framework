@@ -23,8 +23,8 @@ namespace Metalama.Framework.Engine.LamaSerialization.Serializers
         public override ImmutableArray<T> DeserializeObject( IArgumentsReader constructorArguments )
         {
             var values = constructorArguments.GetValue<T[]>( _keyName ).AssertNotNull();
-            return ImmutableArray.Create<T>( values );
-        }
 
+            return ImmutableArray.Create( values );
+        }
     }
 }

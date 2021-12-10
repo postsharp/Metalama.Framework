@@ -74,7 +74,7 @@ namespace Metalama.Framework.Engine.Aspects
         /// <inheritdoc />
         public bool IsAbstract { get; }
 
-        public bool IsInherited { get;  }
+        public bool IsInherited { get; }
 
         public bool IsAttribute => typeof(Attribute).IsAssignableFrom( this.AspectType );
 

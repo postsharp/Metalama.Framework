@@ -135,10 +135,10 @@ namespace Metalama.Framework.Engine.Pipeline
                 if ( result.ExternallyInheritableAspects.Length > 0 )
                 {
                     var inheritedAspectsManifest = TransitiveAspectsManifest.Create(
-                        result.ExternallyInheritableAspects.Select( i=>new InheritableAspectInstance( i ) ).ToImmutableArray(),
+                        result.ExternallyInheritableAspects.Select( i => new InheritableAspectInstance( i ) ).ToImmutableArray(),
                         resultPartialCompilation.Compilation );
 
-                    var resource = inheritedAspectsManifest.ToResource(configuration.ServiceProvider);
+                    var resource = inheritedAspectsManifest.ToResource( configuration.ServiceProvider );
                     additionalResources = additionalResources.Add( resource );
                 }
 

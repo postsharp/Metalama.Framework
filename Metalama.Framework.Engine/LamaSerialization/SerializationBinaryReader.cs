@@ -35,7 +35,7 @@ namespace Metalama.Framework.Engine.LamaSerialization
                 case < 0:
                     {
                         var index = -header - SerializationBinaryWriter.FirstStringIndex;
-                
+
                         // ReSharper disable once ConditionIsAlwaysTrueOrFalse
                         if ( index < 0 || index > this._strings.Count )
                         {
@@ -68,7 +68,7 @@ namespace Metalama.Framework.Engine.LamaSerialization
                 case < 0:
                     {
                         var index = -header - SerializationBinaryWriter.FirstStringIndex;
-                
+
                         // ReSharper disable once ConditionIsAlwaysTrueOrFalse
                         if ( index < 0 || index > this._dottedStrings.Count )
                         {

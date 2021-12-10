@@ -27,7 +27,9 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
             ImmutableDictionary.Create<string, IntroducedSyntaxTree>( StringComparer.Ordinal );
 
         private static readonly ImmutableDictionaryOfHashSet<string, InheritableAspectInstance> _emptyInheritableAspects =
-            ImmutableDictionaryOfHashSet<string, InheritableAspectInstance>.Create( StringComparer.Ordinal, InheritableAspectInstance.ByTargetComparer.Instance );
+            ImmutableDictionaryOfHashSet<string, InheritableAspectInstance>.Create(
+                StringComparer.Ordinal,
+                InheritableAspectInstance.ByTargetComparer.Instance );
 
         public bool IsDirty { get; } = true;
 

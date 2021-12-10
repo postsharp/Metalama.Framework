@@ -6,7 +6,6 @@ using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.LamaSerialization;
 using Metalama.Framework.Serialization;
 using Microsoft.CodeAnalysis;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -14,7 +13,6 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 
 namespace Metalama.Framework.Engine.Aspects
 {
@@ -42,21 +40,20 @@ namespace Metalama.Framework.Engine.Aspects
                 inheritedAspect.GroupBy( a => a.AspectClass )
                     .ToImmutableDictionary(
                         g => g.Key.FullName,
-                        g => (IReadOnlyList<InheritableAspectInstance>) g.Select(
-                                i => new InheritableAspectInstance( i ) )
+                        g => (IReadOnlyList<InheritableAspectInstance>) g.Select( i => new InheritableAspectInstance( i ) )
                             .ToList(),
                         StringComparer.Ordinal ) );
 
         private void Serialize( Stream stream, IServiceProvider serviceProvider )
         {
             using var deflate = new DeflateStream( stream, CompressionLevel.Optimal, true );
-            var formatter = LamaFormatter.CreateSerializingInstance(serviceProvider);
+            var formatter = LamaFormatter.CreateSerializingInstance( serviceProvider );
             formatter.Serialize( this, deflate );
             deflate.Flush();
             stream.Flush();
         }
 
-        public ManagedResource ToResource(IServiceProvider serviceProvider)
+        public ManagedResource ToResource( IServiceProvider serviceProvider )
         {
             var stream = new MemoryStream();
             this.Serialize( stream, serviceProvider );
@@ -73,14 +70,15 @@ namespace Metalama.Framework.Engine.Aspects
             using var deflate = new DeflateStream( stream, CompressionMode.Decompress );
 
             var formatter = LamaFormatter.CreateDeserializingInstance( serviceProvider );
-            
-            return (TransitiveAspectsManifest) formatter.Deserialize( deflate ).AssertNotNull(  );
+
+            return (TransitiveAspectsManifest) formatter.Deserialize( deflate ).AssertNotNull();
         }
 
         public IEnumerable<string> InheritableAspectTypes => this.InheritableAspects.Keys;
 
         public IEnumerable<InheritableAspectInstance> GetInheritedAspects( string aspectType ) => this.InheritableAspects[aspectType];
 
+        // ReSharper disable once UnusedType.Local
         private class Serializer : ReferenceTypeSerializer
         {
             public override object CreateInstance( Type type, IArgumentsReader constructorArguments ) => new TransitiveAspectsManifest();
@@ -94,7 +92,10 @@ namespace Metalama.Framework.Engine.Aspects
             public override void DeserializeFields( object obj, IArgumentsReader initializationArguments )
             {
                 var instance = (TransitiveAspectsManifest) obj;
-                instance.InheritableAspects = initializationArguments.GetValue<ImmutableDictionary<string, IReadOnlyList<InheritableAspectInstance>>>( nameof(instance.InheritableAspects) )!;
+
+                instance.InheritableAspects =
+                    initializationArguments.GetValue<ImmutableDictionary<string, IReadOnlyList<InheritableAspectInstance>>>(
+                        nameof(instance.InheritableAspects) )!;
             }
         }
     }

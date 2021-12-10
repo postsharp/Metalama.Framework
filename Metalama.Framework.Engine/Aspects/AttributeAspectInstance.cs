@@ -3,9 +3,7 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.References;
-using Metalama.Framework.Engine.Diagnostics;
 
 namespace Metalama.Framework.Engine.Aspects
 {
@@ -19,9 +17,6 @@ namespace Metalama.Framework.Engine.Aspects
             in Ref<IDeclaration> target,
             AspectClass aspectClass,
             IAttribute attribute ) :
-            base( aspect, target, aspectClass, new AspectPredecessor( AspectPredecessorKind.Attribute, attribute ) )
-        {
-        }
-
+            base( aspect, target, aspectClass, new AspectPredecessor( AspectPredecessorKind.Attribute, attribute ) ) { }
     }
 }

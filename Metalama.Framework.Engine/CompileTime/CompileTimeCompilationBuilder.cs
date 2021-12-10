@@ -36,7 +36,7 @@ namespace Metalama.Framework.Engine.CompileTime
     internal partial class CompileTimeCompilationBuilder
     {
         private const string _compileTimeAssemblyPrefix = "MetalamaCompileTime_";
-        
+
         private readonly IServiceProvider _serviceProvider;
         private readonly CompileTimeDomain _domain;
         private readonly Dictionary<ulong, CompileTimeProject> _cache = new();
@@ -215,36 +215,29 @@ namespace Metalama.Framework.Engine.CompileTime
             return GetCompileTimeAssemblyName( runTimeAssemblyName, projectHash );
         }
 
-
-
-        public static bool TryParseCompileTimeAssemblyName( string assemblyName, [NotNullWhen(true)] out string? runTimeAssemblyName )
+        public static bool TryParseCompileTimeAssemblyName( string assemblyName, [NotNullWhen( true )] out string? runTimeAssemblyName )
         {
             if ( assemblyName.StartsWith( _compileTimeAssemblyPrefix, StringComparison.OrdinalIgnoreCase ) )
             {
                 var parsedAssemblyName = new AssemblyName( assemblyName );
                 var shortName = parsedAssemblyName.Name;
-                
+
                 runTimeAssemblyName = shortName.Substring(
                     _compileTimeAssemblyPrefix.Length,
                     shortName.Length - _compileTimeAssemblyPrefix.Length - 17 );
 
                 return true;
             }
-        else
+            else
             {
                 runTimeAssemblyName = null;
 
                 return false;
             }
-         
         }
 
-       
-        
         private static string GetCompileTimeAssemblyName( string runTimeAssemblyName, ulong projectHash )
         {
-            
-
             if ( runTimeAssemblyName.StartsWith( _compileTimeAssemblyPrefix, StringComparison.Ordinal ) )
             {
                 throw new ArgumentOutOfRangeException( nameof(runTimeAssemblyName) );
