@@ -13,16 +13,6 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
         [Fact]
         public void TestTypeClass()
         {
-/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
-Before:
-            this.TestSerialization( typeof( DateTime ) );
-            this.TestSerialization( typeof( Guid ) );
-            this.TestSerialization( typeof( IntrinsicSerializationTests ) );
-After:
-            SerializationTestsBase.TestSerialization( typeof( DateTime ) );
-            SerializationTestsBase.TestSerialization( typeof( Guid ) );
-            SerializationTestsBase.TestSerialization( typeof( IntrinsicSerializationTests ) );
-*/
             TestSerialization( typeof(DateTime) );
             TestSerialization( typeof(Guid) );
             TestSerialization( typeof(IntrinsicSerializationTests) );
@@ -31,36 +21,18 @@ After:
         [Fact]
         public void TestTypeGenericClosed()
         {
-/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
-Before:
-            this.TestSerialization( typeof( Dictionary<string, string> ) );
-After:
-            SerializationTestsBase.TestSerialization( typeof( Dictionary<string, string> ) );
-*/
             TestSerialization( typeof(Dictionary<string, string>) );
         }
 
         [Fact]
         public void TestTypeGenericOpen()
         {
-/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
-Before:
-            this.TestSerialization( typeof( Dictionary<,> ) );
-After:
-            SerializationTestsBase.TestSerialization( typeof( Dictionary<,> ) );
-*/
             TestSerialization( typeof(Dictionary<,>) );
         }
 
         [Fact]
         public void TestTypeGenericTypeParameter()
         {
-/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
-Before:
-            this.TestSerialization( typeof( Dictionary<,> ).GetGenericArguments()[0] );
-After:
-            SerializationTestsBase.TestSerialization( typeof( Dictionary<,> ).GetGenericArguments()[0] );
-*/
             TestSerialization( typeof(Dictionary<,>).GetGenericArguments()[0] );
         }
 
@@ -75,44 +47,6 @@ After:
         [Fact]
         public void TestTypeIntrinsics()
         {
-/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
-Before:
-            this.TestSerialization( typeof( byte ) );
-            this.TestSerialization( typeof( sbyte ) );
-            this.TestSerialization( typeof( short ) );
-            this.TestSerialization( typeof( ushort ) );
-            this.TestSerialization( typeof( int ) );
-            this.TestSerialization( typeof( uint ) );
-            this.TestSerialization( typeof( long ) );
-            this.TestSerialization( typeof( ulong ) );
-            this.TestSerialization( typeof( float ) );
-            this.TestSerialization( typeof( double ) );
-            this.TestSerialization( typeof( string ) );
-            this.TestSerialization( typeof( DottedString ) );
-            this.TestSerialization( typeof( char ) );
-            this.TestSerialization( typeof( object ) );
-            this.TestSerialization( typeof( void ) );
-            this.TestSerialization( typeof( Type ) );
-            this.TestSerialization( typeof( ValueType ) );
-After:
-            SerializationTestsBase.TestSerialization( typeof( byte ) );
-            SerializationTestsBase.TestSerialization( typeof( sbyte ) );
-            SerializationTestsBase.TestSerialization( typeof( short ) );
-            SerializationTestsBase.TestSerialization( typeof( ushort ) );
-            SerializationTestsBase.TestSerialization( typeof( int ) );
-            SerializationTestsBase.TestSerialization( typeof( uint ) );
-            SerializationTestsBase.TestSerialization( typeof( long ) );
-            SerializationTestsBase.TestSerialization( typeof( ulong ) );
-            SerializationTestsBase.TestSerialization( typeof( float ) );
-            SerializationTestsBase.TestSerialization( typeof( double ) );
-            SerializationTestsBase.TestSerialization( typeof( string ) );
-            SerializationTestsBase.TestSerialization( typeof( DottedString ) );
-            SerializationTestsBase.TestSerialization( typeof( char ) );
-            SerializationTestsBase.TestSerialization( typeof( object ) );
-            SerializationTestsBase.TestSerialization( typeof( void ) );
-            SerializationTestsBase.TestSerialization( typeof( Type ) );
-            SerializationTestsBase.TestSerialization( typeof( ValueType ) );
-*/
             TestSerialization( typeof(byte) );
             TestSerialization( typeof(sbyte) );
             TestSerialization( typeof(short) );

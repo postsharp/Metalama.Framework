@@ -7,21 +7,44 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serializers
 {
-    public class InheritanceTests : SerializerTestBase
+    public class ManualSerializerTests : SerializerTestBase
     {
         [Fact]
-        public void BaseSerializerInTheSameAssembly()
+        public void CustomBaseSerializer()
         {
             // Verifies that ILamaSerializable compile-time type with explicit parameterless constructor can be serialized and deserialized.
             // Generator should not inject parameterless constructor when it is already defined.
             var code = @"
+using System;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Serialization;
 [assembly: CompileTime]
+[Serializer(typeof(CustomSerializer))]
 public class A : ILamaSerializable
 {
     public int BaseField;
+
+    public class CustomSerializer : ReferenceTypeSerializer
+    {
+        public override object CreateInstance( Type type, IArgumentsReader constructorArguments )
+        {
+            var o = new A();
+            o.BaseField = constructorArguments.GetValue<int>(""BaseField"");
+            return o;
+        }
+
+        public override void SerializeObject( object obj, IArgumentsWriter constructorArguments, IArgumentsWriter initializationArguments )
+        {
+            var a = (A)obj;
+            constructorArguments.SetValue(""BaseField"",a.BaseField);
+        }
+
+        public override void DeserializeFields( object obj, IArgumentsReader initializationArguments )
+        {
+        }
+    }
 }
+
 public class B : A
 {
     public int DerivedField;
@@ -52,58 +75,6 @@ public class B : A
 
             Assert.Equal( 13, deserialized.BaseField );
             Assert.Equal( 42, deserialized.DerivedField );
-        }
-
-        [Fact]
-        public void AbstractBase()
-        {
-            // Verifies that IMetaSerializable readonly struct type can be serialized and deserialized (round-trip).
-            var code = @"
-using Metalama.Framework.Aspects;
-using Metalama.Framework.Serialization;
-[assembly: CompileTime]
-public abstract class A : ILamaSerializable
-{
-    public int PropertyA { get; }
-
-    public A(int propertyA)
-    {
-        this.PropertyA = propertyA;
-    }
-}
-public class B : A
-{
-    public int PropertyB { get; }
-
-    public B(int propertyA, int propertyB) : base(propertyA)
-    {
-        this.PropertyB = propertyB;
-    }
-}
-";
-
-            using var domain = new UnloadableCompileTimeDomain();
-            using var testContext = this.CreateTestContext();
-
-            var project = CreateCompileTimeProject( domain, testContext, code );
-
-            var typeB = project!.GetType( "B" );
-            var metaSerializer = GetSerializer( typeB );
-
-            dynamic instance = Activator.CreateInstance( typeB, 13, 42 )!;
-
-            var constructorArgumentsWriter = new TestArgumentsWriter();
-            var initializationArgumentsWriter = new TestArgumentsWriter();
-            metaSerializer.SerializeObject( instance, constructorArgumentsWriter, initializationArgumentsWriter );
-
-            var constructorArgumentsReader = constructorArgumentsWriter.ToReader();
-            var initializationArgumentsReader = initializationArgumentsWriter.ToReader();
-
-            dynamic deserialized = metaSerializer.CreateInstance( typeB, constructorArgumentsReader );
-            metaSerializer.DeserializeFields( ref deserialized, initializationArgumentsReader );
-
-            Assert.Equal( 13, deserialized.PropertyA );
-            Assert.Equal( 42, deserialized.PropertyB );
         }
     }
 }

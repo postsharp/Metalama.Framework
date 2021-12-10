@@ -16,12 +16,6 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
         [Fact]
         public void ListSerializer_Ints()
         {
-/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
-Before:
-            this.TestValue( new List<int> { 2, 10, 30, int.MinValue, int.MaxValue, -2, 0 } );
-After:
-            CollectionSerializersTests.TestValue( new List<int> { 2, 10, 30, int.MinValue, int.MaxValue, -2, 0 } );
-*/
             TestValue(
                 new List<int>
                 {
@@ -38,12 +32,6 @@ After:
         [Fact]
         public void ListSerializer_Strings()
         {
-/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
-Before:
-            this.TestValue( new List<string?> { string.Empty, null, "text", string.Empty, "2" } );
-After:
-            CollectionSerializersTests.TestValue( new List<string?> { string.Empty, null, "text", string.Empty, "2" } );
-*/
             TestValue(
                 new List<string?>
                 {
@@ -58,24 +46,12 @@ After:
         [Fact]
         public void ListSerializer_Classes()
         {
-/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
-Before:
-            this.TestValue( new List<SimpleType> { new SimpleType { Name = "X" }, new SimpleType { Name = "Y" } } );
-After:
-            CollectionSerializersTests.TestValue( new List<SimpleType> { new SimpleType { Name = "X" }, new SimpleType { Name = "Y" } } );
-*/
             TestValue( new List<SimpleType> { new() { Name = "X" }, new() { Name = "Y" } } );
         }
 
         [Fact]
         public void DictionarySerializer_IntsWithInts()
         {
-/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
-Before:
-            this.TestValue( new Dictionary<int, int> { { 1, 1 }, { 2, 3 }, { 3, 5 }, { 4, 3 }, { 5, int.MinValue } } );
-After:
-            CollectionSerializersTests.TestValue( new Dictionary<int, int> { { 1, 1 }, { 2, 3 }, { 3, 5 }, { 4, 3 }, { 5, int.MinValue } } );
-*/
             TestValue(
                 new Dictionary<int, int>
                 {
@@ -90,12 +66,6 @@ After:
         [Fact]
         public void DictionarySerializer_StringsWithStrings()
         {
-/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
-Before:
-            this.TestValue(
-After:
-            CollectionSerializersTests.TestValue(
-*/
             TestValue(
                 new Dictionary<string, string?>
                 {
@@ -116,12 +86,6 @@ After:
                 { 2, new List<SimpleType> { new() { Name = "e" }, new() { Name = "r" }, new() { Name = "y" } } }
             };
 
-/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
-Before:
-            var deserialized = this.SerializeDeserialize( dictionary );
-After:
-            var deserialized = SerializationTestsBase.SerializeDeserialize( dictionary );
-*/
             var deserialized = SerializeDeserialize( dictionary );
 
             Assert.NotNull( deserialized );
@@ -150,12 +114,6 @@ After:
             dictionary["first"] = a;
             dictionary["second"] = b;
 
-/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
-Before:
-            var deserialized = this.SerializeDeserialize( dictionary );
-After:
-            var deserialized = SerializationTestsBase.SerializeDeserialize( dictionary );
-*/
             var deserialized = SerializeDeserialize( dictionary );
 
             Assert.NotNull( deserialized );
@@ -171,12 +129,6 @@ After:
         {
             var dictionary = new Dictionary<string, string>( StringComparer.OrdinalIgnoreCase ) { ["first"] = "a", ["second"] = "b" };
 
-/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
-Before:
-            var deserialized = this.SerializeDeserialize( dictionary );
-After:
-            var deserialized = SerializationTestsBase.SerializeDeserialize( dictionary );
-*/
             var deserialized = SerializeDeserialize( dictionary );
 
             Assert.NotNull( deserialized );
@@ -192,12 +144,6 @@ After:
         {
             var dictionary = new Dictionary<string, string>( new CustomEqualityComparer() ) { ["first"] = "a", ["second"] = "b" };
 
-/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
-Before:
-            var deserialized = this.SerializeDeserialize( dictionary );
-After:
-            var deserialized = SerializationTestsBase.SerializeDeserialize( dictionary );
-*/
             var deserialized = SerializeDeserialize( dictionary );
 
             Assert.NotNull( deserialized );
@@ -217,12 +163,6 @@ After:
             typeWithDictionary.Dictionary.Add( 2, "2" );
             typeWithDictionary.Dictionary.Add( 3, "3" );
 
-/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
-Before:
-            var deserialized = this.SerializeDeserialize( typeWithDictionary );
-After:
-            var deserialized = SerializationTestsBase.SerializeDeserialize( typeWithDictionary );
-*/
             var deserialized = SerializeDeserialize( typeWithDictionary );
 
             Assert.NotNull( deserialized );
@@ -244,12 +184,6 @@ After:
                 tail = tail.Next;
             }
 
-/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
-Before:
-            var deserialized = this.SerializeDeserialize( ll );
-After:
-            var deserialized = SerializationTestsBase.SerializeDeserialize( ll );
-*/
             var deserialized = SerializeDeserialize( ll );
 
             tail = ll.Head;
@@ -266,12 +200,6 @@ After:
         private static void TestValue<T>( T value )
             where T : ICollection
         {
-/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
-Before:
-            var deserialized = this.SerializeDeserialize( value );
-After:
-            var deserialized = SerializationTestsBase.SerializeDeserialize( value );
-*/
             var deserialized = SerializeDeserialize( value );
 
             Assert.Equal( value, deserialized );
