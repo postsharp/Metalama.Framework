@@ -8,20 +8,20 @@ using System.Globalization;
 
 namespace Metalama.Framework.Engine.LamaSerialization
 {
-    internal sealed class MetaSerializerProvider
+    internal sealed class SerializerProvider
     {
         private readonly ISerializerFactoryProvider _provider;
-        private readonly MetaSerializerProvider? _next;
+        private readonly SerializerProvider? _next;
         private readonly Dictionary<Type, ISerializer> _serializers = new( 64 );
         private readonly object _sync = new();
 
-        public MetaSerializerProvider( ISerializerFactoryProvider provider )
+        public SerializerProvider( ISerializerFactoryProvider provider )
         {
             this._provider = provider;
 
             if ( provider.NextProvider != null )
             {
-                this._next = new MetaSerializerProvider( provider.NextProvider );
+                this._next = new SerializerProvider( provider.NextProvider );
             }
         }
 

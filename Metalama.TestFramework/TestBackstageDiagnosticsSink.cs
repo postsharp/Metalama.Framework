@@ -9,7 +9,7 @@ using System.Collections.Generic;
 
 namespace Metalama.TestFramework
 {
-    internal class TestDiagnosticsSink : IBackstageDiagnosticSink, IService
+    internal class TestBackstageDiagnosticsSink : IBackstageDiagnosticSink, IService
     {
         private readonly List<(string Message, IDiagnosticsLocation? Location)> _warnings = new();
         private readonly List<(string Message, IDiagnosticsLocation? Location)> _errors = new();

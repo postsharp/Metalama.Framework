@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.AdditionalOutputs;
 using Metalama.Framework.Engine.AspectOrdering;
 using Metalama.Framework.Engine.Aspects;
@@ -9,6 +10,7 @@ using Metalama.Framework.Engine.Diagnostics;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
 
 namespace Metalama.Framework.Engine.Pipeline
 {
@@ -45,7 +47,7 @@ namespace Metalama.Framework.Engine.Pipeline
         /// </summary>
         public ImmutableArray<OrderedAspectLayer> AspectLayers { get; }
 
-        public ImmutableArray<AttributeAspectInstance> ExternallyInheritableAspects { get; }
+        public ImmutableArray<IAspectInstance> ExternallyInheritableAspects { get; }
 
         /// <summary>
         /// Gets the compilation model corresponding to <see cref="Compilation"/>, if it has been created.
@@ -61,7 +63,7 @@ namespace Metalama.Framework.Engine.Pipeline
             CompilationModel? compilationModel,
             ImmutableUserDiagnosticList? diagnostics = null,
             IReadOnlyList<IAspectSource>? aspectSources = null,
-            ImmutableArray<AttributeAspectInstance>? inheritableAspectInstances = null,
+            ImmutableArray<IAspectInstance> inheritableAspectInstances = default,
             IReadOnlyList<IntroducedSyntaxTree>? additionalSyntaxTrees = null,
             ImmutableArray<AdditionalCompilationOutputFile>? additionalCompilationOutputFiles = null )
         {
@@ -70,7 +72,7 @@ namespace Metalama.Framework.Engine.Pipeline
             this.AspectSources = aspectSources ?? Array.Empty<IAspectSource>();
             this.AspectLayers = aspectLayers;
             this.CompilationModel = compilationModel;
-            this.ExternallyInheritableAspects = inheritableAspectInstances ?? ImmutableArray<AttributeAspectInstance>.Empty;
+            this.ExternallyInheritableAspects = inheritableAspectInstances.IsDefault ? ImmutableArray<IAspectInstance>.Empty : inheritableAspectInstances;
             this.Project = project;
             this.AdditionalSyntaxTrees = additionalSyntaxTrees ?? ImmutableArray<IntroducedSyntaxTree>.Empty;
             this.AdditionalCompilationOutputFiles = additionalCompilationOutputFiles ?? ImmutableArray<AdditionalCompilationOutputFile>.Empty;

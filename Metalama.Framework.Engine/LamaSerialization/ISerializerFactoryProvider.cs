@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Framework.Project;
 using Metalama.Framework.Serialization;
 using System;
 
@@ -10,7 +11,7 @@ namespace Metalama.Framework.Engine.LamaSerialization
     /// Provides instances of the <see cref="ISerializerFactory"/> interface given the object type.
     /// </summary>
     /// <seealso cref="ISerializerDiscoverer"/>
-    internal interface ISerializerFactoryProvider
+    internal interface ISerializerFactoryProvider : IService
     {
         /// <summary>
         /// Gets the surrogate type for a given object type. 

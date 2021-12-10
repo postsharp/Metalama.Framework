@@ -2,14 +2,8 @@ using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Inheritance.CrossAssembly
 {
-    public class Aspect : TypeAspect
+    public class Aspect : TypeAspect, IInheritedAspect
     {
-        public override void BuildAspectClass( IAspectClassBuilder builder )
-        {
-            builder.IsInherited = true;
-            base.BuildAspectClass( builder );
-        }
-
         [Introduce]
         public void Introduced() { }
     }

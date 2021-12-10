@@ -13,11 +13,6 @@ namespace Metalama.Framework.Engine.LamaSerialization
     /// </summary>
     internal class SerializerFactoryProvider : ISerializerFactoryProvider
     {
-        /// <summary>
-        /// Gets the <see cref="SerializerFactoryProvider"/> instance that supports built-in types.
-        /// </summary>
-        public static readonly SerializerFactoryProvider BuiltIn = new BuiltInSerializerFactoryProvider();
-
         private readonly Dictionary<Type, ISerializerFactory> _serializerTypes = new( 64 );
 
         private bool _isReadOnly;

@@ -82,7 +82,6 @@ After:
             Assert.Same( str2.SimpleClass, str2.SimpleClass2 );
         }
 
-        [Serializer( typeof(GenericStructSerializer<>) )]
         public struct GenericStruct<T> : IEquatable<GenericStruct<T>>
             where T : notnull
         {
@@ -113,27 +112,29 @@ After:
                            ^ (this.StringValue != null ? StringComparer.Ordinal.GetHashCode( this.StringValue ) : 0);
                 }
             }
+
+
+            public class Serializer : ValueTypeSerializer<GenericStruct<T>>
+            {
+                public override void SerializeObject( GenericStruct<T> obj, IArgumentsWriter constructorArguments )
+                {
+                    constructorArguments.SetValue( "T", obj.Value );
+                    constructorArguments.SetValue( "s", obj.StringValue );
+                }
+
+                public override GenericStruct<T> DeserializeObject( IArgumentsReader constructorArguments )
+                {
+                    // Assertion on nullability was added after the code import from PostSharp.
+                    var s = new GenericStruct<T>
+                    {
+                        StringValue = constructorArguments.GetValue<string>( "s" ), Value = constructorArguments.GetValue<T?>( "T" )!
+                    };
+
+                    return s;
+                }
+            }
         }
 
-        public class GenericStructSerializer<T> : ValueTypeSerializer<GenericStruct<T>>
-            where T : notnull
-        {
-            public override void SerializeObject( GenericStruct<T> obj, IArgumentsWriter constructorArguments )
-            {
-                constructorArguments.SetValue( "T", obj.Value );
-                constructorArguments.SetValue( "s", obj.StringValue );
-            }
-
-            public override GenericStruct<T> DeserializeObject( IArgumentsReader constructorArguments )
-            {
-                // Assertion on nullability was added after the code import from PostSharp.
-                var s = new GenericStruct<T> { StringValue = constructorArguments.GetValue<string>( "s" ), Value = constructorArguments.GetValue<T?>( "T" )! };
-
-                return s;
-            }
-        }
-
-        [Serializer( typeof(SimpleStructSerializer) )]
         public struct SimpleStruct : IEquatable<SimpleStruct>
         {
             public int IntValue { get; set; }
@@ -187,35 +188,35 @@ After:
                     return hashCode;
                 }
             }
-        }
 
-        public class SimpleStructSerializer : ValueTypeSerializer<SimpleStruct>
-        {
-            public override void SerializeObject( SimpleStruct obj, IArgumentsWriter constructorArguments )
-            {
-                constructorArguments.SetValue( "int", obj.IntValue );
-                constructorArguments.SetValue( "time", obj.TimeValue );
-                constructorArguments.SetValue( "string", obj.StringValue );
-                constructorArguments.SetValue( "cls", obj.SimpleClass );
-                constructorArguments.SetValue( "cls2", obj.SimpleClass2 );
-                constructorArguments.SetValue( "ne", obj.NullableEnumField );
-            }
 
-            public override SimpleStruct DeserializeObject( IArgumentsReader constructorArguments )
+            public class Serializer : ValueTypeSerializer<SimpleStruct>
             {
-                var str = new SimpleStruct( constructorArguments.GetValue<int>( "int" ), constructorArguments.GetValue<DateTime>( "time" ) )
+                public override void SerializeObject( SimpleStruct obj, IArgumentsWriter constructorArguments )
                 {
-                    StringValue = constructorArguments.GetValue<string>( "string" ),
-                    SimpleClass = constructorArguments.GetValue<SimpleClass>( "cls" ),
-                    SimpleClass2 = constructorArguments.GetValue<SimpleClass>( "cls2" ),
-                    NullableEnumField = constructorArguments.GetValue<TypeCode?>( "ne" )
-                };
+                    constructorArguments.SetValue( "int", obj.IntValue );
+                    constructorArguments.SetValue( "time", obj.TimeValue );
+                    constructorArguments.SetValue( "string", obj.StringValue );
+                    constructorArguments.SetValue( "cls", obj.SimpleClass );
+                    constructorArguments.SetValue( "cls2", obj.SimpleClass2 );
+                    constructorArguments.SetValue( "ne", obj.NullableEnumField );
+                }
 
-                return str;
+                public override SimpleStruct DeserializeObject( IArgumentsReader constructorArguments )
+                {
+                    var str = new SimpleStruct( constructorArguments.GetValue<int>( "int" ), constructorArguments.GetValue<DateTime>( "time" ) )
+                    {
+                        StringValue = constructorArguments.GetValue<string>( "string" ),
+                        SimpleClass = constructorArguments.GetValue<SimpleClass>( "cls" ),
+                        SimpleClass2 = constructorArguments.GetValue<SimpleClass>( "cls2" ),
+                        NullableEnumField = constructorArguments.GetValue<TypeCode?>( "ne" )
+                    };
+
+                    return str;
+                }
             }
         }
 
-        [Serializer( typeof(SimpleClassSerializer) )]
         public class SimpleClass : IEquatable<SimpleClass>
         {
             public int X { get; set; }
@@ -265,20 +266,21 @@ After:
                 // ReSharper disable once NonReadonlyMemberInGetHashCode
                 return this.X;
             }
-        }
 
-        public class SimpleClassSerializer : ReferenceTypeSerializer<SimpleClass>
-        {
-            public override void SerializeObject( SimpleClass obj, IArgumentsWriter constructorArguments, IArgumentsWriter initializationArguments )
+
+            public class SimpleClassSerializer : ReferenceTypeSerializer<SimpleClass>
             {
-                constructorArguments.SetValue( "x", obj.X );
-            }
+                public override void SerializeObject( SimpleClass obj, IArgumentsWriter constructorArguments, IArgumentsWriter initializationArguments )
+                {
+                    constructorArguments.SetValue( "x", obj.X );
+                }
 
-            public override void DeserializeFields( SimpleClass obj, IArgumentsReader initializationArguments ) { }
+                public override void DeserializeFields( SimpleClass obj, IArgumentsReader initializationArguments ) { }
 
-            public override object CreateInstance( Type type, IArgumentsReader constructorArguments )
-            {
-                return new SimpleClass( constructorArguments.GetValue<int>( "x" ) );
+                public override object CreateInstance( Type type, IArgumentsReader constructorArguments )
+                {
+                    return new SimpleClass( constructorArguments.GetValue<int>( "x" ) );
+                }
             }
         }
     }

@@ -28,7 +28,9 @@ namespace Metalama.Framework.Engine.Aspects
         /// </summary>
         public IAspect Aspect { get; }
 
-        public IAspectClass AspectClass { get; }
+        IAspectClass IAspectInstance.AspectClass => this.AspectClass;
+        
+        public IAspectClassImpl AspectClass { get; }
 
         IRef<IDeclaration> IAspectInstance.TargetDeclaration => this.TargetDeclaration;
 
@@ -60,7 +62,7 @@ namespace Metalama.Framework.Engine.Aspects
         internal AspectInstance(
             IAspect aspect,
             in Ref<IDeclaration> declaration,
-            IAspectClass aspectClass,
+            IAspectClassImpl aspectClass,
             IEnumerable<TemplateClassInstance> templateInstances,
             in AspectPredecessor predecessor )
         {
@@ -100,7 +102,7 @@ namespace Metalama.Framework.Engine.Aspects
 
         public EligibleScenarios ComputeEligibility( IDeclaration declaration )
         {
-            var eligibility = ((IAspectClassImpl) this.AspectClass).GetEligibility( declaration );
+            var eligibility = this.AspectClass.GetEligibility( declaration );
 
             if ( (eligibility & EligibleScenarios.Inheritance) != 0 && !((IDeclarationImpl) declaration).CanBeInherited )
             {
@@ -137,10 +139,7 @@ namespace Metalama.Framework.Engine.Aspects
             return 0;
         }
 
-        public virtual AttributeAspectInstance CreateDerivedInstance( IDeclaration target )
-        {
-            // Inherited aspects should not be created with a method that accepts an IAspect, but should provide a way to replicate the aspect.
-            throw new AssertionFailedException();
-        }
+        public AspectInstance CreateDerivedInstance( IDeclaration target )
+            => new AspectInstance( this.Aspect,  ((IDeclarationImpl)target).ToRef() ,(AspectClass) this.AspectClass, new AspectPredecessor( AspectPredecessorKind.Inherited, this ) );
     }
 }

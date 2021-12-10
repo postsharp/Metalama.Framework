@@ -689,7 +689,6 @@ After:
             TestSerialization( (object) DateTime.Now );
         }
 
-        [Serializer( typeof(Serializer) )]
         public class SimpleType : IEquatable<SimpleType>
         {
             public string? Name { get; set; }

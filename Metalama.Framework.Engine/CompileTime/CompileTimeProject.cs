@@ -272,6 +272,18 @@ namespace Metalama.Framework.Engine.CompileTime
 
         public Type GetType( Type reflectionType ) => this.GetType( reflectionType.FullName );
 
+        public Type GetType( string reflectionName, string runTimeAssemblyName )
+        {
+            var project = this.ClosureProjects.FirstOrDefault( p => p.RunTimeIdentity.Name == runTimeAssemblyName );
+
+            if ( project == null )
+            {
+                throw new InvalidOperationException( $"Cannot find the compile-time assembly 'P{runTimeAssemblyName}'." );
+            }
+            
+            return project.GetType( reflectionName );
+        }
+        
         public Type GetType( string reflectionName )
             => this.GetTypeOrNull( reflectionName ) ?? throw new ArgumentOutOfRangeException(
                 nameof(reflectionName),

@@ -239,7 +239,7 @@ namespace Metalama.TestFramework
                     }
                 }
 
-                var diagnosticsSink = this.BaseServiceProvider.GetRequiredService<TestDiagnosticsSink>();
+                var diagnosticsSink = this.BaseServiceProvider.GetRequiredService<TestBackstageDiagnosticsSink>();
                 testResult.PipelineDiagnostics.Report( diagnosticsSink.EnumerateDiagnostics() );
             }
             finally

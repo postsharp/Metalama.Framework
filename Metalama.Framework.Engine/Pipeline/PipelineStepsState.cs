@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Advices;
 using Metalama.Framework.Engine.AspectOrdering;
 using Metalama.Framework.Engine.Aspects;
@@ -29,7 +30,7 @@ namespace Metalama.Framework.Engine.Pipeline
         private readonly PipelineStepIdComparer _comparer;
         private readonly UserDiagnosticSink _diagnostics;
         private readonly List<INonObservableTransformation> _nonObservableTransformations = new();
-        private readonly List<AttributeAspectInstance> _inheritableAspectInstances = new();
+        private readonly List<IAspectInstance> _inheritableAspectInstances = new();
         private readonly OverflowAspectSource _overflowAspectSource = new();
         private PipelineStep? _currentStep;
 
@@ -37,7 +38,7 @@ namespace Metalama.Framework.Engine.Pipeline
 
         public IReadOnlyList<INonObservableTransformation> NonObservableTransformations => this._nonObservableTransformations;
 
-        public ImmutableArray<AttributeAspectInstance> InheritableAspectInstances => this._inheritableAspectInstances.ToImmutableArray();
+        public ImmutableArray<IAspectInstance> InheritableAspectInstances => this._inheritableAspectInstances.ToImmutableArray();
 
         public ImmutableUserDiagnosticList Diagnostics => this._diagnostics.ToImmutable();
 

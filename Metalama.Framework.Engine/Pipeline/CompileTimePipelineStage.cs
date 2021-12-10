@@ -3,6 +3,7 @@
 
 using Metalama.Framework.Engine.AdditionalOutputs;
 using Metalama.Framework.Engine.AspectOrdering;
+using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.DesignTime.Pipeline;
@@ -13,6 +14,7 @@ using Metalama.Framework.Project;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading;
 
@@ -71,7 +73,7 @@ namespace Metalama.Framework.Engine.Pipeline
                 null,
                 pipelineStepsResult.Diagnostics.Concat( linkerResult.Diagnostics ),
                 pipelineStepsResult.ExternalAspectSources,
-                input.ExternallyInheritableAspects.AddRange( pipelineStepsResult.InheritableAspectInstances ),
+                input.ExternallyInheritableAspects.AddRange( pipelineStepsResult.InheritableAspectInstances.Select( i=>new InheritableAspectInstance( i ) ) ),
                 additionalCompilationOutputFiles: additionalCompilationOutputFiles != null
                     ? input.AdditionalCompilationOutputFiles.AddRange( additionalCompilationOutputFiles )
                     : input.AdditionalCompilationOutputFiles );

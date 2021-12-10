@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Code.Collections;
+using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Pipeline;
 using Microsoft.CodeAnalysis;
@@ -21,7 +22,7 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
         public ImmutableArray<Diagnostic>.Builder? Diagnostics;
         public ImmutableArray<CacheableScopedSuppression>.Builder? Suppressions;
         public ImmutableArray<IntroducedSyntaxTree>.Builder? Introductions;
-        public ImmutableArray<(string AspectType, string TargetDeclaration)>.Builder? InheritableAspects;
+        public ImmutableArray<(string AspectType, InheritableAspectInstance AspectInstance)>.Builder? InheritableAspects;
 #pragma warning restore SA1401 // Fields should be private
 
         public SyntaxTreeResultBuilder( SyntaxTree syntaxTree )

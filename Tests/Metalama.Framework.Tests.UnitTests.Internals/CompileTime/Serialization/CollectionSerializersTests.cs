@@ -22,7 +22,7 @@ Before:
 After:
             CollectionSerializersTests.TestValue( new List<int> { 2, 10, 30, int.MinValue, int.MaxValue, -2, 0 } );
 */
-            TestValue(
+this.TestValue(
                 new List<int>
                 {
                     2,
@@ -44,7 +44,7 @@ Before:
 After:
             CollectionSerializersTests.TestValue( new List<string?> { string.Empty, null, "text", string.Empty, "2" } );
 */
-            TestValue(
+this.TestValue(
                 new List<string?>
                 {
                     string.Empty,
@@ -64,7 +64,7 @@ Before:
 After:
             CollectionSerializersTests.TestValue( new List<SimpleType> { new SimpleType { Name = "X" }, new SimpleType { Name = "Y" } } );
 */
-            TestValue( new List<SimpleType> { new() { Name = "X" }, new() { Name = "Y" } } );
+this.TestValue( new List<SimpleType> { new() { Name = "X" }, new() { Name = "Y" } } );
         }
 
         [Fact]
@@ -76,7 +76,7 @@ Before:
 After:
             CollectionSerializersTests.TestValue( new Dictionary<int, int> { { 1, 1 }, { 2, 3 }, { 3, 5 }, { 4, 3 }, { 5, int.MinValue } } );
 */
-            TestValue(
+this.TestValue(
                 new Dictionary<int, int>
                 {
                     { 1, 1 },
@@ -96,7 +96,7 @@ Before:
 After:
             CollectionSerializersTests.TestValue(
 */
-            TestValue(
+this.TestValue(
                 new Dictionary<string, string?>
                 {
                     { "a", "xx uu " },
@@ -122,7 +122,7 @@ Before:
 After:
             var deserialized = SerializationTestsBase.SerializeDeserialize( dictionary );
 */
-            var deserialized = SerializeDeserialize( dictionary );
+            var deserialized = this.SerializeDeserialize( dictionary );
 
             Assert.NotNull( deserialized );
             Assert.Equal( dictionary.Count, deserialized.Count );
@@ -156,7 +156,7 @@ Before:
 After:
             var deserialized = SerializationTestsBase.SerializeDeserialize( dictionary );
 */
-            var deserialized = SerializeDeserialize( dictionary );
+            var deserialized = this.SerializeDeserialize( dictionary );
 
             Assert.NotNull( deserialized );
             Assert.Equal( dictionary.Count, deserialized.Count );
@@ -177,7 +177,7 @@ Before:
 After:
             var deserialized = SerializationTestsBase.SerializeDeserialize( dictionary );
 */
-            var deserialized = SerializeDeserialize( dictionary );
+            var deserialized = this.SerializeDeserialize( dictionary );
 
             Assert.NotNull( deserialized );
             Assert.Equal( dictionary.Count, deserialized.Count );
@@ -198,7 +198,7 @@ Before:
 After:
             var deserialized = SerializationTestsBase.SerializeDeserialize( dictionary );
 */
-            var deserialized = SerializeDeserialize( dictionary );
+            var deserialized = this.SerializeDeserialize( dictionary );
 
             Assert.NotNull( deserialized );
             Assert.Equal( dictionary.Count, deserialized.Count );
@@ -223,7 +223,7 @@ Before:
 After:
             var deserialized = SerializationTestsBase.SerializeDeserialize( typeWithDictionary );
 */
-            var deserialized = SerializeDeserialize( typeWithDictionary );
+            var deserialized = this.SerializeDeserialize( typeWithDictionary );
 
             Assert.NotNull( deserialized );
             Assert.Equal( typeWithDictionary.Dictionary.Count, deserialized.Dictionary!.Count );
@@ -250,7 +250,7 @@ Before:
 After:
             var deserialized = SerializationTestsBase.SerializeDeserialize( ll );
 */
-            var deserialized = SerializeDeserialize( ll );
+            var deserialized = this.SerializeDeserialize( ll );
 
             tail = ll.Head;
             var deserializedTail = deserialized.Head;
@@ -263,7 +263,7 @@ After:
             }
         }
 
-        private static void TestValue<T>( T value )
+        private void TestValue<T>( T value )
             where T : ICollection
         {
 /* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
@@ -272,12 +272,11 @@ Before:
 After:
             var deserialized = SerializationTestsBase.SerializeDeserialize( value );
 */
-            var deserialized = SerializeDeserialize( value );
+            var deserialized = this.SerializeDeserialize( value );
 
             Assert.Equal( value, deserialized );
         }
 
-        [Serializer( typeof(Serializer) )]
         public class SimpleType : IEquatable<SimpleType>
         {
             public string? Name { get; set; }
@@ -344,7 +343,6 @@ After:
             }
         }
 
-        [Serializer( typeof(Serializer) )]
         public class CustomEqualityComparer : IEqualityComparer<string>
         {
             public bool Equals( string? x, string? y )
@@ -390,36 +388,34 @@ After:
             }
         }
 
-        [Serializer( typeof(Serializer<,>) )]
         public class TypeWithDictionary<TKey, TValue>
             where TKey : notnull
         {
             public Dictionary<TKey, TValue>? Dictionary { get; set; }
+
+
+            public class Serializer : ReferenceTypeSerializer<TypeWithDictionary<TKey, TValue>>
+            {
+                public override object CreateInstance( Type type, IArgumentsReader constructorArguments )
+                {
+                    return new TypeWithDictionary<TKey, TValue>();
+                }
+
+                public override void SerializeObject(
+                    TypeWithDictionary<TKey, TValue> obj,
+                    IArgumentsWriter constructorArguments,
+                    IArgumentsWriter initializationArguments )
+                {
+                    initializationArguments.SetValue( "_", obj.Dictionary );
+                }
+
+                public override void DeserializeFields( TypeWithDictionary<TKey, TValue> obj, IArgumentsReader initializationArguments )
+                {
+                    obj.Dictionary = initializationArguments.GetValue<Dictionary<TKey, TValue>>( "_" );
+                }
+            }
         }
 
-        public class Serializer<TKey, TValue> : ReferenceTypeSerializer<TypeWithDictionary<TKey, TValue>>
-            where TKey : notnull
-        {
-            public override object CreateInstance( Type type, IArgumentsReader constructorArguments )
-            {
-                return new TypeWithDictionary<TKey, TValue>();
-            }
-
-            public override void SerializeObject(
-                TypeWithDictionary<TKey, TValue> obj,
-                IArgumentsWriter constructorArguments,
-                IArgumentsWriter initializationArguments )
-            {
-                initializationArguments.SetValue( "_", obj.Dictionary );
-            }
-
-            public override void DeserializeFields( TypeWithDictionary<TKey, TValue> obj, IArgumentsReader initializationArguments )
-            {
-                obj.Dictionary = initializationArguments.GetValue<Dictionary<TKey, TValue>>( "_" );
-            }
-        }
-
-        [Serializer( typeof(Serializer) )]
         public class LinkedListImpl
         {
             public Node<int>? Head { get; set; }
@@ -444,7 +440,6 @@ After:
             }
         }
 
-        [Serializer( typeof(Node<>.Serializer) )]
         public class Node<T> : IEquatable<Node<T>>
             where T : notnull
         {

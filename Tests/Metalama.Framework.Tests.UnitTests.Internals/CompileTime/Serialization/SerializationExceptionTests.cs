@@ -3,6 +3,7 @@
 
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.LamaSerialization;
+using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Serialization;
 using System;
 using System.Collections.Generic;
@@ -20,6 +21,8 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
 
     public class SerializationExceptionTests
     {
+        private readonly IServiceProvider _serviceProvider = ServiceProvider.Empty.WithService( new BuiltInSerializerFactoryProvider() );
+        
         [Fact]
         public void TestWriteException()
         {
@@ -29,7 +32,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
                 new ReferenceToChildren { Children = { new Child { Fail = Fail.None }, new Child { Fail = Fail.Write } } }
             };
 
-            var formatter = new LamaFormatter( null, SerializerFactoryProvider.BuiltIn );
+            var formatter = LamaFormatter.CreateTestInstance(this._serviceProvider);
             var memoryStream = new MemoryStream();
 
             try
@@ -53,7 +56,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
                 new ReferenceToChildren { Children = { new Child { Fail = Fail.None }, new Child { Fail = Fail.Read } } }
             };
 
-            var formatter = new LamaFormatter( null, SerializerFactoryProvider.BuiltIn );
+            var formatter =  LamaFormatter.CreateTestInstance(this._serviceProvider);
             var memoryStream = new MemoryStream();
             formatter.Serialize( references, memoryStream );
             memoryStream.Seek( 0, SeekOrigin.Begin );
@@ -73,7 +76,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
         [Fact]
         public void TestFormatterSerializeFail()
         {
-            var formatter = new LamaFormatter();
+            var formatter = LamaFormatter.CreateTestInstance(this._serviceProvider);
             Child.NSerialized = 0;
 
             try
@@ -90,7 +93,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
         [Fact]
         public void TestFormatterSerializeSuccess()
         {
-            var formatter = new LamaFormatter();
+            var formatter = LamaFormatter.CreateTestInstance(this._serviceProvider);
             Child.NSerialized = 0;
 
             formatter.Serialize( new Child { Fail = Fail.None }, Stream.Null );
@@ -100,7 +103,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
         [Fact]
         public void TestFormatterDeserializeFail()
         {
-            var formatter = new LamaFormatter();
+            var formatter = LamaFormatter.CreateTestInstance(this._serviceProvider);
             var stream = new SeekCountingMemoryStream();
             formatter.Serialize( new Child { Fail = Fail.Read }, stream );
             stream.Seek( 0, SeekOrigin.Begin );
@@ -121,7 +124,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
         [Fact]
         public void TestFormatterDeserializeSuccess()
         {
-            var formatter = new LamaFormatter();
+            var formatter = LamaFormatter.CreateTestInstance(this._serviceProvider);
             var stream = new SeekCountingMemoryStream();
             formatter.Serialize( new Child { Fail = Fail.None }, stream );
             stream.Seek( 0, SeekOrigin.Begin );
@@ -144,7 +147,6 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
             }
         }
 
-        [Serializer( typeof(Serializer) )]
         public class Base
         {
 #pragma warning disable SA1401 // Fields should be private
@@ -180,7 +182,6 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
             }
         }
 
-        [Serializer( typeof(Serializer) )]
         public class Child : Base, ILamaSerializationCallback
         {
             public static int NSerialized { get; set; }
@@ -211,7 +212,6 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
             }
         }
 
-        [Serializer( typeof(Serializer) )]
         public class ReferenceToChildren
         {
 #pragma warning disable SA1401 // Fields should be private

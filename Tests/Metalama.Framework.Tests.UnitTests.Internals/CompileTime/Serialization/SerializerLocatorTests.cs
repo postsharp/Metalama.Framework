@@ -20,8 +20,9 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
 
         public SerializerLocatorTests()
         {
-            Assert.NotNull( SerializerFactoryProvider.BuiltIn.NextProvider );
-            this._customSerializerProvider = SerializerFactoryProvider.BuiltIn.NextProvider!;
+            var builtIn = new BuiltInSerializerFactoryProvider();
+            Assert.NotNull( builtIn.NextProvider );
+            this._customSerializerProvider = builtIn.NextProvider!;
         }
 
         [Fact]
@@ -90,7 +91,6 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
             Assert.Throws<LamaSerializationException>( () => this._customSerializerProvider.GetSerializerFactory( typeof(TypeWithManySerializers) ) );
         }
 
-        [Serializer( typeof(Serializer) )]
         public class SerializedClass
         {
             public class Serializer : ReferenceTypeSerializer<SerializedClass>
@@ -106,7 +106,6 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
             }
         }
 
-        [Serializer( typeof(GenericSerializedClass<>.Serializer) )]
         public class GenericSerializedClass<T>
         {
             public class Serializer : ReferenceTypeSerializer<GenericSerializedClass<T>>
@@ -127,7 +126,6 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
 
         internal class TypeWoSerializer { }
 
-        [Serializer( typeof(Serializer) )]
         [ImportSerializer( typeof(TypeWithManySerializers), typeof(SecondSerializer) )]
         public class TypeWithManySerializers
         {

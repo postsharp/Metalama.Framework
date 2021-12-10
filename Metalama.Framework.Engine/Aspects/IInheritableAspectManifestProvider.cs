@@ -9,6 +9,6 @@ namespace Metalama.Framework.Engine.Aspects
 {
     internal interface IInheritableAspectManifestProvider : IService
     {
-        IInheritableAspectsManifest? GetInheritableAspectsManifest( Compilation compilationReferenceCompilation, CancellationToken cancellationToken );
+        ITransitiveAspectsManifest? GetInheritableAspectsManifest( Compilation compilationReferenceCompilation, CancellationToken cancellationToken );
     }
 }

@@ -235,7 +235,7 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
             return this._pipelinesByProjectId.TryGetValue( projectId, out pipeline );
         }
 
-        public IInheritableAspectsManifest? GetInheritableAspectsManifest( Compilation compilation, CancellationToken cancellationToken )
+        public ITransitiveAspectsManifest? GetInheritableAspectsManifest( Compilation compilation, CancellationToken cancellationToken )
         {
             if ( !this.TryGetPipeline( compilation, out var pipeline ) )
             {

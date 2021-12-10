@@ -261,6 +261,8 @@ namespace Metalama.Framework.Engine.LamaSerialization
         private void WriteTypeName( AssemblyTypeName type )
         {
             this._binaryWriter.WriteDottedString( type.TypeName );
+            
+            // We are writing the assembly name including the hash.
             this._binaryWriter.WriteString( type.AssemblyName );
         }
 

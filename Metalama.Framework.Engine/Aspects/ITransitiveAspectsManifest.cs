@@ -5,10 +5,10 @@ using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.Aspects
 {
-    internal interface IInheritableAspectsManifest
+    internal interface ITransitiveAspectsManifest
     {
         IEnumerable<string> InheritableAspectTypes { get; }
 
-        IEnumerable<string> GetInheritableAspectTargets( string aspectType );
+        IEnumerable<InheritableAspectInstance> GetInheritedAspects( string aspectType );
     }
 }

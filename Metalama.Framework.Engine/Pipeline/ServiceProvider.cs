@@ -3,6 +3,7 @@
 
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
+using Metalama.Framework.Engine.LamaSerialization;
 using Metalama.Framework.Engine.Metrics;
 using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Utilities;
@@ -150,7 +151,7 @@ namespace Metalama.Framework.Engine.Pipeline
         {
             // ReflectionMapperFactory cannot be a global service because it keeps a reference from compilations to types of the
             // user assembly. When we need to unload the user assembly, we first need to unload the ReflectionMapperFactory.
-            var serviceProvider = this.WithServices( new ReflectionMapperFactory(), new AssemblyLocator( metadataReferences ) );
+            var serviceProvider = this.WithServices( new ReflectionMapperFactory(), new AssemblyLocator( metadataReferences ), new BuiltInSerializerFactoryProvider() );
 
             serviceProvider = serviceProvider.WithServices( new SyntaxSerializationService( serviceProvider ), new CompileTimeTypeFactory() );
             serviceProvider = serviceProvider.WithServices( new SystemTypeResolver( serviceProvider ) );

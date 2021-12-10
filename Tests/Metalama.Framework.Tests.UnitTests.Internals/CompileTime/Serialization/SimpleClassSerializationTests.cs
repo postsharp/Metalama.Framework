@@ -24,7 +24,7 @@ Before:
 After:
             SimpleClassSerializationTests.TestSimpleExplicitlySerializedClass( "SimpleText" );
 */
-            TestSimpleExplicitlySerializedClass( "SimpleText" );
+this.TestSimpleExplicitlySerializedClass( "SimpleText" );
         }
 
         [Fact]
@@ -36,7 +36,7 @@ Before:
 After:
             SimpleClassSerializationTests.TestSimpleExplicitlySerializedClass( "Simple.Dotted.Words" );
 */
-            TestSimpleExplicitlySerializedClass( "Simple.Dotted.Words" );
+this.TestSimpleExplicitlySerializedClass( "Simple.Dotted.Words" );
         }
 
         [Fact]
@@ -48,7 +48,7 @@ Before:
 After:
             SimpleClassSerializationTests.TestSimpleExplicitlySerializedClass( "Simple.Dotted.Words, mscorlib" );
 */
-            TestSimpleExplicitlySerializedClass( "Simple.Dotted.Words, mscorlib" );
+this.TestSimpleExplicitlySerializedClass( "Simple.Dotted.Words, mscorlib" );
         }
 
         [Fact]
@@ -60,7 +60,7 @@ Before:
 After:
             SimpleClassSerializationTests.TestSimpleExplicitlySerializedClass<object>( 1000 );
 */
-            TestSimpleExplicitlySerializedClass<object>( 1000 );
+this.TestSimpleExplicitlySerializedClass<object>( 1000 );
         }
 
         [Fact]
@@ -72,7 +72,7 @@ Before:
 After:
             SimpleClassSerializationTests.TestSimpleExplicitlySerializedClass<object>( false );
 */
-            TestSimpleExplicitlySerializedClass<object>( false );
+this.TestSimpleExplicitlySerializedClass<object>( false );
         }
 
         [Fact]
@@ -84,7 +84,7 @@ Before:
 After:
             SimpleClassSerializationTests.TestSimpleExplicitlySerializedClass<object>( DateTime.Now );
 */
-            TestSimpleExplicitlySerializedClass<object>( DateTime.Now );
+this.TestSimpleExplicitlySerializedClass<object>( DateTime.Now );
         }
 
         [Fact]
@@ -96,7 +96,7 @@ Before:
 After:
             SimpleClassSerializationTests.TestSimpleExplicitlySerializedClass( 1000 );
 */
-            TestSimpleExplicitlySerializedClass( 1000 );
+this.TestSimpleExplicitlySerializedClass( 1000 );
         }
 
         [Fact]
@@ -108,7 +108,7 @@ Before:
 After:
             SimpleClassSerializationTests.TestSimpleExplicitlySerializedClass( -1000 );
 */
-            TestSimpleExplicitlySerializedClass( -1000 );
+this.TestSimpleExplicitlySerializedClass( -1000 );
         }
 
         [Fact]
@@ -120,7 +120,7 @@ Before:
 After:
             SimpleClassSerializationTests.TestSimpleExplicitlySerializedClass( 1000000000 );
 */
-            TestSimpleExplicitlySerializedClass( 1000000000 );
+this.TestSimpleExplicitlySerializedClass( 1000000000 );
         }
 
         [Fact]
@@ -132,7 +132,7 @@ Before:
 After:
             SimpleClassSerializationTests.TestSimpleExplicitlySerializedClass( -1000000000 );
 */
-            TestSimpleExplicitlySerializedClass( -1000000000 );
+this.TestSimpleExplicitlySerializedClass( -1000000000 );
         }
 
         [Fact]
@@ -144,7 +144,7 @@ Before:
 After:
             SimpleClassSerializationTests.TestSimpleExplicitlySerializedClass( 223372036854775807 );
 */
-            TestSimpleExplicitlySerializedClass( 223372036854775807 );
+this.TestSimpleExplicitlySerializedClass( 223372036854775807 );
         }
 
         [Fact]
@@ -156,7 +156,7 @@ Before:
 After:
             SimpleClassSerializationTests.TestSimpleExplicitlySerializedClass( -223372036854775807 );
 */
-            TestSimpleExplicitlySerializedClass( -223372036854775807 );
+this.TestSimpleExplicitlySerializedClass( -223372036854775807 );
         }
 
         [Fact]
@@ -168,7 +168,7 @@ Before:
 After:
             SimpleClassSerializationTests.TestSimpleExplicitlySerializedClass( 1000d );
 */
-            TestSimpleExplicitlySerializedClass( 1000d );
+this.TestSimpleExplicitlySerializedClass( 1000d );
         }
 
         [Fact]
@@ -180,7 +180,7 @@ Before:
 After:
             SimpleClassSerializationTests.TestSimpleExplicitlySerializedClass( -1000d );
 */
-            TestSimpleExplicitlySerializedClass( -1000d );
+this.TestSimpleExplicitlySerializedClass( -1000d );
         }
 
         [Fact]
@@ -192,7 +192,7 @@ Before:
 After:
             SimpleClassSerializationTests.TestSimpleExplicitlySerializedClass( double.MaxValue );
 */
-            TestSimpleExplicitlySerializedClass( double.MaxValue );
+this.TestSimpleExplicitlySerializedClass( double.MaxValue );
         }
 
         [Fact]
@@ -204,7 +204,7 @@ Before:
 After:
             SimpleClassSerializationTests.TestSimpleExplicitlySerializedClass( double.MinValue );
 */
-            TestSimpleExplicitlySerializedClass( double.MinValue );
+this.TestSimpleExplicitlySerializedClass( double.MinValue );
         }
 
         [Fact]
@@ -216,7 +216,7 @@ Before:
 After:
             SimpleClassSerializationTests.TestSimpleExplicitlySerializedClass( DateTime.Now );
 */
-            TestSimpleExplicitlySerializedClass( DateTime.Now );
+this.TestSimpleExplicitlySerializedClass( DateTime.Now );
         }
 
         [Fact]
@@ -228,7 +228,7 @@ Before:
 After:
             SimpleClassSerializationTests.TestSimpleExplicitlySerializedClass( (object?) null );
 */
-            TestSimpleExplicitlySerializedClass( (object?) null );
+this.TestSimpleExplicitlySerializedClass( (object?) null );
         }
 
         [Fact]
@@ -240,7 +240,7 @@ Before:
 After:
             SimpleClassSerializationTests.TestSimpleExplicitlySerializedClass( (string?) null );
 */
-            TestSimpleExplicitlySerializedClass( (string?) null );
+this.TestSimpleExplicitlySerializedClass( (string?) null );
         }
 
         [Fact]
@@ -252,7 +252,7 @@ Before:
 After:
             SimpleClassSerializationTests.TestSimpleExplicitlySerializedClass( (SimpleExplicitlySerializedClass<int>?) null );
 */
-            TestSimpleExplicitlySerializedClass( (SimpleExplicitlySerializedClass<int>?) null );
+this.TestSimpleExplicitlySerializedClass( (SimpleExplicitlySerializedClass<int>?) null );
         }
 
         [Fact]
@@ -264,7 +264,7 @@ Before:
 After:
             SimpleClassSerializationTests.TestSimpleExplicitlySerializedClass( new SimpleExplicitlySerializedClass<string>( "testing text" ) );
 */
-            TestSimpleExplicitlySerializedClass( new SimpleExplicitlySerializedClass<string>( "testing text" ) );
+this.TestSimpleExplicitlySerializedClass( new SimpleExplicitlySerializedClass<string>( "testing text" ) );
         }
 
         [Fact]
@@ -276,7 +276,7 @@ Before:
 After:
             SimpleClassSerializationTests.TestSimpleExplicitlySerializedClass( TestEnum.Value1 );
 */
-            TestSimpleExplicitlySerializedClass( TestEnum.Value1 );
+this.TestSimpleExplicitlySerializedClass( TestEnum.Value1 );
         }
 
         [Fact]
@@ -288,7 +288,7 @@ Before:
 After:
             SimpleClassSerializationTests.TestSimpleExplicitlySerializedClass( TestEnum.Value2 );
 */
-            TestSimpleExplicitlySerializedClass( TestEnum.Value2 );
+this.TestSimpleExplicitlySerializedClass( TestEnum.Value2 );
         }
 
         [Fact]
@@ -300,7 +300,7 @@ Before:
 After:
             SimpleClassSerializationTests.TestSimpleExplicitlySerializedClass( TestEnumWithLong.Value2 );
 */
-            TestSimpleExplicitlySerializedClass( TestEnumWithLong.Value2 );
+this.TestSimpleExplicitlySerializedClass( TestEnumWithLong.Value2 );
         }
 
         [Fact]
@@ -312,7 +312,7 @@ Before:
 After:
             SimpleClassSerializationTests.TestSimpleExplicitlySerializedClass( TestEnumWithByte.Value2 );
 */
-            TestSimpleExplicitlySerializedClass( TestEnumWithByte.Value2 );
+this.TestSimpleExplicitlySerializedClass( TestEnumWithByte.Value2 );
         }
 
         [Fact]
@@ -324,7 +324,7 @@ Before:
 After:
             SimpleClassSerializationTests.TestSimpleExplicitlySerializedClass( TestEnumWithFlags.Value2 );
 */
-            TestSimpleExplicitlySerializedClass( TestEnumWithFlags.Value2 );
+this.TestSimpleExplicitlySerializedClass( TestEnumWithFlags.Value2 );
         }
 
         [Fact]
@@ -336,7 +336,7 @@ Before:
 After:
             SimpleClassSerializationTests.TestSimpleExplicitlySerializedClass( TestEnumWithFlags.Value1 | TestEnumWithFlags.Value2 );
 */
-            TestSimpleExplicitlySerializedClass( TestEnumWithFlags.Value1 | TestEnumWithFlags.Value2 );
+this.TestSimpleExplicitlySerializedClass( TestEnumWithFlags.Value1 | TestEnumWithFlags.Value2 );
         }
 
         [Fact]
@@ -348,7 +348,7 @@ Before:
 After:
             SimpleClassSerializationTests.TestExplicitlySerializedClass( (object) null, 1 );
 */
-            TestExplicitlySerializedClass( (object?) null, 1 );
+this.TestExplicitlySerializedClass( (object?) null, 1 );
         }
 
         [Fact]
@@ -360,7 +360,7 @@ Before:
 After:
             SimpleClassSerializationTests.TestSimpleExplicitlySerializedClass( new[] { 1, 2, 3, 4 } );
 */
-            TestSimpleExplicitlySerializedClass( new[] { 1, 2, 3, 4 } );
+this.TestSimpleExplicitlySerializedClass( new[] { 1, 2, 3, 4 } );
         }
 
         [Fact]
@@ -379,7 +379,7 @@ Before:
 After:
             SimpleClassSerializationTests.TestSimpleExplicitlySerializedClass( array );
 */
-            TestSimpleExplicitlySerializedClass( array );
+this.TestSimpleExplicitlySerializedClass( array );
         }
 
         [Fact]
@@ -391,7 +391,7 @@ Before:
 After:
             SimpleClassSerializationTests.TestSimpleExplicitlySerializedClass( new[,] { { 1, 2 }, { 3, 4 } } );
 */
-            TestSimpleExplicitlySerializedClass( new[,] { { 1, 2 }, { 3, 4 } } );
+this.TestSimpleExplicitlySerializedClass( new[,] { { 1, 2 }, { 3, 4 } } );
         }
 
         [Fact]
@@ -403,7 +403,7 @@ Before:
 After:
             SimpleClassSerializationTests.TestSimpleExplicitlySerializedClass( new[, ,] { { { 1 }, { 2 } }, { { 3 }, { 4 } } } );
 */
-            TestSimpleExplicitlySerializedClass( new[,,] { { { 1 }, { 2 } }, { { 3 }, { 4 } } } );
+this.TestSimpleExplicitlySerializedClass( new[,,] { { { 1 }, { 2 } }, { { 3 }, { 4 } } } );
         }
 
         [Fact]
@@ -420,7 +420,7 @@ Before:
 After:
             SimpleClassSerializationTests.TestSimpleExplicitlySerializedClass( (int[]) array );
 */
-            TestSimpleExplicitlySerializedClass( (int[]) array );
+this.TestSimpleExplicitlySerializedClass( (int[]) array );
         }
 
         [Fact]
@@ -432,7 +432,7 @@ Before:
 After:
             SimpleClassSerializationTests.TestExplicitlySerializedClass( 1, 1 );
 */
-            TestExplicitlySerializedClass( 1, 1 );
+this.TestExplicitlySerializedClass( 1, 1 );
         }
 
         [Fact]
@@ -444,7 +444,7 @@ Before:
 After:
             SimpleClassSerializationTests.TestExplicitlySerializedClass( "a field", "a property" );
 */
-            TestExplicitlySerializedClass( "a field", "a property" );
+this.TestExplicitlySerializedClass( "a field", "a property" );
         }
 
         [Fact]
@@ -456,7 +456,7 @@ Before:
 After:
             SimpleClassSerializationTests.TestExplicitlySerializedClass( (object?) null, (object?) null );
 */
-            TestExplicitlySerializedClass( (object?) null, (object?) null );
+this.TestExplicitlySerializedClass( (object?) null, (object?) null );
         }
 
         [Fact]
@@ -468,7 +468,7 @@ Before:
 After:
             SerializationTestsBase.TestSerialization( new ExplicitlySerializedClass<int, int>( 5 ) { Nullable = 3 } );
 */
-            TestSerialization( new ExplicitlySerializedClass<int, int>( 5 ) { Nullable = 3 } );
+this.TestSerialization( new ExplicitlySerializedClass<int, int>( 5 ) { Nullable = 3 } );
         }
 
         [Fact]
@@ -484,7 +484,7 @@ Before:
 After:
             SerializationTestsBase.TestSerialization( array );
 */
-            TestSerialization( array );
+this.TestSerialization( array );
         }
 
         [Fact]
@@ -494,7 +494,7 @@ After:
             var anotherSerializedClass = new SimpleExplicitlySerializedClass<DateTime>( DateTime.Today.AddMonths( -10 ) );
             var array = new[] { serializedClass, anotherSerializedClass };
 
-            var formatter = new LamaFormatter();
+            var formatter = LamaFormatter.CreateTestInstance(this._serviceProvider);
             var memoryStream = new MemoryStream();
             formatter.Serialize( array, memoryStream );
             memoryStream.Seek( 0, SeekOrigin.Begin );
@@ -508,10 +508,10 @@ After:
             Assert.Equal( anotherSerializedClass, deserializedObject[1] );
         }
 
-        private static void TestSimpleExplicitlySerializedClass<T>( T value )
+        private  void TestSimpleExplicitlySerializedClass<T>( T value )
         {
             var initialObject = new SimpleExplicitlySerializedClass<T>( value );
-            var formatter = new LamaFormatter();
+            var formatter = LamaFormatter.CreateTestInstance(this._serviceProvider);
             var memoryStream = new MemoryStream();
             formatter.Serialize( initialObject, memoryStream );
             memoryStream.Seek( 0, SeekOrigin.Begin );
@@ -527,10 +527,10 @@ After:
             }
         }
 
-        private static void TestExplicitlySerializedClass<TForCtor, TForField>( TForCtor value, TForField property )
+        private  void TestExplicitlySerializedClass<TForCtor, TForField>( TForCtor value, TForField property )
         {
             var initialObject = new ExplicitlySerializedClass<TForCtor, TForField>( value ) { Field = property };
-            var formatter = new LamaFormatter();
+            var formatter = LamaFormatter.CreateTestInstance(this._serviceProvider);
             var memoryStream = new MemoryStream();
             formatter.Serialize( initialObject, memoryStream );
             memoryStream.Seek( 0, SeekOrigin.Begin );
@@ -542,7 +542,6 @@ After:
             Assert.Equal( initialObject.Field, deserializedObject.Field );
         }
 
-        [Serializer( typeof(SimpleExplicitlySerializedClass<>.Serializer) )]
         public class SimpleExplicitlySerializedClass<T> : IEquatable<SimpleExplicitlySerializedClass<T>>
         {
 #pragma warning disable SA1401 // Fields should be private
@@ -614,7 +613,6 @@ After:
             }
         }
 
-        [Serializer( typeof(ExplicitlySerializedClass<,>.Serializer) )]
         public class ExplicitlySerializedClass<TForCtor, TForField> : SimpleExplicitlySerializedClass<TForCtor>,
                                                                       IEquatable<ExplicitlySerializedClass<TForCtor, TForField>>
         {

@@ -18,7 +18,7 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
     /// <summary>
     /// Caches the pipeline results for each syntax tree.
     /// </summary>
-    public sealed class CompilationResult : IInheritableAspectsManifest
+    public sealed class CompilationResult : ITransitiveAspectsManifest
     {
         private static readonly ImmutableDictionary<string, SyntaxTreeResult> _emptySyntaxTreeResults =
             ImmutableDictionary.Create<string, SyntaxTreeResult>( StringComparer.Ordinal );
@@ -26,8 +26,8 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
         private static readonly ImmutableDictionary<string, IntroducedSyntaxTree> _emptyIntroducedSyntaxTrees =
             ImmutableDictionary.Create<string, IntroducedSyntaxTree>( StringComparer.Ordinal );
 
-        private static readonly ImmutableDictionaryOfHashSet<string, string> _emptyInheritableAspects =
-            ImmutableDictionaryOfHashSet<string, string>.Create( StringComparer.Ordinal, StringComparer.Ordinal );
+        private static readonly ImmutableDictionaryOfHashSet<string, InheritableAspectInstance> _emptyInheritableAspects =
+            ImmutableDictionaryOfHashSet<string, InheritableAspectInstance>.Create( StringComparer.Ordinal, InheritableAspectInstance.ByTargetComparer.Instance );
 
         public bool IsDirty { get; } = true;
 
@@ -47,13 +47,13 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
 
         private readonly ImmutableDictionary<string, IntroducedSyntaxTree> _introducedSyntaxTrees = _emptyIntroducedSyntaxTrees;
 
-        private readonly ImmutableDictionaryOfHashSet<string, string> _inheritableAspects = _emptyInheritableAspects;
+        private readonly ImmutableDictionaryOfHashSet<string, InheritableAspectInstance> _inheritableAspects = _emptyInheritableAspects;
 
         private CompilationResult(
             ImmutableDictionary<string, SyntaxTreeResult> syntaxTreeResults,
             ImmutableDictionary<string, SyntaxTreeResult> invalidSyntaxTreeResults,
             ImmutableDictionary<string, IntroducedSyntaxTree> introducedSyntaxTrees,
-            ImmutableDictionaryOfHashSet<string, string> inheritableAspects,
+            ImmutableDictionaryOfHashSet<string, InheritableAspectInstance> inheritableAspects,
             bool isDirty )
         {
             this._syntaxTreeResults = syntaxTreeResults;
@@ -75,7 +75,7 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
             var syntaxTreeResultBuilder = this._syntaxTreeResults.ToBuilder();
 
             ImmutableDictionary<string, IntroducedSyntaxTree>.Builder? introducedSyntaxTreeBuilder = null;
-            ImmutableDictionaryOfHashSet<string, string>.Builder? inheritableAspectsBuilder = null;
+            ImmutableDictionaryOfHashSet<string, InheritableAspectInstance>.Builder? inheritableAspectsBuilder = null;
 
             foreach ( var result in resultsByTree )
             {
@@ -101,7 +101,7 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
 
                         foreach ( var x in oldSyntaxTreeResult.InheritableAspects )
                         {
-                            inheritableAspectsBuilder.Remove( x.AspectType, x.TargetDeclaration );
+                            inheritableAspectsBuilder.Remove( x.AspectType, x.AspectInstance );
                         }
                     }
                 }
@@ -123,7 +123,7 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
 
                     foreach ( var x in result.InheritableAspects )
                     {
-                        inheritableAspectsBuilder.Add( x.AspectType, x.TargetDeclaration );
+                        inheritableAspectsBuilder.Add( x.AspectType, x.AspectInstance );
                     }
                 }
 
@@ -223,8 +223,8 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
                 var syntaxTree = targetSymbol.GetPrimarySyntaxReference().AssertNotNull().SyntaxTree;
                 var filePath = syntaxTree.FilePath;
                 var builder = resultBuilders[filePath];
-                builder.InheritableAspects ??= ImmutableArray.CreateBuilder<(string, string)>();
-                builder.InheritableAspects.Add( (inheritableAspectInstance.AspectClass.FullName, DocumentationCommentId.CreateDeclarationId( targetSymbol )) );
+                builder.InheritableAspects ??= ImmutableArray.CreateBuilder<(string, InheritableAspectInstance)>();
+                builder.InheritableAspects.Add( (inheritableAspectInstance.Aspect.GetType().FullName, inheritableAspectInstance) );
             }
 
             // Add syntax trees with empty output to it gets cached too.
@@ -315,6 +315,6 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
 
         public IEnumerable<string> InheritableAspectTypes => this._inheritableAspects.Keys;
 
-        public IEnumerable<string> GetInheritableAspectTargets( string aspectType ) => this._inheritableAspects[aspectType];
+        public IEnumerable<InheritableAspectInstance> GetInheritedAspects( string aspectType ) => this._inheritableAspects[aspectType];
     }
 }

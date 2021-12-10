@@ -8,6 +8,8 @@ using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Immutable;
+using System.Reflection;
+using Document = System.Reflection.Metadata.Document;
 
 namespace Metalama.Framework.Engine.CodeModel.References
 {
@@ -62,9 +64,13 @@ namespace Metalama.Framework.Engine.CodeModel.References
         /// <returns></returns>
         public static Ref<IDeclaration> FromSymbol( ISymbol symbol, Compilation compilation ) => new( symbol, compilation );
 
-        public static Ref<T> FromSymbolKey<T>( SymbolId symbolKey )
+        public static Ref<T> FromSymbolId<T>( SymbolId symbolKey )
             where T : class, ICompilationElement
             => new( symbolKey );
+        
+        public static Ref<T> FromSerializedId<T>( string id )
+            where T : class, ICompilationElement
+            => new( id );
 
         /// <summary>
         /// Creates a <see cref="Ref{T}"/> from a Roslyn symbol.
@@ -86,6 +92,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
     /// The base implementation of <see cref="ISdkRef{T}"/>.
     /// </summary>
     /// <typeparam name="T"></typeparam>
+    [Obfuscation(Exclude = true /* Serialized */ )]    
     internal readonly struct Ref<T> : IRefImpl<T>
         where T : class, ICompilationElement
     {
@@ -128,6 +135,13 @@ namespace Metalama.Framework.Engine.CodeModel.References
             this.TargetKind = DeclarationRefTargetKind.Default;
             this._compilation = null;
         }
+        
+        internal Ref( string id )
+        {
+            this.Target = id;
+            this.TargetKind = DeclarationRefTargetKind.Default;
+            this._compilation = null;
+        }
 
         // ReSharper disable once UnusedParameter.Local
         public Ref( SyntaxNode? declaration, DeclarationRefTargetKind targetKind, Compilation compilation )
@@ -161,6 +175,8 @@ namespace Metalama.Framework.Engine.CodeModel.References
 
             return DocumentationCommentId.CreateDeclarationId( symbol );
         }
+
+        private static bool IsSerializableId( string id ) => char.IsLetter( id[0] ) && id[1] == ':'; 
 
         public static ISymbol? Deserialize( Compilation compilation, string serializedId )
             => DocumentationCommentId.GetFirstSymbolForDeclarationId( serializedId, compilation );
@@ -215,19 +231,30 @@ namespace Metalama.Framework.Engine.CodeModel.References
                 case ISymbol symbol:
                     return symbol.Translate( this._compilation, compilation ).AssertNotNull();
 
-                case string symbolId:
+                case string id:
                     {
-                        var symbolKey = new SymbolId( symbolId );
+                        ISymbol? symbol;
 
-                        var symbol = symbolKey.Resolve( compilation );
+                        if ( IsSerializableId( id ) )
+                        {
+                            symbol = DocumentationCommentId.GetFirstSymbolForDeclarationId( id, compilation );
+                        }
+                        else
+                        {
+                            var symbolKey = new SymbolId( id );
+
+                            symbol = symbolKey.Resolve( compilation );
+
+                        }
 
                         if ( symbol == null )
                         {
-                            throw new AssertionFailedException( $"Cannot resolve {symbolId} into a symbol." );
+                            throw new AssertionFailedException( $"Cannot resolve {id} into a symbol." );
                         }
 
                         return symbol;
                     }
+
 
                 case SyntaxNode node:
                     {
@@ -311,14 +338,26 @@ namespace Metalama.Framework.Engine.CodeModel.References
                 case IDeclarationBuilder builder:
                     return (T) compilation.Factory.GetDeclaration( builder );
 
-                case string symbolId:
+                case string id:
                     {
-                        var symbol = new SymbolId( symbolId ).Resolve( compilation.RoslynCompilation );
+                        ISymbol? symbol;
 
+                        if ( IsSerializableId( id ) )
+                        {
+                            symbol = DocumentationCommentId.GetFirstSymbolForDeclarationId( id, compilation.RoslynCompilation );
+
+                        }
+                        else
+                        {
+                            symbol = new SymbolId( id ).Resolve( compilation.RoslynCompilation );
+
+                        }
+                        
                         if ( symbol == null )
                         {
-                            throw new AssertionFailedException( $"Cannot resolve '{symbolId}' into a symbol." );
+                            throw new AssertionFailedException( $"Cannot resolve '{id}' into a symbol." );
                         }
+
 
                         return (T) compilation.Factory.GetCompilationElement( symbol ).AssertNotNull();
                     }
@@ -335,5 +374,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
             => new( this.Target, this._compilation, this.TargetKind );
 
         public override int GetHashCode() => this.Target?.GetHashCode() ?? 0;
+        
+        
     }
 }
