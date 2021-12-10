@@ -1,14 +1,14 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Metalama.Framework.Tests.UnitTests.Serialization.Assets;
+using Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Assets;
 using System;
 using System.Collections.Generic;
 using Xunit;
 
 // ReSharper disable BadListLineBreaks
 
-namespace Metalama.Framework.Tests.UnitTests.Serialization
+namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization
 {
     // ReSharper disable UnusedTypeParameter
     // ReSharper disable ClassNeverInstantiated.Global

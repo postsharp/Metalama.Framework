@@ -3,7 +3,7 @@
 
 using System;
 
-namespace Metalama.Framework.Tests.UnitTests.Serialization.Assets
+namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Assets
 {
     internal class Box<T>
     {

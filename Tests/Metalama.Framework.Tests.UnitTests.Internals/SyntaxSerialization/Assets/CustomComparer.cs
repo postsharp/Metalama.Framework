@@ -3,7 +3,7 @@
 
 using System.Collections.Generic;
 
-namespace Metalama.Framework.Tests.UnitTests.Serialization.Assets
+namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Assets
 {
     public class CustomComparer<T> : IEqualityComparer<T>
     {

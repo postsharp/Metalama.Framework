@@ -37,7 +37,7 @@ public struct A : ILamaSerializable
 
             var project = CreateCompileTimeProject( domain, testContext, code );
 
-            var type = project!.GetType( "A" );
+            var type = project.GetType( "A" );
             var metaSerializer = GetSerializer( type );
 
             dynamic instance = Activator.CreateInstance( type, 13, 27 )!;
@@ -84,7 +84,7 @@ public readonly struct A : ILamaSerializable
 
             var project = CreateCompileTimeProject( domain, testContext, code );
 
-            var type = project!.GetType( "A" );
+            var type = project.GetType( "A" );
             var metaSerializer = GetSerializer( type );
 
             dynamic instance = Activator.CreateInstance( type, 13, 42 )!;

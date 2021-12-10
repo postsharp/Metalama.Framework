@@ -11,7 +11,7 @@ using Xunit;
 
 #pragma warning disable SA1500 // Braces for multi-line statements should not share line
 
-namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
+namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
 {
     public class SimpleClassSerializationTests : SerializationTestsBase
     {
@@ -441,7 +441,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
                     hashCode = (hashCode * 397) ^ this.Nullable.GetHashCode();
 
                     // ReSharper restore NonReadonlyMemberInGetHashCode
-                    
+
                     return hashCode;
                 }
             }

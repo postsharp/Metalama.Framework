@@ -5,7 +5,7 @@ using System;
 using System.Globalization;
 using Xunit;
 
-namespace Metalama.Framework.Tests.UnitTests.Serialization
+namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization
 {
     public class DateTimeOffsetSerializerTests : SerializerTestsBase
     {

@@ -7,7 +7,7 @@ using Xunit;
 
 #pragma warning disable CA1305 // Specify IFormatProvider
 
-namespace Metalama.Framework.Tests.UnitTests.Serialization
+namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization
 {
     public class PrimitiveSerializersTests : SerializerTestsBase
     {

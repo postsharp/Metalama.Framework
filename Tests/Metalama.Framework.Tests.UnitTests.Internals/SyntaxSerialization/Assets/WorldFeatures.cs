@@ -5,7 +5,7 @@ using System;
 
 // ReSharper disable IdentifierTypo
 
-namespace Metalama.Framework.Tests.UnitTests.Serialization.Assets
+namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Assets
 {
     [Flags]
     internal enum WorldFeatures : ulong

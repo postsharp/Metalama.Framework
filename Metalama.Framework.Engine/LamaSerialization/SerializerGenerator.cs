@@ -37,8 +37,8 @@ namespace Metalama.Framework.Engine.LamaSerialization
             var baseType = serializableType.Type.BaseType.AssertNotNull();
 
             while ( SymbolEqualityComparer.Default.Equals(
-                    serializableType.Type.ContainingAssembly,
-                    baseType.ContainingAssembly) )
+                       serializableType.Type.ContainingAssembly,
+                       baseType.ContainingAssembly ) )
             {
                 // The base type is in the same assembly, we have to walk back to get to the first type that is not in this assembly.
                 // All ancestor types in this assembly will have their attributes generated.
@@ -56,7 +56,7 @@ namespace Metalama.Framework.Engine.LamaSerialization
                             && x.Parameters.Length == 1
                             && SymbolEqualityComparer.Default.Equals(
                                 x.Parameters[0].Type,
-                                this._runtimeReflectionMapper.GetTypeSymbol( typeof( IArgumentsReader ) ) )
+                                this._runtimeReflectionMapper.GetTypeSymbol( typeof(IArgumentsReader) ) )
                             && x.Parameters[0].CustomModifiers.Length == 0
                             && x.Parameters[0].RefCustomModifiers.Length == 0 )
                     .ToArray();

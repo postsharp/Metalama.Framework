@@ -3,7 +3,7 @@
 
 using Metalama.Framework.Engine.LamaSerialization;
 using Metalama.Framework.Serialization;
-using Metalama.Framework.Tests.UnitTests.CompileTime.Serialization;
+using Metalama.Framework.Tests.UnitTests.LamaSerialization;
 using System;
 using Xunit;
 
@@ -12,7 +12,7 @@ using Xunit;
 // attribute added for testing purposes
 [assembly: ImportSerializer( typeof(SerializerLocatorTests.TypeWoSerializer), typeof(SerializerLocatorTests.GenericSerializedClass<>.Serializer) )]
 
-namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
+namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
 {
     public class SerializerLocatorTests
     {

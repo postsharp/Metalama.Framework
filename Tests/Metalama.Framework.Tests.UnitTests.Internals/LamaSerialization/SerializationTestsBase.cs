@@ -8,7 +8,7 @@ using System.Collections;
 using System.IO;
 using Xunit;
 
-namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
+namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
 {
     public class SerializationTestsBase
     {

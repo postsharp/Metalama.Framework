@@ -6,7 +6,7 @@ using Metalama.Framework.Serialization;
 using System;
 using Xunit;
 
-namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
+namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
 {
     public class IntrinsicSerializationTests : SerializationTestsBase
     {

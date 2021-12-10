@@ -9,7 +9,7 @@ using Xunit;
 
 // ReSharper disable StringLiteralTypo
 
-namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
+namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
 {
     public class CollectionSerializersTests : SerializationTestsBase
     {

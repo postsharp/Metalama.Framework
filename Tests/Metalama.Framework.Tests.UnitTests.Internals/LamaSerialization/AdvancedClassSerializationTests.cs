@@ -11,7 +11,7 @@ using Xunit;
 
 // ReSharper disable UnusedMember.Local
 
-namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
+namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
 {
     public class AdvancedClassSerializationTests
     {

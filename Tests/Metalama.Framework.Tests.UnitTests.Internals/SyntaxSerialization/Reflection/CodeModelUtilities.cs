@@ -4,7 +4,7 @@
 using Metalama.Framework.Code;
 using System.Linq;
 
-namespace Metalama.Framework.Tests.UnitTests.Serialization.Reflection
+namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
 {
     public static class CodeModelUtilities
     {

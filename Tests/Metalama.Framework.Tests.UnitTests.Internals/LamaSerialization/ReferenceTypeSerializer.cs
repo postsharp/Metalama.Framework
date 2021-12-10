@@ -3,7 +3,7 @@
 
 using Metalama.Framework.Serialization;
 
-namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
+namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
 {
     public abstract class ReferenceTypeSerializer<T> : ReferenceTypeSerializer
     {

@@ -11,7 +11,7 @@ using Xunit.Abstractions;
 
 // ReSharper disable ParameterOnlyUsedForPreconditionCheck.Local
 
-namespace Metalama.Framework.Tests.UnitTests.Serialization.Reflection
+namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
 {
     public class MetalamaPropertyInfoTests : ReflectionTestBase
     {

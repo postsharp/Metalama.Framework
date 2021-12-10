@@ -87,7 +87,7 @@ public class B : A
 
             var project = CreateCompileTimeProject( domain, testContext, code );
 
-            var typeB = project!.GetType( "B" );
+            var typeB = project.GetType( "B" );
             var metaSerializer = GetSerializer( typeB );
 
             dynamic instance = Activator.CreateInstance( typeB, 13, 42 )!;

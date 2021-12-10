@@ -34,7 +34,7 @@ namespace Metalama.Framework.Engine.Aspects
             CancellationToken cancellationToken )
         {
             var inheritableAspectProvider = serviceProvider.GetService<IInheritableAspectManifestProvider>();
-            
+
             var inheritedAspectsBuilder = ImmutableDictionaryOfArray<IAspectClass, InheritableAspectInstance>.CreateBuilder();
             var aspectClassesByName = aspectClasses.ToDictionary( t => t.FullName, t => t );
 

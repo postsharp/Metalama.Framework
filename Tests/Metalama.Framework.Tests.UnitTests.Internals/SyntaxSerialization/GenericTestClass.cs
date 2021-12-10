@@ -3,7 +3,7 @@
 
 // ReSharper disable UnusedTypeParameter
 
-namespace Metalama.Framework.Tests.UnitTests.Serialization
+namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization
 {
     public class GenericTestClass<T>
     {

@@ -5,7 +5,7 @@ using Metalama.TestFramework.Utilities;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Metalama.Framework.Tests.UnitTests.Serialization.Reflection
+namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
 {
     public class ReflectionTestBase : SerializerTestsBase
     {

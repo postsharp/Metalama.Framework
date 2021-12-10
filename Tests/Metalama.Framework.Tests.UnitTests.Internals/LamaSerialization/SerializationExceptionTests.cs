@@ -10,7 +10,7 @@ using System.Collections.Generic;
 using System.IO;
 using Xunit;
 
-namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serialization
+namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
 {
     public enum Fail
     {

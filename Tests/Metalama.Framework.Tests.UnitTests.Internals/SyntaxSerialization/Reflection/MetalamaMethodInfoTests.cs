@@ -8,7 +8,7 @@ using System.Linq;
 using System.Reflection;
 using Xunit;
 
-namespace Metalama.Framework.Tests.UnitTests.Serialization.Reflection
+namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
 {
     public class MetalamaMethodInfoTests : SerializerTestsBase
     {

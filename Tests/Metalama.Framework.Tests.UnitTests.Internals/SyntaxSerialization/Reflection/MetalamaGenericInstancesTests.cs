@@ -8,7 +8,7 @@ using System.Linq;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Metalama.Framework.Tests.UnitTests.Serialization.Reflection
+namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
 {
     public class MetalamaGenericInstancesTests : ReflectionTestBase
     {

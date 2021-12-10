@@ -8,7 +8,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using Xunit;
 
-namespace Metalama.Framework.Tests.UnitTests.Serialization
+namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization
 {
     public class CanSerializeTests : SerializerTestsBase
     {

@@ -657,7 +657,8 @@ namespace Metalama.Framework.Engine.CompileTime
                             Invariant.Assert( rewrittenProperty.AccessorList != null );
 
                             Invariant.Assert(
-                                !rewrittenProperty.AccessorList!.Accessors.Any( a => a.IsKind( SyntaxKind.SetAccessorDeclaration ) || a.IsKind( SyntaxKind.InitAccessorDeclaration ) )
+                                !rewrittenProperty.AccessorList!.Accessors.Any(
+                                    a => a.IsKind( SyntaxKind.SetAccessorDeclaration ) || a.IsKind( SyntaxKind.InitAccessorDeclaration ) )
                                 || rewrittenProperty.AccessorList!.Accessors.Any( a => a.IsKind( SyntaxKind.InitAccessorDeclaration ) ) );
 
                             rewritten =
