@@ -60,7 +60,7 @@ object ReleaseBuild : BuildType({
                 path = "Build.ps1"
             }
             noProfile = false
-            param("jetbrains_powershell_scriptArguments", "test  --numbered %build.number% --configuration Release --sign")
+            param("jetbrains_powershell_scriptArguments", "test  --numbered %build.number% --configuration Release")
         }
     }
 
@@ -98,6 +98,10 @@ object PublicBuild : BuildType({
         vcs {
         }
     }
+
+    requirements {
+        equals("env.BuildAgentType", "caravela02")
+    }
 })
 
 // Publish the release build to public feeds
@@ -119,7 +123,7 @@ object Deploy : BuildType({
         }
     }
     
-  dependencies {
+    dependencies {
         dependency(PublicBuild) {
             snapshot {
             }
@@ -129,5 +133,9 @@ object Deploy : BuildType({
                 artifactRules = "+:artifacts/publish/**/*=>artifacts/publish"
             }
         }
+    }
+
+    requirements {
+        equals("env.BuildAgentType", "caravela02")
     }
 })
