@@ -8,8 +8,8 @@
 extern alias roslyn;
 using Microsoft.CodeAnalysis;
 using System.Threading;
-using SymbolKey = SymbolKey;
-using SymbolKeyExtensions = SymbolKeyExtensions;
+using SymbolKey = roslyn::Microsoft.CodeAnalysis.SymbolKey;
+using SymbolKeyExtensions = roslyn::Microsoft.CodeAnalysis.SymbolKeyExtensions;
 
 #pragma warning restore SA1516 // Elements should be separated by blank line
 
@@ -21,15 +21,15 @@ namespace Metalama.Framework.Engine.Utilities
     internal struct SymbolId
     {
 #pragma warning disable IDE0044 // SymbolKey.Resolve is mutating.
-        private roslyn::Microsoft.CodeAnalysis.SymbolKey _symbolKey;
+        private SymbolKey _symbolKey;
 #pragma warning restore IDE0044
 
         public SymbolId( string id )
         {
-            this._symbolKey = new roslyn::Microsoft.CodeAnalysis.SymbolKey( id );
+            this._symbolKey = new SymbolKey( id );
         }
 
-        private SymbolId( roslyn::Microsoft.CodeAnalysis.SymbolKey symbolKey )
+        private SymbolId( SymbolKey symbolKey )
         {
             this._symbolKey = symbolKey;
         }
@@ -48,7 +48,7 @@ namespace Metalama.Framework.Engine.Utilities
             else
             {
                 // ReSharper disable once InvokeAsExtensionMethod
-                var symbolKey = roslyn::Microsoft.CodeAnalysis.SymbolKeyExtensions.GetSymbolKey( symbol, cancellationToken );
+                var symbolKey = SymbolKeyExtensions.GetSymbolKey( symbol, cancellationToken );
 
                 return new SymbolId( symbolKey );
             }
