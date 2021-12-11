@@ -19,7 +19,7 @@ namespace Metalama.Framework.Validation
         where T : IDeclaration
     {
         public IAspectState? AspectState { get; }
-        
+
         public IDiagnosticSink Diagnostics { get; }
 
         public T Declaration { get; }

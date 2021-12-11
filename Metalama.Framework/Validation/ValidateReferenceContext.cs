@@ -4,7 +4,6 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
-using System;
 
 // ReSharper disable UnassignedGetOnlyAutoProperty
 
@@ -15,7 +14,7 @@ namespace Metalama.Framework.Validation
         where T : IDeclaration
     {
         public IAspectState? AspectState { get; }
-        
+
         public IDiagnosticSink Diagnostics { get; }
 
         public T ReferencedDeclaration { get; }

@@ -255,8 +255,7 @@ namespace Metalama.Framework.Engine.Pipeline
 
         public void AddNonObservableTransformations( IEnumerable<INonObservableTransformation> transformations )
             => this._nonObservableTransformations.AddRange( transformations );
-        
-        
+
         public bool AddValidatorSources( IEnumerable<ValidatorSource> validatorSources )
         {
             this._validatorSources.AddRange( validatorSources );
@@ -265,6 +264,5 @@ namespace Metalama.Framework.Engine.Pipeline
         }
 
         public void Report( Diagnostic diagnostic ) => this._diagnostics.Report( diagnostic );
-
     }
 }

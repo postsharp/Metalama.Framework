@@ -5,7 +5,6 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Project;
 using Metalama.Framework.Validation;
-using System;
 
 namespace Metalama.Framework.Fabrics
 {

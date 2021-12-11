@@ -158,8 +158,7 @@ namespace Metalama.Framework.Engine.Fabrics
                     this._fabricManager.ServiceProvider );
             }
 
-            
-            public IDeclarationSelection<T> WithTarget() => this.WithTargetMembers( declaration => new[]{ declaration } );
+            public IDeclarationSelection<T> WithTarget() => this.WithTargetMembers( declaration => new[] { declaration } );
 
             [Obsolete( "Not implemented." )]
             public void AddValidator( Action<ValidateDeclarationContext<T>> validator ) => throw new NotImplementedException();

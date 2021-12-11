@@ -8,8 +8,6 @@ using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Validation;
-using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 
 namespace Metalama.Framework.Engine.Pipeline
@@ -35,7 +33,7 @@ namespace Metalama.Framework.Engine.Pipeline
         /// Gets the list of aspect sources.
         /// </summary>
         public ImmutableArray<IAspectSource> AspectSources { get; }
-        
+
         public ImmutableArray<ValidatorSource> ValidatorSources { get; }
 
         /// <summary>

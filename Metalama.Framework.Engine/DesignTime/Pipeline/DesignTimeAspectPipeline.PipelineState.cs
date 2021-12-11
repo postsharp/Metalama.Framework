@@ -406,7 +406,7 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
                     null => ImmutableArray<IntroducedSyntaxTree>.Empty,
                     _ => pipelineResult.AdditionalSyntaxTrees
                 };
-                
+
                 var result = new DesignTimeAspectPipelineResult(
                     success,
                     compilation.SyntaxTrees,

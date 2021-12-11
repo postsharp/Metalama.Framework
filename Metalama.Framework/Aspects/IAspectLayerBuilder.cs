@@ -5,8 +5,6 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Project;
 using Metalama.Framework.Validation;
-using System;
-using System.Collections.Generic;
 using System.Threading;
 
 namespace Metalama.Framework.Aspects
@@ -16,7 +14,7 @@ namespace Metalama.Framework.Aspects
     /// aspects and validators, or report diagnostics. This is a weakly-typed variant of the <see cref="IAspectLayerBuilder{T}"/> interface.
     /// </summary>
     [InternalImplement]
-    public interface IAspectLayerBuilder 
+    public interface IAspectLayerBuilder
     {
         /// <summary>
         /// Gets the current <see cref="IProject"/>, which represents the <c>csproj</c> file and allows to share project-local data.

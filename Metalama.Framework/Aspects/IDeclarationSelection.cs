@@ -10,7 +10,7 @@ using System.Linq.Expressions;
 
 namespace Metalama.Framework.Aspects
 {
-    public interface IDeclarationSelector<out TTarget> 
+    public interface IDeclarationSelector<out TTarget>
         where TTarget : class, IDeclaration
     {
         /// <summary>
@@ -26,7 +26,7 @@ namespace Metalama.Framework.Aspects
 
         IDeclarationSelection<TTarget> WithTarget();
     }
-    
+
     /// <summary>
     /// Represents a set of declarations and offers the ability to add aspects, annotations or validators to them.
     /// </summary>
@@ -37,11 +37,10 @@ namespace Metalama.Framework.Aspects
         where TDeclaration : class, IDeclaration
     {
         void AddReferenceValidator( string methodName, ValidatedReferenceKinds referenceKinds );
-        
-        
+
         void AddDeclarationValidator<T>( string methodName )
             where T : IDeclaration;
-        
+
         /// <summary>
         /// Adds an aspect to the current set of declarations. This overload allows adding inherited aspects.
         /// </summary>

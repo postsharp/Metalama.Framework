@@ -6,7 +6,6 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Eligibility;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace Metalama.Framework.Validation
@@ -20,15 +19,14 @@ namespace Metalama.Framework.Validation
         private readonly string[] _friendTypes;
 
         private static readonly DiagnosticDefinition<(IMemberOrNamedType ReferencedDeclaration, INamedType ReferencingType)> _warning =
-            new ( 
+            new(
                 "MY001",
-                                                                                               Severity.Warning, 
-                "'{0}' cannot be used from '{1}' because of the [Friend] constraint."
-                ); 
+                Severity.Warning,
+                "'{0}' cannot be used from '{1}' because of the [Friend] constraint." );
 
         public FriendAttribute( Type friendType, params Type[] otherFriendTypes )
         {
-            this._friendTypes = otherFriendTypes.Append( friendType ).Select( t=>t.FullName ).ToArray();
+            this._friendTypes = otherFriendTypes.Append( friendType ).Select( t => t.FullName ).ToArray();
         }
 
         public void BuildEligibility( IEligibilityBuilder<IMemberOrNamedType> builder )
@@ -38,26 +36,24 @@ namespace Metalama.Framework.Validation
 
         public void BuildAspect( IAspectBuilder<IMemberOrNamedType> builder )
         {
-
-            builder.WithTarget().AddReferenceValidator( nameof(this.Validate),  ValidatedReferenceKinds.Any );
+            builder.WithTarget().AddReferenceValidator( nameof(this.Validate), ValidatedReferenceKinds.Any );
         }
 
         private void Validate( in ValidateReferenceContext<IMemberOrNamedType> context )
         {
-            
-                for ( var type = context.ReferencingType; type != null; type = type.DeclaringType )
+            for ( var type = context.ReferencingType; type != null; type = type.DeclaringType )
+            {
+                if ( Array.IndexOf( this._friendTypes, type.FullName ) >= 0 )
                 {
-                    if ( Array.IndexOf( this._friendTypes, type.FullName ) >= 0 )
-                    {
-                        // The reference is allowed.
-                        return;
-                    }
+                    // The reference is allowed.
+                    return;
                 }
+            }
 
-                context.Diagnostics.Report<>( 
-                    context.DiagnosticLocation,
-                    _warning!,
-                    (context.ReferencedDeclaration, context.ReferencingType) );
+            context.Diagnostics.Report<>(
+                context.DiagnosticLocation,
+                _warning!,
+                (context.ReferencedDeclaration, context.ReferencingType) );
         }
 
         public void BuildAspectClass( IAspectClassBuilder builder ) { }

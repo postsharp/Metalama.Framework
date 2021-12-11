@@ -9,8 +9,11 @@ namespace Metalama.Framework.Engine.Validation;
 internal class ValidatorInstance
 {
     public IDeclaration ValidatedDeclaration { get; }
+
     public string MethodName { get; }
+
     public AspectPredecessor Predecessor { get; }
+
     public object Object => this.Predecessor.Instance;
 
     public IAspectState? State => (this.Object as IAspectInstance)?.State;

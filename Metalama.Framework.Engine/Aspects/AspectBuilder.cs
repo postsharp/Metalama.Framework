@@ -53,6 +53,7 @@ namespace Metalama.Framework.Engine.Aspects
         public IAspectInstance AspectInstance { get; }
 
         public ImmutableArray<IAspectSource> AspectSources { get; private set; } = ImmutableArray<IAspectSource>.Empty;
+
         public ImmutableArray<ValidatorSource> ValidatorSources { get; private set; } = ImmutableArray<ValidatorSource>.Empty;
 
         public void AddAspectSource( IAspectSource aspectSource )
@@ -64,7 +65,6 @@ namespace Metalama.Framework.Engine.Aspects
         {
             this.ValidatorSources = this.ValidatorSources.Add( validatorSource );
         }
-        
 
         public AdviceFactory AdviceFactory { get; }
 
@@ -107,8 +107,8 @@ namespace Metalama.Framework.Engine.Aspects
                 this._configuration.ServiceProvider );
         }
 
-        public IDeclarationSelection<T> WithTarget() => this.WithTargetMembers( declaration => new[]{ declaration } );
-    
+        public IDeclarationSelection<T> WithTarget() => this.WithTargetMembers( declaration => new[] { declaration } );
+
         IDeclaration IAspectLayerBuilder.Target => this.Target;
 
         public IAdviceFactory Advices => this.AdviceFactory;
@@ -137,10 +137,9 @@ namespace Metalama.Framework.Engine.Aspects
                 : new AspectInstanceResult(
                     success,
                     this._diagnosticSink.ToImmutable(),
-                    ImmutableArray<Advice>.Empty, 
-                    ImmutableArray<IAspectSource>.Empty, 
-                    ImmutableArray<ValidatorSource>.Empty
-                    );
+                    ImmutableArray<Advice>.Empty,
+                    ImmutableArray<IAspectSource>.Empty,
+                    ImmutableArray<ValidatorSource>.Empty );
         }
 
         public void SetAspectLayerBuildAction( string layerName, Action<IAspectLayerBuilder<T>> buildAction ) => throw new NotImplementedException();

@@ -67,32 +67,30 @@ namespace Metalama.Framework.Engine.Fabrics
         }
 
         private void RegisterAspectSource( IAspectSource aspectSource ) => this._registerAspectSource( aspectSource );
-        
+
         private void RegisterValidatorSource( ValidatorSource validatorSource ) => this._registerValidatorSource( validatorSource );
 
         public void AddReferenceValidator( string methodName, ValidatedReferenceKinds referenceKinds )
         {
-            this.RegisterValidatorSource( new ValidatorSource( 
-                                              ( compilation, diagnostics ) => this.SelectAndValidateValidatorTargets(
-                                                  compilation,
-                                                  diagnostics,
-                                                  item => new ReferenceValidatorInstance( this._predecessor, item, methodName, referenceKinds )
-                                              ),
-                                              ValidatorKind.Reference) 
-            );
+            this.RegisterValidatorSource(
+                new ValidatorSource(
+                    ( compilation, diagnostics ) => this.SelectAndValidateValidatorTargets(
+                        compilation,
+                        diagnostics,
+                        item => new ReferenceValidatorInstance( this._predecessor, item, methodName, referenceKinds ) ),
+                    ValidatorKind.Reference ) );
         }
 
         public void AddDeclarationValidator<T1>( string methodName )
             where T1 : IDeclaration
         {
-            this.RegisterValidatorSource( new ValidatorSource( 
-                                              ( compilation, diagnostics ) => this.SelectAndValidateValidatorTargets(
-                                                  compilation,
-                                                  diagnostics,
-                                                  item => new DeclarationValidatorInstance( this._predecessor, item, methodName )
-                                              ),
-                                              ValidatorKind.Definition) 
-            );
+            this.RegisterValidatorSource(
+                new ValidatorSource(
+                    ( compilation, diagnostics ) => this.SelectAndValidateValidatorTargets(
+                        compilation,
+                        diagnostics,
+                        item => new DeclarationValidatorInstance( this._predecessor, item, methodName ) ),
+                    ValidatorKind.Definition ) );
         }
 
         public IDeclarationSelection<T> AddAspect<TAspect>( Func<T, Expression<Func<TAspect>>> createAspect )
@@ -259,8 +257,8 @@ namespace Metalama.Framework.Engine.Fabrics
                 }
             }
         }
-        
-                private IEnumerable<ValidatorInstance> SelectAndValidateValidatorTargets(
+
+        private IEnumerable<ValidatorInstance> SelectAndValidateValidatorTargets(
             CompilationModel compilation,
             IDiagnosticAdder diagnosticAdder,
             Func<T, ValidatorInstance?> createResult )
