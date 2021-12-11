@@ -26,13 +26,13 @@ namespace Metalama.Framework.Aspects
         void SkipAspect();
         
         /// <summary>
-        /// Gets or sets an arbitrary object that is then exposed on the <see cref="IAspectInstance.TargetTag"/> property of
+        /// Gets or sets an arbitrary object that is then exposed on the <see cref="IAspectInstance.State"/> property of
         /// the <see cref="IAspectInstance"/> interface. While a single instance of an aspect class can be used for
-        /// several target declarations, the <see cref="TargetTag"/> is specific to the target declaration. If the aspect
-        /// is inherited, the <see cref="TargetTag"/> must be lama-serializable (<see cref="ILamaSerializable"/> or
+        /// several target declarations, the <see cref="State"/> is specific to the target declaration. If the aspect
+        /// is inherited, the <see cref="State"/> must be lama-serializable (<see cref="ILamaSerializable"/> or
         /// default serializable classes).
         /// </summary>
-        object? TargetTag { get; set; }
+        IAspectState? State { get; set; }
     }
 
     /// <summary>

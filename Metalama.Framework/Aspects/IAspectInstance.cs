@@ -52,6 +52,6 @@ namespace Metalama.Framework.Aspects
         /// <summary>
         /// Gets the optional opaque object defined by the aspect for the specific <see cref="TargetDeclaration"/>. 
         /// </summary>
-        object? TargetTag { get; }
+        IAspectState? State { get; }
     }
 }

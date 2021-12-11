@@ -105,10 +105,10 @@ namespace Metalama.Framework.Engine.Aspects
 
         public void SkipAspect() => this._skipped = true;
 
-        public object? TargetTag
+        public IAspectState? State
         {
-            get => this.AspectInstance.TargetTag;
-            set => ((IAspectInstanceInternal) this.AspectInstance).SetTargetTag( value );
+            get => this.AspectInstance.State;
+            set => ((IAspectInstanceInternal) this.AspectInstance).SetState( value );
         }
 
         public CancellationToken CancellationToken { get; }

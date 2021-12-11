@@ -56,9 +56,9 @@ namespace Metalama.Framework.Engine.Aspects
 
         public ImmutableArray<AspectPredecessor> Predecessors => ImmutableArray.Create( this._primaryInstance.Predecessor );
 
-        public object? TargetTag => this._primaryInstance.TargetTag;
+        public IAspectState? State => this._primaryInstance.State;
 
-        public void SetTargetTag( object? value ) => this._primaryInstance.TargetTag = value;
+        public void SetState( IAspectState? value ) => this._primaryInstance.State = value;
 
         public void Skip() => this._primaryInstance.Skip();
 
