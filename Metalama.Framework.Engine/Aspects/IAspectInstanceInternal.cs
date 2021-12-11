@@ -15,5 +15,7 @@ namespace Metalama.Framework.Engine.Aspects
         void Skip();
 
         ImmutableDictionary<TemplateClass, TemplateClassInstance> TemplateInstances { get; }
+
+        void SetTargetTag( object? value );
     }
 }

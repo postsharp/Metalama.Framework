@@ -56,6 +56,10 @@ namespace Metalama.Framework.Engine.Aspects
 
         public ImmutableArray<AspectPredecessor> Predecessors => ImmutableArray.Create( this._primaryInstance.Predecessor );
 
+        public object? TargetTag => this._primaryInstance.TargetTag;
+
+        public void SetTargetTag( object? value ) => this._primaryInstance.TargetTag = value;
+
         public void Skip() => this._primaryInstance.Skip();
 
         public ImmutableDictionary<TemplateClass, TemplateClassInstance> TemplateInstances => this._primaryInstance.TemplateInstances;

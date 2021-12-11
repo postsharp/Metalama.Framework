@@ -23,6 +23,13 @@ namespace Metalama.Framework.Aspects
         /// automatically causes the aspect to be skipped, but, additionally, provided children aspects are ignored.
         /// </remarks>
         void SkipAspect();
+        
+        /// <summary>
+        /// Gets or sets an arbitrary object that is then exposed on the <see cref="IAspectInstance.TargetTag"/> property of
+        /// the <see cref="IAspectInstance"/> interface. While a single instance of an aspect class can be used for
+        /// several target declarations, the <see cref="TargetTag"/> is specific to the target declaration.
+        /// </summary>
+        object? TargetTag { get; set; }
     }
 
     /// <summary>

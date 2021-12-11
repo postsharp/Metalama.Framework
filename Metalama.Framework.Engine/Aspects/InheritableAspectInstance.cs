@@ -25,6 +25,8 @@ public partial class InheritableAspectInstance : IAspectInstance
 
     ImmutableArray<AspectPredecessor> IAspectInstance.Predecessors => ImmutableArray<AspectPredecessor>.Empty;
 
+    public object? TargetTag { get; private set; }
+
     public IAspect Aspect { get; private set; }
 
     public InheritableAspectInstance( IAspectInstance aspectInstance )
@@ -32,6 +34,7 @@ public partial class InheritableAspectInstance : IAspectInstance
         this.TargetDeclaration = aspectInstance.TargetDeclaration;
         this.Aspect = aspectInstance.Aspect;
         this._aspectClass = aspectInstance.AspectClass;
+        this.TargetTag = aspectInstance.TargetTag;
 
         this.SecondaryInstances = aspectInstance.SecondaryInstances
             .Select( i => new InheritableAspectInstance( i ) )

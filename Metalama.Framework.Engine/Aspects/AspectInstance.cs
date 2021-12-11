@@ -48,6 +48,10 @@ namespace Metalama.Framework.Engine.Aspects
 
         ImmutableArray<AspectPredecessor> IAspectInstance.Predecessors => ImmutableArray.Create( this.Predecessor );
 
+        public object? TargetTag { get; set; }
+
+        void IAspectInstanceInternal.SetTargetTag( object? value ) => this.TargetTag = value;
+
         internal AspectInstance( IAspect aspect, in Ref<IDeclaration> declaration, AspectClass aspectClass, in AspectPredecessor predecessor )
         {
             this.Aspect = aspect;

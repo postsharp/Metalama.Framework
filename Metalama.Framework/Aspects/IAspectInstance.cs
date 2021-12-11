@@ -48,5 +48,10 @@ namespace Metalama.Framework.Aspects
         /// to be created.
         /// </summary>
         ImmutableArray<AspectPredecessor> Predecessors { get; }
+        
+        /// <summary>
+        /// Gets the optional opaque object defined by the aspect for the specific <see cref="TargetDeclaration"/>. 
+        /// </summary>
+        object? TargetTag { get; }
     }
 }
