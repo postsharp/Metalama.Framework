@@ -5,12 +5,30 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Eligibility;
 using Metalama.Framework.Validation;
 using System;
+using System.Collections.Generic;
 using System.Linq.Expressions;
 
 namespace Metalama.Framework.Aspects
 {
+    public interface IDeclarationSelector<out TTarget> 
+        where TTarget : class, IDeclaration
+    {
+        /// <summary>
+        /// Selects members of the current target declaration with the purpose of adding aspects and annotations to them
+        /// using e.g. <see cref="IDeclarationSelection{TDeclaration}.AddAspect{TAspect}(System.Func{TDeclaration,System.Linq.Expressions.Expression{System.Func{TAspect}}})"/>
+        /// or <see cref="IDeclarationSelection{TDeclaration}.AddAnnotation{TAspect,TAnnotation}"/>.
+        /// </summary>
+        /// <param name="selector"></param>
+        /// <typeparam name="TMember"></typeparam>
+        /// <returns></returns>
+        IDeclarationSelection<TMember> WithTargetMembers<TMember>( Func<TTarget, IEnumerable<TMember>> selector )
+            where TMember : class, IDeclaration;
+
+        IDeclarationSelection<TTarget> WithTarget();
+    }
+    
     /// <summary>
-    /// Represents a set of declarations and offers the ability to add aspects and annotations to them.
+    /// Represents a set of declarations and offers the ability to add aspects, annotations or validators to them.
     /// </summary>
     /// <typeparam name="TDeclaration"></typeparam>
     [InternalImplement]
@@ -18,6 +36,12 @@ namespace Metalama.Framework.Aspects
     public interface IDeclarationSelection<out TDeclaration>
         where TDeclaration : class, IDeclaration
     {
+        void AddReferenceValidator( string methodName, ValidatedReferenceKinds referenceKinds );
+        
+        
+        void AddDeclarationValidator<T>( string methodName )
+            where T : IDeclaration;
+        
         /// <summary>
         /// Adds an aspect to the current set of declarations. This overload allows adding inherited aspects.
         /// </summary>

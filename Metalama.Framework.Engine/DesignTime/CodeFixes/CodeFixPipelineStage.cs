@@ -30,7 +30,8 @@ namespace Metalama.Framework.Engine.DesignTime.CodeFixes
                 input.AspectLayers,
                 pipelineStepsResult.Compilation,
                 input.Diagnostics.Concat( pipelineStepsResult.Diagnostics ).Concat( pipelineStepsResult.Diagnostics ),
-                input.AspectSources.Concat( pipelineStepsResult.ExternalAspectSources ),
+                input.AspectSources.AddRange( pipelineStepsResult.ExternalAspectSources ),
+                default,
                 pipelineStepsResult.InheritableAspectInstances,
                 input.AdditionalSyntaxTrees );
     }

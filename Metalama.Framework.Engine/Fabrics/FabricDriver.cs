@@ -9,6 +9,7 @@ using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Validation;
 using Metalama.Framework.Fabrics;
 using Metalama.Framework.Project;
 using Metalama.Framework.Validation;
@@ -125,7 +126,9 @@ namespace Metalama.Framework.Engine.Fabrics
 
             protected abstract void AddAspectSource( IAspectSource aspectSource );
 
-            public IDeclarationSelection<TChild> WithMembers<TChild>( Func<T, IEnumerable<TChild>> selector )
+            protected abstract void AddValidatorSource( ValidatorSource validatorSource );
+
+            public IDeclarationSelection<TChild> WithTargetMembers<TChild>( Func<T, IEnumerable<TChild>> selector )
                 where TChild : class, IDeclaration
             {
                 var executionContext = UserCodeExecutionContext.Current;
@@ -134,6 +137,7 @@ namespace Metalama.Framework.Engine.Fabrics
                     this._targetDeclaration,
                     new AspectPredecessor( AspectPredecessorKind.Fabric, this._fabricInstance ),
                     this.AddAspectSource,
+                    this.AddValidatorSource,
                     ( compilation, diagnostics ) =>
                     {
                         var targetDeclaration = this._targetDeclaration.GetTarget( compilation ).AssertNotNull();
@@ -153,6 +157,9 @@ namespace Metalama.Framework.Engine.Fabrics
                     this._fabricManager.AspectClasses,
                     this._fabricManager.ServiceProvider );
             }
+
+            
+            public IDeclarationSelection<T> WithTarget() => this.WithTargetMembers( declaration => new[]{ declaration } );
 
             [Obsolete( "Not implemented." )]
             public void AddValidator( Action<ValidateDeclarationContext<T>> validator ) => throw new NotImplementedException();

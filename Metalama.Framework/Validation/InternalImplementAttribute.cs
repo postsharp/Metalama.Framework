@@ -3,6 +3,7 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Eligibility;
 using System;
 
@@ -16,35 +17,28 @@ namespace Metalama.Framework.Validation
     [AttributeUsage( AttributeTargets.Interface )]
     public class InternalImplementAttribute : TypeAspect
     {
+        private static readonly DiagnosticDefinition<(IDeclaration InterfaceType, INamedType ImplementingType)> _warning =
+            new DiagnosticDefinition<(IDeclaration ReferencedType, INamedType ReferencingType)>( 
+                "MY001",
+                Severity.Warning, 
+                "The interface '{0}' cannot be implemented by the type '{1}' because of the [InternalImplement] constraint."
+            ); 
+        
         public override void BuildEligibility( IEligibilityBuilder<INamedType> builder )
-            =>
-
-                // Coverage: Ignore
-                builder.MustHaveAccessibility( Accessibility.Public );
+            => builder.MustHaveAccessibility( Accessibility.Public );
 
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            /*
-            builder.AddReferenceValidator<INamedType, Validator>( builder.Target, new[] { DeclarationReferenceKind.ImplementsInterface } );
-            */
+            builder.WithTarget().AddReferenceValidator( nameof(this.Validate), ValidatedReferenceKinds.ImplementsInterface );
         }
 
-        /*
-        private class Validator : IDeclarationReferenceValidator<INamedType>
+        private void Validate( in ValidateReferenceContext<INamedType> context )
         {
-            public void Initialize( IReadOnlyDictionary<string, string> properties ) { }
-
-            public void ValidateReference( in ValidateReferenceContext<INamedType> reference )
+            if ( context.ReferencingDeclaration.Compilation != context.ReferencedDeclaration.Compilation )
             {
-                if ( reference.ReferencingDeclaration.Compilation != reference.ReferencedDeclaration.Compilation )
-                {
-                    reference.Diagnostics.Report( reference.DiagnosticLocation, null!, reference.ReferencingDeclaration, reference.ReferencedDeclaration );
-                }
+                context.Diagnostics.Report( context.DiagnosticLocation, _warning, ( context.ReferencedDeclaration, context.ReferencingType  ) );
             }
         }
-        
-        */
 
-        public override void BuildAspectClass( IAspectClassBuilder builder ) { }
     }
 }

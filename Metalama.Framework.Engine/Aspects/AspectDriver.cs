@@ -13,6 +13,7 @@ using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Sdk;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Validation;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
@@ -113,7 +114,8 @@ namespace Metalama.Framework.Engine.Aspects
                     false,
                     new ImmutableUserDiagnosticList( ImmutableArray.Create( diagnostic ), ImmutableArray<ScopedSuppression>.Empty ),
                     ImmutableArray<Advice>.Empty,
-                    ImmutableArray<IAspectSource>.Empty );
+                    ImmutableArray<IAspectSource>.Empty,
+                    ImmutableArray<ValidatorSource>.Empty);
             }
 
             cancellationToken.ThrowIfCancellationRequested();
@@ -185,7 +187,8 @@ namespace Metalama.Framework.Engine.Aspects
                         false,
                         diagnosticSink.ToImmutable(),
                         ImmutableArray<Advice>.Empty,
-                        ImmutableArray<IAspectSource>.Empty );
+                        ImmutableArray<IAspectSource>.Empty,
+                        ImmutableArray<ValidatorSource>.Empty);
             }
 
             var aspectResult = aspectBuilder.ToResult();

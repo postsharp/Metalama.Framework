@@ -40,7 +40,7 @@ namespace Metalama.Framework.Aspects
     /// aspects and validators, or report diagnostics. This is a weakly-typed variant of the <see cref="IAspectBuilder{T}"/> interface.
     /// </summary>
     public interface IAspectBuilder<out TAspectTarget> : IAspectLayerBuilder<TAspectTarget>, IAspectBuilder
-        where TAspectTarget : IDeclaration
+        where TAspectTarget : class, IDeclaration
     {
         /// <summary>
         /// Registers the build action for an aspect layer. The aspect layer must have been defined

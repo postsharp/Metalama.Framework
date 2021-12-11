@@ -401,10 +401,16 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
 
                 var success = state._pipeline.TryExecute( compilation, diagnosticList, configuration, cancellationToken, out var pipelineResult );
 
+                var additionalSyntaxTrees = pipelineResult switch
+                {
+                    null => ImmutableArray<IntroducedSyntaxTree>.Empty,
+                    _ => pipelineResult.AdditionalSyntaxTrees
+                };
+                
                 var result = new DesignTimeAspectPipelineResult(
                     success,
                     compilation.SyntaxTrees,
-                    pipelineResult?.AdditionalSyntaxTrees ?? Array.Empty<IntroducedSyntaxTree>(),
+                    additionalSyntaxTrees,
                     new ImmutableUserDiagnosticList(
                         diagnosticList.ToImmutableArray(),
                         pipelineResult?.Diagnostics.DiagnosticSuppressions,

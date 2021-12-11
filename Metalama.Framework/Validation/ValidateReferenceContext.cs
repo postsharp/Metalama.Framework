@@ -10,14 +10,12 @@ using System;
 
 namespace Metalama.Framework.Validation
 {
-    /// <summary>
-    /// (Not implemented.)
-    /// </summary>
-    [Obsolete( "Not implemented." )]
     [CompileTimeOnly]
     public readonly struct ValidateReferenceContext<T>
         where T : IDeclaration
     {
+        public IAspectState? AspectState { get; }
+        
         public IDiagnosticSink Diagnostics { get; }
 
         public T ReferencedDeclaration { get; }
@@ -26,7 +24,7 @@ namespace Metalama.Framework.Validation
 
         public INamedType ReferencingType { get; }
 
-        public DeclarationReferenceKind ReferenceKind { get; }
+        public ValidatedReferenceKinds ReferenceKinds { get; }
 
         // Must be a lazy implementation.
         public IDiagnosticLocation DiagnosticLocation { get; }

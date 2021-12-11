@@ -44,11 +44,13 @@ namespace Metalama.Framework.Engine.Pipeline
             var diagnosticSuppressions = aspectInstanceResults.SelectMany( air => air.Diagnostics.DiagnosticSuppressions );
             var codeFixes = aspectInstanceResults.SelectMany( air => air.Diagnostics.CodeFixes );
             var addedAspectSources = aspectInstanceResults.SelectMany( air => air.AspectSources );
+            var addedValidatorSources = aspectInstanceResults.SelectMany( air => air.ValidatorSources );
             var addedAdvices = aspectInstanceResults.SelectMany( air => air.Advices );
 
             pipelineStepsState.AddDiagnostics( reportedDiagnostics, diagnosticSuppressions, codeFixes );
             success &= pipelineStepsState.AddAspectSources( addedAspectSources );
             success &= pipelineStepsState.AddAdvices( addedAdvices );
+            success &= pipelineStepsState.AddValidatorSources( addedValidatorSources );
 
             // It's not clear if we should continue at that time. An error here may result in more errors later.
             _ = success;

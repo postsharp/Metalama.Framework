@@ -16,7 +16,7 @@ namespace Metalama.Framework.Aspects
     /// aspects and validators, or report diagnostics. This is a weakly-typed variant of the <see cref="IAspectLayerBuilder{T}"/> interface.
     /// </summary>
     [InternalImplement]
-    public interface IAspectLayerBuilder : IValidatorAdder
+    public interface IAspectLayerBuilder 
     {
         /// <summary>
         /// Gets the current <see cref="IProject"/>, which represents the <c>csproj</c> file and allows to share project-local data.
@@ -54,23 +54,12 @@ namespace Metalama.Framework.Aspects
     /// An object used by the delegated passed to <see cref="IAspectBuilder{TAspectTarget}.SetAspectLayerBuildAction"/> method of the aspect to provide advices, child
     /// aspects and validators, or report diagnostics. This is the strongly-typed variant of the <see cref="IAspectLayerBuilder"/> interface.
     /// </summary>
-    public interface IAspectLayerBuilder<out TAspectTarget> : IAspectLayerBuilder
-        where TAspectTarget : IDeclaration
+    public interface IAspectLayerBuilder<out TAspectTarget> : IAspectLayerBuilder, IDeclarationSelector<TAspectTarget>
+        where TAspectTarget : class, IDeclaration
     {
         /// <summary>
         /// Gets the declaration to which the aspect was added.
         /// </summary>
         new TAspectTarget Target { get; }
-
-        /// <summary>
-        /// Selects members of the current target declaration with the purpose of adding aspects and annotations to them
-        /// using e.g. <see cref="IDeclarationSelection{TDeclaration}.AddAspect{TAspect}(System.Func{TDeclaration,System.Linq.Expressions.Expression{System.Func{TAspect}}})"/>
-        /// or <see cref="IDeclarationSelection{TDeclaration}.AddAnnotation{TAspect,TAnnotation}"/>.
-        /// </summary>
-        /// <param name="selector"></param>
-        /// <typeparam name="TMember"></typeparam>
-        /// <returns></returns>
-        IDeclarationSelection<TMember> WithMembers<TMember>( Func<TAspectTarget, IEnumerable<TMember>> selector )
-            where TMember : class, IDeclaration;
     }
 }

@@ -10,8 +10,8 @@ using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Fabrics;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Validation;
 using Metalama.Framework.Project;
-using Metalama.Framework.Validation;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -53,11 +53,18 @@ namespace Metalama.Framework.Engine.Aspects
         public IAspectInstance AspectInstance { get; }
 
         public ImmutableArray<IAspectSource> AspectSources { get; private set; } = ImmutableArray<IAspectSource>.Empty;
+        public ImmutableArray<ValidatorSource> ValidatorSources { get; private set; } = ImmutableArray<ValidatorSource>.Empty;
 
         public void AddAspectSource( IAspectSource aspectSource )
         {
             this.AspectSources = this.AspectSources.Add( aspectSource );
         }
+
+        public void AddValidatorSource( ValidatorSource validatorSource )
+        {
+            this.ValidatorSources = this.ValidatorSources.Add( validatorSource );
+        }
+        
 
         public AdviceFactory AdviceFactory { get; }
 
@@ -75,7 +82,7 @@ namespace Metalama.Framework.Engine.Aspects
 
         public T Target { get; }
 
-        public IDeclarationSelection<TMember> WithMembers<TMember>( Func<T, IEnumerable<TMember>> selector )
+        public IDeclarationSelection<TMember> WithTargetMembers<TMember>( Func<T, IEnumerable<TMember>> selector )
             where TMember : class, IDeclaration
         {
             var executionContext = UserCodeExecutionContext.Current;
@@ -84,6 +91,7 @@ namespace Metalama.Framework.Engine.Aspects
                 this.Target.ToTypedRef(),
                 this._predecessor,
                 this.AddAspectSource,
+                this.AddValidatorSource,
                 ( compilation, diagnostics ) =>
                 {
                     var translatedTarget = compilation.Factory.GetDeclaration( this.Target );
@@ -99,6 +107,8 @@ namespace Metalama.Framework.Engine.Aspects
                 this._configuration.ServiceProvider );
         }
 
+        public IDeclarationSelection<T> WithTarget() => this.WithTargetMembers( declaration => new[]{ declaration } );
+    
         IDeclaration IAspectLayerBuilder.Target => this.Target;
 
         public IAdviceFactory Advices => this.AdviceFactory;
@@ -122,25 +132,17 @@ namespace Metalama.Framework.Engine.Aspects
                     success,
                     this._diagnosticSink.ToImmutable(),
                     this._declarativeAdvices.ToImmutableArray().AddRange( this.AdviceFactory.Advices ),
-                    this.AspectSources )
+                    this.AspectSources,
+                    this.ValidatorSources )
                 : new AspectInstanceResult(
                     success,
                     this._diagnosticSink.ToImmutable(),
-                    Array.Empty<Advice>(),
-                    Array.Empty<IAspectSource>() );
+                    ImmutableArray<Advice>.Empty, 
+                    ImmutableArray<IAspectSource>.Empty, 
+                    ImmutableArray<ValidatorSource>.Empty
+                    );
         }
 
-#pragma warning disable 618 // Not implemented
-        void IAspectBuilder<T>.SetAspectLayerBuildAction( string layerName, Action<IAspectLayerBuilder<T>> buildAction ) => throw new NotImplementedException();
-
-        void IValidatorAdder.AddTargetValidator<TTarget>( TTarget targetDeclaration, Action<ValidateReferenceContext<TTarget>> validator )
-            => throw new NotImplementedException();
-
-        void IValidatorAdder.AddReferenceValidator<TTarget, TConstraint>(
-            TTarget targetDeclaration,
-            IReadOnlyList<DeclarationReferenceKind> referenceKinds,
-            IReadOnlyDictionary<string, string>? properties )
-            => throw new NotImplementedException();
-#pragma warning restore 618
+        public void SetAspectLayerBuildAction( string layerName, Action<IAspectLayerBuilder<T>> buildAction ) => throw new NotImplementedException();
     }
 }

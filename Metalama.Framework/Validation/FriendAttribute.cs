@@ -3,6 +3,7 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Eligibility;
 using System;
 using System.Collections.Generic;
@@ -14,14 +15,20 @@ namespace Metalama.Framework.Validation
     /// Means that an internal member can be referenced only by a specific type. (Not implemented.)
     /// </summary>
     [AttributeUsage( AttributeTargets.All & ~AttributeTargets.Assembly )]
-    [Obsolete( "Not implemented." )]
     public class FriendAttribute : Attribute, IAspect<IMemberOrNamedType>
     {
-        private readonly Type[] _friendTypes;
+        private readonly string[] _friendTypes;
+
+        private static readonly DiagnosticDefinition<(IMemberOrNamedType ReferencedDeclaration, INamedType ReferencingType)> _warning =
+            new ( 
+                "MY001",
+                                                                                               Severity.Warning, 
+                "'{0}' cannot be used from '{1}' because of the [Friend] constraint."
+                ); 
 
         public FriendAttribute( Type friendType, params Type[] otherFriendTypes )
         {
-            this._friendTypes = otherFriendTypes.Append( friendType ).ToArray();
+            this._friendTypes = otherFriendTypes.Append( friendType ).Select( t=>t.FullName ).ToArray();
         }
 
         public void BuildEligibility( IEligibilityBuilder<IMemberOrNamedType> builder )
@@ -31,23 +38,14 @@ namespace Metalama.Framework.Validation
 
         public void BuildAspect( IAspectBuilder<IMemberOrNamedType> builder )
         {
-            var properties = new Dictionary<string, string> { ["FriendTypes"] = string.Join( ";", this._friendTypes.Select( t => t.FullName ) ) };
 
-            builder.AddReferenceValidator<IMemberOrNamedType, Validator>( builder.Target, new[] { DeclarationReferenceKind.Any }, properties );
+            builder.WithTarget().AddReferenceValidator( nameof(this.Validate),  ValidatedReferenceKinds.Any );
         }
 
-        private class Validator : IDeclarationReferenceValidator<IMemberOrNamedType>
+        private void Validate( in ValidateReferenceContext<IMemberOrNamedType> context )
         {
-            private string[] _friendTypes = null!;
-
-            public void Initialize( IReadOnlyDictionary<string, string> properties )
-            {
-                this._friendTypes = properties["FriendTypes"].Split( ';' );
-            }
-
-            public void ValidateReference( in ValidateReferenceContext<IMemberOrNamedType> reference )
-            {
-                for ( var type = reference.ReferencingType; type != null; type = type.DeclaringType )
+            
+                for ( var type = context.ReferencingType; type != null; type = type.DeclaringType )
                 {
                     if ( Array.IndexOf( this._friendTypes, type.FullName ) >= 0 )
                     {
@@ -56,15 +54,10 @@ namespace Metalama.Framework.Validation
                     }
                 }
 
-                // TODO: Report
-                //
-                // reference.Diagnostics.Report(
-                //     reference.DiagnosticLocation,
-                //     null!,
-                //     reference.ReferencedDeclaration,
-                //     reference.ReferencedDeclaration,
-                //     this._friendTypes );
-            }
+                context.Diagnostics.Report<>( 
+                    context.DiagnosticLocation,
+                    _warning!,
+                    (context.ReferencedDeclaration, context.ReferencingType) );
         }
 
         public void BuildAspectClass( IAspectClassBuilder builder ) { }

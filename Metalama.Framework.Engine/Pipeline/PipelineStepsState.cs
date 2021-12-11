@@ -10,6 +10,7 @@ using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.DesignTime.CodeFixes;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Transformations;
+using Metalama.Framework.Engine.Validation;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -31,6 +32,7 @@ namespace Metalama.Framework.Engine.Pipeline
         private readonly UserDiagnosticSink _diagnostics;
         private readonly List<INonObservableTransformation> _nonObservableTransformations = new();
         private readonly List<IAspectInstance> _inheritableAspectInstances = new();
+        private readonly List<ValidatorSource> _validatorSources = new();
         private readonly OverflowAspectSource _overflowAspectSource = new();
         private PipelineStep? _currentStep;
 
@@ -40,9 +42,11 @@ namespace Metalama.Framework.Engine.Pipeline
 
         public ImmutableArray<IAspectInstance> InheritableAspectInstances => this._inheritableAspectInstances.ToImmutableArray();
 
+        public ImmutableArray<ValidatorSource> ValidatorSources => this._validatorSources.ToImmutableArray();
+
         public ImmutableUserDiagnosticList Diagnostics => this._diagnostics.ToImmutable();
 
-        public IReadOnlyList<IAspectSource> ExternalAspectSources => new[] { this._overflowAspectSource };
+        public ImmutableArray<IAspectSource> ExternalAspectSources => ImmutableArray.Create<IAspectSource>( this._overflowAspectSource );
 
         public AspectPipelineConfiguration PipelineConfiguration { get; }
 
@@ -251,7 +255,16 @@ namespace Metalama.Framework.Engine.Pipeline
 
         public void AddNonObservableTransformations( IEnumerable<INonObservableTransformation> transformations )
             => this._nonObservableTransformations.AddRange( transformations );
+        
+        
+        public bool AddValidatorSources( IEnumerable<ValidatorSource> validatorSources )
+        {
+            this._validatorSources.AddRange( validatorSources );
+
+            return true;
+        }
 
         public void Report( Diagnostic diagnostic ) => this._diagnostics.Report( diagnostic );
+
     }
 }

@@ -46,9 +46,10 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
                 input.AspectLayers,
                 input.CompilationModel,
                 input.Diagnostics.Concat( pipelineStepsResult.Diagnostics ).Concat( diagnosticSink.ToImmutable() ),
-                input.AspectSources.Concat( pipelineStepsResult.ExternalAspectSources ),
+                input.AspectSources.AddRange( pipelineStepsResult.ExternalAspectSources ),
+                input.ValidatorSources.AddRange( pipelineStepsResult.ValidatorSources ),
                 pipelineStepsResult.InheritableAspectInstances,
-                input.AdditionalSyntaxTrees.Concat( additionalSyntaxTrees ) );
+                input.AdditionalSyntaxTrees.AddRange( additionalSyntaxTrees ) );
         }
     }
 }

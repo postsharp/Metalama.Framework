@@ -6,6 +6,7 @@ using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Transformations;
+using Metalama.Framework.Engine.Validation;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 
@@ -27,6 +28,8 @@ namespace Metalama.Framework.Engine.Pipeline
         /// <summary>
         /// Gets the list of aspect sources that are not a part of the current pipeline stage.
         /// </summary>
-        IReadOnlyList<IAspectSource> ExternalAspectSources { get; }
+        ImmutableArray<IAspectSource> ExternalAspectSources { get; }
+
+        ImmutableArray<ValidatorSource> ValidatorSources { get; }
     }
 }

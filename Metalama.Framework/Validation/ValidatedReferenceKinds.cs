@@ -6,12 +6,9 @@ using System;
 
 namespace Metalama.Framework.Validation
 {
-    /// <summary>
-    /// (Not implemented.)
-    /// </summary>
-    [Obsolete( "Not implemented." )]
     [CompileTimeOnly]
-    public enum DeclarationReferenceKind
+    [Flags]
+    public enum ValidatedReferenceKinds
     {
         ImplementsInterface,
         Any
