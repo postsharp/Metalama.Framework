@@ -20,14 +20,13 @@ using System.Threading;
 
 namespace Metalama.Framework.Engine.Aspects
 {
-    internal class AspectBuilder<T> : IAspectBuilder<T>, IAspectBuilderInternal
+    internal class AspectBuilder<T> : IAspectBuilder<T>, IAspectBuilderInternal, IDeclarationSelectorInternal
         where T : class, IDeclaration
     {
         private readonly UserDiagnosticSink _diagnosticSink;
         private readonly AspectPipelineConfiguration _configuration;
         private readonly IImmutableList<Advice> _declarativeAdvices;
         private bool _skipped;
-        private AspectPredecessor _predecessor;
 
         public AspectBuilder(
             T target,
@@ -45,7 +44,7 @@ namespace Metalama.Framework.Engine.Aspects
             this.AspectInstance = aspectInstance;
             this.AdviceFactory = adviceFactory;
             this.CancellationToken = cancellationToken;
-            this._predecessor = new AspectPredecessor( AspectPredecessorKind.ChildAspect, aspectInstance );
+            this.AspectPredecessor = new AspectPredecessor( AspectPredecessorKind.ChildAspect, aspectInstance );
         }
 
         public IProject Project => this.Target.Compilation.Project;
@@ -70,10 +69,10 @@ namespace Metalama.Framework.Engine.Aspects
 
         public DisposeAction WithPredecessor( in AspectPredecessor predecessor )
         {
-            var oldPredecessor = this._predecessor;
-            this._predecessor = predecessor;
+            var oldPredecessor = this.AspectPredecessor;
+            this.AspectPredecessor = predecessor;
 
-            return new DisposeAction( () => this._predecessor = oldPredecessor );
+            return new DisposeAction( () => this.AspectPredecessor = oldPredecessor );
         }
 
         IDiagnosticAdder IAspectBuilderInternal.DiagnosticAdder => this._diagnosticSink;
@@ -89,7 +88,7 @@ namespace Metalama.Framework.Engine.Aspects
 
             return new DeclarationSelection<TMember>(
                 this.Target.ToTypedRef(),
-                this._predecessor,
+                this,
                 this.AddAspectSource,
                 this.AddValidatorSource,
                 ( compilation, diagnostics ) =>
@@ -143,5 +142,10 @@ namespace Metalama.Framework.Engine.Aspects
         }
 
         public void SetAspectLayerBuildAction( string layerName, Action<IAspectLayerBuilder<T>> buildAction ) => throw new NotImplementedException();
+
+        public AspectPredecessor AspectPredecessor { get; private set; }
+
+        public ValidatorDriver GetValidatorDriver( string name, ValidatorKind kind )
+            => ((IValidatorDriverFactory) this.AspectInstance.AspectClass).GetValidatorDriver( name, kind );
     }
 }

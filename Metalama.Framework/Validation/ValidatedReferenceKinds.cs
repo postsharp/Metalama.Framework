@@ -10,7 +10,15 @@ namespace Metalama.Framework.Validation
     [Flags]
     public enum ValidatedReferenceKinds
     {
-        ImplementsInterface,
-        Any
+        None,
+        BaseType,
+        MemberAccess,
+        TypeArgument,
+        All = BaseType | MemberAccess | TypeArgument,
+        TypeOf,
+        ParameterType,
+        TypeConstraint,
+        Other,
+        ObjectCreation
     }
 }

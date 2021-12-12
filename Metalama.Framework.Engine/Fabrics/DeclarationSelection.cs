@@ -3,6 +3,7 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Eligibility;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
@@ -20,6 +21,14 @@ using Attribute = System.Attribute;
 
 namespace Metalama.Framework.Engine.Fabrics
 {
+    internal interface IDeclarationSelectorInternal : IValidatorDriverFactory
+    {
+        AspectPredecessor AspectPredecessor { get; }
+
+        
+
+    }
+    
     /// <summary>
     /// An implementation of <see cref="IDeclarationSelection{TDeclaration}"/>, which offers a fluent
     /// API to programmatically add children aspects.
@@ -29,7 +38,7 @@ namespace Metalama.Framework.Engine.Fabrics
         where T : class, IDeclaration
     {
         private readonly ISdkRef<IDeclaration> _containingDeclaration;
-        private readonly AspectPredecessor _predecessor;
+        private readonly IDeclarationSelectorInternal _parent;
         private readonly Action<IAspectSource> _registerAspectSource;
         private readonly Action<ValidatorSource> _registerValidatorSource;
         private readonly Func<CompilationModel, IDiagnosticAdder, IEnumerable<T>> _selector;
@@ -38,7 +47,7 @@ namespace Metalama.Framework.Engine.Fabrics
 
         public DeclarationSelection(
             ISdkRef<IDeclaration> containingDeclaration,
-            AspectPredecessor predecessor,
+            IDeclarationSelectorInternal parent,
             Action<IAspectSource> registerAspectSource,
             Action<ValidatorSource> registerValidatorSource,
             Func<CompilationModel, IDiagnosticAdder, IEnumerable<T>> selectTargets,
@@ -46,8 +55,9 @@ namespace Metalama.Framework.Engine.Fabrics
             IServiceProvider serviceProvider )
         {
             this._containingDeclaration = containingDeclaration;
-            this._predecessor = predecessor;
+            this._parent = parent;
             this._registerAspectSource = registerAspectSource;
+            this._registerValidatorSource = registerValidatorSource;
             this._selector = selectTargets;
             this._aspectClasses = aspectClasses;
             this._serviceProvider = serviceProvider;
@@ -70,27 +80,35 @@ namespace Metalama.Framework.Engine.Fabrics
 
         private void RegisterValidatorSource( ValidatorSource validatorSource ) => this._registerValidatorSource( validatorSource );
 
-        public void AddReferenceValidator( string methodName, ValidatedReferenceKinds referenceKinds )
+        public void AddSourceReferenceValidator( string methodName, ValidatedReferenceKinds referenceKinds )
         {
             this.RegisterValidatorSource(
                 new ValidatorSource(
-                    ( compilation, diagnostics ) => this.SelectAndValidateValidatorTargets(
+                    this._parent,
+                    this._parent.AspectPredecessor, 
+                    methodName, 
+                    ValidatorKind.Reference,
+                    ( source, compilation, diagnostics ) => this.SelectAndValidateValidatorTargets(
                         compilation,
                         diagnostics,
-                        item => new ReferenceValidatorInstance( this._predecessor, item, methodName, referenceKinds ) ),
-                    ValidatorKind.Reference ) );
+                        item => new ReferenceValidatorInstance( source, item, referenceKinds ) )
+                     ) );
         }
 
-        public void AddDeclarationValidator<T1>( string methodName )
+        public void AddFinalDeclarationValidator<T1>( string methodName )
             where T1 : IDeclaration
         {
             this.RegisterValidatorSource(
                 new ValidatorSource(
-                    ( compilation, diagnostics ) => this.SelectAndValidateValidatorTargets(
+                    this._parent,
+                    this._parent.AspectPredecessor,
+                    methodName,
+                    ValidatorKind.Definition,
+                    ( source, compilation, diagnostics ) => this.SelectAndValidateValidatorTargets(
                         compilation,
                         diagnostics,
-                        item => new DeclarationValidatorInstance( this._predecessor, item, methodName ) ),
-                    ValidatorKind.Definition ) );
+                        item => new DeclarationValidatorInstance( source, item ) )
+                     ) );
         }
 
         public IDeclarationSelection<T> AddAspect<TAspect>( Func<T, Expression<Func<TAspect>>> createAspect )
@@ -125,7 +143,7 @@ namespace Metalama.Framework.Engine.Fabrics
                                     lambda,
                                     item.ToTypedRef<IDeclaration>(),
                                     aspectClass,
-                                    this._predecessor,
+                                    this._parent.AspectPredecessor,
                                     out var aspectInstance ) )
                             {
                                 return null;
@@ -167,7 +185,7 @@ namespace Metalama.Framework.Engine.Fabrics
                                 aspect!,
                                 t.ToTypedRef<IDeclaration>(),
                                 aspectClass,
-                                this._predecessor );
+                                this._parent.AspectPredecessor );
                         } ) ) );
 
             return this;
@@ -204,7 +222,7 @@ namespace Metalama.Framework.Engine.Fabrics
                                     aspect!,
                                     t.ToTypedRef<IDeclaration>(),
                                     aspectClass,
-                                    this._predecessor );
+                                    this._parent.AspectPredecessor );
                             } );
                     } ) );
 
@@ -219,7 +237,7 @@ namespace Metalama.Framework.Engine.Fabrics
         {
             foreach ( var targetDeclaration in this._selector( compilation, diagnosticAdder ) )
             {
-                var predecessorInstance = (IAspectPredecessorImpl) this._predecessor.Instance;
+                var predecessorInstance = (IAspectPredecessorImpl) this._parent.AspectPredecessor.Instance;
 
                 var containingDeclaration = this._containingDeclaration.GetTarget( compilation ).AssertNotNull();
 
@@ -260,12 +278,14 @@ namespace Metalama.Framework.Engine.Fabrics
 
         private IEnumerable<ValidatorInstance> SelectAndValidateValidatorTargets(
             CompilationModel compilation,
-            IDiagnosticAdder diagnosticAdder,
+            IDiagnosticSink diagnosticSink,
             Func<T, ValidatorInstance?> createResult )
         {
+            var diagnosticAdder = (IDiagnosticAdder) diagnosticSink;
+            
             foreach ( var targetDeclaration in this._selector( compilation, diagnosticAdder ) )
             {
-                var predecessorInstance = (IAspectPredecessorImpl) this._predecessor.Instance;
+                var predecessorInstance = (IAspectPredecessorImpl) this._parent.AspectPredecessor.Instance;
 
                 var containingDeclaration = this._containingDeclaration.GetTarget( compilation ).AssertNotNull();
 

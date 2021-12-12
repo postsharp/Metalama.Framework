@@ -36,9 +36,9 @@ namespace Metalama.Framework.Aspects
     public interface IDeclarationSelection<out TDeclaration>
         where TDeclaration : class, IDeclaration
     {
-        void AddReferenceValidator( string methodName, ValidatedReferenceKinds referenceKinds );
+        void AddSourceReferenceValidator( string methodName, ValidatedReferenceKinds referenceKinds );
 
-        void AddDeclarationValidator<T>( string methodName )
+        void AddFinalDeclarationValidator<T>( string methodName )
             where T : IDeclaration;
 
         /// <summary>

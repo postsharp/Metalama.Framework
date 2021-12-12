@@ -10,18 +10,30 @@ using System;
 
 namespace Metalama.Framework.Validation
 {
+    
+    
     /// <summary>
     /// (Not implemented.)
     /// </summary>
-    [Obsolete( "Not implemented." )]
     [CompileTimeOnly]
-    public readonly struct ValidateDeclarationContext<T>
-        where T : IDeclaration
+    public readonly struct ValidateDeclarationContext
     {
         public IAspectState? AspectState { get; }
 
         public IDiagnosticSink Diagnostics { get; }
 
-        public T Declaration { get; }
+        public IDeclaration ValidatedDeclaration { get; }
+        
+        public SyntaxReference Syntax { get; }
+        
+        public IDiagnosticLocation DiagnosticLocation => this.Syntax.DiagnosticLocation;
+
+        public ValidateDeclarationContext( IDeclaration validatedDeclaration, IAspectState? aspectState, IDiagnosticSink diagnostics, SyntaxReference syntax )
+        {
+            this.AspectState = aspectState;
+            this.Diagnostics = diagnostics;
+            this.ValidatedDeclaration = validatedDeclaration;
+            this.Syntax = syntax;
+        }
     }
 }

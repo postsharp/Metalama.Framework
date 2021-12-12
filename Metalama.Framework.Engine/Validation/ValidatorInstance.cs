@@ -3,25 +3,50 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Diagnostics;
+using Metalama.Framework.Engine.CodeModel;
+using Microsoft.CodeAnalysis;
+using SyntaxReference = Metalama.Framework.Code.SyntaxReference;
 
 namespace Metalama.Framework.Engine.Validation;
 
-internal class ValidatorInstance
+internal class LocationWrapper : IDiagnosticLocationImpl
 {
+    public Location? DiagnosticLocation { get;}
+
+    public LocationWrapper( Location? diagnosticLocation ) {
+        this.DiagnosticLocation = diagnosticLocation;
+    }
+}
+
+internal abstract class ValidatorInstance : ISyntaxReferenceService
+{
+    public ValidatorSource Source { get; }
     public IDeclaration ValidatedDeclaration { get; }
 
-    public string MethodName { get; }
-
-    public AspectPredecessor Predecessor { get; }
-
-    public object Object => this.Predecessor.Instance;
+    public object Object => this.Source.Predecessor.Instance;
 
     public IAspectState? State => (this.Object as IAspectInstance)?.State;
 
-    public ValidatorInstance( string methodName, AspectPredecessor predecessor, IDeclaration validatedDeclaration )
+    public ValidatorInstance( ValidatorSource source, IDeclaration validatedDeclaration )
     {
-        this.MethodName = methodName;
-        this.Predecessor = predecessor;
+        this.Source = source;
         this.ValidatedDeclaration = validatedDeclaration;
+    }
+
+    // TODO: ISyntaxReferenceService should not be implemented in this class.
+    public IDiagnosticLocation GetDiagnosticLocation( in SyntaxReference syntaxReference )
+    {
+        switch ( syntaxReference.NodeOrToken )
+        {
+            case SyntaxNode node:
+                return new LocationWrapper( node.GetLocation() );
+            
+            case SyntaxToken token:
+                return new LocationWrapper( token.GetLocation() );
+            
+            default:
+                throw new AssertionFailedException();
+        }
     }
 }

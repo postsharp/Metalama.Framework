@@ -3,13 +3,25 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Diagnostics;
+using Metalama.Framework.Engine.Diagnostics;
 
 namespace Metalama.Framework.Engine.Validation;
 
 internal class DeclarationValidatorInstance : ValidatorInstance
 {
-    public DeclarationValidatorInstance( AspectPredecessor predecessor, IDeclaration validatedDeclaration, string methodName ) : base(
-        methodName,
-        predecessor,
-        validatedDeclaration ) { }
+    private readonly DeclarationValidatorDriver _driver;
+
+    public DeclarationValidatorInstance( ValidatorSource source, IDeclaration validatedDeclaration ) : base(
+        source,
+        validatedDeclaration )
+    {
+        this._driver = (DeclarationValidatorDriver) source.Driver;
+
+    }
+
+    public void Validate( IDiagnosticSink diagnosticAdder )
+    {
+        this._driver.Validate( this.Object, this.ValidatedDeclaration, diagnosticAdder );
+    }
 }
