@@ -18,7 +18,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization
             this.AssertSerialization( "new global::System.Int32[]{10, 20, 30}", new[] { 10, 20, 30 } );
 
             this.AssertSerialization(
-                "new global::Metalama.Framework.Tests.UnitTests.Serialization.Assets.Mars.Moon[]{global::Metalama.Framework.Tests.UnitTests.Serialization.Assets.Mars.Moon.Deimos}",
+                "new global::Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Assets.Mars.Moon[]{global::Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Assets.Mars.Moon.Deimos}",
                 new[] { Mars.Moon.Deimos } );
         }
 
