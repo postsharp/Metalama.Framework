@@ -33,7 +33,7 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
 
             DesignTimeSyntaxTreeGenerator.GenerateDesignTimeSyntaxTrees(
                 input.Compilation,
-                pipelineStepsResult.Compilation,
+                pipelineStepsResult.LastCompilation,
                 this.ServiceProvider,
                 diagnosticSink,
                 cancellationToken,
@@ -43,7 +43,7 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
                 input.Compilation,
                 input.Project,
                 input.AspectLayers,
-                input.CompilationModel,
+                input.CompilationModels.AddRange( pipelineStepsResult.Compilations ),
                 input.Diagnostics.Concat( pipelineStepsResult.Diagnostics ).Concat( diagnosticSink.ToImmutable() ),
                 input.AspectSources.AddRange( pipelineStepsResult.ExternalAspectSources ),
                 input.ValidatorSources.AddRange( pipelineStepsResult.ValidatorSources ),

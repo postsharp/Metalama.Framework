@@ -6,6 +6,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Engine.CodeModel;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using SyntaxReference = Metalama.Framework.Code.SyntaxReference;
 
 namespace Metalama.Framework.Engine.Validation;
@@ -35,18 +36,20 @@ internal abstract class ValidatorInstance : ISyntaxReferenceService
     }
 
     // TODO: ISyntaxReferenceService should not be implemented in this class.
-    public IDiagnosticLocation GetDiagnosticLocation( in SyntaxReference syntaxReference )
+    public IDiagnosticLocation GetDiagnosticLocation( in SyntaxReference syntaxReference ) 
+        => syntaxReference.NodeOrToken switch
     {
-        switch ( syntaxReference.NodeOrToken )
+        SyntaxNode node => new LocationWrapper( node.GetLocation() ),
+        SyntaxToken token => new LocationWrapper( token.GetLocation() ),
+        _ => throw new AssertionFailedException()
+    };
+
+    public string GetKind( in SyntaxReference syntaxReference )
+        => syntaxReference.NodeOrToken switch
         {
-            case SyntaxNode node:
-                return new LocationWrapper( node.GetLocation() );
-            
-            case SyntaxToken token:
-                return new LocationWrapper( token.GetLocation() );
-            
-            default:
-                throw new AssertionFailedException();
-        }
-    }
+            SyntaxNode node => node.Kind().ToString(),
+            SyntaxToken token => token.Kind().ToString(),
+            _ => throw new AssertionFailedException()
+        };
+
 }

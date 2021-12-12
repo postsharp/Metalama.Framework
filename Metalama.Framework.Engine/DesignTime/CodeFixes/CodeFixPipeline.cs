@@ -61,7 +61,7 @@ namespace Metalama.Framework.Engine.DesignTime.CodeFixes
             else
             {
                 codeFixes = result.Diagnostics.CodeFixes;
-                compilationModel = result.CompilationModel.AssertNotNull();
+                compilationModel = result.CompilationModels[result.CompilationModels.Length-1];
 
                 return true;
             }

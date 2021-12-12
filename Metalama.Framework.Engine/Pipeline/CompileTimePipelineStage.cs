@@ -4,6 +4,7 @@
 using Metalama.Framework.Engine.AdditionalOutputs;
 using Metalama.Framework.Engine.AspectOrdering;
 using Metalama.Framework.Engine.Aspects;
+using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.DesignTime.Pipeline;
@@ -13,6 +14,7 @@ using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Project;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -47,7 +49,7 @@ namespace Metalama.Framework.Engine.Pipeline
                 pipelineConfiguration.ServiceProvider,
                 new AspectLinkerInput(
                     input.Compilation,
-                    pipelineStepsResult.Compilation,
+                    pipelineStepsResult.LastCompilation,
                     pipelineStepsResult.NonObservableTransformations,
                     input.AspectLayers,
                     input.Diagnostics.DiagnosticSuppressions.Concat( pipelineStepsResult.Diagnostics.DiagnosticSuppressions ),
@@ -58,7 +60,7 @@ namespace Metalama.Framework.Engine.Pipeline
             var projectOptions = this.ServiceProvider.GetService<IProjectOptions>();
             IReadOnlyList<AdditionalCompilationOutputFile>? additionalCompilationOutputFiles = null;
 
-            if ( projectOptions != null && !projectOptions.IsDesignTimeEnabled )
+            if ( projectOptions is { IsDesignTimeEnabled: false } )
             {
                 additionalCompilationOutputFiles = this.GenerateAdditionalCompilationOutputFiles(
                     input,
@@ -70,7 +72,7 @@ namespace Metalama.Framework.Engine.Pipeline
                 linkerResult.Compilation,
                 input.Project,
                 input.AspectLayers,
-                null,
+                input.CompilationModels.AddRange( pipelineStepsResult.Compilations ),
                 pipelineStepsResult.Diagnostics.Concat( linkerResult.Diagnostics ),
                 pipelineStepsResult.ExternalAspectSources,
                 input.ValidatorSources.AddRange( pipelineStepsResult.ValidatorSources ),
@@ -92,7 +94,7 @@ namespace Metalama.Framework.Engine.Pipeline
 
             DesignTimeSyntaxTreeGenerator.GenerateDesignTimeSyntaxTrees(
                 input.Compilation,
-                pipelineStepResult.Compilation,
+                pipelineStepResult.LastCompilation,
                 this.ServiceProvider,
                 diagnostics,
                 cancellationToken,

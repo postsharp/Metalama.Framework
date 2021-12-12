@@ -16,7 +16,7 @@ namespace Metalama.Framework.Engine.Validation;
 
 internal partial class ValidationRunner
 {
-    private class Visitor : CSharpSyntaxVisitor
+    private class Visitor : CSharpSyntaxWalker
     {
         private const int _initialStackSize = 8;
         private readonly IDiagnosticSink _diagnosticAdder;
@@ -38,6 +38,7 @@ internal partial class ValidationRunner
         public void Visit( SyntaxTree syntaxTree )
         {
             this._semanticModel = this._compilation.RoslynCompilation.GetSemanticModel( syntaxTree );
+            this.Visit( syntaxTree.GetRoot(  ) );
         }
 
         public override void VisitMemberAccessExpression( MemberAccessExpressionSyntax node )
@@ -49,7 +50,7 @@ internal partial class ValidationRunner
         {
             foreach ( var baseType in node.Types )
             {
-                this.ValidateSymbol( baseType, ValidatedReferenceKinds.BaseType );
+                this.ValidateSymbol( baseType.Type, ValidatedReferenceKinds.BaseType );
             }
             
             base.VisitBaseList( node );

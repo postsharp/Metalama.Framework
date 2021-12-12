@@ -30,7 +30,7 @@ namespace Metalama.Framework.Validation
             builder.WithTarget().AddSourceReferenceValidator( nameof(this.Validate), ValidatedReferenceKinds.BaseType );
         }
 
-        private void Validate( in ValidateReferenceContext context )
+        private static void Validate( in ValidateReferenceContext context )
         {
             if ( context.ReferencingDeclaration.Compilation != context.ReferencedDeclaration.Compilation )
             {

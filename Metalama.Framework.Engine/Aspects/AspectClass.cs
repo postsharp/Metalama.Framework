@@ -10,8 +10,10 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Linking;
 using Metalama.Framework.Engine.Sdk;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Validation;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
@@ -30,10 +32,11 @@ namespace Metalama.Framework.Engine.Aspects
     /// <summary>
     /// Represents the metadata of an aspect class. This class is compilation-independent. It is not used to represent a fabric class.
     /// </summary>
-    internal partial class AspectClass : TemplateClass, IAspectClassImpl, IBoundAspectClass
+    internal partial class AspectClass : TemplateClass, IAspectClassImpl, IBoundAspectClass, IValidatorDriverFactory
     {
         private readonly UserCodeInvoker _userCodeInvoker;
         private readonly IAspectDriver? _aspectDriver;
+        private ValidatorDriverFactory? _validatorDriverFactory;
 
         private readonly IAspect? _prototypeAspectInstance; // Null for abstract classes.
         private IReadOnlyList<AspectLayer>? _layers;
@@ -388,5 +391,12 @@ namespace Metalama.Framework.Engine.Aspects
         public IAspect CreateDefaultInstance() => (IAspect) Activator.CreateInstance( this.AspectType );
 
         public override string ToString() => this.FullName;
+
+        public ValidatorDriver GetValidatorDriver( string name, ValidatorKind kind )
+        {
+            this._validatorDriverFactory ??= new ValidatorDriverFactory( this.AspectType );
+
+            return this._validatorDriverFactory.GetValidatorDriver( name, kind );
+        }
     }
 }

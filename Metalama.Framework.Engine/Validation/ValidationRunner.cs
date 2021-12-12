@@ -22,6 +22,7 @@ internal partial class ValidationRunner
     public void Validate( CompilationModel initialCompilation, CompilationModel finalCompilation, IDiagnosticSink diagnosticAdder )
     {
         this.RunDeclarationValidators( finalCompilation, diagnosticAdder );
+        this.RunReferenceValidators( initialCompilation, diagnosticAdder );
     }
 
     private void RunDeclarationValidators( CompilationModel finalCompilation, IDiagnosticSink diagnosticAdder )

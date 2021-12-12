@@ -6,4 +6,6 @@ namespace Metalama.Framework.Code;
 internal interface ISyntaxReferenceService  : IService
 {
     IDiagnosticLocation GetDiagnosticLocation( in SyntaxReference syntaxReference );
+
+    string GetKind( in SyntaxReference syntaxReference );
 }

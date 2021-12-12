@@ -35,7 +35,7 @@ internal class ValidatorDriverFactory : IValidatorDriverFactory
 
     private ValidatorDriver GetReferenceValidationDriver( string name )
     {
-        var method = this._type.GetMethod( name, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic );
+        var method = this._type.GetMethod( name, BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic );
 
         if ( method == null )
         {
@@ -45,7 +45,18 @@ internal class ValidatorDriverFactory : IValidatorDriverFactory
 
         var instanceParameter = Expression.Parameter( typeof(object), "instance" );
         var contextParameter = Expression.Parameter( typeof(ValidateReferenceContext).MakeByRefType(), "context" );
-        var invocation = Expression.Call( Expression.Convert( instanceParameter, this._type ), method, contextParameter );
+        MethodCallExpression invocation;
+
+        if ( method.IsStatic )
+        {
+            invocation = Expression.Call(  method, contextParameter );
+        }
+        else
+        {
+            invocation = Expression.Call( Expression.Convert( instanceParameter, this._type ), method, contextParameter );
+            
+        }
+
         var lambda = Expression.Lambda<InvokeReferenceValidatorDelegate>( invocation, instanceParameter, contextParameter );
         var compiled = lambda.Compile();
 

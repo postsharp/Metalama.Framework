@@ -17,7 +17,7 @@ namespace Metalama.Framework.Engine.Pipeline
     /// </summary>
     internal interface IPipelineStepsResult
     {
-        CompilationModel Compilation { get; }
+        CompilationModel LastCompilation { get; }
 
         IReadOnlyList<INonObservableTransformation> NonObservableTransformations { get; }
 
@@ -31,5 +31,7 @@ namespace Metalama.Framework.Engine.Pipeline
         ImmutableArray<IAspectSource> ExternalAspectSources { get; }
 
         ImmutableArray<ValidatorSource> ValidatorSources { get; }
+
+        ImmutableArray<CompilationModel> Compilations { get; }
     }
 }

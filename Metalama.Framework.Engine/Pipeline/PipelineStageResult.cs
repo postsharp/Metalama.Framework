@@ -20,10 +20,10 @@ namespace Metalama.Framework.Engine.Pipeline
         public ProjectModel Project { get; }
 
         /// <summary>
-        /// Gets the Roslyn compilation.
+        /// Gets the resulting Roslyn compilation.
         /// </summary>
         public PartialCompilation Compilation { get; }
-
+        
         /// <summary>
         /// Gets the set of diagnostics.
         /// </summary>
@@ -52,7 +52,9 @@ namespace Metalama.Framework.Engine.Pipeline
         /// <summary>
         /// Gets the compilation model corresponding to <see cref="Compilation"/>, if it has been created.
         /// </summary>
-        public CompilationModel? CompilationModel { get; }
+        public ImmutableArray<CompilationModel> CompilationModels { get; }
+        
+        public CompilationModel? FirstCompilationModel { get; }
 
         public ImmutableArray<AdditionalCompilationOutputFile> AdditionalCompilationOutputFiles { get; }
 
@@ -60,7 +62,7 @@ namespace Metalama.Framework.Engine.Pipeline
             PartialCompilation compilation,
             ProjectModel project,
             ImmutableArray<OrderedAspectLayer> aspectLayers,
-            CompilationModel? compilationModel,
+            ImmutableArray<CompilationModel> compilationModels,
             ImmutableUserDiagnosticList? diagnostics = null,
             ImmutableArray<IAspectSource> aspectSources = default,
             ImmutableArray<ValidatorSource> validatorSources = default,
@@ -73,7 +75,7 @@ namespace Metalama.Framework.Engine.Pipeline
             this.AspectSources = aspectSources.IsDefault ? ImmutableArray<IAspectSource>.Empty : aspectSources;
             this.ValidatorSources = validatorSources.IsDefault ? ImmutableArray<ValidatorSource>.Empty : validatorSources;
             this.AspectLayers = aspectLayers;
-            this.CompilationModel = compilationModel;
+            this.CompilationModels = compilationModels;
             this.ExternallyInheritableAspects = inheritableAspectInstances.IsDefault ? ImmutableArray<IAspectInstance>.Empty : inheritableAspectInstances;
             this.Project = project;
             this.AdditionalSyntaxTrees = additionalSyntaxTrees.IsDefault ? ImmutableArray<IntroducedSyntaxTree>.Empty : additionalSyntaxTrees;

@@ -27,7 +27,7 @@ namespace Metalama.Framework.Engine.DesignTime.CodeFixes
                 input.Compilation,
                 input.Project,
                 input.AspectLayers,
-                pipelineStepsResult.Compilation,
+                input.CompilationModels.AddRange( pipelineStepsResult.Compilations ),
                 input.Diagnostics.Concat( pipelineStepsResult.Diagnostics ).Concat( pipelineStepsResult.Diagnostics ),
                 input.AspectSources.AddRange( pipelineStepsResult.ExternalAspectSources ),
                 default,

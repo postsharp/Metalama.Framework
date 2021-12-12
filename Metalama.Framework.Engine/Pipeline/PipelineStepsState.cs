@@ -36,7 +36,9 @@ namespace Metalama.Framework.Engine.Pipeline
         private readonly OverflowAspectSource _overflowAspectSource = new();
         private PipelineStep? _currentStep;
 
-        public CompilationModel Compilation { get; private set; }
+        public CompilationModel LastCompilation { get; private set; }
+        
+        public ImmutableArray<CompilationModel> Compilations { get; private set; }
 
         public IReadOnlyList<INonObservableTransformation> NonObservableTransformations => this._nonObservableTransformations;
 
@@ -52,13 +54,14 @@ namespace Metalama.Framework.Engine.Pipeline
 
         public PipelineStepsState(
             IReadOnlyList<OrderedAspectLayer> aspectLayers,
-            CompilationModel inputCompilation,
+            CompilationModel inputLastCompilation,
             IReadOnlyList<IAspectSource> inputAspectSources,
             AspectPipelineConfiguration pipelineConfiguration )
         {
             this._diagnostics = new UserDiagnosticSink( pipelineConfiguration.CompileTimeProject, pipelineConfiguration.CodeFixFilter );
-            this.Compilation = inputCompilation;
+            this.LastCompilation = inputLastCompilation;
             this.PipelineConfiguration = pipelineConfiguration;
+            this.Compilations = ImmutableArray.Create( inputLastCompilation );
 
             // Create an empty collection of steps.
             this._comparer = new PipelineStepIdComparer( aspectLayers );
@@ -93,9 +96,14 @@ namespace Metalama.Framework.Engine.Pipeline
 
                 this.DetectUnorderedSteps( ref previousStep, this._currentStep );
 
-                var compilation = this.Compilation.GetCompilationModel();
+                var compilation = this.LastCompilation.GetCompilationModel();
 
-                this.Compilation = this._currentStep!.Execute( compilation, this, cancellationToken );
+                this.LastCompilation = this._currentStep!.Execute( compilation, this, cancellationToken );
+
+                if ( compilation != this.LastCompilation )
+                {
+                    this.Compilations = this.Compilations.Add( this.LastCompilation );
+                }
             }
         }
 
@@ -202,7 +210,7 @@ namespace Metalama.Framework.Engine.Pipeline
 
             foreach ( var advice in advices )
             {
-                var depth = this.Compilation.GetDepth( advice.TargetDeclaration );
+                var depth = this.LastCompilation.GetDepth( advice.TargetDeclaration );
 
                 if ( !this.TryGetOrAddStep( advice.AspectLayerId, depth, true, out var step ) )
                 {
@@ -226,7 +234,7 @@ namespace Metalama.Framework.Engine.Pipeline
         {
             foreach ( var aspectInstance in aspectInstances )
             {
-                var depth = this.Compilation.GetDepth( aspectInstance.TargetDeclaration );
+                var depth = this.LastCompilation.GetDepth( aspectInstance.TargetDeclaration );
 
                 if ( !this.TryGetOrAddStep( new AspectLayerId( aspectInstance.AspectInstance.AspectClass ), depth, true, out var step ) )
                 {

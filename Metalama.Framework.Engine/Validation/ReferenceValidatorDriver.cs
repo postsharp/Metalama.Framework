@@ -10,8 +10,6 @@ internal class ReferenceValidatorDriver : ValidatorDriver
     public ReferenceValidatorDriver( InvokeReferenceValidatorDelegate validateMethod )
     {
         this._validateMethod = validateMethod;
-
-        throw new NotImplementedException();
     }
 
     public void Validate( object instance, in ValidateReferenceContext context )

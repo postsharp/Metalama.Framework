@@ -10,6 +10,7 @@ using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Licensing;
 using Metalama.Framework.Engine.Templating;
+using Metalama.Framework.Engine.Validation;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using PostSharp.Backstage.Extensibility.Extensions;
@@ -106,6 +107,19 @@ namespace Metalama.Framework.Engine.Pipeline
                 }
 
                 var resultPartialCompilation = result.Compilation;
+                
+                // Execute validators.
+                if ( !result.ValidatorSources.IsDefaultOrEmpty )
+                {
+                    var validationRunner = new ValidationRunner( result.ValidatorSources );
+                    var initialCompilation = result.CompilationModels[0];
+                    var finalCompilation = result.CompilationModels[result.CompilationModels.Length - 1];
+                    var diagnosticSink = new UserDiagnosticSink( configuration.CompileTimeProject, configuration.CodeFixFilter );
+                    validationRunner.Validate( initialCompilation, finalCompilation, diagnosticSink );
+                    diagnosticAdder.Report( diagnosticSink.ToImmutable().ReportedDiagnostics );
+                    
+                    // TODO: suppressions, code fixes
+                }
 
                 // Format the output.
                 if ( this.ProjectOptions.FormatOutput && OutputCodeFormatter.CanFormat )
