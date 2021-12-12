@@ -19,7 +19,6 @@ using System;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Serialization;
 [assembly: CompileTime]
-[Serializer(typeof(CustomSerializer))]
 public class A : ILamaSerializable
 {
     public int BaseField;
