@@ -189,7 +189,7 @@ namespace Metalama.Framework.Engine.CompileTime
                                             if ( childSymbol.DeclaredAccessibility != Accessibility.Private )
                                             {
                                                 this._diagnosticAdder.Report(
-                                                    TemplatingDiagnosticDescriptors.NestedCompileTypesMustBePrivate.CreateDiagnostic(
+                                                    TemplatingDiagnosticDescriptors.NestedCompileTypesMustBePrivate.CreateRoslynDiagnostic(
                                                         childType.Identifier.GetLocation(),
                                                         childSymbol ) );
                                             }
@@ -198,7 +198,7 @@ namespace Metalama.Framework.Engine.CompileTime
                                             if ( !this.RunTimeCompilation.HasImplicitConversion( childSymbol, this._typeFabricType ) )
                                             {
                                                 this._diagnosticAdder.Report(
-                                                    TemplatingDiagnosticDescriptors.RunTimeTypesCannotHaveCompileTimeTypesExceptClasses.CreateDiagnostic(
+                                                    TemplatingDiagnosticDescriptors.RunTimeTypesCannotHaveCompileTimeTypesExceptClasses.CreateRoslynDiagnostic(
                                                         childSymbol.GetDiagnosticLocation(),
                                                         (childSymbol, typeof(TypeFabric)) ) );
 
@@ -239,7 +239,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
                                     default:
                                         this._diagnosticAdder.Report(
-                                            TemplatingDiagnosticDescriptors.NeutralTypesForbiddenInNestedRunTimeTypes.CreateDiagnostic(
+                                            TemplatingDiagnosticDescriptors.NeutralTypesForbiddenInNestedRunTimeTypes.CreateRoslynDiagnostic(
                                                 childType.Identifier.GetLocation(),
                                                 childSymbol ) );
 
@@ -255,7 +255,7 @@ namespace Metalama.Framework.Engine.CompileTime
                             if ( this.SymbolClassifier.GetTemplatingScope( childSymbol ) == TemplatingScope.CompileTimeOnly )
                             {
                                 this._diagnosticAdder.Report(
-                                    TemplatingDiagnosticDescriptors.RunTimeTypesCannotHaveCompileTimeTypesExceptClasses.CreateDiagnostic(
+                                    TemplatingDiagnosticDescriptors.RunTimeTypesCannotHaveCompileTimeTypesExceptClasses.CreateRoslynDiagnostic(
                                         childSymbol.GetDiagnosticLocation(),
                                         (childSymbol, typeof(TypeFabric)) ) );
 
@@ -460,7 +460,7 @@ namespace Metalama.Framework.Engine.CompileTime
                     this.Success = false;
 
                     this._diagnosticAdder.Report(
-                        GeneralDiagnosticDescriptors.TemplateWithSameNameAlreadyDefined.CreateDiagnostic(
+                        GeneralDiagnosticDescriptors.TemplateWithSameNameAlreadyDefined.CreateRoslynDiagnostic(
                             symbol.GetDiagnosticLocation(),
                             (symbol.Name, this._currentTypeName!) ) );
 
@@ -477,7 +477,7 @@ namespace Metalama.Framework.Engine.CompileTime
                     this.Success = false;
 
                     this._diagnosticAdder.Report(
-                        TemplatingDiagnosticDescriptors.TemplateMustBeInNullableContext.CreateDiagnostic(
+                        TemplatingDiagnosticDescriptors.TemplateMustBeInNullableContext.CreateRoslynDiagnostic(
                             name.GetLocation(),
                             name.Text ) );
                 }
@@ -489,7 +489,7 @@ namespace Metalama.Framework.Engine.CompileTime
                         this.Success = false;
 
                         this._diagnosticAdder.Report(
-                            TemplatingDiagnosticDescriptors.TemplateMustBeInNullableContext.CreateDiagnostic(
+                            TemplatingDiagnosticDescriptors.TemplateMustBeInNullableContext.CreateRoslynDiagnostic(
                                 trivia.GetLocation(),
                                 name.Text ) );
                     }

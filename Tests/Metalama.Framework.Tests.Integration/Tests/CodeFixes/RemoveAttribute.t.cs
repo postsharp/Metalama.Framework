@@ -13,7 +13,7 @@ namespace Metalama.Framework.Tests.Integration.CodeFixes.RemoveAttribute
 {
     class Aspect : MethodAspect
     {
-        static DiagnosticDefinition<None> _diag = new("MY001", Severity.Warning, "Add some attribute");
+        static DiagnosticDefinition _diag = new("MY001", Severity.Warning, "Add some attribute");
 
         public override void BuildAspect(IAspectBuilder<IMethod> builder)
         {

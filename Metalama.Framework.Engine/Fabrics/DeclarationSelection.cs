@@ -72,7 +72,7 @@ namespace Metalama.Framework.Engine.Fabrics
 
         private void RegisterValidatorSource( ValidatorSource validatorSource ) => this._registerValidatorSource( validatorSource );
 
-        public void AddSourceReferenceValidator( string methodName, ValidatedReferenceKinds referenceKinds )
+        public void RegisterReferenceValidator( string methodName, ValidatedReferenceKinds referenceKinds )
         {
             this.RegisterValidatorSource(
                 new ValidatorSource(
@@ -86,7 +86,7 @@ namespace Metalama.Framework.Engine.Fabrics
                         item => new ReferenceValidatorInstance( source, item, referenceKinds ) ) ) );
         }
 
-        public void AddFinalDeclarationValidator<T1>( string methodName )
+        public void RegisterDeclarationValidator<T1>( string methodName )
             where T1 : IDeclaration
         {
             this.RegisterValidatorSource(
@@ -234,7 +234,7 @@ namespace Metalama.Framework.Engine.Fabrics
                 if ( !targetDeclaration.IsContainedIn( containingDeclaration ) || targetDeclaration.DeclaringAssembly.IsExternal )
                 {
                     diagnosticAdder.Report(
-                        GeneralDiagnosticDescriptors.CanAddChildAspectOnlyUnderParent.CreateDiagnostic(
+                        GeneralDiagnosticDescriptors.CanAddChildAspectOnlyUnderParent.CreateRoslynDiagnostic(
                             predecessorInstance.GetDiagnosticLocation( compilation.RoslynCompilation ),
                             (predecessorInstance.FormatPredecessor( compilation ), aspectClass.ShortName, targetDeclaration, containingDeclaration) ) );
 
@@ -250,7 +250,7 @@ namespace Metalama.Framework.Engine.Fabrics
                     var reason = aspectClass.GetIneligibilityJustification( requiredEligibility, new DescribedObject<IDeclaration>( targetDeclaration ) )!;
 
                     diagnosticAdder.Report(
-                        GeneralDiagnosticDescriptors.IneligibleChildAspect.CreateDiagnostic(
+                        GeneralDiagnosticDescriptors.IneligibleChildAspect.CreateRoslynDiagnostic(
                             predecessorInstance.GetDiagnosticLocation( compilation.RoslynCompilation ),
                             (predecessorInstance.FormatPredecessor( compilation ), aspectClass.ShortName, targetDeclaration, reason) ) );
 
@@ -282,7 +282,7 @@ namespace Metalama.Framework.Engine.Fabrics
                 if ( !targetDeclaration.IsContainedIn( containingDeclaration ) || targetDeclaration.DeclaringAssembly.IsExternal )
                 {
                     diagnosticAdder.Report(
-                        GeneralDiagnosticDescriptors.CanAddValidatorOnlyUnderParent.CreateDiagnostic(
+                        GeneralDiagnosticDescriptors.CanAddValidatorOnlyUnderParent.CreateRoslynDiagnostic(
                             predecessorInstance.GetDiagnosticLocation( compilation.RoslynCompilation ),
                             (predecessorInstance.FormatPredecessor( compilation ), targetDeclaration, containingDeclaration) ) );
 

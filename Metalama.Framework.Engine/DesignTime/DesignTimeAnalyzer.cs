@@ -121,7 +121,7 @@ namespace Metalama.Framework.Engine.DesignTime
                         if ( location is not null )
                         {
                             context.ReportDiagnostic(
-                                DesignTimeDiagnosticDescriptors.UnregisteredSuppression.CreateDiagnostic(
+                                DesignTimeDiagnosticDescriptors.UnregisteredSuppression.CreateRoslynDiagnostic(
                                     location,
                                     (Id: suppression.Definition.SuppressedDiagnosticId, symbol) ) );
                         }

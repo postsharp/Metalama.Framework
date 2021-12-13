@@ -152,19 +152,14 @@ namespace Metalama.Framework.Engine.Diagnostics
             }
         }
 
-        public void Report<T>(
-            IDiagnosticLocation? location,
-            DiagnosticDefinition<T> definition,
-            T arguments,
-            IEnumerable<CodeFix>? codeFixes = null )
-            where T : notnull
+        public void Report( IDiagnosticLocation? location, IDiagnostic diagnostic )
         {
-            this.ValidateUserReport( definition );
+            this.ValidateUserReport( diagnostic.Definition );
 
             var resolvedLocation = GetLocation( location );
-            var codeFixTitles = this.ProcessCodeFix( definition, resolvedLocation, codeFixes );
+            var codeFixTitles = this.ProcessCodeFix( diagnostic.Definition, resolvedLocation, diagnostic.CodeFixes );
 
-            this.Report( definition.CreateDiagnostic( resolvedLocation, arguments, codeFixes: codeFixTitles ) );
+            this.Report( diagnostic.Definition.CreateRoslynDiagnostic( resolvedLocation, diagnostic.Arguments, codeFixes: codeFixTitles ) );
         }
 
         public void Suppress( IDeclaration? scope, SuppressionDefinition definition )
@@ -183,7 +178,7 @@ namespace Metalama.Framework.Engine.Diagnostics
             var resolvedLocation = GetLocation( location );
             var codeFixTitles = this.ProcessCodeFix( definition, resolvedLocation, codeFix );
 
-            this.Report( definition.CreateDiagnostic( resolvedLocation, codeFixTitles.Value!, codeFixes: codeFixTitles ) );
+            this.Report( definition.CreateRoslynDiagnostic( resolvedLocation, codeFixTitles.Value!, codeFixes: codeFixTitles ) );
         }
 
         public void AddCodeFixes( IEnumerable<CodeFixInstance> codeFixes )

@@ -50,10 +50,7 @@ namespace Metalama.Framework.Validation
                 }
             }
 
-            context.Diagnostics.Report(
-                context.DiagnosticLocation,
-                _warning!,
-                ((INamedType) context.ReferencedDeclaration, context.ReferencingType) );
+            _warning.WithArguments( ((IMemberOrNamedType) context.ReferencedDeclaration, context.ReferencingType) ).ReportTo( context.Diagnostics );
         }
 
         public void BuildAspectClass( IAspectClassBuilder builder ) { }

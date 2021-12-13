@@ -138,7 +138,8 @@ namespace Metalama.Framework.Engine.Pipeline
 
                             if ( constructor == null )
                             {
-                                diagnosticAdder.Report( GeneralDiagnosticDescriptors.TypeMustHavePublicDefaultConstructor.CreateDiagnostic( null, type ) );
+                                diagnosticAdder.Report(
+                                    GeneralDiagnosticDescriptors.TypeMustHavePublicDefaultConstructor.CreateRoslynDiagnostic( null, type ) );
 
                                 return null;
                             }

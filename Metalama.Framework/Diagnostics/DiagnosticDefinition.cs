@@ -1,6 +1,9 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Framework.CodeFixes;
+using System.Collections.Immutable;
+
 namespace Metalama.Framework.Diagnostics
 {
     // ReSharper disable once UnusedTypeParameter
@@ -14,7 +17,7 @@ namespace Metalama.Framework.Diagnostics
     /// Alternatively, you can also use <c>object[]</c>.
     /// </typeparam>
     /// <seealso href="@diagnostics"/>
-    public sealed class DiagnosticDefinition<T> : IDiagnosticDefinition
+    public class DiagnosticDefinition<T> : IDiagnosticDefinition
         where T : notnull
     {
         // Constructor used by internal code.
@@ -56,5 +59,29 @@ namespace Metalama.Framework.Diagnostics
 
         /// <inheritdoc />
         public string Title { get; }
+
+        public IDiagnostic WithArguments( T arguments ) => new DiagnosticImpl<T>( this, arguments, ImmutableArray<CodeFix>.Empty );
+    }
+
+    public sealed class DiagnosticDefinition : DiagnosticDefinition<None>, IDiagnostic
+    {
+        public DiagnosticDefinition( string id, Severity severity, string messageFormat, string? title = null, string? category = null ) : base(
+            id,
+            severity,
+            messageFormat,
+            title,
+            category ) { }
+
+        IDiagnosticDefinition IDiagnostic.Definition => this;
+
+        ImmutableArray<CodeFix> IDiagnostic.CodeFixes => ImmutableArray<CodeFix>.Empty;
+
+        object? IDiagnostic.Arguments => default(None);
+
+        public IDiagnostic WithCodeFixes( params CodeFix[] codeFixes ) => new DiagnosticImpl<None>( this, default, codeFixes.ToImmutableArray() );
+
+        public void ReportTo( IDiagnosticLocation location, IDiagnosticSink sink ) => sink.Report( location, this );
+
+        public void ReportTo( in ScopedDiagnosticSink sink ) => sink.Report( this );
     }
 }

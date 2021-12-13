@@ -31,7 +31,7 @@ namespace Metalama.Framework.Validation
         /// </summary>
         public IDeclaration Declaration { get; }
 
-        internal DeclarationValidationContext( IDeclaration declaration, IAspectState? aspectState, IDiagnosticSink diagnostics)
+        internal DeclarationValidationContext( IDeclaration declaration, IAspectState? aspectState, IDiagnosticSink diagnostics )
         {
             this.AspectState = aspectState;
             this.Diagnostics = diagnostics;

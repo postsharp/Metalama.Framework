@@ -79,7 +79,7 @@ namespace Metalama.Framework.Engine.Diagnostics
                     return @delegate.Identifier.GetLocation();
 
                 default:
-                    return syntax.GetLocation();
+                    return node.GetLocation();
             }
         }
 

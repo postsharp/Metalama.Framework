@@ -30,7 +30,7 @@ namespace Metalama.Framework.Aspects
         /// <summary>
         /// Gets a service that allows to report or suppress diagnostics.
         /// </summary>
-        IDiagnosticSink Diagnostics { get; }
+        ScopedDiagnosticSink Diagnostics { get; }
 
         /// <summary>
         /// Gets the declaration to which the aspect was added.

@@ -25,7 +25,7 @@ namespace Metalama.Framework.Tests.Integration.Validation.AllReferences
         
      private static void Validate( in ReferenceValidationContext context )
      {
-        context.Diagnostics.Report( context.DiagnosticLocation, _warning, ( context.ReferenceKinds, context.ReferencingDeclaration  ) );
+        _warning.WithArguments(  ( context.ReferenceKinds, context.ReferencingDeclaration  ) ).ReportTo( context.Diagnostics );
      }
     }
 

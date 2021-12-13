@@ -16,16 +16,13 @@ namespace Metalama.Framework.Validation
     [CompileTimeOnly]
     public readonly struct ReferenceValidationContext
     {
+        private readonly IDiagnosticSink _diagnostics;
+
         /// <summary>
         /// Gets the optional opaque object defined by the aspect for the specific target declaration using the <see cref="IAspectBuilder.State"/>
         /// property of the <see cref="IAspectBuilder"/> interface. 
         /// </summary>
         public IAspectState? AspectState { get; }
-
-        /// <summary>
-        /// Gets a service that allows to report or suppress diagnostics.
-        /// </summary>
-        public IDiagnosticSink Diagnostics { get; }
 
         /// <summary>
         /// Gets the declaration being validated (i.e. the one referenced by the <see cref="Syntax"/> being inspected).
@@ -37,7 +34,6 @@ namespace Metalama.Framework.Validation
         /// </summary>
         public IDeclaration ReferencingDeclaration { get; }
 
-        
         /// <summary>
         /// Gets the type containing the reference/
         /// </summary>
@@ -61,6 +57,8 @@ namespace Metalama.Framework.Validation
         /// </summary>
         public SyntaxReference Syntax { get; }
 
+        public ScopedDiagnosticSink Diagnostics => new( this._diagnostics, this.DiagnosticLocation, this.ReferencedDeclaration );
+
         internal ReferenceValidationContext(
             IDeclaration referencedDeclaration,
             IDeclaration referencingDeclaration,
@@ -70,7 +68,7 @@ namespace Metalama.Framework.Validation
             ValidatedReferenceKinds referenceKinds )
         {
             this.AspectState = aspectState;
-            this.Diagnostics = diagnostics;
+            this._diagnostics = diagnostics;
             this.ReferencedDeclaration = referencedDeclaration;
             this.ReferencingDeclaration = referencingDeclaration;
             this.ReferenceKinds = referenceKinds;

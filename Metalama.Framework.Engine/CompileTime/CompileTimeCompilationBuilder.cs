@@ -412,7 +412,7 @@ namespace Metalama.Framework.Engine.CompileTime
                         string.Join( Environment.NewLine, emitResult.Diagnostics ) );
 
                     diagnosticSink.Report(
-                        TemplatingDiagnosticDescriptors.CannotEmitCompileTimeAssembly.CreateDiagnostic(
+                        TemplatingDiagnosticDescriptors.CannotEmitCompileTimeAssembly.CreateRoslynDiagnostic(
                             null,
                             troubleshootingDirectory ) );
 

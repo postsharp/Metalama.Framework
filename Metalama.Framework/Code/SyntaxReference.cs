@@ -5,7 +5,6 @@ using Metalama.Framework.Diagnostics;
 
 namespace Metalama.Framework.Code;
 
-
 /// <summary>
 /// Represents a syntax node or a syntax token. 
 /// </summary>

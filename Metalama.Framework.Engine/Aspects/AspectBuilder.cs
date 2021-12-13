@@ -77,7 +77,7 @@ namespace Metalama.Framework.Engine.Aspects
 
         IDiagnosticAdder IAspectBuilderInternal.DiagnosticAdder => this._diagnosticSink;
 
-        public IDiagnosticSink Diagnostics => this._diagnosticSink;
+        public ScopedDiagnosticSink Diagnostics => new( this._diagnosticSink, this.Target, this.Target );
 
         public T Target { get; }
 

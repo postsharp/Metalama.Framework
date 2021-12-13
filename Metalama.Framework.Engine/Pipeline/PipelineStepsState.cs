@@ -114,7 +114,7 @@ namespace Metalama.Framework.Engine.Pipeline
                 if ( previousStep.AspectLayer != currentStep.AspectLayer && previousStep.AspectLayer.Order >= currentStep.AspectLayer.Order )
                 {
                     this._diagnostics.Report(
-                        GeneralDiagnosticDescriptors.UnorderedLayers.CreateDiagnostic(
+                        GeneralDiagnosticDescriptors.UnorderedLayers.CreateRoslynDiagnostic(
                             null,
                             (previousStep.AspectLayer.AspectLayerId.ToString(), currentStep.AspectLayer.AspectLayerId.ToString()) ) );
                 }
@@ -148,7 +148,7 @@ namespace Metalama.Framework.Engine.Pipeline
                         if ( !this.TryGetOrAddStep( aspectLayerId, -1, false, out var step ) )
                         {
                             this._diagnostics.Report(
-                                GeneralDiagnosticDescriptors.CannotAddChildAspectToPreviousPipelineStep.CreateDiagnostic(
+                                GeneralDiagnosticDescriptors.CannotAddChildAspectToPreviousPipelineStep.CreateRoslynDiagnostic(
                                     this._currentStep!.AspectLayer.AspectClass.DiagnosticLocation,
                                     (this._currentStep.AspectLayer.AspectClass.ShortName, aspectType.ShortName) ) );
 
@@ -215,7 +215,7 @@ namespace Metalama.Framework.Engine.Pipeline
                 if ( !this.TryGetOrAddStep( advice.AspectLayerId, depth, true, out var step ) )
                 {
                     this._diagnostics.Report(
-                        GeneralDiagnosticDescriptors.CannotAddAdviceToPreviousPipelineStep.CreateDiagnostic(
+                        GeneralDiagnosticDescriptors.CannotAddAdviceToPreviousPipelineStep.CreateRoslynDiagnostic(
                             this._currentStep.AspectLayer.AspectClass.DiagnosticLocation,
                             (this._currentStep.AspectLayer.AspectClass.ShortName, advice.TargetDeclaration) ) );
 

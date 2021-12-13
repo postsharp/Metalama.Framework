@@ -130,7 +130,7 @@ namespace Metalama.Framework.Engine.Aspects
 
                         // The template is already defined and we are not overwriting a template of the base class.
                         diagnosticAdder.Report(
-                            GeneralDiagnosticDescriptors.TemplateWithSameNameAlreadyDefinedInBaseClass.CreateDiagnostic(
+                            GeneralDiagnosticDescriptors.TemplateWithSameNameAlreadyDefinedInBaseClass.CreateRoslynDiagnostic(
                                 memberSymbol.GetDiagnosticLocation(),
                                 (memberName, type.Name, existingMember.TemplateClass.AspectType.Name) ) );
 

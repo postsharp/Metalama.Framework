@@ -130,5 +130,9 @@ namespace Metalama.Framework.CodeFixes
             => new(
                 title ?? $"Apply {aspect.GetType().Name} to {targetDeclaration.ToDisplayString( CodeDisplayFormat.MinimallyQualified )}",
                 builder => builder.ApplyAspectAsync( targetDeclaration, aspect ) );
+
+        public void SuggestFor( IDiagnosticLocation location, IDiagnosticSink sink ) => sink.Suggest( location, this );
+
+        public void SuggestFor( in ScopedDiagnosticSink sink ) => sink.Suggest( this );
     }
 }
