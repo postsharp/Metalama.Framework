@@ -21,14 +21,14 @@ namespace Metalama.Framework.Validation
 
         public IDeclaration ReferencingDeclaration { get; }
 
-        public INamedType ReferencingType => this.ReferencingDeclaration.GetDeclaringType() ?? throw new InvalidOperationException( $"Don't know how to get the declaring type of '{this.ReferencingDeclaration}'." );
-
-   
+        public INamedType ReferencingType
+            => this.ReferencingDeclaration.GetDeclaringType()
+               ?? throw new InvalidOperationException( $"Don't know how to get the declaring type of '{this.ReferencingDeclaration}'." );
 
         public ValidatedReferenceKinds ReferenceKinds { get; }
 
         public IDiagnosticLocation DiagnosticLocation => this.Syntax.DiagnosticLocation;
-        
+
         public SyntaxReference Syntax { get; }
 
         internal ValidateReferenceContext(

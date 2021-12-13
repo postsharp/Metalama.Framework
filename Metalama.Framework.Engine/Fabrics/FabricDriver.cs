@@ -96,7 +96,5 @@ namespace Metalama.Framework.Engine.Fabrics
         public abstract FormattableString FormatPredecessor();
 
         public Location? GetDiagnosticLocation() => this.FabricSymbol.GetDiagnosticLocation();
-
-        
     }
 }

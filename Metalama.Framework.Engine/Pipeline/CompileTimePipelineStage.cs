@@ -4,7 +4,6 @@
 using Metalama.Framework.Engine.AdditionalOutputs;
 using Metalama.Framework.Engine.AspectOrdering;
 using Metalama.Framework.Engine.Aspects;
-using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.DesignTime.Pipeline;
@@ -14,7 +13,6 @@ using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Project;
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Text;

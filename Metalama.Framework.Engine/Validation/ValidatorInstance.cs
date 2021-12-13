@@ -13,9 +13,10 @@ namespace Metalama.Framework.Engine.Validation;
 
 internal class LocationWrapper : IDiagnosticLocationImpl
 {
-    public Location? DiagnosticLocation { get;}
+    public Location? DiagnosticLocation { get; }
 
-    public LocationWrapper( Location? diagnosticLocation ) {
+    public LocationWrapper( Location? diagnosticLocation )
+    {
         this.DiagnosticLocation = diagnosticLocation;
     }
 }
@@ -23,6 +24,7 @@ internal class LocationWrapper : IDiagnosticLocationImpl
 internal abstract class ValidatorInstance : ISyntaxReferenceService
 {
     public ValidatorSource Source { get; }
+
     public IDeclaration ValidatedDeclaration { get; }
 
     public object Object => this.Source.Predecessor.Instance;
@@ -36,13 +38,13 @@ internal abstract class ValidatorInstance : ISyntaxReferenceService
     }
 
     // TODO: ISyntaxReferenceService should not be implemented in this class.
-    public IDiagnosticLocation GetDiagnosticLocation( in SyntaxReference syntaxReference ) 
+    public IDiagnosticLocation GetDiagnosticLocation( in SyntaxReference syntaxReference )
         => syntaxReference.NodeOrToken switch
-    {
-        SyntaxNode node => new LocationWrapper( node.GetLocation() ),
-        SyntaxToken token => new LocationWrapper( token.GetLocation() ),
-        _ => throw new AssertionFailedException()
-    };
+        {
+            SyntaxNode node => new LocationWrapper( node.GetLocation() ),
+            SyntaxToken token => new LocationWrapper( token.GetLocation() ),
+            _ => throw new AssertionFailedException()
+        };
 
     public string GetKind( in SyntaxReference syntaxReference )
         => syntaxReference.NodeOrToken switch
@@ -51,5 +53,4 @@ internal abstract class ValidatorInstance : ISyntaxReferenceService
             SyntaxToken token => token.Kind().ToString(),
             _ => throw new AssertionFailedException()
         };
-
 }

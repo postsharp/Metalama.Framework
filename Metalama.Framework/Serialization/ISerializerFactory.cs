@@ -1,16 +1,15 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Metalama.Framework.Serialization;
 using System;
 
-namespace Metalama.Framework.Engine.LamaSerialization
+namespace Metalama.Framework.Serialization
 {
     /// <summary>
     /// Defines a method <see cref="CreateSerializer"/>, which creates instances of the <see cref="ISerializer"/> interface for
     /// given object types.
     /// </summary>
-    internal interface ISerializerFactory
+    public interface ISerializerFactory
     {
         /// <summary>
         /// Creates an instance of the <see cref="ISerializer"/> interface for a given object type.

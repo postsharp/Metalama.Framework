@@ -5,7 +5,6 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Collections;
-using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Validation;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -28,7 +27,10 @@ internal partial class ValidationRunner
         private SyntaxNode?[] _nodeStack = new SyntaxNode?[_initialStackSize];
         private IDeclaration?[] _declarationStack = new IDeclaration?[_initialStackSize];
 
-        public Visitor( IDiagnosticSink diagnosticAdder, ImmutableDictionaryOfArray<ISymbol, ReferenceValidatorInstance> validatorsBySymbol, CompilationModel compilation )
+        public Visitor(
+            IDiagnosticSink diagnosticAdder,
+            ImmutableDictionaryOfArray<ISymbol, ReferenceValidatorInstance> validatorsBySymbol,
+            CompilationModel compilation )
         {
             this._diagnosticAdder = diagnosticAdder;
             this._validatorsBySymbol = validatorsBySymbol;
@@ -38,7 +40,7 @@ internal partial class ValidationRunner
         public void Visit( SyntaxTree syntaxTree )
         {
             this._semanticModel = this._compilation.RoslynCompilation.GetSemanticModel( syntaxTree );
-            this.Visit( syntaxTree.GetRoot(  ) );
+            this.Visit( syntaxTree.GetRoot() );
         }
 
         public override void VisitMemberAccessExpression( MemberAccessExpressionSyntax node )
@@ -50,33 +52,42 @@ internal partial class ValidationRunner
         {
             foreach ( var baseType in node.Types )
             {
-                this.ValidateSymbol( baseType.Type, ValidatedReferenceKinds.BaseType );
+                this.VisitTypeReference( baseType.Type, ValidatedReferenceKinds.BaseType );
             }
-            
-            base.VisitBaseList( node );
         }
 
         public override void VisitTypeArgumentList( TypeArgumentListSyntax node )
         {
-            base.VisitTypeArgumentList( node );
-
             foreach ( var arg in node.Arguments )
             {
-                this.ValidateSymbol( arg, ValidatedReferenceKinds.TypeArgument );
+                this.VisitTypeReference( arg, ValidatedReferenceKinds.TypeArgument );
             }
         }
 
         public override void VisitTypeOfExpression( TypeOfExpressionSyntax node )
         {
-            this.VisitTypeReference( node, ValidatedReferenceKinds.TypeOf );
+            this.VisitTypeReference( node.Type, ValidatedReferenceKinds.TypeOf );
         }
 
         public override void VisitParameter( ParameterSyntax node )
         {
             using ( this.EnterContext( node ) )
             {
-                this.VisitTypeReference( node, ValidatedReferenceKinds.ParameterType );
+                this.VisitTypeReference( node.Type, ValidatedReferenceKinds.ParameterType );
                 this.Visit( node.AttributeLists );
+            }
+        }
+
+        public override void VisitAttribute( AttributeSyntax node )
+        {
+            this.ValidateSymbol( node.Name, ValidatedReferenceKinds.AttributeType );
+
+            if ( node.ArgumentList != null )
+            {
+                foreach ( var arg in node.ArgumentList.Arguments )
+                {
+                    this.Visit( arg );
+                }
             }
         }
 
@@ -100,99 +111,142 @@ internal partial class ValidationRunner
 
         public override void VisitRecordDeclaration( RecordDeclarationSyntax node )
         {
-            using ( this.EnterContext( node ) ) {
-            base.VisitRecordDeclaration( node );
+            using ( this.EnterContext( node ) )
+            {
+                base.VisitRecordDeclaration( node );
             }
         }
 
         public override void VisitStructDeclaration( StructDeclarationSyntax node )
         {
-            using ( this.EnterContext( node ) ) {
-            base.VisitStructDeclaration( node );
+            using ( this.EnterContext( node ) )
+            {
+                base.VisitStructDeclaration( node );
             }
         }
 
         public override void VisitDelegateDeclaration( DelegateDeclarationSyntax node )
         {
-            using ( this.EnterContext( node ) ) {
-            base.VisitDelegateDeclaration( node );
+            using ( this.EnterContext( node ) )
+            {
+                base.VisitDelegateDeclaration( node );
             }
         }
 
         public override void VisitEnumDeclaration( EnumDeclarationSyntax node )
         {
-            using ( this.EnterContext( node ) ) {
-            base.VisitEnumDeclaration( node );
+            using ( this.EnterContext( node ) )
+            {
+                base.VisitEnumDeclaration( node );
             }
         }
 
         public override void VisitMethodDeclaration( MethodDeclarationSyntax node )
         {
-            using ( this.EnterContext( node ) ) {
-            base.VisitMethodDeclaration( node );
+            using ( this.EnterContext( node ) )
+            {
+                this.VisitTypeReference( node.ReturnType, ValidatedReferenceKinds.ReturnType );
+
+                foreach ( var parameter in node.ParameterList.Parameters )
+                {
+                    this.Visit( parameter );
+                }
+                
+                this.Visit( node.AttributeLists );
+                
+                this.Visit( node.ExpressionBody );
+                this.Visit( node.Body );
             }
         }
 
         public override void VisitPropertyDeclaration( PropertyDeclarationSyntax node )
         {
-            using ( this.EnterContext( node ) ) {
-            base.VisitPropertyDeclaration( node );
+            using ( this.EnterContext( node ) )
+            {
+                base.VisitPropertyDeclaration( node );
             }
         }
 
         public override void VisitEventDeclaration( EventDeclarationSyntax node )
         {
-            using ( this.EnterContext( node ) ) {
-            base.VisitEventDeclaration( node );
+            using ( this.EnterContext( node ) )
+            {
+                base.VisitEventDeclaration( node );
             }
         }
 
-        public override void VisitVariableDeclarator( VariableDeclaratorSyntax node )
+        public override void VisitFieldDeclaration( FieldDeclarationSyntax node )
         {
-            using ( this.EnterContext( node ) ) {
-            base.VisitVariableDeclarator( node );
+            using ( this.EnterContext( node.Declaration.Variables[0] ) )
+            {
+                this.VisitTypeReference( node.Declaration.Type, ValidatedReferenceKinds.FieldType );
+            }
+
+            foreach ( var field in node.Declaration.Variables )
+            {
+                if ( field.Initializer != null )
+                {
+                    using ( this.EnterContext( field ) )
+                    {
+                        this.Visit( field.Initializer );
+                    }
+                }
+            }
+        }
+
+        public override void VisitLocalDeclarationStatement( LocalDeclarationStatementSyntax node )
+        {
+            using ( this.EnterContext( node.Declaration.Variables[0] ) )
+            {
+                this.VisitTypeReference( node.Declaration.Type, ValidatedReferenceKinds.LocalVariableType );
             }
         }
 
         public override void VisitOperatorDeclaration( OperatorDeclarationSyntax node )
         {
-            using ( this.EnterContext( node ) ) {
-            base.VisitOperatorDeclaration( node );
+            using ( this.EnterContext( node ) )
+            {
+                base.VisitOperatorDeclaration( node );
             }
         }
 
         public override void VisitAccessorDeclaration( AccessorDeclarationSyntax node )
         {
-            using ( this.EnterContext( node ) ) {
-            base.VisitAccessorDeclaration( node );
+            using ( this.EnterContext( node ) )
+            {
+                base.VisitAccessorDeclaration( node );
             }
         }
 
         public override void VisitConstructorDeclaration( ConstructorDeclarationSyntax node )
         {
-            using ( this.EnterContext( node ) ) {
-            base.VisitConstructorDeclaration( node );
+            using ( this.EnterContext( node ) )
+            {
+                base.VisitConstructorDeclaration( node );
             }
         }
 
         public override void VisitDestructorDeclaration( DestructorDeclarationSyntax node )
         {
-            using ( this.EnterContext( node ) ) {
-            base.VisitDestructorDeclaration( node );
+            using ( this.EnterContext( node ) )
+            {
+                base.VisitDestructorDeclaration( node );
             }
         }
 
         public override void VisitConversionOperatorDeclaration( ConversionOperatorDeclarationSyntax node )
         {
-            using ( this.EnterContext( node ) ) {
-            base.VisitConversionOperatorDeclaration( node );
+            using ( this.EnterContext( node ) )
+            {
+                base.VisitConversionOperatorDeclaration( node );
             }
         }
 
         public override void VisitIndexerDeclaration( IndexerDeclarationSyntax node )
         {
-            using ( this.EnterContext( node ) ) {
-            base.VisitIndexerDeclaration( node );
+            using ( this.EnterContext( node ) )
+            {
+                base.VisitIndexerDeclaration( node );
             }
         }
 
@@ -202,16 +256,22 @@ internal partial class ValidationRunner
             base.VisitObjectCreationExpression( node );
         }
 
+
         private void ValidateSymbol( SyntaxNode? node, ValidatedReferenceKinds referenceKind )
         {
             if ( node == null )
             {
                 return;
             }
-            
+
             var symbol = this._semanticModel!.GetSymbolInfo( node ).Symbol;
-            
-            if ( symbol == null )
+
+            this.ValidateSymbol( node, symbol, referenceKind );
+        }
+
+        private void ValidateSymbol( SyntaxNode node, ISymbol? symbol, ValidatedReferenceKinds referenceKind )
+        {
+            if (symbol == null)
             {
                 return;
             }
@@ -220,11 +280,11 @@ internal partial class ValidationRunner
             var currentDeclaration = this.GetCurrentDeclaration();
             var validators = this._validatorsBySymbol[symbol];
 
-            foreach ( var validator in validators )
+            foreach (var validator in validators)
             {
-                if ( (validator.ReferenceKinds & allKinds) != 0 )
+                if (( validator.ReferenceKinds & allKinds ) != 0)
                 {
-                    validator.Validate(currentDeclaration, node, allKinds, this._diagnosticAdder );
+                    validator.Validate( currentDeclaration, node, allKinds, this._diagnosticAdder );
                 }
             }
         }
@@ -245,41 +305,89 @@ internal partial class ValidationRunner
         {
             if ( this._nodeStack.Length < (this._stackIndex + 2) )
             {
-                Array.Resize( ref this._nodeStack, this._nodeStack.Length*2 );
-                Array.Resize( ref this._declarationStack, this._declarationStack.Length*2 );
+                Array.Resize( ref this._nodeStack, this._nodeStack.Length * 2 );
+                Array.Resize( ref this._declarationStack, this._declarationStack.Length * 2 );
             }
 
             this._stackIndex++;
             this._nodeStack[this._stackIndex] = node;
 
-            return new ContextCookie(this);
+            return new ContextCookie( this );
         }
 
-        private void Visit<T>( SyntaxList<T> list ) 
-            where T : SyntaxNode 
+        private void Visit<T>( SyntaxList<T> list )
+            where T : SyntaxNode
         {
             foreach ( var node in list )
             {
                 this.Visit( node );
             }
-            
         }
 
-        private void VisitTypeReference( SyntaxNode node, ValidatedReferenceKinds kind )
+        private void VisitTypeReference( TypeSyntax? type, ValidatedReferenceKinds kind )
         {
-            this.ValidateSymbol( node, kind );
-            using ( this.EnterReferenceKind( kind ) )
+            if ( type == null )
             {
-                // We use ChildNodesAndTokens and not ChildNodes because ChildNodesAndTokens has a strongly-typed enumerator,
-                // which will not allocate memory.
-                foreach ( var nodeOrToken in node.ChildNodesAndTokens() )
-                {
-                    if ( nodeOrToken.IsNode )
-                    {
-                        this.Visit( nodeOrToken.AsNode() );
-                    }
-                }
+                return;
             }
+
+            switch ( type.Kind() )
+            {
+                case SyntaxKind.IdentifierName:
+                case SyntaxKind.QualifiedName:
+                    this.ValidateSymbol( type, kind );
+                    break;
+                
+                case SyntaxKind.NullableType:
+                    this.ValidateSymbol( ((NullableTypeSyntax) type).ElementType , kind | ValidatedReferenceKinds.NullableType );
+                    break;
+                    
+                case SyntaxKind.ArrayType:
+                    this.ValidateSymbol( ((ArrayTypeSyntax) type).ElementType, kind | ValidatedReferenceKinds.ArrayType );
+                    break;
+                
+                case SyntaxKind.PointerType:
+                    this.ValidateSymbol( ((PointerTypeSyntax) type).ElementType, kind  | ValidatedReferenceKinds.PointerType );
+                    break;
+                
+                case SyntaxKind.RefType:
+                    this.ValidateSymbol( ((RefTypeSyntax) type).Type, kind | ValidatedReferenceKinds.RefType );
+                    break;
+                
+                case SyntaxKind.TupleType:
+                    foreach ( var item in ((TupleTypeSyntax) type).Elements )
+                    {
+                        this.VisitTypeReference( item.Type, kind  | ValidatedReferenceKinds.TupleType );
+                    }
+                    break;
+                
+                case SyntaxKind.AliasQualifiedName:
+                case SyntaxKind.FunctionPointerType:
+                        // Not implemented;
+                break;
+
+                case SyntaxKind.GenericName:
+                    {
+                        var genericType = (GenericNameSyntax) type;
+                        var symbol = this._semanticModel.GetSymbolInfo( genericType ).Symbol;
+
+                        if ( symbol != null )
+                        {
+                            this.ValidateSymbol( genericType, ((INamedTypeSymbol) symbol).ConstructedFrom, kind );
+                        }
+
+                        foreach ( var arg in genericType.TypeArgumentList.Arguments )
+                        {
+                            this.VisitTypeReference( arg, kind | ValidatedReferenceKinds.TypeArgument );
+                        }
+                    }
+                    break;
+                
+                
+                    
+                    
+            }
+    
         }
 
         private ReferenceKindsCookie EnterReferenceKind( ValidatedReferenceKinds kind )
@@ -295,7 +403,7 @@ internal partial class ValidationRunner
             private readonly Visitor _parent;
             private readonly ValidatedReferenceKinds _kindsBefore;
 
-            public ReferenceKindsCookie( Visitor parent, ValidatedReferenceKinds oldKinds ) 
+            public ReferenceKindsCookie( Visitor parent, ValidatedReferenceKinds oldKinds )
             {
                 this._parent = parent;
                 this._kindsBefore = oldKinds;
@@ -307,12 +415,11 @@ internal partial class ValidationRunner
             }
         }
 
-            
         private readonly struct ContextCookie : IDisposable
         {
             private readonly Visitor _parent;
 
-            public ContextCookie( Visitor parent ) 
+            public ContextCookie( Visitor parent )
             {
                 this._parent = parent;
             }
@@ -324,8 +431,5 @@ internal partial class ValidationRunner
                 this._parent._stackIndex--;
             }
         }
-      
-        
-
     }
 }

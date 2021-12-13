@@ -9,7 +9,6 @@ using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Validation;
 using Metalama.Framework.Fabrics;
 using Metalama.Framework.Project;
-using Metalama.Framework.Validation;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -83,7 +82,7 @@ internal abstract partial class FabricDriver
             where TAnnotation : IAnnotation<TTarget, TAspect>
             => throw new NotImplementedException();
 
-        public AspectPredecessor AspectPredecessor => new AspectPredecessor( AspectPredecessorKind.Fabric, this._fabricInstance );
+        public AspectPredecessor AspectPredecessor => new( AspectPredecessorKind.Fabric, this._fabricInstance );
 
         public ValidatorDriver GetValidatorDriver( string name, ValidatorKind kind ) => throw new NotImplementedException();
     }

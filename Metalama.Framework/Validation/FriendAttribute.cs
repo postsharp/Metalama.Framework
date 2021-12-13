@@ -53,7 +53,7 @@ namespace Metalama.Framework.Validation
             context.Diagnostics.Report(
                 context.DiagnosticLocation,
                 _warning!,
-                ( (INamedType) context.ReferencedDeclaration, context.ReferencingType) );
+                ((INamedType) context.ReferencedDeclaration, context.ReferencingType) );
         }
 
         public void BuildAspectClass( IAspectClassBuilder builder ) { }

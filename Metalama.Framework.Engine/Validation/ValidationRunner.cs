@@ -4,7 +4,6 @@
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Collections;
-using Metalama.Framework.Engine.Diagnostics;
 using System.Collections.Immutable;
 using System.Linq;
 
@@ -29,14 +28,14 @@ internal partial class ValidationRunner
     {
         var validators = this._sources
             .Where( s => s.Kind == ValidatorKind.Definition )
-            .SelectMany( s => s.GetValidators( finalCompilation, diagnosticAdder ) ).Cast<DeclarationValidatorInstance>();
+            .SelectMany( s => s.GetValidators( finalCompilation, diagnosticAdder ) )
+            .Cast<DeclarationValidatorInstance>();
 
         foreach ( var validator in validators )
         {
             validator.Validate( diagnosticAdder );
         }
     }
-
 
     private void RunReferenceValidators( CompilationModel initialCompilation, IDiagnosticSink diagnosticAdder )
     {
@@ -53,7 +52,5 @@ internal partial class ValidationRunner
         {
             visitor.Visit( syntaxTree.Value );
         }
-
     }
-
 }

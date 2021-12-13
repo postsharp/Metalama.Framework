@@ -24,11 +24,8 @@ namespace Metalama.Framework.Engine.Fabrics
     internal interface IDeclarationSelectorInternal : IValidatorDriverFactory
     {
         AspectPredecessor AspectPredecessor { get; }
-
-        
-
     }
-    
+
     /// <summary>
     /// An implementation of <see cref="IDeclarationSelection{TDeclaration}"/>, which offers a fluent
     /// API to programmatically add children aspects.
@@ -85,14 +82,13 @@ namespace Metalama.Framework.Engine.Fabrics
             this.RegisterValidatorSource(
                 new ValidatorSource(
                     this._parent,
-                    this._parent.AspectPredecessor, 
-                    methodName, 
+                    this._parent.AspectPredecessor,
+                    methodName,
                     ValidatorKind.Reference,
                     ( source, compilation, diagnostics ) => this.SelectAndValidateValidatorTargets(
                         compilation,
                         diagnostics,
-                        item => new ReferenceValidatorInstance( source, item, referenceKinds ) )
-                     ) );
+                        item => new ReferenceValidatorInstance( source, item, referenceKinds ) ) ) );
         }
 
         public void AddFinalDeclarationValidator<T1>( string methodName )
@@ -107,8 +103,7 @@ namespace Metalama.Framework.Engine.Fabrics
                     ( source, compilation, diagnostics ) => this.SelectAndValidateValidatorTargets(
                         compilation,
                         diagnostics,
-                        item => new DeclarationValidatorInstance( source, item ) )
-                     ) );
+                        item => new DeclarationValidatorInstance( source, item ) ) ) );
         }
 
         public IDeclarationSelection<T> AddAspect<TAspect>( Func<T, Expression<Func<TAspect>>> createAspect )
@@ -282,7 +277,7 @@ namespace Metalama.Framework.Engine.Fabrics
             Func<T, ValidatorInstance?> createResult )
         {
             var diagnosticAdder = (IDiagnosticAdder) diagnosticSink;
-            
+
             foreach ( var targetDeclaration in this._selector( compilation, diagnosticAdder ) )
             {
                 var predecessorInstance = (IAspectPredecessorImpl) this._parent.AspectPredecessor.Instance;

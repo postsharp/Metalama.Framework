@@ -321,7 +321,7 @@ namespace Metalama.Framework.Engine.Pipeline
                     compilation,
                     pipelineConfiguration.ProjectModel,
                     ImmutableArray<OrderedAspectLayer>.Empty,
-                    ImmutableArray<CompilationModel>.Empty, 
+                    ImmutableArray<CompilationModel>.Empty,
                     null );
 
                 return true;

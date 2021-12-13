@@ -27,7 +27,7 @@ namespace Metalama.Framework.Validation
 
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.WithTarget().AddSourceReferenceValidator( nameof(this.Validate), ValidatedReferenceKinds.BaseType );
+            builder.WithTarget().AddSourceReferenceValidator( nameof(Validate), ValidatedReferenceKinds.BaseType );
         }
 
         private static void Validate( in ValidateReferenceContext context )

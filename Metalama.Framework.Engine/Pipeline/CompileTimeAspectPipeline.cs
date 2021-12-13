@@ -107,7 +107,7 @@ namespace Metalama.Framework.Engine.Pipeline
                 }
 
                 var resultPartialCompilation = result.Compilation;
-                
+
                 // Execute validators.
                 if ( !result.ValidatorSources.IsDefaultOrEmpty )
                 {
@@ -117,7 +117,7 @@ namespace Metalama.Framework.Engine.Pipeline
                     var diagnosticSink = new UserDiagnosticSink( configuration.CompileTimeProject, configuration.CodeFixFilter );
                     validationRunner.Validate( initialCompilation, finalCompilation, diagnosticSink );
                     diagnosticAdder.Report( diagnosticSink.ToImmutable().ReportedDiagnostics );
-                    
+
                     // TODO: suppressions, code fixes
                 }
 

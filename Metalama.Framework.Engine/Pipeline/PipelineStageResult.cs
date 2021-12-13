@@ -23,7 +23,7 @@ namespace Metalama.Framework.Engine.Pipeline
         /// Gets the resulting Roslyn compilation.
         /// </summary>
         public PartialCompilation Compilation { get; }
-        
+
         /// <summary>
         /// Gets the set of diagnostics.
         /// </summary>
@@ -53,7 +53,7 @@ namespace Metalama.Framework.Engine.Pipeline
         /// Gets the compilation model corresponding to <see cref="Compilation"/>, if it has been created.
         /// </summary>
         public ImmutableArray<CompilationModel> CompilationModels { get; }
-        
+
         public CompilationModel? FirstCompilationModel { get; }
 
         public ImmutableArray<AdditionalCompilationOutputFile> AdditionalCompilationOutputFiles { get; }

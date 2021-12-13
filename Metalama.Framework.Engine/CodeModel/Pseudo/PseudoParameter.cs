@@ -11,8 +11,8 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Reflection;
 using RefKind = Metalama.Framework.Code.RefKind;
-using TypedConstant = Metalama.Framework.Code.TypedConstant;
 using SyntaxReference = Microsoft.CodeAnalysis.SyntaxReference;
+using TypedConstant = Metalama.Framework.Code.TypedConstant;
 
 namespace Metalama.Framework.Engine.CodeModel.Pseudo
 {

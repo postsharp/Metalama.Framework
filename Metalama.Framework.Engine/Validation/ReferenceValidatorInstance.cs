@@ -1,10 +1,8 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
-using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Validation;
 using Microsoft.CodeAnalysis;
 using SyntaxReference = Metalama.Framework.Code.SyntaxReference;
@@ -25,14 +23,13 @@ internal class ReferenceValidatorInstance : ValidatorInstance
 
     public ValidatedReferenceKinds ReferenceKinds { get; }
 
-    
     public void Validate( IDeclaration? referencingDeclaration, SyntaxNode node, ValidatedReferenceKinds referenceKind, IDiagnosticSink diagnosticAdder )
     {
         var context = new ValidateReferenceContext(
             this.ValidatedDeclaration,
             referencingDeclaration,
             new SyntaxReference( node, this ),
-            State,
+            this.State,
             diagnosticAdder,
             referenceKind );
 

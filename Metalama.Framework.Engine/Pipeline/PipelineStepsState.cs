@@ -37,7 +37,7 @@ namespace Metalama.Framework.Engine.Pipeline
         private PipelineStep? _currentStep;
 
         public CompilationModel LastCompilation { get; private set; }
-        
+
         public ImmutableArray<CompilationModel> Compilations { get; private set; }
 
         public IReadOnlyList<INonObservableTransformation> NonObservableTransformations => this._nonObservableTransformations;

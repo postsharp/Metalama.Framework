@@ -8,7 +8,7 @@ namespace Metalama.Framework.Code;
 public readonly struct SyntaxReference
 {
     private readonly ISyntaxReferenceService _syntaxReferenceService;
-    
+
     public object NodeOrToken { get; }
 
     public string Kind => this._syntaxReferenceService.GetKind( this );
@@ -19,6 +19,5 @@ public readonly struct SyntaxReference
         this._syntaxReferenceService = syntaxReferenceService;
     }
 
-    public IDiagnosticLocation DiagnosticLocation
-        => this._syntaxReferenceService.GetDiagnosticLocation( this );
+    public IDiagnosticLocation DiagnosticLocation => this._syntaxReferenceService.GetDiagnosticLocation( this );
 }

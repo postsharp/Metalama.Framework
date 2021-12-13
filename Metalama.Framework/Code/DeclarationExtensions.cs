@@ -39,7 +39,7 @@ namespace Metalama.Framework.Code
         {
             throw new NotImplementedException();
         }
-        
+
         public static INamedType? GetDeclaringType( this IDeclaration declaration )
             => declaration switch
             {

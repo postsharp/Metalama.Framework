@@ -4,14 +4,11 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
-using System;
 
 // ReSharper disable UnassignedGetOnlyAutoProperty
 
 namespace Metalama.Framework.Validation
 {
-    
-    
     /// <summary>
     /// (Not implemented.)
     /// </summary>
@@ -23,9 +20,9 @@ namespace Metalama.Framework.Validation
         public IDiagnosticSink Diagnostics { get; }
 
         public IDeclaration ValidatedDeclaration { get; }
-        
+
         public SyntaxReference Syntax { get; }
-        
+
         public IDiagnosticLocation DiagnosticLocation => this.Syntax.DiagnosticLocation;
 
         public ValidateDeclarationContext( IDeclaration validatedDeclaration, IAspectState? aspectState, IDiagnosticSink diagnostics, SyntaxReference syntax )
