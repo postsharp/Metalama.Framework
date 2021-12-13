@@ -45,7 +45,7 @@ internal class ValidatorDriverFactory : IValidatorDriverFactory
         }
 
         var instanceParameter = Expression.Parameter( typeof(object), "instance" );
-        var contextParameter = Expression.Parameter( typeof(ValidateReferenceContext).MakeByRefType(), "context" );
+        var contextParameter = Expression.Parameter( typeof(ReferenceValidationContext).MakeByRefType(), "context" );
         MethodCallExpression invocation;
 
         if ( method.IsStatic )

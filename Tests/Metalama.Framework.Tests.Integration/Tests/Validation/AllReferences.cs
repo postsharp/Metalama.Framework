@@ -6,7 +6,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Validation;
 using Metalama.Framework.Diagnostics;
 
-#pragma warning disable CS0168
+#pragma warning disable CS0168, CS8618, CS0169
 
 
 namespace Metalama.Framework.Tests.Integration.Validation.AllReferences
@@ -18,12 +18,12 @@ namespace Metalama.Framework.Tests.Integration.Validation.AllReferences
                 
         public override void BuildAspect(IAspectBuilder<INamedType> builder)
         {
-            builder.WithTarget().AddSourceReferenceValidator(
+            builder.WithTarget().RegisterReferenceValidator(
              nameof(Validate),
              ValidatedReferenceKinds.All );
         }
         
-     private static void Validate( in ValidateReferenceContext context )
+     private static void Validate( in ReferenceValidationContext context )
      {
         context.Diagnostics.Report( context.DiagnosticLocation, _warning, ( context.ReferenceKinds, context.ReferencingDeclaration  ) );
      }

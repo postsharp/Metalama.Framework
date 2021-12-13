@@ -4,24 +4,14 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
-using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Diagnostics;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using SyntaxReference = Metalama.Framework.Code.SyntaxReference;
 
 namespace Metalama.Framework.Engine.Validation;
 
-internal class LocationWrapper : IDiagnosticLocationImpl
-{
-    public Location? DiagnosticLocation { get; }
-
-    public LocationWrapper( Location? diagnosticLocation )
-    {
-        this.DiagnosticLocation = diagnosticLocation;
-    }
-}
-
-internal abstract class ValidatorInstance : ISyntaxReferenceService
+internal abstract class ValidatorInstance : ISyntaxReferenceImpl
 {
     public ValidatorSource Source { get; }
 
@@ -37,11 +27,11 @@ internal abstract class ValidatorInstance : ISyntaxReferenceService
         this.ValidatedDeclaration = validatedDeclaration;
     }
 
-    // TODO: ISyntaxReferenceService should not be implemented in this class.
+    // TODO: ISyntaxReferenceImpl should not be implemented in this class.
     public IDiagnosticLocation GetDiagnosticLocation( in SyntaxReference syntaxReference )
         => syntaxReference.NodeOrToken switch
         {
-            SyntaxNode node => new LocationWrapper( node.GetLocation() ),
+            SyntaxNode node => new LocationWrapper( node.GetDiagnosticLocation() ),
             SyntaxToken token => new LocationWrapper( token.GetLocation() ),
             _ => throw new AssertionFailedException()
         };

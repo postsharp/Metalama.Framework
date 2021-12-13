@@ -5,28 +5,10 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Eligibility;
 using Metalama.Framework.Validation;
 using System;
-using System.Collections.Generic;
 using System.Linq.Expressions;
 
 namespace Metalama.Framework.Aspects
 {
-    public interface IDeclarationSelector<out TTarget>
-        where TTarget : class, IDeclaration
-    {
-        /// <summary>
-        /// Selects members of the current target declaration with the purpose of adding aspects and annotations to them
-        /// using e.g. <see cref="IDeclarationSelection{TDeclaration}.AddAspect{TAspect}(System.Func{TDeclaration,System.Linq.Expressions.Expression{System.Func{TAspect}}})"/>
-        /// or <see cref="IDeclarationSelection{TDeclaration}.AddAnnotation{TAspect,TAnnotation}"/>.
-        /// </summary>
-        /// <param name="selector"></param>
-        /// <typeparam name="TMember"></typeparam>
-        /// <returns></returns>
-        IDeclarationSelection<TMember> WithTargetMembers<TMember>( Func<TTarget, IEnumerable<TMember>> selector )
-            where TMember : class, IDeclaration;
-
-        IDeclarationSelection<TTarget> WithTarget();
-    }
-
     /// <summary>
     /// Represents a set of declarations and offers the ability to add aspects, annotations or validators to them.
     /// </summary>
@@ -36,9 +18,23 @@ namespace Metalama.Framework.Aspects
     public interface IDeclarationSelection<out TDeclaration>
         where TDeclaration : class, IDeclaration
     {
-        void AddSourceReferenceValidator( string methodName, ValidatedReferenceKinds referenceKinds );
+        /// <summary>
+        /// Registers a method that will be invoked to validate references to any declaration in the current set. This method
+        /// must have a parameter of type <c>in</c> <see cref="ReferenceValidationContext"/>. Only source code references
+        /// are validated. References added by aspects are ignored by design.
+        /// </summary>
+        /// <param name="methodName">Name of the validating method. It must be a method in the current aspect or fabric type,
+        /// and must have must have a parameter of type <c>in</c> <see cref="ReferenceValidationContext"/>.</param>
+        /// <param name="referenceKinds">Kinds of references that this method is interested to analyze.</param>
+        void RegisterReferenceValidator( string methodName, ValidatedReferenceKinds referenceKinds );
 
-        void AddFinalDeclarationValidator<T>( string methodName )
+        /// <summary>
+        /// Registers a method that will be invoked to validate the final state (i.e. the state including the transformation by all aspects) of any declaration
+        /// in the current set.  This method must have a parameter of type <c>in</c> <see cref="DeclarationValidationContext"/>.  
+        /// </summary>
+        /// <param name="methodName"></param>
+        /// <typeparam name="T"></typeparam>
+        void RegisterDeclarationValidator<T>( string methodName )
             where T : IDeclaration;
 
         /// <summary>

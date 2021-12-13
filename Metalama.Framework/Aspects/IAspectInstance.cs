@@ -50,7 +50,8 @@ namespace Metalama.Framework.Aspects
         ImmutableArray<AspectPredecessor> Predecessors { get; }
 
         /// <summary>
-        /// Gets the optional opaque object defined by the aspect for the specific <see cref="TargetDeclaration"/>. 
+        /// Gets the optional opaque object defined by the aspect for the specific <see cref="TargetDeclaration"/> using the <see cref="IAspectBuilder.State"/>
+        /// property of the <see cref="IAspectBuilder"/> interface.
         /// </summary>
         IAspectState? State { get; }
     }

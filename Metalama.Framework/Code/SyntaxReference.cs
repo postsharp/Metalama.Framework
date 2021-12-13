@@ -5,19 +5,37 @@ using Metalama.Framework.Diagnostics;
 
 namespace Metalama.Framework.Code;
 
+
+/// <summary>
+/// Represents a syntax node or a syntax token. 
+/// </summary>
 public readonly struct SyntaxReference
 {
-    private readonly ISyntaxReferenceService _syntaxReferenceService;
+    private readonly ISyntaxReferenceImpl _syntaxReferenceImpl;
 
+    /// <summary>
+    /// Gets the Roslyn <c>SyntaxNode</c> or <c>SyntaxToken</c>.
+    /// </summary>
     public object NodeOrToken { get; }
 
-    public string Kind => this._syntaxReferenceService.GetKind( this );
+    /// <summary>
+    /// Gets the <c>SyntaxKind</c> of the node or token.
+    /// </summary>
+    public string Kind => this._syntaxReferenceImpl.GetKind( this );
 
-    internal SyntaxReference( object nodeOrToken, ISyntaxReferenceService syntaxReferenceService )
+    internal SyntaxReference( object nodeOrToken, ISyntaxReferenceImpl syntaxReferenceImpl )
     {
         this.NodeOrToken = nodeOrToken;
-        this._syntaxReferenceService = syntaxReferenceService;
+        this._syntaxReferenceImpl = syntaxReferenceImpl;
     }
 
-    public IDiagnosticLocation DiagnosticLocation => this._syntaxReferenceService.GetDiagnosticLocation( this );
+    /// <summary>
+    /// Gets the location of the node.
+    /// </summary>
+    public IDiagnosticLocation DiagnosticLocation => this._syntaxReferenceImpl.GetDiagnosticLocation( this );
+
+    /// <summary>
+    /// Gets the content of the node or token (without trivia).
+    /// </summary>
+    public override string ToString() => this.NodeOrToken?.ToString() ?? "null";
 }

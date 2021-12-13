@@ -23,9 +23,9 @@ internal class ReferenceValidatorInstance : ValidatorInstance
 
     public ValidatedReferenceKinds ReferenceKinds { get; }
 
-    public void Validate( IDeclaration? referencingDeclaration, SyntaxNode node, ValidatedReferenceKinds referenceKind, IDiagnosticSink diagnosticAdder )
+    public void Validate( IDeclaration referencingDeclaration, SyntaxNode node, ValidatedReferenceKinds referenceKind, IDiagnosticSink diagnosticAdder )
     {
-        var context = new ValidateReferenceContext(
+        var context = new ReferenceValidationContext(
             this.ValidatedDeclaration,
             referencingDeclaration,
             new SyntaxReference( node, this ),

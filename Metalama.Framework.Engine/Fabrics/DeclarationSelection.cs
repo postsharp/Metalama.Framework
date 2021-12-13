@@ -21,11 +21,6 @@ using Attribute = System.Attribute;
 
 namespace Metalama.Framework.Engine.Fabrics
 {
-    internal interface IDeclarationSelectorInternal : IValidatorDriverFactory
-    {
-        AspectPredecessor AspectPredecessor { get; }
-    }
-
     /// <summary>
     /// An implementation of <see cref="IDeclarationSelection{TDeclaration}"/>, which offers a fluent
     /// API to programmatically add children aspects.

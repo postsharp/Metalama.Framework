@@ -413,7 +413,7 @@ internal partial class ValidationRunner
         private ReferenceKindsCookie EnterReferenceKind( ValidatedReferenceKinds kind )
         {
             var kindBefore = this._currentReferenceKinds;
-            this._currentReferenceKinds = this._currentReferenceKinds | kind;
+            this._currentReferenceKinds |= kind;
 
             return new ReferenceKindsCookie( this, kindBefore );
         }

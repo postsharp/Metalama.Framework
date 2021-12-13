@@ -5,4 +5,4 @@ using Metalama.Framework.Validation;
 
 namespace Metalama.Framework.Engine.Validation;
 
-internal delegate void InvokeReferenceValidatorDelegate( object instance, in ValidateReferenceContext context );
+internal delegate void InvokeReferenceValidatorDelegate( object instance, in ReferenceValidationContext context );

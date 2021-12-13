@@ -6,6 +6,9 @@ using System;
 
 namespace Metalama.Framework.Validation
 {
+    /// <summary>
+    /// Enumerates all kinds of references.
+    /// </summary>
     [CompileTimeOnly]
     [Flags]
     public enum ValidatedReferenceKinds

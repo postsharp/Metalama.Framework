@@ -14,7 +14,7 @@ internal class ReferenceValidatorDriver : ValidatorDriver
         this._validateMethod = validateMethod;
     }
 
-    public void Validate( object instance, in ValidateReferenceContext context )
+    public void Validate( object instance, in ReferenceValidationContext context )
     {
         // TODO: use user code invoker.
         this._validateMethod.Invoke( instance, context );

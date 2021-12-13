@@ -6,7 +6,7 @@ using Metalama.Framework.Project;
 
 namespace Metalama.Framework.Code;
 
-internal interface ISyntaxReferenceService : IService
+internal interface ISyntaxReferenceImpl 
 {
     IDiagnosticLocation GetDiagnosticLocation( in SyntaxReference syntaxReference );
 

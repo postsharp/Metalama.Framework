@@ -27,10 +27,10 @@ namespace Metalama.Framework.Validation
 
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.WithTarget().AddSourceReferenceValidator( nameof(Validate), ValidatedReferenceKinds.BaseType );
+            builder.WithTarget().RegisterReferenceValidator( nameof(Validate), ValidatedReferenceKinds.BaseType );
         }
 
-        private static void Validate( in ValidateReferenceContext context )
+        private static void Validate( in ReferenceValidationContext context )
         {
             if ( context.ReferencingDeclaration.Compilation != context.ReferencedDeclaration.Compilation )
             {

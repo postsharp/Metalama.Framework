@@ -35,9 +35,8 @@ namespace Metalama.Framework.Engine.Aspects
     {
         private readonly UserCodeInvoker _userCodeInvoker;
         private readonly IAspectDriver? _aspectDriver;
-        private ValidatorDriverFactory? _validatorDriverFactory;
-
         private readonly IAspect? _prototypeAspectInstance; // Null for abstract classes.
+        private ValidatorDriverFactory? _validatorDriverFactory;
         private IReadOnlyList<AspectLayer>? _layers;
 
         private static readonly MethodInfo _tryInitializeEligibilityMethod = typeof(AspectClass).GetMethod(

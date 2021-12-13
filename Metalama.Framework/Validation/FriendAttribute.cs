@@ -36,10 +36,10 @@ namespace Metalama.Framework.Validation
 
         public void BuildAspect( IAspectBuilder<IMemberOrNamedType> builder )
         {
-            builder.WithTarget().AddSourceReferenceValidator( nameof(this.Validate), ValidatedReferenceKinds.All );
+            builder.WithTarget().RegisterReferenceValidator( nameof(this.Validate), ValidatedReferenceKinds.All );
         }
 
-        private void Validate( in ValidateReferenceContext context )
+        private void Validate( in ReferenceValidationContext context )
         {
             for ( var type = context.ReferencingType; type != null; type = type.DeclaringType )
             {
