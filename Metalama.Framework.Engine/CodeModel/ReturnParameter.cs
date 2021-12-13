@@ -59,7 +59,7 @@ namespace Metalama.Framework.Engine.CodeModel
         public override bool CanBeInherited => ((IDeclarationImpl) this.DeclaringMember).CanBeInherited;
 
         public override string ToString() => this.DeclaringMember + "/" + this.Name;
-        
+
         public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
             => this.DeclaringMember.ToDisplayString( format, context ) + "/" + this.Name;
 

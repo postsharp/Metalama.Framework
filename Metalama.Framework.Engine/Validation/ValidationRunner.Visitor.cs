@@ -151,9 +151,9 @@ internal partial class ValidationRunner
                 {
                     this.Visit( parameter );
                 }
-                
+
                 this.Visit( node.AttributeLists );
-                
+
                 this.Visit( node.ExpressionBody );
                 this.Visit( node.Body );
             }
@@ -256,7 +256,6 @@ internal partial class ValidationRunner
             base.VisitObjectCreationExpression( node );
         }
 
-
         private void ValidateSymbol( SyntaxNode? node, ValidatedReferenceKinds referenceKind )
         {
             if ( node == null )
@@ -271,7 +270,7 @@ internal partial class ValidationRunner
 
         private void ValidateSymbol( SyntaxNode node, ISymbol? symbol, ValidatedReferenceKinds referenceKinds )
         {
-            if (symbol == null)
+            if ( symbol == null )
             {
                 return;
             }
@@ -280,9 +279,9 @@ internal partial class ValidationRunner
             var currentDeclaration = this.GetCurrentDeclaration();
             var validators = this._validatorsBySymbol[symbol];
 
-            foreach (var validator in validators)
+            foreach ( var validator in validators )
             {
-                if (( validator.ReferenceKinds & allKinds ) != 0)
+                if ( (validator.ReferenceKinds & allKinds) != 0 )
                 {
                     validator.Validate( currentDeclaration, node, allKinds, this._diagnosticAdder );
                 }
@@ -355,35 +354,41 @@ internal partial class ValidationRunner
                 case SyntaxKind.IdentifierName:
                 case SyntaxKind.QualifiedName:
                     this.ValidateSymbol( type, kind );
+
                     break;
-                
+
                 case SyntaxKind.NullableType:
-                    this.ValidateSymbol( ((NullableTypeSyntax) type).ElementType , kind | ValidatedReferenceKinds.NullableType );
+                    this.ValidateSymbol( ((NullableTypeSyntax) type).ElementType, kind | ValidatedReferenceKinds.NullableType );
+
                     break;
-                    
+
                 case SyntaxKind.ArrayType:
                     this.ValidateSymbol( ((ArrayTypeSyntax) type).ElementType, kind | ValidatedReferenceKinds.ArrayType );
+
                     break;
-                
+
                 case SyntaxKind.PointerType:
-                    this.ValidateSymbol( ((PointerTypeSyntax) type).ElementType, kind  | ValidatedReferenceKinds.PointerType );
+                    this.ValidateSymbol( ((PointerTypeSyntax) type).ElementType, kind | ValidatedReferenceKinds.PointerType );
+
                     break;
-                
+
                 case SyntaxKind.RefType:
                     this.ValidateSymbol( ((RefTypeSyntax) type).Type, kind | ValidatedReferenceKinds.RefType );
+
                     break;
-                
+
                 case SyntaxKind.TupleType:
                     foreach ( var item in ((TupleTypeSyntax) type).Elements )
                     {
-                        this.VisitTypeReference( item.Type, kind  | ValidatedReferenceKinds.TupleType );
+                        this.VisitTypeReference( item.Type, kind | ValidatedReferenceKinds.TupleType );
                     }
+
                     break;
-                
+
                 case SyntaxKind.AliasQualifiedName:
                 case SyntaxKind.FunctionPointerType:
-                        // Not implemented;
-                break;
+                    // Not implemented;
+                    break;
 
                 case SyntaxKind.GenericName:
                     {
@@ -400,13 +405,9 @@ internal partial class ValidationRunner
                             this.VisitTypeReference( arg, kind | ValidatedReferenceKinds.TypeArgument );
                         }
                     }
+
                     break;
-                
-                
-                    
-                    
             }
-    
         }
 
         private ReferenceKindsCookie EnterReferenceKind( ValidatedReferenceKinds kind )

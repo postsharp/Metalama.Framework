@@ -8,7 +8,7 @@ namespace Metalama.Framework.Validation
 {
     [CompileTimeOnly]
     [Flags]
-    public enum ValidatedReferenceKinds 
+    public enum ValidatedReferenceKinds
     {
         None = 0,
         All = -1,
@@ -23,11 +23,11 @@ namespace Metalama.Framework.Validation
         FieldType = 1 << 8,
         LocalVariableType = 1 << 9,
         AttributeType = 1 << 10,
-        ReturnType= 1 << 11,
-        ArrayType= 1 << 12,
-        NullableType= 1 << 13,
-        PointerType= 1 << 14,
-        RefType= 1 << 15,
-        TupleType= 1 << 16
+        ReturnType = 1 << 11,
+        ArrayType = 1 << 12,
+        NullableType = 1 << 13,
+        PointerType = 1 << 14,
+        RefType = 1 << 15,
+        TupleType = 1 << 16
     }
 }
