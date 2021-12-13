@@ -6,12 +6,15 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Validation;
 using Metalama.Framework.Diagnostics;
 
+#pragma warning disable CS0168
+
+
 namespace Metalama.Framework.Tests.Integration.Validation.AllReferences
 {
     class Aspect : TypeAspect
     {
     private static readonly DiagnosticDefinition<(ValidatedReferenceKinds ReferenceKinds, IDeclaration Declaration)> _warning =
-            new ( "MY001", Severity.Warning, "Reference constraint of type {0} in declaration {1}." );
+            new ( "MY001", Severity.Warning, "Reference constraint of type '{0}' in declaration '{1}'." );
                 
         public override void BuildAspect(IAspectBuilder<INamedType> builder)
         {
@@ -29,7 +32,7 @@ namespace Metalama.Framework.Tests.Integration.Validation.AllReferences
     [Aspect]
     class ValidatedClass
     {
-       
+       public static void Method( object o ) {}
         
     }
     
@@ -46,6 +49,8 @@ namespace Metalama.Framework.Tests.Integration.Validation.AllReferences
         
         ValidatedClass? Method( ValidatedClass[] param1, List<ValidatedClass> param2 )
         {
+            ValidatedClass variable;
+            ValidatedClass.Method( typeof(ValidatedClass) );
             return null;
         }
     }

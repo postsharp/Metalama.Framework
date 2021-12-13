@@ -153,6 +153,9 @@ namespace Metalama.Framework.Engine.CodeModel
             return declaration != null;
         }
 
+        internal IDeclaration? GetDeclarationOrNull( ISymbol symbol, DeclarationRefTargetKind kind = DeclarationRefTargetKind.Default )
+            => this.GetCompilationElement( symbol, kind ) as IDeclaration;
+        
         internal IDeclaration GetDeclaration( ISymbol symbol, DeclarationRefTargetKind kind = DeclarationRefTargetKind.Default )
         {
             var compilationElement = this.GetCompilationElement( symbol, kind );

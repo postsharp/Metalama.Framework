@@ -269,14 +269,14 @@ internal partial class ValidationRunner
             this.ValidateSymbol( node, symbol, referenceKind );
         }
 
-        private void ValidateSymbol( SyntaxNode node, ISymbol? symbol, ValidatedReferenceKinds referenceKind )
+        private void ValidateSymbol( SyntaxNode node, ISymbol? symbol, ValidatedReferenceKinds referenceKinds )
         {
             if (symbol == null)
             {
                 return;
             }
 
-            var allKinds = referenceKind | this._currentReferenceKinds;
+            var allKinds = referenceKinds | this._currentReferenceKinds;
             var currentDeclaration = this.GetCurrentDeclaration();
             var validators = this._validatorsBySymbol[symbol];
 
@@ -287,18 +287,37 @@ internal partial class ValidationRunner
                     validator.Validate( currentDeclaration, node, allKinds, this._diagnosticAdder );
                 }
             }
+
+            if ( symbol.ContainingType != null )
+            {
+                this.ValidateSymbol( node, symbol.ContainingType, referenceKinds );
+            }
+            else if ( symbol.ContainingNamespace != null )
+            {
+                this.ValidateSymbol( node, symbol.ContainingNamespace, referenceKinds );
+            }
         }
 
         private IDeclaration? GetCurrentDeclaration()
         {
-            var declaredSymbol = this._semanticModel!.GetDeclaredSymbol( this._nodeStack[this._stackIndex]! );
-
-            if ( declaredSymbol == null )
+            for ( var i = this._stackIndex; i >= 0; i-- )
             {
-                return null;
+                var declaredSymbol = this._semanticModel!.GetDeclaredSymbol( this._nodeStack[i]! );
+
+                if ( declaredSymbol == null )
+                {
+                    continue;
+                }
+
+                var declaration = this._declarationStack[i] ??= this._compilation.Factory.GetDeclarationOrNull( declaredSymbol );
+
+                if ( declaration != null )
+                {
+                    return declaration;
+                }
             }
 
-            return this._declarationStack[this._stackIndex] ??= this._compilation.Factory.GetDeclaration( declaredSymbol );
+            return null;
         }
 
         private ContextCookie EnterContext( SyntaxNode node )
