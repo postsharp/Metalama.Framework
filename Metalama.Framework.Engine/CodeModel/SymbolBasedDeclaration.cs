@@ -6,12 +6,13 @@ using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
-using SyntaxReference = Microsoft.CodeAnalysis.SyntaxReference;
+using System.Reflection;
 
 namespace Metalama.Framework.Engine.CodeModel
 {
     internal abstract class SymbolBasedDeclaration : BaseDeclaration
     {
+        [Obfuscation( Exclude = true /* The obfuscator believes it implements ISdkDeclaration.Symbol, but it does not. */ )]
         public abstract ISymbol Symbol { get; }
 
         [Memo]

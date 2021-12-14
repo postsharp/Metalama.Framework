@@ -102,9 +102,11 @@ namespace Metalama.Framework.Engine
             {
                 throw new AssertionFailedException( justification ?? $"The reference to {typeof(T).Name} must not be not null." );
             }
-#endif
 
             return obj.Value;
+#else
+            return obj!.Value;
+#endif
         }
 
 #if !DEBUG

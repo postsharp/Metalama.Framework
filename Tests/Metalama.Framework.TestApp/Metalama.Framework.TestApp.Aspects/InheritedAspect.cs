@@ -7,14 +7,8 @@ using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.TestApp.Aspects
 {
-    class InheritedAspect : TypeAspect
+    class InheritedAspect : TypeAspect, IInheritedAspect
     {
-        public override void BuildAspectClass(IAspectClassBuilder builder)
-        {
-            base.BuildAspectClass(builder);
-            builder.IsInherited = true;
-        }
-
         [Introduce]
         public void IntroducedMethod() { }
     }
