@@ -4,7 +4,9 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <NoWarn>IDE0009</NoWarn>
-	  <SkipPostSharp>True</SkipPostSharp>
+	<SkipPostSharp>True</SkipPostSharp>
+	 <!-- Never optimize code. It is difficult to debug. -->
+    <Optimize>False</Optimize>
   </PropertyGroup>
 
   <ItemGroup>

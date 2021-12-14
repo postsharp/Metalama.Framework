@@ -60,7 +60,7 @@ namespace Metalama.Obfuscator
         /// <returns></returns>
         public override bool Execute()
         {
-            this._obfuscationAttributeType = (IType) this.Project.Module.Cache.GetType( typeof(ObfuscationAttribute) );
+            this._obfuscationAttributeType = (IType) this.Project.Module.Cache.GetType( typeof( ObfuscationAttribute ) );
 
             // IMPORTANT: Pdb obfuscation has to be done before changing declaration names.
             // Obfuscate source documents in the PDB.
@@ -203,30 +203,77 @@ namespace Metalama.Obfuscator
 
         private bool IsObfuscationExcluded( MetadataDeclaration declaration ) => this.IsObfuscationExcluded( declaration, false );
 
-        private bool IsObfuscationExcluded( MetadataDeclaration declaration, bool inherited )
+        private bool IsObfuscationExcluded( MetadataDeclaration declaration, bool appliedToMembers )
         {
-            if ( declaration.GetTag<object>( this._excludeObfuscationTag ) != null )
+            bool VerifyTagsAndAttributes( MetadataDeclaration d )
+            {
+                if ( d.GetTag<object>( this._excludeObfuscationTag ) != null )
+                {
+                    return true;
+                }
+
+                // Check custom attributes.
+                var e = d.CustomAttributes.GetByTypeEnumerator( this._obfuscationAttributeType );
+
+                if ( e.MoveNext() )
+                {
+                    var obfuscationAttribute = (ObfuscationAttribute) e.Current!.ConstructRuntimeObject();
+
+                    if ( obfuscationAttribute.Exclude )
+                    {
+                        if ( appliedToMembers )
+                        {
+                            return obfuscationAttribute.ApplyToMembers;
+                        }
+
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+
+            if ( VerifyTagsAndAttributes( declaration ) )
             {
                 return true;
             }
 
-            var e = declaration.CustomAttributes.GetByTypeEnumerator( this._obfuscationAttributeType );
-
-            if ( e.MoveNext() )
+            // Check the overridden methods and properties/events.
+            switch ( declaration.GetTokenType() )
             {
-                var obfuscationAttribute = (ObfuscationAttribute) e.Current!.ConstructRuntimeObject();
-
-                if ( obfuscationAttribute.Exclude )
-                {
-                    if ( inherited )
+                case TokenType.MethodDef:
                     {
-                        return obfuscationAttribute.ApplyToMembers;
+                        var method = (MethodDefDeclaration) declaration;
+                        if ( method.IsVirtual )
+                        {
+                            var parentDefinition = method.GetParentDefinition();
+                            if ( parentDefinition != null && this.IsObfuscationExcluded( parentDefinition ) )
+                            {
+                                return true;
+                            }
+                        }
+
+                        break;
                     }
 
-                    return true;
-                }
+                case TokenType.Property:
+                case TokenType.Event:
+                    {
+                        var methodGroup = (MethodGroupDeclaration) declaration;
+                        foreach ( var member in methodGroup.Members )
+                        {
+                            var parentDefinition = member.Method.GetParentDefinition();
+                            if ( parentDefinition != null && this.IsObfuscationExcluded( parentDefinition ) )
+                            {
+                                return true;
+                            }
+                        }
+
+                        break;
+                    }
             }
 
+            // Check the declaring type.
             switch ( declaration.GetTokenType() )
             {
                 case TokenType.MethodDef:
