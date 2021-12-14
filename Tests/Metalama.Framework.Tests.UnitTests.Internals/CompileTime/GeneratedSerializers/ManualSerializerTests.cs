@@ -5,15 +5,14 @@ using Metalama.TestFramework;
 using System;
 using Xunit;
 
-namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serializers
+namespace Metalama.Framework.Tests.UnitTests.CompileTime.GeneratedSerializers
 {
     public class ManualSerializerTests : SerializerTestBase
     {
         [Fact]
         public void CustomBaseSerializer()
         {
-            // Verifies that ILamaSerializable compile-time type with explicit parameterless constructor can be serialized and deserialized.
-            // Generator should not inject parameterless constructor when it is already defined.
+            // Verifies that custom serializer defined in the base type is correctly consumed by the generated serializer in the derived type.
             var code = @"
 using System;
 using Metalama.Framework.Aspects;

@@ -18,15 +18,17 @@ namespace Metalama.Framework.Engine.CompileTime
         private class CollectSerializableFieldsVisitor : CSharpSyntaxWalker
         {
             private readonly SemanticModel _semanticModel;
+            private readonly SyntaxNode _typeDeclaration;
             private readonly CancellationToken _cancellationToken;
             private readonly List<ISymbol> _serializableFieldsOrProperties;
             private readonly ITypeSymbol _nonSerializedAttribute;
 
             public IReadOnlyList<ISymbol> SerializableFieldsOrProperties => this._serializableFieldsOrProperties;
 
-            public CollectSerializableFieldsVisitor( SemanticModel semanticModel, ReflectionMapper reflectionMapper, CancellationToken cancellationToken )
+            public CollectSerializableFieldsVisitor( SemanticModel semanticModel, SyntaxNode typeDeclaration, ReflectionMapper reflectionMapper, CancellationToken cancellationToken )
             {
                 this._semanticModel = semanticModel;
+                this._typeDeclaration = typeDeclaration;
                 this._cancellationToken = cancellationToken;
                 this._serializableFieldsOrProperties = new List<ISymbol>();
                 this._nonSerializedAttribute = reflectionMapper.GetTypeSymbol( typeof(LamaNonSerializedAttribute) );
@@ -49,6 +51,8 @@ namespace Metalama.Framework.Engine.CompileTime
 
             public override void VisitPropertyDeclaration( PropertyDeclarationSyntax node )
             {
+                this._cancellationToken.ThrowIfCancellationRequested();
+
                 var propertySymbol = this._semanticModel.GetDeclaredSymbol( node ).AssertNotNull();
 
                 if ( !propertySymbol.IsAutoProperty() )
@@ -58,10 +62,41 @@ namespace Metalama.Framework.Engine.CompileTime
 
                 var backingField = propertySymbol.GetBackingField().AssertNotNull();
 
-                if ( !backingField.GetAttributes().Any( a => SymbolEqualityComparer.Default.Equals( a.AttributeClass, this._nonSerializedAttribute ) ) )
+                if ( !backingField.GetAttributes().Any( a => SymbolEqualityComparer.Default.Equals( a.AttributeClass, this._nonSerializedAttribute ) )
+                     && !propertySymbol.GetAttributes().Any( a => SymbolEqualityComparer.Default.Equals( a.AttributeClass, this._nonSerializedAttribute ) ) )
                 {
                     this._serializableFieldsOrProperties.Add( propertySymbol );
                 }
+            }
+
+            public override void VisitClassDeclaration( ClassDeclarationSyntax node )
+            {
+                if ( this._typeDeclaration != node)
+                {
+                    return;
+                }
+
+                base.VisitClassDeclaration( node );
+            }
+
+            public override void VisitStructDeclaration( StructDeclarationSyntax node )
+            {
+                if ( this._typeDeclaration != node )
+                {
+                    return;
+                }
+
+                base.VisitStructDeclaration( node );
+            }
+
+            public override void VisitRecordDeclaration( RecordDeclarationSyntax node )
+            {
+                if ( this._typeDeclaration != node )
+                {
+                    return;
+                }
+
+                base.VisitRecordDeclaration( node );
             }
         }
     }

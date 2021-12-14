@@ -35,7 +35,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 this._serializableTypes = new List<SerializableTypeInfo>();
             }
 
-            private void VisitTypeDeclaration( SyntaxNode node )
+            private void ProcessTypeDeclaration( SyntaxNode node )
             {
                 this._cancellationToken.ThrowIfCancellationRequested();
 
@@ -48,18 +48,30 @@ namespace Metalama.Framework.Engine.CompileTime
                     return;
                 }
 
-                var innerVisitor = new CollectSerializableFieldsVisitor( this._semanticModel, this._reflectionMapper, this._cancellationToken );
+                var innerVisitor = new CollectSerializableFieldsVisitor( this._semanticModel, node, this._reflectionMapper, this._cancellationToken );
 
                 innerVisitor.Visit( node );
 
                 this._serializableTypes.Add( new SerializableTypeInfo( declaredSymbol, innerVisitor.SerializableFieldsOrProperties ) );
             }
 
-            public override void VisitClassDeclaration( ClassDeclarationSyntax node ) => this.VisitTypeDeclaration( node );
+            public override void VisitClassDeclaration( ClassDeclarationSyntax node )
+            {
+                base.VisitClassDeclaration( node );
+                this.ProcessTypeDeclaration( node );
+            }
 
-            public override void VisitStructDeclaration( StructDeclarationSyntax node ) => this.VisitTypeDeclaration( node );
+            public override void VisitStructDeclaration( StructDeclarationSyntax node )
+            {
+                base.VisitStructDeclaration( node );
+                this.ProcessTypeDeclaration( node );
+            }
 
-            public override void VisitRecordDeclaration( RecordDeclarationSyntax node ) => this.VisitTypeDeclaration( node );
+            public override void VisitRecordDeclaration( RecordDeclarationSyntax node )
+            {
+                base.VisitRecordDeclaration( node );
+                this.ProcessTypeDeclaration( node );
+            }
         }
     }
 }

@@ -5,14 +5,14 @@ using Metalama.TestFramework;
 using System;
 using Xunit;
 
-namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serializers
+namespace Metalama.Framework.Tests.UnitTests.CompileTime.GeneratedSerializers
 {
     public class ValueTypeTests : SerializerTestBase
     {
         [Fact]
         public void SimpleStruct()
         {
-            // Verifies that IMetaSerializable readonly struct type can be serialized and deserialized (round-trip).
+            // Verifies that serializable struct type can be serialized and deserialized.
             var code = @"
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Serialization;
@@ -38,20 +38,20 @@ public struct A : ILamaSerializable
             var project = CreateCompileTimeProject( domain, testContext, code );
 
             var type = project!.GetType( "A" );
-            var metaSerializer = GetSerializer( type );
+            var lamaSerializer = GetSerializer( type );
 
             dynamic instance = Activator.CreateInstance( type, 13, 27 )!;
             instance.MutableProperty = 42;
 
             var constructorArgumentsWriter = new TestArgumentsWriter();
             var initializationArgumentsWriter = new TestArgumentsWriter();
-            metaSerializer.SerializeObject( instance, constructorArgumentsWriter, initializationArgumentsWriter );
+            lamaSerializer.SerializeObject( instance, constructorArgumentsWriter, initializationArgumentsWriter );
 
             var constructorArgumentsReader = constructorArgumentsWriter.ToReader();
             var initializationArgumentsReader = initializationArgumentsWriter.ToReader();
 
-            dynamic deserialized = metaSerializer.CreateInstance( type, constructorArgumentsReader );
-            metaSerializer.DeserializeFields( ref deserialized, initializationArgumentsReader );
+            dynamic deserialized = lamaSerializer.CreateInstance( type, constructorArgumentsReader );
+            lamaSerializer.DeserializeFields( ref deserialized, initializationArgumentsReader );
 
             Assert.Equal( 13, deserialized.Field );
             Assert.Equal( 27, deserialized.Property );
@@ -61,7 +61,7 @@ public struct A : ILamaSerializable
         [Fact]
         public void ReadonlyStruct()
         {
-            // Verifies that IMetaSerializable readonly struct type can be serialized and deserialized (round-trip).
+            // Verifies that serializable readonly struct type can be serialized and deserialized.
             var code = @"
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Serialization;
@@ -85,19 +85,19 @@ public readonly struct A : ILamaSerializable
             var project = CreateCompileTimeProject( domain, testContext, code );
 
             var type = project!.GetType( "A" );
-            var metaSerializer = GetSerializer( type );
+            var lamaSerializer = GetSerializer( type );
 
             dynamic instance = Activator.CreateInstance( type, 13, 42 )!;
 
             var constructorArgumentsWriter = new TestArgumentsWriter();
             var initializationArgumentsWriter = new TestArgumentsWriter();
-            metaSerializer.SerializeObject( instance, constructorArgumentsWriter, initializationArgumentsWriter );
+            lamaSerializer.SerializeObject( instance, constructorArgumentsWriter, initializationArgumentsWriter );
 
             var constructorArgumentsReader = constructorArgumentsWriter.ToReader();
             var initializationArgumentsReader = initializationArgumentsWriter.ToReader();
 
-            dynamic deserialized = metaSerializer.CreateInstance( type, constructorArgumentsReader );
-            metaSerializer.DeserializeFields( ref deserialized, initializationArgumentsReader );
+            dynamic deserialized = lamaSerializer.CreateInstance( type, constructorArgumentsReader );
+            lamaSerializer.DeserializeFields( ref deserialized, initializationArgumentsReader );
 
             Assert.Equal( 13, deserialized.Field );
             Assert.Equal( 42, deserialized.Property );

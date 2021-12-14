@@ -410,11 +410,11 @@ namespace Metalama.Framework.Engine.CompileTime
                 // Add serialization logic if the type is serializable and this is the primary declaration.
                 if ( this._serializableTypes.TryGetValue( symbol, out var serializableType ) )
                 {
-                    if ( !serializableType.Type.GetMembers()
-                            .Any(
-                                m => m is IMethodSymbol method && method.MethodKind == MethodKind.Constructor && method.GetPrimarySyntaxReference() != null ) )
+                    if ( !serializableType.Type.IsValueType
+                        && !serializableType.Type.GetMembers()
+                            .Any( m => m is IMethodSymbol method && method.MethodKind == MethodKind.Constructor && method.GetPrimarySyntaxReference() != null ) )
                     {
-                        // There is no defined constructor, so we need to explicitly add parameterless constructor.
+                        // There is no defined constructor, so we need to explicitly add parameterless constructor (only for value types).
                         members.Add(
                             ConstructorDeclaration(
                                     List<AttributeListSyntax>(),
