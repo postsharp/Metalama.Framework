@@ -17,6 +17,7 @@ using Metalama.Framework.Fabrics;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Emit;
 using System;
 using System.Collections.Generic;
@@ -48,10 +49,12 @@ namespace Metalama.Framework.Engine.CompileTime
         private static readonly Lazy<SyntaxTree> _predefinedTypesSyntaxTree = new(
             () =>
                 CSharpSyntaxTree.ParseText(
-                    "namespace System.Runtime.CompilerServices { internal static class IsExternalInit {}}",
+                    "namespace System.Runtime.CompilerServices { internal static class IsExternalInit {} }",
                     path: CompileTimeConstants.PredefinedTypesFileName ) );
 
         private static readonly Guid _buildId = AssemblyMetadataReader.GetInstance( typeof(CompileTimeCompilationBuilder).Assembly ).ModuleId;
+        private readonly ReflectionMapperFactory _reflectionMapperFactory;
+        private readonly SymbolClassificationService _classifierFactory;
 
         public CompileTimeCompilationBuilder( IServiceProvider serviceProvider, CompileTimeDomain domain )
         {
@@ -61,6 +64,8 @@ namespace Metalama.Framework.Engine.CompileTime
             this._observer = serviceProvider.GetService<ICompileTimeCompilationBuilderObserver>();
             this._rewriter = serviceProvider.GetService<ICompileTimeAssemblyBinaryRewriter>();
             this._projectOptions = serviceProvider.GetService<IProjectOptions>();
+            this._reflectionMapperFactory = serviceProvider.GetRequiredService<ReflectionMapperFactory>();
+            this._classifierFactory = serviceProvider.GetRequiredService<SymbolClassificationService>();
         }
 
         private static ulong ComputeSourceHash( IReadOnlyList<SyntaxTree> compileTimeTrees, StringBuilder? log = null )
@@ -138,7 +143,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
             var assemblyName = GetCompileTimeAssemblyName( runTimeCompilation.AssemblyName!, hash );
             compileTimeCompilation = this.CreateEmptyCompileTimeCompilation( assemblyName, referencedProjects );
-            var serializableTypes = GetSerializableTypes( runTimeCompilation, treesWithCompileTimeCode, cancellationToken );
+            var serializableTypes = this.GetSerializableTypes( runTimeCompilation, treesWithCompileTimeCode, cancellationToken );
 
             var templateCompiler = new TemplateCompiler( this._serviceProvider, runTimeCompilation );
 
@@ -484,18 +489,19 @@ namespace Metalama.Framework.Engine.CompileTime
             return compileTimeTrees;
         }
 
-        private static IReadOnlyList<SerializableTypeInfo> GetSerializableTypes(
+        private IReadOnlyList<SerializableTypeInfo> GetSerializableTypes(
             Compilation runTimeCompilation,
             IReadOnlyList<SyntaxTree> compileTimeSyntaxTrees,
             CancellationToken cancellationToken )
         {
             // TODO: Check that the mapper is not already registered.
-            var reflectionMapper = new ReflectionMapper( runTimeCompilation );
             var allSerializableTypes = new List<SerializableTypeInfo>();
+            var reflectionMapper = this._reflectionMapperFactory.GetInstance( runTimeCompilation );
+            var classifier = this._classifierFactory.GetClassifier( runTimeCompilation );
 
             foreach ( var tree in compileTimeSyntaxTrees )
             {
-                var visitor = new CollectSerializableTypesVisitor( runTimeCompilation.GetSemanticModel( tree, true ), reflectionMapper, cancellationToken );
+                var visitor = new CollectSerializableTypesVisitor( runTimeCompilation.GetSemanticModel( tree, true ), reflectionMapper, classifier, cancellationToken );
 
                 visitor.Visit( tree.GetRoot() );
 

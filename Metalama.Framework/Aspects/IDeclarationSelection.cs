@@ -26,7 +26,7 @@ namespace Metalama.Framework.Aspects
         /// <param name="methodName">Name of the validating method. It must be a method in the current aspect or fabric type,
         /// and must have must have a parameter of type <c>in</c> <see cref="ReferenceValidationContext"/>.</param>
         /// <param name="referenceKinds">Kinds of references that this method is interested to analyze.</param>
-        void RegisterReferenceValidator( string methodName, ValidatedReferenceKinds referenceKinds );
+        void RegisterReferenceValidator( string methodName, ReferenceKinds referenceKinds );
 
         /// <summary>
         /// Registers a method that will be invoked to validate the final state (i.e. the state including the transformation by all aspects) of any declaration

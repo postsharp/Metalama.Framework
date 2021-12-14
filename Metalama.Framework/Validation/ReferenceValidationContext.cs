@@ -43,9 +43,9 @@ namespace Metalama.Framework.Validation
 
         /// <summary>
         /// Gets the set (bit mask) of reference kinds for the current <see cref="Syntax"/>. For instance, while validating a parameter of type <c>Foo[]</c>,
-        /// both bits <see cref="ValidatedReferenceKinds.ParameterType"/> and <see cref="ValidatedReferenceKinds.ArrayType"/> will be set.
+        /// both bits <see cref="Validation.ReferenceKinds.ParameterType"/> and <see cref="Validation.ReferenceKinds.ArrayType"/> will be set.
         /// </summary>
-        public ValidatedReferenceKinds ReferenceKinds { get; }
+        public ReferenceKinds ReferenceKinds { get; }
 
         /// <summary>
         /// Gets the location on which the diagnostic should be reported.
@@ -65,7 +65,7 @@ namespace Metalama.Framework.Validation
             in SyntaxReference syntax,
             IAspectState? aspectState,
             IDiagnosticSink diagnostics,
-            ValidatedReferenceKinds referenceKinds )
+            ReferenceKinds referenceKinds )
         {
             this.AspectState = aspectState;
             this._diagnostics = diagnostics;

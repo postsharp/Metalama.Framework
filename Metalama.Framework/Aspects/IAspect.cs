@@ -3,6 +3,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Eligibility;
+using Metalama.Framework.Serialization;
 using System.Runtime.Serialization;
 
 namespace Metalama.Framework.Aspects
@@ -12,7 +13,7 @@ namespace Metalama.Framework.Aspects
     /// this interface, but the strongly-typed variant <see cref="IAspect{T}"/>.
     /// </summary>
     [CompileTime]
-    public interface IAspect
+    public interface IAspect : ILamaSerializable
     {
         /// <summary>
         /// Configures the static characteristics of the aspect, i.e. those that do not depend on the instance state

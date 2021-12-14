@@ -72,7 +72,7 @@ namespace Metalama.Framework.Engine.Fabrics
 
         private void RegisterValidatorSource( ValidatorSource validatorSource ) => this._registerValidatorSource( validatorSource );
 
-        public void RegisterReferenceValidator( string methodName, ValidatedReferenceKinds referenceKinds )
+        public void RegisterReferenceValidator( string methodName, ReferenceKinds referenceKinds )
         {
             this.RegisterValidatorSource(
                 new ValidatorSource(

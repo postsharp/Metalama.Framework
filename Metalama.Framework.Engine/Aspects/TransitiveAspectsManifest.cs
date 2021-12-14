@@ -23,6 +23,7 @@ namespace Metalama.Framework.Engine.Aspects
             new( ImmutableDictionary<string, IReadOnlyList<InheritableAspectInstance>>.Empty );
 
         public ImmutableDictionary<string, IReadOnlyList<InheritableAspectInstance>> InheritableAspects { get; private set; }
+        
 
         // Deserializer constructor.
         private TransitiveAspectsManifest()

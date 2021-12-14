@@ -13,14 +13,14 @@ namespace Metalama.Framework.Tests.Integration.Validation.AllReferences
 {
     class Aspect : TypeAspect
     {
-    private static readonly DiagnosticDefinition<(ValidatedReferenceKinds ReferenceKinds, IDeclaration Declaration)> _warning =
+    private static readonly DiagnosticDefinition<(ReferenceKinds ReferenceKinds, IDeclaration Declaration)> _warning =
             new ( "MY001", Severity.Warning, "Reference constraint of type '{0}' in declaration '{1}'." );
                 
         public override void BuildAspect(IAspectBuilder<INamedType> builder)
         {
             builder.WithTarget().RegisterReferenceValidator(
              nameof(Validate),
-             ValidatedReferenceKinds.All );
+             ReferenceKinds.All );
         }
         
      private static void Validate( in ReferenceValidationContext context )

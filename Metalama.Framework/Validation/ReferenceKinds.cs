@@ -11,7 +11,7 @@ namespace Metalama.Framework.Validation
     /// </summary>
     [CompileTimeOnly]
     [Flags]
-    public enum ValidatedReferenceKinds
+    public enum ReferenceKinds
     {
         None = 0,
         All = -1,

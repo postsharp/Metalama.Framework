@@ -17,6 +17,7 @@ namespace Metalama.Framework.Engine.LamaSerialization
     {
         private readonly SyntaxGenerationContext _context;
         private readonly ReflectionMapper _runtimeReflectionMapper;
+        private const string _serializerTypeName = "Serializer";
 
         public SerializerGenerator( Compilation runtimeCompilation, SyntaxGenerationContext context )
         {
@@ -144,14 +145,14 @@ namespace Metalama.Framework.Engine.LamaSerialization
             return ClassDeclaration(
                 List<AttributeListSyntax>(),
                 TokenList( Token( SyntaxKind.PublicKeyword ) ),
-                Identifier( "MetaSerializer" ),
+                Identifier( _serializerTypeName ),
                 null,
                 BaseList( Token( SyntaxKind.ColonToken ), SingletonSeparatedList<BaseTypeSyntax>( baseType ) ),
                 List<TypeParameterConstraintClauseSyntax>(),
                 List( members ) );
 
             TypeSyntax CreatePendingMetaSerializerType( ITypeSymbol declaringType )
-                => QualifiedName( (NameSyntax) this._context.SyntaxGenerator.Type( declaringType ), IdentifierName( "MetaSerializer" ) );
+                => QualifiedName( (NameSyntax) this._context.SyntaxGenerator.Type( declaringType ), IdentifierName( _serializerTypeName ) );
         }
 
         private static bool HasPendingBaseSerializer( ITypeSymbol serializedType, ITypeSymbol baseSerializerSymbol )
@@ -177,7 +178,7 @@ namespace Metalama.Framework.Engine.LamaSerialization
                 // TODO: This lookup should go through a repository.
                 var baseMetaSerializer = targetType.BaseType.GetContainedSymbols()
                     .OfType<INamedTypeSymbol>()
-                    .FirstOrDefault( x => StringComparer.Ordinal.Equals( x.Name, "MetaSerializer" ) );
+                    .FirstOrDefault( x => StringComparer.Ordinal.Equals( x.Name, _serializerTypeName ) );
 
                 if ( baseMetaSerializer != null )
                 {
@@ -189,6 +190,11 @@ namespace Metalama.Framework.Engine.LamaSerialization
                     {
                         // This serializer is to be generated, we will recursively look for it's base, which should have same semantics.
                         return this.GetBaseSerializer( targetType.BaseType );
+                    }
+                    else if ( targetType.BaseType.ContainingAssembly.Name == "Metalama.Framework" )
+                    {
+                        // This is a serializable base type that does not have anything to serialize. 
+                        return (INamedTypeSymbol) this._context.ReflectionMapper.GetTypeSymbol( typeof(ReferenceTypeSerializer) );
                     }
                     else
                     {
@@ -210,7 +216,7 @@ namespace Metalama.Framework.Engine.LamaSerialization
             return ConstructorDeclaration(
                 List<AttributeListSyntax>(),
                 TokenList( Token( SyntaxKind.PublicKeyword ) ),
-                Identifier( "MetaSerializer" ),
+                Identifier( _serializerTypeName ),
                 ParameterList(),
                 null,
                 Block(),

@@ -14,16 +14,16 @@ internal class ReferenceValidatorInstance : ValidatorInstance
     public ReferenceValidatorInstance(
         ValidatorSource source,
         IDeclaration declaration,
-        ValidatedReferenceKinds referenceKinds ) : base( source, declaration )
+        ReferenceKinds referenceKinds ) : base( source, declaration )
     {
         this.ReferenceKinds = referenceKinds;
     }
 
     // Aspect or fabric.
 
-    public ValidatedReferenceKinds ReferenceKinds { get; }
+    public ReferenceKinds ReferenceKinds { get; }
 
-    public void Validate( IDeclaration referencingDeclaration, SyntaxNode node, ValidatedReferenceKinds referenceKind, IDiagnosticSink diagnosticAdder )
+    public void Validate( IDeclaration referencingDeclaration, SyntaxNode node, ReferenceKinds referenceKind, IDiagnosticSink diagnosticAdder )
     {
         var context = new ReferenceValidationContext(
             this.ValidatedDeclaration,

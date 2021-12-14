@@ -37,7 +37,7 @@ namespace Metalama.Framework.Validation
 
         public void BuildAspect( IAspectBuilder<IMemberOrNamedType> builder )
         {
-            builder.WithTarget().RegisterReferenceValidator( nameof(this.Validate), ValidatedReferenceKinds.All );
+            builder.WithTarget().RegisterReferenceValidator( nameof(this.Validate), ReferenceKinds.All );
         }
 
         private void Validate( in ReferenceValidationContext context )

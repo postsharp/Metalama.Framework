@@ -44,14 +44,14 @@ internal partial class ValidationRunner
 
         public override void VisitMemberAccessExpression( MemberAccessExpressionSyntax node )
         {
-            this.ValidateSymbol( node.Name, ValidatedReferenceKinds.MemberAccess );
+            this.ValidateSymbol( node.Name, ReferenceKinds.MemberAccess );
         }
 
         public override void VisitBaseList( BaseListSyntax node )
         {
             foreach ( var baseType in node.Types )
             {
-                this.VisitTypeReference( baseType.Type, ValidatedReferenceKinds.BaseType );
+                this.VisitTypeReference( baseType.Type, ReferenceKinds.BaseType );
             }
         }
 
@@ -59,27 +59,27 @@ internal partial class ValidationRunner
         {
             foreach ( var arg in node.Arguments )
             {
-                this.VisitTypeReference( arg, ValidatedReferenceKinds.TypeArgument );
+                this.VisitTypeReference( arg, ReferenceKinds.TypeArgument );
             }
         }
 
         public override void VisitTypeOfExpression( TypeOfExpressionSyntax node )
         {
-            this.VisitTypeReference( node.Type, ValidatedReferenceKinds.TypeOf );
+            this.VisitTypeReference( node.Type, ReferenceKinds.TypeOf );
         }
 
         public override void VisitParameter( ParameterSyntax node )
         {
             using ( this.EnterContext( node ) )
             {
-                this.VisitTypeReference( node.Type, ValidatedReferenceKinds.ParameterType );
+                this.VisitTypeReference( node.Type, ReferenceKinds.ParameterType );
                 this.Visit( node.AttributeLists );
             }
         }
 
         public override void VisitAttribute( AttributeSyntax node )
         {
-            this.ValidateSymbol( node.Name, ValidatedReferenceKinds.AttributeType );
+            this.ValidateSymbol( node.Name, ReferenceKinds.AttributeType );
 
             if ( node.ArgumentList != null )
             {
@@ -92,12 +92,12 @@ internal partial class ValidationRunner
 
         public override void VisitTypeConstraint( TypeConstraintSyntax node )
         {
-            this.VisitTypeReference( node.Type, ValidatedReferenceKinds.TypeConstraint );
+            this.VisitTypeReference( node.Type, ReferenceKinds.TypeConstraint );
         }
 
         public override void VisitSimpleBaseType( SimpleBaseTypeSyntax node )
         {
-            this.VisitTypeReference( node.Type, ValidatedReferenceKinds.Other );
+            this.VisitTypeReference( node.Type, ReferenceKinds.Other );
         }
 
         public override void VisitClassDeclaration( ClassDeclarationSyntax node )
@@ -144,7 +144,7 @@ internal partial class ValidationRunner
         {
             using ( this.EnterContext( node ) )
             {
-                this.VisitTypeReference( node.ReturnType, ValidatedReferenceKinds.ReturnType );
+                this.VisitTypeReference( node.ReturnType, ReferenceKinds.ReturnType );
 
                 foreach ( var parameter in node.ParameterList.Parameters )
                 {
@@ -178,7 +178,7 @@ internal partial class ValidationRunner
         {
             using ( this.EnterContext( node.Declaration.Variables[0] ) )
             {
-                this.VisitTypeReference( node.Declaration.Type, ValidatedReferenceKinds.FieldType );
+                this.VisitTypeReference( node.Declaration.Type, ReferenceKinds.FieldType );
             }
 
             foreach ( var field in node.Declaration.Variables )
@@ -197,7 +197,7 @@ internal partial class ValidationRunner
         {
             using ( this.EnterContext( node.Declaration.Variables[0] ) )
             {
-                this.VisitTypeReference( node.Declaration.Type, ValidatedReferenceKinds.LocalVariableType );
+                this.VisitTypeReference( node.Declaration.Type, ReferenceKinds.LocalVariableType );
             }
         }
 
@@ -251,11 +251,11 @@ internal partial class ValidationRunner
 
         public override void VisitObjectCreationExpression( ObjectCreationExpressionSyntax node )
         {
-            this.ValidateSymbol( node, ValidatedReferenceKinds.ObjectCreation );
+            this.ValidateSymbol( node, ReferenceKinds.ObjectCreation );
             base.VisitObjectCreationExpression( node );
         }
 
-        private void ValidateSymbol( SyntaxNode? node, ValidatedReferenceKinds referenceKind )
+        private void ValidateSymbol( SyntaxNode? node, ReferenceKinds referenceKind )
         {
             if ( node == null )
             {
@@ -267,7 +267,7 @@ internal partial class ValidationRunner
             this.ValidateSymbol( node, symbol, referenceKind );
         }
 
-        private void ValidateSymbol( SyntaxNode node, ISymbol? symbol, ValidatedReferenceKinds referenceKinds )
+        private void ValidateSymbol( SyntaxNode node, ISymbol? symbol, ReferenceKinds referenceKinds )
         {
             if ( symbol == null )
             {
@@ -346,7 +346,7 @@ internal partial class ValidationRunner
             }
         }
 
-        private void VisitTypeReference( TypeSyntax? type, ValidatedReferenceKinds kind )
+        private void VisitTypeReference( TypeSyntax? type, ReferenceKinds kind )
         {
             if ( type == null )
             {
@@ -362,29 +362,29 @@ internal partial class ValidationRunner
                     break;
 
                 case SyntaxKind.NullableType:
-                    this.ValidateSymbol( ((NullableTypeSyntax) type).ElementType, kind | ValidatedReferenceKinds.NullableType );
+                    this.ValidateSymbol( ((NullableTypeSyntax) type).ElementType, kind | ReferenceKinds.NullableType );
 
                     break;
 
                 case SyntaxKind.ArrayType:
-                    this.ValidateSymbol( ((ArrayTypeSyntax) type).ElementType, kind | ValidatedReferenceKinds.ArrayType );
+                    this.ValidateSymbol( ((ArrayTypeSyntax) type).ElementType, kind | ReferenceKinds.ArrayType );
 
                     break;
 
                 case SyntaxKind.PointerType:
-                    this.ValidateSymbol( ((PointerTypeSyntax) type).ElementType, kind | ValidatedReferenceKinds.PointerType );
+                    this.ValidateSymbol( ((PointerTypeSyntax) type).ElementType, kind | ReferenceKinds.PointerType );
 
                     break;
 
                 case SyntaxKind.RefType:
-                    this.ValidateSymbol( ((RefTypeSyntax) type).Type, kind | ValidatedReferenceKinds.RefType );
+                    this.ValidateSymbol( ((RefTypeSyntax) type).Type, kind | ReferenceKinds.RefType );
 
                     break;
 
                 case SyntaxKind.TupleType:
                     foreach ( var item in ((TupleTypeSyntax) type).Elements )
                     {
-                        this.VisitTypeReference( item.Type, kind | ValidatedReferenceKinds.TupleType );
+                        this.VisitTypeReference( item.Type, kind | ReferenceKinds.TupleType );
                     }
 
                     break;
@@ -406,7 +406,7 @@ internal partial class ValidationRunner
 
                         foreach ( var arg in genericType.TypeArgumentList.Arguments )
                         {
-                            this.VisitTypeReference( arg, kind | ValidatedReferenceKinds.TypeArgument );
+                            this.VisitTypeReference( arg, kind | ReferenceKinds.TypeArgument );
                         }
                     }
 
