@@ -166,11 +166,7 @@ namespace Metalama.LinqPad
             DumpContainer container = new();
 
             Hyperlinq link = new(
-                () =>
-                {
-                    // On click, replace the link by the object content.
-                    container.Content = o;
-                },
+                () => container.Content = o, // On click, replace the link by the object content.
                 summary );
 
             if ( cssClass != null )

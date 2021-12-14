@@ -89,9 +89,9 @@ namespace Metalama.Framework.Engine.Pipeline
                 if ( Directory.Exists( projectOptions.AdditionalCompilationOutputDirectory ) )
                 {
                     foreach ( var existingAuxiliaryFile in Directory.GetFiles(
-                        projectOptions.AdditionalCompilationOutputDirectory,
-                        "*",
-                        SearchOption.AllDirectories ) )
+                                 projectOptions.AdditionalCompilationOutputDirectory,
+                                 "*",
+                                 SearchOption.AllDirectories ) )
                     {
                         existingFiles.Add( existingAuxiliaryFile );
                     }

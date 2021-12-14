@@ -177,13 +177,13 @@ namespace Metalama.Framework.Engine.CompileTime
             }
 
             if ( !this._builder.TryGetCompileTimeProject(
-                runTimeCompilation,
-                compileTimeTreesHint,
-                referencedProjects,
-                diagnosticSink,
-                cacheOnly,
-                cancellationToken,
-                out compileTimeProject ) )
+                    runTimeCompilation,
+                    compileTimeTreesHint,
+                    referencedProjects,
+                    diagnosticSink,
+                    cacheOnly,
+                    cancellationToken,
+                    out compileTimeProject ) )
             {
                 compileTimeProject = null;
 
@@ -258,11 +258,11 @@ namespace Metalama.Framework.Engine.CompileTime
             var assemblyName = AssemblyName.GetAssemblyName( assemblyPath );
 
             if ( !this.TryDeserializeCompileTimeProject(
-                assemblyName.ToAssemblyIdentity(),
-                new MemoryStream( resourceBytes ),
-                diagnosticSink,
-                cancellationToken,
-                out compileTimeProject ) )
+                    assemblyName.ToAssemblyIdentity(),
+                    new MemoryStream( resourceBytes ),
+                    diagnosticSink,
+                    cancellationToken,
+                    out compileTimeProject ) )
             {
                 // Coverage: ignore
 
@@ -328,14 +328,14 @@ namespace Metalama.Framework.Engine.CompileTime
 
             // Deserialize the project.
             if ( !this._builder.TryCompileDeserializedProject(
-                runTimeAssemblyIdentity.Name,
-                syntaxTrees,
-                manifest.SourceHash,
-                referenceProjects,
-                diagnosticAdder,
-                cancellationToken,
-                out var assemblyPath,
-                out var sourceDirectory ) )
+                    runTimeAssemblyIdentity.Name,
+                    syntaxTrees,
+                    manifest.SourceHash,
+                    referenceProjects,
+                    diagnosticAdder,
+                    cancellationToken,
+                    out var assemblyPath,
+                    out var sourceDirectory ) )
             {
                 // Coverage: ignore
                 // (this happens when the compile-time could not be compiled into a binary assembly.)

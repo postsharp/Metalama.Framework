@@ -25,8 +25,7 @@ namespace Metalama.Framework.Engine.Aspects
     /// </summary>
     internal class ExternalInheritedAspectSource : IAspectSource
     {
-        private readonly ImmutableDictionaryOfArray<IAspectClass, ISymbol> _inheritedAspects;
-        private readonly CompileTimeProjectLoader _loader;
+        private readonly ImmutableDictionaryOfArray<IAspectClass, InheritableAspectInstance> _inheritedAspects;
 
         public ExternalInheritedAspectSource(
             Compilation compilation,
@@ -34,15 +33,14 @@ namespace Metalama.Framework.Engine.Aspects
             IServiceProvider serviceProvider,
             CancellationToken cancellationToken )
         {
-            this._loader = serviceProvider.GetRequiredService<CompileTimeProjectLoader>();
-            var inheritableAspectProvider = serviceProvider.GetService<IInheritableAspectManifestProvider>();
+            var inheritableAspectProvider = serviceProvider.GetService<ITransitiveAspectManifestProvider>();
 
-            var inheritedAspectsBuilder = ImmutableDictionaryOfArray<IAspectClass, ISymbol>.CreateBuilder();
+            var inheritedAspectsBuilder = ImmutableDictionaryOfArray<IAspectClass, InheritableAspectInstance>.CreateBuilder();
             var aspectClassesByName = aspectClasses.ToDictionary( t => t.FullName, t => t );
 
             foreach ( var reference in compilation.References )
             {
-                IInheritableAspectsManifest? manifest = null;
+                ITransitiveAspectsManifest? manifest = null;
 
                 switch ( reference )
                 {
@@ -51,14 +49,14 @@ namespace Metalama.Framework.Engine.Aspects
                         {
                             if ( resources.TryGetValue( CompileTimeConstants.InheritableAspectManifestResourceName, out var bytes ) )
                             {
-                                manifest = InheritableAspectsManifest.Deserialize( new MemoryStream( bytes ) );
+                                manifest = TransitiveAspectsManifest.Deserialize( new MemoryStream( bytes ), serviceProvider );
                             }
                         }
 
                         break;
 
                     case CompilationReference compilationReference:
-                        manifest = inheritableAspectProvider?.GetInheritableAspectsManifest( compilationReference.Compilation, cancellationToken );
+                        manifest = inheritableAspectProvider?.GetTransitiveAspectsManifest( compilationReference.Compilation, cancellationToken );
 
                         break;
 
@@ -72,8 +70,7 @@ namespace Metalama.Framework.Engine.Aspects
                     {
                         var aspectClass = aspectClassesByName[aspectClassName];
 
-                        var targets = manifest.GetInheritableAspectTargets( aspectClassName )
-                            .Select( x => DocumentationCommentId.GetFirstSymbolForDeclarationId( x, compilation ) )
+                        var targets = manifest.GetInheritedAspects( aspectClassName )
                             .WhereNotNull();
 
                         inheritedAspectsBuilder.AddRange( aspectClass, targets );
@@ -94,27 +91,26 @@ namespace Metalama.Framework.Engine.Aspects
             IDiagnosticAdder diagnosticAdder,
             CancellationToken cancellationToken )
         {
-            foreach ( var baseSymbol in this._inheritedAspects[aspectClass] )
+            foreach ( var inheritedAspectInstance in this._inheritedAspects[aspectClass] )
             {
-                var baseDeclaration = compilation.Factory.GetDeclaration( baseSymbol );
-                var attributeData = baseSymbol.GetAttributes().Single( a => a.AttributeClass?.GetReflectionName() == aspectClass.FullName );
-                var attribute = baseDeclaration.Attributes.Single( a => a.Type.FullName == aspectClass.FullName );
+                var targetSymbol = inheritedAspectInstance.TargetDeclaration.GetSymbol( compilation.RoslynCompilation );
+
+                if ( targetSymbol == null )
+                {
+                    continue;
+                }
+
+                var baseDeclaration = compilation.Factory.GetDeclaration( targetSymbol );
 
                 // We need to provide instances on the first level of derivation only because the caller will add to the next levels.
 
                 foreach ( var derived in ((IDeclarationImpl) baseDeclaration).GetDerivedDeclarations( false ) )
                 {
-                    if ( !this._loader.AttributeDeserializer.TryCreateAttribute( attributeData, diagnosticAdder, out var attributeInstance ) )
-                    {
-                        throw new AssertionFailedException();
-                    }
-
-                    yield return new AttributeAspectInstance(
-                        (IAspect) attributeInstance,
+                    yield return new AspectInstance(
+                        inheritedAspectInstance.Aspect,
                         derived.ToTypedRef(),
                         (AspectClass) aspectClass,
-                        attribute,
-                        this._loader );
+                        new AspectPredecessor( AspectPredecessorKind.Inherited, inheritedAspectInstance ) );
                 }
             }
         }

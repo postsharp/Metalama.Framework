@@ -3,9 +3,9 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Eligibility;
-using Metalama.Framework.Fabrics;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CompileTime;
+using Metalama.Framework.Fabrics;
 using System;
 using System.Collections.Immutable;
 

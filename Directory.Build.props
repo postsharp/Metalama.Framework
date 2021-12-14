@@ -15,6 +15,14 @@
     <Import Sdk="PostSharp.Engineering.Sdk" Project="BuildOptions.props" />
     <Import Sdk="PostSharp.Engineering.Sdk" Project="CodeQuality.props" />
     <Import Sdk="PostSharp.Engineering.Sdk" Project="SourceLink.props" />
+    
+    <PropertyGroup Condition="'$(Configuration)'=='Release'">
+    <!-- CS8602: Dereference of a possibly null reference.
+        CS8604: Possible null reference argument for parameter 'x' in 'y'.
+        
+         The compiler will emit these warnings if we have aggressive inlining. This should not be important for code quality.     -->
+        <NoWarn>$(NoWarn);CS8602;CS8604</NoWarn>
+    </PropertyGroup>
 
     <PropertyGroup>
         <!--
@@ -24,8 +32,8 @@
         -->
         <MetalamaLicense>1-ZEQQQQQQZEAEQCRCE4UW3UFEB4URXMHRB8KQBJJSB64LX7YQEUTZXJSRN4JUNTDAEAKZ2NUP6MCEBAXNKGL7VGZ48JHT6G3EGQREL8WQVM74EY4RC774B6HP6X5QQ35M5MZQQDEZJGP4Q8USJG4X6P2</MetalamaLicense>
     </PropertyGroup>
-    
-    
+
+
     <!-- Include the package version in metadata. -->
     <Target Name="AddAssemblyMetadata"
             BeforeTargets="GenerateAdditionalSources"

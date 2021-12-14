@@ -78,11 +78,11 @@ namespace Metalama.Framework.Engine.DesignTime.CodeFixes
 
             // Get the pipeline configuration from the design-time pipeline.
             if ( !designTimePipeline.TryGetConfiguration(
-                partialCompilation,
-                NullDiagnosticAdder.Instance,
-                true,
-                cancellationToken,
-                out var designTimeConfiguration ) )
+                    partialCompilation,
+                    NullDiagnosticAdder.Instance,
+                    true,
+                    cancellationToken,
+                    out var designTimeConfiguration ) )
             {
                 return project.Solution;
             }
@@ -95,11 +95,11 @@ namespace Metalama.Framework.Engine.DesignTime.CodeFixes
                 diagnostic );
 
             if ( !codeFixPipeline.TryExecute(
-                partialCompilation,
-                designTimeConfiguration,
-                cancellationToken,
-                out var userCodeFixes,
-                out _ ) )
+                    partialCompilation,
+                    designTimeConfiguration,
+                    cancellationToken,
+                    out var userCodeFixes,
+                    out _ ) )
             {
                 return project.Solution;
             }

@@ -129,19 +129,19 @@ namespace Metalama.Framework.Engine.Templating
 
                 // The following list of exceptions is incomplete. If you get into an InvalidCastException in the rewriter, you have to extend it.
                 if ( !node.AncestorsAndSelf()
-                    .Any(
-                        a =>
-                            a is GenericNameSyntax or UsingDirectiveSyntax ||
-                            (a.Parent is NamespaceDeclarationSyntax namespaceDeclaration && namespaceDeclaration.Name == a) ||
-                            (a.Parent is MethodDeclarationSyntax methodDeclaration && methodDeclaration.ReturnType == a) ||
-                            (a.Parent is VariableDeclarationSyntax variable && variable.Type == a) ||
-                            (a.Parent is TypeConstraintSyntax typeConstraint && typeConstraint.Type == a) ||
-                            (a.Parent is ArrayTypeSyntax arrayType && arrayType.ElementType == a) ||
-                            (a.Parent is ObjectCreationExpressionSyntax objectCreation && objectCreation.Type == a) ||
-                            (a.Parent is DefaultExpressionSyntax defaultExpression && defaultExpression.Type == a) ||
-                            (a.Parent is CastExpressionSyntax castExpression && castExpression.Type == a) ||
-                            (a.Parent is ExplicitInterfaceSpecifierSyntax explicitInterfaceSpecifier && explicitInterfaceSpecifier.Name == a) ||
-                            (a.Parent is ParameterSyntax parameter && parameter.Type == a) ) )
+                        .Any(
+                            a =>
+                                a is GenericNameSyntax or UsingDirectiveSyntax ||
+                                (a.Parent is NamespaceDeclarationSyntax namespaceDeclaration && namespaceDeclaration.Name == a) ||
+                                (a.Parent is MethodDeclarationSyntax methodDeclaration && methodDeclaration.ReturnType == a) ||
+                                (a.Parent is VariableDeclarationSyntax variable && variable.Type == a) ||
+                                (a.Parent is TypeConstraintSyntax typeConstraint && typeConstraint.Type == a) ||
+                                (a.Parent is ArrayTypeSyntax arrayType && arrayType.ElementType == a) ||
+                                (a.Parent is ObjectCreationExpressionSyntax objectCreation && objectCreation.Type == a) ||
+                                (a.Parent is DefaultExpressionSyntax defaultExpression && defaultExpression.Type == a) ||
+                                (a.Parent is CastExpressionSyntax castExpression && castExpression.Type == a) ||
+                                (a.Parent is ExplicitInterfaceSpecifierSyntax explicitInterfaceSpecifier && explicitInterfaceSpecifier.Name == a) ||
+                                (a.Parent is ParameterSyntax parameter && parameter.Type == a) ) )
                 {
                     return SyntaxFactory.MemberAccessExpression(
                         SyntaxKind.SimpleMemberAccessExpression,

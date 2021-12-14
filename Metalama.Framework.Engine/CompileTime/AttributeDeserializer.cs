@@ -144,8 +144,8 @@ namespace Metalama.Framework.Engine.CompileTime
                     var translatedValue = this.TranslateAttributeArgument( attribute, arg.Value, property.PropertyType, diagnosticAdder );
 
                     if ( !this._userCodeInvoker.TryInvoke(
-                        () => property.SetValue( localAttributeInstance, translatedValue ),
-                        executionContext.WithInvokedMember( UserCodeMemberInfo.FromMemberInfo( property ) ) ) )
+                            () => property.SetValue( localAttributeInstance, translatedValue ),
+                            executionContext.WithInvokedMember( UserCodeMemberInfo.FromMemberInfo( property ) ) ) )
                     {
                         attributeInstance = null;
 
@@ -157,8 +157,8 @@ namespace Metalama.Framework.Engine.CompileTime
                     var translatedValue = this.TranslateAttributeArgument( attribute, arg.Value, field.FieldType, diagnosticAdder );
 
                     if ( !this._userCodeInvoker.TryInvoke(
-                        () => field.SetValue( localAttributeInstance, translatedValue ),
-                        executionContext.WithInvokedMember( UserCodeMemberInfo.FromMemberInfo( field ) ) ) )
+                            () => field.SetValue( localAttributeInstance, translatedValue ),
+                            executionContext.WithInvokedMember( UserCodeMemberInfo.FromMemberInfo( field ) ) ) )
                     {
                         attributeInstance = null;
 

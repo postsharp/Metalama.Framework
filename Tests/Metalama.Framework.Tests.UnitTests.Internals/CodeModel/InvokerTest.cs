@@ -45,8 +45,8 @@ class TargetCode
             var compilation = testContext.CreateCompilationModel( code );
 
             using ( TemplateExpansionContext.WithTestingContext(
-                SyntaxGenerationContext.CreateDefault( serviceProvider, compilation.RoslynCompilation ),
-                serviceProvider ) )
+                       SyntaxGenerationContext.CreateDefault( serviceProvider, compilation.RoslynCompilation ),
+                       serviceProvider ) )
             {
                 var type = compilation.Types[0];
                 var toString = type.Methods.OfName( "ToString" ).Single();
@@ -137,8 +137,8 @@ class TargetCode
             var compilation = testContext.CreateCompilationModel( code );
 
             using ( TemplateExpansionContext.WithTestingContext(
-                SyntaxGenerationContext.CreateDefault( serviceProvider, compilation.RoslynCompilation ),
-                serviceProvider ) )
+                       SyntaxGenerationContext.CreateDefault( serviceProvider, compilation.RoslynCompilation ),
+                       serviceProvider ) )
             {
                 var type = compilation.Types.OfName( "TargetCode" ).Single();
                 var nestedType = type.NestedTypes.Single();
@@ -206,8 +206,8 @@ class TargetCode
             var compilation = testContext.CreateCompilationModel( code );
 
             using ( TemplateExpansionContext.WithTestingContext(
-                SyntaxGenerationContext.CreateDefault( serviceProvider, compilation.RoslynCompilation ),
-                serviceProvider ) )
+                       SyntaxGenerationContext.CreateDefault( serviceProvider, compilation.RoslynCompilation ),
+                       serviceProvider ) )
             {
                 var type = compilation.Types.OfName( "TargetCode" ).Single();
                 var nestedType = type.NestedTypes.Single().ConstructGenericInstance( compilation.Factory.GetTypeByReflectionType( typeof(string) ) );
@@ -286,8 +286,8 @@ class TargetCode
             var compilation = testContext.CreateCompilationModel( code );
 
             using ( TemplateExpansionContext.WithTestingContext(
-                SyntaxGenerationContext.CreateDefault( serviceProvider, compilation.RoslynCompilation ),
-                serviceProvider ) )
+                       SyntaxGenerationContext.CreateDefault( serviceProvider, compilation.RoslynCompilation ),
+                       serviceProvider ) )
             {
                 var localFunction = compilation.Types.OfName( "TargetCode" ).Single().Methods.Single().LocalFunctions.Single();
 
@@ -318,8 +318,8 @@ class TargetCode
             var compilation = testContext.CreateCompilationModel( code );
 
             using ( TemplateExpansionContext.WithTestingContext(
-                SyntaxGenerationContext.CreateDefault( serviceProvider, compilation.RoslynCompilation ),
-                serviceProvider ) )
+                       SyntaxGenerationContext.CreateDefault( serviceProvider, compilation.RoslynCompilation ),
+                       serviceProvider ) )
             {
                 var method = compilation.Types.Single().Methods.Single();
 
@@ -354,8 +354,8 @@ class TargetCode
             var compilation = testContext.CreateCompilationModel( code );
 
             using ( TemplateExpansionContext.WithTestingContext(
-                SyntaxGenerationContext.CreateDefault( serviceProvider, compilation.RoslynCompilation ),
-                serviceProvider ) )
+                       SyntaxGenerationContext.CreateDefault( serviceProvider, compilation.RoslynCompilation ),
+                       serviceProvider ) )
             {
                 var type = compilation.Types.Single();
                 var property = type.Properties.OfName( "P" ).Single();
@@ -399,8 +399,8 @@ class TargetCode
             var compilation = testContext.CreateCompilationModel( code );
 
             using ( TemplateExpansionContext.WithTestingContext(
-                SyntaxGenerationContext.CreateDefault( serviceProvider, compilation.RoslynCompilation ),
-                serviceProvider ) )
+                       SyntaxGenerationContext.CreateDefault( serviceProvider, compilation.RoslynCompilation ),
+                       serviceProvider ) )
             {
                 var type = compilation.Types.Single();
                 var property = type.Properties.OfName( "P" ).Single();
@@ -433,8 +433,8 @@ class TargetCode
             var compilation = testContext.CreateCompilationModel( code );
 
             using ( TemplateExpansionContext.WithTestingContext(
-                SyntaxGenerationContext.CreateDefault( serviceProvider, compilation.RoslynCompilation ),
-                serviceProvider ) )
+                       SyntaxGenerationContext.CreateDefault( serviceProvider, compilation.RoslynCompilation ),
+                       serviceProvider ) )
             {
                 var type = compilation.Types.Single();
                 var @event = type.Events.Single();
@@ -472,8 +472,8 @@ class TargetCode
             var compilation = testContext.CreateCompilationModel( code );
 
             using ( TemplateExpansionContext.WithTestingContext(
-                SyntaxGenerationContext.CreateDefault( serviceProvider, compilation.RoslynCompilation ),
-                serviceProvider ) )
+                       SyntaxGenerationContext.CreateDefault( serviceProvider, compilation.RoslynCompilation ),
+                       serviceProvider ) )
             {
                 var type = compilation.Types.Single();
                 var @event = type.Events.Single();
@@ -527,8 +527,8 @@ class TargetCode
             var compilation = testContext.CreateCompilationModel( code );
 
             using ( TemplateExpansionContext.WithTestingContext(
-                SyntaxGenerationContext.CreateDefault( serviceProvider, compilation.RoslynCompilation ),
-                serviceProvider ) )
+                       SyntaxGenerationContext.CreateDefault( serviceProvider, compilation.RoslynCompilation ),
+                       serviceProvider ) )
             {
                 var type = compilation.Types.Single();
                 var method = type.Methods.OfName( "A" ).Single();

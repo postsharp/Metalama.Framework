@@ -51,10 +51,10 @@ namespace Metalama.Framework.Tests.UnitTests
             };
 
             if ( AspectLayerSorter.TrySort(
-                allLayers,
-                dependencies,
-                diagnostics,
-                out var sortedAspectLayers ) )
+                    allLayers,
+                    dependencies,
+                    diagnostics,
+                    out var sortedAspectLayers ) )
             {
                 sortedAspects = string.Join(
                     ", ",

@@ -129,14 +129,14 @@ namespace Metalama.Framework.Engine.DesignTime
             }
 
             if ( DesignTimeAspectPipelineFactory.Instance.TryApplyAspectToCode(
-                projectOptions,
-                aspectClass,
-                aspectClass.CreateDefaultInstance(),
-                compilation,
-                targetSymbol,
-                cancellationToken,
-                out var outputCompilation,
-                out var diagnostics ) )
+                    projectOptions,
+                    aspectClass,
+                    aspectClass.CreateDefaultInstance(),
+                    compilation,
+                    targetSymbol,
+                    cancellationToken,
+                    out var outputCompilation,
+                    out var diagnostics ) )
             {
                 var project = targetDocument.Project;
 

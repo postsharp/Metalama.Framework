@@ -7,19 +7,19 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serializers
 {
-    public class ReferenceTypeTests : MetaSerializerTestBase
+    public class ReferenceTypeTests : SerializerTestBase
     {
         // Tests verify correctness of the generated serializer.
 
         [Fact]
         public void MutableMembers()
         {
-            // Verifies that IMetaSerializable type with mutable members can be serialized and deserialized (round-trip).
+            // Verifies that ILamaSerializable type with mutable members can be serialized and deserialized (round-trip).
             var code = @"
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Serialization;
 [assembly: CompileTime]
-public class A : IMetaSerializable
+public class A : ILamaSerializable
 {
     public int Field;
     public int Property { get; set; }
@@ -29,16 +29,10 @@ public class A : IMetaSerializable
             using var domain = new UnloadableCompileTimeDomain();
             using var testContext = this.CreateTestContext();
 
-/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
-Before:
-            var project = this.CreateCompileTimeProject( domain, testContext, code );
-After:
-            var project = MetaSerializerTestBase.CreateCompileTimeProject( domain, testContext, code );
-*/
             var project = CreateCompileTimeProject( domain, testContext, code );
 
-            var type = project!.GetType( "A" );
-            var metaSerializer = GetMetaSerializer( type );
+            var type = project.GetType( "A" );
+            var metaSerializer = GetSerializer( type );
 
             dynamic instance = Activator.CreateInstance( type )!;
             instance.Field = 13;
@@ -61,12 +55,12 @@ After:
         [Fact]
         public void ReadOnlyValueTypeMembers()
         {
-            // Verifies that IMetaSerializable type with read-only members can be serialized and deserialized (round-trip).
+            // Verifies that ILamaSerializable type with read-only members can be serialized and deserialized (round-trip).
             var code = @"
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Serialization;
 [assembly: CompileTime]
-public class A : IMetaSerializable
+public class A : ILamaSerializable
 {
     public readonly int Field;
     public int Property { get; }
@@ -82,16 +76,10 @@ public class A : IMetaSerializable
             using var domain = new UnloadableCompileTimeDomain();
             using var testContext = this.CreateTestContext();
 
-/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
-Before:
-            var project = this.CreateCompileTimeProject( domain, testContext, code );
-After:
-            var project = MetaSerializerTestBase.CreateCompileTimeProject( domain, testContext, code );
-*/
             var project = CreateCompileTimeProject( domain, testContext, code );
 
-            var type = project!.GetType( "A" );
-            var metaSerializer = GetMetaSerializer( type );
+            var type = project.GetType( "A" );
+            var metaSerializer = GetSerializer( type );
 
             dynamic instance = Activator.CreateInstance( type, 13, 42 )!;
 
@@ -112,12 +100,12 @@ After:
         [Fact]
         public void ReadOnlyReferenceTypeMembers()
         {
-            // Verifies that IMetaSerializable type with read-only members can be serialized and deserialized (round-trip).
+            // Verifies that ILamaSerializable type with read-only members can be serialized and deserialized (round-trip).
             var code = @"
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Serialization;
 [assembly: CompileTime]
-public class A : IMetaSerializable
+public class A : ILamaSerializable
 {
     public readonly B Field;
     public B Property { get; }
@@ -143,21 +131,15 @@ public class B
             using var domain = new UnloadableCompileTimeDomain();
             using var testContext = this.CreateTestContext();
 
-            /* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
-            Before:
-                        var project = this.CreateCompileTimeProject( domain, testContext, code );
-            After:
-                        var project = MetaSerializerTestBase.CreateCompileTimeProject( domain, testContext, code );
-            */
             var project = CreateCompileTimeProject( domain, testContext, code );
 
-            var typeA = project!.GetType( "A" );
-            var typeB = project!.GetType( "B" );
-            var metaSerializer = GetMetaSerializer( typeA );
+            var typeA = project.GetType( "A" );
+            var typeB = project.GetType( "B" );
+            var metaSerializer = GetSerializer( typeA );
 
             dynamic instanceB1 = Activator.CreateInstance( typeB, 13 )!;
             dynamic instanceB2 = Activator.CreateInstance( typeB, 42 )!;
-            dynamic instanceA = Activator.CreateInstance( typeA, instanceB1, instanceB2 )!;
+            var instanceA = Activator.CreateInstance( typeA, instanceB1, instanceB2 )!;
 
             var constructorArgumentsWriter = new TestArgumentsWriter();
             var initializationArgumentsWriter = new TestArgumentsWriter();
@@ -176,12 +158,13 @@ public class B
         [Fact]
         public void InitOnlyReferenceTypeMembers()
         {
-            // Verifies that IMetaSerializable type with init-only members can be serialized and deserialized (round-trip).
+            // Verifies that ILamaSerializable type with init-only members can be serialized and deserialized (round-trip).
             var code = @"
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Serialization;
 [assembly: CompileTime]
-public class A : IMetaSerializable
+
+public class A : ILamaSerializable
 {
     public B Property { get; init; }
 
@@ -202,23 +185,21 @@ public class B
 }
 ";
 
+#if NETFRAMEWORK
+            code += "namespace System.Runtime.CompilerServices { internal static class IsExternalInit {}}";
+#endif
+
             using var domain = new UnloadableCompileTimeDomain();
             using var testContext = this.CreateTestContext();
 
-            /* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
-            Before:
-                        var project = this.CreateCompileTimeProject( domain, testContext, code );
-            After:
-                        var project = MetaSerializerTestBase.CreateCompileTimeProject( domain, testContext, code );
-            */
             var project = CreateCompileTimeProject( domain, testContext, code );
 
-            var typeA = project!.GetType( "A" );
-            var typeB = project!.GetType( "B" );
-            var metaSerializer = GetMetaSerializer( typeA );
+            var typeA = project.GetType( "A" );
+            var typeB = project.GetType( "B" );
+            var metaSerializer = GetSerializer( typeA );
 
             dynamic instanceB = Activator.CreateInstance( typeB, 42 )!;
-            dynamic instanceA = Activator.CreateInstance( typeA, instanceB )!;
+            var instanceA = Activator.CreateInstance( typeA, instanceB )!;
 
             var constructorArgumentsWriter = new TestArgumentsWriter();
             var initializationArgumentsWriter = new TestArgumentsWriter();
@@ -236,13 +217,13 @@ public class B
         [Fact]
         public void ExplicitParameterlessConstructor()
         {
-            // Verifies that IMetaSerializable compile-time type with explicit parameterless constructor can be serialized and deserialized.
+            // Verifies that ILamaSerializable compile-time type with explicit parameterless constructor can be serialized and deserialized.
             // Generator should not inject parameterless constructor when it is already defined.
             var code = @"
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Serialization;
 [assembly: CompileTime]
-public class A : IMetaSerializable
+public class A : ILamaSerializable
 {
     public A()
     {
@@ -253,16 +234,10 @@ public class A : IMetaSerializable
             using var domain = new UnloadableCompileTimeDomain();
             using var testContext = this.CreateTestContext();
 
-/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
-Before:
-            var project = this.CreateCompileTimeProject( domain, testContext, code );
-After:
-            var project = MetaSerializerTestBase.CreateCompileTimeProject( domain, testContext, code );
-*/
             var project = CreateCompileTimeProject( domain, testContext, code );
 
-            var type = project!.GetType( "A" );
-            var metaSerializer = GetMetaSerializer( type );
+            var type = project.GetType( "A" );
+            var metaSerializer = GetSerializer( type );
 
             dynamic instance = Activator.CreateInstance( type )!;
 
@@ -278,24 +253,21 @@ After:
         }
 
         [Fact]
-        public void SimpleStruct()
+        public void GenericClass()
         {
-            // Verifies that IMetaSerializable readonly struct type can be serialized and deserialized (round-trip).
+            // Verifies that IMetaSerializable compile-time type with explicit parameterless constructor can be serialized and deserialized.
+            // Generator should not inject parameterless constructor when it is already defined.
             var code = @"
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Serialization;
 [assembly: CompileTime]
-public struct A : IMetaSerializable
+public class A<T> : ILamaSerializable
 {
-    public readonly int Field;
-    public int Property { get; }
-    public int MutableProperty { get; set; }
+    public T Property { get; }
 
-    public A(int field, int property)
+    public A(T property)
     {
-        this.Field = field;
         this.Property = property;
-        this.MutableProperty = 0;
     }
 }
 ";
@@ -303,19 +275,12 @@ public struct A : IMetaSerializable
             using var domain = new UnloadableCompileTimeDomain();
             using var testContext = this.CreateTestContext();
 
-            /* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
-            Before:
-                        var project = this.CreateCompileTimeProject( domain, testContext, code );
-            After:
-                        var project = MetaSerializerTestBase.CreateCompileTimeProject( domain, testContext, code );
-            */
             var project = CreateCompileTimeProject( domain, testContext, code );
 
-            var type = project!.GetType( "A" );
-            var metaSerializer = GetMetaSerializer( type );
+            var type = project.GetType( "A`1" ).MakeGenericType( typeof(int) );
+            var metaSerializer = GetSerializer( type );
 
-            dynamic instance = Activator.CreateInstance( type, 13, 27 )!;
-            instance.MutableProperty = 42;
+            dynamic instance = Activator.CreateInstance( type, 42 )!;
 
             var constructorArgumentsWriter = new TestArgumentsWriter();
             var initializationArgumentsWriter = new TestArgumentsWriter();
@@ -327,25 +292,33 @@ public struct A : IMetaSerializable
             dynamic deserialized = metaSerializer.CreateInstance( type, constructorArgumentsReader );
             metaSerializer.DeserializeFields( ref deserialized, initializationArgumentsReader );
 
-            Assert.Equal( 13, deserialized.Field );
-            Assert.Equal( 27, deserialized.Property );
-            Assert.Equal( 42, deserialized.MutableProperty );
+            Assert.Equal( 42, deserialized.Property );
         }
 
         [Fact]
-        public void ReadonlyStruct()
+        public void ClosedGenericValue()
         {
-            // Verifies that IMetaSerializable readonly struct type can be serialized and deserialized (round-trip).
+            // Verifies that generated serializer correctly handles a field/property of closed generic type
             var code = @"
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Serialization;
 [assembly: CompileTime]
-public readonly struct A : IMetaSerializable
+public class A<T>
 {
-    public readonly int Field;
-    public int Property { get; }
+    public T Property { get; set; }
 
-    public A(int field, int property)
+    public A(T property)
+    {
+        this.Property = property;
+    }
+}
+
+public class B : ILamaSerializable
+{
+    public A<object> Field;
+    public A<int> Property { get; set; }
+
+    public B(A<object> field, A<int> property)
     {
         this.Field = field;
         this.Property = property;
@@ -356,31 +329,84 @@ public readonly struct A : IMetaSerializable
             using var domain = new UnloadableCompileTimeDomain();
             using var testContext = this.CreateTestContext();
 
-            /* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
-            Before:
-                        var project = this.CreateCompileTimeProject( domain, testContext, code );
-            After:
-                        var project = MetaSerializerTestBase.CreateCompileTimeProject( domain, testContext, code );
-            */
             var project = CreateCompileTimeProject( domain, testContext, code );
 
-            var type = project!.GetType( "A" );
-            var metaSerializer = GetMetaSerializer( type );
+            var typeAObject = project.GetType( "A`1" ).MakeGenericType( typeof(object) );
+            var typeAInt = project.GetType( "A`1" ).MakeGenericType( typeof(int) );
+            var typeB = project.GetType( "B" );
+            var metaSerializer = GetSerializer( typeB );
 
-            dynamic instance = Activator.CreateInstance( type, 13, 42 )!;
+            var obj = new object();
+            dynamic instanceAObj = Activator.CreateInstance( typeAObject, obj )!;
+            dynamic instanceAInt = Activator.CreateInstance( typeAInt, 42 )!;
+            var instanceB = Activator.CreateInstance( typeB, instanceAObj, instanceAInt )!;
 
             var constructorArgumentsWriter = new TestArgumentsWriter();
             var initializationArgumentsWriter = new TestArgumentsWriter();
-            metaSerializer.SerializeObject( instance, constructorArgumentsWriter, initializationArgumentsWriter );
+            metaSerializer.SerializeObject( instanceB, constructorArgumentsWriter, initializationArgumentsWriter );
 
             var constructorArgumentsReader = constructorArgumentsWriter.ToReader();
             var initializationArgumentsReader = initializationArgumentsWriter.ToReader();
 
-            dynamic deserialized = metaSerializer.CreateInstance( type, constructorArgumentsReader );
+            dynamic deserialized = metaSerializer.CreateInstance( typeB, constructorArgumentsReader );
             metaSerializer.DeserializeFields( ref deserialized, initializationArgumentsReader );
 
-            Assert.Equal( 13, deserialized.Field );
-            Assert.Equal( 42, deserialized.Property );
+            Assert.Same( instanceAObj, deserialized.Field );
+            Assert.Same( instanceAInt, deserialized.Property );
+        }
+
+        [Fact]
+        public void OpenGenericValue()
+        {
+            // Verifies that generated serializer correctly handles a field/property of closed generic type
+            var code = @"
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Serialization;
+[assembly: CompileTime]
+public class A<T>
+{
+    public T Property { get; set; }
+
+    public A(T property)
+    {
+        this.Property = property;
+    }
+}
+
+public class B<T> : ILamaSerializable
+{
+    public A<T> Property { get; set; }
+
+    public B(A<T> property)
+    {
+        this.Property = property;
+    }
+}
+";
+
+            using var domain = new UnloadableCompileTimeDomain();
+            using var testContext = this.CreateTestContext();
+
+            var project = CreateCompileTimeProject( domain, testContext, code );
+
+            var typeA = project.GetType( "A`1" ).MakeGenericType( typeof(int) );
+            var typeB = project.GetType( "B`1" ).MakeGenericType( typeof(int) );
+            var metaSerializer = GetSerializer( typeB );
+
+            dynamic instanceA = Activator.CreateInstance( typeA, 42 )!;
+            var instanceB = Activator.CreateInstance( typeB, instanceA )!;
+
+            var constructorArgumentsWriter = new TestArgumentsWriter();
+            var initializationArgumentsWriter = new TestArgumentsWriter();
+            metaSerializer.SerializeObject( instanceB, constructorArgumentsWriter, initializationArgumentsWriter );
+
+            var constructorArgumentsReader = constructorArgumentsWriter.ToReader();
+            var initializationArgumentsReader = initializationArgumentsWriter.ToReader();
+
+            dynamic deserialized = metaSerializer.CreateInstance( typeB, constructorArgumentsReader );
+            metaSerializer.DeserializeFields( ref deserialized, initializationArgumentsReader );
+
+            Assert.Same( instanceA, deserialized.Property );
         }
     }
 }

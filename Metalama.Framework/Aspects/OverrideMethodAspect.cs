@@ -5,7 +5,6 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Eligibility;
 using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
 namespace Metalama.Framework.Aspects
@@ -17,15 +16,9 @@ namespace Metalama.Framework.Aspects
     [AttributeUsage( AttributeTargets.Method )]
     public abstract class OverrideMethodAspect : MethodAspect
     {
-        private bool _useEnumerableTemplateForAnyEnumerable;
-        private bool _useAsyncTemplateForAnyAwaitable;
-        private bool _buildAspectCalled;
-
         /// <inheritdoc />
         public override void BuildAspect( IAspectBuilder<IMethod> builder )
         {
-            this.EnsureBuildAspectNotCalled();
-
 #if NET5_0_OR_GREATER
             var templates = new MethodTemplateSelector(
                 nameof(this.OverrideMethod),
@@ -48,46 +41,24 @@ namespace Metalama.Framework.Aspects
                 this.UseEnumerableTemplateForAnyEnumerable );
 #endif
 
-            this._buildAspectCalled = true;
             builder.Advices.OverrideMethod( builder.Target, templates );
         }
 
-        private void EnsureBuildAspectNotCalled( [CallerMemberName] string? caller = null )
-        {
-            if ( this._buildAspectCalled )
-            {
-                throw new InvalidOperationException( $"Cannot access {caller} because the {nameof(this.BuildAspect)} method has already been invoked." );
-            }
-        }
+#pragma warning disable SA1623
 
         /// <summary>
         /// Gets or sets a value indicating whether the <see cref="OverrideAsyncMethod"/> template must be applied to all methods returning an awaitable
         /// type (including <c>IAsyncEnumerable</c> and <c>IAsyncEnumerator</c>), instead of only to methods that have the <c>async</c> modifier.
         /// </summary>
-        protected bool UseEnumerableTemplateForAnyEnumerable
-        {
-            get => this._useEnumerableTemplateForAnyEnumerable;
-            set
-            {
-                this.EnsureBuildAspectNotCalled();
-                this._useEnumerableTemplateForAnyEnumerable = value;
-            }
-        }
+        protected bool UseEnumerableTemplateForAnyEnumerable { get; init; }
 
         /// <summary>
         /// Gets or sets a value indicating whether the <see cref="OverrideEnumerableMethod"/>, <see cref="OverrideEnumeratorMethod"/>,
         /// <c>OverrideAsyncEnumerableMethod"</c> or  <c>OverrideAsyncEnumeratorMethod"</c> template must be applied to all methods returning
         /// a compatible return type, instead of only to methods using the <c>yield</c> statement.
         /// </summary>
-        protected bool UseAsyncTemplateForAnyAwaitable
-        {
-            get => this._useAsyncTemplateForAnyAwaitable;
-            set
-            {
-                this.EnsureBuildAspectNotCalled();
-                this._useAsyncTemplateForAnyAwaitable = value;
-            }
-        }
+        protected bool UseAsyncTemplateForAnyAwaitable { get; init; }
+#pragma warning restore SA1623
 
         public override void BuildEligibility( IEligibilityBuilder<IMethod> builder ) => builder.ExceptForInheritance().MustBeNonAbstract();
 

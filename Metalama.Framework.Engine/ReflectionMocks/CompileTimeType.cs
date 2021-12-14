@@ -35,7 +35,7 @@ namespace Metalama.Framework.Engine.ReflectionMocks
             => UserCodeExecutionContext.Current.ServiceProvider.GetRequiredService<CompileTimeTypeFactory>().Get( new SymbolId( id ), fullMetadataName );
 
         internal static Type CreateFromSymbolId( SymbolId symbolId, string fullMetadataName )
-            => new CompileTimeType( Ref.FromSymbolKey<IType>( symbolId ), fullMetadataName );
+            => new CompileTimeType( Ref.FromSymbolId<IType>( symbolId ), fullMetadataName );
 
         // For test only. This is also used from serializers but these used should be removed when serializers will stop using symbols.
         internal static Type Create( IType type ) => Create( type.GetSymbol(), type.GetCompilationModel().RoslynCompilation );

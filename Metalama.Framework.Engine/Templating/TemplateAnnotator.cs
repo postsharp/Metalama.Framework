@@ -5,7 +5,7 @@ using Metalama.Framework.DesignTime.Contracts;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
-using Metalama.Framework.Engine.Serialization;
+using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
@@ -856,9 +856,9 @@ namespace Metalama.Framework.Engine.Templating
                         // dynamic or dynamic[]
 
                         using ( this.WithScopeContext(
-                            ScopeContext.CreatePreferredRunTimeScope(
-                                this._currentScopeContext,
-                                $"argument of the dynamic parameter '{parameter?.Name ?? argumentIndex.ToString( CultureInfo.InvariantCulture )}'" ) ) )
+                                   ScopeContext.CreatePreferredRunTimeScope(
+                                       this._currentScopeContext,
+                                       $"argument of the dynamic parameter '{parameter?.Name ?? argumentIndex.ToString( CultureInfo.InvariantCulture )}'" ) ) )
                         {
                             transformedArgumentValue = this.Visit( argument.Expression );
                         }
@@ -866,9 +866,9 @@ namespace Metalama.Framework.Engine.Templating
                     else if ( expressionScope.IsRunTime() )
                     {
                         using ( this.WithScopeContext(
-                            ScopeContext.CreatePreferredRunTimeScope(
-                                this._currentScopeContext,
-                                $"argument of the run-time method '{node.Expression}'" ) ) )
+                                   ScopeContext.CreatePreferredRunTimeScope(
+                                       this._currentScopeContext,
+                                       $"argument of the run-time method '{node.Expression}'" ) ) )
                         {
                             transformedArgumentValue = this.Visit( argument.Expression );
                         }
@@ -876,7 +876,7 @@ namespace Metalama.Framework.Engine.Templating
                     else
                     {
                         using ( this.WithScopeContext(
-                            ScopeContext.CreateForcedCompileTimeScope( this._currentScopeContext, $"a compile-time expression '{node.Expression}'" ) ) )
+                                   ScopeContext.CreateForcedCompileTimeScope( this._currentScopeContext, $"a compile-time expression '{node.Expression}'" ) ) )
                         {
                             transformedArgumentValue = this.Visit( argument.Expression );
                         }
@@ -1202,9 +1202,9 @@ namespace Metalama.Framework.Engine.Templating
             if ( node.ArgumentList != null )
             {
                 using ( this.WithScopeContext(
-                    localScope == TemplatingScope.CompileTimeOnly
-                        ? ScopeContext.CreateForcedCompileTimeScope( this._currentScopeContext, "creation of a compile-time object" )
-                        : ScopeContext.CreatePreferredRunTimeScope( this._currentScopeContext, "creation of a run-time object" ) ) )
+                           localScope == TemplatingScope.CompileTimeOnly
+                               ? ScopeContext.CreateForcedCompileTimeScope( this._currentScopeContext, "creation of a compile-time object" )
+                               : ScopeContext.CreatePreferredRunTimeScope( this._currentScopeContext, "creation of a run-time object" ) ) )
                 {
                     transformedArguments = node.ArgumentList.Arguments.Select( a => this.Visit( a ) ).ToArray();
                 }
@@ -1239,7 +1239,9 @@ namespace Metalama.Framework.Engine.Templating
             if ( this.GetNodeScope( transformedType ) == TemplatingScope.CompileTimeOnly )
             {
                 using ( this.WithScopeContext(
-                    ScopeContext.CreateForcedCompileTimeScope( this._currentScopeContext, $"a local variable of compile-time-only type '{node.Type}'" ) ) )
+                           ScopeContext.CreateForcedCompileTimeScope(
+                               this._currentScopeContext,
+                               $"a local variable of compile-time-only type '{node.Type}'" ) ) )
                 {
                     // ReSharper disable once RedundantSuppressNullableWarningExpression
                     var transformedVariables = node.Variables.Select( v => this.Visit( v )! );
@@ -1427,9 +1429,9 @@ namespace Metalama.Framework.Engine.Templating
             {
                 // The whole cast is run-time only.
                 using ( this.WithScopeContext(
-                    ScopeContext.CreatePreferredRunTimeScope(
-                        this._currentScopeContext,
-                        $"cast of the run-time-only expression '{node.Expression}'" ) ) )
+                           ScopeContext.CreatePreferredRunTimeScope(
+                               this._currentScopeContext,
+                               $"cast of the run-time-only expression '{node.Expression}'" ) ) )
                 {
                     annotatedType = this.Visit( node.Type );
                 }
@@ -1538,10 +1540,10 @@ namespace Metalama.Framework.Engine.Templating
             StatementSyntax transformedStatement;
 
             using ( this.WithScopeContext(
-                ScopeContext.CreateBreakOrContinueScope(
-                    this._currentScopeContext,
-                    TemplatingScope.RunTimeOnly,
-                    $"for ( {node.Initializers}; ... )" ) ) )
+                       ScopeContext.CreateBreakOrContinueScope(
+                           this._currentScopeContext,
+                           TemplatingScope.RunTimeOnly,
+                           $"for ( {node.Initializers}; ... )" ) ) )
             {
                 transformedStatement = this.Visit( node.Statement );
             }
@@ -1571,7 +1573,7 @@ namespace Metalama.Framework.Engine.Templating
             StatementSyntax annotatedStatement;
 
             using ( this.WithScopeContext(
-                ScopeContext.CreateBreakOrContinueScope( this._currentScopeContext, conditionScope, $"while ( {node.Condition} )" ) ) )
+                       ScopeContext.CreateBreakOrContinueScope( this._currentScopeContext, conditionScope, $"while ( {node.Condition} )" ) ) )
             {
                 annotatedStatement = this.Visit( node.Statement ).ReplaceScopeAnnotation( conditionScope );
             }

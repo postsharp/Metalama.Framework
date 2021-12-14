@@ -79,10 +79,10 @@ namespace Metalama.Framework.Engine.DesignTime
         {
             // Execute the pipeline.
             if ( !DesignTimeAspectPipelineFactory.Instance.TryExecute(
-                options,
-                compilation,
-                cancellationToken,
-                out var compilationResult ) )
+                    options,
+                    compilation,
+                    cancellationToken,
+                    out var compilationResult ) )
             {
                 Logger.Instance?.Write( $"DesignTimeDiagnosticSuppressor.ReportSuppressions('{compilation.AssemblyName}'): the pipeline failed." );
 
@@ -134,13 +134,13 @@ namespace Metalama.Framework.Engine.DesignTime
                     var symbolId = symbol.GetDocumentationCommentId().AssertNotNull();
 
                     foreach ( var suppression in suppressionsBySymbol[symbolId]
-                        .Where( s => string.Equals( s.Definition.SuppressedDiagnosticId, diagnostic.Id, StringComparison.OrdinalIgnoreCase ) ) )
+                                 .Where( s => string.Equals( s.Definition.SuppressedDiagnosticId, diagnostic.Id, StringComparison.OrdinalIgnoreCase ) ) )
                     {
                         suppressionsCount++;
 
                         if ( this._designTimeDiagnosticDefinitions.SupportedSuppressionDescriptors.TryGetValue(
-                            suppression.Definition.SuppressedDiagnosticId,
-                            out var suppressionDescriptor ) )
+                                suppression.Definition.SuppressedDiagnosticId,
+                                out var suppressionDescriptor ) )
                         {
                             reportSuppression( Suppression.Create( suppressionDescriptor, diagnostic ) );
                         }

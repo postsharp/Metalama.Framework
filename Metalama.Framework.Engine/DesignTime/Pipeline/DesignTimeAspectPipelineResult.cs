@@ -22,5 +22,5 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
         ImmutableDictionary<string, SyntaxTree> InputSyntaxTrees,
         IReadOnlyList<IntroducedSyntaxTree> IntroducedSyntaxTrees,
         ImmutableUserDiagnosticList Diagnostics,
-        IReadOnlyList<AttributeAspectInstance> InheritableAspects );
+        IReadOnlyList<InheritableAspectInstance> InheritableAspects );
 }

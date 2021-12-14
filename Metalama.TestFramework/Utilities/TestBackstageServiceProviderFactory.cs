@@ -19,7 +19,7 @@ namespace Metalama.TestFramework.Utilities
         /// <returns>A service provider with backstage service implementations for testing.</returns>
         public static IServiceProvider Create()
         {
-            var diagnosticsSink = new TestDiagnosticsSink();
+            var diagnosticsSink = new TestBackstageDiagnosticsSink();
 
             var services = new ServiceCollection();
 
@@ -33,7 +33,7 @@ namespace Metalama.TestFramework.Utilities
                 .AddSingleton<IBackstageDiagnosticSink>( diagnosticsSink )
 
                 // This allows the retrieval of the service using its type name
-                .AddSingleton<TestDiagnosticsSink>( diagnosticsSink )
+                .AddSingleton( diagnosticsSink )
                 .AddSingleton<ILicenseConsumptionManager>( new DummyLicenseConsumptionManager() );
 
             return serviceProviderBuilder.ServiceProvider;

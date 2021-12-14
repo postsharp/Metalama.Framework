@@ -8,6 +8,7 @@ using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Testing;
 using Metalama.Framework.Tests.Integration.Runners;
 using Metalama.TestFramework;
+using Metalama.TestFramework.Utilities;
 using Microsoft.CodeAnalysis;
 using PostSharp.Patterns.Model;
 using System;
@@ -98,7 +99,8 @@ namespace Metalama.AspectWorkbench.ViewModels
             using var testProjectOptions = new TestProjectOptions() { FormatCompileTimeCode = true };
 
             var serviceProvider = ServiceProviderFactory.GetServiceProvider( testProjectOptions )
-                .WithProjectScopedServices( TestCompilationFactory.GetMetadataReferences() );
+                .WithProjectScopedServices( TestCompilationFactory.GetMetadataReferences() )
+                .WithNextProvider( TestBackstageServiceProviderFactory.Create() );
 
             var syntaxColorizer = new SyntaxColorizer( serviceProvider );
 

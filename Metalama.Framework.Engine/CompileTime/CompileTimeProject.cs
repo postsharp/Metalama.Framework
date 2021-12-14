@@ -4,10 +4,10 @@
 using Metalama.Compiler;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code.Collections;
-using Metalama.Framework.Fabrics;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Templating.Mapping;
+using Metalama.Framework.Fabrics;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
@@ -271,6 +271,18 @@ namespace Metalama.Framework.Engine.CompileTime
         }
 
         public Type GetType( Type reflectionType ) => this.GetType( reflectionType.FullName );
+
+        public Type GetType( string reflectionName, string runTimeAssemblyName )
+        {
+            var project = this.ClosureProjects.FirstOrDefault( p => p.RunTimeIdentity.Name == runTimeAssemblyName );
+
+            if ( project == null )
+            {
+                throw new InvalidOperationException( $"Cannot find the compile-time assembly 'P{runTimeAssemblyName}'." );
+            }
+
+            return project.GetType( reflectionName );
+        }
 
         public Type GetType( string reflectionName )
             => this.GetTypeOrNull( reflectionName ) ?? throw new ArgumentOutOfRangeException(

@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 // ReSharper disable once RedundantBlankLines
+// @formatter:off
 
 #pragma warning disable SA1516 // Elements should be separated by blank line
 extern alias roslyn;

@@ -43,8 +43,7 @@ namespace Metalama.Framework.Aspects
 
         /// <summary>
         /// Gets a value indicating whether instances of this aspect class are inherited by derived declarations.
-        /// This property can be set by the implementation of the <see cref="IAspect.BuildAspectClass"/>
-        /// method by setting the <see cref="IAspectClassBuilder.IsInherited"/> property. By default, it is <c>false</c>.
+        /// An aspect class is inherited if it implements the <see cref="IInheritedAspect"/> class.
         /// </summary>
         bool IsInherited { get; }
 

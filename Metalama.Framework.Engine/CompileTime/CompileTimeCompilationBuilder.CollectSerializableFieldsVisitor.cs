@@ -18,7 +18,6 @@ namespace Metalama.Framework.Engine.CompileTime
         private class CollectSerializableFieldsVisitor : CSharpSyntaxWalker
         {
             private readonly SemanticModel _semanticModel;
-            private readonly ReflectionMapper _reflectionMapper;
             private readonly CancellationToken _cancellationToken;
             private readonly List<ISymbol> _serializableFieldsOrProperties;
             private readonly ITypeSymbol _nonSerializedAttribute;
@@ -28,10 +27,9 @@ namespace Metalama.Framework.Engine.CompileTime
             public CollectSerializableFieldsVisitor( SemanticModel semanticModel, ReflectionMapper reflectionMapper, CancellationToken cancellationToken )
             {
                 this._semanticModel = semanticModel;
-                this._reflectionMapper = reflectionMapper;
                 this._cancellationToken = cancellationToken;
                 this._serializableFieldsOrProperties = new List<ISymbol>();
-                this._nonSerializedAttribute = this._reflectionMapper.GetTypeSymbol( typeof(MetaNonSerializedAttribute) );
+                this._nonSerializedAttribute = reflectionMapper.GetTypeSymbol( typeof(LamaNonSerializedAttribute) );
             }
 
             public override void VisitFieldDeclaration( FieldDeclarationSyntax node )

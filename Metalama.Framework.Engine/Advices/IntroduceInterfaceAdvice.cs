@@ -77,8 +77,8 @@ namespace Metalama.Framework.Engine.Advices
                 [NotNullWhen( true )] out TemplateInfo? templateInfo )
             {
                 if ( this.TemplateInstance.TemplateClass.TryGetInterfaceMember(
-                    member.GetSymbol().AssertNotNull( Justifications.ImplementingIntroducedInterfacesNotSupported ),
-                    out var aspectClassMember ) )
+                        member.GetSymbol().AssertNotNull( Justifications.ImplementingIntroducedInterfacesNotSupported ),
+                        out var aspectClassMember ) )
                 {
                     templateInfo = aspectClassMember.TemplateInfo;
 

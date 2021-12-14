@@ -127,7 +127,7 @@ namespace Metalama.Framework.Engine.AspectOrdering
 
             public T? Value { get; }
 
-            public SimpleLinkedListNode<T>? Next { get; internal set; }
+            public SimpleLinkedListNode<T>? Next { get; }
         }
     }
 }
