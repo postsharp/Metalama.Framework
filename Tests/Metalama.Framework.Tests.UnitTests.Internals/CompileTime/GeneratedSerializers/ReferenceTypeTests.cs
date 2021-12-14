@@ -276,7 +276,7 @@ public class A<T> : ILamaSerializable
 
             var project = CreateCompileTimeProject( domain, testContext, code );
 
-            var type = project!.GetType( "A`1" ).MakeGenericType(typeof(int));
+            var type = project.GetType( "A`1" ).MakeGenericType( typeof(int) );
             var lamaSerializer = GetSerializer( type );
 
             dynamic instance = Activator.CreateInstance( type, 42 )!;
@@ -330,15 +330,15 @@ public class B : ILamaSerializable
 
             var project = CreateCompileTimeProject( domain, testContext, code );
 
-            var typeAObject = project!.GetType( "A`1" ).MakeGenericType( typeof( object ) );
-            var typeAInt = project!.GetType( "A`1" ).MakeGenericType( typeof( int ) );
-            var typeB = project!.GetType( "B" );
+            var typeAObject = project.GetType( "A`1" ).MakeGenericType( typeof(object) );
+            var typeAInt = project.GetType( "A`1" ).MakeGenericType( typeof(int) );
+            var typeB = project.GetType( "B" );
             var lamaSerializer = GetSerializer( typeB );
 
             var obj = new object();
             dynamic instanceAObj = Activator.CreateInstance( typeAObject, obj )!;
             dynamic instanceAInt = Activator.CreateInstance( typeAInt, 42 )!;
-            dynamic instanceB = Activator.CreateInstance( typeB, instanceAObj, instanceAInt )!;
+            var instanceB = Activator.CreateInstance( typeB, instanceAObj, instanceAInt )!;
 
             var constructorArgumentsWriter = new TestArgumentsWriter();
             var initializationArgumentsWriter = new TestArgumentsWriter();
@@ -388,12 +388,12 @@ public class B<T> : ILamaSerializable
 
             var project = CreateCompileTimeProject( domain, testContext, code );
 
-            var typeA = project!.GetType( "A`1" ).MakeGenericType( typeof( int ) );
-            var typeB = project!.GetType( "B`1" ).MakeGenericType( typeof( int ) );
+            var typeA = project.GetType( "A`1" ).MakeGenericType( typeof(int) );
+            var typeB = project.GetType( "B`1" ).MakeGenericType( typeof(int) );
             var lamaSerializer = GetSerializer( typeB );
 
             dynamic instanceA = Activator.CreateInstance( typeA, 42 )!;
-            dynamic instanceB = Activator.CreateInstance( typeB, instanceA )!;
+            var instanceB = Activator.CreateInstance( typeB, instanceA )!;
 
             var constructorArgumentsWriter = new TestArgumentsWriter();
             var initializationArgumentsWriter = new TestArgumentsWriter();

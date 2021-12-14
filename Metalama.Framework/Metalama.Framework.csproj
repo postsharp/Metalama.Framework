@@ -12,8 +12,9 @@
 
 
    <ItemGroup>
-    <Compile Include="..\NullableAttributes.cs" Link="NullableAttributes.cs" />
-  </ItemGroup>
+    <Compile Include="..\NullableAttributes.cs" Link="System Types\NullableAttributes.cs" />
+    <Compile Include="..\IsExternalInit.cs" Link="System Types\IsExternalInit.cs" />
+   </ItemGroup>
 
   <ItemGroup>
     <InternalsVisibleTo Include="Metalama.Framework.Engine" />

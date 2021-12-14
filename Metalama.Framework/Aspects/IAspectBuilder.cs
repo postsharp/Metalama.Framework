@@ -3,6 +3,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
+using Metalama.Framework.Serialization;
 using System;
 
 namespace Metalama.Framework.Aspects
@@ -23,6 +24,15 @@ namespace Metalama.Framework.Aspects
         /// automatically causes the aspect to be skipped, but, additionally, provided children aspects are ignored.
         /// </remarks>
         void SkipAspect();
+
+        /// <summary>
+        /// Gets or sets an arbitrary object that is then exposed on the <see cref="IAspectInstance.State"/> property of
+        /// the <see cref="IAspectInstance"/> interface. While a single instance of an aspect class can be used for
+        /// several target declarations, the <see cref="State"/> is specific to the target declaration. If the aspect
+        /// is inherited, the <see cref="State"/> must be lama-serializable (<see cref="ILamaSerializable"/> or
+        /// default serializable classes).
+        /// </summary>
+        IAspectState? State { get; set; }
     }
 
     /// <summary>

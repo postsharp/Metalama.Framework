@@ -25,7 +25,6 @@ namespace Metalama.Framework.Serialization
         /// <param name="serializerType">Serializer type. This type must implement <see cref="ISerializer"/> or <see cref="ISerializerFactory"/>,
         /// and must have a public default constructor. If <paramref name="serializerType"/> is a generic type, if must have the same number
         /// of generic type parameters as <paramref name="objectType"/>, and have a compatible set of constraints.</param>
-        /// <seealso cref="SerializerAttribute"/>
         public ImportSerializerAttribute( Type objectType, Type serializerType )
         {
             this.ObjectType = objectType;

@@ -5,6 +5,7 @@ using Metalama.Framework.Serialization;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Reflection;
 
 namespace Metalama.Framework.Engine.LamaSerialization
@@ -16,10 +17,7 @@ namespace Metalama.Framework.Engine.LamaSerialization
         private readonly Dictionary<Assembly, bool> _inspectedAssemblies = new();
         private readonly object _sync = new();
 
-        public Type GetSurrogateType( Type objectType )
-        {
-            throw new NotImplementedException();
-        }
+        public Type GetSurrogateType( Type objectType ) => objectType;
 
         public ISerializerFactory? GetSerializerFactory( Type objectType )
         {
@@ -72,42 +70,34 @@ namespace Metalama.Framework.Engine.LamaSerialization
 
             this._inspectedTypes.Add( type, true );
 
-            var hasSerializer = false;
-
             try
             {
-                foreach ( var attribute in type.GetCustomAttributes( false ) )
+                // Find the serializer defined as a nested type.
+                using var serializers = type.GetNestedTypes( BindingFlags.Public | BindingFlags.NonPublic )
+                    .Where( n => typeof(ISerializer).IsAssignableFrom( n ) )
+                    .GetEnumerator();
+
+                if ( serializers.MoveNext() )
                 {
-                    switch ( attribute )
+                    this.AddSerializer( type, serializers.Current );
+
+                    if ( serializers.MoveNext() )
                     {
-                        case SerializerAttribute { SerializerType: { } } serializableAttribute:
-                            hasSerializer = true;
-                            this.AddSerializer( type, serializableAttribute.SerializerType );
-
-                            continue;
-
-                        case ImportSerializerAttribute importSerializerAttribute:
-                            this.ProcessImport( importSerializerAttribute );
-
-                            break;
+                        throw new LamaSerializationException( $"The type {type} has more than one serializer." );
                     }
+                }
+
+                foreach ( var attribute in type.GetCustomAttributes<ImportSerializerAttribute>() )
+                {
+                    this.ProcessImport( attribute );
+
+                    break;
                 }
             }
             catch ( FormatException )
             {
                 // This happens on Windows Phone 7 if the aspect has a custom attribute with a generic type as an argument.
                 // In this case, we ignore the exception and look for the Serializer nested type.
-            }
-
-            // For backward compatibility, we look for a by-convention class named "Serializer".
-            if ( !hasSerializer )
-            {
-                var serializerType = type.GetNestedType( "Serializer", BindingFlags.Public | BindingFlags.NonPublic );
-
-                if ( serializerType != null )
-                {
-                    this.AddSerializer( type, serializerType );
-                }
             }
 
             var baseType = type.BaseType;

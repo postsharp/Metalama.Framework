@@ -21,8 +21,10 @@ using Microsoft.CodeAnalysis.Emit;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading;
 
@@ -33,6 +35,8 @@ namespace Metalama.Framework.Engine.CompileTime
     /// </summary>
     internal partial class CompileTimeCompilationBuilder
     {
+        private const string _compileTimeAssemblyPrefix = "MetalamaCompileTime_";
+
         private readonly IServiceProvider _serviceProvider;
         private readonly CompileTimeDomain _domain;
         private readonly Dictionary<ulong, CompileTimeProject> _cache = new();
@@ -211,16 +215,35 @@ namespace Metalama.Framework.Engine.CompileTime
             return GetCompileTimeAssemblyName( runTimeAssemblyName, projectHash );
         }
 
+        public static bool TryParseCompileTimeAssemblyName( string assemblyName, [NotNullWhen( true )] out string? runTimeAssemblyName )
+        {
+            if ( assemblyName.StartsWith( _compileTimeAssemblyPrefix, StringComparison.OrdinalIgnoreCase ) )
+            {
+                var parsedAssemblyName = new AssemblyName( assemblyName );
+                var shortName = parsedAssemblyName.Name;
+
+                runTimeAssemblyName = shortName.Substring(
+                    _compileTimeAssemblyPrefix.Length,
+                    shortName.Length - _compileTimeAssemblyPrefix.Length - 17 );
+
+                return true;
+            }
+            else
+            {
+                runTimeAssemblyName = null;
+
+                return false;
+            }
+        }
+
         private static string GetCompileTimeAssemblyName( string runTimeAssemblyName, ulong projectHash )
         {
-            const string prefix = "MetalamaCompileTime_";
-
-            if ( runTimeAssemblyName.StartsWith( prefix, StringComparison.Ordinal ) )
+            if ( runTimeAssemblyName.StartsWith( _compileTimeAssemblyPrefix, StringComparison.Ordinal ) )
             {
                 throw new ArgumentOutOfRangeException( nameof(runTimeAssemblyName) );
             }
 
-            return $"{prefix}{runTimeAssemblyName}_{projectHash:x16}";
+            return $"{_compileTimeAssemblyPrefix}{runTimeAssemblyName}_{projectHash:x16}";
         }
 
         private CSharpCompilation CreateEmptyCompileTimeCompilation(

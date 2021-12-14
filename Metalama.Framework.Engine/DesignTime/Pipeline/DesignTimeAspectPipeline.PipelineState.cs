@@ -17,6 +17,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Linq;
 using System.Threading;
 
 namespace Metalama.Framework.Engine.DesignTime.Pipeline
@@ -408,7 +409,8 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
                         diagnosticList.ToImmutableArray(),
                         pipelineResult?.Diagnostics.DiagnosticSuppressions,
                         pipelineResult?.Diagnostics.CodeFixes ),
-                    pipelineResult?.ExternallyInheritableAspects ?? ImmutableArray<AttributeAspectInstance>.Empty );
+                    pipelineResult?.ExternallyInheritableAspects.Select( i => new InheritableAspectInstance( i ) ).ToImmutableArray()
+                    ?? ImmutableArray<InheritableAspectInstance>.Empty );
 
                 var directoryOptions = state._pipeline.ServiceProvider.GetRequiredService<IPathOptions>();
                 UserDiagnosticRegistrationService.GetInstance( directoryOptions ).RegisterDescriptors( result );

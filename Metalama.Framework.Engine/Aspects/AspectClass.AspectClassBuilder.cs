@@ -2,7 +2,6 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Aspects;
-using Metalama.Framework.Engine.Diagnostics;
 using System;
 using System.Collections.Immutable;
 
@@ -17,22 +16,6 @@ namespace Metalama.Framework.Engine.Aspects
             public Builder( AspectClass parent )
             {
                 this._parent = parent;
-            }
-
-            public bool IsInherited
-            {
-                get => this._parent.IsInherited;
-                set
-                {
-                    if ( value && !this._parent.IsAttribute )
-                    {
-                        throw new InvalidOperationException(
-                            UserMessageFormatter.Format(
-                                $"Cannot set the IsInherited property to true because the aspect class '{this._parent.ShortName}' does not derive from System.Attribute." ) );
-                    }
-
-                    this._parent.IsInherited = value;
-                }
             }
 
             public bool IsLiveTemplate

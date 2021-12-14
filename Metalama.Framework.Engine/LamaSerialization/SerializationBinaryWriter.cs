@@ -13,7 +13,7 @@ namespace Metalama.Framework.Engine.LamaSerialization
         // We use 2 as the first index for cached strings or dotted strings because indexes are stored as negative values, and
         // 0 represents an empty string, and -1 represents a null string.
         public const int FirstStringIndex = 2;
-        
+
         private readonly BinaryWriter _writer;
         private readonly Dictionary<string, int> _strings = new( 64, StringComparer.Ordinal );
         private readonly Dictionary<string, int> _dottedStrings = new( 64, StringComparer.Ordinal );
@@ -81,7 +81,7 @@ namespace Metalama.Framework.Engine.LamaSerialization
                 var bytes = Encoding.UTF8.GetBytes( value );
                 this.WriteCompressedInteger( bytes.Length );
                 this._writer.Write( bytes );
-                
+
                 this._strings.Add( value, this._strings.Count + FirstStringIndex );
             }
         }

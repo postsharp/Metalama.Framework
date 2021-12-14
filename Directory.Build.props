@@ -15,6 +15,14 @@
     <Import Sdk="PostSharp.Engineering.Sdk" Project="BuildOptions.props" />
     <Import Sdk="PostSharp.Engineering.Sdk" Project="CodeQuality.props" />
     <Import Sdk="PostSharp.Engineering.Sdk" Project="SourceLink.props" />
+    
+    <PropertyGroup Condition="'$(Configuration)'=='Release'">
+    <!-- CS8602: Dereference of a possibly null reference.
+        CS8604: Possible null reference argument for parameter 'x' in 'y'.
+        
+         The compiler will emit these warnings if we have aggressive inlining. This should not be important for code quality.     -->
+        <NoWarn>$(NoWarn);CS8602;CS8604</NoWarn>
+    </PropertyGroup>
 
     <PropertyGroup>
         <!--

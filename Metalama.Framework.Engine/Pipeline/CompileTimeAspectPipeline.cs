@@ -134,11 +134,11 @@ namespace Metalama.Framework.Engine.Pipeline
                 // Add the index of inherited aspects.
                 if ( result.ExternallyInheritableAspects.Length > 0 )
                 {
-                    var inheritedAspectsManifest = InheritableAspectsManifest.Create(
-                        result.ExternallyInheritableAspects,
+                    var inheritedAspectsManifest = TransitiveAspectsManifest.Create(
+                        result.ExternallyInheritableAspects.Select( i => new InheritableAspectInstance( i ) ).ToImmutableArray(),
                         resultPartialCompilation.Compilation );
 
-                    var resource = inheritedAspectsManifest.ToResource();
+                    var resource = inheritedAspectsManifest.ToResource( configuration.ServiceProvider );
                     additionalResources = additionalResources.Add( resource );
                 }
 

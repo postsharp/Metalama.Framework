@@ -501,10 +501,7 @@ namespace Metalama.Framework.Engine.LamaSerialization
             return declaringType.GetGenericArguments()[position];
         }
 
-        private Type GetType( AssemblyTypeName typeName )
-        {
-            return this._formatter.Binder.BindToType( typeName.TypeName, typeName.AssemblyName );
-        }
+        private Type GetType( AssemblyTypeName typeName ) => this._formatter.Binder.BindToType( typeName.TypeName, typeName.AssemblyName );
 
         private void ReadArray( Array array, SerializationCause? cause )
         {
@@ -651,7 +648,10 @@ namespace Metalama.Framework.Engine.LamaSerialization
         private AssemblyTypeName ReadTypeName()
         {
             // Assertion on nullability was added after the code import from PostSharp.
-            return new AssemblyTypeName( this._binaryReader.ReadDottedString(), this._binaryReader.ReadString().AssertNotNull() );
+            var typeName = this._binaryReader.ReadDottedString();
+            var assemblyName = this._binaryReader.ReadString().AssertNotNull();
+
+            return new AssemblyTypeName( typeName, assemblyName );
         }
 
         private sealed class InstanceFields : IArgumentsReader

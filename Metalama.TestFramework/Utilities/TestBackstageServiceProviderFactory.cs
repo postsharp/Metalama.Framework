@@ -19,7 +19,7 @@ namespace Metalama.TestFramework.Utilities
         /// <returns>A service provider with backstage service implementations for testing.</returns>
         public static IServiceProvider Create()
         {
-            var diagnosticsSink = new TestDiagnosticsSink();
+            var diagnosticsSink = new TestBackstageDiagnosticsSink();
 
             var services = new ServiceCollection();
 

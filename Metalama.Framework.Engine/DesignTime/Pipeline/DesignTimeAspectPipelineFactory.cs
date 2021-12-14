@@ -28,7 +28,7 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
     /// returns produced by <see cref="DesignTimeAspectPipeline"/>. This class is also responsible for invoking
     /// cache invalidation methods as appropriate.
     /// </summary>
-    internal class DesignTimeAspectPipelineFactory : IDisposable, IInheritableAspectManifestProvider
+    internal class DesignTimeAspectPipelineFactory : IDisposable, ITransitiveAspectManifestProvider
     {
         // The project id is passed to a constant, because that's the only public way to push a property to a compilation.
         public const string ProjectIdPreprocessorSymbolPrefix = "MetalamaProjectId_";
@@ -235,7 +235,7 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
             return this._pipelinesByProjectId.TryGetValue( projectId, out pipeline );
         }
 
-        public IInheritableAspectsManifest? GetInheritableAspectsManifest( Compilation compilation, CancellationToken cancellationToken )
+        public ITransitiveAspectsManifest? GetTransitiveAspectsManifest( Compilation compilation, CancellationToken cancellationToken )
         {
             if ( !this.TryGetPipeline( compilation, out var pipeline ) )
             {

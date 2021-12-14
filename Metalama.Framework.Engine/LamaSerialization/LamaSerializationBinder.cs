@@ -19,7 +19,14 @@ namespace Metalama.Framework.Engine.LamaSerialization
         /// <returns>The required <see cref="Type"/>.</returns>
         public virtual Type BindToType( string typeName, string assemblyName )
         {
-            return Type.GetType( ReflectionHelper.GetAssemblyQualifiedTypeName( typeName, assemblyName ) );
+            var type = Type.GetType( ReflectionHelper.GetAssemblyQualifiedTypeName( typeName, assemblyName ) );
+
+            if ( type == null )
+            {
+                throw new LamaSerializationException( $"Cannot find the 'type {typeName}, {assemblyName}'." );
+            }
+
+            return type;
         }
 
         /// <summary>
