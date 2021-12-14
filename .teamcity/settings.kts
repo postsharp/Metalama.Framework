@@ -1,9 +1,6 @@
-// This is the standard TeamCity script for all projects. Our objective is that this script should not contain
-// per-repo customizations. All customizations should go to patches.
-
 import jetbrains.buildServer.configs.kotlin.v2019_2.*
 import jetbrains.buildServer.configs.kotlin.v2019_2.buildSteps.powerShell
-import jetbrains.buildServer.configs.kotlin.v2019_2.triggers.vcs
+import jetbrains.buildServer.configs.kotlin.v2019_2.triggers.*
 
 version = "2019.2"
 
@@ -36,6 +33,8 @@ object DebugBuild : BuildType({
 
     triggers {
         vcs {
+            quietPeriodMode = VcsTrigger.QuietPeriodMode.USE_DEFAULT
+            branchFilter = "+:<default>"
         }
     }
 
@@ -44,7 +43,7 @@ object DebugBuild : BuildType({
     }
 })
 
-// Release build (with unsuffixed version number)
+// Release build (with unsuffixed version number, unsigned)
 object ReleaseBuild : BuildType({
     name = "Build [Release]"
 
@@ -88,7 +87,7 @@ object PublicBuild : BuildType({
             param("jetbrains_powershell_scriptArguments", "test --public --configuration Release --sign")
         }
     }
-
+    
     requirements {
         equals("env.BuildAgentType", "caravela02")
     }
@@ -97,7 +96,7 @@ object PublicBuild : BuildType({
 // Publish the release build to public feeds
 object Deploy : BuildType({
     name = "Deploy [Public]"
-    type = BuildTypeSettings.Type.DEPLOYMENT
+    type = Type.DEPLOYMENT
 
     vcs {
         root(DslContext.settingsRoot)
@@ -124,7 +123,7 @@ object Deploy : BuildType({
             }
         }
     }
-
+    
     requirements {
         equals("env.BuildAgentType", "caravela02")
     }
