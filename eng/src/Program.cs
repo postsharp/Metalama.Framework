@@ -19,8 +19,15 @@ var product = new Product
                         SupportsTestCoverage = true,
                         CanFormatCode = true,
                         FormatExclusions = ImmutableArray.Create(
+
+                            // Test payloads should not be formatted because it would break the test output comparison.
+                            // In some cases, formatting or redundant keywords may be intentional.
                             "Tests\\Metalama.Framework.Tests.Integration\\Tests\\**\\*",
-                            "Tests\\Metalama.Framework.Tests.Integration.Internals\\Tests\\**\\*" )
+                            "Tests\\Metalama.Framework.Tests.Integration.Internals\\Tests\\**\\*",
+
+                            // This file should not be formatted because it contains assembly aliases, and JetBrains tools
+                            // don't support them properly.
+                            "Metalama.Framework.Engine\\Utilities\\SymbolId.cs" )
                     },
                     new DotNetSolution( "Tests\\Metalama.Framework.TestApp\\Metalama.Framework.TestApp.sln" )
                     {

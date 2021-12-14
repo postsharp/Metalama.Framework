@@ -40,9 +40,9 @@ namespace Metalama.Framework.Engine.AspectOrdering
                     attribute =>
                     {
                         if ( this._attributeDeserializer.TryCreateAttribute<AspectOrderAttribute>(
-                            attribute.attribute,
-                            diagnosticAdder,
-                            out var attributeInstance ) )
+                                attribute.attribute,
+                                diagnosticAdder,
+                                out var attributeInstance ) )
                         {
                             return new AspectOrderSpecification( attributeInstance, attribute.attribute.ApplicationSyntaxReference?.GetSyntax().GetLocation() );
                         }

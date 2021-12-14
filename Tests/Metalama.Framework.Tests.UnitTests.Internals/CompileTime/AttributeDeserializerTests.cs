@@ -441,7 +441,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime
 
         public class TestParamsAttribute : Attribute
         {
-            public object Value { get; private set; }
+            public object Value { get; }
 
             public TestParamsAttribute( params string[] p ) { this.Value = p; }
 

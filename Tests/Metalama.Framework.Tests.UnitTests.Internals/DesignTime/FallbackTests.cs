@@ -172,7 +172,7 @@ public class TargetClass
             var resultingCompilation = inputCompilation;
 
             foreach ( var file in compileTimeResult.AdditionalCompilationOutputFiles.Where(
-                f => f.Kind == AdditionalCompilationOutputFileKind.DesignTimeGeneratedCode ) )
+                         f => f.Kind == AdditionalCompilationOutputFileKind.DesignTimeGeneratedCode ) )
             {
                 using var outputStream = new MemoryStream();
                 file.WriteToStream( outputStream );

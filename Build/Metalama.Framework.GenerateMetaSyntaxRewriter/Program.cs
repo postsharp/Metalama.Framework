@@ -189,8 +189,8 @@ namespace Metalama.Framework.GenerateMetaSyntaxRewriter
             writer.WriteLine( "\t{" );
 
             foreach ( var methodGroup in typeof(SyntaxFactory).GetMethods( BindingFlags.Public | BindingFlags.Static )
-                .OrderBy( m => m.Name )
-                .GroupBy( m => m.Name ) )
+                         .OrderBy( m => m.Name )
+                         .GroupBy( m => m.Name ) )
             {
                 MethodInfo SelectBestMethod( IEnumerable<MethodInfo> methods )
                 {
@@ -200,10 +200,10 @@ namespace Metalama.Framework.GenerateMetaSyntaxRewriter
                 }
 
                 foreach ( var methodsWithSameParameterCount in methodGroup
-                    .Select( m => (Method: m, Parameters: string.Join( ",", m.GetParameters().Select( p => p.Name ) )) )
-                    .GroupBy( m => m.Parameters, m => m.Method )
-                    .Select( SelectBestMethod )
-                    .GroupBy( m => m.GetParameters().Length ) )
+                             .Select( m => (Method: m, Parameters: string.Join( ",", m.GetParameters().Select( p => p.Name ) )) )
+                             .GroupBy( m => m.Parameters, m => m.Method )
+                             .Select( SelectBestMethod )
+                             .GroupBy( m => m.GetParameters().Length ) )
                 {
                     void WriteSyntaxFactoryMethod( MethodInfo method, string? suffix = null )
                     {

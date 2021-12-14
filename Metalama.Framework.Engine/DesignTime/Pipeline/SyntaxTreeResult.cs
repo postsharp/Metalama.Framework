@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.Pipeline;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
@@ -30,7 +31,7 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
         /// </summary>
         public ImmutableArray<string> Dependencies { get; }
 
-        public ImmutableArray<(string AspectType, string TargetDeclaration)> InheritableAspects { get; }
+        public ImmutableArray<(string AspectType, InheritableAspectInstance AspectInstance)> InheritableAspects { get; }
 
         public SyntaxTreeResult(
             SyntaxTree syntaxTree,
@@ -38,10 +39,10 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
             ImmutableArray<CacheableScopedSuppression>? suppressions,
             ImmutableArray<IntroducedSyntaxTree>? introductions,
             ImmutableArray<string>? dependencies,
-            ImmutableArray<(string AspectType, string TargetDeclaration)>? inheritableAspects )
+            ImmutableArray<(string AspectType, InheritableAspectInstance AspectInstance)>? inheritableAspects )
         {
             this.SyntaxTree = syntaxTree;
-            this.InheritableAspects = inheritableAspects ?? ImmutableArray<(string AspectType, string TargetDeclaration)>.Empty;
+            this.InheritableAspects = inheritableAspects ?? ImmutableArray<(string AspectType, InheritableAspectInstance AspectInstance)>.Empty;
             this.Diagnostics = diagnostics ?? ImmutableArray<Diagnostic>.Empty;
             this.Suppressions = suppressions ?? ImmutableArray<CacheableScopedSuppression>.Empty;
             this.Introductions = introductions ?? ImmutableArray<IntroducedSyntaxTree>.Empty;

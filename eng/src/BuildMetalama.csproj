@@ -7,7 +7,7 @@
         <GenerateDocumentationFile>false</GenerateDocumentationFile>
         <LangVersion>latest</LangVersion>
         <Nullable>enable</Nullable>
-        <NoWarn>SA0001;CS8002</NoWarn>
+        <NoWarn>SA0001;CS8002;SA1114;SA1115</NoWarn>
     </PropertyGroup>
 
     <ItemGroup>

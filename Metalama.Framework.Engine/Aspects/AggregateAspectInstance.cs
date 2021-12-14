@@ -56,6 +56,10 @@ namespace Metalama.Framework.Engine.Aspects
 
         public ImmutableArray<AspectPredecessor> Predecessors => ImmutableArray.Create( this._primaryInstance.Predecessor );
 
+        public IAspectState? State => this._primaryInstance.State;
+
+        public void SetState( IAspectState? value ) => this._primaryInstance.State = value;
+
         public void Skip() => this._primaryInstance.Skip();
 
         public ImmutableDictionary<TemplateClass, TemplateClassInstance> TemplateInstances => this._primaryInstance.TemplateInstances;

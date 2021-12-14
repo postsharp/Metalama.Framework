@@ -30,6 +30,8 @@ namespace Metalama.Framework.Engine.CodeModel
             {
                 this._types = types;
                 this._syntaxTrees = syntaxTrees;
+
+                this.CheckTrees();
             }
 
             private PartialImpl(
@@ -43,7 +45,21 @@ namespace Metalama.Framework.Engine.CodeModel
             {
                 this._types = types;
                 this._syntaxTrees = syntaxTrees;
+
+                this.CheckTrees();
             }
+
+#pragma warning disable CA1822
+            private void CheckTrees()
+            {
+#if DEBUG
+                if ( this._syntaxTrees.Any( t => string.IsNullOrEmpty( t.Key ) ) )
+                {
+                    throw new AssertionFailedException( "A syntax tree has no name." );
+                }
+#endif
+            }
+#pragma warning restore CA1822
 
             public override ImmutableDictionary<string, SyntaxTree> SyntaxTrees => this._syntaxTrees;
 

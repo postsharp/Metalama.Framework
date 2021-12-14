@@ -34,7 +34,7 @@ namespace Metalama.LinqPad
 
             if ( type.IsInterface )
             {
-                throw new ArgumentOutOfRangeException( nameof(type), "The type cannot be an interface." );
+                throw new ArgumentOutOfRangeException( nameof( type ), "The type cannot be an interface." );
             }
 
             // Find getters of properties of public interfaces.
@@ -49,18 +49,24 @@ namespace Metalama.LinqPad
 
                 var interfaceMap = type.GetInterfaceMap( implementedInterface );
 
-                foreach ( var getter in interfaceMap.TargetMethods )
+                for ( var i = 0; i < interfaceMap.TargetMethods.Length; i++ )
                 {
-                    if ( getter.Name.StartsWith( "get_", StringComparison.Ordinal ) && getter.GetParameters().Length == 0 )
+                    // We need to take the interface method, and not the implementation method, because the implementation may have been obfuscated
+                    // in the Release build.
+
+                    var publicGetter = interfaceMap.InterfaceMethods[i];
+                    if ( publicGetter.Name.StartsWith( "get_", StringComparison.Ordinal ) && publicGetter.GetParameters().Length == 0 )
                     {
+                        var propertyName = publicGetter.Name.Substring( 4 );
+
                         var property =
-                            getter.DeclaringType!.GetProperty(
-                                getter.Name.Substring( 4 ),
+                            publicGetter.DeclaringType!.GetProperty(
+                                propertyName,
                                 BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic );
 
                         if ( property != null )
                         {
-                            properties[property.Name] = new FacadeProperty( property.Name, property.PropertyType, CreateCompiledGetter( property ) );
+                            properties[propertyName] = new FacadeProperty( propertyName, publicGetter.ReturnType, CreateCompiledGetter( publicGetter ) );
                         }
                     }
                 }
@@ -99,12 +105,12 @@ namespace Metalama.LinqPad
                 .OrderBy( p => (p.Name, p.Type), PropertyComparer.Instance )
                 .ToList();
 
-            if ( typeof(IDeclaration).IsAssignableFrom( type ) )
+            if ( typeof( IDeclaration ).IsAssignableFrom( type ) )
             {
                 facadeProperties.Add(
                     new FacadeProperty(
                         "Permalink",
-                        typeof(Permalink),
+                        typeof( Permalink ),
                         o =>
                         {
                             var declaration = (IDeclaration) o;
@@ -123,9 +129,19 @@ namespace Metalama.LinqPad
 
         private static Func<object, object?> CreateCompiledGetter( MemberInfo member )
         {
-            var parameter = Expression.Parameter( typeof(object) );
+            var parameter = Expression.Parameter( typeof( object ) );
             var castParameter = Expression.Convert( parameter, member.DeclaringType! );
-            var getProperty = Expression.Convert( Expression.PropertyOrField( castParameter, member.Name ), typeof(object) );
+            var getProperty = Expression.Convert( Expression.PropertyOrField( castParameter, member.Name ), typeof( object ) );
+            var lambda = Expression.Lambda<Func<object, object?>>( getProperty, parameter ).Compile();
+
+            return lambda;
+        }
+
+        private static Func<object, object?> CreateCompiledGetter( MethodInfo getter )
+        {
+            var parameter = Expression.Parameter( typeof( object ) );
+            var castParameter = Expression.Convert( parameter, getter.DeclaringType! );
+            var getProperty = Expression.Convert( Expression.Call( castParameter, getter ), typeof( object ) );
             var lambda = Expression.Lambda<Func<object, object?>>( getProperty, parameter ).Compile();
 
             return lambda;
@@ -133,7 +149,7 @@ namespace Metalama.LinqPad
 
         private static bool IsPublicType( Type type )
         {
-            if ( !type.IsPublic && type.Assembly != typeof(FacadeType).Assembly )
+            if ( !type.IsPublic && type.Assembly != typeof( FacadeType ).Assembly )
             {
                 return false;
             }
@@ -149,6 +165,6 @@ namespace Metalama.LinqPad
         }
 
         private static Type? GetPublicBase( Type type )
-            => IsPublicType( type ) ? type : type.BaseType != null && type.BaseType != typeof(object) ? GetPublicBase( type.BaseType ) : null;
+            => IsPublicType( type ) ? type : type.BaseType != null && type.BaseType != typeof( object ) ? GetPublicBase( type.BaseType ) : null;
     }
 }

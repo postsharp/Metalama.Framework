@@ -108,11 +108,11 @@ namespace Metalama.Framework.Engine.Formatting
             formattingVisitor.Visit( syntaxRoot );
 
             foreach ( var csharpSpan in Classifier.GetClassifiedSpans(
-                    semanticModel,
-                    syntaxRoot.Span,
-                    document.Project.Solution.Workspace )
-                .OrderBy( c => c.TextSpan.Start )
-                .ThenBy( c => c.ClassificationType ) )
+                             semanticModel,
+                             syntaxRoot.Span,
+                             document.Project.Solution.Workspace )
+                         .OrderBy( c => c.TextSpan.Start )
+                         .ThenBy( c => c.ClassificationType ) )
             {
                 foreach ( var existingSpan in classifiedTextSpans.GetClassifiedSpans( csharpSpan.TextSpan ) )
                 {

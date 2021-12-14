@@ -6,7 +6,7 @@
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
-using Metalama.Framework.Engine.Serialization;
+using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating.MetaModel;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;

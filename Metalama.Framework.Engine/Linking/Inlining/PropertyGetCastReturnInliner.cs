@@ -30,8 +30,8 @@ namespace Metalama.Framework.Engine.Linking.Inlining
             }
 
             if ( !SymbolEqualityComparer.Default.Equals(
-                semanticModel.GetSymbolInfo( castExpression.Type ).Symbol,
-                ((IMethodSymbol) aspectReference.ContainingSymbol).ReturnType ) )
+                    semanticModel.GetSymbolInfo( castExpression.Type ).Symbol,
+                    ((IMethodSymbol) aspectReference.ContainingSymbol).ReturnType ) )
             {
                 return false;
             }

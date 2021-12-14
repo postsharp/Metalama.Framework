@@ -3,13 +3,8 @@ using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Inheritance.InheritedMethodAttribute
 {
-    internal class Aspect : OverrideMethodAspect
+    internal class Aspect : OverrideMethodAspect, IInheritedAspect
     {
-        public override void BuildAspectClass( IAspectClassBuilder builder )
-        {
-            builder.IsInherited = true;
-        }
-
         public override dynamic? OverrideMethod()
         {
             Console.WriteLine( "Overridden!" );

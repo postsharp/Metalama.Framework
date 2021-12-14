@@ -31,8 +31,8 @@ namespace Metalama.Framework.Engine.Linking.Inlining
             }
 
             if ( !SymbolEqualityComparer.Default.Equals(
-                methodSymbol.ReturnType,
-                ((IMethodSymbol) aspectReference.ContainingSymbol).ReturnType ) )
+                    methodSymbol.ReturnType,
+                    ((IMethodSymbol) aspectReference.ContainingSymbol).ReturnType ) )
             {
                 return false;
             }

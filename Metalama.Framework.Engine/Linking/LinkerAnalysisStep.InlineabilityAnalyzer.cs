@@ -52,8 +52,8 @@ namespace Metalama.Framework.Engine.Linking
                 AspectReferenceTargetKind targetKind = AspectReferenceTargetKind.Self )
             {
                 if ( !this._aspectReferenceIndex.TryGetValue(
-                    new AspectReferenceTarget( semantic.Symbol, semantic.Kind, targetKind ),
-                    out var containedReferences ) )
+                        new AspectReferenceTarget( semantic.Symbol, semantic.Kind, targetKind ),
+                        out var containedReferences ) )
                 {
                     return Array.Empty<ResolvedAspectReference>();
                 }

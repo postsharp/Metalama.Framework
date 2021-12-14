@@ -74,7 +74,7 @@ namespace Metalama.Framework.Engine.Aspects
         /// <inheritdoc />
         public bool IsAbstract { get; }
 
-        public bool IsInherited { get; private set; }
+        public bool IsInherited { get; }
 
         public bool IsAttribute => typeof(Attribute).IsAssignableFrom( this.AspectType );
 
@@ -106,7 +106,7 @@ namespace Metalama.Framework.Engine.Aspects
             this.DiagnosticLocation = aspectTypeSymbol.GetDiagnosticLocation();
             this.AspectType = aspectType;
             this._prototypeAspectInstance = prototype;
-
+            this.IsInherited = prototype is IInheritedAspect;
             this.TemplateClasses = ImmutableArray.Create<TemplateClass>( this );
 
             // This must be called after Members is built and assigned.
@@ -144,8 +144,8 @@ namespace Metalama.Framework.Engine.Aspects
                 var eligibilitySuccess = true;
 
                 foreach ( var implementedInterface in this._prototypeAspectInstance.GetType()
-                    .GetInterfaces()
-                    .Where( i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IEligible<>) ) )
+                             .GetInterfaces()
+                             .Where( i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IEligible<>) ) )
                 {
                     eligibilitySuccess &= (bool)
                         _tryInitializeEligibilityMethod.MakeGenericMethod( implementedInterface.GenericTypeArguments[0] )
@@ -200,12 +200,12 @@ namespace Metalama.Framework.Engine.Aspects
         /// <summary>
         /// Creates a new  <see cref="AspectInstance"/> from a custom attribute.
         /// </summary>
-        public AttributeAspectInstance CreateAspectInstanceFromAttribute(
+        public AspectInstance CreateAspectInstanceFromAttribute(
             IAspect aspect,
             in Ref<IDeclaration> target,
             IAttribute attribute,
             CompileTimeProjectLoader loader )
-            => new( aspect, target, this, attribute, loader );
+            => new( aspect, target, this, new AspectPredecessor( AspectPredecessorKind.Attribute, attribute ) );
 
         /// <summary>
         /// Creates a new <see cref="AspectInstance"/> by using the default constructor of the current class.

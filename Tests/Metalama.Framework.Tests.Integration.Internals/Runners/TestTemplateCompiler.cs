@@ -84,14 +84,14 @@ namespace Metalama.Framework.Tests.Integration.Runners
                 if ( this._parent.IsTemplate( node ) )
                 {
                     if ( !this._parent._templateCompiler.TryCompile(
-                        TemplateNameHelper.GetCompiledTemplateName( node.Identifier.ValueText ),
-                        this._compileTimeCompilation,
-                        node,
-                        this._parent._semanticModel,
-                        this._parent._diagnosticAdder,
-                        CancellationToken.None,
-                        out var annotatedNode,
-                        out var transformedNode ) )
+                            TemplateNameHelper.GetCompiledTemplateName( node.Identifier.ValueText ),
+                            this._compileTimeCompilation,
+                            node,
+                            this._parent._semanticModel,
+                            this._parent._diagnosticAdder,
+                            CancellationToken.None,
+                            out var annotatedNode,
+                            out var transformedNode ) )
                     {
                         this._parent.HasError = true;
                     }

@@ -1,28 +1,30 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using K4os.Hash.xxHash;
 using Metalama.Framework.Aspects;
-using Metalama.Framework.Fabrics;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.CompileTime.Serialization;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Formatting;
+using Metalama.Framework.Engine.LamaSerialization;
 using Metalama.Framework.Engine.Observers;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Sdk;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.Mapping;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Fabrics;
 using Metalama.Framework.Project;
-using K4os.Hash.xxHash;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Emit;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading;
 
@@ -33,6 +35,8 @@ namespace Metalama.Framework.Engine.CompileTime
     /// </summary>
     internal partial class CompileTimeCompilationBuilder
     {
+        private const string _compileTimeAssemblyPrefix = "MetalamaCompileTime_";
+
         private readonly IServiceProvider _serviceProvider;
         private readonly CompileTimeDomain _domain;
         private readonly Dictionary<ulong, CompileTimeProject> _cache = new();
@@ -113,8 +117,7 @@ namespace Metalama.Framework.Engine.CompileTime
             IDiagnosticAdder diagnosticSink,
             CancellationToken cancellationToken,
             out Compilation? compileTimeCompilation,
-            out ILocationAnnotationMap? locationAnnotationMap,
-            out Dictionary<string, SyntaxTree>? syntaxTreeMap )
+            out ILocationAnnotationMap? locationAnnotationMap )
         {
             locationAnnotationMap = null;
 
@@ -122,7 +125,6 @@ namespace Metalama.Framework.Engine.CompileTime
             if ( treesWithCompileTimeCode.Count == 0 )
             {
                 compileTimeCompilation = null;
-                syntaxTreeMap = null;
 
                 return true;
             }
@@ -160,8 +162,6 @@ namespace Metalama.Framework.Engine.CompileTime
                           SourceTree: t) )
                 .ToList();
 
-            syntaxTreeMap = syntaxTrees.ToDictionary( t => t.TransformedTree.FilePath, t => t.SourceTree );
-
             locationAnnotationMap = templateCompiler.LocationAnnotationMap;
 
             if ( !produceCompileTimeCodeRewriter.Success )
@@ -174,7 +174,6 @@ namespace Metalama.Framework.Engine.CompileTime
                 // This happens if all compile-time code is illegitimate, i.e. was reported as an error and stripped.
 
                 compileTimeCompilation = null;
-                syntaxTreeMap = null;
 
                 return true;
             }
@@ -216,16 +215,35 @@ namespace Metalama.Framework.Engine.CompileTime
             return GetCompileTimeAssemblyName( runTimeAssemblyName, projectHash );
         }
 
+        public static bool TryParseCompileTimeAssemblyName( string assemblyName, [NotNullWhen( true )] out string? runTimeAssemblyName )
+        {
+            if ( assemblyName.StartsWith( _compileTimeAssemblyPrefix, StringComparison.OrdinalIgnoreCase ) )
+            {
+                var parsedAssemblyName = new AssemblyName( assemblyName );
+                var shortName = parsedAssemblyName.Name;
+
+                runTimeAssemblyName = shortName.Substring(
+                    _compileTimeAssemblyPrefix.Length,
+                    shortName.Length - _compileTimeAssemblyPrefix.Length - 17 );
+
+                return true;
+            }
+            else
+            {
+                runTimeAssemblyName = null;
+
+                return false;
+            }
+        }
+
         private static string GetCompileTimeAssemblyName( string runTimeAssemblyName, ulong projectHash )
         {
-            const string prefix = "MetalamaCompileTime_";
-
-            if ( runTimeAssemblyName.StartsWith( prefix, StringComparison.Ordinal ) )
+            if ( runTimeAssemblyName.StartsWith( _compileTimeAssemblyPrefix, StringComparison.Ordinal ) )
             {
                 throw new ArgumentOutOfRangeException( nameof(runTimeAssemblyName) );
             }
 
-            return $"{prefix}{runTimeAssemblyName}_{projectHash:x16}";
+            return $"{_compileTimeAssemblyPrefix}{runTimeAssemblyName}_{projectHash:x16}";
         }
 
         private CSharpCompilation CreateEmptyCompileTimeCompilation(
@@ -466,14 +484,14 @@ namespace Metalama.Framework.Engine.CompileTime
             return compileTimeTrees;
         }
 
-        private static IReadOnlyList<MetaSerializableTypeInfo> GetSerializableTypes(
+        private static IReadOnlyList<SerializableTypeInfo> GetSerializableTypes(
             Compilation runTimeCompilation,
             IReadOnlyList<SyntaxTree> compileTimeSyntaxTrees,
             CancellationToken cancellationToken )
         {
             // TODO: Check that the mapper is not already registered.
             var reflectionMapper = new ReflectionMapper( runTimeCompilation );
-            var allSerializableTypes = new List<MetaSerializableTypeInfo>();
+            var allSerializableTypes = new List<SerializableTypeInfo>();
 
             foreach ( var tree in compileTimeSyntaxTrees )
             {
@@ -570,12 +588,12 @@ namespace Metalama.Framework.Engine.CompileTime
                 this.GetPreCacheProjectInfo( runTimeCompilation, sourceTreesWithCompileTimeCode, referencedProjects );
 
             if ( !this.TryGetCompileTimeProjectFromCache(
-                runTimeCompilation,
-                referencedProjects,
-                outputPaths,
-                compileTimeAssemblyName,
-                projectHash,
-                out project ) )
+                    runTimeCompilation,
+                    referencedProjects,
+                    outputPaths,
+                    compileTimeAssemblyName,
+                    projectHash,
+                    out project ) )
             {
                 if ( cacheOnly )
                 {
@@ -589,12 +607,12 @@ namespace Metalama.Framework.Engine.CompileTime
                 {
                     // Do a second cache lookup within the lock.
                     if ( this.TryGetCompileTimeProjectFromCache(
-                        runTimeCompilation,
-                        referencedProjects,
-                        outputPaths,
-                        compileTimeAssemblyName,
-                        projectHash,
-                        out project ) )
+                            runTimeCompilation,
+                            referencedProjects,
+                            outputPaths,
+                            compileTimeAssemblyName,
+                            projectHash,
+                            out project ) )
                     {
                         // Coverage: ignore (this depends on a multi-threaded condition)
                         return true;
@@ -602,15 +620,14 @@ namespace Metalama.Framework.Engine.CompileTime
 
                     // Generate the C# compilation.
                     if ( !this.TryCreateCompileTimeCompilation(
-                        runTimeCompilation,
-                        sourceTreesWithCompileTimeCode,
-                        referencedProjects,
-                        projectHash,
-                        diagnosticSink,
-                        cancellationToken,
-                        out var compileTimeCompilation,
-                        out var locationAnnotationMap,
-                        out _ ) )
+                            runTimeCompilation,
+                            sourceTreesWithCompileTimeCode,
+                            referencedProjects,
+                            projectHash,
+                            diagnosticSink,
+                            cancellationToken,
+                            out var compileTimeCompilation,
+                            out var locationAnnotationMap ) )
                     {
                         project = null;
 

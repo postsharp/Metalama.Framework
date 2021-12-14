@@ -141,15 +141,15 @@ namespace Metalama.Framework.Engine.Aspects
                 }
 
                 if ( !AspectClass.TryCreate(
-                    this._serviceProvider,
-                    aspectTypeSymbol,
-                    aspectReflectionType,
-                    baseAspectClass,
-                    project,
-                    diagnosticAdder,
-                    compilation,
-                    this._aspectDriverFactory,
-                    out metadata ) )
+                        this._serviceProvider,
+                        aspectTypeSymbol,
+                        aspectReflectionType,
+                        baseAspectClass,
+                        project,
+                        diagnosticAdder,
+                        compilation,
+                        this._aspectDriverFactory,
+                        out metadata ) )
                 {
                     return false;
                 }

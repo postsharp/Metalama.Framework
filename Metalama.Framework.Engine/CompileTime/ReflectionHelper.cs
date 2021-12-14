@@ -158,10 +158,10 @@ namespace Metalama.Framework.Engine.CompileTime
         {
             if ( typeName == null )
             {
-                throw new ArgumentNullException( nameof(assemblyName) );
+                throw new ArgumentNullException( nameof(typeName) );
             }
 
-            if ( typeName == null )
+            if ( assemblyName == null )
             {
                 throw new ArgumentNullException( nameof(assemblyName) );
             }

@@ -3,13 +3,13 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Fabrics;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Fabrics;
 using Metalama.Framework.Project;
 using Metalama.Framework.Validation;
 using Microsoft.CodeAnalysis;
@@ -49,7 +49,9 @@ namespace Metalama.Framework.Engine.Fabrics
             else
             {
                 this.FabricSymbol = (INamedTypeSymbol)
-                    fabricManager.ServiceProvider.GetRequiredService<ReflectionMapperFactory>().GetInstance( runTimeCompilation ).GetTypeSymbol( fabric.GetType() );
+                    fabricManager.ServiceProvider.GetRequiredService<ReflectionMapperFactory>()
+                        .GetInstance( runTimeCompilation )
+                        .GetTypeSymbol( fabric.GetType() );
             }
         }
 
@@ -137,9 +139,9 @@ namespace Metalama.Framework.Engine.Fabrics
                         var targetDeclaration = this._targetDeclaration.GetTarget( compilation ).AssertNotNull();
 
                         if ( !this._fabricManager.UserCodeInvoker.TryInvokeEnumerable(
-                            () => selector( targetDeclaration ),
-                            executionContext.WithDiagnosticAdder( diagnostics ),
-                            out var targets ) )
+                                () => selector( targetDeclaration ),
+                                executionContext.WithDiagnosticAdder( diagnostics ),
+                                out var targets ) )
                         {
                             return Enumerable.Empty<TChild>();
                         }

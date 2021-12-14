@@ -85,7 +85,7 @@ namespace Metalama.Framework.Workspaces
             CancellationToken cancellationToken )
         {
             var ourProjects = ImmutableArray.CreateBuilder<Project>();
-            MSBuildWorkspace roslynWorkspace = MSBuildWorkspace.Create( properties );
+            var roslynWorkspace = MSBuildWorkspace.Create( properties );
 
             foreach ( var path in projects )
             {
@@ -121,7 +121,7 @@ namespace Metalama.Framework.Workspaces
                     projectProperties = new Dictionary<string, string> { ["TargetFramework"] = targetFramework };
                 }
 
-                Microsoft.Build.Evaluation.Project msbuildProject = projectCollection.LoadProject( roslynProject.FilePath, projectProperties, null );
+                var msbuildProject = projectCollection.LoadProject( roslynProject.FilePath, projectProperties, null );
 
                 // Gets a Roslyn compilation.
                 var compilation = (await roslynProject.GetCompilationAsync( cancellationToken )).AssertNotNull();

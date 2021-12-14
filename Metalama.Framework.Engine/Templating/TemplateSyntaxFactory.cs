@@ -7,7 +7,7 @@ using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Formatting;
-using Metalama.Framework.Engine.Serialization;
+using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating.MetaModel;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Project;
@@ -377,6 +377,7 @@ namespace Metalama.Framework.Engine.Templating
         public static ExpressionSyntax StringLiteralExpression( string? value ) => SyntaxFactoryEx.LiteralExpression( value );
 
         public static Type GetCompileTimeType( string id, string name )
-            => TemplateExpansionContext.Current.SyntaxGenerationContext.ServiceProvider.GetRequiredService<CompileTimeTypeFactory>().Get( new SymbolId( id ), name );
+            => TemplateExpansionContext.Current.SyntaxGenerationContext.ServiceProvider.GetRequiredService<CompileTimeTypeFactory>()
+                .Get( new SymbolId( id ), name );
     }
 }

@@ -7,7 +7,7 @@ using System;
 namespace Metalama.Framework.Project
 {
     // API in line with Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions class.
-    
+
     /// <summary>
     /// Provides extensions methods to the <see cref="IServiceProvider"/> interface.
     /// </summary>
