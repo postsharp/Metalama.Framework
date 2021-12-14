@@ -54,8 +54,6 @@ namespace Metalama.Framework.Engine.Pipeline
         /// </summary>
         public ImmutableArray<CompilationModel> CompilationModels { get; }
 
-        public CompilationModel? FirstCompilationModel { get; }
-
         public ImmutableArray<AdditionalCompilationOutputFile> AdditionalCompilationOutputFiles { get; }
 
         public PipelineStageResult(

@@ -59,9 +59,9 @@ namespace Metalama.Framework.Engine.Diagnostics
         /// <summary>
         /// Returns a string containing all code fix titles and captures the code fixes if we should.  
         /// </summary>
-        private CodeFixTitles ProcessCodeFix( IDiagnosticDefinition diagnosticDefinition, Location? location, IEnumerable<CodeFix>? codeFixes )
+        private CodeFixTitles ProcessCodeFix( IDiagnosticDefinition diagnosticDefinition, Location? location, ImmutableArray<CodeFix> codeFixes )
         {
-            if ( codeFixes != null )
+            if ( !codeFixes.IsDefaultOrEmpty )
             {
                 // This code implements an optimization to allow allocating a StringBuilder if there is a single code fix. 
                 string? firstTitle = null;
@@ -176,7 +176,7 @@ namespace Metalama.Framework.Engine.Diagnostics
         {
             var definition = GeneralDiagnosticDescriptors.SuggestedCodeFix;
             var resolvedLocation = GetLocation( location );
-            var codeFixTitles = this.ProcessCodeFix( definition, resolvedLocation, codeFix );
+            var codeFixTitles = this.ProcessCodeFix( definition, resolvedLocation, ImmutableArray.Create( codeFix ) );
 
             this.Report( definition.CreateRoslynDiagnostic( resolvedLocation, codeFixTitles.Value!, codeFixes: codeFixTitles ) );
         }

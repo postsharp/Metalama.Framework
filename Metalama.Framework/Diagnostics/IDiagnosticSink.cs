@@ -19,7 +19,6 @@ namespace Metalama.Framework.Diagnostics
         /// <summary>
         /// Reports a parametric diagnostic by specifying its location.
         /// </summary>
-        /// <param name="diagnostic"></param>
         void Report( IDiagnosticLocation? location, IDiagnostic diagnostic );
 
         /// <summary>

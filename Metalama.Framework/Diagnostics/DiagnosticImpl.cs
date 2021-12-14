@@ -6,7 +6,8 @@ using System.Collections.Immutable;
 
 namespace Metalama.Framework.Diagnostics;
 
-internal sealed class DiagnosticImpl<T> : IDiagnostic where T : notnull
+internal sealed class DiagnosticImpl<T> : IDiagnostic
+    where T : notnull
 {
     public DiagnosticDefinition<T> Definition { get; }
 

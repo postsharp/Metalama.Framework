@@ -35,7 +35,7 @@ namespace Metalama.Framework.Validation
         public IDeclaration ReferencingDeclaration { get; }
 
         /// <summary>
-        /// Gets the type containing the reference/
+        /// Gets the type containing the reference.
         /// </summary>
         public INamedType ReferencingType
             => this.ReferencingDeclaration.GetDeclaringType()

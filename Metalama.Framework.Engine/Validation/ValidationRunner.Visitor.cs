@@ -23,7 +23,6 @@ internal partial class ValidationRunner
         private readonly CompilationModel _compilation;
         private SemanticModel? _semanticModel;
         private int _stackIndex = -1;
-        private ValidatedReferenceKinds _currentReferenceKinds;
         private SyntaxNode?[] _nodeStack = new SyntaxNode?[_initialStackSize];
         private IDeclaration?[] _declarationStack = new IDeclaration?[_initialStackSize];
 
@@ -275,15 +274,20 @@ internal partial class ValidationRunner
                 return;
             }
 
-            var allKinds = referenceKinds | this._currentReferenceKinds;
             var currentDeclaration = this.GetCurrentDeclaration();
+
+            if ( currentDeclaration == null )
+            {
+                return;
+            }
+            
             var validators = this._validatorsBySymbol[symbol];
 
             foreach ( var validator in validators )
             {
-                if ( (validator.ReferenceKinds & allKinds) != 0 )
+                if ( (validator.ReferenceKinds & referenceKinds) != 0 )
                 {
-                    validator.Validate( currentDeclaration, node, allKinds, this._diagnosticAdder );
+                    validator.Validate( currentDeclaration, node, referenceKinds, this._diagnosticAdder );
                 }
             }
 
@@ -321,7 +325,7 @@ internal partial class ValidationRunner
 
         private ContextCookie EnterContext( SyntaxNode node )
         {
-            if ( this._nodeStack.Length < (this._stackIndex + 2) )
+            if ( this._nodeStack.Length < this._stackIndex + 2 )
             {
                 Array.Resize( ref this._nodeStack, this._nodeStack.Length * 2 );
                 Array.Resize( ref this._declarationStack, this._declarationStack.Length * 2 );
@@ -407,31 +411,6 @@ internal partial class ValidationRunner
                     }
 
                     break;
-            }
-        }
-
-        private ReferenceKindsCookie EnterReferenceKind( ValidatedReferenceKinds kind )
-        {
-            var kindBefore = this._currentReferenceKinds;
-            this._currentReferenceKinds |= kind;
-
-            return new ReferenceKindsCookie( this, kindBefore );
-        }
-
-        private readonly struct ReferenceKindsCookie : IDisposable
-        {
-            private readonly Visitor _parent;
-            private readonly ValidatedReferenceKinds _kindsBefore;
-
-            public ReferenceKindsCookie( Visitor parent, ValidatedReferenceKinds oldKinds )
-            {
-                this._parent = parent;
-                this._kindsBefore = oldKinds;
-            }
-
-            public void Dispose()
-            {
-                this._parent._currentReferenceKinds = this._kindsBefore;
             }
         }
 

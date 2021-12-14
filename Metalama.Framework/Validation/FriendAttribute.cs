@@ -3,6 +3,7 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Eligibility;
 using System;
@@ -26,7 +27,7 @@ namespace Metalama.Framework.Validation
 
         public FriendAttribute( Type friendType, params Type[] otherFriendTypes )
         {
-            this._friendTypes = otherFriendTypes.Append( friendType ).Select( t => t.FullName ).ToArray();
+            this._friendTypes = otherFriendTypes.Append( friendType ).Select( t => t.FullName ).WhereNotNull().ToArray();
         }
 
         public void BuildEligibility( IEligibilityBuilder<IMemberOrNamedType> builder )

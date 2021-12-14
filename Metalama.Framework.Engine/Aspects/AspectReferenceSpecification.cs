@@ -55,17 +55,14 @@ namespace Metalama.Framework.Engine.Aspects
         {
             var parts = str.Split( '$' );
 
-            // ReSharper disable once RedundantAssignment
             var parseSuccess1 = Enum.TryParse<AspectReferenceOrder>( parts[1], out var order );
 
             Invariant.Assert( parseSuccess1 );
 
-            // ReSharper disable once RedundantAssignment
             var parseSuccess2 = Enum.TryParse<AspectReferenceTargetKind>( parts[2], out var targetKind );
 
             Invariant.Assert( parseSuccess2 );
 
-            // ReSharper disable once RedundantAssignment
             var parseSuccess3 = Enum.TryParse<AspectReferenceFlags>( parts[3], out var flags );
 
             Invariant.Assert( parseSuccess3 );
