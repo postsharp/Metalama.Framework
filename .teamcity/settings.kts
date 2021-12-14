@@ -87,7 +87,7 @@ object PublicBuild : BuildType({
             param("jetbrains_powershell_scriptArguments", "test --public --configuration Release --sign")
         }
     }
-    
+
     requirements {
         equals("env.BuildAgentType", "caravela02")
     }
@@ -123,7 +123,7 @@ object Deploy : BuildType({
             }
         }
     }
-    
+
     requirements {
         equals("env.BuildAgentType", "caravela02")
     }
