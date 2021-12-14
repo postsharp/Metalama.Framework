@@ -11,12 +11,10 @@
     
     <!-- Versions of dependencies -->
     <PropertyGroup>
-        <!-- This version should be aligned with the one coming from Metalama.Compiler. -->
-        <RoslynVersion>4.0.1</RoslynVersion>
-        <!-- TODO: Change to public version. -->
+        <PostSharpEngineeringVersion>1.0.21-preview</PostSharpEngineeringVersion>
         <MetalamaCompilerVersion>branch:master</MetalamaCompilerVersion>
-        <PostSharpEngineeringVersion>1.0.19-preview</PostSharpEngineeringVersion>
-        <PostSharpBackstageSettingsVersion>branch:master</PostSharpBackstageSettingsVersion>
+        <RoslynVersion>transitive:Metalama.Compiler</RoslynVersion>
+        <PostSharpBackstageSettingsVersion>transitive:Metalama.Compiler</PostSharpBackstageSettingsVersion>
         <MicrosoftCSharpVersion>4.7.0</MicrosoftCSharpVersion>
         <NewtonsoftJsonVersion>13.0.1</NewtonsoftJsonVersion>
         <SystemCollectionsImmutableVersion>5.0.0</SystemCollectionsImmutableVersion>
