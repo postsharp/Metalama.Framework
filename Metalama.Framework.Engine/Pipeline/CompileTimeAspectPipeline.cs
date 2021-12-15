@@ -5,7 +5,6 @@ using Metalama.Compiler;
 using Metalama.Framework.Engine.AdditionalOutputs;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Formatting;
@@ -154,7 +153,7 @@ namespace Metalama.Framework.Engine.Pipeline
                 {
                     var inheritedAspectsManifest = TransitiveAspectsManifest.Create(
                         result.ExternallyInheritableAspects.Select( i => new InheritableAspectInstance( i ) ).ToImmutableArray(),
-                        referenceValidators.Select( i => new TransitiveValidatorInstance( i ) ).ToImmutableArray());
+                        referenceValidators.Select( i => new TransitiveValidatorInstance( i ) ).ToImmutableArray() );
 
                     var resource = inheritedAspectsManifest.ToResource( configuration.ServiceProvider );
                     additionalResources = additionalResources.Add( resource );

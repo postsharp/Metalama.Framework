@@ -17,7 +17,6 @@ using Metalama.Framework.Fabrics;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Emit;
 using System;
 using System.Collections.Generic;
@@ -501,7 +500,11 @@ namespace Metalama.Framework.Engine.CompileTime
 
             foreach ( var tree in compileTimeSyntaxTrees )
             {
-                var visitor = new CollectSerializableTypesVisitor( runTimeCompilation.GetSemanticModel( tree, true ), reflectionMapper, classifier, cancellationToken );
+                var visitor = new CollectSerializableTypesVisitor(
+                    runTimeCompilation.GetSemanticModel( tree, true ),
+                    reflectionMapper,
+                    classifier,
+                    cancellationToken );
 
                 visitor.Visit( tree.GetRoot() );
 

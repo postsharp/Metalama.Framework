@@ -280,7 +280,7 @@ internal partial class ValidationRunner
             {
                 return;
             }
-            
+
             var validators = this._validatorsBySymbol[symbol];
 
             foreach ( var validator in validators )

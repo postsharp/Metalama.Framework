@@ -5,7 +5,6 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Collections;
-using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -21,9 +20,13 @@ internal partial class ValidationRunner
         this._sources = sources;
     }
 
-    public IReadOnlyList<ReferenceValidatorInstance> Validate( CompilationModel initialCompilation, CompilationModel finalCompilation, IDiagnosticSink diagnosticAdder )
+    public IReadOnlyList<ReferenceValidatorInstance> Validate(
+        CompilationModel initialCompilation,
+        CompilationModel finalCompilation,
+        IDiagnosticSink diagnosticAdder )
     {
         this.RunDeclarationValidators( finalCompilation, diagnosticAdder );
+
         return this.RunReferenceValidators( initialCompilation, diagnosticAdder );
     }
 
@@ -38,7 +41,6 @@ internal partial class ValidationRunner
         {
             validator.Validate( diagnosticAdder );
         }
-        
     }
 
     private IReadOnlyList<ReferenceValidatorInstance> RunReferenceValidators( CompilationModel initialCompilation, IDiagnosticSink diagnosticAdder )
@@ -64,4 +66,3 @@ internal partial class ValidationRunner
             .ToList();
     }
 }
-

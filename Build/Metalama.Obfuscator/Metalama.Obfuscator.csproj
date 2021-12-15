@@ -1,24 +1,24 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
-    <NoWarn>IDE0009</NoWarn>
-	<SkipPostSharp>True</SkipPostSharp>
-	 <!-- Never optimize code. It is difficult to debug. -->
-    <Optimize>False</Optimize>
-  </PropertyGroup>
+    <PropertyGroup>
+        <TargetFramework>netstandard2.0</TargetFramework>
+        <NoWarn>IDE0009</NoWarn>
+        <SkipPostSharp>True</SkipPostSharp>
+        <!-- Never optimize code. It is difficult to debug. -->
+        <Optimize>False</Optimize>
+    </PropertyGroup>
 
-  <ItemGroup>
-    <None Include="Obfuscator.psplugin">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      <SubType>Designer</SubType>
-    </None>
-  </ItemGroup>
+    <ItemGroup>
+        <None Include="Obfuscator.psplugin">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+            <SubType>Designer</SubType>
+        </None>
+    </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="PostSharp.Compiler.Engine" Version="$(PostSharpPackageVersion)" />
-  </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="PostSharp.Compiler.Engine" Version="$(PostSharpPackageVersion)"/>
+    </ItemGroup>
 
-  
+
 </Project>

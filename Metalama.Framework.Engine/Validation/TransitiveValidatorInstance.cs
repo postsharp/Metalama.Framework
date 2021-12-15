@@ -10,10 +10,9 @@ using System.Reflection;
 
 namespace Metalama.Framework.Engine.Validation;
 
-[Obfuscation(Exclude = true /* Serialized */)]
+[Obfuscation( Exclude = true /* Serialized */ )]
 internal class TransitiveValidatorInstance : ILamaSerializable
 {
-
     public TransitiveValidatorInstance( ReferenceValidatorInstance instance )
     {
         this.ValidatedDeclaration = instance.ValidatedDeclaration.ToRef();
@@ -31,17 +30,17 @@ internal class TransitiveValidatorInstance : ILamaSerializable
         this.MethodName = null!;
         this.Object = null!;
     }
-    
-    public IRef<IDeclaration> ValidatedDeclaration { get;  private set;}
-    
-    public ReferenceKinds ReferenceKinds { get;  private set;}
-    
-    public object Object { get;  private set;}
+
+    public IRef<IDeclaration> ValidatedDeclaration { get; private set; }
+
+    public ReferenceKinds ReferenceKinds { get; private set; }
+
+    public object Object { get; private set; }
 
     public IAspectState? State { get; private set; }
 
     public string MethodName { get; private set; }
-    
+
     private sealed class Serializer : ReferenceTypeSerializer
     {
         public override object CreateInstance( Type type, IArgumentsReader constructorArguments ) => new TransitiveValidatorInstance();

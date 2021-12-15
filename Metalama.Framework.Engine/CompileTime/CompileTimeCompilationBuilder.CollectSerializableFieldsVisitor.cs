@@ -25,7 +25,11 @@ namespace Metalama.Framework.Engine.CompileTime
 
             public IReadOnlyList<ISymbol> SerializableFieldsOrProperties => this._serializableFieldsOrProperties;
 
-            public CollectSerializableFieldsVisitor( SemanticModel semanticModel, ReflectionMapper reflectionMapper, ISymbolClassifier symbolClassifier, CancellationToken cancellationToken )
+            public CollectSerializableFieldsVisitor(
+                SemanticModel semanticModel,
+                ReflectionMapper reflectionMapper,
+                ISymbolClassifier symbolClassifier,
+                CancellationToken cancellationToken )
             {
                 this._semanticModel = semanticModel;
                 this._symbolClassifier = symbolClassifier;
@@ -43,7 +47,7 @@ namespace Metalama.Framework.Engine.CompileTime
                     var fieldSymbol = this._semanticModel.GetDeclaredSymbol( declarator ).AssertNotNull();
 
                     if ( !fieldSymbol.IsStatic &&
-                        !fieldSymbol.GetAttributes().Any( a => SymbolEqualityComparer.Default.Equals( a.AttributeClass, this._nonSerializedAttribute ) ) &&
+                         !fieldSymbol.GetAttributes().Any( a => SymbolEqualityComparer.Default.Equals( a.AttributeClass, this._nonSerializedAttribute ) ) &&
                          this._symbolClassifier.GetTemplateInfo( fieldSymbol ).IsNone )
                     {
                         this._serializableFieldsOrProperties.Add( fieldSymbol );
@@ -63,7 +67,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 var backingField = propertySymbol.GetBackingField().AssertNotNull();
 
                 if ( !backingField.GetAttributes().Any( a => SymbolEqualityComparer.Default.Equals( a.AttributeClass, this._nonSerializedAttribute ) ) &&
-                    this._symbolClassifier.GetTemplateInfo( propertySymbol ).IsNone )
+                     this._symbolClassifier.GetTemplateInfo( propertySymbol ).IsNone )
                 {
                     this._serializableFieldsOrProperties.Add( propertySymbol );
                 }

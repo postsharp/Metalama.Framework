@@ -13,7 +13,7 @@ namespace Metalama.Framework.CodeFixes
     /// <summary>
     /// Represents a modification of the current solution, including the <see cref="Title"/> of transformation. 
     /// </summary>
-    public sealed class CodeFix 
+    public sealed class CodeFix
     {
         /// <summary>
         /// Gets the title of the <see cref="CodeFix"/>, displayed to the user in the light bulb or refactoring menu.
