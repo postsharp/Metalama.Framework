@@ -39,6 +39,7 @@ public class TransitiveValidatorInstance : ILamaSerializable
 
     public string MethodName { get; private set; }
 
+    // ReSharper disable once UnusedType.Local
     private sealed class Serializer : ReferenceTypeSerializer
     {
         public override object CreateInstance( Type type, IArgumentsReader constructorArguments ) => new TransitiveValidatorInstance();

@@ -15,9 +15,10 @@ namespace Metalama.Framework.Engine.LamaSerialization
 {
     internal class SerializerGenerator : ISerializerGenerator
     {
+        private const string _serializerTypeName = "Serializer";
+
         private readonly SyntaxGenerationContext _context;
         private readonly ReflectionMapper _runtimeReflectionMapper;
-        private const string _serializerTypeName = "Serializer";
 
         public SerializerGenerator( Compilation runtimeCompilation, SyntaxGenerationContext context )
         {

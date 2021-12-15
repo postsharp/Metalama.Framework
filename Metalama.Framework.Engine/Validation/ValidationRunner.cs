@@ -20,7 +20,7 @@ internal class ValidationRunner
 {
     private readonly AspectPipelineConfiguration _configuration;
     private readonly ImmutableArray<ValidatorSource> _sources;
-    private CancellationToken _cancellationToken;
+    private readonly CancellationToken _cancellationToken;
 
     public ValidationRunner( AspectPipelineConfiguration configuration, ImmutableArray<ValidatorSource> sources, CancellationToken cancellationToken )
     {
