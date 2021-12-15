@@ -10,6 +10,7 @@ using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Validation;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
@@ -416,7 +417,8 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
                         pipelineResult?.Diagnostics.DiagnosticSuppressions,
                         pipelineResult?.Diagnostics.CodeFixes ),
                     pipelineResult?.ExternallyInheritableAspects.Select( i => new InheritableAspectInstance( i ) ).ToImmutableArray()
-                    ?? ImmutableArray<InheritableAspectInstance>.Empty );
+                    ?? ImmutableArray<InheritableAspectInstance>.Empty,
+                    pipelineResult?.ExternallyVisibleValidators ?? ImmutableArray<ReferenceValidatorInstance>.Empty);
 
                 var directoryOptions = state._pipeline.ServiceProvider.GetRequiredService<IPathOptions>();
                 UserDiagnosticRegistrationService.GetInstance( directoryOptions ).RegisterDescriptors( result );

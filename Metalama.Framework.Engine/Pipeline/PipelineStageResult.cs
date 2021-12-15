@@ -48,6 +48,8 @@ namespace Metalama.Framework.Engine.Pipeline
         public ImmutableArray<OrderedAspectLayer> AspectLayers { get; }
 
         public ImmutableArray<IAspectInstance> ExternallyInheritableAspects { get; }
+        
+        public ImmutableArray<ReferenceValidatorInstance> ExternallyVisibleValidators { get; }
 
         /// <summary>
         /// Gets the compilation model corresponding to <see cref="Compilation"/>, if it has been created.
@@ -65,6 +67,7 @@ namespace Metalama.Framework.Engine.Pipeline
             ImmutableArray<IAspectSource> aspectSources = default,
             ImmutableArray<ValidatorSource> validatorSources = default,
             ImmutableArray<IAspectInstance> inheritableAspectInstances = default,
+            ImmutableArray<ReferenceValidatorInstance> externallyVisibleValidators = default,
             ImmutableArray<IntroducedSyntaxTree> additionalSyntaxTrees = default,
             ImmutableArray<AdditionalCompilationOutputFile> additionalCompilationOutputFiles = default )
         {
@@ -75,6 +78,9 @@ namespace Metalama.Framework.Engine.Pipeline
             this.AspectLayers = aspectLayers;
             this.CompilationModels = compilationModels;
             this.ExternallyInheritableAspects = inheritableAspectInstances.IsDefault ? ImmutableArray<IAspectInstance>.Empty : inheritableAspectInstances;
+
+            this.ExternallyVisibleValidators =
+                externallyVisibleValidators.IsDefault ? ImmutableArray<ReferenceValidatorInstance>.Empty : externallyVisibleValidators;
             this.Project = project;
             this.AdditionalSyntaxTrees = additionalSyntaxTrees.IsDefault ? ImmutableArray<IntroducedSyntaxTree>.Empty : additionalSyntaxTrees;
 

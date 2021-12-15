@@ -5,32 +5,44 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Collections;
+using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Pipeline;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Threading;
 
 namespace Metalama.Framework.Engine.Validation;
 
-internal partial class ValidationRunner
+internal record ValidationResult( ImmutableArray<ReferenceValidatorInstance> TransitiveValidations, ImmutableUserDiagnosticList Diagnostics );
+
+internal class ValidationRunner
 {
+    private readonly AspectPipelineConfiguration _configuration;
     private readonly ImmutableArray<ValidatorSource> _sources;
+    private CancellationToken _cancellationToken;
 
-    public ValidationRunner( ImmutableArray<ValidatorSource> sources )
+    public ValidationRunner( AspectPipelineConfiguration configuration, ImmutableArray<ValidatorSource> sources, CancellationToken cancellationToken )
     {
+        this._configuration = configuration;
         this._sources = sources;
+        _cancellationToken = cancellationToken;
     }
 
-    public IReadOnlyList<ReferenceValidatorInstance> Validate(
-        CompilationModel initialCompilation,
-        CompilationModel finalCompilation,
-        IDiagnosticSink diagnosticAdder )
+    /// <summary>
+    /// Runs both declaration and reference validators.
+    /// </summary>
+    public ValidationResult RunAll( CompilationModel initialCompilation, CompilationModel finalCompilation )
     {
-        this.RunDeclarationValidators( finalCompilation, diagnosticAdder );
+        var userDiagnosticSink = new UserDiagnosticSink( this._configuration.CompileTimeProject, this._configuration.CodeFixFilter );
+        this.RunDeclarationValidators( finalCompilation, userDiagnosticSink );
 
-        return this.RunReferenceValidators( initialCompilation, diagnosticAdder );
+        var transitiveValidators = this.RunReferenceValidators( initialCompilation, userDiagnosticSink );
+
+        return new ValidationResult( transitiveValidators, userDiagnosticSink.ToImmutable() );
     }
 
-    private void RunDeclarationValidators( CompilationModel finalCompilation, IDiagnosticSink diagnosticAdder )
+    public void RunDeclarationValidators( CompilationModel finalCompilation, IDiagnosticSink diagnosticAdder )
     {
         var validators = this._sources
             .Where( s => s.Kind == ValidatorKind.Definition )
@@ -43,18 +55,16 @@ internal partial class ValidationRunner
         }
     }
 
-    private IReadOnlyList<ReferenceValidatorInstance> RunReferenceValidators( CompilationModel initialCompilation, IDiagnosticSink diagnosticAdder )
+    private ImmutableArray<ReferenceValidatorInstance> RunReferenceValidators( CompilationModel initialCompilation, IDiagnosticSink diagnosticAdder )
     {
-        var validators = this._sources.Where( s => s.Kind == ValidatorKind.Reference )
-            .SelectMany( s => s.GetValidators( initialCompilation, diagnosticAdder ) )
-            .Cast<ReferenceValidatorInstance>();
+        var validators = this.GetReferenceValidators( initialCompilation, diagnosticAdder );
 
         var validatorsBySymbol = validators
             .ToMultiValueDictionary(
                 v => v.ValidatedDeclaration.GetSymbol().AssertNotNull(),
                 v => v );
 
-        var visitor = new Visitor( diagnosticAdder, validatorsBySymbol, initialCompilation );
+        var visitor = new ReferenceValidationVisitor( diagnosticAdder, s => validatorsBySymbol[s], initialCompilation, this._cancellationToken );
 
         foreach ( var syntaxTree in initialCompilation.PartialCompilation.SyntaxTrees )
         {
@@ -63,6 +73,11 @@ internal partial class ValidationRunner
 
         return validatorsBySymbol.Where( s => s.Key.GetResultingAccessibility() != AccessibilityFlags.SameType )
             .SelectMany( s => s )
-            .ToList();
+            .ToImmutableArray();
     }
+
+    public IEnumerable<ReferenceValidatorInstance> GetReferenceValidators( CompilationModel initialCompilation, IDiagnosticSink diagnosticAdder )
+        => this._sources.Where( s => s.Kind == ValidatorKind.Reference )
+            .SelectMany( s => s.GetValidators( initialCompilation, diagnosticAdder ) )
+            .Cast<ReferenceValidatorInstance>();
 }

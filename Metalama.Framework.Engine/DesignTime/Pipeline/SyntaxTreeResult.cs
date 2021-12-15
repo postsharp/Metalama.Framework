@@ -3,6 +3,7 @@
 
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.Pipeline;
+using Metalama.Framework.Engine.Validation;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
 
@@ -32,6 +33,8 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
         public ImmutableArray<string> Dependencies { get; }
 
         public ImmutableArray<(string AspectType, InheritableAspectInstance AspectInstance)> InheritableAspects { get; }
+        
+        public ImmutableArray<DesignTimeValidatorInstance> Validators { get; }
 
         public SyntaxTreeResult(
             SyntaxTree syntaxTree,
@@ -39,9 +42,11 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
             ImmutableArray<CacheableScopedSuppression>? suppressions,
             ImmutableArray<IntroducedSyntaxTree>? introductions,
             ImmutableArray<string>? dependencies,
-            ImmutableArray<(string AspectType, InheritableAspectInstance AspectInstance)>? inheritableAspects )
+            ImmutableArray<(string AspectType, InheritableAspectInstance AspectInstance)>? inheritableAspects,
+            ImmutableArray<DesignTimeValidatorInstance>? validators )
         {
             this.SyntaxTree = syntaxTree;
+            this.Validators = validators ?? ImmutableArray<DesignTimeValidatorInstance>.Empty;
             this.InheritableAspects = inheritableAspects ?? ImmutableArray<(string AspectType, InheritableAspectInstance AspectInstance)>.Empty;
             this.Diagnostics = diagnostics ?? ImmutableArray<Diagnostic>.Empty;
             this.Suppressions = suppressions ?? ImmutableArray<CacheableScopedSuppression>.Empty;

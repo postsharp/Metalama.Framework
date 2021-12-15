@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Compiler;
+using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.DesignTime.Diagnostics;
 using Metalama.Framework.Engine.DesignTime.Pipeline;
 using Metalama.Framework.Engine.Diagnostics;
@@ -85,6 +86,16 @@ namespace Metalama.Framework.Engine.DesignTime
                 }
 
                 // Execute the pipeline.
+                var pipeline = DesignTimeAspectPipelineFactory.Instance.GetOrCreatePipeline(
+                    projectOptions,
+                    context.SemanticModel.Compilation,
+                    context.CancellationToken );
+
+                if ( pipeline == null )
+                {
+                    return;
+                }
+                
                 var compilation = context.SemanticModel.Compilation;
 
                 if ( !DesignTimeAspectPipelineFactory.Instance.TryExecute(
@@ -98,20 +109,36 @@ namespace Metalama.Framework.Engine.DesignTime
                     return;
                 }
 
-                var result = compilationResult.GetDiagnosticsOnSyntaxTree( syntaxTreeFilePath );
+                var pipelineDiagnostics = compilationResult.GetDiagnosticsOnSyntaxTree( syntaxTreeFilePath );
+                
+                // Execute validators.
+                var validatorDiagnostics = ImmutableUserDiagnosticList.Empty;
+                
+                if ( compilationResult.HasValidators )
+                {
+                    var project = pipeline.LatestConfiguration?.ProjectModel;
+
+                    if ( project != null )
+                    {
+                        DesignTimeValidatorRunner validatorRunner = new( compilationResult, project );
+                        validatorDiagnostics = validatorRunner.Validate( context.SemanticModel, context.CancellationToken );
+                    }
+                }
+                
+                // TODO: suppressions from validators.
 
                 // Report diagnostics from the pipeline.
                 Logger.Instance?.Write(
-                    $"DesignTimeAnalyzer.AnalyzeSemanticModel('{syntaxTreeFilePath}'): {result.Diagnostics.Length} diagnostics and {result.Suppressions.Length} suppressions reported on '{syntaxTreeFilePath}'." );
+                    $"DesignTimeAnalyzer.AnalyzeSemanticModel('{syntaxTreeFilePath}'): {pipelineDiagnostics.Diagnostics.Length} diagnostics and {pipelineDiagnostics.Suppressions.Length} suppressions reported on '{syntaxTreeFilePath}'." );
 
                 DesignTimeDiagnosticHelper.ReportDiagnostics(
-                    result.Diagnostics,
+                    pipelineDiagnostics.Diagnostics.Concat( validatorDiagnostics.ReportedDiagnostics ),
                     compilation,
                     context.ReportDiagnostic,
                     true );
 
                 // If we have unsupported suppressions, a diagnostic here because a Suppressor cannot report.
-                foreach ( var suppression in result.Suppressions.Where(
+                foreach ( var suppression in pipelineDiagnostics.Suppressions.Where(
                              s => !this._designTimeDiagnosticDefinitions.SupportedSuppressionDescriptors.ContainsKey( s.Definition.SuppressedDiagnosticId ) ) )
                 {
                     foreach ( var symbol in DocumentationCommentId.GetSymbolsForDeclarationId( suppression.SymbolId, compilation ) )
@@ -129,19 +156,11 @@ namespace Metalama.Framework.Engine.DesignTime
                 }
 
                 // Perform additional analysis not done by the design-time pipeline.
-                var pipeline = DesignTimeAspectPipelineFactory.Instance.GetOrCreatePipeline(
-                    projectOptions,
-                    context.SemanticModel.Compilation,
+                TemplatingCodeValidator.Validate(
+                    context.SemanticModel,
+                    context.ReportDiagnostic,
+                    pipeline,
                     context.CancellationToken );
-
-                if ( pipeline != null )
-                {
-                    TemplatingCodeValidator.Validate(
-                        context.SemanticModel,
-                        context.ReportDiagnostic,
-                        pipeline,
-                        context.CancellationToken );
-                }
             }
             catch ( Exception e )
             {

@@ -4,6 +4,7 @@
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Pipeline;
+using Metalama.Framework.Engine.Validation;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -22,5 +23,6 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
         ImmutableDictionary<string, SyntaxTree> InputSyntaxTrees,
         IReadOnlyList<IntroducedSyntaxTree> IntroducedSyntaxTrees,
         ImmutableUserDiagnosticList Diagnostics,
-        IReadOnlyList<InheritableAspectInstance> InheritableAspects );
+        IReadOnlyList<InheritableAspectInstance> InheritableAspects,
+        ImmutableArray<ReferenceValidatorInstance> Validators );
 }

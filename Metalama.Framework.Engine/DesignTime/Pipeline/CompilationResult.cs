@@ -31,12 +31,15 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
                 StringComparer.Ordinal,
                 InheritableAspectInstance.ByTargetComparer.Instance );
 
+        private readonly ImmutableDictionaryOfHashSet<SymbolKey, DesignTimeValidatorInstance> _validators =
+            ImmutableDictionaryOfHashSet<SymbolKey, DesignTimeValidatorInstance>.Empty;
+
         public bool IsDirty { get; } = true;
 
         public IEnumerable<IntroducedSyntaxTree> IntroducedSyntaxTrees => this._introducedSyntaxTrees.Values;
 
         public IEnumerable<SyntaxTreeResult> SyntaxTreeResults => this._syntaxTreeResults.Values;
-
+        
         /// <summary>
         /// Maps the syntax tree name to the pipeline result for this syntax tree.
         /// </summary>
@@ -56,12 +59,14 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
             ImmutableDictionary<string, SyntaxTreeResult> invalidSyntaxTreeResults,
             ImmutableDictionary<string, IntroducedSyntaxTree> introducedSyntaxTrees,
             ImmutableDictionaryOfHashSet<string, InheritableAspectInstance> inheritableAspects,
+            ImmutableDictionaryOfHashSet<SymbolKey, DesignTimeValidatorInstance> validators,
             bool isDirty )
         {
             this._syntaxTreeResults = syntaxTreeResults;
             this._invalidSyntaxTreeResults = invalidSyntaxTreeResults;
             this._introducedSyntaxTrees = introducedSyntaxTrees;
             this._inheritableAspects = inheritableAspects;
+            this._validators = validators;
             this.IsDirty = isDirty;
         }
 
@@ -78,6 +83,7 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
 
             ImmutableDictionary<string, IntroducedSyntaxTree>.Builder? introducedSyntaxTreeBuilder = null;
             ImmutableDictionaryOfHashSet<string, InheritableAspectInstance>.Builder? inheritableAspectsBuilder = null;
+            ImmutableDictionaryOfHashSet<SymbolKey, DesignTimeValidatorInstance>.Builder? validatorsBuilder = null;
 
             foreach ( var result in resultsByTree )
             {
@@ -106,6 +112,16 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
                             inheritableAspectsBuilder.Remove( x.AspectType, x.AspectInstance );
                         }
                     }
+
+                    if ( !oldSyntaxTreeResult.Validators.IsEmpty )
+                    {
+                        validatorsBuilder ??= this._validators.ToBuilder();
+
+                        foreach ( var validator in oldSyntaxTreeResult.Validators )
+                        {
+                            validatorsBuilder.Remove( validator.ValidatedDeclaration, validator );
+                        }
+                    }
                 }
 
                 // Index the new tree.
@@ -129,17 +145,29 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
                     }
                 }
 
+                if ( !result.Validators.IsDefaultOrEmpty )
+                {
+                    validatorsBuilder ??= this._validators.ToBuilder();
+
+                    foreach ( var validator in result.Validators )
+                    {
+                        validatorsBuilder.Add( validator.ValidatedDeclaration, validator );
+                    }
+                }
+
                 syntaxTreeResultBuilder[filePath] = result;
             }
 
             var introducedTrees = introducedSyntaxTreeBuilder?.ToImmutable() ?? this._introducedSyntaxTrees;
             var inheritableAspects = inheritableAspectsBuilder?.ToImmutable() ?? this._inheritableAspects;
+            var validators = validatorsBuilder?.ToImmutable() ?? this._validators;
 
             return new CompilationResult(
                 syntaxTreeResultBuilder.ToImmutable(),
                 ImmutableDictionary<string, SyntaxTreeResult>.Empty,
                 introducedTrees,
                 inheritableAspects,
+                validators,
                 false );
         }
 
@@ -229,6 +257,22 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
                 builder.InheritableAspects.Add( (inheritableAspectInstance.Aspect.GetType().FullName, inheritableAspectInstance) );
             }
 
+            // Split validators by syntax tree.
+            foreach ( var validator in pipelineResults.Validators )
+            {
+                var targetSymbol = validator.ValidatedDeclaration.GetSymbol().AssertNotNull();
+                var syntaxTree = targetSymbol.GetPrimarySyntaxReference().AssertNotNull().SyntaxTree;
+                var filePath = syntaxTree.FilePath;
+                var builder = resultBuilders[filePath];
+                builder.Validators ??= ImmutableArray.CreateBuilder<DesignTimeValidatorInstance>();
+
+                builder.Validators.Add(
+                    new DesignTimeValidatorInstance(
+                        validator.ValidatedDeclaration.GetSymbol().AssertNotNull(),
+                        validator.ReferenceKinds,
+                        validator.Source ) );
+            }
+
             // Add syntax trees with empty output to it gets cached too.
             var inputTreesWithoutOutput = compilation.SyntaxTrees.ToBuilder();
 
@@ -288,6 +332,7 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
                     invalidSyntaxTreeBuilders.ToImmutable(),
                     this._introducedSyntaxTrees,
                     this._inheritableAspects,
+                    this._validators,
                     true );
             }
         }
@@ -317,6 +362,15 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
 
         public IEnumerable<string> InheritableAspectTypes => this._inheritableAspects.Keys;
 
+        public bool HasValidators => !this._validators.IsEmpty;
+
         public IEnumerable<InheritableAspectInstance> GetInheritedAspects( string aspectType ) => this._inheritableAspects[aspectType];
+
+        internal ImmutableHashSet<DesignTimeValidatorInstance> GetValidatorsForSymbol( ISymbol symbol )
+        {
+            var symbolKey = SymbolKey.CreateLazy( symbol );
+
+            return this._validators[symbolKey];
+        }
     }
 }

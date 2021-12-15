@@ -7,10 +7,8 @@
 #pragma warning disable SA1516 // Elements should be separated by blank line
 extern alias roslyn;
 using Microsoft.CodeAnalysis;
+using System;
 using System.Threading;
-using SymbolKey = roslyn::Microsoft.CodeAnalysis.SymbolKey;
-using SymbolKeyExtensions = roslyn::Microsoft.CodeAnalysis.SymbolKeyExtensions;
-
 #pragma warning restore SA1516 // Elements should be separated by blank line
 
 namespace Metalama.Framework.Engine.Utilities
@@ -18,18 +16,18 @@ namespace Metalama.Framework.Engine.Utilities
     /// <summary>
     /// An identifier of an <see cref="ISymbol"/> that works across compilations, but not across different versions of Roslyn.  
     /// </summary>
-    internal struct SymbolId
+    internal struct SymbolId : IEquatable<SymbolId>
     {
 #pragma warning disable IDE0044 // SymbolKey.Resolve is mutating.
-        private SymbolKey _symbolKey;
+        private roslyn::Microsoft.CodeAnalysis.SymbolKey _symbolKey;
 #pragma warning restore IDE0044
 
         public SymbolId( string id )
         {
-            this._symbolKey = new SymbolKey( id );
+            this._symbolKey = new roslyn::Microsoft.CodeAnalysis.SymbolKey( id );
         }
 
-        private SymbolId( SymbolKey symbolKey )
+        private SymbolId( roslyn::Microsoft.CodeAnalysis.SymbolKey symbolKey )
         {
             this._symbolKey = symbolKey;
         }
@@ -48,10 +46,20 @@ namespace Metalama.Framework.Engine.Utilities
             else
             {
                 // ReSharper disable once InvokeAsExtensionMethod
-                var symbolKey = SymbolKeyExtensions.GetSymbolKey( symbol, cancellationToken );
+                var symbolKey = roslyn::Microsoft.CodeAnalysis.SymbolKeyExtensions.GetSymbolKey( symbol, cancellationToken );
 
                 return new SymbolId( symbolKey );
             }
         }
+
+        public bool Equals( SymbolId other ) => this._symbolKey.Equals( other._symbolKey );
+
+        public override bool Equals( object? obj ) => obj is SymbolId other && Equals( other );
+
+        public override int GetHashCode() => this._symbolKey.GetHashCode();
+
+        public static bool operator ==( SymbolId left, SymbolId right ) => left.Equals( right );
+
+        public static bool operator !=( SymbolId left, SymbolId right ) => !left.Equals( right );
     }
 }

@@ -149,11 +149,13 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
             }
         }
 
+        internal AspectPipelineConfiguration? LatestConfiguration => this._currentState.Configuration;
+
         /// <inheritdoc/>
         private protected override HighLevelPipelineStage CreateHighLevelStage(
             PipelineStageConfiguration configuration,
             CompileTimeProject compileTimeProject )
-            => new SourceGeneratorPipelineStage( compileTimeProject, configuration.Parts, this.ServiceProvider );
+            => new DesignTimePipelineStage( compileTimeProject, configuration.Parts, this.ServiceProvider );
 
         private protected override LowLevelPipelineStage? CreateLowLevelStage( PipelineStageConfiguration configuration, CompileTimeProject compileTimeProject )
             => null;

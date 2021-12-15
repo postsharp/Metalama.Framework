@@ -133,6 +133,7 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
 
             return pipeline.GetEligibleAspects( compilation, symbol, cancellationToken );
         }
+        
 
         public bool TryExecute(
             IProjectOptions projectOptions,

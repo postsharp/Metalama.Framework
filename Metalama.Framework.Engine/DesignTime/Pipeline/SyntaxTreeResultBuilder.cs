@@ -5,6 +5,7 @@ using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Pipeline;
+using Metalama.Framework.Engine.Validation;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
 using System.Linq;
@@ -23,6 +24,7 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
         public ImmutableArray<CacheableScopedSuppression>.Builder? Suppressions;
         public ImmutableArray<IntroducedSyntaxTree>.Builder? Introductions;
         public ImmutableArray<(string AspectType, InheritableAspectInstance AspectInstance)>.Builder? InheritableAspects;
+        public ImmutableArray<DesignTimeValidatorInstance>.Builder? Validators;
 #pragma warning restore SA1401 // Fields should be private
 
         public SyntaxTreeResultBuilder( SyntaxTree syntaxTree )
@@ -52,7 +54,8 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
                 this.Suppressions?.ToImmutable(),
                 this.Introductions?.ToImmutable(),
                 dependencies,
-                this.InheritableAspects?.ToImmutable() );
+                this.InheritableAspects?.ToImmutable(),
+                this.Validators?.ToImmutable());
         }
     }
 }

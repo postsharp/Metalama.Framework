@@ -10,10 +10,9 @@ using System.Reflection;
 
 namespace Metalama.Framework.Engine.Validation;
 
-[Obfuscation( Exclude = true /* Serialized */ )]
-internal class TransitiveValidatorInstance : ILamaSerializable
+public class TransitiveValidatorInstance : ILamaSerializable
 {
-    public TransitiveValidatorInstance( ReferenceValidatorInstance instance )
+    internal TransitiveValidatorInstance( ReferenceValidatorInstance instance )
     {
         this.ValidatedDeclaration = instance.ValidatedDeclaration.ToRef();
         this.ReferenceKinds = instance.ReferenceKinds;
