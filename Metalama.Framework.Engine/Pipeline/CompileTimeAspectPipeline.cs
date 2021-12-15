@@ -5,6 +5,7 @@ using Metalama.Compiler;
 using Metalama.Framework.Engine.AdditionalOutputs;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Formatting;
@@ -16,6 +17,7 @@ using Microsoft.CodeAnalysis;
 using PostSharp.Backstage.Extensibility.Extensions;
 using PostSharp.Backstage.Licensing;
 using PostSharp.Backstage.Licensing.Consumption;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Linq;
@@ -109,13 +111,15 @@ namespace Metalama.Framework.Engine.Pipeline
                 var resultPartialCompilation = result.Compilation;
 
                 // Execute validators.
+                IReadOnlyList<ReferenceValidatorInstance> referenceValidators = ImmutableArray<ReferenceValidatorInstance>.Empty;
+
                 if ( !result.ValidatorSources.IsDefaultOrEmpty )
                 {
                     var validationRunner = new ValidationRunner( result.ValidatorSources );
                     var initialCompilation = result.CompilationModels[0];
                     var finalCompilation = result.CompilationModels[result.CompilationModels.Length - 1];
                     var diagnosticSink = new UserDiagnosticSink( configuration.CompileTimeProject, configuration.CodeFixFilter );
-                    validationRunner.Validate( initialCompilation, finalCompilation, diagnosticSink );
+                    referenceValidators = validationRunner.Validate( initialCompilation, finalCompilation, diagnosticSink );
                     diagnosticAdder.Report( diagnosticSink.ToImmutable().ReportedDiagnostics );
 
                     // TODO: suppressions, code fixes
@@ -146,11 +150,11 @@ namespace Metalama.Framework.Engine.Pipeline
                 }
 
                 // Add the index of inherited aspects.
-                if ( result.ExternallyInheritableAspects.Length > 0 )
+                if ( result.ExternallyInheritableAspects.Length > 0 || referenceValidators.Count > 0 )
                 {
                     var inheritedAspectsManifest = TransitiveAspectsManifest.Create(
                         result.ExternallyInheritableAspects.Select( i => new InheritableAspectInstance( i ) ).ToImmutableArray(),
-                        resultPartialCompilation.Compilation );
+                        referenceValidators.Select( i => new TransitiveValidatorInstance( i ) ).ToImmutableArray());
 
                     var resource = inheritedAspectsManifest.ToResource( configuration.ServiceProvider );
                     additionalResources = additionalResources.Add( resource );

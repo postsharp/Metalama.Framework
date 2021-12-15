@@ -1,9 +1,12 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Collections;
+using Microsoft.CodeAnalysis;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 
@@ -18,10 +21,10 @@ internal partial class ValidationRunner
         this._sources = sources;
     }
 
-    public void Validate( CompilationModel initialCompilation, CompilationModel finalCompilation, IDiagnosticSink diagnosticAdder )
+    public IReadOnlyList<ReferenceValidatorInstance> Validate( CompilationModel initialCompilation, CompilationModel finalCompilation, IDiagnosticSink diagnosticAdder )
     {
         this.RunDeclarationValidators( finalCompilation, diagnosticAdder );
-        this.RunReferenceValidators( initialCompilation, diagnosticAdder );
+        return this.RunReferenceValidators( initialCompilation, diagnosticAdder );
     }
 
     private void RunDeclarationValidators( CompilationModel finalCompilation, IDiagnosticSink diagnosticAdder )
@@ -35,13 +38,16 @@ internal partial class ValidationRunner
         {
             validator.Validate( diagnosticAdder );
         }
+        
     }
 
-    private void RunReferenceValidators( CompilationModel initialCompilation, IDiagnosticSink diagnosticAdder )
+    private IReadOnlyList<ReferenceValidatorInstance> RunReferenceValidators( CompilationModel initialCompilation, IDiagnosticSink diagnosticAdder )
     {
-        var validatorsBySymbol = this._sources.Where( s => s.Kind == ValidatorKind.Reference )
+        var validators = this._sources.Where( s => s.Kind == ValidatorKind.Reference )
             .SelectMany( s => s.GetValidators( initialCompilation, diagnosticAdder ) )
-            .Cast<ReferenceValidatorInstance>()
+            .Cast<ReferenceValidatorInstance>();
+
+        var validatorsBySymbol = validators
             .ToMultiValueDictionary(
                 v => v.ValidatedDeclaration.GetSymbol().AssertNotNull(),
                 v => v );
@@ -52,5 +58,10 @@ internal partial class ValidationRunner
         {
             visitor.Visit( syntaxTree.Value );
         }
+
+        return validatorsBySymbol.Where( s => s.Key.GetResultingAccessibility() != AccessibilityFlags.SameType )
+            .SelectMany( s => s )
+            .ToList();
     }
 }
+
