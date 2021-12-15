@@ -39,7 +39,7 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
         public IEnumerable<IntroducedSyntaxTree> IntroducedSyntaxTrees => this._introducedSyntaxTrees.Values;
 
         public IEnumerable<SyntaxTreeResult> SyntaxTreeResults => this._syntaxTreeResults.Values;
-        
+
         /// <summary>
         /// Maps the syntax tree name to the pipeline result for this syntax tree.
         /// </summary>

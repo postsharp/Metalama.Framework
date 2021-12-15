@@ -3,7 +3,6 @@
 
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.Pipeline;
-using Metalama.Framework.Engine.Validation;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
 
@@ -33,7 +32,7 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
         public ImmutableArray<string> Dependencies { get; }
 
         public ImmutableArray<(string AspectType, InheritableAspectInstance AspectInstance)> InheritableAspects { get; }
-        
+
         public ImmutableArray<DesignTimeValidatorInstance> Validators { get; }
 
         public SyntaxTreeResult(

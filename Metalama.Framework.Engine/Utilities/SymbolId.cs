@@ -46,7 +46,7 @@ namespace Metalama.Framework.Engine.Utilities
             else
             {
                 // ReSharper disable once InvokeAsExtensionMethod
-                var symbolKey = roslyn::Microsoft.CodeAnalysis.SymbolKeyExtensions.GetSymbolKey( symbol, cancellationToken );
+                var symbolKey = Microsoft.CodeAnalysis.SymbolKeyExtensions.GetSymbolKey( symbol, cancellationToken );
 
                 return new SymbolId( symbolKey );
             }
@@ -54,7 +54,7 @@ namespace Metalama.Framework.Engine.Utilities
 
         public bool Equals( SymbolId other ) => this._symbolKey.Equals( other._symbolKey );
 
-        public override bool Equals( object? obj ) => obj is SymbolId other && Equals( other );
+        public override bool Equals( object? obj ) => obj is SymbolId other && this.Equals( other );
 
         public override int GetHashCode() => this._symbolKey.GetHashCode();
 

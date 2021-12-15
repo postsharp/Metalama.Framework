@@ -26,7 +26,7 @@ internal class ValidationRunner
     {
         this._configuration = configuration;
         this._sources = sources;
-        _cancellationToken = cancellationToken;
+        this._cancellationToken = cancellationToken;
     }
 
     /// <summary>

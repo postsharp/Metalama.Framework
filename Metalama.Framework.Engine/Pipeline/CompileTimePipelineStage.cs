@@ -49,7 +49,7 @@ namespace Metalama.Framework.Engine.Pipeline
             var initialCompilation = input.CompilationModels[0];
             var finalCompilation = input.CompilationModels[input.CompilationModels.Length - 1];
             var validationResult = validationRunner.RunAll( initialCompilation, finalCompilation );
-            
+
             // Run the linker.
             var linker = new AspectLinker(
                 pipelineConfiguration.ServiceProvider,
@@ -58,7 +58,8 @@ namespace Metalama.Framework.Engine.Pipeline
                     pipelineStepsResult.LastCompilation,
                     pipelineStepsResult.NonObservableTransformations,
                     input.AspectLayers,
-                    input.Diagnostics.DiagnosticSuppressions.Concat( pipelineStepsResult.Diagnostics.DiagnosticSuppressions ).Concat( validationResult.Diagnostics.DiagnosticSuppressions ),
+                    input.Diagnostics.DiagnosticSuppressions.Concat( pipelineStepsResult.Diagnostics.DiagnosticSuppressions )
+                        .Concat( validationResult.Diagnostics.DiagnosticSuppressions ),
                     this._compileTimeProject ) );
 
             var linkerResult = linker.ToResult();
@@ -81,7 +82,7 @@ namespace Metalama.Framework.Engine.Pipeline
                 input.Project,
                 input.AspectLayers,
                 input.CompilationModels.AddRange( pipelineStepsResult.Compilations ),
-                pipelineStepsResult.Diagnostics.Concat( linkerResult.Diagnostics ).Concat( validationResult.Diagnostics),
+                pipelineStepsResult.Diagnostics.Concat( linkerResult.Diagnostics ).Concat( validationResult.Diagnostics ),
                 pipelineStepsResult.ExternalAspectSources,
                 input.ValidatorSources.AddRange( pipelineStepsResult.ValidatorSources ),
                 input.ExternallyInheritableAspects.AddRange( pipelineStepsResult.InheritableAspectInstances.Select( i => new InheritableAspectInstance( i ) ) ),

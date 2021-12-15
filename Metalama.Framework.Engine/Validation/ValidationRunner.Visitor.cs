@@ -4,13 +4,11 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Validation;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Threading;
 
@@ -49,7 +47,7 @@ internal class ReferenceValidationVisitor : CSharpSyntaxWalker
     public void Visit( SemanticModel semanticModel )
     {
         this._semanticModel = semanticModel;
-        this.Visit( semanticModel.SyntaxTree.GetRoot( ) );
+        this.Visit( semanticModel.SyntaxTree.GetRoot() );
     }
 
     public override void DefaultVisit( SyntaxNode node )
@@ -297,7 +295,7 @@ internal class ReferenceValidationVisitor : CSharpSyntaxWalker
             return;
         }
 
-        var validators = this._getValidatorsFunc(symbol);
+        var validators = this._getValidatorsFunc( symbol );
 
         foreach ( var validator in validators )
         {

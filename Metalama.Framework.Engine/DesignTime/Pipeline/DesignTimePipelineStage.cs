@@ -9,7 +9,6 @@ using Metalama.Framework.Engine.Validation;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Linq;
 using System.Threading;
 
 namespace Metalama.Framework.Engine.DesignTime.Pipeline
@@ -42,7 +41,7 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
             var referenceValidators = validatorRunner.GetReferenceValidators( initialCompilation, diagnosticSink ).ToImmutableArray();
 
             // Generate the additional syntax trees.
-         
+
             DesignTimeSyntaxTreeGenerator.GenerateDesignTimeSyntaxTrees(
                 input.Compilation,
                 pipelineStepsResult.LastCompilation,
@@ -50,7 +49,7 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
                 diagnosticSink,
                 cancellationToken,
                 out var additionalSyntaxTrees );
-            
+
             return new PipelineStageResult(
                 input.Compilation,
                 input.Project,

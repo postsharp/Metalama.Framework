@@ -418,7 +418,7 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
                         pipelineResult?.Diagnostics.CodeFixes ),
                     pipelineResult?.ExternallyInheritableAspects.Select( i => new InheritableAspectInstance( i ) ).ToImmutableArray()
                     ?? ImmutableArray<InheritableAspectInstance>.Empty,
-                    pipelineResult?.ExternallyVisibleValidators ?? ImmutableArray<ReferenceValidatorInstance>.Empty);
+                    pipelineResult?.ExternallyVisibleValidators ?? ImmutableArray<ReferenceValidatorInstance>.Empty );
 
                 var directoryOptions = state._pipeline.ServiceProvider.GetRequiredService<IPathOptions>();
                 UserDiagnosticRegistrationService.GetInstance( directoryOptions ).RegisterDescriptors( result );

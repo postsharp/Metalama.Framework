@@ -5,7 +5,6 @@ using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Pipeline;
-using Metalama.Framework.Engine.Validation;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
 using System.Linq;
@@ -55,7 +54,7 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
                 this.Introductions?.ToImmutable(),
                 dependencies,
                 this.InheritableAspects?.ToImmutable(),
-                this.Validators?.ToImmutable());
+                this.Validators?.ToImmutable() );
         }
     }
 }

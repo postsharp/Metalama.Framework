@@ -1,3 +1,6 @@
+// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+
 using Microsoft.CodeAnalysis;
 using System;
 
@@ -32,11 +35,9 @@ public readonly struct SymbolKey : IEquatable<SymbolKey>
         return this.GetId().Equals( other.GetId() );
     }
 
-    internal static SymbolKey Create( ISymbol symbol )
-        => new SymbolKey( StructuralSymbolComparer.Default.GetHashCode( symbol ), SymbolId.Create( symbol ).ToString() );
-    
-    public static SymbolKey CreateLazy( ISymbol symbol )
-        => new SymbolKey( StructuralSymbolComparer.Default.GetHashCode( symbol ), symbol );
+    internal static SymbolKey Create( ISymbol symbol ) => new( StructuralSymbolComparer.Default.GetHashCode( symbol ), SymbolId.Create( symbol ).ToString() );
+
+    public static SymbolKey CreateLazy( ISymbol symbol ) => new( StructuralSymbolComparer.Default.GetHashCode( symbol ), symbol );
 
     internal SymbolId GetId()
         => this._identity switch

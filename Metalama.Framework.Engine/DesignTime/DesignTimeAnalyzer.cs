@@ -95,7 +95,7 @@ namespace Metalama.Framework.Engine.DesignTime
                 {
                     return;
                 }
-                
+
                 var compilation = context.SemanticModel.Compilation;
 
                 if ( !DesignTimeAspectPipelineFactory.Instance.TryExecute(
@@ -110,10 +110,10 @@ namespace Metalama.Framework.Engine.DesignTime
                 }
 
                 var pipelineDiagnostics = compilationResult.GetDiagnosticsOnSyntaxTree( syntaxTreeFilePath );
-                
+
                 // Execute validators.
                 var validatorDiagnostics = ImmutableUserDiagnosticList.Empty;
-                
+
                 if ( compilationResult.HasValidators )
                 {
                     var project = pipeline.LatestConfiguration?.ProjectModel;
@@ -124,7 +124,7 @@ namespace Metalama.Framework.Engine.DesignTime
                         validatorDiagnostics = validatorRunner.Validate( context.SemanticModel, context.CancellationToken );
                     }
                 }
-                
+
                 // TODO: suppressions from validators.
 
                 // Report diagnostics from the pipeline.

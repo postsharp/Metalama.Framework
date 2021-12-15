@@ -48,7 +48,7 @@ namespace Metalama.Framework.Engine.Pipeline
         public ImmutableArray<OrderedAspectLayer> AspectLayers { get; }
 
         public ImmutableArray<IAspectInstance> ExternallyInheritableAspects { get; }
-        
+
         public ImmutableArray<ReferenceValidatorInstance> ExternallyVisibleValidators { get; }
 
         /// <summary>
@@ -81,6 +81,7 @@ namespace Metalama.Framework.Engine.Pipeline
 
             this.ExternallyVisibleValidators =
                 externallyVisibleValidators.IsDefault ? ImmutableArray<ReferenceValidatorInstance>.Empty : externallyVisibleValidators;
+
             this.Project = project;
             this.AdditionalSyntaxTrees = additionalSyntaxTrees.IsDefault ? ImmutableArray<IntroducedSyntaxTree>.Empty : additionalSyntaxTrees;
 
