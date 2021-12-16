@@ -6,18 +6,14 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Diagnostics;
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Metalama.Framework.CodeFixes
 {
     /// <summary>
-    /// Represents a modification of the current solution, including the <see cref="Title"/> of transformation. This class also implements <c>IEnumerable&lt;CodeFix&gt;</c>
-    /// (enumerating just itself), so it can be used as an argument of <see cref="IDiagnosticSink.Report{T}"/> or <see cref="IDiagnosticSink.Suggest"/>
-    /// without additional syntax.
+    /// Represents a modification of the current solution, including the <see cref="Title"/> of transformation. 
     /// </summary>
-    public sealed class CodeFix : IEnumerable<CodeFix>
+    public sealed class CodeFix
     {
         /// <summary>
         /// Gets the title of the <see cref="CodeFix"/>, displayed to the user in the light bulb or refactoring menu.
@@ -33,16 +29,6 @@ namespace Metalama.Framework.CodeFixes
         {
             this.Title = title;
             this.Action = action;
-        }
-
-        IEnumerator<CodeFix> IEnumerable<CodeFix>.GetEnumerator()
-        {
-            yield return this;
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            yield return this;
         }
 
         /// <summary>
@@ -130,5 +116,9 @@ namespace Metalama.Framework.CodeFixes
             => new(
                 title ?? $"Apply {aspect.GetType().Name} to {targetDeclaration.ToDisplayString( CodeDisplayFormat.MinimallyQualified )}",
                 builder => builder.ApplyAspectAsync( targetDeclaration, aspect ) );
+
+        public void SuggestFor( IDiagnosticLocation location, IDiagnosticSink sink ) => sink.Suggest( location, this );
+
+        public void SuggestFor( in ScopedDiagnosticSink sink ) => sink.Suggest( this );
     }
 }

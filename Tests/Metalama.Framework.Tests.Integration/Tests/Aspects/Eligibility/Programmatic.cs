@@ -16,7 +16,7 @@ namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Eligibility.Programmat
         {
             base.BuildAspect(builder);
             
-            builder.WithMembers( t => t.Methods ).AddAspect( x => new Aspect2() );
+            builder.WithTargetMembers( t => t.Methods ).AddAspect( x => new Aspect2() );
             
         }
     }

@@ -12,7 +12,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.GeneratedSerializers
         [Fact]
         public void Field()
         {
-            // Verifies that serializable type with non-serialized field can be serialized and deserialized.
+            // Verifies that serializable type with a non-serialized field can be serialized and deserialized.
             var code = @"
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Serialization;
@@ -52,9 +52,9 @@ public class A : ILamaSerializable
         }
 
         [Fact]
-        public void Property ()
+        public void Property()
         {
-            // Verifies that serializable type with non-serialized property can be serialized and deserialized.
+            // Verifies that serializable type with a non-serialized property can be serialized and deserialized.
             var code = @"
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Serialization;
@@ -96,7 +96,7 @@ public class A : ILamaSerializable
         [Fact]
         public void PropertyBackingField()
         {
-            // Verifies that serializable type with non-serialized auto-property backing field can be serialized and deserialized.
+            // Verifies that serializable type with a non-serialized auto-property backing field can be serialized and deserialized.
             var code = @"
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Serialization;
@@ -133,6 +133,136 @@ public class A : ILamaSerializable
 
             Assert.Equal( 13, deserialized.Field );
             Assert.Equal( 0, deserialized.Property );
+        }
+
+        [Fact]
+        public void StaticProperty()
+        {
+            // Verifies that serializable type with a static property can be serialized and deserialized.
+            var code = @"
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Serialization;
+[assembly: CompileTime]
+public class A : ILamaSerializable
+{
+    public int Field;
+    
+    public static int StaticProperty { get; set; }
+}
+";
+
+            using var domain = new UnloadableCompileTimeDomain();
+            using var testContext = this.CreateTestContext();
+
+            var project = CreateCompileTimeProject( domain, testContext, code );
+
+            var type = project.GetType( "A" );
+            var lamaSerializer = GetSerializer( type );
+
+            dynamic instance = Activator.CreateInstance( type )!;
+            instance.Field = 13;
+
+            var constructorArgumentsWriter = new TestArgumentsWriter();
+            var initializationArgumentsWriter = new TestArgumentsWriter();
+            lamaSerializer.SerializeObject( instance, constructorArgumentsWriter, initializationArgumentsWriter );
+
+            var constructorArgumentsReader = constructorArgumentsWriter.ToReader();
+            var initializationArgumentsReader = initializationArgumentsWriter.ToReader();
+
+            dynamic deserialized = lamaSerializer.CreateInstance( type, constructorArgumentsReader );
+            lamaSerializer.DeserializeFields( ref deserialized, initializationArgumentsReader );
+
+            Assert.Equal( 13, deserialized.Field );
+        }
+
+        [Fact]
+        public void StaticField()
+        {
+            // Verifies that serializable type with a static field can be serialized and deserialized.
+            var code = @"
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Serialization;
+[assembly: CompileTime]
+public class A : ILamaSerializable
+{
+    public int Field;
+    
+    public static int StaticField;
+}
+";
+
+            using var domain = new UnloadableCompileTimeDomain();
+            using var testContext = this.CreateTestContext();
+
+            var project = CreateCompileTimeProject( domain, testContext, code );
+
+            var type = project.GetType( "A" );
+            var lamaSerializer = GetSerializer( type );
+
+            dynamic instance = Activator.CreateInstance( type )!;
+            instance.Field = 13;
+
+            var constructorArgumentsWriter = new TestArgumentsWriter();
+            var initializationArgumentsWriter = new TestArgumentsWriter();
+            lamaSerializer.SerializeObject( instance, constructorArgumentsWriter, initializationArgumentsWriter );
+
+            var constructorArgumentsReader = constructorArgumentsWriter.ToReader();
+            var initializationArgumentsReader = initializationArgumentsWriter.ToReader();
+
+            dynamic deserialized = lamaSerializer.CreateInstance( type, constructorArgumentsReader );
+            lamaSerializer.DeserializeFields( ref deserialized, initializationArgumentsReader );
+
+            Assert.Equal( 13, deserialized.Field );
+        }
+
+        [Fact]
+        public void NonAutoProperty()
+        {
+            // Verifies that serializable type with a non-auto property can be serialized and deserialized and the property is not used.
+            var code = @"
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Serialization;
+[assembly: CompileTime]
+public class A : ILamaSerializable
+{
+    public B Field;
+    public int ManualProperty { get => this.Field.Field; set => this.Field.Field = value; }
+}
+
+public class B : ILamaSerializable
+{
+    public int Field;
+}
+";
+
+            using var domain = new UnloadableCompileTimeDomain();
+            using var testContext = this.CreateTestContext();
+
+            var project = CreateCompileTimeProject( domain, testContext, code );
+
+            var typeA = project.GetType( "A" );
+            var typeB = project.GetType( "B" );
+            var lamaSerializer = GetSerializer( typeA );
+
+            dynamic instanceA = Activator.CreateInstance( typeA )!;
+            dynamic instanceB = Activator.CreateInstance( typeB )!;
+            instanceA.Field = instanceB;
+            instanceB.Field = 42;
+
+            var constructorArgumentsWriter = new TestArgumentsWriter();
+            var initializationArgumentsWriter = new TestArgumentsWriter();
+            lamaSerializer.SerializeObject( instanceA, constructorArgumentsWriter, initializationArgumentsWriter );
+
+            instanceB.Field = -42;
+
+            var constructorArgumentsReader = constructorArgumentsWriter.ToReader();
+            var initializationArgumentsReader = initializationArgumentsWriter.ToReader();
+
+            dynamic deserialized = lamaSerializer.CreateInstance( typeA, constructorArgumentsReader );
+            lamaSerializer.DeserializeFields( ref deserialized, initializationArgumentsReader );
+
+            Assert.Equal( instanceB, instanceA.Field );
+            Assert.Equal( -42, instanceA.ManualProperty );
         }
     }
 }

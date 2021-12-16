@@ -33,11 +33,11 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty
 
                 if (dirtyStateProperty?.SetMethod == null)
                 {
-                    builder.Diagnostics.Report( builder.Target, _mustHaveDirtyStateSetter, builder.Target );
+                    _mustHaveDirtyStateSetter.WithArguments( builder.Target ).ReportTo( builder.Diagnostics );
                 }
                 else if (dirtyStateProperty.SetMethod.Accessibility != Accessibility.Protected)
                 {
-                    builder.Diagnostics.Report( builder.Target, _dirtyStateSetterMustBeProtected, dirtyStateProperty );
+                    _dirtyStateSetterMustBeProtected.WithArguments( dirtyStateProperty ).ReportTo( dirtyStateProperty, builder.Diagnostics );
                 }
             }
 

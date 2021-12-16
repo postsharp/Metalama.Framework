@@ -21,6 +21,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
+using SyntaxReference = Microsoft.CodeAnalysis.SyntaxReference;
 
 // ReSharper disable SuspiciousTypeConversion.Global
 

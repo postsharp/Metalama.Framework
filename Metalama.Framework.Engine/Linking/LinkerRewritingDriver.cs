@@ -608,7 +608,7 @@ namespace Metalama.Framework.Engine.Linking
                                         var targetDeclaration = aspectInstance.TargetDeclaration.GetSymbol( this._intermediateCompilation );
 
                                         this._diagnosticSink.Report(
-                                            AspectLinkerDiagnosticDescriptors.CannotUseBaseInvokerWithNonInstanceExpression.CreateDiagnostic(
+                                            AspectLinkerDiagnosticDescriptors.CannotUseBaseInvokerWithNonInstanceExpression.CreateRoslynDiagnostic(
                                                 targetDeclaration.GetDiagnosticLocation(),
                                                 (aspectInstance.AspectClass.ShortName, TargetDeclaration: targetDeclaration) ) );
 

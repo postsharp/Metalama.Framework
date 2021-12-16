@@ -47,7 +47,7 @@ namespace Metalama.Framework.Engine.Pipeline
                 pipelineConfiguration.ServiceProvider,
                 new AspectLinkerInput(
                     input.Compilation,
-                    pipelineStepsResult.Compilation,
+                    pipelineStepsResult.LastCompilation,
                     pipelineStepsResult.NonObservableTransformations,
                     input.AspectLayers,
                     input.Diagnostics.DiagnosticSuppressions.Concat( pipelineStepsResult.Diagnostics.DiagnosticSuppressions ),
@@ -58,7 +58,7 @@ namespace Metalama.Framework.Engine.Pipeline
             var projectOptions = this.ServiceProvider.GetService<IProjectOptions>();
             IReadOnlyList<AdditionalCompilationOutputFile>? additionalCompilationOutputFiles = null;
 
-            if ( projectOptions != null && !projectOptions.IsDesignTimeEnabled )
+            if ( projectOptions is { IsDesignTimeEnabled: false } )
             {
                 additionalCompilationOutputFiles = this.GenerateAdditionalCompilationOutputFiles(
                     input,
@@ -70,9 +70,10 @@ namespace Metalama.Framework.Engine.Pipeline
                 linkerResult.Compilation,
                 input.Project,
                 input.AspectLayers,
-                null,
+                input.CompilationModels.AddRange( pipelineStepsResult.Compilations ),
                 pipelineStepsResult.Diagnostics.Concat( linkerResult.Diagnostics ),
                 pipelineStepsResult.ExternalAspectSources,
+                input.ValidatorSources.AddRange( pipelineStepsResult.ValidatorSources ),
                 input.ExternallyInheritableAspects.AddRange( pipelineStepsResult.InheritableAspectInstances.Select( i => new InheritableAspectInstance( i ) ) ),
                 additionalCompilationOutputFiles: additionalCompilationOutputFiles != null
                     ? input.AdditionalCompilationOutputFiles.AddRange( additionalCompilationOutputFiles )
@@ -91,7 +92,7 @@ namespace Metalama.Framework.Engine.Pipeline
 
             DesignTimeSyntaxTreeGenerator.GenerateDesignTimeSyntaxTrees(
                 input.Compilation,
-                pipelineStepResult.Compilation,
+                pipelineStepResult.LastCompilation,
                 this.ServiceProvider,
                 diagnostics,
                 cancellationToken,

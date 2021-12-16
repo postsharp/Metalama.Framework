@@ -73,7 +73,7 @@ namespace Metalama.Framework.Engine.CompileTime
             if ( type == null )
             {
                 diagnosticAdder.Report(
-                    AttributeDeserializerDiagnostics.CannotFindAttributeType.CreateDiagnostic(
+                    AttributeDeserializerDiagnostics.CannotFindAttributeType.CreateRoslynDiagnostic(
                         attribute.GetDiagnosticLocation(),
                         constructorSymbol.ContainingType ) );
 

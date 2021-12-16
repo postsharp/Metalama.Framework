@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
 
 namespace Metalama.Framework.Diagnostics
 {
@@ -26,5 +27,9 @@ namespace Metalama.Framework.Diagnostics
         {
             this.SuppressedDiagnosticId = suppressedDiagnosticId;
         }
+
+        public void SuppressFrom( IDeclaration declaration, IDiagnosticSink sink ) => sink.Suppress( declaration, this );
+
+        public void SuppressFrom( in ScopedDiagnosticSink sink ) => sink.Suppress( this );
     }
 }

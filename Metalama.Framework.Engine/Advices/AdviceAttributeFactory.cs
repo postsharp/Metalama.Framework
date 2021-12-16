@@ -48,7 +48,7 @@ namespace Metalama.Framework.Engine.Advices
 
                             default:
                                 diagnosticAdder.Report(
-                                    AdviceDiagnosticDescriptors.CannotUseIntroduceWithoutDeclaringType.CreateDiagnostic(
+                                    AdviceDiagnosticDescriptors.CannotUseIntroduceWithoutDeclaringType.CreateRoslynDiagnostic(
                                         aspectTargetDeclaration.GetDiagnosticLocation(),
                                         (aspect.AspectClass.ShortName, templateDeclaration.DeclarationKind, aspectTargetDeclaration.DeclarationKind) ) );
 

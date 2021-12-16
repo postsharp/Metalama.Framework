@@ -104,7 +104,7 @@ namespace Metalama.Framework.Engine.Utilities
                 if ( context.TargetDeclaration != null )
                 {
                     context.Diagnostics.Report(
-                        GeneralDiagnosticDescriptors.ExceptionInUserCodeWithTarget.CreateDiagnostic(
+                        GeneralDiagnosticDescriptors.ExceptionInUserCodeWithTarget.CreateRoslynDiagnostic(
                             location,
                             (context.InvokedMember,
                              context.TargetDeclaration,
@@ -115,7 +115,7 @@ namespace Metalama.Framework.Engine.Utilities
                 else
                 {
                     context.Diagnostics.Report(
-                        GeneralDiagnosticDescriptors.ExceptionInUserCodeWithoutTarget.CreateDiagnostic(
+                        GeneralDiagnosticDescriptors.ExceptionInUserCodeWithoutTarget.CreateRoslynDiagnostic(
                             location,
                             (context.InvokedMember,
                              exceptionType,

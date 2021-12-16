@@ -7,8 +7,7 @@ using Metalama.Framework.Engine.AspectOrdering;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
-using System;
-using System.Collections.Generic;
+using Metalama.Framework.Engine.Validation;
 using System.Collections.Immutable;
 
 namespace Metalama.Framework.Engine.Pipeline
@@ -21,7 +20,7 @@ namespace Metalama.Framework.Engine.Pipeline
         public ProjectModel Project { get; }
 
         /// <summary>
-        /// Gets the Roslyn compilation.
+        /// Gets the resulting Roslyn compilation.
         /// </summary>
         public PartialCompilation Compilation { get; }
 
@@ -33,13 +32,15 @@ namespace Metalama.Framework.Engine.Pipeline
         /// <summary>
         /// Gets the list of aspect sources.
         /// </summary>
-        public IReadOnlyList<IAspectSource> AspectSources { get; }
+        public ImmutableArray<IAspectSource> AspectSources { get; }
+
+        public ImmutableArray<ValidatorSource> ValidatorSources { get; }
 
         /// <summary>
         /// Gets the list of syntax trees to be added to the compilation (typically in a source generation scenario). The key is the "hint name" in the
         /// source generator API.
         /// </summary>
-        public IReadOnlyList<IntroducedSyntaxTree> AdditionalSyntaxTrees { get; }
+        public ImmutableArray<IntroducedSyntaxTree> AdditionalSyntaxTrees { get; }
 
         /// <summary>
         /// Gets the list of ordered aspect parts.
@@ -51,7 +52,7 @@ namespace Metalama.Framework.Engine.Pipeline
         /// <summary>
         /// Gets the compilation model corresponding to <see cref="Compilation"/>, if it has been created.
         /// </summary>
-        public CompilationModel? CompilationModel { get; }
+        public ImmutableArray<CompilationModel> CompilationModels { get; }
 
         public ImmutableArray<AdditionalCompilationOutputFile> AdditionalCompilationOutputFiles { get; }
 
@@ -59,22 +60,27 @@ namespace Metalama.Framework.Engine.Pipeline
             PartialCompilation compilation,
             ProjectModel project,
             ImmutableArray<OrderedAspectLayer> aspectLayers,
-            CompilationModel? compilationModel,
+            ImmutableArray<CompilationModel> compilationModels,
             ImmutableUserDiagnosticList? diagnostics = null,
-            IReadOnlyList<IAspectSource>? aspectSources = null,
+            ImmutableArray<IAspectSource> aspectSources = default,
+            ImmutableArray<ValidatorSource> validatorSources = default,
             ImmutableArray<IAspectInstance> inheritableAspectInstances = default,
-            IReadOnlyList<IntroducedSyntaxTree>? additionalSyntaxTrees = null,
-            ImmutableArray<AdditionalCompilationOutputFile>? additionalCompilationOutputFiles = null )
+            ImmutableArray<IntroducedSyntaxTree> additionalSyntaxTrees = default,
+            ImmutableArray<AdditionalCompilationOutputFile> additionalCompilationOutputFiles = default )
         {
             this.Compilation = compilation;
             this.Diagnostics = diagnostics ?? ImmutableUserDiagnosticList.Empty;
-            this.AspectSources = aspectSources ?? Array.Empty<IAspectSource>();
+            this.AspectSources = aspectSources.IsDefault ? ImmutableArray<IAspectSource>.Empty : aspectSources;
+            this.ValidatorSources = validatorSources.IsDefault ? ImmutableArray<ValidatorSource>.Empty : validatorSources;
             this.AspectLayers = aspectLayers;
-            this.CompilationModel = compilationModel;
+            this.CompilationModels = compilationModels;
             this.ExternallyInheritableAspects = inheritableAspectInstances.IsDefault ? ImmutableArray<IAspectInstance>.Empty : inheritableAspectInstances;
             this.Project = project;
-            this.AdditionalSyntaxTrees = additionalSyntaxTrees ?? ImmutableArray<IntroducedSyntaxTree>.Empty;
-            this.AdditionalCompilationOutputFiles = additionalCompilationOutputFiles ?? ImmutableArray<AdditionalCompilationOutputFile>.Empty;
+            this.AdditionalSyntaxTrees = additionalSyntaxTrees.IsDefault ? ImmutableArray<IntroducedSyntaxTree>.Empty : additionalSyntaxTrees;
+
+            this.AdditionalCompilationOutputFiles = additionalCompilationOutputFiles.IsDefault
+                ? ImmutableArray<AdditionalCompilationOutputFile>.Empty
+                : additionalCompilationOutputFiles;
         }
     }
 }

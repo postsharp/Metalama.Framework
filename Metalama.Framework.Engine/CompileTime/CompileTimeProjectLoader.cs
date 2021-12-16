@@ -123,7 +123,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 if ( this._runTimeAssemblyLocator.TryFindAssembly( runTimeAssemblyIdentity, out var metadataReference ) != true )
                 {
                     diagnosticAdder.Report(
-                        GeneralDiagnosticDescriptors.CannotFindCompileTimeAssembly.CreateDiagnostic(
+                        GeneralDiagnosticDescriptors.CannotFindCompileTimeAssembly.CreateRoslynDiagnostic(
                             Location.None,
                             runTimeAssemblyIdentity ) );
 

@@ -138,7 +138,8 @@ namespace Metalama.Framework.Engine.Pipeline
 
                             if ( constructor == null )
                             {
-                                diagnosticAdder.Report( GeneralDiagnosticDescriptors.TypeMustHavePublicDefaultConstructor.CreateDiagnostic( null, type ) );
+                                diagnosticAdder.Report(
+                                    GeneralDiagnosticDescriptors.TypeMustHavePublicDefaultConstructor.CreateRoslynDiagnostic( null, type ) );
 
                                 return null;
                             }
@@ -321,7 +322,7 @@ namespace Metalama.Framework.Engine.Pipeline
                     compilation,
                     pipelineConfiguration.ProjectModel,
                     ImmutableArray<OrderedAspectLayer>.Empty,
-                    null );
+                    ImmutableArray<CompilationModel>.Empty );
 
                 return true;
             }
@@ -333,6 +334,7 @@ namespace Metalama.Framework.Engine.Pipeline
                 compilation,
                 pipelineConfiguration.ProjectModel,
                 pipelineConfiguration.AspectLayers,
+                ImmutableArray<CompilationModel>.Empty,
                 null,
                 aspectSources: aspectSources,
                 additionalCompilationOutputFiles: additionalCompilationOutputFiles );

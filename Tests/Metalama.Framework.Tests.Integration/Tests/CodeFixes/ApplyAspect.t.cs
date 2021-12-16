@@ -14,7 +14,7 @@ namespace Metalama.Framework.Tests.Integration.CodeFixes.ApplyAspect
 {
     class Aspect1 : MethodAspect
     {
-        static DiagnosticDefinition<None> _diag = new ( "MY001", Severity.Warning, "Apply Aspect2" );
+        static DiagnosticDefinition _diag = new ( "MY001", Severity.Warning, "Apply Aspect2" );
     
         public override void BuildAspect(IAspectBuilder<IMethod> builder)
         {

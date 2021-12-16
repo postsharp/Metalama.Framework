@@ -27,14 +27,14 @@ public class A : ILamaSerializable
         public override object CreateInstance( Type type, IArgumentsReader constructorArguments )
         {
             var o = new A();
-            o.BaseField = constructorArguments.GetValue<int>(""BaseField"");
+            o.BaseField = constructorArguments.GetValue<int>(""BaseField"")-1;
             return o;
         }
 
         public override void SerializeObject( object obj, IArgumentsWriter constructorArguments, IArgumentsWriter initializationArguments )
         {
             var a = (A)obj;
-            constructorArguments.SetValue(""BaseField"",a.BaseField);
+            constructorArguments.SetValue(""BaseField"",a.BaseField+1);
         }
 
         public override void DeserializeFields( object obj, IArgumentsReader initializationArguments )

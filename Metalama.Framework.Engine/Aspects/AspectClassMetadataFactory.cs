@@ -63,7 +63,7 @@ namespace Metalama.Framework.Engine.Aspects
                             if ( typeSymbol == null )
                             {
                                 diagnosticAdder.Report(
-                                    TemplatingDiagnosticDescriptors.CannotFindAspectInCompilation.CreateDiagnostic(
+                                    TemplatingDiagnosticDescriptors.CannotFindAspectInCompilation.CreateRoslynDiagnostic(
                                         Location.None,
                                         (item.TypeName, item.Project.RunTimeIdentity.Name) ) );
 

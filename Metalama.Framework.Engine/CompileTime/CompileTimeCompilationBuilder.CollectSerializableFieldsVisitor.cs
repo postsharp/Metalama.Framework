@@ -19,16 +19,23 @@ namespace Metalama.Framework.Engine.CompileTime
         {
             private readonly SemanticModel _semanticModel;
             private readonly SyntaxNode _typeDeclaration;
+            private readonly ISymbolClassifier _symbolClassifier;
             private readonly CancellationToken _cancellationToken;
             private readonly List<ISymbol> _serializableFieldsOrProperties;
             private readonly ITypeSymbol _nonSerializedAttribute;
 
             public IReadOnlyList<ISymbol> SerializableFieldsOrProperties => this._serializableFieldsOrProperties;
 
-            public CollectSerializableFieldsVisitor( SemanticModel semanticModel, SyntaxNode typeDeclaration, ReflectionMapper reflectionMapper, CancellationToken cancellationToken )
+            public CollectSerializableFieldsVisitor(
+                SemanticModel semanticModel,
+                SyntaxNode typeDeclaration,
+                ReflectionMapper reflectionMapper,
+                ISymbolClassifier symbolClassifier,
+                CancellationToken cancellationToken )
             {
                 this._semanticModel = semanticModel;
                 this._typeDeclaration = typeDeclaration;
+                this._symbolClassifier = symbolClassifier;
                 this._cancellationToken = cancellationToken;
                 this._serializableFieldsOrProperties = new List<ISymbol>();
                 this._nonSerializedAttribute = reflectionMapper.GetTypeSymbol( typeof(LamaNonSerializedAttribute) );
@@ -42,7 +49,9 @@ namespace Metalama.Framework.Engine.CompileTime
                 {
                     var fieldSymbol = this._semanticModel.GetDeclaredSymbol( declarator ).AssertNotNull();
 
-                    if ( !fieldSymbol.GetAttributes().Any( a => SymbolEqualityComparer.Default.Equals( a.AttributeClass, this._nonSerializedAttribute ) ) )
+                    if ( !fieldSymbol.IsStatic &&
+                         !fieldSymbol.GetAttributes().Any( a => SymbolEqualityComparer.Default.Equals( a.AttributeClass, this._nonSerializedAttribute ) ) &&
+                         this._symbolClassifier.GetTemplateInfo( fieldSymbol ).IsNone )
                     {
                         this._serializableFieldsOrProperties.Add( fieldSymbol );
                     }
@@ -55,7 +64,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
                 var propertySymbol = this._semanticModel.GetDeclaredSymbol( node ).AssertNotNull();
 
-                if ( !propertySymbol.IsAutoProperty() )
+                if ( !propertySymbol.IsAutoProperty() || propertySymbol.IsStatic )
                 {
                     return;
                 }
@@ -63,7 +72,8 @@ namespace Metalama.Framework.Engine.CompileTime
                 var backingField = propertySymbol.GetBackingField().AssertNotNull();
 
                 if ( !backingField.GetAttributes().Any( a => SymbolEqualityComparer.Default.Equals( a.AttributeClass, this._nonSerializedAttribute ) )
-                     && !propertySymbol.GetAttributes().Any( a => SymbolEqualityComparer.Default.Equals( a.AttributeClass, this._nonSerializedAttribute ) ) )
+                     && !propertySymbol.GetAttributes().Any( a => SymbolEqualityComparer.Default.Equals( a.AttributeClass, this._nonSerializedAttribute ) )
+                     && this._symbolClassifier.GetTemplateInfo( propertySymbol ).IsNone )
                 {
                     this._serializableFieldsOrProperties.Add( propertySymbol );
                 }

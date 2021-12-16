@@ -2,7 +2,6 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Engine.AspectOrdering;
-using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Pipeline;
 using System;
@@ -28,9 +27,10 @@ namespace Metalama.Framework.Engine.DesignTime.CodeFixes
                 input.Compilation,
                 input.Project,
                 input.AspectLayers,
-                pipelineStepsResult.Compilation,
+                input.CompilationModels.AddRange( pipelineStepsResult.Compilations ),
                 input.Diagnostics.Concat( pipelineStepsResult.Diagnostics ).Concat( pipelineStepsResult.Diagnostics ),
-                input.AspectSources.Concat( pipelineStepsResult.ExternalAspectSources ),
+                input.AspectSources.AddRange( pipelineStepsResult.ExternalAspectSources ),
+                default,
                 pipelineStepsResult.InheritableAspectInstances,
                 input.AdditionalSyntaxTrees );
     }

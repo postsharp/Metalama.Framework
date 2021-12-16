@@ -89,7 +89,7 @@ namespace Metalama.Framework.Engine.Templating
                              !(referencedSymbol.ContainingSymbol != null && this._alreadyReportedDiagnostics.Contains( referencedSymbol.ContainingSymbol )) )
                         {
                             this.Report(
-                                TemplatingDiagnosticDescriptors.CannotReferenceCompileTimeOnly.CreateDiagnostic(
+                                TemplatingDiagnosticDescriptors.CannotReferenceCompileTimeOnly.CreateRoslynDiagnostic(
                                     node.GetLocation(),
                                     (this._currentDeclaration!, referencedSymbol) ) );
                         }
@@ -105,7 +105,7 @@ namespace Metalama.Framework.Engine.Templating
                      this._isCompileTimeTreeOutdated )
                 {
                     this.Report(
-                        TemplatingDiagnosticDescriptors.CompileTimeTypeNeedsRebuild.CreateDiagnostic(
+                        TemplatingDiagnosticDescriptors.CompileTimeTypeNeedsRebuild.CreateRoslynDiagnostic(
                             node.Identifier.GetLocation(),
                             scope.Symbol! ) );
                 }
@@ -199,7 +199,7 @@ namespace Metalama.Framework.Engine.Templating
                     if ( scope != TemplatingScope.RunTimeOnly && !this._hasCompileTimeCodeFast )
                     {
                         this.Report(
-                            TemplatingDiagnosticDescriptors.CompileTimeCodeNeedsNamespaceImport.CreateDiagnostic(
+                            TemplatingDiagnosticDescriptors.CompileTimeCodeNeedsNamespaceImport.CreateRoslynDiagnostic(
                                 declaredSymbol.GetDiagnosticLocation(),
                                 (declaredSymbol, CompileTimeCodeDetector.Namespace) ) );
                     }

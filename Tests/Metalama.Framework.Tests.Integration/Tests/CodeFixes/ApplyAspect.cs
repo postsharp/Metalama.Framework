@@ -16,13 +16,13 @@ namespace Metalama.Framework.Tests.Integration.CodeFixes.ApplyAspect
 {
     class Aspect1 : MethodAspect
     {
-        static DiagnosticDefinition<None> _diag = new ( "MY001", Severity.Warning, "Apply Aspect2" );
+        static DiagnosticDefinition _diag = new ( "MY001", Severity.Warning, "Apply Aspect2" );
     
         public override void BuildAspect(IAspectBuilder<IMethod> builder)
         {
             base.BuildAspect(builder);
             
-            builder.Diagnostics.Report( builder.Target, _diag, default, CodeFix.ApplyAspect( builder.Target, new Aspect2(), "Apply" ) );
+            _diag.WithCodeFixes( CodeFix.ApplyAspect( builder.Target, new Aspect2(), "Apply" ) ).ReportTo( builder.Diagnostics );
         }
     }
     

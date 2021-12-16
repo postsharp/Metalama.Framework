@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Serialization;
 
 namespace Metalama.Framework.Fabrics
 {
@@ -11,5 +12,5 @@ namespace Metalama.Framework.Fabrics
     /// or <see cref="TypeFabric"/>. 
     /// </summary>
     [CompileTimeOnly]
-    public abstract class Fabric { }
+    public abstract class Fabric : ILamaSerializable { }
 }

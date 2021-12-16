@@ -20,17 +20,17 @@ namespace Metalama.Framework.Engine.Diagnostics
         /// </summary>
         public static Exception CreateException<T>( this DiagnosticDefinition<T> definition, T arguments )
             where T : notnull
-            => new DiagnosticException( definition.CreateDiagnostic( null, arguments ) );
+            => new DiagnosticException( definition.CreateRoslynDiagnostic( null, arguments ) );
 
         // Coverage: ignore (trivial)
         public static Exception CreateException<T>( this DiagnosticDefinition<T> definition, Location location, T arguments )
             where T : notnull
-            => new DiagnosticException( definition.CreateDiagnostic( location, arguments ) );
+            => new DiagnosticException( definition.CreateRoslynDiagnostic( location, arguments ) );
 
         /// <summary>
         /// Instantiates a <see cref="Diagnostic"/> based on the current descriptor and given arguments.
         /// </summary>
-        public static Diagnostic CreateDiagnostic<T>(
+        public static Diagnostic CreateRoslynDiagnostic<T>(
             this DiagnosticDefinition<T> definition,
             Location? location,
             T arguments,
@@ -39,28 +39,53 @@ namespace Metalama.Framework.Engine.Diagnostics
             ImmutableDictionary<string, string?>? properties = null )
             where T : notnull
         {
-            object[] argumentArray;
+            var argumentArray = ConvertDiagnosticArguments( arguments );
 
-            if ( typeof(T).Name.StartsWith( nameof(ValueTuple), StringComparison.OrdinalIgnoreCase ) )
+            return definition.CreateRoslynDiagnosticImpl( location, argumentArray, additionalLocations, codeFixes, properties );
+        }
+
+        public static Diagnostic CreateRoslynDiagnostic(
+            this IDiagnosticDefinition definition,
+            Location? location,
+            object? arguments,
+            IEnumerable<Location>? additionalLocations = null,
+            CodeFixTitles codeFixes = default,
+            ImmutableDictionary<string, string?>? properties = null )
+        {
+            var argumentArray = ConvertDiagnosticArguments( arguments );
+
+            return definition.CreateRoslynDiagnosticImpl( location, argumentArray, additionalLocations, codeFixes, properties );
+        }
+
+        private static object?[] ConvertDiagnosticArguments( object? arguments )
+        {
+            object?[] argumentArray;
+
+            if ( arguments == null )
+            {
+                return Array.Empty<object?>();
+            }
+
+            if ( arguments.GetType().Name.StartsWith( nameof(ValueTuple), StringComparison.OrdinalIgnoreCase ) )
             {
                 argumentArray = ValueTupleAdapter.ToArray( arguments );
             }
             else if ( arguments.GetType().IsArray )
             {
-                argumentArray = (object[]) (object) arguments;
+                argumentArray = (object[]) arguments;
             }
             else
             {
-                argumentArray = new object[] { arguments };
+                argumentArray = new[] { arguments };
             }
 
-            return definition.CreateDiagnosticImpl( location, argumentArray, additionalLocations, codeFixes, properties );
+            return argumentArray;
         }
 
-        private static Diagnostic CreateDiagnosticImpl(
+        private static Diagnostic CreateRoslynDiagnosticImpl(
             this IDiagnosticDefinition definition,
             Location? location,
-            object[]? arguments,
+            object?[] arguments,
             IEnumerable<Location>? additionalLocations,
             CodeFixTitles codeFixes = default,
             ImmutableDictionary<string, string?>? properties = null )

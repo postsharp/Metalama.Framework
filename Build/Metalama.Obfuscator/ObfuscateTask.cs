@@ -60,7 +60,7 @@ namespace Metalama.Obfuscator
         /// <returns></returns>
         public override bool Execute()
         {
-            this._obfuscationAttributeType = (IType) this.Project.Module.Cache.GetType( typeof( ObfuscationAttribute ) );
+            this._obfuscationAttributeType = (IType) this.Project.Module.Cache.GetType( typeof(ObfuscationAttribute) );
 
             // IMPORTANT: Pdb obfuscation has to be done before changing declaration names.
             // Obfuscate source documents in the PDB.
@@ -244,9 +244,11 @@ namespace Metalama.Obfuscator
                 case TokenType.MethodDef:
                     {
                         var method = (MethodDefDeclaration) declaration;
+
                         if ( method.IsVirtual )
                         {
                             var parentDefinition = method.GetParentDefinition();
+
                             if ( parentDefinition != null && this.IsObfuscationExcluded( parentDefinition ) )
                             {
                                 return true;
@@ -260,9 +262,11 @@ namespace Metalama.Obfuscator
                 case TokenType.Event:
                     {
                         var methodGroup = (MethodGroupDeclaration) declaration;
+
                         foreach ( var member in methodGroup.Members )
                         {
                             var parentDefinition = member.Method.GetParentDefinition();
+
                             if ( parentDefinition != null && this.IsObfuscationExcluded( parentDefinition ) )
                             {
                                 return true;

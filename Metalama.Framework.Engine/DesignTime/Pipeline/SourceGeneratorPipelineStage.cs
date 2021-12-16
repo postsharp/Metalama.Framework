@@ -2,7 +2,6 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Engine.AspectOrdering;
-using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Pipeline;
@@ -34,7 +33,7 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
 
             DesignTimeSyntaxTreeGenerator.GenerateDesignTimeSyntaxTrees(
                 input.Compilation,
-                pipelineStepsResult.Compilation,
+                pipelineStepsResult.LastCompilation,
                 this.ServiceProvider,
                 diagnosticSink,
                 cancellationToken,
@@ -44,11 +43,12 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
                 input.Compilation,
                 input.Project,
                 input.AspectLayers,
-                input.CompilationModel,
+                input.CompilationModels.AddRange( pipelineStepsResult.Compilations ),
                 input.Diagnostics.Concat( pipelineStepsResult.Diagnostics ).Concat( diagnosticSink.ToImmutable() ),
-                input.AspectSources.Concat( pipelineStepsResult.ExternalAspectSources ),
+                input.AspectSources.AddRange( pipelineStepsResult.ExternalAspectSources ),
+                input.ValidatorSources.AddRange( pipelineStepsResult.ValidatorSources ),
                 pipelineStepsResult.InheritableAspectInstances,
-                input.AdditionalSyntaxTrees.Concat( additionalSyntaxTrees ) );
+                input.AdditionalSyntaxTrees.AddRange( additionalSyntaxTrees ) );
         }
     }
 }

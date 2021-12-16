@@ -24,14 +24,20 @@ namespace Metalama.Framework.Engine.CompileTime
             private readonly ReflectionMapper _reflectionMapper;
             private readonly CancellationToken _cancellationToken;
             private readonly List<SerializableTypeInfo> _serializableTypes;
+            private readonly ISymbolClassifier _symbolClassifier;
 
             public IReadOnlyList<SerializableTypeInfo> SerializableTypes => this._serializableTypes;
 
-            public CollectSerializableTypesVisitor( SemanticModel semanticModel, ReflectionMapper reflectionMapper, CancellationToken cancellationToken )
+            public CollectSerializableTypesVisitor(
+                SemanticModel semanticModel,
+                ReflectionMapper reflectionMapper,
+                ISymbolClassifier symbolClassifier,
+                CancellationToken cancellationToken )
             {
                 this._semanticModel = semanticModel;
                 this._reflectionMapper = reflectionMapper;
                 this._cancellationToken = cancellationToken;
+                this._symbolClassifier = symbolClassifier;
                 this._serializableTypes = new List<SerializableTypeInfo>();
             }
 
@@ -48,7 +54,12 @@ namespace Metalama.Framework.Engine.CompileTime
                     return;
                 }
 
-                var innerVisitor = new CollectSerializableFieldsVisitor( this._semanticModel, node, this._reflectionMapper, this._cancellationToken );
+                var innerVisitor = new CollectSerializableFieldsVisitor(
+                    this._semanticModel,
+                    node,
+                    this._reflectionMapper,
+                    this._symbolClassifier,
+                    this._cancellationToken );
 
                 innerVisitor.Visit( node );
 

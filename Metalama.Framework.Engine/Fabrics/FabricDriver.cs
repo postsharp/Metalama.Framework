@@ -1,21 +1,13 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Metalama.Framework.Aspects;
-using Metalama.Framework.Code;
-using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
-using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Fabrics;
 using Metalama.Framework.Project;
-using Metalama.Framework.Validation;
 using Microsoft.CodeAnalysis;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 
 namespace Metalama.Framework.Engine.Fabrics
@@ -23,7 +15,7 @@ namespace Metalama.Framework.Engine.Fabrics
     /// <summary>
     /// The base class for fabric drivers, which are responsible for ordering and executing fabrics.
     /// </summary>
-    internal abstract class FabricDriver : IComparable<FabricDriver>
+    internal abstract partial class FabricDriver : IComparable<FabricDriver>
     {
         protected FabricManager FabricManager { get; }
 
@@ -99,70 +91,6 @@ namespace Metalama.Framework.Engine.Fabrics
             // namespace, so the symbol name is sufficient.
 
             return string.Compare( this.FabricSymbol.Name, other.FabricSymbol.Name, StringComparison.Ordinal );
-        }
-
-        protected abstract class BaseAmender<T> : IAmender<T>
-            where T : class, IDeclaration
-        {
-            // The Target property is protected (and not exposed to the API) because
-            private readonly FabricInstance _fabricInstance;
-            private readonly Ref<T> _targetDeclaration;
-            private readonly FabricManager _fabricManager;
-
-            protected BaseAmender(
-                IProject project,
-                FabricManager fabricManager,
-                FabricInstance fabricInstance,
-                in Ref<T> targetDeclaration )
-            {
-                this._fabricInstance = fabricInstance;
-                this._targetDeclaration = targetDeclaration;
-                this._fabricManager = fabricManager;
-                this.Project = project;
-            }
-
-            public IProject Project { get; }
-
-            protected abstract void AddAspectSource( IAspectSource aspectSource );
-
-            public IDeclarationSelection<TChild> WithMembers<TChild>( Func<T, IEnumerable<TChild>> selector )
-                where TChild : class, IDeclaration
-            {
-                var executionContext = UserCodeExecutionContext.Current;
-
-                return new DeclarationSelection<TChild>(
-                    this._targetDeclaration,
-                    new AspectPredecessor( AspectPredecessorKind.Fabric, this._fabricInstance ),
-                    this.AddAspectSource,
-                    ( compilation, diagnostics ) =>
-                    {
-                        var targetDeclaration = this._targetDeclaration.GetTarget( compilation ).AssertNotNull();
-
-                        if ( !this._fabricManager.UserCodeInvoker.TryInvokeEnumerable(
-                                () => selector( targetDeclaration ),
-                                executionContext.WithDiagnosticAdder( diagnostics ),
-                                out var targets ) )
-                        {
-                            return Enumerable.Empty<TChild>();
-                        }
-                        else
-                        {
-                            return targets;
-                        }
-                    },
-                    this._fabricManager.AspectClasses,
-                    this._fabricManager.ServiceProvider );
-            }
-
-            [Obsolete( "Not implemented." )]
-            public void AddValidator( Action<ValidateDeclarationContext<T>> validator ) => throw new NotImplementedException();
-
-            [Obsolete( "Not implemented." )]
-            public void AddAnnotation<TTarget, TAspect, TAnnotation>( Func<TTarget, TAnnotation?> provider )
-                where TTarget : class, IDeclaration
-                where TAspect : IAspect
-                where TAnnotation : IAnnotation<TTarget, TAspect>
-                => throw new NotImplementedException();
         }
 
         public abstract FormattableString FormatPredecessor();

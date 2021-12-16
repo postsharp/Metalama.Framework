@@ -1,76 +1,75 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-	<PropertyGroup>
-		<TargetFramework>netstandard2.0</TargetFramework>
-		<RootNamespace>Metalama.Framework.CompilerExtensions</RootNamespace>
-		<!-- Packaging -->
-		<IsPackable>False</IsPackable>
-	</PropertyGroup>
+    <PropertyGroup>
+        <TargetFramework>netstandard2.0</TargetFramework>
+        <RootNamespace>Metalama.Framework.CompilerExtensions</RootNamespace>
+        <!-- Packaging -->
+        <IsPackable>False</IsPackable>
+    </PropertyGroup>
 
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-	  <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-	</PropertyGroup>
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    </PropertyGroup>
 
-	<ItemGroup>
-	  <Compile Include="..\Metalama.Framework.Engine\AssertionFailedException.cs" Link="Utilities\AssertionFailedException.cs" />
-	  <Compile Include="..\Metalama.Framework.Engine\Utilities\AssemblyMetadataReader.cs" Link="Utilities\AssemblyMetadataReader.cs" />
-	  <Compile Include="..\Metalama.Framework.Engine\Utilities\RetryHelper.cs" Link="Utilities\RetryHelper.cs" />
-	  <Compile Include="..\Metalama.Framework.Engine\Utilities\TempPathHelper.cs" Link="Utilities\TempPathHelper.cs" />
-	  <Compile Include="..\Metalama.Framework.Engine\Utilities\Logger.cs" Link="Utilities\Logger.cs" />
-	</ItemGroup>
-
-
-	<ItemGroup>
-
-		<!-- TODO: These two assemblies must be included because they are not a part of csc.exe, but it would be better to include them in csc.exe -->
-		<PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="$(RoslynVersion)" PrivateAssets="all">
-		    <GeneratePathProperty>true</GeneratePathProperty>
-		    </PackageReference>
-		<EmbeddedResource Include="$(PkgMicrosoft_CodeAnalysis_CSharp_Workspaces)\lib\netstandard2.0\Microsoft.CodeAnalysis.CSharp.Workspaces.dll" Link="Resources\Microsoft.CodeAnalysis.CSharp.Workspaces.dll" />
-		
-		<PackageReference Include="Microsoft.CodeAnalysis.Workspaces.Common" Version="$(RoslynVersion)" PrivateAssets="all">
-		    <GeneratePathProperty>true</GeneratePathProperty>
-		</PackageReference>
-		<EmbeddedResource Include="$(PkgMicrosoft_CodeAnalysis_Workspaces_Common)\lib\netstandard2.0\Microsoft.CodeAnalysis.Workspaces.dll" Link="Resources\Microsoft.CodeAnalysis.Workspaces.dll" />
+    <ItemGroup>
+        <Compile Include="..\Metalama.Framework.Engine\AssertionFailedException.cs" Link="Utilities\AssertionFailedException.cs"/>
+        <Compile Include="..\Metalama.Framework.Engine\Utilities\AssemblyMetadataReader.cs" Link="Utilities\AssemblyMetadataReader.cs"/>
+        <Compile Include="..\Metalama.Framework.Engine\Utilities\RetryHelper.cs" Link="Utilities\RetryHelper.cs"/>
+        <Compile Include="..\Metalama.Framework.Engine\Utilities\TempPathHelper.cs" Link="Utilities\TempPathHelper.cs"/>
+        <Compile Include="..\Metalama.Framework.Engine\Utilities\Logger.cs" Link="Utilities\Logger.cs"/>
+    </ItemGroup>
 
 
-		<PackageReference Include="Microsoft.Bcl.HashCode" Version="$(MicrosoftBclHashCodeVersion)" PrivateAssets="all">
-		    <GeneratePathProperty>true</GeneratePathProperty>
-		</PackageReference>
-		<EmbeddedResource Include="$(PkgMicrosoft_Bcl_HashCode)\lib\netstandard2.0\Microsoft.Bcl.HashCode.dll" Link="Resources\Microsoft.Bcl.HashCode.dll" />
+    <ItemGroup>
 
-		<PackageReference Include="K4os.Hash.xxHash" Version="$(K4osHashxxHashVersion)" PrivateAssets="all">
-		    <GeneratePathProperty>true</GeneratePathProperty>
-		</PackageReference>
-		<EmbeddedResource Include="$(PkgK4os_Hash_xxHash)\lib\netstandard2.0\K4os.Hash.xxHash.dll" Link="Resources\K4os.Hash.xxHash.dll" />
-
-
-		<PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonVersion)" PrivateAssets="all">
-		    <GeneratePathProperty>true</GeneratePathProperty>
-		</PackageReference>
-		<EmbeddedResource Include="$(PkgNewtonsoft_Json)\lib\netstandard2.0\Newtonsoft.Json.dll" Link="Resources\Newtonsoft.Json.dll" />
-		
-		<PackageReference Include="Metalama.RoslynUtilities" Version="$(MetalamaCompilerVersion)" PrivateAssets="all">
+        <!-- TODO: These two assemblies must be included because they are not a part of csc.exe, but it would be better to include them in csc.exe -->
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="$(RoslynVersion)" PrivateAssets="all">
             <GeneratePathProperty>true</GeneratePathProperty>
         </PackageReference>
-        <EmbeddedResource Include="$(PkgMetalama_RoslynUtilities)\lib\netstandard2.0\Metalama.RoslynUtilities.dll" Link="Resources\Metalama.RoslynUtilities.dll" />
+        <EmbeddedResource Include="$(PkgMicrosoft_CodeAnalysis_CSharp_Workspaces)\lib\netstandard2.0\Microsoft.CodeAnalysis.CSharp.Workspaces.dll" Link="Resources\Microsoft.CodeAnalysis.CSharp.Workspaces.dll"/>
+
+        <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.Common" Version="$(RoslynVersion)" PrivateAssets="all">
+            <GeneratePathProperty>true</GeneratePathProperty>
+        </PackageReference>
+        <EmbeddedResource Include="$(PkgMicrosoft_CodeAnalysis_Workspaces_Common)\lib\netstandard2.0\Microsoft.CodeAnalysis.Workspaces.dll" Link="Resources\Microsoft.CodeAnalysis.Workspaces.dll"/>
 
 
-		<EmbeddedResource Include="..\Metalama.Framework.Engine\bin\$(Configuration)\$(TargetFramework)\Metalama.Framework.Engine.dll" Link="Resources\Metalama.Framework.Engine.dll" />
-		<EmbeddedResource Include="..\Metalama.Framework.DesignTime.Contracts\bin\$(Configuration)\$(TargetFramework)\Metalama.Framework.DesignTime.Contracts.dll" Link="Resources\Metalama.Framework.DesignTime.Contracts.dll" />
-		<EmbeddedResource Include="..\Metalama.Framework.Sdk\bin\$(Configuration)\$(TargetFramework)\Metalama.Framework.Sdk.dll" Link="Resources\Metalama.Framework.Sdk.dll" />
-		<EmbeddedResource Include="..\Metalama.Framework\bin\$(Configuration)\$(TargetFramework)\Metalama.Framework.dll" Link="Resources\Metalama.Framework.dll" />
-		
-		
-		<PackageReference Include="Metalama.Compiler.Sdk" Version="$(MetalamaCompilerVersion)" PrivateAssets="true" />
+        <PackageReference Include="Microsoft.Bcl.HashCode" Version="$(MicrosoftBclHashCodeVersion)" PrivateAssets="all">
+            <GeneratePathProperty>true</GeneratePathProperty>
+        </PackageReference>
+        <EmbeddedResource Include="$(PkgMicrosoft_Bcl_HashCode)\lib\netstandard2.0\Microsoft.Bcl.HashCode.dll" Link="Resources\Microsoft.Bcl.HashCode.dll"/>
 
-	</ItemGroup>
+        <PackageReference Include="K4os.Hash.xxHash" Version="$(K4osHashxxHashVersion)" PrivateAssets="all">
+            <GeneratePathProperty>true</GeneratePathProperty>
+        </PackageReference>
+        <EmbeddedResource Include="$(PkgK4os_Hash_xxHash)\lib\netstandard2.0\K4os.Hash.xxHash.dll" Link="Resources\K4os.Hash.xxHash.dll"/>
 
 
-	<ItemGroup>
-		<Folder Include="Resources\" />
-	</ItemGroup>
+        <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonVersion)" PrivateAssets="all">
+            <GeneratePathProperty>true</GeneratePathProperty>
+        </PackageReference>
+        <EmbeddedResource Include="$(PkgNewtonsoft_Json)\lib\netstandard2.0\Newtonsoft.Json.dll" Link="Resources\Newtonsoft.Json.dll"/>
 
+        <PackageReference Include="Metalama.RoslynUtilities" Version="$(MetalamaCompilerVersion)" PrivateAssets="all">
+            <GeneratePathProperty>true</GeneratePathProperty>
+        </PackageReference>
+        <EmbeddedResource Include="$(PkgMetalama_RoslynUtilities)\lib\netstandard2.0\Metalama.RoslynUtilities.dll" Link="Resources\Metalama.RoslynUtilities.dll"/>
+
+
+        <EmbeddedResource Include="..\Metalama.Framework.Engine\bin\$(Configuration)\$(TargetFramework)\Metalama.Framework.Engine.dll" Link="Resources\Metalama.Framework.Engine.dll"/>
+        <EmbeddedResource Include="..\Metalama.Framework.DesignTime.Contracts\bin\$(Configuration)\$(TargetFramework)\Metalama.Framework.DesignTime.Contracts.dll" Link="Resources\Metalama.Framework.DesignTime.Contracts.dll"/>
+        <EmbeddedResource Include="..\Metalama.Framework.Sdk\bin\$(Configuration)\$(TargetFramework)\Metalama.Framework.Sdk.dll" Link="Resources\Metalama.Framework.Sdk.dll"/>
+        <EmbeddedResource Include="..\Metalama.Framework\bin\$(Configuration)\$(TargetFramework)\Metalama.Framework.dll" Link="Resources\Metalama.Framework.dll"/>
+
+
+        <PackageReference Include="Metalama.Compiler.Sdk" Version="$(MetalamaCompilerVersion)" PrivateAssets="true"/>
+
+    </ItemGroup>
+
+
+    <ItemGroup>
+        <Folder Include="Resources\"/>
+    </ItemGroup>
 
 
 </Project>
