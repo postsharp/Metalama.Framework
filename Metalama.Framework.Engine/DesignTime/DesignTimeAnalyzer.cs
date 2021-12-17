@@ -5,6 +5,7 @@ using Metalama.Compiler;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.DesignTime.Diagnostics;
 using Metalama.Framework.Engine.DesignTime.Pipeline;
+using Metalama.Framework.Engine.DesignTime.Utilities;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Templating;
@@ -34,6 +35,11 @@ namespace Metalama.Framework.Engine.DesignTime
 
         public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics
             => this._designTimeDiagnosticDefinitions.SupportedDiagnosticDescriptors.Values.ToImmutableArray();
+
+        static DesignTimeAnalyzer()
+        {
+            Logger.Initialize();
+        }
 
         public override void Initialize( AnalysisContext context )
         {
@@ -86,10 +92,12 @@ namespace Metalama.Framework.Engine.DesignTime
                 }
 
                 // Execute the pipeline.
+                var cancellationToken = context.CancellationToken.IgnoreIfDebugging();
+
                 var pipeline = DesignTimeAspectPipelineFactory.Instance.GetOrCreatePipeline(
                     projectOptions,
                     context.SemanticModel.Compilation,
-                    context.CancellationToken );
+                    cancellationToken );
 
                 if ( pipeline == null )
                 {
@@ -101,7 +109,7 @@ namespace Metalama.Framework.Engine.DesignTime
                 if ( !DesignTimeAspectPipelineFactory.Instance.TryExecute(
                         projectOptions,
                         compilation,
-                        context.CancellationToken,
+                        cancellationToken,
                         out var compilationResult ) )
                 {
                     Logger.Instance?.Write( $"DesignTimeAnalyzer.AnalyzeSemanticModel('{syntaxTreeFilePath}'): the pipeline failed." );
@@ -121,7 +129,7 @@ namespace Metalama.Framework.Engine.DesignTime
                     if ( project != null )
                     {
                         DesignTimeValidatorRunner validatorRunner = new( compilationResult, project );
-                        validatorDiagnostics = validatorRunner.Validate( context.SemanticModel, context.CancellationToken );
+                        validatorDiagnostics = validatorRunner.Validate( context.SemanticModel, cancellationToken );
                     }
                 }
 
@@ -160,11 +168,11 @@ namespace Metalama.Framework.Engine.DesignTime
                     context.SemanticModel,
                     context.ReportDiagnostic,
                     pipeline,
-                    context.CancellationToken );
+                    cancellationToken );
             }
             catch ( Exception e )
             {
-                Logger.Instance?.Write( e.ToString() );
+                DesignTimeExceptionHandler.ReportException( e );
             }
         }
     }

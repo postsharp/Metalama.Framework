@@ -32,7 +32,7 @@ namespace Metalama.Framework.Engine.Fabrics
         private readonly ISdkRef<IDeclaration> _containingDeclaration;
         private readonly IDeclarationSelectorInternal _parent;
         private readonly Action<IAspectSource> _registerAspectSource;
-        private readonly Action<ValidatorSource> _registerValidatorSource;
+        private readonly Action<ProgrammaticValidatorSource> _registerValidatorSource;
         private readonly Func<CompilationModel, IDiagnosticAdder, IEnumerable<T>> _selector;
         private readonly BoundAspectClassCollection _aspectClasses;
         private readonly IServiceProvider _serviceProvider;
@@ -41,7 +41,7 @@ namespace Metalama.Framework.Engine.Fabrics
             ISdkRef<IDeclaration> containingDeclaration,
             IDeclarationSelectorInternal parent,
             Action<IAspectSource> registerAspectSource,
-            Action<ValidatorSource> registerValidatorSource,
+            Action<ProgrammaticValidatorSource> registerValidatorSource,
             Func<CompilationModel, IDiagnosticAdder, IEnumerable<T>> selectTargets,
             BoundAspectClassCollection aspectClasses,
             IServiceProvider serviceProvider )
@@ -70,12 +70,12 @@ namespace Metalama.Framework.Engine.Fabrics
 
         private void RegisterAspectSource( IAspectSource aspectSource ) => this._registerAspectSource( aspectSource );
 
-        private void RegisterValidatorSource( ValidatorSource validatorSource ) => this._registerValidatorSource( validatorSource );
+        private void RegisterValidatorSource( ProgrammaticValidatorSource validatorSource ) => this._registerValidatorSource( validatorSource );
 
         public void RegisterReferenceValidator( string methodName, ReferenceKinds referenceKinds )
         {
             this.RegisterValidatorSource(
-                new ValidatorSource(
+                new ProgrammaticValidatorSource(
                     this._parent,
                     this._parent.AspectPredecessor,
                     methodName,
@@ -83,14 +83,18 @@ namespace Metalama.Framework.Engine.Fabrics
                     ( source, compilation, diagnostics ) => this.SelectAndValidateValidatorTargets(
                         compilation,
                         diagnostics,
-                        item => new ReferenceValidatorInstance( source, item, referenceKinds ) ) ) );
+                        item => new ReferenceValidatorInstance(
+                            item,
+                            source.Driver,
+                            ValidatorImplementation.Create( source.Predecessor.Instance ),
+                            referenceKinds ) ) ) );
         }
 
         public void RegisterDeclarationValidator<T1>( string methodName )
             where T1 : IDeclaration
         {
             this.RegisterValidatorSource(
-                new ValidatorSource(
+                new ProgrammaticValidatorSource(
                     this._parent,
                     this._parent.AspectPredecessor,
                     methodName,
@@ -98,7 +102,7 @@ namespace Metalama.Framework.Engine.Fabrics
                     ( source, compilation, diagnostics ) => this.SelectAndValidateValidatorTargets(
                         compilation,
                         diagnostics,
-                        item => new DeclarationValidatorInstance( source, item ) ) ) );
+                        item => new DeclarationValidatorInstance( item, source.Driver, ValidatorImplementation.Create( source.Predecessor.Instance ) ) ) ) );
         }
 
         public IDeclarationSelection<T> AddAspect<TAspect>( Func<T, Expression<Func<TAspect>>> createAspect )

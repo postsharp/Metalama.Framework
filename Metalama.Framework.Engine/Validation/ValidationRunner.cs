@@ -19,10 +19,10 @@ internal record ValidationResult( ImmutableArray<ReferenceValidatorInstance> Tra
 internal class ValidationRunner
 {
     private readonly AspectPipelineConfiguration _configuration;
-    private readonly ImmutableArray<ValidatorSource> _sources;
+    private readonly ImmutableArray<IValidatorSource> _sources;
     private readonly CancellationToken _cancellationToken;
 
-    public ValidationRunner( AspectPipelineConfiguration configuration, ImmutableArray<ValidatorSource> sources, CancellationToken cancellationToken )
+    public ValidationRunner( AspectPipelineConfiguration configuration, ImmutableArray<IValidatorSource> sources, CancellationToken cancellationToken )
     {
         this._configuration = configuration;
         this._sources = sources;
@@ -63,6 +63,11 @@ internal class ValidationRunner
             .ToMultiValueDictionary(
                 v => v.ValidatedDeclaration.GetSymbol().AssertNotNull(),
                 v => v );
+
+        if ( validatorsBySymbol.IsEmpty )
+        {
+            return ImmutableArray<ReferenceValidatorInstance>.Empty;
+        }
 
         var visitor = new ReferenceValidationVisitor( diagnosticAdder, s => validatorsBySymbol[s], initialCompilation, this._cancellationToken );
 

@@ -115,7 +115,7 @@ namespace Metalama.Framework.Engine.Aspects
                     new ImmutableUserDiagnosticList( ImmutableArray.Create( diagnostic ), ImmutableArray<ScopedSuppression>.Empty ),
                     ImmutableArray<Advice>.Empty,
                     ImmutableArray<IAspectSource>.Empty,
-                    ImmutableArray<ValidatorSource>.Empty );
+                    ImmutableArray<IValidatorSource>.Empty );
             }
 
             cancellationToken.ThrowIfCancellationRequested();
@@ -188,7 +188,7 @@ namespace Metalama.Framework.Engine.Aspects
                         diagnosticSink.ToImmutable(),
                         ImmutableArray<Advice>.Empty,
                         ImmutableArray<IAspectSource>.Empty,
-                        ImmutableArray<ValidatorSource>.Empty );
+                        ImmutableArray<IValidatorSource>.Empty );
             }
 
             var aspectResult = aspectBuilder.ToResult();

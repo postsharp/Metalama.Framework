@@ -392,7 +392,7 @@ namespace Metalama.Framework.Engine.Aspects
 
         public ValidatorDriver GetValidatorDriver( string name, ValidatorKind kind )
         {
-            this._validatorDriverFactory ??= new ValidatorDriverFactory( this.AspectType );
+            this._validatorDriverFactory ??= ValidatorDriverFactory.GetInstance( this.AspectType );
 
             return this._validatorDriverFactory.GetValidatorDriver( name, kind );
         }

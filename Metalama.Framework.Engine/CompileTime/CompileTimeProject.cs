@@ -27,12 +27,57 @@ namespace Metalama.Framework.Engine.CompileTime
     /// </summary>
     internal sealed class CompileTimeProject : IService
     {
+        private static readonly Assembly _frameworkAssembly = typeof(IAspect).Assembly;
+        private static readonly AssemblyIdentity _frameworkAssemblyIdentity = _frameworkAssembly.GetName().ToAssemblyIdentity();
+        
+        private static readonly CompileTimeProjectManifest _frameworkProjectManifest = new(
+            _frameworkAssemblyIdentity.ToString(),
+            _frameworkAssemblyIdentity.ToString(),
+            _frameworkAssembly.GetExportedTypes()
+                .Where( t => !t.IsInterface && !t.IsAbstract && typeof(IAspect).IsAssignableFrom( t ) )
+                .Select( t => t.FullName )
+                .ToImmutableArray(),
+            ImmutableArray<string>.Empty,
+            ImmutableArray<string>.Empty,
+            ImmutableArray<string>.Empty,
+            ImmutableArray<string>.Empty,
+            0,
+            ImmutableArray<CompileTimeFile>.Empty );
+
+        private static DiagnosticManifest? _frameworkDiagnosticManifest;
+
+        internal static CompileTimeProject CreateFrameworkProject( IServiceProvider serviceProvider, CompileTimeDomain domain )
+        {
+            var project = new CompileTimeProject(
+                serviceProvider,
+                domain,
+                _frameworkAssemblyIdentity,
+                _frameworkAssemblyIdentity,
+                ImmutableArray<CompileTimeProject>.Empty,
+                _frameworkProjectManifest,
+                null,
+                _ => null,
+                null,
+                _frameworkAssembly,
+                _frameworkDiagnosticManifest );
+
+            if ( _frameworkDiagnosticManifest == null )
+            {
+                // Cache the diagnostic manifest for the next time.
+                _frameworkDiagnosticManifest = project.DiagnosticManifest;
+            }
+
+            return project;
+        }
+
         private readonly CompileTimeProjectManifest? _manifest;
         private readonly CompileTimeDomain _domain;
         private readonly string? _compiledAssemblyPath;
         private readonly AssemblyIdentity? _compileTimeIdentity;
         private readonly Func<string, TextMapFile?>? _getLocationMap;
-        private readonly DiagnosticManifest _diagnosticManifest;
+
+        public DiagnosticManifest DiagnosticManifest { get; }
+
         private Assembly? _assembly;
 
         /// <summary>
@@ -94,7 +139,9 @@ namespace Metalama.Framework.Engine.CompileTime
         /// Gets a value indicating whether the current project is empty, i.e. does not contain any source code. Note that
         /// an empty project can STILL contain <see cref="References"/>.
         /// </summary>
-        public bool IsEmpty => this._compiledAssemblyPath == null;
+        public bool IsEmpty => this._compiledAssemblyPath == null && !this.IsFramework;
+
+        public bool IsFramework => this.RunTimeIdentity.Name == "Metalama.Framework";
 
         /// <summary>
         /// Gets the CLR <see cref="System.Reflection.Assembly"/>, and loads it if necessary.
@@ -128,7 +175,9 @@ namespace Metalama.Framework.Engine.CompileTime
             CompileTimeProjectManifest? manifest,
             string? compiledAssemblyPath,
             Func<string, TextMapFile?>? getLocationMap,
-            string? directory )
+            string? directory,
+            Assembly? assembly = null,
+            DiagnosticManifest? diagnosticManifest = null )
         {
             this._domain = domain;
             this._compiledAssemblyPath = compiledAssemblyPath;
@@ -138,9 +187,11 @@ namespace Metalama.Framework.Engine.CompileTime
             this.RunTimeIdentity = runTimeIdentity;
             this._compileTimeIdentity = compileTimeIdentity;
             this.References = references;
+
+            this._assembly = assembly;
             this.ClosureProjects = this.SelectManyRecursive( p => p.References, true, false ).ToImmutableList();
-            this._diagnosticManifest = this.GetDiagnosticManifest( serviceProvider );
-            this.ClosureDiagnosticManifest = new DiagnosticManifest( this.ClosureProjects.Select( p => p._diagnosticManifest ).ToList() );
+            this.DiagnosticManifest = diagnosticManifest ?? this.GetDiagnosticManifest( serviceProvider );
+            this.ClosureDiagnosticManifest = new DiagnosticManifest( this.ClosureProjects.Select( p => p.DiagnosticManifest ).ToList() );
 
 #if DEBUG
             if ( manifest != null )
@@ -169,7 +220,7 @@ namespace Metalama.Framework.Engine.CompileTime
             IReadOnlyList<CompileTimeProject> references,
             CompileTimeProjectManifest manifest,
             string? compiledAssemblyPath,
-            string sourceDirectory,
+            string? sourceDirectory,
             Func<string, TextMapFile?> getLocationMap )
             => new(
                 serviceProvider,
@@ -260,7 +311,9 @@ namespace Metalama.Framework.Engine.CompileTime
 
                 // Check that the type is linked properly. An error here may be caused by a bug in 
                 // a handler of the AppDomain.AssemblyResolve event.
-                if ( type.GetInterfaces().Any( i => i.FullName == typeof(IAspect).FullName && !typeof(IAspect).IsAssignableFrom( i ) ) )
+                var iAspectInterface = type.GetInterfaces().FirstOrDefault( i => i.FullName == typeof(IAspect).FullName );
+
+                if ( iAspectInterface != null && !typeof(IAspect).IsAssignableFrom( iAspectInterface ) )
                 {
                     // There must have been some assembly version mismatch.
                     throw new AssertionFailedException( "Assembly version mismatch." );

@@ -66,10 +66,12 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
             // The design-time pipeline contains project-scoped services for performance reasons: the pipeline may be called several
             // times with the same compilation.
 
-            if ( this.ProjectOptions.BuildTouchFile == null )
+            if ( string.IsNullOrEmpty( this.ProjectOptions.BuildTouchFile ) )
             {
                 return;
             }
+
+            Logger.Instance?.Write( $"BuildTouchFile={this.ProjectOptions.BuildTouchFile}" );
 
             var watchedFilter = "*" + Path.GetExtension( this.ProjectOptions.BuildTouchFile );
             var watchedDirectory = Path.GetDirectoryName( this.ProjectOptions.BuildTouchFile );
@@ -96,7 +98,7 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
                 return;
             }
 
-            lock ( this._sync )
+            using ( this.WithLock() )
             {
                 // There was an external build. Touch the files to re-run the analyzer.
                 Logger.Instance?.Write( $"Detected an external build for project '{this.ProjectOptions.AssemblyName}'." );
@@ -124,7 +126,7 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
 
         public void OnExternalBuildStarted()
         {
-            lock ( this._sync )
+            using ( this.WithLock() )
             {
                 this._currentState = new PipelineState( this );
                 this.ExternalBuildStarted?.Invoke( this, EventArgs.Empty );
@@ -138,7 +140,7 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
             CancellationToken cancellationToken,
             [NotNullWhen( true )] out AspectPipelineConfiguration? configuration )
         {
-            lock ( this._sync )
+            using ( this.WithLock() )
             {
                 var state = this._currentState;
                 var success = PipelineState.TryGetConfiguration( ref state, compilation, diagnosticAdder, ignoreStatus, cancellationToken, out configuration );
@@ -175,7 +177,7 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
 
         public void InvalidateCache()
         {
-            lock ( this._sync )
+            using ( this.WithLock() )
             {
                 this._currentState = this._currentState.Reset();
             }
@@ -204,7 +206,7 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
                 return true;
             }
 
-            lock ( this._sync )
+            using ( this.WithLock() )
             {
                 if ( this._compilationResultCache.TryGetValue( compilation, out compilationResult ) )
                 {
@@ -215,6 +217,15 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
                 var changes = this.InvalidateCache( compilation, this.Status != DesignTimeAspectPipelineStatus.NeedsExternalBuild, cancellationToken );
 
                 var compilationToAnalyze = changes.CompilationToAnalyze;
+
+                if ( Logger.Instance != null )
+                {
+                    if ( compilationToAnalyze != compilation )
+                    {
+                        Logger.Instance.Write(
+                            $"Cache hit: the original compilation is {DebuggingHelper.GetObjectId( compilation )}, but we will analyze the cached compilation {DebuggingHelper.GetObjectId( compilationToAnalyze )}" );
+                    }
+                }
 
                 if ( this.Status != DesignTimeAspectPipelineStatus.NeedsExternalBuild )
                 {
@@ -246,7 +257,8 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
                 {
                     // If we need a build, we only serve results from the cache.
                     Logger.Instance?.Write(
-                        $"DesignTimeAspectPipelineCache.TryExecute('{compilation.AssemblyName}'): build required," +
+                        $"DesignTimeAspectPipelineCache.TryExecute('{compilation.AssemblyName}', CompilationId={DebuggingHelper.GetObjectId( compilation )}): external build required,"
+                        +
                         $" returning from cache only." );
 
                     compilationResult = this._currentState.CompilationResult;
@@ -323,6 +335,36 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
                         yield return aspectClass;
                     }
                 }
+            }
+        }
+
+        private Lock WithLock()
+        {
+            if ( !Monitor.TryEnter( this._sync ) )
+            {
+                Logger.Instance?.Write( $"Waiting for lock on '{this.ProjectOptions.ProjectId}'." );
+
+                Monitor.Enter( this._sync );
+            }
+
+            Logger.Instance?.Write( $"Lock on '{this.ProjectOptions.ProjectId}' acquired." );
+
+            return new Lock( this );
+        }
+
+        private readonly struct Lock : IDisposable
+        {
+            private readonly DesignTimeAspectPipeline _parent;
+
+            public Lock( DesignTimeAspectPipeline sync )
+            {
+                this._parent = sync;
+            }
+
+            public void Dispose()
+            {
+                Logger.Instance?.Write( $"Releasing lock on '{this._parent.ProjectOptions.ProjectId}'." );
+                Monitor.Exit( this._parent._sync );
             }
         }
     }

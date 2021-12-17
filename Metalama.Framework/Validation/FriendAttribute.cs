@@ -6,16 +6,22 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Eligibility;
+using Metalama.Framework.Validation;
 using System;
 using System.Linq;
+
+[assembly: AspectOrder( typeof(FriendAttribute), typeof(InternalImplementAttribute) )]
 
 namespace Metalama.Framework.Validation
 {
     /// <summary>
-    /// Means that an internal member can be referenced only by a specific type. (Not implemented.)
+    /// Means that an internal member can be referenced only by a specific type.
     /// </summary>
-    [AttributeUsage( AttributeTargets.All & ~AttributeTargets.Assembly )]
-    public class FriendAttribute : Attribute, IAspect<IMemberOrNamedType>
+    [AttributeUsage(
+        AttributeTargets.Class | AttributeTargets.Constructor | AttributeTargets.Delegate | AttributeTargets.Enum | AttributeTargets.Field
+        | AttributeTargets.Interface
+        | AttributeTargets.Method | AttributeTargets.Property | AttributeTargets.Struct )]
+    public sealed class FriendAttribute : Attribute, IAspect<IMemberOrNamedType>
     {
         private readonly string[] _friendTypes;
 
@@ -32,7 +38,7 @@ namespace Metalama.Framework.Validation
 
         public void BuildEligibility( IEligibilityBuilder<IMemberOrNamedType> builder )
         {
-            builder.MustHaveAccessibility( Accessibility.Public, Accessibility.Protected );
+            builder.MustHaveAccessibility( Accessibility.Public, Accessibility.Protected, Accessibility.Internal );
         }
 
         public void BuildAspect( IAspectBuilder<IMemberOrNamedType> builder )

@@ -18,7 +18,7 @@ namespace Metalama.Framework.Engine.Aspects
     {
         void AddAspectSource( IAspectSource aspectSource );
 
-        void AddValidatorSource( ValidatorSource validatorSource );
+        void AddValidatorSource( IValidatorSource validatorSource );
 
         AdviceFactory AdviceFactory { get; }
 

@@ -45,9 +45,9 @@ namespace Metalama.Framework.Engine.Pipeline
             CancellationToken cancellationToken )
         {
             // Run the validators.
-            var validationRunner = new ValidationRunner( pipelineConfiguration, input.ValidatorSources, cancellationToken );
-            var initialCompilation = input.CompilationModels[0];
-            var finalCompilation = input.CompilationModels[input.CompilationModels.Length - 1];
+            var validationRunner = new ValidationRunner( pipelineConfiguration, pipelineStepsResult.ValidatorSources, cancellationToken );
+            var initialCompilation = pipelineStepsResult.Compilations[0];
+            var finalCompilation = pipelineStepsResult.Compilations[pipelineStepsResult.Compilations.Length - 1];
             var validationResult = validationRunner.RunAll( initialCompilation, finalCompilation );
 
             // Run the linker.

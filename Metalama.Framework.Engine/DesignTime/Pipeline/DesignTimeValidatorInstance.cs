@@ -11,18 +11,29 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline;
 
 public class DesignTimeValidatorInstance
 {
-    public SymbolKey ValidatedDeclaration { get; }
+    public SymbolDictionaryKey ValidatedDeclaration { get; }
 
     private readonly ReferenceKinds _referenceKinds;
-    private readonly ValidatorSource _source;
+    private readonly ValidatorDriver _driver;
 
-    internal DesignTimeValidatorInstance( ISymbol validatedDeclaration, ReferenceKinds referenceKinds, ValidatorSource source )
+    internal ValidatorImplementation Implementation { get; }
+
+    internal DesignTimeValidatorInstance(
+        ISymbol validatedDeclaration,
+        ReferenceKinds referenceKinds,
+        ValidatorDriver driver,
+        ValidatorImplementation implementation )
     {
-        this.ValidatedDeclaration = SymbolKey.Create( validatedDeclaration );
+        this.ValidatedDeclaration = SymbolDictionaryKey.CreatePersistentKey( validatedDeclaration );
         this._referenceKinds = referenceKinds;
-        this._source = source;
+        this._driver = driver;
+        this.Implementation = implementation;
     }
 
     internal ReferenceValidatorInstance ToReferenceValidationInstance( CompilationModel compilation )
-        => new( this._source, compilation.Factory.GetDeclarationFromId( this.ValidatedDeclaration.GetId().ToString() ).AssertNotNull(), this._referenceKinds );
+        => new(
+            compilation.Factory.GetDeclarationFromId( this.ValidatedDeclaration.GetId().ToString() ).AssertNotNull(),
+            this._driver,
+            this.Implementation,
+            this._referenceKinds );
 }

@@ -13,4 +13,6 @@ internal class DeclarationValidatorDriver : ValidatorDriver
     {
         throw new NotImplementedException();
     }
+
+    public DeclarationValidatorDriver( Type implementationType, string methodName ) : base( implementationType, methodName ) { }
 }

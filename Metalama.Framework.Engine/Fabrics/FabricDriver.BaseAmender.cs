@@ -41,7 +41,7 @@ internal abstract partial class FabricDriver
 
         protected abstract void AddAspectSource( IAspectSource aspectSource );
 
-        protected abstract void AddValidatorSource( ValidatorSource validatorSource );
+        protected abstract void AddValidatorSource( ProgrammaticValidatorSource validatorSource );
 
         public IDeclarationSelection<TChild> WithTargetMembers<TChild>( Func<T, IEnumerable<TChild>> selector )
             where TChild : class, IDeclaration

@@ -11,8 +11,10 @@ namespace Metalama.Framework.Engine.Utilities
     internal class Logger
     {
         private readonly TextWriter _textWriter;
+        private static readonly object _initializeSync = new();
+        private static volatile Logger? _instance;
 
-        public static Logger? Instance { get; private set; }
+        public static Logger? Instance => _instance;
 
         private Logger( TextWriter textWriter )
         {
@@ -21,9 +23,43 @@ namespace Metalama.Framework.Engine.Utilities
             this.Write( $"Process={Process.GetCurrentProcess().ProcessName}, CommandLine={Environment.CommandLine}." );
         }
 
-        public static void Initialize( TextWriter textWriter )
+        public static void Initialize()
         {
-            Instance = new Logger( textWriter );
+            if ( _instance == null )
+            {
+                lock ( _initializeSync )
+                {
+                    // ReSharper disable once ConditionIsAlwaysTrueOrFalse
+                    if ( _instance == null )
+                    {
+                        var pid = Process.GetCurrentProcess().Id;
+
+                        var directory = Path.Combine( Path.GetTempPath(), "Metalama", "Logs" );
+
+                        try
+                        {
+                            RetryHelper.Retry(
+                                () =>
+                                {
+                                    if ( !Directory.Exists( directory ) )
+                                    {
+                                        Directory.CreateDirectory( directory );
+                                    }
+                                } );
+
+                            // The filename must be unique because several instances of the current assembly (of different versions) may be loaded in the process.
+                            var textWriter = File.CreateText(
+                                Path.Combine( directory, $"Metalama.{Process.GetCurrentProcess().ProcessName}.{pid}.{Guid.NewGuid()}.log" ) );
+
+                            _instance = new Logger( textWriter );
+                        }
+                        catch
+                        {
+                            // Don't fail if we cannot initialize the log.
+                        }
+                    }
+                }
+            }
         }
 
         public void Write( string s )

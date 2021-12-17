@@ -9,7 +9,7 @@ using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.Validation;
 
-internal class ValidatorSource
+internal class ProgrammaticValidatorSource : IValidatorSource
 {
     public ValidatorDriver Driver { get; }
 
@@ -17,16 +17,16 @@ internal class ValidatorSource
 
     public string MethodName { get; }
 
-    private readonly Func<ValidatorSource, CompilationModel, IDiagnosticSink, IEnumerable<ValidatorInstance>> _func;
+    private readonly Func<ProgrammaticValidatorSource, CompilationModel, IDiagnosticSink, IEnumerable<ValidatorInstance>> _func;
 
     public ValidatorKind Kind { get; }
 
-    public ValidatorSource(
+    public ProgrammaticValidatorSource(
         IValidatorDriverFactory driverFactory,
         AspectPredecessor predecessor,
         string methodName,
         ValidatorKind kind,
-        Func<ValidatorSource, CompilationModel, IDiagnosticSink, IEnumerable<ValidatorInstance>> func )
+        Func<ProgrammaticValidatorSource, CompilationModel, IDiagnosticSink, IEnumerable<ValidatorInstance>> func )
     {
         this.Driver = driverFactory.GetValidatorDriver( methodName, kind );
         this.Predecessor = predecessor;
@@ -37,10 +37,4 @@ internal class ValidatorSource
 
     public IEnumerable<ValidatorInstance> GetValidators( CompilationModel compilation, IDiagnosticSink diagnosticAdder )
         => this._func.Invoke( this, compilation, diagnosticAdder );
-}
-
-internal enum ValidatorKind
-{
-    Definition,
-    Reference
 }

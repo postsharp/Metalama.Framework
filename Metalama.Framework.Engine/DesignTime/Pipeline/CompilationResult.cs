@@ -7,6 +7,7 @@ using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.DesignTime.Diff;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Validation;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -31,8 +32,8 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
                 StringComparer.Ordinal,
                 InheritableAspectInstance.ByTargetComparer.Instance );
 
-        private readonly ImmutableDictionaryOfHashSet<SymbolKey, DesignTimeValidatorInstance> _validators =
-            ImmutableDictionaryOfHashSet<SymbolKey, DesignTimeValidatorInstance>.Empty;
+        private readonly ImmutableDictionaryOfHashSet<SymbolDictionaryKey, DesignTimeValidatorInstance> _validators =
+            ImmutableDictionaryOfHashSet<SymbolDictionaryKey, DesignTimeValidatorInstance>.Empty;
 
         public bool IsDirty { get; } = true;
 
@@ -59,7 +60,7 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
             ImmutableDictionary<string, SyntaxTreeResult> invalidSyntaxTreeResults,
             ImmutableDictionary<string, IntroducedSyntaxTree> introducedSyntaxTrees,
             ImmutableDictionaryOfHashSet<string, InheritableAspectInstance> inheritableAspects,
-            ImmutableDictionaryOfHashSet<SymbolKey, DesignTimeValidatorInstance> validators,
+            ImmutableDictionaryOfHashSet<SymbolDictionaryKey, DesignTimeValidatorInstance> validators,
             bool isDirty )
         {
             this._syntaxTreeResults = syntaxTreeResults;
@@ -83,7 +84,7 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
 
             ImmutableDictionary<string, IntroducedSyntaxTree>.Builder? introducedSyntaxTreeBuilder = null;
             ImmutableDictionaryOfHashSet<string, InheritableAspectInstance>.Builder? inheritableAspectsBuilder = null;
-            ImmutableDictionaryOfHashSet<SymbolKey, DesignTimeValidatorInstance>.Builder? validatorsBuilder = null;
+            ImmutableDictionaryOfHashSet<SymbolDictionaryKey, DesignTimeValidatorInstance>.Builder? validatorsBuilder = null;
 
             foreach ( var result in resultsByTree )
             {
@@ -270,7 +271,8 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
                     new DesignTimeValidatorInstance(
                         validator.ValidatedDeclaration.GetSymbol().AssertNotNull(),
                         validator.ReferenceKinds,
-                        validator.Source ) );
+                        validator.Driver,
+                        validator.Implementation ) );
             }
 
             // Add syntax trees with empty output to it gets cached too.
@@ -366,9 +368,13 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
 
         public IEnumerable<InheritableAspectInstance> GetInheritedAspects( string aspectType ) => this._inheritableAspects[aspectType];
 
+        // The design-time implementation of validators does not use this property but GetValidatorsForSymbol.
+        // (and cross-project design-time validators are not implemented)
+        ImmutableArray<TransitiveValidatorInstance> ITransitiveAspectsManifest.Validators => ImmutableArray<TransitiveValidatorInstance>.Empty;
+
         internal ImmutableHashSet<DesignTimeValidatorInstance> GetValidatorsForSymbol( ISymbol symbol )
         {
-            var symbolKey = SymbolKey.CreateLazy( symbol );
+            var symbolKey = SymbolDictionaryKey.CreateLookupKey( symbol );
 
             return this._validators[symbolKey];
         }

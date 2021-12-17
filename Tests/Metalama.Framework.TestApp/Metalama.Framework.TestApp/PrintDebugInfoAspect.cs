@@ -11,13 +11,12 @@ namespace Metalama.Framework.TestApp
 {
     internal class PrintDebugInfoAspect : OverrideMethodAspect
     {
-        static DiagnosticDefinition<IDeclaration> myWarning = new( "MY001", Severity.Warning, "Hello, {0} v23." );
+        static DiagnosticDefinition<IDeclaration> myWarning = new( "MY001", Severity.Warning, "Hello, {0} v24." );
 
         public override void BuildAspect(IAspectBuilder<IMethod> aspectBuilder )
         {
             base.BuildAspect( aspectBuilder );
-
-            aspectBuilder.Diagnostics.Report( aspectBuilder.Target, myWarning, aspectBuilder.Target );
+            myWarning.WithArguments(aspectBuilder.Target).ReportTo(aspectBuilder.Diagnostics);
         }
 
         public override dynamic? OverrideMethod()

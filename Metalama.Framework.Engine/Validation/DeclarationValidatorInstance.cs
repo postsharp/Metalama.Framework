@@ -10,15 +10,16 @@ internal class DeclarationValidatorInstance : ValidatorInstance
 {
     private readonly DeclarationValidatorDriver _driver;
 
-    public DeclarationValidatorInstance( ValidatorSource source, IDeclaration validatedDeclaration ) : base(
-        source,
-        validatedDeclaration )
+    public DeclarationValidatorInstance( IDeclaration validatedDeclaration, ValidatorDriver driver, in ValidatorImplementation implementation ) : base(
+        validatedDeclaration,
+        driver,
+        implementation )
     {
-        this._driver = (DeclarationValidatorDriver) source.Driver;
+        this._driver = (DeclarationValidatorDriver) driver;
     }
 
     public void Validate( IDiagnosticSink diagnosticAdder )
     {
-        this._driver.Validate( this.Object, this.ValidatedDeclaration, diagnosticAdder );
+        this._driver.Validate( this.Implementation, this.ValidatedDeclaration, diagnosticAdder );
     }
 }

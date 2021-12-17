@@ -265,7 +265,7 @@ namespace Metalama.Framework.Engine.CompileTime
                     new CSharpCompilationOptions( OutputKind.DynamicallyLinkedLibrary, deterministic: true ) )
                 .AddReferences(
                     referencedProjects
-                        .Where( r => !r.IsEmpty )
+                        .Where( r => !r.IsEmpty && !r.IsFramework )
                         .Select( r => r.ToMetadataReference() ) );
         }
 
@@ -756,7 +756,7 @@ namespace Metalama.Framework.Engine.CompileTime
             return (sourceHash, projectHash, compileTimeAssemblyName, outputPaths);
         }
 
-        private record OutputPaths( string Directory, string Pe, string Pdb, string Manifest );
+        private record OutputPaths( string? Directory, string Pe, string Pdb, string Manifest );
 
         private OutputPaths GetOutputPaths( string compileTimeAssemblyName )
         {
@@ -780,7 +780,7 @@ namespace Metalama.Framework.Engine.CompileTime
             IDiagnosticAdder diagnosticAdder,
             CancellationToken cancellationToken,
             out string assemblyPath,
-            out string sourceDirectory )
+            out string? sourceDirectory )
         {
             Logger.Instance?.Write( $"TryCompileDeserializedProject( '{runTimeAssemblyName}' )" );
             var compileTimeAssemblyName = GetCompileTimeAssemblyName( runTimeAssemblyName, referencedProjects, syntaxTreeHash );

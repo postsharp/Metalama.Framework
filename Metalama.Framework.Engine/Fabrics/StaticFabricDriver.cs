@@ -33,14 +33,14 @@ namespace Metalama.Framework.Engine.Fabrics
             where T : class, IDeclaration
         {
             private readonly List<IAspectSource> _aspectSources = new();
-            private readonly List<ValidatorSource> _validatorSources = new();
+            private readonly List<ProgrammaticValidatorSource> _validatorSources = new();
 
             protected StaticAmender( IProject project, FabricManager fabricManager, FabricInstance fabricInstance, in Ref<T> targetDeclaration ) :
                 base( project, fabricManager, fabricInstance, targetDeclaration ) { }
 
             protected sealed override void AddAspectSource( IAspectSource aspectSource ) => this._aspectSources.Add( aspectSource );
 
-            protected override void AddValidatorSource( ValidatorSource validatorSource ) => this._validatorSources.Add( validatorSource );
+            protected override void AddValidatorSource( ProgrammaticValidatorSource validatorSource ) => this._validatorSources.Add( validatorSource );
 
             public StaticFabricResult ToResult() => new( this._aspectSources.ToImmutableArray(), this._validatorSources.ToImmutableArray() );
         }

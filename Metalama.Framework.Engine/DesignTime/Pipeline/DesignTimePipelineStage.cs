@@ -34,11 +34,20 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
             var diagnosticSink = new UserDiagnosticSink( this.CompileTimeProject, null );
 
             // Discover the validators.
-            var validatorRunner = new ValidationRunner( pipelineConfiguration, pipelineStepsResult.ValidatorSources, cancellationToken );
-            var initialCompilation = input.CompilationModels[0];
-            var finalCompilation = input.CompilationModels[input.CompilationModels.Length - 1];
-            validatorRunner.RunDeclarationValidators( finalCompilation, diagnosticSink );
-            var referenceValidators = validatorRunner.GetReferenceValidators( initialCompilation, diagnosticSink ).ToImmutableArray();
+            ImmutableArray<ReferenceValidatorInstance> referenceValidators;
+
+            if ( !pipelineStepsResult.ValidatorSources.IsDefaultOrEmpty )
+            {
+                var validatorRunner = new ValidationRunner( pipelineConfiguration, pipelineStepsResult.ValidatorSources, cancellationToken );
+                var initialCompilation = pipelineStepsResult.Compilations[0];
+                var finalCompilation = pipelineStepsResult.Compilations[pipelineStepsResult.Compilations.Length - 1];
+                validatorRunner.RunDeclarationValidators( finalCompilation, diagnosticSink );
+                referenceValidators = validatorRunner.GetReferenceValidators( initialCompilation, diagnosticSink ).ToImmutableArray();
+            }
+            else
+            {
+                referenceValidators = ImmutableArray<ReferenceValidatorInstance>.Empty;
+            }
 
             // Generate the additional syntax trees.
 
