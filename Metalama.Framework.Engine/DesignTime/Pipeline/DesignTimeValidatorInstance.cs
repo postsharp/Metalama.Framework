@@ -32,7 +32,7 @@ public class DesignTimeValidatorInstance
 
     internal ReferenceValidatorInstance ToReferenceValidationInstance( CompilationModel compilation )
         => new(
-            compilation.Factory.GetDeclarationFromId( this.ValidatedDeclaration.GetId().ToString() ).AssertNotNull(),
+            compilation.Factory.GetDeclaration( this.ValidatedDeclaration.GetId().Resolve( compilation.RoslynCompilation ).AssertNotNull()).AssertNotNull(),
             this._driver,
             this.Implementation,
             this._referenceKinds );
