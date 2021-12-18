@@ -15,29 +15,22 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline;
 
 internal class DesignTimeValidatorRunner
 {
-    private readonly CompilationResult _compilationResult;
+    private readonly CompilationPipelineResult _compilationResult;
     private readonly IProject _project;
     private readonly Dictionary<ISymbol, ImmutableArray<ReferenceValidatorInstance>> _validators = new();
 
-    public DesignTimeValidatorRunner( CompilationResult compilationResult, IProject project )
+    public DesignTimeValidatorRunner( CompilationPipelineResult compilationResult, IProject project )
     {
         this._compilationResult = compilationResult;
         this._project = project;
     }
 
-    public ImmutableUserDiagnosticList Validate( SemanticModel model, CancellationToken cancellationToken )
+    public void Validate( SemanticModel model, UserDiagnosticSink diagnosticSink, CancellationToken cancellationToken )
     {
-        var diagnostics = new UserDiagnosticSink();
-
-        // TODO: We may want to optimize here:
-        //  1. We may have created a compilation model upstream.
-        //  2. PartialCompilation.CreatePartial creates a closure, but we don't need it.
         var compilation = CompilationModel.CreateInitialInstance( this._project, PartialCompilation.CreatePartial( model.Compilation, model.SyntaxTree ) );
 
-        var visitor = new ReferenceValidationVisitor( diagnostics, s => this.GetValidatorsForSymbol( s, compilation ), compilation, cancellationToken );
+        var visitor = new ReferenceValidationVisitor( diagnosticSink, s => this.GetValidatorsForSymbol( s, compilation ), compilation, cancellationToken );
         visitor.Visit( model );
-
-        return diagnostics.ToImmutable();
     }
 
     private ImmutableArray<ReferenceValidatorInstance> GetValidatorsForSymbol( ISymbol symbol, CompilationModel compilation )
@@ -48,7 +41,7 @@ internal class DesignTimeValidatorRunner
         }
         else
         {
-            validators = this._compilationResult.GetValidatorsForSymbol( symbol )
+            validators = this._compilationResult.Validators.GetValidatorsForSymbol( symbol )
                 .Select( x => x.ToReferenceValidationInstance( compilation ) )
                 .ToImmutableArray();
 

@@ -29,6 +29,29 @@ namespace Metalama.Framework.Engine.Diagnostics
 
         public IDeclaration? DefaultScope { get; private set; }
 
+        public bool IsEmpty
+        {
+            get
+            {
+                if ( this._diagnostics is { Count: > 0 } )
+                {
+                    return false;
+                }
+
+                if ( this._suppressions is { Count: > 0 } )
+                {
+                    return false;
+                }
+
+                if ( this._codeFixes is { Count: > 0 } )
+                {
+                    return false;
+                }
+
+                return true;
+            }
+        }
+
         internal UserDiagnosticSink( CompileTimeProject? compileTimeProject, CodeFixFilter? codeFixFilter, IDeclaration? defaultScope = null )
         {
             this._diagnosticManifest = compileTimeProject?.ClosureDiagnosticManifest;
@@ -41,6 +64,13 @@ namespace Metalama.Framework.Engine.Diagnostics
         {
             this.DefaultScope = defaultScope;
             this._codeFixFilter = codeFixFilter ?? (( _, _ ) => false);
+        }
+
+        public void Reset()
+        {
+            this._diagnostics?.Clear();
+            this._suppressions?.Clear();
+            this._codeFixes?.Clear();
         }
 
         public int ErrorCount { get; private set; }

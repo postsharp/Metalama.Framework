@@ -71,7 +71,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
             return compilation;
         }
 
-        private static void DumpSyntaxTreeResult( SyntaxTreeResult syntaxTreeResult, StringBuilder stringBuilder )
+        private static void DumpSyntaxTreeResult( SyntaxTreePipelineResult syntaxTreeResult, StringBuilder stringBuilder )
         {
             string? GetTextUnderDiagnostic( Diagnostic diagnostic )
             {
@@ -115,7 +115,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
 
             var i = 0;
 
-            foreach ( var result in results.SyntaxTreeResults.OrderBy( t => t.SyntaxTree.FilePath ) )
+            foreach ( var result in results.PipelineResult.SyntaxTreeResults.OrderBy( t => t.SyntaxTree.FilePath ) )
             {
                 if ( i > 0 )
                 {

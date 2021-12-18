@@ -81,7 +81,7 @@ namespace Metalama.Framework.Engine.DesignTime
                 // Add introduced syntax trees.
                 var sourcesCount = 0;
 
-                foreach ( var introducedSyntaxTree in compilationResult.IntroducedSyntaxTrees )
+                foreach ( var introducedSyntaxTree in compilationResult.PipelineResult.IntroducedSyntaxTrees )
                 {
                     sourcesCount++;
                     Logger.Instance?.Write( $"  AddSource('{introducedSyntaxTree.Name}')" );

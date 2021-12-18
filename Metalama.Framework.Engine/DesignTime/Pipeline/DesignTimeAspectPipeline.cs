@@ -183,7 +183,10 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
             }
         }
 
-        private bool TryExecutePartial( PartialCompilation partialCompilation, CancellationToken cancellationToken, out CompilationResult? compilationResult )
+        private bool TryExecutePartial(
+            PartialCompilation partialCompilation,
+            CancellationToken cancellationToken,
+            [NotNullWhen( true )] out CompilationResult? compilationResult )
         {
             var state = this._currentState;
 
@@ -247,7 +250,7 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
                         }
                     }
 
-                    compilationResult = this._currentState.CompilationResult;
+                    compilationResult = new CompilationResult( this._currentState.PipelineResult, this._currentState.ValidationResult );
 
                     this._compilationResultCache.Add( compilation, compilationResult );
 
@@ -261,7 +264,7 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
                         +
                         $" returning from cache only." );
 
-                    compilationResult = this._currentState.CompilationResult;
+                    compilationResult = new CompilationResult( this._currentState.PipelineResult, this._currentState.ValidationResult );
 
                     return true;
                 }
@@ -282,7 +285,7 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
                     continue;
                 }
 
-                if ( this._currentState.CompilationResult.IsSyntaxTreeDirty( syntaxTree ) )
+                if ( this._currentState.PipelineResult.IsSyntaxTreeDirty( syntaxTree ) )
                 {
                     uncachedSyntaxTrees.Add( syntaxTree );
                 }

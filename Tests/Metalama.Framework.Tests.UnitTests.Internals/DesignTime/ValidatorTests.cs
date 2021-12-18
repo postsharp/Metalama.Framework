@@ -47,8 +47,8 @@ public class C {}
 
             Assert.True( pipeline.TryExecute( compilation1.RoslynCompilation, CancellationToken.None, out var compilationResult1 ) );
 
-            Assert.True( compilationResult1!.HasValidators );
-            Assert.Single( compilationResult1.GetValidatorsForSymbol( compilation1.Types.OfName( "C" ).Single().GetSymbol() ) );
+            Assert.False( compilationResult1!.PipelineResult.Validators.IsEmpty );
+            Assert.Single( compilationResult1.PipelineResult.Validators.GetValidatorsForSymbol( compilation1.Types.OfName( "C" ).Single().GetSymbol() ) );
         }
 
         [Fact]
@@ -95,22 +95,24 @@ public class Aspect2 : TypeAspect
             var pipeline = new DesignTimeAspectPipeline( testContext.ServiceProvider, domain, compilation1.RoslynCompilation.References, true );
             Assert.True( pipeline.TryExecute( compilation1.RoslynCompilation, CancellationToken.None, out var compilationResult1 ) );
 
-            Assert.True( compilationResult1!.HasValidators );
+            Assert.False( compilationResult1!.PipelineResult.Validators.IsEmpty );
 
             Assert.Equal(
                 new[] { "Aspect1" },
-                compilationResult1.GetValidatorsForSymbol( classC ).Select( v => v.Implementation.Implementation.GetType().Name ).ToArray() );
+                compilationResult1.PipelineResult.Validators.GetValidatorsForSymbol( classC )
+                    .Select( v => v.Implementation.Implementation.GetType().Name )
+                    .ToArray() );
 
             // Add a constraint.
             var targetTree2 = CSharpSyntaxTree.ParseText( "[Aspect1, Aspect2] class C {}", path: "target.cs" );
 
             var compilation2 = testContext.CreateCompilationModel( compilation1.RoslynCompilation.ReplaceSyntaxTree( targetTree1, targetTree2 ) );
             Assert.True( pipeline.TryExecute( compilation2.RoslynCompilation, CancellationToken.None, out var compilationResult2 ) );
-            Assert.True( compilationResult2!.HasValidators );
+            Assert.False( compilationResult2!.PipelineResult.Validators.IsEmpty );
 
             Assert.Equal(
                 new[] { "Aspect1", "Aspect2" },
-                compilationResult2.GetValidatorsForSymbol( classC )
+                compilationResult2.PipelineResult.Validators.GetValidatorsForSymbol( classC )
                     .Select( v => v.Implementation.Implementation.GetType().Name )
                     .OrderBy( n => n )
                     .ToArray() );
@@ -119,11 +121,13 @@ public class Aspect2 : TypeAspect
             var targetTree3 = CSharpSyntaxTree.ParseText( "[Aspect2] class C {}", path: "target.cs" );
             var compilation3 = testContext.CreateCompilationModel( compilation2.RoslynCompilation.ReplaceSyntaxTree( targetTree2, targetTree3 ) );
             Assert.True( pipeline.TryExecute( compilation3.RoslynCompilation, CancellationToken.None, out var compilationResult3 ) );
-            Assert.True( compilationResult3!.HasValidators );
+            Assert.False( compilationResult3!.PipelineResult.Validators.IsEmpty );
 
             Assert.Equal(
                 new[] { "Aspect2" },
-                compilationResult3.GetValidatorsForSymbol( classC ).Select( v => v.Implementation.Implementation.GetType().Name ).ToArray() );
+                compilationResult3.PipelineResult.Validators.GetValidatorsForSymbol( classC )
+                    .Select( v => v.Implementation.Implementation.GetType().Name )
+                    .ToArray() );
         }
 
         /*
@@ -164,7 +168,7 @@ public interface I {}
             // We have to execute the pipeline on compilation1 first and explicitly because implicit running is not currently possible
             // because of missing project options.
 
-            Assert.True( factory.TryExecute( testContext1.ProjectOptions, compilation1, CancellationToken.None, out _ ) );
+            Assert.True( factory.TryExecute( testContext1.ProjectOptions, compilation1, CancellationToken.None) );
             Assert.True( factory.TryExecute( testContext2.ProjectOptions, compilation2, CancellationToken.None, out var compilationResult2 ) );
 
             Assert.Single( compilationResult2!.IntroducedSyntaxTrees );

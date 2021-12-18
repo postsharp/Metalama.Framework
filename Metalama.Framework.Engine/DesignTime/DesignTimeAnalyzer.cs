@@ -2,7 +2,6 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Compiler;
-using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.DesignTime.Diagnostics;
 using Metalama.Framework.Engine.DesignTime.Pipeline;
 using Metalama.Framework.Engine.DesignTime.Utilities;
@@ -110,43 +109,27 @@ namespace Metalama.Framework.Engine.DesignTime
                         projectOptions,
                         compilation,
                         cancellationToken,
-                        out var compilationResult ) )
+                        out var pipelineResult ) )
                 {
                     Logger.Instance?.Write( $"DesignTimeAnalyzer.AnalyzeSemanticModel('{syntaxTreeFilePath}'): the pipeline failed." );
 
                     return;
                 }
 
-                var pipelineDiagnostics = compilationResult.GetDiagnosticsOnSyntaxTree( syntaxTreeFilePath );
-
-                // Execute validators.
-                var validatorDiagnostics = ImmutableUserDiagnosticList.Empty;
-
-                if ( compilationResult.HasValidators )
-                {
-                    var project = pipeline.LatestConfiguration?.ProjectModel;
-
-                    if ( project != null )
-                    {
-                        DesignTimeValidatorRunner validatorRunner = new( compilationResult, project );
-                        validatorDiagnostics = validatorRunner.Validate( context.SemanticModel, cancellationToken );
-                    }
-                }
-
-                // TODO: suppressions from validators.
+                var diagnosticsAndSuppressions = pipelineResult.GetDiagnosticsOnSyntaxTree( syntaxTreeFilePath );
 
                 // Report diagnostics from the pipeline.
                 Logger.Instance?.Write(
-                    $"DesignTimeAnalyzer.AnalyzeSemanticModel('{syntaxTreeFilePath}'): {pipelineDiagnostics.Diagnostics.Length} diagnostics and {pipelineDiagnostics.Suppressions.Length} suppressions reported on '{syntaxTreeFilePath}'." );
+                    $"DesignTimeAnalyzer.AnalyzeSemanticModel('{syntaxTreeFilePath}'): {diagnosticsAndSuppressions.Diagnostics.Length} diagnostics and {diagnosticsAndSuppressions.Suppressions.Length} suppressions reported on '{syntaxTreeFilePath}'." );
 
                 DesignTimeDiagnosticHelper.ReportDiagnostics(
-                    pipelineDiagnostics.Diagnostics.Concat( validatorDiagnostics.ReportedDiagnostics ),
+                    diagnosticsAndSuppressions.Diagnostics,
                     compilation,
                     context.ReportDiagnostic,
                     true );
 
                 // If we have unsupported suppressions, a diagnostic here because a Suppressor cannot report.
-                foreach ( var suppression in pipelineDiagnostics.Suppressions.Where(
+                foreach ( var suppression in diagnosticsAndSuppressions.Suppressions.Where(
                              s => !this._designTimeDiagnosticDefinitions.SupportedSuppressionDescriptors.ContainsKey( s.Definition.SuppressedDiagnosticId ) ) )
                 {
                     foreach ( var symbol in DocumentationCommentId.GetSymbolsForDeclarationId( suppression.SymbolId, compilation ) )

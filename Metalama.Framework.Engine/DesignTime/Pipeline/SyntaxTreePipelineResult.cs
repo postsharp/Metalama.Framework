@@ -9,10 +9,10 @@ using System.Collections.Immutable;
 namespace Metalama.Framework.Engine.DesignTime.Pipeline
 {
     /// <summary>
-    /// Represents the content of <see cref="DesignTimeAspectPipelineResult"/>, but only the items that relate to a single <see cref="Microsoft.CodeAnalysis.SyntaxTree"/>.
+    /// Represents the content of <see cref="DesignTimePipelineExecutionResult"/>, but only the items that relate to a single <see cref="Microsoft.CodeAnalysis.SyntaxTree"/>.
     /// This class is compilation-independent and cacheable.
     /// </summary>
-    public class SyntaxTreeResult
+    public sealed class SyntaxTreePipelineResult
     {
         /// <summary>
         /// Gets the <see cref="Microsoft.CodeAnalysis.SyntaxTree"/> for which the results was prepared.
@@ -35,7 +35,7 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
 
         public ImmutableArray<DesignTimeValidatorInstance> Validators { get; }
 
-        public SyntaxTreeResult(
+        public SyntaxTreePipelineResult(
             SyntaxTree syntaxTree,
             ImmutableArray<Diagnostic>? diagnostics,
             ImmutableArray<CacheableScopedSuppression>? suppressions,

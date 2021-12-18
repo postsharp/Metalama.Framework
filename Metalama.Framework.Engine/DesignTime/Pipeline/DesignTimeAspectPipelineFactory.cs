@@ -258,7 +258,7 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
                 return null;
             }
 
-            return compilationResult;
+            return compilationResult.PipelineResult;
         }
     }
 }

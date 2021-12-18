@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using K4os.Hash.xxHash;
 using Microsoft.CodeAnalysis;
 using System;
 
@@ -55,4 +56,16 @@ public readonly struct SymbolDictionaryKey : IEquatable<SymbolDictionaryKey>
     public static bool operator ==( SymbolDictionaryKey left, SymbolDictionaryKey right ) => left.Equals( right );
 
     public static bool operator !=( SymbolDictionaryKey left, SymbolDictionaryKey right ) => !left.Equals( right );
+
+    internal void UpdateHash( XXH64 hasher )
+    {
+        if ( this._identity is not string id )
+        {
+            // We should not compute a hash of lookup keys, only of persistent keys.
+
+            throw new InvalidOperationException();
+        }
+
+        hasher.Update( id );
+    }
 }
