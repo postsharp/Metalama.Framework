@@ -99,7 +99,7 @@ namespace Metalama.Framework.Engine.Aspects
             Compilation compilation,
             AspectDriverFactory aspectDriverFactory ) : base( serviceProvider, compilation, aspectTypeSymbol, diagnosticAdder, baseClass )
         {
-            this.FullName = aspectTypeSymbol.GetReflectionName();
+            this.FullName = aspectTypeSymbol.GetReflectionName().AssertNotNull(  );
             this.DisplayName = this.ShortName = AttributeRef.GetShortName( aspectTypeSymbol.Name );
             this.IsAbstract = aspectTypeSymbol.IsAbstract;
             this.Project = project;

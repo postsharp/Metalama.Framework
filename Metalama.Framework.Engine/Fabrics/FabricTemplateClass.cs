@@ -33,6 +33,6 @@ namespace Metalama.Framework.Engine.Fabrics
 
         public override CompileTimeProject? Project { get; }
 
-        public override string FullName => this.Driver.FabricSymbol.GetReflectionName();
+        public override string FullName => this.Driver.FabricSymbol.GetReflectionName().AssertNotNull(  );
     }
 }

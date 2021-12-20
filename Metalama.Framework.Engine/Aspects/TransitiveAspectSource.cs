@@ -76,6 +76,7 @@ namespace Metalama.Framework.Engine.Aspects
                     // Process inherited aspects.
                     foreach ( var aspectClassName in manifest.InheritableAspectTypes )
                     {
+                        // TODO: the next line may throw KeyNotFoundException.
                         var aspectClass = aspectClassesByName[aspectClassName];
 
                         var targets = manifest.GetInheritedAspects( aspectClassName )

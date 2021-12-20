@@ -12,21 +12,4 @@ namespace Metalama.Framework.TestApp
     }
 
 
-    [Friend(typeof(FriendClass))]
-    class ValidatedClass
-    {
-
-    }
-
-
-    class FriendClass
-    {
-        ValidatedClass _validatedClass;
-
-    }
-
-    class NotFriendClass
-    {
-        ValidatedClass _validatedClass;
-    }
 }

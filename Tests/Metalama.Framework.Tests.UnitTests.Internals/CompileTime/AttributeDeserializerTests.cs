@@ -271,6 +271,39 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime
             Assert.Equal( new[] { typeof(int), typeof(string) }, Deserialize( "typeof(int), typeof(string)" ) );
             Assert.Equal( new[] { typeof(int) }, Deserialize( "typeof(int)" ) );
         }
+        
+        [Fact]
+        public void TestParams2()
+        {
+            void Test( string args, object firstValue, object otherValues )
+            {
+                using var testContext = this.CreateTestContext();
+
+                var code = $@"[assembly: Metalama.Framework.Tests.UnitTests.CompileTime.AttributeDeserializerTests.TestParams2Attribute( {args} )]";
+                var compilation = testContext.CreateCompilationModel( code );
+
+                using UnloadableCompileTimeDomain domain = new();
+                var loader = CompileTimeProjectLoader.Create( domain, testContext.ServiceProvider );
+
+                var attribute = compilation.Attributes.Single();
+
+                if ( !loader.AttributeDeserializer.TryCreateAttribute( attribute, new DiagnosticList(), out var deserializedAttribute ) )
+                {
+                    throw new AssertionFailedException();
+                }
+
+                Assert.Equal( firstValue, ((TestParams2Attribute) deserializedAttribute).FirstValue );
+                Assert.Equal( otherValues, ((TestParams2Attribute) deserializedAttribute).OtherValues );
+            }
+
+            
+            Test( "\"a\", \"b\"" , "a", new[]{"b"} );
+            Test( "\"a\"" , "a", new string[0] );
+            Test( "1, 2" , 1, new []{2} );
+            Test( "1" , 1, new int[0] );
+            Test( "typeof(int), typeof(string)", typeof(int), new []{typeof(string)} );
+            Test( "typeof(int)", typeof(int), new Type[0] );
+        }
 
         [Fact]
         public void AttributesOfUnknownTypeAreIgnored()
@@ -450,6 +483,22 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime
             public TestParamsAttribute( params Type[] p ) { this.Value = p; }
 
             public TestParamsAttribute( params object[] p ) { this.Value = p; }
+        }
+        
+        public class TestParams2Attribute : Attribute
+        {
+            public object FirstValue { get; }
+            public object OtherValues { get; }
+
+            public TestParams2Attribute( string a, params string[] p )
+            {
+                this.FirstValue = a; this.OtherValues = p; }
+
+            public TestParams2Attribute( int a, params int[] p ) { this.FirstValue = a;this.OtherValues = p; }
+
+            public TestParams2Attribute( Type a, params Type[] p ) {this.FirstValue = a; this.OtherValues = p; }
+
+            public TestParams2Attribute(object a, params object[] p ) { this.FirstValue = a;this.OtherValues = p; }
         }
 
         public class ThrowingAttribute : Attribute

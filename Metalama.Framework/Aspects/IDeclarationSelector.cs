@@ -7,19 +7,26 @@ using System.Collections.Generic;
 
 namespace Metalama.Framework.Aspects;
 
+/// <summary>
+/// An interface that allows aspects and fabrics to add child aspects and register validators
+/// </summary>
 public interface IDeclarationSelector<out TTarget>
     where TTarget : class, IDeclaration
 {
     /// <summary>
-    /// Selects members of the current target declaration with the purpose of adding aspects, annotations and validators to them
-    /// using e.g. <see cref="IDeclarationSelection{TDeclaration}.AddAspect{TAspect}(System.Func{TDeclaration,System.Linq.Expressions.Expression{System.Func{TAspect}}})"/>
-    /// or <see cref="IDeclarationSelection{TDeclaration}.AddAnnotation{TAspect,TAnnotation}"/>.
+    /// Selects members of the  target declaration of the current aspect or fabric with the purpose of adding aspects, annotations or validators to them
+    /// using e.g. <see cref="IDeclarationSelection{TDeclaration}.AddAspect{TAspect}(System.Func{TDeclaration,System.Linq.Expressions.Expression{System.Func{TAspect}}})"/>,
+    ///  <see cref="IDeclarationSelection{TDeclaration}.AddAnnotation{TAspect,TAnnotation}"/>,  <see cref="IDeclarationSelection{TDeclaration}.RegisterDeclarationValidator{T}"/>
+    /// or <see cref="IDeclarationSelection{TDeclaration}.RegisterReferenceValidator"/>.
     /// </summary>
-    /// <param name="selector"></param>
-    /// <typeparam name="TMember"></typeparam>
-    /// <returns></returns>
     IDeclarationSelection<TMember> WithTargetMembers<TMember>( Func<TTarget, IEnumerable<TMember>> selector )
         where TMember : class, IDeclaration;
 
+    /// <summary>
+    /// Selects the  target declaration of the current aspect or fabric with the purpose of adding aspects, annotations or validators to them
+    /// using e.g. <see cref="IDeclarationSelection{TDeclaration}.AddAspect{TAspect}(System.Func{TDeclaration,System.Linq.Expressions.Expression{System.Func{TAspect}}})"/>,
+    ///  <see cref="IDeclarationSelection{TDeclaration}.AddAnnotation{TAspect,TAnnotation}"/>,  <see cref="IDeclarationSelection{TDeclaration}.RegisterDeclarationValidator{T}"/>
+    /// or <see cref="IDeclarationSelection{TDeclaration}.RegisterReferenceValidator"/>.
+    /// </summary>
     IDeclarationSelection<TTarget> WithTarget();
 }

@@ -9,6 +9,7 @@ using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Templating.Mapping;
 using Metalama.Framework.Fabrics;
 using Metalama.Framework.Project;
+using Metalama.Framework.Validation;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -33,8 +34,7 @@ namespace Metalama.Framework.Engine.CompileTime
         private static readonly CompileTimeProjectManifest _frameworkProjectManifest = new(
             _frameworkAssemblyIdentity.ToString(),
             _frameworkAssemblyIdentity.ToString(),
-            _frameworkAssembly.GetExportedTypes()
-                .Where( t => !t.IsInterface && !t.IsAbstract && typeof(IAspect).IsAssignableFrom( t ) )
+            new[] { typeof(InternalImplementAttribute)}
                 .Select( t => t.FullName )
                 .ToImmutableArray(),
             ImmutableArray<string>.Empty,

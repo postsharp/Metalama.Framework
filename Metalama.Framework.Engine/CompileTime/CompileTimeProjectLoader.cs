@@ -86,7 +86,14 @@ namespace Metalama.Framework.Engine.CompileTime
 
                 var compileTimeProject = this.GetCompileTimeProject( assemblySymbol.Identity, cancellationToken );
 
-                type = compileTimeProject?.GetTypeOrNull( typeSymbol.GetReflectionName() );
+                var reflectionName = typeSymbol.GetReflectionName();
+
+                if ( reflectionName == null )
+                {
+                    return null;
+                }
+                
+                type = compileTimeProject?.GetTypeOrNull( reflectionName );
 
                 this.Cache.Add( typeSymbol, type );
             }

@@ -70,11 +70,18 @@ namespace Metalama.Framework.Engine.Aspects
                                 return null;
                             }
 
+                            var typeName = typeSymbol.GetReflectionName();
+
+                            if ( typeName == null )
+                            {
+                                return null;
+                            }
+
                             return new AspectTypeData(
                                 item.Project,
                                 item.TypeName,
                                 typeSymbol,
-                                item.Project.GetType( typeSymbol.GetReflectionName() ) );
+                                item.Project.GetType( typeName ) );
                         } )
                     .WhereNotNull()
                     .Concat( frameworkAspectClasses )
@@ -93,9 +100,11 @@ namespace Metalama.Framework.Engine.Aspects
             CompileTimeProject compileTimeProject,
             IDiagnosticAdder diagnosticAdder )
         {
-            var aspectTypesDiagnostics = aspectTypes.ToDictionary(
-                t => t.GetReflectionName(),
-                t => new AspectTypeData( compileTimeProject, t.GetReflectionName(), t, compileTimeProject.GetType( t.GetReflectionName() ) ) );
+            var aspectTypesDiagnostics = aspectTypes
+                .Select( t => ( Symbol: t, ReflectionName: t.GetReflectionName().AssertNotNull(  )) )
+                .ToDictionary(
+                t => t.ReflectionName,
+                t => new AspectTypeData( compileTimeProject, t.ReflectionName, t.Symbol, compileTimeProject.GetType( t.ReflectionName ) ) );
 
             return this.GetAspectClasses( aspectTypesDiagnostics, diagnosticAdder, null! );
         }

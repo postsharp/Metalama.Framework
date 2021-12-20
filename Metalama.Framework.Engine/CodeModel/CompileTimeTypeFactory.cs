@@ -21,7 +21,7 @@ namespace Metalama.Framework.Engine.CodeModel
             {
                 IDynamicTypeSymbol => throw new AssertionFailedException(),
                 IArrayTypeSymbol { ElementType: IDynamicTypeSymbol } => throw new AssertionFailedException(),
-                _ => this.Get( symbol.GetSymbolId(), symbol.GetReflectionName() )
+                _ => this.Get( symbol.GetSymbolId(), symbol.GetReflectionName().AssertNotNull(  ) )
             };
 
         public Type Get( SymbolId symbolKey, string fullMetadataName )

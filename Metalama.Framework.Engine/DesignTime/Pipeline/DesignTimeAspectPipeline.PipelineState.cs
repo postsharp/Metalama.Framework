@@ -54,7 +54,7 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
             {
                 this._pipeline = pipeline;
                 this.PipelineResult = new CompilationPipelineResult();
-                this.ValidationResult = new CompilationValidationResult();
+                this.ValidationResult = CompilationValidationResult.Empty;
             }
 
             private PipelineState( PipelineState prototype )
@@ -271,6 +271,9 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
                         }
                         else
                         {
+                            Logger.Instance?.Write( "Requiring an in-process configuration refresh." );
+                            
+                            newConfiguration = null;
                             newStatus = DesignTimeAspectPipelineStatus.Default;
                         }
                     }
@@ -309,7 +312,7 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
                         // A failure here means an error or a cache miss.
 
                         Logger.Instance?.Write(
-                            $"DesignTimeAspectPipeline.TryGetConfiguration('{compilation.Compilation.AssemblyName}', CompilationId={DebuggingHelper.GetObjectId( compilation.Compilation )}) failed." );
+                            $"DesignTimeAspectPipeline.TryGetConfiguration('{compilation.Compilation.AssemblyName}', CompilationId = {DebuggingHelper.GetObjectId( compilation.Compilation )}) failed." );
 
                         configuration = null;
 
@@ -318,7 +321,7 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
                     else
                     {
                         Logger.Instance?.Write(
-                            $"DesignTimeAspectPipeline.TryGetConfiguration('{compilation.Compilation.AssemblyName}', CompilationId={DebuggingHelper.GetObjectId( compilation.Compilation )}) succeeded with a new configuration: "
+                            $"DesignTimeAspectPipeline.TryGetConfiguration('{compilation.Compilation.AssemblyName}', CompilationId = {DebuggingHelper.GetObjectId( compilation.Compilation )}) succeeded with new configuration {DebuggingHelper.GetObjectId( configuration )}: "
                             +
                             $"the compilation contained {compilation.Compilation.SyntaxTrees.Count()} syntax trees: {string.Join( ", ", compilation.Compilation.SyntaxTrees.Select( t => Path.GetFileName( t.FilePath ) ) )}" );
 
@@ -339,7 +342,7 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
                     // We have a valid configuration and it is not outdated.
 
                     Logger.Instance?.Write(
-                        $"DesignTimeAspectPipeline.TryGetConfiguration('{compilation.Compilation.AssemblyName}', CompilationId={DebuggingHelper.GetObjectId( compilation.Compilation )}) returned existing configuration." );
+                        $"DesignTimeAspectPipeline.TryGetConfiguration('{compilation.Compilation.AssemblyName}', CompilationId = {DebuggingHelper.GetObjectId( compilation.Compilation )}) returned existing configuration {DebuggingHelper.GetObjectId( state.Configuration )}." );
 
                     configuration = state.Configuration;
 
@@ -398,64 +401,70 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
                 // in case of cancellation. From our point of view, this is a safe place to commit.
                 state = state.SetPipelineResult( compilation, result );
 
-                // Execute the validators.
-                if ( !state.PipelineResult.Validators.IsEmpty )
-                {
-                    var validationRunner = new DesignTimeValidatorRunner( state.PipelineResult, configuration.ProjectModel );
-
-                    IEnumerable<SyntaxTree> syntaxTreesToValidate;
-
-                    if ( state.PipelineResult.Validators.EqualityKey == state.ValidationResult.ValidatorEqualityKey )
-                    {
-                        // If validators did not change, we only have to validate syntax trees that have changed.
-                        // (we actually received a closure of modified syntax trees, so the flow could be optimized).
-                        syntaxTreesToValidate = compilation.SyntaxTrees.Values;
-                    }
-                    else
-                    {
-                        // If validators did change, we need to validate all syntax trees.
-                        syntaxTreesToValidate = compilation.Compilation.SyntaxTrees;
-                    }
-
-                    var syntaxTreeDictionaryBuilder = state.ValidationResult.SyntaxTreeResults.ToBuilder();
-
-                    var userDiagnosticSink = new UserDiagnosticSink( configuration.CompileTimeProject, null );
-
-                    foreach ( var syntaxTree in syntaxTreesToValidate )
-                    {
-                        userDiagnosticSink.Reset();
-                        var semanticModel = compilation.Compilation.GetSemanticModel( syntaxTree );
-                        validationRunner.Validate( semanticModel, userDiagnosticSink, cancellationToken );
-
-                        if ( !userDiagnosticSink.IsEmpty )
-                        {
-                            var diagnostics = userDiagnosticSink.ToImmutable();
-
-                            var syntaxTreeResult = new SyntaxTreeValidationResult(
-                                syntaxTree,
-                                diagnostics.ReportedDiagnostics,
-                                diagnostics.DiagnosticSuppressions.Select( d => new CacheableScopedSuppression( d ) ).ToImmutableArray() );
-
-                            syntaxTreeDictionaryBuilder[syntaxTree.FilePath] = syntaxTreeResult;
-                        }
-                        else
-                        {
-                            syntaxTreeDictionaryBuilder.Remove( syntaxTree.FilePath );
-                        }
-                    }
-
-                    // TODO: remove trees that no longer exist in the compilation.
-
-                    var newValidationResult = new CompilationValidationResult(
-                        syntaxTreeDictionaryBuilder.ToImmutable(),
-                        state.PipelineResult.Validators.EqualityKey );
-
-                    state = state.SetValidationResult( newValidationResult );
-                }
+                // Execute the validators. We have to run them even if we have no user validator because this also runs system validators.
+                ExecuteValidators( ref state, compilation, configuration, cancellationToken );
 
                 compilationResult = new CompilationResult( state.PipelineResult, state.ValidationResult );
 
                 return true;
+            }
+
+            private static void ExecuteValidators(
+                ref PipelineState state,
+                PartialCompilation compilation,
+                AspectPipelineConfiguration configuration,
+                CancellationToken cancellationToken )
+            {
+                var validationRunner = new DesignTimeValidatorRunner( state.PipelineResult, configuration.ProjectModel, state._pipeline );
+
+                IEnumerable<SyntaxTree> syntaxTreesToValidate;
+
+                if (state.PipelineResult.Validators.EqualityKey == state.ValidationResult.ValidatorEqualityKey)
+                {
+                    // If validators did not change, we only have to validate syntax trees that have changed.
+                    // (we actually received a closure of modified syntax trees, so the flow could be optimized).
+                    syntaxTreesToValidate = compilation.SyntaxTrees.Values;
+                }
+                else
+                {
+                    // If validators did change, we need to validate all syntax trees.
+                    syntaxTreesToValidate = compilation.Compilation.SyntaxTrees;
+                }
+
+                var syntaxTreeDictionaryBuilder = state.ValidationResult.SyntaxTreeResults.ToBuilder();
+
+                var userDiagnosticSink = new UserDiagnosticSink( configuration.CompileTimeProject, null );
+
+                foreach (var syntaxTree in syntaxTreesToValidate)
+                {
+                    userDiagnosticSink.Reset();
+                    var semanticModel = compilation.Compilation.GetSemanticModel( syntaxTree );
+                    validationRunner.Validate( semanticModel, userDiagnosticSink, cancellationToken );
+
+                    if (!userDiagnosticSink.IsEmpty)
+                    {
+                        var diagnostics = userDiagnosticSink.ToImmutable();
+
+                        var syntaxTreeResult = new SyntaxTreeValidationResult(
+                            syntaxTree,
+                            diagnostics.ReportedDiagnostics,
+                            diagnostics.DiagnosticSuppressions.Select( d => new CacheableScopedSuppression( d ) ).ToImmutableArray() );
+
+                        syntaxTreeDictionaryBuilder[syntaxTree.FilePath] = syntaxTreeResult;
+                    }
+                    else
+                    {
+                        syntaxTreeDictionaryBuilder.Remove( syntaxTree.FilePath );
+                    }
+                }
+
+                // TODO: remove trees that no longer exist in the compilation.
+
+                var newValidationResult = new CompilationValidationResult(
+                    syntaxTreeDictionaryBuilder.ToImmutable(),
+                    state.PipelineResult.Validators.EqualityKey );
+
+                state = state.SetValidationResult( newValidationResult );
             }
 
             private PipelineState SetValidationResult( CompilationValidationResult validationResult )

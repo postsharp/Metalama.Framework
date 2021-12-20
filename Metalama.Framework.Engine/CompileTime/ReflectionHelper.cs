@@ -50,7 +50,7 @@ namespace Metalama.Framework.Engine.CompileTime
         /// <summary>
         /// Gets a string that would be equal to <see cref="Type.FullName"/>, except that we do not qualify type names with the assembly name.
         /// </summary>
-        public static string GetReflectionName( this ITypeSymbol s )
+        public static string? GetReflectionName( this ITypeSymbol s )
         {
             if ( s is ITypeParameterSymbol typeParameter )
             {
@@ -58,9 +58,13 @@ namespace Metalama.Framework.Engine.CompileTime
             }
 
             var sb = new StringBuilder();
-            Append( s );
 
-            void Append( INamespaceOrTypeSymbol symbol )
+            if ( !TryAppend( s ) )
+            {
+                return null;
+            }
+
+            bool TryAppend( INamespaceOrTypeSymbol symbol )
             {
                 // Append the containing namespace or type.
                 switch ( symbol.ContainingSymbol )
@@ -69,7 +73,11 @@ namespace Metalama.Framework.Engine.CompileTime
                         break;
 
                     case ITypeSymbol typeSymbol:
-                        Append( typeSymbol );
+                        if ( !TryAppend( typeSymbol ) )
+                        {
+                            return false;
+                        }
+                        
                         sb.Append( '+' );
 
                         break;
@@ -77,7 +85,10 @@ namespace Metalama.Framework.Engine.CompileTime
                     case INamespaceSymbol namespaceSymbol:
                         if ( !namespaceSymbol.IsGlobalNamespace )
                         {
-                            Append( namespaceSymbol );
+                            if ( !TryAppend( namespaceSymbol ) )
+                            {
+                                return false;
+                            }
                             sb.Append( '.' );
                         }
 
@@ -102,7 +113,10 @@ namespace Metalama.Framework.Engine.CompileTime
                             }
 
                             var arg = unboundGenericType.TypeArguments[i];
-                            Append( arg );
+                            if ( !TryAppend( arg ) )
+                            {
+                                return false;
+                            }
                         }
 
                         sb.Append( "]" );
@@ -115,7 +129,10 @@ namespace Metalama.Framework.Engine.CompileTime
                         break;
 
                     case IArrayTypeSymbol array:
-                        Append( array.ElementType );
+                        if ( !TryAppend( array.ElementType ) )
+                        {
+                            return false;
+                        }
                         sb.Append( '[' );
 
                         for ( var i = 1; i < array.Rank; i++ )
@@ -128,7 +145,10 @@ namespace Metalama.Framework.Engine.CompileTime
                         break;
 
                     case IPointerTypeSymbol pointer:
-                        Append( pointer.PointedAtType );
+                        if ( !TryAppend( pointer.PointedAtType ) )
+                        {
+                            return false;
+                        }
                         sb.Append( '*' );
 
                         break;
@@ -137,10 +157,15 @@ namespace Metalama.Framework.Engine.CompileTime
                         sb.Append( "System.Object" );
 
                         break;
+                    
+                    case IErrorTypeSymbol:
+                        return false;
 
                     default:
                         throw new AssertionFailedException( $"Don't know how to process a {symbol!.Kind}." );
                 }
+
+                return true;
             }
 
             return sb.ToString();

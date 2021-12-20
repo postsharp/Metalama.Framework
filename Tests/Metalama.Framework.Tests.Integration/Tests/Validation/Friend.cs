@@ -1,8 +1,10 @@
+#pragma warning disable CS8618, CS0169
+
 using Metalama.Framework.Validation;
 
 namespace Metalama.Framework.Tests.Integration.Validation.Friend
 {
-    [Friend( typeof(FriendClass) )]
+    [OnlyVisibleTo( typeof(FriendClass) )]
     public class ValidatedClass { }
 
     internal class FriendClass

@@ -9,11 +9,13 @@ using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.DesignTime.Diff;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Pipeline;
+using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
@@ -258,17 +260,68 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
                 }
                 else
                 {
-                    // If we need a build, we only serve results from the cache.
+                    
                     Logger.Instance?.Write(
-                        $"DesignTimeAspectPipelineCache.TryExecute('{compilation.AssemblyName}', CompilationId={DebuggingHelper.GetObjectId( compilation )}): external build required,"
+                        $"DesignTimeAspectPipelineCache.TryExecute('{compilation.AssemblyName}', CompilationId = {DebuggingHelper.GetObjectId( compilation )}): external build required,"
                         +
                         $" returning from cache only." );
 
-                    compilationResult = new CompilationResult( this._currentState.PipelineResult, this._currentState.ValidationResult );
+
+                    // If we need an external build, we only serve pipeline results from the cache.
+                    // For validation results, we need to continuously run the templating validators (not the user ones) because the user is likely editing the
+                    // template right now. We run only the system validators. We don't run the user validators because of performance -- at this point, we don't have
+                    // caching, so we need to validate all syntax trees. If we want to improve performance, we would have to cache system validators separately from the pipeline.
+                    
+                    var validationResult = this.ValidateWithBrokenPipeline( compilation, this, cancellationToken );
+                    compilationResult = new CompilationResult( this._currentState.PipelineResult, validationResult );
 
                     return true;
                 }
             }
+        }
+        
+        private  CompilationValidationResult ValidateWithBrokenPipeline(
+            Compilation compilation,
+            DesignTimeAspectPipeline pipeline,
+            CancellationToken cancellationToken )
+        {
+            var resultBuilder = ImmutableDictionary.CreateBuilder<string, SyntaxTreeValidationResult>();
+            var diagnostics = new List<Diagnostic>();
+            
+            foreach ( var syntaxTree in compilation.SyntaxTrees )
+            {
+                diagnostics.Clear();
+                
+                var semanticModel = compilation.GetSemanticModel( syntaxTree );
+                
+                TemplatingCodeValidator.Validate(
+                    pipeline.ServiceProvider,
+                    semanticModel,
+                    diagnostics.Add,
+                    pipeline.IsCompileTimeSyntaxTreeOutdated( syntaxTree.FilePath ),
+                    true,
+                    cancellationToken );
+
+                ImmutableArray<CacheableScopedSuppression> suppressions;
+
+                // Take the cached suppressions so we don't submerge the user with warnings (although these are only validation suppressions, not aspect suppressions).
+                if ( this._currentState.ValidationResult.SyntaxTreeResults.TryGetValue( syntaxTree.FilePath, out var syntaxTreeResult ) )
+                {
+                    suppressions = syntaxTreeResult.Suppressions;
+                }
+                else
+                {
+                    suppressions = ImmutableArray<CacheableScopedSuppression>.Empty;
+                }
+
+                if ( diagnostics.Count > 0 || !suppressions.IsEmpty )
+                {
+                    resultBuilder[syntaxTree.FilePath] = new SyntaxTreeValidationResult( syntaxTree, diagnostics.ToImmutableArray(), suppressions );
+                }
+            }
+
+            return new CompilationValidationResult( resultBuilder.ToImmutable(), DesignTimeValidatorCollectionEqualityKey.Empty );
+
         }
 
         private List<SyntaxTree> GetDirtySyntaxTrees( Compilation compilation )
