@@ -53,14 +53,14 @@ namespace Metalama.Framework.Engine.Aspects
 
         public ImmutableArray<IAspectSource> AspectSources { get; private set; } = ImmutableArray<IAspectSource>.Empty;
 
-        public ImmutableArray<ValidatorSource> ValidatorSources { get; private set; } = ImmutableArray<ValidatorSource>.Empty;
+        public ImmutableArray<IValidatorSource> ValidatorSources { get; private set; } = ImmutableArray<IValidatorSource>.Empty;
 
         public void AddAspectSource( IAspectSource aspectSource )
         {
             this.AspectSources = this.AspectSources.Add( aspectSource );
         }
 
-        public void AddValidatorSource( ValidatorSource validatorSource )
+        public void AddValidatorSource( IValidatorSource validatorSource )
         {
             this.ValidatorSources = this.ValidatorSources.Add( validatorSource );
         }
@@ -138,7 +138,7 @@ namespace Metalama.Framework.Engine.Aspects
                     this._diagnosticSink.ToImmutable(),
                     ImmutableArray<Advice>.Empty,
                     ImmutableArray<IAspectSource>.Empty,
-                    ImmutableArray<ValidatorSource>.Empty );
+                    ImmutableArray<IValidatorSource>.Empty );
         }
 
         public void SetAspectLayerBuildAction( string layerName, Action<IAspectLayerBuilder<T>> buildAction ) => throw new NotImplementedException();

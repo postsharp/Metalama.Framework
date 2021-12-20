@@ -11,18 +11,20 @@ namespace Metalama.Framework.Engine.Templating
 {
     internal static partial class TemplatingCodeValidator
     {
-        internal static bool Validate(
+        internal static void Validate(
             SemanticModel semanticModel,
             Action<Diagnostic> reportDiagnostic,
             DesignTimeAspectPipeline pipeline,
             CancellationToken cancellationToken )
-            => Validate(
+        {
+            Validate(
                 pipeline.ServiceProvider,
                 semanticModel,
                 reportDiagnostic,
                 pipeline.IsCompileTimeSyntaxTreeOutdated( semanticModel.SyntaxTree.FilePath ),
                 true,
                 cancellationToken );
+        }
 
         internal static bool Validate(
             Compilation compilation,

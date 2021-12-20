@@ -34,7 +34,7 @@ namespace Metalama.Framework.Engine.Pipeline
         /// </summary>
         public ImmutableArray<IAspectSource> AspectSources { get; }
 
-        public ImmutableArray<ValidatorSource> ValidatorSources { get; }
+        public ImmutableArray<IValidatorSource> ValidatorSources { get; }
 
         /// <summary>
         /// Gets the list of syntax trees to be added to the compilation (typically in a source generation scenario). The key is the "hint name" in the
@@ -48,6 +48,8 @@ namespace Metalama.Framework.Engine.Pipeline
         public ImmutableArray<OrderedAspectLayer> AspectLayers { get; }
 
         public ImmutableArray<IAspectInstance> ExternallyInheritableAspects { get; }
+
+        public ImmutableArray<ReferenceValidatorInstance> ExternallyVisibleValidators { get; }
 
         /// <summary>
         /// Gets the compilation model corresponding to <see cref="Compilation"/>, if it has been created.
@@ -63,18 +65,23 @@ namespace Metalama.Framework.Engine.Pipeline
             ImmutableArray<CompilationModel> compilationModels,
             ImmutableUserDiagnosticList? diagnostics = null,
             ImmutableArray<IAspectSource> aspectSources = default,
-            ImmutableArray<ValidatorSource> validatorSources = default,
+            ImmutableArray<IValidatorSource> validatorSources = default,
             ImmutableArray<IAspectInstance> inheritableAspectInstances = default,
+            ImmutableArray<ReferenceValidatorInstance> externallyVisibleValidators = default,
             ImmutableArray<IntroducedSyntaxTree> additionalSyntaxTrees = default,
             ImmutableArray<AdditionalCompilationOutputFile> additionalCompilationOutputFiles = default )
         {
             this.Compilation = compilation;
             this.Diagnostics = diagnostics ?? ImmutableUserDiagnosticList.Empty;
             this.AspectSources = aspectSources.IsDefault ? ImmutableArray<IAspectSource>.Empty : aspectSources;
-            this.ValidatorSources = validatorSources.IsDefault ? ImmutableArray<ValidatorSource>.Empty : validatorSources;
+            this.ValidatorSources = validatorSources.IsDefault ? ImmutableArray<IValidatorSource>.Empty : validatorSources;
             this.AspectLayers = aspectLayers;
             this.CompilationModels = compilationModels;
             this.ExternallyInheritableAspects = inheritableAspectInstances.IsDefault ? ImmutableArray<IAspectInstance>.Empty : inheritableAspectInstances;
+
+            this.ExternallyVisibleValidators =
+                externallyVisibleValidators.IsDefault ? ImmutableArray<ReferenceValidatorInstance>.Empty : externallyVisibleValidators;
+
             this.Project = project;
             this.AdditionalSyntaxTrees = additionalSyntaxTrees.IsDefault ? ImmutableArray<IntroducedSyntaxTree>.Empty : additionalSyntaxTrees;
 

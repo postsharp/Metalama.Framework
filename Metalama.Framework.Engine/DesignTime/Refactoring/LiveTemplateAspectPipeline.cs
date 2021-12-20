@@ -8,6 +8,7 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Pipeline;
+using Metalama.Framework.Engine.Validation;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -34,11 +35,11 @@ namespace Metalama.Framework.Engine.DesignTime.Refactoring
             this._source = new InteractiveAspectSource( aspectClass, aspect, targetSymbol );
         }
 
-        private protected override ImmutableArray<IAspectSource> CreateAspectSources(
+        private protected override (ImmutableArray<IAspectSource> AspectSources, ImmutableArray<IValidatorSource> ValidatorSources) CreateAspectSources(
             AspectPipelineConfiguration configuration,
             Compilation compilation,
             CancellationToken cancellationToken )
-            => ImmutableArray.Create<IAspectSource>( this._source );
+            => (ImmutableArray.Create<IAspectSource>( this._source ), ImmutableArray<IValidatorSource>.Empty);
 
         public static bool TryExecute(
             ServiceProvider serviceProvider,

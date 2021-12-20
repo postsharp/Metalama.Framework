@@ -112,18 +112,6 @@ namespace Metalama.Framework.Engine.Pipeline
                 // Execute validators.
                 IReadOnlyList<ReferenceValidatorInstance> referenceValidators = ImmutableArray<ReferenceValidatorInstance>.Empty;
 
-                if ( !result.ValidatorSources.IsDefaultOrEmpty )
-                {
-                    var validationRunner = new ValidationRunner( result.ValidatorSources );
-                    var initialCompilation = result.CompilationModels[0];
-                    var finalCompilation = result.CompilationModels[result.CompilationModels.Length - 1];
-                    var diagnosticSink = new UserDiagnosticSink( configuration.CompileTimeProject, configuration.CodeFixFilter );
-                    referenceValidators = validationRunner.Validate( initialCompilation, finalCompilation, diagnosticSink );
-                    diagnosticAdder.Report( diagnosticSink.ToImmutable().ReportedDiagnostics );
-
-                    // TODO: suppressions, code fixes
-                }
-
                 // Format the output.
                 if ( this.ProjectOptions.FormatOutput && OutputCodeFormatter.CanFormat )
                 {

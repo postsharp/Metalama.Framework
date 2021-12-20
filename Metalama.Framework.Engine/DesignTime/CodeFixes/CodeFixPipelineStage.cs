@@ -4,8 +4,10 @@
 using Metalama.Framework.Engine.AspectOrdering;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Pipeline;
+using Metalama.Framework.Engine.Validation;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Threading;
 
 namespace Metalama.Framework.Engine.DesignTime.CodeFixes
@@ -32,6 +34,7 @@ namespace Metalama.Framework.Engine.DesignTime.CodeFixes
                 input.AspectSources.AddRange( pipelineStepsResult.ExternalAspectSources ),
                 default,
                 pipelineStepsResult.InheritableAspectInstances,
+                ImmutableArray<ReferenceValidatorInstance>.Empty,
                 input.AdditionalSyntaxTrees );
     }
 }

@@ -2,13 +2,11 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 // ReSharper disable once RedundantBlankLines
-// @formatter:off
 
 #pragma warning disable SA1516 // Elements should be separated by blank line
 extern alias roslyn;
 using Microsoft.CodeAnalysis;
 using System.Threading;
-using SymbolKey = roslyn::Microsoft.CodeAnalysis.SymbolKey;
 using SymbolKeyExtensions = roslyn::Microsoft.CodeAnalysis.SymbolKeyExtensions;
 
 #pragma warning restore SA1516 // Elements should be separated by blank line
@@ -21,15 +19,15 @@ namespace Metalama.Framework.Engine.Utilities
     internal struct SymbolId
     {
 #pragma warning disable IDE0044 // SymbolKey.Resolve is mutating.
-        private SymbolKey _symbolKey;
+        private roslyn::Microsoft.CodeAnalysis.SymbolKey _symbolKey;
 #pragma warning restore IDE0044
 
         public SymbolId( string id )
         {
-            this._symbolKey = new SymbolKey( id );
+            this._symbolKey = new roslyn::Microsoft.CodeAnalysis.SymbolKey( id );
         }
 
-        private SymbolId( SymbolKey symbolKey )
+        private SymbolId( roslyn::Microsoft.CodeAnalysis.SymbolKey symbolKey )
         {
             this._symbolKey = symbolKey;
         }
@@ -53,5 +51,15 @@ namespace Metalama.Framework.Engine.Utilities
                 return new SymbolId( symbolKey );
             }
         }
+
+        public bool Equals( SymbolId other ) => this._symbolKey.Equals( other._symbolKey );
+
+        public override bool Equals( object? obj ) => obj is SymbolId other && this.Equals( other );
+
+        public override int GetHashCode() => this._symbolKey.GetHashCode();
+
+        public static bool operator ==( SymbolId left, SymbolId right ) => left.Equals( right );
+
+        public static bool operator !=( SymbolId left, SymbolId right ) => !left.Equals( right );
     }
 }

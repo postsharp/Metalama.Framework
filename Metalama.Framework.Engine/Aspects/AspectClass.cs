@@ -99,7 +99,7 @@ namespace Metalama.Framework.Engine.Aspects
             Compilation compilation,
             AspectDriverFactory aspectDriverFactory ) : base( serviceProvider, compilation, aspectTypeSymbol, diagnosticAdder, baseClass )
         {
-            this.FullName = aspectTypeSymbol.GetReflectionName();
+            this.FullName = aspectTypeSymbol.GetReflectionName().AssertNotNull();
             this.DisplayName = this.ShortName = AttributeRef.GetShortName( aspectTypeSymbol.Name );
             this.IsAbstract = aspectTypeSymbol.IsAbstract;
             this.Project = project;
@@ -392,7 +392,7 @@ namespace Metalama.Framework.Engine.Aspects
 
         public ValidatorDriver GetValidatorDriver( string name, ValidatorKind kind )
         {
-            this._validatorDriverFactory ??= new ValidatorDriverFactory( this.AspectType );
+            this._validatorDriverFactory ??= ValidatorDriverFactory.GetInstance( this.AspectType );
 
             return this._validatorDriverFactory.GetValidatorDriver( name, kind );
         }

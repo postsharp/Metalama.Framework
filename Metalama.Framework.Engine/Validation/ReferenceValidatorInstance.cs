@@ -12,9 +12,10 @@ namespace Metalama.Framework.Engine.Validation;
 internal class ReferenceValidatorInstance : ValidatorInstance
 {
     public ReferenceValidatorInstance(
-        ValidatorSource source,
-        IDeclaration declaration,
-        ReferenceKinds referenceKinds ) : base( source, declaration )
+        IDeclaration validatedDeclaration,
+        ValidatorDriver driver,
+        in ValidatorImplementation implementation,
+        ReferenceKinds referenceKinds ) : base( validatedDeclaration, driver, implementation )
     {
         this.ReferenceKinds = referenceKinds;
     }
@@ -29,10 +30,10 @@ internal class ReferenceValidatorInstance : ValidatorInstance
             this.ValidatedDeclaration,
             referencingDeclaration,
             new SyntaxReference( node, this ),
-            this.State,
+            this.Implementation.State,
             diagnosticAdder,
             referenceKind );
 
-        ((ReferenceValidatorDriver) this.Source.Driver).Validate( this.Object, context );
+        ((ReferenceValidatorDriver) this.Driver).Validate( this.Implementation, context );
     }
 }

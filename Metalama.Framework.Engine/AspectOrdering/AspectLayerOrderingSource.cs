@@ -4,15 +4,16 @@
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.Diagnostics;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 
 namespace Metalama.Framework.Engine.AspectOrdering
 {
     internal class AspectLayerOrderingSource : IAspectOrderingSource
     {
-        private readonly IReadOnlyList<AspectClass> _aspectTypes;
+        private readonly ImmutableArray<AspectClass> _aspectTypes;
 
-        public AspectLayerOrderingSource( IReadOnlyList<AspectClass> aspectTypes )
+        public AspectLayerOrderingSource( ImmutableArray<AspectClass> aspectTypes )
         {
             this._aspectTypes = aspectTypes;
         }

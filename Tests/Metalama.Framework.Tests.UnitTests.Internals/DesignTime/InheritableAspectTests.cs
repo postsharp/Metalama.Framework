@@ -36,8 +36,11 @@ public interface I {}
 
             Assert.True( pipeline.TryExecute( compilation1.RoslynCompilation, CancellationToken.None, out var compilationResult1 ) );
 
-            Assert.Equal( new[] { "Aspect" }, compilationResult1!.InheritableAspectTypes.ToArray() );
-            Assert.Equal( new[] { "T:I" }, compilationResult1.GetInheritedAspects( "Aspect" ).Select( i => i.TargetDeclaration.ToSerializableId() ).ToArray() );
+            Assert.Equal( new[] { "Aspect" }, compilationResult1!.PipelineResult.InheritableAspectTypes.ToArray() );
+
+            Assert.Equal(
+                new[] { "T:I" },
+                compilationResult1.PipelineResult.GetInheritedAspects( "Aspect" ).Select( i => i.TargetDeclaration.ToSerializableId() ).ToArray() );
         }
 
         [Fact]
@@ -66,7 +69,7 @@ public class Aspect : TypeAspect, IInheritedAspect
 
             Assert.Equal(
                 new[] { "T:I" },
-                compilationResult1!.GetInheritedAspects( "Aspect" ).Select( i => i.TargetDeclaration.ToSerializableId() ).ToArray() );
+                compilationResult1!.PipelineResult.GetInheritedAspects( "Aspect" ).Select( i => i.TargetDeclaration.ToSerializableId() ).ToArray() );
 
             // Add a target class.
             var targetTree2 = CSharpSyntaxTree.ParseText( "[Aspect] interface I {} [Aspect] class C {}", path: "target.cs" );
@@ -76,7 +79,10 @@ public class Aspect : TypeAspect, IInheritedAspect
 
             Assert.Equal(
                 new[] { "T:C", "T:I" },
-                compilationResult2!.GetInheritedAspects( "Aspect" ).Select( i => i.TargetDeclaration.ToSerializableId() ).OrderBy( a => a ).ToArray() );
+                compilationResult2!.PipelineResult.GetInheritedAspects( "Aspect" )
+                    .Select( i => i.TargetDeclaration.ToSerializableId() )
+                    .OrderBy( a => a )
+                    .ToArray() );
 
             // Remove a target
             var targetTree3 = CSharpSyntaxTree.ParseText( "[Aspect] class C {}", path: "target.cs" );
@@ -85,7 +91,10 @@ public class Aspect : TypeAspect, IInheritedAspect
 
             Assert.Equal(
                 new[] { "T:C" },
-                compilationResult3!.GetInheritedAspects( "Aspect" ).Select( i => i.TargetDeclaration.ToSerializableId() ).OrderBy( a => a ).ToArray() );
+                compilationResult3!.PipelineResult.GetInheritedAspects( "Aspect" )
+                    .Select( i => i.TargetDeclaration.ToSerializableId() )
+                    .OrderBy( a => a )
+                    .ToArray() );
         }
 
 #if NET5_0_OR_GREATER
@@ -128,7 +137,7 @@ public interface I {}
             Assert.True( factory.TryExecute( testContext1.ProjectOptions, compilation1, CancellationToken.None, out _ ) );
             Assert.True( factory.TryExecute( testContext2.ProjectOptions, compilation2, CancellationToken.None, out var compilationResult2 ) );
 
-            Assert.Single( compilationResult2!.IntroducedSyntaxTrees );
+            Assert.Single( compilationResult2!.PipelineResult.IntroducedSyntaxTrees );
         }
     }
 }

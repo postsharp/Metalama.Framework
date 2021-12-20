@@ -71,7 +71,8 @@ namespace Metalama.Framework.Engine.Fabrics
 
             protected override void AddAspectSource( IAspectSource aspectSource ) => this._aspectBuilder.AddAspectSource( aspectSource );
 
-            protected override void AddValidatorSource( ValidatorSource validatorSource ) => this._aspectBuilder.AddValidatorSource( validatorSource );
+            protected override void AddValidatorSource( ProgrammaticValidatorSource validatorSource )
+                => this._aspectBuilder.AddValidatorSource( validatorSource );
         }
     }
 }

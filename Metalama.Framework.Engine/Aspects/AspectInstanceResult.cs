@@ -19,14 +19,14 @@ namespace Metalama.Framework.Engine.Aspects
 
         public IReadOnlyList<IAspectSource> AspectSources { get; }
 
-        public ImmutableArray<ValidatorSource> ValidatorSources { get; }
+        public ImmutableArray<IValidatorSource> ValidatorSources { get; }
 
         public AspectInstanceResult(
             bool success,
             ImmutableUserDiagnosticList diagnostics,
             ImmutableArray<Advice> advices,
             ImmutableArray<IAspectSource> aspectSources,
-            ImmutableArray<ValidatorSource> validatorSources )
+            ImmutableArray<IValidatorSource> validatorSources )
         {
             this.Success = success;
             this.Diagnostics = diagnostics;

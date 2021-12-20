@@ -6,20 +6,18 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Serialization;
 using Metalama.Framework.Validation;
 using System;
-using System.Reflection;
 
 namespace Metalama.Framework.Engine.Validation;
 
-[Obfuscation( Exclude = true /* Serialized */ )]
-internal class TransitiveValidatorInstance : ILamaSerializable
+public class TransitiveValidatorInstance : ILamaSerializable
 {
-    public TransitiveValidatorInstance( ReferenceValidatorInstance instance )
+    internal TransitiveValidatorInstance( ReferenceValidatorInstance instance )
     {
         this.ValidatedDeclaration = instance.ValidatedDeclaration.ToRef();
         this.ReferenceKinds = instance.ReferenceKinds;
-        this.MethodName = instance.Source.MethodName;
-        this.Object = instance.Object;
-        this.State = instance.State;
+        this.MethodName = instance.Driver.MethodName;
+        this.Object = instance.Implementation.Implementation;
+        this.State = instance.Implementation.State;
     }
 
     private TransitiveValidatorInstance()
@@ -41,6 +39,7 @@ internal class TransitiveValidatorInstance : ILamaSerializable
 
     public string MethodName { get; private set; }
 
+    // ReSharper disable once UnusedType.Local
     private sealed class Serializer : ReferenceTypeSerializer
     {
         public override object CreateInstance( Type type, IArgumentsReader constructorArguments ) => new TransitiveValidatorInstance();

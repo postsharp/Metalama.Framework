@@ -32,7 +32,7 @@ namespace Metalama.Framework.Engine.Pipeline
         private readonly UserDiagnosticSink _diagnostics;
         private readonly List<INonObservableTransformation> _nonObservableTransformations = new();
         private readonly List<IAspectInstance> _inheritableAspectInstances = new();
-        private readonly List<ValidatorSource> _validatorSources = new();
+        private readonly List<IValidatorSource> _validatorSources = new();
         private readonly OverflowAspectSource _overflowAspectSource = new();
         private PipelineStep? _currentStep;
 
@@ -44,7 +44,7 @@ namespace Metalama.Framework.Engine.Pipeline
 
         public ImmutableArray<IAspectInstance> InheritableAspectInstances => this._inheritableAspectInstances.ToImmutableArray();
 
-        public ImmutableArray<ValidatorSource> ValidatorSources => this._validatorSources.ToImmutableArray();
+        public ImmutableArray<IValidatorSource> ValidatorSources => this._validatorSources.ToImmutableArray();
 
         public ImmutableUserDiagnosticList Diagnostics => this._diagnostics.ToImmutable();
 
@@ -264,7 +264,7 @@ namespace Metalama.Framework.Engine.Pipeline
         public void AddNonObservableTransformations( IEnumerable<INonObservableTransformation> transformations )
             => this._nonObservableTransformations.AddRange( transformations );
 
-        public bool AddValidatorSources( IEnumerable<ValidatorSource> validatorSources )
+        public bool AddValidatorSources( IEnumerable<IValidatorSource> validatorSources )
         {
             this._validatorSources.AddRange( validatorSources );
 

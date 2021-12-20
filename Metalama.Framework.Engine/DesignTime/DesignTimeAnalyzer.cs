@@ -4,9 +4,9 @@
 using Metalama.Compiler;
 using Metalama.Framework.Engine.DesignTime.Diagnostics;
 using Metalama.Framework.Engine.DesignTime.Pipeline;
+using Metalama.Framework.Engine.DesignTime.Utilities;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Options;
-using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
@@ -34,6 +34,11 @@ namespace Metalama.Framework.Engine.DesignTime
         public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics
             => this._designTimeDiagnosticDefinitions.SupportedDiagnosticDescriptors.Values.ToImmutableArray();
 
+        static DesignTimeAnalyzer()
+        {
+            Logger.Initialize();
+        }
+
         public override void Initialize( AnalysisContext context )
         {
             if ( MetalamaCompilerInfo.IsActive )
@@ -48,32 +53,18 @@ namespace Metalama.Framework.Engine.DesignTime
 
             context.ConfigureGeneratedCodeAnalysis( GeneratedCodeAnalysisFlags.None );
 
-            // Semantic model analysis is used for frequent and "short loop" analysis, principally of the templates themselves.
-            context.RegisterSemanticModelAction( this.AnalyzeSemanticModel );
-
             context.RegisterCompilationAction( this.AnalyzeCompilation );
         }
 
         private void AnalyzeCompilation( CompilationAnalysisContext context )
         {
-            Logger.Instance?.Write( $"DesignTimeAnalyzer.AnalyzeCompilation('{context.Compilation.AssemblyName}') started." );
+            Logger.Instance?.Write(
+                $"DesignTimeAnalyzer.AnalyzeCompilation('{context.Compilation.AssemblyName}', CompilationId = {DebuggingHelper.GetObjectId( context.Compilation )}) started." );
 
-            try { }
-            catch ( Exception e )
-            {
-                Logger.Instance?.Write( e.ToString() );
-            }
-        }
-
-        private void AnalyzeSemanticModel( SemanticModelAnalysisContext context )
-        {
             try
             {
                 // Execute the analysis that are not performed in the pipeline.
                 var projectOptions = new ProjectOptions( context.Options.AnalyzerConfigOptionsProvider );
-
-                var syntaxTreeFilePath = context.SemanticModel.SyntaxTree.FilePath;
-                Logger.Instance?.Write( $"DesignTimeAnalyzer.AnalyzeSemanticModel('{syntaxTreeFilePath}')" );
 
                 DebuggingHelper.AttachDebugger( projectOptions );
 
@@ -85,33 +76,44 @@ namespace Metalama.Framework.Engine.DesignTime
                 }
 
                 // Execute the pipeline.
-                var compilation = context.SemanticModel.Compilation;
+                var cancellationToken = context.CancellationToken.IgnoreIfDebugging();
+
+                var pipeline = DesignTimeAspectPipelineFactory.Instance.GetOrCreatePipeline(
+                    projectOptions,
+                    context.Compilation,
+                    cancellationToken );
+
+                if ( pipeline == null )
+                {
+                    return;
+                }
+
+                var compilation = context.Compilation;
 
                 if ( !DesignTimeAspectPipelineFactory.Instance.TryExecute(
                         projectOptions,
                         compilation,
-                        context.CancellationToken,
+                        cancellationToken,
                         out var compilationResult ) )
                 {
-                    Logger.Instance?.Write( $"DesignTimeAnalyzer.AnalyzeSemanticModel('{syntaxTreeFilePath}'): the pipeline failed." );
+                    Logger.Instance?.Write(
+                        $"DesignTimeAnalyzer.AnalyzeCompilation('{context.Compilation.AssemblyName}', CompilationId = {DebuggingHelper.GetObjectId( context.Compilation )}): the pipeline failed." );
 
                     return;
                 }
 
-                var result = compilationResult.GetDiagnosticsOnSyntaxTree( syntaxTreeFilePath );
+                var diagnostics = compilationResult.GetAllDiagnostics();
+                var suppressions = compilationResult.GetAllSuppressions();
 
-                // Report diagnostics from the pipeline.
-                Logger.Instance?.Write(
-                    $"DesignTimeAnalyzer.AnalyzeSemanticModel('{syntaxTreeFilePath}'): {result.Diagnostics.Length} diagnostics and {result.Suppressions.Length} suppressions reported on '{syntaxTreeFilePath}'." );
-
+                // Report diagnostics.
                 DesignTimeDiagnosticHelper.ReportDiagnostics(
-                    result.Diagnostics,
+                    diagnostics,
                     compilation,
                     context.ReportDiagnostic,
                     true );
 
                 // If we have unsupported suppressions, a diagnostic here because a Suppressor cannot report.
-                foreach ( var suppression in result.Suppressions.Where(
+                foreach ( var suppression in suppressions.Where(
                              s => !this._designTimeDiagnosticDefinitions.SupportedSuppressionDescriptors.ContainsKey( s.Definition.SuppressedDiagnosticId ) ) )
                 {
                     foreach ( var symbol in DocumentationCommentId.GetSymbolsForDeclarationId( suppression.SymbolId, compilation ) )
@@ -127,25 +129,10 @@ namespace Metalama.Framework.Engine.DesignTime
                         }
                     }
                 }
-
-                // Perform additional analysis not done by the design-time pipeline.
-                var pipeline = DesignTimeAspectPipelineFactory.Instance.GetOrCreatePipeline(
-                    projectOptions,
-                    context.SemanticModel.Compilation,
-                    context.CancellationToken );
-
-                if ( pipeline != null )
-                {
-                    TemplatingCodeValidator.Validate(
-                        context.SemanticModel,
-                        context.ReportDiagnostic,
-                        pipeline,
-                        context.CancellationToken );
-                }
             }
             catch ( Exception e )
             {
-                Logger.Instance?.Write( e.ToString() );
+                DesignTimeExceptionHandler.ReportException( e );
             }
         }
     }

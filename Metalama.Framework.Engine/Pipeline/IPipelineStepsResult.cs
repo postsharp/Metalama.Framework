@@ -30,7 +30,7 @@ namespace Metalama.Framework.Engine.Pipeline
         /// </summary>
         ImmutableArray<IAspectSource> ExternalAspectSources { get; }
 
-        ImmutableArray<ValidatorSource> ValidatorSources { get; }
+        ImmutableArray<IValidatorSource> ValidatorSources { get; }
 
         ImmutableArray<CompilationModel> Compilations { get; }
     }

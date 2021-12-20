@@ -99,7 +99,10 @@ namespace Ns { class C {} }
         public void IsEligible( string target, string aspects )
         {
             var targetSymbol = this._declarations[target].GetSymbol().AssertNotNull();
-            var eligibleAspects = this._pipeline.GetEligibleAspects( this._compilation.RoslynCompilation, targetSymbol, CancellationToken.None );
+
+            var eligibleAspects = this._pipeline.GetEligibleAspects( this._compilation.RoslynCompilation, targetSymbol, CancellationToken.None )
+                .Where( c => !c.Project!.IsFramework );
+
             var eligibleAspectsString = string.Join( ",", eligibleAspects.OrderBy( a => a.ShortName ) );
 
             Assert.Equal( aspects, eligibleAspectsString );

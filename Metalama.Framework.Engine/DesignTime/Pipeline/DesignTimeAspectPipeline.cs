@@ -9,11 +9,13 @@ using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.DesignTime.Diff;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Pipeline;
+using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
@@ -66,10 +68,12 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
             // The design-time pipeline contains project-scoped services for performance reasons: the pipeline may be called several
             // times with the same compilation.
 
-            if ( this.ProjectOptions.BuildTouchFile == null )
+            if ( string.IsNullOrEmpty( this.ProjectOptions.BuildTouchFile ) )
             {
                 return;
             }
+
+            Logger.Instance?.Write( $"BuildTouchFile={this.ProjectOptions.BuildTouchFile}" );
 
             var watchedFilter = "*" + Path.GetExtension( this.ProjectOptions.BuildTouchFile );
             var watchedDirectory = Path.GetDirectoryName( this.ProjectOptions.BuildTouchFile );
@@ -96,7 +100,7 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
                 return;
             }
 
-            lock ( this._sync )
+            using ( this.WithLock() )
             {
                 // There was an external build. Touch the files to re-run the analyzer.
                 Logger.Instance?.Write( $"Detected an external build for project '{this.ProjectOptions.AssemblyName}'." );
@@ -124,7 +128,7 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
 
         public void OnExternalBuildStarted()
         {
-            lock ( this._sync )
+            using ( this.WithLock() )
             {
                 this._currentState = new PipelineState( this );
                 this.ExternalBuildStarted?.Invoke( this, EventArgs.Empty );
@@ -138,7 +142,7 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
             CancellationToken cancellationToken,
             [NotNullWhen( true )] out AspectPipelineConfiguration? configuration )
         {
-            lock ( this._sync )
+            using ( this.WithLock() )
             {
                 var state = this._currentState;
                 var success = PipelineState.TryGetConfiguration( ref state, compilation, diagnosticAdder, ignoreStatus, cancellationToken, out configuration );
@@ -149,11 +153,13 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
             }
         }
 
+        internal AspectPipelineConfiguration? LatestConfiguration => this._currentState.Configuration;
+
         /// <inheritdoc/>
         private protected override HighLevelPipelineStage CreateHighLevelStage(
             PipelineStageConfiguration configuration,
             CompileTimeProject compileTimeProject )
-            => new SourceGeneratorPipelineStage( compileTimeProject, configuration.Parts, this.ServiceProvider );
+            => new DesignTimePipelineStage( compileTimeProject, configuration.Parts, this.ServiceProvider );
 
         private protected override LowLevelPipelineStage? CreateLowLevelStage( PipelineStageConfiguration configuration, CompileTimeProject compileTimeProject )
             => null;
@@ -173,13 +179,16 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
 
         public void InvalidateCache()
         {
-            lock ( this._sync )
+            using ( this.WithLock() )
             {
                 this._currentState = this._currentState.Reset();
             }
         }
 
-        private bool TryExecutePartial( PartialCompilation partialCompilation, CancellationToken cancellationToken, out CompilationResult? compilationResult )
+        private bool TryExecutePartial(
+            PartialCompilation partialCompilation,
+            CancellationToken cancellationToken,
+            [NotNullWhen( true )] out CompilationResult? compilationResult )
         {
             var state = this._currentState;
 
@@ -202,7 +211,7 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
                 return true;
             }
 
-            lock ( this._sync )
+            using ( this.WithLock() )
             {
                 if ( this._compilationResultCache.TryGetValue( compilation, out compilationResult ) )
                 {
@@ -213,6 +222,15 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
                 var changes = this.InvalidateCache( compilation, this.Status != DesignTimeAspectPipelineStatus.NeedsExternalBuild, cancellationToken );
 
                 var compilationToAnalyze = changes.CompilationToAnalyze;
+
+                if ( Logger.Instance != null )
+                {
+                    if ( compilationToAnalyze != compilation )
+                    {
+                        Logger.Instance.Write(
+                            $"Cache hit: the original compilation is {DebuggingHelper.GetObjectId( compilation )}, but we will analyze the cached compilation {DebuggingHelper.GetObjectId( compilationToAnalyze )}" );
+                    }
+                }
 
                 if ( this.Status != DesignTimeAspectPipelineStatus.NeedsExternalBuild )
                 {
@@ -234,7 +252,7 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
                         }
                     }
 
-                    compilationResult = this._currentState.CompilationResult;
+                    compilationResult = new CompilationResult( this._currentState.PipelineResult, this._currentState.ValidationResult );
 
                     this._compilationResultCache.Add( compilation, compilationResult );
 
@@ -242,16 +260,65 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
                 }
                 else
                 {
-                    // If we need a build, we only serve results from the cache.
                     Logger.Instance?.Write(
-                        $"DesignTimeAspectPipelineCache.TryExecute('{compilation.AssemblyName}'): build required," +
+                        $"DesignTimeAspectPipelineCache.TryExecute('{compilation.AssemblyName}', CompilationId = {DebuggingHelper.GetObjectId( compilation )}): external build required,"
+                        +
                         $" returning from cache only." );
 
-                    compilationResult = this._currentState.CompilationResult;
+                    // If we need an external build, we only serve pipeline results from the cache.
+                    // For validation results, we need to continuously run the templating validators (not the user ones) because the user is likely editing the
+                    // template right now. We run only the system validators. We don't run the user validators because of performance -- at this point, we don't have
+                    // caching, so we need to validate all syntax trees. If we want to improve performance, we would have to cache system validators separately from the pipeline.
+
+                    var validationResult = this.ValidateWithBrokenPipeline( compilation, this, cancellationToken );
+                    compilationResult = new CompilationResult( this._currentState.PipelineResult, validationResult );
 
                     return true;
                 }
             }
+        }
+
+        private CompilationValidationResult ValidateWithBrokenPipeline(
+            Compilation compilation,
+            DesignTimeAspectPipeline pipeline,
+            CancellationToken cancellationToken )
+        {
+            var resultBuilder = ImmutableDictionary.CreateBuilder<string, SyntaxTreeValidationResult>();
+            var diagnostics = new List<Diagnostic>();
+
+            foreach ( var syntaxTree in compilation.SyntaxTrees )
+            {
+                diagnostics.Clear();
+
+                var semanticModel = compilation.GetSemanticModel( syntaxTree );
+
+                TemplatingCodeValidator.Validate(
+                    pipeline.ServiceProvider,
+                    semanticModel,
+                    diagnostics.Add,
+                    pipeline.IsCompileTimeSyntaxTreeOutdated( syntaxTree.FilePath ),
+                    true,
+                    cancellationToken );
+
+                ImmutableArray<CacheableScopedSuppression> suppressions;
+
+                // Take the cached suppressions so we don't submerge the user with warnings (although these are only validation suppressions, not aspect suppressions).
+                if ( this._currentState.ValidationResult.SyntaxTreeResults.TryGetValue( syntaxTree.FilePath, out var syntaxTreeResult ) )
+                {
+                    suppressions = syntaxTreeResult.Suppressions;
+                }
+                else
+                {
+                    suppressions = ImmutableArray<CacheableScopedSuppression>.Empty;
+                }
+
+                if ( diagnostics.Count > 0 || !suppressions.IsEmpty )
+                {
+                    resultBuilder[syntaxTree.FilePath] = new SyntaxTreeValidationResult( syntaxTree, diagnostics.ToImmutableArray(), suppressions );
+                }
+            }
+
+            return new CompilationValidationResult( resultBuilder.ToImmutable(), DesignTimeValidatorCollectionEqualityKey.Empty );
         }
 
         private List<SyntaxTree> GetDirtySyntaxTrees( Compilation compilation )
@@ -268,7 +335,7 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
                     continue;
                 }
 
-                if ( this._currentState.CompilationResult.IsSyntaxTreeDirty( syntaxTree ) )
+                if ( this._currentState.PipelineResult.IsSyntaxTreeDirty( syntaxTree ) )
                 {
                     uncachedSyntaxTrees.Add( syntaxTree );
                 }
@@ -321,6 +388,36 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
                         yield return aspectClass;
                     }
                 }
+            }
+        }
+
+        private Lock WithLock()
+        {
+            if ( !Monitor.TryEnter( this._sync ) )
+            {
+                Logger.Instance?.Write( $"Waiting for lock on '{this.ProjectOptions.ProjectId}'." );
+
+                Monitor.Enter( this._sync );
+            }
+
+            Logger.Instance?.Write( $"Lock on '{this.ProjectOptions.ProjectId}' acquired." );
+
+            return new Lock( this );
+        }
+
+        private readonly struct Lock : IDisposable
+        {
+            private readonly DesignTimeAspectPipeline _parent;
+
+            public Lock( DesignTimeAspectPipeline sync )
+            {
+                this._parent = sync;
+            }
+
+            public void Dispose()
+            {
+                Logger.Instance?.Write( $"Releasing lock on '{this._parent.ProjectOptions.ProjectId}'." );
+                Monitor.Exit( this._parent._sync );
             }
         }
     }

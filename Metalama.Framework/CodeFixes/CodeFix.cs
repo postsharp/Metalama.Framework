@@ -117,8 +117,17 @@ namespace Metalama.Framework.CodeFixes
                 title ?? $"Apply {aspect.GetType().Name} to {targetDeclaration.ToDisplayString( CodeDisplayFormat.MinimallyQualified )}",
                 builder => builder.ApplyAspectAsync( targetDeclaration, aspect ) );
 
+        /// <summary>
+        /// Suggests the current code fix for a given <see cref="IDiagnosticLocation"/> (typically for a declaration or syntax node). 
+        /// </summary>
+        /// <param name="location">The declaration or node where the code fix should be suggested.</param>
+        /// <param name="sink">A <see cref="ScopedDiagnosticSink"/>.</param>
         public void SuggestFor( IDiagnosticLocation location, IDiagnosticSink sink ) => sink.Suggest( location, this );
 
+        /// <summary>
+        /// Suggests the current code fix for the default location (typically a declaration or syntax node) in the current context.
+        /// </summary>
+        /// <param name="sink">The <see cref="ScopedDiagnosticSink"/> for the current context.</param>
         public void SuggestFor( in ScopedDiagnosticSink sink ) => sink.Suggest( this );
     }
 }

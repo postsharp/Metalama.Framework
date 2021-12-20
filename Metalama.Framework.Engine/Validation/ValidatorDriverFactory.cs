@@ -6,6 +6,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 
 namespace Metalama.Framework.Engine.Validation;
 
@@ -13,8 +14,34 @@ internal class ValidatorDriverFactory : IValidatorDriverFactory
 {
     private readonly Type _type;
     private readonly ConcurrentDictionary<string, ValidatorDriver> _drivers = new( StringComparer.Ordinal );
+    private static readonly ConditionalWeakTable<Type, ValidatorDriverFactory> _instances = new();
 
-    public ValidatorDriverFactory( Type type )
+    public static ValidatorDriverFactory GetInstance( Type type )
+    {
+        if ( _instances.TryGetValue( type, out var instance ) )
+        {
+            return instance;
+        }
+        else
+        {
+            lock ( _instances )
+            {
+                if ( _instances.TryGetValue( type, out instance ) )
+                {
+                    return instance;
+                }
+                else
+                {
+                    instance = new ValidatorDriverFactory( type );
+                    _instances.Add( type, instance );
+                }
+            }
+        }
+
+        return instance;
+    }
+
+    private ValidatorDriverFactory( Type type )
     {
         this._type = type;
     }
@@ -60,7 +87,7 @@ internal class ValidatorDriverFactory : IValidatorDriverFactory
         var lambda = Expression.Lambda<InvokeReferenceValidatorDelegate>( invocation, instanceParameter, contextParameter );
         var compiled = lambda.Compile();
 
-        return new ReferenceValidatorDriver( compiled );
+        return new ReferenceValidatorDriver( this._type, name, compiled );
     }
 
     private ValidatorDriver GetDefinitionValidationDriver( string name )

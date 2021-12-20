@@ -32,6 +32,7 @@ namespace Metalama.Framework.Engine.CompileTime
         private readonly CompileTimeCompilationBuilder _builder;
         private readonly IAssemblyLocator _runTimeAssemblyLocator;
         private readonly SystemTypeResolver _systemTypeResolver;
+        private readonly CompileTimeProject _frameworkProject;
 
         // Maps the identity of the run-time project to the compile-time project.
         private readonly Dictionary<AssemblyIdentity, CompileTimeProject?> _projects = new();
@@ -46,6 +47,8 @@ namespace Metalama.Framework.Engine.CompileTime
             this._runTimeAssemblyLocator = serviceProvider.GetRequiredService<IAssemblyLocator>();
             this.AttributeDeserializer = new AttributeDeserializer( serviceProvider, this );
             this._systemTypeResolver = serviceProvider.GetRequiredService<SystemTypeResolver>();
+            this._frameworkProject = CompileTimeProject.CreateFrameworkProject( serviceProvider, domain );
+            this._projects.Add( this._frameworkProject.RunTimeIdentity, this._frameworkProject );
         }
 
         /// <summary>
@@ -83,7 +86,14 @@ namespace Metalama.Framework.Engine.CompileTime
 
                 var compileTimeProject = this.GetCompileTimeProject( assemblySymbol.Identity, cancellationToken );
 
-                type = compileTimeProject?.GetTypeOrNull( typeSymbol.GetReflectionName() );
+                var reflectionName = typeSymbol.GetReflectionName();
+
+                if ( reflectionName == null )
+                {
+                    return null;
+                }
+
+                type = compileTimeProject?.GetTypeOrNull( reflectionName );
 
                 this.Cache.Add( typeSymbol, type );
             }
@@ -154,7 +164,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 return true;
             }
 
-            List<CompileTimeProject> referencedProjects = new();
+            List<CompileTimeProject> referencedProjects = new() { this._frameworkProject };
 
             foreach ( var reference in runTimeCompilation.References )
             {
@@ -170,6 +180,7 @@ namespace Metalama.Framework.Engine.CompileTime
                     // Coverage: ignore
                     // (this happens when the project reference could not be resolved.)
 
+                    Logger.Instance?.Write( $"The project reference from '{runTimeCompilation}' to' {reference}' could not be resolved." );
                     compileTimeProject = null;
 
                     return false;

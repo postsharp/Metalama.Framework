@@ -5,6 +5,7 @@ using Metalama.Compiler;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.DesignTime.Diagnostics;
 using Metalama.Framework.Engine.DesignTime.Pipeline;
+using Metalama.Framework.Engine.DesignTime.Utilities;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
@@ -29,6 +30,11 @@ namespace Metalama.Framework.Engine.DesignTime
     [ExcludeFromCodeCoverage]
     public class DesignTimeDiagnosticSuppressor : DiagnosticSuppressor
     {
+        static DesignTimeDiagnosticSuppressor()
+        {
+            Logger.Initialize();
+        }
+
         private readonly DesignTimeDiagnosticDefinitions _designTimeDiagnosticDefinitions = DesignTimeDiagnosticDefinitions.GetInstance();
 
         public override void ReportSuppressions( SuppressionAnalysisContext context )
@@ -59,7 +65,7 @@ namespace Metalama.Framework.Engine.DesignTime
                     context.ReportedDiagnostics,
                     context.ReportSuppression,
                     buildOptions,
-                    context.CancellationToken );
+                    context.CancellationToken.IgnoreIfDebugging() );
             }
             catch ( Exception e ) when ( DesignTimeExceptionHandler.MustHandle( e ) )
             {

@@ -2,7 +2,7 @@
 
 
     <ItemGroup Condition="'$(MetalamaCompileTimeOnlyProject)'=='True'">
-        <AssemblyAttribute Include="Metalama.Framework.Aspects.CompileTimeOnlyAttribute"/>
+        <AssemblyAttribute Include="Metalama.Framework.Aspects.CompileTimeOnlyAttribute" />
     </ItemGroup>
 
     <PropertyGroup>
@@ -29,11 +29,11 @@
     </PropertyGroup>
 
     <ItemGroup Condition="'$(DesignTimeBuild)' == 'True'">
-        <AdditionalFiles Include="$(MetalamaDesignTimeFallbackTouchFile)"/>
+        <AdditionalFiles Include="$(MetalamaDesignTimeFallbackTouchFile)" />
     </ItemGroup>
 
     <Target Name="ExportMetalamaFrameworkProperties" BeforeTargets="PrepareForBuild">
-        <Error Text="The IntermediateOutputPath property is not defined." Condition="'$(IntermediateOutputPath)'==''"/>
+        <Error Text="The IntermediateOutputPath property is not defined." Condition="'$(IntermediateOutputPath)'==''" />
         <PropertyGroup>
             <MetalamaBuildTouchFile>$(MSBuildProjectDirectory)\$(IntermediateOutputPath)MetalamaBuild.touch</MetalamaBuildTouchFile>
         </PropertyGroup>
@@ -45,10 +45,10 @@
              delete the file. It should do that only when the source code has changed (even if it is not saved). We don't overwrite an existing
              file because this would break incremental build -->
         <WriteLinesToFile File="$(MetalamaBuildTouchFile)" Lines=">$([System.Guid]::NewGuid())"
-                          Condition="!Exists('$(MetalamaBuildTouchFile)')"/>
+                          Condition="!Exists('$(MetalamaBuildTouchFile)')" />
         <ItemGroup>
-            <AdditionalFiles Include="$(MetalamaBuildTouchFile)"/>
-            <Clean Include="$(MetalamaBuildTouchFile)"/>
+            <AdditionalFiles Include="$(MetalamaBuildTouchFile)" />
+            <Clean Include="$(MetalamaBuildTouchFile)" />
         </ItemGroup>
     </Target>
 </Project>

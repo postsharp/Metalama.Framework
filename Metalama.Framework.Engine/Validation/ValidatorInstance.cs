@@ -1,7 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Engine.Diagnostics;
@@ -13,22 +12,21 @@ namespace Metalama.Framework.Engine.Validation;
 
 internal abstract class ValidatorInstance : ISyntaxReferenceImpl
 {
-    public ValidatorSource Source { get; }
+    public ValidatorDriver Driver { get; }
 
     public IDeclaration ValidatedDeclaration { get; }
 
-    public object Object => this.Source.Predecessor.Instance;
+    public ValidatorImplementation Implementation { get; }
 
-    public IAspectState? State => (this.Object as IAspectInstance)?.State;
-
-    public ValidatorInstance( ValidatorSource source, IDeclaration validatedDeclaration )
+    public ValidatorInstance( IDeclaration validatedDeclaration, ValidatorDriver driver, in ValidatorImplementation implementation )
     {
-        this.Source = source;
+        this.Driver = driver;
+        this.Implementation = implementation;
         this.ValidatedDeclaration = validatedDeclaration;
     }
 
     // TODO: ISyntaxReferenceImpl should not be implemented in this class.
-    public IDiagnosticLocation GetDiagnosticLocation( in SyntaxReference syntaxReference )
+    IDiagnosticLocation ISyntaxReferenceImpl.GetDiagnosticLocation( in SyntaxReference syntaxReference )
         => syntaxReference.NodeOrToken switch
         {
             SyntaxNode node => new LocationWrapper( node.GetDiagnosticLocation() ),
@@ -36,7 +34,7 @@ internal abstract class ValidatorInstance : ISyntaxReferenceImpl
             _ => throw new AssertionFailedException()
         };
 
-    public string GetKind( in SyntaxReference syntaxReference )
+    string ISyntaxReferenceImpl.GetKind( in SyntaxReference syntaxReference )
         => syntaxReference.NodeOrToken switch
         {
             SyntaxNode node => node.Kind().ToString(),
