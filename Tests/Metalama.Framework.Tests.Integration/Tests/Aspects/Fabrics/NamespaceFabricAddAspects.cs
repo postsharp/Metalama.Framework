@@ -11,7 +11,7 @@ namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Fabrics.NamespaceFabri
         public override void AmendNamespace( INamespaceAmender amender )
         {
             amender
-                .WithMembers( c => c.AllTypes
+                .WithTargetMembers( c => c.AllTypes
                     .SelectMany( t => t.Methods )
                     .Where( m => m.ReturnType.Is( typeof(string) ) ) )
                 .AddAspect<Aspect>();

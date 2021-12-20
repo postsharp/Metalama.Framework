@@ -73,6 +73,8 @@ namespace Metalama.Framework.Engine.Collections
 
         public IEnumerable<TKey> Keys => this._dictionary.Keys;
 
+        public bool IsEmpty => this._dictionary.IsEmpty;
+
         public IEnumerator<IGrouping<TKey, TValue>> GetEnumerator() => this._dictionary.Values.Cast<IGrouping<TKey, TValue>>().GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();

@@ -635,28 +635,7 @@ public class ReferencedClass
                     out var compileTimeProject ) );
 
             Assert.NotNull( compileTimeProject );
-            Assert.Single( compileTimeProject!.References );
-        }
-
-        [Fact]
-        public void EmptyProjectWithoutReference()
-        {
-            using var testContext = this.CreateTestContext();
-            DiagnosticList diagnosticList = new();
-
-            var loader = CompileTimeProjectLoader.Create( new CompileTimeDomain(), testContext.ServiceProvider );
-
-            // Create the referencing compile-time project.
-            Assert.True(
-                loader.TryGetCompileTimeProjectFromCompilation(
-                    CreateCSharpCompilation( @"/* Intentionally empty. */" ),
-                    null,
-                    diagnosticList,
-                    false,
-                    CancellationToken.None,
-                    out var compileTimeProject ) );
-
-            Assert.Null( compileTimeProject );
+            Assert.Single( compileTimeProject!.References.Where( r => !r.IsFramework ) );
         }
 
         [Fact]
@@ -772,7 +751,9 @@ public class SomeRunTimeClass
             Assert.True(
                 loader1.TryGetCompileTimeProjectFromCompilation( roslynCompilation, null, diagnosticList, false, CancellationToken.None, out var project ) );
 
-            Assert.Null( project );
+            Assert.NotNull( project );
+            Assert.Single( project!.References );
+            Assert.True( project.References[0].IsFramework );
         }
 
         [Fact]

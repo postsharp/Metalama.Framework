@@ -3,7 +3,9 @@
 
 using Metalama.Framework.Engine.Advices;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Validation;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 
 namespace Metalama.Framework.Engine.Aspects
 {
@@ -17,16 +19,20 @@ namespace Metalama.Framework.Engine.Aspects
 
         public IReadOnlyList<IAspectSource> AspectSources { get; }
 
+        public ImmutableArray<IValidatorSource> ValidatorSources { get; }
+
         public AspectInstanceResult(
             bool success,
             ImmutableUserDiagnosticList diagnostics,
-            IReadOnlyList<Advice> advices,
-            IReadOnlyList<IAspectSource> aspectSources )
+            ImmutableArray<Advice> advices,
+            ImmutableArray<IAspectSource> aspectSources,
+            ImmutableArray<IValidatorSource> validatorSources )
         {
             this.Success = success;
             this.Diagnostics = diagnostics;
             this.Advices = advices;
             this.AspectSources = aspectSources;
+            this.ValidatorSources = validatorSources;
         }
     }
 }

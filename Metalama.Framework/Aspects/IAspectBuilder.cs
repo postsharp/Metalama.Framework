@@ -2,7 +2,6 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Serialization;
 using System;
 
@@ -19,9 +18,7 @@ namespace Metalama.Framework.Aspects
         /// and diagnostics are preserved. 
         /// </summary>
         /// <remarks>
-        /// Note that reporting an error using
-        /// <see cref="IDiagnosticSink.Report{T}"/>
-        /// automatically causes the aspect to be skipped, but, additionally, provided children aspects are ignored.
+        /// Note that reporting an error automatically causes the aspect to be skipped, but, additionally, provided children aspects are ignored.
         /// </remarks>
         void SkipAspect();
 
@@ -40,7 +37,7 @@ namespace Metalama.Framework.Aspects
     /// aspects and validators, or report diagnostics. This is a weakly-typed variant of the <see cref="IAspectBuilder{T}"/> interface.
     /// </summary>
     public interface IAspectBuilder<out TAspectTarget> : IAspectLayerBuilder<TAspectTarget>, IAspectBuilder
-        where TAspectTarget : IDeclaration
+        where TAspectTarget : class, IDeclaration
     {
         /// <summary>
         /// Registers the build action for an aspect layer. The aspect layer must have been defined

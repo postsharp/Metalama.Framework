@@ -44,6 +44,11 @@ namespace Metalama.Framework.Engine.CompileTime
         {
             var typeName = typeSymbol.GetReflectionName();
 
+            if ( typeName == null )
+            {
+                return null;
+            }
+
             if ( typeSymbol.ContainingAssembly != null )
             {
                 var assemblyIdentity = typeSymbol.ContainingAssembly.Identity;

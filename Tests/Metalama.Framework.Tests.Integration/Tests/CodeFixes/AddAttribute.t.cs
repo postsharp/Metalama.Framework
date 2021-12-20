@@ -13,13 +13,13 @@ namespace Metalama.Framework.Tests.Integration.CodeFixes.AddAttribute
 {
     class Aspect : MethodAspect
     {
-        static DiagnosticDefinition<None> _diag = new ( "MY001", Severity.Warning, "Add some attribute" );
+        static DiagnosticDefinition _diag = new ( "MY001", Severity.Warning, "Add some attribute" );
     
         public override void BuildAspect(IAspectBuilder<IMethod> builder)
         {
             base.BuildAspect(builder);
             
-            builder.Diagnostics.Report( builder.Target, _diag, default, CodeFix.AddAttribute(  builder.Target, typeof(MyAttribute) ) );
+            _diag.WithCodeFixes( CodeFix.AddAttribute(  builder.Target, typeof(MyAttribute) )  ).ReportTo( builder.Diagnostics );
         }
     }
     

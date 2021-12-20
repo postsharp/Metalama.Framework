@@ -103,7 +103,7 @@ namespace Metalama.Framework.Engine.Fabrics
 
             if ( constructor == null )
             {
-                diagnostics.Report( GeneralDiagnosticDescriptors.TypeMustHavePublicDefaultConstructor.CreateDiagnostic( null, fabricType ) );
+                diagnostics.Report( GeneralDiagnosticDescriptors.TypeMustHavePublicDefaultConstructor.CreateRoslynDiagnostic( null, fabricType ) );
 
                 return null;
             }

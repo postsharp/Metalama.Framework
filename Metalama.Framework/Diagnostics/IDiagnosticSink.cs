@@ -5,7 +5,6 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.CodeFixes;
 using Metalama.Framework.Validation;
-using System.Collections.Generic;
 
 namespace Metalama.Framework.Diagnostics
 {
@@ -20,17 +19,7 @@ namespace Metalama.Framework.Diagnostics
         /// <summary>
         /// Reports a parametric diagnostic by specifying its location.
         /// </summary>
-        /// <param name="location">The code location to which the diagnostic should be written, typically an <see cref="IDeclaration"/>.</param>
-        /// <param name="definition">The diagnostic definition, which must be defined as a static field or property.</param>
-        /// <param name="arguments">The diagnostic arguments.</param>
-        /// <param name="codeFixes">An optional <see cref="CodeFix"/> for the diagnostic, or a collection of code fixes. Note that the <see cref="CodeFix"/> class
-        /// implements the <c>IEnumerable&lt;CodeFix&gt;</c> so you don't need to use additional syntax for a single code fix.</param>
-        void Report<T>(
-            IDiagnosticLocation location,
-            DiagnosticDefinition<T> definition,
-            T arguments,
-            IEnumerable<CodeFix>? codeFixes = null )
-            where T : notnull;
+        void Report( IDiagnosticLocation? location, IDiagnostic diagnostic );
 
         /// <summary>
         /// Suppresses a diagnostic by specifying the declaration in which the suppression must be effective.

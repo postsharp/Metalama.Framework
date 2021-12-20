@@ -4,6 +4,7 @@
 using Metalama.Compiler;
 using Metalama.Framework.Engine.AdditionalOutputs;
 using Metalama.Framework.Engine.DesignTime.Pipeline;
+using Metalama.Framework.Engine.DesignTime.Utilities;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Utilities;
@@ -25,6 +26,11 @@ namespace Metalama.Framework.Engine.DesignTime
     {
         private bool _isEnabled;
 
+        static DesignTimeSourceGenerator()
+        {
+            Logger.Initialize();
+        }
+
         void ISourceGenerator.Execute( GeneratorExecutionContext context )
         {
             if ( !this._isEnabled || context.Compilation is not CSharpCompilation compilation )
@@ -34,7 +40,8 @@ namespace Metalama.Framework.Engine.DesignTime
 
             try
             {
-                Logger.Instance?.Write( $"DesignTimeSourceGenerator.Execute('{compilation.AssemblyName}')." );
+                Logger.Instance?.Write(
+                    $"DesignTimeSourceGenerator.Execute('{compilation.AssemblyName}', CompilationId = {DebuggingHelper.GetObjectId( compilation )})." );
 
                 var projectOptions = new ProjectOptions( context.AnalyzerConfigOptions );
 
@@ -44,7 +51,7 @@ namespace Metalama.Framework.Engine.DesignTime
                 {
                     // Execute the fallback.
                     Logger.Instance?.Write(
-                        $"DesignTimeSourceGenerator.Execute('{compilation.AssemblyName}'): DesignTimeEnabled is false, will output fallback files from {projectOptions.AdditionalCompilationOutputDirectory}." );
+                        $"DesignTimeSourceGenerator.Execute('{compilation.AssemblyName}'): DesignTimeEnabled is false, will output fallback files from '{projectOptions.AdditionalCompilationOutputDirectory}'." );
 
                     ExecuteFromAdditionalCompilationOutputFiles( context, projectOptions );
 
@@ -52,13 +59,21 @@ namespace Metalama.Framework.Engine.DesignTime
                 }
 
                 // Execute the pipeline.
+                var cancellationToken = context.CancellationToken.IgnoreIfDebugging();
+
                 if ( !DesignTimeAspectPipelineFactory.Instance.TryExecute(
                         projectOptions,
                         compilation,
-                        context.CancellationToken,
+                        cancellationToken,
                         out var compilationResult ) )
                 {
-                    Logger.Instance?.Write( $"DesignTimeSourceGenerator.Execute('{compilation.AssemblyName}'): the pipeline failed." );
+                    Logger.Instance?.Write(
+                        $"DesignTimeSourceGenerator.Execute('{compilation.AssemblyName}', CompilationId = {DebuggingHelper.GetObjectId( compilation )}): the pipeline failed." );
+
+                    Logger.Instance?.Write(
+                        " Compilation references: " + string.Join(
+                            ", ",
+                            compilation.References.GroupBy( r => r.GetType() ).Select( g => $"{g.Key.Name}: {g.Count()}" ) ) );
 
                     return;
                 }
@@ -66,13 +81,15 @@ namespace Metalama.Framework.Engine.DesignTime
                 // Add introduced syntax trees.
                 var sourcesCount = 0;
 
-                foreach ( var introducedSyntaxTree in compilationResult.IntroducedSyntaxTrees )
+                foreach ( var introducedSyntaxTree in compilationResult.PipelineResult.IntroducedSyntaxTrees )
                 {
                     sourcesCount++;
+                    Logger.Instance?.Write( $"  AddSource('{introducedSyntaxTree.Name}')" );
                     context.AddSource( introducedSyntaxTree.Name, introducedSyntaxTree.GeneratedSyntaxTree.GetText() );
                 }
 
-                Logger.Instance?.Write( $"DesignTimeSourceGenerator.Execute('{compilation.AssemblyName}'): {sourcesCount} sources generated." );
+                Logger.Instance?.Write(
+                    $"DesignTimeSourceGenerator.Execute('{compilation.AssemblyName}', CompilationId = {DebuggingHelper.GetObjectId( compilation )}): {sourcesCount} sources generated." );
 
                 // We don't report diagnostics because it seems to be without effect.
                 // All diagnostics are reported by the analyzer.

@@ -10,8 +10,8 @@ using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Fabrics;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Validation;
 using Metalama.Framework.Project;
-using Metalama.Framework.Validation;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -20,14 +20,13 @@ using System.Threading;
 
 namespace Metalama.Framework.Engine.Aspects
 {
-    internal class AspectBuilder<T> : IAspectBuilder<T>, IAspectBuilderInternal
+    internal class AspectBuilder<T> : IAspectBuilder<T>, IAspectBuilderInternal, IDeclarationSelectorInternal
         where T : class, IDeclaration
     {
         private readonly UserDiagnosticSink _diagnosticSink;
         private readonly AspectPipelineConfiguration _configuration;
         private readonly IImmutableList<Advice> _declarativeAdvices;
         private bool _skipped;
-        private AspectPredecessor _predecessor;
 
         public AspectBuilder(
             T target,
@@ -45,7 +44,7 @@ namespace Metalama.Framework.Engine.Aspects
             this.AspectInstance = aspectInstance;
             this.AdviceFactory = adviceFactory;
             this.CancellationToken = cancellationToken;
-            this._predecessor = new AspectPredecessor( AspectPredecessorKind.ChildAspect, aspectInstance );
+            this.AspectPredecessor = new AspectPredecessor( AspectPredecessorKind.ChildAspect, aspectInstance );
         }
 
         public IProject Project => this.Target.Compilation.Project;
@@ -54,36 +53,44 @@ namespace Metalama.Framework.Engine.Aspects
 
         public ImmutableArray<IAspectSource> AspectSources { get; private set; } = ImmutableArray<IAspectSource>.Empty;
 
+        public ImmutableArray<IValidatorSource> ValidatorSources { get; private set; } = ImmutableArray<IValidatorSource>.Empty;
+
         public void AddAspectSource( IAspectSource aspectSource )
         {
             this.AspectSources = this.AspectSources.Add( aspectSource );
+        }
+
+        public void AddValidatorSource( IValidatorSource validatorSource )
+        {
+            this.ValidatorSources = this.ValidatorSources.Add( validatorSource );
         }
 
         public AdviceFactory AdviceFactory { get; }
 
         public DisposeAction WithPredecessor( in AspectPredecessor predecessor )
         {
-            var oldPredecessor = this._predecessor;
-            this._predecessor = predecessor;
+            var oldPredecessor = this.AspectPredecessor;
+            this.AspectPredecessor = predecessor;
 
-            return new DisposeAction( () => this._predecessor = oldPredecessor );
+            return new DisposeAction( () => this.AspectPredecessor = oldPredecessor );
         }
 
         IDiagnosticAdder IAspectBuilderInternal.DiagnosticAdder => this._diagnosticSink;
 
-        public IDiagnosticSink Diagnostics => this._diagnosticSink;
+        public ScopedDiagnosticSink Diagnostics => new( this._diagnosticSink, this.Target, this.Target );
 
         public T Target { get; }
 
-        public IDeclarationSelection<TMember> WithMembers<TMember>( Func<T, IEnumerable<TMember>> selector )
+        public IDeclarationSelection<TMember> WithTargetMembers<TMember>( Func<T, IEnumerable<TMember>> selector )
             where TMember : class, IDeclaration
         {
             var executionContext = UserCodeExecutionContext.Current;
 
             return new DeclarationSelection<TMember>(
                 this.Target.ToTypedRef(),
-                this._predecessor,
+                this,
                 this.AddAspectSource,
+                this.AddValidatorSource,
                 ( compilation, diagnostics ) =>
                 {
                     var translatedTarget = compilation.Factory.GetDeclaration( this.Target );
@@ -98,6 +105,8 @@ namespace Metalama.Framework.Engine.Aspects
                 this._configuration.AspectClasses,
                 this._configuration.ServiceProvider );
         }
+
+        public IDeclarationSelection<T> WithTarget() => this.WithTargetMembers( declaration => new[] { declaration } );
 
         IDeclaration IAspectLayerBuilder.Target => this.Target;
 
@@ -122,25 +131,21 @@ namespace Metalama.Framework.Engine.Aspects
                     success,
                     this._diagnosticSink.ToImmutable(),
                     this._declarativeAdvices.ToImmutableArray().AddRange( this.AdviceFactory.Advices ),
-                    this.AspectSources )
+                    this.AspectSources,
+                    this.ValidatorSources )
                 : new AspectInstanceResult(
                     success,
                     this._diagnosticSink.ToImmutable(),
-                    Array.Empty<Advice>(),
-                    Array.Empty<IAspectSource>() );
+                    ImmutableArray<Advice>.Empty,
+                    ImmutableArray<IAspectSource>.Empty,
+                    ImmutableArray<IValidatorSource>.Empty );
         }
 
-#pragma warning disable 618 // Not implemented
-        void IAspectBuilder<T>.SetAspectLayerBuildAction( string layerName, Action<IAspectLayerBuilder<T>> buildAction ) => throw new NotImplementedException();
+        public void SetAspectLayerBuildAction( string layerName, Action<IAspectLayerBuilder<T>> buildAction ) => throw new NotImplementedException();
 
-        void IValidatorAdder.AddTargetValidator<TTarget>( TTarget targetDeclaration, Action<ValidateReferenceContext<TTarget>> validator )
-            => throw new NotImplementedException();
+        public AspectPredecessor AspectPredecessor { get; private set; }
 
-        void IValidatorAdder.AddReferenceValidator<TTarget, TConstraint>(
-            TTarget targetDeclaration,
-            IReadOnlyList<DeclarationReferenceKind> referenceKinds,
-            IReadOnlyDictionary<string, string>? properties )
-            => throw new NotImplementedException();
-#pragma warning restore 618
+        public ValidatorDriver GetValidatorDriver( string name, ValidatorKind kind )
+            => ((IValidatorDriverFactory) this.AspectInstance.AspectClass).GetValidatorDriver( name, kind );
     }
 }

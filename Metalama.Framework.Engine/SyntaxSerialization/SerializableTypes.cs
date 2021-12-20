@@ -93,7 +93,7 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
 
             if ( diagnosticAdder != null )
             {
-                diagnosticAdder.Report( SerializationDiagnosticDescriptors.UnsupportedSerialization.CreateDiagnostic( diagnosticLocation, type ) );
+                diagnosticAdder.Report( SerializationDiagnosticDescriptors.UnsupportedSerialization.CreateRoslynDiagnostic( diagnosticLocation, type ) );
             }
 
             return false;

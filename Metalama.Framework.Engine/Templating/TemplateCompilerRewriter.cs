@@ -396,7 +396,7 @@ namespace Metalama.Framework.Engine.Templating
 
                     // However, this can happen in an incorrect/incomplete compilation. In this case, returning anything is fine.
                     this.Report(
-                        TemplatingDiagnosticDescriptors.UndeclaredRunTimeIdentifier.CreateDiagnostic(
+                        TemplatingDiagnosticDescriptors.UndeclaredRunTimeIdentifier.CreateRoslynDiagnostic(
                             this._syntaxTreeAnnotationMap.GetLocation( node ),
                             node.Identifier.Text ) );
 
@@ -485,7 +485,8 @@ namespace Metalama.Framework.Engine.Templating
                                                .FirstOrDefault( n => n is InvocationExpressionSyntax or BinaryExpressionSyntax )
                                            ?? expression;
 
-                    this.Report( TemplatingDiagnosticDescriptors.CannotUseThisInRunTimeContext.CreateDiagnostic( location, parentExpression.ToString() ) );
+                    this.Report(
+                        TemplatingDiagnosticDescriptors.CannotUseThisInRunTimeContext.CreateRoslynDiagnostic( location, parentExpression.ToString() ) );
 
                     return expression;
             }

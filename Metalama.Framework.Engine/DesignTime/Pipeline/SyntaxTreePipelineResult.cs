@@ -9,10 +9,10 @@ using System.Collections.Immutable;
 namespace Metalama.Framework.Engine.DesignTime.Pipeline
 {
     /// <summary>
-    /// Represents the content of <see cref="DesignTimeAspectPipelineResult"/>, but only the items that relate to a single <see cref="Microsoft.CodeAnalysis.SyntaxTree"/>.
+    /// Represents the content of <see cref="DesignTimePipelineExecutionResult"/>, but only the items that relate to a single <see cref="Microsoft.CodeAnalysis.SyntaxTree"/>.
     /// This class is compilation-independent and cacheable.
     /// </summary>
-    public class SyntaxTreeResult
+    public sealed class SyntaxTreePipelineResult
     {
         /// <summary>
         /// Gets the <see cref="Microsoft.CodeAnalysis.SyntaxTree"/> for which the results was prepared.
@@ -33,15 +33,19 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
 
         public ImmutableArray<(string AspectType, InheritableAspectInstance AspectInstance)> InheritableAspects { get; }
 
-        public SyntaxTreeResult(
+        public ImmutableArray<DesignTimeValidatorInstance> Validators { get; }
+
+        public SyntaxTreePipelineResult(
             SyntaxTree syntaxTree,
             ImmutableArray<Diagnostic>? diagnostics,
             ImmutableArray<CacheableScopedSuppression>? suppressions,
             ImmutableArray<IntroducedSyntaxTree>? introductions,
             ImmutableArray<string>? dependencies,
-            ImmutableArray<(string AspectType, InheritableAspectInstance AspectInstance)>? inheritableAspects )
+            ImmutableArray<(string AspectType, InheritableAspectInstance AspectInstance)>? inheritableAspects,
+            ImmutableArray<DesignTimeValidatorInstance>? validators )
         {
             this.SyntaxTree = syntaxTree;
+            this.Validators = validators ?? ImmutableArray<DesignTimeValidatorInstance>.Empty;
             this.InheritableAspects = inheritableAspects ?? ImmutableArray<(string AspectType, InheritableAspectInstance AspectInstance)>.Empty;
             this.Diagnostics = diagnostics ?? ImmutableArray<Diagnostic>.Empty;
             this.Suppressions = suppressions ?? ImmutableArray<CacheableScopedSuppression>.Empty;

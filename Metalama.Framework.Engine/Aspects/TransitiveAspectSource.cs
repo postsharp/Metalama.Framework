@@ -4,11 +4,13 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
+using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Validation;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
@@ -23,11 +25,12 @@ namespace Metalama.Framework.Engine.Aspects
     /// <summary>
     /// An aspect source that applies aspects that are inherited from referenced assemblies or projects.
     /// </summary>
-    internal class ExternalInheritedAspectSource : IAspectSource
+    internal class TransitiveAspectSource : IAspectSource, IValidatorSource
     {
         private readonly ImmutableDictionaryOfArray<IAspectClass, InheritableAspectInstance> _inheritedAspects;
+        private readonly ImmutableArray<TransitiveValidatorInstance> _validators;
 
-        public ExternalInheritedAspectSource(
+        public TransitiveAspectSource(
             Compilation compilation,
             ImmutableArray<IAspectClass> aspectClasses,
             IServiceProvider serviceProvider,
@@ -36,10 +39,13 @@ namespace Metalama.Framework.Engine.Aspects
             var inheritableAspectProvider = serviceProvider.GetService<ITransitiveAspectManifestProvider>();
 
             var inheritedAspectsBuilder = ImmutableDictionaryOfArray<IAspectClass, InheritableAspectInstance>.CreateBuilder();
+            var validatorsBuilder = ImmutableArray.CreateBuilder<TransitiveValidatorInstance>();
+
             var aspectClassesByName = aspectClasses.ToDictionary( t => t.FullName, t => t );
 
             foreach ( var reference in compilation.References )
             {
+                // Get the manifest of the reference.
                 ITransitiveAspectsManifest? manifest = null;
 
                 switch ( reference )
@@ -64,10 +70,13 @@ namespace Metalama.Framework.Engine.Aspects
                         throw new AssertionFailedException( $"Unexpected reference kind: {reference}." );
                 }
 
+                // Process the manifest.
                 if ( manifest != null )
                 {
+                    // Process inherited aspects.
                     foreach ( var aspectClassName in manifest.InheritableAspectTypes )
                     {
+                        // TODO: the next line may throw KeyNotFoundException.
                         var aspectClass = aspectClassesByName[aspectClassName];
 
                         var targets = manifest.GetInheritedAspects( aspectClassName )
@@ -75,10 +84,14 @@ namespace Metalama.Framework.Engine.Aspects
 
                         inheritedAspectsBuilder.AddRange( aspectClass, targets );
                     }
+
+                    // Process validators.
+                    validatorsBuilder.AddRange( manifest.Validators );
                 }
             }
 
             this._inheritedAspects = inheritedAspectsBuilder.ToImmutable();
+            this._validators = validatorsBuilder.ToImmutable();
         }
 
         public ImmutableArray<IAspectClass> AspectClasses => this._inheritedAspects.Keys.ToImmutableArray();
@@ -114,5 +127,18 @@ namespace Metalama.Framework.Engine.Aspects
                 }
             }
         }
+
+        IEnumerable<ValidatorInstance> IValidatorSource.GetValidators( CompilationModel compilation, IDiagnosticSink diagnosticAdder )
+            => this._validators.Select(
+                v => new ReferenceValidatorInstance(
+                    v.ValidatedDeclaration.GetTarget( compilation ),
+                    GetValidatorDriver( v.Object.GetType(), v.MethodName ),
+                    ValidatorImplementation.Create( v.Object, v.State ),
+                    v.ReferenceKinds ) );
+
+        private static ReferenceValidatorDriver GetValidatorDriver( Type type, string methodName )
+            => (ReferenceValidatorDriver) ValidatorDriverFactory.GetInstance( type ).GetValidatorDriver( methodName, ValidatorKind.Reference );
+
+        ValidatorKind IValidatorSource.Kind => ValidatorKind.Reference;
     }
 }

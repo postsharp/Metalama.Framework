@@ -48,10 +48,12 @@ namespace Metalama.Framework.Engine.CompileTime
         private static readonly Lazy<SyntaxTree> _predefinedTypesSyntaxTree = new(
             () =>
                 CSharpSyntaxTree.ParseText(
-                    "namespace System.Runtime.CompilerServices { internal static class IsExternalInit {}}",
+                    "namespace System.Runtime.CompilerServices { internal static class IsExternalInit {} }",
                     path: CompileTimeConstants.PredefinedTypesFileName ) );
 
         private static readonly Guid _buildId = AssemblyMetadataReader.GetInstance( typeof(CompileTimeCompilationBuilder).Assembly ).ModuleId;
+        private readonly ReflectionMapperFactory _reflectionMapperFactory;
+        private readonly SymbolClassificationService _classifierFactory;
 
         public CompileTimeCompilationBuilder( IServiceProvider serviceProvider, CompileTimeDomain domain )
         {
@@ -61,6 +63,8 @@ namespace Metalama.Framework.Engine.CompileTime
             this._observer = serviceProvider.GetService<ICompileTimeCompilationBuilderObserver>();
             this._rewriter = serviceProvider.GetService<ICompileTimeAssemblyBinaryRewriter>();
             this._projectOptions = serviceProvider.GetService<IProjectOptions>();
+            this._reflectionMapperFactory = serviceProvider.GetRequiredService<ReflectionMapperFactory>();
+            this._classifierFactory = serviceProvider.GetRequiredService<SymbolClassificationService>();
         }
 
         private static ulong ComputeSourceHash( IReadOnlyList<SyntaxTree> compileTimeTrees, StringBuilder? log = null )
@@ -138,7 +142,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
             var assemblyName = GetCompileTimeAssemblyName( runTimeCompilation.AssemblyName!, hash );
             compileTimeCompilation = this.CreateEmptyCompileTimeCompilation( assemblyName, referencedProjects );
-            var serializableTypes = GetSerializableTypes( runTimeCompilation, treesWithCompileTimeCode, cancellationToken );
+            var serializableTypes = this.GetSerializableTypes( runTimeCompilation, treesWithCompileTimeCode, cancellationToken );
 
             var templateCompiler = new TemplateCompiler( this._serviceProvider, runTimeCompilation );
 
@@ -261,7 +265,7 @@ namespace Metalama.Framework.Engine.CompileTime
                     new CSharpCompilationOptions( OutputKind.DynamicallyLinkedLibrary, deterministic: true ) )
                 .AddReferences(
                     referencedProjects
-                        .Where( r => !r.IsEmpty )
+                        .Where( r => !r.IsEmpty && !r.IsFramework )
                         .Select( r => r.ToMetadataReference() ) );
         }
 
@@ -412,7 +416,7 @@ namespace Metalama.Framework.Engine.CompileTime
                         string.Join( Environment.NewLine, emitResult.Diagnostics ) );
 
                     diagnosticSink.Report(
-                        TemplatingDiagnosticDescriptors.CannotEmitCompileTimeAssembly.CreateDiagnostic(
+                        TemplatingDiagnosticDescriptors.CannotEmitCompileTimeAssembly.CreateRoslynDiagnostic(
                             null,
                             troubleshootingDirectory ) );
 
@@ -484,18 +488,23 @@ namespace Metalama.Framework.Engine.CompileTime
             return compileTimeTrees;
         }
 
-        private static IReadOnlyList<SerializableTypeInfo> GetSerializableTypes(
+        private IReadOnlyList<SerializableTypeInfo> GetSerializableTypes(
             Compilation runTimeCompilation,
             IReadOnlyList<SyntaxTree> compileTimeSyntaxTrees,
             CancellationToken cancellationToken )
         {
             // TODO: Check that the mapper is not already registered.
-            var reflectionMapper = new ReflectionMapper( runTimeCompilation );
             var allSerializableTypes = new List<SerializableTypeInfo>();
+            var reflectionMapper = this._reflectionMapperFactory.GetInstance( runTimeCompilation );
+            var classifier = this._classifierFactory.GetClassifier( runTimeCompilation );
 
             foreach ( var tree in compileTimeSyntaxTrees )
             {
-                var visitor = new CollectSerializableTypesVisitor( runTimeCompilation.GetSemanticModel( tree, true ), reflectionMapper, cancellationToken );
+                var visitor = new CollectSerializableTypesVisitor(
+                    runTimeCompilation.GetSemanticModel( tree, true ),
+                    reflectionMapper,
+                    classifier,
+                    cancellationToken );
 
                 visitor.Visit( tree.GetRoot() );
 
@@ -674,7 +683,7 @@ namespace Metalama.Framework.Engine.CompileTime
                         var aspectTypes = compileTimeCompilation.Assembly
                             .GetTypes()
                             .Where( t => compileTimeCompilation.HasImplicitConversion( t, aspectType ) )
-                            .Select( t => t.GetReflectionName() )
+                            .Select( t => t.GetReflectionName().AssertNotNull() )
                             .ToList();
 
                         var fabricTypes = compileTimeCompilation.Assembly
@@ -682,19 +691,19 @@ namespace Metalama.Framework.Engine.CompileTime
                             .Where(
                                 t => compileTimeCompilation.HasImplicitConversion( t, fabricType ) &&
                                      !compileTimeCompilation.HasImplicitConversion( t, transitiveFabricType ) )
-                            .Select( t => t.GetReflectionName() )
+                            .Select( t => t.GetReflectionName().AssertNotNull() )
                             .ToList();
 
                         var transitiveFabricTypes = compileTimeCompilation.Assembly
                             .GetTypes()
                             .Where( t => compileTimeCompilation.HasImplicitConversion( t, transitiveFabricType ) )
-                            .Select( t => t.GetReflectionName() )
+                            .Select( t => t.GetReflectionName().AssertNotNull() )
                             .ToList();
 
                         var compilerPlugInTypes = compileTimeCompilation.Assembly
                             .GetTypes()
                             .Where( t => t.GetAttributes().Any( a => a is { AttributeClass: { Name: nameof(CompilerPluginAttribute) } } ) )
-                            .Select( t => t.GetReflectionName() )
+                            .Select( t => t.GetReflectionName().AssertNotNull() )
                             .ToList();
 
                         var manifest = new CompileTimeProjectManifest(
@@ -747,7 +756,7 @@ namespace Metalama.Framework.Engine.CompileTime
             return (sourceHash, projectHash, compileTimeAssemblyName, outputPaths);
         }
 
-        private record OutputPaths( string Directory, string Pe, string Pdb, string Manifest );
+        private record OutputPaths( string? Directory, string Pe, string Pdb, string Manifest );
 
         private OutputPaths GetOutputPaths( string compileTimeAssemblyName )
         {
@@ -771,7 +780,7 @@ namespace Metalama.Framework.Engine.CompileTime
             IDiagnosticAdder diagnosticAdder,
             CancellationToken cancellationToken,
             out string assemblyPath,
-            out string sourceDirectory )
+            out string? sourceDirectory )
         {
             Logger.Instance?.Write( $"TryCompileDeserializedProject( '{runTimeAssemblyName}' )" );
             var compileTimeAssemblyName = GetCompileTimeAssemblyName( runTimeAssemblyName, referencedProjects, syntaxTreeHash );

@@ -33,7 +33,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime.TestCode
 
         public override void BuildAspect(IAspectBuilder<IMethod> builder)
         {
-            builder.Diagnostics.Report(builder.Target, _userError, builder.Target);
+            _userError.WithArguments( builder.Target ).ReportTo( builder.Diagnostics );
         }
     }
 }
@@ -87,8 +87,8 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime.TestCode
 
         public override void BuildAspect(IAspectBuilder<IMethod> builder)
         {
-            builder.Diagnostics.Suppress(builder.Target, _suppressionDefinition);
-            builder.Diagnostics.Report(builder.Target, _userWarning, builder.Target);
+            _suppressionDefinition.SuppressFrom( builder.Diagnostics );
+            _userWarning.WithArguments(builder.Target).ReportTo( builder.Diagnostics ); 
         }
     }
 }

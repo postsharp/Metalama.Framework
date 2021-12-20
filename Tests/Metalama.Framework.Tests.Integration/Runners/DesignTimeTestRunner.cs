@@ -43,11 +43,11 @@ namespace Metalama.Framework.Tests.Integration.Runners
                 return;
             }
 
-            testResult.InputCompilationDiagnostics.Report( compilationResult.SyntaxTreeResults.SelectMany( t => t.Diagnostics ) );
+            testResult.InputCompilationDiagnostics.Report( compilationResult.PipelineResult.SyntaxTreeResults.SelectMany( t => t.Diagnostics ) );
 
             testResult.HasOutputCode = true;
 
-            var introducedSyntaxTree = compilationResult.IntroducedSyntaxTrees.SingleOrDefault();
+            var introducedSyntaxTree = compilationResult.PipelineResult.IntroducedSyntaxTrees.SingleOrDefault();
 
             var introducedSyntaxRoot = introducedSyntaxTree == null
                 ? SyntaxFactory.GlobalStatement( SyntaxFactoryEx.EmptyStatement )

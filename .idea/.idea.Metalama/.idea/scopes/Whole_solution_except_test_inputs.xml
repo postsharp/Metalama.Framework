@@ -1,0 +1,3 @@
+<component name="DependencyValidationManager">
+  <scope name="Whole solution except test inputs" pattern="!file[Metalama.Framework.Tests.Integration#Project#69EB8F34-975E-46AD-8EA1-A592A629CCD6]:Tests/Metalama.Framework.Tests.Integration/TestInputs//*&amp;&amp;!file[rider.module]:Tests/Metalama.Framework.Tests.Integration.Internals/Tests//*&amp;&amp;!file[rider.module]:Tests/Metalama.Framework.Tests.Integration/Tests//*&amp;&amp;!file:.editorconfig" />
+</component>

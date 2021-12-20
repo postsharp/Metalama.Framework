@@ -35,7 +35,7 @@ namespace Metalama.Framework.Engine.Pipeline
             var aspectTypeSymbol = compilation.RoslynCompilation.GetTypeByMetadataName( aspectClass.FullName ).AssertNotNull();
 
             return this._aspectSources
-                .Where( s => s.AspectClass.FullName.Equals( aspectTypeSymbol.GetReflectionName(), StringComparison.Ordinal ) )
+                .Where( s => s.AspectClass.FullName.Equals( aspectTypeSymbol.GetReflectionName().AssertNotNull(), StringComparison.Ordinal ) )
                 .Select( a => a.Source )
                 .Distinct()
                 .SelectMany( a => a.GetAspectInstances( compilation, aspectClass, diagnosticAdder, cancellationToken ) );

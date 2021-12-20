@@ -24,6 +24,11 @@ namespace Metalama.Framework.Engine.DesignTime
     [ExcludeFromCodeCoverage]
     public class CentralCodeRefactoringProvider : CodeRefactoringProvider
     {
+        static CentralCodeRefactoringProvider()
+        {
+            Logger.Initialize();
+        }
+
         public override async Task ComputeRefactoringsAsync( CodeRefactoringContext context )
         {
             try

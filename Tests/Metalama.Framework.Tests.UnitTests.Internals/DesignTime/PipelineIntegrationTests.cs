@@ -71,7 +71,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
             return compilation;
         }
 
-        private static void DumpSyntaxTreeResult( SyntaxTreeResult syntaxTreeResult, StringBuilder stringBuilder )
+        private static void DumpSyntaxTreeResult( SyntaxTreePipelineResult syntaxTreeResult, StringBuilder stringBuilder )
         {
             string? GetTextUnderDiagnostic( Diagnostic diagnostic )
             {
@@ -115,7 +115,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
 
             var i = 0;
 
-            foreach ( var result in results.SyntaxTreeResults.OrderBy( t => t.SyntaxTree.FilePath ) )
+            foreach ( var result in results.PipelineResult.SyntaxTreeResults.OrderBy( t => t.SyntaxTree.FilePath ) )
             {
                 if ( i > 0 )
                 {
@@ -179,7 +179,7 @@ class MyAspect : MethodAspect
 
    public override void BuildAspect( IAspectBuilder<IMethod> aspectBuilder )
    {
-        aspectBuilder.Diagnostics.Report( aspectBuilder.Target, _description, this.Version );
+        _description.WithArguments( this.Version ).ReportTo( aspectBuilder.Diagnostics );
    }
 }
 ";

@@ -249,6 +249,14 @@ namespace Metalama.Framework.Engine
                     "Code fix suggestion",
                     _category );
 
+        public static readonly DiagnosticDefinition<(FormattableString Predecessor, IDeclaration Child, IDeclaration Parent)>
+            CanAddValidatorOnlyUnderParent = new(
+                "CR0044",
+                _category,
+                "The {0} cannot add a validator to '{1}' because it is not contained in '{2}'.",
+                Error,
+                "An aspect or fabric can add validators only under its target declaration." );
+
         // TODO: Use formattable string (C# does not seem to find extension methods).
         public static readonly DiagnosticDefinition<string>
             UnsupportedFeature = new(

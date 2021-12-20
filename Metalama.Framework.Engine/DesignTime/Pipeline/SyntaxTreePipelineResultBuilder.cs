@@ -12,9 +12,9 @@ using System.Linq;
 namespace Metalama.Framework.Engine.DesignTime.Pipeline
 {
     /// <summary>
-    /// Builds a <see cref="SyntaxTreeResult"/>.
+    /// Builds a <see cref="SyntaxTreePipelineResult"/>.
     /// </summary>
-    internal sealed class SyntaxTreeResultBuilder
+    internal sealed class SyntaxTreePipelineResultBuilder
     {
         private readonly SyntaxTree _syntaxTree;
 
@@ -23,14 +23,15 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
         public ImmutableArray<CacheableScopedSuppression>.Builder? Suppressions;
         public ImmutableArray<IntroducedSyntaxTree>.Builder? Introductions;
         public ImmutableArray<(string AspectType, InheritableAspectInstance AspectInstance)>.Builder? InheritableAspects;
+        public ImmutableArray<DesignTimeValidatorInstance>.Builder? Validators;
 #pragma warning restore SA1401 // Fields should be private
 
-        public SyntaxTreeResultBuilder( SyntaxTree syntaxTree )
+        public SyntaxTreePipelineResultBuilder( SyntaxTree syntaxTree )
         {
             this._syntaxTree = syntaxTree;
         }
 
-        public SyntaxTreeResult ToImmutable( Compilation compilation )
+        public SyntaxTreePipelineResult ToImmutable( Compilation compilation )
         {
             // Compute the default dependency graph.
             var semanticModel = compilation.GetSemanticModel( this._syntaxTree );
@@ -46,13 +47,14 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
                 .Distinct()
                 .ToImmutableArray();
 
-            return new SyntaxTreeResult(
+            return new SyntaxTreePipelineResult(
                 this._syntaxTree,
                 this.Diagnostics?.ToImmutable(),
                 this.Suppressions?.ToImmutable(),
                 this.Introductions?.ToImmutable(),
                 dependencies,
-                this.InheritableAspects?.ToImmutable() );
+                this.InheritableAspects?.ToImmutable(),
+                this.Validators?.ToImmutable() );
         }
     }
 }

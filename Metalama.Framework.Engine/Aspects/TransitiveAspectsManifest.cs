@@ -4,8 +4,8 @@
 using Metalama.Compiler;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.LamaSerialization;
+using Metalama.Framework.Engine.Validation;
 using Metalama.Framework.Serialization;
-using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -20,9 +20,11 @@ namespace Metalama.Framework.Engine.Aspects
     internal class TransitiveAspectsManifest : ITransitiveAspectsManifest
     {
         public static TransitiveAspectsManifest Empty { get; } =
-            new( ImmutableDictionary<string, IReadOnlyList<InheritableAspectInstance>>.Empty );
+            new( ImmutableDictionary<string, IReadOnlyList<InheritableAspectInstance>>.Empty, ImmutableArray<TransitiveValidatorInstance>.Empty );
 
         public ImmutableDictionary<string, IReadOnlyList<InheritableAspectInstance>> InheritableAspects { get; private set; }
+
+        public ImmutableArray<TransitiveValidatorInstance> Validators { get; private set; }
 
         // Deserializer constructor.
         private TransitiveAspectsManifest()
@@ -30,19 +32,25 @@ namespace Metalama.Framework.Engine.Aspects
             this.InheritableAspects = null!;
         }
 
-        public TransitiveAspectsManifest( ImmutableDictionary<string, IReadOnlyList<InheritableAspectInstance>> inheritableAspects )
+        private TransitiveAspectsManifest(
+            ImmutableDictionary<string, IReadOnlyList<InheritableAspectInstance>> inheritableAspects,
+            ImmutableArray<TransitiveValidatorInstance> validators )
         {
             this.InheritableAspects = inheritableAspects;
+            this.Validators = validators;
         }
 
-        public static TransitiveAspectsManifest Create( ImmutableArray<InheritableAspectInstance> inheritedAspect, Compilation compilation )
+        public static TransitiveAspectsManifest Create(
+            ImmutableArray<InheritableAspectInstance> inheritedAspect,
+            ImmutableArray<TransitiveValidatorInstance> validators )
             => new(
                 inheritedAspect.GroupBy( a => a.AspectClass )
                     .ToImmutableDictionary(
                         g => g.Key.FullName,
                         g => (IReadOnlyList<InheritableAspectInstance>) g.Select( i => new InheritableAspectInstance( i ) )
                             .ToList(),
-                        StringComparer.Ordinal ) );
+                        StringComparer.Ordinal ),
+                validators );
 
         private void Serialize( Stream stream, IServiceProvider serviceProvider )
         {
@@ -87,6 +95,7 @@ namespace Metalama.Framework.Engine.Aspects
             {
                 var instance = (TransitiveAspectsManifest) obj;
                 initializationArguments.SetValue( nameof(instance.InheritableAspects), instance.InheritableAspects );
+                initializationArguments.SetValue( nameof(instance.Validators), instance.Validators );
             }
 
             public override void DeserializeFields( object obj, IArgumentsReader initializationArguments )
@@ -96,6 +105,9 @@ namespace Metalama.Framework.Engine.Aspects
                 instance.InheritableAspects =
                     initializationArguments.GetValue<ImmutableDictionary<string, IReadOnlyList<InheritableAspectInstance>>>(
                         nameof(instance.InheritableAspects) )!;
+
+                instance.Validators =
+                    initializationArguments.GetValue<ImmutableArray<TransitiveValidatorInstance>>( nameof(instance.Validators) );
             }
         }
     }

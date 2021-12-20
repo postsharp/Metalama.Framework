@@ -189,7 +189,7 @@ namespace Metalama.Framework.Engine.CodeModel
                         if ( !arg.IsReferenceable )
                         {
                             throw new DiagnosticException(
-                                GeneralDiagnosticDescriptors.CannotPassExpressionToByRefParameter.CreateDiagnostic(
+                                GeneralDiagnosticDescriptors.CannotPassExpressionToByRefParameter.CreateRoslynDiagnostic(
                                     null,
                                     (arg.Syntax.ToString(), parameter.Name, parameter.DeclaringMember) ) );
                         }

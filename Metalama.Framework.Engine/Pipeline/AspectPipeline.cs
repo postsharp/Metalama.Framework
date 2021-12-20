@@ -15,6 +15,7 @@ using Metalama.Framework.Engine.Fabrics;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Sdk;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Validation;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using MoreLinq;
@@ -138,7 +139,8 @@ namespace Metalama.Framework.Engine.Pipeline
 
                             if ( constructor == null )
                             {
-                                diagnosticAdder.Report( GeneralDiagnosticDescriptors.TypeMustHavePublicDefaultConstructor.CreateDiagnostic( null, type ) );
+                                diagnosticAdder.Report(
+                                    GeneralDiagnosticDescriptors.TypeMustHavePublicDefaultConstructor.CreateRoslynDiagnostic( null, type ) );
 
                                 return null;
                             }
@@ -192,7 +194,9 @@ namespace Metalama.Framework.Engine.Pipeline
 
             var aspectOrderSources = new IAspectOrderingSource[]
             {
-                new AttributeAspectOrderingSource( compilation.Compilation, loader ), new AspectLayerOrderingSource( aspectClasses )
+                new AttributeAspectOrderingSource( compilation.Compilation, loader ),
+                new AspectLayerOrderingSource( aspectClasses ),
+                new FrameworkAspectOrderingSource( aspectClasses )
             };
 
             if ( !AspectLayerSorter.TrySort( unsortedAspectLayers, aspectOrderSources, diagnosticAdder, out var orderedAspectLayers ) )
@@ -268,23 +272,27 @@ namespace Metalama.Framework.Engine.Pipeline
 
         private protected virtual bool FilterCodeFix( IDiagnosticDefinition diagnosticDefinition, Location location ) => false;
 
-        private protected virtual ImmutableArray<IAspectSource> CreateAspectSources(
+        private protected virtual ( ImmutableArray<IAspectSource> AspectSources, ImmutableArray<IValidatorSource> ValidatorSources) CreateAspectSources(
             AspectPipelineConfiguration configuration,
             Compilation compilation,
             CancellationToken cancellationToken )
         {
             var aspectClasses = configuration.AspectClasses.ToImmutableArray<IAspectClass>();
 
+            var transitiveAspectSource = new TransitiveAspectSource( compilation, aspectClasses, configuration.ServiceProvider, cancellationToken );
+
             var sources = ImmutableArray.Create<IAspectSource>(
                 new CompilationAspectSource( aspectClasses, configuration.CompileTimeProjectLoader ),
-                new ExternalInheritedAspectSource( compilation, aspectClasses, configuration.ServiceProvider, cancellationToken ) );
+                transitiveAspectSource );
 
             if ( configuration.FabricsConfiguration != null )
             {
                 sources = sources.AddRange( configuration.FabricsConfiguration.AspectSources );
             }
 
-            return sources;
+            // TODO: fabric validators.
+
+            return (sources, ImmutableArray.Create<IValidatorSource>( transitiveAspectSource ));
         }
 
         private protected virtual ImmutableArray<AdditionalCompilationOutputFile> GetAdditionalCompilationOutputFiles( ServiceProvider serviceProvider )
@@ -321,7 +329,7 @@ namespace Metalama.Framework.Engine.Pipeline
                     compilation,
                     pipelineConfiguration.ProjectModel,
                     ImmutableArray<OrderedAspectLayer>.Empty,
-                    null );
+                    ImmutableArray<CompilationModel>.Empty );
 
                 return true;
             }
@@ -333,8 +341,10 @@ namespace Metalama.Framework.Engine.Pipeline
                 compilation,
                 pipelineConfiguration.ProjectModel,
                 pipelineConfiguration.AspectLayers,
+                ImmutableArray<CompilationModel>.Empty,
                 null,
-                aspectSources: aspectSources,
+                aspectSources.AspectSources,
+                aspectSources.ValidatorSources,
                 additionalCompilationOutputFiles: additionalCompilationOutputFiles );
 
             foreach ( var stageConfiguration in pipelineConfiguration.Stages )

@@ -173,7 +173,7 @@ namespace Metalama.Framework.Engine.AspectOrdering
                 var cycleNodesString = string.Join( ", ", cycleNodes );
 
                 var diagnostic =
-                    GeneralDiagnosticDescriptors.CycleInAspectOrdering.CreateDiagnostic(
+                    GeneralDiagnosticDescriptors.CycleInAspectOrdering.CreateRoslynDiagnostic(
                         mainLocation,
                         cycleNodesString,
                         additionalLocations );

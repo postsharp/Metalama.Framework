@@ -10,7 +10,7 @@ using System.Linq.Expressions;
 namespace Metalama.Framework.Aspects
 {
     /// <summary>
-    /// Represents a set of declarations and offers the ability to add aspects and annotations to them.
+    /// Represents a set of declarations and offers the ability to add aspects, annotations or validators to them.
     /// </summary>
     /// <typeparam name="TDeclaration"></typeparam>
     [InternalImplement]
@@ -18,6 +18,25 @@ namespace Metalama.Framework.Aspects
     public interface IDeclarationSelection<out TDeclaration>
         where TDeclaration : class, IDeclaration
     {
+        /// <summary>
+        /// Registers a method that will be invoked to validate references to any declaration in the current set. This method
+        /// must have a parameter of type <c>in</c> <see cref="ReferenceValidationContext"/>. Only source code references
+        /// are validated. References added by aspects are ignored by design.
+        /// </summary>
+        /// <param name="methodName">Name of the validating method. It must be a method in the current aspect or fabric type,
+        /// and must have must have a parameter of type <c>in</c> <see cref="ReferenceValidationContext"/>.</param>
+        /// <param name="referenceKinds">Kinds of references that this method is interested to analyze.</param>
+        void RegisterReferenceValidator( string methodName, ReferenceKinds referenceKinds );
+
+        /// <summary>
+        /// Registers a method that will be invoked to validate the final state (i.e. the state including the transformation by all aspects) of any declaration
+        /// in the current set.  This method must have a parameter of type <c>in</c> <see cref="DeclarationValidationContext"/>.  
+        /// </summary>
+        /// <param name="methodName"></param>
+        /// <typeparam name="T"></typeparam>
+        void RegisterDeclarationValidator<T>( string methodName )
+            where T : IDeclaration;
+
         /// <summary>
         /// Adds an aspect to the current set of declarations. This overload allows adding inherited aspects.
         /// </summary>

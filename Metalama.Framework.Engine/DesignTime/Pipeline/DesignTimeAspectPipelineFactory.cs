@@ -10,6 +10,7 @@ using Metalama.Framework.Engine.DesignTime.Refactoring;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline;
+using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Concurrent;
@@ -232,7 +233,14 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
                 return false;
             }
 
-            return this._pipelinesByProjectId.TryGetValue( projectId, out pipeline );
+            if ( !this._pipelinesByProjectId.TryGetValue( projectId, out pipeline ) )
+            {
+                Logger.Instance?.Write( $"Cannot get the pipeline for project '{projectId}': it has not been created yet." );
+
+                return false;
+            }
+
+            return true;
         }
 
         public ITransitiveAspectsManifest? GetTransitiveAspectsManifest( Compilation compilation, CancellationToken cancellationToken )
@@ -250,7 +258,7 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
                 return null;
             }
 
-            return compilationResult;
+            return compilationResult.PipelineResult;
         }
     }
 }

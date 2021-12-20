@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Engine.CompileTime;
+using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -47,6 +48,80 @@ namespace Metalama.Framework.Engine.DesignTime.Diff
             return new CompilationChangeTracker( this._lastTrees, this.LastCompilation, CompilationChanges.Empty( this.LastCompilation ) );
         }
 
+        private bool AreMetadataReferencesEqual( Compilation newCompilation )
+        {
+            // Detect changes in project references. 
+            if ( this.LastCompilation == null )
+            {
+                return false;
+            }
+
+            var oldExternalReferences = this.LastCompilation.ExternalReferences;
+
+            var newExternalReferences = newCompilation.ExternalReferences;
+
+            Logger.Instance?.Write(
+                $"Comparing metadata references: old count is {oldExternalReferences.Length}, new count is {newExternalReferences.Length}." );
+
+            if ( oldExternalReferences == newExternalReferences )
+            {
+                return true;
+            }
+
+            // If the only differences are in compilation references, do not consider this as a difference.
+            // Cross-project dependencies are not yet taken into consideration.
+            var hasChange = false;
+
+            if ( oldExternalReferences.Length != newExternalReferences.Length )
+            {
+                hasChange = true;
+            }
+            else
+            {
+                for ( var i = 0; i < oldExternalReferences.Length; i++ )
+                {
+                    if ( !MetadataReferencesEqual( oldExternalReferences[i], newExternalReferences[i] ) )
+                    {
+                        hasChange = true;
+
+                        break;
+                    }
+                }
+            }
+
+            if ( hasChange )
+            {
+                Logger.Instance?.Write( "Change found in metadata reference. The last configuration cannot be reused" );
+
+                return false;
+            }
+
+            return true;
+
+            static bool MetadataReferencesEqual( MetadataReference a, MetadataReference b )
+            {
+                if ( a == b )
+                {
+                    return true;
+                }
+                else
+                {
+                    switch (a, b)
+                    {
+                        case (CompilationReference compilationReferenceA, CompilationReference compilationReferenceB):
+                            // The way we compare in this case is naive, but we are processing cross-project dependencies through
+                            // a different mechanism.
+                            return compilationReferenceA.Compilation.AssemblyName == compilationReferenceB.Compilation.AssemblyName;
+
+                        case (PortableExecutableReference portableExecutableReferenceA, PortableExecutableReference portableExecutableReferenceB):
+                            return portableExecutableReferenceA.FilePath == portableExecutableReferenceB.FilePath;
+                    }
+
+                    return false;
+                }
+            }
+        }
+
         /// <summary>
         /// Updates the <see cref="LastCompilation"/> property and returns the set of changes between the
         /// old value of <see cref="LastCompilation"/> and the newly provided <see cref="Compilation"/>.
@@ -58,11 +133,13 @@ namespace Metalama.Framework.Engine.DesignTime.Diff
                 return this;
             }
 
+            var areMetadataReferencesEqual = this.AreMetadataReferencesEqual( newCompilation );
+
             var newTrees = ImmutableDictionary.CreateBuilder<string, (SyntaxTree Tree, bool HasCompileTimeCode)>( StringComparer.Ordinal );
             var generatedTrees = new List<SyntaxTree>();
 
             var syntaxTreeChanges = new List<SyntaxTreeChange>();
-            var hasCompileTimeChange = false;
+            var hasCompileTimeChange = !areMetadataReferencesEqual;
 
             // Process new trees.
             var lastTrees = this._lastTrees;

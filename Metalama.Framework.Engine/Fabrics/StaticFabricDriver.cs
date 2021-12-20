@@ -5,6 +5,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Validation;
 using Metalama.Framework.Fabrics;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
@@ -32,13 +33,16 @@ namespace Metalama.Framework.Engine.Fabrics
             where T : class, IDeclaration
         {
             private readonly List<IAspectSource> _aspectSources = new();
+            private readonly List<ProgrammaticValidatorSource> _validatorSources = new();
 
             protected StaticAmender( IProject project, FabricManager fabricManager, FabricInstance fabricInstance, in Ref<T> targetDeclaration ) :
                 base( project, fabricManager, fabricInstance, targetDeclaration ) { }
 
             protected sealed override void AddAspectSource( IAspectSource aspectSource ) => this._aspectSources.Add( aspectSource );
 
-            public StaticFabricResult ToResult() => new( this._aspectSources.ToImmutableArray() );
+            protected override void AddValidatorSource( ProgrammaticValidatorSource validatorSource ) => this._validatorSources.Add( validatorSource );
+
+            public StaticFabricResult ToResult() => new( this._aspectSources.ToImmutableArray(), this._validatorSources.ToImmutableArray() );
         }
     }
 }

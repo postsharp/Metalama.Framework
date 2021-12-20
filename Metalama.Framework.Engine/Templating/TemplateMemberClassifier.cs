@@ -88,12 +88,9 @@ namespace Metalama.Framework.Engine.Templating
                    (nodeSymbol is IPropertySymbol property && this._symbolClassifier.GetTemplatingScope( property.Type ) == TemplatingScope.Dynamic);
         }
 
-#pragma warning disable CA1822 // Static anyway.
-
         public bool HasTemplateKeywordAttribute( ISymbol symbol )
             => symbol.GetAttributes()
                 .Any( a => a.AttributeClass != null && a.AttributeClass.AnyBaseType( t => t.Name == nameof(TemplateKeywordAttribute) ) );
-#pragma warning restore CA1822
 
         /// <summary>
         /// Determines if the node is a pragma and returns the kind of pragma, if any.

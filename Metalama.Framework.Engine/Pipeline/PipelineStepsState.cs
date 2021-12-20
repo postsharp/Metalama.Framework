@@ -10,6 +10,7 @@ using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.DesignTime.CodeFixes;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Transformations;
+using Metalama.Framework.Engine.Validation;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -31,30 +32,36 @@ namespace Metalama.Framework.Engine.Pipeline
         private readonly UserDiagnosticSink _diagnostics;
         private readonly List<INonObservableTransformation> _nonObservableTransformations = new();
         private readonly List<IAspectInstance> _inheritableAspectInstances = new();
+        private readonly List<IValidatorSource> _validatorSources = new();
         private readonly OverflowAspectSource _overflowAspectSource = new();
         private PipelineStep? _currentStep;
 
-        public CompilationModel Compilation { get; private set; }
+        public CompilationModel LastCompilation { get; private set; }
+
+        public ImmutableArray<CompilationModel> Compilations { get; private set; }
 
         public IReadOnlyList<INonObservableTransformation> NonObservableTransformations => this._nonObservableTransformations;
 
         public ImmutableArray<IAspectInstance> InheritableAspectInstances => this._inheritableAspectInstances.ToImmutableArray();
 
+        public ImmutableArray<IValidatorSource> ValidatorSources => this._validatorSources.ToImmutableArray();
+
         public ImmutableUserDiagnosticList Diagnostics => this._diagnostics.ToImmutable();
 
-        public IReadOnlyList<IAspectSource> ExternalAspectSources => new[] { this._overflowAspectSource };
+        public ImmutableArray<IAspectSource> ExternalAspectSources => ImmutableArray.Create<IAspectSource>( this._overflowAspectSource );
 
         public AspectPipelineConfiguration PipelineConfiguration { get; }
 
         public PipelineStepsState(
             IReadOnlyList<OrderedAspectLayer> aspectLayers,
-            CompilationModel inputCompilation,
+            CompilationModel inputLastCompilation,
             IReadOnlyList<IAspectSource> inputAspectSources,
             AspectPipelineConfiguration pipelineConfiguration )
         {
             this._diagnostics = new UserDiagnosticSink( pipelineConfiguration.CompileTimeProject, pipelineConfiguration.CodeFixFilter );
-            this.Compilation = inputCompilation;
+            this.LastCompilation = inputLastCompilation;
             this.PipelineConfiguration = pipelineConfiguration;
+            this.Compilations = ImmutableArray.Create( inputLastCompilation );
 
             // Create an empty collection of steps.
             this._comparer = new PipelineStepIdComparer( aspectLayers );
@@ -89,9 +96,14 @@ namespace Metalama.Framework.Engine.Pipeline
 
                 this.DetectUnorderedSteps( ref previousStep, this._currentStep );
 
-                var compilation = this.Compilation.GetCompilationModel();
+                var compilation = this.LastCompilation.GetCompilationModel();
 
-                this.Compilation = this._currentStep!.Execute( compilation, this, cancellationToken );
+                this.LastCompilation = this._currentStep!.Execute( compilation, this, cancellationToken );
+
+                if ( compilation != this.LastCompilation )
+                {
+                    this.Compilations = this.Compilations.Add( this.LastCompilation );
+                }
             }
         }
 
@@ -102,7 +114,7 @@ namespace Metalama.Framework.Engine.Pipeline
                 if ( previousStep.AspectLayer != currentStep.AspectLayer && previousStep.AspectLayer.Order >= currentStep.AspectLayer.Order )
                 {
                     this._diagnostics.Report(
-                        GeneralDiagnosticDescriptors.UnorderedLayers.CreateDiagnostic(
+                        GeneralDiagnosticDescriptors.UnorderedLayers.CreateRoslynDiagnostic(
                             null,
                             (previousStep.AspectLayer.AspectLayerId.ToString(), currentStep.AspectLayer.AspectLayerId.ToString()) ) );
                 }
@@ -136,7 +148,7 @@ namespace Metalama.Framework.Engine.Pipeline
                         if ( !this.TryGetOrAddStep( aspectLayerId, -1, false, out var step ) )
                         {
                             this._diagnostics.Report(
-                                GeneralDiagnosticDescriptors.CannotAddChildAspectToPreviousPipelineStep.CreateDiagnostic(
+                                GeneralDiagnosticDescriptors.CannotAddChildAspectToPreviousPipelineStep.CreateRoslynDiagnostic(
                                     this._currentStep!.AspectLayer.AspectClass.DiagnosticLocation,
                                     (this._currentStep.AspectLayer.AspectClass.ShortName, aspectType.ShortName) ) );
 
@@ -198,12 +210,12 @@ namespace Metalama.Framework.Engine.Pipeline
 
             foreach ( var advice in advices )
             {
-                var depth = this.Compilation.GetDepth( advice.TargetDeclaration );
+                var depth = this.LastCompilation.GetDepth( advice.TargetDeclaration );
 
                 if ( !this.TryGetOrAddStep( advice.AspectLayerId, depth, true, out var step ) )
                 {
                     this._diagnostics.Report(
-                        GeneralDiagnosticDescriptors.CannotAddAdviceToPreviousPipelineStep.CreateDiagnostic(
+                        GeneralDiagnosticDescriptors.CannotAddAdviceToPreviousPipelineStep.CreateRoslynDiagnostic(
                             this._currentStep.AspectLayer.AspectClass.DiagnosticLocation,
                             (this._currentStep.AspectLayer.AspectClass.ShortName, advice.TargetDeclaration) ) );
 
@@ -222,7 +234,7 @@ namespace Metalama.Framework.Engine.Pipeline
         {
             foreach ( var aspectInstance in aspectInstances )
             {
-                var depth = this.Compilation.GetDepth( aspectInstance.TargetDeclaration );
+                var depth = this.LastCompilation.GetDepth( aspectInstance.TargetDeclaration );
 
                 if ( !this.TryGetOrAddStep( new AspectLayerId( aspectInstance.AspectInstance.AspectClass ), depth, true, out var step ) )
                 {
@@ -251,6 +263,13 @@ namespace Metalama.Framework.Engine.Pipeline
 
         public void AddNonObservableTransformations( IEnumerable<INonObservableTransformation> transformations )
             => this._nonObservableTransformations.AddRange( transformations );
+
+        public bool AddValidatorSources( IEnumerable<IValidatorSource> validatorSources )
+        {
+            this._validatorSources.AddRange( validatorSources );
+
+            return true;
+        }
 
         public void Report( Diagnostic diagnostic ) => this._diagnostics.Report( diagnostic );
     }

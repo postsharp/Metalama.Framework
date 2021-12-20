@@ -4,11 +4,8 @@
 using Metalama.Framework.DesignTime.Contracts;
 using Metalama.Framework.Engine.DesignTime.Preview;
 using Metalama.Framework.Engine.Pipeline;
-using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
-using System.Diagnostics;
-using System.IO;
 using System.Linq;
 
 namespace Metalama.Framework.Engine.DesignTime
@@ -26,8 +23,6 @@ namespace Metalama.Framework.Engine.DesignTime
 
             // Also configure logging.
             // TODO: Move to Microsoft.Extensions.Logging.
-
-            InitializeLogging();
         }
 
         private CompilerServiceProvider()
@@ -39,34 +34,6 @@ namespace Metalama.Framework.Engine.DesignTime
         {
             // Make sure the type is initialized.
             _ = _instance.GetType();
-        }
-
-        private static void InitializeLogging()
-        {
-            var pid = Process.GetCurrentProcess().Id;
-
-            var directory = Path.Combine( Path.GetTempPath(), "Metalama", "Logs" );
-
-            try
-            {
-                RetryHelper.Retry(
-                    () =>
-                    {
-                        if ( !Directory.Exists( directory ) )
-                        {
-                            Directory.CreateDirectory( directory );
-                        }
-                    } );
-
-                // The filename must be unique because several instances of the current assembly (of different versions) may be loaded in the process.
-                var textWriter = File.CreateText( Path.Combine( directory, $"Metalama.{Process.GetCurrentProcess().ProcessName}.{pid}.{Guid.NewGuid()}.log" ) );
-
-                Logger.Initialize( textWriter );
-            }
-            catch
-            {
-                // Don't fail if we cannot initialize the log.
-            }
         }
 
         public Version Version { get; }

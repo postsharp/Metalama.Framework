@@ -2,22 +2,23 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Engine.AspectOrdering;
-using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Pipeline;
+using Metalama.Framework.Engine.Validation;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Threading;
 
 namespace Metalama.Framework.Engine.DesignTime.Pipeline
 {
     /// <summary>
-    /// An implementation of <see cref="SourceGeneratorPipelineStage"/> called from source generators.
+    /// An implementation of <see cref="DesignTimePipelineStage"/> called from source generators.
     /// </summary>
-    internal class SourceGeneratorPipelineStage : HighLevelPipelineStage
+    internal class DesignTimePipelineStage : HighLevelPipelineStage
     {
-        public SourceGeneratorPipelineStage(
+        public DesignTimePipelineStage(
             CompileTimeProject compileTimeProject,
             IReadOnlyList<OrderedAspectLayer> aspectLayers,
             IServiceProvider serviceProvider )
@@ -32,9 +33,29 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
         {
             var diagnosticSink = new UserDiagnosticSink( this.CompileTimeProject, null );
 
+            // Discover the validators.
+            ImmutableArray<ReferenceValidatorInstance> referenceValidators;
+
+            var validatorSources = input.ValidatorSources.AddRange( pipelineStepsResult.ValidatorSources );
+
+            if ( !validatorSources.IsEmpty )
+            {
+                var validatorRunner = new ValidationRunner( pipelineConfiguration, validatorSources, cancellationToken );
+                var initialCompilation = pipelineStepsResult.Compilations[0];
+                var finalCompilation = pipelineStepsResult.Compilations[pipelineStepsResult.Compilations.Length - 1];
+                validatorRunner.RunDeclarationValidators( finalCompilation, diagnosticSink );
+                referenceValidators = validatorRunner.GetReferenceValidators( initialCompilation, diagnosticSink ).ToImmutableArray();
+            }
+            else
+            {
+                referenceValidators = ImmutableArray<ReferenceValidatorInstance>.Empty;
+            }
+
+            // Generate the additional syntax trees.
+
             DesignTimeSyntaxTreeGenerator.GenerateDesignTimeSyntaxTrees(
                 input.Compilation,
-                pipelineStepsResult.Compilation,
+                pipelineStepsResult.LastCompilation,
                 this.ServiceProvider,
                 diagnosticSink,
                 cancellationToken,
@@ -44,11 +65,13 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
                 input.Compilation,
                 input.Project,
                 input.AspectLayers,
-                input.CompilationModel,
+                input.CompilationModels.AddRange( pipelineStepsResult.Compilations ),
                 input.Diagnostics.Concat( pipelineStepsResult.Diagnostics ).Concat( diagnosticSink.ToImmutable() ),
-                input.AspectSources.Concat( pipelineStepsResult.ExternalAspectSources ),
+                input.AspectSources.AddRange( pipelineStepsResult.ExternalAspectSources ),
+                validatorSources,
                 pipelineStepsResult.InheritableAspectInstances,
-                input.AdditionalSyntaxTrees.Concat( additionalSyntaxTrees ) );
+                referenceValidators,
+                input.AdditionalSyntaxTrees.AddRange( additionalSyntaxTrees ) );
         }
     }
 }

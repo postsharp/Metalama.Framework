@@ -76,7 +76,7 @@ namespace Metalama.Framework.Engine.Aspects
                                     new DescribedObject<IDeclaration>( targetDeclaration ) )!;
 
                                 diagnosticAdder.Report(
-                                    GeneralDiagnosticDescriptors.AspectNotEligibleOnAspect.CreateDiagnostic(
+                                    GeneralDiagnosticDescriptors.AspectNotEligibleOnAspect.CreateRoslynDiagnostic(
                                         attribute.GetDiagnosticLocation(),
                                         (aspectClass.ShortName, targetDeclaration, reason) ) );
 
