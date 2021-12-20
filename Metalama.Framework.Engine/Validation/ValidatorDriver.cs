@@ -5,10 +5,19 @@ using System;
 
 namespace Metalama.Framework.Engine.Validation;
 
+/// <summary>
+/// Validation drivers cache and execute the method call to the user validation method.
+/// </summary>
 internal abstract class ValidatorDriver
 {
+    /// <summary>
+    /// Gets the type defining the validation method.
+    /// </summary>
     public Type ImplementationType { get; }
 
+    /// <summary>
+    /// Gets the name of the validation method.
+    /// </summary>
     public string MethodName { get; }
 
     protected ValidatorDriver( Type implementationType, string methodName )
