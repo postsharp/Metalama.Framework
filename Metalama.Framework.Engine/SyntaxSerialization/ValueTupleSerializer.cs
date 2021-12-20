@@ -8,8 +8,6 @@ using System.Linq;
 using System.Reflection;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
-#pragma warning disable SA1414 // Tuples should have element names.
-
 namespace Metalama.Framework.Engine.SyntaxSerialization
 {
     internal abstract class ValueTupleSerializer : ObjectSerializer

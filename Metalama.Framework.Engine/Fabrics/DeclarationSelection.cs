@@ -196,9 +196,7 @@ namespace Metalama.Framework.Engine.Fabrics
             this.RegisterAspectSource(
                 new ProgrammaticAspectSource<TAspect, T>(
                     aspectClass,
-                    ( compilation, diagnosticAdder ) =>
-                    {
-                        return this.SelectAndValidateAspectTargets(
+                    ( compilation, diagnosticAdder ) => this.SelectAndValidateAspectTargets(
                             compilation,
                             diagnosticAdder,
                             aspectClass,
@@ -217,8 +215,7 @@ namespace Metalama.Framework.Engine.Fabrics
                                     t.ToTypedRef<IDeclaration>(),
                                     aspectClass,
                                     this._parent.AspectPredecessor );
-                            } );
-                    } ) );
+                            } ) ) );
 
             return this;
         }

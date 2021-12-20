@@ -20,7 +20,7 @@ namespace Metalama.Framework.Tests.Integration.CodeFixes.ApplyAspect
         {
             base.BuildAspect(builder);
             
-            builder.Diagnostics.Report( builder.Target, _diag, default, CodeFix.ApplyAspect( builder.Target, new Aspect2(), "Apply" ) );
+            _diag.WithCodeFixes( CodeFix.ApplyAspect( builder.Target, new Aspect2(), "Apply" ) ).ReportTo( builder.Diagnostics );
         }
     }
     
