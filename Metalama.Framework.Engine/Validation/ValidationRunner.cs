@@ -14,8 +14,6 @@ using System.Threading;
 
 namespace Metalama.Framework.Engine.Validation;
 
-internal record ValidationResult( ImmutableArray<ReferenceValidatorInstance> TransitiveValidations, ImmutableUserDiagnosticList Diagnostics );
-
 internal class ValidationRunner
 {
     private readonly AspectPipelineConfiguration _configuration;
