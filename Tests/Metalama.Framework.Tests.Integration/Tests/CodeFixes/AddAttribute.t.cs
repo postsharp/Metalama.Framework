@@ -19,7 +19,7 @@ namespace Metalama.Framework.Tests.Integration.CodeFixes.AddAttribute
         {
             base.BuildAspect(builder);
             
-            builder.Diagnostics.Report( builder.Target, _diag, default, CodeFix.AddAttribute(  builder.Target, typeof(MyAttribute) ) );
+            _diag.WithCodeFixes( CodeFix.AddAttribute(  builder.Target, typeof(MyAttribute) )  ).ReportTo( builder.Diagnostics );
         }
     }
     
