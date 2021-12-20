@@ -50,6 +50,13 @@ namespace Metalama.Framework.Engine.Linking
             return this.FindUniqueName( targetType, nameHint );
         }
 
+        internal override string GetInitializerName( INamedType targetType, AspectLayerId aspectLayer, IFieldOrProperty initializedDeclaration )
+        {
+            var nameHint = $"Initialize_{initializedDeclaration.Name}";
+
+            return this.FindUniqueName( targetType, nameHint );
+        }
+
         private string FindUniqueName( INamedType containingType, string hint )
         {
             if ( CheckName( hint ) )

@@ -12,5 +12,7 @@ namespace Metalama.Framework.Code.DeclarationBuilders
         /// Gets or sets the type of the field or property.
         /// </summary>
         new IType Type { get; set; }
+
+        IExpression? InitializerExpression { get; set; }
     }
 }

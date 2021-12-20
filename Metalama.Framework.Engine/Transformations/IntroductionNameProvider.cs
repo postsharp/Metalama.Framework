@@ -12,5 +12,7 @@ namespace Metalama.Framework.Engine.Transformations
     internal abstract class IntroductionNameProvider
     {
         internal abstract string GetOverrideName( INamedType targetType, AspectLayerId aspectLayer, IMember overriddenDeclaration );
+
+        internal abstract string GetInitializerName( INamedType targetType, AspectLayerId aspectLayer, IFieldOrProperty initializedDeclaration );
     }
 }

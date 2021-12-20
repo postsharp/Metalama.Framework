@@ -252,6 +252,18 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
             this._type = fieldOrProperty.DeclaringType;
         }
 
+        private MetaApi( IFieldOrProperty fieldOrProperty, MetaApiProperties common ) : this( (IDeclaration)fieldOrProperty, common )
+        {
+            this._fieldOrProperty = fieldOrProperty switch
+            {
+                IField field => new AdvisedField( field ),
+                IProperty property => new AdvisedProperty( property ),
+                _ => throw new AssertionFailedException()
+            };
+
+            this._type = fieldOrProperty.DeclaringType;
+        }
+
         private MetaApi( IEvent @event, IMethod accessor, MetaApiProperties common ) : this( accessor, common )
         {
             this._event = new AdvisedEvent( @event );
@@ -263,6 +275,9 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
 
         public static MetaApi ForFieldOrProperty( IFieldOrProperty fieldOrProperty, IMethod accessor, MetaApiProperties common )
             => new( fieldOrProperty, accessor, common );
+
+        public static MetaApi ForFieldOrPropertyInitializer( IFieldOrProperty fieldOrProperty, MetaApiProperties common )
+            => new( fieldOrProperty, common );
 
         public static MetaApi ForEvent( IEvent @event, IMethod accessor, MetaApiProperties common ) => new( @event, accessor, common );
     }

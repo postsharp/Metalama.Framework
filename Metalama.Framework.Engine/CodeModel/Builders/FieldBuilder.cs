@@ -6,6 +6,7 @@ using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.Advices;
 using Metalama.Framework.Engine.CodeModel.Invokers;
+using Metalama.Framework.Engine.Templating.MetaModel;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.RunTime;
@@ -48,7 +49,9 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                 InsertPositionRelation.Within,
                 (MemberDeclarationSyntax) ((NamedType) this.DeclaringType).Symbol.GetPrimaryDeclaration().AssertNotNull() );
 
-        public ExpressionSyntax? InitializerSyntax { get; set; }
+        public IExpression? InitializerExpression { get; set; }
+
+        public TemplateMember<IProperty> InitializerTemplate { get; set; }
 
         public FieldBuilder( Advice parentAdvice, INamedType targetType, string name )
             : base( parentAdvice, targetType, name )
@@ -60,6 +63,23 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         {
             var syntaxGenerator = context.SyntaxGenerationContext.SyntaxGenerator;
 
+            ExpressionSyntax? initializerExpression;
+
+            if ( this.InitializerExpression != null )
+            {
+                // TODO: Error about the expression type?
+
+                initializerExpression = ((IUserExpression) this.InitializerExpression).ToRunTimeExpression().Syntax;
+            }
+            else if ( this.HasInitializerTemplate )
+            {
+                throw new AssertionFailedException();
+            }
+            else
+            {
+                initializerExpression = null;
+            }
+
             var field =
                 FieldDeclaration(
                     List<AttributeListSyntax>(), // TODO: Attributes.
@@ -70,8 +90,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                             VariableDeclarator(
                                 Identifier( this.Name ),
                                 null,
-                                this.InitializerSyntax != null
-                                    ? EqualsValueClause( this.InitializerSyntax )
+                                initializerExpression != null
+                                    ? EqualsValueClause( initializerExpression )
                                     : null ) ) ) );
 
             return new[] { new IntroducedMember( this, field, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, this ) };

@@ -7,6 +7,7 @@ using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
+using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Transformations;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -49,8 +50,8 @@ namespace Metalama.Framework.Engine.Advices
                 name,
                 hasGet,
                 hasSet,
-                this.TemplateMember is { IsAutoPropertyOrField: true },
-                this.TemplateMember is { Writeability: Writeability.InitOnly } );
+                this.Template.Declaration is { IsAutoPropertyOrField: true },
+                this.Template.Declaration is { Writeability: Writeability.InitOnly } );
 
             if ( propertyTemplate.IsNotNull )
             {
@@ -64,13 +65,17 @@ namespace Metalama.Framework.Engine.Advices
 
             // TODO: Indexers.
 
-            this.MemberBuilder.Type = (this.TemplateMember?.Type ?? this._getTemplate.Declaration?.ReturnType).AssertNotNull();
-            this.MemberBuilder.Accessibility = (this.TemplateMember?.Accessibility ?? this._getTemplate.Declaration?.Accessibility).AssertNotNull();
+            this.MemberBuilder.Type = (this.Template.Declaration?.Type ?? this._getTemplate.Declaration?.ReturnType).AssertNotNull();
+            this.MemberBuilder.Accessibility = (this.Template.Declaration?.Accessibility ?? this._getTemplate.Declaration?.Accessibility).AssertNotNull();
 
-            if ( this.TemplateMember != null )
+            if ( this.Template.Declaration != null )
             {
-                var declaration = (PropertyDeclarationSyntax) this.TemplateMember.GetPrimaryDeclaration().AssertNotNull();
-                this.MemberBuilder.InitializerSyntax = declaration.Initializer?.Value;
+                var declarator = (PropertyDeclarationSyntax)this.Template.Declaration.GetPrimaryDeclaration().AssertNotNull();
+
+                if ( declarator.Initializer != null )
+                {
+                    this.MemberBuilder.InitializerTemplate = TemplateMember.Create( this.Template.Declaration, TemplateInfo.None, TemplateKind.Introduction );
+                }
             }
         }
 

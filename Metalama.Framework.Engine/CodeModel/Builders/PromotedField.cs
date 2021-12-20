@@ -15,6 +15,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public MemberRef<IMemberOrNamedType> ReplacedMember => this._field.ToMemberRef<IMemberOrNamedType>();
 
+        public EqualsValueClauseSyntax? InitializerSyntax { get; set; }
+
         public PromotedField( Advice advice, IField field ) : base(
             advice,
             field.DeclaringType,
@@ -29,18 +31,20 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             this.Accessibility = this._field.Accessibility;
             this.IsStatic = this._field.IsStatic;
 
-            // Copy the initializer.
             if ( this._field is BuiltField builtField )
             {
-                this.InitializerSyntax = builtField.FieldBuilder.InitializerSyntax;
+                // For field builder, copy the expression and template.
+                this.InitializerTemplate = builtField.FieldBuilder.InitializerTemplate;
+                this.InitializerExpression = builtField.FieldBuilder.InitializerExpression;
             }
             else
             {
+                // For original code fields, copy the initializer syntax.
                 var fieldDeclaration = (VariableDeclaratorSyntax) this._field.GetPrimaryDeclaration().AssertNotNull();
 
                 if ( fieldDeclaration.Initializer != null )
                 {
-                    this.InitializerSyntax = fieldDeclaration.Initializer.Value;
+                    this.InitializerSyntax = fieldDeclaration.Initializer;
                 }
             }
 

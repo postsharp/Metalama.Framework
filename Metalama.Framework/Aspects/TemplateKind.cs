@@ -48,8 +48,13 @@ namespace Metalama.Framework.Aspects
         IAsyncEnumerator,
 
         /// <summary>
-        /// Templated used for an introduction. Can be any type, must be detected from the signature and implementation.
+        /// Template used for an introduction. Can be any type, must be detected from the signature and implementation.
         /// </summary>
-        Introduction
+        Introduction,
+
+        /// <summary>
+        /// Template used for initializer of introduced field, property of event field.
+        /// </summary>
+        Initializer,
     }
 }

@@ -8,6 +8,7 @@ using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Templating.MetaModel;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
 
@@ -47,7 +48,11 @@ namespace Metalama.Framework.Engine.Advices
             if ( this.TemplateMember != null )
             {
                 var declarator = (VariableDeclaratorSyntax) this.TemplateMember.GetPrimaryDeclaration().AssertNotNull();
-                this.MemberBuilder.InitializerSyntax = declarator.Initializer?.Value;
+
+                if ( declarator.Initializer != null )
+                {
+                    this.MemberBuilder.HasInitializerTemplate = true;
+                }
             }
         }
 
