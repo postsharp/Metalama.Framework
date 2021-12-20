@@ -54,16 +54,6 @@ namespace Metalama.Framework.Engine.CompileTime
         /// </summary>
         protected virtual Assembly LoadAssembly( string path ) => Assembly.LoadFile( path );
 
-        internal void RegisterAssembly( AssemblyIdentity identity, Assembly assembly )
-        {
-            this._assemblyCache[identity] = assembly;
-
-            if ( !this._assembliesByName.TryAdd( identity.Name, (assembly, identity) ) )
-            {
-                throw new AssertionFailedException();
-            }
-        }
-
         /// <summary>
         /// Gets an assembly given its <see cref="AssemblyIdentity"/> and image, or loads it.
         /// </summary>
