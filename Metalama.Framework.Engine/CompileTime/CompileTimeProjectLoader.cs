@@ -92,7 +92,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 {
                     return null;
                 }
-                
+
                 type = compileTimeProject?.GetTypeOrNull( reflectionName );
 
                 this.Cache.Add( typeSymbol, type );

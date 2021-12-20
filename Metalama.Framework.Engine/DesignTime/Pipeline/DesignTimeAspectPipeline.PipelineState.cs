@@ -272,7 +272,7 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
                         else
                         {
                             Logger.Instance?.Write( "Requiring an in-process configuration refresh." );
-                            
+
                             newConfiguration = null;
                             newStatus = DesignTimeAspectPipelineStatus.Default;
                         }
@@ -419,7 +419,7 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
 
                 IEnumerable<SyntaxTree> syntaxTreesToValidate;
 
-                if (state.PipelineResult.Validators.EqualityKey == state.ValidationResult.ValidatorEqualityKey)
+                if ( state.PipelineResult.Validators.EqualityKey == state.ValidationResult.ValidatorEqualityKey )
                 {
                     // If validators did not change, we only have to validate syntax trees that have changed.
                     // (we actually received a closure of modified syntax trees, so the flow could be optimized).
@@ -435,13 +435,13 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
 
                 var userDiagnosticSink = new UserDiagnosticSink( configuration.CompileTimeProject, null );
 
-                foreach (var syntaxTree in syntaxTreesToValidate)
+                foreach ( var syntaxTree in syntaxTreesToValidate )
                 {
                     userDiagnosticSink.Reset();
                     var semanticModel = compilation.Compilation.GetSemanticModel( syntaxTree );
                     validationRunner.Validate( semanticModel, userDiagnosticSink, cancellationToken );
 
-                    if (!userDiagnosticSink.IsEmpty)
+                    if ( !userDiagnosticSink.IsEmpty )
                     {
                         var diagnostics = userDiagnosticSink.ToImmutable();
 

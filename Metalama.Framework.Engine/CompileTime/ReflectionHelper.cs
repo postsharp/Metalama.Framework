@@ -77,7 +77,7 @@ namespace Metalama.Framework.Engine.CompileTime
                         {
                             return false;
                         }
-                        
+
                         sb.Append( '+' );
 
                         break;
@@ -89,6 +89,7 @@ namespace Metalama.Framework.Engine.CompileTime
                             {
                                 return false;
                             }
+
                             sb.Append( '.' );
                         }
 
@@ -113,6 +114,7 @@ namespace Metalama.Framework.Engine.CompileTime
                             }
 
                             var arg = unboundGenericType.TypeArguments[i];
+
                             if ( !TryAppend( arg ) )
                             {
                                 return false;
@@ -133,6 +135,7 @@ namespace Metalama.Framework.Engine.CompileTime
                         {
                             return false;
                         }
+
                         sb.Append( '[' );
 
                         for ( var i = 1; i < array.Rank; i++ )
@@ -149,6 +152,7 @@ namespace Metalama.Framework.Engine.CompileTime
                         {
                             return false;
                         }
+
                         sb.Append( '*' );
 
                         break;
@@ -157,7 +161,7 @@ namespace Metalama.Framework.Engine.CompileTime
                         sb.Append( "System.Object" );
 
                         break;
-                    
+
                     case IErrorTypeSymbol:
                         return false;
 

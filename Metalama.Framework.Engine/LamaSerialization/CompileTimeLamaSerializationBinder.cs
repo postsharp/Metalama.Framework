@@ -25,7 +25,7 @@ internal class CompileTimeLamaSerializationBinder : LamaSerializationBinder
             // Replace by the current system assembly.
             assemblyName = _systemAssemblyName;
         }
-        
+
         if ( CompileTimeCompilationBuilder.TryParseCompileTimeAssemblyName( assemblyName, out var runTimeAssemblyName ) )
         {
             return this._project.GetType( typeName, runTimeAssemblyName );

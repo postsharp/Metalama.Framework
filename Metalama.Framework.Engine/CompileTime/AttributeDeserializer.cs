@@ -66,8 +66,9 @@ namespace Metalama.Framework.Engine.CompileTime
             if ( constructorSymbol == null )
             {
                 // This may happen at design time or with an invalid file. In this case, no error message is necessary.
-                
+
                 attributeInstance = null;
+
                 return false;
             }
 
@@ -118,7 +119,7 @@ namespace Metalama.Framework.Engine.CompileTime
             if ( constructorParameters.Length > 0 )
             {
                 // This code seems to execute only at design time.
-                
+
                 var lastParameter = constructorSymbol.Parameters[constructorParameters.Length - 1];
 
                 if ( lastParameter.IsParams && constructorParameters.Length != attribute.ConstructorArguments.Length )
@@ -126,11 +127,10 @@ namespace Metalama.Framework.Engine.CompileTime
                     paramsParameter = constructorParameters[constructorParameters.Length - 1];
 
                     paramsArgument = Array.CreateInstance(
-                         paramsParameter.ParameterType.GetElementType(),
+                        paramsParameter.ParameterType.GetElementType(),
                         attribute.ConstructorArguments.Length - constructorParameters.Length + 1 );
                 }
             }
-            
 
             for ( var i = 0; i < attribute.ConstructorArguments.Length; i++ )
             {

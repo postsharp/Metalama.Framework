@@ -9,6 +9,7 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline;
 public class CompilationValidationResult
 {
     public static CompilationValidationResult Empty { get; } = new();
+
     internal ImmutableDictionary<string, SyntaxTreeValidationResult> SyntaxTreeResults { get; }
 
     public DesignTimeValidatorCollectionEqualityKey ValidatorEqualityKey { get; }

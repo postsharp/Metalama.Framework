@@ -30,11 +30,11 @@ namespace Metalama.Framework.Engine.CompileTime
     {
         private static readonly Assembly _frameworkAssembly = typeof(IAspect).Assembly;
         private static readonly AssemblyIdentity _frameworkAssemblyIdentity = _frameworkAssembly.GetName().ToAssemblyIdentity();
-        
+
         private static readonly CompileTimeProjectManifest _frameworkProjectManifest = new(
             _frameworkAssemblyIdentity.ToString(),
             _frameworkAssemblyIdentity.ToString(),
-            new[] { typeof(InternalImplementAttribute)}
+            new[] { typeof(InternalImplementAttribute) }
                 .Select( t => t.FullName )
                 .ToImmutableArray(),
             ImmutableArray<string>.Empty,

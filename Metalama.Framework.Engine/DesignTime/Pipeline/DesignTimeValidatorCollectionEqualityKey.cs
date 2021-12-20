@@ -9,7 +9,7 @@ public readonly struct DesignTimeValidatorCollectionEqualityKey : IEquatable<Des
 {
     private readonly ulong _hashCode;
 
-    internal static DesignTimeValidatorCollectionEqualityKey Empty { get; } = new( 0 ); 
+    internal static DesignTimeValidatorCollectionEqualityKey Empty { get; } = new( 0 );
 
     internal DesignTimeValidatorCollectionEqualityKey( ulong hashCode )
     {

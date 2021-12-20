@@ -8,7 +8,7 @@ using System.Collections.Generic;
 namespace Metalama.Framework.Aspects;
 
 /// <summary>
-/// An interface that allows aspects and fabrics to add child aspects and register validators
+/// An interface that allows aspects and fabrics to add child aspects and register validators.
 /// </summary>
 public interface IDeclarationSelector<out TTarget>
     where TTarget : class, IDeclaration

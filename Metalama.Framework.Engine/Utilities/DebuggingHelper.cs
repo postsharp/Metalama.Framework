@@ -49,6 +49,7 @@ namespace Metalama.Framework.Engine.Utilities
         // The argument type must be specified explicitly to make sure we are not creating ids for unwanted objects.
         // This avoids e.g. confusion between PartialCompilation and Compilation.
         public static int GetObjectId( Compilation o ) => GetObjectIdImpl( o );
+
         public static int GetObjectId( AspectPipelineConfiguration o ) => GetObjectIdImpl( o );
 
         /// <summary>

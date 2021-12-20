@@ -260,18 +260,16 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
                 }
                 else
                 {
-                    
                     Logger.Instance?.Write(
                         $"DesignTimeAspectPipelineCache.TryExecute('{compilation.AssemblyName}', CompilationId = {DebuggingHelper.GetObjectId( compilation )}): external build required,"
                         +
                         $" returning from cache only." );
 
-
                     // If we need an external build, we only serve pipeline results from the cache.
                     // For validation results, we need to continuously run the templating validators (not the user ones) because the user is likely editing the
                     // template right now. We run only the system validators. We don't run the user validators because of performance -- at this point, we don't have
                     // caching, so we need to validate all syntax trees. If we want to improve performance, we would have to cache system validators separately from the pipeline.
-                    
+
                     var validationResult = this.ValidateWithBrokenPipeline( compilation, this, cancellationToken );
                     compilationResult = new CompilationResult( this._currentState.PipelineResult, validationResult );
 
@@ -279,21 +277,21 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
                 }
             }
         }
-        
-        private  CompilationValidationResult ValidateWithBrokenPipeline(
+
+        private CompilationValidationResult ValidateWithBrokenPipeline(
             Compilation compilation,
             DesignTimeAspectPipeline pipeline,
             CancellationToken cancellationToken )
         {
             var resultBuilder = ImmutableDictionary.CreateBuilder<string, SyntaxTreeValidationResult>();
             var diagnostics = new List<Diagnostic>();
-            
+
             foreach ( var syntaxTree in compilation.SyntaxTrees )
             {
                 diagnostics.Clear();
-                
+
                 var semanticModel = compilation.GetSemanticModel( syntaxTree );
-                
+
                 TemplatingCodeValidator.Validate(
                     pipeline.ServiceProvider,
                     semanticModel,
@@ -321,7 +319,6 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
             }
 
             return new CompilationValidationResult( resultBuilder.ToImmutable(), DesignTimeValidatorCollectionEqualityKey.Empty );
-
         }
 
         private List<SyntaxTree> GetDirtySyntaxTrees( Compilation compilation )

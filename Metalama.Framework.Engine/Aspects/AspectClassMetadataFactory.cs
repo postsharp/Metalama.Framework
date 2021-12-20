@@ -101,10 +101,10 @@ namespace Metalama.Framework.Engine.Aspects
             IDiagnosticAdder diagnosticAdder )
         {
             var aspectTypesDiagnostics = aspectTypes
-                .Select( t => ( Symbol: t, ReflectionName: t.GetReflectionName().AssertNotNull(  )) )
+                .Select( t => (Symbol: t, ReflectionName: t.GetReflectionName().AssertNotNull()) )
                 .ToDictionary(
-                t => t.ReflectionName,
-                t => new AspectTypeData( compileTimeProject, t.ReflectionName, t.Symbol, compileTimeProject.GetType( t.ReflectionName ) ) );
+                    t => t.ReflectionName,
+                    t => new AspectTypeData( compileTimeProject, t.ReflectionName, t.Symbol, compileTimeProject.GetType( t.ReflectionName ) ) );
 
             return this.GetAspectClasses( aspectTypesDiagnostics, diagnosticAdder, null! );
         }
@@ -134,7 +134,7 @@ namespace Metalama.Framework.Engine.Aspects
                 {
                     // Process the base type.
 
-                    if ( aspectTypeDataDictionary.TryGetValue( aspectTypeSymbol.BaseType.GetReflectionName(), out var baseData ) )
+                    if ( aspectTypeDataDictionary.TryGetValue( aspectTypeSymbol.BaseType.GetReflectionName().AssertNotNull(), out var baseData ) )
                     {
                         if ( !TryProcessType( aspectTypeSymbol.BaseType, aspectReflectionType.BaseType, baseData.Project, out baseAspectClass ) )
                         {
