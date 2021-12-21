@@ -7,6 +7,7 @@ using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Validation;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -16,13 +17,19 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline;
 
 internal class DesignTimeValidatorRunner
 {
+    private readonly IServiceProvider _serviceProvider;
     private readonly CompilationPipelineResult _compilationResult;
     private readonly IProject _project;
     private readonly DesignTimeAspectPipeline _pipeline;
     private readonly Dictionary<ISymbol, ImmutableArray<ReferenceValidatorInstance>> _validators = new();
 
-    public DesignTimeValidatorRunner( CompilationPipelineResult compilationResult, IProject project, DesignTimeAspectPipeline pipeline )
+    public DesignTimeValidatorRunner(
+        IServiceProvider serviceProvider,
+        CompilationPipelineResult compilationResult,
+        IProject project,
+        DesignTimeAspectPipeline pipeline )
     {
+        this._serviceProvider = serviceProvider;
         this._compilationResult = compilationResult;
         this._project = project;
         this._pipeline = pipeline;
@@ -34,7 +41,13 @@ internal class DesignTimeValidatorRunner
         {
             var compilation = CompilationModel.CreateInitialInstance( this._project, PartialCompilation.CreatePartial( model.Compilation, model.SyntaxTree ) );
 
-            var visitor = new ReferenceValidationVisitor( diagnosticSink, s => this.GetValidatorsForSymbol( s, compilation ), compilation, cancellationToken );
+            using var visitor = new ReferenceValidationVisitor(
+                this._serviceProvider,
+                diagnosticSink,
+                s => this.GetValidatorsForSymbol( s, compilation ),
+                compilation,
+                cancellationToken );
+
             visitor.Visit( model );
         }
 

@@ -415,7 +415,11 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
                 AspectPipelineConfiguration configuration,
                 CancellationToken cancellationToken )
             {
-                var validationRunner = new DesignTimeValidatorRunner( state.PipelineResult, configuration.ProjectModel, state._pipeline );
+                var validationRunner = new DesignTimeValidatorRunner(
+                    state.Configuration!.ServiceProvider,
+                    state.PipelineResult,
+                    configuration.ProjectModel,
+                    state._pipeline );
 
                 IEnumerable<SyntaxTree> syntaxTreesToValidate;
 

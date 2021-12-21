@@ -145,7 +145,7 @@ namespace Metalama.Framework.Engine.Aspects
 
         public AspectPredecessor AspectPredecessor { get; private set; }
 
-        public ValidatorDriver GetValidatorDriver( string name, ValidatorKind kind )
-            => ((IValidatorDriverFactory) this.AspectInstance.AspectClass).GetValidatorDriver( name, kind );
+        public ValidatorDriver<TContext> GetValidatorDriver<TContext>( string name )
+            => ((IValidatorDriverFactory) this.AspectInstance.AspectClass).GetValidatorDriver<TContext>( name );
     }
 }

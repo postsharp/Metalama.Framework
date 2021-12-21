@@ -390,11 +390,11 @@ namespace Metalama.Framework.Engine.Aspects
 
         public override string ToString() => this.FullName;
 
-        public ValidatorDriver GetValidatorDriver( string name, ValidatorKind kind )
+        public ValidatorDriver<TContext> GetValidatorDriver<TContext>( string name )
         {
             this._validatorDriverFactory ??= ValidatorDriverFactory.GetInstance( this.AspectType );
 
-            return this._validatorDriverFactory.GetValidatorDriver( name, kind );
+            return this._validatorDriverFactory.GetValidatorDriver<TContext>( name );
         }
     }
 }

@@ -7,6 +7,9 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Pipeline;
+using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Project;
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -19,11 +22,15 @@ internal class ValidationRunner
     private readonly AspectPipelineConfiguration _configuration;
     private readonly ImmutableArray<IValidatorSource> _sources;
     private readonly CancellationToken _cancellationToken;
+    private readonly IServiceProvider _serviceProvider;
+    private readonly UserCodeInvoker _userCodeInvoker;
 
     public ValidationRunner( AspectPipelineConfiguration configuration, ImmutableArray<IValidatorSource> sources, CancellationToken cancellationToken )
     {
         this._configuration = configuration;
         this._sources = sources;
+        this._serviceProvider = configuration.ServiceProvider;
+        this._userCodeInvoker = this._serviceProvider.GetRequiredService<UserCodeInvoker>();
         this._cancellationToken = cancellationToken;
     }
 
@@ -40,20 +47,27 @@ internal class ValidationRunner
         return new ValidationResult( transitiveValidators, userDiagnosticSink.ToImmutable() );
     }
 
-    public void RunDeclarationValidators( CompilationModel finalCompilation, IDiagnosticSink diagnosticAdder )
+    public void RunDeclarationValidators( CompilationModel finalCompilation, UserDiagnosticSink diagnosticAdder )
     {
         var validators = this._sources
             .Where( s => s.Kind == ValidatorKind.Definition )
             .SelectMany( s => s.GetValidators( finalCompilation, diagnosticAdder ) )
             .Cast<DeclarationValidatorInstance>();
 
-        foreach ( var validator in validators )
+        var userCodeExecutionContext = new UserCodeExecutionContext( this._serviceProvider, diagnosticAdder, default, compilationModel: finalCompilation );
+
+        using ( UserCodeExecutionContext.WithContext( userCodeExecutionContext ) )
         {
-            validator.Validate( diagnosticAdder );
+            foreach ( var validator in validators )
+            {
+                userCodeExecutionContext.InvokedMember = UserCodeMemberInfo.FromMemberInfo( validator.Driver.ValidateMethod );
+
+                validator.Validate( diagnosticAdder, this._userCodeInvoker, null );
+            }
         }
     }
 
-    private ImmutableArray<ReferenceValidatorInstance> RunReferenceValidators( CompilationModel initialCompilation, IDiagnosticSink diagnosticAdder )
+    private ImmutableArray<ReferenceValidatorInstance> RunReferenceValidators( CompilationModel initialCompilation, UserDiagnosticSink diagnosticAdder )
     {
         var validators = this.GetReferenceValidators( initialCompilation, diagnosticAdder );
 
@@ -67,11 +81,17 @@ internal class ValidationRunner
             return ImmutableArray<ReferenceValidatorInstance>.Empty;
         }
 
-        var visitor = new ReferenceValidationVisitor( diagnosticAdder, s => validatorsBySymbol[s], initialCompilation, this._cancellationToken );
-
-        foreach ( var syntaxTree in initialCompilation.PartialCompilation.SyntaxTrees )
+        using ( var visitor = new ReferenceValidationVisitor(
+                   this._serviceProvider,
+                   diagnosticAdder,
+                   s => validatorsBySymbol[s],
+                   initialCompilation,
+                   this._cancellationToken ) )
         {
-            visitor.Visit( syntaxTree.Value );
+            foreach ( var syntaxTree in initialCompilation.PartialCompilation.SyntaxTrees )
+            {
+                visitor.Visit( syntaxTree.Value );
+            }
         }
 
         return validatorsBySymbol.Where( s => s.Key.GetResultingAccessibility() != AccessibilityFlags.SameType )

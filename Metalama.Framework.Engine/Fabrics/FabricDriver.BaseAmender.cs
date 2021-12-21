@@ -84,6 +84,6 @@ internal abstract partial class FabricDriver
 
         public AspectPredecessor AspectPredecessor => new( AspectPredecessorKind.Fabric, this._fabricInstance );
 
-        public ValidatorDriver GetValidatorDriver( string name, ValidatorKind kind ) => throw new NotImplementedException();
+        public ValidatorDriver<TContext> GetValidatorDriver<TContext>( string name ) => throw new NotImplementedException();
     }
 }

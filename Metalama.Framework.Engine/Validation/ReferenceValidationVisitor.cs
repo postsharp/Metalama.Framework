@@ -4,6 +4,9 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Project;
 using Metalama.Framework.Validation;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -14,20 +17,24 @@ using System.Threading;
 
 namespace Metalama.Framework.Engine.Validation;
 
-internal class ReferenceValidationVisitor : CSharpSyntaxWalker
+internal class ReferenceValidationVisitor : CSharpSyntaxWalker, IDisposable
 {
     private const int _initialStackSize = 8;
     private readonly IDiagnosticSink _diagnosticAdder;
     private readonly Func<ISymbol, ImmutableArray<ReferenceValidatorInstance>> _getValidatorsFunc;
     private readonly CompilationModel _compilation;
+    private readonly UserCodeInvoker _userCodeInvoker;
     private readonly CancellationToken _cancellationToken;
+    private readonly UserCodeExecutionContext _userCodeExecutionContext;
+    private readonly DisposeAction _disposeExecutionContext;
     private SemanticModel? _semanticModel;
     private int _stackIndex = -1;
     private SyntaxNode?[] _nodeStack = new SyntaxNode?[_initialStackSize];
     private IDeclaration?[] _declarationStack = new IDeclaration?[_initialStackSize];
 
     public ReferenceValidationVisitor(
-        IDiagnosticSink diagnosticAdder,
+        IServiceProvider serviceProvider,
+        UserDiagnosticSink diagnosticAdder,
         Func<ISymbol, ImmutableArray<ReferenceValidatorInstance>> getValidatorsFunc,
         CompilationModel compilation,
         CancellationToken cancellationToken )
@@ -35,7 +42,10 @@ internal class ReferenceValidationVisitor : CSharpSyntaxWalker
         this._diagnosticAdder = diagnosticAdder;
         this._getValidatorsFunc = getValidatorsFunc;
         this._compilation = compilation;
+        this._userCodeInvoker = serviceProvider.GetRequiredService<UserCodeInvoker>();
+        this._userCodeExecutionContext = new UserCodeExecutionContext( serviceProvider, diagnosticAdder, default, compilationModel: compilation );
         this._cancellationToken = cancellationToken;
+        this._disposeExecutionContext = UserCodeExecutionContext.WithContext( this._userCodeExecutionContext );
     }
 
     public void Visit( SyntaxTree syntaxTree )
@@ -301,7 +311,8 @@ internal class ReferenceValidationVisitor : CSharpSyntaxWalker
         {
             if ( (validator.ReferenceKinds & referenceKinds) != 0 )
             {
-                validator.Validate( currentDeclaration, node, referenceKinds, this._diagnosticAdder );
+                this._userCodeExecutionContext.InvokedMember = UserCodeMemberInfo.FromMemberInfo( validator.Driver.ValidateMethod );
+                validator.Validate( currentDeclaration, node, referenceKinds, this._diagnosticAdder, this._userCodeInvoker, null );
             }
         }
 
@@ -443,5 +454,10 @@ internal class ReferenceValidationVisitor : CSharpSyntaxWalker
             this._parent._declarationStack[this._parent._stackIndex] = null;
             this._parent._stackIndex--;
         }
+    }
+
+    public void Dispose()
+    {
+        this._disposeExecutionContext.Dispose();
     }
 }

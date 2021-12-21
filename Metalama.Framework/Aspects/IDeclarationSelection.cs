@@ -33,9 +33,7 @@ namespace Metalama.Framework.Aspects
         /// in the current set.  This method must have a parameter of type <c>in</c> <see cref="DeclarationValidationContext"/>.  
         /// </summary>
         /// <param name="methodName"></param>
-        /// <typeparam name="T"></typeparam>
-        void RegisterDeclarationValidator<T>( string methodName )
-            where T : IDeclaration;
+        void RegisterDeclarationValidator( string methodName );
 
         /// <summary>
         /// Adds an aspect to the current set of declarations. This overload allows adding inherited aspects.

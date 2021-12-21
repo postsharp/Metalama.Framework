@@ -19,22 +19,22 @@ internal class ProgrammaticValidatorSource : IValidatorSource
 
     private readonly Func<ProgrammaticValidatorSource, CompilationModel, IDiagnosticSink, IEnumerable<ValidatorInstance>> _func;
 
-    public ValidatorKind Kind { get; }
-
     public ProgrammaticValidatorSource(
         IValidatorDriverFactory driverFactory,
+        ValidatorKind validatorKind,
         AspectPredecessor predecessor,
         string methodName,
-        ValidatorKind kind,
         Func<ProgrammaticValidatorSource, CompilationModel, IDiagnosticSink, IEnumerable<ValidatorInstance>> func )
     {
-        this.Driver = driverFactory.GetValidatorDriver( methodName, kind );
+        this.Driver = driverFactory.GetValidatorDriver( methodName, validatorKind );
+        this.Kind = validatorKind;
         this.Predecessor = predecessor;
         this.MethodName = methodName;
         this._func = func;
-        this.Kind = kind;
     }
 
     public IEnumerable<ValidatorInstance> GetValidators( CompilationModel compilation, IDiagnosticSink diagnosticAdder )
         => this._func.Invoke( this, compilation, diagnosticAdder );
+
+    public ValidatorKind Kind { get; }
 }

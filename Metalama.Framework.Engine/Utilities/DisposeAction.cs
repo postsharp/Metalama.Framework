@@ -7,7 +7,7 @@ namespace Metalama.Framework.Engine.Utilities
 {
     internal readonly struct DisposeAction : IDisposable
     {
-        private readonly Action _action;
+        private readonly Action? _action;
 
         public DisposeAction( Action action )
         {
@@ -16,7 +16,7 @@ namespace Metalama.Framework.Engine.Utilities
 
         public void Dispose()
         {
-            this._action();
+            this._action?.Invoke();
         }
     }
 }

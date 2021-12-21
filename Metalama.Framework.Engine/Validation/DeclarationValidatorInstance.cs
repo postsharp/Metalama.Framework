@@ -3,23 +3,33 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
+using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Validation;
 
 namespace Metalama.Framework.Engine.Validation;
 
 internal class DeclarationValidatorInstance : ValidatorInstance
 {
-    private readonly DeclarationValidatorDriver _driver;
+    private readonly ValidatorDriver<DeclarationValidationContext> _driver;
 
-    public DeclarationValidatorInstance( IDeclaration validatedDeclaration, ValidatorDriver driver, in ValidatorImplementation implementation ) : base(
+    public DeclarationValidatorInstance(
+        IDeclaration validatedDeclaration,
+        ValidatorDriver<DeclarationValidationContext> driver,
+        in ValidatorImplementation implementation ) : base(
         validatedDeclaration,
         driver,
         implementation )
     {
-        this._driver = (DeclarationValidatorDriver) driver;
+        this._driver = driver;
     }
 
-    public void Validate( IDiagnosticSink diagnosticAdder )
+    public void Validate( IDiagnosticSink diagnosticAdder, UserCodeInvoker userCodeInvoker, UserCodeExecutionContext? userCodeExecutionContext )
     {
-        this._driver.Validate( this.Implementation, this.ValidatedDeclaration, diagnosticAdder );
+        var validationContext = new DeclarationValidationContext(
+            this.ValidatedDeclaration,
+            this.Implementation.State,
+            diagnosticAdder );
+
+        this._driver.Validate( this.Implementation, validationContext, userCodeInvoker, userCodeExecutionContext );
     }
 }
