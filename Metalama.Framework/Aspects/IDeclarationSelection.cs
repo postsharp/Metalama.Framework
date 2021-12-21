@@ -23,17 +23,16 @@ namespace Metalama.Framework.Aspects
         /// must have a parameter of type <c>in</c> <see cref="ReferenceValidationContext"/>. Only source code references
         /// are validated. References added by aspects are ignored by design.
         /// </summary>
-        /// <param name="methodName">Name of the validating method. It must be a method in the current aspect or fabric type,
-        /// and must have must have a parameter of type <c>in</c> <see cref="ReferenceValidationContext"/>.</param>
+        /// <param name="validateMethod"></param>
         /// <param name="referenceKinds">Kinds of references that this method is interested to analyze.</param>
-        void RegisterReferenceValidator( string methodName, ReferenceKinds referenceKinds );
+        void RegisterReferenceValidator( ValidatorDelegate<ReferenceValidationContext> validateMethod, ReferenceKinds referenceKinds );
 
         /// <summary>
         /// Registers a method that will be invoked to validate the final state (i.e. the state including the transformation by all aspects) of any declaration
         /// in the current set.  This method must have a parameter of type <c>in</c> <see cref="DeclarationValidationContext"/>.  
         /// </summary>
-        /// <param name="methodName"></param>
-        void RegisterDeclarationValidator( string methodName );
+        /// <param name="validateMethod"></param>
+        void RegisterDeclarationValidator( ValidatorDelegate<DeclarationValidationContext> validateMethod );
 
         /// <summary>
         /// Adds an aspect to the current set of declarations. This overload allows adding inherited aspects.

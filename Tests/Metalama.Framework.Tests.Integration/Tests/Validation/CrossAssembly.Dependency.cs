@@ -15,9 +15,7 @@ namespace Metalama.Framework.Tests.Integration.Validation.CrossAssembly
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
             builder.WithTarget()
-                .RegisterReferenceValidator(
-                    nameof(Validate),
-                    ReferenceKinds.All );
+                .RegisterReferenceValidator( Validate, ReferenceKinds.All );
         }
 
         private static void Validate( in ReferenceValidationContext context )

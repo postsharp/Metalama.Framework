@@ -16,10 +16,16 @@ namespace Metalama.Framework.Tests.Integration.Validation.CrossAssembly
 
         private ValidatedClass? Method( ValidatedClass[] param1, List<ValidatedClass> param2 )
         {
-            ValidatedClass variable;
-            Method( typeof(ValidatedClass) );
-
             return null;
+        }
+    }
+
+    internal class ReferencingClass
+    {
+        private void Method()
+        {
+            ValidatedClass variable;
+            ValidatedClass.Method( typeof(ValidatedClass) );
         }
     }
 }

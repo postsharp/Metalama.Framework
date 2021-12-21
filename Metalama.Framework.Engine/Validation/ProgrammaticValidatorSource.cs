@@ -6,6 +6,7 @@ using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Engine.CodeModel;
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 
 namespace Metalama.Framework.Engine.Validation;
 
@@ -15,21 +16,18 @@ internal class ProgrammaticValidatorSource : IValidatorSource
 
     public AspectPredecessor Predecessor { get; }
 
-    public string MethodName { get; }
-
     private readonly Func<ProgrammaticValidatorSource, CompilationModel, IDiagnosticSink, IEnumerable<ValidatorInstance>> _func;
 
     public ProgrammaticValidatorSource(
         IValidatorDriverFactory driverFactory,
         ValidatorKind validatorKind,
         AspectPredecessor predecessor,
-        string methodName,
+        MethodInfo method,
         Func<ProgrammaticValidatorSource, CompilationModel, IDiagnosticSink, IEnumerable<ValidatorInstance>> func )
     {
-        this.Driver = driverFactory.GetValidatorDriver( methodName, validatorKind );
+        this.Driver = driverFactory.GetValidatorDriver( method, validatorKind );
         this.Kind = validatorKind;
         this.Predecessor = predecessor;
-        this.MethodName = methodName;
         this._func = func;
     }
 

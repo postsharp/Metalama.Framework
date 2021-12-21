@@ -16,7 +16,9 @@ using Metalama.Framework.Project;
 using Metalama.Framework.Validation;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using Attribute = System.Attribute;
 
 namespace Metalama.Framework.Engine.Fabrics
@@ -72,14 +74,35 @@ namespace Metalama.Framework.Engine.Fabrics
 
         private void RegisterValidatorSource( ProgrammaticValidatorSource validatorSource ) => this._registerValidatorSource( validatorSource );
 
-        public void RegisterReferenceValidator( string methodName, ReferenceKinds referenceKinds )
+        private void ValidateValidatorDelegate<TContext>( ValidatorDelegate<TContext> validateMethod )
         {
+            var methodInfo = validateMethod.Method;
+
+            if ( methodInfo.DeclaringType != this._parent.Type )
+            {
+                throw new ArgumentOutOfRangeException( nameof(validateMethod), $"The delegate must point to a method of type '{this._parent.Type};." );
+            }
+
+            if ( methodInfo.DeclaringType != null &&
+                 methodInfo.DeclaringType.GetMethods( BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static )
+                     .Count( m => m.Name == methodInfo.Name ) > 1 )
+            {
+                throw new ArgumentOutOfRangeException(
+                    nameof(validateMethod),
+                    $"The type '{this._parent.Type}' must have only one method called '{methodInfo.Name}'." );
+            }
+        }
+
+        public void RegisterReferenceValidator( ValidatorDelegate<ReferenceValidationContext> validateMethod, ReferenceKinds referenceKinds )
+        {
+            this.ValidateValidatorDelegate( validateMethod );
+
             this.RegisterValidatorSource(
                 new ProgrammaticValidatorSource(
                     this._parent,
                     ValidatorKind.Reference,
                     this._parent.AspectPredecessor,
-                    methodName,
+                    validateMethod.Method,
                     ( source, compilation, diagnostics ) => this.SelectAndValidateValidatorTargets(
                         compilation,
                         diagnostics,
@@ -90,14 +113,16 @@ namespace Metalama.Framework.Engine.Fabrics
                             referenceKinds ) ) ) );
         }
 
-        public void RegisterDeclarationValidator( string methodName )
+        public void RegisterDeclarationValidator( ValidatorDelegate<DeclarationValidationContext> validateMethod )
         {
+            this.ValidateValidatorDelegate( validateMethod );
+
             this.RegisterValidatorSource(
                 new ProgrammaticValidatorSource(
                     this._parent,
                     ValidatorKind.Definition,
                     this._parent.AspectPredecessor,
-                    methodName,
+                    validateMethod.Method,
                     ( source, compilation, diagnostics ) => this.SelectAndValidateValidatorTargets(
                         compilation,
                         diagnostics,

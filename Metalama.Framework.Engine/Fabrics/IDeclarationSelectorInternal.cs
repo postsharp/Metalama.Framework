@@ -3,10 +3,13 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Validation;
+using System;
 
 namespace Metalama.Framework.Engine.Fabrics;
 
 internal interface IDeclarationSelectorInternal : IValidatorDriverFactory
 {
     AspectPredecessor AspectPredecessor { get; }
+
+    Type Type { get; }
 }

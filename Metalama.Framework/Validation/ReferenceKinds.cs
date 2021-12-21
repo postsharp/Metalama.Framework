@@ -6,6 +6,8 @@ using System;
 
 namespace Metalama.Framework.Validation
 {
+    public delegate void ValidatorDelegate<TContext>( in TContext context );
+
     /// <summary>
     /// Enumerates all kinds of references.
     /// </summary>

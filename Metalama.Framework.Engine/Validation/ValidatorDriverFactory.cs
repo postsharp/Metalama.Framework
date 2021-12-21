@@ -12,7 +12,7 @@ namespace Metalama.Framework.Engine.Validation;
 internal class ValidatorDriverFactory : IValidatorDriverFactory
 {
     private readonly Type _type;
-    private readonly ConcurrentDictionary<string, ValidatorDriver> _drivers = new( StringComparer.Ordinal );
+    private readonly ConcurrentDictionary<MethodInfo, ValidatorDriver> _drivers = new();
     private static readonly ConditionalWeakTable<Type, ValidatorDriverFactory> _instances = new();
 
     public static ValidatorDriverFactory GetInstance( Type type )
@@ -49,19 +49,11 @@ internal class ValidatorDriverFactory : IValidatorDriverFactory
         this._type = type;
     }
 
-    public ValidatorDriver<TContext> GetValidatorDriver<TContext>( string name )
-        => (ValidatorDriver<TContext>) this._drivers.GetOrAdd( name, this.GetValidatorDriverImpl<TContext> );
+    public ValidatorDriver<TContext> GetValidatorDriver<TContext>( MethodInfo validateMethod )
+        => (ValidatorDriver<TContext>) this._drivers.GetOrAdd( validateMethod, this.GetValidatorDriverImpl<TContext> );
 
-    private ValidatorDriver<TContext> GetValidatorDriverImpl<TContext>( string name )
+    private ValidatorDriver<TContext> GetValidatorDriverImpl<TContext>( MethodInfo method )
     {
-        var method = this._type.GetMethod( name, BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic );
-
-        if ( method == null )
-        {
-            // This should have been validated before. (TODO)
-            throw new AssertionFailedException();
-        }
-
         var instanceParameter = Expression.Parameter( typeof(object), "instance" );
         var contextParameter = Expression.Parameter( typeof(TContext).MakeByRefType(), "context" );
 

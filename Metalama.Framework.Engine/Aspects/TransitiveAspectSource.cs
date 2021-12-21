@@ -19,6 +19,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading;
 
 namespace Metalama.Framework.Engine.Aspects
@@ -140,6 +141,8 @@ namespace Metalama.Framework.Engine.Aspects
         public ValidatorKind Kind => ValidatorKind.Reference;
 
         private static ValidatorDriver<ReferenceValidationContext> GetValidatorDriver( Type type, string methodName )
-            => ValidatorDriverFactory.GetInstance( type ).GetValidatorDriver<ReferenceValidationContext>( methodName );
+            => ValidatorDriverFactory.GetInstance( type )
+                .GetValidatorDriver<ReferenceValidationContext>(
+                    type.GetMethod( methodName, BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic ) );
     }
 }
