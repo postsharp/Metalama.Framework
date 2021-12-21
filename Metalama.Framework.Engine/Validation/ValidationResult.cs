@@ -6,4 +6,4 @@ using System.Collections.Immutable;
 
 namespace Metalama.Framework.Engine.Validation;
 
-internal record ValidationResult( ImmutableArray<ReferenceValidatorInstance> TransitiveValidations, ImmutableUserDiagnosticList Diagnostics );
+internal record ValidationResult( ImmutableArray<ReferenceValidatorInstance> ExternallyVisibleValidations, ImmutableUserDiagnosticList Diagnostics );

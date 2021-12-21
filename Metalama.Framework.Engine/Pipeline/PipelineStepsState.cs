@@ -55,7 +55,8 @@ namespace Metalama.Framework.Engine.Pipeline
         public PipelineStepsState(
             IReadOnlyList<OrderedAspectLayer> aspectLayers,
             CompilationModel inputLastCompilation,
-            IReadOnlyList<IAspectSource> inputAspectSources,
+            ImmutableArray<IAspectSource> inputAspectSources,
+            ImmutableArray<IValidatorSource> inputValidatorSources,
             AspectPipelineConfiguration pipelineConfiguration )
         {
             this._diagnostics = new UserDiagnosticSink( pipelineConfiguration.CompileTimeProject, pipelineConfiguration.CodeFixFilter );
@@ -81,6 +82,7 @@ namespace Metalama.Framework.Engine.Pipeline
             // Add the initial sources.
             // TODO: process failure of the next line.
             this.AddAspectSources( inputAspectSources );
+            this.AddValidatorSources( inputValidatorSources );
         }
 
         public void Execute( CancellationToken cancellationToken )

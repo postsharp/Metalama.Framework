@@ -110,7 +110,7 @@ namespace Metalama.Framework.Engine.Pipeline
                 var resultPartialCompilation = result.Compilation;
 
                 // Execute validators.
-                IReadOnlyList<ReferenceValidatorInstance> referenceValidators = ImmutableArray<ReferenceValidatorInstance>.Empty;
+                IReadOnlyList<ReferenceValidatorInstance> referenceValidators = result.ExternallyVisibleValidators;
 
                 // Format the output.
                 if ( this.ProjectOptions.FormatOutput && OutputCodeFormatter.CanFormat )
@@ -136,7 +136,7 @@ namespace Metalama.Framework.Engine.Pipeline
                     additionalResources = additionalResources.Add( configuration.CompileTimeProject.ToResource() );
                 }
 
-                // Add the index of inherited aspects.
+                // Create a manifest for transitive aspects and validators.
                 if ( result.ExternallyInheritableAspects.Length > 0 || referenceValidators.Count > 0 )
                 {
                     var inheritedAspectsManifest = TransitiveAspectsManifest.Create(
