@@ -48,4 +48,16 @@ namespace Metalama.Framework.Tests.Integration.Validation.AllReferences
             return null;
         }
     }
+    
+    internal class ReferencingClass
+    {
+    
+        void ReferencingMethod()
+        {
+                    ValidatedClass variable;
+            ValidatedClass.Method( typeof(ValidatedClass) );
+        }
+
+
+    }
 }

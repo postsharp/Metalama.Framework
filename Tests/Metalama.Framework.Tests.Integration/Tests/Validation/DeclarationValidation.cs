@@ -17,7 +17,7 @@ namespace Metalama.Framework.Tests.Integration.Validation.DeclarationValidation
 
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.WithTargetMembers( t => t.Methods ).RegisterDeclarationValidator( Validate );
+            builder.WithTargetMembers( t => t.Methods ).RegisterFinalValidator( Validate );
         }
 
         private static void Validate( in DeclarationValidationContext context )

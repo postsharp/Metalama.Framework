@@ -5,21 +5,23 @@
 // Warning MY001 on `ValidatedClass`: `Reference constraint of type 'ParameterType, ArrayType' in declaration 'DerivedClass.Method(ValidatedClass[], List<ValidatedClass>)/param1'.`
 // Warning MY001 on `ValidatedClass`: `Reference constraint of type 'TypeArgument, ParameterType' in declaration 'DerivedClass.Method(ValidatedClass[], List<ValidatedClass>)/param2'.`
 // Warning MY001 on `ValidatedClass`: `Reference constraint of type 'LocalVariableType' in declaration 'DerivedClass.Method(ValidatedClass[], List<ValidatedClass>)'.`
-// Warning MY001 on `Method`: `Reference constraint of type 'MemberAccess' in declaration 'DerivedClass.Method(ValidatedClass[], List<ValidatedClass>)'.`
 // Warning MY001 on `ValidatedClass`: `Reference constraint of type 'TypeOf' in declaration 'DerivedClass.Method(ValidatedClass[], List<ValidatedClass>)'.`
-class DerivedClass : ValidatedClass
+// Warning MY001 on `ValidatedClass`: `Reference constraint of type 'LocalVariableType' in declaration 'ReferencingClass.ReferencingMethod()'.`
+// Warning MY001 on `Method`: `Reference constraint of type 'MemberAccess' in declaration 'ReferencingClass.ReferencingMethod()'.`
+// Warning MY001 on `ValidatedClass`: `Reference constraint of type 'TypeOf' in declaration 'ReferencingClass.ReferencingMethod()'.`
+internal class DerivedClass : ValidatedClass
     {
         // Field type.
-        ValidatedClass _field1;
-        
+        private ValidatedClass _field1;
+
         // Typeof in field initializer.
-        Type _field2 = typeof(ValidatedClass);
-        
-        
-        ValidatedClass? Method( ValidatedClass[] param1, List<ValidatedClass> param2 )
+        private Type _field2 = typeof(ValidatedClass);
+
+        private ValidatedClass? Method( ValidatedClass[] param1, List<ValidatedClass> param2 )
         {
             ValidatedClass variable;
-            ValidatedClass.Method( typeof(ValidatedClass) );
+            Method( typeof(ValidatedClass) );
+
             return null;
         }
     }

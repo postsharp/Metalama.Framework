@@ -113,7 +113,7 @@ namespace Metalama.Framework.Engine.Fabrics
                             referenceKinds ) ) ) );
         }
 
-        public void RegisterDeclarationValidator( ValidatorDelegate<DeclarationValidationContext> validateMethod )
+        public void RegisterFinalValidator( ValidatorDelegate<DeclarationValidationContext> validateMethod )
         {
             this.ValidateValidatorDelegate( validateMethod );
 

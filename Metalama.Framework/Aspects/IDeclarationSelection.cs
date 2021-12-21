@@ -29,10 +29,10 @@ namespace Metalama.Framework.Aspects
 
         /// <summary>
         /// Registers a method that will be invoked to validate the final state (i.e. the state including the transformation by all aspects) of any declaration
-        /// in the current set.  This method must have a parameter of type <c>in</c> <see cref="DeclarationValidationContext"/>.  
+        /// in the current set. This method must have a parameter of type <c>in</c> <see cref="DeclarationValidationContext"/>.  
         /// </summary>
         /// <param name="validateMethod"></param>
-        void RegisterDeclarationValidator( ValidatorDelegate<DeclarationValidationContext> validateMethod );
+        void RegisterFinalValidator( ValidatorDelegate<DeclarationValidationContext> validateMethod );
 
         /// <summary>
         /// Adds an aspect to the current set of declarations. This overload allows adding inherited aspects.

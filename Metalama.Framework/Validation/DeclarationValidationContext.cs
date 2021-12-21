@@ -10,7 +10,7 @@ using Metalama.Framework.Diagnostics;
 namespace Metalama.Framework.Validation
 {
     /// <summary>
-    /// The context object passed to the single parameter of validators added using <see cref="IDeclarationSelection{TDeclaration}.RegisterDeclarationValidator"/>.
+    /// The context object passed to the single parameter of validators added using <see cref="IDeclarationSelection{TDeclaration}.RegisterFinalValidator"/>.
     /// </summary>
     [CompileTimeOnly]
     public readonly struct DeclarationValidationContext
