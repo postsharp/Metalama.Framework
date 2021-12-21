@@ -863,18 +863,73 @@ namespace SomeNamespace
 using System;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Fabrics;
+using Metalama.Framework.Serialization;
 
 [OriginalPath(""main.cs"")]
 [OriginalId(""T:SomeClass.Fabric"")]
 internal class SomeClass_Fabric : TypeFabric
-{ public override void AmendType(ITypeAmender amender) { } }
+{
+    public override void AmendType(ITypeAmender amender) { }
+    public SomeClass_Fabric()
+    {
+    }
+    protected SomeClass_Fabric(IArgumentsReader reader)
+    {
+    }
+    public class Serializer : ReferenceTypeSerializer
+    {
+        public Serializer()
+        {
+        }
+
+        public override object CreateInstance(Type type, IArgumentsReader constructorArguments)
+        {
+            return new global::SomeClass_Fabric(constructorArguments);
+        }
+
+        public override void SerializeObject(object obj, IArgumentsWriter constructorArguments, IArgumentsWriter initializationArguments)
+        {
+        }
+
+        public override void DeserializeFields(object obj, IArgumentsReader initializationArguments)
+        {
+        }
+    }
+}
 
 namespace SomeNamespace
 {
     [OriginalPath(""main.cs"")]
     [OriginalId(""T:SomeNamespace.OtherClass`1.NestedTwice.Fabric"")]
     internal class OtherClassX1_NestedTwice_Fabric : TypeFabric
-    { public override void AmendType(ITypeAmender amender) { } }
+    {
+        public override void AmendType(ITypeAmender amender) { }
+        public OtherClassX1_NestedTwice_Fabric()
+        {
+        }
+        protected OtherClassX1_NestedTwice_Fabric(IArgumentsReader reader)
+        {
+        }
+        public class Serializer : ReferenceTypeSerializer
+        {
+            public Serializer()
+            {
+            }
+
+            public override object CreateInstance(Type type, IArgumentsReader constructorArguments)
+            {
+                return new global::SomeNamespace.OtherClassX1_NestedTwice_Fabric(constructorArguments);
+            }
+
+            public override void SerializeObject(object obj, IArgumentsWriter constructorArguments, IArgumentsWriter initializationArguments)
+            {
+            }
+
+            public override void DeserializeFields(object obj, IArgumentsReader initializationArguments)
+            {
+            }
+        }
+    }
 }
 ";
 

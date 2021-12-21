@@ -87,6 +87,7 @@ internal abstract partial class FabricDriver
 
         Type IDeclarationSelectorInternal.Type => this._fabricInstance.Fabric.GetType();
 
-        public ValidatorDriver<TContext> GetValidatorDriver<TContext>( MethodInfo validateMethod ) => throw new NotImplementedException();
+        public ValidatorDriver<TContext> GetValidatorDriver<TContext>( MethodInfo validateMethod )
+            => this._fabricInstance.ValidatorDriverFactory.GetValidatorDriver<TContext>( validateMethod );
     }
 }
