@@ -1,7 +1,9 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Serialization;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -528,13 +530,39 @@ namespace Metalama.Framework.Engine.LamaSerialization
                 }
             }
 
-            foreach ( var member in serializableType.Type.GetMembers().Where( x => !x.IsStatic && ((x is IFieldSymbol && !x.IsImplicitlyDeclared) || (x is IPropertySymbol p && p.IsAutoProperty())) ) )
+            foreach ( var member in serializableType.Type.GetMembers().Where( x => this.RequiresConstructorInitialization(x) ) )
             {
                 if ( !constructorDeserializedMembers.Contains( member ) )
                 {
                     yield return member;
                 }
             }
+        }
+
+        private bool RequiresConstructorInitialization(ISymbol fieldOrProperty)
+        {
+            if (fieldOrProperty.IsStatic)
+            {
+                return false;
+            }
+
+            if ( fieldOrProperty.GetAttributes().Any( a => a.AttributeClass.AssertNotNull().Is( this._runtimeReflectionMapper.GetTypeSymbol( typeof( TemplateAttribute ) ) ) ) )
+            {
+                // Skip all template symbols.
+                return false;
+            }
+
+            if ( fieldOrProperty is IFieldSymbol f && !f.IsImplicitlyDeclared )
+            {
+                return true;
+            }
+
+            if ( fieldOrProperty is IPropertySymbol p && p.IsAutoProperty() )
+            {
+                return true;
+            }
+
+            return false;
         }
 
         private IEnumerable<ISymbol> SelectLateDeserializedFields( SerializableTypeInfo serializableType )
