@@ -12,12 +12,14 @@ using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Validation;
 using Metalama.Framework.Project;
+using Metalama.Framework.Validation;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading;
 
 namespace Metalama.Framework.Engine.Aspects
@@ -136,9 +138,11 @@ namespace Metalama.Framework.Engine.Aspects
                     ValidatorImplementation.Create( v.Object, v.State ),
                     v.ReferenceKinds ) );
 
-        private static ReferenceValidatorDriver GetValidatorDriver( Type type, string methodName )
-            => (ReferenceValidatorDriver) ValidatorDriverFactory.GetInstance( type ).GetValidatorDriver( methodName, ValidatorKind.Reference );
+        public ValidatorKind Kind => ValidatorKind.Reference;
 
-        ValidatorKind IValidatorSource.Kind => ValidatorKind.Reference;
+        private static ValidatorDriver<ReferenceValidationContext> GetValidatorDriver( Type type, string methodName )
+            => ValidatorDriverFactory.GetInstance( type )
+                .GetValidatorDriver<ReferenceValidationContext>(
+                    type.GetMethod( methodName, BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic ) );
     }
 }

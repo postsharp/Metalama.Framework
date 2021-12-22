@@ -16,7 +16,7 @@ public interface IDeclarationSelector<out TTarget>
     /// <summary>
     /// Selects members of the  target declaration of the current aspect or fabric with the purpose of adding aspects, annotations or validators to them
     /// using e.g. <see cref="IDeclarationSelection{TDeclaration}.AddAspect{TAspect}(System.Func{TDeclaration,System.Linq.Expressions.Expression{System.Func{TAspect}}})"/>,
-    ///  <see cref="IDeclarationSelection{TDeclaration}.AddAnnotation{TAspect,TAnnotation}"/>,  <see cref="IDeclarationSelection{TDeclaration}.RegisterDeclarationValidator{T}"/>
+    ///  <see cref="IDeclarationSelection{TDeclaration}.AddAnnotation{TAspect,TAnnotation}"/>,  <see cref="IDeclarationSelection{TDeclaration}.RegisterFinalValidator"/>
     /// or <see cref="IDeclarationSelection{TDeclaration}.RegisterReferenceValidator"/>.
     /// </summary>
     IDeclarationSelection<TMember> WithTargetMembers<TMember>( Func<TTarget, IEnumerable<TMember>> selector )
@@ -25,7 +25,7 @@ public interface IDeclarationSelector<out TTarget>
     /// <summary>
     /// Selects the  target declaration of the current aspect or fabric with the purpose of adding aspects, annotations or validators to them
     /// using e.g. <see cref="IDeclarationSelection{TDeclaration}.AddAspect{TAspect}(System.Func{TDeclaration,System.Linq.Expressions.Expression{System.Func{TAspect}}})"/>,
-    ///  <see cref="IDeclarationSelection{TDeclaration}.AddAnnotation{TAspect,TAnnotation}"/>,  <see cref="IDeclarationSelection{TDeclaration}.RegisterDeclarationValidator{T}"/>
+    ///  <see cref="IDeclarationSelection{TDeclaration}.AddAnnotation{TAspect,TAnnotation}"/>,  <see cref="IDeclarationSelection{TDeclaration}.RegisterFinalValidator"/>
     /// or <see cref="IDeclarationSelection{TDeclaration}.RegisterReferenceValidator"/>.
     /// </summary>
     IDeclarationSelection<TTarget> WithTarget();

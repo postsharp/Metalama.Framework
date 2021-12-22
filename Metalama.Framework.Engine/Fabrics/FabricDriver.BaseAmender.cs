@@ -12,6 +12,7 @@ using Metalama.Framework.Project;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 
 namespace Metalama.Framework.Engine.Fabrics;
 
@@ -84,6 +85,9 @@ internal abstract partial class FabricDriver
 
         public AspectPredecessor AspectPredecessor => new( AspectPredecessorKind.Fabric, this._fabricInstance );
 
-        public ValidatorDriver GetValidatorDriver( string name, ValidatorKind kind ) => throw new NotImplementedException();
+        Type IDeclarationSelectorInternal.Type => this._fabricInstance.Fabric.GetType();
+
+        public ValidatorDriver<TContext> GetValidatorDriver<TContext>( MethodInfo validateMethod )
+            => this._fabricInstance.ValidatorDriverFactory.GetValidatorDriver<TContext>( validateMethod );
     }
 }

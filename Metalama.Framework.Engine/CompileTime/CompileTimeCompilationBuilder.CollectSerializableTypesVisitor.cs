@@ -68,21 +68,43 @@ namespace Metalama.Framework.Engine.CompileTime
 
             public override void VisitClassDeclaration( ClassDeclarationSyntax node )
             {
+                this.VisitTypeDeclaration( node );
                 base.VisitClassDeclaration( node );
-                this.ProcessTypeDeclaration( node );
             }
 
             public override void VisitStructDeclaration( StructDeclarationSyntax node )
             {
+                this.VisitTypeDeclaration( node );
                 base.VisitStructDeclaration( node );
-                this.ProcessTypeDeclaration( node );
             }
 
             public override void VisitRecordDeclaration( RecordDeclarationSyntax node )
             {
+                this.VisitTypeDeclaration( node );
                 base.VisitRecordDeclaration( node );
-                this.ProcessTypeDeclaration( node );
             }
+
+            public override void VisitMethodDeclaration( MethodDeclarationSyntax node ) { }
+
+            public override void VisitFieldDeclaration( FieldDeclarationSyntax node ) { }
+
+            public override void VisitPropertyDeclaration( PropertyDeclarationSyntax node ) { }
+
+            public override void VisitPropertyPatternClause( PropertyPatternClauseSyntax node ) { }
+
+            public override void VisitAccessorDeclaration( AccessorDeclarationSyntax node ) { }
+
+            public override void VisitConstructorDeclaration( ConstructorDeclarationSyntax node ) { }
+
+            public override void VisitIndexerDeclaration( IndexerDeclarationSyntax node ) { }
+
+            public override void VisitOperatorDeclaration( OperatorDeclarationSyntax node ) { }
+
+            public override void VisitConversionOperatorDeclaration( ConversionOperatorDeclarationSyntax node ) { }
+
+            public override void VisitEventDeclaration( EventDeclarationSyntax node ) { }
+
+            public override void VisitEventFieldDeclaration( EventFieldDeclarationSyntax node ) { }
         }
     }
 }
