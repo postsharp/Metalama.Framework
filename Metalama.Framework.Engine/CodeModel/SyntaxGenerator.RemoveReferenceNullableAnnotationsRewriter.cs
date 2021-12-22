@@ -18,35 +18,6 @@ namespace Metalama.Framework.Engine.CodeModel
                 this._type = type;
             }
 
-            public override SyntaxNode? VisitQualifiedName( QualifiedNameSyntax node )
-            {
-                var oldType = (INamedTypeSymbol) this._type;
-
-                if ( oldType.ContainingType != null )
-                {
-                    var right = (SimpleNameSyntax)this.Visit( node.Right ).AssertNotNull();
-
-                    try
-                    {
-                        this._type = oldType.ContainingType;
-
-                        var left = (NameSyntax)this.Visit( node.Left ).AssertNotNull();
-
-                        return node.WithLeft( left ).WithRight( right );
-                    }
-                    finally
-                    {
-                        this._type = oldType;
-                    }
-                }
-                else
-                {
-                    // Top-most type.
-                    return node.WithLeft( (NameSyntax)this.Visit( node.Left ).AssertNotNull() );
-                }
-                
-            }
-
             public override SyntaxNode? VisitGenericName( GenericNameSyntax node )
             {
                 var oldType = (INamedTypeSymbol) this._type;
@@ -54,18 +25,13 @@ namespace Metalama.Framework.Engine.CodeModel
                 var argumentsCount = node.TypeArgumentList.Arguments.Count;
                 var typeArguments = new TypeSyntax[argumentsCount];
 
-                try
+                for ( var i = 0; i < argumentsCount; i++ )
                 {
-                    for ( var i = 0; i < argumentsCount; i++ )
-                    {
-                        this._type = oldType.TypeArguments[i];
-                        typeArguments[i] = (TypeSyntax) this.Visit( node.TypeArgumentList.Arguments[i] );
-                    }
+                    this._type = oldType.TypeArguments[i];
+                    typeArguments[i] = (TypeSyntax) this.Visit( node.TypeArgumentList.Arguments[i] );
                 }
-                finally
-                {
-                    this._type = oldType;
-                }
+
+                this._type = oldType;
 
                 return node.WithTypeArgumentList( SyntaxFactory.TypeArgumentList( SyntaxFactory.SeparatedList( typeArguments ) ) );
             }

@@ -68,19 +68,19 @@ namespace Metalama.Framework.Engine.CompileTime
 
             public override void VisitClassDeclaration( ClassDeclarationSyntax node )
             {
-                this.VisitTypeDeclaration( node );
+                this.ProcessTypeDeclaration( node );
                 base.VisitClassDeclaration( node );
             }
 
             public override void VisitStructDeclaration( StructDeclarationSyntax node )
             {
-                this.VisitTypeDeclaration( node );
+                this.ProcessTypeDeclaration( node );
                 base.VisitStructDeclaration( node );
             }
 
             public override void VisitRecordDeclaration( RecordDeclarationSyntax node )
             {
-                this.VisitTypeDeclaration( node );
+                this.ProcessTypeDeclaration( node );
                 base.VisitRecordDeclaration( node );
             }
 
