@@ -16,6 +16,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Reflection;
 using System.Threading;
 
 namespace Metalama.Framework.Engine.Aspects
@@ -145,7 +146,9 @@ namespace Metalama.Framework.Engine.Aspects
 
         public AspectPredecessor AspectPredecessor { get; private set; }
 
-        public ValidatorDriver GetValidatorDriver( string name, ValidatorKind kind )
-            => ((IValidatorDriverFactory) this.AspectInstance.AspectClass).GetValidatorDriver( name, kind );
+        Type IDeclarationSelectorInternal.Type => this.AspectInstance.AspectClass.Type;
+
+        public ValidatorDriver<TContext> GetValidatorDriver<TContext>( MethodInfo validateMethod )
+            => ((IValidatorDriverFactory) this.AspectInstance.AspectClass).GetValidatorDriver<TContext>( validateMethod );
     }
 }

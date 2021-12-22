@@ -3,6 +3,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
+using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Validation;
 using Microsoft.CodeAnalysis;
 using SyntaxReference = Metalama.Framework.Code.SyntaxReference;
@@ -24,9 +25,15 @@ internal class ReferenceValidatorInstance : ValidatorInstance
 
     public ReferenceKinds ReferenceKinds { get; }
 
-    public void Validate( IDeclaration referencingDeclaration, SyntaxNode node, ReferenceKinds referenceKind, IDiagnosticSink diagnosticAdder )
+    public void Validate(
+        IDeclaration referencingDeclaration,
+        SyntaxNode node,
+        ReferenceKinds referenceKind,
+        IDiagnosticSink diagnosticAdder,
+        UserCodeInvoker userCodeInvoker,
+        UserCodeExecutionContext? userCodeExecutionContext )
     {
-        var context = new ReferenceValidationContext(
+        var validationContext = new ReferenceValidationContext(
             this.ValidatedDeclaration,
             referencingDeclaration,
             new SyntaxReference( node, this ),
@@ -34,6 +41,10 @@ internal class ReferenceValidatorInstance : ValidatorInstance
             diagnosticAdder,
             referenceKind );
 
-        ((ReferenceValidatorDriver) this.Driver).Validate( this.Implementation, context );
+        ((ValidatorDriver<ReferenceValidationContext>) this.Driver).Validate(
+            this.Implementation,
+            validationContext,
+            userCodeInvoker,
+            userCodeExecutionContext );
     }
 }

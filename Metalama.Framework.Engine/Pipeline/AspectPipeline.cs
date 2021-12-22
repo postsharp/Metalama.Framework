@@ -281,18 +281,19 @@ namespace Metalama.Framework.Engine.Pipeline
 
             var transitiveAspectSource = new TransitiveAspectSource( compilation, aspectClasses, configuration.ServiceProvider, cancellationToken );
 
-            var sources = ImmutableArray.Create<IAspectSource>(
+            var aspectSources = ImmutableArray.Create<IAspectSource>(
                 new CompilationAspectSource( aspectClasses, configuration.CompileTimeProjectLoader ),
                 transitiveAspectSource );
 
+            var validatorSources = ImmutableArray.Create<IValidatorSource>( transitiveAspectSource );
+
             if ( configuration.FabricsConfiguration != null )
             {
-                sources = sources.AddRange( configuration.FabricsConfiguration.AspectSources );
+                aspectSources = aspectSources.AddRange( configuration.FabricsConfiguration.AspectSources );
+                validatorSources = validatorSources.AddRange( configuration.FabricsConfiguration.ValidatorSources );
             }
 
-            // TODO: fabric validators.
-
-            return (sources, ImmutableArray.Create<IValidatorSource>( transitiveAspectSource ));
+            return (aspectSources, validatorSources);
         }
 
         private protected virtual ImmutableArray<AdditionalCompilationOutputFile> GetAdditionalCompilationOutputFiles( ServiceProvider serviceProvider )

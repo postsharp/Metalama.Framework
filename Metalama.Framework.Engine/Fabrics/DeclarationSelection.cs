@@ -16,7 +16,9 @@ using Metalama.Framework.Project;
 using Metalama.Framework.Validation;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using Attribute = System.Attribute;
 
 namespace Metalama.Framework.Engine.Fabrics
@@ -72,14 +74,35 @@ namespace Metalama.Framework.Engine.Fabrics
 
         private void RegisterValidatorSource( ProgrammaticValidatorSource validatorSource ) => this._registerValidatorSource( validatorSource );
 
-        public void RegisterReferenceValidator( string methodName, ReferenceKinds referenceKinds )
+        private void ValidateValidatorDelegate<TContext>( ValidatorDelegate<TContext> validateMethod )
         {
+            var methodInfo = validateMethod.Method;
+
+            if ( methodInfo.DeclaringType != this._parent.Type )
+            {
+                throw new ArgumentOutOfRangeException( nameof(validateMethod), $"The delegate must point to a method of type '{this._parent.Type};." );
+            }
+
+            if ( methodInfo.DeclaringType != null &&
+                 methodInfo.DeclaringType.GetMethods( BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static )
+                     .Count( m => m.Name == methodInfo.Name ) > 1 )
+            {
+                throw new ArgumentOutOfRangeException(
+                    nameof(validateMethod),
+                    $"The type '{this._parent.Type}' must have only one method called '{methodInfo.Name}'." );
+            }
+        }
+
+        public void RegisterReferenceValidator( ValidatorDelegate<ReferenceValidationContext> validateMethod, ReferenceKinds referenceKinds )
+        {
+            this.ValidateValidatorDelegate( validateMethod );
+
             this.RegisterValidatorSource(
                 new ProgrammaticValidatorSource(
                     this._parent,
-                    this._parent.AspectPredecessor,
-                    methodName,
                     ValidatorKind.Reference,
+                    this._parent.AspectPredecessor,
+                    validateMethod.Method,
                     ( source, compilation, diagnostics ) => this.SelectAndValidateValidatorTargets(
                         compilation,
                         diagnostics,
@@ -90,19 +113,23 @@ namespace Metalama.Framework.Engine.Fabrics
                             referenceKinds ) ) ) );
         }
 
-        public void RegisterDeclarationValidator<T1>( string methodName )
-            where T1 : IDeclaration
+        public void RegisterFinalValidator( ValidatorDelegate<DeclarationValidationContext> validateMethod )
         {
+            this.ValidateValidatorDelegate( validateMethod );
+
             this.RegisterValidatorSource(
                 new ProgrammaticValidatorSource(
                     this._parent,
-                    this._parent.AspectPredecessor,
-                    methodName,
                     ValidatorKind.Definition,
+                    this._parent.AspectPredecessor,
+                    validateMethod.Method,
                     ( source, compilation, diagnostics ) => this.SelectAndValidateValidatorTargets(
                         compilation,
                         diagnostics,
-                        item => new DeclarationValidatorInstance( item, source.Driver, ValidatorImplementation.Create( source.Predecessor.Instance ) ) ) ) );
+                        item => new DeclarationValidatorInstance(
+                            item,
+                            (ValidatorDriver<DeclarationValidationContext>) source.Driver,
+                            ValidatorImplementation.Create( source.Predecessor.Instance ) ) ) ) );
         }
 
         public IDeclarationSelection<T> AddAspect<TAspect>( Func<T, Expression<Func<TAspect>>> createAspect )
@@ -197,25 +224,25 @@ namespace Metalama.Framework.Engine.Fabrics
                 new ProgrammaticAspectSource<TAspect, T>(
                     aspectClass,
                     ( compilation, diagnosticAdder ) => this.SelectAndValidateAspectTargets(
-                            compilation,
-                            diagnosticAdder,
-                            aspectClass,
-                            t =>
+                        compilation,
+                        diagnosticAdder,
+                        aspectClass,
+                        t =>
+                        {
+                            if ( !userCodeInvoker.TryInvoke(
+                                    () => new TAspect(),
+                                    executionContext.WithDiagnosticAdder( diagnosticAdder ),
+                                    out var aspect ) )
                             {
-                                if ( !userCodeInvoker.TryInvoke(
-                                        () => new TAspect(),
-                                        executionContext.WithDiagnosticAdder( diagnosticAdder ),
-                                        out var aspect ) )
-                                {
-                                    return null;
-                                }
+                                return null;
+                            }
 
-                                return new AspectInstance(
-                                    aspect!,
-                                    t.ToTypedRef<IDeclaration>(),
-                                    aspectClass,
-                                    this._parent.AspectPredecessor );
-                            } ) ) );
+                            return new AspectInstance(
+                                aspect!,
+                                t.ToTypedRef<IDeclaration>(),
+                                aspectClass,
+                                this._parent.AspectPredecessor );
+                        } ) ) );
 
             return this;
         }

@@ -25,8 +25,13 @@ namespace Metalama.Framework.Engine.Utilities
 
         public static UserCodeExecutionContext? CurrentInternal => (UserCodeExecutionContext?) MetalamaExecutionContext.CurrentOrNull;
 
-        internal static DisposeAction WithContext( UserCodeExecutionContext context )
+        internal static DisposeAction WithContext( UserCodeExecutionContext? context )
         {
+            if ( context == null )
+            {
+                return default;
+            }
+
             var oldContext = MetalamaExecutionContext.CurrentOrNull;
             MetalamaExecutionContext.CurrentOrNull = context;
             var oldCulture = CultureInfo.CurrentCulture;
@@ -42,7 +47,9 @@ namespace Metalama.Framework.Engine.Utilities
 
         public IDiagnosticAdder Diagnostics { get; }
 
-        public UserCodeMemberInfo InvokedMember { get; }
+        // This property is intentionally writable because it allows us to reuse the same context for several calls, when performance
+        // is critical. This feature is used by validators.
+        public UserCodeMemberInfo InvokedMember { get; set; }
 
         public IDeclaration? TargetDeclaration { get; }
 

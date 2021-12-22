@@ -10,11 +10,13 @@ using Metalama.Framework.Diagnostics;
 namespace Metalama.Framework.Validation
 {
     /// <summary>
-    /// The context object passed to the single parameter of validators added using <see cref="IDeclarationSelection{TDeclaration}.RegisterDeclarationValidator{T}"/>.
+    /// The context object passed to the single parameter of validators added using <see cref="IDeclarationSelection{TDeclaration}.RegisterFinalValidator"/>.
     /// </summary>
     [CompileTimeOnly]
     public readonly struct DeclarationValidationContext
     {
+        private readonly IDiagnosticSink _diagnostics;
+
         /// <summary>
         /// Gets the optional opaque object defined by the aspect for the specific target declaration using the <see cref="IAspectBuilder.State"/>
         /// property of the <see cref="IAspectBuilder"/> interface. 
@@ -24,7 +26,7 @@ namespace Metalama.Framework.Validation
         /// <summary>
         /// Gets a service that allows to report or suppress diagnostics.
         /// </summary>
-        public IDiagnosticSink Diagnostics { get; }
+        public ScopedDiagnosticSink Diagnostics => new( this._diagnostics, this.Declaration, this.Declaration );
 
         /// <summary>
         /// Gets the declaration that should be validated.
@@ -34,7 +36,7 @@ namespace Metalama.Framework.Validation
         internal DeclarationValidationContext( IDeclaration declaration, IAspectState? aspectState, IDiagnosticSink diagnostics )
         {
             this.AspectState = aspectState;
-            this.Diagnostics = diagnostics;
+            this._diagnostics = diagnostics;
             this.Declaration = declaration;
         }
     }

@@ -4,6 +4,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel.References;
+using Metalama.Framework.Engine.Validation;
 using Metalama.Framework.Fabrics;
 using Microsoft.CodeAnalysis;
 using System;
@@ -14,6 +15,8 @@ namespace Metalama.Framework.Engine.Fabrics
     {
         private readonly FabricDriver _driver;
 
+        public ValidatorDriverFactory ValidatorDriverFactory { get; }
+
         IRef<IDeclaration> IFabricInstance.TargetDeclaration => this.TargetDeclaration;
 
         public Ref<IDeclaration> TargetDeclaration { get; }
@@ -22,6 +25,8 @@ namespace Metalama.Framework.Engine.Fabrics
         {
             this._driver = driver;
             this.TargetDeclaration = targetDeclaration;
+
+            this.ValidatorDriverFactory = ValidatorDriverFactory.GetInstance( driver.Fabric.GetType() );
         }
 
         public Fabric Fabric => this._driver.Fabric;
