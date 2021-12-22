@@ -309,7 +309,7 @@ namespace Metalama.Framework.Engine.LamaSerialization
 
             if ( serializedType.SerializedMembers.Count > 0 )
             {
-            var localVariableDeclaration =
+                var localVariableDeclaration =
                     CreateTypedLocalVariable( serializedTypeName, IdentifierName( baseSerializeMethod.Parameters[0].Name ), out var localVariableName );
 
                 body = Block(
@@ -354,7 +354,7 @@ namespace Metalama.Framework.Engine.LamaSerialization
 
             if ( serializedType.SerializedMembers.Count > 0 )
             {
-            var localVariableDeclaration =
+                var localVariableDeclaration =
                     CreateTypedLocalVariable( serializedTypeName, IdentifierName( baseDeserializeMethod.Parameters[0].Name ), out var localVariableName );
 
                 body = Block(
