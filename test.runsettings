@@ -1,0 +1,10 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!-- https://docs.microsoft.com/en-us/visualstudio/test/configure-unit-tests-by-using-a-dot-runsettings-file -->
+<!-- This file is included in all test projects in Directory.Build.targets. -->
+<RunSettings>
+	<RunConfiguration>
+		<!-- App domains in xUnit are not compatible with public-signed test assemblies. -->
+		<!-- https://github.com/coverlet-coverage/coverlet/issues/347 -->
+		<DisableAppDomain>true</DisableAppDomain>
+	</RunConfiguration>
+</RunSettings>

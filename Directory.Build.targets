@@ -21,4 +21,10 @@
         <!-- <Optimize>False</Optimize> -->
     </PropertyGroup>
 
+    <!-- Test projects specific settings. -->
+    <!-- This is not placed in Directory.Build.props as the IsTestProject property is not yet set there. -->
+    <PropertyGroup Condition="'$(IsTestProject)'=='true'">
+        <RunSettingsFilePath>$(MSBuildThisFileDirectory)test.runsettings</RunSettingsFilePath>
+    </PropertyGroup>
+
 </Project>

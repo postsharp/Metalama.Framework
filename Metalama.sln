@@ -17,6 +17,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		Directory.Build.targets = Directory.Build.targets
 		LICENSE.md = LICENSE.md
 		nuget.config = nuget.config
+		test.runsettings = test.runsettings
 		THIRD-PARTY-NOTICES.TXT = THIRD-PARTY-NOTICES.TXT
 	EndProjectSection
 EndProject
@@ -58,15 +59,15 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Metalama.Framework.CompileT
 		{DB6B2103-3DB0-4C86-BA11-46A2DC5B3E62} = {DB6B2103-3DB0-4C86-BA11-46A2DC5B3E62}
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Metalama.Framework.Tests.UnitTests", "Tests\Metalama.Framework.Tests.UnitTests\Metalama.Framework.Tests.UnitTests.csproj", "{62E8C6ED-B0E7-48E3-9C1C-345F46687E3C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Metalama.Framework.Tests.UnitTests", "Tests\Metalama.Framework.Tests.UnitTests\Metalama.Framework.Tests.UnitTests.csproj", "{62E8C6ED-B0E7-48E3-9C1C-345F46687E3C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Metalama.Framework.Workspaces", "Metalama.Framework.Workspaces\Metalama.Framework.Workspaces.csproj", "{8F215547-1833-486E-BC25-F403E89C8B4A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Metalama.Framework.Workspaces", "Metalama.Framework.Workspaces\Metalama.Framework.Workspaces.csproj", "{8F215547-1833-486E-BC25-F403E89C8B4A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Metalama.Framework.Tests.Workspaces", "Tests\Metalama.Framework.Tests.Workspaces\Metalama.Framework.Tests.Workspaces.csproj", "{6B0B4099-06FA-408A-8230-5F952198245B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Metalama.Framework.Tests.Workspaces", "Tests\Metalama.Framework.Tests.Workspaces\Metalama.Framework.Tests.Workspaces.csproj", "{6B0B4099-06FA-408A-8230-5F952198245B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Metalama.LinqPad", "Metalama.LinqPad\Metalama.LinqPad.csproj", "{A651E922-244B-4EA3-B6C2-F609A5E66FC6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Metalama.LinqPad", "Metalama.LinqPad\Metalama.LinqPad.csproj", "{A651E922-244B-4EA3-B6C2-F609A5E66FC6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Metalama.LinqPad.Tests", "Tests\Metalama.LinqPad.Tests\Metalama.LinqPad.Tests.csproj", "{6615862D-D68E-48D5-B7EF-0C520C0E0ABD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Metalama.LinqPad.Tests", "Tests\Metalama.LinqPad.Tests\Metalama.LinqPad.Tests.csproj", "{6615862D-D68E-48D5-B7EF-0C520C0E0ABD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
