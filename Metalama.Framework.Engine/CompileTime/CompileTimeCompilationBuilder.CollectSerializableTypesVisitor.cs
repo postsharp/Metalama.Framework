@@ -41,7 +41,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 this._serializableTypes = new List<SerializableTypeInfo>();
             }
 
-            private void VisitTypeDeclaration( SyntaxNode node )
+            private void ProcessTypeDeclaration( SyntaxNode node )
             {
                 this._cancellationToken.ThrowIfCancellationRequested();
 
@@ -56,6 +56,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
                 var innerVisitor = new CollectSerializableFieldsVisitor(
                     this._semanticModel,
+                    node,
                     this._reflectionMapper,
                     this._symbolClassifier,
                     this._cancellationToken );
@@ -67,19 +68,19 @@ namespace Metalama.Framework.Engine.CompileTime
 
             public override void VisitClassDeclaration( ClassDeclarationSyntax node )
             {
-                this.VisitTypeDeclaration( node );
+                this.ProcessTypeDeclaration( node );
                 base.VisitClassDeclaration( node );
             }
 
             public override void VisitStructDeclaration( StructDeclarationSyntax node )
             {
-                this.VisitTypeDeclaration( node );
+                this.ProcessTypeDeclaration( node );
                 base.VisitStructDeclaration( node );
             }
 
             public override void VisitRecordDeclaration( RecordDeclarationSyntax node )
             {
-                this.VisitTypeDeclaration( node );
+                this.ProcessTypeDeclaration( node );
                 base.VisitRecordDeclaration( node );
             }
 

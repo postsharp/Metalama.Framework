@@ -417,11 +417,12 @@ namespace Metalama.Framework.Engine.CompileTime
                 {
                     var serializedTypeName = this.CreateNameExpression( serializableType.Type );
 
-                    if ( !serializableType.Type.GetMembers()
+                    if ( !serializableType.Type.IsValueType
+                        && !serializableType.Type.GetMembers()
                             .Any(
                                 m => m is IMethodSymbol method && method.MethodKind == MethodKind.Constructor && method.GetPrimarySyntaxReference() != null ) )
                     {
-                        // There is no defined constructor, so we need to explicitly add parameterless constructor.
+                        // There is no defined constructor, so we need to explicitly add parameterless constructor (only for reference types).
                         members.Add(
                             ConstructorDeclaration(
                                     List<AttributeListSyntax>(),

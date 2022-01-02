@@ -5,7 +5,7 @@ using Metalama.TestFramework;
 using System;
 using Xunit;
 
-namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serializers
+namespace Metalama.Framework.Tests.UnitTests.CompileTime.GeneratedSerializers
 {
     public class ReferenceTypeTests : SerializerTestBase
     {
@@ -14,7 +14,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serializers
         [Fact]
         public void MutableMembers()
         {
-            // Verifies that ILamaSerializable type with mutable members can be serialized and deserialized (round-trip).
+            // Verifies that serializable type with mutable members can be serialized and deserialized.
             var code = @"
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Serialization;
@@ -32,7 +32,7 @@ public class A : ILamaSerializable
             var project = CreateCompileTimeProject( domain, testContext, code );
 
             var type = project.GetType( "A" );
-            var metaSerializer = GetSerializer( type );
+            var lamaSerializer = GetSerializer( type );
 
             dynamic instance = Activator.CreateInstance( type )!;
             instance.Field = 13;
@@ -40,13 +40,13 @@ public class A : ILamaSerializable
 
             var constructorArgumentsWriter = new TestArgumentsWriter();
             var initializationArgumentsWriter = new TestArgumentsWriter();
-            metaSerializer.SerializeObject( instance, constructorArgumentsWriter, initializationArgumentsWriter );
+            lamaSerializer.SerializeObject( instance, constructorArgumentsWriter, initializationArgumentsWriter );
 
             var constructorArgumentsReader = constructorArgumentsWriter.ToReader();
             var initializationArgumentsReader = initializationArgumentsWriter.ToReader();
 
-            dynamic deserialized = metaSerializer.CreateInstance( type, constructorArgumentsReader );
-            metaSerializer.DeserializeFields( ref deserialized, initializationArgumentsReader );
+            dynamic deserialized = lamaSerializer.CreateInstance( type, constructorArgumentsReader );
+            lamaSerializer.DeserializeFields( ref deserialized, initializationArgumentsReader );
 
             Assert.Equal( 13, deserialized.Field );
             Assert.Equal( 42, deserialized.Property );
@@ -55,7 +55,7 @@ public class A : ILamaSerializable
         [Fact]
         public void ReadOnlyValueTypeMembers()
         {
-            // Verifies that ILamaSerializable type with read-only members can be serialized and deserialized (round-trip).
+            // Verifies that serializable type with read-only members can be serialized and deserialized.
             var code = @"
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Serialization;
@@ -79,19 +79,19 @@ public class A : ILamaSerializable
             var project = CreateCompileTimeProject( domain, testContext, code );
 
             var type = project.GetType( "A" );
-            var metaSerializer = GetSerializer( type );
+            var lamaSerializer = GetSerializer( type );
 
             dynamic instance = Activator.CreateInstance( type, 13, 42 )!;
 
             var constructorArgumentsWriter = new TestArgumentsWriter();
             var initializationArgumentsWriter = new TestArgumentsWriter();
-            metaSerializer.SerializeObject( instance, constructorArgumentsWriter, initializationArgumentsWriter );
+            lamaSerializer.SerializeObject( instance, constructorArgumentsWriter, initializationArgumentsWriter );
 
             var constructorArgumentsReader = constructorArgumentsWriter.ToReader();
             var initializationArgumentsReader = initializationArgumentsWriter.ToReader();
 
-            dynamic deserialized = metaSerializer.CreateInstance( type, constructorArgumentsReader );
-            metaSerializer.DeserializeFields( ref deserialized, initializationArgumentsReader );
+            dynamic deserialized = lamaSerializer.CreateInstance( type, constructorArgumentsReader );
+            lamaSerializer.DeserializeFields( ref deserialized, initializationArgumentsReader );
 
             Assert.Equal( 13, deserialized.Field );
             Assert.Equal( 42, deserialized.Property );
@@ -100,7 +100,7 @@ public class A : ILamaSerializable
         [Fact]
         public void ReadOnlyReferenceTypeMembers()
         {
-            // Verifies that ILamaSerializable type with read-only members can be serialized and deserialized (round-trip).
+            // Verifies that serializable type with read-only members can be serialized and deserialized.
             var code = @"
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Serialization;
@@ -135,7 +135,7 @@ public class B
 
             var typeA = project.GetType( "A" );
             var typeB = project.GetType( "B" );
-            var metaSerializer = GetSerializer( typeA );
+            var lamaSerializer = GetSerializer( typeA );
 
             dynamic instanceB1 = Activator.CreateInstance( typeB, 13 )!;
             dynamic instanceB2 = Activator.CreateInstance( typeB, 42 )!;
@@ -143,13 +143,13 @@ public class B
 
             var constructorArgumentsWriter = new TestArgumentsWriter();
             var initializationArgumentsWriter = new TestArgumentsWriter();
-            metaSerializer.SerializeObject( instanceA, constructorArgumentsWriter, initializationArgumentsWriter );
+            lamaSerializer.SerializeObject( instanceA, constructorArgumentsWriter, initializationArgumentsWriter );
 
             var constructorArgumentsReader = constructorArgumentsWriter.ToReader();
             var initializationArgumentsReader = initializationArgumentsWriter.ToReader();
 
-            dynamic deserialized = metaSerializer.CreateInstance( typeA, constructorArgumentsReader );
-            metaSerializer.DeserializeFields( ref deserialized, initializationArgumentsReader );
+            dynamic deserialized = lamaSerializer.CreateInstance( typeA, constructorArgumentsReader );
+            lamaSerializer.DeserializeFields( ref deserialized, initializationArgumentsReader );
 
             Assert.Equal( 13, deserialized.Field.Field );
             Assert.Equal( 42, deserialized.Property.Field );
@@ -158,7 +158,7 @@ public class B
         [Fact]
         public void InitOnlyReferenceTypeMembers()
         {
-            // Verifies that ILamaSerializable type with init-only members can be serialized and deserialized (round-trip).
+            // Verifies that serializable type with init-only members can be serialized and deserialized.
             var code = @"
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Serialization;
@@ -196,20 +196,20 @@ public class B
 
             var typeA = project.GetType( "A" );
             var typeB = project.GetType( "B" );
-            var metaSerializer = GetSerializer( typeA );
+            var lamaSerializer = GetSerializer( typeA );
 
             dynamic instanceB = Activator.CreateInstance( typeB, 42 )!;
             var instanceA = Activator.CreateInstance( typeA, instanceB )!;
 
             var constructorArgumentsWriter = new TestArgumentsWriter();
             var initializationArgumentsWriter = new TestArgumentsWriter();
-            metaSerializer.SerializeObject( instanceA, constructorArgumentsWriter, initializationArgumentsWriter );
+            lamaSerializer.SerializeObject( instanceA, constructorArgumentsWriter, initializationArgumentsWriter );
 
             var constructorArgumentsReader = constructorArgumentsWriter.ToReader();
             var initializationArgumentsReader = initializationArgumentsWriter.ToReader();
 
-            dynamic deserialized = metaSerializer.CreateInstance( typeA, constructorArgumentsReader );
-            metaSerializer.DeserializeFields( ref deserialized, initializationArgumentsReader );
+            dynamic deserialized = lamaSerializer.CreateInstance( typeA, constructorArgumentsReader );
+            lamaSerializer.DeserializeFields( ref deserialized, initializationArgumentsReader );
 
             Assert.Equal( 42, deserialized.Property.Field );
         }
@@ -217,7 +217,7 @@ public class B
         [Fact]
         public void ExplicitParameterlessConstructor()
         {
-            // Verifies that ILamaSerializable compile-time type with explicit parameterless constructor can be serialized and deserialized.
+            // Verifies that serializable compile-time type with explicit parameterless constructor can be serialized and deserialized.
             // Generator should not inject parameterless constructor when it is already defined.
             var code = @"
 using Metalama.Framework.Aspects;
@@ -237,26 +237,25 @@ public class A : ILamaSerializable
             var project = CreateCompileTimeProject( domain, testContext, code );
 
             var type = project.GetType( "A" );
-            var metaSerializer = GetSerializer( type );
+            var lamaSerializer = GetSerializer( type );
 
             dynamic instance = Activator.CreateInstance( type )!;
 
             var constructorArgumentsWriter = new TestArgumentsWriter();
             var initializationArgumentsWriter = new TestArgumentsWriter();
-            metaSerializer.SerializeObject( instance, constructorArgumentsWriter, initializationArgumentsWriter );
+            lamaSerializer.SerializeObject( instance, constructorArgumentsWriter, initializationArgumentsWriter );
 
             var constructorArgumentsReader = constructorArgumentsWriter.ToReader();
             var initializationArgumentsReader = initializationArgumentsWriter.ToReader();
 
-            dynamic deserialized = metaSerializer.CreateInstance( type, constructorArgumentsReader );
-            metaSerializer.DeserializeFields( ref deserialized, initializationArgumentsReader );
+            dynamic deserialized = lamaSerializer.CreateInstance( type, constructorArgumentsReader );
+            lamaSerializer.DeserializeFields( ref deserialized, initializationArgumentsReader );
         }
 
         [Fact]
         public void GenericClass()
         {
-            // Verifies that IMetaSerializable compile-time type with explicit parameterless constructor can be serialized and deserialized.
-            // Generator should not inject parameterless constructor when it is already defined.
+            // Verifies that serializable generic type can be serialized and deserialized.
             var code = @"
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Serialization;
@@ -278,19 +277,19 @@ public class A<T> : ILamaSerializable
             var project = CreateCompileTimeProject( domain, testContext, code );
 
             var type = project.GetType( "A`1" ).MakeGenericType( typeof(int) );
-            var metaSerializer = GetSerializer( type );
+            var lamaSerializer = GetSerializer( type );
 
             dynamic instance = Activator.CreateInstance( type, 42 )!;
 
             var constructorArgumentsWriter = new TestArgumentsWriter();
             var initializationArgumentsWriter = new TestArgumentsWriter();
-            metaSerializer.SerializeObject( instance, constructorArgumentsWriter, initializationArgumentsWriter );
+            lamaSerializer.SerializeObject( instance, constructorArgumentsWriter, initializationArgumentsWriter );
 
             var constructorArgumentsReader = constructorArgumentsWriter.ToReader();
             var initializationArgumentsReader = initializationArgumentsWriter.ToReader();
 
-            dynamic deserialized = metaSerializer.CreateInstance( type, constructorArgumentsReader );
-            metaSerializer.DeserializeFields( ref deserialized, initializationArgumentsReader );
+            dynamic deserialized = lamaSerializer.CreateInstance( type, constructorArgumentsReader );
+            lamaSerializer.DeserializeFields( ref deserialized, initializationArgumentsReader );
 
             Assert.Equal( 42, deserialized.Property );
         }
@@ -298,7 +297,7 @@ public class A<T> : ILamaSerializable
         [Fact]
         public void ClosedGenericValue()
         {
-            // Verifies that generated serializer correctly handles a field/property of closed generic type
+            // Verifies that generated serializer correctly handles a field/property of closed generic type.
             var code = @"
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Serialization;
@@ -334,7 +333,7 @@ public class B : ILamaSerializable
             var typeAObject = project.GetType( "A`1" ).MakeGenericType( typeof(object) );
             var typeAInt = project.GetType( "A`1" ).MakeGenericType( typeof(int) );
             var typeB = project.GetType( "B" );
-            var metaSerializer = GetSerializer( typeB );
+            var lamaSerializer = GetSerializer( typeB );
 
             var obj = new object();
             dynamic instanceAObj = Activator.CreateInstance( typeAObject, obj )!;
@@ -343,13 +342,13 @@ public class B : ILamaSerializable
 
             var constructorArgumentsWriter = new TestArgumentsWriter();
             var initializationArgumentsWriter = new TestArgumentsWriter();
-            metaSerializer.SerializeObject( instanceB, constructorArgumentsWriter, initializationArgumentsWriter );
+            lamaSerializer.SerializeObject( instanceB, constructorArgumentsWriter, initializationArgumentsWriter );
 
             var constructorArgumentsReader = constructorArgumentsWriter.ToReader();
             var initializationArgumentsReader = initializationArgumentsWriter.ToReader();
 
-            dynamic deserialized = metaSerializer.CreateInstance( typeB, constructorArgumentsReader );
-            metaSerializer.DeserializeFields( ref deserialized, initializationArgumentsReader );
+            dynamic deserialized = lamaSerializer.CreateInstance( typeB, constructorArgumentsReader );
+            lamaSerializer.DeserializeFields( ref deserialized, initializationArgumentsReader );
 
             Assert.Same( instanceAObj, deserialized.Field );
             Assert.Same( instanceAInt, deserialized.Property );
@@ -358,7 +357,7 @@ public class B : ILamaSerializable
         [Fact]
         public void OpenGenericValue()
         {
-            // Verifies that generated serializer correctly handles a field/property of closed generic type
+            // Verifies that generated serializer correctly handles a field/property of open generic type.
             var code = @"
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Serialization;
@@ -391,22 +390,110 @@ public class B<T> : ILamaSerializable
 
             var typeA = project.GetType( "A`1" ).MakeGenericType( typeof(int) );
             var typeB = project.GetType( "B`1" ).MakeGenericType( typeof(int) );
-            var metaSerializer = GetSerializer( typeB );
+            var lamaSerializer = GetSerializer( typeB );
 
             dynamic instanceA = Activator.CreateInstance( typeA, 42 )!;
             var instanceB = Activator.CreateInstance( typeB, instanceA )!;
 
             var constructorArgumentsWriter = new TestArgumentsWriter();
             var initializationArgumentsWriter = new TestArgumentsWriter();
-            metaSerializer.SerializeObject( instanceB, constructorArgumentsWriter, initializationArgumentsWriter );
+            lamaSerializer.SerializeObject( instanceB, constructorArgumentsWriter, initializationArgumentsWriter );
 
             var constructorArgumentsReader = constructorArgumentsWriter.ToReader();
             var initializationArgumentsReader = initializationArgumentsWriter.ToReader();
 
-            dynamic deserialized = metaSerializer.CreateInstance( typeB, constructorArgumentsReader );
-            metaSerializer.DeserializeFields( ref deserialized, initializationArgumentsReader );
+            dynamic deserialized = lamaSerializer.CreateInstance( typeB, constructorArgumentsReader );
+            lamaSerializer.DeserializeFields( ref deserialized, initializationArgumentsReader );
 
             Assert.Same( instanceA, deserialized.Property );
+        }
+
+        [Fact]
+        public void Nested()
+        {
+            // Verifies that serializable nested type can be serialized and deserialized.
+            var code = @"
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Serialization;
+[assembly: CompileTime]
+public class A
+{
+    public class B : ILamaSerializable
+    {
+        public int Field;
+        public int Property { get; set; }
+    }
+}
+";
+
+            using var domain = new UnloadableCompileTimeDomain();
+            using var testContext = this.CreateTestContext();
+
+            var project = CreateCompileTimeProject( domain, testContext, code );
+
+            var type = project.GetType( "A+B" );
+            var lamaSerializer = GetSerializer( type );
+
+            dynamic instance = Activator.CreateInstance( type )!;
+            instance.Field = 13;
+            instance.Property = 42;
+
+            var constructorArgumentsWriter = new TestArgumentsWriter();
+            var initializationArgumentsWriter = new TestArgumentsWriter();
+            lamaSerializer.SerializeObject( instance, constructorArgumentsWriter, initializationArgumentsWriter );
+
+            var constructorArgumentsReader = constructorArgumentsWriter.ToReader();
+            var initializationArgumentsReader = initializationArgumentsWriter.ToReader();
+
+            dynamic deserialized = lamaSerializer.CreateInstance( type, constructorArgumentsReader );
+            lamaSerializer.DeserializeFields( ref deserialized, initializationArgumentsReader );
+
+            Assert.Equal( 13, deserialized.Field );
+            Assert.Equal( 42, deserialized.Property );
+        }
+
+        [Fact]
+        public void NestedGeneric()
+        {
+            // Verifies that serializable nested generic type can be serialized and deserialized.
+            var code = @"
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Serialization;
+[assembly: CompileTime]
+public class A<T>
+{
+    public class B<U> : ILamaSerializable
+    {
+        public T Field;
+        public U Property { get; set; }
+    }
+}
+";
+
+            using var domain = new UnloadableCompileTimeDomain();
+            using var testContext = this.CreateTestContext();
+
+            var project = CreateCompileTimeProject( domain, testContext, code );
+
+            var type = project.GetType( "A`1+B`1" ).MakeGenericType(typeof(int), typeof(double));
+            var lamaSerializer = GetSerializer( type );
+
+            dynamic instance = Activator.CreateInstance( type )!;
+            instance.Field = 13;
+            instance.Property = 42.0;
+
+            var constructorArgumentsWriter = new TestArgumentsWriter();
+            var initializationArgumentsWriter = new TestArgumentsWriter();
+            lamaSerializer.SerializeObject( instance, constructorArgumentsWriter, initializationArgumentsWriter );
+
+            var constructorArgumentsReader = constructorArgumentsWriter.ToReader();
+            var initializationArgumentsReader = initializationArgumentsWriter.ToReader();
+
+            dynamic deserialized = lamaSerializer.CreateInstance( type, constructorArgumentsReader );
+            lamaSerializer.DeserializeFields( ref deserialized, initializationArgumentsReader );
+
+            Assert.Equal( 13, deserialized.Field );
+            Assert.Equal( 42.0, deserialized.Property );
         }
     }
 }

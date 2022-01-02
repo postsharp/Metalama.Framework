@@ -12,7 +12,7 @@ using System.Linq;
 using System.Threading;
 using Xunit;
 
-namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serializers
+namespace Metalama.Framework.Tests.UnitTests.CompileTime.GeneratedSerializers
 {
     public class SerializerTestBase : TestBase
     {
@@ -39,30 +39,30 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.Serializers
             return project!;
         }
 
-        private protected static Type GetMetaSerializerType( Type type )
+        private protected static Type GetLamaSerializerType( Type type )
         {
-            var metaSerializerTypes =
+            var lamaSerializerTypes =
                 type.GetNestedTypes()
                     .Where( nestedType => typeof(ISerializer).IsAssignableFrom( nestedType ) )
                     .ToArray();
 
-            Assert.Single( metaSerializerTypes );
+            Assert.Single( lamaSerializerTypes );
 
-            if ( metaSerializerTypes[0].IsGenericTypeDefinition )
+            if ( lamaSerializerTypes[0].IsGenericTypeDefinition )
             {
-                return metaSerializerTypes[0].MakeGenericType( type.GenericTypeArguments );
+                return lamaSerializerTypes[0].MakeGenericType( type.GenericTypeArguments );
             }
             else
             {
-                return metaSerializerTypes[0];
+                return lamaSerializerTypes[0];
             }
         }
 
         private protected static ISerializer GetSerializer( Type type )
         {
-            var metaSerializerType = GetMetaSerializerType( type );
+            var lamaSerializerType = GetLamaSerializerType( type );
 
-            return (ISerializer) Activator.CreateInstance( metaSerializerType ).AssertNotNull();
+            return (ISerializer) Activator.CreateInstance( lamaSerializerType ).AssertNotNull();
         }
 
         private protected class TestArgumentsReader : IArgumentsReader
