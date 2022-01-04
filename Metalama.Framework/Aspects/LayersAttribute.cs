@@ -6,7 +6,7 @@ using System;
 namespace Metalama.Framework.Aspects;
 
 /// <summary>
-/// Custom attribute that, when applied to an aspect class, means that this aspect classes uses several
+/// Custom attribute that, when applied to an aspect class, means that this aspect class uses several
 /// layers, and defines the name and the order of execution of these layers.
 /// </summary>
 [AttributeUsage( AttributeTargets.Class )]
