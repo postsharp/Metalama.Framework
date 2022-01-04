@@ -2,7 +2,8 @@ using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Inheritance.InheritedPropertyAttribute
 {
-    internal class Aspect : OverrideFieldOrPropertyAspect, IInheritedAspect
+    [Inherited]
+    internal class Aspect : OverrideFieldOrPropertyAspect
     {
         public override dynamic? OverrideProperty
         {

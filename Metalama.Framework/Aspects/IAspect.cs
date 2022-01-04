@@ -4,7 +4,6 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Eligibility;
 using Metalama.Framework.Serialization;
-using System.Runtime.Serialization;
 
 namespace Metalama.Framework.Aspects
 {
@@ -13,27 +12,7 @@ namespace Metalama.Framework.Aspects
     /// this interface, but the strongly-typed variant <see cref="IAspect{T}"/>.
     /// </summary>
     [CompileTime]
-    public interface IAspect : ILamaSerializable
-    {
-        /// <summary>
-        /// Configures the static characteristics of the aspect, i.e. those that do not depend on the instance state
-        /// of the aspect class. Implementations are not allowed to reference non-static members.
-        /// Implementations must call the implementation of the base class if it exists.
-        /// </summary>
-        /// <param name="builder">An object that allows the aspect to configure characteristics like
-        /// description, dependencies, or layers.</param>
-        /// <remarks>
-        /// Do not reference instance class members in your implementation of  <see cref="BuildAspectClass"/>.
-        /// Indeed, this method is called on an instance obtained using <see cref="FormatterServices.GetUninitializedObject"/>, that is,
-        /// <i>without invoking the class constructor</i>.
-        /// </remarks>
-        void BuildAspectClass( IAspectClassBuilder builder )
-#if NET5_0_OR_GREATER
-        { }
-#else
-            ;
-#endif
-    }
+    public interface IAspect : ILamaSerializable { }
 
     /// <summary>
     /// The base interface for all aspects, with the type parameter indicating to which types

@@ -257,6 +257,14 @@ namespace Metalama.Framework.Engine
                 Error,
                 "An aspect or fabric can add validators only under its target declaration." );
 
+        public static readonly DiagnosticDefinition<INamedTypeSymbol>
+            LiveTemplateMustHaveDefaultConstructor = new(
+                "CR0045",
+                _category,
+                "The class '{0}' must have a default constructor because of the [LiveTemplate] attribute.",
+                Error,
+                "Live templates must have a default constructor." );
+
         // TODO: Use formattable string (C# does not seem to find extension methods).
         public static readonly DiagnosticDefinition<string>
             UnsupportedFeature = new(

@@ -27,8 +27,6 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
             Console.WriteLine( "This is the overridden setter." );
         }
 
-        public void BuildAspectClass( IAspectClassBuilder builder ) { }
-
         public void BuildEligibility( IEligibilityBuilder<IProperty> builder ) { }
     }
 

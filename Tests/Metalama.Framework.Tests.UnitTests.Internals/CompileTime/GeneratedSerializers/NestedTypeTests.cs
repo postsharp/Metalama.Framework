@@ -41,7 +41,7 @@ public class A
             var lamaSerializer = GetSerializer( type );
 
             dynamic instance = Activator.CreateInstance( type )!;
-            type.GetField("Field")!.SetValue(instance, 13);
+            type.GetField( "Field" )!.SetValue( instance, 13 );
             type.GetProperty( "Property" )!.SetValue( instance, 42 );
 
             var constructorArgumentsWriter = new TestArgumentsWriter();

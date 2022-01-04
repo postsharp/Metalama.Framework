@@ -47,8 +47,6 @@ namespace Metalama.Framework.Engine.Fabrics
             }
         }
 
-        void IAspect.BuildAspectClass( IAspectClassBuilder builder ) { }
-
         void IEligible<T>.BuildEligibility( IEligibilityBuilder<T> builder ) { }
 
         public IEnumerable<Fabric> Fabrics => this._templateClasses.Select( t => t.Driver.Fabric );

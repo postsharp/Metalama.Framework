@@ -13,9 +13,5 @@ namespace Metalama.Framework.Aspects
     /// <remarks>
     /// <para>This class is a redundant helper class. The aspect framework only respects the <see cref="IAspect{T}"/> interface.</para>
     /// </remarks>
-    public abstract class Aspect : Attribute, IAspect
-    {
-        /// <inheritdoc />
-        public virtual void BuildAspectClass( IAspectClassBuilder builder ) { }
-    }
+    public abstract class Aspect : Attribute, IAspect { }
 }

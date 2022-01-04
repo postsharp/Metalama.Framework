@@ -18,6 +18,7 @@ using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
@@ -31,7 +32,7 @@ namespace Metalama.Framework.Engine.Aspects
     /// <summary>
     /// Represents the metadata of an aspect class. This class is compilation-independent. It is not used to represent a fabric class.
     /// </summary>
-    internal partial class AspectClass : TemplateClass, IAspectClassImpl, IBoundAspectClass, IValidatorDriverFactory
+    internal class AspectClass : TemplateClass, IAspectClassImpl, IBoundAspectClass, IValidatorDriverFactory
     {
         private readonly UserCodeInvoker _userCodeInvoker;
         private readonly IAspectDriver? _aspectDriver;
@@ -52,9 +53,9 @@ namespace Metalama.Framework.Engine.Aspects
         public string ShortName { get; }
 
         /// <inheritdoc />
-        public string DisplayName { get; private set; }
+        public string DisplayName { get; }
 
-        public string? Description { get; private set; }
+        public string? Description { get; }
 
         public override CompileTimeProject? Project { get; }
 
@@ -81,7 +82,7 @@ namespace Metalama.Framework.Engine.Aspects
 
         Type IAspectClass.Type => this.AspectType;
 
-        public bool IsLiveTemplate { get; private set; }
+        public bool IsLiveTemplate { get; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AspectClass"/> class.
@@ -107,8 +108,68 @@ namespace Metalama.Framework.Engine.Aspects
             this.DiagnosticLocation = aspectTypeSymbol.GetDiagnosticLocation();
             this.AspectType = aspectType;
             this._prototypeAspectInstance = prototype;
-            this.IsInherited = prototype is IInheritedAspect;
             this.TemplateClasses = ImmutableArray.Create<TemplateClass>( this );
+
+            List<string?> layers = new();
+
+            if ( baseClass != null )
+            {
+                this.Description = baseClass.Description;
+                this.DisplayName = baseClass.DisplayName;
+                this.IsInherited = baseClass.IsInherited;
+                this.IsLiveTemplate = baseClass.IsLiveTemplate;
+                layers.AddRange( baseClass._layers.Select( l => l.LayerName ) );
+            }
+            else
+            {
+                layers.Add( null );
+            }
+
+            foreach ( var attribute in aspectTypeSymbol.GetAttributes() )
+            {
+                switch ( attribute.AttributeClass?.Name )
+                {
+                    case null:
+                        continue;
+
+                    case nameof(InheritedAttribute):
+                        this.IsInherited = true;
+
+                        break;
+
+                    case nameof(LiveTemplateAttribute):
+                        if ( !aspectTypeSymbol.HasDefaultConstructor() )
+                        {
+                            diagnosticAdder.Report(
+                                GeneralDiagnosticDescriptors.LiveTemplateMustHaveDefaultConstructor.CreateRoslynDiagnostic(
+                                    attribute.GetDiagnosticLocation(),
+                                    aspectTypeSymbol ) );
+                        }
+                        else
+                        {
+                            this.IsLiveTemplate = true;
+                        }
+
+                        break;
+
+                    case nameof(LayersAttribute):
+                        layers.AddRange( attribute.ConstructorArguments[0].Values.Select( v => (string?) v.Value ).Where( v => !string.IsNullOrEmpty( v ) ) );
+
+                        break;
+
+                    case nameof(DescriptionAttribute):
+                        this.Description = (string?) attribute.ConstructorArguments[0].Value;
+
+                        break;
+
+                    case nameof(DisplayNameAttribute):
+                        this.DisplayName = (string?) attribute.ConstructorArguments[0].Value ?? this.ShortName;
+
+                        break;
+                }
+            }
+
+            this._layers = layers.Select( l => new AspectLayer( this, l ) ).ToImmutableArray();
 
             // This must be called after Members is built and assigned.
             this._aspectDriver = aspectDriverFactory.GetAspectDriver( this, aspectTypeSymbol );
@@ -118,21 +179,6 @@ namespace Metalama.Framework.Engine.Aspects
         {
             if ( this._prototypeAspectInstance != null )
             {
-                // Call BuildAspectClass
-                var classBuilder = new Builder( this );
-
-                var executionContext = new UserCodeExecutionContext(
-                    this.ServiceProvider,
-                    diagnosticAdder,
-                    UserCodeMemberInfo.FromDelegate( new Action<IAspectClassBuilder>( this._prototypeAspectInstance.BuildAspectClass ) ) );
-
-                if ( !this._userCodeInvoker.TryInvoke( () => this._prototypeAspectInstance.BuildAspectClass( classBuilder ), executionContext ) )
-                {
-                    return false;
-                }
-
-                this._layers = classBuilder.Layers.As<string?>().Prepend( null ).Select( l => new AspectLayer( this, l ) ).ToImmutableArray();
-
                 // Call BuildEligibility for all relevant interface implementations.
                 List<KeyValuePair<Type, IEligibilityRule<IDeclaration>>> eligibilityRules = new();
 

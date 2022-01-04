@@ -4,15 +4,10 @@ using Metalama.Framework.Code;
 
 namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Initialize.LiveTemplateError
 {
+    [LiveTemplate]
     internal class Aspect : MethodAspect
     {
         public Aspect( int x ) { }
-
-        public override void BuildAspectClass( IAspectClassBuilder builder )
-        {
-            // This should not be allowed because there is no default constructor.
-            builder.IsLiveTemplate = true;
-        }
 
         public override void BuildAspect( IAspectBuilder<IMethod> builder )
         {

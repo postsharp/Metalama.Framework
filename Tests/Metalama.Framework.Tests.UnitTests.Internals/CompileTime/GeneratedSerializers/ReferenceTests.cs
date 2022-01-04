@@ -33,7 +33,7 @@ public class A : ILamaSerializable
 
             var project = CreateCompileTimeProject( domain, testContext, code );
 
-            var type = project!.GetType( "A" );
+            var type = project.GetType( "A" );
             var lamaSerializer = GetSerializer( type );
 
             var obj = new object();
@@ -79,7 +79,7 @@ public class A : ILamaSerializable
 
             var project = CreateCompileTimeProject( domain, testContext, code );
 
-            var type = project!.GetType( "A" );
+            var type = project.GetType( "A" );
             var lamaSerializer = GetSerializer( type );
 
             dynamic instance = Activator.CreateInstance( type, 42 )!;
@@ -130,7 +130,7 @@ public struct S : ILamaSerializable
 
             var project = CreateCompileTimeProject( domain, testContext, code );
 
-            var type = project!.GetType( "A" );
+            var type = project.GetType( "A" );
             var lamaSerializer = GetSerializer( type );
 
             dynamic instance = Activator.CreateInstance( type, 27, 42 )!;
@@ -183,7 +183,7 @@ public struct S : ILamaSerializable
 
             var project = CreateCompileTimeProject( domain, testContext, code );
 
-            var type = project!.GetType( "A" );
+            var type = project.GetType( "A" );
             var lamaSerializer = GetSerializer( type );
 
             var obj = new object();
@@ -250,7 +250,7 @@ public struct U : ILamaSerializable
 
             var project = CreateCompileTimeProject( domain, testContext, code );
 
-            var type = project!.GetType( "A" );
+            var type = project.GetType( "A" );
             var lamaSerializer = GetSerializer( type );
 
             var obj = new object();
@@ -310,7 +310,7 @@ public struct S : ILamaSerializable
 
             var project = CreateCompileTimeProject( domain, testContext, code );
 
-            var type = project!.GetType( "A" );
+            var type = project.GetType( "A" );
             var lamaSerializer = GetSerializer( type );
 
             var obj = new object();

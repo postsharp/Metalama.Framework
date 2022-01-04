@@ -3,8 +3,8 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.CompileTime;
+using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Serialization;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -373,7 +373,7 @@ namespace Metalama.Framework.Engine.LamaSerialization
                         IdentifierName( localVariableName ),
                         IdentifierName( baseDeserializeMethod.Parameters[1].Name ),
                         this.SelectLateDeserializedFields,
-                        static t => Array.Empty<ISymbol>() ) );
+                        static _ => Array.Empty<ISymbol>() ) );
             }
             else
             {
@@ -483,7 +483,7 @@ namespace Metalama.Framework.Engine.LamaSerialization
             ExpressionSyntax targetExpression,
             ExpressionSyntax argumentsReaderExpression,
             Func<SerializableTypeInfo, IEnumerable<ISymbol>> deserializedLocationSelector,
-            Func<SerializableTypeInfo, IEnumerable<ISymbol>> defaultLocationSelector)
+            Func<SerializableTypeInfo, IEnumerable<ISymbol>> defaultLocationSelector )
         {
             var statements = new List<StatementSyntax>();
 
@@ -550,16 +550,17 @@ namespace Metalama.Framework.Engine.LamaSerialization
 
         private IEnumerable<ISymbol> SelectConstructorDefaultFields( SerializableTypeInfo serializableType )
         {
-            var constructorDeserializedMembers = new HashSet<ISymbol>( SymbolEqualityComparer.Default);
+            var constructorDeserializedMembers = new HashSet<ISymbol>( SymbolEqualityComparer.Default );
+
             foreach ( var serializedMember in serializableType.SerializedMembers )
             {
                 if ( this.ClassifyFieldOrProperty( serializedMember ) == FieldOrPropertyDeserializationKind.Constructor )
                 {
-                    constructorDeserializedMembers.Add(serializedMember);
+                    constructorDeserializedMembers.Add( serializedMember );
                 }
             }
 
-            foreach ( var member in serializableType.Type.GetMembers().Where( x => this.RequiresConstructorInitialization(x) ) )
+            foreach ( var member in serializableType.Type.GetMembers().Where( x => this.RequiresConstructorInitialization( x ) ) )
             {
                 if ( !constructorDeserializedMembers.Contains( member ) )
                 {
@@ -568,14 +569,15 @@ namespace Metalama.Framework.Engine.LamaSerialization
             }
         }
 
-        private bool RequiresConstructorInitialization(ISymbol fieldOrProperty)
+        private bool RequiresConstructorInitialization( ISymbol fieldOrProperty )
         {
-            if (fieldOrProperty.IsStatic)
+            if ( fieldOrProperty.IsStatic )
             {
                 return false;
             }
 
-            if ( fieldOrProperty.GetAttributes().Any( a => a.AttributeClass.AssertNotNull().Is( this._runtimeReflectionMapper.GetTypeSymbol( typeof( TemplateAttribute ) ) ) ) )
+            if ( fieldOrProperty.GetAttributes()
+                .Any( a => a.AttributeClass.AssertNotNull().Is( this._runtimeReflectionMapper.GetTypeSymbol( typeof(TemplateAttribute) ) ) ) )
             {
                 // Skip all template symbols.
                 return false;
