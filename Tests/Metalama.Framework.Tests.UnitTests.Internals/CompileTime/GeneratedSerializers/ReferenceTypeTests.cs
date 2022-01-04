@@ -475,7 +475,7 @@ public class A<T>
 
             var project = CreateCompileTimeProject( domain, testContext, code );
 
-            var type = project.GetType( "A`1+B`1" ).MakeGenericType(typeof(int), typeof(double));
+            var type = project.GetType( "A`1+B`1" ).MakeGenericType( typeof(int), typeof(double) );
             var lamaSerializer = GetSerializer( type );
 
             dynamic instance = Activator.CreateInstance( type )!;

@@ -41,7 +41,7 @@ namespace Metalama.Framework.Aspects
     {
         /// <summary>
         /// Registers the build action for an aspect layer. The aspect layer must have been defined
-        /// by the <see cref="IAspect.BuildAspectClass"/> method.
+        /// by the <see cref="LayersAttribute"/> attribute.
         /// </summary>
         /// <param name="layerName"></param>
         /// <param name="buildAction"></param>

@@ -4,7 +4,8 @@ using Metalama.Framework.Code;
 
 namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Inheritance.InheritedGenericTypeAttribute
 {
-    internal class Aspect : TypeAspect, IInheritedAspect
+    [Inherited]
+    internal class Aspect : TypeAspect
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {

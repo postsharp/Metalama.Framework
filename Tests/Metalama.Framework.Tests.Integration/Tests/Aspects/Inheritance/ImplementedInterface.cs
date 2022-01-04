@@ -4,7 +4,8 @@ using Metalama.Framework.Code;
 
 namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Inheritance.ImplementedInterface
 {
-    internal class Aspect : TypeAspect, IInheritedAspect
+    [Inherited]
+    internal class Aspect : TypeAspect
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
@@ -27,10 +28,7 @@ namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Inheritance.Implemente
     internal class Targets
     {
         [Aspect]
-        private interface I
-        {
-            
-        }
+        private interface I { }
 
         private class DerivedClass : I
         {

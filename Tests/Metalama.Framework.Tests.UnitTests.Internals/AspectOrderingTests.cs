@@ -84,9 +84,7 @@ namespace Metalama.Framework.Tests.UnitTests
         {
             var code = @"
 using Metalama.Framework.Aspects;
-class Aspect1 : TypeAspect 
-{
-}
+class Aspect1 : TypeAspect { }
 ";
 
             var ordered = this.GetOrderedAspectLayers( code, "Aspect1" );
@@ -98,13 +96,8 @@ class Aspect1 : TypeAspect
         {
             var code = @"
 using Metalama.Framework.Aspects;
-class Aspect1 : TypeAspect
-{
-    public override void BuildAspectClass( IAspectClassBuilder builder ) 
-    {
-        builder.Layers = System.Collections.Immutable.ImmutableArray.Create(""Layer1"");
-    }
-}
+[Layers(""Layer1"")]
+class Aspect1 : TypeAspect { }
 ";
 
             var ordered = this.GetOrderedAspectLayers( code, "Aspect1" );
@@ -116,21 +109,11 @@ class Aspect1 : TypeAspect
         {
             var code = @"
 using Metalama.Framework.Aspects;
-class Aspect1 : TypeAspect
-{
-    public override void BuildAspectClass( IAspectClassBuilder builder ) 
-    {
-        builder.Layers = System.Collections.Immutable.ImmutableArray.Create(""Layer1"");
-    }
-}
+[Layers(""Layer1"")]
+class Aspect1 : TypeAspect { }
 
-class Aspect2 : TypeAspect
-{
-    public override void BuildAspectClass( IAspectClassBuilder builder ) 
-    {
-        builder.Layers = System.Collections.Immutable.ImmutableArray.Create(""Layer1"");
-    }
-}
+[Layers(""Layer1"")]
+class Aspect2 : TypeAspect { }
 ";
 
             var ordered = this.GetOrderedAspectLayers( code, "Aspect1", "Aspect2" );
@@ -173,21 +156,11 @@ using Metalama.Framework.Aspects;
 
 [assembly: AspectOrder( typeof(Aspect2), typeof(Aspect1) ) ]
 
-class Aspect1 : TypeAspect
-{
-    public override void BuildAspectClass( IAspectClassBuilder builder ) 
-    {
-        builder.Layers = System.Collections.Immutable.ImmutableArray.Create(""Layer1"");
-    }
-}
+[Layers(""Layer1"")]
+class Aspect1 : TypeAspect { }
 
-class Aspect2 : TypeAspect
-{
-    public override void BuildAspectClass( IAspectClassBuilder builder ) 
-    {
-        builder.Layers = System.Collections.Immutable.ImmutableArray.Create(""Layer1"");
-    }
-}
+[Layers(""Layer1"")]
+class Aspect2 : TypeAspect { }
 ";
 
             var ordered = this.GetOrderedAspectLayers( code, "Aspect1", "Aspect2" );
@@ -202,21 +175,11 @@ using Metalama.Framework.Aspects;
 
 [assembly: AspectOrder( ""Aspect2"", ""Aspect1"" ) ]
 
-class Aspect1  : TypeAspect
-{
-    public override void BuildAspectClass( IAspectClassBuilder builder ) 
-    {
-        builder.Layers = System.Collections.Immutable.ImmutableArray.Create(""Layer1"");
-    }
-}
+[Layers(""Layer1"")]
+class Aspect1  : TypeAspect { }
 
-class Aspect2  : TypeAspect
-{
-    public override void BuildAspectClass( IAspectClassBuilder builder ) 
-    {
-        builder.Layers = System.Collections.Immutable.ImmutableArray.Create(""Layer1"");
-    }
-}
+[Layers(""Layer1"")]
+class Aspect2  : TypeAspect { }
 ";
 
             var ordered = this.GetOrderedAspectLayers( code, "Aspect1", "Aspect2" );
@@ -231,21 +194,11 @@ using Metalama.Framework.Aspects;
 
 [assembly: AspectOrder( ""Aspect2:Layer1"", ""Aspect1:Layer1"", ""Aspect2"", ""Aspect1"" ) ]
 
-class Aspect1  : TypeAspect
-{
-    public override void BuildAspectClass( IAspectClassBuilder builder ) 
-    {
-        builder.Layers = System.Collections.Immutable.ImmutableArray.Create(""Layer1"");
-    }
-}
+[Layers(""Layer1"")]
+class Aspect1  : TypeAspect { }
 
-class Aspect2  : TypeAspect
-{
-    public override void BuildAspectClass( IAspectClassBuilder builder ) 
-    {
-        builder.Layers = System.Collections.Immutable.ImmutableArray.Create(""Layer1"");
-    }
-}
+[Layers(""Layer1"")]
+class Aspect2  : TypeAspect { }
 ";
 
             var ordered = this.GetOrderedAspectLayers( code, "Aspect1", "Aspect2" );
@@ -258,13 +211,8 @@ class Aspect2  : TypeAspect
             var code = @"
 using Metalama.Framework.Aspects;
 
-class Aspect1  : TypeAspect
-{
-    public override void BuildAspectClass( IAspectClassBuilder builder ) 
-    {
-        builder.Layers = System.Collections.Immutable.ImmutableArray.Create(""Layer1"");
-    }
-}
+[Layers(""Layer1"")]
+class Aspect1  : TypeAspect { }
 
 class Aspect2 : Aspect1 {}
 ";
@@ -282,9 +230,7 @@ using Metalama.Framework.Aspects;
 
 [assembly: AspectOrder( ""NonExistent1"", ""Aspect1"" ) ]
 
-class Aspect1 : TypeAspect
-{
-}
+class Aspect1 : TypeAspect { }
 
 ";
 
@@ -301,13 +247,8 @@ using Metalama.Framework.Aspects;
 [assembly: AspectOrder( typeof(Aspect2), typeof(Aspect1) ) ]
 [assembly: AspectOrder( typeof(Aspect1), typeof(Aspect2) ) ]
 
-class Aspect1 : TypeAspect
-{
-}
-
-class Aspect2 : TypeAspect
-{
-}
+class Aspect1 : TypeAspect { }
+class Aspect2 : TypeAspect { }
 ";
 
             var diagnostics = new DiagnosticList();
@@ -327,17 +268,11 @@ using Metalama.Framework.Aspects;
 [assembly: AspectOrder( typeof(Aspect2), typeof(Aspect1), typeof(Aspect3) ) ]
 [assembly: AspectOrder( typeof(Aspect1), typeof(Aspect2) ) ]
 
-class Aspect1 : TypeAspect
-{
-}
+class Aspect1 : TypeAspect { }
 
-class Aspect2 : TypeAspect
-{
-}
+class Aspect2 : TypeAspect { }
 
-class Aspect3 : TypeAspect
-{
-}
+class Aspect3 : TypeAspect { }
 ";
 
             var diagnostics = new DiagnosticList();

@@ -20,7 +20,7 @@ namespace Metalama.Framework.Engine.AspectOrdering
 
         public IEnumerable<AspectOrderSpecification> GetAspectOrderSpecification( IDiagnosticAdder diagnosticAdder )
             => this._aspectTypes
-                .Where( at => at.Layers.Count > 1 )
+                .Where( at => at.Layers.Length > 1 )
                 .Select( at => new AspectOrderSpecification( at.Layers.Select( l => l.AspectLayerId.FullName ) ) );
     }
 }

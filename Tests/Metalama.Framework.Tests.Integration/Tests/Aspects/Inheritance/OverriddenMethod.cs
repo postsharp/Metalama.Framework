@@ -3,7 +3,8 @@ using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Inheritance.InheritedMethodAttribute
 {
-    internal class Aspect : OverrideMethodAspect, IInheritedAspect
+    [Inherited]
+    internal class Aspect : OverrideMethodAspect
     {
         public override dynamic? OverrideMethod()
         {

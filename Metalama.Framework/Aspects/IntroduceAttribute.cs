@@ -14,8 +14,8 @@ namespace Metalama.Framework.Aspects
     public class IntroduceAttribute : TemplateAttribute
     {
         /// <summary>
-        /// Gets or sets the name of the aspect layer into which the member will be introduced. The layer must have been defined in the implementation of the
-        /// <see cref="IAspect.BuildAspectClass"/> method.
+        /// Gets or sets the name of the aspect layer into which the member will be introduced. The layer must have been defined
+        /// using the <see cref="LayersAttribute"/> custom attribute.
         /// </summary>
         [Obsolete( "Not implemented." )]
         public string? Layer { get; set; }
