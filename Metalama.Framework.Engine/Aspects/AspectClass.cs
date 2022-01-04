@@ -38,8 +38,7 @@ namespace Metalama.Framework.Engine.Aspects
         private readonly IAspectDriver? _aspectDriver;
         private readonly IAspect? _prototypeAspectInstance; // Null for abstract classes.
         private ValidatorDriverFactory? _validatorDriverFactory;
-        private IReadOnlyList<AspectLayer>? _layers;
-
+        
         private static readonly MethodInfo _tryInitializeEligibilityMethod = typeof(AspectClass).GetMethod(
             nameof(TryInitializeEligibility),
             BindingFlags.Instance | BindingFlags.NonPublic );
@@ -69,7 +68,7 @@ namespace Metalama.Framework.Engine.Aspects
         /// <summary>
         /// Gets the list of layers of the current aspect.
         /// </summary>
-        public IReadOnlyList<AspectLayer> Layers => this._layers.AssertNotNull();
+        public ImmutableArray<AspectLayer> Layers { get; }
 
         public Location? DiagnosticLocation { get; }
 
@@ -83,6 +82,8 @@ namespace Metalama.Framework.Engine.Aspects
         Type IAspectClass.Type => this.AspectType;
 
         public bool IsLiveTemplate { get; }
+        
+        public bool HasError { get; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AspectClass"/> class.
@@ -118,7 +119,7 @@ namespace Metalama.Framework.Engine.Aspects
                 this.DisplayName = baseClass.DisplayName;
                 this.IsInherited = baseClass.IsInherited;
                 this.IsLiveTemplate = baseClass.IsLiveTemplate;
-                layers.AddRange( baseClass._layers.Select( l => l.LayerName ) );
+                layers.AddRange( baseClass.Layers.Select( l => l.LayerName ) );
             }
             else
             {
@@ -144,6 +145,8 @@ namespace Metalama.Framework.Engine.Aspects
                                 GeneralDiagnosticDescriptors.LiveTemplateMustHaveDefaultConstructor.CreateRoslynDiagnostic(
                                     attribute.GetDiagnosticLocation(),
                                     aspectTypeSymbol ) );
+
+                            this.HasError = true;
                         }
                         else
                         {
@@ -169,7 +172,7 @@ namespace Metalama.Framework.Engine.Aspects
                 }
             }
 
-            this._layers = layers.Select( l => new AspectLayer( this, l ) ).ToImmutableArray();
+            this.Layers = layers.Select( l => new AspectLayer( this, l ) ).ToImmutableArray();
 
             // This must be called after Members is built and assigned.
             this._aspectDriver = aspectDriverFactory.GetAspectDriver( this, aspectTypeSymbol );
@@ -177,6 +180,11 @@ namespace Metalama.Framework.Engine.Aspects
 
         private bool TryInitialize( IDiagnosticAdder diagnosticAdder )
         {
+            if ( this.HasError )
+            {
+                return false;
+            }
+            
             if ( this._prototypeAspectInstance != null )
             {
                 // Call BuildEligibility for all relevant interface implementations.
@@ -208,9 +216,6 @@ namespace Metalama.Framework.Engine.Aspects
             }
             else
             {
-                // Abstract aspect classes don't have any layer.
-                this._layers = Array.Empty<AspectLayer>();
-
                 // Abstract aspect classes don't have eligibility because they cannot be applied.
                 this._eligibilityRules = ImmutableArray<KeyValuePair<Type, IEligibilityRule<IDeclaration>>>.Empty;
             }
@@ -310,6 +315,8 @@ namespace Metalama.Framework.Engine.Aspects
 
             if ( !aspectClass.TryInitialize( diagnosticAdder ) )
             {
+                aspectClass = null;
+                
                 return false;
             }
 
