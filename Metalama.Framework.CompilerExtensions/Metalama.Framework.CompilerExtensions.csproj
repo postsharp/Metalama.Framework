@@ -21,19 +21,7 @@
 
 
     <ItemGroup>
-
-        <!-- TODO: These two assemblies must be included because they are not a part of csc.exe, but it would be better to include them in csc.exe -->
-        <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="$(RoslynVersion)" PrivateAssets="all">
-            <GeneratePathProperty>true</GeneratePathProperty>
-        </PackageReference>
-        <EmbeddedResource Include="$(PkgMicrosoft_CodeAnalysis_CSharp_Workspaces)\lib\netstandard2.0\Microsoft.CodeAnalysis.CSharp.Workspaces.dll" Link="Resources\Microsoft.CodeAnalysis.CSharp.Workspaces.dll"/>
-
-        <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.Common" Version="$(RoslynVersion)" PrivateAssets="all">
-            <GeneratePathProperty>true</GeneratePathProperty>
-        </PackageReference>
-        <EmbeddedResource Include="$(PkgMicrosoft_CodeAnalysis_Workspaces_Common)\lib\netstandard2.0\Microsoft.CodeAnalysis.Workspaces.dll" Link="Resources\Microsoft.CodeAnalysis.Workspaces.dll"/>
-
-
+        
         <PackageReference Include="Microsoft.Bcl.HashCode" Version="$(MicrosoftBclHashCodeVersion)" PrivateAssets="all">
             <GeneratePathProperty>true</GeneratePathProperty>
         </PackageReference>

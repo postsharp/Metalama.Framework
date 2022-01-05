@@ -18,6 +18,14 @@
         <DefineConstants>$(DefineConstants);METALAMA</DefineConstants>
     </PropertyGroup>
 
+    <!-- Implementation of the 'LamaDebug' build configuration -->
+    <PropertyGroup Condition="'$(Configuration)'=='LamaDebug'">
+        <MetalamaFormatOutput Condition="'$(MetalamaFormatOutput)'==''">True</MetalamaFormatOutput>
+        <MetalamaDebugTransformedCode>True</MetalamaDebugTransformedCode>
+        <MetalamaEmitCompilerTransformedFiles Condition="'$(MetalamaEmitCompilerTransformedFiles)'==''">True</MetalamaEmitCompilerTransformedFiles>
+        <MetalamaCompilerTransformedFilesOutputPath Condition="'$(MetalamaCompilerTransformedFilesOutputPath)'==''">$(IntermediateOutputPath)metalama</MetalamaCompilerTransformedFilesOutputPath>
+    </PropertyGroup>
+
     <!-- Auxiliary files. -->
     <PropertyGroup>
         <MetalamaAdditionalCompilationOutputDirectory>$(MSBuildProjectDirectory)\$(IntermediateOutputPath)\metalama-aux\</MetalamaAdditionalCompilationOutputDirectory>
