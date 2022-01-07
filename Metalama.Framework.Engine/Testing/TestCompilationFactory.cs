@@ -21,14 +21,15 @@ namespace Metalama.Framework.Engine.Testing
         public static CSharpCompilation CreateEmptyCSharpCompilation(
             string? name,
             IEnumerable<Assembly> additionalAssemblies,
-            bool addMetalamaReferences = true )
-            => CreateEmptyCSharpCompilation( name, GetMetadataReferences( additionalAssemblies, addMetalamaReferences ) );
+            bool addMetalamaReferences = true,
+            OutputKind outputKind = OutputKind.DynamicallyLinkedLibrary )
+            => CreateEmptyCSharpCompilation( name, GetMetadataReferences( additionalAssemblies, addMetalamaReferences ), outputKind );
 
-        public static CSharpCompilation CreateEmptyCSharpCompilation( string? name, IEnumerable<MetadataReference> metadataReferences )
+        public static CSharpCompilation CreateEmptyCSharpCompilation( string? name, IEnumerable<MetadataReference> metadataReferences, OutputKind outputKind = OutputKind.DynamicallyLinkedLibrary )
             => CSharpCompilation.Create( name ?? "test_" + Guid.NewGuid() )
                 .WithOptions(
                     new CSharpCompilationOptions(
-                        OutputKind.DynamicallyLinkedLibrary,
+                        outputKind,
                         allowUnsafe: true,
                         nullableContextOptions: NullableContextOptions.Enable ) )
                 .AddReferences( metadataReferences );
