@@ -38,7 +38,7 @@ namespace Metalama.Framework.Engine.Aspects
         private readonly IAspectDriver? _aspectDriver;
         private readonly IAspect? _prototypeAspectInstance; // Null for abstract classes.
         private ValidatorDriverFactory? _validatorDriverFactory;
-        
+
         private static readonly MethodInfo _tryInitializeEligibilityMethod = typeof(AspectClass).GetMethod(
             nameof(TryInitializeEligibility),
             BindingFlags.Instance | BindingFlags.NonPublic );
@@ -82,7 +82,7 @@ namespace Metalama.Framework.Engine.Aspects
         Type IAspectClass.Type => this.AspectType;
 
         public bool IsLiveTemplate { get; }
-        
+
         public bool HasError { get; }
 
         /// <summary>
@@ -184,7 +184,7 @@ namespace Metalama.Framework.Engine.Aspects
             {
                 return false;
             }
-            
+
             if ( this._prototypeAspectInstance != null )
             {
                 // Call BuildEligibility for all relevant interface implementations.
@@ -202,8 +202,17 @@ namespace Metalama.Framework.Engine.Aspects
                              .GetInterfaces()
                              .Where( i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IEligible<>) ) )
                 {
+                    var declarationInterface = implementedInterface.GenericTypeArguments[0];
+
+                    // If methods are eligible, we need to check that the target method is not a local function.
+                    if ( declarationInterface == typeof(IMethod) )
+                    {
+                        eligibilityRules.Add(
+                            new KeyValuePair<Type, IEligibilityRule<IDeclaration>>( typeof(IMethod), LocalFunctionEligibilityRule.Instance ) );
+                    }
+
                     eligibilitySuccess &= (bool)
-                        _tryInitializeEligibilityMethod.MakeGenericMethod( implementedInterface.GenericTypeArguments[0] )
+                        _tryInitializeEligibilityMethod.MakeGenericMethod( declarationInterface )
                             .Invoke( this, new object[] { diagnosticAdder, eligibilityRules } );
                 }
 
@@ -316,7 +325,7 @@ namespace Metalama.Framework.Engine.Aspects
             if ( !aspectClass.TryInitialize( diagnosticAdder ) )
             {
                 aspectClass = null;
-                
+
                 return false;
             }
 
@@ -348,7 +357,7 @@ namespace Metalama.Framework.Engine.Aspects
         {
             var ourDeclarationInterface = symbol switch
             {
-                IMethodSymbol method when IsMethod( method.MethodKind ) => typeof(IMethod),
+                IMethodSymbol method when IsMethod( method.MethodKind ) => method.MethodKind != MethodKind.LocalFunction ? typeof(IMethod) : null,
                 IMethodSymbol method when IsConstructor( method.MethodKind ) => typeof(IConstructor),
                 IPropertySymbol => typeof(IProperty),
                 IEventSymbol => typeof(IEvent),
@@ -367,8 +376,6 @@ namespace Metalama.Framework.Engine.Aspects
             var aspectInterface = typeof(IAspect<>).MakeGenericType( ourDeclarationInterface );
 
             return aspectInterface.IsAssignableFrom( this.AspectType );
-
-            // TODO: call IsEligible on the prototype
         }
 
         public EligibleScenarios GetEligibility( IDeclaration targetDeclaration )
@@ -448,6 +455,21 @@ namespace Metalama.Framework.Engine.Aspects
             this._validatorDriverFactory ??= ValidatorDriverFactory.GetInstance( this.AspectType );
 
             return this._validatorDriverFactory.GetValidatorDriver<TContext>( validateMethod );
+        }
+
+        private class LocalFunctionEligibilityRule : IEligibilityRule<IDeclaration>
+        {
+            public static LocalFunctionEligibilityRule Instance { get; } = new();
+
+            private LocalFunctionEligibilityRule() { }
+
+            public EligibleScenarios GetEligibility( IDeclaration obj )
+                => ((IMethod) obj).MethodKind == Code.MethodKind.LocalFunction ? EligibleScenarios.None : EligibleScenarios.All;
+
+            public FormattableString? GetIneligibilityJustification( EligibleScenarios requestedEligibility, IDescribedObject<IDeclaration> describedObject )
+                => ((IMethod) describedObject.Object).MethodKind == Code.MethodKind.LocalFunction
+                    ? $"{describedObject} is a local function"
+                    : (FormattableString?) null;
         }
     }
 }

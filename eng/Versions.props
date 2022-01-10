@@ -13,8 +13,6 @@
     <PropertyGroup>
         <PostSharpEngineeringVersion>1.0.21-preview</PostSharpEngineeringVersion>
         <MetalamaCompilerVersion>branch:master</MetalamaCompilerVersion>
-        <RoslynVersion>transitive:Metalama.Compiler</RoslynVersion>
-        <PostSharpBackstageSettingsVersion>transitive:Metalama.Compiler</PostSharpBackstageSettingsVersion>
         <MicrosoftCSharpVersion>4.7.0</MicrosoftCSharpVersion>
         <NewtonsoftJsonVersion>13.0.1</NewtonsoftJsonVersion>
         <SystemCollectionsImmutableVersion>5.0.0</SystemCollectionsImmutableVersion>

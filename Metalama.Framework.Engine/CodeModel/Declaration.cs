@@ -8,6 +8,7 @@ using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Metrics;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
 using System.Linq;
@@ -75,7 +76,8 @@ namespace Metalama.Framework.Engine.CodeModel
                     EventDeclarationSyntax _ => null,
                     VariableDeclaratorSyntax { Parent: { Parent: EventFieldDeclarationSyntax } } => null,
                     BaseTypeDeclarationSyntax _ => null,
-                    _ => throw new AssertionFailedException()
+                    LocalFunctionStatementSyntax localFunction => (SyntaxNode?) localFunction.Body ?? localFunction.ExpressionBody,
+                    _ => throw new AssertionFailedException( $"Don't know how to get the body of a {syntaxReference.GetSyntax().Kind()}" )
                 };
 
             // Accessors have implicit "value" parameter.

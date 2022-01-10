@@ -42,8 +42,7 @@ var product = new Product
         "Metalama.Framework.DesignTime.Contracts.$(PackageVersion).nupkg" ),
     Dependencies = ImmutableArray.Create(
         Dependencies.PostSharpEngineering,
-        Dependencies.MetalamaCompiler,
-        Dependencies.PostSharpBackstageSettings )
+        Dependencies.MetalamaCompiler )
 };
 
 product.PrepareCompleted += OnPrepareCompleted;

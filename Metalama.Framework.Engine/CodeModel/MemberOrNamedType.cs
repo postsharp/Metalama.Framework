@@ -37,6 +37,9 @@ namespace Metalama.Framework.Engine.CodeModel
                     case VariableDeclaratorSyntax { Parent: { Parent: FieldDeclarationSyntax fieldDeclaration } }:
                         return fieldDeclaration.Modifiers.Any( m => m.Kind() == SyntaxKind.NewKeyword );
 
+                    case LocalFunctionStatementSyntax:
+                        return false;
+
                     default:
                         throw new AssertionFailedException();
                 }
