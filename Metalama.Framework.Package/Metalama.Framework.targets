@@ -1,22 +1,26 @@
 ﻿<Project>
 
-
-    <ItemGroup Condition="'$(MetalamaCompileTimeOnlyProject)'=='True'">
-        <AssemblyAttribute Include="Metalama.Framework.Aspects.CompileTimeOnlyAttribute" />
-    </ItemGroup>
-
-    <PropertyGroup>
-        <!-- This must be in .targets, not in .props, because it relies on other properties and
-              is not meant to be overwritten -->
+    <PropertyGroup Condition="'$(MetalamaEnabled)'!='False'">
+        <!-- MetalamaProjectId uniquely identifies a project configuration. It is used at design time by components that do not have access to the Project class.   
+             This property must be defined in .targets, not in .props, because it relies on other properties and is not meant to be overwritten -->
         <MetalamaProjectId>$(AssemblyName.Replace(".",""))_$(MetalamaProjectIdSuffix)_$(Configuration.Replace(".",""))_$(TargetFramework.Replace(".",""))</MetalamaProjectId>
+
+        <!-- Define a METALAMA compilation symbol (aka constant). -->
+        <DefineConstants>$(DefineConstants);METALAMA</DefineConstants>
 
         <!-- This constant is used to identify the pipeline when we have only a compilation but no analyzer options -->
         <DefineConstants>$(DefinedConstants);MetalamaProjectId_$(MetalamaProjectId)</DefineConstants>
+
+        <!-- Define a new build configuration named LamaDebug (configured below). -->
+        <Configurations>$(Configurations);LamaDebug</Configurations>
+        
+        <!-- Auxiliary files used at design time. -->
+        <MetalamaAdditionalCompilationOutputDirectory>$(MSBuildProjectDirectory)\$(IntermediateOutputPath)\metalama-aux\</MetalamaAdditionalCompilationOutputDirectory>
+
+        <!-- Design time fallback dependency that forces rerun of analyzers/source generators when changed. -->
+        <MetalamaDesignTimeFallbackTouchFile>$(MetalamaAdditionalCompilationOutputDirectory)DesignTimeTouch\touch</MetalamaDesignTimeFallbackTouchFile>
     </PropertyGroup>
 
-    <PropertyGroup Condition="'$(MetalamaEnabled)'!='False'">
-        <DefineConstants>$(DefineConstants);METALAMA</DefineConstants>
-    </PropertyGroup>
 
     <!-- Implementation of the 'LamaDebug' build configuration -->
     <PropertyGroup Condition="'$(Configuration)'=='LamaDebug'">
@@ -26,15 +30,9 @@
         <MetalamaCompilerTransformedFilesOutputPath Condition="'$(MetalamaCompilerTransformedFilesOutputPath)'==''">$(IntermediateOutputPath)metalama</MetalamaCompilerTransformedFilesOutputPath>
     </PropertyGroup>
 
-    <!-- Auxiliary files. -->
-    <PropertyGroup>
-        <MetalamaAdditionalCompilationOutputDirectory>$(MSBuildProjectDirectory)\$(IntermediateOutputPath)\metalama-aux\</MetalamaAdditionalCompilationOutputDirectory>
-    </PropertyGroup>
-
-    <!-- Design time fallback dependency that forces rerun of analyzers/source generators when changed. -->
-    <PropertyGroup>
-        <MetalamaDesignTimeFallbackTouchFile>$(MetalamaAdditionalCompilationOutputDirectory)DesignTimeTouch\touch</MetalamaDesignTimeFallbackTouchFile>
-    </PropertyGroup>
+    <ItemGroup Condition="'$(MetalamaCompileTimeOnlyProject)'=='True'">
+        <AssemblyAttribute Include="Metalama.Framework.Aspects.CompileTimeOnlyAttribute" />
+    </ItemGroup>
 
     <ItemGroup Condition="'$(DesignTimeBuild)' == 'True'">
         <AdditionalFiles Include="$(MetalamaDesignTimeFallbackTouchFile)" />

@@ -4,13 +4,6 @@
         <PackageReference Update="Metalama.Framework" PrivateAssets="none" />
         <PackageReference Update="Metalama.Framework.Sdk" PrivateAssets="none" />
     </ItemGroup>
-    
-    <PropertyGroup>
-        <!-- Define a new build configuration named LamaDebug. The effective settings of this configuration
-             are implemented in Metalama.Framework.targets -->
-        <Configurations>$(Configurations);LamaDebug</Configurations>
-    </PropertyGroup>
-
 
     <Import Project="Metalama.CompilerVisibleProperties.props"
             Condition="'$(MetalamaCompilerVisiblePropertiesProjectImported)'==''" />
