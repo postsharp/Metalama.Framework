@@ -105,7 +105,7 @@ namespace Metalama.Framework.Engine.DesignTime.Preview
 
         private sealed class TransformationPreviewBackstageServiceProvider : IServiceProvider
         {
-            private readonly IBackstageDiagnosticSink _backstageDiagnosticSink = new PreviewBackstageDiargnosticsSink();
+            private readonly IBackstageDiagnosticSink _backstageDiagnosticSink = new PreviewBackstageDiagnosticsSink();
             private readonly ILicenseConsumptionManager _licenseConsumptionManager = new PreviewLicenseConsumptionManager();
 
             public object? GetService( Type serviceType )
@@ -125,7 +125,7 @@ namespace Metalama.Framework.Engine.DesignTime.Preview
             }
 
             // TODO - Preview transformation feature licensing
-            private sealed class PreviewBackstageDiargnosticsSink : IBackstageDiagnosticSink
+            private sealed class PreviewBackstageDiagnosticsSink : IBackstageDiagnosticSink
             {
                 public void ReportError( string message, IDiagnosticsLocation? location = null ) { }
 
