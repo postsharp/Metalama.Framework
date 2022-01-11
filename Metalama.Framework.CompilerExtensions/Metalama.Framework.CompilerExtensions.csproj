@@ -43,6 +43,11 @@
         </PackageReference>
         <EmbeddedResource Include="$(PkgMetalama_RoslynUtilities)\lib\netstandard2.0\Metalama.RoslynUtilities.dll" Link="Resources\Metalama.RoslynUtilities.dll"/>
 
+        <PackageReference Include="PostSharp.Backstage.Settings" Version="$(PostSharpBackstageSettingsVersion)" PrivateAssets="all">
+            <GeneratePathProperty>True</GeneratePathProperty>
+        </PackageReference>
+        <EmbeddedResource Include="$(PkgPostSharp_Backstage_Settings)\lib\netstandard2.0\PostSharp.Backstage.Settings.dll" Link="Resources\PostSharp.Backstage.Settings.dll"/>
+
 
         <EmbeddedResource Include="..\Metalama.Framework.Engine\bin\$(Configuration)\$(TargetFramework)\Metalama.Framework.Engine.dll" Link="Resources\Metalama.Framework.Engine.dll"/>
         <EmbeddedResource Include="..\Metalama.Framework.DesignTime.Contracts\bin\$(Configuration)\$(TargetFramework)\Metalama.Framework.DesignTime.Contracts.dll" Link="Resources\Metalama.Framework.DesignTime.Contracts.dll"/>
