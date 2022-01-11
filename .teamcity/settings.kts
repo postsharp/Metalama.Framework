@@ -36,6 +36,12 @@ object DebugBuild : BuildType({
             quietPeriodMode = VcsTrigger.QuietPeriodMode.USE_DEFAULT
             branchFilter = "+:<default>"
         }
+
+        finishBuildTrigger {
+            buildType = "Metalama_MetalamaCompiler_ReleaseBuild"
+            successfulOnly = true
+            branchFilter = "+:<default>"
+        }
     }
 
     requirements {
