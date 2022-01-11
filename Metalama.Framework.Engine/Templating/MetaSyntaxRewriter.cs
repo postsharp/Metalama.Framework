@@ -203,7 +203,7 @@ namespace Metalama.Framework.Engine.Templating
                         SingletonSeparatedList(
                             Argument(
                                 ArrayCreationExpression(
-                                    Token( SyntaxKind.NewKeyword ).WithTrailingTrivia( Space ),
+                                    Token( SyntaxKind.NewKeyword ).WithTrailingTrivia( ElasticSpace ),
                                     this.MetaSyntaxFactory.ArrayType<T>(),
                                     InitializerExpression(
                                         SyntaxKind.ArrayInitializerExpression,

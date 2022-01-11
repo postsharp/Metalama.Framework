@@ -70,7 +70,7 @@ namespace Metalama.Framework.Engine.DesignTime.Preview
 
             // For preview, we need to override a few options, especially to enable code formatting.
             var previewServiceProvider = designTimeConfiguration.ServiceProvider.WithService(
-                new PreviewProjectOptions( designTimeConfiguration.ServiceProvider.GetRequiredService<IProjectOptions>() ) )
+                    new PreviewProjectOptions( designTimeConfiguration.ServiceProvider.GetRequiredService<IProjectOptions>() ) )
                 .WithNextProvider( new TransformationPreviewBackstageServiceProvider() );
 
             var previewConfiguration = designTimeConfiguration.WithServiceProvider( previewServiceProvider );
@@ -110,11 +110,11 @@ namespace Metalama.Framework.Engine.DesignTime.Preview
 
             public object? GetService( Type serviceType )
             {
-                if ( serviceType == typeof( IBackstageDiagnosticSink ) )
+                if ( serviceType == typeof(IBackstageDiagnosticSink) )
                 {
                     return this._backstageDiagnosticSink;
                 }
-                else if ( serviceType == typeof( ILicenseConsumptionManager ) )
+                else if ( serviceType == typeof(ILicenseConsumptionManager) )
                 {
                     return this._licenseConsumptionManager;
                 }
@@ -127,13 +127,9 @@ namespace Metalama.Framework.Engine.DesignTime.Preview
             // TODO - Preview transformation feature licensing
             private sealed class PreviewBackstageDiargnosticsSink : IBackstageDiagnosticSink
             {
-                public void ReportError( string message, IDiagnosticsLocation? location = null )
-                {
-                }
+                public void ReportError( string message, IDiagnosticsLocation? location = null ) { }
 
-                public void ReportWarning( string message, IDiagnosticsLocation? location = null )
-                {
-                }
+                public void ReportWarning( string message, IDiagnosticsLocation? location = null ) { }
             }
 
             // TODO - Preview transformation feature licensing
@@ -144,9 +140,7 @@ namespace Metalama.Framework.Engine.DesignTime.Preview
                     return true;
                 }
 
-                public void ConsumeFeatures( ILicenseConsumer consumer, LicensedFeatures requiredFeatures )
-                {
-                }
+                public void ConsumeFeatures( ILicenseConsumer consumer, LicensedFeatures requiredFeatures ) { }
             }
         }
     }

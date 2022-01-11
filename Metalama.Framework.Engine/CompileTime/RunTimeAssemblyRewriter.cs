@@ -37,7 +37,7 @@ namespace Metalama.Compiler
         // In general, accessible compile-time metadata must remain.
 
         private static readonly Lazy<SyntaxTree> _intrinsicsSyntaxTree =
-            new( () => CSharpSyntaxTree.ParseText( _intrinsics, CSharpParseOptions.Default ) );
+            new( () => CSharpSyntaxTree.ParseText( _intrinsics, CSharpParseOptions.Default, path: "@@Intrinsics.cs" ) );
 
         private readonly INamedTypeSymbol? _aspectDriverSymbol;
 
