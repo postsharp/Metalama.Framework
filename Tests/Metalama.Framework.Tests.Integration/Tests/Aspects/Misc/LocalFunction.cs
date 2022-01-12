@@ -5,7 +5,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Misc.LocalFunction
 {
     internal class Aspect : OverrideMethodAspect
     {
-        public override dynamic OverrideMethod()
+        public override dynamic? OverrideMethod()
         {
             Console.WriteLine( "Hello, world." );
 
@@ -19,6 +19,8 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Misc.LocalFunction
         {
             [Aspect]
             void LocalMethod() { }
+            
+            LocalMethod();
 
             return a;
         }
