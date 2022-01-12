@@ -8,6 +8,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Linq;
+using System.Text;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.CompileTime
@@ -37,7 +38,7 @@ namespace Metalama.Compiler
         // In general, accessible compile-time metadata must remain.
 
         private static readonly Lazy<SyntaxTree> _intrinsicsSyntaxTree =
-            new( () => CSharpSyntaxTree.ParseText( _intrinsics, CSharpParseOptions.Default ) );
+            new( () => CSharpSyntaxTree.ParseText( _intrinsics, CSharpParseOptions.Default, path: "@@Intrinsics.cs", Encoding.UTF8 ) );
 
         private readonly INamedTypeSymbol? _aspectDriverSymbol;
 

@@ -159,6 +159,17 @@ namespace Metalama.Framework.Engine.DesignTime.Diff
                     continue;
                 }
 
+                // At design time, the collection of syntax trees can contain duplicates.
+                if ( newTrees.TryGetValue( newSyntaxTree.FilePath, out var existingNewTree ) )
+                {
+                    if ( existingNewTree.Tree != newSyntaxTree )
+                    {
+                        throw new AssertionFailedException();
+                    }
+                    
+                    continue;
+                }
+
                 if ( lastTrees != null && lastTrees.TryGetValue( newSyntaxTree.FilePath, out var oldEntry ) )
                 {
                     if ( IsDifferent( oldEntry.Tree, newSyntaxTree, out var newHasCompileTimeCode ) )

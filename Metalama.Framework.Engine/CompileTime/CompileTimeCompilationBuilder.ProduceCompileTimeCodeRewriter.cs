@@ -833,7 +833,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 }
             }
 
-            private SyntaxList<MemberDeclarationSyntax> VisitTypeOrNamespaceMembers( SyntaxList<MemberDeclarationSyntax> members )
+            private SyntaxList<MemberDeclarationSyntax> VisitTypeOrNamespaceMembers( IReadOnlyList<MemberDeclarationSyntax> members )
             {
                 var resultingMembers = new List<MemberDeclarationSyntax>( members.Count );
 
@@ -893,7 +893,11 @@ namespace Metalama.Framework.Engine.CompileTime
 
             public override SyntaxNode? VisitCompilationUnit( CompilationUnitSyntax node )
             {
-                var transformedMembers = this.VisitTypeOrNamespaceMembers( node.Members );
+                // Get the list of members that are not statements, local variables, local functions,...
+                var nonTopLevelMembers = node.Members.Where( m => m is BaseTypeDeclarationSyntax or NamespaceDeclarationSyntax or DelegateDeclarationSyntax )
+                    .ToList();
+
+                var transformedMembers = this.VisitTypeOrNamespaceMembers( nonTopLevelMembers );
 
                 if ( transformedMembers.Any( m => m.HasAnnotation( _hasCompileTimeCodeAnnotation ) ) )
                 {

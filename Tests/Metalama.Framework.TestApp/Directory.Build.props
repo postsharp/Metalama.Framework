@@ -10,7 +10,7 @@
 
   <PropertyGroup>
     <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
-    <DebugMetalamaAnalyzer>True</DebugMetalamaAnalyzer>
+    <DebugMetalamaAnalyzer>False</DebugMetalamaAnalyzer>
 	 <DebugMetalamaIde>False</DebugMetalamaIde>
     <!-- Overwrite from the parent directory -->
     

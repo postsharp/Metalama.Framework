@@ -781,12 +781,15 @@ public class MyAspect : OverrideMethodAspect
             Assert.Contains( "using Microsoft.CodeAnalysis", compileTimeCode, StringComparison.Ordinal );
         }
 
-        private static string GetCompileTimeCode( TestContext testContext, string code )
-            => GetCompileTimeCode( testContext, new Dictionary<string, string> { { "main.cs", code } } ).Values.Single();
+        private static string GetCompileTimeCode( TestContext testContext, string code, OutputKind outputKind = OutputKind.DynamicallyLinkedLibrary )
+            => GetCompileTimeCode( testContext, new Dictionary<string, string> { { "main.cs", code } }, outputKind ).Values.Single();
 
-        private static IReadOnlyDictionary<string, string> GetCompileTimeCode( TestContext testContext, IReadOnlyDictionary<string, string> code )
+        private static IReadOnlyDictionary<string, string> GetCompileTimeCode(
+            TestContext testContext,
+            IReadOnlyDictionary<string, string> code,
+            OutputKind outputKind = OutputKind.DynamicallyLinkedLibrary )
         {
-            var roslynCompilation = CreateCSharpCompilation( code );
+            var roslynCompilation = CreateCSharpCompilation( code, outputKind: outputKind );
             var loader1 = CompileTimeProjectLoader.Create( new CompileTimeDomain(), testContext.ServiceProvider );
             DiagnosticList diagnosticList = new();
 
@@ -828,6 +831,38 @@ public class MyAspect : OverrideMethodAspect
                 "namespace Ns2",
                 compileTimeCode.Single( p => p.Key.StartsWith( "Both_", StringComparison.OrdinalIgnoreCase ) ).Value,
                 StringComparison.Ordinal );
+        }
+
+        [Fact]
+        public void TopLevelStatementsAreRemoved()
+        {
+            using var testContext = this.CreateTestContext();
+            testContext.ProjectOptions.FormatCompileTimeCode = true;
+
+            var code = @"
+using System;
+using Metalama.Framework.Aspects;
+
+Method();
+
+void Method() { }
+int field;
+
+[CompileTimeOnly]
+class CompileTimeClass { }
+";
+
+            var compileTimeCode = GetCompileTimeCode( testContext, code, OutputKind.ConsoleApplication );
+
+            var expected = @"
+using System;
+using Metalama.Framework.Aspects;
+
+[CompileTimeOnly]
+class CompileTimeClass { }
+";
+
+            Assert.Equal( expected, compileTimeCode );
         }
 
         [Fact]
