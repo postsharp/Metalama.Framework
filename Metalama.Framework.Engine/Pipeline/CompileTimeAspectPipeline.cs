@@ -10,11 +10,13 @@ using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Licensing;
 using Metalama.Framework.Engine.Templating;
+using Metalama.Framework.Engine.Validation;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using PostSharp.Backstage.Extensibility.Extensions;
 using PostSharp.Backstage.Licensing;
 using PostSharp.Backstage.Licensing.Consumption;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Linq;
@@ -107,6 +109,9 @@ namespace Metalama.Framework.Engine.Pipeline
 
                 var resultPartialCompilation = result.Compilation;
 
+                // Execute validators.
+                IReadOnlyList<ReferenceValidatorInstance> referenceValidators = result.ExternallyVisibleValidators;
+
                 // Format the output.
                 if ( this.ProjectOptions.FormatOutput && OutputCodeFormatter.CanFormat )
                 {
@@ -131,12 +136,12 @@ namespace Metalama.Framework.Engine.Pipeline
                     additionalResources = additionalResources.Add( configuration.CompileTimeProject.ToResource() );
                 }
 
-                // Add the index of inherited aspects.
-                if ( result.ExternallyInheritableAspects.Length > 0 )
+                // Create a manifest for transitive aspects and validators.
+                if ( result.ExternallyInheritableAspects.Length > 0 || referenceValidators.Count > 0 )
                 {
                     var inheritedAspectsManifest = TransitiveAspectsManifest.Create(
                         result.ExternallyInheritableAspects.Select( i => new InheritableAspectInstance( i ) ).ToImmutableArray(),
-                        resultPartialCompilation.Compilation );
+                        referenceValidators.Select( i => new TransitiveValidatorInstance( i ) ).ToImmutableArray() );
 
                     var resource = inheritedAspectsManifest.ToResource( configuration.ServiceProvider );
                     additionalResources = additionalResources.Add( resource );

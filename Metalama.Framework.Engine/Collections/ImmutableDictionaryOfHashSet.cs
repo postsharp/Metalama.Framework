@@ -63,6 +63,8 @@ namespace Metalama.Framework.Engine.Collections
             return builder.ToImmutable();
         }
 
+        public bool IsEmpty => this._dictionary.IsEmpty;
+
         IReadOnlyCollection<TValue> IReadOnlyMultiValueDictionary<TKey, TValue>.this[ TKey key ] => this[key];
 
         public ImmutableHashSet<TValue> this[ TKey key ]

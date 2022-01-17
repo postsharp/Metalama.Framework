@@ -138,7 +138,7 @@ csharp_indent_case_contents_when_block = true
 csharp_indent_labels = one_less_than_current
 csharp_indent_switch_labels = true
 
-# Space preferences
+# ElasticSpace preferences
 csharp_space_after_cast = true
 csharp_space_after_colon_in_inheritance_clause = true
 csharp_space_after_comma = true

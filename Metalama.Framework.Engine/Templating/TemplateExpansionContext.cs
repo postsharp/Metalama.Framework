@@ -152,7 +152,7 @@ namespace Metalama.Framework.Engine.Templating
                 // If we need to return null or default, there is no need to emit a cast.
                 return
                     ReturnStatement(
-                        Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( Space ),
+                        Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( ElasticSpace ),
                         returnExpression,
                         Token( SyntaxKind.SemicolonToken ) );
             }
@@ -166,7 +166,7 @@ namespace Metalama.Framework.Engine.Templating
                     // No need to emit a cast.
                     return
                         ReturnStatement(
-                            Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( Space ),
+                            Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( ElasticSpace ),
                             returnExpression,
                             Token( SyntaxKind.SemicolonToken ) );
                 }
@@ -174,7 +174,7 @@ namespace Metalama.Framework.Engine.Templating
                 {
                     return
                         ReturnStatement(
-                            Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( Space ),
+                            Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( ElasticSpace ),
                             this.SyntaxGenerator.CastExpression( returnType.GetSymbol(), returnExpression )
                                 .WithAdditionalAnnotations( Simplifier.Annotation ),
                             Token( SyntaxKind.SemicolonToken ) );

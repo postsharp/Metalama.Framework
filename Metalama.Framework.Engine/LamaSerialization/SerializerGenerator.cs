@@ -1,7 +1,10 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CompileTime;
+using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Serialization;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -15,6 +18,7 @@ namespace Metalama.Framework.Engine.LamaSerialization
 {
     internal class SerializerGenerator : ISerializerGenerator
     {
+        private const string _serializerTypeName = "Serializer";
         private readonly SyntaxGenerationContext _context;
         private readonly ReflectionMapper _runtimeReflectionMapper;
 
@@ -32,7 +36,7 @@ namespace Metalama.Framework.Engine.LamaSerialization
             return this.ClassifyFieldOrProperty( serializableTypeMember ) == FieldOrPropertyDeserializationKind.Deserialize_MakeMutable;
         }
 
-        public MemberDeclarationSyntax CreateDeserializingConstructor( SerializableTypeInfo serializableType )
+        public MemberDeclarationSyntax CreateDeserializingConstructor( SerializableTypeInfo serializableType, in QualifiedTypeNameInfo serializableTypeName )
         {
             var baseType = serializableType.Type.BaseType.AssertNotNull();
 
@@ -81,14 +85,15 @@ namespace Metalama.Framework.Engine.LamaSerialization
                     serializableType,
                     ThisExpression(),
                     IdentifierName( argumentReaderParameterName ),
-                    this.SelectConstructorDeserializedFields );
+                    this.SelectConstructorDeserializedFields,
+                    this.SelectConstructorDefaultFields );
 
             // TODO: Browsability attributes.
             return
                 ConstructorDeclaration(
                     List<AttributeListSyntax>(),
                     TokenList( serializableType.Type.IsValueType ? Token( SyntaxKind.PrivateKeyword ) : Token( SyntaxKind.ProtectedKeyword ) ),
-                    Identifier( serializableType.Type.Name ),
+                    serializableTypeName.ShortName,
                     ParameterList(
                         SingletonSeparatedList(
                             Parameter( Identifier( argumentReaderParameterName ) )
@@ -102,7 +107,7 @@ namespace Metalama.Framework.Engine.LamaSerialization
                     null );
         }
 
-        public TypeDeclarationSyntax CreateSerializerType( SerializableTypeInfo serializableType )
+        public TypeDeclarationSyntax CreateSerializerType( SerializableTypeInfo serializableType, in QualifiedTypeNameInfo serializableTypeName )
         {
             var members = new List<MemberDeclarationSyntax>();
 
@@ -126,32 +131,32 @@ namespace Metalama.Framework.Engine.LamaSerialization
             if ( serializableType.Type.IsValueType )
             {
                 members.Add( this.CreateValueTypeSerializeMethod( serializableType, baseSerializerType ) );
-                members.Add( this.CreateValueTypeDeserializeMethod( serializableType, baseSerializerType ) );
+                members.Add( this.CreateValueTypeDeserializeMethod( serializableTypeName, baseSerializerType ) );
             }
             else
             {
-                members.Add( this.CreateCreateInstanceMethod( serializableType, baseSerializerType ) );
-                members.Add( this.CreateReferenceTypeSerializeMethod( serializableType, baseSerializerType ) );
-                members.Add( this.CreateReferenceTypeDeserializeMethod( serializableType, baseSerializerType ) );
+                members.Add( this.CreateCreateInstanceMethod( serializableType, serializableTypeName, baseSerializerType ) );
+                members.Add( this.CreateReferenceTypeSerializeMethod( serializableType, serializableTypeName, baseSerializerType ) );
+                members.Add( this.CreateReferenceTypeDeserializeMethod( serializableType, serializableTypeName, baseSerializerType ) );
             }
 
             var baseType =
                 HasPendingBaseSerializer( serializableType.Type, baseSerializerType )
-                    ? SimpleBaseType( CreatePendingMetaSerializerType( serializableType.Type.BaseType.AssertNotNull() ) )
+                    ? SimpleBaseType( CreatePendingSerializerType( serializableType.Type.BaseType.AssertNotNull() ) )
                     : SimpleBaseType( this._context.SyntaxGenerator.Type( baseSerializerType ) );
 
             // TODO: CompilerGenerated attribute.
             return ClassDeclaration(
                 List<AttributeListSyntax>(),
                 TokenList( Token( SyntaxKind.PublicKeyword ) ),
-                Identifier( "MetaSerializer" ),
+                Identifier( _serializerTypeName ),
                 null,
                 BaseList( Token( SyntaxKind.ColonToken ), SingletonSeparatedList<BaseTypeSyntax>( baseType ) ),
                 List<TypeParameterConstraintClauseSyntax>(),
                 List( members ) );
 
-            TypeSyntax CreatePendingMetaSerializerType( ITypeSymbol declaringType )
-                => QualifiedName( (NameSyntax) this._context.SyntaxGenerator.Type( declaringType ), IdentifierName( "MetaSerializer" ) );
+            TypeSyntax CreatePendingSerializerType( ITypeSymbol declaringType )
+                => QualifiedName( (NameSyntax) this._context.SyntaxGenerator.Type( declaringType ), IdentifierName( _serializerTypeName ) );
         }
 
         private static bool HasPendingBaseSerializer( ITypeSymbol serializedType, ITypeSymbol baseSerializerSymbol )
@@ -164,7 +169,7 @@ namespace Metalama.Framework.Engine.LamaSerialization
 
             if ( targetType.IsValueType )
             {
-                // Value type serializers are always based on ValueTypeMetaSerializer.
+                // Value type serializers are always based on ValueTypeSerializer.
                 return ((INamedTypeSymbol) this._context.ReflectionMapper.GetTypeSymbol( typeof(ValueTypeSerializer<>) )).Construct( targetType );
             }
 
@@ -172,16 +177,14 @@ namespace Metalama.Framework.Engine.LamaSerialization
                     this._runtimeReflectionMapper.GetTypeSymbol( typeof(ILamaSerializable) ),
                     SymbolEqualityComparer.Default ) )
             {
-                // The base type should have a meta serializer.
-
-                // TODO: This lookup should go through a repository.
-                var baseMetaSerializer = targetType.BaseType.GetContainedSymbols()
+                // The base type should have a serializer.
+                var baseSerializer = targetType.BaseType.GetContainedSymbols()
                     .OfType<INamedTypeSymbol>()
-                    .FirstOrDefault( x => StringComparer.Ordinal.Equals( x.Name, "MetaSerializer" ) );
+                    .FirstOrDefault( x => StringComparer.Ordinal.Equals( x.Name, _serializerTypeName ) );
 
-                if ( baseMetaSerializer != null )
+                if ( baseSerializer != null )
                 {
-                    return baseMetaSerializer;
+                    return baseSerializer;
                 }
                 else
                 {
@@ -189,6 +192,11 @@ namespace Metalama.Framework.Engine.LamaSerialization
                     {
                         // This serializer is to be generated, we will recursively look for it's base, which should have same semantics.
                         return this.GetBaseSerializer( targetType.BaseType );
+                    }
+                    else if ( targetType.BaseType.ContainingAssembly.Name == "Metalama.Framework" )
+                    {
+                        // This is a serializable base type that does not have anything to serialize. 
+                        return (INamedTypeSymbol) this._context.ReflectionMapper.GetTypeSymbol( typeof(ReferenceTypeSerializer) );
                     }
                     else
                     {
@@ -210,14 +218,17 @@ namespace Metalama.Framework.Engine.LamaSerialization
             return ConstructorDeclaration(
                 List<AttributeListSyntax>(),
                 TokenList( Token( SyntaxKind.PublicKeyword ) ),
-                Identifier( "MetaSerializer" ),
+                Identifier( _serializerTypeName ),
                 ParameterList(),
                 null,
                 Block(),
                 null );
         }
 
-        private MethodDeclarationSyntax CreateCreateInstanceMethod( SerializableTypeInfo serializedType, INamedTypeSymbol baseSerializer )
+        private MethodDeclarationSyntax CreateCreateInstanceMethod(
+            SerializableTypeInfo serializedType,
+            in QualifiedTypeNameInfo serializedTypeName,
+            INamedTypeSymbol baseSerializer )
         {
             var serializerBaseType = baseSerializer;
 
@@ -250,7 +261,7 @@ namespace Metalama.Framework.Engine.LamaSerialization
                     Block(
                         ReturnStatement(
                             ObjectCreationExpression(
-                                this._context.SyntaxGenerator.Type( serializedType.Type ),
+                                serializedTypeName.QualifiedName,
                                 ArgumentList( SingletonSeparatedList( Argument( IdentifierName( createInstanceMethod.Parameters[1].Name ) ) ) ),
                                 null ) ) );
             }
@@ -260,7 +271,10 @@ namespace Metalama.Framework.Engine.LamaSerialization
                 body );
         }
 
-        private LocalDeclarationStatementSyntax CreateTypedLocalVariable( ITypeSymbol type, ExpressionSyntax untypedExpression, out string name )
+        private static LocalDeclarationStatementSyntax CreateTypedLocalVariable(
+            in QualifiedTypeNameInfo type,
+            ExpressionSyntax untypedExpression,
+            out string name )
         {
             const string typedVariableName = "typedObj";
 
@@ -269,30 +283,36 @@ namespace Metalama.Framework.Engine.LamaSerialization
             return
                 LocalDeclarationStatement(
                     VariableDeclaration(
-                        this._context.SyntaxGenerator.Type( type ),
+                        type.QualifiedName,
                         SingletonSeparatedList(
                             VariableDeclarator(
                                 Identifier( typedVariableName ),
                                 null,
                                 EqualsValueClause(
                                     CastExpression(
-                                        this._context.SyntaxGenerator.Type( type ),
+                                        type.QualifiedName,
                                         untypedExpression ) ) ) ) ) );
         }
 
-        private MethodDeclarationSyntax CreateReferenceTypeSerializeMethod( SerializableTypeInfo serializedType, INamedTypeSymbol baseSerializer )
+        private MethodDeclarationSyntax CreateReferenceTypeSerializeMethod(
+            SerializableTypeInfo serializedType,
+            in QualifiedTypeNameInfo serializedTypeName,
+            INamedTypeSymbol baseSerializer )
         {
+            BlockSyntax body;
+
             var baseSerializeMethod = baseSerializer.GetMembers()
                 .OfType<IMethodSymbol>()
                 .Single( x => x.Name == nameof(ReferenceTypeSerializer.SerializeObject) );
 
             Invariant.Assert( baseSerializeMethod.Parameters.Length == 3 );
 
-            var localVariableDeclaration =
-                this.CreateTypedLocalVariable( serializedType.Type, IdentifierName( baseSerializeMethod.Parameters[0].Name ), out var localVariableName );
+            if ( serializedType.SerializedMembers.Count > 0 )
+            {
+                var localVariableDeclaration =
+                    CreateTypedLocalVariable( serializedTypeName, IdentifierName( baseSerializeMethod.Parameters[0].Name ), out var localVariableName );
 
-            var body =
-                Block(
+                body = Block(
                     baseSerializeMethod.IsAbstract && !HasPendingBaseSerializer( serializedType.Type, baseSerializer )
                         ? EmptyStatement()
                         : ExpressionStatement(
@@ -308,13 +328,21 @@ namespace Metalama.Framework.Engine.LamaSerialization
                         IdentifierName( localVariableName ),
                         IdentifierName( baseSerializeMethod.Parameters[1].Name ),
                         IdentifierName( baseSerializeMethod.Parameters[2].Name ) ) );
+            }
+            else
+            {
+                body = Block();
+            }
 
             return this.CreateOverrideMethod(
                 baseSerializeMethod,
                 body );
         }
 
-        private MethodDeclarationSyntax CreateReferenceTypeDeserializeMethod( SerializableTypeInfo serializedType, INamedTypeSymbol baseSerializer )
+        private MethodDeclarationSyntax CreateReferenceTypeDeserializeMethod(
+            SerializableTypeInfo serializedType,
+            in QualifiedTypeNameInfo serializedTypeName,
+            INamedTypeSymbol baseSerializer )
         {
             var baseDeserializeMethod = baseSerializer.GetMembers()
                 .OfType<IMethodSymbol>()
@@ -322,11 +350,14 @@ namespace Metalama.Framework.Engine.LamaSerialization
 
             Invariant.Assert( baseDeserializeMethod.Parameters.Length == 2 );
 
-            var localVariableDeclaration =
-                this.CreateTypedLocalVariable( serializedType.Type, IdentifierName( baseDeserializeMethod.Parameters[0].Name ), out var localVariableName );
+            BlockSyntax body;
 
-            var body =
-                Block(
+            if ( serializedType.SerializedMembers.Count > 0 )
+            {
+                var localVariableDeclaration =
+                    CreateTypedLocalVariable( serializedTypeName, IdentifierName( baseDeserializeMethod.Parameters[0].Name ), out var localVariableName );
+
+                body = Block(
                     baseDeserializeMethod.IsAbstract && !HasPendingBaseSerializer( serializedType.Type, baseSerializer )
                         ? EmptyStatement()
                         : ExpressionStatement(
@@ -341,7 +372,13 @@ namespace Metalama.Framework.Engine.LamaSerialization
                         serializedType,
                         IdentifierName( localVariableName ),
                         IdentifierName( baseDeserializeMethod.Parameters[1].Name ),
-                        this.SelectLateDeserializedFields ) );
+                        this.SelectLateDeserializedFields,
+                        static _ => Array.Empty<ISymbol>() ) );
+            }
+            else
+            {
+                body = Block();
+            }
 
             return this.CreateOverrideMethod(
                 baseSerializer.GetMembers().OfType<IMethodSymbol>().Single( x => x.Name == nameof(ReferenceTypeSerializer.DeserializeFields) ),
@@ -367,7 +404,7 @@ namespace Metalama.Framework.Engine.LamaSerialization
                 body );
         }
 
-        private MethodDeclarationSyntax CreateValueTypeDeserializeMethod( SerializableTypeInfo serializedType, INamedTypeSymbol baseSerializer )
+        private MethodDeclarationSyntax CreateValueTypeDeserializeMethod( in QualifiedTypeNameInfo serializedTypeName, INamedTypeSymbol baseSerializer )
         {
             var deserializeMethod = baseSerializer.GetMembers()
                 .OfType<IMethodSymbol>()
@@ -379,7 +416,7 @@ namespace Metalama.Framework.Engine.LamaSerialization
                 Block(
                     ReturnStatement(
                         ObjectCreationExpression(
-                            this._context.SyntaxGenerator.Type( serializedType.Type ),
+                            serializedTypeName.QualifiedName,
                             ArgumentList( SingletonSeparatedList( Argument( IdentifierName( deserializeMethod.Parameters[0].Name ) ) ) ),
                             null ) ) );
 
@@ -445,11 +482,12 @@ namespace Metalama.Framework.Engine.LamaSerialization
             SerializableTypeInfo serializedType,
             ExpressionSyntax targetExpression,
             ExpressionSyntax argumentsReaderExpression,
-            Func<SerializableTypeInfo, IEnumerable<ISymbol>> locationSelector )
+            Func<SerializableTypeInfo, IEnumerable<ISymbol>> deserializedLocationSelector,
+            Func<SerializableTypeInfo, IEnumerable<ISymbol>> defaultLocationSelector )
         {
             var statements = new List<StatementSyntax>();
 
-            foreach ( var member in locationSelector( serializedType ) )
+            foreach ( var member in deserializedLocationSelector( serializedType ) )
             {
                 var memberType =
                     member switch
@@ -483,6 +521,19 @@ namespace Metalama.Framework.Engine.LamaSerialization
                                         } ) ) ) ) ) );
             }
 
+            foreach ( var member in defaultLocationSelector( serializedType ) )
+            {
+                statements.Add(
+                    ExpressionStatement(
+                        AssignmentExpression(
+                            SyntaxKind.SimpleAssignmentExpression,
+                            MemberAccessExpression(
+                                SyntaxKind.SimpleMemberAccessExpression,
+                                targetExpression,
+                                IdentifierName( member.Name ) ),
+                            LiteralExpression( SyntaxKind.DefaultLiteralExpression ) ) ) );
+            }
+
             return Block( statements );
         }
 
@@ -495,6 +546,54 @@ namespace Metalama.Framework.Engine.LamaSerialization
                     yield return serializedMember;
                 }
             }
+        }
+
+        private IEnumerable<ISymbol> SelectConstructorDefaultFields( SerializableTypeInfo serializableType )
+        {
+            var constructorDeserializedMembers = new HashSet<ISymbol>( SymbolEqualityComparer.Default );
+
+            foreach ( var serializedMember in serializableType.SerializedMembers )
+            {
+                if ( this.ClassifyFieldOrProperty( serializedMember ) == FieldOrPropertyDeserializationKind.Constructor )
+                {
+                    constructorDeserializedMembers.Add( serializedMember );
+                }
+            }
+
+            foreach ( var member in serializableType.Type.GetMembers().Where( x => this.RequiresConstructorInitialization( x ) ) )
+            {
+                if ( !constructorDeserializedMembers.Contains( member ) )
+                {
+                    yield return member;
+                }
+            }
+        }
+
+        private bool RequiresConstructorInitialization( ISymbol fieldOrProperty )
+        {
+            if ( fieldOrProperty.IsStatic )
+            {
+                return false;
+            }
+
+            if ( fieldOrProperty.GetAttributes()
+                .Any( a => a.AttributeClass.AssertNotNull().Is( this._runtimeReflectionMapper.GetTypeSymbol( typeof(TemplateAttribute) ) ) ) )
+            {
+                // Skip all template symbols.
+                return false;
+            }
+
+            if ( fieldOrProperty is IFieldSymbol f && !f.IsImplicitlyDeclared )
+            {
+                return true;
+            }
+
+            if ( fieldOrProperty is IPropertySymbol p && p.IsAutoProperty() )
+            {
+                return true;
+            }
+
+            return false;
         }
 
         private IEnumerable<ISymbol> SelectLateDeserializedFields( SerializableTypeInfo serializableType )

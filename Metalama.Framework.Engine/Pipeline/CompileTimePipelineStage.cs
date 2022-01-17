@@ -10,6 +10,7 @@ using Metalama.Framework.Engine.DesignTime.Pipeline;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Linking;
 using Metalama.Framework.Engine.Options;
+using Metalama.Framework.Engine.Validation;
 using Metalama.Framework.Project;
 using System;
 using System.Collections.Generic;
@@ -43,22 +44,31 @@ namespace Metalama.Framework.Engine.Pipeline
             IPipelineStepsResult pipelineStepsResult,
             CancellationToken cancellationToken )
         {
+            // Run the validators.
+            var validationRunner = new ValidationRunner( pipelineConfiguration, pipelineStepsResult.ValidatorSources, cancellationToken );
+            var initialCompilation = pipelineStepsResult.Compilations[0];
+            var finalCompilation = pipelineStepsResult.Compilations[pipelineStepsResult.Compilations.Length - 1];
+            var validationResult = validationRunner.RunAll( initialCompilation, finalCompilation );
+
+            // Run the linker.
             var linker = new AspectLinker(
                 pipelineConfiguration.ServiceProvider,
                 new AspectLinkerInput(
                     input.Compilation,
-                    pipelineStepsResult.Compilation,
+                    pipelineStepsResult.LastCompilation,
                     pipelineStepsResult.NonObservableTransformations,
                     input.AspectLayers,
-                    input.Diagnostics.DiagnosticSuppressions.Concat( pipelineStepsResult.Diagnostics.DiagnosticSuppressions ),
+                    input.Diagnostics.DiagnosticSuppressions.Concat( pipelineStepsResult.Diagnostics.DiagnosticSuppressions )
+                        .Concat( validationResult.Diagnostics.DiagnosticSuppressions ),
                     this._compileTimeProject ) );
 
             var linkerResult = linker.ToResult();
 
+            // Generate additional output files.
             var projectOptions = this.ServiceProvider.GetService<IProjectOptions>();
             IReadOnlyList<AdditionalCompilationOutputFile>? additionalCompilationOutputFiles = null;
 
-            if ( projectOptions != null && !projectOptions.IsDesignTimeEnabled )
+            if ( projectOptions is { IsDesignTimeEnabled: false } )
             {
                 additionalCompilationOutputFiles = this.GenerateAdditionalCompilationOutputFiles(
                     input,
@@ -66,14 +76,17 @@ namespace Metalama.Framework.Engine.Pipeline
                     cancellationToken );
             }
 
+            // Return the result.
             return new PipelineStageResult(
                 linkerResult.Compilation,
                 input.Project,
                 input.AspectLayers,
-                null,
-                pipelineStepsResult.Diagnostics.Concat( linkerResult.Diagnostics ),
+                input.CompilationModels.AddRange( pipelineStepsResult.Compilations ),
+                pipelineStepsResult.Diagnostics.Concat( linkerResult.Diagnostics ).Concat( validationResult.Diagnostics ),
                 pipelineStepsResult.ExternalAspectSources,
+                input.ValidatorSources.AddRange( pipelineStepsResult.ValidatorSources ),
                 input.ExternallyInheritableAspects.AddRange( pipelineStepsResult.InheritableAspectInstances.Select( i => new InheritableAspectInstance( i ) ) ),
+                validationResult.ExternallyVisibleValidations,
                 additionalCompilationOutputFiles: additionalCompilationOutputFiles != null
                     ? input.AdditionalCompilationOutputFiles.AddRange( additionalCompilationOutputFiles )
                     : input.AdditionalCompilationOutputFiles );
@@ -91,7 +104,7 @@ namespace Metalama.Framework.Engine.Pipeline
 
             DesignTimeSyntaxTreeGenerator.GenerateDesignTimeSyntaxTrees(
                 input.Compilation,
-                pipelineStepResult.Compilation,
+                pipelineStepResult.LastCompilation,
                 this.ServiceProvider,
                 diagnostics,
                 cancellationToken,

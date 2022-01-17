@@ -104,7 +104,10 @@ namespace Metalama.Framework.Engine.Templating
 
             var sourceDiagnostics = semanticModel.GetDiagnostics( sourceSyntaxRoot.Span, cancellationToken );
 
-            if ( sourceDiagnostics.Any( d => d.Severity == DiagnosticSeverity.Error ) )
+            var errors = sourceDiagnostics.Where( d => d.Severity == DiagnosticSeverity.Error );
+
+            // ReSharper disable PossibleMultipleEnumeration
+            if ( errors.Any() )
             {
                 // Don't continue with errors in source code (note however that we do the annotation with errors because of real-time syntax highlighting).
                 // Diagnostics don't need to be reported because they would be reported by the compiler anyway.
@@ -113,11 +116,52 @@ namespace Metalama.Framework.Engine.Templating
                 annotatedSyntaxRoot = null;
                 transformedSyntaxRoot = null;
 
-                Logger.Instance?.Write(
-                    $"Cannot create a compile-time assembly for '{semanticModel.SyntaxTree.FilePath}' because there are diagnostics in the source code." );
+                if ( Logger.Instance != null )
+                {
+                    Logger.Instance.Write(
+                        $"Cannot create a compile-time assembly for '{semanticModel.SyntaxTree.FilePath}' because there are diagnostics in the source code:" );
+
+                    foreach ( var error in errors )
+                    {
+                        Logger.Instance.Write( "    " + error );
+                    }
+
+                    Logger.Instance.Write( $"  Compilation id: {DebuggingHelper.GetObjectId( semanticModel.Compilation )}" );
+
+                    Logger.Instance.Write( "Syntax trees:" );
+
+                    foreach ( var syntaxTree in semanticModel.Compilation.SyntaxTrees )
+                    {
+                        Logger.Instance.Write( "   " + syntaxTree.FilePath );
+                    }
+
+                    Logger.Instance.Write( "Compilation references: " );
+
+                    foreach ( var reference in semanticModel.Compilation.References )
+                    {
+                        switch ( reference )
+                        {
+                            case PortableExecutableReference:
+                                // Skipped because there are too many of them and they are never wrong.
+                                break;
+
+                            case CompilationReference compilation:
+                                Logger.Instance.Write( $"Project: {compilation.Display} ({compilation.Compilation.SyntaxTrees.Count()} syntax tree(s))" );
+
+                                break;
+
+                            default:
+                                Logger.Instance.Write( "Other: " + reference );
+
+                                break;
+                        }
+                    }
+                }
 
                 return false;
             }
+
+            // ReSharper restore PossibleMultipleEnumeration
 
             // Compile the syntax tree.
             var templateCompilerRewriter = new TemplateCompilerRewriter(

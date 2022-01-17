@@ -103,7 +103,7 @@ namespace Metalama.Framework.Engine.Advices
                 {
                     return
                         AdviceResult.Create(
-                            AdviceDiagnosticDescriptors.CannotIntroduceWithDifferentStaticity.CreateDiagnostic(
+                            AdviceDiagnosticDescriptors.CannotIntroduceWithDifferentStaticity.CreateRoslynDiagnostic(
                                 this.TargetDeclaration.GetDiagnosticLocation(),
                                 (this.Aspect.AspectClass.ShortName, this.MemberBuilder, this.TargetDeclaration, existingDeclaration.DeclaringType) ) );
                 }
@@ -114,7 +114,7 @@ namespace Metalama.Framework.Engine.Advices
                         // Produce fail diagnostic.
                         return
                             AdviceResult.Create(
-                                AdviceDiagnosticDescriptors.CannotIntroduceMemberAlreadyExists.CreateDiagnostic(
+                                AdviceDiagnosticDescriptors.CannotIntroduceMemberAlreadyExists.CreateRoslynDiagnostic(
                                     this.TargetDeclaration.GetDiagnosticLocation(),
                                     (this.Aspect.AspectClass.ShortName, this.MemberBuilder, this.TargetDeclaration, existingDeclaration.DeclaringType) ) );
 
@@ -166,7 +166,7 @@ namespace Metalama.Framework.Engine.Advices
                         {
                             return
                                 AdviceResult.Create(
-                                    AdviceDiagnosticDescriptors.CannotIntroduceOverrideOfSealed.CreateDiagnostic(
+                                    AdviceDiagnosticDescriptors.CannotIntroduceOverrideOfSealed.CreateRoslynDiagnostic(
                                         this.TargetDeclaration.GetDiagnosticLocation(),
                                         (this.Aspect.AspectClass.ShortName, this.MemberBuilder, this.TargetDeclaration,
                                          existingDeclaration.DeclaringType) ) );
@@ -175,7 +175,7 @@ namespace Metalama.Framework.Engine.Advices
                         {
                             return
                                 AdviceResult.Create(
-                                    AdviceDiagnosticDescriptors.CannotIntroduceDifferentExistingReturnType.CreateDiagnostic(
+                                    AdviceDiagnosticDescriptors.CannotIntroduceDifferentExistingReturnType.CreateRoslynDiagnostic(
                                         this.TargetDeclaration.GetDiagnosticLocation(),
                                         (this.Aspect.AspectClass.ShortName, this.MemberBuilder, this.TargetDeclaration,
                                          existingDeclaration.DeclaringType, existingDeclaration.Type) ) );

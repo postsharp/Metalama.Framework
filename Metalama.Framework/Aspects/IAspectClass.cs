@@ -3,6 +3,7 @@
 
 using Metalama.Framework.Validation;
 using System;
+using System.ComponentModel;
 
 namespace Metalama.Framework.Aspects
 {
@@ -25,14 +26,12 @@ namespace Metalama.Framework.Aspects
 
         /// <summary>
         /// Gets the name of the aspect displayed to the design-time UI. This property should not be used to report diagnostics (<see cref="ShortName"/>
-        /// should be used instead). It can be set by the implementation of the <see cref="IAspect.BuildAspectClass"/>
-        /// method by setting the <see cref="IAspectClassBuilder.DisplayName"/> property. By default, it is equal to <see cref="ShortName"/>.
+        /// should be used instead). It can be set by adding the <see cref="DisplayNameAttribute"/> custom attribute to the aspect class. By default, it is equal to <see cref="ShortName"/>.
         /// </summary>
         string DisplayName { get; }
 
         /// <summary>
-        /// Gets the optional long description of the aspect. This property can be set by the implementation of the <see cref="IAspect.BuildAspectClass"/>
-        /// method by setting the <see cref="IAspectClassBuilder.Description"/> property. By default, it is <c>null</c>.
+        /// Gets the optional long description of the aspect. This property can be set by adding the <see cref="DescriptionAttribute"/> custom attribute to the aspect class. By default, it is <c>null</c>.
         /// </summary>
         string? Description { get; }
 
@@ -43,7 +42,7 @@ namespace Metalama.Framework.Aspects
 
         /// <summary>
         /// Gets a value indicating whether instances of this aspect class are inherited by derived declarations.
-        /// An aspect class is inherited if it implements the <see cref="IInheritedAspect"/> class.
+        /// This property can be set by adding the <see cref="InheritedAttribute"/> custom attribute to the aspect class.
         /// </summary>
         bool IsInherited { get; }
 

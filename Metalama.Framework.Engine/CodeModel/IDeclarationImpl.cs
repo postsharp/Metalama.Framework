@@ -3,9 +3,9 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel.References;
-using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using SyntaxReference = Microsoft.CodeAnalysis.SyntaxReference;
 
 namespace Metalama.Framework.Engine.CodeModel
 {
@@ -14,7 +14,7 @@ namespace Metalama.Framework.Engine.CodeModel
         new Ref<IDeclaration> ToRef();
 
         /// <summary>
-        /// Gets the <see cref="SyntaxReference"/> syntaxes that declare the current declaration.
+        /// Gets the <see cref="Microsoft.CodeAnalysis.SyntaxReference"/> syntaxes that declare the current declaration.
         /// In case of a member introduction, this returns the syntax references of the type.
         /// In case of a type introduction, this returns an empty list.
         /// </summary>

@@ -10,6 +10,7 @@ using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Validation;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
@@ -45,12 +46,15 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
 
             public CompilationChanges? UnprocessedChanges => this._compilationChangeTracker.UnprocessedChanges;
 
-            public CompilationResult CompilationResult { get; }
+            public CompilationPipelineResult PipelineResult { get; }
+
+            public CompilationValidationResult ValidationResult { get; }
 
             internal PipelineState( DesignTimeAspectPipeline pipeline ) : this()
             {
                 this._pipeline = pipeline;
-                this.CompilationResult = new CompilationResult();
+                this.PipelineResult = new CompilationPipelineResult();
+                this.ValidationResult = CompilationValidationResult.Empty;
             }
 
             private PipelineState( PipelineState prototype )
@@ -60,7 +64,8 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
                 this.CompileTimeSyntaxTrees = prototype.CompileTimeSyntaxTrees;
                 this.Configuration = prototype.Configuration;
                 this.Status = prototype.Status;
-                this.CompilationResult = prototype.CompilationResult;
+                this.PipelineResult = prototype.PipelineResult;
+                this.ValidationResult = prototype.ValidationResult;
             }
 
             private PipelineState(
@@ -77,14 +82,14 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
                 ImmutableDictionary<string, SyntaxTree?> compileTimeSyntaxTrees,
                 DesignTimeAspectPipelineStatus status,
                 CompilationChangeTracker tracker,
-                CompilationResult compilationResult,
+                CompilationPipelineResult pipelineResult,
                 AspectPipelineConfiguration? configuration )
                 : this( prototype )
             {
                 this.CompileTimeSyntaxTrees = compileTimeSyntaxTrees;
                 this.Status = status;
                 this._compilationChangeTracker = tracker;
-                this.CompilationResult = compilationResult;
+                this.PipelineResult = pipelineResult;
                 this.Configuration = configuration;
             }
 
@@ -94,10 +99,15 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
                 this.CompileTimeSyntaxTrees = compileTimeSyntaxTrees;
             }
 
-            private PipelineState( PipelineState prototype, CompilationChangeTracker tracker, CompilationResult compilationResult ) : this( prototype )
+            private PipelineState( PipelineState prototype, CompilationChangeTracker tracker, CompilationPipelineResult pipelineResult ) : this( prototype )
             {
-                this.CompilationResult = compilationResult;
+                this.PipelineResult = pipelineResult;
                 this._compilationChangeTracker = tracker;
+            }
+
+            private PipelineState( PipelineState prototype, CompilationValidationResult validationResult ) : this( prototype )
+            {
+                this.ValidationResult = validationResult;
             }
 
             private static IReadOnlyList<SyntaxTree> GetCompileTimeSyntaxTrees(
@@ -161,66 +171,6 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
                 var newState = this;
                 var newConfiguration = this.Configuration;
 
-                // Detect changes in project references. 
-                if ( this._compilationChangeTracker.LastCompilation != null )
-                {
-                    var oldExternalReferences = this._compilationChangeTracker.LastCompilation.ExternalReferences;
-
-                    var newExternalReferences = newCompilation.ExternalReferences;
-
-                    if ( oldExternalReferences != newExternalReferences )
-                    {
-                        // If the only differences are in compilation references, do not consider this as a difference.
-                        // Cross-project dependencies are not yet taken into consideration.
-                        var hasChange = false;
-
-                        if ( oldExternalReferences.Length != newExternalReferences.Length )
-                        {
-                            hasChange = true;
-                        }
-                        else
-                        {
-                            for ( var i = 0; i < oldExternalReferences.Length; i++ )
-                            {
-                                if ( !ReferencesEqual( oldExternalReferences[i], newExternalReferences[i] ) )
-                                {
-                                    hasChange = true;
-
-                                    break;
-                                }
-                            }
-                        }
-
-                        if ( hasChange )
-                        {
-                            newConfiguration = null;
-                        }
-                    }
-
-                    static bool ReferencesEqual( MetadataReference a, MetadataReference b )
-                    {
-                        if ( a == b )
-                        {
-                            return true;
-                        }
-                        else
-                        {
-                            switch (a, b)
-                            {
-                                case (CompilationReference compilationReferenceA, CompilationReference compilationReferenceB):
-                                    // The way we compare in this case is naive, but we are processing cross-project dependencies through
-                                    // a different mechanism.
-                                    return compilationReferenceA.Compilation.AssemblyName == compilationReferenceB.Compilation.AssemblyName;
-
-                                case (PortableExecutableReference portableExecutableReferenceA, PortableExecutableReference portableExecutableReferenceB):
-                                    return portableExecutableReferenceA.FilePath == portableExecutableReferenceB.FilePath;
-                            }
-
-                            return false;
-                        }
-                    }
-                }
-
                 // Detect changes in compile-time syntax trees.
                 var newTracker = this._compilationChangeTracker.Update( newCompilation, cancellationToken );
                 var newChanges = newTracker.UnprocessedChanges.AssertNotNull();
@@ -251,20 +201,26 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
 
                                     // We require an external build because we don't want to invalidate the pipeline configuration at
                                     // each keystroke.
-                                    OnCompileTimeChange();
+                                    Logger.Instance?.Write( $"Compile-time change detected: {change.FilePath} has changed." );
+                                    OnCompileTimeChange( true );
                                 }
 
                                 break;
 
                             case CompileTimeChangeKind.NewlyCompileTime:
+                                // We don't require an external rebuild when a new syntax tree is added because Roslyn does not give us a complete
+                                // compilation in the first call in the Visual Studio initializations sequence. Roslyn calls us later with
+                                // a complete compilation, but we don't want to bother the user with the need of an external build.
                                 compileTimeSyntaxTreesBuilder[change.FilePath] = change.NewTree;
-                                OnCompileTimeChange();
+                                Logger.Instance?.Write( $"Compile-time change detected: {change.FilePath} is a new compile-time syntax tree." );
+                                OnCompileTimeChange( false );
 
                                 break;
 
                             case CompileTimeChangeKind.NoLongerCompileTime:
                                 compileTimeSyntaxTreesBuilder.Remove( change.FilePath );
-                                OnCompileTimeChange();
+                                Logger.Instance?.Write( $"Compile-time change detected: : {change.FilePath} no longer contains compile-time code." );
+                                OnCompileTimeChange( false );
 
                                 break;
                         }
@@ -278,7 +234,7 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
                 }
 
                 // Return the new state.
-                var newCompilationResult = invalidateCompilationResult ? this.CompilationResult.Invalidate( newChanges ) : this.CompilationResult;
+                var newCompilationResult = invalidateCompilationResult ? this.PipelineResult.Invalidate( newChanges ) : this.PipelineResult;
 
                 newState = new PipelineState(
                     newState,
@@ -290,8 +246,8 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
 
                 return newState;
 
-                // Local method called when a change is detected in compile-time code.
-                void OnCompileTimeChange()
+                // Local method called when a change is detected in compile-time code. Returns a value specifying is logging is required.
+                void OnCompileTimeChange( bool requiresRebuild )
                 {
                     invalidateCompilationResult = false;
 
@@ -301,12 +257,24 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
 
                         var pipeline = newState._pipeline;
 
-                        newStatus = DesignTimeAspectPipelineStatus.NeedsExternalBuild;
-
-                        if ( pipeline.ProjectOptions.BuildTouchFile != null && File.Exists( pipeline.ProjectOptions.BuildTouchFile ) )
+                        if ( requiresRebuild )
                         {
-                            using var mutex = MutexHelper.WithGlobalLock( pipeline.ProjectOptions.BuildTouchFile );
-                            File.Delete( pipeline.ProjectOptions.BuildTouchFile );
+                            Logger.Instance?.Write( "Requiring an external rebuild." );
+
+                            newStatus = DesignTimeAspectPipelineStatus.NeedsExternalBuild;
+
+                            if ( pipeline.ProjectOptions.BuildTouchFile != null && File.Exists( pipeline.ProjectOptions.BuildTouchFile ) )
+                            {
+                                using var mutex = MutexHelper.WithGlobalLock( pipeline.ProjectOptions.BuildTouchFile );
+                                File.Delete( pipeline.ProjectOptions.BuildTouchFile );
+                            }
+                        }
+                        else
+                        {
+                            Logger.Instance?.Write( "Requiring an in-process configuration refresh." );
+
+                            newConfiguration = null;
+                            newStatus = DesignTimeAspectPipelineStatus.Default;
                         }
                     }
                 }
@@ -325,6 +293,9 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
                     state = new PipelineState( state._pipeline );
                 }
 
+                Logger.Instance?.Write(
+                    $"DesignTimeAspectPipeline.TryGetConfiguration( '{compilation.Compilation.AssemblyName}', CompilationId = {DebuggingHelper.GetObjectId( compilation.Compilation )})" );
+
                 if ( state.Configuration == null )
                 {
                     // If we don't have any configuration, we will build one, because this is the first time we are called.
@@ -340,7 +311,8 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
                     {
                         // A failure here means an error or a cache miss.
 
-                        Logger.Instance?.Write( $"DesignTimeAspectPipeline.TryGetConfiguration('{compilation.Compilation.AssemblyName}') failed." );
+                        Logger.Instance?.Write(
+                            $"DesignTimeAspectPipeline.TryGetConfiguration('{compilation.Compilation.AssemblyName}', CompilationId = {DebuggingHelper.GetObjectId( compilation.Compilation )}) failed." );
 
                         configuration = null;
 
@@ -349,7 +321,9 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
                     else
                     {
                         Logger.Instance?.Write(
-                            $"DesignTimeAspectPipeline.TryGetConfiguration('{compilation.Compilation.AssemblyName}') succeeded with a new configuration." );
+                            $"DesignTimeAspectPipeline.TryGetConfiguration('{compilation.Compilation.AssemblyName}', CompilationId = {DebuggingHelper.GetObjectId( compilation.Compilation )}) succeeded with new configuration {DebuggingHelper.GetObjectId( configuration )}: "
+                            +
+                            $"the compilation contained {compilation.Compilation.SyntaxTrees.Count()} syntax trees: {string.Join( ", ", compilation.Compilation.SyntaxTrees.Select( t => Path.GetFileName( t.FilePath ) ) )}" );
 
                         state = new PipelineState( state, configuration, DesignTimeAspectPipelineStatus.Ready );
 
@@ -368,7 +342,7 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
                     // We have a valid configuration and it is not outdated.
 
                     Logger.Instance?.Write(
-                        $"DesignTimeAspectPipeline.TryGetConfiguration('{compilation.Compilation.AssemblyName}') returned existing configuration." );
+                        $"DesignTimeAspectPipeline.TryGetConfiguration('{compilation.Compilation.AssemblyName}', CompilationId = {DebuggingHelper.GetObjectId( compilation.Compilation )}) returned existing configuration {DebuggingHelper.GetObjectId( state.Configuration )}." );
 
                     configuration = state.Configuration;
 
@@ -394,36 +368,117 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
 
                 if ( !TryGetConfiguration( ref state, compilation, diagnosticList, false, cancellationToken, out var configuration ) )
                 {
-                    compilationResult = null;
+                    compilationResult = default;
 
                     return false;
                 }
 
+                // Execute the pipeline.
                 var success = state._pipeline.TryExecute( compilation, diagnosticList, configuration, cancellationToken, out var pipelineResult );
 
-                var result = new DesignTimeAspectPipelineResult(
+                var additionalSyntaxTrees = pipelineResult switch
+                {
+                    null => ImmutableArray<IntroducedSyntaxTree>.Empty,
+                    _ => pipelineResult.AdditionalSyntaxTrees
+                };
+
+                var result = new DesignTimePipelineExecutionResult(
                     success,
                     compilation.SyntaxTrees,
-                    pipelineResult?.AdditionalSyntaxTrees ?? Array.Empty<IntroducedSyntaxTree>(),
+                    additionalSyntaxTrees,
                     new ImmutableUserDiagnosticList(
                         diagnosticList.ToImmutableArray(),
                         pipelineResult?.Diagnostics.DiagnosticSuppressions,
                         pipelineResult?.Diagnostics.CodeFixes ),
                     pipelineResult?.ExternallyInheritableAspects.Select( i => new InheritableAspectInstance( i ) ).ToImmutableArray()
-                    ?? ImmutableArray<InheritableAspectInstance>.Empty );
+                    ?? ImmutableArray<InheritableAspectInstance>.Empty,
+                    pipelineResult?.ExternallyVisibleValidators ?? ImmutableArray<ReferenceValidatorInstance>.Empty );
 
                 var directoryOptions = state._pipeline.ServiceProvider.GetRequiredService<IPathOptions>();
                 UserDiagnosticRegistrationService.GetInstance( directoryOptions ).RegisterDescriptors( result );
 
-                state = state.SetResult( compilation, result );
-                compilationResult = state.CompilationResult;
+                // We intentionally commit the pipeline state here so that the caller, not us, can decide what part of the work should be committed
+                // in case of cancellation. From our point of view, this is a safe place to commit.
+                state = state.SetPipelineResult( compilation, result );
+
+                // Execute the validators. We have to run them even if we have no user validator because this also runs system validators.
+                ExecuteValidators( ref state, compilation, configuration, cancellationToken );
+
+                compilationResult = new CompilationResult( state.PipelineResult, state.ValidationResult );
 
                 return true;
             }
 
-            private PipelineState SetResult( PartialCompilation compilation, DesignTimeAspectPipelineResult pipelineResult )
+            private static void ExecuteValidators(
+                ref PipelineState state,
+                PartialCompilation compilation,
+                AspectPipelineConfiguration configuration,
+                CancellationToken cancellationToken )
             {
-                var compilationResult = this.CompilationResult.Update( compilation, pipelineResult );
+                var validationRunner = new DesignTimeValidatorRunner(
+                    state.Configuration!.ServiceProvider,
+                    state.PipelineResult,
+                    configuration.ProjectModel,
+                    state._pipeline );
+
+                IEnumerable<SyntaxTree> syntaxTreesToValidate;
+
+                if ( state.PipelineResult.Validators.EqualityKey == state.ValidationResult.ValidatorEqualityKey )
+                {
+                    // If validators did not change, we only have to validate syntax trees that have changed.
+                    // (we actually received a closure of modified syntax trees, so the flow could be optimized).
+                    syntaxTreesToValidate = compilation.SyntaxTrees.Values;
+                }
+                else
+                {
+                    // If validators did change, we need to validate all syntax trees.
+                    syntaxTreesToValidate = compilation.Compilation.SyntaxTrees;
+                }
+
+                var syntaxTreeDictionaryBuilder = state.ValidationResult.SyntaxTreeResults.ToBuilder();
+
+                var userDiagnosticSink = new UserDiagnosticSink( configuration.CompileTimeProject, null );
+
+                foreach ( var syntaxTree in syntaxTreesToValidate )
+                {
+                    userDiagnosticSink.Reset();
+                    var semanticModel = compilation.Compilation.GetSemanticModel( syntaxTree );
+                    validationRunner.Validate( semanticModel, userDiagnosticSink, cancellationToken );
+
+                    if ( !userDiagnosticSink.IsEmpty )
+                    {
+                        var diagnostics = userDiagnosticSink.ToImmutable();
+
+                        var syntaxTreeResult = new SyntaxTreeValidationResult(
+                            syntaxTree,
+                            diagnostics.ReportedDiagnostics,
+                            diagnostics.DiagnosticSuppressions.Select( d => new CacheableScopedSuppression( d ) ).ToImmutableArray() );
+
+                        syntaxTreeDictionaryBuilder[syntaxTree.FilePath] = syntaxTreeResult;
+                    }
+                    else
+                    {
+                        syntaxTreeDictionaryBuilder.Remove( syntaxTree.FilePath );
+                    }
+                }
+
+                // TODO: remove trees that no longer exist in the compilation.
+
+                var newValidationResult = new CompilationValidationResult(
+                    syntaxTreeDictionaryBuilder.ToImmutable(),
+                    state.PipelineResult.Validators.EqualityKey );
+
+                state = state.SetValidationResult( newValidationResult );
+            }
+
+            private PipelineState SetValidationResult( CompilationValidationResult validationResult )
+            {
+                return new PipelineState( this, validationResult );
+            }
+
+            private PipelineState SetPipelineResult( PartialCompilation compilation, DesignTimePipelineExecutionResult pipelineResult )
+            {
+                var compilationResult = this.PipelineResult.Update( compilation, pipelineResult );
 
                 return new PipelineState( this, this._compilationChangeTracker.ResetUnprocessedChanges(), compilationResult );
             }

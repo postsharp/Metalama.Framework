@@ -17,10 +17,8 @@ namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Misc.AbstractTemplate
 
         public virtual void BuildEligibility( IEligibilityBuilder<IMethod> builder )
         {
-            builder.ExceptForScenarios(EligibleScenarios.Inheritance).MustBeNonAbstract();
+            builder.ExceptForScenarios( EligibleScenarios.Inheritance ).MustBeNonAbstract();
         }
-
-        public virtual void BuildAspectClass( IAspectClassBuilder builder ) { }
 
         [Template]
         public abstract dynamic? OverrideMethod();

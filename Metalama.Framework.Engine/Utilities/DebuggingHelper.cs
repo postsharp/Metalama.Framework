@@ -3,9 +3,13 @@
 
 using Metalama.Compiler;
 using Metalama.Framework.Engine.Options;
+using Metalama.Framework.Engine.Pipeline;
+using Microsoft.CodeAnalysis;
 using System;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
+using System.Threading;
 
 namespace Metalama.Framework.Engine.Utilities
 {
@@ -16,6 +20,7 @@ namespace Metalama.Framework.Engine.Utilities
     internal static class DebuggingHelper
     {
         private static readonly object _sync = new();
+        private static readonly ConditionalWeakTable<object, ObjectId> _objectIds = new();
         private static volatile bool _attachDebuggerRequested;
 
         public static ProcessKind ProcessKind
@@ -38,6 +43,14 @@ namespace Metalama.Framework.Engine.Utilities
                 throw new AssertionFailedException( "Metalama is running in the vanilla C# compiler instead of the customized one." );
             }
         }
+
+        private static int GetObjectIdImpl( object o ) => _objectIds.GetOrCreateValue( o ).Id;
+
+        // The argument type must be specified explicitly to make sure we are not creating ids for unwanted objects.
+        // This avoids e.g. confusion between PartialCompilation and Compilation.
+        public static int GetObjectId( Compilation o ) => GetObjectIdImpl( o );
+
+        public static int GetObjectId( AspectPipelineConfiguration o ) => GetObjectIdImpl( o );
 
         /// <summary>
         /// Attaches the debugger to the current process if requested.
@@ -70,6 +83,19 @@ namespace Metalama.Framework.Engine.Utilities
                         }
                     }
                 }
+            }
+        }
+
+        // ReSharper disable once ClassNeverInstantiated.Local
+        private class ObjectId
+        {
+            public int Id { get; }
+
+            private static int _nextId;
+
+            public ObjectId()
+            {
+                this.Id = Interlocked.Increment( ref _nextId );
             }
         }
     }

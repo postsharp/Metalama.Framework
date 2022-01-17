@@ -19,18 +19,11 @@ namespace Metalama.Framework.TestApp
 
         private static void Main()
         {
-            //Console.WriteLine( $"x={x}" ); 
-
-            int x = 0;
-
+            
             Foo();
-       //     new Program().SomeOtherIntroducedMethod();
+            new Program().SomeOtherIntroducedMethod();
 
-           // IMethod m = null;
-            // m.Base.Invoke( null );
-
-            // TemplateContext.compileTime( 0 );
-
+       
             MethodWithTwoAspects();
 
             PrintDebugInfo();

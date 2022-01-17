@@ -69,7 +69,7 @@ namespace Metalama.Framework.Engine.Advices
                     {
                         // Diagnostics are reported to a sink when the advice is declarative, but as an exception when it is programmatic. 
                         diagnosticAdder.Report(
-                            AdviceDiagnosticDescriptors.CannotIntroduceInstanceMemberIntoStaticType.CreateDiagnostic(
+                            AdviceDiagnosticDescriptors.CannotIntroduceInstanceMemberIntoStaticType.CreateRoslynDiagnostic(
                                 this.TargetDeclaration.GetDiagnosticLocation(),
                                 (this.Aspect.AspectClass.ShortName, this.MemberBuilder, this.TargetDeclaration) ) );
                     }

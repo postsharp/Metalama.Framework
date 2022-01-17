@@ -29,6 +29,29 @@ namespace Metalama.Framework.Engine.Diagnostics
 
         public IDeclaration? DefaultScope { get; private set; }
 
+        public bool IsEmpty
+        {
+            get
+            {
+                if ( this._diagnostics is { Count: > 0 } )
+                {
+                    return false;
+                }
+
+                if ( this._suppressions is { Count: > 0 } )
+                {
+                    return false;
+                }
+
+                if ( this._codeFixes is { Count: > 0 } )
+                {
+                    return false;
+                }
+
+                return true;
+            }
+        }
+
         internal UserDiagnosticSink( CompileTimeProject? compileTimeProject, CodeFixFilter? codeFixFilter, IDeclaration? defaultScope = null )
         {
             this._diagnosticManifest = compileTimeProject?.ClosureDiagnosticManifest;
@@ -41,6 +64,13 @@ namespace Metalama.Framework.Engine.Diagnostics
         {
             this.DefaultScope = defaultScope;
             this._codeFixFilter = codeFixFilter ?? (( _, _ ) => false);
+        }
+
+        public void Reset()
+        {
+            this._diagnostics?.Clear();
+            this._suppressions?.Clear();
+            this._codeFixes?.Clear();
         }
 
         public int ErrorCount { get; private set; }
@@ -59,9 +89,9 @@ namespace Metalama.Framework.Engine.Diagnostics
         /// <summary>
         /// Returns a string containing all code fix titles and captures the code fixes if we should.  
         /// </summary>
-        private CodeFixTitles ProcessCodeFix( IDiagnosticDefinition diagnosticDefinition, Location? location, IEnumerable<CodeFix>? codeFixes )
+        private CodeFixTitles ProcessCodeFix( IDiagnosticDefinition diagnosticDefinition, Location? location, ImmutableArray<CodeFix> codeFixes )
         {
-            if ( codeFixes != null )
+            if ( !codeFixes.IsDefaultOrEmpty )
             {
                 // This code implements an optimization to allow allocating a StringBuilder if there is a single code fix. 
                 string? firstTitle = null;
@@ -152,19 +182,14 @@ namespace Metalama.Framework.Engine.Diagnostics
             }
         }
 
-        public void Report<T>(
-            IDiagnosticLocation? location,
-            DiagnosticDefinition<T> definition,
-            T arguments,
-            IEnumerable<CodeFix>? codeFixes = null )
-            where T : notnull
+        public void Report( IDiagnosticLocation? location, IDiagnostic diagnostic )
         {
-            this.ValidateUserReport( definition );
+            this.ValidateUserReport( diagnostic.Definition );
 
             var resolvedLocation = GetLocation( location );
-            var codeFixTitles = this.ProcessCodeFix( definition, resolvedLocation, codeFixes );
+            var codeFixTitles = this.ProcessCodeFix( diagnostic.Definition, resolvedLocation, diagnostic.CodeFixes );
 
-            this.Report( definition.CreateDiagnostic( resolvedLocation, arguments, codeFixes: codeFixTitles ) );
+            this.Report( diagnostic.Definition.CreateRoslynDiagnostic( resolvedLocation, diagnostic.Arguments, codeFixes: codeFixTitles ) );
         }
 
         public void Suppress( IDeclaration? scope, SuppressionDefinition definition )
@@ -181,9 +206,9 @@ namespace Metalama.Framework.Engine.Diagnostics
         {
             var definition = GeneralDiagnosticDescriptors.SuggestedCodeFix;
             var resolvedLocation = GetLocation( location );
-            var codeFixTitles = this.ProcessCodeFix( definition, resolvedLocation, codeFix );
+            var codeFixTitles = this.ProcessCodeFix( definition, resolvedLocation, ImmutableArray.Create( codeFix ) );
 
-            this.Report( definition.CreateDiagnostic( resolvedLocation, codeFixTitles.Value!, codeFixes: codeFixTitles ) );
+            this.Report( definition.CreateRoslynDiagnostic( resolvedLocation, codeFixTitles.Value!, codeFixes: codeFixTitles ) );
         }
 
         public void AddCodeFixes( IEnumerable<CodeFixInstance> codeFixes )

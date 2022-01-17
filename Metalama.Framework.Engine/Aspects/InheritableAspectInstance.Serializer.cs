@@ -22,6 +22,7 @@ public partial class InheritableAspectInstance
             initializationArguments.SetValue( nameof(instance.TargetDeclaration), instance.TargetDeclaration );
             initializationArguments.SetValue( nameof(instance.Aspect), instance.Aspect );
             initializationArguments.SetValue( nameof(instance.SecondaryInstances), instance.SecondaryInstances );
+
             initializationArguments.SetValue( nameof(instance.State), instance.State );
         }
 

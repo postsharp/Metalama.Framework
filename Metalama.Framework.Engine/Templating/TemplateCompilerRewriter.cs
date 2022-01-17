@@ -295,7 +295,7 @@ namespace Metalama.Framework.Engine.Templating
 
             if ( tokenKind.EndsWith( "Keyword", StringComparison.Ordinal ) )
             {
-                transformedToken = transformedToken.WithTrailingTrivia( Space );
+                transformedToken = transformedToken.WithTrailingTrivia( ElasticSpace );
             }
 
             return transformedToken;
@@ -396,7 +396,7 @@ namespace Metalama.Framework.Engine.Templating
 
                     // However, this can happen in an incorrect/incomplete compilation. In this case, returning anything is fine.
                     this.Report(
-                        TemplatingDiagnosticDescriptors.UndeclaredRunTimeIdentifier.CreateDiagnostic(
+                        TemplatingDiagnosticDescriptors.UndeclaredRunTimeIdentifier.CreateRoslynDiagnostic(
                             this._syntaxTreeAnnotationMap.GetLocation( node ),
                             node.Identifier.Text ) );
 
@@ -485,7 +485,8 @@ namespace Metalama.Framework.Engine.Templating
                                                .FirstOrDefault( n => n is InvocationExpressionSyntax or BinaryExpressionSyntax )
                                            ?? expression;
 
-                    this.Report( TemplatingDiagnosticDescriptors.CannotUseThisInRunTimeContext.CreateDiagnostic( location, parentExpression.ToString() ) );
+                    this.Report(
+                        TemplatingDiagnosticDescriptors.CannotUseThisInRunTimeContext.CreateRoslynDiagnostic( location, parentExpression.ToString() ) );
 
                     return expression;
             }
@@ -1130,13 +1131,13 @@ namespace Metalama.Framework.Engine.Templating
                                 statementComment = statementComment.Substring( 0, 117 ) + "...";
                             }
 
-                            var leadingTrivia = TriviaList( CarriageReturnLineFeed )
+                            var leadingTrivia = TriviaList( ElasticCarriageReturnLineFeed )
                                 .AddRange( this.GetIndentation() )
                                 .Add( Comment( "// " + statementComment ) )
-                                .Add( CarriageReturnLineFeed )
+                                .Add( ElasticCarriageReturnLineFeed )
                                 .AddRange( this.GetIndentation() );
 
-                            var trailingTrivia = TriviaList( CarriageReturnLineFeed, CarriageReturnLineFeed );
+                            var trailingTrivia = TriviaList( ElasticCarriageReturnLineFeed, ElasticCarriageReturnLineFeed );
 
                             // TemplateSyntaxFactory.Add( __s, expression )
                             var add =
@@ -1318,9 +1319,9 @@ namespace Metalama.Framework.Engine.Templating
 
             // It seems that trivia can be lost upstream, there can be a missing one between the 'in' keyword and the expression. Add them to be sure.
             return ForEachStatement(
-                node.Type.WithTrailingTrivia( Space ),
-                node.Identifier.WithTrailingTrivia( Space ),
-                node.Expression.WithLeadingTrivia( Space ),
+                node.Type.WithTrailingTrivia( ElasticSpace ),
+                node.Identifier.WithTrailingTrivia( ElasticSpace ),
+                node.Expression.WithLeadingTrivia( ElasticSpace ),
                 statement );
         }
 

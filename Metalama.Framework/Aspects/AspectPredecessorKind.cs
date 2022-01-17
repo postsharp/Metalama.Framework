@@ -25,7 +25,7 @@ namespace Metalama.Framework.Aspects
         ChildAspect,
 
         /// <summary>
-        /// Provided implicitly by <see cref="IAspectDependencyBuilder.RequiresAspect{TAspect}"/>.
+        /// Not implemented.
         /// </summary>
         [Obsolete( "Not implemented." )]
         RequiredAspect,

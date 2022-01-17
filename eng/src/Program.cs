@@ -7,18 +7,19 @@ using PostSharp.Engineering.BuildTools.Build.Model;
 using PostSharp.Engineering.BuildTools.Dependencies.Model;
 using PostSharp.Engineering.BuildTools.Utilities;
 using Spectre.Console.Cli;
-using System.Collections.Immutable;
 using System.IO;
 
 var product = new Product
 {
     ProductName = "Metalama",
-    Solutions = ImmutableArray.Create<Solution>(
+    Solutions = new[]
+    {
                     new DotNetSolution( "Metalama.sln" )
                     {
                         SupportsTestCoverage = true,
                         CanFormatCode = true,
-                        FormatExclusions = ImmutableArray.Create(
+                        FormatExclusions = new[]
+                        {
 
                             // Test payloads should not be formatted because it would break the test output comparison.
                             // In some cases, formatting or redundant keywords may be intentional.
@@ -27,12 +28,14 @@ var product = new Product
 
                             // This file should not be formatted because it contains assembly aliases, and JetBrains tools
                             // don't support them properly.
-                            "Metalama.Framework.Engine\\Utilities\\SymbolId.cs" )
+                            "Metalama.Framework.Engine\\Utilities\\SymbolId.cs"
+                        }
                     },
                     new DotNetSolution( "Tests\\Metalama.Framework.TestApp\\Metalama.Framework.TestApp.sln" )
                     {
                         IsTestOnly = true
-                    } ),
+                    }
+    },
     PublicArtifacts = Pattern.Create(
         "Metalama.Framework.$(PackageVersion).nupkg",
         "Metalama.TestFramework.$(PackageVersion).nupkg",
@@ -40,11 +43,11 @@ var product = new Product
         "Metalama.Framework.Sdk.$(PackageVersion).nupkg",
         "Metalama.Framework.Engine.$(PackageVersion).nupkg",
         "Metalama.Framework.DesignTime.Contracts.$(PackageVersion).nupkg" ),
-    Dependencies = ImmutableArray.Create(
+    Dependencies = new[]
+    {
         Dependencies.PostSharpEngineering,
-        Dependencies.Roslyn,
-        Dependencies.MetalamaCompiler,
-        Dependencies.PostSharpBackstageSettings )
+        Dependencies.MetalamaCompiler
+    }
 };
 
 product.PrepareCompleted += OnPrepareCompleted;

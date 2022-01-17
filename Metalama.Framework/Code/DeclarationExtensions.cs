@@ -39,5 +39,17 @@ namespace Metalama.Framework.Code
         {
             throw new NotImplementedException();
         }
+
+        /// <summary>
+        /// Gets the declaring type of a given declaration if the declaration if not a type, or the type itself if the given declaration is itself a type. 
+        /// </summary>
+        public static INamedType? GetDeclaringType( this IDeclaration declaration )
+            => declaration switch
+            {
+                INamedType namedType => namedType,
+                IMember member => member.DeclaringType,
+                { ContainingDeclaration: { } containingDeclaration } => GetDeclaringType( containingDeclaration ),
+                _ => null
+            };
     }
 }

@@ -16,9 +16,9 @@
                           Condition="'$(UseMetalamaCompiler)'=='Public'" />
     </ItemGroup>
 
-	<PropertyGroup>
-		<!-- When debugging the release build, disable optimizations. -->
-		<!-- <Optimize>False</Optimize> -->
-	</PropertyGroup>
+    <PropertyGroup>
+        <!-- When debugging the release build, disable optimizations. -->
+        <!-- <Optimize>False</Optimize> -->
+    </PropertyGroup>
 
 </Project>

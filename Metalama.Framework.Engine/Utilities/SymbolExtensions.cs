@@ -226,5 +226,10 @@ namespace Metalama.Framework.Engine.Utilities
         }
 
         public static SymbolId GetSymbolId( this ISymbol? symbol ) => SymbolId.Create( symbol );
+
+        public static bool HasDefaultConstructor( this INamedTypeSymbol type )
+            => type.TypeKind == TypeKind.Struct ||
+               (type.TypeKind == TypeKind.Class && !type.IsAbstract &&
+                type.InstanceConstructors.Any( ctor => ctor.Parameters.Length == 0 ));
     }
 }

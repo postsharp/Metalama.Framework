@@ -83,12 +83,15 @@ namespace Metalama.Framework.Engine.Pipeline
 
             var newCompilation = (PartialCompilation) context.Compilation;
 
-            // TODO: update AspectCompilation.Aspects
+            // TODO: update AspectCompilation.Aspects and CompilationModels
+            // (the problem here is that we don't necessarily need CompilationModels after a low-level pipeline, because
+            // they are supposed to be "unmanaged" at the end of the pipeline. Currently this condition is not properly enforced,
+            // and we don't test what happens when a low-level stage is before a high-level stage).
             result = new PipelineStageResult(
                 newCompilation,
                 input.Project,
                 input.AspectLayers,
-                null,
+                input.CompilationModels,
                 input.Diagnostics,
                 input.AspectSources );
 

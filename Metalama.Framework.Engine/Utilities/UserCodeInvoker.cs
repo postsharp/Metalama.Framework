@@ -104,7 +104,7 @@ namespace Metalama.Framework.Engine.Utilities
                 if ( context.TargetDeclaration != null )
                 {
                     context.Diagnostics.Report(
-                        GeneralDiagnosticDescriptors.ExceptionInUserCodeWithTarget.CreateDiagnostic(
+                        GeneralDiagnosticDescriptors.ExceptionInUserCodeWithTarget.CreateRoslynDiagnostic(
                             location,
                             (context.InvokedMember,
                              context.TargetDeclaration,
@@ -115,7 +115,7 @@ namespace Metalama.Framework.Engine.Utilities
                 else
                 {
                     context.Diagnostics.Report(
-                        GeneralDiagnosticDescriptors.ExceptionInUserCodeWithoutTarget.CreateDiagnostic(
+                        GeneralDiagnosticDescriptors.ExceptionInUserCodeWithoutTarget.CreateRoslynDiagnostic(
                             location,
                             (context.InvokedMember,
                              exceptionType,
@@ -189,15 +189,22 @@ namespace Metalama.Framework.Engine.Utilities
 
         public T Invoke<T>( Func<T> func, UserCodeExecutionContext context )
         {
+            var adapter = new UserCodeFuncAdapter<T>( func );
+
+            return this.Invoke( adapter.UserCodeFunc, ref adapter, context );
+        }
+
+        public TResult Invoke<TResult, TPayload>( UserCodeFunc<TResult, TPayload> func, ref TPayload payload, UserCodeExecutionContext? context )
+        {
             using ( UserCodeExecutionContext.WithContext( context ) )
             {
                 if ( this._hook != null )
                 {
-                    return this._hook.Invoke( func );
+                    return this._hook.Invoke( func, ref payload );
                 }
                 else
                 {
-                    return func();
+                    return func( ref payload );
                 }
             }
         }

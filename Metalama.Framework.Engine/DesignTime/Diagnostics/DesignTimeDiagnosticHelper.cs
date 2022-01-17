@@ -47,7 +47,7 @@ namespace Metalama.Framework.Engine.DesignTime.Diagnostics
                             _ => throw new NotImplementedException()
                         };
 
-                    designTimeDiagnostic = descriptor.CreateDiagnostic(
+                    designTimeDiagnostic = descriptor.CreateRoslynDiagnostic(
                         diagnostic.Location,
                         (diagnostic.Id, diagnostic.GetMessage()),
                         properties: diagnostic.Properties );

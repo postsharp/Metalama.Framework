@@ -87,7 +87,7 @@ namespace Metalama.Framework.Engine.Templating
         private void ReportDiagnostic<T>( DiagnosticDefinition<T> descriptor, Location? location, T arguments )
             where T : notnull
         {
-            var diagnostic = descriptor.CreateDiagnostic( location, arguments );
+            var diagnostic = descriptor.CreateRoslynDiagnostic( location, arguments );
             this._diagnosticAdder.Report( diagnostic );
 
             if ( diagnostic.Severity == DiagnosticSeverity.Error )

@@ -31,6 +31,11 @@ namespace Metalama.Framework.Engine.DesignTime
         private const string _makePartialKey = "Metalama.MakePartial";
         private readonly DesignTimeDiagnosticDefinitions _designTimeDiagnosticDefinitions = DesignTimeDiagnosticDefinitions.GetInstance();
 
+        static CentralCodeFixProvider()
+        {
+            Logger.Initialize();
+        }
+
         public CentralCodeFixProvider()
         {
             this.FixableDiagnosticIds =

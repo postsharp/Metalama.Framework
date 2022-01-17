@@ -109,7 +109,7 @@ namespace Metalama.Framework.Engine.Advices
             {
                 // The aspect conflicts with itself, introducing the base interface after the derived interface.
                 diagnosticAdder.Report(
-                    AdviceDiagnosticDescriptors.InterfaceIsAlreadyIntroducedByTheAspect.CreateDiagnostic(
+                    AdviceDiagnosticDescriptors.InterfaceIsAlreadyIntroducedByTheAspect.CreateRoslynDiagnostic(
                         this.TargetDeclaration.GetDiagnosticLocation(),
                         (this.Aspect.AspectClass.ShortName, interfaceType, this.TargetDeclaration) ) );
             }
@@ -122,7 +122,7 @@ namespace Metalama.Framework.Engine.Advices
                     case OverrideStrategy.Fail:
                         // Report the diagnostic and return.
                         diagnosticAdder.Report(
-                            AdviceDiagnosticDescriptors.InterfaceIsAlreadyImplemented.CreateDiagnostic(
+                            AdviceDiagnosticDescriptors.InterfaceIsAlreadyImplemented.CreateRoslynDiagnostic(
                                 this.TargetDeclaration.GetDiagnosticLocation(),
                                 (this.Aspect.AspectClass.ShortName, interfaceType, this.TargetDeclaration) ) );
 
@@ -148,7 +148,7 @@ namespace Metalama.Framework.Engine.Advices
                         foreach ( var conflictingInterface in conflictingAncestorInterfaces )
                         {
                             diagnosticAdder.Report(
-                                AdviceDiagnosticDescriptors.InterfaceIsAlreadyImplemented.CreateDiagnostic(
+                                AdviceDiagnosticDescriptors.InterfaceIsAlreadyImplemented.CreateRoslynDiagnostic(
                                     this.TargetDeclaration.GetDiagnosticLocation(),
                                     (this.Aspect.AspectClass.ShortName, conflictingInterface, this.TargetDeclaration) ) );
                         }
@@ -186,7 +186,7 @@ namespace Metalama.Framework.Engine.Advices
                         if ( matchingAspectMethod.Method == null )
                         {
                             diagnosticAdder.Report(
-                                AdviceDiagnosticDescriptors.MissingDeclarativeInterfaceMember.CreateDiagnostic(
+                                AdviceDiagnosticDescriptors.MissingDeclarativeInterfaceMember.CreateRoslynDiagnostic(
                                     this.TargetDeclaration.GetDiagnosticLocation(),
                                     (this.Aspect.AspectClass.ShortName, this.TargetDeclaration, interfaceType, interfaceMethod) ) );
                         }
@@ -197,7 +197,7 @@ namespace Metalama.Framework.Engine.Advices
                             || interfaceMethod.ReturnParameter.RefKind != matchingAspectMethod.Method.ReturnParameter.RefKind )
                         {
                             diagnosticAdder.Report(
-                                AdviceDiagnosticDescriptors.DeclarativeInterfaceMemberDoesNotMatch.CreateDiagnostic(
+                                AdviceDiagnosticDescriptors.DeclarativeInterfaceMemberDoesNotMatch.CreateRoslynDiagnostic(
                                     this.TargetDeclaration.GetDiagnosticLocation(),
                                     (this.Aspect.AspectClass.ShortName, this.TargetDeclaration, interfaceType, matchingAspectMethod.Method,
                                      interfaceMethod) ) );
@@ -218,7 +218,7 @@ namespace Metalama.Framework.Engine.Advices
                         if ( matchingAspectProperty.Property == null )
                         {
                             diagnosticAdder.Report(
-                                AdviceDiagnosticDescriptors.MissingDeclarativeInterfaceMember.CreateDiagnostic(
+                                AdviceDiagnosticDescriptors.MissingDeclarativeInterfaceMember.CreateRoslynDiagnostic(
                                     this.TargetDeclaration.GetDiagnosticLocation(),
                                     (this.Aspect.AspectClass.ShortName, this.TargetDeclaration, interfaceType, interfaceProperty) ) );
                         }
@@ -227,7 +227,7 @@ namespace Metalama.Framework.Engine.Advices
                             || interfaceProperty.RefKind != matchingAspectProperty.Property.RefKind )
                         {
                             diagnosticAdder.Report(
-                                AdviceDiagnosticDescriptors.DeclarativeInterfaceMemberDoesNotMatch.CreateDiagnostic(
+                                AdviceDiagnosticDescriptors.DeclarativeInterfaceMemberDoesNotMatch.CreateRoslynDiagnostic(
                                     this.TargetDeclaration.GetDiagnosticLocation(),
                                     (this.Aspect.AspectClass.ShortName, this.TargetDeclaration, interfaceType, matchingAspectProperty.Property,
                                      interfaceProperty) ) );
@@ -250,14 +250,14 @@ namespace Metalama.Framework.Engine.Advices
                         if ( matchingAspectEvent.Event == null )
                         {
                             diagnosticAdder.Report(
-                                AdviceDiagnosticDescriptors.MissingDeclarativeInterfaceMember.CreateDiagnostic(
+                                AdviceDiagnosticDescriptors.MissingDeclarativeInterfaceMember.CreateRoslynDiagnostic(
                                     this.TargetDeclaration.GetDiagnosticLocation(),
                                     (this.Aspect.AspectClass.ShortName, this.TargetDeclaration, interfaceType, interfaceEvent) ) );
                         }
                         else if ( !compilation.InvariantComparer.Equals( interfaceEvent.Type, matchingAspectEvent.Event.Type ) )
                         {
                             diagnosticAdder.Report(
-                                AdviceDiagnosticDescriptors.DeclarativeInterfaceMemberDoesNotMatch.CreateDiagnostic(
+                                AdviceDiagnosticDescriptors.DeclarativeInterfaceMemberDoesNotMatch.CreateRoslynDiagnostic(
                                     this.TargetDeclaration.GetDiagnosticLocation(),
                                     (this.Aspect.AspectClass.ShortName, this.TargetDeclaration, interfaceType, matchingAspectEvent.Event,
                                      interfaceEvent) ) );

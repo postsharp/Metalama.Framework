@@ -54,14 +54,15 @@ namespace Metalama.Framework.Tests.UnitTests
             IEnumerable<MetadataReference>? additionalReferences = null,
             string? name = null,
             bool addMetalamaReferences = true,
-            IEnumerable<string>? preprocessorSymbols = null )
+            IEnumerable<string>? preprocessorSymbols = null,
+            OutputKind outputKind = OutputKind.DynamicallyLinkedLibrary )
         {
             var additionalAssemblies = new[] { typeof(TestBase).Assembly };
 
             var parseOptions = new CSharpParseOptions( preprocessorSymbols: preprocessorSymbols );
 
             var mainRoslynCompilation = TestCompilationFactory
-                .CreateEmptyCSharpCompilation( name, additionalAssemblies, addMetalamaReferences )
+                .CreateEmptyCSharpCompilation( name, additionalAssemblies, addMetalamaReferences, outputKind )
                 .AddSyntaxTrees( code.Select( c => SyntaxFactory.ParseSyntaxTree( c.Value, path: c.Key, options: parseOptions ) ) );
 
             if ( dependentCode != null )

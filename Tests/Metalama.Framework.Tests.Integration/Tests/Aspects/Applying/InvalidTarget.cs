@@ -10,8 +10,6 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Applying.InvalidTarget
     {
         public void BuildAspect( IAspectBuilder<INamedType> builder ) { }
 
-        public void BuildAspectClass( IAspectClassBuilder builder ) { }
-
         public void BuildEligibility( IEligibilityBuilder<INamedType> builder ) { }
     }
 

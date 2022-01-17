@@ -8,6 +8,7 @@ using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Validation;
 using Metalama.Framework.Fabrics;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
@@ -70,6 +71,7 @@ namespace Metalama.Framework.Engine.Fabrics
             var typeFabricDrivers = fabrics.OfType<TypeFabricDriver>().ToImmutableArray();
 
             var aspectSources = ImmutableArray.CreateBuilder<IAspectSource>();
+            var validatorSources = ImmutableArray.CreateBuilder<IValidatorSource>();
 
             if ( !typeFabricDrivers.IsEmpty )
             {
@@ -85,6 +87,7 @@ namespace Metalama.Framework.Engine.Fabrics
                     if ( driver.TryExecute( project, diagnosticAdder, out var result ) )
                     {
                         aspectSources.AddRange( result.AspectSources );
+                        validatorSources.AddRange( result.ValidatorSources );
                     }
                 }
             }
@@ -94,7 +97,7 @@ namespace Metalama.Framework.Engine.Fabrics
             project.Freeze();
             Execute( fabrics.OfType<NamespaceFabricDriver>() );
 
-            return new FabricsConfiguration( aspectSources.ToImmutable() );
+            return new FabricsConfiguration( aspectSources.ToImmutable(), validatorSources.ToImmutable() );
         }
 
         private FabricDriver? CreateDriver( Type fabricType, Compilation runTimeCompilation, IDiagnosticAdder diagnostics )
@@ -103,7 +106,7 @@ namespace Metalama.Framework.Engine.Fabrics
 
             if ( constructor == null )
             {
-                diagnostics.Report( GeneralDiagnosticDescriptors.TypeMustHavePublicDefaultConstructor.CreateDiagnostic( null, fabricType ) );
+                diagnostics.Report( GeneralDiagnosticDescriptors.TypeMustHavePublicDefaultConstructor.CreateRoslynDiagnostic( null, fabricType ) );
 
                 return null;
             }

@@ -65,7 +65,11 @@ namespace Metalama.Framework.Engine.CompileTime
 
             if ( constructorSymbol == null )
             {
-                throw new ArgumentOutOfRangeException( nameof(attribute), "Cannot instantiate an invalid attribute." );
+                // This may happen at design time or with an invalid file. In this case, no error message is necessary.
+
+                attributeInstance = null;
+
+                return false;
             }
 
             var type = this._compileTimeTypeResolver.GetCompileTimeType( constructorSymbol.ContainingType, false );
@@ -73,7 +77,7 @@ namespace Metalama.Framework.Engine.CompileTime
             if ( type == null )
             {
                 diagnosticAdder.Report(
-                    AttributeDeserializerDiagnostics.CannotFindAttributeType.CreateDiagnostic(
+                    AttributeDeserializerDiagnostics.CannotFindAttributeType.CreateRoslynDiagnostic(
                         attribute.GetDiagnosticLocation(),
                         constructorSymbol.ContainingType ) );
 
@@ -106,22 +110,57 @@ namespace Metalama.Framework.Engine.CompileTime
 
             var constructor = constructors[0];
 
-            var parameters = new object?[attribute.ConstructorArguments.Length];
+            var constructorParameters = constructor.GetParameters();
+            var arguments = new object?[constructorParameters.Length];
+            ParameterInfo? paramsParameter = null;
+            Array? paramsArgument = null;
+            var paramsIndex = 0;
 
-            for ( var i = 0; i < parameters.Length; i++ )
+            if ( constructorParameters.Length > 0 )
+            {
+                // This code seems to execute only at design time.
+
+                var lastParameter = constructorSymbol.Parameters[constructorParameters.Length - 1];
+
+                if ( lastParameter.IsParams && constructorParameters.Length != attribute.ConstructorArguments.Length )
+                {
+                    paramsParameter = constructorParameters[constructorParameters.Length - 1];
+
+                    paramsArgument = Array.CreateInstance(
+                        paramsParameter.ParameterType.GetElementType(),
+                        attribute.ConstructorArguments.Length - constructorParameters.Length + 1 );
+                }
+            }
+
+            for ( var i = 0; i < attribute.ConstructorArguments.Length; i++ )
             {
                 var constructorArgument = attribute.ConstructorArguments[i];
 
-                parameters[i] = this.TranslateAttributeArgument(
+                var translatedArgument = this.TranslateAttributeArgument(
                     attribute,
                     constructorArgument,
-                    constructor.GetParameters()[i].ParameterType,
+                    constructorParameters[i].ParameterType,
                     diagnosticAdder );
+
+                if ( paramsParameter != null && i >= paramsParameter.Position )
+                {
+                    paramsArgument!.SetValue( translatedArgument, paramsIndex );
+                    paramsIndex++;
+                }
+                else
+                {
+                    arguments[i] = translatedArgument;
+                }
+            }
+
+            if ( paramsArgument != null )
+            {
+                arguments[paramsParameter!.Position] = paramsArgument;
             }
 
             var executionContext = new UserCodeExecutionContext( this._serviceProvider, diagnosticAdder, UserCodeMemberInfo.FromMemberInfo( constructor ) );
 
-            if ( !this._userCodeInvoker.TryInvoke( () => (Attribute) constructor.Invoke( parameters ), executionContext, out var localAttributeInstance ) )
+            if ( !this._userCodeInvoker.TryInvoke( () => (Attribute) constructor.Invoke( arguments ), executionContext, out var localAttributeInstance ) )
             {
                 attributeInstance = null;
 

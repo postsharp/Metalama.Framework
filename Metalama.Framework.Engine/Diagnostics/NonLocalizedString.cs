@@ -10,12 +10,12 @@ namespace Metalama.Framework.Engine.Diagnostics
     public sealed class NonLocalizedString : LocalizableString
     {
         private readonly string _message;
-        private readonly object[] _arguments;
+        private readonly object?[] _arguments;
 
-        public NonLocalizedString( string message, object[]? arguments = null )
+        public NonLocalizedString( string message, object?[]? arguments = null )
         {
             this._message = message;
-            this._arguments = arguments ?? Array.Empty<object>();
+            this._arguments = arguments ?? Array.Empty<object?>();
         }
 
         protected override string GetText( IFormatProvider? formatProvider )

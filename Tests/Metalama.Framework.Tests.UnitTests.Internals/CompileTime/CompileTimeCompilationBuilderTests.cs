@@ -635,28 +635,7 @@ public class ReferencedClass
                     out var compileTimeProject ) );
 
             Assert.NotNull( compileTimeProject );
-            Assert.Single( compileTimeProject!.References );
-        }
-
-        [Fact]
-        public void EmptyProjectWithoutReference()
-        {
-            using var testContext = this.CreateTestContext();
-            DiagnosticList diagnosticList = new();
-
-            var loader = CompileTimeProjectLoader.Create( new CompileTimeDomain(), testContext.ServiceProvider );
-
-            // Create the referencing compile-time project.
-            Assert.True(
-                loader.TryGetCompileTimeProjectFromCompilation(
-                    CreateCSharpCompilation( @"/* Intentionally empty. */" ),
-                    null,
-                    diagnosticList,
-                    false,
-                    CancellationToken.None,
-                    out var compileTimeProject ) );
-
-            Assert.Null( compileTimeProject );
+            Assert.Single( compileTimeProject!.References.Where( r => !r.IsFramework ) );
         }
 
         [Fact]
@@ -772,7 +751,9 @@ public class SomeRunTimeClass
             Assert.True(
                 loader1.TryGetCompileTimeProjectFromCompilation( roslynCompilation, null, diagnosticList, false, CancellationToken.None, out var project ) );
 
-            Assert.Null( project );
+            Assert.NotNull( project );
+            Assert.Single( project!.References );
+            Assert.True( project.References[0].IsFramework );
         }
 
         [Fact]
@@ -800,12 +781,15 @@ public class MyAspect : OverrideMethodAspect
             Assert.Contains( "using Microsoft.CodeAnalysis", compileTimeCode, StringComparison.Ordinal );
         }
 
-        private static string GetCompileTimeCode( TestContext testContext, string code )
-            => GetCompileTimeCode( testContext, new Dictionary<string, string> { { "main.cs", code } } ).Values.Single();
+        private static string GetCompileTimeCode( TestContext testContext, string code, OutputKind outputKind = OutputKind.DynamicallyLinkedLibrary )
+            => GetCompileTimeCode( testContext, new Dictionary<string, string> { { "main.cs", code } }, outputKind ).Values.Single();
 
-        private static IReadOnlyDictionary<string, string> GetCompileTimeCode( TestContext testContext, IReadOnlyDictionary<string, string> code )
+        private static IReadOnlyDictionary<string, string> GetCompileTimeCode(
+            TestContext testContext,
+            IReadOnlyDictionary<string, string> code,
+            OutputKind outputKind = OutputKind.DynamicallyLinkedLibrary )
         {
-            var roslynCompilation = CreateCSharpCompilation( code );
+            var roslynCompilation = CreateCSharpCompilation( code, outputKind: outputKind );
             var loader1 = CompileTimeProjectLoader.Create( new CompileTimeDomain(), testContext.ServiceProvider );
             DiagnosticList diagnosticList = new();
 
@@ -850,6 +834,38 @@ public class MyAspect : OverrideMethodAspect
         }
 
         [Fact]
+        public void TopLevelStatementsAreRemoved()
+        {
+            using var testContext = this.CreateTestContext();
+            testContext.ProjectOptions.FormatCompileTimeCode = true;
+
+            var code = @"
+using System;
+using Metalama.Framework.Aspects;
+
+Method();
+
+void Method() { }
+int field;
+
+[CompileTimeOnly]
+class CompileTimeClass { }
+";
+
+            var compileTimeCode = GetCompileTimeCode( testContext, code, OutputKind.ConsoleApplication );
+
+            var expected = @"
+using System;
+using Metalama.Framework.Aspects;
+
+[CompileTimeOnly]
+class CompileTimeClass { }
+";
+
+            Assert.Equal( expected, compileTimeCode );
+        }
+
+        [Fact]
         public void FabricClassesAreUnNested()
         {
             using var testContext = this.CreateTestContext();
@@ -882,18 +898,73 @@ namespace SomeNamespace
 using System;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Fabrics;
+using Metalama.Framework.Serialization;
 
 [OriginalPath(""main.cs"")]
 [OriginalId(""T:SomeClass.Fabric"")]
 internal class SomeClass_Fabric : TypeFabric
-{ public override void AmendType(ITypeAmender amender) { } }
+{
+    public override void AmendType(ITypeAmender amender) { }
+    public SomeClass_Fabric()
+    {
+    }
+    protected SomeClass_Fabric(IArgumentsReader reader)
+    {
+    }
+    public class Serializer : ReferenceTypeSerializer
+    {
+        public Serializer()
+        {
+        }
+
+        public override object CreateInstance(Type type, IArgumentsReader constructorArguments)
+        {
+            return new global::SomeClass_Fabric(constructorArguments);
+        }
+
+        public override void SerializeObject(object obj, IArgumentsWriter constructorArguments, IArgumentsWriter initializationArguments)
+        {
+        }
+
+        public override void DeserializeFields(object obj, IArgumentsReader initializationArguments)
+        {
+        }
+    }
+}
 
 namespace SomeNamespace
 {
     [OriginalPath(""main.cs"")]
     [OriginalId(""T:SomeNamespace.OtherClass`1.NestedTwice.Fabric"")]
     internal class OtherClassX1_NestedTwice_Fabric : TypeFabric
-    { public override void AmendType(ITypeAmender amender) { } }
+    {
+        public override void AmendType(ITypeAmender amender) { }
+        public OtherClassX1_NestedTwice_Fabric()
+        {
+        }
+        protected OtherClassX1_NestedTwice_Fabric(IArgumentsReader reader)
+        {
+        }
+        public class Serializer : ReferenceTypeSerializer
+        {
+            public Serializer()
+            {
+            }
+
+            public override object CreateInstance(Type type, IArgumentsReader constructorArguments)
+            {
+                return new global::SomeNamespace.OtherClassX1_NestedTwice_Fabric(constructorArguments);
+            }
+
+            public override void SerializeObject(object obj, IArgumentsWriter constructorArguments, IArgumentsWriter initializationArguments)
+            {
+            }
+
+            public override void DeserializeFields(object obj, IArgumentsReader initializationArguments)
+            {
+            }
+        }
+    }
 }
 ";
 

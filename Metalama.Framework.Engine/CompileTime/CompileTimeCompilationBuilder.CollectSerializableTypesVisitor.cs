@@ -24,18 +24,24 @@ namespace Metalama.Framework.Engine.CompileTime
             private readonly ReflectionMapper _reflectionMapper;
             private readonly CancellationToken _cancellationToken;
             private readonly List<SerializableTypeInfo> _serializableTypes;
+            private readonly ISymbolClassifier _symbolClassifier;
 
             public IReadOnlyList<SerializableTypeInfo> SerializableTypes => this._serializableTypes;
 
-            public CollectSerializableTypesVisitor( SemanticModel semanticModel, ReflectionMapper reflectionMapper, CancellationToken cancellationToken )
+            public CollectSerializableTypesVisitor(
+                SemanticModel semanticModel,
+                ReflectionMapper reflectionMapper,
+                ISymbolClassifier symbolClassifier,
+                CancellationToken cancellationToken )
             {
                 this._semanticModel = semanticModel;
                 this._reflectionMapper = reflectionMapper;
                 this._cancellationToken = cancellationToken;
+                this._symbolClassifier = symbolClassifier;
                 this._serializableTypes = new List<SerializableTypeInfo>();
             }
 
-            private void VisitTypeDeclaration( SyntaxNode node )
+            private void ProcessTypeDeclaration( SyntaxNode node )
             {
                 this._cancellationToken.ThrowIfCancellationRequested();
 
@@ -48,18 +54,57 @@ namespace Metalama.Framework.Engine.CompileTime
                     return;
                 }
 
-                var innerVisitor = new CollectSerializableFieldsVisitor( this._semanticModel, this._reflectionMapper, this._cancellationToken );
+                var innerVisitor = new CollectSerializableFieldsVisitor(
+                    this._semanticModel,
+                    node,
+                    this._reflectionMapper,
+                    this._symbolClassifier,
+                    this._cancellationToken );
 
                 innerVisitor.Visit( node );
 
                 this._serializableTypes.Add( new SerializableTypeInfo( declaredSymbol, innerVisitor.SerializableFieldsOrProperties ) );
             }
 
-            public override void VisitClassDeclaration( ClassDeclarationSyntax node ) => this.VisitTypeDeclaration( node );
+            public override void VisitClassDeclaration( ClassDeclarationSyntax node )
+            {
+                this.ProcessTypeDeclaration( node );
+                base.VisitClassDeclaration( node );
+            }
 
-            public override void VisitStructDeclaration( StructDeclarationSyntax node ) => this.VisitTypeDeclaration( node );
+            public override void VisitStructDeclaration( StructDeclarationSyntax node )
+            {
+                this.ProcessTypeDeclaration( node );
+                base.VisitStructDeclaration( node );
+            }
 
-            public override void VisitRecordDeclaration( RecordDeclarationSyntax node ) => this.VisitTypeDeclaration( node );
+            public override void VisitRecordDeclaration( RecordDeclarationSyntax node )
+            {
+                this.ProcessTypeDeclaration( node );
+                base.VisitRecordDeclaration( node );
+            }
+
+            public override void VisitMethodDeclaration( MethodDeclarationSyntax node ) { }
+
+            public override void VisitFieldDeclaration( FieldDeclarationSyntax node ) { }
+
+            public override void VisitPropertyDeclaration( PropertyDeclarationSyntax node ) { }
+
+            public override void VisitPropertyPatternClause( PropertyPatternClauseSyntax node ) { }
+
+            public override void VisitAccessorDeclaration( AccessorDeclarationSyntax node ) { }
+
+            public override void VisitConstructorDeclaration( ConstructorDeclarationSyntax node ) { }
+
+            public override void VisitIndexerDeclaration( IndexerDeclarationSyntax node ) { }
+
+            public override void VisitOperatorDeclaration( OperatorDeclarationSyntax node ) { }
+
+            public override void VisitConversionOperatorDeclaration( ConversionOperatorDeclarationSyntax node ) { }
+
+            public override void VisitEventDeclaration( EventDeclarationSyntax node ) { }
+
+            public override void VisitEventFieldDeclaration( EventFieldDeclarationSyntax node ) { }
         }
     }
 }

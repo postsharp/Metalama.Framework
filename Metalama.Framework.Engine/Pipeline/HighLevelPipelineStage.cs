@@ -50,6 +50,7 @@ namespace Metalama.Framework.Engine.Pipeline
                 this._aspectLayers,
                 compilation,
                 input.AspectSources,
+                input.ValidatorSources,
                 pipelineConfiguration );
 
             pipelineStepsState.Execute( cancellationToken );

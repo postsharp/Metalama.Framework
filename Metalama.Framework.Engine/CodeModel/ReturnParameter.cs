@@ -8,6 +8,7 @@ using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
 using System.Reflection;
 using RefKind = Microsoft.CodeAnalysis.RefKind;
+using SyntaxReference = Microsoft.CodeAnalysis.SyntaxReference;
 using TypedConstant = Metalama.Framework.Code.TypedConstant;
 
 namespace Metalama.Framework.Engine.CodeModel
@@ -47,9 +48,6 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public override CompilationModel Compilation => this.ContainingDeclaration?.GetCompilationModel() ?? throw new AssertionFailedException();
 
-        public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
-            => this.ContainingDeclaration!.ToDisplayString() + "@return";
-
         public abstract bool Equals( IDeclaration other );
 
         public override Location? DiagnosticLocation => this.DeclaringMember.GetDiagnosticLocation();
@@ -61,6 +59,9 @@ namespace Metalama.Framework.Engine.CodeModel
         public override bool CanBeInherited => ((IDeclarationImpl) this.DeclaringMember).CanBeInherited;
 
         public override string ToString() => this.DeclaringMember + "/" + this.Name;
+
+        public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
+            => this.DeclaringMember.ToDisplayString( format, context ) + "/" + this.Name;
 
         public override DeclarationOrigin Origin => this.DeclaringMember.Origin;
     }

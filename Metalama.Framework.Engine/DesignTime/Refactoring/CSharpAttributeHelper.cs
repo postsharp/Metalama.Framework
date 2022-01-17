@@ -71,8 +71,8 @@ namespace Metalama.Framework.Engine.DesignTime.Refactoring
                     {
                         newRoot =
                             newUnit.AddUsings(
-                                SyntaxFactory.UsingDirective( SyntaxFactory.IdentifierName( ns ).WithLeadingTrivia( SyntaxFactory.Space ) )
-                                    .WithTrailingTrivia( SyntaxFactory.CarriageReturnLineFeed )
+                                SyntaxFactory.UsingDirective( SyntaxFactory.IdentifierName( ns ).WithLeadingTrivia( SyntaxFactory.ElasticSpace ) )
+                                    .WithTrailingTrivia( SyntaxFactory.ElasticCarriageReturnLineFeed )
                                     .WithAdditionalAnnotations( Formatter.Annotation ) );
                     }
                 }

@@ -20,7 +20,7 @@ namespace Metalama.Framework.Engine.Pipeline
                 File.WriteAllText( reportFile, exception.ToString() );
             }
 
-            reportDiagnostic( GeneralDiagnosticDescriptors.UnhandledException.CreateDiagnostic( null, (exception.Message, reportFile ?? "(none)") ) );
+            reportDiagnostic( GeneralDiagnosticDescriptors.UnhandledException.CreateRoslynDiagnostic( null, (exception.Message, reportFile ?? "(none)") ) );
             mustRethrow = false;
         }
     }

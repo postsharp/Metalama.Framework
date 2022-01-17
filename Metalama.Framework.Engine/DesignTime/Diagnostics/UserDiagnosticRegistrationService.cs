@@ -70,10 +70,10 @@ namespace Metalama.Framework.Engine.DesignTime.Diagnostics
                 this._registrationFile.Suppressions.Select( id => new SuppressionDescriptor( "Metalama." + id, id, "" ) ).ToImmutableArray());
 
         /// <summary>
-        /// Inspects a <see cref="DesignTimeAspectPipelineResult"/> and compares the reported or suppressed diagnostics to the list of supported diagnostics
+        /// Inspects a <see cref="DesignTimePipelineExecutionResult"/> and compares the reported or suppressed diagnostics to the list of supported diagnostics
         /// and suppressions from the user profile. If some items are not supported in the user profile, add them to the user profile. 
         /// </summary>
-        public void RegisterDescriptors( DesignTimeAspectPipelineResult pipelineResult )
+        public void RegisterDescriptors( DesignTimePipelineExecutionResult pipelineResult )
         {
             var missing = this.GetMissingDiagnostics( pipelineResult );
             var timestamp = this._registrationFile.Timestamp;
@@ -104,7 +104,7 @@ namespace Metalama.Framework.Engine.DesignTime.Diagnostics
             }
         }
 
-        private (List<string> Suppressions, List<DiagnosticDescriptor> Diagnostics) GetMissingDiagnostics( DesignTimeAspectPipelineResult pipelineResult )
+        private (List<string> Suppressions, List<DiagnosticDescriptor> Diagnostics) GetMissingDiagnostics( DesignTimePipelineExecutionResult pipelineResult )
         {
             List<string> missingSuppressions = new();
             List<DiagnosticDescriptor> missingDiagnostics = new();

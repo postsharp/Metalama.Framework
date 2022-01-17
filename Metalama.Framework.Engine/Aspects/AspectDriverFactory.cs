@@ -32,7 +32,7 @@ namespace Metalama.Framework.Engine.Aspects
 
         public IAspectDriver GetAspectDriver( AspectClass aspectClass, INamedTypeSymbol type )
         {
-            var weavers = this._weaverTypes[type.GetReflectionName()].ToList();
+            var weavers = this._weaverTypes[type.GetReflectionName().AssertNotNull()].ToList();
 
             if ( weavers.Count > 1 )
             {

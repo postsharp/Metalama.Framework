@@ -50,7 +50,7 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
                 {
                     // If the type is not marked as partial, we can emit a diagnostic and a code fix, but not a partial class itself.
                     diagnostics.Report(
-                        DesignTimeDiagnosticDescriptors.TypeNotPartial.CreateDiagnostic( declaringType.GetDiagnosticLocation(), declaringType ) );
+                        DesignTimeDiagnosticDescriptors.TypeNotPartial.CreateRoslynDiagnostic( declaringType.GetDiagnosticLocation(), declaringType ) );
 
                     continue;
                 }

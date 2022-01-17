@@ -15,7 +15,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Fabrics.TransitiveP
             // Capture the message outside of the lambda otherwise it gets evaluated later and we don't test that the transitive fabric runs
             // after the non-transitive one.
             var message = configuration.Message;
-            amender.WithMembers( c => c.Types.SelectMany( t => t.Methods ) ).AddAspect( m => new Aspect( message ) );
+            amender.WithTargetMembers( c => c.Types.SelectMany( t => t.Methods ) ).AddAspect( m => new Aspect( message ) );
         }
     }
 

@@ -12,11 +12,13 @@ using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Sdk;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Validation;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
@@ -30,13 +32,12 @@ namespace Metalama.Framework.Engine.Aspects
     /// <summary>
     /// Represents the metadata of an aspect class. This class is compilation-independent. It is not used to represent a fabric class.
     /// </summary>
-    internal partial class AspectClass : TemplateClass, IAspectClassImpl, IBoundAspectClass
+    internal class AspectClass : TemplateClass, IAspectClassImpl, IBoundAspectClass, IValidatorDriverFactory
     {
         private readonly UserCodeInvoker _userCodeInvoker;
         private readonly IAspectDriver? _aspectDriver;
-
         private readonly IAspect? _prototypeAspectInstance; // Null for abstract classes.
-        private IReadOnlyList<AspectLayer>? _layers;
+        private ValidatorDriverFactory? _validatorDriverFactory;
 
         private static readonly MethodInfo _tryInitializeEligibilityMethod = typeof(AspectClass).GetMethod(
             nameof(TryInitializeEligibility),
@@ -51,9 +52,9 @@ namespace Metalama.Framework.Engine.Aspects
         public string ShortName { get; }
 
         /// <inheritdoc />
-        public string DisplayName { get; private set; }
+        public string DisplayName { get; }
 
-        public string? Description { get; private set; }
+        public string? Description { get; }
 
         public override CompileTimeProject? Project { get; }
 
@@ -67,7 +68,7 @@ namespace Metalama.Framework.Engine.Aspects
         /// <summary>
         /// Gets the list of layers of the current aspect.
         /// </summary>
-        public IReadOnlyList<AspectLayer> Layers => this._layers.AssertNotNull();
+        public ImmutableArray<AspectLayer> Layers { get; }
 
         public Location? DiagnosticLocation { get; }
 
@@ -80,7 +81,9 @@ namespace Metalama.Framework.Engine.Aspects
 
         Type IAspectClass.Type => this.AspectType;
 
-        public bool IsLiveTemplate { get; private set; }
+        public bool IsLiveTemplate { get; }
+
+        public bool HasError { get; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AspectClass"/> class.
@@ -98,7 +101,7 @@ namespace Metalama.Framework.Engine.Aspects
             Compilation compilation,
             AspectDriverFactory aspectDriverFactory ) : base( serviceProvider, compilation, aspectTypeSymbol, diagnosticAdder, baseClass )
         {
-            this.FullName = aspectTypeSymbol.GetReflectionName();
+            this.FullName = aspectTypeSymbol.GetReflectionName().AssertNotNull();
             this.DisplayName = this.ShortName = AttributeRef.GetShortName( aspectTypeSymbol.Name );
             this.IsAbstract = aspectTypeSymbol.IsAbstract;
             this.Project = project;
@@ -106,8 +109,70 @@ namespace Metalama.Framework.Engine.Aspects
             this.DiagnosticLocation = aspectTypeSymbol.GetDiagnosticLocation();
             this.AspectType = aspectType;
             this._prototypeAspectInstance = prototype;
-            this.IsInherited = prototype is IInheritedAspect;
             this.TemplateClasses = ImmutableArray.Create<TemplateClass>( this );
+
+            List<string?> layers = new();
+
+            if ( baseClass != null )
+            {
+                this.Description = baseClass.Description;
+                this.DisplayName = baseClass.DisplayName;
+                this.IsInherited = baseClass.IsInherited;
+                this.IsLiveTemplate = baseClass.IsLiveTemplate;
+                layers.AddRange( baseClass.Layers.Select( l => l.LayerName ) );
+            }
+            else
+            {
+                layers.Add( null );
+            }
+
+            foreach ( var attribute in aspectTypeSymbol.GetAttributes() )
+            {
+                switch ( attribute.AttributeClass?.Name )
+                {
+                    case null:
+                        continue;
+
+                    case nameof(InheritedAttribute):
+                        this.IsInherited = true;
+
+                        break;
+
+                    case nameof(LiveTemplateAttribute):
+                        if ( !aspectTypeSymbol.HasDefaultConstructor() )
+                        {
+                            diagnosticAdder.Report(
+                                GeneralDiagnosticDescriptors.LiveTemplateMustHaveDefaultConstructor.CreateRoslynDiagnostic(
+                                    attribute.GetDiagnosticLocation(),
+                                    aspectTypeSymbol ) );
+
+                            this.HasError = true;
+                        }
+                        else
+                        {
+                            this.IsLiveTemplate = true;
+                        }
+
+                        break;
+
+                    case nameof(LayersAttribute):
+                        layers.AddRange( attribute.ConstructorArguments[0].Values.Select( v => (string?) v.Value ).Where( v => !string.IsNullOrEmpty( v ) ) );
+
+                        break;
+
+                    case nameof(DescriptionAttribute):
+                        this.Description = (string?) attribute.ConstructorArguments[0].Value;
+
+                        break;
+
+                    case nameof(DisplayNameAttribute):
+                        this.DisplayName = (string?) attribute.ConstructorArguments[0].Value ?? this.ShortName;
+
+                        break;
+                }
+            }
+
+            this.Layers = layers.Select( l => new AspectLayer( this, l ) ).ToImmutableArray();
 
             // This must be called after Members is built and assigned.
             this._aspectDriver = aspectDriverFactory.GetAspectDriver( this, aspectTypeSymbol );
@@ -115,23 +180,13 @@ namespace Metalama.Framework.Engine.Aspects
 
         private bool TryInitialize( IDiagnosticAdder diagnosticAdder )
         {
+            if ( this.HasError )
+            {
+                return false;
+            }
+
             if ( this._prototypeAspectInstance != null )
             {
-                // Call BuildAspectClass
-                var classBuilder = new Builder( this );
-
-                var executionContext = new UserCodeExecutionContext(
-                    this.ServiceProvider,
-                    diagnosticAdder,
-                    UserCodeMemberInfo.FromDelegate( new Action<IAspectClassBuilder>( this._prototypeAspectInstance.BuildAspectClass ) ) );
-
-                if ( !this._userCodeInvoker.TryInvoke( () => this._prototypeAspectInstance.BuildAspectClass( classBuilder ), executionContext ) )
-                {
-                    return false;
-                }
-
-                this._layers = classBuilder.Layers.As<string?>().Prepend( null ).Select( l => new AspectLayer( this, l ) ).ToImmutableArray();
-
                 // Call BuildEligibility for all relevant interface implementations.
                 List<KeyValuePair<Type, IEligibilityRule<IDeclaration>>> eligibilityRules = new();
 
@@ -147,8 +202,17 @@ namespace Metalama.Framework.Engine.Aspects
                              .GetInterfaces()
                              .Where( i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IEligible<>) ) )
                 {
+                    var declarationInterface = implementedInterface.GenericTypeArguments[0];
+
+                    // If methods are eligible, we need to check that the target method is not a local function.
+                    if ( declarationInterface == typeof(IMethod) )
+                    {
+                        eligibilityRules.Add(
+                            new KeyValuePair<Type, IEligibilityRule<IDeclaration>>( typeof(IMethod), LocalFunctionEligibilityRule.Instance ) );
+                    }
+
                     eligibilitySuccess &= (bool)
-                        _tryInitializeEligibilityMethod.MakeGenericMethod( implementedInterface.GenericTypeArguments[0] )
+                        _tryInitializeEligibilityMethod.MakeGenericMethod( declarationInterface )
                             .Invoke( this, new object[] { diagnosticAdder, eligibilityRules } );
                 }
 
@@ -161,9 +225,6 @@ namespace Metalama.Framework.Engine.Aspects
             }
             else
             {
-                // Abstract aspect classes don't have any layer.
-                this._layers = Array.Empty<AspectLayer>();
-
                 // Abstract aspect classes don't have eligibility because they cannot be applied.
                 this._eligibilityRules = ImmutableArray<KeyValuePair<Type, IEligibilityRule<IDeclaration>>>.Empty;
             }
@@ -263,6 +324,8 @@ namespace Metalama.Framework.Engine.Aspects
 
             if ( !aspectClass.TryInitialize( diagnosticAdder ) )
             {
+                aspectClass = null;
+
                 return false;
             }
 
@@ -294,7 +357,7 @@ namespace Metalama.Framework.Engine.Aspects
         {
             var ourDeclarationInterface = symbol switch
             {
-                IMethodSymbol method when IsMethod( method.MethodKind ) => typeof(IMethod),
+                IMethodSymbol method when IsMethod( method.MethodKind ) => method.MethodKind != MethodKind.LocalFunction ? typeof(IMethod) : null,
                 IMethodSymbol method when IsConstructor( method.MethodKind ) => typeof(IConstructor),
                 IPropertySymbol => typeof(IProperty),
                 IEventSymbol => typeof(IEvent),
@@ -313,8 +376,6 @@ namespace Metalama.Framework.Engine.Aspects
             var aspectInterface = typeof(IAspect<>).MakeGenericType( ourDeclarationInterface );
 
             return aspectInterface.IsAssignableFrom( this.AspectType );
-
-            // TODO: call IsEligible on the prototype
         }
 
         public EligibleScenarios GetEligibility( IDeclaration targetDeclaration )
@@ -388,5 +449,27 @@ namespace Metalama.Framework.Engine.Aspects
         public IAspect CreateDefaultInstance() => (IAspect) Activator.CreateInstance( this.AspectType );
 
         public override string ToString() => this.FullName;
+
+        public ValidatorDriver<TContext> GetValidatorDriver<TContext>( MethodInfo validateMethod )
+        {
+            this._validatorDriverFactory ??= ValidatorDriverFactory.GetInstance( this.AspectType );
+
+            return this._validatorDriverFactory.GetValidatorDriver<TContext>( validateMethod );
+        }
+
+        private class LocalFunctionEligibilityRule : IEligibilityRule<IDeclaration>
+        {
+            public static LocalFunctionEligibilityRule Instance { get; } = new();
+
+            private LocalFunctionEligibilityRule() { }
+
+            public EligibleScenarios GetEligibility( IDeclaration obj )
+                => ((IMethod) obj).MethodKind == Code.MethodKind.LocalFunction ? EligibleScenarios.None : EligibleScenarios.All;
+
+            public FormattableString? GetIneligibilityJustification( EligibleScenarios requestedEligibility, IDescribedObject<IDeclaration> describedObject )
+                => ((IMethod) describedObject.Object).MethodKind == Code.MethodKind.LocalFunction
+                    ? $"{describedObject} is a local function"
+                    : (FormattableString?) null;
+        }
     }
 }

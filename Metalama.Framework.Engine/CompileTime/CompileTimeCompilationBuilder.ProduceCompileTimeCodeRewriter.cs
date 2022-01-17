@@ -73,7 +73,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 this._diagnosticAdder = diagnosticAdder;
                 this._templateCompiler = templateCompiler;
                 this._cancellationToken = cancellationToken;
-                this._currentContext = new Context( TemplatingScope.Both, this );
+                this._currentContext = new Context( TemplatingScope.Both, null, null, 0, this );
 
                 this._serializableTypes =
                     serializableTypes.ToDictionary<SerializableTypeInfo, INamedTypeSymbol, SerializableTypeInfo>(
@@ -153,7 +153,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 }
             }
 
-            private void PopulateNestedCompileTimeTypes( TypeDeclarationSyntax node, List<MemberDeclarationSyntax> list, string namePrefix )
+            private void PopulateNestedCompileTimeTypes( TypeDeclarationSyntax node, List<MemberDeclarationSyntax> list, string namePrefix, int nestingLevel )
             {
                 // Compute the new name of the relocated children.
                 namePrefix += node.Identifier.Text;
@@ -189,7 +189,7 @@ namespace Metalama.Framework.Engine.CompileTime
                                             if ( childSymbol.DeclaredAccessibility != Accessibility.Private )
                                             {
                                                 this._diagnosticAdder.Report(
-                                                    TemplatingDiagnosticDescriptors.NestedCompileTypesMustBePrivate.CreateDiagnostic(
+                                                    TemplatingDiagnosticDescriptors.NestedCompileTypesMustBePrivate.CreateRoslynDiagnostic(
                                                         childType.Identifier.GetLocation(),
                                                         childSymbol ) );
                                             }
@@ -198,7 +198,7 @@ namespace Metalama.Framework.Engine.CompileTime
                                             if ( !this.RunTimeCompilation.HasImplicitConversion( childSymbol, this._typeFabricType ) )
                                             {
                                                 this._diagnosticAdder.Report(
-                                                    TemplatingDiagnosticDescriptors.RunTimeTypesCannotHaveCompileTimeTypesExceptClasses.CreateDiagnostic(
+                                                    TemplatingDiagnosticDescriptors.RunTimeTypesCannotHaveCompileTimeTypesExceptClasses.CreateRoslynDiagnostic(
                                                         childSymbol.GetDiagnosticLocation(),
                                                         (childSymbol, typeof(TypeFabric)) ) );
 
@@ -214,10 +214,15 @@ namespace Metalama.Framework.Engine.CompileTime
                                                         SingletonSeparatedList( AttributeArgument( SyntaxFactoryEx.LiteralExpression( originalId ) ) ) ) );
 
                                             // Transform the type.
-                                            var transformedChild = (TypeDeclarationSyntax) this.Visit( childType )!;
+                                            TypeDeclarationSyntax transformedChild;
+                                            var newName = namePrefix + "" + childType.Identifier.Text;
+
+                                            using ( this.WithUnnestedType( (INamedTypeSymbol) childSymbol, newName, nestingLevel ) )
+                                            {
+                                                transformedChild = (TypeDeclarationSyntax) this.Visit( childType )!;
+                                            }
 
                                             // Rename the type and add [OriginalId].
-                                            var newName = namePrefix + "" + childType.Identifier.Text;
 
                                             transformedChild = transformedChild
                                                 .WithIdentifier( Identifier( newName ) )
@@ -233,13 +238,13 @@ namespace Metalama.Framework.Engine.CompileTime
                                     case TemplatingScope.RunTimeOnly:
                                         // We have a run-time child type, and it must be further checked for un-nesting.
 
-                                        this.PopulateNestedCompileTimeTypes( childType, list, namePrefix );
+                                        this.PopulateNestedCompileTimeTypes( childType, list, namePrefix, nestingLevel + 1 );
 
                                         break;
 
                                     default:
                                         this._diagnosticAdder.Report(
-                                            TemplatingDiagnosticDescriptors.NeutralTypesForbiddenInNestedRunTimeTypes.CreateDiagnostic(
+                                            TemplatingDiagnosticDescriptors.NeutralTypesForbiddenInNestedRunTimeTypes.CreateRoslynDiagnostic(
                                                 childType.Identifier.GetLocation(),
                                                 childSymbol ) );
 
@@ -255,7 +260,7 @@ namespace Metalama.Framework.Engine.CompileTime
                             if ( this.SymbolClassifier.GetTemplatingScope( childSymbol ) == TemplatingScope.CompileTimeOnly )
                             {
                                 this._diagnosticAdder.Report(
-                                    TemplatingDiagnosticDescriptors.RunTimeTypesCannotHaveCompileTimeTypesExceptClasses.CreateDiagnostic(
+                                    TemplatingDiagnosticDescriptors.RunTimeTypesCannotHaveCompileTimeTypesExceptClasses.CreateRoslynDiagnostic(
                                         childSymbol.GetDiagnosticLocation(),
                                         (childSymbol, typeof(TypeFabric)) ) );
 
@@ -297,7 +302,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 {
                     // If the type contains compile-time nested types, we have to un-nest them.
                     var compileTimeMembers = new List<MemberDeclarationSyntax>();
-                    this.PopulateNestedCompileTimeTypes( node, compileTimeMembers, "" );
+                    this.PopulateNestedCompileTimeTypes( node, compileTimeMembers, "", 1 );
 
                     return compileTimeMembers;
                 }
@@ -410,16 +415,19 @@ namespace Metalama.Framework.Engine.CompileTime
                 // Add serialization logic if the type is serializable and this is the primary declaration.
                 if ( this._serializableTypes.TryGetValue( symbol, out var serializableType ) )
                 {
-                    if ( !serializableType.Type.GetMembers()
-                            .Any(
-                                m => m is IMethodSymbol method && method.MethodKind == MethodKind.Constructor && method.GetPrimarySyntaxReference() != null ) )
+                    var serializedTypeName = this.CreateNameExpression( serializableType.Type );
+
+                    if ( !serializableType.Type.IsValueType
+                         && !serializableType.Type.GetMembers()
+                             .Any(
+                                 m => m is IMethodSymbol method && method.MethodKind == MethodKind.Constructor && method.GetPrimarySyntaxReference() != null ) )
                     {
-                        // There is no defined constructor, so we need to explicitly add parameterless constructor.
+                        // There is no defined constructor, so we need to explicitly add parameterless constructor (only for reference types).
                         members.Add(
                             ConstructorDeclaration(
                                     List<AttributeListSyntax>(),
                                     TokenList( Token( SyntaxKind.PublicKeyword ) ),
-                                    Identifier( serializableType.Type.Name ),
+                                    serializedTypeName.ShortName,
                                     ParameterList(),
                                     null,
                                     Block(),
@@ -427,8 +435,8 @@ namespace Metalama.Framework.Engine.CompileTime
                                 .NormalizeWhitespace() );
                     }
 
-                    members.Add( this._serializerGenerator.CreateDeserializingConstructor( serializableType ).NormalizeWhitespace() );
-                    members.Add( this._serializerGenerator.CreateSerializerType( serializableType ).NormalizeWhitespace() );
+                    members.Add( this._serializerGenerator.CreateDeserializingConstructor( serializableType, serializedTypeName ).NormalizeWhitespace() );
+                    members.Add( this._serializerGenerator.CreateSerializerType( serializableType, serializedTypeName ).NormalizeWhitespace() );
                 }
 
                 var transformedNode = node.WithMembers( List( members ) ).WithAdditionalAnnotations( _hasCompileTimeCodeAnnotation );
@@ -460,7 +468,7 @@ namespace Metalama.Framework.Engine.CompileTime
                     this.Success = false;
 
                     this._diagnosticAdder.Report(
-                        GeneralDiagnosticDescriptors.TemplateWithSameNameAlreadyDefined.CreateDiagnostic(
+                        GeneralDiagnosticDescriptors.TemplateWithSameNameAlreadyDefined.CreateRoslynDiagnostic(
                             symbol.GetDiagnosticLocation(),
                             (symbol.Name, this._currentTypeName!) ) );
 
@@ -477,7 +485,7 @@ namespace Metalama.Framework.Engine.CompileTime
                     this.Success = false;
 
                     this._diagnosticAdder.Report(
-                        TemplatingDiagnosticDescriptors.TemplateMustBeInNullableContext.CreateDiagnostic(
+                        TemplatingDiagnosticDescriptors.TemplateMustBeInNullableContext.CreateRoslynDiagnostic(
                             name.GetLocation(),
                             name.Text ) );
                 }
@@ -489,7 +497,7 @@ namespace Metalama.Framework.Engine.CompileTime
                         this.Success = false;
 
                         this._diagnosticAdder.Report(
-                            TemplatingDiagnosticDescriptors.TemplateMustBeInNullableContext.CreateDiagnostic(
+                            TemplatingDiagnosticDescriptors.TemplateMustBeInNullableContext.CreateRoslynDiagnostic(
                                 trivia.GetLocation(),
                                 name.Text ) );
                     }
@@ -825,7 +833,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 }
             }
 
-            private SyntaxList<MemberDeclarationSyntax> VisitTypeOrNamespaceMembers( SyntaxList<MemberDeclarationSyntax> members )
+            private SyntaxList<MemberDeclarationSyntax> VisitTypeOrNamespaceMembers( IReadOnlyList<MemberDeclarationSyntax> members )
             {
                 var resultingMembers = new List<MemberDeclarationSyntax>( members.Count );
 
@@ -853,6 +861,22 @@ namespace Metalama.Framework.Engine.CompileTime
                 return List( resultingMembers );
             }
 
+            public override SyntaxNode? VisitConstructorDeclaration( ConstructorDeclarationSyntax node )
+            {
+                var unnestedType = this._currentContext.NestedType;
+
+                var visitedConstructor = (ConstructorDeclarationSyntax) base.VisitConstructorDeclaration( node )!;
+
+                if ( unnestedType != null && node.Identifier.Text == unnestedType.Name )
+                {
+                    return visitedConstructor.WithIdentifier( Identifier( this._currentContext.NestedTypeNewName! ) );
+                }
+                else
+                {
+                    return visitedConstructor;
+                }
+            }
+
             public override SyntaxNode? VisitNamespaceDeclaration( NamespaceDeclarationSyntax node )
             {
                 var transformedMembers = this.VisitTypeOrNamespaceMembers( node.Members );
@@ -869,7 +893,11 @@ namespace Metalama.Framework.Engine.CompileTime
 
             public override SyntaxNode? VisitCompilationUnit( CompilationUnitSyntax node )
             {
-                var transformedMembers = this.VisitTypeOrNamespaceMembers( node.Members );
+                // Get the list of members that are not statements, local variables, local functions,...
+                var nonTopLevelMembers = node.Members.Where( m => m is BaseTypeDeclarationSyntax or NamespaceDeclarationSyntax or DelegateDeclarationSyntax )
+                    .ToList();
+
+                var transformedMembers = this.VisitTypeOrNamespaceMembers( nonTopLevelMembers );
 
                 if ( transformedMembers.Any( m => m.HasAnnotation( _hasCompileTimeCodeAnnotation ) ) )
                 {
@@ -948,6 +976,34 @@ namespace Metalama.Framework.Engine.CompileTime
 
             public override SyntaxToken VisitToken( SyntaxToken token ) => this._templateCompiler.LocationAnnotationMap.AddLocationAnnotation( token );
 
+            private QualifiedTypeNameInfo CreateNameExpression( INamespaceOrTypeSymbol symbol )
+            {
+                var unnestedType = this._currentContext.NestedType;
+                var fullyQualifiedName = (NameSyntax) OurSyntaxGenerator.CompileTime.NameExpression( symbol );
+
+                static NameSyntax RenameType( NameSyntax syntax, string newIdentifier, int nestingLevel )
+                    => syntax switch
+                    {
+                        AliasQualifiedNameSyntax aliasQualifiedNameSyntax => aliasQualifiedNameSyntax.WithName( IdentifierName( newIdentifier ) ),
+                        QualifiedNameSyntax qualifiedNameSyntax when nestingLevel > 0 => RenameType(
+                            qualifiedNameSyntax.Left,
+                            newIdentifier,
+                            nestingLevel - 1 ),
+                        QualifiedNameSyntax qualifiedNameSyntax when nestingLevel == 0 => qualifiedNameSyntax.WithRight( IdentifierName( newIdentifier ) ),
+                        SimpleNameSyntax => IdentifierName( newIdentifier ),
+                        _ => throw new AssertionFailedException()
+                    };
+
+                if ( unnestedType != null && symbol.Equals( unnestedType ) )
+                {
+                    return new QualifiedTypeNameInfo(
+                        RenameType( fullyQualifiedName, this._currentContext.NestedTypeNewName!, this._currentContext.NestingLevel ),
+                        this._currentContext.NestedTypeNewName! );
+                }
+
+                return new QualifiedTypeNameInfo( fullyQualifiedName );
+            }
+
             public override SyntaxNode? VisitQualifiedName( QualifiedNameSyntax node )
             {
                 // Fully qualify type names and namespaces.
@@ -956,7 +1012,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
                 if ( symbol is INamespaceOrTypeSymbol namespaceOrType )
                 {
-                    return OurSyntaxGenerator.CompileTime.NameExpression( namespaceOrType ).WithTriviaFrom( node );
+                    return this.CreateNameExpression( namespaceOrType ).QualifiedName.WithTriviaFrom( node );
                 }
 
                 return base.VisitQualifiedName( node );
@@ -970,7 +1026,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
                 if ( symbol is INamespaceOrTypeSymbol namespaceOrType )
                 {
-                    return OurSyntaxGenerator.CompileTime.NameExpression( namespaceOrType ).WithTriviaFrom( node );
+                    return this.CreateNameExpression( namespaceOrType ).QualifiedName.WithTriviaFrom( node );
                 }
 
                 return base.VisitMemberAccessExpression( node );
@@ -990,7 +1046,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
                     if ( symbol is INamespaceOrTypeSymbol namespaceOrType )
                     {
-                        return OurSyntaxGenerator.CompileTime.NameExpression( namespaceOrType ).WithTriviaFrom( node );
+                        return this.CreateNameExpression( namespaceOrType ).QualifiedName.WithTriviaFrom( node );
                     }
                     else if ( symbol is { IsStatic: true } && node.Parent is not MemberAccessExpressionSyntax && node.Parent is not AliasQualifiedNameSyntax )
                     {
@@ -1003,7 +1059,7 @@ namespace Metalama.Framework.Engine.CompileTime
                                 // We have an access to a field or method with a "using static", or a non-qualified static member access.
                                 return MemberAccessExpression(
                                     SyntaxKind.SimpleMemberAccessExpression,
-                                    OurSyntaxGenerator.CompileTime.NameExpression( symbol.ContainingType ),
+                                    this.CreateNameExpression( symbol.ContainingType ).QualifiedName,
                                     IdentifierName( node.Identifier.Text ) );
                         }
                     }
@@ -1016,7 +1072,19 @@ namespace Metalama.Framework.Engine.CompileTime
 
             private Context WithScope( TemplatingScope scope )
             {
-                this._currentContext = new Context( scope, this );
+                this._currentContext = new Context(
+                    scope,
+                    this._currentContext.NestedType,
+                    this._currentContext.NestedTypeNewName,
+                    this._currentContext.NestingLevel,
+                    this );
+
+                return this._currentContext;
+            }
+
+            private Context WithUnnestedType( INamedTypeSymbol unnestedType, string newName, int nestingLevel )
+            {
+                this._currentContext = new Context( this._currentContext.Scope, unnestedType, newName, nestingLevel, this );
 
                 return this._currentContext;
             }
@@ -1028,9 +1096,17 @@ namespace Metalama.Framework.Engine.CompileTime
                 private readonly ProduceCompileTimeCodeRewriter _parent;
                 private readonly Context _oldContext;
 
-                public Context( TemplatingScope scope, ProduceCompileTimeCodeRewriter parent )
+                public Context(
+                    TemplatingScope scope,
+                    INamedTypeSymbol? nestedType,
+                    string? nestedTypeNewName,
+                    int nestingLevel,
+                    ProduceCompileTimeCodeRewriter parent )
                 {
                     this.Scope = scope;
+                    this.NestedTypeNewName = nestedTypeNewName;
+                    this.NestingLevel = nestingLevel;
+                    this.NestedType = nestedType;
                     this._parent = parent;
 
                     // This will be null for the root context.
@@ -1038,6 +1114,12 @@ namespace Metalama.Framework.Engine.CompileTime
                 }
 
                 public TemplatingScope Scope { get; }
+
+                public string? NestedTypeNewName { get; }
+
+                public int NestingLevel { get; }
+
+                public INamedTypeSymbol? NestedType { get; }
 
                 public void Dispose() => this._parent._currentContext = this._oldContext;
             }

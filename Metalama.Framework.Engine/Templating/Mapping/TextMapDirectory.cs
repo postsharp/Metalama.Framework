@@ -26,7 +26,7 @@ namespace Metalama.Framework.Engine.Templating.Mapping
         /// <summary>
         /// Loads a new instance of <see cref="TextMapDirectory"/> from the file system.
         /// </summary>
-        public static TextMapDirectory Load( string directory )
+        public static TextMapDirectory Load( string? directory )
         {
             var dictionaryBuilder = ImmutableDictionary.CreateBuilder<string, TextMapFile>();
 
@@ -57,7 +57,7 @@ namespace Metalama.Framework.Engine.Templating.Mapping
         /// <summary>
         /// Writes the content of the current <see cref="TextMapDirectory"/> to the filesystem.
         /// </summary>
-        public void Write( string outputDirectory )
+        public void Write( string? outputDirectory )
         {
             foreach ( var map in this.FilesByTargetPath.Values )
             {
