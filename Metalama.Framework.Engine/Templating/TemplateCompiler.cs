@@ -8,6 +8,7 @@ using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -161,10 +162,17 @@ namespace Metalama.Framework.Engine.Templating
                 return false;
             }
 
+            var sourceSyntaxRootKind = sourceSyntaxRoot switch
+            {
+                VariableDeclaratorSyntax variable when variable.Parent?.Parent is FieldDeclarationSyntax => TemplateSyntaxRootKind.FieldDeclarator,
+                _ => TemplateSyntaxRootKind.Self
+            };
+
             // ReSharper restore PossibleMultipleEnumeration
 
             // Compile the syntax tree.
             var templateCompilerRewriter = new TemplateCompilerRewriter(
+                sourceSyntaxRootKind,
                 templateName,
                 semanticModel.Compilation,
                 compileTimeCompilation,

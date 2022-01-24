@@ -53,17 +53,17 @@ namespace Metalama.Framework.Engine.Advices
             base.Initialize( declarativeAdvices, diagnosticAdder );
 
             this.MemberBuilder.Type =
-                (this.TemplateMember?.Type ?? (INamedType?) this._addTemplate.Declaration?.Parameters.FirstOrDefault().AssertNotNull().Type)
+                (this.Template.Declaration?.Type ?? (INamedType?) this._addTemplate.Declaration?.Parameters.FirstOrDefault().AssertNotNull().Type)
                 .AssertNotNull();
 
-            this.MemberBuilder.Accessibility = (this.TemplateMember?.Accessibility ?? this._addTemplate.Declaration?.Accessibility).AssertNotNull();
+            this.MemberBuilder.Accessibility = (this.Template.Declaration?.Accessibility ?? this._addTemplate.Declaration?.Accessibility).AssertNotNull();
         }
 
         public override AdviceResult ToResult( ICompilation compilation )
         {
             // TODO: Override transformations.
             var existingDeclaration = this.TargetDeclaration.Events.OfExactSignature( this.MemberBuilder, false, false );
-            var hasNoOverrideSemantics = this.TemplateMember != null && this.TemplateMember.IsEventField();
+            var hasNoOverrideSemantics = this.Template.Declaration != null && this.Template.Declaration.IsEventField();
 
             if ( existingDeclaration == null )
             {

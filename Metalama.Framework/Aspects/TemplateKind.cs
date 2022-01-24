@@ -55,6 +55,6 @@ namespace Metalama.Framework.Aspects
         /// <summary>
         /// Template used for initializer of introduced field, property of event field.
         /// </summary>
-        Initializer,
+        IntroductionInitializer,
     }
 }

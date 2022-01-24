@@ -15,6 +15,12 @@ namespace Metalama.Framework.Engine.Templating
                 _ => GetCompiledTemplateName( method.Name )
             };
 
+        public static string GetCompiledTemplateName( IFieldSymbol field )
+            => GetCompiledTemplateName( field.Name );
+
+        public static string GetPseudoInitializerMethodName( string fieldName )
+            => $"__Initialize{fieldName}";
+
         public static string GetCompiledTemplateName( string templateMethodName ) => "__" + templateMethodName;
     }
 }

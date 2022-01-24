@@ -103,45 +103,52 @@ namespace Metalama.Framework.Engine.Templating
                 return ReturnStatement();
             }
 
-            var method = this.MetaApi.Method;
-
-            var returnType = method.ReturnType;
-
-            if ( this._templateMethod.MustInterpretAsAsync() )
+            if ( this.MetaApi.Declaration is IField field )
             {
-                // If we are in an awaitable async method, the consider the return type as seen by the method body,
-                // not the one as seen from outside.
-                var asyncInfo = method.GetAsyncInfoImpl();
-
-                if ( asyncInfo.IsAwaitable )
-                {
-                    returnType = asyncInfo.ResultType;
-                }
-            }
-
-            if ( TypeExtensions.Equals( returnType, SpecialType.Void ) )
-            {
-                return CreateReturnStatementVoid( returnExpression );
-            }
-            else if ( method.GetIteratorInfoImpl() is { EnumerableKind: EnumerableKind.IAsyncEnumerable or EnumerableKind.IAsyncEnumerator } iteratorInfo &&
-                      this._templateMethod.MustInterpretAsAsyncIterator() )
-            {
-                switch ( iteratorInfo.EnumerableKind )
-                {
-                    case EnumerableKind.IAsyncEnumerable:
-
-                        return this.CreateReturnStatementAsyncEnumerable( returnExpression );
-
-                    case EnumerableKind.IAsyncEnumerator:
-                        return this.CreateReturnStatementAsyncEnumerator( returnExpression );
-
-                    default:
-                        throw new AssertionFailedException();
-                }
+                // This is initializer template expantion
+                return this.CreateReturnStatementDefault( returnExpression, field.Type );
             }
             else
             {
-                return this.CreateReturnStatementDefault( returnExpression, returnType );
+                var method = this.MetaApi.Method;
+                var returnType = method.ReturnType;
+
+                if ( this._templateMethod.MustInterpretAsAsync() )
+                {
+                    // If we are in an awaitable async method, the consider the return type as seen by the method body,
+                    // not the one as seen from outside.
+                    var asyncInfo = method.GetAsyncInfoImpl();
+
+                    if ( asyncInfo.IsAwaitable )
+                    {
+                        returnType = asyncInfo.ResultType;
+                    }
+                }
+
+                if ( TypeExtensions.Equals( returnType, SpecialType.Void ) )
+                {
+                    return CreateReturnStatementVoid( returnExpression );
+                }
+                else if ( method.GetIteratorInfoImpl() is { EnumerableKind: EnumerableKind.IAsyncEnumerable or EnumerableKind.IAsyncEnumerator } iteratorInfo &&
+                          this._templateMethod.MustInterpretAsAsyncIterator() )
+                {
+                    switch ( iteratorInfo.EnumerableKind )
+                    {
+                        case EnumerableKind.IAsyncEnumerable:
+
+                            return this.CreateReturnStatementAsyncEnumerable( returnExpression );
+
+                        case EnumerableKind.IAsyncEnumerator:
+                            return this.CreateReturnStatementAsyncEnumerator( returnExpression );
+
+                        default:
+                            throw new AssertionFailedException();
+                    }
+                }
+                else
+                {
+                    return this.CreateReturnStatementDefault( returnExpression, returnType );
+                }
             }
         }
 

@@ -73,6 +73,30 @@ namespace Metalama.Framework.Engine.Aspects
             return templateDriver;
         }
 
+        public TemplateDriver GetTemplateDriver( IField sourceTemplate )
+        {
+            var templateSymbol = sourceTemplate.GetSymbol().AssertNotNull();
+            var id = templateSymbol.GetDocumentationCommentId()!;
+
+            if ( this._templateDrivers.TryGetValue( id, out var templateDriver ) )
+            {
+                return templateDriver;
+            }
+
+            var templateName = TemplateNameHelper.GetCompiledTemplateName( templateSymbol );
+            var compiledTemplateMethodInfo = this.AspectType.GetMethod( templateName );
+
+            if ( compiledTemplateMethodInfo == null )
+            {
+                throw new AssertionFailedException( $"Could not find the compile template for {sourceTemplate}." );
+            }
+
+            templateDriver = new TemplateDriver( this.ServiceProvider, compiledTemplateMethodInfo );
+            this._templateDrivers.Add( id, templateDriver );
+
+            return templateDriver;
+        }
+
         public abstract CompileTimeProject? Project { get; }
 
         [Obfuscation( Exclude = true )] // Working around an obfuscator bug.

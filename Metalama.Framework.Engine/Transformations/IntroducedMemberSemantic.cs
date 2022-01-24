@@ -14,6 +14,6 @@ namespace Metalama.Framework.Engine.Transformations
         RemoverOverride,
         RaiserOverride,
         InterfaceImplementation,
-        Initializer
+        InitializerMethod
     }
 }

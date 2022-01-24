@@ -715,6 +715,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
             private new IEnumerable<MemberDeclarationSyntax> VisitFieldDeclaration( FieldDeclarationSyntax node )
             {
+                var hasTemplateVariables = false;
                 var unchangedVariables = new List<VariableDeclaratorSyntax>();
                 var nonReadOnlyVariables = new List<VariableDeclaratorSyntax>();
 
@@ -728,11 +729,23 @@ namespace Metalama.Framework.Engine.CompileTime
                          && this._serializerGenerator.ShouldSuppressReadOnly( serializableType, fieldSymbol ) )
                     {
                         // This field needs to have it's readonly modifier removed.
-                        nonReadOnlyVariables.Add( (VariableDeclaratorSyntax) this.Visit( declarator ).AssertNotNull() );
+                        nonReadOnlyVariables.Add( TransformVariable( declarator, out var compiledInitializerTemplate ) );
+
+                        if (compiledInitializerTemplate != null)
+                        {
+                            hasTemplateVariables = true;
+                            yield return compiledInitializerTemplate;
+                        }
                     }
                     else
                     {
-                        unchangedVariables.Add( (VariableDeclaratorSyntax) this.Visit( declarator ).AssertNotNull() );
+                        unchangedVariables.Add( TransformVariable( declarator, out var compiledInitializerTemplate ) );
+
+                        if ( compiledInitializerTemplate != null )
+                        {
+                            hasTemplateVariables = true;
+                            yield return compiledInitializerTemplate;
+                        }
                     }
                 }
 
@@ -748,6 +761,12 @@ namespace Metalama.Framework.Engine.CompileTime
                         node.WithDeclaration( node.Declaration.WithVariables( SeparatedList( nonReadOnlyVariables ) ) )
                             .WithModifiers( TokenList( node.Modifiers.Where( t => !t.IsKind( SyntaxKind.ReadOnlyKeyword ) ) ) );
                 }
+                else if ( hasTemplateVariables )
+                {
+                    // Having template variables means that we've changed nodes even though we did not change readability.
+                    yield return
+                        node.WithDeclaration( node.Declaration.WithVariables( SeparatedList( unchangedVariables ) ) );
+                }
                 else
                 {
                     var visitedNode = this.Visit( node );
@@ -755,6 +774,43 @@ namespace Metalama.Framework.Engine.CompileTime
                     if ( visitedNode != null )
                     {
                         yield return (MemberDeclarationSyntax) visitedNode;
+                    }
+                }
+
+                VariableDeclaratorSyntax TransformVariable( VariableDeclaratorSyntax variable, out MethodDeclarationSyntax? compiledInitializerTemplate )
+                {
+                    var fieldSymbol = (IFieldSymbol)this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( variable ).AssertNotNull();
+
+                    if ( variable.Initializer != null )
+                    {
+                        var templateName = TemplateNameHelper.GetCompiledTemplateName( fieldSymbol.Name );
+
+                        // This is field template with initializer.
+                        if ( this._templateCompiler.TryCompile(
+                            templateName,
+                            this._compileTimeCompilation,
+                            variable,
+                            this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ),
+                            this._diagnosticAdder,
+                            this._cancellationToken,
+                            out _,
+                            out var transformedFieldDeclaration ) )
+                        {
+                            compiledInitializerTemplate = (MethodDeclarationSyntax)transformedFieldDeclaration;
+                            return ((VariableDeclaratorSyntax) this.Visit( variable ).AssertNotNull())
+                                .WithInitializer( null );
+                        }
+                        else
+                        {
+                            this.Success = false;
+                            compiledInitializerTemplate = null;
+                            return (VariableDeclaratorSyntax) this.Visit( variable ).AssertNotNull();
+                        }
+                    }
+                    else
+                    {
+                        compiledInitializerTemplate = null;
+                        return (VariableDeclaratorSyntax) this.Visit( variable ).AssertNotNull();
                     }
                 }
             }

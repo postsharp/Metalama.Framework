@@ -3,6 +3,10 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Templating;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Linq;
 
 namespace Metalama.Framework.Engine.Advices
 {
@@ -20,6 +24,27 @@ namespace Metalama.Framework.Engine.Advices
             }
 
             return (default, default);
+        }
+
+        public static TemplateMember<IField> GetInitializerTemplate( this in TemplateMember<IField> fieldTemplate )
+        {
+            if ( fieldTemplate.IsNotNull )
+            {
+                var fieldSyntax = (VariableDeclaratorSyntax)fieldTemplate.Declaration!.GetPrimaryDeclaration().AssertNotNull();
+
+                if (fieldSyntax.Initializer != null)
+                {
+                    return TemplateMember.Create( fieldTemplate.Declaration, fieldTemplate.TemplateInfo, TemplateKind.IntroductionInitializer );
+                }
+                else
+                {
+                    return default;
+                }
+            }
+            else
+            {
+                return default;
+            }
         }
 
         private static bool IsAsync( this TemplateKind selectionKind )

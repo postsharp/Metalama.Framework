@@ -10,6 +10,7 @@ using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Templating.MetaModel;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
 using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.Advices
@@ -35,24 +36,24 @@ namespace Metalama.Framework.Engine.Advices
             : base( aspect, templateInstance, targetDeclaration, fieldTemplate, scope, overrideStrategy, layerName, null )
         {
             this.MemberBuilder = new FieldBuilder( this, this.TargetDeclaration, (explicitName ?? fieldTemplate.Declaration?.Name).AssertNotNull() );
+            this.MemberBuilder.InitializerTemplate = fieldTemplate.GetInitializerTemplate();
         }
 
         public override void Initialize( IReadOnlyList<Advice> declarativeAdvices, IDiagnosticAdder diagnosticAdder )
         {
             base.Initialize( declarativeAdvices, diagnosticAdder );
 
-            this.MemberBuilder.Type = this.TemplateMember?.Type ?? this.TargetDeclaration.Compilation.TypeFactory.GetSpecialType( SpecialType.Object );
-            this.MemberBuilder.Accessibility = this.TemplateMember?.Accessibility ?? Accessibility.Private;
-            this.MemberBuilder.IsStatic = this.TemplateMember?.IsStatic ?? false;
-
-            if ( this.TemplateMember != null )
+            if ( !this.Template.IsNull )
             {
-                var declarator = (VariableDeclaratorSyntax) this.TemplateMember.GetPrimaryDeclaration().AssertNotNull();
-
-                if ( declarator.Initializer != null )
-                {
-                    this.MemberBuilder.HasInitializerTemplate = true;
-                }
+                this.MemberBuilder.Type = this.Template.Declaration!.Type;
+                this.MemberBuilder.Accessibility = this.Template.Declaration!.Accessibility;
+                this.MemberBuilder.IsStatic = this.Template.Declaration!.IsStatic;
+            }
+            else
+            {
+                this.MemberBuilder.Type = this.TargetDeclaration.Compilation.TypeFactory.GetSpecialType( SpecialType.Object );
+                this.MemberBuilder.Accessibility = Accessibility.Private;
+                this.MemberBuilder.IsStatic = false;
             }
         }
 

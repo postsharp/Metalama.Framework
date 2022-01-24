@@ -7,6 +7,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
@@ -114,6 +115,35 @@ namespace Metalama.Compiler
             return base.VisitClassDeclaration( node )!
                 .WithLeadingTrivia( leadingTrivia )
                 .WithTrailingTrivia( trailingTrivia );
+        }
+
+        public override SyntaxNode? VisitFieldDeclaration( FieldDeclarationSyntax node )
+        {
+            var anyChange = false;
+            var variables = new List<VariableDeclaratorSyntax>();
+
+            foreach (var variable in node.Declaration.Variables)
+            {
+                if ( variable.Initializer != null && this.MustReplaceByThrow( variable ) )
+                {
+                    anyChange = true;
+                    // The "= default" will indicate presence of the initializer.
+                    variables.Add( variable.WithInitializer( null ) );
+                }
+                else
+                {
+                    variables.Add( variable );
+                }
+            }
+
+            if (anyChange)
+            {
+                return node.WithDeclaration( node.Declaration.WithVariables( SeparatedList( variables ) ) );
+            }
+            else
+            {
+                return node;
+            }
         }
 
         public override SyntaxNode VisitMethodDeclaration( MethodDeclarationSyntax node )

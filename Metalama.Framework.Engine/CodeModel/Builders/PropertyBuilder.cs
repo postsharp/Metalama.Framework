@@ -87,7 +87,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public IExpression? InitializerExpression { get; set; }
 
-        public TemplateMember<IProperty> InitializerTemplate { get; set; }
+        public TemplateMember<IField> InitializerTemplate { get; set; }
 
         public PropertyBuilder(
             Advice parentAdvice,
@@ -184,7 +184,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             var introducedPropertyMember = new IntroducedMember( this, property, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, this );
             var introducedInitializerMember = 
                 initializerMethod != null
-                ? new IntroducedMember( this, initializerMethod, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Initializer, this )
+                ? new IntroducedMember( this, initializerMethod, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.InitializerMethod, this )
                 : null;
 
             if ( introducedInitializerMember != null )

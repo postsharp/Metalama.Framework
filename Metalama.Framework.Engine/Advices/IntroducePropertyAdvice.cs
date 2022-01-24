@@ -67,16 +67,6 @@ namespace Metalama.Framework.Engine.Advices
 
             this.MemberBuilder.Type = (this.Template.Declaration?.Type ?? this._getTemplate.Declaration?.ReturnType).AssertNotNull();
             this.MemberBuilder.Accessibility = (this.Template.Declaration?.Accessibility ?? this._getTemplate.Declaration?.Accessibility).AssertNotNull();
-
-            if ( this.Template.Declaration != null )
-            {
-                var declarator = (PropertyDeclarationSyntax)this.Template.Declaration.GetPrimaryDeclaration().AssertNotNull();
-
-                if ( declarator.Initializer != null )
-                {
-                    this.MemberBuilder.InitializerTemplate = TemplateMember.Create( this.Template.Declaration, TemplateInfo.None, TemplateKind.Introduction );
-                }
-            }
         }
 
         public override AdviceResult ToResult( ICompilation compilation )

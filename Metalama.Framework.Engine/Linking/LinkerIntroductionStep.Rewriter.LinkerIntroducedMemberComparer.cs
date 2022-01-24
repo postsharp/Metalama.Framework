@@ -132,6 +132,13 @@ namespace Metalama.Framework.Engine.Linking
                         return aspectLayerComparison;
                     }
 
+                    var semanticComparison = GetSemanticOrder( x.Semantic ).CompareTo( GetSemanticOrder( y.Semantic ) );
+
+                    if ( semanticComparison != 0 )
+                    {
+                        return semanticComparison;
+                    }
+
                     throw new AssertionFailedException( $"'{x}' and '{y}' are not strongly ordered" );
                 }
 
@@ -141,6 +148,8 @@ namespace Metalama.Framework.Engine.Linking
                     => _orderedAccessibilities.TryGetValue( accessibility, out var order ) ? order : 10;
 
                 private static int GetTypeOrder( IMemberIntroduction introduction ) => introduction is IOverriddenDeclaration ? 0 : 1;
+
+                private static int GetSemanticOrder( IntroducedMemberSemantic semantic) => semantic != IntroducedMemberSemantic.InitializerMethod ? 0 : 1;
 
                 private static IMember GetDeclaration( IntroducedMember introducedMember )
                 {

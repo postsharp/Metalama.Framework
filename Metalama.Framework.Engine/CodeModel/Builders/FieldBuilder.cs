@@ -6,13 +6,19 @@ using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.Advices;
 using Metalama.Framework.Engine.CodeModel.Invokers;
+using Metalama.Framework.Engine.SyntaxSerialization;
+using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.MetaModel;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Project;
 using Metalama.Framework.RunTime;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Reflection;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
@@ -51,7 +57,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public IExpression? InitializerExpression { get; set; }
 
-        public TemplateMember<IProperty> InitializerTemplate { get; set; }
+        public TemplateMember<IField> InitializerTemplate { get; set; }
 
         public FieldBuilder( Advice parentAdvice, INamedType targetType, string name )
             : base( parentAdvice, targetType, name )
@@ -64,20 +70,58 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             var syntaxGenerator = context.SyntaxGenerationContext.SyntaxGenerator;
 
             ExpressionSyntax? initializerExpression;
+            BlockSyntax? initializerBlock;
 
             if ( this.InitializerExpression != null )
             {
                 // TODO: Error about the expression type?
-
+                initializerBlock = null;
                 initializerExpression = ((IUserExpression) this.InitializerExpression).ToRunTimeExpression().Syntax;
             }
-            else if ( this.HasInitializerTemplate )
+            else if ( this.InitializerTemplate.IsNotNull )
             {
-                throw new AssertionFailedException();
+                initializerExpression = null;
+                if (!this.TryExpandInitializerTemplate( context, this.InitializerTemplate, out initializerBlock ) )
+                {
+                    // Template expansion error.
+                    return Enumerable.Empty<IntroducedMember>();
+                }
+
+                // This is a bit out of place, but works in most cases and if not done here, it would get quite complex in the linker.
+                if (initializerBlock.Statements.Count == 1 && initializerBlock.Statements[0] is ReturnStatementSyntax { Expression: not null } returnStatement )
+                {
+                    initializerBlock = null;
+                    initializerExpression = returnStatement.Expression;
+                }
             }
             else
             {
+                initializerBlock = null;
                 initializerExpression = null;
+            }
+
+            MethodDeclarationSyntax? initializerMethod;
+            var initializerName = context.IntroductionNameProvider.GetInitializerName( this.DeclaringType, this.ParentAdvice.AspectLayerId, this );
+
+            if (initializerBlock != null)
+            {
+                initializerExpression = InvocationExpression( IdentifierName( initializerName ) );
+                initializerMethod =
+                    MethodDeclaration(
+                        List<AttributeListSyntax>(),
+                        TokenList( Token( SyntaxKind.PrivateKeyword ), Token( SyntaxKind.StaticKeyword ) ),
+                        context.SyntaxGenerator.Type( this.Type.GetSymbol() ),
+                        null,
+                        Identifier( initializerName ),
+                        null,
+                        ParameterList(),
+                        List<TypeParameterConstraintClauseSyntax>(),
+                        initializerBlock,
+                        null );
+            }
+            else
+            {
+                initializerMethod = null;
             }
 
             var field =
@@ -91,10 +135,56 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                                 Identifier( this.Name ),
                                 null,
                                 initializerExpression != null
-                                    ? EqualsValueClause( initializerExpression )
+                                    ? EqualsValueClause( initializerExpression! )
                                     : null ) ) ) );
 
-            return new[] { new IntroducedMember( this, field, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, this ) };
+            if ( initializerMethod != null )
+            {
+                return new[] 
+                {
+                    new IntroducedMember( this, field, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, this ),
+                    new IntroducedMember( this, initializerMethod, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.InitializerMethod, this ),
+                };
+            }
+            else
+            {
+                return new[] { new IntroducedMember( this, field, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, this ) };
+            }
+        }
+
+        private bool TryExpandInitializerTemplate( 
+            MemberIntroductionContext context, 
+            TemplateMember<IField> initializerTemplate,
+            [NotNullWhen( true )] out BlockSyntax? expression )
+        {
+            using ( context.DiagnosticSink.WithDefaultScope( this ) )
+            {
+                var metaApi = MetaApi.ForFieldOrPropertyInitializer(
+                    this,
+                    new MetaApiProperties(
+                        context.DiagnosticSink,
+                        initializerTemplate.Cast(),
+                        this.ParentAdvice.ReadOnlyTags,
+                        this.ParentAdvice.AspectLayerId,
+                        context.SyntaxGenerationContext,
+                        this.ParentAdvice.Aspect,
+                        context.ServiceProvider ) );
+
+                var expansionContext = new TemplateExpansionContext(
+                    this.ParentAdvice.Aspect.Aspect,
+                    metaApi,
+                    this.Compilation,
+                    context.LexicalScopeProvider.GetLexicalScope( this ),
+                    context.ServiceProvider.GetRequiredService<SyntaxSerializationService>(),
+                    context.SyntaxGenerationContext,
+                    default,
+                    null,
+                    this.ParentAdvice.AspectLayerId );
+
+                var templateDriver = this.ParentAdvice.TemplateInstance.TemplateClass.GetTemplateDriver( this.InitializerTemplate.Declaration! );
+
+                return templateDriver.TryExpandDeclaration( expansionContext, context.DiagnosticSink, out expression );
+            }
         }
 
         public IMethod? GetAccessor( MethodKind methodKind )
