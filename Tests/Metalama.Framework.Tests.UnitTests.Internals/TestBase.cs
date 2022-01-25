@@ -4,7 +4,6 @@
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Testing;
-using Metalama.Framework.Tests.UnitTests.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
@@ -152,7 +151,6 @@ class Expression
                 this.ProjectOptions = projectOptions ?? new TestProjectOptions();
 
                 this.ServiceProvider = ServiceProviderFactory.GetServiceProvider( this.ProjectOptions )
-                    .WithNextProvider( TestBackstageServiceProviderFactory.Create() )
                     .WithProjectScopedServices( TestCompilationFactory.GetMetadataReferences() )
                     .WithMark( ServiceProviderMark.Test );
 

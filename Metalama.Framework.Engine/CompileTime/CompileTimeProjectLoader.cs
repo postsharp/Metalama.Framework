@@ -1,6 +1,8 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Backstage.Diagnostics;
+using Metalama.Backstage.Extensibility;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Templating.Mapping;
 using Metalama.Framework.Engine.Utilities;
@@ -33,6 +35,7 @@ namespace Metalama.Framework.Engine.CompileTime
         private readonly IAssemblyLocator _runTimeAssemblyLocator;
         private readonly SystemTypeResolver _systemTypeResolver;
         private readonly CompileTimeProject _frameworkProject;
+        private readonly ILogger _logger;
 
         // Maps the identity of the run-time project to the compile-time project.
         private readonly Dictionary<AssemblyIdentity, CompileTimeProject?> _projects = new();
@@ -45,6 +48,7 @@ namespace Metalama.Framework.Engine.CompileTime
             this._serviceProvider = serviceProvider;
             this._builder = new CompileTimeCompilationBuilder( serviceProvider, domain );
             this._runTimeAssemblyLocator = serviceProvider.GetRequiredService<IAssemblyLocator>();
+            this._logger = serviceProvider.GetLoggerFactory().CompileTime();
             this.AttributeDeserializer = new AttributeDeserializer( serviceProvider, this );
             this._systemTypeResolver = serviceProvider.GetRequiredService<SystemTypeResolver>();
             this._frameworkProject = CompileTimeProject.CreateFrameworkProject( serviceProvider, domain );
@@ -180,7 +184,7 @@ namespace Metalama.Framework.Engine.CompileTime
                     // Coverage: ignore
                     // (this happens when the project reference could not be resolved.)
 
-                    Logger.Instance?.Write( $"The project reference from '{runTimeCompilation}' to' {reference}' could not be resolved." );
+                    this._logger.Warning?.Log( $"The project reference from '{runTimeCompilation}' to' {reference}' could not be resolved." );
                     compileTimeProject = null;
 
                     return false;

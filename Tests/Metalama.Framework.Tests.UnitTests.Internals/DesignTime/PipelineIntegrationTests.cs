@@ -7,7 +7,6 @@ using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Testing;
-using Metalama.Framework.Tests.UnitTests.Utilities;
 using Metalama.TestFramework;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -308,7 +307,6 @@ Target.cs:
             using UnloadableCompileTimeDomain domain = new();
 
             var serviceProvider = ServiceProviderFactory.GetServiceProvider( projectOptions )
-                .WithNextProvider( TestBackstageServiceProviderFactory.Create() )
                 .WithProjectScopedServices( compilation.References );
 
             var compileTimeAspectPipeline = new CompileTimeAspectPipeline( serviceProvider, true, domain );

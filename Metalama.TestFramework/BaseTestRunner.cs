@@ -238,9 +238,6 @@ namespace Metalama.TestFramework
                         testResult.SetFailed( "The initial compilation failed." );
                     }
                 }
-
-                var diagnosticsSink = this.BaseServiceProvider.GetRequiredService<TestBackstageDiagnosticsSink>();
-                testResult.PipelineDiagnostics.Report( diagnosticsSink.EnumerateDiagnostics() );
             }
             finally
             {

@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Backstage.Diagnostics;
 using System;
 using System.Threading;
 
@@ -8,21 +9,21 @@ namespace Metalama.Framework.Engine.Utilities
 {
     internal static class MutexHelper
     {
-        public static IDisposable WithGlobalLock( string name )
+        public static IDisposable WithGlobalLock( string name, ILogger? logger = null )
         {
-            Logger.Instance?.Write( $"Acquiring lock '{name}'." );
+            logger?.Trace?.Log( $"Acquiring lock '{name}'." );
 
-            var mutex = CreateGlobalMutex( name );
+            var mutex = CreateGlobalMutex( name, logger );
             mutex.WaitOne();
 
-            return new MutexHandle( mutex, name );
+            return new MutexHandle( mutex, name, logger );
         }
 
-        private static Mutex CreateGlobalMutex( string fullName )
+        private static Mutex CreateGlobalMutex( string fullName, ILogger? logger )
         {
             var mutexName = "Global\\Metalama_" + HashUtilities.HashString( fullName );
 
-            Logger.Instance?.Write( $"  Mutex name: '{mutexName}'." );
+            logger?.Trace?.Log( $"  Mutex name: '{mutexName}'." );
 
             return new Mutex( false, mutexName );
         }
@@ -31,16 +32,18 @@ namespace Metalama.Framework.Engine.Utilities
         {
             private readonly Mutex _mutex;
             private readonly string _name;
+            private readonly ILogger? _logger;
 
-            public MutexHandle( Mutex mutex, string name )
+            public MutexHandle( Mutex mutex, string name, ILogger? logger )
             {
                 this._mutex = mutex;
                 this._name = name;
+                this._logger = logger;
             }
 
             public void Dispose()
             {
-                Logger.Instance?.Write( $"Releasing lock '{this._name}'." );
+                this._logger?.Trace?.Log( $"Releasing lock '{this._name}'." );
 
                 this._mutex.ReleaseMutex();
                 this._mutex.Dispose();

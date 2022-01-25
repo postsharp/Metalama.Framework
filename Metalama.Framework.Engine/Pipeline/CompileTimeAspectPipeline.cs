@@ -8,17 +8,12 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Formatting;
-using Metalama.Framework.Engine.Licensing;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Validation;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
-using PostSharp.Backstage.Extensibility.Extensions;
-using PostSharp.Backstage.Licensing;
-using PostSharp.Backstage.Licensing.Consumption;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -38,16 +33,7 @@ namespace Metalama.Framework.Engine.Pipeline
             serviceProvider,
             executionScenario ?? ExecutionScenario.CompileTime,
             isTest,
-            domain )
-        {
-            if ( this.ProjectOptions.DebugCompilerProcess )
-            {
-                if ( !Debugger.IsAttached )
-                {
-                    Debugger.Launch();
-                }
-            }
-        }
+            domain ) { }
 
         public async Task<CompileTimeAspectPipelineResult?> ExecuteAsync(
             IDiagnosticAdder diagnosticAdder,
@@ -96,11 +82,6 @@ namespace Metalama.Framework.Engine.Pipeline
         {
             try
             {
-                var licenseManager = this.ServiceProvider.GetRequiredService<ILicenseConsumptionManager>();
-
-                // TODO: Implement all license policies.
-                licenseManager.ConsumeFeatures( new LicenseConsumer( this.ServiceProvider ), LicensedFeatures.Community );
-
                 // Execute the pipeline.
                 if ( !this.TryExecute( compilation, diagnosticAdder, configuration, cancellationToken, out var result ) )
                 {

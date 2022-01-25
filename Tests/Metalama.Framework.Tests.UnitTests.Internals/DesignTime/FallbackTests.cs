@@ -220,12 +220,6 @@ public class TargetClass
 
             public string? AdditionalCompilationOutputDirectory => null;
 
-            public bool DebugCompilerProcess => this._underlying.DebugCompilerProcess;
-
-            public bool DebugAnalyzerProcess => this._underlying.DebugAnalyzerProcess;
-
-            public bool DebugIdeProcess => this._underlying.DebugIdeProcess;
-
             public DesignTimeFallbackProjectOptions( IProjectOptions underlying )
             {
                 this._underlying = underlying;

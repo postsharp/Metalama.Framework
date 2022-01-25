@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Backstage.Diagnostics;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
@@ -10,7 +11,7 @@ namespace Metalama.Framework.Engine.Utilities
 {
     public static class RetryHelper
     {
-        public static void Retry( Action action, Predicate<Exception>? retryPredicate = null )
+        public static void Retry( Action action, Predicate<Exception>? retryPredicate = null, ILogger? logger = null )
             => Retry(
                 () =>
                 {
@@ -18,10 +19,11 @@ namespace Metalama.Framework.Engine.Utilities
 
                     return true;
                 },
-                retryPredicate );
+                retryPredicate,
+                logger );
 
         [ExcludeFromCodeCoverage]
-        public static T Retry<T>( Func<T> action, Predicate<Exception>? retryPredicate = null )
+        public static T Retry<T>( Func<T> action, Predicate<Exception>? retryPredicate = null, ILogger? logger = null )
         {
             var delay = 10.0;
             const int maxAttempts = 12;
@@ -35,7 +37,7 @@ namespace Metalama.Framework.Engine.Utilities
                 }
                 catch ( Exception e ) when ( i < maxAttempts && retryPredicate( e ) )
                 {
-                    Logger.Instance?.Write( $"RetryHelper caught '{e.Message}'. Retrying in {delay}." );
+                    logger?.Warning?.Log( $"RetryHelper caught {e.GetType().Name} '{e.Message}'. Retrying in {delay}." );
 
                     Thread.Sleep( TimeSpan.FromMilliseconds( delay ) );
                     delay *= 1.2;
