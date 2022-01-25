@@ -5,7 +5,7 @@ using Metalama.Compiler;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline;
 using Microsoft.CodeAnalysis;
-using PostSharp.Backstage.Diagnostics;
+using Metalama.Backstage.Diagnostics;
 using System;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;

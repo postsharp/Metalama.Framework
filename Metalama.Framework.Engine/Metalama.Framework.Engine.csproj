@@ -29,7 +29,7 @@
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="$(RoslynVersion)" />
         <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.Common" Version="$(RoslynVersion)" />
         <PackageReference Include="Metalama.Compiler.Sdk" Version="$(MetalamaCompilerVersion)" />
-        <PackageReference Include="PostSharp.Backstage.Settings" Version="$(PostSharpBackstageSettingsVersion)" />
+        <PackageReference Include="Metalama.Backstage" Version="$(MetalamaBackstageVersion)" />
 
         <PackageReference Include="Microsoft.Bcl.HashCode" Version="$(MicrosoftBclHashCodeVersion)" />
         <PackageReference Include="K4os.Hash.xxHash" Version="$(K4osHashxxHashVersion)" />

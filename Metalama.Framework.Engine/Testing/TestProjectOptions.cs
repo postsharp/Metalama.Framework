@@ -50,12 +50,6 @@ namespace Metalama.Framework.Engine.Testing
 
         public string BaseDirectory => this._baseDirectory.Value;
 
-        public bool DebugCompilerProcess => false;
-
-        public bool DebugAnalyzerProcess => false;
-
-        public bool DebugIdeProcess => false;
-
         public override string CompileTimeProjectCacheDirectory => this._compileTimeProjectCacheDirectory.Value;
 
         public override string SettingsDirectory => this._settingsDirectory.Value;

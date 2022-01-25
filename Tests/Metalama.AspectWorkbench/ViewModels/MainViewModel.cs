@@ -99,8 +99,7 @@ namespace Metalama.AspectWorkbench.ViewModels
             using var testProjectOptions = new TestProjectOptions() { FormatCompileTimeCode = true };
 
             var serviceProvider = ServiceProviderFactory.GetServiceProvider( testProjectOptions )
-                .WithProjectScopedServices( TestCompilationFactory.GetMetadataReferences() )
-                .WithNextProvider( TestBackstageServiceProviderFactory.Create() );
+                .WithProjectScopedServices( TestCompilationFactory.GetMetadataReferences() );
 
             var syntaxColorizer = new SyntaxColorizer( serviceProvider );
 

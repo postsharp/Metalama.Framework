@@ -74,8 +74,7 @@ namespace Metalama.TestFramework
             using var testOptions = new TestProjectOptions();
 
             var serviceProvider =
-                ServiceProviderFactory.GetServiceProvider( testOptions )
-                    .WithNextProvider( TestBackstageServiceProviderFactory.Create() );
+                ServiceProviderFactory.GetServiceProvider( testOptions );
 
             var assemblyAssets = GetAssemblyAssets( this.GetType().Assembly );
 

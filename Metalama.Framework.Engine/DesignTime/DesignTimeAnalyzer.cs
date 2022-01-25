@@ -10,7 +10,7 @@ using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
-using PostSharp.Backstage.Diagnostics;
+using Metalama.Backstage.Diagnostics;
 using System;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
