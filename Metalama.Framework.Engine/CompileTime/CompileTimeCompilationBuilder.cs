@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using K4os.Hash.xxHash;
+using Metalama.Backstage.Diagnostics;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
@@ -18,8 +19,6 @@ using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Emit;
-using Metalama.Backstage.Diagnostics;
-using Metalama.Backstage.Extensibility;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;

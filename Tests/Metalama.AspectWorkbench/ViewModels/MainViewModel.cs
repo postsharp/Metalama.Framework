@@ -8,7 +8,6 @@ using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Testing;
 using Metalama.Framework.Tests.Integration.Runners;
 using Metalama.TestFramework;
-using Metalama.TestFramework.Utilities;
 using Microsoft.CodeAnalysis;
 using PostSharp.Patterns.Model;
 using System;

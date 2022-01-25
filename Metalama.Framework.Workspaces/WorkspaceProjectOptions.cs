@@ -38,12 +38,6 @@ namespace Metalama.Framework.Workspaces
             this.Configuration = msbuildProject.Properties.FirstOrDefault( p => p.Name == "Configuration" )?.EvaluatedValue;
         }
 
-        public bool DebugCompilerProcess => false;
-
-        public bool DebugAnalyzerProcess => false;
-
-        public bool DebugIdeProcess => false;
-
         public string ProjectId { get; } = Guid.NewGuid().ToString();
 
         public string? BuildTouchFile => null;

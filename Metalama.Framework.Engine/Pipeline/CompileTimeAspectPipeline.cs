@@ -14,7 +14,6 @@ using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -34,8 +33,7 @@ namespace Metalama.Framework.Engine.Pipeline
             serviceProvider,
             executionScenario ?? ExecutionScenario.CompileTime,
             isTest,
-            domain )
-        { }
+            domain ) { }
 
         public async Task<CompileTimeAspectPipelineResult?> ExecuteAsync(
             IDiagnosticAdder diagnosticAdder,
