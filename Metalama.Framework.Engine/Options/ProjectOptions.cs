@@ -32,12 +32,6 @@ namespace Metalama.Framework.Engine.Options
 
         public ProjectOptions( AnalyzerConfigOptions options, ImmutableArray<object>? plugIns = null ) : this( new OptionsAdapter( options ), plugIns ) { }
 
-        public bool DebugCompilerProcess => this.GetBooleanOption( "MetalamaDebug" );
-
-        public bool DebugAnalyzerProcess => this.GetBooleanOption( "DebugMetalamaAnalyzer" );
-
-        public bool DebugIdeProcess => this.GetBooleanOption( "DebugMetalamaIde" );
-
         public string ProjectId => this.GetStringOption( "MetalamaProjectId" ) ?? this._defaultProjectId;
 
         public string? BuildTouchFile => this.GetStringOption( "MetalamaBuildTouchFile" );
