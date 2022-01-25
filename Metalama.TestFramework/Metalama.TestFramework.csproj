@@ -8,25 +8,25 @@
 
     <ItemGroup>
         <!-- Workspaces is used in TestRunner, Workspaces.Lightweight is a dependency of Metalama.Framework.Engine -->
-        <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="$(RoslynVersion)"/>
-        <PackageReference Include="xunit.assert" Version="$(xUnitVersion)"/>
-        <PackageReference Include="xunit.extensibility.core" Version="$(xUnitVersion)"/>
-        <PackageReference Include="xunit.extensibility.execution" Version="$(xUnitVersion)"/>
-        <PackageReference Include="PostSharp.Backstage.Settings" Version="$(PostSharpBackstageSettingsVersion)"/>
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="$(RoslynVersion)" />
+        <PackageReference Include="xunit.assert" Version="$(xUnitVersion)" />
+        <PackageReference Include="xunit.extensibility.core" Version="$(xUnitVersion)" />
+        <PackageReference Include="xunit.extensibility.execution" Version="$(xUnitVersion)" />
+        <PackageReference Include="PostSharp.Backstage.Settings" Version="$(PostSharpBackstageSettingsVersion)" />
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Metalama.Framework.DesignTime.Contracts\Metalama.Framework.DesignTime.Contracts.csproj"/>
-        <ProjectReference Include="..\Metalama.Framework.Engine\Metalama.Framework.Engine.csproj"/>
-        <ProjectReference Include="..\Metalama.Framework.Sdk\Metalama.Framework.Sdk.csproj"/>
-        <ProjectReference Include="..\Metalama.Framework\Metalama.Framework.csproj"/>
+        <ProjectReference Include="..\Metalama.Framework.DesignTime.Contracts\Metalama.Framework.DesignTime.Contracts.csproj" />
+        <ProjectReference Include="..\Metalama.Framework.Engine\Metalama.Framework.Engine.csproj" />
+        <ProjectReference Include="..\Metalama.Framework.Sdk\Metalama.Framework.Sdk.csproj" />
+        <ProjectReference Include="..\Metalama.Framework\Metalama.Framework.csproj" />
     </ItemGroup>
 
     <ItemGroup>
-        <InternalsVisibleTo Include="Metalama.Framework.Tests.Integration.Internals"/>
-        <InternalsVisibleTo Include="Metalama.Framework.Tests.UnitTests.Internals"/>
-        <InternalsVisibleTo Include="Metalama.AspectWorkbench"/>
-        <InternalsVisibleTo Include="DynamicProxyGenAssembly2" Key="$(FakeItEasyKey)" LoadsWithinVisualStudio="false"/>
+        <InternalsVisibleTo Include="Metalama.Framework.Tests.Integration.Internals" />
+        <InternalsVisibleTo Include="Metalama.Framework.Tests.UnitTests.Internals" />
+        <InternalsVisibleTo Include="Metalama.AspectWorkbench" />
+        <InternalsVisibleTo Include="DynamicProxyGenAssembly2" Key="$(FakeItEasyKey)" LoadsWithinVisualStudio="false" />
     </ItemGroup>
 
     <ItemGroup>

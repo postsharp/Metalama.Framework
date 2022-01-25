@@ -73,7 +73,7 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
                 return;
             }
 
-            Logger.Instance?.Write( $"BuildTouchFile={this.ProjectOptions.BuildTouchFile}" );
+            Logger.DesignTime.Trace?.Log( $"BuildTouchFile={this.ProjectOptions.BuildTouchFile}" );
 
             var watchedFilter = "*" + Path.GetExtension( this.ProjectOptions.BuildTouchFile );
             var watchedDirectory = Path.GetDirectoryName( this.ProjectOptions.BuildTouchFile );
@@ -103,7 +103,7 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
             using ( this.WithLock() )
             {
                 // There was an external build. Touch the files to re-run the analyzer.
-                Logger.Instance?.Write( $"Detected an external build for project '{this.ProjectOptions.AssemblyName}'." );
+                Logger.DesignTime.Trace?.Log( $"Detected an external build for project '{this.ProjectOptions.AssemblyName}'." );
 
                 var hasRelevantChange = false;
 
@@ -112,8 +112,8 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
                     if ( file.Value == null )
                     {
                         hasRelevantChange = true;
-                        Logger.Instance?.Write( $"Touching file '{file.Key}'." );
-                        RetryHelper.Retry( () => File.SetLastWriteTimeUtc( file.Key, DateTime.UtcNow ) );
+                        Logger.DesignTime.Trace?.Log( $"Touching file '{file.Key}'." );
+                        RetryHelper.Retry( () => File.SetLastWriteTimeUtc( file.Key, DateTime.UtcNow ), logger: Logger.DesignTime );
                     }
                 }
 
@@ -223,11 +223,11 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
 
                 var compilationToAnalyze = changes.CompilationToAnalyze;
 
-                if ( Logger.Instance != null )
+                if ( Logger.DesignTime.Trace != null )
                 {
                     if ( compilationToAnalyze != compilation )
                     {
-                        Logger.Instance.Write(
+                        Logger.DesignTime.Trace?.Log(
                             $"Cache hit: the original compilation is {DebuggingHelper.GetObjectId( compilation )}, but we will analyze the cached compilation {DebuggingHelper.GetObjectId( compilationToAnalyze )}" );
                     }
                 }
@@ -260,7 +260,7 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
                 }
                 else
                 {
-                    Logger.Instance?.Write(
+                    Logger.DesignTime.Trace?.Log(
                         $"DesignTimeAspectPipelineCache.TryExecute('{compilation.AssemblyName}', CompilationId = {DebuggingHelper.GetObjectId( compilation )}): external build required,"
                         +
                         $" returning from cache only." );
@@ -395,12 +395,12 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
         {
             if ( !Monitor.TryEnter( this._sync ) )
             {
-                Logger.Instance?.Write( $"Waiting for lock on '{this.ProjectOptions.ProjectId}'." );
+                Logger.DesignTime.Trace?.Log( $"Waiting for lock on '{this.ProjectOptions.ProjectId}'." );
 
                 Monitor.Enter( this._sync );
             }
 
-            Logger.Instance?.Write( $"Lock on '{this.ProjectOptions.ProjectId}' acquired." );
+            Logger.DesignTime.Trace?.Log( $"Lock on '{this.ProjectOptions.ProjectId}' acquired." );
 
             return new Lock( this );
         }
@@ -416,7 +416,7 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
 
             public void Dispose()
             {
-                Logger.Instance?.Write( $"Releasing lock on '{this._parent.ProjectOptions.ProjectId}'." );
+                Logger.DesignTime.Trace?.Log( $"Releasing lock on '{this._parent.ProjectOptions.ProjectId}'." );
                 Monitor.Exit( this._parent._sync );
             }
         }

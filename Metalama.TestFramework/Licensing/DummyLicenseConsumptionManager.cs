@@ -4,6 +4,8 @@
 using Metalama.Framework.Project;
 using PostSharp.Backstage.Licensing;
 using PostSharp.Backstage.Licensing.Consumption;
+using System;
+using System.Collections.Generic;
 
 namespace Metalama.TestFramework.Licensing
 {
@@ -12,10 +14,8 @@ namespace Metalama.TestFramework.Licensing
     /// </summary>
     internal class DummyLicenseConsumptionManager : ILicenseConsumptionManager, IService
     {
-        /// <inheritdoc />
-        public bool CanConsumeFeatures( ILicenseConsumer consumer, LicensedFeatures requiredFeatures ) => true;
+        public bool CanConsumeFeatures( LicensedFeatures requiredFeatures, string? consumerNamespace = null ) => true;
 
-        /// <inheritdoc />
-        public void ConsumeFeatures( ILicenseConsumer consumer, LicensedFeatures requiredFeatures ) { }
+        public IReadOnlyList<LicensingMessage> Messages => Array.Empty<LicensingMessage>();
     }
 }

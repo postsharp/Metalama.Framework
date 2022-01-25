@@ -60,7 +60,7 @@ namespace Metalama.Framework.Engine.DesignTime.Diff
 
             var newExternalReferences = newCompilation.ExternalReferences;
 
-            Logger.Instance?.Write(
+            Logger.DesignTime.Trace?.Log(
                 $"Comparing metadata references: old count is {oldExternalReferences.Length}, new count is {newExternalReferences.Length}." );
 
             if ( oldExternalReferences == newExternalReferences )
@@ -91,7 +91,7 @@ namespace Metalama.Framework.Engine.DesignTime.Diff
 
             if ( hasChange )
             {
-                Logger.Instance?.Write( "Change found in metadata reference. The last configuration cannot be reused" );
+                Logger.DesignTime.Trace?.Log( "Change found in metadata reference. The last configuration cannot be reused" );
 
                 return false;
             }
@@ -166,7 +166,7 @@ namespace Metalama.Framework.Engine.DesignTime.Diff
                     {
                         throw new AssertionFailedException();
                     }
-                    
+
                     continue;
                 }
 

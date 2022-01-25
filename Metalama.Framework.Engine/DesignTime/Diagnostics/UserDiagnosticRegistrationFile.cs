@@ -27,7 +27,7 @@ namespace Metalama.Framework.Engine.DesignTime.Diagnostics
         {
             var textWriter = new StringWriter();
             this.Write( textWriter );
-            RetryHelper.Retry( () => File.WriteAllText( file, textWriter.ToString() ) );
+            RetryHelper.Retry( () => File.WriteAllText( file, textWriter.ToString() ), logger: Logger.DesignTime );
         }
 
         public void Write( TextWriter textWriter )

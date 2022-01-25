@@ -35,8 +35,6 @@ namespace Metalama.Framework.Engine.DesignTime
             {
                 var projectOptions = new ProjectOptions( context.Document.Project.AnalyzerOptions.AnalyzerConfigOptionsProvider );
 
-                DebuggingHelper.AttachDebugger( projectOptions );
-
                 if ( !context.Document.SupportsSemanticModel )
                 {
                     return;

@@ -46,7 +46,7 @@ namespace Metalama.Framework.Engine.DesignTime
 
         public override Task RegisterCodeFixesAsync( CodeFixContext context )
         {
-            Logger.Instance?.Write( "DesignTimeCodeFixProvider.RegisterCodeFixesAsync" );
+            Logger.DesignTime.Trace?.Log( "DesignTimeCodeFixProvider.RegisterCodeFixesAsync" );
 
             if ( context.Diagnostics.Any( d => d.Id == DesignTimeDiagnosticDescriptors.TypeNotPartial.Id ) )
             {

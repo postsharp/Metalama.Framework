@@ -318,7 +318,7 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
 
                         case SyntaxTreeChangeKind.Deleted:
                         case SyntaxTreeChangeKind.Changed:
-                            Logger.Instance?.Write( $"DesignTimeSyntaxTreeResultCache.InvalidateCache({change.FilePath}): removed from cache." );
+                            Logger.DesignTime.Trace?.Log( $"DesignTimeSyntaxTreeResultCache.InvalidateCache({change.FilePath}): removed from cache." );
 
                             if ( syntaxTreeBuilders.TryGetValue( change.FilePath, out var oldSyntaxTreeResult ) )
                             {
@@ -344,7 +344,7 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
         public CompilationPipelineResult Clear()
 #pragma warning restore CA1822
         {
-            Logger.Instance?.Write( $"DesignTimeSyntaxTreeResultCache.Clear()." );
+            Logger.DesignTime.Trace?.Log( $"DesignTimeSyntaxTreeResultCache.Clear()." );
 
             return new CompilationPipelineResult();
         }

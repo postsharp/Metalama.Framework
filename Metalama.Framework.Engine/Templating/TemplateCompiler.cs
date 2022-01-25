@@ -8,6 +8,8 @@ using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using PostSharp.Backstage.Diagnostics;
+using PostSharp.Backstage.Extensibility;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -21,11 +23,14 @@ namespace Metalama.Framework.Engine.Templating
         private readonly SyntaxTreeAnnotationMap _syntaxTreeAnnotationMap;
         private readonly ITemplateCompilerObserver? _observer;
         private readonly SerializableTypes _serializableTypes;
+        private readonly ILogger _logger;
 
         public TemplateCompiler( IServiceProvider serviceProvider, Compilation runTimeCompilation )
         {
             this._syntaxTreeAnnotationMap = new SyntaxTreeAnnotationMap( runTimeCompilation );
             this._serviceProvider = serviceProvider;
+            this._logger = serviceProvider.GetLoggerFactory().CompileTime();
+
             var syntaxSerializationService = serviceProvider.GetRequiredService<SyntaxSerializationService>();
             this._serializableTypes = syntaxSerializationService.GetSerializableTypes( runTimeCompilation );
 
@@ -116,26 +121,26 @@ namespace Metalama.Framework.Engine.Templating
                 annotatedSyntaxRoot = null;
                 transformedSyntaxRoot = null;
 
-                if ( Logger.Instance != null )
+                if ( this._logger.Trace != null )
                 {
-                    Logger.Instance.Write(
+                    this._logger.Trace.Log(
                         $"Cannot create a compile-time assembly for '{semanticModel.SyntaxTree.FilePath}' because there are diagnostics in the source code:" );
 
                     foreach ( var error in errors )
                     {
-                        Logger.Instance.Write( "    " + error );
+                        this._logger.Trace.Log( "    " + error );
                     }
 
-                    Logger.Instance.Write( $"  Compilation id: {DebuggingHelper.GetObjectId( semanticModel.Compilation )}" );
+                    this._logger.Trace.Log( $"  Compilation id: {DebuggingHelper.GetObjectId( semanticModel.Compilation )}" );
 
-                    Logger.Instance.Write( "Syntax trees:" );
+                    this._logger.Trace.Log( "Syntax trees:" );
 
                     foreach ( var syntaxTree in semanticModel.Compilation.SyntaxTrees )
                     {
-                        Logger.Instance.Write( "   " + syntaxTree.FilePath );
+                        this._logger.Trace.Log( "   " + syntaxTree.FilePath );
                     }
 
-                    Logger.Instance.Write( "Compilation references: " );
+                    this._logger.Trace.Log( "Compilation references: " );
 
                     foreach ( var reference in semanticModel.Compilation.References )
                     {
@@ -146,12 +151,12 @@ namespace Metalama.Framework.Engine.Templating
                                 break;
 
                             case CompilationReference compilation:
-                                Logger.Instance.Write( $"Project: {compilation.Display} ({compilation.Compilation.SyntaxTrees.Count()} syntax tree(s))" );
+                                this._logger.Trace.Log( $"Project: {compilation.Display} ({compilation.Compilation.SyntaxTrees.Count()} syntax tree(s))" );
 
                                 break;
 
                             default:
-                                Logger.Instance.Write( "Other: " + reference );
+                                this._logger.Trace.Log( "Other: " + reference );
 
                                 break;
                         }

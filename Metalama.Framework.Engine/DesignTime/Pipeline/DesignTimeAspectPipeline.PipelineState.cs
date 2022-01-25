@@ -201,7 +201,7 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
 
                                     // We require an external build because we don't want to invalidate the pipeline configuration at
                                     // each keystroke.
-                                    Logger.Instance?.Write( $"Compile-time change detected: {change.FilePath} has changed." );
+                                    Logger.DesignTime.Trace?.Log( $"Compile-time change detected: {change.FilePath} has changed." );
                                     OnCompileTimeChange( true );
                                 }
 
@@ -212,14 +212,14 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
                                 // compilation in the first call in the Visual Studio initializations sequence. Roslyn calls us later with
                                 // a complete compilation, but we don't want to bother the user with the need of an external build.
                                 compileTimeSyntaxTreesBuilder[change.FilePath] = change.NewTree;
-                                Logger.Instance?.Write( $"Compile-time change detected: {change.FilePath} is a new compile-time syntax tree." );
+                                Logger.DesignTime.Trace?.Log( $"Compile-time change detected: {change.FilePath} is a new compile-time syntax tree." );
                                 OnCompileTimeChange( false );
 
                                 break;
 
                             case CompileTimeChangeKind.NoLongerCompileTime:
                                 compileTimeSyntaxTreesBuilder.Remove( change.FilePath );
-                                Logger.Instance?.Write( $"Compile-time change detected: : {change.FilePath} no longer contains compile-time code." );
+                                Logger.DesignTime.Trace?.Log( $"Compile-time change detected: : {change.FilePath} no longer contains compile-time code." );
                                 OnCompileTimeChange( false );
 
                                 break;
@@ -253,13 +253,14 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
 
                     if ( newState.Status == DesignTimeAspectPipelineStatus.Ready )
                     {
-                        Logger.Instance?.Write( $"DesignTimeAspectPipeline.InvalidateCache('{newCompilation.AssemblyName}'): compile-time change detected." );
+                        Logger.DesignTime.Trace?.Log(
+                            $"DesignTimeAspectPipeline.InvalidateCache('{newCompilation.AssemblyName}'): compile-time change detected." );
 
                         var pipeline = newState._pipeline;
 
                         if ( requiresRebuild )
                         {
-                            Logger.Instance?.Write( "Requiring an external rebuild." );
+                            Logger.DesignTime.Trace?.Log( "Requiring an external rebuild." );
 
                             newStatus = DesignTimeAspectPipelineStatus.NeedsExternalBuild;
 
@@ -271,7 +272,7 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
                         }
                         else
                         {
-                            Logger.Instance?.Write( "Requiring an in-process configuration refresh." );
+                            Logger.DesignTime.Trace?.Log( "Requiring an in-process configuration refresh." );
 
                             newConfiguration = null;
                             newStatus = DesignTimeAspectPipelineStatus.Default;
@@ -293,7 +294,7 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
                     state = new PipelineState( state._pipeline );
                 }
 
-                Logger.Instance?.Write(
+                Logger.DesignTime.Trace?.Log(
                     $"DesignTimeAspectPipeline.TryGetConfiguration( '{compilation.Compilation.AssemblyName}', CompilationId = {DebuggingHelper.GetObjectId( compilation.Compilation )})" );
 
                 if ( state.Configuration == null )
@@ -311,7 +312,7 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
                     {
                         // A failure here means an error or a cache miss.
 
-                        Logger.Instance?.Write(
+                        Logger.DesignTime.Trace?.Log(
                             $"DesignTimeAspectPipeline.TryGetConfiguration('{compilation.Compilation.AssemblyName}', CompilationId = {DebuggingHelper.GetObjectId( compilation.Compilation )}) failed." );
 
                         configuration = null;
@@ -320,7 +321,7 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
                     }
                     else
                     {
-                        Logger.Instance?.Write(
+                        Logger.DesignTime.Trace?.Log(
                             $"DesignTimeAspectPipeline.TryGetConfiguration('{compilation.Compilation.AssemblyName}', CompilationId = {DebuggingHelper.GetObjectId( compilation.Compilation )}) succeeded with new configuration {DebuggingHelper.GetObjectId( configuration )}: "
                             +
                             $"the compilation contained {compilation.Compilation.SyntaxTrees.Count()} syntax trees: {string.Join( ", ", compilation.Compilation.SyntaxTrees.Select( t => Path.GetFileName( t.FilePath ) ) )}" );
@@ -341,7 +342,7 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
 
                     // We have a valid configuration and it is not outdated.
 
-                    Logger.Instance?.Write(
+                    Logger.DesignTime.Trace?.Log(
                         $"DesignTimeAspectPipeline.TryGetConfiguration('{compilation.Compilation.AssemblyName}', CompilationId = {DebuggingHelper.GetObjectId( compilation.Compilation )}) returned existing configuration {DebuggingHelper.GetObjectId( state.Configuration )}." );
 
                     configuration = state.Configuration;

@@ -10,6 +10,7 @@ using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
+using PostSharp.Backstage.Diagnostics;
 using System;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
@@ -36,7 +37,7 @@ namespace Metalama.Framework.Engine.DesignTime
 
         static DesignTimeAnalyzer()
         {
-            Logger.Initialize();
+            DiagnosticsService.Initialize( DebuggingHelper.ProcessKind );
         }
 
         public override void Initialize( AnalysisContext context )
@@ -58,7 +59,7 @@ namespace Metalama.Framework.Engine.DesignTime
 
         private void AnalyzeCompilation( CompilationAnalysisContext context )
         {
-            Logger.Instance?.Write(
+            Logger.DesignTime.Trace?.Log(
                 $"DesignTimeAnalyzer.AnalyzeCompilation('{context.Compilation.AssemblyName}', CompilationId = {DebuggingHelper.GetObjectId( context.Compilation )}) started." );
 
             try
@@ -66,11 +67,9 @@ namespace Metalama.Framework.Engine.DesignTime
                 // Execute the analysis that are not performed in the pipeline.
                 var projectOptions = new ProjectOptions( context.Options.AnalyzerConfigOptionsProvider );
 
-                DebuggingHelper.AttachDebugger( projectOptions );
-
                 if ( !projectOptions.IsDesignTimeEnabled )
                 {
-                    Logger.Instance?.Write( $"DesignTimeAnalyzer.AnalyzeSemanticModel: design time experience is disabled." );
+                    Logger.DesignTime.Trace?.Log( $"DesignTimeAnalyzer.AnalyzeSemanticModel: design time experience is disabled." );
 
                     return;
                 }
@@ -96,7 +95,7 @@ namespace Metalama.Framework.Engine.DesignTime
                         cancellationToken,
                         out var compilationResult ) )
                 {
-                    Logger.Instance?.Write(
+                    Logger.DesignTime.Trace?.Log(
                         $"DesignTimeAnalyzer.AnalyzeCompilation('{context.Compilation.AssemblyName}', CompilationId = {DebuggingHelper.GetObjectId( context.Compilation )}): the pipeline failed." );
 
                     return;

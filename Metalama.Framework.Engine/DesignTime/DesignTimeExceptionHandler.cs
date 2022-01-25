@@ -22,7 +22,7 @@ namespace Metalama.Framework.Engine.DesignTime
         {
             if ( MustHandle( e ) )
             {
-                Logger.Instance?.Write( e.ToString() );
+                Logger.DesignTime.Error?.Log( e.ToString() );
             }
         }
     }

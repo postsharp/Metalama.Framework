@@ -19,8 +19,6 @@ namespace Metalama.TestFramework.Utilities
         /// <returns>A service provider with backstage service implementations for testing.</returns>
         public static IServiceProvider Create()
         {
-            var diagnosticsSink = new TestBackstageDiagnosticsSink();
-
             var services = new ServiceCollection();
 
             var serviceProviderBuilder = new ServiceProviderBuilder(
@@ -30,10 +28,6 @@ namespace Metalama.TestFramework.Utilities
             // We can't add these services to the ServiceProviderFactory using the WithServices method
             // because the backstage interfaces do not inherit from IService.
             serviceProviderBuilder
-                .AddSingleton<IBackstageDiagnosticSink>( diagnosticsSink )
-
-                // This allows the retrieval of the service using its type name
-                .AddSingleton( diagnosticsSink )
                 .AddSingleton<ILicenseConsumptionManager>( new DummyLicenseConsumptionManager() );
 
             return serviceProviderBuilder.ServiceProvider;

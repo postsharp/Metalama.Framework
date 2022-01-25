@@ -47,15 +47,13 @@ namespace Metalama.Framework.Engine.DesignTime
 
             try
             {
-                Logger.Instance?.Write( $"DesignTimeDiagnosticSuppressor.ReportSuppressions('{context.Compilation.AssemblyName}')." );
+                Logger.DesignTime.Trace?.Log( $"DesignTimeDiagnosticSuppressor.ReportSuppressions('{context.Compilation.AssemblyName}')." );
 
                 var buildOptions = new ProjectOptions( context.Options.AnalyzerConfigOptionsProvider );
 
-                DebuggingHelper.AttachDebugger( buildOptions );
-
                 if ( !buildOptions.IsDesignTimeEnabled )
                 {
-                    Logger.Instance?.Write( $"DesignTimeAnalyzer.AnalyzeSemanticModel: design time experience is disabled." );
+                    Logger.DesignTime.Trace?.Log( $"DesignTimeAnalyzer.AnalyzeSemanticModel: design time experience is disabled." );
 
                     return;
                 }
@@ -90,7 +88,7 @@ namespace Metalama.Framework.Engine.DesignTime
                     cancellationToken,
                     out var compilationResult ) )
             {
-                Logger.Instance?.Write( $"DesignTimeDiagnosticSuppressor.ReportSuppressions('{compilation.AssemblyName}'): the pipeline failed." );
+                Logger.DesignTime.Trace?.Log( $"DesignTimeDiagnosticSuppressor.ReportSuppressions('{compilation.AssemblyName}'): the pipeline failed." );
 
                 return;
             }
@@ -158,7 +156,7 @@ namespace Metalama.Framework.Engine.DesignTime
                 }
             }
 
-            Logger.Instance?.Write(
+            Logger.DesignTime.Trace?.Log(
                 $"DesignTimeDiagnosticSuppressor.ReportSuppressions('{compilation.AssemblyName}'): {suppressionsCount} suppressions reported." );
         }
 

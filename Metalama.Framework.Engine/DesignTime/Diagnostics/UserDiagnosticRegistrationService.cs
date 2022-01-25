@@ -39,7 +39,8 @@ namespace Metalama.Framework.Engine.DesignTime.Diagnostics
                     {
                         Directory.CreateDirectory( settingsDirectory );
                     }
-                } );
+                },
+                logger: Logger.DesignTime );
 
             this._settingsFilePath = Path.Combine( settingsDirectory, "userDiagnostics.json" );
 
