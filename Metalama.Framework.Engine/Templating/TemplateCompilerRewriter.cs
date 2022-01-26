@@ -28,7 +28,7 @@ namespace Metalama.Framework.Engine.Templating
     /// </summary>
     internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDiagnosticAdder
     {
-        private readonly TemplateSyntaxRootKind _syntaxRootKind;
+        private readonly TemplateSyntaxKind _syntaxKind;
         private readonly string _templateName;
         private readonly SyntaxTreeAnnotationMap _syntaxTreeAnnotationMap;
         private readonly IDiagnosticAdder _diagnosticAdder;
@@ -42,8 +42,8 @@ namespace Metalama.Framework.Engine.Templating
         private ISymbol? _rootTemplateSymbol;
 
         public TemplateCompilerRewriter(
-            TemplateSyntaxRootKind syntaxRootKind,
             string templateName,
+            TemplateSyntaxKind syntaxKind,
             Compilation runTimeCompilation,
             Compilation compileTimeCompilation,
             SyntaxTreeAnnotationMap syntaxTreeAnnotationMap,
@@ -52,8 +52,8 @@ namespace Metalama.Framework.Engine.Templating
             SerializableTypes serializableTypes,
             CancellationToken cancellationToken ) : base( serviceProvider, compileTimeCompilation )
         {
-            this._syntaxRootKind = syntaxRootKind;
             this._templateName = templateName;
+            this._syntaxKind = syntaxKind;
             this._syntaxTreeAnnotationMap = syntaxTreeAnnotationMap;
             this._diagnosticAdder = diagnosticAdder;
             this._cancellationToken = cancellationToken;
@@ -894,20 +894,39 @@ namespace Metalama.Framework.Engine.Templating
 
         public override SyntaxNode VisitPropertyDeclaration( PropertyDeclarationSyntax node )
         {
-            this.Indent( 3 );
+            if ( node.ExpressionBody is not null and { Expression: var bodyExpression } )
+            {
+                this.Indent( 3 );
 
-            var body = (BlockSyntax) this.BuildRunTimeBlock( node.ExpressionBody.AssertNotNull().Expression, false, false );
+                var body = (BlockSyntax) this.BuildRunTimeBlock( bodyExpression, false, false );
 
-            var result = this.CreateTemplateMethod( node, body );
+                var result = this.CreateTemplateMethod( node, body );
 
-            this.Unindent( 3 );
+                this.Unindent( 3 );
 
-            return result;
+                return result;
+            }
+            else if (node.Initializer is not null and { Value: var initializerExpression } )
+            {
+                this.Indent( 3 );
+
+                var body = (BlockSyntax) this.BuildRunTimeBlock( initializerExpression, false, false );
+
+                var result = this.CreateTemplateMethod( node, body );
+
+                this.Unindent( 3 );
+
+                return result;
+            }
+            else
+            {
+                throw new AssertionFailedException();
+            }
         }
 
         public override SyntaxNode VisitVariableDeclarator( VariableDeclaratorSyntax node )
         {
-            if ( this._syntaxRootKind == TemplateSyntaxRootKind.FieldDeclarator )
+            if ( this._syntaxKind == TemplateSyntaxKind.FieldInitializer )
             {
                 this.Indent( 3 );
 

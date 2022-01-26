@@ -90,6 +90,7 @@ namespace Metalama.Framework.Engine.Templating
             string templateName,
             Compilation compileTimeCompilation,
             SyntaxNode sourceSyntaxRoot,
+            TemplateSyntaxKind templateSyntaxKind,
             SemanticModel semanticModel,
             IDiagnosticAdder diagnostics,
             CancellationToken cancellationToken,
@@ -162,18 +163,12 @@ namespace Metalama.Framework.Engine.Templating
                 return false;
             }
 
-            var sourceSyntaxRootKind = sourceSyntaxRoot switch
-            {
-                VariableDeclaratorSyntax variable when variable.Parent?.Parent is FieldDeclarationSyntax => TemplateSyntaxRootKind.FieldDeclarator,
-                _ => TemplateSyntaxRootKind.Self
-            };
-
             // ReSharper restore PossibleMultipleEnumeration
 
             // Compile the syntax tree.
             var templateCompilerRewriter = new TemplateCompilerRewriter(
-                sourceSyntaxRootKind,
                 templateName,
+                templateSyntaxKind,
                 semanticModel.Compilation,
                 compileTimeCompilation,
                 this._syntaxTreeAnnotationMap,

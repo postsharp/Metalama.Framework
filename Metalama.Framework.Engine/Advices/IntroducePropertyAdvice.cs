@@ -57,6 +57,8 @@ namespace Metalama.Framework.Engine.Advices
             {
                 this.MemberBuilder.ApplyTemplateAttribute( propertyTemplate.TemplateInfo.Attribute );
             }
+
+            this.MemberBuilder.InitializerTemplate = propertyTemplate.GetInitializerTemplate();
         }
 
         public override void Initialize( IReadOnlyList<Advice> declarativeAdvices, IDiagnosticAdder diagnosticAdder )

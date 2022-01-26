@@ -1306,7 +1306,6 @@ namespace Metalama.Framework.Engine.Templating
 
         public override SyntaxNode? VisitAttribute( AttributeSyntax node )
             =>
-
                 // Don't process attributes.
                 node;
 
@@ -1354,7 +1353,8 @@ namespace Metalama.Framework.Engine.Templating
             => this.VisitMemberDeclaration(
                 node,
                 n => n.WithAccessorList( this.Visit( n.AccessorList ) )
-                    .WithExpressionBody( this.Visit( n.ExpressionBody ) ) );
+                    .WithExpressionBody( this.Visit( n.ExpressionBody ) )
+                    .WithInitializer( this.Visit( n.Initializer ) ) );
 
         public override SyntaxNode? VisitEventDeclaration( EventDeclarationSyntax node )
             => this.VisitMemberDeclaration( node, n => n.WithAccessorList( this.Visit( n.AccessorList ) ) );

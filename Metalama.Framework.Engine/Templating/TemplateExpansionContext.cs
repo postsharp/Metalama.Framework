@@ -105,8 +105,13 @@ namespace Metalama.Framework.Engine.Templating
 
             if ( this.MetaApi.Declaration is IField field )
             {
-                // This is initializer template expantion
+                // This is field initializer template expansion.
                 return this.CreateReturnStatementDefault( returnExpression, field.Type );
+            }
+            else if ( this.MetaApi.Declaration is IProperty property )
+            {
+                // This is property initializer template expansion.
+                return this.CreateReturnStatementDefault( returnExpression, property.Type );
             }
             else
             {

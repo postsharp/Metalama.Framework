@@ -127,7 +127,6 @@ namespace Metalama.Compiler
                 if ( variable.Initializer != null && this.MustReplaceByThrow( variable ) )
                 {
                     anyChange = true;
-                    // The "= default" will indicate presence of the initializer.
                     variables.Add( variable.WithInitializer( null ) );
                 }
                 else

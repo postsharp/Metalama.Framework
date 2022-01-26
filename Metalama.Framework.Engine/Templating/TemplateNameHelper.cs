@@ -7,20 +7,17 @@ namespace Metalama.Framework.Engine.Templating
 {
     internal static class TemplateNameHelper
     {
-        public static string GetCompiledTemplateName( IMethodSymbol method )
-            => method.MethodKind switch
+        public static string GetCompiledTemplateName( ISymbol symbol )
+            => symbol switch
             {
-                MethodKind.PropertyGet => GetCompiledTemplateName( $"Get{method.AssociatedSymbol!.Name}" ),
-                MethodKind.PropertySet => GetCompiledTemplateName( $"Set{method.AssociatedSymbol!.Name}" ),
-                _ => GetCompiledTemplateName( method.Name )
+                IMethodSymbol { MethodKind: MethodKind.PropertyGet } method => GetCompiledTemplateName( $"Get{method.AssociatedSymbol!.Name}" ),
+                IMethodSymbol { MethodKind: MethodKind.PropertySet } method => GetCompiledTemplateName( $"Set{method.AssociatedSymbol!.Name}" ),
+                IMethodSymbol method => GetCompiledTemplateName( method.Name ),
+                IFieldSymbol field => GetCompiledTemplateName( field.Name ),
+                IPropertySymbol property => GetCompiledTemplateName( property.Name ),
+                _ => throw new AssertionFailedException(),
             };
 
-        public static string GetCompiledTemplateName( IFieldSymbol field )
-            => GetCompiledTemplateName( field.Name );
-
-        public static string GetPseudoInitializerMethodName( string fieldName )
-            => $"__Initialize{fieldName}";
-
-        public static string GetCompiledTemplateName( string templateMethodName ) => "__" + templateMethodName;
+        public static string GetCompiledTemplateName( string templateMemberName ) => "__" + templateMemberName;
     }
 }

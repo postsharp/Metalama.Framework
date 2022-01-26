@@ -47,6 +47,27 @@ namespace Metalama.Framework.Engine.Advices
             }
         }
 
+        public static TemplateMember<IProperty> GetInitializerTemplate( this in TemplateMember<IProperty> propertyTemplate )
+        {
+            if ( propertyTemplate.IsNotNull )
+            {
+                var propertySyntax = (PropertyDeclarationSyntax) propertyTemplate.Declaration!.GetPrimaryDeclaration().AssertNotNull();
+
+                if ( propertySyntax.Initializer != null )
+                {
+                    return TemplateMember.Create( propertyTemplate.Declaration, propertyTemplate.TemplateInfo, TemplateKind.IntroductionInitializer );
+                }
+                else
+                {
+                    return default;
+                }
+            }
+            else
+            {
+                return default;
+            }
+        }
+
         private static bool IsAsync( this TemplateKind selectionKind )
             => selectionKind switch
             {

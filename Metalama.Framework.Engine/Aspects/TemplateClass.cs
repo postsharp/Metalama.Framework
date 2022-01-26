@@ -49,31 +49,7 @@ namespace Metalama.Framework.Engine.Aspects
 
         public abstract Type AspectType { get; }
 
-        public TemplateDriver GetTemplateDriver( IMethod sourceTemplate )
-        {
-            var templateSymbol = sourceTemplate.GetSymbol().AssertNotNull();
-            var id = templateSymbol.GetDocumentationCommentId()!;
-
-            if ( this._templateDrivers.TryGetValue( id, out var templateDriver ) )
-            {
-                return templateDriver;
-            }
-
-            var templateName = TemplateNameHelper.GetCompiledTemplateName( templateSymbol );
-            var compiledTemplateMethodInfo = this.AspectType.GetMethod( templateName );
-
-            if ( compiledTemplateMethodInfo == null )
-            {
-                throw new AssertionFailedException( $"Could not find the compile template for {sourceTemplate}." );
-            }
-
-            templateDriver = new TemplateDriver( this.ServiceProvider, compiledTemplateMethodInfo );
-            this._templateDrivers.Add( id, templateDriver );
-
-            return templateDriver;
-        }
-
-        public TemplateDriver GetTemplateDriver( IField sourceTemplate )
+        public TemplateDriver GetTemplateDriver( IMember sourceTemplate )
         {
             var templateSymbol = sourceTemplate.GetSymbol().AssertNotNull();
             var id = templateSymbol.GetDocumentationCommentId()!;

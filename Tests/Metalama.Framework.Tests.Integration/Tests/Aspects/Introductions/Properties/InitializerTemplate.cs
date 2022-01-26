@@ -10,7 +10,10 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Properties.I
     public class Introduction : TypeAspect
     {
         [Introduce]
-        public int IntroducedProperty_Accessors { get; set; } = meta.Target.Type.Name.Length;
+        public string IntroducedProperty { get; set; } = meta.Target.Member.Name;
+
+        [Introduce]
+        public static string IntroducedProperty_Static { get; set; } = meta.Target.Member.Name;
     }
 
     // <target>

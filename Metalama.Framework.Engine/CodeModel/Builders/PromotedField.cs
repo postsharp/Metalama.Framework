@@ -15,8 +15,6 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public MemberRef<IMemberOrNamedType> ReplacedMember => this._field.ToMemberRef<IMemberOrNamedType>();
 
-        public EqualsValueClauseSyntax? InitializerSyntax { get; set; }
-
         public PromotedField( Advice advice, IField field ) : base(
             advice,
             field.DeclaringType,
@@ -31,23 +29,6 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             this.Accessibility = this._field.Accessibility;
             this.IsStatic = this._field.IsStatic;
 
-            if ( this._field is BuiltField builtField )
-            {
-                // For field builder, copy the expression and template.
-                this.InitializerTemplate = builtField.FieldBuilder.InitializerTemplate;
-                this.InitializerExpression = builtField.FieldBuilder.InitializerExpression;
-            }
-            else
-            {
-                // For original code fields, copy the initializer syntax.
-                var fieldDeclaration = (VariableDeclaratorSyntax) this._field.GetPrimaryDeclaration().AssertNotNull();
-
-                if ( fieldDeclaration.Initializer != null )
-                {
-                    this.InitializerSyntax = fieldDeclaration.Initializer;
-                }
-            }
-
             // TODO: Attributes etc.
         }
 
@@ -56,5 +37,32 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public override bool IsDesignTime => false;
 
         protected override bool HasBaseInvoker => true;
+
+        protected override bool GetPropertyInitializerExpressionOrMethod( in MemberIntroductionContext context, out ExpressionSyntax? initializerExpression, out MethodDeclarationSyntax? initializerMethod )
+        {
+            if ( this._field is BuiltField builtField )
+            {
+                var fieldBuilder = builtField.FieldBuilder;
+
+                return fieldBuilder.GetInitializerExpressionOrMethod( context, fieldBuilder.InitializerExpression, fieldBuilder.InitializerTemplate, out initializerExpression, out initializerMethod );
+            }
+            else
+            {
+                // For original code fields, copy the initializer syntax.
+                var fieldDeclaration = (VariableDeclaratorSyntax) this._field.GetPrimaryDeclaration().AssertNotNull();
+
+                if ( fieldDeclaration.Initializer != null )
+                {
+                    initializerExpression = fieldDeclaration.Initializer.Value;
+                }
+                else
+                {
+                    initializerExpression = null;
+                }
+
+                initializerMethod = null;
+                return true;
+            }
+        }
     }
 }

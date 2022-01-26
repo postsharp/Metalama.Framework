@@ -7,9 +7,10 @@ using System.Text;
 
 namespace Metalama.Framework.Engine.Templating
 {
-    internal enum TemplateSyntaxRootKind
+    internal enum TemplateSyntaxKind
     {
         Self,
-        FieldDeclarator
+        FieldInitializer,
+        PropertyInitializer
     }
 }

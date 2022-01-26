@@ -24,38 +24,40 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders
 {
-    internal class FieldBuilder : MemberBuilder, IFieldBuilder, IFieldImpl
+    internal class FieldBuilder : FieldOrPropertyBuilder, IFieldBuilder, IFieldImpl
     {
         public override DeclarationKind DeclarationKind => DeclarationKind.Field;
 
-        public IType Type { get; set; }
+        public override IType Type { get; set; }
 
         [Memo]
-        public IMethod? GetMethod => new AccessorBuilder( this, MethodKind.PropertyGet );
+        public override IMethodBuilder? GetMethod => new AccessorBuilder( this, MethodKind.PropertyGet );
 
         [Memo]
-        public IMethod? SetMethod => new AccessorBuilder( this, MethodKind.PropertySet );
+        public override IMethodBuilder? SetMethod => new AccessorBuilder( this, MethodKind.PropertySet );
 
         public override bool IsExplicitInterfaceImplementation => false;
 
         public override IMember? OverriddenMember => null;
 
+        protected override IInvokerFactory<IFieldOrPropertyInvoker> FieldOrPropertyInvokers => this.Invokers;
+
         [Memo]
         public IInvokerFactory<IFieldOrPropertyInvoker> Invokers
             => new InvokerFactory<IFieldOrPropertyInvoker>( ( order, invokerOperator ) => new FieldOrPropertyInvoker( this, order, invokerOperator ), false );
 
-        public Writeability Writeability { get; set; }
+        public override Writeability Writeability { get; set; }
 
         Writeability IFieldOrProperty.Writeability => this.Writeability;
 
-        public bool IsAutoPropertyOrField => true;
+        public override bool IsAutoPropertyOrField => true;
 
         public override InsertPosition InsertPosition
             => new(
                 InsertPositionRelation.Within,
                 (MemberDeclarationSyntax) ((NamedType) this.DeclaringType).Symbol.GetPrimaryDeclaration().AssertNotNull() );
 
-        public IExpression? InitializerExpression { get; set; }
+        public override IExpression? InitializerExpression { get; set; }
 
         public TemplateMember<IField> InitializerTemplate { get; set; }
 
@@ -69,60 +71,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         {
             var syntaxGenerator = context.SyntaxGenerationContext.SyntaxGenerator;
 
-            ExpressionSyntax? initializerExpression;
-            BlockSyntax? initializerBlock;
-
-            if ( this.InitializerExpression != null )
-            {
-                // TODO: Error about the expression type?
-                initializerBlock = null;
-                initializerExpression = ((IUserExpression) this.InitializerExpression).ToRunTimeExpression().Syntax;
-            }
-            else if ( this.InitializerTemplate.IsNotNull )
-            {
-                initializerExpression = null;
-                if (!this.TryExpandInitializerTemplate( context, this.InitializerTemplate, out initializerBlock ) )
-                {
-                    // Template expansion error.
-                    return Enumerable.Empty<IntroducedMember>();
-                }
-
-                // This is a bit out of place, but works in most cases and if not done here, it would get quite complex in the linker.
-                if (initializerBlock.Statements.Count == 1 && initializerBlock.Statements[0] is ReturnStatementSyntax { Expression: not null } returnStatement )
-                {
-                    initializerBlock = null;
-                    initializerExpression = returnStatement.Expression;
-                }
-            }
-            else
-            {
-                initializerBlock = null;
-                initializerExpression = null;
-            }
-
-            MethodDeclarationSyntax? initializerMethod;
-            var initializerName = context.IntroductionNameProvider.GetInitializerName( this.DeclaringType, this.ParentAdvice.AspectLayerId, this );
-
-            if (initializerBlock != null)
-            {
-                initializerExpression = InvocationExpression( IdentifierName( initializerName ) );
-                initializerMethod =
-                    MethodDeclaration(
-                        List<AttributeListSyntax>(),
-                        TokenList( Token( SyntaxKind.PrivateKeyword ), Token( SyntaxKind.StaticKeyword ) ),
-                        context.SyntaxGenerator.Type( this.Type.GetSymbol() ),
-                        null,
-                        Identifier( initializerName ),
-                        null,
-                        ParameterList(),
-                        List<TypeParameterConstraintClauseSyntax>(),
-                        initializerBlock,
-                        null );
-            }
-            else
-            {
-                initializerMethod = null;
-            }
+            // If template fails to expand, we will still generate the field, albeit without the initializer.
+            _ = this.GetInitializerExpressionOrMethod( context, this.InitializerExpression, this.InitializerTemplate, out var initializerExpression, out var initializerMethod );
 
             var field =
                 FieldDeclaration(
@@ -152,42 +102,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             }
         }
 
-        private bool TryExpandInitializerTemplate( 
-            MemberIntroductionContext context, 
-            TemplateMember<IField> initializerTemplate,
-            [NotNullWhen( true )] out BlockSyntax? expression )
-        {
-            using ( context.DiagnosticSink.WithDefaultScope( this ) )
-            {
-                var metaApi = MetaApi.ForFieldOrPropertyInitializer(
-                    this,
-                    new MetaApiProperties(
-                        context.DiagnosticSink,
-                        initializerTemplate.Cast(),
-                        this.ParentAdvice.ReadOnlyTags,
-                        this.ParentAdvice.AspectLayerId,
-                        context.SyntaxGenerationContext,
-                        this.ParentAdvice.Aspect,
-                        context.ServiceProvider ) );
-
-                var expansionContext = new TemplateExpansionContext(
-                    this.ParentAdvice.Aspect.Aspect,
-                    metaApi,
-                    this.Compilation,
-                    context.LexicalScopeProvider.GetLexicalScope( this ),
-                    context.ServiceProvider.GetRequiredService<SyntaxSerializationService>(),
-                    context.SyntaxGenerationContext,
-                    default,
-                    null,
-                    this.ParentAdvice.AspectLayerId );
-
-                var templateDriver = this.ParentAdvice.TemplateInstance.TemplateClass.GetTemplateDriver( this.InitializerTemplate.Declaration! );
-
-                return templateDriver.TryExpandDeclaration( expansionContext, context.DiagnosticSink, out expression );
-            }
-        }
-
-        public IMethod? GetAccessor( MethodKind methodKind )
+        public override IMethod? GetAccessor( MethodKind methodKind )
             => methodKind switch
             {
                 MethodKind.PropertyGet => this.GetMethod,
@@ -195,7 +110,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                 _ => null
             };
 
-        public IEnumerable<IMethod> Accessors
+        public override IEnumerable<IMethod> Accessors
         {
             get
             {
@@ -213,6 +128,6 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public FieldInfo ToFieldInfo() => throw new NotImplementedException();
 
-        public FieldOrPropertyInfo ToFieldOrPropertyInfo() => throw new NotImplementedException();
+        public override FieldOrPropertyInfo ToFieldOrPropertyInfo() => throw new NotImplementedException();
     }
 }

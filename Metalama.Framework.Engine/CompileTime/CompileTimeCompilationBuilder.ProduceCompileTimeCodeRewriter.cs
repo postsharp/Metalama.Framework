@@ -527,6 +527,7 @@ namespace Metalama.Framework.Engine.CompileTime
                         TemplateNameHelper.GetCompiledTemplateName( methodSymbol ),
                         this._compileTimeCompilation,
                         node,
+                        TemplateSyntaxKind.Self,
                         this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ),
                         this._diagnosticAdder,
                         this._cancellationToken,
@@ -591,6 +592,7 @@ namespace Metalama.Framework.Engine.CompileTime
                                     TemplateNameHelper.GetCompiledTemplateName( propertySymbol.GetMethod.AssertNotNull() ),
                                     this._compileTimeCompilation,
                                     getAccessor,
+                                    TemplateSyntaxKind.Self,
                                     this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ),
                                     this._diagnosticAdder,
                                     this._cancellationToken,
@@ -608,6 +610,7 @@ namespace Metalama.Framework.Engine.CompileTime
                                     TemplateNameHelper.GetCompiledTemplateName( propertySymbol.SetMethod.AssertNotNull() ),
                                     this._compileTimeCompilation,
                                     setAccessor,
+                                    TemplateSyntaxKind.Self,
                                     this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ),
                                     this._diagnosticAdder,
                                     this._cancellationToken,
@@ -615,6 +618,22 @@ namespace Metalama.Framework.Engine.CompileTime
                                     out transformedSetDeclaration );
 
                             templateAccessorCount++;
+                        }
+
+                        if ( propertyIsTemplate && node is PropertyDeclarationSyntax { Initializer: not null } )
+                        {
+                            success =
+                                success &&
+                                this._templateCompiler.TryCompile(
+                                    TemplateNameHelper.GetCompiledTemplateName( propertySymbol.Name ),
+                                    this._compileTimeCompilation,
+                                    node,
+                                    TemplateSyntaxKind.PropertyInitializer,
+                                    this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ),
+                                    this._diagnosticAdder,
+                                    this._cancellationToken,
+                                    out _,
+                                    out transformedGetDeclaration );
                         }
 
                         if ( templateAccessorCount > 0 )
@@ -637,6 +656,7 @@ namespace Metalama.Framework.Engine.CompileTime
                                 TemplateNameHelper.GetCompiledTemplateName( propertySymbol.GetMethod.AssertNotNull() ),
                                 this._compileTimeCompilation,
                                 propertyNode,
+                                TemplateSyntaxKind.Self,
                                 this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ),
                                 this._diagnosticAdder,
                                 this._cancellationToken,
@@ -780,8 +800,9 @@ namespace Metalama.Framework.Engine.CompileTime
                 VariableDeclaratorSyntax TransformVariable( VariableDeclaratorSyntax variable, out MethodDeclarationSyntax? compiledInitializerTemplate )
                 {
                     var fieldSymbol = (IFieldSymbol)this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( variable ).AssertNotNull();
+                    var fieldIsTemplate = !this.SymbolClassifier.GetTemplateInfo( fieldSymbol ).IsNone;
 
-                    if ( variable.Initializer != null )
+                    if ( fieldIsTemplate && variable.Initializer != null )
                     {
                         var templateName = TemplateNameHelper.GetCompiledTemplateName( fieldSymbol.Name );
 
@@ -790,6 +811,7 @@ namespace Metalama.Framework.Engine.CompileTime
                             templateName,
                             this._compileTimeCompilation,
                             variable,
+                            TemplateSyntaxKind.FieldInitializer,
                             this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ),
                             this._diagnosticAdder,
                             this._cancellationToken,
@@ -850,6 +872,7 @@ namespace Metalama.Framework.Engine.CompileTime
                                       TemplateNameHelper.GetCompiledTemplateName( eventSymbol.AddMethod.AssertNotNull() ),
                                       this._compileTimeCompilation,
                                       addAccessor,
+                                      TemplateSyntaxKind.Self,
                                       this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ),
                                       this._diagnosticAdder,
                                       this._cancellationToken,
@@ -861,6 +884,7 @@ namespace Metalama.Framework.Engine.CompileTime
                                       TemplateNameHelper.GetCompiledTemplateName( eventSymbol.RemoveMethod.AssertNotNull() ),
                                       this._compileTimeCompilation,
                                       removeAccessor,
+                                      TemplateSyntaxKind.Self,
                                       this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ),
                                       this._diagnosticAdder,
                                       this._cancellationToken,
