@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Aspects;
 using System.Collections;
 using System.Collections.Generic;
@@ -8,7 +9,7 @@ using System.Collections.Immutable;
 
 namespace Metalama.Framework.Engine.Pipeline
 {
-    internal class BoundAspectClassCollection : IReadOnlyCollection<IBoundAspectClass>
+    internal class BoundAspectClassCollection : IReadOnlyCollection<IBoundAspectClass>, IReadOnlyCollection<IAspectClass>
     {
         private readonly ImmutableDictionary<string, IBoundAspectClass> _aspectClassesByName;
 
@@ -18,6 +19,8 @@ namespace Metalama.Framework.Engine.Pipeline
         {
             this._aspectClassesByName = aspectClasses.ToImmutableDictionary( c => c.FullName, c => c );
         }
+
+        IEnumerator<IAspectClass> IEnumerable<IAspectClass>.GetEnumerator() => this.GetEnumerator();
 
         public IEnumerator<IBoundAspectClass> GetEnumerator() => this._aspectClassesByName.Values.GetEnumerator();
 

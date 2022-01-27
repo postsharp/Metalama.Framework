@@ -11,7 +11,7 @@ namespace Metalama.Framework.Engine.CodeFixes
     /// <summary>
     /// Represents a code action menu, with children items.
     /// </summary>
-    internal class CodeActionMenuModel : CodeActionBaseModel
+    public class CodeActionMenuModel : CodeActionBaseModel
     {
         public List<CodeActionBaseModel> Items { get; } = new();
 

@@ -15,7 +15,7 @@ using System.Threading;
 
 namespace Metalama.Framework.Engine.Templating
 {
-    internal partial class TemplatingCodeValidator
+    public partial class TemplatingCodeValidator
     {
         /// <summary>
         /// Performs the analysis that are not performed by the pipeline: essentially validates that run-time code does not

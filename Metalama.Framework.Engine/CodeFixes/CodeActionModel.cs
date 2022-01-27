@@ -13,7 +13,7 @@ namespace Metalama.Framework.Engine.CodeFixes
     /// <summary>
     /// Represent a leaf in a code action menu.
     /// </summary>
-    internal class CodeActionModel : CodeActionBaseModel
+    public class CodeActionModel : CodeActionBaseModel
     {
         public Func<CancellationToken, Task<Solution>> Action { get; }
 

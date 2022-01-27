@@ -16,7 +16,7 @@ namespace Metalama.Framework.Engine.Utilities;
 // ReSharper disable StringLiteralTypo
 #pragma warning disable SA1310, IDE1006 // Naming conventions.
 
-internal static class ProcessUtilities
+public static class ProcessUtilities
 {
     // ReSharper disable FieldCanBeMadeReadOnly.Local
     // ReSharper disable MemberCanBePrivate.Local

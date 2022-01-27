@@ -22,7 +22,7 @@ namespace Metalama.Framework.Engine.Aspects
     /// A base class for <see cref="AspectClass"/> and <see cref="FabricTemplateClass"/>. Represents an aspect, but does not
     /// assume the class implements the <see cref="IAspect"/> semantic.
     /// </summary>
-    internal abstract class TemplateClass
+    public abstract class TemplateClass
     {
         public IServiceProvider ServiceProvider { get; }
 
@@ -45,11 +45,11 @@ namespace Metalama.Framework.Engine.Aspects
         /// </summary>
         public TemplateClass? BaseClass { get; }
 
-        public ImmutableDictionary<string, TemplateClassMember> Members { get; }
+        internal ImmutableDictionary<string, TemplateClassMember> Members { get; }
 
         public abstract Type AspectType { get; }
 
-        public TemplateDriver GetTemplateDriver( IMethod sourceTemplate )
+        internal TemplateDriver GetTemplateDriver( IMethod sourceTemplate )
         {
             var templateSymbol = sourceTemplate.GetSymbol().AssertNotNull();
             var id = templateSymbol.GetDocumentationCommentId()!;
@@ -73,12 +73,12 @@ namespace Metalama.Framework.Engine.Aspects
             return templateDriver;
         }
 
-        public abstract CompileTimeProject? Project { get; }
+        internal abstract CompileTimeProject? Project { get; }
 
         [Obfuscation( Exclude = true )] // Working around an obfuscator bug.
         public abstract string FullName { get; }
 
-        public bool TryGetInterfaceMember( ISymbol symbol, [NotNullWhen( true )] out TemplateClassMember? member )
+        internal bool TryGetInterfaceMember( ISymbol symbol, [NotNullWhen( true )] out TemplateClassMember? member )
             => this.Members.TryGetValue( DocumentationCommentId.CreateDeclarationId( symbol ), out member )
                && member.TemplateInfo.AttributeType == TemplateAttributeType.InterfaceMember;
 

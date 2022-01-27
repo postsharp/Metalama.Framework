@@ -32,7 +32,7 @@ namespace Metalama.Framework.Engine.Aspects
     /// <summary>
     /// Represents the metadata of an aspect class. This class is compilation-independent. It is not used to represent a fabric class.
     /// </summary>
-    internal class AspectClass : TemplateClass, IAspectClassImpl, IBoundAspectClass, IValidatorDriverFactory
+    public class AspectClass : TemplateClass, IAspectClassImpl, IBoundAspectClass, IValidatorDriverFactory
     {
         private readonly UserCodeInvoker _userCodeInvoker;
         private readonly IAspectDriver? _aspectDriver;
@@ -56,7 +56,9 @@ namespace Metalama.Framework.Engine.Aspects
 
         public string? Description { get; }
 
-        public override CompileTimeProject? Project { get; }
+        internal override CompileTimeProject? Project { get; }
+
+        CompileTimeProject? IAspectClassImpl.Project => this.Project;
 
         public ImmutableArray<TemplateClass> TemplateClasses { get; }
 
@@ -68,7 +70,7 @@ namespace Metalama.Framework.Engine.Aspects
         /// <summary>
         /// Gets the list of layers of the current aspect.
         /// </summary>
-        public ImmutableArray<AspectLayer> Layers { get; }
+        internal ImmutableArray<AspectLayer> Layers { get; }
 
         public Location? DiagnosticLocation { get; }
 
@@ -90,7 +92,7 @@ namespace Metalama.Framework.Engine.Aspects
         /// </summary>
         /// <param name="aspectTypeSymbol"></param>
         /// <param name="aspectDriver">Can be null for testing.</param>
-        protected internal AspectClass(
+        internal AspectClass(
             IServiceProvider serviceProvider,
             INamedTypeSymbol aspectTypeSymbol,
             AspectClass? baseClass,
@@ -102,7 +104,7 @@ namespace Metalama.Framework.Engine.Aspects
             AspectDriverFactory aspectDriverFactory ) : base( serviceProvider, compilation, aspectTypeSymbol, diagnosticAdder, baseClass )
         {
             this.FullName = aspectTypeSymbol.GetReflectionName().AssertNotNull();
-            this.DisplayName = this.ShortName = AttributeRef.GetShortName( aspectTypeSymbol.Name );
+            this.DisplayName = this.ShortName = AttributeHelper.GetShortName( aspectTypeSymbol.Name );
             this.IsAbstract = aspectTypeSymbol.IsAbstract;
             this.Project = project;
             this._userCodeInvoker = serviceProvider.GetRequiredService<UserCodeInvoker>();
@@ -261,7 +263,7 @@ namespace Metalama.Framework.Engine.Aspects
         /// <summary>
         /// Creates a new  <see cref="AspectInstance"/> from a custom attribute.
         /// </summary>
-        public AspectInstance CreateAspectInstanceFromAttribute(
+        internal AspectInstance CreateAspectInstanceFromAttribute(
             IAspect aspect,
             in Ref<IDeclaration> target,
             IAttribute attribute,
@@ -272,13 +274,13 @@ namespace Metalama.Framework.Engine.Aspects
         /// Creates a new <see cref="AspectInstance"/> by using the default constructor of the current class.
         /// This method is used by live templates.
         /// </summary>
-        public AspectInstance CreateAspectInstance( IDeclaration target, IAspect aspect, in AspectPredecessor predecessor )
+        internal  AspectInstance CreateAspectInstance( IDeclaration target, IAspect aspect, in AspectPredecessor predecessor )
             => new( aspect, target.ToTypedRef(), this, predecessor );
 
         /// <summary>
         /// Creates an instance of the <see cref="AspectClass"/> class.
         /// </summary>
-        public static bool TryCreate(
+        internal  static bool TryCreate(
             IServiceProvider serviceProvider,
             INamedTypeSymbol aspectTypeSymbol,
             Type aspectReflectionType,
@@ -449,8 +451,9 @@ namespace Metalama.Framework.Engine.Aspects
         public IAspect CreateDefaultInstance() => (IAspect) Activator.CreateInstance( this.AspectType );
 
         public override string ToString() => this.FullName;
-
-        public ValidatorDriver<TContext> GetValidatorDriver<TContext>( MethodInfo validateMethod )
+        
+      
+        ValidatorDriver<TContext> IValidatorDriverFactory.GetValidatorDriver<TContext>( MethodInfo validateMethod )
         {
             this._validatorDriverFactory ??= ValidatorDriverFactory.GetInstance( this.AspectType );
 
@@ -471,5 +474,12 @@ namespace Metalama.Framework.Engine.Aspects
                     ? $"{describedObject} is a local function"
                     : (FormattableString?) null;
         }
+    }
+
+    public static class AttributeHelper
+    {
+        [return: NotNullIfNotNull( "name" )]
+        public static string? GetShortName( string? name ) => name?.TrimEnd( "Attribute" );
+
     }
 }

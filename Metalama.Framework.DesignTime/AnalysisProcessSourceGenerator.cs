@@ -2,7 +2,6 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.DesignTime.Pipeline;
-using Metalama.Framework.DesignTime.VisualStudio.Remoting;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Utilities;
@@ -10,39 +9,24 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
 using System.Collections.Immutable;
 
-namespace Metalama.Framework.DesignTime.VisualStudio;
+namespace Metalama.Framework.DesignTime;
 
-public class AnalysisProcessSourceGenerator : DesignTimeSourceGenerator, IDisposable
+public class AnalysisProcessSourceGenerator : DesignTimeSourceGenerator
 {
-    private readonly ServiceHost? _serviceHost;
-
-    public AnalysisProcessSourceGenerator()
-    {
-        if ( ServiceHost.TryGetPipeName( out var pipeName ) )
-        {
-            this._serviceHost = new ServiceHost( pipeName );
-            this._serviceHost.Start();
-        }
-    }
-
 #pragma warning disable CA1001 // ServiceHost is disposable but not owned.
-    private class AnalysisProcessSourceGeneratorImpl : SourceGeneratorImpl
+    protected class AnalysisProcessSourceGeneratorImpl : SourceGeneratorImpl
 #pragma warning restore CA1001
     {
-        private readonly ServiceHost? _serviceHost;
         private CancellationTokenSource? _currentCancellationSource;
-        private ImmutableDictionary<string, SourceText> _currentSources = ImmutableDictionary<string, SourceText>.Empty;
-        private ImmutableDictionary<string, IntroducedSyntaxTree>? _lastIntroducedTrees;
 
-        public AnalysisProcessSourceGeneratorImpl( ServiceHost? serviceHost )
-        {
-            this._serviceHost = serviceHost;
-        }
+        public ImmutableDictionary<string, SourceText> Sources { get; private set; } = ImmutableDictionary<string, SourceText>.Empty;
+
+        private ImmutableDictionary<string, IntroducedSyntaxTree>? _lastIntroducedTrees;
 
         public override void GenerateSources( IProjectOptions projectOptions, Compilation compilation, GeneratorExecutionContext context )
         {
             // Serve from the cache.
-            foreach ( var source in this._currentSources )
+            foreach ( var source in this.Sources )
             {
                 context.AddSource( source.Key, source.Value );
             }
@@ -94,16 +78,13 @@ public class AnalysisProcessSourceGenerator : DesignTimeSourceGenerator, IDispos
                 generatedSources[introducedSyntaxTree.Value.Name] = sourceText;
             }
 
-            this._currentSources = generatedSources.ToImmutable();
+            this.Sources = generatedSources.ToImmutable();
 
             Logger.DesignTime.Trace?.Log(
                 $"DesignTimeSourceGenerator.Execute('{compilation.AssemblyName}', CompilationId = {DebuggingHelper.GetObjectId( compilation )}): {generatedSources.Count} sources generated." );
 
             // Publish to the interactive process. We need to await before we change the touch file.
-            await this._serviceHost.PublishGeneratedSourcesAsync(
-                projectOptions.ProjectId,
-                generatedSources.ToImmutableDictionary( x => x.Key, x => x.Value.ToString() ),
-                cancellationToken );
+            await this.PublishGeneratedSourcesAsync( projectOptions.ProjectId, cancellationToken );
 
             // Notify Roslyn that we have changes.
             if ( projectOptions.SourceGeneratorTouchFile == null )
@@ -115,9 +96,9 @@ public class AnalysisProcessSourceGenerator : DesignTimeSourceGenerator, IDispos
                 RetryHelper.Retry( () => File.WriteAllText( projectOptions.SourceGeneratorTouchFile, Guid.NewGuid().ToString() ) );
             }
         }
+
+        protected virtual Task PublishGeneratedSourcesAsync( string projectId, CancellationToken cancellationToken ) => Task.CompletedTask;
     }
 
-    protected override SourceGeneratorImpl CreateSourceGeneratorImpl() => new AnalysisProcessSourceGeneratorImpl( this._serviceHost );
-
-    public void Dispose() => this._serviceHost?.Dispose();
+    protected override SourceGeneratorImpl CreateSourceGeneratorImpl() => new AnalysisProcessSourceGeneratorImpl();
 }

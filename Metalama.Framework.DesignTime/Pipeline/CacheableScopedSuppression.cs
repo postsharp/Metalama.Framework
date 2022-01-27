@@ -12,7 +12,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
     /// <summary>
     /// A compilation-independent version of <see cref="ScopedSuppression"/>, which stores the symbol id instead of the <see cref="ISymbol"/> itself.
     /// </summary>
-    public readonly struct CacheableScopedSuppression
+    internal readonly struct CacheableScopedSuppression
     {
         /// <summary>
         /// Gets the suppression definition.

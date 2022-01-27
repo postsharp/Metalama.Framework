@@ -12,7 +12,7 @@ using SyntaxReference = Microsoft.CodeAnalysis.SyntaxReference;
 
 namespace Metalama.Framework.Engine.CodeModel
 {
-    internal abstract class BaseDeclaration : IDeclarationImpl
+    public abstract class BaseDeclaration : IDeclarationImpl
     {
         public abstract string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null );
 
@@ -28,7 +28,9 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public abstract IEnumerable<IDeclaration> GetDerivedDeclarations( bool deep = true );
 
-        public abstract Ref<IDeclaration> ToRef();
+        internal abstract Ref<IDeclaration> ToRef();
+
+        Ref<IDeclaration> IDeclarationImpl.ToRef() => this.ToRef();
 
         public abstract IAssembly DeclaringAssembly { get; }
 

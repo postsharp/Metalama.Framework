@@ -9,5 +9,5 @@ namespace Metalama.Framework.Engine.CodeFixes
     /// <summary>
     /// Represents a <see cref="CodeActionModel"/> and the set of diagnostics to which it is attached. 
     /// </summary>
-    internal record CodeFixModel( CodeActionBaseModel CodeAction, ImmutableArray<Diagnostic> Diagnostic );
+    public record CodeFixModel( CodeActionBaseModel CodeAction, ImmutableArray<Diagnostic> Diagnostic );
 }

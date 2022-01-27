@@ -9,7 +9,7 @@ using System.Collections.Immutable;
 
 namespace Metalama.Framework.Engine.Diagnostics
 {
-    internal static class DiagnosticDescriptorExtensions
+    public static class DiagnosticDescriptorExtensions
     {
         public static DiagnosticDescriptor ToRoslynDescriptor( this IDiagnosticDefinition definition )
             => new( definition.Id, definition.Title, definition.MessageFormat, definition.Category, definition.Severity.ToRoslynSeverity(), true );

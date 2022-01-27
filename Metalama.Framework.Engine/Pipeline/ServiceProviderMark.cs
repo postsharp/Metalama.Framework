@@ -21,7 +21,7 @@ namespace Metalama.Framework.Engine.Pipeline
         internal static readonly ServiceProviderMark Global = new( "Global" );
         internal static readonly ServiceProviderMark AsyncLocal = new( "AsyncLocal" );
         internal static readonly ServiceProviderMark Pipeline = new( "Pipeline" );
-        internal static readonly ServiceProviderMark Project = new( "Project" );
+        public static readonly ServiceProviderMark Project = new( "Project" );
         internal static readonly ServiceProviderMark Other = new( "Other" );
 
         // The testing mark is the only public because it is used by the testing API and this is the only use case of this class.

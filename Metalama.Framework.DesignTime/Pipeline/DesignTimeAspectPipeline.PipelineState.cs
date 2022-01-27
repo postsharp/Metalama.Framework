@@ -434,7 +434,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
                 var syntaxTreeDictionaryBuilder = state.ValidationResult.SyntaxTreeResults.ToBuilder();
 
-                var userDiagnosticSink = new UserDiagnosticSink( configuration.CompileTimeProject, null );
+                var userDiagnosticSink = new UserDiagnosticSink( configuration.CompileTimeProject );
 
                 foreach ( var syntaxTree in syntaxTreesToValidate )
                 {

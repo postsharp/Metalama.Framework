@@ -11,7 +11,7 @@ using System.Threading;
 
 namespace Metalama.Framework.Engine.CodeFixes;
 
-internal class DesignTimeCodeFixRunner : CodeFixRunner
+public class DesignTimeCodeFixRunner : CodeFixRunner
 {
     private readonly IAspectPipelineConfigurationProvider _configurationProvider;
 

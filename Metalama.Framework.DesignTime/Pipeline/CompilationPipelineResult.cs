@@ -17,7 +17,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
     /// <summary>
     /// Caches the pipeline results for each syntax tree.
     /// </summary>
-    public sealed class CompilationPipelineResult : ITransitiveAspectsManifest
+    internal sealed class CompilationPipelineResult : ITransitiveAspectsManifest
     {
         private static readonly ImmutableDictionary<string, SyntaxTreePipelineResult> _emptySyntaxTreeResults =
             ImmutableDictionary.Create<string, SyntaxTreePipelineResult>( StringComparer.Ordinal );
@@ -213,7 +213,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                     }
                 }
 
-                var declaringSyntaxes = ((IDeclarationImpl) suppression.Declaration).DeclaringSyntaxReferences;
+                var declaringSyntaxes = suppression.Declaration.GetDeclaringSyntaxReferences();
 
                 switch ( declaringSyntaxes.Length )
                 {

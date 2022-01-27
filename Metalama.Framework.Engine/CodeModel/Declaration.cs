@@ -38,7 +38,7 @@ namespace Metalama.Framework.Engine.CodeModel
         [Memo]
         public override IAssembly DeclaringAssembly => this.Compilation.Factory.GetAssembly( this.Symbol.ContainingAssembly );
 
-        public override Ref<IDeclaration> ToRef() => Ref.FromSymbol( this.Symbol, this.Compilation.RoslynCompilation );
+        internal override Ref<IDeclaration> ToRef() => Ref.FromSymbol( this.Symbol, this.Compilation.RoslynCompilation );
 
         public IReadOnlyList<ISymbol> LookupSymbols()
         {

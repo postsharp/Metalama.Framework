@@ -36,7 +36,7 @@ public readonly struct SymbolDictionaryKey : IEquatable<SymbolDictionaryKey>
         return this.GetId().Equals( other.GetId() );
     }
 
-    internal static SymbolDictionaryKey CreatePersistentKey( ISymbol symbol )
+    public static SymbolDictionaryKey CreatePersistentKey( ISymbol symbol )
         => new( StructuralSymbolComparer.Default.GetHashCode( symbol ), SymbolId.Create( symbol ).ToString() );
 
     public static SymbolDictionaryKey CreateLookupKey( ISymbol symbol ) => new( StructuralSymbolComparer.Default.GetHashCode( symbol ), symbol );
@@ -57,7 +57,7 @@ public readonly struct SymbolDictionaryKey : IEquatable<SymbolDictionaryKey>
 
     public static bool operator !=( SymbolDictionaryKey left, SymbolDictionaryKey right ) => !left.Equals( right );
 
-    internal void UpdateHash( XXH64 hasher )
+    public void UpdateHash( XXH64 hasher )
     {
         if ( this._identity is not string id )
         {

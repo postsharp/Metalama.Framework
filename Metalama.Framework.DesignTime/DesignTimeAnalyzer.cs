@@ -26,7 +26,7 @@ namespace Metalama.Framework.DesignTime
     /// Our implementation of <see cref="DiagnosticAnalyzer"/>. It reports all diagnostics that we produce.
     /// </summary>
     [ExcludeFromCodeCoverage]
-    public class DesignTimeAnalyzer : DiagnosticAnalyzer
+    internal class DesignTimeAnalyzer : DiagnosticAnalyzer
     {
         private readonly DesignTimeDiagnosticDefinitions _designTimeDiagnosticDefinitions = DesignTimeDiagnosticDefinitions.GetInstance();
 

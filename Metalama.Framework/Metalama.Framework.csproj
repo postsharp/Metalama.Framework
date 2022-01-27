@@ -12,14 +12,12 @@
 
 
     <ItemGroup>
-        <Compile Include="..\NullableAttributes.cs" Link="System Types\NullableAttributes.cs"/>
-        <Compile Include="..\IsExternalInit.cs" Link="System Types\IsExternalInit.cs"/>
+        <Compile Include="..\Metalama.SystemTypes\NullableAttributes.cs" Link="System Types\NullableAttributes.cs"/>
+        <Compile Include="..\Metalama.SystemTypes\IsExternalInit.cs" Link="System Types\IsExternalInit.cs"/>
     </ItemGroup>
 
     <ItemGroup>
         <InternalsVisibleTo Include="Metalama.Framework.Engine"/>
-        <InternalsVisibleTo Include="Metalama.Framework.DesignTime"/>
-        <InternalsVisibleTo Include="Metalama.Framework.DesignTime.VisualStudio"/>
         <InternalsVisibleTo Include="Metalama.TestFramework"/>
         <InternalsVisibleTo Include="Metalama.Framework.Tests.UnitTests.Internals"/>
         <InternalsVisibleTo Include="Metalama.Framework.Tests.Integration.Internals"/>

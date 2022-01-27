@@ -101,17 +101,17 @@ namespace Metalama.Framework.Tests.UnitTests.RunTime
 
 #if NET5_0_OR_GREATER
         [Fact]
-        public async Task BufferAsyncEnumerable()
+        public async Task BufferAsyncEnumerableAsync()
         {
-            var original = ReturnsAsyncEnumerable();
+            var original = ReturnsAsyncEnumerableAsync();
 
             var buffered = await original.BufferAsync();
 
-            await CompareAsyncEnumerators( ReturnsAsyncEnumerable().GetAsyncEnumerator(), buffered.GetAsyncEnumerator() );
+            await CompareAsyncEnumeratorsAsync( ReturnsAsyncEnumerableAsync().GetAsyncEnumerator(), buffered.GetAsyncEnumerator() );
         }
 
         [Fact]
-        public async Task BufferAsyncEnumerableList()
+        public async Task BufferAsyncEnumerableListAsync()
         {
             var list = new AsyncEnumerableList<int>() { 1, 2, 3 };
 
@@ -121,16 +121,16 @@ namespace Metalama.Framework.Tests.UnitTests.RunTime
         }
 
         [Fact]
-        public async Task BufferAsyncEnumerator()
+        public async Task BufferAsyncEnumeratorAsync()
         {
-            var original = ReturnsAsyncEnumerable().GetAsyncEnumerator();
+            var original = ReturnsAsyncEnumerableAsync().GetAsyncEnumerator();
             var buffered = await original.BufferAsync();
 
-            await CompareAsyncEnumerators( ReturnsAsyncEnumerable().GetAsyncEnumerator(), buffered );
+            await CompareAsyncEnumeratorsAsync( ReturnsAsyncEnumerableAsync().GetAsyncEnumerator(), buffered );
         }
 
         [Fact]
-        public async Task BufferAsyncEnumeratorList()
+        public async Task BufferAsyncEnumeratorListAsync()
         {
             var list = new AsyncEnumerableList<int>() { 1, 2, 3 };
 
@@ -139,7 +139,7 @@ namespace Metalama.Framework.Tests.UnitTests.RunTime
             // We cannot test that no new list was created (the list is not exposed on List.Enumerator)
             // so we have to test the content.
 
-            await CompareAsyncEnumerators( list.GetAsyncEnumerator(), buffered );
+            await CompareAsyncEnumeratorsAsync( list.GetAsyncEnumerator(), buffered );
         }
 
 #endif
@@ -180,7 +180,7 @@ namespace Metalama.Framework.Tests.UnitTests.RunTime
         }
 
 #if NET5_0_OR_GREATER
-        private static async Task CompareAsyncEnumerators<T>( IAsyncEnumerator<T> a, IAsyncEnumerator<T> b )
+        private static async Task CompareAsyncEnumeratorsAsync<T>( IAsyncEnumerator<T> a, IAsyncEnumerator<T> b )
         {
             while ( await a.MoveNextAsync() )
             {
@@ -191,7 +191,7 @@ namespace Metalama.Framework.Tests.UnitTests.RunTime
             Assert.False( await b.MoveNextAsync() );
         }
 
-        private static async IAsyncEnumerable<int> ReturnsAsyncEnumerable()
+        private static async IAsyncEnumerable<int> ReturnsAsyncEnumerableAsync()
         {
             await Task.Yield();
 

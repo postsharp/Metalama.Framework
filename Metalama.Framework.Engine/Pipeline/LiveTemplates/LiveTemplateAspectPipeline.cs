@@ -22,7 +22,7 @@ namespace Metalama.Framework.Engine.Pipeline.LiveTemplates
     /// <summary>
     /// An implementation of the <see cref="AspectPipeline"/> that applies an aspect to source code in the interactive process.
     /// </summary>
-    internal class LiveTemplateAspectPipeline : AspectPipeline
+    public class LiveTemplateAspectPipeline : AspectPipeline
     {
         private readonly Func<AspectPipelineConfiguration, IAspectClass> _aspectSelector;
         private readonly ISymbol _targetSymbol;

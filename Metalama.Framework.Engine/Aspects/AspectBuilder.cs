@@ -103,7 +103,7 @@ namespace Metalama.Framework.Engine.Aspects
 
                     return items ?? Enumerable.Empty<TMember>();
                 },
-                this._configuration.AspectClasses,
+                this._configuration.BoundAspectClasses,
                 this._configuration.ServiceProvider );
         }
 

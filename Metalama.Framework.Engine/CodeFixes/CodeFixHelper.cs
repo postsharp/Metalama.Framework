@@ -17,7 +17,7 @@ namespace Metalama.Framework.Engine.CodeFixes
     /// <summary>
     /// Helper methods used by different implementations of code fixes.
     /// </summary>
-    internal static class CodeFixHelper
+    public static class CodeFixHelper
     {
         public static async Task<Solution> ApplyChangesAsync(
             PartialCompilation compilation,

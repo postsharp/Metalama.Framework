@@ -14,7 +14,7 @@ using System.Threading;
 namespace Metalama.Framework.Engine.Utilities
 {
     [ExcludeFromCodeCoverage]
-    internal static class DebuggingHelper
+    public static class DebuggingHelper
     {
         private static readonly ConditionalWeakTable<object, ObjectId> _objectIds = new();
 

@@ -7,6 +7,7 @@ using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Engine.CodeFixes;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
+using Metalama.Framework.Engine.Pipeline;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -19,7 +20,7 @@ namespace Metalama.Framework.Engine.Diagnostics
     /// Implements the user-level <see cref="IDiagnosticSink"/> interface
     /// and maps user-level diagnostics into Roslyn <see cref="Diagnostic"/>.
     /// </summary>
-    internal partial class UserDiagnosticSink : IDiagnosticSink, IDiagnosticAdder
+    public partial class UserDiagnosticSink : IDiagnosticSink, IDiagnosticAdder
     {
         private readonly DiagnosticManifest? _diagnosticManifest;
         private readonly CodeFixFilter _codeFixFilter;
@@ -51,6 +52,8 @@ namespace Metalama.Framework.Engine.Diagnostics
                 return true;
             }
         }
+
+        public UserDiagnosticSink( CompileTimeProject? compileTimeProject ) : this( compileTimeProject, null ) { }
 
         internal UserDiagnosticSink( CompileTimeProject? compileTimeProject, CodeFixFilter? codeFixFilter, IDeclaration? defaultScope = null )
         {

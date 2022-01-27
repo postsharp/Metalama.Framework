@@ -12,7 +12,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
     /// Represents the content of <see cref="DesignTimePipelineExecutionResult"/>, but only the items that relate to a single <see cref="Microsoft.CodeAnalysis.SyntaxTree"/>.
     /// This class is compilation-independent and cacheable.
     /// </summary>
-    public sealed class SyntaxTreePipelineResult
+    internal sealed class SyntaxTreePipelineResult
     {
         /// <summary>
         /// Gets the <see cref="Microsoft.CodeAnalysis.SyntaxTree"/> for which the results was prepared.

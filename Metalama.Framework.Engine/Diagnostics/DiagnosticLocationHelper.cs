@@ -12,7 +12,7 @@ namespace Metalama.Framework.Engine.Diagnostics
     /// <summary>
     /// Helper methods to work with diagnostics.
     /// </summary>
-    internal static class DiagnosticLocationHelper
+    public static class DiagnosticLocationHelper
     {
         public static Location? GetDiagnosticLocation( this IDiagnosticLocation location ) => ((IDiagnosticLocationImpl) location).DiagnosticLocation;
 

@@ -8,7 +8,7 @@ using System.Threading;
 
 namespace Metalama.Framework.Engine.Pipeline;
 
-internal interface IAspectPipelineConfigurationProvider
+public interface IAspectPipelineConfigurationProvider
 {
     bool TryGetConfiguration(
         PartialCompilation compilation,

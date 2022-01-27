@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Pipeline;
@@ -44,7 +45,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
                 serviceProvider,
                 domain,
                 null,
-                c => c.AspectClasses.Single( a => a.ShortName == "TestAspect" ),
+                c => c.BoundAspectClasses.Single<IAspectClass>( a => a.ShortName == "TestAspect" ),
                 partialCompilation,
                 target!,
                 testResult.PipelineDiagnostics,

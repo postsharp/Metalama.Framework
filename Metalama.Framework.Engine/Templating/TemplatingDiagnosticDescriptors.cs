@@ -11,7 +11,7 @@ namespace Metalama.Framework.Engine.Templating
 {
 #pragma warning disable SA1118 // Allow multi-line parameters.
 
-    internal static class TemplatingDiagnosticDescriptors
+    public static class TemplatingDiagnosticDescriptors
     {
         // Reserved range 100-199
 

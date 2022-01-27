@@ -6,7 +6,7 @@ using Metalama.Framework.Engine.Diagnostics;
 
 namespace Metalama.Framework.Engine.Aspects
 {
-    internal static class EligibilityExtensions
+    public static class EligibilityExtensions
     {
         public static bool IncludesAll( this EligibleScenarios scenarios, EligibleScenarios subset ) => (scenarios & subset) == subset;
 

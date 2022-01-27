@@ -6,7 +6,6 @@ using Metalama.Framework.DesignTime.Refactoring;
 using Metalama.Framework.DesignTime.Utilities;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeFixes;
-using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
@@ -108,7 +107,7 @@ namespace Metalama.Framework.DesignTime
             CancellationToken cancellationToken )
         {
             var attributeDescription = new AttributeDescription(
-                AttributeRef.GetShortName( aspect.AspectType.Name ),
+                AttributeHelper.GetShortName( aspect.AspectType.Name ),
                 imports: ImmutableList.Create( aspect.AspectType.Namespace ) );
 
             return CSharpAttributeHelper.AddAttributeAsync( targetDocument, targetSymbol, attributeDescription, cancellationToken ).AsTask();

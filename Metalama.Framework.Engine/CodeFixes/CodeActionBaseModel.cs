@@ -9,7 +9,7 @@ namespace Metalama.Framework.Engine.CodeFixes
     /// <summary>
     /// Represents a code action or a code action menu.
     /// </summary>
-    internal abstract class CodeActionBaseModel
+    public abstract class CodeActionBaseModel
     {
         protected const string TitleJoin = ": ";
 

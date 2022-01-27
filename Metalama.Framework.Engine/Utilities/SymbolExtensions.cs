@@ -12,7 +12,7 @@ using SpecialType = Metalama.Framework.Code.SpecialType;
 
 namespace Metalama.Framework.Engine.Utilities
 {
-    internal static class SymbolExtensions
+    public static class SymbolExtensions
     {
         // Coverage: ignore
         public static SpecialType ToOurSpecialType( this RoslynSpecialType type )
@@ -225,7 +225,7 @@ namespace Metalama.Framework.Engine.Utilities
             }
         }
 
-        public static SymbolId GetSymbolId( this ISymbol? symbol ) => SymbolId.Create( symbol );
+        internal static SymbolId GetSymbolId( this ISymbol? symbol ) => SymbolId.Create( symbol );
 
         public static bool HasDefaultConstructor( this INamedTypeSymbol type )
             => type.TypeKind == TypeKind.Struct ||

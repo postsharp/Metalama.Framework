@@ -73,7 +73,7 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
                 cancellationToken );
         }
 
-        internal async Task<CompileTimeAspectPipelineResult?> ExecuteCoreAsync(
+        public async Task<CompileTimeAspectPipelineResult?> ExecuteCoreAsync(
             IDiagnosticAdder diagnosticAdder,
             PartialCompilation compilation,
             ImmutableArray<ManagedResource> resources,

@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.Collections
 {
-    internal partial class ImmutableDictionaryOfHashSet<TKey, TValue>
+    public partial class ImmutableDictionaryOfHashSet<TKey, TValue>
     {
         internal readonly struct Group : IGrouping<TKey, TValue>
         {

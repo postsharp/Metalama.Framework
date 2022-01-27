@@ -5,7 +5,7 @@ using System.IO;
 
 namespace Metalama.Framework.Engine.Utilities
 {
-    internal sealed class ProcessInfo
+    public sealed class ProcessInfo
     {
         public int ProcessId { get; }
 

@@ -6,7 +6,7 @@ using System.Collections.Immutable;
 
 namespace Metalama.Framework.DesignTime.Pipeline;
 
-public class CompilationValidationResult
+internal class CompilationValidationResult
 {
     public static CompilationValidationResult Empty { get; } = new();
 

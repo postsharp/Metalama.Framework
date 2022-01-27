@@ -8,7 +8,7 @@ using System.Threading;
 
 namespace Metalama.Framework.Engine.Templating
 {
-    internal static partial class TemplatingCodeValidator
+    public static partial class TemplatingCodeValidator
     {
         internal static bool Validate(
             Compilation compilation,

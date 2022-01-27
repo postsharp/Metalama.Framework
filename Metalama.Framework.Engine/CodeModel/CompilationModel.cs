@@ -24,7 +24,7 @@ using SyntaxReference = Microsoft.CodeAnalysis.SyntaxReference;
 
 namespace Metalama.Framework.Engine.CodeModel
 {
-    internal partial class CompilationModel : SymbolBasedDeclaration, ICompilationInternal
+    public partial class CompilationModel : SymbolBasedDeclaration, ICompilationInternal
     {
         public static CompilationModel CreateInitialInstance( IProject project, PartialCompilation compilation ) => new( project, compilation );
 
@@ -58,9 +58,9 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public PartialCompilation PartialCompilation { get; }
 
-        public ReflectionMapper ReflectionMapper { get; }
+        internal ReflectionMapper ReflectionMapper { get; }
 
-        public ISymbolClassifier SymbolClassifier { get; }
+        internal ISymbolClassifier SymbolClassifier { get; }
 
         public MetricManager MetricManager { get; }
 
@@ -160,7 +160,7 @@ namespace Metalama.Framework.Engine.CodeModel
             return new CompilationModel( this, introducedDeclarations );
         }
 
-        public CompilationModel WithAspectInstances( ImmutableArray<AspectInstance> aspectInstances )
+        internal CompilationModel WithAspectInstances( ImmutableArray<AspectInstance> aspectInstances )
             => aspectInstances.Length == 0 ? this : new CompilationModel( this, aspectInstances );
 
         public string AssemblyName => this.RoslynCompilation.AssemblyName ?? "";
@@ -249,7 +249,7 @@ namespace Metalama.Framework.Engine.CodeModel
         ICompilation ICompilationElement.Compilation => this;
 
         public IEnumerable<IAttribute> GetAllAttributesOfType( INamedType type )
-            => this._allMemberAttributesByTypeName[AttributeRef.GetShortName( type.Name )]
+            => this._allMemberAttributesByTypeName[AttributeHelper.GetShortName( type.Name )]
                 .Select(
                     a =>
                     {
@@ -345,7 +345,7 @@ namespace Metalama.Framework.Engine.CodeModel
             return depth;
         }
 
-        public override Ref<IDeclaration> ToRef() => Ref.Compilation( this.RoslynCompilation ).As<IDeclaration>();
+        internal override Ref<IDeclaration> ToRef() => Ref.Compilation( this.RoslynCompilation ).As<IDeclaration>();
 
         public override ImmutableArray<SyntaxReference> DeclaringSyntaxReferences => ImmutableArray<SyntaxReference>.Empty;
 
@@ -366,11 +366,13 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public override string ToString() => $"{this.RoslynCompilation.AssemblyName}";
 
-        public ICompilationHelpers Helpers { get; } = new CompilationHelpers();
+        internal ICompilationHelpers Helpers { get; } = new CompilationHelpers();
+
+        ICompilationHelpers ICompilationInternal.Helpers => this.Helpers; 
 
         public override IDeclaration OriginalDefinition => this;
 
-        public GenericMap EmptyGenericMap { get; }
+        internal GenericMap EmptyGenericMap { get; }
 
         public bool ContainsType( INamedTypeSymbol type )
         {

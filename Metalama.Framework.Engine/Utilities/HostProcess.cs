@@ -5,7 +5,7 @@ using Metalama.Backstage.Diagnostics;
 
 namespace Metalama.Framework.Engine.Utilities
 {
-    internal class HostProcess
+    public class HostProcess
     {
         public static HostProcess Current { get; } = new();
 

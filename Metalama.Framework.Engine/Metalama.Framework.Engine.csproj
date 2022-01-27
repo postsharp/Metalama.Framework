@@ -18,35 +18,32 @@
 
     <ItemGroup>
         <!-- We cannot use InternalsVisibleTo for Metalama.TestFramework because of obfuscation in the release build. -->
-        <InternalsVisibleTo Include="Metalama.Framework.Tests.UnitTests.Internals"/>
-        <InternalsVisibleTo Include="Metalama.Framework.Tests.Integration.Internals"/>
-        <InternalsVisibleTo Include="Metalama.Framework.CompilerAddIn"/>
-        <InternalsVisibleTo Include="Metalama.Framework.DesignTime"/>
-        <InternalsVisibleTo Include="Metalama.Framework.DesignTime.VisualStudio"/>
-        <InternalsVisibleTo Include="DynamicProxyGenAssembly2" Key="$(FakeItEasyKey)" LoadsWithinVisualStudio="false"/>
+        <InternalsVisibleTo Include="Metalama.Framework.Tests.UnitTests.Internals" />
+        <InternalsVisibleTo Include="Metalama.Framework.Tests.Integration.Internals" />
+        <InternalsVisibleTo Include="DynamicProxyGenAssembly2" Key="$(FakeItEasyKey)" LoadsWithinVisualStudio="false" />
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="$(RoslynVersion)"/>
-        <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.Common" Version="$(RoslynVersion)"/>
-        <PackageReference Include="Metalama.Compiler.Sdk" Version="$(MetalamaCompilerVersion)"/>
-        <PackageReference Include="Metalama.Backstage" Version="$(MetalamaBackstageVersion)"/>
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="$(RoslynVersion)" />
+        <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.Common" Version="$(RoslynVersion)" />
+        <PackageReference Include="Metalama.Compiler.Sdk" Version="$(MetalamaCompilerVersion)" />
+        <PackageReference Include="Metalama.Backstage" Version="$(MetalamaBackstageVersion)" />
 
-        <PackageReference Include="Microsoft.Bcl.HashCode" Version="$(MicrosoftBclHashCodeVersion)"/>
-        <PackageReference Include="K4os.Hash.xxHash" Version="$(K4osHashxxHashVersion)"/>
-        <PackageReference Include="Microsoft.CSharp" Version="$(MicrosoftCSharpVersion)"/>
-        <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonVersion)"/>
-        <PackageReference Include="System.Runtime.Serialization.Formatters" Version="4.3.0"/>
-        <ProjectReference Include="..\Metalama.Framework.DesignTime.Contracts\Metalama.Framework.DesignTime.Contracts.csproj"/>
-        <ProjectReference Include="..\Metalama.Framework\Metalama.Framework.csproj"/>
-        <ProjectReference Include="..\Metalama.Framework.Sdk\Metalama.Framework.Sdk.csproj"/>
+        <PackageReference Include="Microsoft.Bcl.HashCode" Version="$(MicrosoftBclHashCodeVersion)" />
+        <PackageReference Include="K4os.Hash.xxHash" Version="$(K4osHashxxHashVersion)" />
+        <PackageReference Include="Microsoft.CSharp" Version="$(MicrosoftCSharpVersion)" />
+        <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonVersion)" />
+        <PackageReference Include="System.Runtime.Serialization.Formatters" Version="4.3.0" />
+        <ProjectReference Include="..\Metalama.Framework.DesignTime.Contracts\Metalama.Framework.DesignTime.Contracts.csproj" />
+        <ProjectReference Include="..\Metalama.Framework\Metalama.Framework.csproj" />
+        <ProjectReference Include="..\Metalama.Framework.Sdk\Metalama.Framework.Sdk.csproj" />
 
         <!-- Reference PostSharp for obfuscation -->
-        <PackageReference Include="PostSharp" Version="$(PostSharpPackageVersion)" PrivateAssets="all" Condition="'$(Obfuscate)' == 'True'"/>
-        <ProjectReference Include="..\Build\Metalama.Obfuscator\Metalama.Obfuscator.csproj" ReferenceOutputAssembly="false" Condition="'$(Obfuscate)' == 'True'"/>
+        <PackageReference Include="PostSharp" Version="$(PostSharpPackageVersion)" PrivateAssets="all" Condition="'$(Obfuscate)' == 'True'" />
+        <ProjectReference Include="..\Build\Metalama.Obfuscator\Metalama.Obfuscator.csproj" ReferenceOutputAssembly="false" Condition="'$(Obfuscate)' == 'True'" />
 
         <!-- The following references handle [Memo] -->
-        <ProjectReference Include="..\Build\Metalama.SourceTransformer\Metalama.SourceTransformer.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false"/>
+        <ProjectReference Include="..\Build\Metalama.SourceTransformer\Metalama.SourceTransformer.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
 
 
         <!-- Metalama.RoslynUtilities is embedded in the current package to having to publish Metalama.RoslynUtilities as public package
@@ -57,7 +54,7 @@
         <PackageReference Include="Metalama.RoslynUtilities" Version="$(MetalamaCompilerVersion)" PrivateAssets="all" Aliases="roslyn">
             <GeneratePathProperty>true</GeneratePathProperty>
         </PackageReference>
-        <None Include="$(PkgMetalama_RoslynUtilities)\lib\netstandard2.0\Metalama.RoslynUtilities.dll" Pack="true" PackagePath="lib\netstandard2.0" CopyToOutputDirectory="Always"/>
+        <None Include="$(PkgMetalama_RoslynUtilities)\lib\netstandard2.0\Metalama.RoslynUtilities.dll" Pack="true" PackagePath="lib\netstandard2.0" CopyToOutputDirectory="Always" />
 
     </ItemGroup>
 
@@ -72,7 +69,7 @@
     </PropertyGroup>
 
     <Target Name="NoPackWithoutObfuscate" BeforeTargets="Pack">
-        <Error Condition="'$(Configuration)' == 'Release' AND '$(Obfuscate)' != 'True'" Text="Not allowed to create Release package without obfuscation, use '-p:Obfuscate=True'."/>
+        <Error Condition="'$(Configuration)' == 'Release' AND '$(Obfuscate)' != 'True'" Text="Not allowed to create Release package without obfuscation, use '-p:Obfuscate=True'." />
     </Target>
 
 </Project>

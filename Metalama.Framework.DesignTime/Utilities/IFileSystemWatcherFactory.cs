@@ -3,7 +3,7 @@
 
 using Metalama.Framework.Project;
 
-namespace Metalama.Framework.Engine.Utilities
+namespace Metalama.Framework.DesignTime.Utilities
 {
     internal interface IFileSystemWatcherFactory : IService
     {

@@ -80,7 +80,7 @@ namespace Metalama.Framework.Engine.Pipeline
 
         internal int PipelineInitializationCount { get; private set; }
 
-        private protected bool TryInitialize(
+        protected bool TryInitialize(
             IDiagnosticAdder diagnosticAdder,
             PartialCompilation compilation,
             IReadOnlyList<SyntaxTree>? compileTimeTreesHint,
@@ -278,7 +278,7 @@ namespace Metalama.Framework.Engine.Pipeline
             Compilation compilation,
             CancellationToken cancellationToken )
         {
-            var aspectClasses = configuration.AspectClasses.ToImmutableArray<IAspectClass>();
+            var aspectClasses = configuration.BoundAspectClasses.ToImmutableArray<IAspectClass>();
 
             var transitiveAspectSource = new TransitiveAspectSource( compilation, aspectClasses, configuration.ServiceProvider, cancellationToken );
 
@@ -313,7 +313,7 @@ namespace Metalama.Framework.Engine.Pipeline
         /// Executes the all stages of the current pipeline, report diagnostics, and returns the last <see cref="PipelineStageResult"/>.
         /// </summary>
         /// <returns><c>true</c> if there was no error, <c>false</c> otherwise.</returns>
-        internal bool TryExecute(
+        public bool TryExecute(
             PartialCompilation compilation,
             IDiagnosticAdder diagnosticAdder,
             AspectPipelineConfiguration? pipelineConfiguration,
@@ -334,7 +334,7 @@ namespace Metalama.Framework.Engine.Pipeline
             // we need to substitute the code fix filter.
             pipelineConfiguration = pipelineConfiguration.WithCodeFixFilter( this.FilterCodeFix );
 
-            if ( pipelineConfiguration.CompileTimeProject == null || pipelineConfiguration.AspectClasses.Count == 0 )
+            if ( pipelineConfiguration.CompileTimeProject == null || pipelineConfiguration.BoundAspectClasses.Count == 0 )
             {
                 // If there is no aspect in the compilation, don't execute the pipeline.
                 pipelineStageResult = new PipelineStageResult(

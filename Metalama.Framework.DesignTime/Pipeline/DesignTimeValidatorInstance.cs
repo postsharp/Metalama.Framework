@@ -11,7 +11,7 @@ using Microsoft.CodeAnalysis;
 
 namespace Metalama.Framework.DesignTime.Pipeline;
 
-public class DesignTimeValidatorInstance
+internal class DesignTimeValidatorInstance
 {
     private ulong _longHashCode;
 
@@ -36,7 +36,7 @@ public class DesignTimeValidatorInstance
 
     internal ReferenceValidatorInstance ToReferenceValidationInstance( CompilationModel compilation )
         => new(
-            compilation.Factory.GetDeclaration( this.ValidatedDeclaration.GetId().Resolve( compilation.RoslynCompilation ).AssertNotNull() ).AssertNotNull(),
+            compilation.Factory.GetDeclaration( this.ValidatedDeclaration ).AssertNotNull(),
             this._driver,
             this.Implementation,
             this._referenceKinds );

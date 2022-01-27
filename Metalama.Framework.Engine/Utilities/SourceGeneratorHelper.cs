@@ -6,8 +6,8 @@ using System;
 
 namespace Metalama.Framework.Engine.Utilities;
 
-internal static class SourceGeneratorHelper
+public static class SourceGeneratorHelper
 {
-    internal static bool IsGeneratedFile( SyntaxTree syntaxTree )
+    public static bool IsGeneratedFile( SyntaxTree syntaxTree )
         => syntaxTree.FilePath.StartsWith( "Metalama.Framework.CompilerExtensions", StringComparison.Ordinal );
 }

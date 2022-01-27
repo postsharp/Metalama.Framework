@@ -19,49 +19,48 @@ namespace Metalama.Framework.DesignTime
             UserError
                 = new(
                     "CR0301",
-                    "A Metalama user error.",
+                    Error,
                     "{0}: {1} The diagnostic {0} was not defined in the user profile and has been replaced by a generic diagnostic ID.",
-                    _category,
-                    Error );
+                    "A Metalama user error." );
 
         internal static readonly DiagnosticDefinition<(string Id, string Message)>
             UserWarning
                 = new(
                     "CR0302",
-                    "A Metalama user warning.",
+                    Warning,
                     "{0}: {1} The diagnostic {0} was not defined in the user profile and has been replaced by a generic diagnostic ID. "
                     + "Please restart your IDE.",
-                    _category,
-                    Warning );
+                    "A Metalama user warning.",
+                    _category );
 
         internal static readonly DiagnosticDefinition<(string Id, string Message)>
             UserInfo
                 = new(
                     "CR0303",
-                    "A Metalama user info.",
+                    Info,
                     "{0}: {1} The diagnostic {0} was not defined in the user profile and has been replaced by a generic diagnostic ID. "
                     + " Please restart your IDE.",
-                    _category,
-                    Info );
+                    "A Metalama user info.",
+                    _category );
 
         internal static readonly DiagnosticDefinition<(string Id, string Message)>
             UserHidden
                 = new(
                     "CR0304",
-                    "A Metalama user hidden message.",
+                    Hidden,
                     "{0}: {1} The diagnostic {0} was not defined in the user profile and has been replaced by a generic diagnostic ID."
                     + " Please restart your IDE.",
-                    _category,
-                    Hidden );
+                    "A Metalama user hidden message.",
+                    _category );
 
         internal static readonly DiagnosticDefinition<(string Id, ISymbol Symbol)>
             UnregisteredSuppression
                 = new(
                     "CR0306",
+                    Warning,
                     "An aspect tried to suppress an unregistered diagnostic.",
                     "An aspect tried to suppress the diagnostic {0} on '{1}', but this diagnostic ID has not been configured for "
                     + "suppression in the user profile. Please restart your IDE.",
-                    _category,
-                    Warning );
+                    _category );
     }
 }

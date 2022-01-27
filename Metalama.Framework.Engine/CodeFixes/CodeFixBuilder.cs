@@ -171,7 +171,7 @@ namespace Metalama.Framework.Engine.CodeFixes
                 throw new ArgumentOutOfRangeException( nameof(targetDeclaration), "The declaration is not declared in source." );
             }
 
-            var aspectClass = (AspectClass) this._context.PipelineConfiguration.AspectClasses.Single( c => c.Type == aspect.GetType() );
+            var aspectClass = (AspectClass) this._context.PipelineConfiguration.BoundAspectClasses.Single<IBoundAspectClass>( c => c.Type == aspect.GetType() );
 
             var diagnosticList = new DiagnosticList();
 

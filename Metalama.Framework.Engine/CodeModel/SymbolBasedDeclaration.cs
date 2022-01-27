@@ -11,7 +11,7 @@ using SyntaxReference = Microsoft.CodeAnalysis.SyntaxReference;
 
 namespace Metalama.Framework.Engine.CodeModel
 {
-    internal abstract class SymbolBasedDeclaration : BaseDeclaration
+    public abstract class SymbolBasedDeclaration : BaseDeclaration
     {
         [Obfuscation( Exclude = true /* The obfuscator believes it implements ISdkDeclaration.Symbol, but it does not. */ )]
         public abstract ISymbol Symbol { get; }
