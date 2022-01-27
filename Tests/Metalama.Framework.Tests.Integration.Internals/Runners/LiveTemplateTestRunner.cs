@@ -7,6 +7,7 @@ using Metalama.Framework.Engine.DesignTime.Refactoring;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Pipeline;
+using Metalama.Framework.Engine.Pipeline.DesignTime;
 using Metalama.Framework.Engine.Templating;
 using Metalama.TestFramework;
 using Microsoft.CodeAnalysis;
@@ -40,34 +41,23 @@ namespace Metalama.Framework.Tests.Integration.Runners
             var serviceProvider = testResult.ProjectScopedServiceProvider;
             var compilation = CompilationModel.CreateInitialInstance( new NullProject( serviceProvider ), testResult.InputCompilation! );
 
-            using var designTimePipeline = new DesignTimeAspectPipeline( serviceProvider, domain, this.MetadataReferences, true );
-
-            Assert.True(
-                designTimePipeline.TryGetConfiguration(
-                    PartialCompilation.CreateComplete( testResult.InputCompilation! ),
-                    NullDiagnosticAdder.Instance,
-                    true,
-                    CancellationToken.None,
-                    out var configuration ) );
 
             var partialCompilation = PartialCompilation.CreateComplete( testResult.InputCompilation! );
             var target = compilation.Types.OfName( "TargetClass" ).Single().Methods.OfName( "TargetMethod" ).Single().GetSymbol();
-            var aspectClass = designTimePipeline.AspectClasses!.Single( a => a.ShortName == "TestAspect" );
-
+            
             var success = LiveTemplateAspectPipeline.TryExecute(
-                configuration!.ServiceProvider,
+                serviceProvider,
                 domain,
-                configuration,
-                aspectClass,
-                aspectClass.CreateDefaultInstance(),
+                null,
+                c => c.AspectClasses.Single( a => a.ShortName == "TestAspect" ),
+                    
                 partialCompilation,
                 target!,
+                testResult.PipelineDiagnostics,
                 CancellationToken.None,
-                out var outputCompilation,
-                out var diagnostics );
+                out var outputCompilation );
 
-            testResult.PipelineDiagnostics.Report( diagnostics );
-
+            
             if ( success )
             {
                 testResult.HasOutputCode = true;

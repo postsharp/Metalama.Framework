@@ -18,6 +18,7 @@ namespace Metalama.Framework.Engine.Pipeline
     /// the order of layers.
     /// </summary>
     internal record AspectPipelineConfiguration(
+        CompileTimeDomain Domain,
         ImmutableArray<PipelineStageConfiguration> Stages,
         BoundAspectClassCollection AspectClasses,
         ImmutableArray<OrderedAspectLayer> AspectLayers,
@@ -30,6 +31,7 @@ namespace Metalama.Framework.Engine.Pipeline
     {
         public AspectPipelineConfiguration WithServiceProvider( ServiceProvider serviceProvider )
             => new(
+                this.Domain,
                 this.Stages,
                 this.AspectClasses,
                 this.AspectLayers,
@@ -44,6 +46,7 @@ namespace Metalama.Framework.Engine.Pipeline
             => codeFixFilter == this.CodeFixFilter
                 ? this
                 : new AspectPipelineConfiguration(
+                    this.Domain,
                     this.Stages,
                     this.AspectClasses,
                     this.AspectLayers,

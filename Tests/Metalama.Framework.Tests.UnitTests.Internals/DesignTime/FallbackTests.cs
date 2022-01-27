@@ -29,7 +29,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
     public class FallbackTests : TestBase
     {
         [Fact]
-        public async Task Declarative()
+        public async Task DeclarativeAsync()
         {
             const string code = @"
 using Metalama.Framework.Aspects;
@@ -62,11 +62,11 @@ public partial class TargetClass
 }
 ";
 
-            await this.RunTest( code );
+            await this.RunTestAsync( code );
         }
 
         [Fact]
-        public async Task Programmatic()
+        public async Task ProgrammaticAsync()
         {
             const string code = @"
 using Metalama.Framework.Aspects;
@@ -105,11 +105,11 @@ public partial class TargetClass
 }
 ";
 
-            await this.RunTest( code );
+            await this.RunTestAsync( code );
         }
 
         [Fact]
-        public async Task NonPartial()
+        public async Task NonPartialAsync()
         {
             const string code = @"
 using Metalama.Framework.Aspects;
@@ -132,10 +132,10 @@ public class TargetClass
 }
 ";
 
-            await this.RunTest( code );
+            await this.RunTestAsync( code );
         }
 
-        public async Task RunTest( string code )
+        private async Task RunTestAsync( string code )
         {
             using var domain = new UnloadableCompileTimeDomain();
             using var testContext = this.CreateTestContext();
@@ -197,6 +197,8 @@ public class TargetClass
             public string ProjectId => this._underlying.ProjectId;
 
             public string? BuildTouchFile => this._underlying.BuildTouchFile;
+
+            public string? SourceGeneratorTouchFile => this._underlying.SourceGeneratorTouchFile;
 
             public string? AssemblyName => this._underlying.AssemblyName;
 

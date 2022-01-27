@@ -90,7 +90,7 @@ namespace Metalama.TestFramework
                 if ( testInput.Options.ApplyCodeFix.GetValueOrDefault() )
                 {
                     // When we test code fixed, we don't apply the pipeline output, but we apply the code fix instead.
-                    if ( !await ApplyCodeFixAsync( testInput, testResult, domain ) )
+                    if ( !await ApplyCodeFixAsync( testInput, testResult, domain, serviceProviderWithObserver ) )
                     {
                         return;
                     }
@@ -114,11 +114,11 @@ namespace Metalama.TestFramework
             }
         }
 
-        private static async Task<bool> ApplyCodeFixAsync( TestInput testInput, TestResult testResult, CompileTimeDomain domain )
+        private static async Task<bool> ApplyCodeFixAsync( TestInput testInput, TestResult testResult, CompileTimeDomain domain, ServiceProvider serviceProvider )
         {
             var codeFixes = testResult.PipelineDiagnostics.SelectMany( d => CodeFixTitles.GetCodeFixTitles( d ).Select( t => (Diagnostic: d, Title: t) ) );
             var codeFix = codeFixes.ElementAt( testInput.Options.AppliedCodeFixIndex.GetValueOrDefault() );
-            var codeFixRunner = new CodeFixRunner( domain, new TestProjectOptions() );
+            var codeFixRunner = new StandaloneCodeFixRunner(  domain,  serviceProvider, new TestProjectOptions() );
 
             var inputDocument = testResult.SyntaxTrees[0].InputDocument;
 

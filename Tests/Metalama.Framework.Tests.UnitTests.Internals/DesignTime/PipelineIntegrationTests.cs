@@ -161,7 +161,7 @@ F1.cs:
         }
 
         [Fact]
-        public async Task ChangeInAspectCode()
+        public async Task ChangeInAspectCodeAsync()
         {
             var assemblyName = "test_" + Guid.NewGuid();
 
@@ -270,7 +270,7 @@ Target.cs:
             // There must be an error on the aspect.
             List<Diagnostic> diagnostics4 = new();
 
-            TemplatingCodeValidator.Validate( compilation4.GetSemanticModel( aspect4 ), diagnostics4.Add, pipeline, CancellationToken.None );
+            pipeline.ValidateTemplatingCode( compilation4.GetSemanticModel( aspect4 ), diagnostics4.Add );
 
             Assert.Contains(
                 diagnostics4,
@@ -297,7 +297,7 @@ Target.cs:
 
             List<Diagnostic> diagnostics5 = new();
 
-            TemplatingCodeValidator.Validate( compilation5.GetSemanticModel( aspect5 ), diagnostics5.Add, pipeline, CancellationToken.None );
+            pipeline.ValidateTemplatingCode( compilation5.GetSemanticModel( aspect5 ), diagnostics5.Add );
 
             Assert.Contains(
                 diagnostics5,
@@ -329,7 +329,7 @@ Target.cs:
 
             List<Diagnostic> diagnostics6 = new();
 
-            TemplatingCodeValidator.Validate( compilation5.GetSemanticModel( aspect5 ), diagnostics6.Add, pipeline, CancellationToken.None );
+            pipeline.ValidateTemplatingCode( compilation5.GetSemanticModel( aspect5 ), diagnostics6.Add );
 
             Assert.DoesNotContain(
                 diagnostics6,

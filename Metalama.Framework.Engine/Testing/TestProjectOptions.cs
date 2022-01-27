@@ -58,6 +58,8 @@ namespace Metalama.Framework.Engine.Testing
 
         public virtual string? BuildTouchFile => null;
 
+        public string? SourceGeneratorTouchFile => null;
+
         public string? AssemblyName => null;
 
         public ImmutableArray<object> PlugIns => ImmutableArray<object>.Empty;

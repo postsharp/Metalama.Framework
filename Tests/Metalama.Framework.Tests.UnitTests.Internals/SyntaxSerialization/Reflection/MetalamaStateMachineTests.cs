@@ -31,7 +31,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
         }
 
         [Fact]
-        public void TestAsync()
+        public void Test()
         {
             var code = "class Target { public static async void Method() { await System.Threading.Tasks.Task.Delay(1); } }";
 

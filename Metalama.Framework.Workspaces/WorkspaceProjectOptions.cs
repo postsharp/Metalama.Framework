@@ -42,6 +42,8 @@ namespace Metalama.Framework.Workspaces
 
         public string? BuildTouchFile => null;
 
+        public string? SourceGeneratorTouchFile => null;
+
         public string? AssemblyName => this._compilation.AssemblyName;
 
         public ImmutableArray<object> PlugIns => ImmutableArray<object>.Empty;

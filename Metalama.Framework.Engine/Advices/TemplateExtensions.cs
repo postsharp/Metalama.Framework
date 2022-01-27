@@ -22,7 +22,7 @@ namespace Metalama.Framework.Engine.Advices
             return (default, default);
         }
 
-        private static bool IsAsync( this TemplateKind selectionKind )
+        private static bool IsAsyncTemplate( this TemplateKind selectionKind )
             => selectionKind switch
             {
                 TemplateKind.Async => true,
@@ -31,7 +31,7 @@ namespace Metalama.Framework.Engine.Advices
                 _ => false
             };
 
-        private static bool IsAsyncIterator( this TemplateKind selectionKind )
+        private static bool IsAsyncIteratorTemplate( this TemplateKind selectionKind )
             => selectionKind switch
             {
                 TemplateKind.IAsyncEnumerable => true,
@@ -39,11 +39,11 @@ namespace Metalama.Framework.Engine.Advices
                 _ => false
             };
 
-        public static bool MustInterpretAsAsync( this in TemplateMember<IMethod> template )
+        public static bool MustInterpretAsAsyncTemplate( this in TemplateMember<IMethod> template )
             => template.Declaration is { IsAsync: true }
-               || (template.SelectedKind == TemplateKind.Default && template.InterpretedKind.IsAsync());
+               || (template.SelectedKind == TemplateKind.Default && template.InterpretedKind.IsAsyncTemplate());
 
-        public static bool MustInterpretAsAsyncIterator( this in TemplateMember<IMethod> template )
-            => template.InterpretedKind.IsAsyncIterator() && (template.Declaration!.IsAsync || template.SelectedKind == TemplateKind.Default);
+        public static bool MustInterpretAsAsyncIteratorTemplate( this in TemplateMember<IMethod> template )
+            => template.InterpretedKind.IsAsyncIteratorTemplate() && (template.Declaration!.IsAsync || template.SelectedKind == TemplateKind.Default);
     }
 }

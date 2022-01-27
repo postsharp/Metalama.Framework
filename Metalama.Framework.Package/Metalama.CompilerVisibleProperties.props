@@ -4,16 +4,17 @@
     </PropertyGroup>
     <!-- Exports the properties to the compiler -->
     <ItemGroup>
-        <CompilerVisibleProperty Include="MetalamaProjectId" />
-        <CompilerVisibleProperty Include="MetalamaBuildTouchFile" />
-        <CompilerVisibleProperty Include="MetalamaEnabled" />
-        <CompilerVisibleProperty Include="MetalamaFormatOutput" />
-        <CompilerVisibleProperty Include="MetalamaFormatCompileTimeCode" />
-        <CompilerVisibleProperty Include="MetalamaUserCodeTrusted" />
-        <CompilerVisibleProperty Include="MetalamaCompileTimeOnlyProject" />
-        <CompilerVisibleProperty Include="AssemblyName" />
-        <CompilerVisibleProperty Include="MetalamaDesignTimeEnabled" />
-        <CompilerVisibleProperty Include="MetalamaAdditionalCompilationOutputDirectory" />
+        <CompilerVisibleProperty Include="MetalamaProjectId"/>
+        <CompilerVisibleProperty Include="MetalamaBuildTouchFile"/>
+        <CompilerVisibleProperty Include="MetalamaSourceGeneratorTouchFile"/>
+        <CompilerVisibleProperty Include="MetalamaEnabled"/>
+        <CompilerVisibleProperty Include="MetalamaFormatOutput"/>
+        <CompilerVisibleProperty Include="MetalamaFormatCompileTimeCode"/>
+        <CompilerVisibleProperty Include="MetalamaUserCodeTrusted"/>
+        <CompilerVisibleProperty Include="MetalamaCompileTimeOnlyProject"/>
+        <CompilerVisibleProperty Include="AssemblyName"/>
+        <CompilerVisibleProperty Include="MetalamaDesignTimeEnabled"/>
+        <CompilerVisibleProperty Include="MetalamaAdditionalCompilationOutputDirectory"/>
     </ItemGroup>
 
     <!-- More properties are already exported by Metalama.Compiler and don't need to be exported a second time. -->

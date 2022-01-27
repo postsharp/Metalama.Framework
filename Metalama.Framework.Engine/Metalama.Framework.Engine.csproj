@@ -14,7 +14,6 @@
         <EmbeddedResource Include="..\Metalama.Framework.CompileTime\bin\$(Configuration)\netstandard2.0\Metalama.Framework.dll">
             <LogicalName>Metalama.Framework.dll</LogicalName>
         </EmbeddedResource>
-        <EmbeddedResource Remove="ServiceProvider\**" />
     </ItemGroup>
 
     <ItemGroup>
@@ -22,6 +21,8 @@
         <InternalsVisibleTo Include="Metalama.Framework.Tests.UnitTests.Internals" />
         <InternalsVisibleTo Include="Metalama.Framework.Tests.Integration.Internals" />
         <InternalsVisibleTo Include="Metalama.Framework.CompilerAddIn" />
+        <InternalsVisibleTo Include="Metalama.Framework.DesignTime" />
+        <InternalsVisibleTo Include="Metalama.Framework.DesignTime.VisualStudio" />
         <InternalsVisibleTo Include="DynamicProxyGenAssembly2" Key="$(FakeItEasyKey)" LoadsWithinVisualStudio="false" />
     </ItemGroup>
 
@@ -58,17 +59,6 @@
         </PackageReference>
         <None Include="$(PkgMetalama_RoslynUtilities)\lib\netstandard2.0\Metalama.RoslynUtilities.dll" Pack="true" PackagePath="lib\netstandard2.0" CopyToOutputDirectory="Always" />
 
-    </ItemGroup>
-
-    <ItemGroup>
-
-        <Compile Remove="ServiceProvider\**" />
-        <Compile Remove="CodeModel\Builders\BuiltGenericParameter.cs" />
-        <Compile Remove="CompileTime\CompileTimeLogCategory.cs" />
-    </ItemGroup>
-
-    <ItemGroup>
-        <None Remove="ServiceProvider\**" />
     </ItemGroup>
 
     <!-- Obfuscation -->

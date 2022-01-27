@@ -244,6 +244,7 @@ namespace Metalama.Framework.Engine.Pipeline
                 .ToImmutableArray();
 
             configuration = new AspectPipelineConfiguration(
+                this._domain,
                 stages,
                 allAspectClasses,
                 allOrderedAspectLayers,
@@ -312,13 +313,24 @@ namespace Metalama.Framework.Engine.Pipeline
         /// Executes the all stages of the current pipeline, report diagnostics, and returns the last <see cref="PipelineStageResult"/>.
         /// </summary>
         /// <returns><c>true</c> if there was no error, <c>false</c> otherwise.</returns>
-        private protected bool TryExecute(
+        internal bool TryExecute(
             PartialCompilation compilation,
             IDiagnosticAdder diagnosticAdder,
-            AspectPipelineConfiguration pipelineConfiguration,
+            AspectPipelineConfiguration? pipelineConfiguration,
             CancellationToken cancellationToken,
             [NotNullWhen( true )] out PipelineStageResult? pipelineStageResult )
         {
+
+            if ( pipelineConfiguration == null )
+            {
+                if ( !this.TryInitialize( diagnosticAdder, compilation, null, cancellationToken, out pipelineConfiguration ) )
+                {
+                    pipelineStageResult = null;
+                    
+                    return false;
+                }
+            }
+            
             // When we reuse a pipeline configuration created from a different pipeline (e.g. design-time to code fix),
             // we need to substitute the code fix filter.
             pipelineConfiguration = pipelineConfiguration.WithCodeFixFilter( this.FilterCodeFix );

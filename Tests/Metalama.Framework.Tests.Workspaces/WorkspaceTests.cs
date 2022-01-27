@@ -12,7 +12,7 @@ namespace Metalama.Framework.Tests.Workspaces
     public class WorkspaceTests : TestBase
     {
         [Fact]
-        public async Task LoadProjectSingleTarget()
+        public async Task LoadProjectSingleTargetAsync()
         {
             using var testContext = this.CreateTestContext();
 
@@ -40,7 +40,7 @@ namespace Metalama.Framework.Tests.Workspaces
         }
 
         [Fact]
-        public async Task LoadProjectMultiTarget()
+        public async Task LoadProjectMultiTargetAsync()
         {
             using var testContext = this.CreateTestContext();
 

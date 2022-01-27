@@ -143,12 +143,12 @@ namespace Metalama.TestFramework
                 var emptyProject = this.CreateProject( testInput.Options ).WithParseOptions( parseOptions ).WithCompilationOptions( compilationOptions );
                 var project = emptyProject;
 
-                Document? AddDocument( string fileName, string sourceCode )
+                async Task<Document?> AddDocumentAsync( string fileName, string sourceCode )
                 {
                     // Note that we don't pass the full path to the Document because it causes call stacks of exceptions to have full paths,
                     // which is more difficult to test.
                     var parsedSyntaxTree = CSharpSyntaxTree.ParseText( sourceCode, parseOptions, fileName, Encoding.UTF8 );
-                    var prunedSyntaxRoot = new InactiveCodeRemover().Visit( parsedSyntaxTree.GetRoot() );
+                    var prunedSyntaxRoot = new InactiveCodeRemover().Visit( await parsedSyntaxTree.GetRootAsync() );
 
                     if ( prunedSyntaxRoot is CompilationUnitSyntax { Members: { Count: 0 } } )
                     {
@@ -163,7 +163,7 @@ namespace Metalama.TestFramework
                 }
 
                 var sourceFileName = testInput.TestName + ".cs";
-                var mainDocument = AddDocument( sourceFileName, testInput.SourceCode );
+                var mainDocument = await AddDocumentAsync( sourceFileName, testInput.SourceCode );
 
                 if ( mainDocument == null )
                 {
@@ -182,7 +182,10 @@ namespace Metalama.TestFramework
                     (CSharpCompilationOptions?) project.CompilationOptions );
 
 #if NETFRAMEWORK
-                var platformDocument = AddDocument( "Platform.cs", "namespace System.Runtime.CompilerServices { internal static class IsExternalInit {}}" );
+                var platformDocument = await AddDocumentAsync(
+                    "Platform.cs",
+                    "namespace System.Runtime.CompilerServices { internal static class IsExternalInit {}}" );
+
                 initialCompilation = initialCompilation.AddSyntaxTrees( (await platformDocument!.GetSyntaxTreeAsync())! );
 #endif
 
@@ -195,7 +198,7 @@ namespace Metalama.TestFramework
                     {
                         var includedFileName = Path.GetFileName( includedFullPath );
 
-                        var includedDocument = AddDocument( includedFileName, includedText );
+                        var includedDocument = await AddDocumentAsync( includedFileName, includedText );
 
                         if ( includedDocument == null )
                         {
@@ -315,9 +318,9 @@ namespace Metalama.TestFramework
             }
         }
 
-        protected internal static string NormalizeEndOfLines( string? s ) => string.IsNullOrWhiteSpace( s ) ? "" : _newLineRegex.Replace( s, "\n" ).Trim();
+        protected static string NormalizeEndOfLines( string? s ) => string.IsNullOrWhiteSpace( s ) ? "" : _newLineRegex.Replace( s, "\n" ).Trim();
 
-        internal static string? NormalizeTestOutput( string? s, bool preserveFormatting )
+        public static string? NormalizeTestOutput( string? s, bool preserveFormatting )
             => s == null ? null : NormalizeTestOutput( CSharpSyntaxTree.ParseText( s ).GetRoot(), preserveFormatting );
 
         private static string? NormalizeTestOutput( SyntaxNode syntaxNode, bool preserveFormatting )

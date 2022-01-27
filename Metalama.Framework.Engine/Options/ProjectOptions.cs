@@ -36,6 +36,8 @@ namespace Metalama.Framework.Engine.Options
 
         public string? BuildTouchFile => this.GetStringOption( "MetalamaBuildTouchFile" );
 
+        public string? SourceGeneratorTouchFile => this.GetStringOption( "MetalamaSourceGeneratorTouchFile" );
+
         public string? AssemblyName => this.GetStringOption( "AssemblyName" );
 
         public ImmutableArray<object> PlugIns { get; }

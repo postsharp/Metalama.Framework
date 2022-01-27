@@ -71,10 +71,11 @@ namespace Metalama.Framework.Engine.CompileTime
         }
 
         private readonly CompileTimeProjectManifest? _manifest;
-        private readonly CompileTimeDomain _domain;
         private readonly string? _compiledAssemblyPath;
         private readonly AssemblyIdentity? _compileTimeIdentity;
         private readonly Func<string, TextMapFile?>? _getLocationMap;
+
+        public CompileTimeDomain Domain { get; }
 
         public DiagnosticManifest DiagnosticManifest { get; }
 
@@ -179,7 +180,7 @@ namespace Metalama.Framework.Engine.CompileTime
             Assembly? assembly = null,
             DiagnosticManifest? diagnosticManifest = null )
         {
-            this._domain = domain;
+            this.Domain = domain;
             this._compiledAssemblyPath = compiledAssemblyPath;
             this._getLocationMap = getLocationMap;
             this.Directory = directory;
@@ -363,7 +364,7 @@ namespace Metalama.Framework.Engine.CompileTime
                     }
                 }
 
-                this._assembly = this._domain.GetOrLoadAssembly( this._compileTimeIdentity!, this._compiledAssemblyPath! );
+                this._assembly = this.Domain.GetOrLoadAssembly( this._compileTimeIdentity!, this._compiledAssemblyPath! );
             }
         }
 

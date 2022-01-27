@@ -264,6 +264,16 @@ namespace Metalama.Framework.Engine
                 "The class '{0}' must have a default constructor because of the [LiveTemplate] attribute.",
                 Error,
                 "Live templates must have a default constructor." );
+        
+        internal static readonly DiagnosticDefinition<INamedType>
+            TypeNotPartial
+                = new(
+                    "CR0048",
+                    "The type must be made partial.",
+                    "Aspects add members to '{0}' but it is not marked as 'partial'. Make the type 'partial' to make it possible to "
+                    + "reference aspect-generated artefacts from source code.",
+                    _category,
+                    Warning );
 
         // TODO: Use formattable string (C# does not seem to find extension methods).
         public static readonly DiagnosticDefinition<string>
