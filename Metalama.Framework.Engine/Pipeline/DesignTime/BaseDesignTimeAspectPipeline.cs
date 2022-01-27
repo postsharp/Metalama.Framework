@@ -3,19 +3,20 @@
 
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
-using Metalama.Framework.Engine.DesignTime.Pipeline;
 using Metalama.Framework.Engine.Diagnostics;
-using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
-using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 
 namespace Metalama.Framework.Engine.Pipeline.DesignTime;
 
 public abstract class BaseDesignTimeAspectPipeline : AspectPipeline
 {
-    public BaseDesignTimeAspectPipeline( ServiceProvider serviceProvider, bool isTest, CompileTimeDomain? domain ) : base( serviceProvider, ExecutionScenario.DesignTime, isTest, domain ) { }
+    public BaseDesignTimeAspectPipeline( ServiceProvider serviceProvider, bool isTest, CompileTimeDomain? domain ) : base(
+        serviceProvider,
+        ExecutionScenario.DesignTime,
+        isTest,
+        domain ) { }
 
     /// <inheritdoc/>
     private protected override HighLevelPipelineStage CreateHighLevelStage(
@@ -34,9 +35,9 @@ public class TestDesignTimeAspectPipeline : BaseDesignTimeAspectPipeline
     public TestDesignTimeAspectPipelineResult Execute( Compilation inputCompilation )
     {
         var diagnosticList = new DiagnosticList();
-        
+
         var partialCompilation = PartialCompilation.CreateComplete( inputCompilation );
-        
+
         if ( !this.TryInitialize( diagnosticList, partialCompilation, null, CancellationToken.None, out var configuration ) )
         {
             return new TestDesignTimeAspectPipelineResult( false, diagnosticList.ToImmutableArray(), ImmutableArray<IntroducedSyntaxTree>.Empty );
@@ -47,9 +48,14 @@ public class TestDesignTimeAspectPipeline : BaseDesignTimeAspectPipeline
             return new TestDesignTimeAspectPipelineResult( false, diagnosticList.ToImmutableArray(), ImmutableArray<IntroducedSyntaxTree>.Empty );
         }
 
-        return new TestDesignTimeAspectPipelineResult( true, stageResult.Diagnostics.ReportedDiagnostics.AddRange( diagnosticList ), stageResult.AdditionalSyntaxTrees );
-
+        return new TestDesignTimeAspectPipelineResult(
+            true,
+            stageResult.Diagnostics.ReportedDiagnostics.AddRange( diagnosticList ),
+            stageResult.AdditionalSyntaxTrees );
     }
 }
 
-public record TestDesignTimeAspectPipelineResult ( bool Success,  ImmutableArray<Diagnostic> Diagnostics,  ImmutableArray<IntroducedSyntaxTree> AdditionalSyntaxTrees  );
+public record TestDesignTimeAspectPipelineResult(
+    bool Success,
+    ImmutableArray<Diagnostic> Diagnostics,
+    ImmutableArray<IntroducedSyntaxTree> AdditionalSyntaxTrees );

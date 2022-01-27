@@ -6,7 +6,6 @@ using Metalama.Framework.Engine.AspectOrdering;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.CompileTime;
-using Metalama.Framework.Engine.DesignTime.Pipeline;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Linking;
 using Metalama.Framework.Engine.Options;
@@ -19,7 +18,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 
-namespace Metalama.Framework.Engine.Pipeline
+namespace Metalama.Framework.Engine.Pipeline.CompileTime
 {
     /// <summary>
     /// The implementation of <see cref="HighLevelPipelineStage"/> used at compile time (not at design time).

@@ -7,9 +7,8 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Pipeline;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
-using System.Linq;
 
-namespace Metalama.Framework.Engine.DesignTime.Pipeline
+namespace Metalama.Framework.DesignTime.Pipeline
 {
     /// <summary>
     /// Builds a <see cref="SyntaxTreePipelineResult"/>.

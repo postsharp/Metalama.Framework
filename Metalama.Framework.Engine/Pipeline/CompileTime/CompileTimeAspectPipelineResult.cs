@@ -6,7 +6,7 @@ using Metalama.Framework.Engine.AdditionalOutputs;
 using Metalama.Framework.Engine.CodeModel;
 using System.Collections.Immutable;
 
-namespace Metalama.Framework.Engine.Pipeline
+namespace Metalama.Framework.Engine.Pipeline.CompileTime
 {
     public record CompileTimeAspectPipelineResult(
         ImmutableArray<SyntaxTreeTransformation> SyntaxTreeTransformations,

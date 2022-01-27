@@ -6,13 +6,12 @@ using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Validation;
 using Microsoft.CodeAnalysis;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 
-namespace Metalama.Framework.Engine.DesignTime.Pipeline
+namespace Metalama.Framework.DesignTime.Pipeline
 {
     /// <summary>
-    /// Results produced by <see cref="Metalama.Framework.Engine.DesignTime.Pipeline.DesignTimeAspectPipeline"/>.
+    /// Results produced by <see cref="DesignTimeAspectPipeline"/>.
     /// </summary>
     /// <param name="Success">Determines whether the pipeline was successful.</param>
     /// <param name="InputSyntaxTrees">The syntax trees for which the pipeline was executed.</param>

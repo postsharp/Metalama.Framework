@@ -7,13 +7,9 @@ using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Validation;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
-using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Linq;
-using System.Threading;
 
-namespace Metalama.Framework.Engine.DesignTime.Pipeline;
+namespace Metalama.Framework.DesignTime.Pipeline;
 
 internal class DesignTimeValidatorRunner
 {

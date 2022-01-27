@@ -10,5 +10,4 @@ internal static class SourceGeneratorHelper
 {
     internal static bool IsGeneratedFile( SyntaxTree syntaxTree )
         => syntaxTree.FilePath.StartsWith( "Metalama.Framework.CompilerExtensions", StringComparison.Ordinal );
-
 }

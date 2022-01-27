@@ -320,17 +320,16 @@ namespace Metalama.Framework.Engine.Pipeline
             CancellationToken cancellationToken,
             [NotNullWhen( true )] out PipelineStageResult? pipelineStageResult )
         {
-
             if ( pipelineConfiguration == null )
             {
                 if ( !this.TryInitialize( diagnosticAdder, compilation, null, cancellationToken, out pipelineConfiguration ) )
                 {
                     pipelineStageResult = null;
-                    
+
                     return false;
                 }
             }
-            
+
             // When we reuse a pipeline configuration created from a different pipeline (e.g. design-time to code fix),
             // we need to substitute the code fix filter.
             pipelineConfiguration = pipelineConfiguration.WithCodeFixFilter( this.FilterCodeFix );

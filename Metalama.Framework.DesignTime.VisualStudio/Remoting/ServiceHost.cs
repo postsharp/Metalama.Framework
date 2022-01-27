@@ -4,14 +4,11 @@
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.VisualStudio.Threading;
 using StreamJsonRpc;
-using System;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.IO.Pipes;
-using System.Threading;
-using System.Threading.Tasks;
 
-namespace Metalama.Framework.Engine.DesignTime.Remoting;
+namespace Metalama.Framework.DesignTime.VisualStudio.Remoting;
 
 internal class ServiceHost : IDisposable
 {

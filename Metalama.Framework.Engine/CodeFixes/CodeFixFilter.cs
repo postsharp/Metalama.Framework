@@ -4,7 +4,7 @@
 using Metalama.Framework.Diagnostics;
 using Microsoft.CodeAnalysis;
 
-namespace Metalama.Framework.Engine.DesignTime.CodeFixes
+namespace Metalama.Framework.Engine.CodeFixes
 {
     /// <summary>
     /// A predicate that determines whether code fixes should be captured for a specific diagnostic and location.

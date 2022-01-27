@@ -46,10 +46,22 @@ namespace Metalama.Framework.Tests.UnitTests.CodeModel
         [InlineData( "List<string?[]?>?", "typeof(global::System.Collections.Generic.List<global::System.String[]>)", false )]
         [InlineData( "List<int[]?>", "typeof(global::System.Collections.Generic.List<global::System.Int32[]>)", false )]
         [InlineData( "List<int?[]>", "typeof(global::System.Collections.Generic.List<global::System.Int32?[]>)", false )]
-        [InlineData( "global::System.Collections.Generic.List<global::System.String[]?>", "typeof(global::System.Collections.Generic.List<global::System.String[]>)", false )]
-        [InlineData( "global::System.Collections.Generic.List<global::System.String?[]?>?", "typeof(global::System.Collections.Generic.List<global::System.String[]>)", false )]
-        [InlineData( "global::System.Collections.Generic.List<global::System.Int32[]?>", "typeof(global::System.Collections.Generic.List<global::System.Int32[]>)", false )]
-        [InlineData( "global::System.Collections.Generic.List<global::System.Int32?[]>", "typeof(global::System.Collections.Generic.List<global::System.Int32?[]>)", false )]
+        [InlineData(
+            "global::System.Collections.Generic.List<global::System.String[]?>",
+            "typeof(global::System.Collections.Generic.List<global::System.String[]>)",
+            false )]
+        [InlineData(
+            "global::System.Collections.Generic.List<global::System.String?[]?>?",
+            "typeof(global::System.Collections.Generic.List<global::System.String[]>)",
+            false )]
+        [InlineData(
+            "global::System.Collections.Generic.List<global::System.Int32[]?>",
+            "typeof(global::System.Collections.Generic.List<global::System.Int32[]>)",
+            false )]
+        [InlineData(
+            "global::System.Collections.Generic.List<global::System.Int32?[]>",
+            "typeof(global::System.Collections.Generic.List<global::System.Int32?[]>)",
+            false )]
         public void TypeOfSyntax( string type, string expectedTypeOf, bool nullable )
         {
             using var testContext = this.CreateTestContext();

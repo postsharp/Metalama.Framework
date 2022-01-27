@@ -4,7 +4,7 @@
 using Metalama.Framework.Engine.Options;
 using Microsoft.CodeAnalysis;
 
-namespace Metalama.Framework.Engine.DesignTime;
+namespace Metalama.Framework.DesignTime;
 
 public partial class DesignTimeSourceGenerator
 {

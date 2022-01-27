@@ -3,7 +3,6 @@
 
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
-using Metalama.Framework.Engine.DesignTime.Pipeline;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Utilities;
@@ -13,7 +12,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Metalama.Framework.Engine.DesignTime.CodeFixes
+namespace Metalama.Framework.Engine.CodeFixes
 {
     // This class needs to be public because it is used by the public test runner.
 
@@ -25,7 +24,6 @@ namespace Metalama.Framework.Engine.DesignTime.CodeFixes
     {
         private readonly IProjectOptions _projectOptions;
 
-
         protected CodeFixRunner( IProjectOptions projectOptions )
         {
             this._projectOptions = projectOptions;
@@ -35,8 +33,8 @@ namespace Metalama.Framework.Engine.DesignTime.CodeFixes
             PartialCompilation compilation,
             CancellationToken cancellationToken,
             out AspectPipelineConfiguration? configuration,
-            [NotNullWhen(true)] out ServiceProvider? serviceProvider,
-            [NotNullWhen(true)] out CompileTimeDomain? domain);
+            [NotNullWhen( true )] out ServiceProvider? serviceProvider,
+            [NotNullWhen( true )] out CompileTimeDomain? domain );
 
         public async Task<Solution> ExecuteCodeFixAsync(
             Document document,
@@ -59,14 +57,12 @@ namespace Metalama.Framework.Engine.DesignTime.CodeFixes
                 return project.Solution;
             }
 
-
             // Get a compilation _without_ generated code, and map the target symbol.
             var generatedFiles = compilation.SyntaxTrees.Where( SourceGeneratorHelper.IsGeneratedFile );
             var sourceCompilation = compilation.RemoveSyntaxTrees( generatedFiles );
 
             var partialCompilation = PartialCompilation.CreatePartial( sourceCompilation, syntaxTree );
-            
-            
+
             // Get the pipeline configuration.
             if ( !this.TryGetConfiguration( partialCompilation, cancellationToken, out var designTimeConfiguration, out var serviceProvider, out var domain ) )
             {
@@ -75,7 +71,6 @@ namespace Metalama.Framework.Engine.DesignTime.CodeFixes
                 return project.Solution;
             }
 
-            
             // Execute the compile-time pipeline with the design-time project configuration.
             var codeFixPipeline = new CodeFixPipeline(
                 serviceProvider,
@@ -85,7 +80,7 @@ namespace Metalama.Framework.Engine.DesignTime.CodeFixes
 
             if ( !codeFixPipeline.TryExecute(
                     partialCompilation,
-                    designTimeConfiguration,
+                    ref designTimeConfiguration,
                     cancellationToken,
                     out var userCodeFixes,
                     out _ ) )
@@ -114,7 +109,7 @@ namespace Metalama.Framework.Engine.DesignTime.CodeFixes
             var context = new CodeFixContext(
                 document,
                 this._projectOptions,
-                designTimeConfiguration );
+                designTimeConfiguration! );
 
             var codeFixBuilder = new CodeFixBuilder( context, cancellationToken );
 

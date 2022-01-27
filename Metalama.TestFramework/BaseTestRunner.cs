@@ -4,6 +4,7 @@
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Pipeline;
+using Metalama.Framework.Engine.Pipeline.CompileTime;
 using Metalama.Framework.Engine.Testing;
 using Metalama.Framework.Project;
 using Metalama.TestFramework.Utilities;

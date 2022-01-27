@@ -10,7 +10,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Threading;
 
-namespace Metalama.Framework.Engine.DesignTime.CodeFixes
+namespace Metalama.Framework.Engine.CodeFixes
 {
     /// <summary>
     /// The implementation of <see cref="HighLevelPipelineStage"/> for <see cref="CodeFixPipeline"/>.

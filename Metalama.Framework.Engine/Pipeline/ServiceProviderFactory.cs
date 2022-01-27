@@ -3,6 +3,7 @@
 
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Options;
+using Metalama.Framework.Engine.Pipeline.CompileTime;
 using Metalama.Framework.Project;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;

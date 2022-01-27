@@ -18,7 +18,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Metalama.Framework.Engine.Pipeline
+namespace Metalama.Framework.Engine.Pipeline.CompileTime
 {
     /// <summary>
     /// The implementation of <see cref="AspectPipeline"/> used at compile time.

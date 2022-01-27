@@ -1,9 +1,8 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Metalama.Framework.Engine.DesignTime;
-using Metalama.Framework.Engine.DesignTime.Pipeline;
-using Metalama.Framework.Engine.DesignTime.Remoting;
+using Metalama.Framework.DesignTime.Pipeline;
+using Metalama.Framework.DesignTime.VisualStudio.Remoting;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Utilities;
@@ -13,9 +12,9 @@ using System.Collections.Immutable;
 
 namespace Metalama.Framework.DesignTime.VisualStudio;
 
-public class AnalysisProcessSourceGenerator : DesignTimeSourceGenerator
+public class AnalysisProcessSourceGenerator : DesignTimeSourceGenerator, IDisposable
 {
-    private ServiceHost? _serviceHost;
+    private readonly ServiceHost? _serviceHost;
 
     public AnalysisProcessSourceGenerator()
     {
@@ -25,8 +24,10 @@ public class AnalysisProcessSourceGenerator : DesignTimeSourceGenerator
             this._serviceHost.Start();
         }
     }
-    
+
+#pragma warning disable CA1001 // ServiceHost is disposable but not owned.
     private class AnalysisProcessSourceGeneratorImpl : SourceGeneratorImpl
+#pragma warning restore CA1001
     {
         private readonly ServiceHost? _serviceHost;
         private CancellationTokenSource? _currentCancellationSource;
@@ -117,4 +118,6 @@ public class AnalysisProcessSourceGenerator : DesignTimeSourceGenerator
     }
 
     protected override SourceGeneratorImpl CreateSourceGeneratorImpl() => new AnalysisProcessSourceGeneratorImpl( this._serviceHost );
+
+    public void Dispose() => this._serviceHost?.Dispose();
 }

@@ -4,7 +4,7 @@
 using Metalama.Framework.DesignTime.Contracts;
 using Microsoft.CodeAnalysis;
 
-namespace Metalama.Framework.Engine.DesignTime.Preview
+namespace Metalama.Framework.DesignTime.Preview
 {
     internal class PreviewTransformationResult : IPreviewTransformationResult
     {

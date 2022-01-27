@@ -3,22 +3,17 @@
 
 using Metalama.Compiler;
 using Metalama.Framework.DesignTime.Contracts;
+using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.DesignTime.Diff;
-using Metalama.Framework.Engine.DesignTime.Pipeline;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Options;
-using Metalama.Framework.Engine.Pipeline;
+using Metalama.Framework.Engine.Pipeline.CompileTime;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
-using System;
 using System.Collections.Immutable;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
-namespace Metalama.Framework.Engine.DesignTime.Preview
+namespace Metalama.Framework.DesignTime.Preview
 {
     public class TransformationPreviewService : ITransformationPreviewService
     {

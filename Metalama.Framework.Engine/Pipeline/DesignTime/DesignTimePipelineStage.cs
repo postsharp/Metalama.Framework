@@ -4,14 +4,13 @@
 using Metalama.Framework.Engine.AspectOrdering;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
-using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Validation;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Threading;
 
-namespace Metalama.Framework.Engine.DesignTime.Pipeline
+namespace Metalama.Framework.Engine.Pipeline.DesignTime
 {
     /// <summary>
     /// An implementation of <see cref="DesignTimePipelineStage"/> called from source generators.

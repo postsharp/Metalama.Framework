@@ -11,7 +11,7 @@ using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 
-namespace Metalama.Framework.Engine.DesignTime.CodeFixes
+namespace Metalama.Framework.Engine.CodeFixes
 {
     /// <summary>
     /// The implementation of <see cref="AspectPipeline"/> used to gather the code fix implementations, when a code fix
@@ -46,7 +46,7 @@ namespace Metalama.Framework.Engine.DesignTime.CodeFixes
 
         public bool TryExecute(
             PartialCompilation partialCompilation,
-            AspectPipelineConfiguration? configuration,
+            ref AspectPipelineConfiguration? configuration,
             CancellationToken cancellationToken,
             out ImmutableArray<CodeFixInstance> codeFixes,
             [NotNullWhen( true )] out CompilationModel? compilationModel )
@@ -56,10 +56,11 @@ namespace Metalama.Framework.Engine.DesignTime.CodeFixes
                 if ( !this.TryInitialize( NullDiagnosticAdder.Instance, partialCompilation, null, cancellationToken, out configuration ) )
                 {
                     compilationModel = null;
+
                     return false;
                 }
             }
-            
+
             if ( !this.TryExecute( partialCompilation, NullDiagnosticAdder.Instance, configuration, cancellationToken, out var result ) )
             {
                 codeFixes = default;

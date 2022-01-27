@@ -5,7 +5,6 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Linking;
-using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Transformations;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -16,7 +15,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 
-namespace Metalama.Framework.Engine.DesignTime.Pipeline
+namespace Metalama.Framework.Engine.Pipeline
 {
     internal static class DesignTimeSyntaxTreeGenerator
     {

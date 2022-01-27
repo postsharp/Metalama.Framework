@@ -2,25 +2,23 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Compiler;
+using Metalama.Framework.DesignTime.Diagnostics;
+using Metalama.Framework.DesignTime.Pipeline;
+using Metalama.Framework.DesignTime.Utilities;
+using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Collections;
-using Metalama.Framework.Engine.DesignTime.Diagnostics;
-using Metalama.Framework.Engine.DesignTime.Pipeline;
-using Metalama.Framework.Engine.DesignTime.Utilities;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Diagnostics;
-using System;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Threading;
 
 #pragma warning disable RS1001 // Missing diagnostic analyzer attribute.
 #pragma warning disable RS1022 // Remove access to our implementation types.
 
-namespace Metalama.Framework.Engine.DesignTime
+namespace Metalama.Framework.DesignTime
 {
     // ReSharper disable UnusedType.Global
 

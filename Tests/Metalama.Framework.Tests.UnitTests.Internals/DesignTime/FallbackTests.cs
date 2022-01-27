@@ -6,7 +6,7 @@ using Metalama.Framework.Engine.AdditionalOutputs;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Options;
-using Metalama.Framework.Engine.Pipeline;
+using Metalama.Framework.Engine.Pipeline.CompileTime;
 using Metalama.TestFramework;
 using Metalama.TestFramework.Utilities;
 using Microsoft.CodeAnalysis;
@@ -146,7 +146,7 @@ public class TargetClass
             {
                 inputCompilation = inputCompilation.ReplaceSyntaxTree(
                     inputSyntaxTree,
-                    inputSyntaxTree.WithRootAndOptions( RemovingRewriter.Instance.Visit( inputSyntaxTree.GetRoot() ), inputSyntaxTree.Options ) );
+                    inputSyntaxTree.WithRootAndOptions( RemovingRewriter.Instance.Visit( await inputSyntaxTree.GetRootAsync() ), inputSyntaxTree.Options ) );
             }
 
             // Replace the project options to enable design time fallback.

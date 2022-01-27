@@ -7,9 +7,9 @@ using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.CodeFixes;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.DesignTime.Refactoring;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Formatting;
+using Metalama.Framework.Engine.Pipeline.LiveTemplates;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -20,7 +20,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Metalama.Framework.Engine.DesignTime.CodeFixes
+namespace Metalama.Framework.Engine.CodeFixes
 {
     /// <summary>
     /// The implementation of <see cref="ICodeFixBuilder"/>, passed to user code.
@@ -174,18 +174,16 @@ namespace Metalama.Framework.Engine.DesignTime.CodeFixes
             var aspectClass = (AspectClass) this._context.PipelineConfiguration.AspectClasses.Single( c => c.Type == aspect.GetType() );
 
             var diagnosticList = new DiagnosticList();
-            
-            
 
             if ( !LiveTemplateAspectPipeline.TryExecute(
                     this._context.ServiceProvider,
                     this._context.PipelineConfiguration.Domain,
                     this._context.PipelineConfiguration,
                     _ => aspectClass,
-                    PartialCompilation.CreatePartial( compilation, targetSymbol.GetPrimaryDeclaration()!.SyntaxTree ), 
+                    PartialCompilation.CreatePartial( compilation, targetSymbol.GetPrimaryDeclaration()!.SyntaxTree ),
                     targetSymbol,
                     diagnosticList,
-                    CancellationToken.None, 
+                    CancellationToken.None,
                     out var outputCompilation ) )
             {
                 this._solution = await CodeFixHelper.ReportDiagnosticsAsCommentsAsync(
@@ -198,7 +196,6 @@ namespace Metalama.Framework.Engine.DesignTime.CodeFixes
             }
             else
             {
-
                 this._solution = await CodeFixHelper.ApplyChangesAsync( outputCompilation, project, this.CancellationToken );
             }
 

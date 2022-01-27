@@ -2,9 +2,8 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Engine.Utilities;
-using System;
 
-namespace Metalama.Framework.Engine.DesignTime
+namespace Metalama.Framework.DesignTime
 {
     internal static class DesignTimeExceptionHandler
     {

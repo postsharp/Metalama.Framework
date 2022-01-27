@@ -5,11 +5,8 @@ using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 
-namespace Metalama.Framework.Engine.DesignTime.Diagnostics
+namespace Metalama.Framework.DesignTime.Diagnostics
 {
     internal static class DesignTimeDiagnosticHelper
     {

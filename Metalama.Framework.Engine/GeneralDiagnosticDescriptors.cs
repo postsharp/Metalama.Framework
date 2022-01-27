@@ -264,7 +264,7 @@ namespace Metalama.Framework.Engine
                 "The class '{0}' must have a default constructor because of the [LiveTemplate] attribute.",
                 Error,
                 "Live templates must have a default constructor." );
-        
+
         internal static readonly DiagnosticDefinition<INamedType>
             TypeNotPartial
                 = new(

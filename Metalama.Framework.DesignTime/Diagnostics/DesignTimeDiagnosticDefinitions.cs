@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Compiler;
+using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Advices;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Linking;
@@ -11,12 +12,9 @@ using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
-using System;
 using System.Collections.Immutable;
-using System.Linq;
-using System.Threading;
 
-namespace Metalama.Framework.Engine.DesignTime.Diagnostics
+namespace Metalama.Framework.DesignTime.Diagnostics
 {
     internal class DesignTimeDiagnosticDefinitions
     {

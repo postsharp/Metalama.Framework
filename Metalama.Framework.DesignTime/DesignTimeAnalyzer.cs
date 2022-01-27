@@ -3,18 +3,16 @@
 
 using Metalama.Backstage.Diagnostics;
 using Metalama.Compiler;
-using Metalama.Framework.Engine.DesignTime.Diagnostics;
-using Metalama.Framework.Engine.DesignTime.Pipeline;
-using Metalama.Framework.Engine.DesignTime.Utilities;
+using Metalama.Framework.DesignTime.Diagnostics;
+using Metalama.Framework.DesignTime.Pipeline;
+using Metalama.Framework.DesignTime.Utilities;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
-using System;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 
 // ReSharper disable UnusedType.Global
 
@@ -22,7 +20,7 @@ using System.Linq;
 #pragma warning disable RS1001 // Missing diagnostic analyzer attribute.
 #pragma warning disable RS1022 // Remove access to our implementation types 
 
-namespace Metalama.Framework.Engine.DesignTime
+namespace Metalama.Framework.DesignTime
 {
     /// <summary>
     /// Our implementation of <see cref="DiagnosticAnalyzer"/>. It reports all diagnostics that we produce.

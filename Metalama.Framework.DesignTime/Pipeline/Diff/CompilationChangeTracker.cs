@@ -1,17 +1,15 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Threading;
 
-namespace Metalama.Framework.Engine.DesignTime.Diff
+namespace Metalama.Framework.DesignTime.Pipeline.Diff
 {
     /// <summary>
     /// Computes the changes between the last <see cref="Compilation"/> and a new one.

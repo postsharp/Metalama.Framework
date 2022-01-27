@@ -3,12 +3,9 @@
 
 using Metalama.Framework.Engine.Utilities;
 using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Reflection;
 
-namespace Metalama.Framework.Engine.DesignTime.Diagnostics
+namespace Metalama.Framework.DesignTime.Diagnostics
 {
     /// <summary>
     /// A JSON-serializable file that contains user-defined diagnostic and suppression descriptors.

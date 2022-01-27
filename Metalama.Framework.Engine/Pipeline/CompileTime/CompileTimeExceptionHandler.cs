@@ -7,7 +7,7 @@ using Microsoft.CodeAnalysis;
 using System;
 using System.IO;
 
-namespace Metalama.Framework.Engine.Pipeline
+namespace Metalama.Framework.Engine.Pipeline.CompileTime
 {
     internal class CompileTimeExceptionHandler : ICompileTimeExceptionHandler
     {

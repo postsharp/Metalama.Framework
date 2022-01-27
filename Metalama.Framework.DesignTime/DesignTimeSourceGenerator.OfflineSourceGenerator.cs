@@ -7,11 +7,8 @@ using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
-using System;
-using System.IO;
-using System.Linq;
 
-namespace Metalama.Framework.Engine.DesignTime;
+namespace Metalama.Framework.DesignTime;
 
 public partial class DesignTimeSourceGenerator
 {

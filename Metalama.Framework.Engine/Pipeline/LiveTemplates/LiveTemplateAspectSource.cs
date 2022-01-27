@@ -11,7 +11,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Threading;
 
-namespace Metalama.Framework.Engine.DesignTime.Refactoring
+namespace Metalama.Framework.Engine.Pipeline.LiveTemplates
 {
     /// <summary>
     /// A fake instance of <see cref="IAspectSource"/> to avoid having to support null sources.

@@ -2,9 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
-using Microsoft.CodeAnalysis;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 

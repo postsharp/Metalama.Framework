@@ -2,13 +2,14 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using K4os.Hash.xxHash;
+using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Validation;
 using Metalama.Framework.Validation;
 using Microsoft.CodeAnalysis;
 
-namespace Metalama.Framework.Engine.DesignTime.Pipeline;
+namespace Metalama.Framework.DesignTime.Pipeline;
 
 public class DesignTimeValidatorInstance
 {

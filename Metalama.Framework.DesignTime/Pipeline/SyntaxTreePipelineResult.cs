@@ -6,7 +6,7 @@ using Metalama.Framework.Engine.Pipeline;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
 
-namespace Metalama.Framework.Engine.DesignTime.Pipeline
+namespace Metalama.Framework.DesignTime.Pipeline
 {
     /// <summary>
     /// Represents the content of <see cref="DesignTimePipelineExecutionResult"/>, but only the items that relate to a single <see cref="Microsoft.CodeAnalysis.SyntaxTree"/>.

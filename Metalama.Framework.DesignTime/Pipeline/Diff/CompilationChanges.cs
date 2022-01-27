@@ -2,12 +2,9 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Microsoft.CodeAnalysis;
-using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Linq;
 
-namespace Metalama.Framework.Engine.DesignTime.Diff
+namespace Metalama.Framework.DesignTime.Pipeline.Diff
 {
     /// <summary>
     /// Represents changes between two instances of the <see cref="Microsoft.CodeAnalysis.Compilation"/> class.

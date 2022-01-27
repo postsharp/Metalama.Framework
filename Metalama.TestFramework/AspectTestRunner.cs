@@ -1,10 +1,11 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Framework.Engine.CodeFixes;
 using Metalama.Framework.Engine.CompileTime;
-using Metalama.Framework.Engine.DesignTime.CodeFixes;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Pipeline;
+using Metalama.Framework.Engine.Pipeline.CompileTime;
 using Metalama.Framework.Engine.Testing;
 using Microsoft.CodeAnalysis;
 using System;
@@ -114,11 +115,15 @@ namespace Metalama.TestFramework
             }
         }
 
-        private static async Task<bool> ApplyCodeFixAsync( TestInput testInput, TestResult testResult, CompileTimeDomain domain, ServiceProvider serviceProvider )
+        private static async Task<bool> ApplyCodeFixAsync(
+            TestInput testInput,
+            TestResult testResult,
+            CompileTimeDomain domain,
+            ServiceProvider serviceProvider )
         {
             var codeFixes = testResult.PipelineDiagnostics.SelectMany( d => CodeFixTitles.GetCodeFixTitles( d ).Select( t => (Diagnostic: d, Title: t) ) );
             var codeFix = codeFixes.ElementAt( testInput.Options.AppliedCodeFixIndex.GetValueOrDefault() );
-            var codeFixRunner = new StandaloneCodeFixRunner(  domain,  serviceProvider, new TestProjectOptions() );
+            var codeFixRunner = new StandaloneCodeFixRunner( domain, serviceProvider, new TestProjectOptions() );
 
             var inputDocument = testResult.SyntaxTrees[0].InputDocument;
 

@@ -7,9 +7,9 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Metalama.Framework.DesignTime\Metalama.Framework.DesignTime.csproj" />
-        <PackageReference Include="StreamJsonRpc" Version="2.9.85" />
-        <InternalsVisibleTo Include="Metalama.Framework.Tests.UnitTests.Internals" />
+        <ProjectReference Include="..\Metalama.Framework.DesignTime\Metalama.Framework.DesignTime.csproj"/>
+        <PackageReference Include="StreamJsonRpc" Version="2.9.85"/>
+        <InternalsVisibleTo Include="Metalama.Framework.Tests.UnitTests.Internals"/>
     </ItemGroup>
 
 </Project>

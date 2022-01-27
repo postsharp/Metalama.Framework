@@ -2,10 +2,8 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using System.Collections.Immutable;
-using System.Threading;
-using System.Threading.Tasks;
 
-namespace Metalama.Framework.Engine.DesignTime.Remoting;
+namespace Metalama.Framework.DesignTime.VisualStudio.Remoting;
 
 internal interface IServerApi
 {

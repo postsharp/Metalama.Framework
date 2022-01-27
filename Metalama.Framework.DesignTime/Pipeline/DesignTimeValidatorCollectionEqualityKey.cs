@@ -1,9 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System;
-
-namespace Metalama.Framework.Engine.DesignTime.Pipeline;
+namespace Metalama.Framework.DesignTime.Pipeline;
 
 public readonly struct DesignTimeValidatorCollectionEqualityKey : IEquatable<DesignTimeValidatorCollectionEqualityKey>
 {

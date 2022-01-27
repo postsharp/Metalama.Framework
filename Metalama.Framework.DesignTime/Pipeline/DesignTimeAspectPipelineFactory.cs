@@ -2,27 +2,23 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
-using Metalama.Framework.Engine.DesignTime.Diff;
-using Metalama.Framework.Engine.DesignTime.Refactoring;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline;
+using Metalama.Framework.Engine.Pipeline.LiveTemplates;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
-using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Threading;
 
 // ReSharper disable InconsistentlySynchronizedField
 
-namespace Metalama.Framework.Engine.DesignTime.Pipeline
+namespace Metalama.Framework.DesignTime.Pipeline
 {
     /// <summary>
     /// Caches the <see cref="DesignTimeAspectPipeline"/> (so they can be reused between projects) and the
@@ -36,7 +32,6 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
 
         private readonly ConcurrentDictionary<string, DesignTimeAspectPipeline> _pipelinesByProjectId = new();
 
-        
         public CompileTimeDomain Domain { get; }
 
         private readonly bool _isTest;
@@ -195,7 +190,6 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
                 return false;
             }
 
-            
             var result = LiveTemplateAspectPipeline.TryExecute(
                 configuration.ServiceProvider,
                 this.Domain,
@@ -248,7 +242,6 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
             return true;
         }
 
-        
         public ITransitiveAspectsManifest? GetTransitiveAspectsManifest( Compilation compilation, CancellationToken cancellationToken )
         {
             if ( !this.TryGetPipeline( compilation, out var pipeline ) )
@@ -282,6 +275,5 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
 
             return pipeline.TryGetConfiguration( compilation, diagnosticAdder, true, cancellationToken, out configuration );
         }
-
     }
 }

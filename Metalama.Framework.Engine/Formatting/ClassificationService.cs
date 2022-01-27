@@ -4,14 +4,13 @@
 using Metalama.Framework.DesignTime.Contracts;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
-using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Templating;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 
-namespace Metalama.Framework.Engine.DesignTime
+namespace Metalama.Framework.Engine.Formatting
 {
     /// <summary>
     /// The implementation of <see cref="IClassificationService"/>.

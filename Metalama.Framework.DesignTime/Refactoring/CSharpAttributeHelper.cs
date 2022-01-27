@@ -5,13 +5,9 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Formatting;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 
-namespace Metalama.Framework.Engine.DesignTime.Refactoring
+namespace Metalama.Framework.DesignTime.Refactoring
 {
     internal static class CSharpAttributeHelper
     {

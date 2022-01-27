@@ -5,9 +5,8 @@ using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Options;
 using Microsoft.CodeAnalysis;
 using System.Diagnostics.CodeAnalysis;
-using System.Threading;
 
-namespace Metalama.Framework.Engine.DesignTime.Pipeline
+namespace Metalama.Framework.DesignTime.Pipeline
 {
     internal class TestDesignTimeAspectPipelineFactory : DesignTimeAspectPipelineFactory
     {

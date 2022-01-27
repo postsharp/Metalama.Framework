@@ -1,3 +1,6 @@
+// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
@@ -6,7 +9,7 @@ using Metalama.Framework.Engine.Pipeline;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 
-namespace Metalama.Framework.Engine.DesignTime.CodeFixes;
+namespace Metalama.Framework.Engine.CodeFixes;
 
 internal class DesignTimeCodeFixRunner : CodeFixRunner
 {
@@ -22,7 +25,7 @@ internal class DesignTimeCodeFixRunner : CodeFixRunner
         CancellationToken cancellationToken,
         out AspectPipelineConfiguration? configuration,
         [NotNullWhen( true )] out ServiceProvider? serviceProvider,
-        [NotNullWhen( true )]out CompileTimeDomain? domain )
+        [NotNullWhen( true )] out CompileTimeDomain? domain )
     {
         if ( this._configurationProvider.TryGetConfiguration( compilation, NullDiagnosticAdder.Instance, cancellationToken, out configuration ) )
         {

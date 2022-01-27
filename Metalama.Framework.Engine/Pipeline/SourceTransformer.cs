@@ -5,6 +5,7 @@ using Metalama.Compiler;
 using Metalama.Framework.Engine.AdditionalOutputs;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Options;
+using Metalama.Framework.Engine.Pipeline.CompileTime;
 using Metalama.Framework.Project;
 using System;
 using System.Collections.Generic;

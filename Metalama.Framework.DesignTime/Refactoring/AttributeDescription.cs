@@ -3,7 +3,7 @@
 
 using System.Collections.Immutable;
 
-namespace Metalama.Framework.Engine.DesignTime.Refactoring
+namespace Metalama.Framework.DesignTime.Refactoring
 {
     internal class AttributeDescription
     {

@@ -1,23 +1,20 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Framework.DesignTime.Pipeline;
+using Metalama.Framework.DesignTime.Refactoring;
+using Metalama.Framework.DesignTime.Utilities;
 using Metalama.Framework.Engine.Aspects;
+using Metalama.Framework.Engine.CodeFixes;
 using Metalama.Framework.Engine.CodeModel.References;
-using Metalama.Framework.Engine.DesignTime.CodeFixes;
-using Metalama.Framework.Engine.DesignTime.Pipeline;
-using Metalama.Framework.Engine.DesignTime.Refactoring;
-using Metalama.Framework.Engine.DesignTime.Utilities;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeRefactorings;
-using System;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
-using System.Threading;
-using System.Threading.Tasks;
 
-namespace Metalama.Framework.Engine.DesignTime
+namespace Metalama.Framework.DesignTime
 {
     // ReSharper disable UnusedType.Global
 

@@ -2,12 +2,9 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.DesignTime.Pipeline;
-using Metalama.Framework.Engine.DesignTime.Refactoring;
-using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Pipeline;
-using Metalama.Framework.Engine.Pipeline.DesignTime;
+using Metalama.Framework.Engine.Pipeline.LiveTemplates;
 using Metalama.Framework.Engine.Templating;
 using Metalama.TestFramework;
 using Microsoft.CodeAnalysis;
@@ -16,7 +13,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Xunit;
 using Xunit.Abstractions;
 
 namespace Metalama.Framework.Tests.Integration.Runners
@@ -41,23 +37,20 @@ namespace Metalama.Framework.Tests.Integration.Runners
             var serviceProvider = testResult.ProjectScopedServiceProvider;
             var compilation = CompilationModel.CreateInitialInstance( new NullProject( serviceProvider ), testResult.InputCompilation! );
 
-
             var partialCompilation = PartialCompilation.CreateComplete( testResult.InputCompilation! );
             var target = compilation.Types.OfName( "TargetClass" ).Single().Methods.OfName( "TargetMethod" ).Single().GetSymbol();
-            
+
             var success = LiveTemplateAspectPipeline.TryExecute(
                 serviceProvider,
                 domain,
                 null,
                 c => c.AspectClasses.Single( a => a.ShortName == "TestAspect" ),
-                    
                 partialCompilation,
                 target!,
                 testResult.PipelineDiagnostics,
                 CancellationToken.None,
                 out var outputCompilation );
 
-            
             if ( success )
             {
                 testResult.HasOutputCode = true;

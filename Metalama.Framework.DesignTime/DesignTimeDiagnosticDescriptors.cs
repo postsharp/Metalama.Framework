@@ -1,14 +1,13 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
 using Microsoft.CodeAnalysis;
 using static Metalama.Framework.Diagnostics.Severity;
 
 #pragma warning disable SA1118
 
-namespace Metalama.Framework.Engine.DesignTime
+namespace Metalama.Framework.DesignTime
 {
     internal static class DesignTimeDiagnosticDescriptors
     {
@@ -64,7 +63,5 @@ namespace Metalama.Framework.Engine.DesignTime
                     + "suppression in the user profile. Please restart your IDE.",
                     _category,
                     Warning );
-
-   
     }
 }

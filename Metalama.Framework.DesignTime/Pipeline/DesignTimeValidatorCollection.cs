@@ -7,7 +7,7 @@ using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
 
-namespace Metalama.Framework.Engine.DesignTime.Pipeline;
+namespace Metalama.Framework.DesignTime.Pipeline;
 
 internal class DesignTimeValidatorCollection
 {

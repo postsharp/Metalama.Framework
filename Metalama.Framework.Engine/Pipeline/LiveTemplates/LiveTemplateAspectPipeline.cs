@@ -7,7 +7,7 @@ using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
-using Metalama.Framework.Engine.Pipeline;
+using Metalama.Framework.Engine.Pipeline.CompileTime;
 using Metalama.Framework.Engine.Validation;
 using Microsoft.CodeAnalysis;
 using System;
@@ -15,17 +15,16 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Net.NetworkInformation;
 using System.Threading;
 
-namespace Metalama.Framework.Engine.DesignTime.Refactoring
+namespace Metalama.Framework.Engine.Pipeline.LiveTemplates
 {
     /// <summary>
     /// An implementation of the <see cref="AspectPipeline"/> that applies an aspect to source code in the interactive process.
     /// </summary>
     internal class LiveTemplateAspectPipeline : AspectPipeline
     {
-        private readonly Func<AspectPipelineConfiguration,IAspectClass> _aspectSelector;
+        private readonly Func<AspectPipelineConfiguration, IAspectClass> _aspectSelector;
         private readonly ISymbol _targetSymbol;
 
         private LiveTemplateAspectPipeline(
@@ -44,6 +43,7 @@ namespace Metalama.Framework.Engine.DesignTime.Refactoring
             CancellationToken cancellationToken )
         {
             var aspectClass = this._aspectSelector( configuration );
+
             return (ImmutableArray.Create<IAspectSource>( new AspectSource( this, aspectClass ) ), ImmutableArray<IValidatorSource>.Empty);
         }
 
@@ -58,18 +58,17 @@ namespace Metalama.Framework.Engine.DesignTime.Refactoring
             CancellationToken cancellationToken,
             [NotNullWhen( true )] out PartialCompilation? outputCompilation )
         {
-            
             LiveTemplateAspectPipeline pipeline = new( serviceProvider, domain, aspectSelector, targetSymbol );
 
             if ( !pipeline.TryExecute( inputCompilation, diagnosticAdder, pipelineConfiguration, cancellationToken, out var result ) )
             {
                 outputCompilation = null;
-            
+
                 return false;
             }
 
             outputCompilation = result.Compilation;
-            
+
             return true;
         }
 
@@ -81,11 +80,11 @@ namespace Metalama.Framework.Engine.DesignTime.Refactoring
         private class AspectSource : IAspectSource
         {
             private readonly LiveTemplateAspectPipeline _parent;
-            
+
             public AspectSource( LiveTemplateAspectPipeline parent, IAspectClass aspectClass )
             {
                 this._parent = parent;
-            
+
                 this.AspectClasses = ImmutableArray.Create( aspectClass );
             }
 
@@ -101,7 +100,13 @@ namespace Metalama.Framework.Engine.DesignTime.Refactoring
             {
                 var targetDeclaration = compilation.Factory.GetDeclaration( this._parent._targetSymbol );
 
-                return new[] { ((AspectClass) aspectClass).CreateAspectInstance( targetDeclaration,  (IAspect) Activator.CreateInstance( this.AspectClasses[0].Type ), default ) };
+                return new[]
+                {
+                    ((AspectClass) aspectClass).CreateAspectInstance(
+                        targetDeclaration,
+                        (IAspect) Activator.CreateInstance( this.AspectClasses[0].Type ),
+                        default )
+                };
             }
         }
     }
