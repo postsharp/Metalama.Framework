@@ -50,7 +50,7 @@ public class TestDesignTimeAspectPipeline : BaseDesignTimeAspectPipeline
 
         return new TestDesignTimeAspectPipelineResult(
             true,
-            stageResult.Diagnostics.ReportedDiagnostics.AddRange( diagnosticList ),
+            stageResult.Diagnostics.ReportedDiagnostics,
             stageResult.AdditionalSyntaxTrees );
     }
 }

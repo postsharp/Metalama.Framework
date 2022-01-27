@@ -14,7 +14,9 @@ namespace Metalama.Framework.CompilerExtensions
 
         public FacadeSourceTransformer()
         {
-            this._impl = (ISourceTransformer) ResourceExtractor.CreateInstance( "Metalama.Framework.Engine.Pipeline.SourceTransformer" );
+            this._impl = (ISourceTransformer) ResourceExtractor.CreateInstance(
+                "Metalama.Framework.Engine",
+                "Metalama.Framework.Engine.Pipeline.SourceTransformer" );
         }
 
         public void Execute( TransformerContext context ) => this._impl.Execute( context );

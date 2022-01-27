@@ -369,6 +369,8 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
                         }
 
                         // If we are here, it means that we have a relevant change.
+                        Logger.DesignTime.Trace?.Log( $"Found a relevant change in '{newSyntaxTree.FilePath}': new text is '{change.NewText}'." );
+
                         return true;
                     }
                 }

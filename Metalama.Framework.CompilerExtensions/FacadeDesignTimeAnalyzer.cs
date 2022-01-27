@@ -15,15 +15,27 @@ namespace Metalama.Framework.CompilerExtensions
     [DiagnosticAnalyzer( LanguageNames.CSharp )]
     public class FacadeDesignTimeAnalyzer : DiagnosticAnalyzer
     {
-        private readonly DiagnosticAnalyzer _impl;
+        private readonly DiagnosticAnalyzer? _impl;
 
         public FacadeDesignTimeAnalyzer()
         {
-            this._impl = (DiagnosticAnalyzer) ResourceExtractor.CreateInstance( "Metalama.Framework.Engine.DesignTime.DesignTimeAnalyzer" );
+            switch ( ProcessKindHelper.CurrentProcessKind )
+            {
+                case ProcessKind.Compiler:
+                    break;
+
+                default:
+                    this._impl = (DiagnosticAnalyzer) ResourceExtractor.CreateInstance(
+                        "Metalama.Framework.DesignTime",
+                        "Metalama.Framework.DesignTime.DesignTimeAnalyzer" );
+
+                    break;
+            }
         }
 
-        public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => this._impl.SupportedDiagnostics;
+        public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics
+            => this._impl?.SupportedDiagnostics ?? ImmutableArray<DiagnosticDescriptor>.Empty;
 
-        public override void Initialize( AnalysisContext context ) => this._impl.Initialize( context );
+        public override void Initialize( AnalysisContext context ) => this._impl?.Initialize( context );
     }
 }

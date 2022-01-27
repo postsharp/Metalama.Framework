@@ -19,7 +19,9 @@ namespace Metalama.Framework.CompilerExtensions
 
         public FacadeCodeFixProvider()
         {
-            this._impl = (CodeFixProvider) ResourceExtractor.CreateInstance( "Metalama.Framework.Engine.DesignTime.CentralCodeFixProvider" );
+            this._impl = (CodeFixProvider) ResourceExtractor.CreateInstance(
+                "Metalama.Framework.DesignTime",
+                "Metalama.Framework.DesignTime.CentralCodeFixProvider" );
         }
 
         public override Task RegisterCodeFixesAsync( CodeFixContext context ) => this._impl.RegisterCodeFixesAsync( context );

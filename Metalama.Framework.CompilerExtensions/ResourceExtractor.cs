@@ -26,63 +26,68 @@ namespace Metalama.Framework.CompilerExtensions
 
         private static string? _snapshotDirectory;
         private static volatile bool _initialized;
-        private static Assembly? _metalamaImplementationAssembly;
+
+        private static void Initialize()
+        {
+            if ( !_initialized )
+            {
+                lock ( _initializeLock )
+                {
+                    if ( !_initialized )
+                    {
+                        // To debug, uncomment the next line.
+                        // System.Diagnostics.Debugger.Launch();
+
+                        var currentAssembly = typeof(ResourceExtractor).Assembly;
+
+                        AppDomain.CurrentDomain.AssemblyResolve += OnAssemblyResolve;
+
+                        // Get a temp directory. AssemblyName.GetAssemblyName does not support long paths.
+                        _snapshotDirectory = TempPathHelper.GetTempPath( "Extract" );
+
+                        // Extract embedded assemblies to a temp directory.
+                        ExtractEmbeddedAssemblies( currentAssembly );
+
+                        // Load assemblies from the temp directory.
+
+                        foreach ( var file in Directory.GetFiles( _snapshotDirectory, "*.dll" ) )
+                        {
+                            // We don't load assemblies using Assembly.LoadFile here, because the assemblies may be loaded in
+                            // the main load context, or may be loaded later. We will use Assembly.LoadFile in last chance in the AssemblyResolve event.
+                            // This scenario is used in Metalama.Try.
+
+                            var loadedAssemblyName = AssemblyName.GetAssemblyName( file );
+                            _embeddedAssemblies[loadedAssemblyName.Name] = (file, loadedAssemblyName);
+                        }
+
+                        _initialized = true;
+                    }
+                }
+            }
+        }
 
         /// <summary>
         /// Creates an instance of a type of the <c>Metalama.Framework.Engine</c> assembly.
         /// </summary>
-        public static object CreateInstance( string name )
+        public static object CreateInstance( string assemblyName, string typeName )
         {
             try
             {
-                if ( !_initialized )
+                Initialize();
+
+                var assembly = GetAssembly( assemblyName );
+
+                if ( assembly == null )
                 {
-                    lock ( _initializeLock )
-                    {
-                        if ( !_initialized )
-                        {
-                            // To debug, uncomment the next line.
-                            // System.Diagnostics.Debugger.Launch();
-
-                            var currentAssembly = typeof(ResourceExtractor).Assembly;
-
-                            AppDomain.CurrentDomain.AssemblyResolve += OnAssemblyResolve;
-
-                            // Get a temp directory. AssemblyName.GetAssemblyName does not support long paths.
-                            _snapshotDirectory = TempPathHelper.GetTempPath( "Extract" );
-
-                            // Extract embedded assemblies to a temp directory.
-                            ExtractEmbeddedAssemblies( currentAssembly );
-
-                            // Load assemblies from the temp directory.
-                            AssemblyName? metalamaImplementationAssemblyName = null;
-
-                            foreach ( var file in Directory.GetFiles( _snapshotDirectory, "*.dll" ) )
-                            {
-                                // We don't load assemblies using Assembly.LoadFile here, because the assemblies may be loaded in
-                                // the main load context, or may be loaded later. We will use Assembly.LoadFile in last chance in the AssemblyResolve event.
-                                // This scenario is used in Metalama.Try.
-
-                                var assemblyName = AssemblyName.GetAssemblyName( file );
-
-                                // Index the assembly even if we did not load it ourselves.
-                                _embeddedAssemblies[assemblyName.Name] = (file, assemblyName);
-
-                                if ( assemblyName.Name == "Metalama.Framework.Engine" )
-                                {
-                                    metalamaImplementationAssemblyName = assemblyName;
-                                }
-                            }
-
-                            // Attempt to use the main assembly in the default context. If it does not work, this will trigger an AssemblyResolve event.
-                            _metalamaImplementationAssembly = Assembly.Load( metalamaImplementationAssemblyName );
-
-                            _initialized = true;
-                        }
-                    }
+                    throw new ArgumentOutOfRangeException( $"Cannot load the assembly '{assemblyName}'" );
                 }
 
-                var type = _metalamaImplementationAssembly!.GetType( name, true );
+                var type = assembly!.GetType( typeName );
+
+                if ( type == null )
+                {
+                    throw new ArgumentOutOfRangeException( $"Cannot load the type '{typeName}' in assembly '{assemblyName}'" );
+                }
 
                 return Activator.CreateInstance( type );
             }
@@ -116,6 +121,8 @@ namespace Metalama.Framework.CompilerExtensions
                 var processName = Process.GetCurrentProcess();
                 log.AppendLine( $"Process Name: {processName.ProcessName}" );
                 log.AppendLine( $"Process Id: {processName.Id}" );
+                log.AppendLine( $"Process Kind: {ProcessKindHelper.CurrentProcessKind}" );
+                log.AppendLine( $"Command Line: {Environment.CommandLine}" );
                 log.AppendLine( $"Source Assembly Name: '{currentAssembly.FullName}'" );
                 log.AppendLine( $"Source Assembly Location: '{currentAssembly.Location}'" );
                 log.AppendLine( "Stack trace:" );
@@ -178,9 +185,9 @@ namespace Metalama.Framework.CompilerExtensions
             }
         }
 
-        private static Assembly? OnAssemblyResolve( object sender, ResolveEventArgs args )
+        private static Assembly? GetAssembly( string name )
         {
-            return _assemblyCache.GetOrAdd( args.Name, Load );
+            return _assemblyCache.GetOrAdd( name, Load );
 
             static Assembly? Load( string name )
             {
@@ -210,7 +217,7 @@ namespace Metalama.Framework.CompilerExtensions
 
                     // We need to explicitly verify the exact version, because AssemblyName.ReferenceMatchesDefinition is too tolerant. 
                     if ( AssemblyName.ReferenceMatchesDefinition( requestedAssemblyName, assemblyName )
-                         && assemblyName.Version == requestedAssemblyName.Version )
+                         && (requestedAssemblyName.Version == null || assemblyName.Version == requestedAssemblyName.Version) )
                     {
                         return Assembly.LoadFile( assembly.Path );
                     }
@@ -223,5 +230,7 @@ namespace Metalama.Framework.CompilerExtensions
                 return null;
             }
         }
+
+        private static Assembly? OnAssemblyResolve( object sender, ResolveEventArgs args ) => GetAssembly( args.Name );
     }
 }

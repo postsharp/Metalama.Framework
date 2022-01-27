@@ -14,7 +14,7 @@ namespace Metalama.Framework.Engine.Utilities
     /// Reads the <see cref="AssemblyMetadataAttribute"/> defined by the build pipeline.
     /// These attributes are defined by Directory.Build.targets.
     /// </summary>
-    internal class AssemblyMetadataReader
+    public class AssemblyMetadataReader
     {
         private readonly Assembly _assembly;
         private readonly Dictionary<string, string> _metadata = new( StringComparer.OrdinalIgnoreCase );

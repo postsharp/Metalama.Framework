@@ -58,6 +58,8 @@ namespace Metalama.Framework.DesignTime.Pipeline
         {
             if ( !projectOptions.IsFrameworkEnabled )
             {
+                Logger.DesignTime.Trace?.Log( $"Cannot get a pipeline for project '{projectOptions.AssemblyName}': Metalama is disabled for this project." );
+
                 return null;
             }
 
@@ -85,15 +87,6 @@ namespace Metalama.Framework.DesignTime.Pipeline
                     var serviceProvider = ServiceProviderFactory.GetServiceProvider().WithServices( projectOptions, this );
                     pipeline = new DesignTimeAspectPipeline( serviceProvider, this.Domain, compilation.References, this._isTest );
                     pipeline.ExternalBuildStarted += this.OnExternalBuildStarted;
-
-                    if ( !this._isTest )
-                    {
-                        // We _intentionally_ wait 5 seconds before starting a pipeline. This allows the initial burst of requests
-                        // to "settle down" and hopefully only the final will survive.
-                        // This is a temporary solution until we understand that happens.
-                        // TODO #29089
-                        Thread.Sleep( 5000 );
-                    }
 
                     if ( !this._pipelinesByProjectId.TryAdd( projectId, pipeline ) )
                     {

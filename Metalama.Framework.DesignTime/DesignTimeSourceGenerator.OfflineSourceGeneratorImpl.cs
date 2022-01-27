@@ -15,12 +15,14 @@ public partial class DesignTimeSourceGenerator
 {
     private class OfflineSourceGeneratorImpl : SourceGeneratorImpl
     {
-        public override void GenerateSources( IProjectOptions projectOptions, Compilation compilation, GeneratorExecutionContext context )
+        public OfflineSourceGeneratorImpl( IProjectOptions projectOptions ) : base( projectOptions ) { }
+
+        public override void GenerateSources( Compilation compilation, GeneratorExecutionContext context )
         {
-            var serviceProvider = ServiceProvider.Empty.WithServices( projectOptions );
+            var serviceProvider = ServiceProvider.Empty.WithServices( this.ProjectOptions );
             var provider = new AdditionalCompilationOutputFileProvider( serviceProvider );
 
-            if ( projectOptions.AdditionalCompilationOutputDirectory == null )
+            if ( this.ProjectOptions.AdditionalCompilationOutputDirectory == null )
             {
                 return;
             }

@@ -18,7 +18,9 @@ namespace Metalama.Framework.CompilerExtensions
 
         public FacadeCodeRefactoringProvider()
         {
-            this._impl = (CodeRefactoringProvider) ResourceExtractor.CreateInstance( "Metalama.Framework.Engine.DesignTime.CentralCodeRefactoringProvider" );
+            this._impl = (CodeRefactoringProvider) ResourceExtractor.CreateInstance(
+                "Metalama.Framework.DesignTime",
+                "Metalama.Framework.DesignTime.CentralCodeRefactoringProvider" );
         }
 
         public override Task ComputeRefactoringsAsync( CodeRefactoringContext context ) => this._impl.ComputeRefactoringsAsync( context );

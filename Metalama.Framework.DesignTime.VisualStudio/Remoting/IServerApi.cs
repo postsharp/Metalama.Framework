@@ -7,6 +7,9 @@ namespace Metalama.Framework.DesignTime.VisualStudio.Remoting;
 
 internal interface IServerApi
 {
+    // The client should not await this call, otherwise we will have a deadlock.
+    Task HelloAsync( string projectId, CancellationToken cancellationToken = default );
+
     Task<string> PreviewAsync( string fileName, CancellationToken cancellationToken = default );
 }
 

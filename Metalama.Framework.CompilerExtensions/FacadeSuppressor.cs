@@ -12,15 +12,27 @@ namespace Metalama.Framework.CompilerExtensions
     [DiagnosticAnalyzer( LanguageNames.CSharp )]
     public class FacadeSuppressor : DiagnosticSuppressor
     {
-        private readonly DiagnosticSuppressor _impl;
+        private readonly DiagnosticSuppressor? _impl;
 
         public FacadeSuppressor()
         {
-            this._impl = (DiagnosticSuppressor) ResourceExtractor.CreateInstance( "Metalama.Framework.Engine.DesignTime.DesignTimeDiagnosticSuppressor" );
+            switch ( ProcessKindHelper.CurrentProcessKind )
+            {
+                case ProcessKind.Compiler:
+                    break;
+
+                default:
+                    this._impl = (DiagnosticSuppressor) ResourceExtractor.CreateInstance(
+                        "Metalama.Framework.DesignTime",
+                        "Metalama.Framework.DesignTime.DesignTimeDiagnosticSuppressor" );
+
+                    break;
+            }
         }
 
-        public override void ReportSuppressions( SuppressionAnalysisContext context ) => this._impl.ReportSuppressions( context );
+        public override void ReportSuppressions( SuppressionAnalysisContext context ) => this._impl?.ReportSuppressions( context );
 
-        public override ImmutableArray<SuppressionDescriptor> SupportedSuppressions => this._impl.SupportedSuppressions;
+        public override ImmutableArray<SuppressionDescriptor> SupportedSuppressions
+            => this._impl?.SupportedSuppressions ?? ImmutableArray<SuppressionDescriptor>.Empty;
     }
 }

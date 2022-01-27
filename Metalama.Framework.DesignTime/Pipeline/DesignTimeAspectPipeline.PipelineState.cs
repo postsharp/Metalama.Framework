@@ -308,8 +308,8 @@ namespace Metalama.Framework.DesignTime.Pipeline
                     {
                         // A failure here means an error or a cache miss.
 
-                        Logger.DesignTime.Trace?.Log(
-                            $"DesignTimeAspectPipeline.TryGetConfiguration('{compilation.Compilation.AssemblyName}', CompilationId = {DebuggingHelper.GetObjectId( compilation.Compilation )}) failed." );
+                        Logger.DesignTime.Warning?.Log(
+                            $"DesignTimeAspectPipeline.TryGetConfiguration('{compilation.Compilation.AssemblyName}', CompilationId = {DebuggingHelper.GetObjectId( compilation.Compilation )}) failed: cannot initialize." );
 
                         configuration = null;
 
@@ -331,6 +331,9 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 {
                     if ( state.Status == DesignTimeAspectPipelineStatus.NeedsExternalBuild )
                     {
+                        Logger.DesignTime.Warning?.Log(
+                            $"DesignTimeAspectPipeline.TryGetConfiguration('{compilation.Compilation.AssemblyName}', CompilationId = {DebuggingHelper.GetObjectId( compilation.Compilation )}) failed: external build needed." );
+
                         configuration = null;
 
                         return false;
@@ -365,6 +368,19 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
                 if ( !TryGetConfiguration( ref state, compilation, diagnosticList, false, cancellationToken, out var configuration ) )
                 {
+                    if ( Logger.DesignTime.Error != null )
+                    {
+                        Logger.DesignTime.Error?.Log( $"TryGetConfiguration('{compilation.Compilation.AssemblyName}') failed" );
+
+                        foreach ( var diagnostic in diagnosticList )
+                        {
+                            if ( diagnostic.Severity == DiagnosticSeverity.Error )
+                            {
+                                Logger.DesignTime.Error?.Log( diagnostic.ToString() );
+                            }
+                        }
+                    }
+
                     compilationResult = default;
 
                     return false;

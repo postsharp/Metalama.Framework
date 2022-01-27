@@ -10,6 +10,13 @@ public partial class DesignTimeSourceGenerator
 {
     protected abstract class SourceGeneratorImpl
     {
-        public abstract void GenerateSources( IProjectOptions projectOptions, Compilation compilation, GeneratorExecutionContext context );
+        public IProjectOptions ProjectOptions { get; }
+
+        protected SourceGeneratorImpl( IProjectOptions projectOptions )
+        {
+            this.ProjectOptions = projectOptions;
+        }
+
+        public abstract void GenerateSources( Compilation compilation, GeneratorExecutionContext context );
     }
 }

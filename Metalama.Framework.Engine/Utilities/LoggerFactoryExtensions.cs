@@ -7,6 +7,8 @@ namespace Metalama.Framework.Engine.Utilities;
 
 internal static class LoggerFactoryExtensions
 {
+    public static ILogger Remoting( this ILoggerFactory loggerFactory ) => loggerFactory.GetLogger( "Remoting" );
+
     public static ILogger DesignTime( this ILoggerFactory loggerFactory ) => loggerFactory.GetLogger( "DesignTime" );
 
     public static ILogger CompileTime( this ILoggerFactory loggerFactory ) => loggerFactory.GetLogger( "CompileTime" );

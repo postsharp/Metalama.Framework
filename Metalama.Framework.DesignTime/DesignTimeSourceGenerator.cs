@@ -1,8 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Metalama.Backstage.Diagnostics;
-using Metalama.Compiler;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
@@ -18,10 +16,7 @@ namespace Metalama.Framework.DesignTime
     [ExcludeFromCodeCoverage]
     public abstract partial class DesignTimeSourceGenerator : ISourceGenerator
     {
-        private static readonly ProcessKind _processKind = DebuggingHelper.ProcessKind;
-        private readonly ConcurrentDictionary<string, SourceGeneratorImpl> _generators = new();
-
-        private bool _isEnabled;
+        private readonly ConcurrentDictionary<string, SourceGeneratorImpl?> _generators = new();
 
         static DesignTimeSourceGenerator()
         {
@@ -31,11 +26,11 @@ namespace Metalama.Framework.DesignTime
         protected bool TryGetImpl( string projectId, [NotNullWhen( true )] out SourceGeneratorImpl? impl )
             => this._generators.TryGetValue( projectId, out impl );
 
-        protected abstract SourceGeneratorImpl CreateSourceGeneratorImpl();
+        protected abstract SourceGeneratorImpl CreateSourceGeneratorImpl( IProjectOptions projectOptions );
 
         void ISourceGenerator.Execute( GeneratorExecutionContext context )
         {
-            if ( !this._isEnabled || context.Compilation is not CSharpCompilation compilation )
+            if ( context.Compilation is not CSharpCompilation compilation )
             {
                 return;
             }
@@ -43,7 +38,7 @@ namespace Metalama.Framework.DesignTime
             try
             {
                 Logger.DesignTime.Trace?.Log(
-                    $"DesignTimeSourceGenerator.Execute('{compilation.AssemblyName}', CompilationId = {DebuggingHelper.GetObjectId( compilation )})." );
+                    $"{this.GetType().Name}.Execute('{compilation.AssemblyName}', CompilationId = {DebuggingHelper.GetObjectId( compilation )})." );
 
                 var projectOptions = new ProjectOptions( context.AnalyzerConfigOptions );
 
@@ -51,10 +46,27 @@ namespace Metalama.Framework.DesignTime
                 {
                     generator = this._generators.GetOrAdd(
                         projectOptions.ProjectId,
-                        _ => projectOptions.IsDesignTimeEnabled ? this.CreateSourceGeneratorImpl() : new OfflineSourceGeneratorImpl() );
+                        _ =>
+                        {
+                            if ( projectOptions.IsFrameworkEnabled )
+                            {
+                                if ( projectOptions.IsDesignTimeEnabled )
+                                {
+                                    return this.CreateSourceGeneratorImpl( projectOptions );
+                                }
+                                else
+                                {
+                                    return new OfflineSourceGeneratorImpl( projectOptions );
+                                }
+                            }
+                            else
+                            {
+                                return null;
+                            }
+                        } );
                 }
 
-                generator.GenerateSources( projectOptions, compilation, context );
+                generator?.GenerateSources( compilation, context );
             }
             catch ( Exception e ) when ( DesignTimeExceptionHandler.MustHandle( e ) )
             {
@@ -62,13 +74,6 @@ namespace Metalama.Framework.DesignTime
             }
         }
 
-        void ISourceGenerator.Initialize( GeneratorInitializationContext context )
-        {
-            this._isEnabled = !MetalamaCompilerInfo.IsActive;
-
-            // Start the remoting host or client.
-            if ( _processKind == ProcessKind.RoslynCodeAnalysisService ) { }
-            else if ( _processKind == ProcessKind.DevEnv ) { }
-        }
+        void ISourceGenerator.Initialize( GeneratorInitializationContext context ) { }
     }
 }

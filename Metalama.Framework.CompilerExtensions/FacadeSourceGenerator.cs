@@ -10,15 +10,41 @@ namespace Metalama.Framework.CompilerExtensions
     [Generator]
     public class FacadeSourceGenerator : ISourceGenerator
     {
-        private readonly ISourceGenerator _impl;
+        private readonly ISourceGenerator? _impl;
 
         public FacadeSourceGenerator()
         {
-            this._impl = (ISourceGenerator) ResourceExtractor.CreateInstance( "Metalama.Framework.Engine.DesignTime.DesignTimeSourceGenerator" );
+            switch ( ProcessKindHelper.CurrentProcessKind )
+            {
+                case ProcessKind.DevEnv:
+                    this._impl = (ISourceGenerator) ResourceExtractor.CreateInstance(
+                        "Metalama.Framework.DesignTime.VisualStudio",
+                        "Metalama.Framework.DesignTime.VisualStudio.VsUserProcessSourceGenerator" );
+
+                    break;
+
+                case ProcessKind.RoslynCodeAnalysisService:
+                    this._impl = (ISourceGenerator) ResourceExtractor.CreateInstance(
+                        "Metalama.Framework.DesignTime.VisualStudio",
+                        "Metalama.Framework.DesignTime.VisualStudio.VsAnalysisProcessSourceGenerator" );
+
+                    break;
+
+                case ProcessKind.Other:
+                    this._impl = (ISourceGenerator) ResourceExtractor.CreateInstance(
+                        "Metalama.Framework.DesignTime",
+                        "Metalama.Framework.DesignTime.AnalysisProcessSourceGenerator" );
+
+                    break;
+
+                case ProcessKind.Compiler:
+                    // No implementation required.
+                    break;
+            }
         }
 
-        void ISourceGenerator.Execute( GeneratorExecutionContext context ) => this._impl.Execute( context );
+        void ISourceGenerator.Execute( GeneratorExecutionContext context ) => this._impl?.Execute( context );
 
-        void ISourceGenerator.Initialize( GeneratorInitializationContext context ) => this._impl.Initialize( context );
+        void ISourceGenerator.Initialize( GeneratorInitializationContext context ) => this._impl?.Initialize( context );
     }
 }

@@ -18,5 +18,7 @@ namespace Metalama.Framework.Engine.Utilities
             this.ProcessId = processId;
             this.ImagePath = imageFileName;
         }
+
+        public override string ToString() => $"{this.ProcessName}({this.ProcessId})";
     }
 }

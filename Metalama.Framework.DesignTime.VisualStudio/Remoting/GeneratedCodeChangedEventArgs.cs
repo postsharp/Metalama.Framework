@@ -11,6 +11,8 @@ internal class GeneratedCodeChangedEventArgs : EventArgs
 
     public ImmutableDictionary<string, string> GeneratedSources { get; }
 
+    public bool IsHandled { get; set; }
+
     public GeneratedCodeChangedEventArgs( string projectId, ImmutableDictionary<string, string> generatedSources )
     {
         this.ProjectId = projectId;

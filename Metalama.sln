@@ -46,6 +46,9 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Metalama.Framework.CompilerExtensions", "Metalama.Framework.CompilerExtensions\Metalama.Framework.CompilerExtensions.csproj", "{089A7C8A-1D13-49BC-A83A-DFBC09941EFE}"
 	ProjectSection(ProjectDependencies) = postProject
 		{FA9772A5-51D5-4374-8DD3-E7CC1B3F138B} = {FA9772A5-51D5-4374-8DD3-E7CC1B3F138B}
+		{94DC3AA3-0753-47A4-A8BC-3AFF1ADFF959} = {94DC3AA3-0753-47A4-A8BC-3AFF1ADFF959}
+		{2D3EE834-B910-4F2F-8069-F95CE8D0D933} = {2D3EE834-B910-4F2F-8069-F95CE8D0D933}
+		{0B6E6000-3E37-4E6E-871D-682B41F8A59E} = {0B6E6000-3E37-4E6E-871D-682B41F8A59E}
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Metalama.Framework.CompilerExtensions.CodeFixes", "Metalama.Framework.CompilerExtensions.CodeFixes\Metalama.Framework.CompilerExtensions.CodeFixes.csproj", "{1A8806A6-BDF6-4276-AE26-E8278AFA7284}"
