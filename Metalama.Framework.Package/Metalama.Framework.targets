@@ -31,15 +31,15 @@
     </PropertyGroup>
 
     <ItemGroup Condition="'$(MetalamaCompileTimeOnlyProject)'=='True'">
-        <AssemblyAttribute Include="Metalama.Framework.Aspects.CompileTimeOnlyAttribute"/>
+        <AssemblyAttribute Include="Metalama.Framework.Aspects.CompileTimeOnlyAttribute" />
     </ItemGroup>
 
     <ItemGroup Condition="'$(DesignTimeBuild)' == 'True'">
-        <AdditionalFiles Include="$(MetalamaDesignTimeFallbackTouchFile)"/>
+        <AdditionalFiles Include="$(MetalamaDesignTimeFallbackTouchFile)" />
     </ItemGroup>
 
     <Target Name="ExportMetalamaFrameworkProperties" BeforeTargets="PrepareForBuild">
-        <Error Text="The IntermediateOutputPath property is not defined." Condition="'$(IntermediateOutputPath)'==''"/>
+        <Error Text="The IntermediateOutputPath property is not defined." Condition="'$(IntermediateOutputPath)'==''" />
         <PropertyGroup>
             <MetalamaBuildTouchFile>$(MSBuildProjectDirectory)\$(IntermediateOutputPath)MetalamaBuild.touch</MetalamaBuildTouchFile>
             <MetalamaSourceGeneratorTouchFile>$(MSBuildProjectDirectory)\$(IntermediateOutputPath)MetalamaSourceGenerator.touch</MetalamaSourceGeneratorTouchFile>
@@ -52,16 +52,16 @@
              delete the file. It should do that only when the source code has changed (even if it is not saved). We don't overwrite an existing
              file because this would break incremental build -->
         <WriteLinesToFile File="$(MetalamaBuildTouchFile)" Lines=">$([System.Guid]::NewGuid())"
-                          Condition="!Exists('$(MetalamaBuildTouchFile)')"/>
+                          Condition="!Exists('$(MetalamaBuildTouchFile)')" />
 
         <!-- We create the generator touch file so that it is included in the project. This file is changed by the Roslyn analysis process. -->
         <WriteLinesToFile File="$(MetalamaSourceGeneratorTouchFile)" Lines=">$([System.Guid]::NewGuid())"
-                          Condition="!Exists('$(MetalamaSourceGeneratorTouchFile)')"/>
+                          Condition="!Exists('$(MetalamaSourceGeneratorTouchFile)')" />
         <ItemGroup>
-            <AdditionalFiles Include="$(MetalamaBuildTouchFile)"/>
-            <AdditionalFiles Include="$(MetalamaSourceGeneratorTouchFile)"/>
-            <Clean Include="$(MetalamaBuildTouchFile)"/>
-            <Clean Include="$(MetalamaSourceGeneratorTouchFile)"/>
+            <AdditionalFiles Include="$(MetalamaBuildTouchFile)" />
+            <AdditionalFiles Include="$(MetalamaSourceGeneratorTouchFile)" />
+            <Clean Include="$(MetalamaBuildTouchFile)" />
+            <Clean Include="$(MetalamaSourceGeneratorTouchFile)" />
         </ItemGroup>
     </Target>
 </Project>

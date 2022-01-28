@@ -68,13 +68,14 @@ namespace Metalama.Framework.Engine
                 Error,
                 "Cannot provide instance for a local function." );
 
-        internal static readonly DiagnosticDefinition<(string Expression, string ParameterName, IMemberOrNamedType Method)> CannotPassExpressionToByRefParameter =
-            new(
-                "CR0019",
-                _category,
-                "Cannot pass the expression '{0}' to the '{1}' parameter of method '{2}' because the parameter is 'out' or 'ref'.",
-                Error,
-                "Cannot use an expression in an out or ref parameter." );
+        internal static readonly DiagnosticDefinition<(string Expression, string ParameterName, IMemberOrNamedType Method)>
+            CannotPassExpressionToByRefParameter =
+                new(
+                    "CR0019",
+                    _category,
+                    "Cannot pass the expression '{0}' to the '{1}' parameter of method '{2}' because the parameter is 'out' or 'ref'.",
+                    Error,
+                    "Cannot use an expression in an out or ref parameter." );
 
         internal static readonly DiagnosticDefinition<string> CannotFindType =
             new( "CR0020", _category, "Cannot find the type '{0}'.", Error, "Cannot find a type" );

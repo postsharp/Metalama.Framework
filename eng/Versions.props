@@ -1,7 +1,7 @@
 <Project>
 
     <!-- Set the default version -->
-    <Import Project="MainVersion.props"/>
+    <Import Project="MainVersion.props" />
 
     <PropertyGroup>
         <MetalamaVersion>$(MainVersion)$(PackageVersionSuffix)</MetalamaVersion>
@@ -39,7 +39,7 @@
     </PropertyGroup>
 
     <!-- Import overrides for the local build -->
-    <Import Project="Versions.g.props" Condition="Exists('Versions.g.props')"/>
+    <Import Project="Versions.g.props" Condition="Exists('Versions.g.props')" />
 
     <PropertyGroup>
         <AssemblyVersion>$(MetalamaAssemblyVersion)</AssemblyVersion>

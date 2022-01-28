@@ -16,7 +16,6 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
-using CodeFixContext = Microsoft.CodeAnalysis.CodeFixes.CodeFixContext;
 
 namespace Metalama.Framework.DesignTime
 {

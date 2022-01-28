@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Backstage.Diagnostics;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.VisualStudio.Threading;
 using StreamJsonRpc;
@@ -13,10 +14,12 @@ namespace Metalama.Framework.DesignTime.VisualStudio.Remoting;
 
 internal class ServiceClient : IDisposable
 {
+    private static readonly ILogger _logger = Logger.Remoting;
+
     private readonly string? _pipeName;
     private readonly MessageHandler _messageHandler;
     private readonly ConcurrentDictionary<string, ImmutableDictionary<string, string>> _unhandledSources = new();
-    private TaskCompletionSource<bool> _connectTask = new TaskCompletionSource<bool>();
+    private readonly TaskCompletionSource<bool> _connectTask = new();
 
     private NamedPipeClientStream? _pipeStream;
     private JsonRpc? _rpc;
@@ -30,7 +33,7 @@ internal class ServiceClient : IDisposable
 
     public async Task ConnectAsync( CancellationToken cancellationToken = default )
     {
-        Logger.Remoting.Trace?.Log( $"Connecting to the ServiceHost '{this._pipeName}'." );
+        _logger.Trace?.Log( $"Connecting to the ServiceHost '{this._pipeName}'." );
 
         try
         {
@@ -41,15 +44,16 @@ internal class ServiceClient : IDisposable
             this._server = this._rpc.Attach<IServerApi>();
             this._rpc.StartListening();
 
-            Logger.Remoting.Trace?.Log( $"The client is connected to the ServiceHost '{this._pipeName}'." );
-            
+            _logger.Trace?.Log( $"The client is connected to the ServiceHost '{this._pipeName}'." );
+
             this._connectTask.SetResult( true );
         }
         catch ( Exception e )
         {
-            Logger.Remoting.Error?.Log( $"Cannot connect to the ServiceHost '{this._pipeName}': " + e );
+            _logger.Error?.Log( $"Cannot connect to the ServiceHost '{this._pipeName}': " + e );
 
             this._connectTask.SetException( e );
+
             throw;
         }
     }
@@ -59,7 +63,6 @@ internal class ServiceClient : IDisposable
         await this._connectTask.Task.WithCancellation( cancellationToken );
         await this.ServerApi.HelloAsync( projectId, cancellationToken );
     }
-
 
     public IServerApi ServerApi => this._server ?? throw new InvalidOperationException();
 
@@ -94,7 +97,7 @@ internal class ServiceClient : IDisposable
 
             if ( !args.IsHandled )
             {
-                Logger.Remoting.Warning?.Log( $"Nobody handled the new generated code for project '{projectId}'." );
+                _logger.Warning?.Log( $"Nobody handled the new generated code for project '{projectId}'." );
 
                 // Store the event so that a source generator that would be create later can retrieve it.
                 this._parent._unhandledSources[projectId] = sources;
@@ -103,5 +106,4 @@ internal class ServiceClient : IDisposable
             return Task.CompletedTask;
         }
     }
-
 }

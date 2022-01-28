@@ -274,13 +274,13 @@ namespace Metalama.Framework.Engine.Aspects
         /// Creates a new <see cref="AspectInstance"/> by using the default constructor of the current class.
         /// This method is used by live templates.
         /// </summary>
-        internal  AspectInstance CreateAspectInstance( IDeclaration target, IAspect aspect, in AspectPredecessor predecessor )
+        internal AspectInstance CreateAspectInstance( IDeclaration target, IAspect aspect, in AspectPredecessor predecessor )
             => new( aspect, target.ToTypedRef(), this, predecessor );
 
         /// <summary>
         /// Creates an instance of the <see cref="AspectClass"/> class.
         /// </summary>
-        internal  static bool TryCreate(
+        internal static bool TryCreate(
             IServiceProvider serviceProvider,
             INamedTypeSymbol aspectTypeSymbol,
             Type aspectReflectionType,
@@ -451,8 +451,7 @@ namespace Metalama.Framework.Engine.Aspects
         public IAspect CreateDefaultInstance() => (IAspect) Activator.CreateInstance( this.AspectType );
 
         public override string ToString() => this.FullName;
-        
-      
+
         ValidatorDriver<TContext> IValidatorDriverFactory.GetValidatorDriver<TContext>( MethodInfo validateMethod )
         {
             this._validatorDriverFactory ??= ValidatorDriverFactory.GetInstance( this.AspectType );
@@ -480,6 +479,5 @@ namespace Metalama.Framework.Engine.Aspects
     {
         [return: NotNullIfNotNull( "name" )]
         public static string? GetShortName( string? name ) => name?.TrimEnd( "Attribute" );
-
     }
 }

@@ -4,7 +4,6 @@
 using Metalama.Framework.DesignTime.VisualStudio.Remoting;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Utilities;
-using System.Collections.Concurrent;
 using System.Collections.Immutable;
 
 namespace Metalama.Framework.DesignTime.VisualStudio;
@@ -38,13 +37,16 @@ public class VsAnalysisProcessSourceGenerator : AnalysisProcessSourceGenerator
 
         private void OnClientConnected( object sender, ClientConnectedEventArgs e )
         {
-            // When a client connects, we update the touch file to force that client to request the info again.
-            this.UpdateTouchFile();
+            if ( e.ProjectId == this.ProjectOptions.ProjectId )
+            {
+                // When a client connects, we update the touch file to force that client to request the info again.
+                this.UpdateTouchFile();
+            }
         }
 
         protected override Task PublishGeneratedSourcesAsync( string projectId, CancellationToken cancellationToken )
         {
-            if ( _serviceHost != null )
+            if ( _serviceHost != null && this.Sources != null )
             {
                 var generatedSources = this.Sources.ToImmutableDictionary( x => x.Key, x => x.Value.ToString() );
 

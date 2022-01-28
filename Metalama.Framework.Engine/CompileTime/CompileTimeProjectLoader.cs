@@ -246,11 +246,12 @@ namespace Metalama.Framework.Engine.CompileTime
             if ( !File.Exists( assemblyPath ) )
             {
                 this._logger.Warning?.Log( $"The file '{assemblyPath}' does not exist." );
-                
+
                 compileTimeProject = null;
+
                 return false;
             }
-            
+
             var assemblyIdentity = AssemblyName.GetAssemblyName( assemblyPath ).ToAssemblyIdentity();
 
             // If the assembly is a standard one, there is no need to analyze.

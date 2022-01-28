@@ -368,7 +368,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         internal ICompilationHelpers Helpers { get; } = new CompilationHelpers();
 
-        ICompilationHelpers ICompilationInternal.Helpers => this.Helpers; 
+        ICompilationHelpers ICompilationInternal.Helpers => this.Helpers;
 
         public override IDeclaration OriginalDefinition => this;
 

@@ -22,39 +22,52 @@ namespace Metalama.Framework.Engine.Pipeline
     public class AspectPipelineConfiguration
     {
         internal CompileTimeDomain Domain { get; }
-        internal                           ImmutableArray<PipelineStageConfiguration> Stages{ get; }
+
+        internal ImmutableArray<PipelineStageConfiguration> Stages { get; }
 
         internal BoundAspectClassCollection BoundAspectClasses { get; }
 
         public IReadOnlyCollection<IAspectClass> AspectClasses => this.BoundAspectClasses;
 
-
         internal ImmutableArray<OrderedAspectLayer> AspectLayers { get; }
 
         public CompileTimeProject? CompileTimeProject { get; }
-                                   internal CompileTimeProjectLoader CompileTimeProjectLoader { get; }
-                            internal FabricsConfiguration? FabricsConfiguration { get; }
 
-                            public ProjectModel ProjectModel { get; }
+        internal CompileTimeProjectLoader CompileTimeProjectLoader { get; }
 
-                            public ServiceProvider ServiceProvider { get; }
-                            internal CodeFixFilter CodeFixFilter { get; }
+        internal FabricsConfiguration? FabricsConfiguration { get; }
 
-                            internal AspectPipelineConfiguration( CompileTimeDomain domain, ImmutableArray<PipelineStageConfiguration> stages, BoundAspectClassCollection aspectClasses, ImmutableArray<OrderedAspectLayer> aspectLayers, CompileTimeProject? compileTimeProject, CompileTimeProjectLoader compileTimeProjectLoader, FabricsConfiguration? fabricsConfiguration, ProjectModel projectModel, ServiceProvider serviceProvider, CodeFixFilter codeFixFilter )
-                            {
-                                this.Domain = domain;
-                                this.Stages = stages;
-                                this.BoundAspectClasses = aspectClasses;
-                                this.AspectLayers = aspectLayers;
-                                this.CompileTimeProject = compileTimeProject;
-                                this.CompileTimeProjectLoader = compileTimeProjectLoader;
-                                this.FabricsConfiguration = fabricsConfiguration;
-                                this.ProjectModel = projectModel;
-                                this.ServiceProvider = serviceProvider;
-                                this.CodeFixFilter = codeFixFilter;
-                            }
+        public ProjectModel ProjectModel { get; }
 
-                            public AspectPipelineConfiguration WithServiceProvider( ServiceProvider serviceProvider )
+        public ServiceProvider ServiceProvider { get; }
+
+        internal CodeFixFilter CodeFixFilter { get; }
+
+        internal AspectPipelineConfiguration(
+            CompileTimeDomain domain,
+            ImmutableArray<PipelineStageConfiguration> stages,
+            BoundAspectClassCollection aspectClasses,
+            ImmutableArray<OrderedAspectLayer> aspectLayers,
+            CompileTimeProject? compileTimeProject,
+            CompileTimeProjectLoader compileTimeProjectLoader,
+            FabricsConfiguration? fabricsConfiguration,
+            ProjectModel projectModel,
+            ServiceProvider serviceProvider,
+            CodeFixFilter codeFixFilter )
+        {
+            this.Domain = domain;
+            this.Stages = stages;
+            this.BoundAspectClasses = aspectClasses;
+            this.AspectLayers = aspectLayers;
+            this.CompileTimeProject = compileTimeProject;
+            this.CompileTimeProjectLoader = compileTimeProjectLoader;
+            this.FabricsConfiguration = fabricsConfiguration;
+            this.ProjectModel = projectModel;
+            this.ServiceProvider = serviceProvider;
+            this.CodeFixFilter = codeFixFilter;
+        }
+
+        public AspectPipelineConfiguration WithServiceProvider( ServiceProvider serviceProvider )
             => new(
                 this.Domain,
                 this.Stages,
@@ -67,7 +80,7 @@ namespace Metalama.Framework.Engine.Pipeline
                 serviceProvider,
                 this.CodeFixFilter );
 
-        internal  AspectPipelineConfiguration WithCodeFixFilter( CodeFixFilter codeFixFilter )
+        internal AspectPipelineConfiguration WithCodeFixFilter( CodeFixFilter codeFixFilter )
             => codeFixFilter == this.CodeFixFilter
                 ? this
                 : new AspectPipelineConfiguration(
@@ -82,6 +95,6 @@ namespace Metalama.Framework.Engine.Pipeline
                     this.ServiceProvider,
                     codeFixFilter );
 
-        internal  UserCodeInvoker UserCodeInvoker => this.ServiceProvider.GetRequiredService<UserCodeInvoker>();
+        internal UserCodeInvoker UserCodeInvoker => this.ServiceProvider.GetRequiredService<UserCodeInvoker>();
     }
 }

@@ -30,7 +30,7 @@ namespace Metalama.Framework.DesignTime.Diagnostics
         public void Write( TextWriter textWriter )
         {
             var serializer = JsonSerializer.Create();
-            serializer.Formatting = Newtonsoft.Json.Formatting.Indented;
+            serializer.Formatting = Formatting.Indented;
 
             serializer.Serialize( textWriter, this );
 

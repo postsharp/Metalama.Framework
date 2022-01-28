@@ -94,7 +94,10 @@ namespace Metalama.Framework.Engine.CodeModel
                 _ => Array.Empty<ISymbol>()
             };
 
-        internal static IEnumerable<AttributeRef> ToAttributeLinks( this IEnumerable<AttributeData> attributes, ISymbol declaringSymbol, Compilation compilation )
+        internal static IEnumerable<AttributeRef> ToAttributeLinks(
+            this IEnumerable<AttributeData> attributes,
+            ISymbol declaringSymbol,
+            Compilation compilation )
             => attributes.Select( a => new AttributeRef( a, Ref.FromSymbol( declaringSymbol, compilation ) ) );
 
         internal static IEnumerable<AttributeRef> GetAllAttributes( this ISymbol symbol, Compilation compilation )
@@ -355,6 +358,7 @@ namespace Metalama.Framework.Engine.CodeModel
             }
         }
 
-        public static ImmutableArray<SyntaxReference> GetDeclaringSyntaxReferences(this IDeclaration declaration) => ((IDeclarationImpl) declaration).DeclaringSyntaxReferences;
+        public static ImmutableArray<SyntaxReference> GetDeclaringSyntaxReferences( this IDeclaration declaration )
+            => ((IDeclarationImpl) declaration).DeclaringSyntaxReferences;
     }
 }

@@ -156,10 +156,11 @@ namespace Metalama.Framework.Engine.CodeModel
         internal IDeclaration? GetDeclarationOrNull( ISymbol symbol, DeclarationRefTargetKind kind = DeclarationRefTargetKind.Default )
             => this.GetCompilationElement( symbol, kind ) as IDeclaration;
 
-        public IDeclaration GetDeclaration(SymbolDictionaryKey key) => this.GetDeclaration( key.GetId().Resolve( this.Compilation ).AssertNotNull() );
+        public IDeclaration GetDeclaration( SymbolDictionaryKey key ) => this.GetDeclaration( key.GetId().Resolve( this.Compilation ).AssertNotNull() );
 
         public IDeclaration GetDeclaration( ISymbol symbol ) => this.GetDeclaration( symbol, DeclarationRefTargetKind.Default );
-        internal IDeclaration GetDeclaration( ISymbol symbol, DeclarationRefTargetKind kind  )
+
+        internal IDeclaration GetDeclaration( ISymbol symbol, DeclarationRefTargetKind kind )
         {
             var compilationElement = this.GetCompilationElement( symbol, kind );
 

@@ -1,10 +1,10 @@
 ﻿<Project>
     <!-- TODO: somehow also set PrivateAssets for aspect libraries -->
     <ItemGroup>
-        <PackageReference Update="Metalama.Framework" PrivateAssets="none"/>
-        <PackageReference Update="Metalama.Framework.Sdk" PrivateAssets="none"/>
+        <PackageReference Update="Metalama.Framework" PrivateAssets="none" />
+        <PackageReference Update="Metalama.Framework.Sdk" PrivateAssets="none" />
     </ItemGroup>
 
     <Import Project="Metalama.CompilerVisibleProperties.props"
-            Condition="'$(MetalamaCompilerVisiblePropertiesProjectImported)'==''"/>
+            Condition="'$(MetalamaCompilerVisiblePropertiesProjectImported)'==''" />
 </Project>

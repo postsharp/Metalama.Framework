@@ -7,7 +7,6 @@ using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Engine.CodeFixes;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
-using Metalama.Framework.Engine.Pipeline;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
