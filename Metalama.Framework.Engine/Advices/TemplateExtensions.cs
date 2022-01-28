@@ -47,6 +47,25 @@ namespace Metalama.Framework.Engine.Advices
             }
         }
 
+        public static TemplateMember<IEvent> GetInitializerTemplate( this in TemplateMember<IEvent> eventFieldTemplate )
+        {
+            if ( eventFieldTemplate.IsNotNull && eventFieldTemplate.Declaration!.GetPrimaryDeclaration().AssertNotNull() is VariableDeclaratorSyntax eventFieldSyntax)
+            {
+                if ( eventFieldSyntax.Initializer != null )
+                {
+                    return TemplateMember.Create( eventFieldTemplate.Declaration, eventFieldTemplate.TemplateInfo, TemplateKind.IntroductionInitializer );
+                }
+                else
+                {
+                    return default;
+                }
+            }
+            else
+            {
+                return default;
+            }
+        }
+
         public static TemplateMember<IProperty> GetInitializerTemplate( this in TemplateMember<IProperty> propertyTemplate )
         {
             if ( propertyTemplate.IsNotNull )

@@ -1,6 +1,6 @@
 using Metalama.Framework.Aspects;
 
-namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Field.InitializerTemplate
+namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Fields.InitializerTemplate
 {
     public class IntroductionAttribute : TypeAspect
     {

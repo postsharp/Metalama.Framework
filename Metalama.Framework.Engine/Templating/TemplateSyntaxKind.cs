@@ -11,6 +11,7 @@ namespace Metalama.Framework.Engine.Templating
     {
         Self,
         FieldInitializer,
-        PropertyInitializer
+        PropertyInitializer,
+        EventFieldInitializer,
     }
 }

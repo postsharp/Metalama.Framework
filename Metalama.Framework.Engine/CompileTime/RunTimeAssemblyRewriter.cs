@@ -124,7 +124,7 @@ namespace Metalama.Compiler
 
             foreach (var variable in node.Declaration.Variables)
             {
-                if ( variable.Initializer != null && this.MustReplaceByThrow( variable ) )
+                if ( variable.Initializer != null && this.MustRemoveInitializer( variable ) )
                 {
                     anyChange = true;
                     variables.Add( variable.WithInitializer( null ) );
@@ -154,6 +154,16 @@ namespace Metalama.Compiler
 
             return node;
         }
+
+        private bool MustRemoveInitializer( SyntaxNode node )
+        {
+            var symbol = this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node )!;
+
+            return this.MustRemoveInitializer( symbol );
+        }
+
+        private bool MustRemoveInitializer( ISymbol symbol )
+            => !this.SymbolClassifier.GetTemplateInfo( symbol ).IsNone;
 
         private bool MustReplaceByThrow( SyntaxNode node )
         {
@@ -199,6 +209,11 @@ namespace Metalama.Compiler
                 }
 
                 return this.WithThrowNotSupportedExceptionBody( node, "Compile-time only code cannot be called at run-time." );
+            }
+
+            if ( node.Initializer != null && this.MustRemoveInitializer(node))
+            {
+                return node.WithInitializer( null );
             }
 
             return node;

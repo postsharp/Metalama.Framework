@@ -24,40 +24,38 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders
 {
-    internal class FieldBuilder : FieldOrPropertyBuilder, IFieldBuilder, IFieldImpl
+    internal class FieldBuilder : MemberBuilder, IFieldBuilder, IFieldImpl
     {
         public override DeclarationKind DeclarationKind => DeclarationKind.Field;
 
-        public override IType Type { get; set; }
+        public IType Type { get; set; }
 
         [Memo]
-        public override IMethodBuilder? GetMethod => new AccessorBuilder( this, MethodKind.PropertyGet );
+        public IMethod? GetMethod => new AccessorBuilder( this, MethodKind.PropertyGet );
 
         [Memo]
-        public override IMethodBuilder? SetMethod => new AccessorBuilder( this, MethodKind.PropertySet );
+        public IMethod? SetMethod => new AccessorBuilder( this, MethodKind.PropertySet );
 
         public override bool IsExplicitInterfaceImplementation => false;
 
         public override IMember? OverriddenMember => null;
-
-        protected override IInvokerFactory<IFieldOrPropertyInvoker> FieldOrPropertyInvokers => this.Invokers;
-
+        
         [Memo]
         public IInvokerFactory<IFieldOrPropertyInvoker> Invokers
             => new InvokerFactory<IFieldOrPropertyInvoker>( ( order, invokerOperator ) => new FieldOrPropertyInvoker( this, order, invokerOperator ), false );
 
-        public override Writeability Writeability { get; set; }
+        public Writeability Writeability { get; set; }
 
         Writeability IFieldOrProperty.Writeability => this.Writeability;
 
-        public override bool IsAutoPropertyOrField => true;
+        public bool IsAutoPropertyOrField => true;
 
         public override InsertPosition InsertPosition
             => new(
                 InsertPositionRelation.Within,
                 (MemberDeclarationSyntax) ((NamedType) this.DeclaringType).Symbol.GetPrimaryDeclaration().AssertNotNull() );
 
-        public override IExpression? InitializerExpression { get; set; }
+        public IExpression? InitializerExpression { get; set; }
 
         public TemplateMember<IField> InitializerTemplate { get; set; }
 
@@ -72,7 +70,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             var syntaxGenerator = context.SyntaxGenerationContext.SyntaxGenerator;
 
             // If template fails to expand, we will still generate the field, albeit without the initializer.
-            _ = this.GetInitializerExpressionOrMethod( context, this.InitializerExpression, this.InitializerTemplate, out var initializerExpression, out var initializerMethod );
+            _ = this.GetInitializerExpressionOrMethod( context, this.Type, this.InitializerExpression, this.InitializerTemplate, out var initializerExpression, out var initializerMethod );
 
             var field =
                 FieldDeclaration(
@@ -102,7 +100,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             }
         }
 
-        public override IMethod? GetAccessor( MethodKind methodKind )
+        public IMethod? GetAccessor( MethodKind methodKind )
             => methodKind switch
             {
                 MethodKind.PropertyGet => this.GetMethod,
@@ -110,7 +108,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                 _ => null
             };
 
-        public override IEnumerable<IMethod> Accessors
+        public IEnumerable<IMethod> Accessors
         {
             get
             {
@@ -128,6 +126,6 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public FieldInfo ToFieldInfo() => throw new NotImplementedException();
 
-        public override FieldOrPropertyInfo ToFieldOrPropertyInfo() => throw new NotImplementedException();
+        public FieldOrPropertyInfo ToFieldOrPropertyInfo() => throw new NotImplementedException();
     }
 }

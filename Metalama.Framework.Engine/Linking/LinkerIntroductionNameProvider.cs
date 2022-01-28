@@ -20,16 +20,16 @@ namespace Metalama.Framework.Engine.Linking
             this._overrideNames = new Dictionary<INamedType, HashSet<string>>();
         }
 
-        internal override string GetOverrideName( INamedType targetType, AspectLayerId aspectLayer, IMember overriddenDeclaration )
+        internal override string GetOverrideName( INamedType targetType, AspectLayerId aspectLayer, IMember overriddenMember )
         {
             var shortAspectName = aspectLayer.AspectShortName;
             var shortLayerName = aspectLayer.LayerName;
 
             string nameHint;
 
-            if ( overriddenDeclaration.IsExplicitInterfaceImplementation )
+            if ( overriddenMember.IsExplicitInterfaceImplementation )
             {
-                var interfaceMember = overriddenDeclaration.GetExplicitInterfaceImplementation();
+                var interfaceMember = overriddenMember.GetExplicitInterfaceImplementation();
                 var cleanInterfaceName = interfaceMember.DeclaringType.Name.Replace( "_", "__" ).Replace( ".", "_" );
 
                 nameHint =
@@ -43,16 +43,16 @@ namespace Metalama.Framework.Engine.Linking
 
                 nameHint =
                     shortLayerName != null
-                        ? $"{overriddenDeclaration.Name}_{shortAspectName}_{shortLayerName}"
-                        : $"{overriddenDeclaration.Name}_{shortAspectName}";
+                        ? $"{overriddenMember.Name}_{shortAspectName}_{shortLayerName}"
+                        : $"{overriddenMember.Name}_{shortAspectName}";
             }
 
             return this.FindUniqueName( targetType, nameHint );
         }
 
-        internal override string GetInitializerName( INamedType targetType, AspectLayerId aspectLayer, IFieldOrProperty initializedDeclaration )
+        internal override string GetInitializerName( INamedType targetType, AspectLayerId aspectLayer, IMember initializedMember )
         {
-            var nameHint = $"Initialize_{initializedDeclaration.Name}";
+            var nameHint = $"Initialize_{initializedMember.Name}";
 
             return this.FindUniqueName( targetType, nameHint );
         }

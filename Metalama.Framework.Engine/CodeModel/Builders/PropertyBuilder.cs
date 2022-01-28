@@ -29,7 +29,7 @@ using TypedConstant = Metalama.Framework.Code.TypedConstant;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders
 {
-    internal class PropertyBuilder : FieldOrPropertyBuilder, IPropertyBuilder, IPropertyImpl
+    internal class PropertyBuilder : MemberBuilder, IPropertyBuilder, IPropertyImpl
     {
         private readonly bool _hasInitOnlySetter;
 
@@ -37,40 +37,35 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public RefKind RefKind { get; set; }
 
-        public override Writeability Writeability
-        {
-            get => this switch
+        public Writeability Writeability => 
+            this switch
             {
                 { SetMethod: null, IsAutoPropertyOrField: false } => Writeability.None,
                 { SetMethod: null, IsAutoPropertyOrField: true } => Writeability.ConstructorOnly,
                 { _hasInitOnlySetter: true } => Writeability.InitOnly,
                 _ => Writeability.All
             };
+        
 
-            set => throw new NotSupportedException();
-        }
-
-        public override bool IsAutoPropertyOrField { get; }
+        public bool IsAutoPropertyOrField { get; }
 
         public ParameterBuilderList Parameters { get; } = new();
 
         IParameterList IHasParameters.Parameters => this.Parameters;
 
-        public override IType Type { get; set; }
+        public IType Type { get; set; }
 
-        public override IMethodBuilder? GetMethod { get; }
+        public IMethodBuilder? GetMethod { get; }
 
         IMethod? IFieldOrProperty.GetMethod => this.GetMethod;
 
         IMethod? IFieldOrProperty.SetMethod => this.SetMethod;
 
-        public override IMethodBuilder? SetMethod { get; }
+        public IMethodBuilder? SetMethod { get; }
 
         protected virtual bool HasBaseInvoker => this.OverriddenProperty != null;
 
         IInvokerFactory<IFieldOrPropertyInvoker> IFieldOrProperty.Invokers => this.Invokers;
-
-        protected override IInvokerFactory<IFieldOrPropertyInvoker> FieldOrPropertyInvokers => this.Invokers;
 
         [Memo]
         public IInvokerFactory<IPropertyInvoker> Invokers
@@ -93,7 +88,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public bool IsIndexer => string.Equals( this.Name, "Items", StringComparison.Ordinal );
 
-        public override IExpression? InitializerExpression { get; set; }
+        public IExpression? InitializerExpression { get; set; }
 
         public TemplateMember<IProperty> InitializerTemplate { get; set; }
 
@@ -169,7 +164,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             out ExpressionSyntax? initializerExpression,
             out MethodDeclarationSyntax? initializerMethod )
         {
-            return this.GetInitializerExpressionOrMethod( context, this.InitializerExpression, this.InitializerTemplate, out initializerExpression, out initializerMethod );
+            return this.GetInitializerExpressionOrMethod( context, this.Type, this.InitializerExpression, this.InitializerTemplate, out initializerExpression, out initializerMethod );
         }
         
         public override IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context )
@@ -351,7 +346,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         {
             using ( context.DiagnosticSink.WithDefaultScope( this ) )
             {
-                var metaApi = MetaApi.ForFieldOrPropertyInitializer(
+                var metaApi = MetaApi.ForInitializer(
                     this,
                     new MetaApiProperties(
                         context.DiagnosticSink,
@@ -379,7 +374,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             }
         }
 
-        public override IMethod? GetAccessor( MethodKind methodKind )
+        public IMethod? GetAccessor( MethodKind methodKind )
             => methodKind switch
             {
                 MethodKind.PropertyGet => this.GetMethod,
@@ -387,7 +382,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                 _ => null
             };
 
-        public override IEnumerable<IMethod> Accessors
+        public IEnumerable<IMethod> Accessors
         {
             get
             {
@@ -405,7 +400,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public PropertyInfo ToPropertyInfo() => throw new NotImplementedException();
 
-        public override FieldOrPropertyInfo ToFieldOrPropertyInfo() => throw new NotImplementedException();
+        public FieldOrPropertyInfo ToFieldOrPropertyInfo() => throw new NotImplementedException();
 
         public void SetExplicitInterfaceImplementation( IProperty interfaceProperty ) => this.ExplicitInterfaceImplementations = new[] { interfaceProperty };
     }

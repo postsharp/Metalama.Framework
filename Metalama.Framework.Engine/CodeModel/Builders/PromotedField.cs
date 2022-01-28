@@ -44,7 +44,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             {
                 var fieldBuilder = builtField.FieldBuilder;
 
-                return fieldBuilder.GetInitializerExpressionOrMethod( context, fieldBuilder.InitializerExpression, fieldBuilder.InitializerTemplate, out initializerExpression, out initializerMethod );
+                return fieldBuilder.GetInitializerExpressionOrMethod( context, this.Type, fieldBuilder.InitializerExpression, fieldBuilder.InitializerTemplate, out initializerExpression, out initializerMethod );
             }
             else
             {

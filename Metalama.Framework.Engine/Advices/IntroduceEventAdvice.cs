@@ -46,6 +46,8 @@ namespace Metalama.Framework.Engine.Advices
                 this.TargetDeclaration,
                 eventTemplate.Declaration?.Name ?? explicitName.AssertNotNull(),
                 eventTemplate.Declaration != null && eventTemplate.Declaration.IsEventField() );
+
+            this.MemberBuilder.InitializerTemplate = eventTemplate.GetInitializerTemplate();
         }
 
         public override void Initialize( IReadOnlyList<Advice> declarativeAdvices, IDiagnosticAdder diagnosticAdder )

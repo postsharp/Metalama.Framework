@@ -74,9 +74,17 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         // TODO: When an interface is introduced, explicit implementation should appear here.
         public IReadOnlyList<IEvent> ExplicitInterfaceImplementations { get; set; } = Array.Empty<IEvent>();
 
+        public IExpression? InitializerExpression { get; set; }
+
+        public TemplateMember<IEvent> InitializerTemplate { get; set; }
+
         public override IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context )
         {
             var syntaxGenerator = context.SyntaxGenerationContext.SyntaxGenerator;
+            
+            _ = this.GetInitializerExpressionOrMethod( context, this.Type, this.InitializerExpression, this.InitializerTemplate, out var initializerExpression, out var initializerMethod );
+
+            Invariant.Assert( !(!this._isEventField && initializerExpression != null) );
 
             MemberDeclarationSyntax @event =
                 this._isEventField && this.ExplicitInterfaceImplementations.Count == 0
@@ -88,7 +96,12 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                             SeparatedList(
                                 new[]
                                 {
-                                    VariableDeclarator( Identifier( this.Name ), null, null ) // TODO: Initializer.
+                                    VariableDeclarator( 
+                                        Identifier( this.Name ), 
+                                        null,
+                                        initializerExpression != null
+                                        ? EqualsValueClause( initializerExpression )
+                                        : null ) // TODO: Initializer.
                                 } ) ) )
                     : EventDeclaration(
                         List<AttributeListSyntax>(), // TODO: Attributes.
@@ -107,7 +120,18 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                 @event = @event.WithLinkerDeclarationFlags( LinkerDeclarationFlags.EventField );
             }
 
-            return new[] { new IntroducedMember( this, @event, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, this ) };
+            if ( initializerMethod != null )
+            {
+                return new[]
+                {
+                    new IntroducedMember( this, @event, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, this ),
+                    new IntroducedMember( this, initializerMethod, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.InitializerMethod, this ), 
+                };
+            }
+            else
+            {
+                return new[] { new IntroducedMember( this, @event, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, this ) };
+            }
 
             AccessorListSyntax GenerateAccessorList()
             {

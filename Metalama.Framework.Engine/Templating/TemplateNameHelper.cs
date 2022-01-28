@@ -15,6 +15,7 @@ namespace Metalama.Framework.Engine.Templating
                 IMethodSymbol method => GetCompiledTemplateName( method.Name ),
                 IFieldSymbol field => GetCompiledTemplateName( field.Name ),
                 IPropertySymbol property => GetCompiledTemplateName( property.Name ),
+                IEventSymbol @event => GetCompiledTemplateName( @event.Name ),
                 _ => throw new AssertionFailedException(),
             };
 

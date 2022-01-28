@@ -926,7 +926,7 @@ namespace Metalama.Framework.Engine.Templating
 
         public override SyntaxNode VisitVariableDeclarator( VariableDeclaratorSyntax node )
         {
-            if ( this._syntaxKind == TemplateSyntaxKind.FieldInitializer )
+            if ( this._syntaxKind == TemplateSyntaxKind.FieldInitializer || this._syntaxKind == TemplateSyntaxKind.EventFieldInitializer )
             {
                 this.Indent( 3 );
 

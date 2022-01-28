@@ -356,6 +356,11 @@ namespace Metalama.Framework.Engine.CompileTime
 
                                 break;
 
+                            case EventFieldDeclarationSyntax eventField:
+                                members.AddRange( this.VisitEventFieldDeclaration( eventField ).AssertNoneNull() );
+
+                                break;
+
                             default:
                                 members.Add( (MemberDeclarationSyntax) this.Visit( member ).AssertNotNull() );
 
@@ -749,7 +754,7 @@ namespace Metalama.Framework.Engine.CompileTime
                          && this._serializerGenerator.ShouldSuppressReadOnly( serializableType, fieldSymbol ) )
                     {
                         // This field needs to have it's readonly modifier removed.
-                        nonReadOnlyVariables.Add( TransformVariable( declarator, out var compiledInitializerTemplate ) );
+                        nonReadOnlyVariables.Add( this.TransformVariable( TemplateSyntaxKind.FieldInitializer, declarator, out var compiledInitializerTemplate ) );
 
                         if (compiledInitializerTemplate != null)
                         {
@@ -759,7 +764,7 @@ namespace Metalama.Framework.Engine.CompileTime
                     }
                     else
                     {
-                        unchangedVariables.Add( TransformVariable( declarator, out var compiledInitializerTemplate ) );
+                        unchangedVariables.Add( this.TransformVariable( TemplateSyntaxKind.FieldInitializer, declarator, out var compiledInitializerTemplate ) );
 
                         if ( compiledInitializerTemplate != null )
                         {
@@ -796,44 +801,77 @@ namespace Metalama.Framework.Engine.CompileTime
                         yield return (MemberDeclarationSyntax) visitedNode;
                     }
                 }
+            }
 
-                VariableDeclaratorSyntax TransformVariable( VariableDeclaratorSyntax variable, out MethodDeclarationSyntax? compiledInitializerTemplate )
+            private new IEnumerable<MemberDeclarationSyntax> VisitEventFieldDeclaration( EventFieldDeclarationSyntax node )
+            {
+                var hasTemplateVariables = false;
+                var variables = new List<VariableDeclaratorSyntax>();
+
+                foreach ( var declarator in node.Declaration.Variables )
                 {
-                    var fieldSymbol = (IFieldSymbol)this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( variable ).AssertNotNull();
-                    var fieldIsTemplate = !this.SymbolClassifier.GetTemplateInfo( fieldSymbol ).IsNone;
+                    variables.Add( this.TransformVariable( TemplateSyntaxKind.EventFieldInitializer, declarator, out var compiledInitializerTemplate ) );
 
-                    if ( fieldIsTemplate && variable.Initializer != null )
+                    if ( compiledInitializerTemplate != null )
                     {
-                        var templateName = TemplateNameHelper.GetCompiledTemplateName( fieldSymbol.Name );
+                        hasTemplateVariables = true;
+                        yield return compiledInitializerTemplate;
+                    }
+                }
 
-                        // This is field template with initializer.
-                        if ( this._templateCompiler.TryCompile(
-                            templateName,
-                            this._compileTimeCompilation,
-                            variable,
-                            TemplateSyntaxKind.FieldInitializer,
-                            this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ),
-                            this._diagnosticAdder,
-                            this._cancellationToken,
-                            out _,
-                            out var transformedFieldDeclaration ) )
-                        {
-                            compiledInitializerTemplate = (MethodDeclarationSyntax)transformedFieldDeclaration;
-                            return ((VariableDeclaratorSyntax) this.Visit( variable ).AssertNotNull())
-                                .WithInitializer( null );
-                        }
-                        else
-                        {
-                            this.Success = false;
-                            compiledInitializerTemplate = null;
-                            return (VariableDeclaratorSyntax) this.Visit( variable ).AssertNotNull();
-                        }
+                if ( hasTemplateVariables )
+                {
+                    // Having template variables means that we've changed nodes even though we did not change readability.
+                    yield return
+                        node.WithDeclaration( node.Declaration.WithVariables( SeparatedList( variables ) ) );
+                }
+                else
+                {
+                    var visitedNode = this.Visit( node );
+
+                    if ( visitedNode != null )
+                    {
+                        yield return (MemberDeclarationSyntax) visitedNode;
+                    }
+                }
+            }
+
+            private VariableDeclaratorSyntax TransformVariable( TemplateSyntaxKind templateSyntaxKind, VariableDeclaratorSyntax variable, out MethodDeclarationSyntax? compiledInitializerTemplate )
+            {
+                var symbol = this.RunTimeCompilation.GetSemanticModel( variable.SyntaxTree ).GetDeclaredSymbol( variable ).AssertNotNull();
+                var isTemplate = !this.SymbolClassifier.GetTemplateInfo( symbol ).IsNone;
+
+                if ( isTemplate && variable.Initializer != null )
+                {
+                    var templateName = TemplateNameHelper.GetCompiledTemplateName( symbol.Name );
+
+                    // This is field template with initializer.
+                    if ( this._templateCompiler.TryCompile(
+                        templateName,
+                        this._compileTimeCompilation,
+                        variable,
+                        templateSyntaxKind,
+                        this.RunTimeCompilation.GetSemanticModel( variable.SyntaxTree ),
+                        this._diagnosticAdder,
+                        this._cancellationToken,
+                        out _,
+                        out var transformedFieldDeclaration ) )
+                    {
+                        compiledInitializerTemplate = (MethodDeclarationSyntax) transformedFieldDeclaration;
+                        return ((VariableDeclaratorSyntax) this.Visit( variable ).AssertNotNull())
+                            .WithInitializer( null );
                     }
                     else
                     {
+                        this.Success = false;
                         compiledInitializerTemplate = null;
                         return (VariableDeclaratorSyntax) this.Visit( variable ).AssertNotNull();
                     }
+                }
+                else
+                {
+                    compiledInitializerTemplate = null;
+                    return (VariableDeclaratorSyntax) this.Visit( variable ).AssertNotNull();
                 }
             }
 
