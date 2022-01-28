@@ -3,7 +3,6 @@
 
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Testing;
-using Metalama.TestFramework.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -96,8 +95,7 @@ namespace Metalama.TestFramework.XunitFramework
                                 {
                                     using var testOptions = new TestProjectOptions();
 
-                                    var serviceProvider = ServiceProviderFactory.GetServiceProvider( testOptions )
-                                        .WithNextProvider( TestBackstageServiceProviderFactory.Create() );
+                                    var serviceProvider = ServiceProviderFactory.GetServiceProvider( testOptions );
 
                                     var testInput = TestInput.FromFile( this._factory.ProjectProperties, directoryOptionsReader, testCase.UniqueID );
                                     testInput.Options.References.AddRange( references );

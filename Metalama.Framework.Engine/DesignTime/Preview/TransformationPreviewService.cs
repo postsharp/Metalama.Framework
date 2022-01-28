@@ -11,9 +11,6 @@ using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
-using PostSharp.Backstage.Extensibility;
-using PostSharp.Backstage.Licensing;
-using PostSharp.Backstage.Licensing.Consumption;
 using System;
 using System.Collections.Immutable;
 using System.Linq;
@@ -70,8 +67,7 @@ namespace Metalama.Framework.Engine.DesignTime.Preview
 
             // For preview, we need to override a few options, especially to enable code formatting.
             var previewServiceProvider = designTimeConfiguration.ServiceProvider.WithService(
-                    new PreviewProjectOptions( designTimeConfiguration.ServiceProvider.GetRequiredService<IProjectOptions>() ) )
-                .WithNextProvider( new TransformationPreviewBackstageServiceProvider() );
+                new PreviewProjectOptions( designTimeConfiguration.ServiceProvider.GetRequiredService<IProjectOptions>() ) );
 
             var previewConfiguration = designTimeConfiguration.WithServiceProvider( previewServiceProvider );
 
@@ -101,47 +97,6 @@ namespace Metalama.Framework.Engine.DesignTime.Preview
             var transformedSyntaxTree = pipelineResult.ResultingCompilation.SyntaxTrees[syntaxTree.FilePath];
 
             result[0] = PreviewTransformationResult.Success( transformedSyntaxTree );
-        }
-
-        private sealed class TransformationPreviewBackstageServiceProvider : IServiceProvider
-        {
-            private readonly IBackstageDiagnosticSink _backstageDiagnosticSink = new PreviewBackstageDiagnosticsSink();
-            private readonly ILicenseConsumptionManager _licenseConsumptionManager = new PreviewLicenseConsumptionManager();
-
-            public object? GetService( Type serviceType )
-            {
-                if ( serviceType == typeof(IBackstageDiagnosticSink) )
-                {
-                    return this._backstageDiagnosticSink;
-                }
-                else if ( serviceType == typeof(ILicenseConsumptionManager) )
-                {
-                    return this._licenseConsumptionManager;
-                }
-                else
-                {
-                    return null;
-                }
-            }
-
-            // TODO - Preview transformation feature licensing
-            private sealed class PreviewBackstageDiagnosticsSink : IBackstageDiagnosticSink
-            {
-                public void ReportError( string message, IDiagnosticsLocation? location = null ) { }
-
-                public void ReportWarning( string message, IDiagnosticsLocation? location = null ) { }
-            }
-
-            // TODO - Preview transformation feature licensing
-            private sealed class PreviewLicenseConsumptionManager : ILicenseConsumptionManager
-            {
-                public bool CanConsumeFeatures( ILicenseConsumer consumer, LicensedFeatures requiredFeatures )
-                {
-                    return true;
-                }
-
-                public void ConsumeFeatures( ILicenseConsumer consumer, LicensedFeatures requiredFeatures ) { }
-            }
         }
     }
 }

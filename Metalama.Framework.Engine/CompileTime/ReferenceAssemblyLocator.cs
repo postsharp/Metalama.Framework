@@ -1,6 +1,8 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Backstage.Diagnostics;
+using Metalama.Backstage.Extensibility;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Sdk;
@@ -27,6 +29,7 @@ namespace Metalama.Framework.Engine.CompileTime
     {
         private const string _compileTimeFrameworkAssemblyName = "Metalama.Framework";
         private readonly string _cacheDirectory;
+        private readonly ILogger _logger;
 
         /// <summary>
         /// Gets the name (without path and extension) of Metalama assemblies.
@@ -66,6 +69,7 @@ namespace Metalama.Framework.Engine.CompileTime
         public ReferenceAssemblyLocator( IServiceProvider serviceProvider )
         {
             this._cacheDirectory = serviceProvider.GetRequiredService<IPathOptions>().AssemblyLocatorCacheDirectory;
+            this._logger = serviceProvider.GetLoggerFactory().CompileTime();
 
             this.SystemAssemblyPaths = this.GetSystemAssemblyPaths().ToImmutableArray();
 
@@ -120,7 +124,7 @@ namespace Metalama.Framework.Engine.CompileTime
         {
             var tempProjectDirectory = Path.Combine( this._cacheDirectory, nameof(ReferenceAssemblyLocator) );
 
-            using var mutex = MutexHelper.WithGlobalLock( tempProjectDirectory );
+            using var mutex = MutexHelper.WithGlobalLock( tempProjectDirectory, this._logger );
             var referenceAssemblyListFile = Path.Combine( tempProjectDirectory, "assemblies.txt" );
 
             if ( File.Exists( referenceAssemblyListFile ) )

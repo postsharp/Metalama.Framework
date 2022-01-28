@@ -17,12 +17,6 @@ namespace Metalama.Framework.Engine.DesignTime.Preview
             this._underlying = underlying;
         }
 
-        bool IDebuggingOptions.DebugCompilerProcess => false;
-
-        bool IDebuggingOptions.DebugAnalyzerProcess => false;
-
-        bool IDebuggingOptions.DebugIdeProcess => false;
-
         string IProjectOptions.ProjectId => this._underlying.ProjectId;
 
         string? IProjectOptions.BuildTouchFile => this._underlying.BuildTouchFile;

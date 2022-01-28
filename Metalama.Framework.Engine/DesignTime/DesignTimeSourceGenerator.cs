@@ -40,17 +40,15 @@ namespace Metalama.Framework.Engine.DesignTime
 
             try
             {
-                Logger.Instance?.Write(
+                Logger.DesignTime.Trace?.Log(
                     $"DesignTimeSourceGenerator.Execute('{compilation.AssemblyName}', CompilationId = {DebuggingHelper.GetObjectId( compilation )})." );
 
                 var projectOptions = new ProjectOptions( context.AnalyzerConfigOptions );
 
-                DebuggingHelper.AttachDebugger( projectOptions );
-
                 if ( !projectOptions.IsDesignTimeEnabled )
                 {
                     // Execute the fallback.
-                    Logger.Instance?.Write(
+                    Logger.DesignTime.Trace?.Log(
                         $"DesignTimeSourceGenerator.Execute('{compilation.AssemblyName}'): DesignTimeEnabled is false, will output fallback files from '{projectOptions.AdditionalCompilationOutputDirectory}'." );
 
                     ExecuteFromAdditionalCompilationOutputFiles( context, projectOptions );
@@ -67,10 +65,10 @@ namespace Metalama.Framework.Engine.DesignTime
                         cancellationToken,
                         out var compilationResult ) )
                 {
-                    Logger.Instance?.Write(
+                    Logger.DesignTime.Trace?.Log(
                         $"DesignTimeSourceGenerator.Execute('{compilation.AssemblyName}', CompilationId = {DebuggingHelper.GetObjectId( compilation )}): the pipeline failed." );
 
-                    Logger.Instance?.Write(
+                    Logger.DesignTime.Trace?.Log(
                         " Compilation references: " + string.Join(
                             ", ",
                             compilation.References.GroupBy( r => r.GetType() ).Select( g => $"{g.Key.Name}: {g.Count()}" ) ) );
@@ -84,11 +82,11 @@ namespace Metalama.Framework.Engine.DesignTime
                 foreach ( var introducedSyntaxTree in compilationResult.PipelineResult.IntroducedSyntaxTrees )
                 {
                     sourcesCount++;
-                    Logger.Instance?.Write( $"  AddSource('{introducedSyntaxTree.Name}')" );
+                    Logger.DesignTime.Trace?.Log( $"  AddSource('{introducedSyntaxTree.Name}')" );
                     context.AddSource( introducedSyntaxTree.Name, introducedSyntaxTree.GeneratedSyntaxTree.GetText() );
                 }
 
-                Logger.Instance?.Write(
+                Logger.DesignTime.Trace?.Log(
                     $"DesignTimeSourceGenerator.Execute('{compilation.AssemblyName}', CompilationId = {DebuggingHelper.GetObjectId( compilation )}): {sourcesCount} sources generated." );
 
                 // We don't report diagnostics because it seems to be without effect.
@@ -122,7 +120,7 @@ namespace Metalama.Framework.Engine.DesignTime
                 sourcesCount++;
             }
 
-            Logger.Instance?.Write( $"DesignTimeSourceGenerator.Execute('{context.Compilation.AssemblyName}'): {sourcesCount} sources generated." );
+            Logger.DesignTime.Trace?.Log( $"DesignTimeSourceGenerator.Execute('{context.Compilation.AssemblyName}'): {sourcesCount} sources generated." );
         }
 
         void ISourceGenerator.Initialize( GeneratorInitializationContext context )

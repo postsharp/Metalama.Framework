@@ -235,7 +235,7 @@ namespace Metalama.Framework.Engine.DesignTime.Pipeline
 
             if ( !this._pipelinesByProjectId.TryGetValue( projectId, out pipeline ) )
             {
-                Logger.Instance?.Write( $"Cannot get the pipeline for project '{projectId}': it has not been created yet." );
+                Logger.DesignTime.Trace?.Log( $"Cannot get the pipeline for project '{projectId}': it has not been created yet." );
 
                 return false;
             }

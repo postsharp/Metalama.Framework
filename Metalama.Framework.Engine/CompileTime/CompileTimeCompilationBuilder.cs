@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using K4os.Hash.xxHash;
+using Metalama.Backstage.Diagnostics;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
@@ -44,6 +45,7 @@ namespace Metalama.Framework.Engine.CompileTime
         private readonly IProjectOptions? _projectOptions;
         private readonly ICompileTimeCompilationBuilderObserver? _observer;
         private readonly ICompileTimeAssemblyBinaryRewriter? _rewriter;
+        private readonly ILogger _logger;
 
         private static readonly Lazy<SyntaxTree> _predefinedTypesSyntaxTree = new(
             () =>
@@ -65,6 +67,7 @@ namespace Metalama.Framework.Engine.CompileTime
             this._projectOptions = serviceProvider.GetService<IProjectOptions>();
             this._reflectionMapperFactory = serviceProvider.GetRequiredService<ReflectionMapperFactory>();
             this._classifierFactory = serviceProvider.GetRequiredService<SymbolClassificationService>();
+            this._logger = serviceProvider.GetLoggerFactory().CompileTime();
         }
 
         private static ulong ComputeSourceHash( IReadOnlyList<SyntaxTree> compileTimeTrees, StringBuilder? log = null )
@@ -277,7 +280,7 @@ namespace Metalama.Framework.Engine.CompileTime
         {
             var outputInfo = this.GetOutputPaths( compileTimeCompilation.AssemblyName! );
 
-            Logger.Instance?.Write( $"TryEmit( '{compileTimeCompilation.AssemblyName}' )" );
+            this._logger.Trace?.Log( $"TryEmit( '{compileTimeCompilation.AssemblyName}' )" );
 
             try
             {
@@ -286,7 +289,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 // Write the generated files to disk if we should.
                 if ( !Directory.Exists( outputInfo.Directory ) )
                 {
-                    Logger.Instance?.Write( $"Creating directory '{outputInfo.Directory}'." );
+                    this._logger.Trace?.Log( $"Creating directory '{outputInfo.Directory}'." );
                     Directory.CreateDirectory( outputInfo.Directory );
                 }
 
@@ -309,7 +312,8 @@ namespace Metalama.Framework.Engine.CompileTime
                             {
                                 text.Write( textWriter, cancellationToken );
                             }
-                        } );
+                        },
+                        logger: this._logger );
 
                     // Update the link to the file path.
                     var newTree = CSharpSyntaxTree.Create(
@@ -411,7 +415,7 @@ namespace Metalama.Framework.Engine.CompileTime
                     var diagnostics = emitResult.Diagnostics.Select( d => d.ToString() ).ToArray();
                     File.WriteAllLines( diagnosticPath, diagnostics );
 
-                    Logger.Instance?.Write(
+                    this._logger.Trace?.Log(
                         $"TryEmit( '{compileTimeCompilation.AssemblyName}' ): failure: " +
                         string.Join( Environment.NewLine, emitResult.Diagnostics ) );
 
@@ -428,14 +432,14 @@ namespace Metalama.Framework.Engine.CompileTime
                 }
                 else
                 {
-                    Logger.Instance?.Write( $"TryEmit( '{compileTimeCompilation.AssemblyName}' ): success." );
+                    this._logger.Trace?.Log( $"TryEmit( '{compileTimeCompilation.AssemblyName}' ): success." );
 
                     return true;
                 }
             }
             catch ( Exception e )
             {
-                Logger.Instance?.Write( e.ToString() );
+                this._logger.Trace?.Log( e.ToString() );
 
                 DeleteOutputFiles();
 
@@ -451,7 +455,8 @@ namespace Metalama.Framework.Engine.CompileTime
                         {
                             File.Delete( outputInfo.Pe );
                         }
-                    } );
+                    },
+                    logger: this._logger );
 
                 RetryHelper.Retry(
                     () =>
@@ -460,7 +465,8 @@ namespace Metalama.Framework.Engine.CompileTime
                         {
                             File.Delete( outputInfo.Pdb );
                         }
-                    } );
+                    },
+                    logger: this._logger );
             }
         }
 
@@ -542,12 +548,12 @@ namespace Metalama.Framework.Engine.CompileTime
             ulong projectHash,
             out CompileTimeProject? project )
         {
-            Logger.Instance?.Write( $"TryGetCompileTimeProjectFromCache( '{runTimeCompilation.AssemblyName}' )" );
+            this._logger.Trace?.Log( $"TryGetCompileTimeProjectFromCache( '{runTimeCompilation.AssemblyName}' )" );
 
             // Look in in-memory cache.
             if ( this._cache.TryGetValue( projectHash, out project ) )
             {
-                Logger.Instance?.Write( $"TryGetCompileTimeProjectFromCache( '{runTimeCompilation.AssemblyName}' ): found in memory cache." );
+                this._logger.Trace?.Log( $"TryGetCompileTimeProjectFromCache( '{runTimeCompilation.AssemblyName}' ): found in memory cache." );
 
                 return true;
             }
@@ -555,17 +561,17 @@ namespace Metalama.Framework.Engine.CompileTime
             // Look on disk.
             if ( !File.Exists( outputPaths.Pe ) || !File.Exists( outputPaths.Manifest ) )
             {
-                Logger.Instance?.Write( $"TryGetCompileTimeProjectFromCache( '{runTimeCompilation.AssemblyName}' ): not found." );
+                this._logger.Trace?.Log( $"TryGetCompileTimeProjectFromCache( '{runTimeCompilation.AssemblyName}' ): not found." );
 
                 project = null;
 
                 return false;
             }
 
-            Logger.Instance?.Write( $"TryGetCompileTimeProjectFromCache( '{runTimeCompilation.AssemblyName}' ): found on disk. Deserializing." );
+            this._logger.Trace?.Log( $"TryGetCompileTimeProjectFromCache( '{runTimeCompilation.AssemblyName}' ): found on disk. Deserializing." );
 
             // Deserialize the manifest.
-            var manifest = CompileTimeProjectManifest.Deserialize( RetryHelper.Retry( () => File.OpenRead( outputPaths.Manifest ) ) );
+            var manifest = CompileTimeProjectManifest.Deserialize( RetryHelper.Retry( () => File.OpenRead( outputPaths.Manifest ), logger: this._logger ) );
 
             project = CompileTimeProject.Create(
                 this._serviceProvider,
@@ -612,7 +618,7 @@ namespace Metalama.Framework.Engine.CompileTime
                     return false;
                 }
 
-                using ( WithLock( compileTimeAssemblyName ) )
+                using ( this.WithLock( compileTimeAssemblyName ) )
                 {
                     // Do a second cache lookup within the lock.
                     if ( this.TryGetCompileTimeProjectFromCache(
@@ -782,7 +788,7 @@ namespace Metalama.Framework.Engine.CompileTime
             out string assemblyPath,
             out string? sourceDirectory )
         {
-            Logger.Instance?.Write( $"TryCompileDeserializedProject( '{runTimeAssemblyName}' )" );
+            this._logger.Trace?.Log( $"TryCompileDeserializedProject( '{runTimeAssemblyName}' )" );
             var compileTimeAssemblyName = GetCompileTimeAssemblyName( runTimeAssemblyName, referencedProjects, syntaxTreeHash );
 
             var outputInfo = this.GetOutputPaths( compileTimeAssemblyName );
@@ -793,14 +799,14 @@ namespace Metalama.Framework.Engine.CompileTime
             assemblyPath = outputInfo.Pe;
             sourceDirectory = outputInfo.Directory;
 
-            using ( WithLock( compileTimeAssemblyName ) )
+            using ( this.WithLock( compileTimeAssemblyName ) )
             {
                 if ( File.Exists( outputInfo.Pe ) )
                 {
                     // If the file already exists, given that it has a strong hash, it means that the assembly has already been 
                     // emitted and it does not need to be done a second time.
 
-                    Logger.Instance?.Write( $"TryCompileDeserializedProject( '{runTimeAssemblyName}' ): '{outputInfo.Pe}' already exists." );
+                    this._logger.Trace?.Log( $"TryCompileDeserializedProject( '{runTimeAssemblyName}' ): '{outputInfo.Pe}' already exists." );
 
                     return true;
                 }
@@ -811,6 +817,6 @@ namespace Metalama.Framework.Engine.CompileTime
             }
         }
 
-        private static IDisposable WithLock( string compileTimeAssemblyName ) => MutexHelper.WithGlobalLock( compileTimeAssemblyName );
+        private IDisposable WithLock( string compileTimeAssemblyName ) => MutexHelper.WithGlobalLock( compileTimeAssemblyName, this._logger );
     }
 }
