@@ -106,6 +106,8 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 this.ValidationResult = validationResult;
             }
 
+            public Compilation? LastCompilation => this._compilationChangeTracker.LastCompilation;
+
             private static IReadOnlyList<SyntaxTree> GetCompileTimeSyntaxTrees(
                 ref PipelineState state,
                 Compilation compilation,

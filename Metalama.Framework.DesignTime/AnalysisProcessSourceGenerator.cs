@@ -1,160 +1,20 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline;
-using Metalama.Framework.Engine.Utilities;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.Text;
-using System.Collections.Immutable;
 
 namespace Metalama.Framework.DesignTime;
 
 public class AnalysisProcessSourceGenerator : DesignTimeSourceGenerator
 {
 #pragma warning disable CA1001 // ServiceHost is disposable but not owned.
-    protected class AnalysisProcessSourceGeneratorImpl : SourceGeneratorImpl
-#pragma warning restore CA1001
-    {
-        private CancellationTokenSource? _currentCancellationSource;
 
-        public AnalysisProcessSourceGeneratorImpl( IProjectOptions projectOptions ) : base( projectOptions ) { }
+    protected override ProjectHandler CreateSourceGeneratorImpl( IProjectOptions projectOptions )
+        => new AnalysisProcessProjectHandler( this.ServiceProvider, projectOptions );
 
-        public ImmutableDictionary<string, SourceText>? Sources { get; private set; }
+    // This constructor is called by the facade.
+    public AnalysisProcessSourceGenerator() : this( DesignTimeServiceProviderFactory.GetServiceProvider() ) { }
 
-        private ImmutableDictionary<string, IntroducedSyntaxTree>? _lastIntroducedTrees;
-
-        public override void GenerateSources( Compilation compilation, GeneratorExecutionContext context )
-        {
-            void AddSources()
-            {
-                if ( this.Sources != null )
-                {
-                    foreach ( var source in this.Sources )
-                    {
-                        Logger.DesignTime.Trace?.Log( $"  AddSource('{source.Key}')" );
-
-                        context.AddSource( source.Key, source.Value );
-                    }
-                }
-            }
-
-            if ( this.Sources != null )
-            {
-                Logger.DesignTime.Trace?.Log( "Serving the generated sources from the cache." );
-
-                // Serve from the cache.
-                AddSources();
-
-                // Cancel the previous computation.
-                this._currentCancellationSource?.Cancel();
-
-                // Schedule a new computation.
-                var cancellationSource = this._currentCancellationSource = new CancellationTokenSource();
-                _ = Task.Run( () => this.ComputeAndPublishAsync( compilation, cancellationSource.Token ), cancellationSource.Token );
-            }
-            else
-            {
-                // We don't have sources in the cache.
-
-                Logger.DesignTime.Trace?.Log(
-                    $"No generated sources in the cache for project '{this.ProjectOptions.ProjectId}'. Need to generate them synchronously." );
-
-                if ( this.Compute( compilation, context.CancellationToken ) )
-                {
-                    AddSources();
-
-                    // Publish the changes asynchronously.
-                    var cancellationSource = this._currentCancellationSource = new CancellationTokenSource();
-                    _ = Task.Run( () => this.PublishAsync( cancellationSource.Token ), cancellationSource.Token );
-                }
-            }
-        }
-
-        private bool Compute( Compilation compilation, CancellationToken cancellationToken )
-        {
-            // Execute the pipeline.
-            if ( !DesignTimeAspectPipelineFactory.Instance.TryExecute(
-                    this.ProjectOptions,
-                    compilation,
-                    cancellationToken,
-                    out var compilationResult ) )
-            {
-                Logger.DesignTime.Warning?.Log(
-                    $"{this.GetType().Name}.Execute('{compilation.AssemblyName}', CompilationId = {DebuggingHelper.GetObjectId( compilation )}): the pipeline failed." );
-
-                Logger.DesignTime.Trace?.Log(
-                    " Compilation references: " + string.Join(
-                        ", ",
-                        compilation.References.GroupBy( r => r.GetType() ).Select( g => $"{g.Key.Name}: {g.Count()}" ) ) );
-
-                return false;
-            }
-
-            // Check if the pipeline returned any difference. If not, do not update our cache.
-            if ( compilationResult.PipelineResult.IntroducedSyntaxTrees == this._lastIntroducedTrees )
-            {
-                Logger.DesignTime.Trace?.Log(
-                    $"{this.GetType().Name}.Execute('{compilation.AssemblyName}', CompilationId = {DebuggingHelper.GetObjectId( compilation )}): generated sources did not change." );
-
-                return false;
-            }
-
-            this._lastIntroducedTrees = compilationResult.PipelineResult.IntroducedSyntaxTrees;
-
-            // Cache the introduces trees.
-            var generatedSources = ImmutableDictionary.CreateBuilder<string, SourceText>();
-
-            foreach ( var introducedSyntaxTree in this._lastIntroducedTrees! )
-            {
-                var sourceText = introducedSyntaxTree.Value.GeneratedSyntaxTree.GetText();
-                generatedSources[introducedSyntaxTree.Value.Name] = sourceText;
-            }
-
-            this.Sources = generatedSources.ToImmutable();
-
-            Logger.DesignTime.Trace?.Log(
-                $"{this.GetType().Name}.Execute('{compilation.AssemblyName}', CompilationId = {DebuggingHelper.GetObjectId( compilation )}): {this._lastIntroducedTrees!.Count} sources generated." );
-
-            return true;
-        }
-
-        private async Task ComputeAndPublishAsync( Compilation compilation, CancellationToken cancellationToken )
-        {
-            if ( this.Compute( compilation, cancellationToken ) )
-            {
-                await this.PublishAsync( cancellationToken );
-            }
-        }
-
-        private async Task PublishAsync( CancellationToken cancellationToken )
-        {
-            Logger.DesignTime.Trace?.Log( $"{this.GetType().Name}.Publish('{this.ProjectOptions.ProjectId}'" );
-
-            // Publish to the interactive process. We need to await before we change the touch file.
-            await this.PublishGeneratedSourcesAsync( this.ProjectOptions.ProjectId, cancellationToken );
-
-            // Notify Roslyn that we have changes.
-            if ( this.ProjectOptions.SourceGeneratorTouchFile == null )
-            {
-                Logger.DesignTime.Error?.Log( "Property MetalamaSourceGeneratorTouchFile cannot be null." );
-            }
-            else
-            {
-                this.UpdateTouchFile();
-            }
-        }
-
-        protected void UpdateTouchFile()
-        {
-            Logger.DesignTime.Trace?.Log( $"Touching '{this.ProjectOptions.SourceGeneratorTouchFile}'." );
-            RetryHelper.Retry( () => File.WriteAllText( this.ProjectOptions.SourceGeneratorTouchFile, Guid.NewGuid().ToString() ) );
-        }
-
-        protected virtual Task PublishGeneratedSourcesAsync( string projectId, CancellationToken cancellationToken ) => Task.CompletedTask;
-    }
-
-    protected override SourceGeneratorImpl CreateSourceGeneratorImpl( IProjectOptions projectOptions )
-        => new AnalysisProcessSourceGeneratorImpl( projectOptions );
+    public AnalysisProcessSourceGenerator( ServiceProvider serviceProvider ) : base( serviceProvider ) { }
 }

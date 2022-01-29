@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Backstage.Diagnostics;
 using Metalama.Compiler;
 using Metalama.Framework.DesignTime.Diagnostics;
 using Metalama.Framework.DesignTime.Pipeline;
@@ -8,7 +9,7 @@ using Metalama.Framework.DesignTime.Utilities;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Options;
-using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Diagnostics;
@@ -28,12 +29,18 @@ namespace Metalama.Framework.DesignTime
     [ExcludeFromCodeCoverage]
     public class DesignTimeDiagnosticSuppressor : DiagnosticSuppressor
     {
-        static DesignTimeDiagnosticSuppressor()
-        {
-            Logger.Initialize();
-        }
-
         private readonly DesignTimeDiagnosticDefinitions _designTimeDiagnosticDefinitions = DesignTimeDiagnosticDefinitions.GetInstance();
+
+        private readonly ILogger _logger;
+        private readonly DesignTimeAspectPipelineFactory _pipelineFactory;
+
+        public DesignTimeDiagnosticSuppressor() : this( DesignTimeServiceProviderFactory.GetServiceProvider() ) { }
+
+        public DesignTimeDiagnosticSuppressor( IServiceProvider serviceProvider )
+        {
+            this._logger = serviceProvider.GetLoggerFactory().GetLogger( "DesignTime" );
+            this._pipelineFactory = serviceProvider.GetRequiredService<DesignTimeAspectPipelineFactory>();
+        }
 
         public override void ReportSuppressions( SuppressionAnalysisContext context )
         {
@@ -45,13 +52,13 @@ namespace Metalama.Framework.DesignTime
 
             try
             {
-                Logger.DesignTime.Trace?.Log( $"DesignTimeDiagnosticSuppressor.ReportSuppressions('{context.Compilation.AssemblyName}')." );
+                this._logger.Trace?.Log( $"DesignTimeDiagnosticSuppressor.ReportSuppressions('{context.Compilation.AssemblyName}')." );
 
                 var buildOptions = new ProjectOptions( context.Options.AnalyzerConfigOptionsProvider );
 
                 if ( !buildOptions.IsDesignTimeEnabled )
                 {
-                    Logger.DesignTime.Trace?.Log( $"DesignTimeAnalyzer.AnalyzeSemanticModel: design time experience is disabled." );
+                    this._logger.Trace?.Log( $"DesignTimeAnalyzer.AnalyzeSemanticModel: design time experience is disabled." );
 
                     return;
                 }
@@ -80,13 +87,13 @@ namespace Metalama.Framework.DesignTime
             CancellationToken cancellationToken )
         {
             // Execute the pipeline.
-            if ( !DesignTimeAspectPipelineFactory.Instance.TryExecute(
+            if ( !this._pipelineFactory.TryExecute(
                     options,
                     compilation,
                     cancellationToken,
                     out var compilationResult ) )
             {
-                Logger.DesignTime.Trace?.Log( $"DesignTimeDiagnosticSuppressor.ReportSuppressions('{compilation.AssemblyName}'): the pipeline failed." );
+                this._logger.Trace?.Log( $"DesignTimeDiagnosticSuppressor.ReportSuppressions('{compilation.AssemblyName}'): the pipeline failed." );
 
                 return;
             }
@@ -154,7 +161,7 @@ namespace Metalama.Framework.DesignTime
                 }
             }
 
-            Logger.DesignTime.Trace?.Log(
+            this._logger.Trace?.Log(
                 $"DesignTimeDiagnosticSuppressor.ReportSuppressions('{compilation.AssemblyName}'): {suppressionsCount} suppressions reported." );
         }
 

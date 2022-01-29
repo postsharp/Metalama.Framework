@@ -380,7 +380,7 @@ namespace Metalama.Framework.Engine.Aspects
             return aspectInterface.IsAssignableFrom( this.AspectType );
         }
 
-        public EligibleScenarios GetEligibility( IDeclaration targetDeclaration )
+        public EligibleScenarios GetEligibility( IDeclaration obj )
         {
             if ( this._eligibilityRules.IsDefaultOrEmpty )
             {
@@ -398,7 +398,7 @@ namespace Metalama.Framework.Engine.Aspects
             // Implementation, which all runs in a user context.
             EligibleScenarios GetEligibilityCore()
             {
-                var declarationType = targetDeclaration.GetType();
+                var declarationType = obj.GetType();
                 var eligibility = EligibleScenarios.All;
 
                 // If the aspect cannot be inherited, remove the inheritance eligibility.
@@ -412,7 +412,7 @@ namespace Metalama.Framework.Engine.Aspects
                 {
                     if ( rule.Key.IsAssignableFrom( declarationType ) )
                     {
-                        eligibility &= rule.Value.GetEligibility( targetDeclaration );
+                        eligibility &= rule.Value.GetEligibility( obj );
 
                         if ( eligibility == EligibleScenarios.None )
                         {
@@ -425,9 +425,9 @@ namespace Metalama.Framework.Engine.Aspects
             }
         }
 
-        public FormattableString? GetIneligibilityJustification( EligibleScenarios requestedEligibility, IDescribedObject<IDeclaration> target )
+        public FormattableString? GetIneligibilityJustification( EligibleScenarios requestedEligibility, IDescribedObject<IDeclaration> describedObject )
         {
-            var targetDeclaration = target.Object;
+            var targetDeclaration = describedObject.Object;
             var declarationType = targetDeclaration.GetType();
 
             var group = new AndEligibilityRule<IDeclaration>(
@@ -473,11 +473,5 @@ namespace Metalama.Framework.Engine.Aspects
                     ? $"{describedObject} is a local function"
                     : (FormattableString?) null;
         }
-    }
-
-    public static class AttributeHelper
-    {
-        [return: NotNullIfNotNull( "name" )]
-        public static string? GetShortName( string? name ) => name?.TrimEnd( "Attribute" );
     }
 }

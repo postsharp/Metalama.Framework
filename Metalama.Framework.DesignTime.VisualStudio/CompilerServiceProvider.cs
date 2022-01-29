@@ -2,12 +2,12 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.DesignTime.Contracts;
-using Metalama.Framework.DesignTime.Preview;
+using Metalama.Framework.DesignTime.VisualStudio.Preview;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Pipeline;
 using Microsoft.CodeAnalysis;
 
-namespace Metalama.Framework.DesignTime
+namespace Metalama.Framework.DesignTime.VisualStudio
 {
     /// <summary>
     /// The implementation of <see cref="ICompilerServiceProvider"/>.
@@ -45,7 +45,7 @@ namespace Metalama.Framework.DesignTime
             }
             else if ( type.IsEquivalentTo( typeof(ITransformationPreviewService) ) )
             {
-                return new TransformationPreviewService();
+                return new UserProcessTransformationPreviewService( VisualStudioServiceProviderFactory.GetServiceProvider() );
             }
             else
             {

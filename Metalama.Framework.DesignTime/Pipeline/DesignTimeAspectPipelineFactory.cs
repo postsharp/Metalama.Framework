@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Backstage.Diagnostics;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Aspects;
@@ -27,25 +28,20 @@ namespace Metalama.Framework.DesignTime.Pipeline
     /// </summary>
     internal class DesignTimeAspectPipelineFactory : IDisposable, ITransitiveAspectManifestProvider, IAspectPipelineConfigurationProvider
     {
-        // The project id is passed to a constant, because that's the only public way to push a property to a compilation.
-        public const string ProjectIdPreprocessorSymbolPrefix = "MetalamaProjectId_";
-
         private readonly ConcurrentDictionary<string, DesignTimeAspectPipeline> _pipelinesByProjectId = new();
+
+        private readonly ILogger _logger;
 
         public CompileTimeDomain Domain { get; }
 
         private readonly bool _isTest;
 
-        public DesignTimeAspectPipelineFactory( CompileTimeDomain domain, bool isTest = false )
+        public DesignTimeAspectPipelineFactory( IServiceProvider serviceProvider, CompileTimeDomain domain, bool isTest = false )
         {
             this.Domain = domain;
             this._isTest = isTest;
+            this._logger = serviceProvider.GetLoggerFactory().GetLogger( "DesignTime" );
         }
-
-        /// <summary>
-        /// Gets the singleton instance of this class (other instances can be used in tests).
-        /// </summary>
-        public static DesignTimeAspectPipelineFactory Instance { get; } = new( new CompileTimeDomain() );
 
         protected virtual string GetProjectId( IProjectOptions projectOptions, Compilation compilation ) => projectOptions.ProjectId;
 
@@ -58,7 +54,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
         {
             if ( !projectOptions.IsFrameworkEnabled )
             {
-                Logger.DesignTime.Trace?.Log( $"Cannot get a pipeline for project '{projectOptions.AssemblyName}': Metalama is disabled for this project." );
+                this._logger.Trace?.Log( $"Cannot get a pipeline for project '{projectOptions.AssemblyName}': Metalama is disabled for this project." );
 
                 return null;
             }
@@ -212,12 +208,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
         public virtual bool TryGetPipeline( Compilation compilation, [NotNullWhen( true )] out DesignTimeAspectPipeline? pipeline )
         {
-            var projectIdConstant = compilation.SyntaxTrees.First()
-                .Options.PreprocessorSymbolNames.FirstOrDefault( x => x.StartsWith( ProjectIdPreprocessorSymbolPrefix, StringComparison.OrdinalIgnoreCase ) );
-
-            var projectId = projectIdConstant?.Substring( ProjectIdPreprocessorSymbolPrefix.Length );
-
-            if ( projectId == null )
+            if ( !ProjectIdHelper.TryGetProjectId( compilation, out var projectId ) )
             {
                 // The compilation does not reference our package.
                 pipeline = null;
@@ -227,7 +218,19 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
             if ( !this._pipelinesByProjectId.TryGetValue( projectId, out pipeline ) )
             {
-                Logger.DesignTime.Trace?.Log( $"Cannot get the pipeline for project '{projectId}': it has not been created yet." );
+                this._logger.Trace?.Log( $"Cannot get the pipeline for project '{projectId}': it has not been created yet." );
+
+                return false;
+            }
+
+            return true;
+        }
+
+        public bool TryGetPipeline( string projectId, [NotNullWhen( true )] out DesignTimeAspectPipeline? pipeline )
+        {
+            if ( !this._pipelinesByProjectId.TryGetValue( projectId, out pipeline ) )
+            {
+                this._logger.Trace?.Log( $"Cannot get the pipeline for project '{projectId}': it has not been created yet." );
 
                 return false;
             }

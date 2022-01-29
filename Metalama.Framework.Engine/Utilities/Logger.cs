@@ -10,14 +10,17 @@ namespace Metalama.Framework.Engine.Utilities
     {
         public static void Initialize()
         {
-            DiagnosticsService.Initialize( DebuggingHelper.ProcessKind );
+            if ( DiagnosticsService.Initialize( DebuggingHelper.ProcessKind ) )
+            {
+                var processInfo = DiagnosticsService.Instance.GetLogger( "ProcessInfo" );
+
+                processInfo.Info?.Log( $"Command line: {Environment.CommandLine}" );
+                processInfo.Info?.Log( $"Process kind: {DebuggingHelper.ProcessKind}" );
+                processInfo.Info?.Log( $"Version: {AssemblyMetadataReader.BuildId}" );
+            }
+
             DesignTime = DiagnosticsService.Instance.DesignTime();
             Remoting = DiagnosticsService.Instance.Remoting();
-
-            var processInfo = DiagnosticsService.Instance.GetLogger( "ProcessInfo" );
-            processInfo.Info?.Log( $"Command line: {Environment.CommandLine}" );
-            processInfo.Info?.Log( $"Process kind: {DebuggingHelper.ProcessKind}" );
-            processInfo.Info?.Log( $"Version: {AssemblyMetadataReader.BuildId}" );
         }
 
         // The DesignTime logger is used before the service container is initialized, therefore we use the global instance.

@@ -4,7 +4,6 @@
 using Metalama.Framework.DesignTime.Offline;
 using Metalama.Framework.Engine.AdditionalOutputs;
 using Metalama.Framework.Engine.Options;
-using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
@@ -13,13 +12,14 @@ namespace Metalama.Framework.DesignTime;
 
 public partial class DesignTimeSourceGenerator
 {
-    private class OfflineSourceGeneratorImpl : SourceGeneratorImpl
+    private class OfflineProjectHandler : ProjectHandler
     {
-        public OfflineSourceGeneratorImpl( IProjectOptions projectOptions ) : base( projectOptions ) { }
+        public OfflineProjectHandler( IServiceProvider serviceProvider, IProjectOptions projectOptions ) : base( serviceProvider, projectOptions ) { }
 
         public override void GenerateSources( Compilation compilation, GeneratorExecutionContext context )
         {
-            var serviceProvider = ServiceProvider.Empty.WithServices( this.ProjectOptions );
+            var serviceProvider = Engine.Pipeline.ServiceProvider.Empty.WithServices( this.ProjectOptions );
+
             var provider = new AdditionalCompilationOutputFileProvider( serviceProvider );
 
             if ( this.ProjectOptions.AdditionalCompilationOutputDirectory == null )

@@ -1,7 +1,9 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Backstage.Diagnostics;
 using Metalama.Framework.Engine.Options;
+using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -16,17 +18,18 @@ namespace Metalama.Framework.DesignTime
     [ExcludeFromCodeCoverage]
     public abstract partial class DesignTimeSourceGenerator : ISourceGenerator
     {
-        private readonly ConcurrentDictionary<string, SourceGeneratorImpl?> _generators = new();
+        public ServiceProvider ServiceProvider { get; }
 
-        static DesignTimeSourceGenerator()
+        private readonly ILogger _logger;
+        private readonly ConcurrentDictionary<string, ProjectHandler?> _projectHandlers = new();
+
+        public DesignTimeSourceGenerator( ServiceProvider serviceProvider )
         {
-            Logger.Initialize();
+            this.ServiceProvider = serviceProvider;
+            this._logger = serviceProvider.GetLoggerFactory().GetLogger( "DesignTime" );
         }
 
-        protected bool TryGetImpl( string projectId, [NotNullWhen( true )] out SourceGeneratorImpl? impl )
-            => this._generators.TryGetValue( projectId, out impl );
-
-        protected abstract SourceGeneratorImpl CreateSourceGeneratorImpl( IProjectOptions projectOptions );
+        protected abstract ProjectHandler CreateSourceGeneratorImpl( IProjectOptions projectOptions );
 
         void ISourceGenerator.Execute( GeneratorExecutionContext context )
         {
@@ -37,14 +40,22 @@ namespace Metalama.Framework.DesignTime
 
             try
             {
-                Logger.DesignTime.Trace?.Log(
+                this._logger.Trace?.Log(
                     $"{this.GetType().Name}.Execute('{compilation.AssemblyName}', CompilationId = {DebuggingHelper.GetObjectId( compilation )})." );
 
                 var projectOptions = new ProjectOptions( context.AnalyzerConfigOptions );
 
-                if ( !this._generators.TryGetValue( projectOptions.ProjectId, out var generator ) )
+                if ( string.IsNullOrEmpty( projectOptions.ProjectId ) )
                 {
-                    generator = this._generators.GetOrAdd(
+                    // Metalama is not enabled for this project.
+
+                    return;
+                }
+
+                // Get or create an IProjectHandler instance.
+                if ( !this._projectHandlers.TryGetValue( projectOptions.ProjectId, out var projectHandler ) )
+                {
+                    projectHandler = this._projectHandlers.GetOrAdd(
                         projectOptions.ProjectId,
                         _ =>
                         {
@@ -56,7 +67,7 @@ namespace Metalama.Framework.DesignTime
                                 }
                                 else
                                 {
-                                    return new OfflineSourceGeneratorImpl( projectOptions );
+                                    return new OfflineProjectHandler( this.ServiceProvider, projectOptions );
                                 }
                             }
                             else
@@ -66,7 +77,8 @@ namespace Metalama.Framework.DesignTime
                         } );
                 }
 
-                generator?.GenerateSources( compilation, context );
+                // Invoke GenerateSources for the project handler.
+                projectHandler?.GenerateSources( compilation, context );
             }
             catch ( Exception e ) when ( DesignTimeExceptionHandler.MustHandle( e ) )
             {

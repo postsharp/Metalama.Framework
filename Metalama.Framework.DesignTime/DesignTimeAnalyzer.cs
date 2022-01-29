@@ -9,6 +9,7 @@ using Metalama.Framework.DesignTime.Utilities;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
 using System.Collections.Immutable;
@@ -30,12 +31,23 @@ namespace Metalama.Framework.DesignTime
     {
         private readonly DesignTimeDiagnosticDefinitions _designTimeDiagnosticDefinitions = DesignTimeDiagnosticDefinitions.GetInstance();
 
+        private readonly ILogger _logger;
+        private readonly DesignTimeAspectPipelineFactory _pipelineFactory;
+
+        public DesignTimeAnalyzer() : this( DesignTimeServiceProviderFactory.GetServiceProvider() ) { }
+
+        public DesignTimeAnalyzer( IServiceProvider serviceProvider )
+        {
+            this._logger = serviceProvider.GetLoggerFactory().GetLogger( "DesignTime" );
+            this._pipelineFactory = serviceProvider.GetRequiredService<DesignTimeAspectPipelineFactory>();
+        }
+
         public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics
             => this._designTimeDiagnosticDefinitions.SupportedDiagnosticDescriptors.Values.ToImmutableArray();
 
         static DesignTimeAnalyzer()
         {
-            DiagnosticsService.Initialize( DebuggingHelper.ProcessKind );
+            Logger.Initialize();
         }
 
         public override void Initialize( AnalysisContext context )
@@ -57,7 +69,7 @@ namespace Metalama.Framework.DesignTime
 
         private void AnalyzeCompilation( CompilationAnalysisContext context )
         {
-            Logger.DesignTime.Trace?.Log(
+            this._logger.Trace?.Log(
                 $"DesignTimeAnalyzer.AnalyzeCompilation('{context.Compilation.AssemblyName}', CompilationId = {DebuggingHelper.GetObjectId( context.Compilation )}) started." );
 
             try
@@ -67,7 +79,7 @@ namespace Metalama.Framework.DesignTime
 
                 if ( !projectOptions.IsDesignTimeEnabled )
                 {
-                    Logger.DesignTime.Trace?.Log( $"DesignTimeAnalyzer.AnalyzeSemanticModel: design time experience is disabled." );
+                    this._logger.Trace?.Log( $"DesignTimeAnalyzer.AnalyzeSemanticModel: design time experience is disabled." );
 
                     return;
                 }
@@ -75,7 +87,7 @@ namespace Metalama.Framework.DesignTime
                 // Execute the pipeline.
                 var cancellationToken = context.CancellationToken.IgnoreIfDebugging();
 
-                var pipeline = DesignTimeAspectPipelineFactory.Instance.GetOrCreatePipeline(
+                var pipeline = this._pipelineFactory.GetOrCreatePipeline(
                     projectOptions,
                     context.Compilation,
                     cancellationToken );
@@ -87,13 +99,13 @@ namespace Metalama.Framework.DesignTime
 
                 var compilation = context.Compilation;
 
-                if ( !DesignTimeAspectPipelineFactory.Instance.TryExecute(
+                if ( !this._pipelineFactory.TryExecute(
                         projectOptions,
                         compilation,
                         cancellationToken,
                         out var compilationResult ) )
                 {
-                    Logger.DesignTime.Trace?.Log(
+                    this._logger.Trace?.Log(
                         $"DesignTimeAnalyzer.AnalyzeCompilation('{context.Compilation.AssemblyName}', CompilationId = {DebuggingHelper.GetObjectId( context.Compilation )}): the pipeline failed." );
 
                     return;

@@ -6,17 +6,21 @@ using Microsoft.CodeAnalysis;
 
 namespace Metalama.Framework.DesignTime;
 
-public partial class DesignTimeSourceGenerator
+public abstract class ProjectHandler : IDisposable
 {
-    protected abstract class SourceGeneratorImpl
+    public IServiceProvider ServiceProvider { get; }
+
+    public IProjectOptions ProjectOptions { get; }
+
+    protected ProjectHandler( IServiceProvider serviceProvider, IProjectOptions projectOptions )
     {
-        public IProjectOptions ProjectOptions { get; }
-
-        protected SourceGeneratorImpl( IProjectOptions projectOptions )
-        {
-            this.ProjectOptions = projectOptions;
-        }
-
-        public abstract void GenerateSources( Compilation compilation, GeneratorExecutionContext context );
+        this.ServiceProvider = serviceProvider;
+        this.ProjectOptions = projectOptions;
     }
+
+    public abstract void GenerateSources( Compilation compilation, GeneratorExecutionContext context );
+
+    protected virtual void Dispose( bool disposing ) { }
+
+    public void Dispose() => this.Dispose( true );
 }

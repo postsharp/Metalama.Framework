@@ -82,7 +82,7 @@ namespace Metalama.Framework.CompilerExtensions
                     throw new ArgumentOutOfRangeException( $"Cannot load the assembly '{assemblyName}'" );
                 }
 
-                var type = assembly!.GetType( typeName );
+                var type = assembly.GetType( typeName );
 
                 if ( type == null )
                 {

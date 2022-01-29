@@ -3,6 +3,7 @@
 
 using Metalama.Backstage.Diagnostics;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Project;
 using Microsoft.VisualStudio.Threading;
 using StreamJsonRpc;
 using System.Collections.Concurrent;
@@ -12,18 +13,40 @@ using System.IO.Pipes;
 
 namespace Metalama.Framework.DesignTime.VisualStudio.Remoting;
 
-internal class ServiceClient : IDisposable
+internal class ServiceClient : IDisposable, IService
 {
     private static readonly ILogger _logger = Logger.Remoting;
+    private static readonly object _initializeLock = new();
+    private static ServiceClient? _instance;
 
     private readonly string? _pipeName;
     private readonly MessageHandler _messageHandler;
     private readonly ConcurrentDictionary<string, ImmutableDictionary<string, string>> _unhandledSources = new();
+    private readonly ConcurrentDictionary<string, IClientApi> _clients = new();
     private readonly TaskCompletionSource<bool> _connectTask = new();
 
     private NamedPipeClientStream? _pipeStream;
     private JsonRpc? _rpc;
     private IServerApi? _server;
+
+    public static ServiceClient? GetInstance()
+    {
+        Logger.Initialize();
+
+        if ( _instance == null )
+        {
+            lock ( _initializeLock )
+            {
+                if ( _instance == null )
+                {
+                    _instance = new ServiceClient();
+                    _ = _instance.ConnectAsync();
+                }
+            }
+        }
+
+        return _instance;
+    }
 
     public ServiceClient( string? pipeName = null )
     {
@@ -58,17 +81,21 @@ internal class ServiceClient : IDisposable
         }
     }
 
-    public async Task HelloAsync( string projectId, CancellationToken cancellationToken = default )
+    public async Task HelloAsync( string projectId, IClientApi api, CancellationToken cancellationToken = default )
     {
         await this._connectTask.Task.WithCancellation( cancellationToken );
-        await this.ServerApi.HelloAsync( projectId, cancellationToken );
+        this._clients[projectId] = api;
+        await (await this.GetServerApiAsync()).HelloAsync( projectId, cancellationToken );
     }
 
-    public IServerApi ServerApi => this._server ?? throw new InvalidOperationException();
+    public async ValueTask<IServerApi> GetServerApiAsync( CancellationToken cancellationToken = default )
+    {
+        await this._connectTask.Task.WithCancellation( cancellationToken );
+
+        return this._server ?? throw new InvalidOperationException();
+    }
 
     private static string GetPipeName() => ServiceHost.GetPipeName( Process.GetCurrentProcess().Id );
-
-    public event EventHandler<GeneratedCodeChangedEventArgs>? GeneratedCodePublished;
 
     public bool TryGetUnhandledSources( string projectId, out ImmutableDictionary<string, string>? sources )
         => this._unhandledSources.TryRemove( projectId, out sources );
@@ -88,22 +115,24 @@ internal class ServiceClient : IDisposable
             this._parent = parent;
         }
 
-        public Task PublishGeneratedCodeAsync( string projectId, ImmutableDictionary<string, string> sources, CancellationToken cancellationToken = default )
+        public async Task PublishGeneratedCodeAsync(
+            string projectId,
+            ImmutableDictionary<string, string> sources,
+            CancellationToken cancellationToken = default )
         {
             Logger.DesignTime.Trace?.Log( $"Received new generated code from the remote host for project '{projectId}'." );
 
-            var args = new GeneratedCodeChangedEventArgs( projectId, sources );
-            this._parent.GeneratedCodePublished?.Invoke( projectId, args );
-
-            if ( !args.IsHandled )
+            if ( this._parent._clients.TryGetValue( projectId, out var client ) )
             {
-                _logger.Warning?.Log( $"Nobody handled the new generated code for project '{projectId}'." );
+                await client.PublishGeneratedCodeAsync( projectId, sources, cancellationToken );
+            }
+            else
+            {
+                _logger.Warning?.Log( $"No client registered for project '{projectId}'." );
 
                 // Store the event so that a source generator that would be create later can retrieve it.
                 this._parent._unhandledSources[projectId] = sources;
             }
-
-            return Task.CompletedTask;
         }
     }
 }

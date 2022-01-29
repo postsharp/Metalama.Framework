@@ -151,7 +151,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
             }
         }
 
-        internal AspectPipelineConfiguration? LatestConfiguration => this._currentState.Configuration;
+        public Compilation? LastCompilation => this._currentState.LastCompilation;
 
         protected override void Dispose( bool disposing )
         {

@@ -22,8 +22,6 @@ namespace Metalama.Framework.DesignTime.CodeFixes
             this._codeFixRunner = new DesignTimeCodeFixRunner( designTimeAspectPipelineFactory, projectOptions );
         }
 
-        public UserCodeFixProvider( IProjectOptions projectOptions ) : this( DesignTimeAspectPipelineFactory.Instance, projectOptions ) { }
-
         public ImmutableArray<CodeFixModel> ProvideCodeFixes(
             Document document,
             ImmutableArray<Diagnostic> diagnostics,

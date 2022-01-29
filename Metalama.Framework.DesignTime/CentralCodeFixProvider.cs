@@ -1,13 +1,16 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Backstage.Diagnostics;
 using Metalama.Framework.DesignTime.CodeFixes;
 using Metalama.Framework.DesignTime.Diagnostics;
+using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.DesignTime.Utilities;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeActions;
 using Microsoft.CodeAnalysis.CodeFixes;
@@ -27,13 +30,16 @@ namespace Metalama.Framework.DesignTime
         private const string _makePartialKey = "Metalama.MakePartial";
         private readonly DesignTimeDiagnosticDefinitions _designTimeDiagnosticDefinitions = DesignTimeDiagnosticDefinitions.GetInstance();
 
-        static CentralCodeFixProvider()
-        {
-            Logger.Initialize();
-        }
+        private readonly ILogger _logger;
+        private readonly DesignTimeAspectPipelineFactory _pipelineFactory;
 
-        public CentralCodeFixProvider()
+        public CentralCodeFixProvider() : this( DesignTimeServiceProviderFactory.GetServiceProvider() ) { }
+
+        public CentralCodeFixProvider( IServiceProvider serviceProvider )
         {
+            this._logger = serviceProvider.GetLoggerFactory().GetLogger( "CodeFix" );
+            this._pipelineFactory = serviceProvider.GetRequiredService<DesignTimeAspectPipelineFactory>();
+
             this.FixableDiagnosticIds =
                 ImmutableArray.Create( GeneralDiagnosticDescriptors.TypeNotPartial.Id )
                     .Add( GeneralDiagnosticDescriptors.SuggestedCodeFix.Id )
@@ -42,7 +48,7 @@ namespace Metalama.Framework.DesignTime
 
         public override Task RegisterCodeFixesAsync( CodeFixContext context )
         {
-            Logger.DesignTime.Trace?.Log( "DesignTimeCodeFixProvider.RegisterCodeFixesAsync" );
+            this._logger.Trace?.Log( "DesignTimeCodeFixProvider.RegisterCodeFixesAsync" );
 
             if ( context.Diagnostics.Any( d => d.Id == GeneralDiagnosticDescriptors.TypeNotPartial.Id ) )
             {
@@ -60,7 +66,7 @@ namespace Metalama.Framework.DesignTime
                 // We have a user diagnostics where a code fix provider was specified. We need to execute the CodeFix pipeline to gather
                 // the actual code fixes.
                 var projectOptions = new ProjectOptions( context.Document.Project );
-                var userCodeFixProvider = new UserCodeFixProvider( projectOptions );
+                var userCodeFixProvider = new UserCodeFixProvider( this._pipelineFactory, projectOptions );
 
                 var codeFixes = userCodeFixProvider.ProvideCodeFixes(
                     context.Document,

@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Backstage.Diagnostics;
 using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.DesignTime.Refactoring;
 using Metalama.Framework.DesignTime.Utilities;
@@ -8,6 +9,7 @@ using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeFixes;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeRefactorings;
 using System.Collections.Immutable;
@@ -20,19 +22,29 @@ namespace Metalama.Framework.DesignTime
     [ExcludeFromCodeCoverage]
     public class CentralCodeRefactoringProvider : CodeRefactoringProvider
     {
-        static CentralCodeRefactoringProvider()
+        private readonly ILogger _logger;
+        private readonly DesignTimeAspectPipelineFactory _pipelineFactory;
+
+        public CentralCodeRefactoringProvider() : this( DesignTimeServiceProviderFactory.GetServiceProvider() ) { }
+
+        public CentralCodeRefactoringProvider( IServiceProvider serviceProvider )
         {
-            Logger.Initialize();
+            this._logger = serviceProvider.GetLoggerFactory().GetLogger( "CodeRefactoring" );
+            this._pipelineFactory = serviceProvider.GetRequiredService<DesignTimeAspectPipelineFactory>();
         }
 
         public override async Task ComputeRefactoringsAsync( CodeRefactoringContext context )
         {
+            this._logger.Trace?.Log( $"ComputeRefactorings('{context.Document.Name}')" );
+
             try
             {
                 var projectOptions = new ProjectOptions( context.Document.Project.AnalyzerOptions.AnalyzerConfigOptionsProvider );
 
                 if ( !context.Document.SupportsSemanticModel )
                 {
+                    this._logger.Trace?.Log( $"ComputeRefactorings('{context.Document.Name}'): the document does not have a semantic model." );
+
                     return;
                 }
 
@@ -42,6 +54,8 @@ namespace Metalama.Framework.DesignTime
 
                 if ( syntaxTree == null )
                 {
+                    this._logger.Trace?.Log( $"ComputeRefactorings('{context.Document.Name}'): cannot get the syntax tree." );
+
                     return;
                 }
 
@@ -51,6 +65,8 @@ namespace Metalama.Framework.DesignTime
 
                 if ( semanticModel == null )
                 {
+                    this._logger.Trace?.Log( $"ComputeRefactorings('{context.Document.Name}'): cannot get the semantic model." );
+
                     return;
                 }
 
@@ -58,13 +74,15 @@ namespace Metalama.Framework.DesignTime
 
                 if ( symbol == null )
                 {
+                    this._logger.Trace?.Log( $"ComputeRefactorings('{context.Document.Name}'): cannot resolve the symbol." );
+
                     return;
                 }
 
                 // Execute the pipeline.
 
                 var compilation = await context.Document.Project.GetCompilationAsync( cancellationToken );
-                var eligibleAspects = DesignTimeAspectPipelineFactory.Instance.GetEligibleAspects( compilation!, symbol, projectOptions, cancellationToken );
+                var eligibleAspects = this._pipelineFactory.GetEligibleAspects( compilation!, symbol, projectOptions, cancellationToken );
 
                 var aspectActions = new CodeActionMenuModel( "Add aspect" );
                 var liveTemplatesActions = new CodeActionMenuModel( "Apply live template" );
@@ -78,7 +96,7 @@ namespace Metalama.Framework.DesignTime
                         liveTemplatesActions.Items.Add(
                             new CodeActionModel(
                                 aspect.DisplayName,
-                                ct => ApplyLiveTemplateAsync( projectOptions, aspect, symbol, context.Document, ct.IgnoreIfDebugging() ) ) );
+                                ct => this.ApplyLiveTemplateAsync( projectOptions, aspect, symbol, context.Document, ct.IgnoreIfDebugging() ) ) );
                     }
                 }
 
@@ -113,7 +131,7 @@ namespace Metalama.Framework.DesignTime
             return CSharpAttributeHelper.AddAttributeAsync( targetDocument, targetSymbol, attributeDescription, cancellationToken ).AsTask();
         }
 
-        private static async Task<Solution> ApplyLiveTemplateAsync(
+        private async Task<Solution> ApplyLiveTemplateAsync(
             ProjectOptions projectOptions,
             AspectClass aspectClass,
             ISymbol targetSymbol,
@@ -127,7 +145,7 @@ namespace Metalama.Framework.DesignTime
                 return targetDocument.Project.Solution;
             }
 
-            if ( DesignTimeAspectPipelineFactory.Instance.TryApplyAspectToCode(
+            if ( this._pipelineFactory.TryApplyAspectToCode(
                     projectOptions,
                     aspectClass,
                     aspectClass.CreateDefaultInstance(),
