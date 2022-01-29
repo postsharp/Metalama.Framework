@@ -2,6 +2,8 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Backstage.Diagnostics;
+using Metalama.Framework.DesignTime.Contracts;
+using Metalama.Framework.DesignTime.Preview;
 using Metalama.Framework.DesignTime.VisualStudio.Remoting;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Pipeline;
@@ -27,13 +29,21 @@ public static class VisualStudioServiceProviderFactory
                     switch ( DebuggingHelper.ProcessKind )
                     {
                         case ProcessKind.DevEnv:
-                            var serviceClient = new ServiceClient();
+                            var serviceClient = new ServiceClient( _serviceProvider );
                             _ = serviceClient.ConnectAsync();
                             _serviceProvider = _serviceProvider.WithService( serviceClient );
+
+                            var compilerServiceProvider = new CompilerServiceProvider( _serviceProvider );
+                            DesignTimeEntryPointManager.Instance.RegisterServiceProvider( compilerServiceProvider );
 
                             break;
 
                         case ProcessKind.RoslynCodeAnalysisService:
+                            
+                            _serviceProvider =
+                                _serviceProvider.WithService( new TransformationPreviewServiceImpl( _serviceProvider ) );
+
+                            // ServiceHost depends on the services added above.
                             var serviceHost = ServiceHost.GetInstance( _serviceProvider );
 
                             if ( serviceHost != null )

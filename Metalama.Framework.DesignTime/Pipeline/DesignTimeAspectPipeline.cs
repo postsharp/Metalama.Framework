@@ -33,7 +33,9 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
         private readonly IFileSystemWatcher? _fileSystemWatcher;
 
+        // This field should not be changed directly, but only through the SetState method.
         private PipelineState _currentState;
+
         private int _pipelineExecutionCount;
 
         /// <summary>
@@ -50,9 +52,22 @@ namespace Metalama.Framework.DesignTime.Pipeline
         // ReSharper disable once InconsistentlySynchronizedField
         internal DesignTimeAspectPipelineStatus Status => this._currentState.Status;
 
+        internal event Action<DesignTimePipelineStatusChangedEventArgs>? StatusChanged;
+
+        private void SetState( in PipelineState state )
+        {
+            var oldStatus = this._currentState.Status;
+            this._currentState = state;
+
+            if ( oldStatus != state.Status )
+            {
+                this.StatusChanged?.Invoke( new DesignTimePipelineStatusChangedEventArgs( this, oldStatus, state.Status ) );
+            }
+        }
+
         // It's ok if we return an obsolete project in the use cases of this property.
         // ReSharper disable once InconsistentlySynchronizedField
-        internal IEnumerable<AspectClass>? AspectClasses => this._currentState.Configuration?.AspectClasses.OfType<AspectClass>();
+        private IEnumerable<AspectClass>? AspectClasses => this._currentState.Configuration?.AspectClasses.OfType<AspectClass>();
 
         public DesignTimeAspectPipeline(
             ServiceProvider serviceProvider,
@@ -89,47 +104,69 @@ namespace Metalama.Framework.DesignTime.Pipeline
             this._fileSystemWatcher.EnableRaisingEvents = true;
         }
 
-        public event EventHandler? ExternalBuildStarted;
+        public event EventHandler? PipelineResumed;
 
         private void OnOutputDirectoryChanged( object sender, FileSystemEventArgs e )
         {
-            if ( e.FullPath != this.ProjectOptions.BuildTouchFile || this.Status != DesignTimeAspectPipelineStatus.NeedsExternalBuild )
+            if ( e.FullPath != this.ProjectOptions.BuildTouchFile || this.Status != DesignTimeAspectPipelineStatus.Paused )
             {
                 return;
             }
 
+            // There was an external build. Touch the files to re-run the analyzer.
+            Logger.DesignTime.Trace?.Log( $"Detected an external build for project '{this.ProjectOptions.ProjectId}'." );
+
+            this.Resume( true );
+        }
+
+        public void Resume( bool touchFiles )
+        {
             using ( this.WithLock() )
             {
-                // There was an external build. Touch the files to re-run the analyzer.
-                Logger.DesignTime.Trace?.Log( $"Detected an external build for project '{this.ProjectOptions.AssemblyName}'." );
+                if ( this.Status != DesignTimeAspectPipelineStatus.Paused )
+                {
+                    Logger.DesignTime.Trace?.Log(
+                        $"A Resume request was requested for project '{this.ProjectOptions.ProjectId}', but the pipeline was not paused." );
 
+                    return;
+                }
+                
                 var hasRelevantChange = false;
+                var filesToTouch = new List<string>();
 
                 foreach ( var file in this._currentState.CompileTimeSyntaxTrees.AssertNotNull() )
                 {
                     if ( file.Value == null )
                     {
                         hasRelevantChange = true;
-                        Logger.DesignTime.Trace?.Log( $"Touching file '{file.Key}'." );
-                        RetryHelper.Retry( () => File.SetLastWriteTimeUtc( file.Key, DateTime.UtcNow ), logger: Logger.DesignTime );
+
+                        if ( touchFiles )
+                        {
+                            filesToTouch.Add( file.Key );
+                        }
                     }
                 }
 
                 if ( hasRelevantChange )
                 {
-                    this.ExternalBuildStarted?.Invoke( this, EventArgs.Empty );
+                    Logger.DesignTime.Trace?.Log( $"Resuming the pipeline for project '{this.ProjectOptions.ProjectId}'. The following files had compile-time changes: {string.Join( ", ", filesToTouch.Select( x=>$"'{x}'" ))} " );
 
-                    this._currentState = new PipelineState( this );
+                    this.SetState( new PipelineState( this ) );
+                    this.PipelineResumed?.Invoke( this, EventArgs.Empty );
+
+                    // Touching the files after having reset the pipeline.
+
+                    foreach ( var file in filesToTouch )
+                    {
+                        Logger.DesignTime.Trace?.Log( $"Touching file '{file}'." );
+                        RetryHelper.Retry( () => File.SetLastWriteTimeUtc( file, DateTime.UtcNow ), logger: Logger.DesignTime );
+                    }
                 }
-            }
-        }
-
-        public void OnExternalBuildStarted()
-        {
-            using ( this.WithLock() )
-            {
-                this._currentState = new PipelineState( this );
-                this.ExternalBuildStarted?.Invoke( this, EventArgs.Empty );
+                else
+                {
+                    Logger.DesignTime.Trace?.Log(
+                        $"A Resume request was requested for project '{this.ProjectOptions.ProjectId}', but there was no relevant change." );
+                }
             }
         }
 
@@ -145,7 +182,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 var state = this._currentState;
                 var success = PipelineState.TryGetConfiguration( ref state, compilation, diagnosticAdder, ignoreStatus, cancellationToken, out configuration );
 
-                this._currentState = state;
+                this.SetState( state );
 
                 return success;
             }
@@ -161,7 +198,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
         private CompilationChanges InvalidateCache( Compilation compilation, bool invalidateCompilationResult, CancellationToken cancellationToken )
         {
-            this._currentState = this._currentState.InvalidateCacheForNewCompilation( compilation, invalidateCompilationResult, cancellationToken );
+            this.SetState( this._currentState.InvalidateCacheForNewCompilation( compilation, invalidateCompilationResult, cancellationToken ) );
 
             return this._currentState.UnprocessedChanges.AssertNotNull();
         }
@@ -170,7 +207,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
         {
             using ( this.WithLock() )
             {
-                this._currentState = this._currentState.Reset();
+                this.SetState( this._currentState.Reset() );
             }
         }
 
@@ -188,7 +225,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
             // Intentionally updating the state atomically after successful execution of the method, so the state is
             // not affected by a cancellation.
-            this._currentState = state;
+            this.SetState( state );
 
             return true;
         }
@@ -208,27 +245,37 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 }
 
                 // Invalidate the cache for the new compilation.
-                var changes = this.InvalidateCache( compilation, this.Status != DesignTimeAspectPipelineStatus.NeedsExternalBuild, cancellationToken );
+                Compilation? compilationToAnalyze = null;
 
-                var compilationToAnalyze = changes.CompilationToAnalyze;
-
-                if ( Logger.DesignTime.Trace != null )
+                if ( this.Status != DesignTimeAspectPipelineStatus.Paused )
                 {
-                    if ( compilationToAnalyze != compilation )
+                    var changes = this.InvalidateCache( compilation, this.Status != DesignTimeAspectPipelineStatus.Paused, cancellationToken );
+
+                    compilationToAnalyze = changes.CompilationToAnalyze;
+
+                    if ( Logger.DesignTime.Trace != null )
                     {
-                        Logger.DesignTime.Trace?.Log(
-                            $"Cache hit: the original compilation is {DebuggingHelper.GetObjectId( compilation )}, but we will analyze the cached compilation {DebuggingHelper.GetObjectId( compilationToAnalyze )}" );
+                        if ( compilationToAnalyze != compilation )
+                        {
+                            Logger.DesignTime.Trace?.Log(
+                                $"Cache hit: the original compilation is {DebuggingHelper.GetObjectId( compilation )}, but we will analyze the cached compilation {DebuggingHelper.GetObjectId( compilationToAnalyze )}" );
+                        }
                     }
                 }
-
-                if ( this.Status != DesignTimeAspectPipelineStatus.NeedsExternalBuild )
+                else
                 {
-                    var dirtySyntaxTrees = this.GetDirtySyntaxTrees( compilationToAnalyze );
+                    // If the pipeline is paused, there is no need to track changes because the pipeline will be fully invalidated anywhen
+                    // when it will be resumed.
+                }
+
+                if ( this.Status != DesignTimeAspectPipelineStatus.Paused )
+                {
+                    var dirtySyntaxTrees = this.GetDirtySyntaxTrees( compilationToAnalyze! );
 
                     // Execute the pipeline if required, and update the cache.
                     if ( dirtySyntaxTrees.Count > 0 )
                     {
-                        var partialCompilation = PartialCompilation.CreatePartial( compilationToAnalyze, dirtySyntaxTrees );
+                        var partialCompilation = PartialCompilation.CreatePartial( compilationToAnalyze!, dirtySyntaxTrees );
 
                         if ( !partialCompilation.IsEmpty )
                         {
@@ -250,16 +297,15 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 else
                 {
                     Logger.DesignTime.Trace?.Log(
-                        $"DesignTimeAspectPipelineCache.TryExecute('{compilation.AssemblyName}', CompilationId = {DebuggingHelper.GetObjectId( compilation )}): external build required,"
-                        +
-                        $" returning from cache only." );
+                        $"DesignTimeAspectPipelineCache.TryExecute('{compilation.AssemblyName}', CompilationId = {DebuggingHelper.GetObjectId( compilation )}): "
+                        + $"the pipeline is paused, returning from cache only." );
 
-                    // If we need an external build, we only serve pipeline results from the cache.
+                    // If the pipeline is paused, we only serve pipeline results from the cache.
                     // For validation results, we need to continuously run the templating validators (not the user ones) because the user is likely editing the
                     // template right now. We run only the system validators. We don't run the user validators because of performance -- at this point, we don't have
                     // caching, so we need to validate all syntax trees. If we want to improve performance, we would have to cache system validators separately from the pipeline.
 
-                    var validationResult = this.ValidateWithBrokenPipeline( compilation, this, cancellationToken );
+                    var validationResult = this.ValidateWithPausedPipeline( compilation, this, cancellationToken );
                     compilationResult = new CompilationResult( this._currentState.PipelineResult, validationResult );
 
                     return true;
@@ -267,7 +313,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
             }
         }
 
-        private CompilationValidationResult ValidateWithBrokenPipeline(
+        private CompilationValidationResult ValidateWithPausedPipeline(
             Compilation compilation,
             DesignTimeAspectPipeline pipeline,
             CancellationToken cancellationToken )

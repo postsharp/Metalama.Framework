@@ -18,9 +18,9 @@ public class TransformationPreviewServiceImpl : IService
 {
     private readonly DesignTimeAspectPipelineFactory _designTimeAspectPipelineFactory;
 
-    internal TransformationPreviewServiceImpl( DesignTimeAspectPipelineFactory designTimeAspectPipelineFactory )
+    public TransformationPreviewServiceImpl( IServiceProvider serviceProvider )
     {
-        this._designTimeAspectPipelineFactory = designTimeAspectPipelineFactory;
+        this._designTimeAspectPipelineFactory = serviceProvider.GetRequiredService<DesignTimeAspectPipelineFactory>();
     }
 
     public async Task<PreviewTransformationResult> PreviewTransformationAsync( string projectId, string syntaxTreeName, CancellationToken cancellationToken )

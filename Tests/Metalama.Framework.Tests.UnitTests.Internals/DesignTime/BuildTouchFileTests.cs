@@ -93,7 +93,7 @@ using Metalama.Framework.Code;
                 compilation1.References,
                 true );
 
-            pipeline.ExternalBuildStarted += ( _, _ ) =>
+            pipeline.PipelineResumed += ( _, _ ) =>
             {
                 Assert.False( externalBuildStarted );
                 externalBuildStarted = true;

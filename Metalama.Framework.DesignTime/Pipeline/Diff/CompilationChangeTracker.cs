@@ -80,6 +80,7 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
                 {
                     if ( !MetadataReferencesEqual( oldExternalReferences[i], newExternalReferences[i] ) )
                     {
+                        Logger.DesignTime.Trace?.Log( $"Difference found in {i}-th reference: '{oldExternalReferences[i]}' != '{newExternalReferences[i]}'." );
                         hasChange = true;
 
                         break;
@@ -89,7 +90,7 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
 
             if ( hasChange )
             {
-                Logger.DesignTime.Trace?.Log( "Change found in metadata reference. The last configuration cannot be reused" );
+                Logger.DesignTime.Trace?.Log( "Change found in metadata reference. The last configuration cannot be reused." );
 
                 return false;
             }

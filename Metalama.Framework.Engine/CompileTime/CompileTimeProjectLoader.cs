@@ -201,6 +201,8 @@ namespace Metalama.Framework.Engine.CompileTime
                     cancellationToken,
                     out compileTimeProject ) )
             {
+                this._logger.Warning?.Log( $"TryGetCompileTimeProject failed." );
+                
                 compileTimeProject = null;
 
                 return false;
@@ -289,6 +291,8 @@ namespace Metalama.Framework.Engine.CompileTime
                     cancellationToken,
                     out compileTimeProject ) )
             {
+                this._logger.Warning?.Log( $"TryDeserializeCompileTimeProject failed." );
+                
                 // Coverage: ignore
 
                 return false;
@@ -340,6 +344,8 @@ namespace Metalama.Framework.Engine.CompileTime
                         // (this happens when the project reference could not be resolved.)
 
                         project = null;
+                        
+                        this._logger.Warning?.Log( $"TryDeserializeCompileTimeProject('{runTimeAssemblyIdentity}'): processing of reference '{referenceAssemblyIdentity}' failed." );
 
                         return false;
                     }
@@ -365,6 +371,8 @@ namespace Metalama.Framework.Engine.CompileTime
                 // Coverage: ignore
                 // (this happens when the compile-time could not be compiled into a binary assembly.)
 
+                this._logger.Warning?.Log( $"TryDeserializeCompileTimeProject('{runTimeAssemblyIdentity}'): TryCompileDeserializedProject failed'." );
+                
                 project = null;
 
                 return false;

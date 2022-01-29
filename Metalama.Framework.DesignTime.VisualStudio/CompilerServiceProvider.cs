@@ -14,25 +14,12 @@ namespace Metalama.Framework.DesignTime.VisualStudio
     /// </summary>
     internal class CompilerServiceProvider : ICompilerServiceProvider
     {
-        private static readonly CompilerServiceProvider _instance = new();
+        private readonly IServiceProvider _serviceProvider;
 
-        static CompilerServiceProvider()
+        public CompilerServiceProvider( IServiceProvider serviceProvider )
         {
-            DesignTimeEntryPointManager.Instance.RegisterServiceProvider( _instance );
-
-            // Also configure logging.
-            // TODO: Move to Microsoft.Extensions.Logging.
-        }
-
-        private CompilerServiceProvider()
-        {
+            this._serviceProvider = serviceProvider;
             this.Version = this.GetType().Assembly.GetName().Version;
-        }
-
-        public static void Initialize()
-        {
-            // Make sure the type is initialized.
-            _ = _instance.GetType();
         }
 
         public Version Version { get; }
@@ -46,6 +33,10 @@ namespace Metalama.Framework.DesignTime.VisualStudio
             else if ( type.IsEquivalentTo( typeof(ITransformationPreviewService) ) )
             {
                 return new UserProcessTransformationPreviewService( VisualStudioServiceProviderFactory.GetServiceProvider() );
+            }
+            else if ( type.IsEquivalentTo( typeof(ICompileTimeEditingStatusService) ) )
+            {
+                return new CompileTimeEditingStatusService( this._serviceProvider );
             }
             else
             {

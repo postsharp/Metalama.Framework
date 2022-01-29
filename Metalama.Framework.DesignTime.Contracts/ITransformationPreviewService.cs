@@ -12,7 +12,7 @@ namespace Metalama.Framework.DesignTime.Contracts
     /// Defines a method that allows to transform a single syntax tree in a compilation. This service
     /// is used to produce the diff view between original code and transform code.
     /// </summary>
-    [Guid( "ee288fa4-6315-49f5-b6b5-ed84328d5ca4" )]
+    [Guid( "9601bb8b-917a-44d8-a1cf-80f7b6569d0d" )]
     [ComImport]
     public interface ITransformationPreviewService : ICompilerService
     {
@@ -25,11 +25,10 @@ namespace Metalama.Framework.DesignTime.Contracts
         /// </summary>
         /// <param name="compilation"></param>
         /// <param name="syntaxTree"></param>
-        /// <param name="result">An allocated array of 1 element that will receive the result.</param>
-        Task PreviewTransformationAsync(
+        /// <param name="cancellationToken"></param>
+        ValueTask<IPreviewTransformationResult> PreviewTransformationAsync(
             Compilation compilation,
             SyntaxTree syntaxTree,
-            IPreviewTransformationResult?[] result,
             CancellationToken cancellationToken );
     }
 }

@@ -259,7 +259,7 @@ Target.cs:
 
             Assert.True( factory.TryExecute( projectOptions, compilation4, CancellationToken.None, out var results4 ) );
 
-            Assert.Equal( DesignTimeAspectPipelineStatus.NeedsExternalBuild, pipeline.Status );
+            Assert.Equal( DesignTimeAspectPipelineStatus.Paused, pipeline.Status );
             Assert.True( pipeline.IsCompileTimeSyntaxTreeOutdated( "Aspect.cs" ) );
 
             var dumpedResults4 = DumpResults( results4! );
@@ -287,7 +287,7 @@ Target.cs:
 
             var aspect5 = compilation5.SyntaxTrees.Single( t => t.FilePath == "Aspect.cs" );
 
-            Assert.Equal( DesignTimeAspectPipelineStatus.NeedsExternalBuild, pipeline.Status );
+            Assert.Equal( DesignTimeAspectPipelineStatus.Paused, pipeline.Status );
 
             Assert.True( factory.TryExecute( projectOptions, compilation5, CancellationToken.None, out var results5 ) );
             var dumpedResults5 = DumpResults( results5! );
@@ -316,8 +316,8 @@ Target.cs:
 
             Assert.NotNull( pipelineResult );
 
-            // Simulate an external build event. This is normally triggered by the build touch file.
-            pipeline.OnExternalBuildStarted();
+            // Simulate an external build event. This is normally triggered by the build touch file or by a UI signal.
+            pipeline.Resume( false );
 
             // A new evaluation of the design-time pipeline should now give the new results.
             Assert.True( factory.TryExecute( projectOptions, compilation5, CancellationToken.None, out var results6 ) );

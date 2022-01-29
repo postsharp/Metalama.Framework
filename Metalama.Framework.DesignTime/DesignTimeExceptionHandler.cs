@@ -23,6 +23,10 @@ namespace Metalama.Framework.DesignTime
             {
                 Logger.DesignTime.Error?.Log( e.ToString() );
             }
+            else
+            {
+                Logger.DesignTime.Warning?.Log( $"Got an acceptable exception {e.GetType().Name}." );
+            }
         }
     }
 }

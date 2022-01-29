@@ -18,12 +18,12 @@ namespace Metalama.Framework.DesignTime
     [ExcludeFromCodeCoverage]
     public abstract partial class DesignTimeSourceGenerator : ISourceGenerator
     {
-        public ServiceProvider ServiceProvider { get; }
+        protected ServiceProvider ServiceProvider { get; }
 
         private readonly ILogger _logger;
         private readonly ConcurrentDictionary<string, ProjectHandler?> _projectHandlers = new();
 
-        public DesignTimeSourceGenerator( ServiceProvider serviceProvider )
+        protected DesignTimeSourceGenerator( ServiceProvider serviceProvider )
         {
             this.ServiceProvider = serviceProvider;
             this._logger = serviceProvider.GetLoggerFactory().GetLogger( "DesignTime" );

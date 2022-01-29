@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
@@ -21,8 +22,6 @@ namespace Metalama.Framework.DesignTime.Contracts
     public class DesignTimeEntryPointManager : IDesignTimeEntryPointManager
     {
         private const string _appDomainDataName = "Metalama.Framework.DesignTime.Contracts.DesignTimeEntryPointManager";
-
-        private readonly ConcurrentDictionary<Version, Task<ICompilerServiceProvider>> _getProviderTasks = new();
 
         public static Version MatchAllVersion { get; } = new( 9999, 99 );
 
@@ -63,8 +62,13 @@ namespace Metalama.Framework.DesignTime.Contracts
         public DesignTimeEntryPointManager() { }
 
         private readonly object _sync = new();
+        private readonly ConcurrentDictionary<Version, Task<ICompilerServiceProvider>> _getProviderTasks = new();
         private volatile TaskCompletionSource<ICompilerServiceProvider> _registrationTask = new();
-        private ImmutableHashSet<ICompilerServiceProvider> _entryPoints = ImmutableHashSet<ICompilerServiceProvider>.Empty;
+        private volatile ImmutableHashSet<ICompilerServiceProvider> _providers = ImmutableHashSet<ICompilerServiceProvider>.Empty;
+        private int _nextObserverId;
+
+        private volatile ImmutableDictionary<int, IObserver<ICompilerServiceProvider>> _observers =
+            ImmutableDictionary<int, IObserver<ICompilerServiceProvider>>.Empty;
 
         async ValueTask<ICompilerServiceProvider?> IDesignTimeEntryPointManager.GetServiceProviderAsync( Version version, CancellationToken cancellationToken )
         {
@@ -92,13 +96,15 @@ namespace Metalama.Framework.DesignTime.Contracts
             return task.Result;
         }
 
+        public IEnumerable<ICompilerServiceProvider> GetRegisteredProviders() => this._providers;
+
         private async Task<ICompilerServiceProvider> GetProviderForVersion( Version version )
         {
             while ( true )
             {
                 lock ( this._sync )
                 {
-                    foreach ( var entryPoint in this._entryPoints )
+                    foreach ( var entryPoint in this._providers )
                     {
                         if ( version == MatchAllVersion || entryPoint.Version == version )
                         {
@@ -111,17 +117,23 @@ namespace Metalama.Framework.DesignTime.Contracts
             }
         }
 
-        void IDesignTimeEntryPointManager.RegisterServiceProvider( ICompilerServiceProvider entryPoint )
+        void IDesignTimeEntryPointManager.RegisterServiceProvider( ICompilerServiceProvider provider )
         {
             lock ( this._sync )
             {
-                entryPoint.Unloaded += () => this.OnUnloaded( entryPoint );
-                this._entryPoints = this._entryPoints.Add( entryPoint );
+                provider.Unloaded += () => this.OnUnloaded( provider );
+                this._providers = this._providers.Add( provider );
 
                 // The order here is important.
                 var oldRegistrationTask = this._registrationTask;
                 this._registrationTask = new TaskCompletionSource<ICompilerServiceProvider>();
-                oldRegistrationTask.SetResult( entryPoint );
+                oldRegistrationTask.SetResult( provider );
+
+                // Send notifications.
+                foreach ( var observer in this._observers )
+                {
+                    observer.Value.OnNext( provider );
+                }
             }
         }
 
@@ -131,10 +143,46 @@ namespace Metalama.Framework.DesignTime.Contracts
         {
             lock ( this._sync )
             {
-                this._entryPoints = this._entryPoints.Remove( entryPoint );
+                this._providers = this._providers.Remove( entryPoint );
 
                 this._getProviderTasks.TryRemove( entryPoint.Version, out _ );
                 this._getProviderTasks.TryRemove( MatchAllVersion, out _ );
+            }
+        }
+
+        public IDisposable Subscribe( IObserver<ICompilerServiceProvider> observer )
+        {
+            lock ( this._sync )
+            {
+                foreach ( var provider in this._providers )
+                {
+                    observer.OnNext( provider );
+                }
+
+                var observerId = this._nextObserverId++;
+                this._observers = this._observers.Add( observerId, observer );
+
+                return new ObserverCookie( this, observerId );
+            }
+        }
+
+        private class ObserverCookie : IDisposable
+        {
+            private readonly DesignTimeEntryPointManager _parent;
+            private readonly int _id;
+
+            public ObserverCookie( DesignTimeEntryPointManager parent, int id )
+            {
+                this._parent = parent;
+                this._id = id;
+            }
+
+            public void Dispose()
+            {
+                lock ( this._parent._sync )
+                {
+                    this._parent._observers = this._parent._observers.Remove( this._id );
+                }
             }
         }
     }

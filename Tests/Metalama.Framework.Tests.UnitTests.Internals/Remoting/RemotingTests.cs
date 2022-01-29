@@ -22,13 +22,13 @@ public class RemotingTests
 
         var pipeName = $"Metalama_Test_{Guid.NewGuid()}";
         using var server = new ServiceHost( ServiceProvider.Empty, pipeName );
-        using var client = new ServiceClient( pipeName );
+        using var client = new ServiceClient( ServiceProvider.Empty, pipeName );
         var projectHandler = new TestProjectHandler();
 
         server.Start();
         await client.ConnectAsync();
 
-        await client.HelloAsync( projectId, projectHandler );
+        await client.RegisterProjectHandlerAsync( projectId, projectHandler );
 
         await server.PublishGeneratedSourcesAsync( projectId, ImmutableDictionary.Create<string, string>().Add( sourceTreeName, "content" ) );
 
@@ -48,7 +48,7 @@ public class RemotingTests
         server.Start();
 
         // Start the client, but do not call Hello.
-        using var client = new ServiceClient( pipeName );
+        using var client = new ServiceClient( ServiceProvider.Empty, pipeName );
         var projectHandler = new TestProjectHandler();
         await client.ConnectAsync();
 
@@ -56,7 +56,7 @@ public class RemotingTests
         await server.PublishGeneratedSourcesAsync( projectId, ImmutableDictionary.Create<string, string>().Add( sourceTreeName, "content" ) );
 
         // Finish the connection from the client. We should receive the message that were sent before saying hello.
-        await client.HelloAsync( projectId, projectHandler );
+        await client.RegisterProjectHandlerAsync( projectId, projectHandler );
 
         // Asserts.
         Assert.Single( projectHandler.GeneratedCodeEvents, x => x.ProjectId == projectId );
@@ -78,17 +78,17 @@ public class RemotingTests
         await server.PublishGeneratedSourcesAsync( projectId, ImmutableDictionary.Create<string, string>().Add( sourceTreeName, "content" ) );
 
         // Start the client.
-        using var client = new ServiceClient( pipeName );
+        using var client = new ServiceClient( ServiceProvider.Empty, pipeName );
         var projectHandler = new TestProjectHandler();
         await client.ConnectAsync();
-        await client.HelloAsync( projectId, projectHandler );
+        await client.RegisterProjectHandlerAsync( projectId, projectHandler );
 
         // Asserts.
         Assert.Single( projectHandler.GeneratedCodeEvents, x => x.ProjectId == projectId );
         Assert.Single( projectHandler.GeneratedCodeEvents[0].Sources, x => x.Key == sourceTreeName );
     }
 
-    private class TestProjectHandler : IClientApi
+    private class TestProjectHandler : IProjectHandlerCallback
     {
         public List<(string ProjectId, ImmutableDictionary<string, string> Sources)> GeneratedCodeEvents { get; } = new();
 

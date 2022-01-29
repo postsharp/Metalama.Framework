@@ -53,12 +53,15 @@ public class AnalysisProcessProjectHandler : ProjectHandler
             AddSources();
 
             // Atomically cancel the previous computation and create a new cancellation token.
-            CancellationTokenSource newCancellationSource;
+            CancellationToken newCancellationToken;
 
             while ( true )
             {
                 var currentCancellationSource = this._currentCancellationSource;
-                newCancellationSource = new CancellationTokenSource();
+                var newCancellationSource = new CancellationTokenSource();
+                
+                // It's critical to take the token before calling CompareExchange, otherwise the source may be disposed.
+                newCancellationToken = newCancellationSource.Token;
 
                 if ( Interlocked.CompareExchange( ref this._currentCancellationSource, newCancellationSource, currentCancellationSource )
                      == currentCancellationSource )
@@ -77,7 +80,8 @@ public class AnalysisProcessProjectHandler : ProjectHandler
             }
 
             // Schedule a new computation.
-            _ = Task.Run( () => this.ComputeAndPublishAsync( compilation, newCancellationSource.Token ), newCancellationSource.Token );
+            
+            _ = Task.Run( () => this.ComputeAndPublishAsync( compilation, newCancellationToken ), newCancellationToken );
         }
         else
         {

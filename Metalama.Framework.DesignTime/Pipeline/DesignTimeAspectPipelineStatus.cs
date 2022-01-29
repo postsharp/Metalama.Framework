@@ -19,8 +19,8 @@ namespace Metalama.Framework.DesignTime.Pipeline
         Ready,
 
         /// <summary>
-        /// The pipeline configuration is outdated. A project build is required.
+        /// The compile-time code is being edited, so the pipeline is paused and serving cached results only.
         /// </summary>
-        NeedsExternalBuild
+        Paused
     }
 }

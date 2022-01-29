@@ -18,17 +18,14 @@ namespace Metalama.Framework.DesignTime.VisualStudio.Preview
             this._serviceClient = serviceProvider.GetRequiredService<ServiceClient>();
         }
 
-        public async Task PreviewTransformationAsync(
+        public async ValueTask<IPreviewTransformationResult> PreviewTransformationAsync(
             Compilation compilation,
             SyntaxTree syntaxTree,
-            IPreviewTransformationResult?[] result,
             CancellationToken cancellationToken )
         {
             if ( !ProjectIdHelper.TryGetProjectId( compilation, out var projectId ) )
             {
-                result[0] = PreviewTransformationResult.Failure( "This is not a Metalama project." );
-
-                return;
+                return PreviewTransformationResult.Failure( "This is not a Metalama project." );
             }
 
             var transformationResult =
@@ -37,7 +34,7 @@ namespace Metalama.Framework.DesignTime.VisualStudio.Preview
                     syntaxTree.FilePath,
                     cancellationToken );
 
-            result[0] = transformationResult;
+            return transformationResult;
         }
     }
 }

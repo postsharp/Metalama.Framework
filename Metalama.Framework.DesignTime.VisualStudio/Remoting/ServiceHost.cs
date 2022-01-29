@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Backstage.Diagnostics;
+using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.DesignTime.Preview;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Project;
@@ -26,6 +27,8 @@ internal class ServiceHost : IService, IDisposable
     private readonly ConcurrentDictionary<string, ImmutableDictionary<string, string>> _sourcesForUnconnectedClients = new();
     private readonly TaskCompletionSource<bool> _startTask = new();
     private readonly IServiceProvider _serviceProvider;
+
+    private readonly ICompileTimeCodeEditingStatusService? _compileTimeCodeEditingStatusService;
 
     private NamedPipeServerStream? _pipeStream;
     private JsonRpc? _rpc;
@@ -54,6 +57,13 @@ internal class ServiceHost : IService, IDisposable
     public ServiceHost( IServiceProvider serviceProvider, string pipeName )
     {
         this._logger = serviceProvider.GetLoggerFactory().GetLogger( "Remoting" );
+        this._compileTimeCodeEditingStatusService = serviceProvider.GetService<ICompileTimeCodeEditingStatusService>();
+
+        if ( this._compileTimeCodeEditingStatusService != null )
+        {
+            this._compileTimeCodeEditingStatusService.IsEditingCompileTimeCodeChanged += this.OnIsEditingCompileTimeCodeChanged;
+        }
+
         this._serviceProvider = serviceProvider;
         this._pipeName = pipeName;
         this._handler = new MessageHandler( this );
@@ -116,10 +126,20 @@ internal class ServiceHost : IService, IDisposable
         }
     }
 
+    private void OnIsEditingCompileTimeCodeChanged( bool isEditing )
+    {
+        this._client?.OnIsEditingCompileTimeCodeChanged( isEditing );
+    }
+
     public void Dispose()
     {
         this._rpc?.Dispose();
         this._pipeStream?.Dispose();
+
+        if ( this._compileTimeCodeEditingStatusService != null )
+        {
+            this._compileTimeCodeEditingStatusService.IsEditingCompileTimeCodeChanged -= this.OnIsEditingCompileTimeCodeChanged;
+        }
     }
 
     public event EventHandler<ClientConnectedEventArgs>? ClientConnected;
@@ -133,7 +153,7 @@ internal class ServiceHost : IService, IDisposable
             this._parent = parent;
         }
 
-        public async Task HelloAsync( string projectId, CancellationToken cancellationToken )
+        public async Task RegisterProjectHandlerAsync( string projectId, CancellationToken cancellationToken )
         {
             this._parent._logger.Trace?.Log( $"The client '{projectId}' has connected." );
 
@@ -157,6 +177,14 @@ internal class ServiceHost : IService, IDisposable
             var implementation = this._parent._serviceProvider.GetRequiredService<TransformationPreviewServiceImpl>();
 
             return implementation.PreviewTransformationAsync( projectId, syntaxTreeName, cancellationToken );
+        }
+
+        public Task OnCompileTimeCodeEditingCompletedAsync( CancellationToken cancellationToken = default )
+        {
+            var service = this._parent._serviceProvider.GetRequiredService<ICompileTimeCodeEditingStatusService>();
+            service.OnEditingCompileTimeCodeCompleted();
+
+            return Task.CompletedTask;
         }
     }
 

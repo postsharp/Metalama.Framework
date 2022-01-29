@@ -26,15 +26,16 @@ namespace Metalama.Framework.DesignTime.Pipeline
     /// returns produced by <see cref="DesignTimeAspectPipeline"/>. This class is also responsible for invoking
     /// cache invalidation methods as appropriate.
     /// </summary>
-    internal class DesignTimeAspectPipelineFactory : IDisposable, ITransitiveAspectManifestProvider, IAspectPipelineConfigurationProvider
+    internal class DesignTimeAspectPipelineFactory : IDisposable, ITransitiveAspectManifestProvider, IAspectPipelineConfigurationProvider,
+                                                     ICompileTimeCodeEditingStatusService
     {
         private readonly ConcurrentDictionary<string, DesignTimeAspectPipeline> _pipelinesByProjectId = new();
-
         private readonly ILogger _logger;
+        private readonly bool _isTest;
+
+        private volatile int _numberOfPipelinesEditingCompileTimeCode;
 
         public CompileTimeDomain Domain { get; }
-
-        private readonly bool _isTest;
 
         public DesignTimeAspectPipelineFactory( IServiceProvider serviceProvider, CompileTimeDomain domain, bool isTest = false )
         {
@@ -82,7 +83,8 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
                     var serviceProvider = ServiceProviderFactory.GetServiceProvider().WithServices( projectOptions, this );
                     pipeline = new DesignTimeAspectPipeline( serviceProvider, this.Domain, compilation.References, this._isTest );
-                    pipeline.ExternalBuildStarted += this.OnExternalBuildStarted;
+                    pipeline.PipelineResumed += this.OnPipelineResumed;
+                    pipeline.StatusChanged += this.OnPipelineStatusChanged;
 
                     if ( !this._pipelinesByProjectId.TryAdd( projectId, pipeline ) )
                     {
@@ -94,7 +96,44 @@ namespace Metalama.Framework.DesignTime.Pipeline
             }
         }
 
-        private void OnExternalBuildStarted( object sender, EventArgs e )
+        private bool IsEditingCompileTimeCode { get; set; }
+
+        bool ICompileTimeCodeEditingStatusService.IsEditingCompileTimeCode => this.IsEditingCompileTimeCode;
+
+        public event Action<bool>? IsEditingCompileTimeCodeChanged;
+
+        void ICompileTimeCodeEditingStatusService.OnEditingCompileTimeCodeCompleted()
+        {
+            foreach ( var pipeline in this._pipelinesByProjectId.Values )
+            {
+                pipeline.Resume(true);
+            }
+        }
+
+        private void OnPipelineStatusChanged( DesignTimePipelineStatusChangedEventArgs args )
+        {
+            var wasEditing = args.OldStatus == DesignTimeAspectPipelineStatus.Paused;
+            var isEditing = args.NewStatus == DesignTimeAspectPipelineStatus.Paused;
+
+            if ( wasEditing && !isEditing )
+            {
+                if ( Interlocked.Decrement( ref this._numberOfPipelinesEditingCompileTimeCode ) == 0 )
+                {
+                    this.IsEditingCompileTimeCode = false;
+                    this.IsEditingCompileTimeCodeChanged?.Invoke( false );
+                }
+            }
+            else if ( !wasEditing && isEditing )
+            {
+                if ( Interlocked.Increment( ref this._numberOfPipelinesEditingCompileTimeCode ) == 1 )
+                {
+                    this.IsEditingCompileTimeCode = true;
+                    this.IsEditingCompileTimeCodeChanged?.Invoke( true );
+                }
+            }
+        }
+
+        private void OnPipelineResumed( object sender, EventArgs e )
         {
             // If a build has started, we have to invalidate the whole cache because we have allowed
             // our cache to become inconsistent when we started to have an outdated pipeline configuration.

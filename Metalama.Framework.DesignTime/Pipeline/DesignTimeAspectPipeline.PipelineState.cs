@@ -258,9 +258,9 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
                         if ( requiresRebuild )
                         {
-                            Logger.DesignTime.Trace?.Log( "Requiring an external rebuild." );
+                            Logger.DesignTime.Trace?.Log( "Pausing the pipeline." );
 
-                            newStatus = DesignTimeAspectPipelineStatus.NeedsExternalBuild;
+                            newStatus = DesignTimeAspectPipelineStatus.Paused;
 
                             if ( pipeline.ProjectOptions.BuildTouchFile != null && File.Exists( pipeline.ProjectOptions.BuildTouchFile ) )
                             {
@@ -287,7 +287,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 CancellationToken cancellationToken,
                 [NotNullWhen( true )] out AspectPipelineConfiguration? configuration )
             {
-                if ( state.Status == DesignTimeAspectPipelineStatus.NeedsExternalBuild && ignoreStatus )
+                if ( state.Status == DesignTimeAspectPipelineStatus.Paused && ignoreStatus )
                 {
                     state = new PipelineState( state._pipeline );
                 }
@@ -331,10 +331,10 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 }
                 else
                 {
-                    if ( state.Status == DesignTimeAspectPipelineStatus.NeedsExternalBuild )
+                    if ( state.Status == DesignTimeAspectPipelineStatus.Paused )
                     {
                         Logger.DesignTime.Warning?.Log(
-                            $"DesignTimeAspectPipeline.TryGetConfiguration('{compilation.Compilation.AssemblyName}', CompilationId = {DebuggingHelper.GetObjectId( compilation.Compilation )}) failed: external build needed." );
+                            $"DesignTimeAspectPipeline.TryGetConfiguration('{compilation.Compilation.AssemblyName}', CompilationId = {DebuggingHelper.GetObjectId( compilation.Compilation )}) failed: the pipeline is paused." );
 
                         configuration = null;
 
@@ -363,7 +363,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
             {
                 DiagnosticList diagnosticList = new();
 
-                if ( state.Status == DesignTimeAspectPipelineStatus.NeedsExternalBuild )
+                if ( state.Status == DesignTimeAspectPipelineStatus.Paused )
                 {
                     throw new InvalidOperationException();
                 }
@@ -372,14 +372,13 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 {
                     if ( Logger.DesignTime.Error != null )
                     {
-                        Logger.DesignTime.Error?.Log( $"TryGetConfiguration('{compilation.Compilation.AssemblyName}') failed" );
+                        var errors = diagnosticList.Where( d => d.Severity == DiagnosticSeverity.Error ).ToList();
+                        
+                        Logger.DesignTime.Error?.Log( $"TryGetConfiguration('{compilation.Compilation.AssemblyName}') failed: {errors.Count} reported." );
 
-                        foreach ( var diagnostic in diagnosticList )
+                        foreach ( var diagnostic in errors )
                         {
-                            if ( diagnostic.Severity == DiagnosticSeverity.Error )
-                            {
-                                Logger.DesignTime.Error?.Log( diagnostic.ToString() );
-                            }
+                            Logger.DesignTime.Error?.Log( diagnostic.ToString() );
                         }
                     }
 

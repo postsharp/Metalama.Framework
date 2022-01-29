@@ -1,10 +1,10 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Backstage.Diagnostics;
 using Metalama.Framework.DesignTime.Offline;
 using Metalama.Framework.Engine.AdditionalOutputs;
 using Metalama.Framework.Engine.Options;
-using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
 
@@ -14,7 +14,12 @@ public partial class DesignTimeSourceGenerator
 {
     private class OfflineProjectHandler : ProjectHandler
     {
-        public OfflineProjectHandler( IServiceProvider serviceProvider, IProjectOptions projectOptions ) : base( serviceProvider, projectOptions ) { }
+        private readonly ILogger _logger;
+
+        public OfflineProjectHandler( IServiceProvider serviceProvider, IProjectOptions projectOptions ) : base( serviceProvider, projectOptions )
+        {
+            this._logger = serviceProvider.GetLoggerFactory().GetLogger( "DesignTime" );
+        }
 
         public override void GenerateSources( Compilation compilation, GeneratorExecutionContext context )
         {
@@ -39,7 +44,7 @@ public partial class DesignTimeSourceGenerator
                 sourcesCount++;
             }
 
-            Logger.DesignTime.Trace?.Log( $"DesignTimeSourceGenerator.Execute('{context.Compilation.AssemblyName}'): {sourcesCount} sources generated." );
+            this._logger.Trace?.Log( $"DesignTimeSourceGenerator.Execute('{context.Compilation.AssemblyName}'): {sourcesCount} sources generated." );
         }
     }
 }
