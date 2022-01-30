@@ -60,10 +60,16 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
 
                         FlushTextToken();
 
-                        contents.Add(
-                            SyntaxFactory.Interpolation(
-                                RuntimeExpression.FromValue( token.Expression, this.Type.Compilation, syntaxGenerationContext )
-                                    .Syntax ) );
+                        var tokenSyntax = RuntimeExpression.FromValue( token.Expression, this.Type.Compilation, syntaxGenerationContext ).Syntax;
+
+                        if ( tokenSyntax is LiteralExpressionSyntax literal && literal.Token.Kind() == SyntaxKind.StringLiteralToken )
+                        {
+                            textAccumulator.Append( literal.Token.Text.Substring( 1, literal.Token.Text.Length - 2 ) );
+                        }
+                        else
+                        {
+                            contents.Add( SyntaxFactory.Interpolation( tokenSyntax ) );
+                        }
 
                         break;
 

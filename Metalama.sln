@@ -33,7 +33,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{19660464
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Metalama.Obfuscator", "Build\Metalama.Obfuscator\Metalama.Obfuscator.csproj", "{B9D33CDD-3D37-40A5-B5D5-F42118342D5B}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Metalama.Framework.DesignTime.Contracts", "Metalama.Framework.DesignTime.Contracts\Metalama.Framework.DesignTime.Contracts.csproj", "{2D3EE834-B910-4F2F-8069-F95CE8D0D933}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Metalama.Framework.DesignTime.Contracts.1.0", "Metalama.Framework.DesignTime.Contracts.1.0\Metalama.Framework.DesignTime.Contracts.1.0.csproj", "{2D3EE834-B910-4F2F-8069-F95CE8D0D933}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Metalama.Framework.Tests.Integration", "Tests\Metalama.Framework.Tests.Integration\Metalama.Framework.Tests.Integration.csproj", "{69EB8F34-975E-46AD-8EA1-A592A629CCD6}"
 EndProject

@@ -18,6 +18,7 @@ using Metalama.Framework.Fabrics;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Emit;
 using System;
 using System.Collections.Generic;
@@ -120,8 +121,9 @@ namespace Metalama.Framework.Engine.CompileTime
             Compilation runTimeCompilation,
             IReadOnlyList<SyntaxTree> treesWithCompileTimeCode,
             IEnumerable<CompileTimeProject> referencedProjects,
+            ImmutableArray<UsingDirectiveSyntax> globalUsings,
             ulong hash,
-            IDiagnosticAdder diagnosticSink,
+             IDiagnosticAdder diagnosticSink,
             CancellationToken cancellationToken,
             out Compilation? compileTimeCompilation,
             out ILocationAnnotationMap? locationAnnotationMap )
@@ -153,6 +155,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 runTimeCompilation,
                 compileTimeCompilation,
                 serializableTypes,
+                globalUsings,
                 diagnosticSink,
                 templateCompiler,
                 this._serviceProvider,
@@ -190,7 +193,18 @@ namespace Metalama.Framework.Engine.CompileTime
 
             if ( this._projectOptions is { FormatCompileTimeCode: true } && OutputCodeFormatter.CanFormat )
             {
-                compileTimeCompilation = OutputCodeFormatter.FormatAll( compileTimeCompilation );
+                var formattedCompilation = OutputCodeFormatter.FormatAll( compileTimeCompilation );
+
+                if ( !(formattedCompilation.GetDiagnostics().Any( d => d.Severity == DiagnosticSeverity.Error ) &&
+                       !compileTimeCompilation.GetDiagnostics().Any( d => d.Severity == DiagnosticSeverity.Error )) )
+                {
+                    compileTimeCompilation = formattedCompilation;
+                }
+                else
+                {
+                    this._logger.Warning?.Log(
+                        $"The formatting of the compile-time project '{compileTimeCompilation.AssemblyName}' failed. Falling back to the unformatted code." );
+                }
             }
 
             this._observer?.OnCompileTimeCompilation( compileTimeCompilation );
@@ -469,13 +483,32 @@ namespace Metalama.Framework.Engine.CompileTime
                     logger: this._logger );
             }
         }
+        
+        private static List<UsingDirectiveSyntax> GetUsingsFromOptions( Compilation compilation )
+        {
+                
+            return ((CSharpCompilation) compilation).Options.Usings.Select( x => SyntaxFactory.UsingDirective( ParseNamespace( x ) ).NormalizeWhitespace(  ) ).ToList();
+            static NameSyntax ParseNamespace( string ns )
+            {
+                var parts = ns.Split( '.' );
+                NameSyntax result = SyntaxFactory.IdentifierName( parts[0] );
 
-        private IReadOnlyList<SyntaxTree> GetCompileTimeSyntaxTrees(
+                for ( var i = 1; i < parts.Length; i++ )
+                {
+                    result = SyntaxFactory.QualifiedName( result, SyntaxFactory.IdentifierName( parts[i] ) );
+                }
+
+                return result;
+            }
+        }
+
+        private (IReadOnlyList<SyntaxTree> SyntaxTrees, ImmutableArray<UsingDirectiveSyntax> GlobalUsings) GetCompileTimeArtifacts(
             Compilation runTimeCompilation,
             IReadOnlyList<SyntaxTree>? compileTimeTreesHint,
             CancellationToken cancellationToken )
         {
             List<SyntaxTree> compileTimeTrees = new();
+            var globalUsings = GetUsingsFromOptions( runTimeCompilation );
             var classifier = this._serviceProvider.GetRequiredService<SymbolClassificationService>().GetClassifier( runTimeCompilation );
 
             var trees = compileTimeTreesHint ?? runTimeCompilation.SyntaxTrees;
@@ -489,9 +522,12 @@ namespace Metalama.Framework.Engine.CompileTime
                 {
                     compileTimeTrees.Add( tree );
                 }
+                
+                globalUsings.AddRange( visitor.GlobalUsings.Select( syntax => SyntaxFactory.UsingDirective( syntax ).NormalizeWhitespace() ) );
+
             }
 
-            return compileTimeTrees;
+            return (compileTimeTrees, globalUsings.ToImmutableArray() );
         }
 
         private IReadOnlyList<SerializableTypeInfo> GetSerializableTypes(
@@ -531,14 +567,19 @@ namespace Metalama.Framework.Engine.CompileTime
             bool cacheOnly,
             CancellationToken cancellationToken,
             out CompileTimeProject? project )
-            => this.TryGetCompileTimeProjectImpl(
+        {
+            var compileTimeArtifacts = this.GetCompileTimeArtifacts( runTimeCompilation, compileTimeTreesHint, cancellationToken );
+            
+            return this.TryGetCompileTimeProjectImpl(
                 runTimeCompilation,
-                this.GetCompileTimeSyntaxTrees( runTimeCompilation, compileTimeTreesHint, cancellationToken ),
+                compileTimeArtifacts.SyntaxTrees,
                 referencedProjects,
+                compileTimeArtifacts.GlobalUsings,
                 diagnosticSink,
                 cacheOnly,
                 cancellationToken,
                 out project );
+        }
 
         private bool TryGetCompileTimeProjectFromCache(
             Compilation runTimeCompilation,
@@ -593,6 +634,7 @@ namespace Metalama.Framework.Engine.CompileTime
             Compilation runTimeCompilation,
             IReadOnlyList<SyntaxTree> sourceTreesWithCompileTimeCode,
             IReadOnlyList<CompileTimeProject> referencedProjects,
+            ImmutableArray<UsingDirectiveSyntax> globalUsings,
             IDiagnosticAdder diagnosticSink,
             bool cacheOnly,
             CancellationToken cancellationToken,
@@ -638,6 +680,7 @@ namespace Metalama.Framework.Engine.CompileTime
                             runTimeCompilation,
                             sourceTreesWithCompileTimeCode,
                             referencedProjects,
+                            globalUsings,
                             projectHash,
                             diagnosticSink,
                             cancellationToken,

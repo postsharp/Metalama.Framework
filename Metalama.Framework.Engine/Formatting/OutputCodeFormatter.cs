@@ -15,7 +15,7 @@ using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.Formatting
 {
-    public static class OutputCodeFormatter
+    public static partial class OutputCodeFormatter
     {
         /// <summary>
         /// Annotation used to mark locals and 'return;' statement that may be redundant. Currently we are not doing anything with them,
@@ -57,6 +57,10 @@ namespace Metalama.Framework.Engine.Formatting
             }
             else
             {
+                // ImportAdder annotates its node with Formatter.Annotation, but we are using FormattingAnnotations.GeneratedCode, so we need to ask to reformat all usings.
+                // TODO: we may detect the spans to be reformatted using a classifier, so we would avoid reformatting user code.
+                outputSyntaxRoot = (CompilationUnitSyntax) MarkUsingsRewriter.Instance.Visit( outputSyntaxRoot );
+                
                 outputSyntaxRoot = (CompilationUnitSyntax) Formatter.Format(
                     outputSyntaxRoot,
                     FormattingAnnotations.GeneratedCode,
@@ -96,7 +100,7 @@ namespace Metalama.Framework.Engine.Formatting
         public static Compilation FormatAll( Compilation compilation, CancellationToken cancellationToken = default )
             => Task.Run( () => FormatAllAsync( compilation, cancellationToken ), cancellationToken ).Result;
 
-        public static async Task<Compilation> FormatAllAsync( Compilation compilation, CancellationToken cancellationToken = default )
+        private static async Task<Compilation> FormatAllAsync( Compilation compilation, CancellationToken cancellationToken = default )
         {
             var formattedCompilation = compilation;
             var (project, syntaxTreeMap) = await CreateProjectFromCompilationAsync( compilation, cancellationToken );

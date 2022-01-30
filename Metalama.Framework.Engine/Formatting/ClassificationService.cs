@@ -1,7 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Metalama.Framework.DesignTime.Contracts;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Templating;
@@ -19,7 +18,7 @@ namespace Metalama.Framework.Engine.Formatting
     /// This class is public because it is used by Try.Metalama.
     /// </remarks>
     [ExcludeFromCodeCoverage]
-    public class ClassificationService : IClassificationService
+    public class ClassificationService
     {
         private readonly IServiceProvider _serviceProvider;
 
@@ -29,11 +28,6 @@ namespace Metalama.Framework.Engine.Formatting
         }
 
         public bool ContainsCompileTimeCode( SyntaxNode syntaxRoot ) => CompileTimeCodeDetector.HasCompileTimeCode( syntaxRoot );
-
-        IClassifiedTextSpans IClassificationService.GetClassifiedTextSpans(
-            SemanticModel model,
-            CancellationToken cancellationToken )
-            => this.GetClassifiedTextSpans( model, cancellationToken );
 
         public ClassifiedTextSpanCollection GetClassifiedTextSpans( SemanticModel model, CancellationToken cancellationToken )
         {

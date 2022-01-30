@@ -18,6 +18,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
@@ -39,6 +40,7 @@ namespace Metalama.Framework.Engine.CompileTime
         {
             private static readonly SyntaxAnnotation _hasCompileTimeCodeAnnotation = new( "Metalama_HasCompileTimeCode" );
             private readonly Compilation _compileTimeCompilation;
+            private readonly ImmutableArray<UsingDirectiveSyntax> _globalUsings;
             private readonly IReadOnlyDictionary<INamedTypeSymbol, SerializableTypeInfo> _serializableTypes;
             private readonly IReadOnlyDictionary<ISymbol, SerializableTypeInfo> _serializableFieldsAndProperties;
             private readonly IDiagnosticAdder _diagnosticAdder;
@@ -63,6 +65,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 Compilation runTimeCompilation,
                 Compilation compileTimeCompilation,
                 IReadOnlyList<SerializableTypeInfo> serializableTypes,
+                ImmutableArray<UsingDirectiveSyntax> globalUsings,
                 IDiagnosticAdder diagnosticAdder,
                 TemplateCompiler templateCompiler,
                 IServiceProvider serviceProvider,
@@ -70,6 +73,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 : base( runTimeCompilation, serviceProvider )
             {
                 this._compileTimeCompilation = compileTimeCompilation;
+                this._globalUsings = globalUsings;
                 this._diagnosticAdder = diagnosticAdder;
                 this._templateCompiler = templateCompiler;
                 this._cancellationToken = cancellationToken;
@@ -891,8 +895,11 @@ namespace Metalama.Framework.Engine.CompileTime
                 }
             }
 
+        
+
             public override SyntaxNode? VisitCompilationUnit( CompilationUnitSyntax node )
             {
+                
                 // Get the list of members that are not statements, local variables, local functions,...
                 var nonTopLevelMembers = node.Members.Where( m => m is BaseTypeDeclarationSyntax or NamespaceDeclarationSyntax or DelegateDeclarationSyntax )
                     .ToList();
@@ -901,7 +908,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
                 if ( transformedMembers.Any( m => m.HasAnnotation( _hasCompileTimeCodeAnnotation ) ) )
                 {
-                    return node.WithMembers( transformedMembers ).WithAdditionalAnnotations( _hasCompileTimeCodeAnnotation );
+                    return node.WithMembers( transformedMembers ).WithAdditionalAnnotations( _hasCompileTimeCodeAnnotation ).WithUsings( node.Usings.AddRange( this._globalUsings ) );
                 }
                 else
                 {

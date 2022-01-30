@@ -4,15 +4,13 @@
 using Metalama.Framework.DesignTime.Contracts;
 using Metalama.Framework.DesignTime.VisualStudio.Remoting;
 using Metalama.Framework.Project;
-using System.Collections.Concurrent;
 
 namespace Metalama.Framework.DesignTime.VisualStudio;
 
 internal class CompileTimeEditingStatusService : ICompileTimeEditingStatusService, IDisposable
 {
     private readonly ServiceClient _serviceClient;
-    private readonly ConcurrentBag<ICompileTimeEditingStatusServiceCallback> _callbacks = new();
-
+    
     public CompileTimeEditingStatusService( IServiceProvider serviceProvider )
     {
         this._serviceClient = serviceProvider.GetRequiredService<ServiceClient>();
@@ -22,17 +20,14 @@ internal class CompileTimeEditingStatusService : ICompileTimeEditingStatusServic
     private void OnIsEditingChanged( bool value )
     {
         this.IsEditing = value;
-
-        foreach ( var callback in this._callbacks )
-        {
-            callback.OnIsEditingChanged( value );
-        }
+        this.IsEditingChanged?.Invoke(value);
     }
 
     public bool IsEditing { get; private set; }
 
-    public void RegisterCallback( ICompileTimeEditingStatusServiceCallback callback ) => this._callbacks.Add( callback );
+    public event Action<bool>? IsEditingChanged;
 
+    
     public async Task OnEditingCompletedAsync( CancellationToken cancellationToken )
     {
         var api = await this._serviceClient.GetServerApiAsync( cancellationToken );

@@ -41,8 +41,7 @@ var product = new Product
         "Metalama.TestFramework.$(PackageVersion).nupkg",
         "Metalama.Framework.Redist.$(PackageVersion).nupkg",
         "Metalama.Framework.Sdk.$(PackageVersion).nupkg",
-        "Metalama.Framework.Engine.$(PackageVersion).nupkg",
-        "Metalama.Framework.DesignTime.Contracts.$(PackageVersion).nupkg" ),
+        "Metalama.Framework.Engine.$(PackageVersion).nupkg" ),
     Dependencies = new[]
     {
         Dependencies.PostSharpEngineering,

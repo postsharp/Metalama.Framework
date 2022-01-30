@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -14,8 +13,6 @@ namespace Metalama.Framework.DesignTime.Contracts
     /// be both of different versions. This contract is strongly versioned. The reference to this API is stored
     /// on the <see cref="AppDomain"/> using <see cref="AppDomain.GetData"/> and <see cref="AppDomain.SetData"/>.
     /// </summary>
-    [Guid( "c6c2ccd1-d8f8-4252-9df1-6c1528272efe" )]
-    [ComImport]
     public interface IDesignTimeEntryPointManager : IObservable<ICompilerServiceProvider>
     {
         /// <summary>
@@ -39,10 +36,4 @@ namespace Metalama.Framework.DesignTime.Contracts
         Version Version { get; }
     }
 
-    [ComImport]
-    [Guid( "191046a8-fff7-41e5-9baa-75dff5c1e0c7" )]
-    public interface IDesignTimeEntryPointManagerCallback
-    {
-        void OnProviderRegistered( ICompilerServiceProvider provider );
-    }
 }

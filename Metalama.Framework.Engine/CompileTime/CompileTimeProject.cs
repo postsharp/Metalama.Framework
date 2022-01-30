@@ -42,7 +42,7 @@ namespace Metalama.Framework.Engine.CompileTime
             ImmutableArray<string>.Empty,
             ImmutableArray<string>.Empty,
             0,
-            ImmutableArray<CompileTimeFile>.Empty );
+            ImmutableArray<CompileTimeFile>.Empty);
 
         private static DiagnosticManifest? _frameworkDiagnosticManifest;
 

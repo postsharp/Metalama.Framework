@@ -18,7 +18,7 @@ namespace Metalama.Framework.DesignTime.VisualStudio.Preview
             this._serviceClient = serviceProvider.GetRequiredService<ServiceClient>();
         }
 
-        public async ValueTask<IPreviewTransformationResult> PreviewTransformationAsync(
+        public async ValueTask<PreviewTransformationResult> PreviewTransformationAsync(
             Compilation compilation,
             SyntaxTree syntaxTree,
             CancellationToken cancellationToken )

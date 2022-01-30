@@ -3,9 +3,6 @@
 
 using Metalama.Framework.DesignTime.Contracts;
 using Metalama.Framework.DesignTime.VisualStudio.Preview;
-using Metalama.Framework.Engine.Formatting;
-using Metalama.Framework.Engine.Pipeline;
-using Microsoft.CodeAnalysis;
 
 namespace Metalama.Framework.DesignTime.VisualStudio
 {
@@ -28,7 +25,7 @@ namespace Metalama.Framework.DesignTime.VisualStudio
         {
             if ( type.IsEquivalentTo( typeof(IClassificationService) ) )
             {
-                return new ClassificationService( ServiceProviderFactory.GlobalProvider.WithProjectScopedServices( Enumerable.Empty<MetadataReference>() ) );
+                return new DesignTimeClassificationService();
             }
             else if ( type.IsEquivalentTo( typeof(ITransformationPreviewService) ) )
             {

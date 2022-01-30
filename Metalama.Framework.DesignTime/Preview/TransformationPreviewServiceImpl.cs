@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Compiler;
+using Metalama.Framework.DesignTime.Contracts;
 using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
@@ -31,7 +32,7 @@ public class TransformationPreviewServiceImpl : IService
             // We cannot create the pipeline because we don't have all options.
             // If this is a problem, we will need to pass all options as AssemblyMetadataAttribute.
 
-            return PreviewTransformationResult.Failure( "The component has not been initialized yet." );
+            return PreviewTransformationResult.Failure( "The project has not been fully loaded yet. Open a file of this project in the editor." );
         }
 
         // Find the syntax tree of the given name.

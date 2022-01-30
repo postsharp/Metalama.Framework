@@ -188,7 +188,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
             }
         }
 
-        public Compilation? LastCompilation => this._currentState.LastCompilation;
+        public Compilation? LastCompilation { get; private set; }
 
         protected override void Dispose( bool disposing )
         {
@@ -236,6 +236,8 @@ namespace Metalama.Framework.DesignTime.Pipeline
             {
                 return true;
             }
+
+            this.LastCompilation = compilation;
 
             using ( this.WithLock() )
             {
