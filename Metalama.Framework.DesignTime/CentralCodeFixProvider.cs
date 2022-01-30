@@ -64,10 +64,8 @@ namespace Metalama.Framework.DesignTime
             {
                 // We have a user diagnostics where a code fix provider was specified. We need to execute the CodeFix pipeline to gather
                 // the actual code fixes.
-                var userCodeFixProvider = new UserCodeFixProvider();
 
-                var codeFixes = userCodeFixProvider.ProvideCodeFixes(
-                    context.Document,
+                var codeFixes = ProvideCodeFixes(
                     context.Diagnostics,
                     context.CancellationToken );
 
@@ -136,5 +134,35 @@ namespace Metalama.Framework.DesignTime
             };
 
         public override ImmutableArray<string> FixableDiagnosticIds { get; }
+
+        private static ImmutableArray<CodeFixModel> ProvideCodeFixes( ImmutableArray<Diagnostic> diagnostics, CancellationToken cancellationToken )
+        {
+            var codeFixesBuilder = ImmutableArray.CreateBuilder<CodeFixModel>();
+
+            foreach ( var diagnostic in diagnostics )
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+
+                if ( diagnostic.Properties.TryGetValue( CodeFixTitles.DiagnosticPropertyKey, out var codeFixTitles ) &&
+                     !string.IsNullOrEmpty( codeFixTitles ) )
+                {
+                    var splitTitles = codeFixTitles!.Split( CodeFixTitles.Separator );
+
+                    foreach ( var codeFixTitle in splitTitles )
+                    {
+                        // TODO: We may support hierarchical code fixes by allowing a separator in the title given by the user, i.e. '|'.
+                        // The creation of the tree structure would then be done here.
+
+                        var codeAction = new UserCodeActionModel(
+                            codeFixTitle,
+                            diagnostic );
+
+                        codeFixesBuilder.Add( new CodeFixModel( codeAction, ImmutableArray.Create( diagnostic ) ) );
+                    }
+                }
+            }
+
+            return codeFixesBuilder.ToImmutable();
+        }
     }
 }

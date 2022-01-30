@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.DesignTime.Contracts;
+using Metalama.Framework.DesignTime.VisualStudio.Classification;
 using Metalama.Framework.DesignTime.VisualStudio.Preview;
 
 namespace Metalama.Framework.DesignTime.VisualStudio

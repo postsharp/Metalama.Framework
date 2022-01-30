@@ -11,12 +11,6 @@ using System.Threading;
 
 namespace Metalama.Framework.Engine.Formatting
 {
-    /// <summary>
-    /// The implementation of <see cref="IClassificationService"/>.
-    /// </summary>
-    /// <remarks>
-    /// This class is public because it is used by Try.Metalama.
-    /// </remarks>
     [ExcludeFromCodeCoverage]
     public class ClassificationService
     {
@@ -27,7 +21,7 @@ namespace Metalama.Framework.Engine.Formatting
             this._serviceProvider = serviceProvider;
         }
 
-        public bool ContainsCompileTimeCode( SyntaxNode syntaxRoot ) => CompileTimeCodeDetector.HasCompileTimeCode( syntaxRoot );
+        public static bool ContainsCompileTimeCode( SyntaxNode syntaxRoot ) => CompileTimeCodeDetector.HasCompileTimeCode( syntaxRoot );
 
         public ClassifiedTextSpanCollection GetClassifiedTextSpans( SemanticModel model, CancellationToken cancellationToken )
         {

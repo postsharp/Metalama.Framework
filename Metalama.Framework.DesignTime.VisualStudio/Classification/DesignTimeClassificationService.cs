@@ -2,12 +2,11 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.DesignTime.Contracts;
-using Metalama.Framework.DesignTime.VisualStudio.Classification;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Pipeline;
 using Microsoft.CodeAnalysis;
 
-namespace Metalama.Framework.DesignTime.VisualStudio;
+namespace Metalama.Framework.DesignTime.VisualStudio.Classification;
 
 internal class DesignTimeClassificationService : IClassificationService
 {
@@ -21,7 +20,7 @@ internal class DesignTimeClassificationService : IClassificationService
         this._classificationService = new ClassificationService( serviceProvider );
     }
 
-    public bool ContainsCompileTimeCode( SyntaxNode syntaxRoot ) => this._classificationService.ContainsCompileTimeCode( syntaxRoot );
+    public bool ContainsCompileTimeCode( SyntaxNode syntaxRoot ) => ClassificationService.ContainsCompileTimeCode( syntaxRoot );
 
     public IDesignTimeClassifiedTextCollection GetClassifiedTextSpans( SemanticModel model, CancellationToken cancellationToken )
     {

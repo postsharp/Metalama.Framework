@@ -17,7 +17,7 @@ namespace Metalama.Framework.Engine.CodeFixes
         protected const int NextKey = 1;
 
         /// <summary>
-        /// Gets the code action title.
+        /// Gets or sets the code action title.
         /// </summary>
         [DataMember( Order = 0 )]
         public string Title { get; set; }

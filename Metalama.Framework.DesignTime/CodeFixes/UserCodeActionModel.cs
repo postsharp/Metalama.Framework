@@ -11,7 +11,11 @@ namespace Metalama.Framework.DesignTime.CodeFixes;
 
 internal class UserCodeActionModel : CodeActionModel
 {
-    public UserCodeActionModel() { }
+    public UserCodeActionModel()
+    {
+        this.DiagnosticId = null!;
+        this.SyntaxTreeFilePath = null!;
+    }
 
     public UserCodeActionModel( string title, Diagnostic diagnostic ) : base( title )
     {
@@ -55,7 +59,7 @@ internal class UserCodeActionModel : CodeActionModel
             return CodeActionResult.Empty;
         }
 
-        var codeFixRunner = new DesignTimeCodeFixRunner( executionContext.ServiceProvider, pipeline.ProjectOptions );
+        var codeFixRunner = new DesignTimeCodeFixRunner( executionContext.ServiceProvider );
 
         return await codeFixRunner.ExecuteCodeFixAsync( compilation, syntaxTree, this.DiagnosticId, this.DiagnosticSpan, this.Title, cancellationToken );
     }

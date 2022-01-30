@@ -3,7 +3,6 @@
 
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
-using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
@@ -15,7 +14,7 @@ public class StandaloneCodeFixRunner : CodeFixRunner
     private readonly CompileTimeDomain _domain;
     private readonly ServiceProvider _serviceProvider;
 
-    public StandaloneCodeFixRunner( CompileTimeDomain domain, ServiceProvider serviceProvider, IProjectOptions projectOptions ) : base()
+    public StandaloneCodeFixRunner( CompileTimeDomain domain, ServiceProvider serviceProvider )
     {
         this._domain = domain;
         this._serviceProvider = serviceProvider;

@@ -268,7 +268,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 }
                 else
                 {
-                    // If the pipeline is paused, there is no need to track changes because the pipeline will be fully invalidated anywhen
+                    // If the pipeline is paused, there is no need to track changes because the pipeline will be fully invalidated anyway
                     // when it will be resumed.
                 }
 

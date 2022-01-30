@@ -146,7 +146,6 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                bool hasCompileTimeCode;
                 CompileTimeChangeKind compileTimeChangeKind;
 
                 // Generated files are ignored during the comparison.
@@ -193,10 +192,6 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
                                 newSyntaxTree ) );
 
                         hasCompileTimeChange |= newHasCompileTimeCode || oldEntry.HasCompileTimeCode;
-                    }
-                    else
-                    {
-                        hasCompileTimeCode = oldEntry.HasCompileTimeCode;
                     }
                 }
                 else

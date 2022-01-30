@@ -144,7 +144,7 @@ namespace Metalama.Framework.Engine.CodeFixes
         public Task<bool> RemoveAttributesAsync( IDeclaration targetDeclaration, Type attributeType )
             => this.RemoveAttributesAsync( targetDeclaration, (INamedType) targetDeclaration.Compilation.TypeFactory.GetTypeByReflectionType( attributeType ) );
 
-        public async Task<bool> ApplyAspectAsync<TTarget>( TTarget targetDeclaration, IAspect<TTarget> aspect )
+        public Task<bool> ApplyAspectAsync<TTarget>( TTarget targetDeclaration, IAspect<TTarget> aspect )
             where TTarget : class, IDeclaration
         {
             var compilation = this._compilation.Compilation;
@@ -169,7 +169,7 @@ namespace Metalama.Framework.Engine.CodeFixes
                     CancellationToken.None,
                     out var outputCompilation ) )
             {
-                return false;
+                return Task.FromResult( false );
             }
             else
             {
@@ -182,7 +182,7 @@ namespace Metalama.Framework.Engine.CodeFixes
                     this._changedSyntaxTrees.Add( modifiedPath );
                 }
 
-                return true;
+                return Task.FromResult( true );
             }
         }
 

@@ -3,11 +3,12 @@
 
 using Metalama.Framework.DesignTime.Refactoring;
 using Metalama.Framework.Engine.Aspects;
+using Metalama.Framework.Engine.CodeFixes;
 using Metalama.Framework.Engine.CodeModel;
 using System.Collections.Immutable;
 using System.Runtime.Serialization;
 
-namespace Metalama.Framework.Engine.CodeFixes;
+namespace Metalama.Framework.DesignTime.CodeFixes;
 
 [DataContract]
 public class AddAspectAttributeCodeActionModel : CodeActionModel
@@ -23,14 +24,19 @@ public class AddAspectAttributeCodeActionModel : CodeActionModel
 
     public AddAspectAttributeCodeActionModel( string aspectTypeName, string targetSymbolId, string syntaxTreeFilePath ) : base(
         $"Add [{AttributeHelper.GetShortName( aspectTypeName )}]" )
-
     {
         this.AspectTypeName = aspectTypeName;
         this.TargetSymbolId = targetSymbolId;
         this.SyntaxTreeFilePath = syntaxTreeFilePath;
     }
 
-    public AddAspectAttributeCodeActionModel() { }
+    // Deserializing constructor.
+    public AddAspectAttributeCodeActionModel()
+    {
+        this.AspectTypeName = null!;
+        this.TargetSymbolId = null!;
+        this.SyntaxTreeFilePath = null!;
+    }
 
     protected override async Task<CodeActionResult> ExecuteAsync( CodeActionExecutionContext executionContext, CancellationToken cancellationToken )
     {

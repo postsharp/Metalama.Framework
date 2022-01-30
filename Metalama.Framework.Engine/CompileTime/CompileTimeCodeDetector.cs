@@ -53,8 +53,6 @@ namespace Metalama.Framework.Engine.CompileTime
                         _ => false
                     };
                 }
-
-                return false;
             }
 
             public override bool VisitNamespaceDeclaration( NamespaceDeclarationSyntax node ) => node.ChildNodes().Any( this.Visit );

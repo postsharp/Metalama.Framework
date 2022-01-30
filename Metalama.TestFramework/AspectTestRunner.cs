@@ -7,7 +7,6 @@ using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Pipeline.CompileTime;
-using Metalama.Framework.Engine.Testing;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -124,7 +123,7 @@ namespace Metalama.TestFramework
         {
             var codeFixes = testResult.PipelineDiagnostics.SelectMany( d => CodeFixTitles.GetCodeFixTitles( d ).Select( t => (Diagnostic: d, Title: t) ) );
             var codeFix = codeFixes.ElementAt( testInput.Options.AppliedCodeFixIndex.GetValueOrDefault() );
-            var codeFixRunner = new StandaloneCodeFixRunner( domain, serviceProvider, new TestProjectOptions() );
+            var codeFixRunner = new StandaloneCodeFixRunner( domain, serviceProvider );
 
             var inputDocument = testResult.SyntaxTrees[0].InputDocument;
 

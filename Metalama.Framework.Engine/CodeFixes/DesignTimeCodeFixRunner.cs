@@ -4,7 +4,6 @@
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
-using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Project;
 using System;
@@ -17,7 +16,7 @@ public class DesignTimeCodeFixRunner : CodeFixRunner
 {
     private readonly IAspectPipelineConfigurationProvider _configurationProvider;
 
-    public DesignTimeCodeFixRunner( IServiceProvider serviceProvider, IProjectOptions projectOptions ) : base()
+    public DesignTimeCodeFixRunner( IServiceProvider serviceProvider )
     {
         this._configurationProvider = serviceProvider.GetRequiredService<IAspectPipelineConfigurationProvider>();
     }

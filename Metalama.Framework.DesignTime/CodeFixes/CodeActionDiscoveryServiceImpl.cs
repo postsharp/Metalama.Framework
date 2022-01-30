@@ -70,7 +70,7 @@ public class CodeActionDiscoveryServiceImpl : ICodeActionDiscoveryService
 
         // Execute the pipeline.
 
-        var eligibleAspects = pipeline.GetEligibleAspects( compilation!, symbol, cancellationToken );
+        var eligibleAspects = pipeline.GetEligibleAspects( compilation, symbol, cancellationToken );
 
         var aspectActions = new CodeActionMenuModel( "Add aspect" );
         var liveTemplatesActions = new CodeActionMenuModel( "Apply live template" );

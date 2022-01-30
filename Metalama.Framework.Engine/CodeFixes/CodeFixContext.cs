@@ -21,6 +21,7 @@ namespace Metalama.Framework.Engine.CodeFixes
             PartialCompilation originalCompilation,
             AspectPipelineConfiguration pipelineConfiguration )
         {
+            this.OriginalCompilation = originalCompilation;
             this.PipelineConfiguration = pipelineConfiguration;
         }
     }

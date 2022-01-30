@@ -2,11 +2,12 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.DesignTime.Pipeline;
+using Metalama.Framework.Engine.CodeFixes;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Project;
 using System.Runtime.Serialization;
 
-namespace Metalama.Framework.Engine.CodeFixes;
+namespace Metalama.Framework.DesignTime.CodeFixes;
 
 [DataContract]
 public class ApplyLiveTemplateCodeActionModel : CodeActionModel
@@ -20,7 +21,12 @@ public class ApplyLiveTemplateCodeActionModel : CodeActionModel
     [DataMember( Order = NextKey + 2 )]
     public string SyntaxTreeFilePath { get; set; }
 
-    public ApplyLiveTemplateCodeActionModel() { }
+    public ApplyLiveTemplateCodeActionModel()
+    {
+        this.AspectTypeName = null!;
+        this.TargetSymbolId = null!;
+        this.SyntaxTreeFilePath = null!;
+    }
 
     public ApplyLiveTemplateCodeActionModel( string title, string aspectTypeName, string targetSymbolId, string syntaxTreeFilePath ) : base( title )
     {
@@ -29,21 +35,21 @@ public class ApplyLiveTemplateCodeActionModel : CodeActionModel
         this.SyntaxTreeFilePath = syntaxTreeFilePath;
     }
 
-    protected override async Task<CodeActionResult> ExecuteAsync( CodeActionExecutionContext executionContext, CancellationToken cancellationToken )
+    protected override Task<CodeActionResult> ExecuteAsync( CodeActionExecutionContext executionContext, CancellationToken cancellationToken )
     {
         var compilation = executionContext.Compilation.RoslynCompilation;
         var pipelineFactory = executionContext.ServiceProvider.GetRequiredService<DesignTimeAspectPipelineFactory>();
 
         if ( !pipelineFactory.TryGetPipeline( executionContext.ProjectId, out var pipeline ) )
         {
-            return CodeActionResult.Empty;
+            return Task.FromResult( CodeActionResult.Empty );
         }
 
         var targetSymbol = new SymbolId( this.TargetSymbolId ).Resolve( compilation, cancellationToken: cancellationToken );
 
         if ( targetSymbol == null )
         {
-            return CodeActionResult.Empty;
+            return Task.FromResult( CodeActionResult.Empty );
         }
 
         if ( pipeline.TryApplyAspectToCode(
@@ -52,14 +58,14 @@ public class ApplyLiveTemplateCodeActionModel : CodeActionModel
                 targetSymbol,
                 cancellationToken,
                 out var outputCompilation,
-                out var diagnostics ) )
+                out _ ) )
         {
-            return new CodeActionResult( outputCompilation.ModifiedSyntaxTrees.Values.Select( x => x.NewTree ) );
+            return Task.FromResult( new CodeActionResult( outputCompilation.ModifiedSyntaxTrees.Values.Select( x => x.NewTree ) ) );
         }
         else
         {
             // How to report errors here? We will add a comment to the target symbol.
-            return CodeActionResult.Empty;
+            return Task.FromResult( CodeActionResult.Empty );
         }
     }
 }

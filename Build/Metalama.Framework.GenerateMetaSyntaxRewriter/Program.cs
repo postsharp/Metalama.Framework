@@ -352,7 +352,7 @@ namespace Metalama.Framework.GenerateMetaSyntaxRewriter
         private static void GenerateHasher( string path, string className, bool isCompileTime )
         {
             var syntaxDocument = XElement.Load( "Syntax-4.0.1.xml" );
-            var nodes = syntaxDocument.Elements( "Node" ).ToDictionary( x => x.Attribute( "Name" ).Value, x => x );
+            var nodes = syntaxDocument.Elements( "Node" ).ToDictionary( x => x!.Attribute( "Name" )!.Value, x => x );
 
             Console.WriteLine( "Creating " + Path.GetFullPath( path ) );
 
@@ -388,8 +388,8 @@ namespace Metalama.Framework.GenerateMetaSyntaxRewriter
 
                 void ProcessField( XElement field, bool isInChoice )
                 {
-                    var fieldName = field.Attribute( "Name" ).Value;
-                    var fieldType = field.Attribute( "Type" ).Value;
+                    var fieldName = field.Attribute( "Name" )!.Value;
+                    var fieldType = field.Attribute( "Type" )!.Value;
                     var fieldIsOptional = field.Attribute( "Optional" )?.Value == "true";
 
                     switch ( fieldType )
@@ -407,7 +407,7 @@ namespace Metalama.Framework.GenerateMetaSyntaxRewriter
 
                     if ( fieldType == "SyntaxToken" )
                     {
-                        var fieldTokenKinds = field.Elements( "Kind" ).Select( k => k.Attribute( "Name" ).Value ).ToArray();
+                        var fieldTokenKinds = field.Elements( "Kind" ).Select( k => k.Attribute( "Name" )!.Value ).ToArray();
                         var isTrivialToken = fieldTokenKinds.All( IsTrivialToken );
 
                         if ( !isInChoice && fieldTokenKinds.Length == 1 && isTrivialToken && !fieldIsOptional )

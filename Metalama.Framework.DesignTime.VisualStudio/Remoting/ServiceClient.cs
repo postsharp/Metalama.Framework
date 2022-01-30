@@ -41,7 +41,7 @@ internal class ServiceClient : ServiceEndpoint, IDisposable, IService
             this._pipeStream = new NamedPipeClientStream( ".", this._pipeName, PipeDirection.InOut, PipeOptions.Asynchronous );
             await this._pipeStream.ConnectAsync( cancellationToken );
 
-            this._rpc = this.CreateRpc( this._pipeStream );
+            this._rpc = CreateRpc( this._pipeStream );
             this._rpc.AddLocalRpcTarget<IClientApi>( this._messageHandler, null );
             this._server = this._rpc.Attach<IServerApi>();
             this._rpc.StartListening();

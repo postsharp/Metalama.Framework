@@ -18,17 +18,6 @@ using System.IO.Pipes;
 
 namespace Metalama.Framework.DesignTime.VisualStudio.Remoting;
 
-internal class ServiceEndpoint
-{
-    protected JsonRpc CreateRpc( Stream stream )
-    {
-        var formatter = new MessagePackFormatter();
-        var handler = new LengthHeaderMessageHandler( stream, stream, formatter );
-
-        return new JsonRpc( handler );
-    }
-}
-
 internal class ServiceHost : ServiceEndpoint, IService, IDisposable
 {
     private readonly ILogger _logger;
@@ -124,7 +113,7 @@ internal class ServiceHost : ServiceEndpoint, IService, IDisposable
             this._pipeStream = new NamedPipeServerStream( this._pipeName, PipeDirection.InOut, 1, PipeTransmissionMode.Byte, PipeOptions.Asynchronous );
             await this._pipeStream.WaitForConnectionAsync( cancellationToken );
 
-            this._rpc = this.CreateRpc( this._pipeStream );
+            this._rpc = CreateRpc( this._pipeStream );
 
             this._rpc.AddLocalRpcTarget<IServerApi>( this._service, null );
             this._client = this._rpc.Attach<IClientApi>();
