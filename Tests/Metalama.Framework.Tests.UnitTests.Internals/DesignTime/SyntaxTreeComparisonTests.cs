@@ -103,9 +103,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
 
             var syntaxTree2 = CSharpSyntaxTree.ParseText( "class C {}" );
 
-            // We don't check whether we are removing white space at a place where it is required or not. 
-            // In this case, we detect an irrelevant difference.
-            Assert.True( CompilationChangeTracker.IsDifferent( syntaxTree1, syntaxTree2 ) );
+            Assert.False( CompilationChangeTracker.IsDifferent( syntaxTree1, syntaxTree2 ) );
         }
 
         [Fact]

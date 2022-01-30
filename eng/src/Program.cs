@@ -80,14 +80,22 @@ static bool OnPrepareCompleted( (BuildContext Context, BaseBuildSettings Setting
     {
         return false;
     }
+    
+    CopyFile( "MetaSyntaxRewriter.g.cs" , "Metalama.Framework.Engine\\Templating"  );
+    CopyFile( "RunTimeCodeHasher.g.cs" , "Metalama.Framework.DesignTime\\Pipeline\\Diff"  );
+    CopyFile( "CompileTimeCodeHasher.g.cs" , "Metalama.Framework.DesignTime\\Pipeline\\Diff"  );
 
-    var targetFile = Path.Combine( arg.Context.RepoDirectory, "Metalama.Framework.Engine", "Templating", "MetaSyntaxRewriter.g.cs" );
-    if ( File.Exists( targetFile ) )
+    void CopyFile( string fileName, string targetDirectory)
     {
-        File.Delete( targetFile );
-    }
+        var targetFile = Path.Combine( arg.Context.RepoDirectory,targetDirectory,fileName );
 
-    File.Copy( Path.Combine( toolDirectory, "MetaSyntaxRewriter.g.cs" ), targetFile );
+        if ( File.Exists( targetFile ) )
+        {
+            File.Delete( targetFile );
+        }
+
+        File.Copy( Path.Combine( toolDirectory, fileName ), targetFile );
+    }
 
     return true;
 }

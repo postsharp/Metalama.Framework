@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using K4os.Hash.xxHash;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Utilities;
@@ -16,7 +17,7 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
     /// </summary>
     internal readonly struct CompilationChangeTracker
     {
-        private readonly ImmutableDictionary<string, (SyntaxTree Tree, bool HasCompileTimeCode)>? _lastTrees;
+        private readonly ImmutableDictionary<string, (SyntaxTree Tree, bool HasCompileTimeCode, ulong Hash)>? _lastTrees;
 
         /// <summary>
         /// Gets the last <see cref="Compilation"/>, or <c>null</c> if the <see cref="Update"/> method
@@ -27,7 +28,7 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
         public CompilationChanges? UnprocessedChanges { get; }
 
         private CompilationChangeTracker(
-            ImmutableDictionary<string, (SyntaxTree Tree, bool HasCompileTimeCode)>? lastTrees,
+            ImmutableDictionary<string, (SyntaxTree Tree, bool HasCompileTimeCode, ulong Hash)>? lastTrees,
             Compilation? lastCompilation,
             CompilationChanges? unprocessedChanges )
         {
@@ -134,12 +135,12 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
 
             var areMetadataReferencesEqual = this.AreMetadataReferencesEqual( newCompilation );
 
-            var newTrees = ImmutableDictionary.CreateBuilder<string, (SyntaxTree Tree, bool HasCompileTimeCode)>( StringComparer.Ordinal );
+            var newTrees = ImmutableDictionary.CreateBuilder<string, (SyntaxTree Tree, bool HasCompileTimeCode, ulong Hash)>( StringComparer.Ordinal );
             var generatedTrees = new List<SyntaxTree>();
 
             var syntaxTreeChanges = new List<SyntaxTreeChange>();
             var hasCompileTimeChange = !areMetadataReferencesEqual;
-
+            
             // Process new trees.
             var lastTrees = this._lastTrees;
 
@@ -169,22 +170,25 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
                     continue;
                 }
 
+                bool newHasCompileTimeCode;
+
+                ulong newSyntaxTreeHash;
+
                 if ( lastTrees != null && lastTrees.TryGetValue( newSyntaxTree.FilePath, out var oldEntry ) )
                 {
-                    if ( IsDifferent( oldEntry.Tree, newSyntaxTree, out var newHasCompileTimeCode ) )
+                    if ( IsDifferent( oldEntry.Tree, oldEntry.HasCompileTimeCode, oldEntry.Hash,  newSyntaxTree, out newHasCompileTimeCode, out newSyntaxTreeHash ) )
                     {
-                        hasCompileTimeCode = newHasCompileTimeCode ?? CompileTimeCodeDetector.HasCompileTimeCode( newSyntaxTree.GetRoot() );
-                        compileTimeChangeKind = GetCompileTimeChangeKind( oldEntry.HasCompileTimeCode, hasCompileTimeCode );
+                        compileTimeChangeKind = GetCompileTimeChangeKind( oldEntry.HasCompileTimeCode, newHasCompileTimeCode );
 
                         syntaxTreeChanges.Add(
                             new SyntaxTreeChange(
                                 newSyntaxTree.FilePath,
                                 SyntaxTreeChangeKind.Changed,
-                                hasCompileTimeCode,
+                                newHasCompileTimeCode,
                                 compileTimeChangeKind,
                                 newSyntaxTree ) );
 
-                        hasCompileTimeChange |= hasCompileTimeCode || oldEntry.HasCompileTimeCode;
+                        hasCompileTimeChange |= newHasCompileTimeCode || oldEntry.HasCompileTimeCode;
                     }
                     else
                     {
@@ -194,22 +198,22 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
                 else
                 {
                     // This is a new tree.
+                    AnalyzeSyntaxTree( newSyntaxTree, out newHasCompileTimeCode, out newSyntaxTreeHash );
 
-                    hasCompileTimeCode = CompileTimeCodeDetector.HasCompileTimeCode( newSyntaxTree.GetRoot() );
-                    compileTimeChangeKind = GetCompileTimeChangeKind( false, hasCompileTimeCode );
+                    compileTimeChangeKind = GetCompileTimeChangeKind( false, newHasCompileTimeCode );
 
                     syntaxTreeChanges.Add(
                         new SyntaxTreeChange(
                             newSyntaxTree.FilePath,
                             SyntaxTreeChangeKind.Added,
-                            hasCompileTimeCode,
+                            newHasCompileTimeCode,
                             compileTimeChangeKind,
                             newSyntaxTree ) );
 
-                    hasCompileTimeChange |= hasCompileTimeCode;
+                    hasCompileTimeChange |= newHasCompileTimeCode;
                 }
 
-                newTrees.Add( newSyntaxTree.FilePath, (newSyntaxTree, hasCompileTimeCode) );
+                newTrees.Add( newSyntaxTree.FilePath, (newSyntaxTree, newHasCompileTimeCode, newSyntaxTreeHash) );
                 lastTrees = lastTrees?.Remove( newSyntaxTree.FilePath );
             }
 
@@ -269,128 +273,45 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
         /// <summary>
         /// Determines whether two syntax trees are significantly different. This overload is called from tests.
         /// </summary>
-        internal static bool IsDifferent( SyntaxTree oldSyntaxTree, SyntaxTree newSyntaxTree ) => IsDifferent( oldSyntaxTree, newSyntaxTree, out _ );
-
-        private static bool IsDifferent( SyntaxTree oldSyntaxTree, SyntaxTree newSyntaxTree, out bool? hasCompileTimeCode )
+        internal static bool IsDifferent( SyntaxTree oldSyntaxTree, SyntaxTree newSyntaxTree )
         {
-            hasCompileTimeCode = null;
+            AnalyzeSyntaxTree( oldSyntaxTree, out var oldHasCompileTimeCode, out var oldSyntaxTreeHash );
+            return IsDifferent( oldSyntaxTree, oldHasCompileTimeCode, oldSyntaxTreeHash, newSyntaxTree, out _, out _ );
+        }
 
+        private static bool IsDifferent( SyntaxTree oldSyntaxTree, bool oldHasCompileTimeCode, ulong oldSyntaxTreeHash, SyntaxTree newSyntaxTree, out bool newHasCompileTimeCode, out ulong newSyntaxTreeHash )
+        {
+            
             // Check if the source text has changed.
             if ( newSyntaxTree == oldSyntaxTree )
             {
+                newSyntaxTreeHash = oldSyntaxTreeHash;
+                newHasCompileTimeCode = oldHasCompileTimeCode;
+                
                 return false;
             }
             else
             {
-                if ( !newSyntaxTree.GetText().ContentEquals( oldSyntaxTree.GetText() ) )
-                {
-                    var oldSyntaxRoot = oldSyntaxTree.GetRoot();
+                var newSyntaxRoot = newSyntaxTree.GetRoot();
+                newHasCompileTimeCode = CompileTimeCodeDetector.HasCompileTimeCode( newSyntaxRoot );
+                var hhx64 = new XXH64();
+                BaseCodeHasher hasher = newHasCompileTimeCode ? new CompileTimeCodeHasher( hhx64 ) : new RunTimeCodeHasher( hhx64 );
+                hasher.Visit( newSyntaxRoot );
+                newSyntaxTreeHash = hhx64.Digest();
 
-                    // If the source text has changed, check whether the change can possibly change symbols. Changes in method implementations are ignored.
-                    foreach ( var change in newSyntaxTree.GetChanges( oldSyntaxTree ) )
-                    {
-                        // change.Span is a span in the _old_ syntax tree.
-                        // change.NewText is the new text.
-                        var changedSpan = change.Span;
-
-                        // If we are inserting a space, ignore it.
-                        if ( changedSpan.Length == 0 && string.IsNullOrWhiteSpace( change.NewText ) )
-                        {
-                            continue;
-                        }
-
-                        // If we are editing a comment, ignore it.
-                        var changedTrivia = oldSyntaxRoot.FindTrivia( changedSpan.Start );
-
-                        var triviaKind = changedTrivia.Kind();
-
-                        if ( triviaKind != SyntaxKind.None && changedTrivia.Span.Contains( changedSpan ) )
-                        {
-                            // If the change is totally contained in a trivia, excluding the trivia prefix, we may ignore it
-
-                            switch ( triviaKind )
-                            {
-                                case SyntaxKind.SingleLineDocumentationCommentTrivia:
-                                case SyntaxKind.MultiLineDocumentationCommentTrivia:
-                                case SyntaxKind.XmlComment:
-                                    if ( changedSpan.Start > changedTrivia.Span.Start + 3 )
-                                    {
-                                        continue;
-                                    }
-                                    else
-                                    {
-                                        break;
-                                    }
-
-                                case SyntaxKind.MultiLineCommentTrivia:
-                                case SyntaxKind.SingleLineCommentTrivia:
-                                    if ( changedSpan.Start > changedTrivia.Span.Start + 3 )
-                                    {
-                                        continue;
-                                    }
-                                    else
-                                    {
-                                        break;
-                                    }
-
-                                case SyntaxKind.WhitespaceTrivia:
-                                    if ( changedTrivia.Span.Length == changedSpan.Length && string.IsNullOrEmpty( change.NewText ) )
-                                    {
-                                        // Removing all spaces of a trivia is potentially breaking.
-                                        break;
-                                    }
-                                    else if ( !string.IsNullOrWhiteSpace( change.NewText ) )
-                                    {
-                                        // Adding non-whitespace to a whitespace is breaking.
-                                        break;
-                                    }
-                                    else
-                                    {
-                                        continue;
-                                    }
-                            }
-                        }
-
-                        // If the change is in a method body or other expression, ignore it.
-                        hasCompileTimeCode = CompileTimeCodeDetector.HasCompileTimeCode( newSyntaxTree.GetRoot() );
-
-                        if ( !hasCompileTimeCode.Value )
-                        {
-                            if ( !oldSyntaxRoot.FullSpan.Contains( changedSpan ) )
-                            {
-                                throw new AssertionFailedException();
-                            }
-
-                            var changedNode = oldSyntaxRoot.FindNode( changedSpan );
-
-                            if ( IsChangeIrrelevantToSymbol( changedNode ) )
-                            {
-                                continue;
-                            }
-                        }
-
-                        // If we are here, it means that we have a relevant change.
-                        Logger.DesignTime.Trace?.Log( $"Found a relevant change in '{newSyntaxTree.FilePath}': new text is '{change.NewText}'." );
-
-                        return true;
-                    }
-                }
-
-                return false;
+                return newSyntaxTreeHash != oldSyntaxTreeHash;
             }
+            
+        }
 
-            // Determines if a change in a node can possibly affect a change in symbols.
-            static bool IsChangeIrrelevantToSymbol( SyntaxNode node )
-            {
-                return node.Parent switch
-                {
-                    BaseMethodDeclarationSyntax method => node == method.Body || node == method.ExpressionBody,
-                    AccessorDeclarationSyntax accessor => node == accessor.Body || node == accessor.ExpressionBody,
-                    VariableDeclaratorSyntax field => node == field.Initializer,
-                    PropertyDeclarationSyntax property => node == property.ExpressionBody || node == property.Initializer,
-                    _ => node.Parent != null && IsChangeIrrelevantToSymbol( node.Parent )
-                };
-            }
+        private static void AnalyzeSyntaxTree( SyntaxTree syntaxTree, out bool hasCompileTimeCode, out ulong hash )
+        {
+            var newSyntaxRoot = syntaxTree.GetRoot();
+            hasCompileTimeCode = CompileTimeCodeDetector.HasCompileTimeCode( newSyntaxRoot );
+            var hhx64 = new XXH64();
+            BaseCodeHasher hasher = hasCompileTimeCode ? new CompileTimeCodeHasher( hhx64 ) : new RunTimeCodeHasher( hhx64 );
+            hasher.Visit( newSyntaxRoot );
+            hash = hhx64.Digest();
         }
     }
 }
