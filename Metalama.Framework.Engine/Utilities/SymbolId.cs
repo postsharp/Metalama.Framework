@@ -16,7 +16,7 @@ namespace Metalama.Framework.Engine.Utilities
     /// <summary>
     /// An identifier of an <see cref="ISymbol"/> that works across compilations, but not across different versions of Roslyn.  
     /// </summary>
-    internal struct SymbolId
+    public struct SymbolId
     {
 #pragma warning disable IDE0044 // SymbolKey.Resolve is mutating.
         private roslyn::Microsoft.CodeAnalysis.SymbolKey _symbolKey;

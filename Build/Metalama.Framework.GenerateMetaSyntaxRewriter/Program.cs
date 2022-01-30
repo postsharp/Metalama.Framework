@@ -367,11 +367,10 @@ namespace Metalama.Framework.GenerateMetaSyntaxRewriter
             writer.WriteLine( "\t{" );
             writer.WriteLine( $"\t\tpublic {className}(XXH64 hasher) : base(hasher) {{}}" );
             writer.WriteLine();
-            
+
             var visitMethods = typeof(CSharpSyntaxRewriter).GetMethods( BindingFlags.Public | BindingFlags.Instance )
                 .OrderBy( m => m.Name )
                 .Where( method => method.Name.StartsWith( "Visit", StringComparison.Ordinal ) && method.ReturnType == typeof(SyntaxNode) );
-
 
             foreach ( var visitMethod in visitMethods )
             {
@@ -381,10 +380,9 @@ namespace Metalama.Framework.GenerateMetaSyntaxRewriter
                 {
                     continue;
                 }
-                
+
                 var node = nodes[nodeType];
 
-                
                 writer.WriteLine( $"\t\tpublic override void {visitMethod.Name}( {nodeType} node )" );
                 writer.WriteLine( "\t\t{" );
 
@@ -457,7 +455,6 @@ namespace Metalama.Framework.GenerateMetaSyntaxRewriter
 
                 writer.WriteLine( "\t\t}" ); // End of method
             }
-            
 
             writer.WriteLine( "\t}" ); // End of class
             writer.WriteLine( "}" );   // End of namespace

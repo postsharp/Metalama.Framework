@@ -5,6 +5,7 @@ using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline.CompileTime;
 using Metalama.Framework.Project;
+using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 
@@ -86,7 +87,7 @@ namespace Metalama.Framework.Engine.Pipeline
         /// <see cref="AddAsyncLocalService"/> are ignored). This scenario is used in tests. Otherwise, a shallow clone of the async-local or the global
         /// provider is provided.
         /// </summary>
-        public static ServiceProvider GetServiceProvider( IPathOptions? pathOptions = null )
+        public static ServiceProvider GetServiceProvider( IPathOptions? pathOptions = null, IServiceProvider? nextServiceProvider = null )
         {
             ServiceProvider serviceProvider;
 
@@ -99,6 +100,11 @@ namespace Metalama.Framework.Engine.Pipeline
             else
             {
                 serviceProvider = CreateBaseServiceProvider( pathOptions );
+            }
+
+            if ( nextServiceProvider != null )
+            {
+                serviceProvider = serviceProvider.WithNextProvider( nextServiceProvider );
             }
 
             return serviceProvider;

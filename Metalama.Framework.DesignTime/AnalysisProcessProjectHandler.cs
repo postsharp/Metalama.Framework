@@ -59,7 +59,7 @@ public class AnalysisProcessProjectHandler : ProjectHandler
             {
                 var currentCancellationSource = this._currentCancellationSource;
                 var newCancellationSource = new CancellationTokenSource();
-                
+
                 // It's critical to take the token before calling CompareExchange, otherwise the source may be disposed.
                 newCancellationToken = newCancellationSource.Token;
 
@@ -67,7 +67,7 @@ public class AnalysisProcessProjectHandler : ProjectHandler
                      == currentCancellationSource )
                 {
                     // We won the race. Cancel the previous task if any.
-                    
+
                     currentCancellationSource?.Cancel();
                     currentCancellationSource?.Dispose();
 
@@ -80,7 +80,7 @@ public class AnalysisProcessProjectHandler : ProjectHandler
             }
 
             // Schedule a new computation.
-            
+
             _ = Task.Run( () => this.ComputeAndPublishAsync( compilation, newCancellationToken ), newCancellationToken );
         }
         else

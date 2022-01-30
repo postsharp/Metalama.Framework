@@ -13,7 +13,7 @@ public static partial class OutputCodeFormatter
     {
         private readonly ClassifiedTextSpanCollection _collection;
 
-        public MarkTextSpansVisitor( ClassifiedTextSpanCollection collection ) 
+        public MarkTextSpansVisitor( ClassifiedTextSpanCollection collection )
         {
             this._collection = collection;
         }
@@ -21,7 +21,7 @@ public static partial class OutputCodeFormatter
         public override void DefaultVisit( SyntaxNode node )
         {
             if ( node.HasAnnotation( FormattingAnnotations.GeneratedCode ) ||
-                 node.HasAnnotation( Formatter.Annotation ))
+                 node.HasAnnotation( Formatter.Annotation ) )
             {
                 this._collection.Add( node.FullSpan, TextSpanClassification.GeneratedCode );
             }
@@ -29,9 +29,8 @@ public static partial class OutputCodeFormatter
             {
                 this._collection.Add( node.FullSpan, TextSpanClassification.SourceCode );
             }
-            
+
             base.DefaultVisit( node );
-            
         }
     }
 }

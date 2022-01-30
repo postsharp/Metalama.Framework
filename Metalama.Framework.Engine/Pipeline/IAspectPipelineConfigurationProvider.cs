@@ -3,12 +3,13 @@
 
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Project;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 
 namespace Metalama.Framework.Engine.Pipeline;
 
-public interface IAspectPipelineConfigurationProvider
+public interface IAspectPipelineConfigurationProvider : IService
 {
     bool TryGetConfiguration(
         PartialCompilation compilation,

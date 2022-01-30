@@ -373,7 +373,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                     if ( Logger.DesignTime.Error != null )
                     {
                         var errors = diagnosticList.Where( d => d.Severity == DiagnosticSeverity.Error ).ToList();
-                        
+
                         Logger.DesignTime.Error?.Log( $"TryGetConfiguration('{compilation.Compilation.AssemblyName}') failed: {errors.Count} reported." );
 
                         foreach ( var diagnostic in errors )

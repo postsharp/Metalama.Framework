@@ -35,5 +35,4 @@ namespace Metalama.Framework.DesignTime.Contracts
         /// </summary>
         Version Version { get; }
     }
-
 }

@@ -895,11 +895,8 @@ namespace Metalama.Framework.Engine.CompileTime
                 }
             }
 
-        
-
             public override SyntaxNode? VisitCompilationUnit( CompilationUnitSyntax node )
             {
-                
                 // Get the list of members that are not statements, local variables, local functions,...
                 var nonTopLevelMembers = node.Members.Where( m => m is BaseTypeDeclarationSyntax or NamespaceDeclarationSyntax or DelegateDeclarationSyntax )
                     .ToList();
@@ -908,7 +905,9 @@ namespace Metalama.Framework.Engine.CompileTime
 
                 if ( transformedMembers.Any( m => m.HasAnnotation( _hasCompileTimeCodeAnnotation ) ) )
                 {
-                    return node.WithMembers( transformedMembers ).WithAdditionalAnnotations( _hasCompileTimeCodeAnnotation ).WithUsings( node.Usings.AddRange( this._globalUsings ) );
+                    return node.WithMembers( transformedMembers )
+                        .WithAdditionalAnnotations( _hasCompileTimeCodeAnnotation )
+                        .WithUsings( node.Usings.AddRange( this._globalUsings ) );
                 }
                 else
                 {

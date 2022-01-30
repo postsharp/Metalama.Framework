@@ -5,25 +5,28 @@ using Microsoft.CodeAnalysis.CodeActions;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Runtime.Serialization;
 
 namespace Metalama.Framework.Engine.CodeFixes
 {
     /// <summary>
     /// Represents a code action menu, with children items.
     /// </summary>
+    [DataContract]
     public class CodeActionMenuModel : CodeActionBaseModel
     {
+        [DataMember( Order = NextKey + 0 )]
         public List<CodeActionBaseModel> Items { get; } = new();
 
         public CodeActionMenuModel( string title ) : base( title ) { }
 
-        public override ImmutableArray<CodeAction> ToCodeActions( bool supportsHierarchicalItems, string titlePrefix = "" )
+        public override ImmutableArray<CodeAction> ToCodeActions( CodeActionInvocationContext invocationContext, string titlePrefix = "" )
         {
-            if ( supportsHierarchicalItems )
+            if ( invocationContext.HierarchicalItemsSupported )
             {
                 // If the IDE supports hierarchical items, we just reproduce the structure.
 
-                var codeActions = this.Items.SelectMany( i => i.ToCodeActions( true, titlePrefix ) ).ToImmutableArray();
+                var codeActions = this.Items.SelectMany( i => i.ToCodeActions( invocationContext, titlePrefix ) ).ToImmutableArray();
 
                 if ( codeActions.IsDefaultOrEmpty )
                 {
@@ -49,7 +52,7 @@ namespace Metalama.Framework.Engine.CodeFixes
                         switch ( item )
                         {
                             case CodeActionModel codeAction:
-                                codeActions.AddRange( codeAction.ToCodeActions( false, childPrefix ) );
+                                codeActions.AddRange( codeAction.ToCodeActions( invocationContext, childPrefix ) );
 
                                 break;
 

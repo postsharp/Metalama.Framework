@@ -26,8 +26,7 @@ namespace Metalama.Framework.Engine.Pipeline
     {
         public void Execute( TransformerContext context )
         {
-            var serviceProvider = ServiceProviderFactory.GetServiceProvider()
-                .WithNextProvider( context.Services );
+            var serviceProvider = ServiceProviderFactory.GetServiceProvider( nextServiceProvider: context.Services );
 
             // Try.Metalama ships its own project options using the async-local service provider.
             var projectOptions = serviceProvider.GetService<IProjectOptions>();

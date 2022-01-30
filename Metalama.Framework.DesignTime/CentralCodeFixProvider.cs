@@ -4,12 +4,10 @@
 using Metalama.Backstage.Diagnostics;
 using Metalama.Framework.DesignTime.CodeFixes;
 using Metalama.Framework.DesignTime.Diagnostics;
-using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.DesignTime.Utilities;
 using Metalama.Framework.Engine;
+using Metalama.Framework.Engine.CodeFixes;
 using Metalama.Framework.Engine.Diagnostics;
-using Metalama.Framework.Engine.Options;
-using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeActions;
@@ -31,14 +29,15 @@ namespace Metalama.Framework.DesignTime
         private readonly DesignTimeDiagnosticDefinitions _designTimeDiagnosticDefinitions = DesignTimeDiagnosticDefinitions.GetInstance();
 
         private readonly ILogger _logger;
-        private readonly DesignTimeAspectPipelineFactory _pipelineFactory;
+        private readonly ICodeActionExecutionService _codeActionExecutionService;
 
         public CentralCodeFixProvider() : this( DesignTimeServiceProviderFactory.GetServiceProvider() ) { }
 
         public CentralCodeFixProvider( IServiceProvider serviceProvider )
         {
             this._logger = serviceProvider.GetLoggerFactory().GetLogger( "CodeFix" );
-            this._pipelineFactory = serviceProvider.GetRequiredService<DesignTimeAspectPipelineFactory>();
+            serviceProvider.GetRequiredService<ICodeActionDiscoveryService>();
+            this._codeActionExecutionService = serviceProvider.GetRequiredService<ICodeActionExecutionService>();
 
             this.FixableDiagnosticIds =
                 ImmutableArray.Create( GeneralDiagnosticDescriptors.TypeNotPartial.Id )
@@ -65,8 +64,7 @@ namespace Metalama.Framework.DesignTime
             {
                 // We have a user diagnostics where a code fix provider was specified. We need to execute the CodeFix pipeline to gather
                 // the actual code fixes.
-                var projectOptions = new ProjectOptions( context.Document.Project );
-                var userCodeFixProvider = new UserCodeFixProvider( this._pipelineFactory, projectOptions );
+                var userCodeFixProvider = new UserCodeFixProvider();
 
                 var codeFixes = userCodeFixProvider.ProvideCodeFixes(
                     context.Document,
@@ -79,11 +77,11 @@ namespace Metalama.Framework.DesignTime
                     return Task.CompletedTask;
                 }
 
-                var supportsHierarchicalItems = HostProcess.Current.Product != HostProduct.Rider;
+                var invocationContext = new CodeActionInvocationContext( this._codeActionExecutionService, context.Document, this._logger );
 
                 foreach ( var fix in codeFixes )
                 {
-                    foreach ( var codeAction in fix.CodeAction.ToCodeActions( supportsHierarchicalItems ) )
+                    foreach ( var codeAction in fix.CodeAction.ToCodeActions( invocationContext ) )
                     {
                         context.RegisterCodeFix( codeAction, fix.Diagnostic );
                     }

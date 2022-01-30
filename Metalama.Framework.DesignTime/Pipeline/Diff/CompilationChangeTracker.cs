@@ -6,8 +6,6 @@ using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Immutable;
 
 namespace Metalama.Framework.DesignTime.Pipeline.Diff
@@ -140,7 +138,7 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
 
             var syntaxTreeChanges = new List<SyntaxTreeChange>();
             var hasCompileTimeChange = !areMetadataReferencesEqual;
-            
+
             // Process new trees.
             var lastTrees = this._lastTrees;
 
@@ -176,7 +174,13 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
 
                 if ( lastTrees != null && lastTrees.TryGetValue( newSyntaxTree.FilePath, out var oldEntry ) )
                 {
-                    if ( IsDifferent( oldEntry.Tree, oldEntry.HasCompileTimeCode, oldEntry.Hash,  newSyntaxTree, out newHasCompileTimeCode, out newSyntaxTreeHash ) )
+                    if ( IsDifferent(
+                            oldEntry.Tree,
+                            oldEntry.HasCompileTimeCode,
+                            oldEntry.Hash,
+                            newSyntaxTree,
+                            out newHasCompileTimeCode,
+                            out newSyntaxTreeHash ) )
                     {
                         compileTimeChangeKind = GetCompileTimeChangeKind( oldEntry.HasCompileTimeCode, newHasCompileTimeCode );
 
@@ -276,18 +280,24 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
         internal static bool IsDifferent( SyntaxTree oldSyntaxTree, SyntaxTree newSyntaxTree )
         {
             AnalyzeSyntaxTree( oldSyntaxTree, out var oldHasCompileTimeCode, out var oldSyntaxTreeHash );
+
             return IsDifferent( oldSyntaxTree, oldHasCompileTimeCode, oldSyntaxTreeHash, newSyntaxTree, out _, out _ );
         }
 
-        private static bool IsDifferent( SyntaxTree oldSyntaxTree, bool oldHasCompileTimeCode, ulong oldSyntaxTreeHash, SyntaxTree newSyntaxTree, out bool newHasCompileTimeCode, out ulong newSyntaxTreeHash )
+        private static bool IsDifferent(
+            SyntaxTree oldSyntaxTree,
+            bool oldHasCompileTimeCode,
+            ulong oldSyntaxTreeHash,
+            SyntaxTree newSyntaxTree,
+            out bool newHasCompileTimeCode,
+            out ulong newSyntaxTreeHash )
         {
-            
             // Check if the source text has changed.
             if ( newSyntaxTree == oldSyntaxTree )
             {
                 newSyntaxTreeHash = oldSyntaxTreeHash;
                 newHasCompileTimeCode = oldHasCompileTimeCode;
-                
+
                 return false;
             }
             else
@@ -301,7 +311,6 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
 
                 return newSyntaxTreeHash != oldSyntaxTreeHash;
             }
-            
         }
 
         private static void AnalyzeSyntaxTree( SyntaxTree syntaxTree, out bool hasCompileTimeCode, out ulong hash )

@@ -8,10 +8,10 @@ using Metalama.Framework.CodeFixes;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
-using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Pipeline.LiveTemplates;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
@@ -28,36 +28,21 @@ namespace Metalama.Framework.Engine.CodeFixes
     internal partial class CodeFixBuilder : ICodeFixBuilder
     {
         private readonly CodeFixContext _context;
-        private readonly HashSet<DocumentId> _changedDocuments = new();
-        private Solution _solution;
+        private readonly HashSet<string> _changedSyntaxTrees = new();
+        private readonly DiagnosticList _diagnostics = new();
+        private PartialCompilation _compilation;
         private bool _hasChange;
 
         public CodeFixBuilder( CodeFixContext context, CancellationToken cancellationToken )
         {
             this._context = context;
-            this._solution = this._context.OriginalDocument.Project.Solution;
+            this._compilation = this._context.OriginalCompilation;
             this.CancellationToken = cancellationToken;
         }
 
         public CancellationToken CancellationToken { get; }
 
-        public async Task<Solution> GetResultingSolutionAsync()
-        {
-            var formattedSolution = this._solution;
-
-            foreach ( var changedDocumentId in this._changedDocuments )
-            {
-                var formattingResult = await OutputCodeFormatter.FormatToDocumentAsync(
-                    formattedSolution.GetDocument( changedDocumentId )!,
-                    null,
-                    false,
-                    this.CancellationToken );
-
-                formattedSolution = formattingResult.Document.Project.Solution;
-            }
-
-            return formattedSolution;
-        }
+        public CodeActionResult ToCodeActionResult() => new( this._changedSyntaxTrees.Select( x => this._compilation.SyntaxTrees[x] ).ToImmutableArray() );
 
         public async Task<bool> AddAttributeAsync( IDeclaration targetDeclaration, AttributeConstruction attribute )
         {
@@ -65,13 +50,7 @@ namespace Metalama.Framework.Engine.CodeFixes
 
             this.CancellationToken.ThrowIfCancellationRequested();
 
-            var compilation = await this._solution.GetProject( this._context.OriginalDocument.Project.Id )!.GetCompilationAsync( this.CancellationToken );
-
-            if ( compilation == null )
-            {
-                // TODO: Error. Log.
-                return false;
-            }
+            var compilation = this._compilation.Compilation;
 
             var targetSymbol = targetDeclaration.ToRef().GetSymbol( compilation );
 
@@ -87,26 +66,41 @@ namespace Metalama.Framework.Engine.CodeFixes
                 originalNode = variableDeclaration.Parent!;
             }
 
-            var originalRoot = await originalNode.SyntaxTree.GetRootAsync( this.CancellationToken );
-            var originalDocument = this._solution.GetDocument( originalNode.SyntaxTree ).AssertNotNull();
+            var originalTree = originalNode.SyntaxTree;
+            var originalRoot = await originalTree.GetRootAsync( this.CancellationToken );
 
             var generationContext = SyntaxGenerationContext.Create( this._context.ServiceProvider, compilation, originalNode );
             var transformedNode = generationContext.SyntaxGenerator.AddAttribute( originalNode, attribute, generationContext.ReflectionMapper );
 
             var transformedRoot = originalRoot.ReplaceNode( originalNode, transformedNode );
 
-            this._solution = this._solution.WithDocumentSyntaxRoot( originalDocument.Id, transformedRoot );
-            this._changedDocuments.Add( originalDocument.Id );
+            this.UpdateTree( transformedRoot, originalTree );
 
             return true;
+        }
+
+        private void UpdateTree( SyntaxTree transformedTree, SyntaxTree originalTree )
+        {
+            this._compilation = this._compilation.Update( new[] { new SyntaxTreeModification( transformedTree, originalTree ) } );
+            this._changedSyntaxTrees.Add( originalTree.FilePath );
+        }
+
+        private void UpdateTree( SyntaxNode transformedRoot, SyntaxTree originalTree )
+        {
+            var transformedTree = CSharpSyntaxTree.Create(
+                (CSharpSyntaxNode) transformedRoot,
+                (CSharpParseOptions?) originalTree.Options,
+                originalTree.FilePath,
+                originalTree.Encoding );
+
+            this.UpdateTree( transformedTree, originalTree );
         }
 
         public async Task<bool> RemoveAttributesAsync( IDeclaration targetDeclaration, INamedType attributeType )
         {
             this.CancellationToken.ThrowIfCancellationRequested();
 
-            var project = this._solution.GetProject( this._context.OriginalDocument.Project.Id ).AssertNotNull();
-            var compilation = (await project.GetCompilationAsync( this.CancellationToken )).AssertNotNull();
+            var compilation = this._compilation.Compilation;
 
             var attributeTypeSymbol = (ITypeSymbol?) attributeType.GetSymbol( compilation );
 
@@ -125,11 +119,10 @@ namespace Metalama.Framework.Engine.CodeFixes
             // We need to process all syntaxes that define this symbol.
             foreach ( var syntaxReferenceGroup in targetSymbol.DeclaringSyntaxReferences.GroupBy( r => r.SyntaxTree ) )
             {
-                var originalSyntaxTree = syntaxReferenceGroup.Key;
-                var originalDocument = project.GetDocument( originalSyntaxTree ).AssertNotNull();
-                var originalRoot = await originalSyntaxTree.GetRootAsync( this.CancellationToken );
+                var originalTree = syntaxReferenceGroup.Key;
+                var originalRoot = await originalTree.GetRootAsync( this.CancellationToken );
 
-                var rewriter = new RemoveAttributeRewriter( compilation.GetSemanticModel( originalSyntaxTree ), attributeTypeSymbol );
+                var rewriter = new RemoveAttributeRewriter( compilation.GetSemanticModel( originalTree ), attributeTypeSymbol );
 
                 var transformedRoot = originalRoot;
                 var syntaxNodes = new List<SyntaxNode>();
@@ -142,8 +135,7 @@ namespace Metalama.Framework.Engine.CodeFixes
 
                 transformedRoot = transformedRoot.ReplaceNodes( syntaxNodes, ( node, _ ) => rewriter.Visit( node ) );
 
-                this._solution = this._solution.WithDocumentSyntaxRoot( originalDocument.Id, transformedRoot );
-                this._changedDocuments.Add( originalDocument.Id );
+                this.UpdateTree( transformedRoot, originalTree );
             }
 
             return true;
@@ -155,14 +147,7 @@ namespace Metalama.Framework.Engine.CodeFixes
         public async Task<bool> ApplyAspectAsync<TTarget>( TTarget targetDeclaration, IAspect<TTarget> aspect )
             where TTarget : class, IDeclaration
         {
-            var project = this._solution.GetProject( this._context.OriginalDocument.Project.Id )!;
-            var compilation = await project.GetCompilationAsync( this.CancellationToken );
-
-            if ( compilation == null )
-            {
-                // TODO: Error. Log.
-                return false;
-            }
+            var compilation = this._compilation.Compilation;
 
             var targetSymbol = targetDeclaration.ToRef().GetSymbol( compilation );
 
@@ -173,8 +158,6 @@ namespace Metalama.Framework.Engine.CodeFixes
 
             var aspectClass = (AspectClass) this._context.PipelineConfiguration.BoundAspectClasses.Single<IBoundAspectClass>( c => c.Type == aspect.GetType() );
 
-            var diagnosticList = new DiagnosticList();
-
             if ( !LiveTemplateAspectPipeline.TryExecute(
                     this._context.ServiceProvider,
                     this._context.PipelineConfiguration.Domain,
@@ -182,24 +165,25 @@ namespace Metalama.Framework.Engine.CodeFixes
                     _ => aspectClass,
                     PartialCompilation.CreatePartial( compilation, targetSymbol.GetPrimaryDeclaration()!.SyntaxTree ),
                     targetSymbol,
-                    diagnosticList,
+                    this._diagnostics,
                     CancellationToken.None,
                     out var outputCompilation ) )
             {
-                this._solution = await CodeFixHelper.ReportDiagnosticsAsCommentsAsync(
-                    targetSymbol,
-                    this._context.OriginalDocument,
-                    diagnosticList.ToImmutableArray(),
-                    this.CancellationToken );
-
                 return false;
             }
             else
             {
-                this._solution = await CodeFixHelper.ApplyChangesAsync( outputCompilation, project, this.CancellationToken );
-            }
+                this._compilation = this._compilation.Update(
+                    outputCompilation.ModifiedSyntaxTrees.Values.Where( x => x.OldTree != null ).ToList(),
+                    outputCompilation.ModifiedSyntaxTrees.Values.Where( x => x.OldTree == null ).Select( x => x.NewTree ).ToList() );
 
-            return true;
+                foreach ( var modifiedPath in outputCompilation.ModifiedSyntaxTrees.Keys )
+                {
+                    this._changedSyntaxTrees.Add( modifiedPath );
+                }
+
+                return true;
+            }
         }
 
         private void CheckChange()

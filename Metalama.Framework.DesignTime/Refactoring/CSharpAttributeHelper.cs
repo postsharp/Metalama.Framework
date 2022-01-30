@@ -11,7 +11,7 @@ namespace Metalama.Framework.DesignTime.Refactoring
 {
     internal static class CSharpAttributeHelper
     {
-        private static async ValueTask<SyntaxNode?> AddAttributeAsync(
+        public static async ValueTask<SyntaxNode?> AddAttributeAsync(
             SyntaxNode oldRoot,
             SyntaxNode? oldNode,
             AttributeDescription attribute,

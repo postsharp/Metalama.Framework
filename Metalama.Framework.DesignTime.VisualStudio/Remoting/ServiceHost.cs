@@ -2,11 +2,14 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Backstage.Diagnostics;
+using Metalama.Framework.DesignTime.CodeFixes;
 using Metalama.Framework.DesignTime.Contracts;
 using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.DesignTime.Preview;
+using Metalama.Framework.Engine.CodeFixes;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Project;
+using Microsoft.CodeAnalysis.Text;
 using StreamJsonRpc;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
@@ -15,14 +18,25 @@ using System.IO.Pipes;
 
 namespace Metalama.Framework.DesignTime.VisualStudio.Remoting;
 
-internal class ServiceHost : IService, IDisposable
+internal class ServiceEndpoint
+{
+    protected JsonRpc CreateRpc( Stream stream )
+    {
+        var formatter = new MessagePackFormatter();
+        var handler = new LengthHeaderMessageHandler( stream, stream, formatter );
+
+        return new JsonRpc( handler );
+    }
+}
+
+internal class ServiceHost : ServiceEndpoint, IService, IDisposable
 {
     private readonly ILogger _logger;
     private static readonly object _initializeLock = new();
     private static ServiceHost? _instance;
 
     private readonly string? _pipeName;
-    private readonly MessageHandler _handler;
+    private readonly ServiceImpl _service;
     private readonly CancellationTokenSource _startCancellationSource = new();
     private readonly ConcurrentDictionary<string, string> _connectedClients = new();
     private readonly ConcurrentDictionary<string, ImmutableDictionary<string, string>> _sourcesForUnconnectedClients = new();
@@ -67,7 +81,7 @@ internal class ServiceHost : IService, IDisposable
 
         this._serviceProvider = serviceProvider;
         this._pipeName = pipeName;
-        this._handler = new MessageHandler( this );
+        this._service = new ServiceImpl( this );
     }
 
     public static string GetPipeName( int processId ) => $"Metalama_{processId}_{AssemblyMetadataReader.BuildId}";
@@ -110,8 +124,9 @@ internal class ServiceHost : IService, IDisposable
             this._pipeStream = new NamedPipeServerStream( this._pipeName, PipeDirection.InOut, 1, PipeTransmissionMode.Byte, PipeOptions.Asynchronous );
             await this._pipeStream.WaitForConnectionAsync( cancellationToken );
 
-            this._rpc = new JsonRpc( this._pipeStream );
-            this._rpc.AddLocalRpcTarget<IServerApi>( this._handler, null );
+            this._rpc = this.CreateRpc( this._pipeStream );
+
+            this._rpc.AddLocalRpcTarget<IServerApi>( this._service, null );
             this._client = this._rpc.Attach<IClientApi>();
             this._rpc.StartListening();
 
@@ -145,11 +160,11 @@ internal class ServiceHost : IService, IDisposable
 
     public event EventHandler<ClientConnectedEventArgs>? ClientConnected;
 
-    private class MessageHandler : IServerApi
+    private class ServiceImpl : IServerApi
     {
         private readonly ServiceHost _parent;
 
-        public MessageHandler( ServiceHost parent )
+        public ServiceImpl( ServiceHost parent )
         {
             this._parent = parent;
         }
@@ -186,6 +201,17 @@ internal class ServiceHost : IService, IDisposable
             service.OnEditingCompileTimeCodeCompleted();
 
             return Task.CompletedTask;
+        }
+
+        public async Task<ImmutableArray<CodeActionBaseModel>> ComputeRefactoringsAsync(
+            string projectId,
+            string syntaxTreePath,
+            TextSpan span,
+            CancellationToken cancellationToken = default )
+        {
+            var service = this._parent._serviceProvider.GetRequiredService<CodeActionDiscoveryServiceImpl>();
+
+            return await service.ComputeRefactoringsAsync( projectId, syntaxTreePath, span, cancellationToken );
         }
     }
 

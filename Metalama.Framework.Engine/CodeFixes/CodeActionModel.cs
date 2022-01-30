@@ -3,7 +3,6 @@
 
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeActions;
-using System;
 using System.Collections.Immutable;
 using System.Threading;
 using System.Threading.Tasks;
@@ -13,20 +12,30 @@ namespace Metalama.Framework.Engine.CodeFixes
     /// <summary>
     /// Represent a leaf in a code action menu.
     /// </summary>
-    public class CodeActionModel : CodeActionBaseModel
+    public abstract class CodeActionModel : CodeActionBaseModel
     {
-        public Func<CancellationToken, Task<Solution>> Action { get; }
+        protected abstract Task<CodeActionResult> ExecuteAsync( CodeActionExecutionContext executionContext, CancellationToken cancellationToken );
 
-        public CodeActionModel( string title, Func<CancellationToken, Task<Solution>> action ) : base( title )
-        {
-            this.Action = action;
-        }
+        protected CodeActionModel( string title ) : base( title ) { }
 
-        public override ImmutableArray<CodeAction> ToCodeActions( bool supportsHierarchicalItems, string titlePrefix = "" )
+        protected CodeActionModel() { }
+
+        public override ImmutableArray<CodeAction> ToCodeActions( CodeActionInvocationContext invocationContext, string titlePrefix = "" )
         {
             var title = titlePrefix + this.Title;
 
-            return ImmutableArray.Create( CodeAction.Create( title, this.Action ) );
+            return ImmutableArray.Create( CodeAction.Create( title, ct => this.InvokeAsync( invocationContext, ct ) ) );
+        }
+
+        private async Task<Solution> InvokeAsync( CodeActionInvocationContext invocationContext, CancellationToken cancellationToken )
+        {
+            // Execute the current code action locally or remotely. In case of remote execution, the code action is serialized.
+            var result = await invocationContext.Service.ExecuteAsync( this, cancellationToken );
+
+            // Apply the result to the current solution.
+            var project = invocationContext.Document.Project;
+
+            return await result.ApplyAsync( project, invocationContext.Logger, true, cancellationToken );
         }
     }
 }

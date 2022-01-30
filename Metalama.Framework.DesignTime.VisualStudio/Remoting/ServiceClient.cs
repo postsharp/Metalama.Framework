@@ -12,7 +12,7 @@ using System.IO.Pipes;
 
 namespace Metalama.Framework.DesignTime.VisualStudio.Remoting;
 
-internal class ServiceClient : IDisposable, IService
+internal class ServiceClient : ServiceEndpoint, IDisposable, IService
 {
     private readonly ILogger _logger;
     private readonly string? _pipeName;
@@ -40,7 +40,8 @@ internal class ServiceClient : IDisposable, IService
         {
             this._pipeStream = new NamedPipeClientStream( ".", this._pipeName, PipeDirection.InOut, PipeOptions.Asynchronous );
             await this._pipeStream.ConnectAsync( cancellationToken );
-            this._rpc = new JsonRpc( this._pipeStream );
+
+            this._rpc = this.CreateRpc( this._pipeStream );
             this._rpc.AddLocalRpcTarget<IClientApi>( this._messageHandler, null );
             this._server = this._rpc.Attach<IServerApi>();
             this._rpc.StartListening();

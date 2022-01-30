@@ -60,8 +60,8 @@ namespace Metalama.Framework.Engine.Formatting
                 var classifiedTextSpans = new ClassifiedTextSpanCollection( outputSyntaxRoot.GetText() );
                 var visitor = new MarkTextSpansVisitor( classifiedTextSpans );
                 visitor.Visit( outputSyntaxRoot );
-                var generatedSpans = classifiedTextSpans.Where( s => s.Classification == TextSpanClassification.GeneratedCode ).Select( s=>s.Span );
-                
+                var generatedSpans = classifiedTextSpans.Where( s => s.Classification == TextSpanClassification.GeneratedCode ).Select( s => s.Span );
+
                 outputSyntaxRoot = (CompilationUnitSyntax) Formatter.Format(
                     outputSyntaxRoot,
                     generatedSpans,

@@ -224,7 +224,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 case SymbolKind.Label:
                 case SymbolKind.ErrorType:
                     return null;
-                
+
                 default:
                     throw new AssertionFailedException( $"Don't know how to resolve a '{symbol.Kind}'." );
             }

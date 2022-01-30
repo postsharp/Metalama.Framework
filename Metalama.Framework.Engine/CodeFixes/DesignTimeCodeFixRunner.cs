@@ -6,6 +6,8 @@ using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline;
+using Metalama.Framework.Project;
+using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 
@@ -15,9 +17,9 @@ public class DesignTimeCodeFixRunner : CodeFixRunner
 {
     private readonly IAspectPipelineConfigurationProvider _configurationProvider;
 
-    public DesignTimeCodeFixRunner( IAspectPipelineConfigurationProvider configurationProvider, IProjectOptions projectOptions ) : base( projectOptions )
+    public DesignTimeCodeFixRunner( IServiceProvider serviceProvider, IProjectOptions projectOptions ) : base()
     {
-        this._configurationProvider = configurationProvider;
+        this._configurationProvider = serviceProvider.GetRequiredService<IAspectPipelineConfigurationProvider>();
     }
 
     private protected override bool TryGetConfiguration(

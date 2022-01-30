@@ -7,6 +7,7 @@ using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Pipeline;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.Text;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
@@ -19,16 +20,22 @@ namespace Metalama.Framework.Engine.CodeFixes
     /// </summary>
     internal class CodeFixPipeline : AspectPipeline
     {
-        private readonly Diagnostic _diagnostic;
+        private readonly string _diagnosticId;
+        private readonly string _diagnosticFilePath;
+        private readonly TextSpan _diagnosticSpan;
 
         public CodeFixPipeline(
             ServiceProvider serviceProvider,
             bool isTest,
             CompileTimeDomain? domain,
-            Diagnostic diagnostic ) :
+            string diagnosticId,
+            string diagnosticFilePath,
+            in TextSpan diagnosticSpan ) :
             base( serviceProvider, ExecutionScenario.CodeFix, isTest, domain )
         {
-            this._diagnostic = diagnostic;
+            this._diagnosticId = diagnosticId;
+            this._diagnosticFilePath = diagnosticFilePath;
+            this._diagnosticSpan = diagnosticSpan;
         }
 
         private protected override HighLevelPipelineStage CreateHighLevelStage(
@@ -40,9 +47,9 @@ namespace Metalama.Framework.Engine.CodeFixes
             => null;
 
         private protected override bool FilterCodeFix( IDiagnosticDefinition diagnosticDefinition, Location location )
-            => diagnosticDefinition.Id == this._diagnostic.Id &&
-               location.SourceTree == this._diagnostic.Location.SourceTree &&
-               location.SourceSpan.Equals( this._diagnostic.Location.SourceSpan );
+            => diagnosticDefinition.Id == this._diagnosticId &&
+               location.SourceTree?.FilePath == this._diagnosticFilePath &&
+               location.SourceSpan.Equals( this._diagnosticSpan );
 
         public bool TryExecute(
             PartialCompilation partialCompilation,

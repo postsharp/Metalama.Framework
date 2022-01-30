@@ -24,11 +24,11 @@ public static class VisualStudioServiceProviderFactory
             {
                 if ( _serviceProvider == null )
                 {
-                    _serviceProvider = DesignTimeServiceProviderFactory.GetServiceProvider();
-
                     switch ( DebuggingHelper.ProcessKind )
                     {
                         case ProcessKind.DevEnv:
+                            _serviceProvider = DesignTimeServiceProviderFactory.GetServiceProvider( false );
+
                             var serviceClient = new ServiceClient( _serviceProvider );
                             _ = serviceClient.ConnectAsync();
                             _serviceProvider = _serviceProvider.WithService( serviceClient );
@@ -39,7 +39,9 @@ public static class VisualStudioServiceProviderFactory
                             break;
 
                         case ProcessKind.RoslynCodeAnalysisService:
-                            
+
+                            _serviceProvider = DesignTimeServiceProviderFactory.GetServiceProvider();
+
                             _serviceProvider =
                                 _serviceProvider.WithService( new TransformationPreviewServiceImpl( _serviceProvider ) );
 

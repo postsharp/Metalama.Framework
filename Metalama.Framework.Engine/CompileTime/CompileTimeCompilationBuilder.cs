@@ -123,7 +123,7 @@ namespace Metalama.Framework.Engine.CompileTime
             IEnumerable<CompileTimeProject> referencedProjects,
             ImmutableArray<UsingDirectiveSyntax> globalUsings,
             ulong hash,
-             IDiagnosticAdder diagnosticSink,
+            IDiagnosticAdder diagnosticSink,
             CancellationToken cancellationToken,
             out Compilation? compileTimeCompilation,
             out ILocationAnnotationMap? locationAnnotationMap )
@@ -483,11 +483,12 @@ namespace Metalama.Framework.Engine.CompileTime
                     logger: this._logger );
             }
         }
-        
+
         private static List<UsingDirectiveSyntax> GetUsingsFromOptions( Compilation compilation )
         {
-                
-            return ((CSharpCompilation) compilation).Options.Usings.Select( x => SyntaxFactory.UsingDirective( ParseNamespace( x ) ).NormalizeWhitespace(  ) ).ToList();
+            return ((CSharpCompilation) compilation).Options.Usings.Select( x => SyntaxFactory.UsingDirective( ParseNamespace( x ) ).NormalizeWhitespace() )
+                .ToList();
+
             static NameSyntax ParseNamespace( string ns )
             {
                 var parts = ns.Split( '.' );
@@ -522,12 +523,11 @@ namespace Metalama.Framework.Engine.CompileTime
                 {
                     compileTimeTrees.Add( tree );
                 }
-                
-                globalUsings.AddRange( visitor.GlobalUsings.Select( syntax => SyntaxFactory.UsingDirective( syntax ).NormalizeWhitespace() ) );
 
+                globalUsings.AddRange( visitor.GlobalUsings.Select( syntax => SyntaxFactory.UsingDirective( syntax ).NormalizeWhitespace() ) );
             }
 
-            return (compileTimeTrees, globalUsings.ToImmutableArray() );
+            return (compileTimeTrees, globalUsings.ToImmutableArray());
         }
 
         private IReadOnlyList<SerializableTypeInfo> GetSerializableTypes(
@@ -569,7 +569,7 @@ namespace Metalama.Framework.Engine.CompileTime
             out CompileTimeProject? project )
         {
             var compileTimeArtifacts = this.GetCompileTimeArtifacts( runTimeCompilation, compileTimeTreesHint, cancellationToken );
-            
+
             return this.TryGetCompileTimeProjectImpl(
                 runTimeCompilation,
                 compileTimeArtifacts.SyntaxTrees,

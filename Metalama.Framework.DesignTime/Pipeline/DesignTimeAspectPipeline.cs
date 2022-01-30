@@ -12,6 +12,7 @@ using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Pipeline.DesignTime;
+using Metalama.Framework.Engine.Pipeline.LiveTemplates;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Project;
@@ -130,7 +131,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
                     return;
                 }
-                
+
                 var hasRelevantChange = false;
                 var filesToTouch = new List<string>();
 
@@ -149,7 +150,8 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
                 if ( hasRelevantChange )
                 {
-                    Logger.DesignTime.Trace?.Log( $"Resuming the pipeline for project '{this.ProjectOptions.ProjectId}'. The following files had compile-time changes: {string.Join( ", ", filesToTouch.Select( x=>$"'{x}'" ))} " );
+                    Logger.DesignTime.Trace?.Log(
+                        $"Resuming the pipeline for project '{this.ProjectOptions.ProjectId}'. The following files had compile-time changes: {string.Join( ", ", filesToTouch.Select( x => $"'{x}'" ) )} " );
 
                     this.SetState( new PipelineState( this ) );
                     this.PipelineResumed?.Invoke( this, EventArgs.Empty );
@@ -467,6 +469,51 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 this.IsCompileTimeSyntaxTreeOutdated( semanticModel.SyntaxTree.FilePath ),
                 true,
                 CancellationToken.None );
+        }
+
+        public bool TryApplyAspectToCode(
+            string aspectTypeName,
+            Compilation inputCompilation,
+            ISymbol targetSymbol,
+            CancellationToken cancellationToken,
+            [NotNullWhen( true )] out PartialCompilation? outputCompilation,
+            out ImmutableArray<Diagnostic> diagnostics )
+        {
+            // Get a compilation _without_ generated code, and map the target symbol.
+            var generatedFiles = inputCompilation.SyntaxTrees.Where( SourceGeneratorHelper.IsGeneratedFile );
+            var sourceCompilation = inputCompilation.RemoveSyntaxTrees( generatedFiles );
+
+            var sourceSymbol = DocumentationCommentId
+                .GetFirstSymbolForDeclarationId( targetSymbol.GetDocumentationCommentId().AssertNotNull(), sourceCompilation )
+                .AssertNotNull();
+
+            // TODO: use partial compilation (it does not seem to work).
+            var partialCompilation = PartialCompilation.CreateComplete( sourceCompilation );
+
+            DiagnosticList diagnosticList = new();
+
+            if ( !this.TryGetConfiguration( partialCompilation, diagnosticList, true, cancellationToken, out var configuration ) )
+            {
+                outputCompilation = null;
+                diagnostics = diagnosticList.ToImmutableArray();
+
+                return false;
+            }
+
+            var result = LiveTemplateAspectPipeline.TryExecute(
+                configuration.ServiceProvider,
+                this.Domain,
+                configuration,
+                x => x.AspectClasses.Single( c => c.FullName == aspectTypeName ),
+                partialCompilation,
+                sourceSymbol,
+                diagnosticList,
+                cancellationToken,
+                out outputCompilation );
+
+            diagnostics = diagnosticList.ToImmutableArray();
+
+            return result;
         }
     }
 }

@@ -3,10 +3,10 @@
 
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
-using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.Text;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
@@ -22,13 +22,6 @@ namespace Metalama.Framework.Engine.CodeFixes
     public abstract class CodeFixRunner
 #pragma warning restore CA1001
     {
-        private readonly IProjectOptions _projectOptions;
-
-        protected CodeFixRunner( IProjectOptions projectOptions )
-        {
-            this._projectOptions = projectOptions;
-        }
-
         private protected abstract bool TryGetConfiguration(
             PartialCompilation compilation,
             CancellationToken cancellationToken,
@@ -36,7 +29,7 @@ namespace Metalama.Framework.Engine.CodeFixes
             [NotNullWhen( true )] out ServiceProvider? serviceProvider,
             [NotNullWhen( true )] out CompileTimeDomain? domain );
 
-        public async Task<Solution> ExecuteCodeFixAsync(
+        public async Task<CodeActionResult> ExecuteCodeFixAsync(
             Document document,
             Diagnostic diagnostic,
             string codeFixTitle,
@@ -47,16 +40,27 @@ namespace Metalama.Framework.Engine.CodeFixes
 
             if ( compilation == null )
             {
-                return project.Solution;
+                return CodeActionResult.Empty;
             }
 
             var syntaxTree = await document.GetSyntaxTreeAsync( cancellationToken );
 
             if ( syntaxTree == null )
             {
-                return project.Solution;
+                return CodeActionResult.Empty;
             }
 
+            return await this.ExecuteCodeFixAsync( compilation, syntaxTree, diagnostic.Id, diagnostic.Location.SourceSpan, codeFixTitle, cancellationToken );
+        }
+
+        public async Task<CodeActionResult> ExecuteCodeFixAsync(
+            Compilation compilation,
+            SyntaxTree syntaxTree,
+            string diagnosticId,
+            TextSpan diagnosticSpan,
+            string codeFixTitle,
+            CancellationToken cancellationToken )
+        {
             // Get a compilation _without_ generated code, and map the target symbol.
             var generatedFiles = compilation.SyntaxTrees.Where( SourceGeneratorHelper.IsGeneratedFile );
             var sourceCompilation = compilation.RemoveSyntaxTrees( generatedFiles );
@@ -68,7 +72,7 @@ namespace Metalama.Framework.Engine.CodeFixes
             {
                 // We cannot get the pipeline configuration.
 
-                return project.Solution;
+                return CodeActionResult.Empty;
             }
 
             // Execute the compile-time pipeline with the design-time project configuration.
@@ -76,7 +80,9 @@ namespace Metalama.Framework.Engine.CodeFixes
                 serviceProvider,
                 false,
                 domain,
-                diagnostic );
+                diagnosticId,
+                syntaxTree.FilePath,
+                diagnosticSpan );
 
             if ( !codeFixPipeline.TryExecute(
                     partialCompilation,
@@ -85,13 +91,13 @@ namespace Metalama.Framework.Engine.CodeFixes
                     out var userCodeFixes,
                     out _ ) )
             {
-                return project.Solution;
+                return CodeActionResult.Empty;
             }
 
             if ( userCodeFixes.IsDefaultOrEmpty )
             {
                 // The pipeline did not generate any code fix, which is unexpected.
-                return project.Solution;
+                return CodeActionResult.Empty;
             }
 
             var codeFix = userCodeFixes.FirstOrDefault( f => f.CodeFix.Title == codeFixTitle );
@@ -103,20 +109,17 @@ namespace Metalama.Framework.Engine.CodeFixes
                 // of the same id on the same span, and we would not be able to differentiate these instances and therefore the ids.
                 // In theory, the aspect author could provide different code fixes with the same title for the same diagnostic,
                 // but in this case this would also be confusing for the end user.
-                return project.Solution;
+                return CodeActionResult.Empty;
             }
 
-            var context = new CodeFixContext(
-                document,
-                this._projectOptions,
-                designTimeConfiguration! );
+            var context = new CodeFixContext( partialCompilation, designTimeConfiguration! );
 
             var codeFixBuilder = new CodeFixBuilder( context, cancellationToken );
 
             // TODO: use user code invoker
             await codeFix.CodeFix.Action( codeFixBuilder );
 
-            return await codeFixBuilder.GetResultingSolutionAsync();
+            return codeFixBuilder.ToCodeActionResult();
         }
     }
 }

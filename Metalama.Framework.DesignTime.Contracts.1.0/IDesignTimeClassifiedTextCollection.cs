@@ -3,7 +3,6 @@
 
 using Microsoft.CodeAnalysis.Text;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
 
 namespace Metalama.Framework.DesignTime.Contracts
 {

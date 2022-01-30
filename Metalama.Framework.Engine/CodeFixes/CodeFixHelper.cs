@@ -1,9 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
-using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -19,37 +17,6 @@ namespace Metalama.Framework.Engine.CodeFixes
     /// </summary>
     public static class CodeFixHelper
     {
-        public static async Task<Solution> ApplyChangesAsync(
-            PartialCompilation compilation,
-            Microsoft.CodeAnalysis.Project project,
-            CancellationToken cancellationToken )
-        {
-            var solution = project.Solution;
-
-            foreach ( var modifiedSyntaxTree in compilation.ModifiedSyntaxTrees )
-            {
-                var document = project.GetDocument( modifiedSyntaxTree.Value.OldTree );
-
-                if ( document == null || !document.SupportsSyntaxTree )
-                {
-                    continue;
-                }
-
-                var newSyntaxRoot = await modifiedSyntaxTree.Value.NewTree.GetRootAsync( cancellationToken );
-
-                var newDocument = document.WithSyntaxRoot( newSyntaxRoot );
-
-                var formattedSyntaxRoot = await OutputCodeFormatter.FormatToSyntaxAsync(
-                    newDocument,
-                    reformatAll: false,
-                    cancellationToken: cancellationToken );
-
-                solution = solution.WithDocumentSyntaxRoot( document.Id, formattedSyntaxRoot );
-            }
-
-            return solution;
-        }
-
         public static async Task<Solution> ReportErrorAsCommentsAsync(
             ISymbol targetSymbol,
             Document targetDocument,

@@ -2,7 +2,6 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Backstage.Diagnostics;
-using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
@@ -10,11 +9,8 @@ using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline;
-using Metalama.Framework.Engine.Pipeline.LiveTemplates;
-using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using System.Collections.Concurrent;
-using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 
 // ReSharper disable InconsistentlySynchronizedField
@@ -106,7 +102,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
         {
             foreach ( var pipeline in this._pipelinesByProjectId.Values )
             {
-                pipeline.Resume(true);
+                pipeline.Resume( true );
             }
         }
 
@@ -175,63 +171,6 @@ namespace Metalama.Framework.DesignTime.Pipeline
             }
 
             return designTimePipeline.TryExecute( compilation, cancellationToken, out compilationResult );
-        }
-
-        public bool TryApplyAspectToCode(
-            IProjectOptions projectOptions,
-            AspectClass aspectClass,
-            IAspect aspect,
-            Compilation inputCompilation,
-            ISymbol targetSymbol,
-            CancellationToken cancellationToken,
-            [NotNullWhen( true )] out PartialCompilation? outputCompilation,
-            out ImmutableArray<Diagnostic> diagnostics )
-        {
-            var designTimePipeline = this.GetOrCreatePipeline( projectOptions, inputCompilation, cancellationToken );
-
-            if ( designTimePipeline == null )
-            {
-                outputCompilation = null;
-                diagnostics = ImmutableArray<Diagnostic>.Empty;
-
-                return false;
-            }
-
-            // Get a compilation _without_ generated code, and map the target symbol.
-            var generatedFiles = inputCompilation.SyntaxTrees.Where( SourceGeneratorHelper.IsGeneratedFile );
-            var sourceCompilation = inputCompilation.RemoveSyntaxTrees( generatedFiles );
-
-            var sourceSymbol = DocumentationCommentId
-                .GetFirstSymbolForDeclarationId( targetSymbol.GetDocumentationCommentId().AssertNotNull(), sourceCompilation )
-                .AssertNotNull();
-
-            // TODO: use partial compilation (it does not seem to work).
-            var partialCompilation = PartialCompilation.CreateComplete( sourceCompilation );
-
-            DiagnosticList diagnosticList = new();
-
-            if ( !designTimePipeline.TryGetConfiguration( partialCompilation, diagnosticList, true, cancellationToken, out var configuration ) )
-            {
-                outputCompilation = null;
-                diagnostics = diagnosticList.ToImmutableArray();
-
-                return false;
-            }
-
-            var result = LiveTemplateAspectPipeline.TryExecute(
-                configuration.ServiceProvider,
-                this.Domain,
-                configuration,
-                _ => aspectClass,
-                partialCompilation,
-                sourceSymbol,
-                diagnosticList,
-                cancellationToken,
-                out outputCompilation );
-
-            diagnostics = diagnosticList.ToImmutableArray();
-
-            return result;
         }
 
         public void Dispose()
