@@ -57,13 +57,14 @@ namespace Metalama.Framework.Engine.Formatting
             }
             else
             {
-                // ImportAdder annotates its node with Formatter.Annotation, but we are using FormattingAnnotations.GeneratedCode, so we need to ask to reformat all usings.
-                // TODO: we may detect the spans to be reformatted using a classifier, so we would avoid reformatting user code.
-                outputSyntaxRoot = (CompilationUnitSyntax) MarkUsingsRewriter.Instance.Visit( outputSyntaxRoot );
+                var classifiedTextSpans = new ClassifiedTextSpanCollection( outputSyntaxRoot.GetText() );
+                var visitor = new MarkTextSpansVisitor( classifiedTextSpans );
+                visitor.Visit( outputSyntaxRoot );
+                var generatedSpans = classifiedTextSpans.Where( s => s.Classification == TextSpanClassification.GeneratedCode ).Select( s=>s.Span );
                 
                 outputSyntaxRoot = (CompilationUnitSyntax) Formatter.Format(
                     outputSyntaxRoot,
-                    FormattingAnnotations.GeneratedCode,
+                    generatedSpans,
                     document.Project.Solution.Workspace );
             }
 
