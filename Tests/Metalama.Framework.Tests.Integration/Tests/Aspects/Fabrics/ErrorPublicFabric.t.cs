@@ -4,7 +4,7 @@ internal class TargetCode
 #pragma warning disable CS0067
         public class F : TypeFabric
         {
-            public override void AmendType(ITypeAmender amender) => throw new System.NotSupportedException("Compile-time only code cannot be called at run-time.");
+            public override void AmendType(ITypeAmender amender) => throw new System.NotSupportedException("Compile-time-only code cannot be called at run-time.");
 
         }
 #pragma warning restore CS0067

@@ -9,7 +9,7 @@ namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Fabrics.NamespaceFabri
 #pragma warning disable CS0067
     internal class Fabric : NamespaceFabric
     {
-        public override void AmendNamespace(INamespaceAmender amender) => throw new System.NotSupportedException("Compile-time only code cannot be called at run-time.");
+        public override void AmendNamespace(INamespaceAmender amender) => throw new System.NotSupportedException("Compile-time-only code cannot be called at run-time.");
 
     }
 #pragma warning restore CS0067
@@ -17,7 +17,7 @@ namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Fabrics.NamespaceFabri
 
     internal class Aspect : OverrideMethodAspect
     {
-        public override dynamic? OverrideMethod() => throw new System.NotSupportedException("Compile-time only code cannot be called at run-time.");
+        public override dynamic? OverrideMethod() => throw new System.NotSupportedException("Compile-time-only code cannot be called at run-time.");
 
     }
 #pragma warning restore CS0067

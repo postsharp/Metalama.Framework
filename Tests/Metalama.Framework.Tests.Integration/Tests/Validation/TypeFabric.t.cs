@@ -31,10 +31,10 @@ namespace Metalama.Framework.Tests.Integration.Validation.TypeFabric_
             private static readonly DiagnosticDefinition<(ReferenceKinds ReferenceKinds, IDeclaration Declaration)> _warning =
                 new( "MY001", Severity.Warning, "Reference constraint of type '{0}' in declaration '{1}'." );
 
-            public override void AmendType(ITypeAmender amender) => throw new System.NotSupportedException("Compile-time only code cannot be called at run-time.");
+            public override void AmendType(ITypeAmender amender) => throw new System.NotSupportedException("Compile-time-only code cannot be called at run-time.");
 
 
-            private static void Validate(in ReferenceValidationContext context) => throw new System.NotSupportedException("Compile-time only code cannot be called at run-time.");
+            private static void Validate(in ReferenceValidationContext context) => throw new System.NotSupportedException("Compile-time-only code cannot be called at run-time.");
 
         }
 #pragma warning restore CS0067

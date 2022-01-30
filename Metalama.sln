@@ -78,8 +78,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Metalama.Framework.DesignTi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Metalama.SystemTypes", "Metalama.SystemTypes\Metalama.SystemTypes.csproj", "{593F39C7-66A8-4547-989C-6EB5E9313760}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BuildMetalama", "eng\src\BuildMetalama.csproj", "{0A4E34EB-C08A-4920-BB1B-08542EDB6DD4}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -182,10 +180,6 @@ Global
 		{593F39C7-66A8-4547-989C-6EB5E9313760}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{593F39C7-66A8-4547-989C-6EB5E9313760}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{593F39C7-66A8-4547-989C-6EB5E9313760}.Release|Any CPU.Build.0 = Release|Any CPU
-		{0A4E34EB-C08A-4920-BB1B-08542EDB6DD4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{0A4E34EB-C08A-4920-BB1B-08542EDB6DD4}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{0A4E34EB-C08A-4920-BB1B-08542EDB6DD4}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{0A4E34EB-C08A-4920-BB1B-08542EDB6DD4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -201,7 +195,6 @@ Global
 		{62E8C6ED-B0E7-48E3-9C1C-345F46687E3C} = {E4A0A0FD-0EC6-45C6-92C3-1D81974EE32B}
 		{6B0B4099-06FA-408A-8230-5F952198245B} = {E4A0A0FD-0EC6-45C6-92C3-1D81974EE32B}
 		{6615862D-D68E-48D5-B7EF-0C520C0E0ABD} = {E4A0A0FD-0EC6-45C6-92C3-1D81974EE32B}
-		{0A4E34EB-C08A-4920-BB1B-08542EDB6DD4} = {19660464-978E-4457-846E-B399BB6A3884}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {59CB4F2D-3547-4DDF-9712-7B3F95C1ED66}

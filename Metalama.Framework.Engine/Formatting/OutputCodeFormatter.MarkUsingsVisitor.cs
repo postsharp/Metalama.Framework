@@ -30,6 +30,8 @@ public static partial class OutputCodeFormatter
                 this._collection.Add( node.FullSpan, TextSpanClassification.SourceCode );
             }
             
+            base.DefaultVisit( node );
+            
         }
     }
 }
