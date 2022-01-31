@@ -13,7 +13,7 @@ using System.Threading;
 
 namespace Metalama.Framework.Engine.CodeFixes;
 
-public class SerializationSyntaxTree
+public class SerializableSyntaxTree
 {
     public string FilePath { get; }
 
@@ -23,14 +23,14 @@ public class SerializationSyntaxTree
 
 
     [JsonConstructor]
-    public SerializationSyntaxTree( string filePath, string sourceText, ImmutableArray<SerializableAnnotation> annotations )
+    public SerializableSyntaxTree( string filePath, string sourceText, ImmutableArray<SerializableAnnotation> annotations )
     {
         this.FilePath = filePath;
         this.SourceText = sourceText;
         this.Annotations = annotations;
     }
 
-    public SerializationSyntaxTree( string filePath, SyntaxNode syntaxRoot )
+    public SerializableSyntaxTree( string filePath, SyntaxNode syntaxRoot )
     {
         this.FilePath = filePath;
         this.SourceText = syntaxRoot.ToFullString();
@@ -42,9 +42,9 @@ public class SerializationSyntaxTree
     }
 
 
-    public SerializationSyntaxTree( SyntaxTree tree ) : this( tree.FilePath, tree.GetRoot() ) { }
+    public SerializableSyntaxTree( SyntaxTree tree ) : this( tree.FilePath, tree.GetRoot() ) { }
 
-    public SyntaxNode GetAnnotatedSyntaxNode( CancellationToken cancellationToken )
+    public SyntaxNode GetAnnotatedSyntaxNode( CancellationToken cancellationToken = default )
     {
         var syntaxRoot = SyntaxFactory.ParseCompilationUnit( this.SourceText );
 

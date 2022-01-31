@@ -5,6 +5,7 @@ using Metalama.Backstage.Diagnostics;
 using Metalama.Framework.DesignTime.CodeFixes;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Project;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeRefactorings;
 using System.Diagnostics.CodeAnalysis;
 
@@ -43,12 +44,40 @@ namespace Metalama.Framework.DesignTime
                     return;
                 }
 
+                if ( !context.Document.SupportsSemanticModel )
+                {
+                    this._logger.Trace?.Log( $"ComputeRefactorings('{context.Document.Name}'): no semantic model." );
+                    
+                    return;
+                }
+                
+                // Do not attempt a remote call if we cannot get the declared symbol.
+                var semanticModel = await context.Document.GetSemanticModelAsync( context.CancellationToken );
+
+                if ( semanticModel == null )
+                {
+                    this._logger.Trace?.Log( $"ComputeRefactorings('{context.Document.Name}'): no semantic model." );
+                    
+                    return;
+                }
+                
+                var node = (await semanticModel.SyntaxTree.GetRootAsync( context.CancellationToken )).FindNode( context.Span );
+
+                if ( semanticModel.GetDeclaredSymbol( node ) == null )
+                {
+                    this._logger.Trace?.Log( $"ComputeRefactorings('{context.Document.Name}'): no symbol." );
+                    
+                    return;
+                }
+
+                // Call the service.
                 var result = await this._codeActionDiscoveryService.ComputeRefactoringsAsync(
                     projectOptions.ProjectId,
                     context.Document.FilePath!,
                     context.Span,
                     context.CancellationToken );
 
+                // Translate the model objects into VS refactorings.
                 if ( !result.CodeActions.IsDefaultOrEmpty )
                 {
                     var invocationContext = new CodeActionInvocationContext(

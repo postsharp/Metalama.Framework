@@ -117,8 +117,6 @@ public class CodeActionDiscoveryService : ICodeActionDiscoveryService
 
         if ( symbol == null )
         {
-            this._logger.Warning?.Log( $"ComputeRefactorings('{projectId}', '{syntaxTreePath}'):: cannot resolve the symbol." );
-
             return ComputeRefactoringResult.Empty;
         }
 

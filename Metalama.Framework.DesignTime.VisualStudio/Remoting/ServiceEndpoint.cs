@@ -21,7 +21,9 @@ internal class ServiceEndpoint
         */
         
         var formatter = new JsonMessageFormatter();
-        formatter.JsonSerializer.TypeNameHandling = TypeNameHandling.All; 
+        formatter.JsonSerializer.TypeNameHandling = TypeNameHandling.All;
+        formatter.JsonSerializer.TypeNameAssemblyFormatHandling = TypeNameAssemblyFormatHandling.Simple;
+        
         var handler = new LengthHeaderMessageHandler( stream, stream, formatter );
 
         return new JsonRpc( handler );

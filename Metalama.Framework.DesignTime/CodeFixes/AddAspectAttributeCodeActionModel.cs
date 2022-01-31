@@ -85,6 +85,6 @@ public class AddAspectAttributeCodeActionModel : CodeActionModel
             return CodeActionResult.Empty;
         }
 
-        return new CodeActionResult( ImmutableArray.Create( new SerializationSyntaxTree( syntaxTree.FilePath, newSyntaxRoot ) ) );
+        return new CodeActionResult( ImmutableArray.Create( new SerializableSyntaxTree( syntaxTree.FilePath, newSyntaxRoot ) ) );
     }
 }

@@ -5,12 +5,15 @@ using MessagePack;
 using MessagePack.Resolvers;
 using Metalama.Framework.DesignTime.CodeFixes;
 using Metalama.Framework.Engine.CodeFixes;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.Formatting;
 using Newtonsoft.Json;
 using StreamJsonRpc;
 using StreamJsonRpc.Protocol;
 using System.Collections.Immutable;
 using System.IO;
+using System.Linq;
 using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.CodeFixes;
@@ -77,5 +80,25 @@ public class SerializationTests
         Assert.Equal( "path.cs", roundloop.SyntaxTreeChanges[0].FilePath );
         Assert.Equal( code, roundloop.SyntaxTreeChanges[0].SourceText );
 
+    }
+
+    [Fact]
+    public void Serialize_SyntaxTree()
+    {
+        var code = "class Program { static void Main() {} }";
+        var tree = CSharpSyntaxTree.ParseText( code, path: "path.cs" );
+        var root = tree.GetRoot();
+        var node = root.DescendantNodes().Single( n => n.Kind() == SyntaxKind.ClassDeclaration );
+        var rootWithAnnotation = root.ReplaceNode( node, node.WithAdditionalAnnotations( Formatter.Annotation ) );
+        var treeWithAnnotation = tree.WithRootAndOptions( rootWithAnnotation, tree.Options );
+        var input = new SerializableSyntaxTree( treeWithAnnotation );
+        var roundloop = Roundloop( input );
+        Assert.Single( roundloop.Annotations );
+        Assert.Equal( SerializableAnnotationKind.Formatter, roundloop.Annotations[0].Kind );
+        Assert.Equal( node.Span, roundloop.Annotations[0].TextSpan );
+
+        var roundloopRoot = roundloop.GetAnnotatedSyntaxNode();
+        var roundloopNode = roundloopRoot.DescendantNodes().Single( n => n.Kind() == SyntaxKind.ClassDeclaration );
+        Assert.True( roundloopNode.HasAnnotation( Formatter.Annotation ) );
     }
 }

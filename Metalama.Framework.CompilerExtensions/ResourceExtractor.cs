@@ -192,17 +192,15 @@ namespace Metalama.Framework.CompilerExtensions
             static Assembly? Load( string name )
             {
                 var requestedAssemblyName = new AssemblyName( name );
+                
+                bool CandidateMatchesRequest( AssemblyName candidate )
+                => AssemblyName.ReferenceMatchesDefinition( requestedAssemblyName, candidate )
+                           && (requestedAssemblyName.Version == null || candidate.Version == requestedAssemblyName.Version);
+                
+
 
                 // First try to find the assembly in the AppDomain.
-                var existingAssembly = AppDomain.CurrentDomain.GetAssemblies()
-                    .FirstOrDefault(
-                        x =>
-                        {
-                            var existingAssemblyName = x.GetName();
-
-                            return AssemblyName.ReferenceMatchesDefinition( requestedAssemblyName, existingAssemblyName ) &&
-                                   existingAssemblyName.Version == requestedAssemblyName.Version;
-                        } );
+                var existingAssembly = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault( x => CandidateMatchesRequest( x.GetName() ) );
 
                 if ( existingAssembly != null )
                 {
@@ -216,8 +214,7 @@ namespace Metalama.Framework.CompilerExtensions
                     var assemblyName = assembly.Name;
 
                     // We need to explicitly verify the exact version, because AssemblyName.ReferenceMatchesDefinition is too tolerant. 
-                    if ( AssemblyName.ReferenceMatchesDefinition( requestedAssemblyName, assemblyName )
-                         && (requestedAssemblyName.Version == null || assemblyName.Version == requestedAssemblyName.Version) )
+                    if ( CandidateMatchesRequest( assemblyName ) )
                     {
                         return Assembly.LoadFile( assembly.Path );
                     }

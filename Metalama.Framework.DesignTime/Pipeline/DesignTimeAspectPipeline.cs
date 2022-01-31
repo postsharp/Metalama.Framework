@@ -274,24 +274,39 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
                 if ( this.Status != DesignTimeAspectPipelineStatus.Paused )
                 {
-                    var dirtySyntaxTrees = this.GetDirtySyntaxTrees( compilationToAnalyze! );
+                    PartialCompilation? partialCompilation;
 
-                    // Execute the pipeline if required, and update the cache.
-                    if ( dirtySyntaxTrees.Count > 0 )
+                    if ( this.Status == DesignTimeAspectPipelineStatus.Default )
                     {
-                        var partialCompilation = PartialCompilation.CreatePartial( compilationToAnalyze!, dirtySyntaxTrees );
+                        partialCompilation = PartialCompilation.CreateComplete( compilationToAnalyze! );
+                    }
+                    else
+                    {
+                        var dirtySyntaxTrees = this.GetDirtySyntaxTrees( compilationToAnalyze! );
 
-                        if ( !partialCompilation.IsEmpty )
+                        if ( dirtySyntaxTrees.Count == 0 )
                         {
-                            Interlocked.Increment( ref this._pipelineExecutionCount );
-
-                            if ( !this.TryExecutePartial( partialCompilation, cancellationToken, out compilationResult ) )
-                            {
-                                return false;
-                            }
+                            Logger.DesignTime.Trace?.Log( "There is no dirty tree." );
+                            partialCompilation = null;
+                        }
+                        else
+                        {
+                            partialCompilation = PartialCompilation.CreatePartial( compilationToAnalyze!, dirtySyntaxTrees );
                         }
                     }
 
+                    // Execute the pipeline if required, and update the cache.
+                    if ( partialCompilation != null )
+                    {
+                        Interlocked.Increment( ref this._pipelineExecutionCount );
+
+                        if ( !this.TryExecutePartial( partialCompilation, cancellationToken, out compilationResult ) )
+                        {
+                            return false;
+                        }
+                    }
+
+                    // Return the result from the cache.
                     compilationResult = new CompilationResult( this._currentState.PipelineResult, this._currentState.ValidationResult );
 
                     this._compilationResultCache.Add( compilation, compilationResult );

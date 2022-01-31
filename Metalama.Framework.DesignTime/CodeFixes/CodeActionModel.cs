@@ -34,7 +34,7 @@ namespace Metalama.Framework.DesignTime.CodeFixes
             // Apply the result to the current solution.
             var project = invocationContext.Document.Project;
 
-            return await result.ApplyAsync( project, invocationContext.Logger, false, cancellationToken );
+            return await result.ApplyAsync( project, invocationContext.Logger, true, cancellationToken );
         }
     }
 }

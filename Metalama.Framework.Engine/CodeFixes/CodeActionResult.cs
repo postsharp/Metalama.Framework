@@ -17,17 +17,17 @@ namespace Metalama.Framework.Engine.CodeFixes;
 
 public class CodeActionResult
 {
-    public ImmutableArray<SerializationSyntaxTree> SyntaxTreeChanges { get; }
+    public ImmutableArray<SerializableSyntaxTree> SyntaxTreeChanges { get; }
 
     [JsonConstructor]
-    public CodeActionResult( ImmutableArray<SerializationSyntaxTree> syntaxTreeChanges )
+    public CodeActionResult( ImmutableArray<SerializableSyntaxTree> syntaxTreeChanges )
     {
         this.SyntaxTreeChanges = syntaxTreeChanges;
     }
 
-    public CodeActionResult( IEnumerable<SyntaxTree> modifiedTrees ) : this( modifiedTrees.Select( x => new SerializationSyntaxTree( x ) ).ToImmutableArray() ) { }
+    public CodeActionResult( IEnumerable<SyntaxTree> modifiedTrees ) : this( modifiedTrees.Select( x => new SerializableSyntaxTree( x ) ).ToImmutableArray() ) { }
 
-    public static CodeActionResult Empty { get; } = new( ImmutableArray<SerializationSyntaxTree>.Empty );
+    public static CodeActionResult Empty { get; } = new( ImmutableArray<SerializableSyntaxTree>.Empty );
 
     public async ValueTask<Solution> ApplyAsync( Microsoft.CodeAnalysis.Project project, ILogger logger, bool format, CancellationToken cancellationToken )
     {

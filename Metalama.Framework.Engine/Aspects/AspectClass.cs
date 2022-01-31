@@ -118,7 +118,6 @@ namespace Metalama.Framework.Engine.Aspects
             if ( baseClass != null )
             {
                 this.Description = baseClass.Description;
-                this.DisplayName = baseClass.DisplayName;
                 this.IsInherited = baseClass.IsInherited;
                 this.IsLiveTemplate = baseClass.IsLiveTemplate;
                 layers.AddRange( baseClass.Layers.Select( l => l.LayerName ) );
