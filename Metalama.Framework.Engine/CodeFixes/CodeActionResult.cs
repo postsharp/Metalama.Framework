@@ -4,12 +4,10 @@
 using Metalama.Backstage.Diagnostics;
 using Metalama.Framework.Engine.Formatting;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.Text;
 using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
-using System.Runtime.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 

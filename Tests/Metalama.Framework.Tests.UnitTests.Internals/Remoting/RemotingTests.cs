@@ -5,7 +5,6 @@ using Metalama.Framework.DesignTime.Contracts;
 using Metalama.Framework.DesignTime.Preview;
 using Metalama.Framework.DesignTime.VisualStudio.Remoting;
 using Metalama.Framework.Engine.Pipeline;
-using Metalama.Framework.Project;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -96,16 +95,15 @@ public class RemotingTests
     {
         // Start the server.
         var pipeName = $"Metalama_Test_{Guid.NewGuid()}";
-        using var server = new ServiceHost( ServiceProvider.Empty.WithService( new PreviewImpl()  ), pipeName );
+        using var server = new ServiceHost( ServiceProvider.Empty.WithService( new PreviewImpl() ), pipeName );
         server.Start();
 
         using var client = new ServiceClient( ServiceProvider.Empty, pipeName );
-        var projectHandler = new TestProjectHandler();
         await client.ConnectAsync();
 
         var result = await (await client.GetServerApiAsync()).PreviewTransformationAsync( "projectId", "syntaxTreeName", CancellationToken.None );
         Assert.True( result.IsSuccessful );
-        Assert.Equal("Transformed code", result.TransformedCode );
+        Assert.Equal( "Transformed code", result.TransformedCode );
     }
 
     private class PreviewImpl : ITransformationPreviewServiceImpl

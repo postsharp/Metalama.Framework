@@ -21,7 +21,6 @@ public class SerializableSyntaxTree
 
     public ImmutableArray<SerializableAnnotation> Annotations { get; }
 
-
     [JsonConstructor]
     public SerializableSyntaxTree( string filePath, string sourceText, ImmutableArray<SerializableAnnotation> annotations )
     {
@@ -38,9 +37,7 @@ public class SerializableSyntaxTree
         var annotationFinder = new AnnotationReader();
         annotationFinder.Visit( syntaxRoot );
         this.Annotations = annotationFinder.GetAnnotations();
-
     }
-
 
     public SerializableSyntaxTree( SyntaxTree tree ) : this( tree.FilePath, tree.GetRoot() ) { }
 
@@ -53,7 +50,7 @@ public class SerializableSyntaxTree
             foreach ( var annotation in this.Annotations )
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                
+
                 var realAnnotation = annotation.Kind switch
                 {
                     SerializableAnnotationKind.Formatter => Formatter.Annotation,
@@ -62,15 +59,13 @@ public class SerializableSyntaxTree
                     SerializableAnnotationKind.SourceCode => FormattingAnnotations.SourceCode,
                     _ => throw new AssertionFailedException()
                 };
-                
+
                 var node = syntaxRoot.FindNode( annotation.TextSpan );
-                syntaxRoot = syntaxRoot.ReplaceNode( node, node.WithAdditionalAnnotations(realAnnotation) );
+                syntaxRoot = syntaxRoot.ReplaceNode( node, node.WithAdditionalAnnotations( realAnnotation ) );
             }
         }
 
         return syntaxRoot;
-
-
     }
 
     private class AnnotationReader : CSharpSyntaxWalker
@@ -100,7 +95,7 @@ public class SerializableSyntaxTree
                 {
                     this.AddAnnotation( node, SerializableAnnotationKind.Simplifier );
                 }
-                else if ( node.HasAnnotation( Microsoft.CodeAnalysis.Formatting.Formatter.Annotation ) )
+                else if ( node.HasAnnotation( Formatter.Annotation ) )
                 {
                     this.AddAnnotation( node, SerializableAnnotationKind.Formatter );
                 }
@@ -114,6 +109,7 @@ public class SerializableSyntaxTree
 public readonly struct SerializableAnnotation
 {
     public TextSpan TextSpan { get; }
+
     public SerializableAnnotationKind Kind { get; }
 
     public SerializableAnnotation( TextSpan textSpan, SerializableAnnotationKind kind )
@@ -130,6 +126,3 @@ public enum SerializableAnnotationKind
     Simplifier,
     Formatter
 }
-
-
-

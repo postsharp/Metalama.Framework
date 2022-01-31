@@ -1,9 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Metalama.Framework.Engine.CodeFixes;
 using Microsoft.CodeAnalysis.CodeActions;
-using Newtonsoft.Json;
 using System.Collections.Immutable;
 
 namespace Metalama.Framework.DesignTime.CodeFixes

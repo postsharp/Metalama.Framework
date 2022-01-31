@@ -1,16 +1,12 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using MessagePack;
-using MessagePack.Resolvers;
 using Metalama.Framework.DesignTime.CodeFixes;
 using Metalama.Framework.Engine.CodeFixes;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Formatting;
 using Newtonsoft.Json;
-using StreamJsonRpc;
-using StreamJsonRpc.Protocol;
 using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
@@ -22,11 +18,11 @@ public class SerializationTests
 {
     private static T Roundloop<T>( T input )
     {
-
         var stringWriter = new StringWriter();
-        var serializer = JsonSerializer.Create( new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.All });
-        serializer.Serialize( stringWriter, input);
-        return serializer.Deserialize<T>( new JsonTextReader( new StringReader( stringWriter.ToString() ) ))!;
+        var serializer = JsonSerializer.Create( new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.All } );
+        serializer.Serialize( stringWriter, input );
+
+        return serializer.Deserialize<T>( new JsonTextReader( new StringReader( stringWriter.ToString() ) ) )!;
     }
 
     [Fact]
@@ -62,10 +58,10 @@ public class SerializationTests
     public void Serialize_CodeActionMenu()
     {
         var input = new CodeActionMenuModel( "The title" );
-        input.Items.Add( new AddAspectAttributeCodeActionModel( "AspectTypeName", "SymbolId", "SyntaxTreeFilePath" ));
+        input.Items.Add( new AddAspectAttributeCodeActionModel( "AspectTypeName", "SymbolId", "SyntaxTreeFilePath" ) );
 
         var roundloop = (CodeActionMenuModel) Roundloop( (CodeActionBaseModel) input );
-        
+
         Assert.Equal( "The title", roundloop.Title );
         Assert.Single( roundloop.Items );
     }
@@ -74,12 +70,11 @@ public class SerializationTests
     public void Serialize_CodeActionResult()
     {
         var code = "class Program { static void Main() {} }";
-        var input = new CodeActionResult( new[] { CSharpSyntaxTree.ParseText( code, path: "path.cs" ), } );
+        var input = new CodeActionResult( new[] { CSharpSyntaxTree.ParseText( code, path: "path.cs" ) } );
         var roundloop = Roundloop( input );
         Assert.Single( roundloop.SyntaxTreeChanges );
         Assert.Equal( "path.cs", roundloop.SyntaxTreeChanges[0].FilePath );
         Assert.Equal( code, roundloop.SyntaxTreeChanges[0].SourceText );
-
     }
 
     [Fact]

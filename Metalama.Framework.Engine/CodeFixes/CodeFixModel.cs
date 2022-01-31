@@ -7,7 +7,7 @@ using System.Collections.Immutable;
 namespace Metalama.Framework.Engine.CodeFixes
 {
     /// <summary>
-    /// Represents a <see cref="CodeActionModel"/> and the set of diagnostics to which it is attached. 
+    /// Represents a code action and the set of diagnostics to which it is attached. 
     /// </summary>
     public record CodeFixModel( ICodeAction CodeAction, ImmutableArray<Diagnostic> Diagnostic );
 

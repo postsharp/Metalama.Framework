@@ -4,7 +4,6 @@
 using Metalama.Framework.DesignTime.Refactoring;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeFixes;
-using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Utilities;
 using System.Collections.Immutable;
 
