@@ -34,7 +34,7 @@ namespace Metalama.Framework.Engine.Advices
 
                 if (fieldSyntax.Initializer != null)
                 {
-                    return TemplateMember.Create( fieldTemplate.Declaration, fieldTemplate.TemplateInfo, TemplateKind.IntroductionInitializer );
+                    return TemplateMember.Create( fieldTemplate.Declaration, fieldTemplate.TemplateInfo, TemplateKind.InitializerExpression );
                 }
                 else
                 {
@@ -53,7 +53,7 @@ namespace Metalama.Framework.Engine.Advices
             {
                 if ( eventFieldSyntax.Initializer != null )
                 {
-                    return TemplateMember.Create( eventFieldTemplate.Declaration, eventFieldTemplate.TemplateInfo, TemplateKind.IntroductionInitializer );
+                    return TemplateMember.Create( eventFieldTemplate.Declaration, eventFieldTemplate.TemplateInfo, TemplateKind.InitializerExpression );
                 }
                 else
                 {
@@ -74,7 +74,7 @@ namespace Metalama.Framework.Engine.Advices
 
                 if ( propertySyntax.Initializer != null )
                 {
-                    return TemplateMember.Create( propertyTemplate.Declaration, propertyTemplate.TemplateInfo, TemplateKind.IntroductionInitializer );
+                    return TemplateMember.Create( propertyTemplate.Declaration, propertyTemplate.TemplateInfo, TemplateKind.InitializerExpression );
                 }
                 else
                 {

@@ -44,11 +44,6 @@
         <InternalsVisibleTo Include="Metalama.AspectWorkbench" />
     </ItemGroup>
 
-    <ItemGroup>
-        <None Include="Tests\Validation\CrossAssembly.t.cs" />
-    </ItemGroup>
-
-
     <Import Project="..\..\Metalama.TestFramework\Metalama.TestFramework.targets" />
 
 </Project>

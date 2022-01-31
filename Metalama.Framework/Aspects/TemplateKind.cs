@@ -52,11 +52,9 @@ namespace Metalama.Framework.Aspects
         /// </summary>
         Introduction,
 
-        // TODO: This is an internal value, but it needs to be in the public enum, which is not good.
-
         /// <summary>
         /// Template used for initializer of introduced field, property of event field.
         /// </summary>
-        IntroductionInitializer,
+        InitializerExpression,
     }
 }

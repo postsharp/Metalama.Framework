@@ -28,7 +28,7 @@ namespace Metalama.Framework.Engine.Templating
     /// </summary>
     internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDiagnosticAdder
     {
-        private readonly TemplateSyntaxKind _syntaxKind;
+        private readonly TemplateCompilerSemantics _syntaxKind;
         private readonly string _templateName;
         private readonly SyntaxTreeAnnotationMap _syntaxTreeAnnotationMap;
         private readonly IDiagnosticAdder _diagnosticAdder;
@@ -43,7 +43,7 @@ namespace Metalama.Framework.Engine.Templating
 
         public TemplateCompilerRewriter(
             string templateName,
-            TemplateSyntaxKind syntaxKind,
+            TemplateCompilerSemantics syntaxKind,
             Compilation runTimeCompilation,
             Compilation compileTimeCompilation,
             SyntaxTreeAnnotationMap syntaxTreeAnnotationMap,
@@ -926,7 +926,7 @@ namespace Metalama.Framework.Engine.Templating
 
         public override SyntaxNode VisitVariableDeclarator( VariableDeclaratorSyntax node )
         {
-            if ( this._syntaxKind == TemplateSyntaxKind.FieldInitializer || this._syntaxKind == TemplateSyntaxKind.EventFieldInitializer )
+            if ( this._syntaxKind == TemplateCompilerSemantics.Initializer )
             {
                 this.Indent( 3 );
 

@@ -87,7 +87,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
                             TemplateNameHelper.GetCompiledTemplateName( node.Identifier.ValueText ),
                             this._compileTimeCompilation,
                             node,
-                            TemplateSyntaxKind.Self,
+                            TemplateCompilerSemantics.Default,
                             this._parent._semanticModel,
                             this._parent._diagnosticAdder,
                             CancellationToken.None,

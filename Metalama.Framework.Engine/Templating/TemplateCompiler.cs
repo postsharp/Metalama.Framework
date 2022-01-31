@@ -95,7 +95,7 @@ namespace Metalama.Framework.Engine.Templating
             string templateName,
             Compilation compileTimeCompilation,
             SyntaxNode sourceSyntaxRoot,
-            TemplateSyntaxKind templateSyntaxKind,
+            TemplateCompilerSemantics templateSyntaxKind,
             SemanticModel semanticModel,
             IDiagnosticAdder diagnostics,
             CancellationToken cancellationToken,
