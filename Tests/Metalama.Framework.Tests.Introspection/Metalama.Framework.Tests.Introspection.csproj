@@ -5,7 +5,7 @@
     <PropertyGroup>
         <TargetFramework>net6.0</TargetFramework>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-        <RootNamespace>Metalama.Framework.Tests.Workspaces</RootNamespace>
+        <RootNamespace>Metalama.Framework.Tests.Introspection</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>

@@ -66,7 +66,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Metalama.Framework.Tests.Un
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Metalama.Framework.Introspection", "Metalama.Framework.Introspection\Metalama.Framework.Introspection.csproj", "{8F215547-1833-486E-BC25-F403E89C8B4A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Metalama.Framework.Tests.Workspaces", "Tests\Metalama.Framework.Tests.Workspaces\Metalama.Framework.Tests.Workspaces.csproj", "{6B0B4099-06FA-408A-8230-5F952198245B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Metalama.Framework.Tests.Introspection", "Tests\Metalama.Framework.Tests.Introspection\Metalama.Framework.Tests.Introspection.csproj", "{6B0B4099-06FA-408A-8230-5F952198245B}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Metalama.LinqPad", "Metalama.LinqPad\Metalama.LinqPad.csproj", "{A651E922-244B-4EA3-B6C2-F609A5E66FC6}"
 EndProject
