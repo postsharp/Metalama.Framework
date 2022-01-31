@@ -39,9 +39,8 @@ namespace Metalama.Framework.DesignTime
         private readonly ICodeActionExecutionService _codeActionExecutionService;
 
         public TheCodeFixProvider() : this( DesignTimeServiceProviderFactory.GetServiceProvider() ) { }
-        
-        public override ImmutableArray<string> FixableDiagnosticIds { get; } 
-            
+
+        public override ImmutableArray<string> FixableDiagnosticIds { get; }
 
         public TheCodeFixProvider( IServiceProvider serviceProvider )
         {

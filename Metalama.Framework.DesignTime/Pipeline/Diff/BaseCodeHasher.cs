@@ -8,6 +8,10 @@ using Microsoft.CodeAnalysis.CSharp;
 
 namespace Metalama.Framework.DesignTime.Pipeline.Diff;
 
+/// <summary>
+/// Base for the auto-generated <see cref="RunTimeCodeHasher"/> and <see cref="CompileTimeCodeHasher"/>.
+/// Generates a hash that is unique enough under the desired invariants.
+/// </summary>
 internal abstract class BaseCodeHasher : CSharpSyntaxWalker
 {
     private readonly XXH64 _hasher;

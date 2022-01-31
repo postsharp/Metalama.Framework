@@ -22,13 +22,13 @@ namespace Metalama.Framework.DesignTime.VisualStudio
 
         public Version Version { get; }
 
-        public T? GetService<T>( ) 
-            where T : class, ICompilerServiceProvider
+        public T? GetService<T>()
+            where T : class, ICompilerService
         {
             var type = typeof(T);
 
             object? service;
-            
+
             if ( type.IsEquivalentTo( typeof(IClassificationService) ) )
             {
                 service = new DesignTimeClassificationService();

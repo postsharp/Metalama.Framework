@@ -8,5 +8,4 @@ namespace Metalama.Framework.DesignTime.Contracts
     /// can be returned synchronously.
     /// </summary>
     public interface ICompilerService { }
-
 }

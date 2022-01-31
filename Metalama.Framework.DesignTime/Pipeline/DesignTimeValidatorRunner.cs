@@ -47,8 +47,6 @@ internal class DesignTimeValidatorRunner
             visitor.Visit( model );
         }
 
-
-        
         // Perform additional analysis not done by the design-time pipeline.
         // We do it from here so that we benefit from caching.
         TemplatingCodeValidator.Validate(

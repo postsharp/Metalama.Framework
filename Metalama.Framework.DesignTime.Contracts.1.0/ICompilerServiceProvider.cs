@@ -21,7 +21,7 @@ namespace Metalama.Framework.DesignTime.Contracts
         /// Gets a service.
         /// </summary>
         T? GetService<T>()
-            where T : class, ICompilerServiceProvider;
+            where T : class, ICompilerService;
 
         /// <summary>
         /// Event raised when the compiler-side component is unloaded. (Which now never happens).

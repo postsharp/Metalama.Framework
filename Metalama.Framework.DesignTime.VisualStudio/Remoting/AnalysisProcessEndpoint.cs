@@ -16,7 +16,6 @@ namespace Metalama.Framework.DesignTime.VisualStudio.Remoting;
 /// <summary>
 /// Implements the remoting API of the analysis process.
 /// </summary>
-
 internal partial class AnalysisProcessEndpoint : ServiceEndpoint, IService, IDisposable
 {
     private readonly ILogger _logger;

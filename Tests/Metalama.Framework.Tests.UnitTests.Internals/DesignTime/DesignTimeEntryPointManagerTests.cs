@@ -79,9 +79,8 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
 
             public Version Version { get; }
 
-            
-            public T? GetService<T>() 
-                where T : class, ICompilerServiceProvider 
+            public T? GetService<T>()
+                where T : class, ICompilerService
                 => throw new NotImplementedException();
 
             public event Action? Unloaded;

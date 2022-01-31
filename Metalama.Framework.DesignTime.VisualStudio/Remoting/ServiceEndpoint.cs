@@ -6,7 +6,6 @@ using StreamJsonRpc;
 
 namespace Metalama.Framework.DesignTime.VisualStudio.Remoting;
 
-
 /// <summary>
 /// A base class for <see cref="UserProcessEndpoint"/> and <see cref="AnalysisProcessEndpoint"/>.
 /// </summary>
@@ -15,7 +14,7 @@ internal class ServiceEndpoint
     protected static JsonRpc CreateRpc( Stream stream )
     {
         // MessagePackFormatter does not work in the devenv process, probably because devenv sets it up with some global effect.
-        
+
         /*
         var formatter = new MessagePackFormatter();
         var options = MessagePackSerializerOptions.Standard.WithResolver(

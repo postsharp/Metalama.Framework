@@ -37,7 +37,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
         public ImmutableDictionary<string, IntroducedSyntaxTree> IntroducedSyntaxTrees { get; } = _emptyIntroducedSyntaxTrees;
 
         /// <summary>
-        /// Maps the syntax tree name to the pipeline result for this syntax tree.
+        /// Gets a maps if the syntax tree name to the pipeline result for this syntax tree.
         /// </summary>
         public ImmutableDictionary<string, SyntaxTreePipelineResult> SyntaxTreeResults { get; } = _emptySyntaxTreeResults;
 

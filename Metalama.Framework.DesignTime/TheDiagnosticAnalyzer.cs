@@ -101,7 +101,6 @@ namespace Metalama.Framework.DesignTime
                     return;
                 }
 
-
                 if ( !this._pipelineFactory.TryExecute(
                         projectOptions,
                         compilation,
@@ -114,8 +113,8 @@ namespace Metalama.Framework.DesignTime
                     return;
                 }
 
-                var diagnostics = compilationResult.GetAllDiagnostics(syntaxTreeFilePath);
-                var suppressions = compilationResult.GetAllSuppressions(syntaxTreeFilePath);
+                var diagnostics = compilationResult.GetAllDiagnostics( syntaxTreeFilePath );
+                var suppressions = compilationResult.GetAllSuppressions( syntaxTreeFilePath );
 
                 // Report diagnostics.
                 DesignTimeDiagnosticHelper.ReportDiagnostics(

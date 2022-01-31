@@ -18,7 +18,7 @@ internal sealed class CompilationResult
         this.PipelineResult = pipelineResult;
     }
 
-    internal IEnumerable<Diagnostic> GetAllDiagnostics(string path)
+    internal IEnumerable<Diagnostic> GetAllDiagnostics( string path )
     {
         if ( this.PipelineResult.SyntaxTreeResults.TryGetValue( path, out var syntaxTreeResults ) )
         {
@@ -27,7 +27,6 @@ internal sealed class CompilationResult
                 yield return diagnostic;
             }
         }
-        
 
         if ( this.ValidationResult.SyntaxTreeResults.TryGetValue( path, out var validationResult ) )
         {
@@ -37,7 +36,7 @@ internal sealed class CompilationResult
             }
         }
     }
-    
+
     internal IEnumerable<Diagnostic> GetAllDiagnostics()
     {
         foreach ( var syntaxTree in this.PipelineResult.SyntaxTreeResults.Values )
@@ -75,8 +74,8 @@ internal sealed class CompilationResult
             }
         }
     }
-    
-    internal IEnumerable<CacheableScopedSuppression> GetAllSuppressions(string path)
+
+    internal IEnumerable<CacheableScopedSuppression> GetAllSuppressions( string path )
     {
         if ( this.PipelineResult.SyntaxTreeResults.TryGetValue( path, out var syntaxTreeResults ) )
         {
@@ -85,7 +84,6 @@ internal sealed class CompilationResult
                 yield return diagnostic;
             }
         }
-        
 
         if ( this.ValidationResult.SyntaxTreeResults.TryGetValue( path, out var validationResult ) )
         {

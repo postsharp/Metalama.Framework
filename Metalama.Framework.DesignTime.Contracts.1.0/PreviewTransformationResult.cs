@@ -16,13 +16,13 @@ namespace Metalama.Framework.DesignTime.Contracts
 
         public string[]? ErrorMessages { get; set; }
 
-        public PreviewTransformationResult( bool isSuccessful, string? transformedCode, string[]? errorMessages )
+        public PreviewTransformationResult( bool isSuccessful, string? transformedSourceText, string[]? errorMessages )
         {
             this.IsSuccessful = isSuccessful;
 
             if ( isSuccessful )
             {
-                this.TransformedSourceText = transformedCode ?? throw new ArgumentNullException( nameof(transformedCode) );
+                this.TransformedSourceText = transformedSourceText ?? throw new ArgumentNullException( nameof(transformedSourceText) );
             }
             else
             {

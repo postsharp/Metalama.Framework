@@ -75,18 +75,20 @@ namespace Metalama.Framework.CompilerExtensions
             {
                 Initialize();
 
-                var assembly = GetAssembly( assemblyName );
+                var assemblyQualifiedName = _embeddedAssemblies[assemblyName].Name.ToString();
+
+                var assembly = GetAssembly( assemblyQualifiedName );
 
                 if ( assembly == null )
                 {
-                    throw new ArgumentOutOfRangeException( $"Cannot load the assembly '{assemblyName}'" );
+                    throw new ArgumentOutOfRangeException( $"Cannot load the assembly '{assemblyQualifiedName}'" );
                 }
 
                 var type = assembly.GetType( typeName );
 
                 if ( type == null )
                 {
-                    throw new ArgumentOutOfRangeException( $"Cannot load the type '{typeName}' in assembly '{assemblyName}'" );
+                    throw new ArgumentOutOfRangeException( $"Cannot load the type '{typeName}' in assembly '{assemblyQualifiedName}'" );
                 }
 
                 return Activator.CreateInstance( type );
