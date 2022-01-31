@@ -16,11 +16,11 @@ internal partial class AnalysisProcessEndpoint
     /// <summary>
     /// Implementation of the <see cref="IAnalysisProcessApi"/> interface. Processes remote requests.
     /// </summary>
-    private class ServiceImpl : IAnalysisProcessApi
+    private class ApiImplementation : IAnalysisProcessApi
     {
         private readonly AnalysisProcessEndpoint _parent;
 
-        public ServiceImpl( AnalysisProcessEndpoint parent )
+        public ApiImplementation( AnalysisProcessEndpoint parent )
         {
             this._parent = parent;
         }

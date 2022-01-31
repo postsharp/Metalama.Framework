@@ -23,7 +23,7 @@ internal partial class AnalysisProcessEndpoint : ServiceEndpoint, IService, IDis
     private static AnalysisProcessEndpoint? _instance;
 
     private readonly string? _pipeName;
-    private readonly ServiceImpl _service;
+    private readonly ApiImplementation _service;
     private readonly CancellationTokenSource _startCancellationSource = new();
     private readonly ConcurrentDictionary<string, string> _connectedClients = new();
     private readonly ConcurrentDictionary<string, ImmutableDictionary<string, string>> _sourcesForUnconnectedClients = new();
@@ -71,7 +71,7 @@ internal partial class AnalysisProcessEndpoint : ServiceEndpoint, IService, IDis
 
         this._serviceProvider = serviceProvider;
         this._pipeName = pipeName;
-        this._service = new ServiceImpl( this );
+        this._service = new ApiImplementation( this );
     }
 
     public static string GetPipeName( int processId ) => $"Metalama_{processId}_{AssemblyMetadataReader.BuildId}";

@@ -21,7 +21,7 @@ internal partial class UserProcessEndpoint : ServiceEndpoint, IDisposable, ICode
 {
     private readonly ILogger _logger;
     private readonly string? _pipeName;
-    private readonly ServiceImpl _serviceImpl;
+    private readonly ApiImplementation _apiImplementation;
     private readonly ConcurrentDictionary<string, ImmutableDictionary<string, string>> _unhandledSources = new();
     private readonly ConcurrentDictionary<string, IProjectHandlerCallback> _projectHandlers = new();
     private readonly TaskCompletionSource<bool> _connectTask = new();
@@ -34,7 +34,7 @@ internal partial class UserProcessEndpoint : ServiceEndpoint, IDisposable, ICode
     {
         this._logger = serviceProvider.GetLoggerFactory().GetLogger( "Remoting" );
         this._pipeName = pipeName ?? GetPipeName();
-        this._serviceImpl = new ServiceImpl( this );
+        this._apiImplementation = new ApiImplementation( this );
     }
 
     public async Task ConnectAsync( CancellationToken cancellationToken = default )
@@ -47,7 +47,8 @@ internal partial class UserProcessEndpoint : ServiceEndpoint, IDisposable, ICode
             await this._pipeStream.ConnectAsync( cancellationToken );
 
             this._rpc = CreateRpc( this._pipeStream );
-            this._rpc.AddLocalRpcTarget<IUserProcessApi>( this._serviceImpl, null );
+            this._rpc.AddLocalRpcTarget<IUserProcessApi>( this._apiImplementation, null );
+            this._rpc.AddLocalRpcTarget<IProjectHandlerCallback>( this._apiImplementation, null );
             this._server = this._rpc.Attach<IAnalysisProcessApi>();
             this._rpc.StartListening();
 
@@ -86,8 +87,8 @@ internal partial class UserProcessEndpoint : ServiceEndpoint, IDisposable, ICode
 
     public void Dispose()
     {
-        this._pipeStream?.Dispose();
         this._rpc?.Dispose();
+        this._pipeStream?.Dispose();
     }
 
     public event Action<bool>? IsEditingCompileTimeCodeChanged;
