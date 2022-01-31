@@ -1,21 +1,18 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Framework.Engine.CodeFixes;
 using Microsoft.CodeAnalysis.CodeActions;
-using System.Collections.Generic;
+using Newtonsoft.Json;
 using System.Collections.Immutable;
-using System.Linq;
-using System.Runtime.Serialization;
 
-namespace Metalama.Framework.Engine.CodeFixes
+namespace Metalama.Framework.DesignTime.CodeFixes
 {
     /// <summary>
     /// Represents a code action menu, with children items.
     /// </summary>
-    [DataContract]
     public class CodeActionMenuModel : CodeActionBaseModel
     {
-        [DataMember( Order = NextKey + 0 )]
         public List<CodeActionBaseModel> Items { get; } = new();
 
         public CodeActionMenuModel( string title ) : base( title ) { }

@@ -5,7 +5,7 @@ using Metalama.Backstage.Diagnostics;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 
-namespace Metalama.Framework.Engine.CodeFixes;
+namespace Metalama.Framework.DesignTime.CodeFixes;
 
 public class CodeActionInvocationContext
 {
@@ -17,10 +17,13 @@ public class CodeActionInvocationContext
 
     public ILogger Logger { get; }
 
-    public CodeActionInvocationContext( ICodeActionExecutionService service, Document document, ILogger logger )
+    public string ProjectId { get; }
+
+    public CodeActionInvocationContext( ICodeActionExecutionService service, Document document, ILogger logger, string projectId )
     {
         this.Service = service;
         this.Document = document;
         this.Logger = logger;
+        this.ProjectId = projectId;
     }
 }

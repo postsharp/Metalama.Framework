@@ -11,23 +11,30 @@ using Metalama.Framework.Engine.Utilities;
 
 namespace Metalama.Framework.DesignTime.VisualStudio;
 
-public static class VisualStudioServiceProviderFactory
+public static class VsServiceProviderFactory
 {
     private static readonly object _initializeSync = new();
     private static volatile ServiceProvider? _serviceProvider;
 
     public static ServiceProvider GetServiceProvider()
     {
+        var processKind = DebuggingHelper.ProcessKind;
+
+        if ( processKind == ProcessKind.Compiler )
+        {
+            throw new InvalidOperationException();
+        }
+
         if ( _serviceProvider == null )
         {
             lock ( _initializeSync )
             {
                 if ( _serviceProvider == null )
                 {
-                    switch ( DebuggingHelper.ProcessKind )
+                    switch ( processKind )
                     {
                         case ProcessKind.DevEnv:
-                            _serviceProvider = DesignTimeServiceProviderFactory.GetServiceProvider( false );
+                            _serviceProvider = DesignTimeServiceProviderFactory.GetServiceProvider();
 
                             var serviceClient = new ServiceClient( _serviceProvider );
                             _ = serviceClient.ConnectAsync();

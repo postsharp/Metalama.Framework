@@ -5,21 +5,17 @@ using Metalama.Framework.DesignTime.Refactoring;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeFixes;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Utilities;
 using System.Collections.Immutable;
-using System.Runtime.Serialization;
 
 namespace Metalama.Framework.DesignTime.CodeFixes;
 
-[DataContract]
 public class AddAspectAttributeCodeActionModel : CodeActionModel
 {
-    [DataMember( Order = NextKey + 0 )]
     public string AspectTypeName { get; set; }
 
-    [DataMember( Order = NextKey + 1 )]
     public string TargetSymbolId { get; set; }
 
-    [DataMember( Order = NextKey + 2 )]
     public string SyntaxTreeFilePath { get; set; }
 
     public AddAspectAttributeCodeActionModel( string aspectTypeName, string targetSymbolId, string syntaxTreeFilePath ) : base(
@@ -38,7 +34,7 @@ public class AddAspectAttributeCodeActionModel : CodeActionModel
         this.SyntaxTreeFilePath = null!;
     }
 
-    protected override async Task<CodeActionResult> ExecuteAsync( CodeActionExecutionContext executionContext, CancellationToken cancellationToken )
+    public override async Task<CodeActionResult> ExecuteAsync( CodeActionExecutionContext executionContext, CancellationToken cancellationToken )
     {
         var lastDot = this.AspectTypeName.LastIndexOf( '.' );
         string ns, typeName;
@@ -70,7 +66,7 @@ public class AddAspectAttributeCodeActionModel : CodeActionModel
 
         var syntaxRoot = await syntaxTree.GetRootAsync( cancellationToken );
 
-        var targetSymbol = compilation.Factory.GetDeclarationFromId( this.TargetSymbolId )?.GetSymbol();
+        var targetSymbol = new SymbolId( this.TargetSymbolId ).Resolve( compilation.RoslynCompilation, cancellationToken: cancellationToken );
 
         if ( targetSymbol == null )
         {
@@ -89,6 +85,6 @@ public class AddAspectAttributeCodeActionModel : CodeActionModel
             return CodeActionResult.Empty;
         }
 
-        return new CodeActionResult( ImmutableArray.Create( new SyntaxTreeChange( syntaxTree.FilePath, newSyntaxRoot ) ) );
+        return new CodeActionResult( ImmutableArray.Create( new SerializationSyntaxTree( syntaxTree.FilePath, newSyntaxRoot ) ) );
     }
 }

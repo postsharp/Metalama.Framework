@@ -6,13 +6,13 @@ using Metalama.Framework.Engine.Pipeline;
 
 namespace Metalama.Framework.DesignTime.VisualStudio;
 
-public class VsUserProcessSourceGenerator : DesignTimeSourceGenerator
+public class VsUserProcessSourceGenerator : TheSourceGenerator
 {
     protected override ProjectHandler CreateSourceGeneratorImpl( IProjectOptions projectOptions )
         => new VsUserProcessProjectHandler( this.ServiceProvider, projectOptions );
 
     // This constructor is called by the facade.
-    public VsUserProcessSourceGenerator() : this( VisualStudioServiceProviderFactory.GetServiceProvider() ) { }
+    public VsUserProcessSourceGenerator() : this( VsServiceProviderFactory.GetServiceProvider() ) { }
 
     internal VsUserProcessSourceGenerator( ServiceProvider serviceProvider ) : base( serviceProvider ) { }
 }

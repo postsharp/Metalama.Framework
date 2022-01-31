@@ -27,16 +27,16 @@ namespace Metalama.Framework.DesignTime
     /// Our implementation of <see cref="DiagnosticAnalyzer"/>. It reports all diagnostics that we produce.
     /// </summary>
     [ExcludeFromCodeCoverage]
-    internal class DesignTimeAnalyzer : DiagnosticAnalyzer
+    public class TheDiagnosticAnalyzer : DiagnosticAnalyzer
     {
         private readonly DesignTimeDiagnosticDefinitions _designTimeDiagnosticDefinitions = DesignTimeDiagnosticDefinitions.GetInstance();
 
         private readonly ILogger _logger;
         private readonly DesignTimeAspectPipelineFactory _pipelineFactory;
 
-        public DesignTimeAnalyzer() : this( DesignTimeServiceProviderFactory.GetServiceProvider() ) { }
+        public TheDiagnosticAnalyzer() : this( DesignTimeServiceProviderFactory.GetServiceProvider() ) { }
 
-        public DesignTimeAnalyzer( IServiceProvider serviceProvider )
+        public TheDiagnosticAnalyzer( IServiceProvider serviceProvider )
         {
             this._logger = serviceProvider.GetLoggerFactory().GetLogger( "DesignTime" );
             this._pipelineFactory = serviceProvider.GetRequiredService<DesignTimeAspectPipelineFactory>();
@@ -45,7 +45,7 @@ namespace Metalama.Framework.DesignTime
         public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics
             => this._designTimeDiagnosticDefinitions.SupportedDiagnosticDescriptors.Values.ToImmutableArray();
 
-        static DesignTimeAnalyzer()
+        static TheDiagnosticAnalyzer()
         {
             Logger.Initialize();
         }

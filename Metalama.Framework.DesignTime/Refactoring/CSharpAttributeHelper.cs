@@ -56,7 +56,7 @@ namespace Metalama.Framework.DesignTime.Refactoring
 
             foreach ( var ns in attribute.Imports )
             {
-                if ( ns == null )
+                if ( string.IsNullOrEmpty( ns ) )
                 {
                     continue;
                 }

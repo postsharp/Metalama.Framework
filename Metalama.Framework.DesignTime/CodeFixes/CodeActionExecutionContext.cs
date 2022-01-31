@@ -3,9 +3,8 @@
 
 using Metalama.Backstage.Diagnostics;
 using Metalama.Framework.Engine.CodeModel;
-using System;
 
-namespace Metalama.Framework.Engine.CodeFixes;
+namespace Metalama.Framework.DesignTime.CodeFixes;
 
 public class CodeActionExecutionContext
 {

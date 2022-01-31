@@ -15,7 +15,12 @@ using System.Collections.Immutable;
 
 namespace Metalama.Framework.DesignTime.Preview;
 
-public class TransformationPreviewServiceImpl : IService
+public interface ITransformationPreviewServiceImpl : IService
+{
+    Task<PreviewTransformationResult> PreviewTransformationAsync( string projectId, string syntaxTreeName, CancellationToken cancellationToken );
+}
+
+public class TransformationPreviewServiceImpl : ITransformationPreviewServiceImpl
 {
     private readonly DesignTimeAspectPipelineFactory _designTimeAspectPipelineFactory;
 

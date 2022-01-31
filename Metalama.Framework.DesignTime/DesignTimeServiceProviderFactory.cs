@@ -15,7 +15,7 @@ public static class DesignTimeServiceProviderFactory
     private static readonly object _initializeSync = new();
     private static volatile ServiceProvider? _serviceProvider;
 
-    public static ServiceProvider GetServiceProvider( bool isImplementationProcess = true )
+    public static ServiceProvider GetServiceProvider()
     {
         if ( _serviceProvider == null )
         {
@@ -30,9 +30,15 @@ public static class DesignTimeServiceProviderFactory
                     _serviceProvider = _serviceProvider
                         .WithService( new DesignTimeAspectPipelineFactory( _serviceProvider, new CompileTimeDomain() ) );
 
-                    if ( isImplementationProcess )
+                    if ( DebuggingHelper.ProcessKind != ProcessKind.DevEnv )
                     {
-                        _serviceProvider = _serviceProvider.WithService( new CodeActionDiscoveryServiceImpl( _serviceProvider ) );
+                        _serviceProvider = _serviceProvider.WithServices(
+                            new CodeActionDiscoveryService( _serviceProvider ),
+                            new CodeActionExecutionService( _serviceProvider ) );
+                    }
+                    else
+                    {
+                        // The service will be registered by VsDesignTimeServiceProviderFactory.
                     }
                 }
             }

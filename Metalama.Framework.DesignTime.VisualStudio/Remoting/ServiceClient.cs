@@ -2,7 +2,9 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Backstage.Diagnostics;
-using Metalama.Framework.Project;
+using Metalama.Framework.DesignTime.CodeFixes;
+using Metalama.Framework.Engine.CodeFixes;
+using Microsoft.CodeAnalysis.Text;
 using Microsoft.VisualStudio.Threading;
 using StreamJsonRpc;
 using System.Collections.Concurrent;
@@ -12,7 +14,7 @@ using System.IO.Pipes;
 
 namespace Metalama.Framework.DesignTime.VisualStudio.Remoting;
 
-internal class ServiceClient : ServiceEndpoint, IDisposable, IService
+internal class ServiceClient : ServiceEndpoint, IDisposable, ICodeActionDiscoveryService, ICodeActionExecutionService
 {
     private readonly ILogger _logger;
     private readonly string? _pipeName;
@@ -120,5 +122,30 @@ internal class ServiceClient : ServiceEndpoint, IDisposable, IService
         {
             this._parent.IsEditingCompileTimeCodeChanged?.Invoke( isEditing );
         }
+    }
+
+    async Task<ComputeRefactoringResult> ICodeActionDiscoveryService.ComputeRefactoringsAsync(
+        string projectId,
+        string syntaxTreePath,
+        TextSpan span,
+        CancellationToken cancellationToken )
+    {
+        var peer = await this.GetServerApiAsync( cancellationToken );
+
+        return await peer.ComputeRefactoringsAsync(
+            projectId,
+            syntaxTreePath,
+            span,
+            cancellationToken );
+    }
+
+    async Task<CodeActionResult> ICodeActionExecutionService.ExecuteCodeActionAsync(
+        string projectId,
+        CodeActionModel codeActionModel,
+        CancellationToken cancellationToken )
+    {
+        var peer = await this.GetServerApiAsync( cancellationToken );
+
+        return await peer.ExecuteCodeActionAsync( projectId, codeActionModel, cancellationToken );
     }
 }

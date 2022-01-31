@@ -8,6 +8,7 @@ using Metalama.Framework.DesignTime.Utilities;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CodeFixes;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeActions;
@@ -23,7 +24,7 @@ namespace Metalama.Framework.DesignTime
     // ReSharper disable UnusedType.Global
 
     [ExcludeFromCodeCoverage]
-    public class CentralCodeFixProvider : CodeFixProvider
+    public class TheCodeFixProvider : CodeFixProvider
     {
         private const string _makePartialKey = "Metalama.MakePartial";
         private readonly DesignTimeDiagnosticDefinitions _designTimeDiagnosticDefinitions = DesignTimeDiagnosticDefinitions.GetInstance();
@@ -31,9 +32,9 @@ namespace Metalama.Framework.DesignTime
         private readonly ILogger _logger;
         private readonly ICodeActionExecutionService _codeActionExecutionService;
 
-        public CentralCodeFixProvider() : this( DesignTimeServiceProviderFactory.GetServiceProvider() ) { }
+        public TheCodeFixProvider() : this( DesignTimeServiceProviderFactory.GetServiceProvider() ) { }
 
-        public CentralCodeFixProvider( IServiceProvider serviceProvider )
+        public TheCodeFixProvider( IServiceProvider serviceProvider )
         {
             this._logger = serviceProvider.GetLoggerFactory().GetLogger( "CodeFix" );
             serviceProvider.GetRequiredService<ICodeActionDiscoveryService>();
@@ -48,6 +49,15 @@ namespace Metalama.Framework.DesignTime
         public override Task RegisterCodeFixesAsync( CodeFixContext context )
         {
             this._logger.Trace?.Log( "DesignTimeCodeFixProvider.RegisterCodeFixesAsync" );
+
+            var projectOptions = new ProjectOptions( context.Document.Project );
+
+            if ( string.IsNullOrEmpty( projectOptions.ProjectId ) )
+            {
+                this._logger.Trace?.Log( "Not a Metalama project." );
+
+                return Task.CompletedTask;
+            }
 
             if ( context.Diagnostics.Any( d => d.Id == GeneralDiagnosticDescriptors.TypeNotPartial.Id ) )
             {
@@ -75,11 +85,15 @@ namespace Metalama.Framework.DesignTime
                     return Task.CompletedTask;
                 }
 
-                var invocationContext = new CodeActionInvocationContext( this._codeActionExecutionService, context.Document, this._logger );
+                var invocationContext = new CodeActionInvocationContext(
+                    this._codeActionExecutionService,
+                    context.Document,
+                    this._logger,
+                    projectOptions.ProjectId );
 
                 foreach ( var fix in codeFixes )
                 {
-                    foreach ( var codeAction in fix.CodeAction.ToCodeActions( invocationContext ) )
+                    foreach ( var codeAction in ((CodeActionBaseModel) fix.CodeAction).ToCodeActions( invocationContext ) )
                     {
                         context.RegisterCodeFix( codeAction, fix.Diagnostic );
                     }

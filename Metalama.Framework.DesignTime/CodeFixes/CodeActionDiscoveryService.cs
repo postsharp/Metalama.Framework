@@ -4,6 +4,8 @@
 using Metalama.Backstage.Diagnostics;
 using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.Engine.CodeFixes;
+using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
@@ -12,18 +14,70 @@ using System.Collections.Immutable;
 
 namespace Metalama.Framework.DesignTime.CodeFixes;
 
-public class CodeActionDiscoveryServiceImpl : ICodeActionDiscoveryService
+public class CodeActionExecutionService : ICodeActionExecutionService
+{
+    private readonly DesignTimeAspectPipelineFactory _pipelineFactory;
+    private readonly ILogger _logger;
+
+    public CodeActionExecutionService( IServiceProvider serviceProvider )
+    {
+        this._pipelineFactory = serviceProvider.GetRequiredService<DesignTimeAspectPipelineFactory>();
+        this._logger = serviceProvider.GetLoggerFactory().GetLogger( "CodeAction" );
+    }
+
+    public async Task<CodeActionResult> ExecuteCodeActionAsync( string projectId, CodeActionModel codeActionModel, CancellationToken cancellationToken )
+    {
+        if ( !this._pipelineFactory.TryGetPipeline( projectId, out var pipeline ) )
+        {
+            this._logger.Error?.Log( "Cannot get the pipeline." );
+
+            return CodeActionResult.Empty;
+        }
+
+        var compilation = pipeline.LastCompilation;
+
+        if ( compilation == null )
+        {
+            this._logger.Error?.Log( "Cannot get the compilation." );
+
+            return CodeActionResult.Empty;
+        }
+
+        var partialCompilation = PartialCompilation.CreateComplete( compilation );
+
+        if ( !pipeline.TryGetConfiguration(
+                partialCompilation,
+                NullDiagnosticAdder.Instance,
+                true,
+                cancellationToken,
+                out var configuration ) )
+        {
+            this._logger.Error?.Log( "Cannot initialize the pipeline." );
+
+            return CodeActionResult.Empty;
+        }
+
+        var compilationModel = CompilationModel.CreateInitialInstance( configuration.ProjectModel, partialCompilation );
+
+        var executionContext = new CodeActionExecutionContext( configuration.ServiceProvider, compilationModel, this._logger, projectId );
+
+        return await codeActionModel.ExecuteAsync( executionContext, cancellationToken );
+        
+    }
+}
+
+public class CodeActionDiscoveryService : ICodeActionDiscoveryService
 {
     private readonly ILogger _logger;
     private readonly DesignTimeAspectPipelineFactory _pipelineFactory;
 
-    public CodeActionDiscoveryServiceImpl( IServiceProvider serviceProvider )
+    public CodeActionDiscoveryService( IServiceProvider serviceProvider )
     {
         this._logger = serviceProvider.GetLoggerFactory().GetLogger( "CodeRefactoring" );
         this._pipelineFactory = serviceProvider.GetRequiredService<DesignTimeAspectPipelineFactory>();
     }
 
-    public async Task<ImmutableArray<CodeActionBaseModel>> ComputeRefactoringsAsync(
+    public async Task<ComputeRefactoringResult> ComputeRefactoringsAsync(
         string projectId,
         string syntaxTreePath,
         TextSpan span,
@@ -33,7 +87,7 @@ public class CodeActionDiscoveryServiceImpl : ICodeActionDiscoveryService
         {
             this._logger.Warning?.Log( $"ComputeRefactorings('{projectId}', '{syntaxTreePath}'): cannot get the pipeline for project '{projectId}'." );
 
-            return default;
+            return ComputeRefactoringResult.Empty;
         }
 
         var compilation = pipeline.LastCompilation;
@@ -42,7 +96,7 @@ public class CodeActionDiscoveryServiceImpl : ICodeActionDiscoveryService
         {
             this._logger.Warning?.Log( $"ComputeRefactorings('{projectId}', '{syntaxTreePath}'): cannot get the compilation for project '{projectId}'." );
 
-            return default;
+            return ComputeRefactoringResult.Empty;
         }
 
         var syntaxTree = compilation.SyntaxTrees.FirstOrDefault( x => x.FilePath == syntaxTreePath );
@@ -52,7 +106,7 @@ public class CodeActionDiscoveryServiceImpl : ICodeActionDiscoveryService
             this._logger.Warning?.Log(
                 $"ComputeRefactorings('{projectId}', '{syntaxTreePath}'): cannot get the SyntaxTree '{syntaxTreePath}' in project '{projectId}'." );
 
-            return default;
+            return ComputeRefactoringResult.Empty;
         }
 
         var node = (await syntaxTree.GetRootAsync( cancellationToken )).FindNode( span );
@@ -65,7 +119,7 @@ public class CodeActionDiscoveryServiceImpl : ICodeActionDiscoveryService
         {
             this._logger.Warning?.Log( $"ComputeRefactorings('{projectId}', '{syntaxTreePath}'):: cannot resolve the symbol." );
 
-            return default;
+            return ComputeRefactoringResult.Empty;
         }
 
         // Execute the pipeline.
@@ -103,6 +157,6 @@ public class CodeActionDiscoveryServiceImpl : ICodeActionDiscoveryService
             topLevelActions.Add( liveTemplatesActions );
         }
 
-        return topLevelActions.ToImmutable();
+        return new ComputeRefactoringResult( topLevelActions.ToImmutable() );
     }
 }

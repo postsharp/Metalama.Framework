@@ -10,7 +10,7 @@ using Microsoft.CodeAnalysis.Text;
 
 namespace Metalama.Framework.DesignTime;
 
-public partial class DesignTimeSourceGenerator
+public partial class TheSourceGenerator
 {
     private class OfflineProjectHandler : ProjectHandler
     {

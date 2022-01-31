@@ -30,7 +30,7 @@ internal class UserCodeActionModel : CodeActionModel
 
     public string SyntaxTreeFilePath { get; init; }
 
-    protected override async Task<CodeActionResult> ExecuteAsync( CodeActionExecutionContext executionContext, CancellationToken cancellationToken )
+    public override async Task<CodeActionResult> ExecuteAsync( CodeActionExecutionContext executionContext, CancellationToken cancellationToken )
     {
         var pipelineFactory = executionContext.ServiceProvider.GetRequiredService<DesignTimeAspectPipelineFactory>();
 

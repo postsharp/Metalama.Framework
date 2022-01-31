@@ -13,21 +13,29 @@ namespace Metalama.Framework.CompilerExtensions
     // ReSharper disable UnusedType.Global
 
     [DiagnosticAnalyzer( LanguageNames.CSharp )]
-    public class FacadeDesignTimeAnalyzer : DiagnosticAnalyzer
+    public class MetalamaDiagnosticAnalyzer : DiagnosticAnalyzer
     {
         private readonly DiagnosticAnalyzer? _impl;
 
-        public FacadeDesignTimeAnalyzer()
+        public MetalamaDiagnosticAnalyzer()
         {
             switch ( ProcessKindHelper.CurrentProcessKind )
             {
                 case ProcessKind.Compiler:
                     break;
 
+                case ProcessKind.DevEnv:
+                case ProcessKind.RoslynCodeAnalysisService:
+                    this._impl = (DiagnosticAnalyzer) ResourceExtractor.CreateInstance(
+                        "Metalama.Framework.DesignTime.VisualStudio",
+                        "Metalama.Framework.DesignTime.VisualStudio.VsDiagnosticAnalyzer" );
+
+                    break;
+
                 default:
                     this._impl = (DiagnosticAnalyzer) ResourceExtractor.CreateInstance(
                         "Metalama.Framework.DesignTime",
-                        "Metalama.Framework.DesignTime.DesignTimeAnalyzer" );
+                        "Metalama.Framework.DesignTime.TheDiagnosticAnalyzer" );
 
                     break;
             }

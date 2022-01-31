@@ -6,7 +6,7 @@ using Metalama.Framework.Engine.Pipeline;
 
 namespace Metalama.Framework.DesignTime;
 
-public class AnalysisProcessSourceGenerator : DesignTimeSourceGenerator
+public class AnalysisProcessSourceGenerator : TheSourceGenerator
 {
 #pragma warning disable CA1001 // ServiceHost is disposable but not owned.
 

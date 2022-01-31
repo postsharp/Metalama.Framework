@@ -8,11 +8,11 @@ namespace Metalama.Framework.CompilerExtensions
     // ReSharper disable UnusedType.Global
 
     [Transformer]
-    public sealed class FacadeSourceTransformer : ISourceTransformer
+    public sealed class MetalamaSourceTransformer : ISourceTransformer
     {
         private readonly ISourceTransformer _impl;
 
-        public FacadeSourceTransformer()
+        public MetalamaSourceTransformer()
         {
             this._impl = (ISourceTransformer) ResourceExtractor.CreateInstance(
                 "Metalama.Framework.Engine",

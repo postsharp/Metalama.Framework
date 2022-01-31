@@ -5,20 +5,15 @@ using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.Engine.CodeFixes;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Project;
-using System.Runtime.Serialization;
 
 namespace Metalama.Framework.DesignTime.CodeFixes;
 
-[DataContract]
 public class ApplyLiveTemplateCodeActionModel : CodeActionModel
 {
-    [DataMember( Order = NextKey + 0 )]
     public string AspectTypeName { get; set; }
 
-    [DataMember( Order = NextKey + 1 )]
     public string TargetSymbolId { get; set; }
 
-    [DataMember( Order = NextKey + 2 )]
     public string SyntaxTreeFilePath { get; set; }
 
     public ApplyLiveTemplateCodeActionModel()
@@ -35,7 +30,7 @@ public class ApplyLiveTemplateCodeActionModel : CodeActionModel
         this.SyntaxTreeFilePath = syntaxTreeFilePath;
     }
 
-    protected override Task<CodeActionResult> ExecuteAsync( CodeActionExecutionContext executionContext, CancellationToken cancellationToken )
+    public override Task<CodeActionResult> ExecuteAsync( CodeActionExecutionContext executionContext, CancellationToken cancellationToken )
     {
         var compilation = executionContext.Compilation.RoslynCompilation;
         var pipelineFactory = executionContext.ServiceProvider.GetRequiredService<DesignTimeAspectPipelineFactory>();

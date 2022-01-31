@@ -1,17 +1,16 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Framework.Engine.CodeFixes;
 using Microsoft.CodeAnalysis.CodeActions;
 using System.Collections.Immutable;
-using System.Runtime.Serialization;
 
-namespace Metalama.Framework.Engine.CodeFixes
+namespace Metalama.Framework.DesignTime.CodeFixes
 {
     /// <summary>
     /// Represents a code action or a code action menu.
     /// </summary>
-    [DataContract]
-    public abstract class CodeActionBaseModel
+    public abstract class CodeActionBaseModel : ICodeAction
     {
         protected const string TitleJoin = ": ";
         protected const int NextKey = 1;
@@ -19,7 +18,6 @@ namespace Metalama.Framework.Engine.CodeFixes
         /// <summary>
         /// Gets or sets the code action title.
         /// </summary>
-        [DataMember( Order = 0 )]
         public string Title { get; set; }
 
         protected CodeActionBaseModel( string title )

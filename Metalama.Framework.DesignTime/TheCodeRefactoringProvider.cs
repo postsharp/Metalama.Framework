@@ -3,7 +3,6 @@
 
 using Metalama.Backstage.Diagnostics;
 using Metalama.Framework.DesignTime.CodeFixes;
-using Metalama.Framework.Engine.CodeFixes;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis.CodeRefactorings;
@@ -14,15 +13,15 @@ namespace Metalama.Framework.DesignTime
     // ReSharper disable UnusedType.Global
 
     [ExcludeFromCodeCoverage]
-    public class CentralCodeRefactoringProvider : CodeRefactoringProvider
+    public class TheCodeRefactoringProvider : CodeRefactoringProvider
     {
         private readonly ILogger _logger;
         private readonly ICodeActionDiscoveryService _codeActionDiscoveryService;
         private readonly ICodeActionExecutionService _codeActionExecutionService;
 
-        public CentralCodeRefactoringProvider() : this( DesignTimeServiceProviderFactory.GetServiceProvider() ) { }
+        public TheCodeRefactoringProvider() : this( DesignTimeServiceProviderFactory.GetServiceProvider() ) { }
 
-        public CentralCodeRefactoringProvider( IServiceProvider serviceProvider )
+        public TheCodeRefactoringProvider( IServiceProvider serviceProvider )
         {
             this._logger = serviceProvider.GetLoggerFactory().GetLogger( "CodeRefactoring" );
             this._codeActionDiscoveryService = serviceProvider.GetRequiredService<ICodeActionDiscoveryService>();
@@ -39,6 +38,8 @@ namespace Metalama.Framework.DesignTime
 
                 if ( string.IsNullOrEmpty( projectOptions.ProjectId ) )
                 {
+                    this._logger.Trace?.Log( $"ComputeRefactorings('{context.Document.Name}'): not a Metalama project." );
+
                     return;
                 }
 
@@ -48,11 +49,15 @@ namespace Metalama.Framework.DesignTime
                     context.Span,
                     context.CancellationToken );
 
-                if ( !result.IsDefaultOrEmpty )
+                if ( !result.CodeActions.IsDefaultOrEmpty )
                 {
-                    var invocationContext = new CodeActionInvocationContext( this._codeActionExecutionService, context.Document, this._logger );
+                    var invocationContext = new CodeActionInvocationContext(
+                        this._codeActionExecutionService,
+                        context.Document,
+                        this._logger,
+                        projectOptions.ProjectId );
 
-                    foreach ( var actionModel in result )
+                    foreach ( var actionModel in result.CodeActions )
                     {
                         foreach ( var action in actionModel.ToCodeActions( invocationContext ) )
                         {

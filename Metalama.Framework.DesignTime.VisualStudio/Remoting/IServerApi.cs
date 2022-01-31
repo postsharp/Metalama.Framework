@@ -6,7 +6,7 @@ using Metalama.Framework.DesignTime.Contracts;
 
 namespace Metalama.Framework.DesignTime.VisualStudio.Remoting;
 
-internal interface IServerApi : ICodeActionDiscoveryService
+internal interface IServerApi : ICodeActionDiscoveryService, ICodeActionExecutionService
 {
     // The client should not await this call, otherwise we will have a deadlock.
     Task RegisterProjectHandlerAsync( string projectId, CancellationToken cancellationToken = default );

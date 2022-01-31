@@ -4,6 +4,8 @@
 using Metalama.Backstage.Diagnostics;
 using Metalama.Framework.Engine.Formatting;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.Text;
+using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -13,20 +15,19 @@ using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.CodeFixes;
 
-[DataContract]
 public class CodeActionResult
 {
-    [DataMember( Order = 0 )]
-    public ImmutableArray<SyntaxTreeChange> SyntaxTreeChanges { get; }
+    public ImmutableArray<SerializationSyntaxTree> SyntaxTreeChanges { get; }
 
-    public CodeActionResult( ImmutableArray<SyntaxTreeChange> syntaxTreeChanges )
+    [JsonConstructor]
+    public CodeActionResult( ImmutableArray<SerializationSyntaxTree> syntaxTreeChanges )
     {
         this.SyntaxTreeChanges = syntaxTreeChanges;
     }
 
-    public CodeActionResult( IEnumerable<SyntaxTree> modifiedTrees ) : this( modifiedTrees.Select( x => new SyntaxTreeChange( x ) ).ToImmutableArray() ) { }
+    public CodeActionResult( IEnumerable<SyntaxTree> modifiedTrees ) : this( modifiedTrees.Select( x => new SerializationSyntaxTree( x ) ).ToImmutableArray() ) { }
 
-    public static CodeActionResult Empty { get; } = new( ImmutableArray<SyntaxTreeChange>.Empty );
+    public static CodeActionResult Empty { get; } = new( ImmutableArray<SerializationSyntaxTree>.Empty );
 
     public async ValueTask<Solution> ApplyAsync( Microsoft.CodeAnalysis.Project project, ILogger logger, bool format, CancellationToken cancellationToken )
     {
@@ -45,17 +46,19 @@ public class CodeActionResult
 
                 continue;
             }
+            
+            solution = solution.WithDocumentSyntaxRoot( document.Id, change.GetAnnotatedSyntaxNode( cancellationToken ) );
 
             if ( format )
             {
-                document = (await OutputCodeFormatter.FormatToDocumentAsync(
-                    document,
+                var formatted = (await OutputCodeFormatter.FormatToDocumentAsync(
+                    solution.GetDocument( document.Id )!,
                     null,
                     false,
-                    cancellationToken )).Document;
-            }
+                    cancellationToken )).Syntax;
 
-            solution = solution.WithDocumentSyntaxRoot( document.Id, change.Root.Node );
+                solution = solution.WithDocumentSyntaxRoot( document.Id, formatted );
+            }
         }
 
         return solution;

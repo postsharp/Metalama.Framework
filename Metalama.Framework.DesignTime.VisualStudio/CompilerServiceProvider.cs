@@ -30,7 +30,7 @@ namespace Metalama.Framework.DesignTime.VisualStudio
             }
             else if ( type.IsEquivalentTo( typeof(ITransformationPreviewService) ) )
             {
-                return new UserProcessTransformationPreviewService( VisualStudioServiceProviderFactory.GetServiceProvider() );
+                return new UserProcessTransformationPreviewService( VsServiceProviderFactory.GetServiceProvider() );
             }
             else if ( type.IsEquivalentTo( typeof(ICompileTimeEditingStatusService) ) )
             {

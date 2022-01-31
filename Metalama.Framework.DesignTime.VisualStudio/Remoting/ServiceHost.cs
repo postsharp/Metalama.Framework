@@ -179,7 +179,7 @@ internal class ServiceHost : ServiceEndpoint, IService, IDisposable
 
         public Task<PreviewTransformationResult> PreviewTransformationAsync( string projectId, string syntaxTreeName, CancellationToken cancellationToken )
         {
-            var implementation = this._parent._serviceProvider.GetRequiredService<TransformationPreviewServiceImpl>();
+            var implementation = this._parent._serviceProvider.GetRequiredService<ITransformationPreviewServiceImpl>();
 
             return implementation.PreviewTransformationAsync( projectId, syntaxTreeName, cancellationToken );
         }
@@ -192,15 +192,22 @@ internal class ServiceHost : ServiceEndpoint, IService, IDisposable
             return Task.CompletedTask;
         }
 
-        public async Task<ImmutableArray<CodeActionBaseModel>> ComputeRefactoringsAsync(
+        public Task<ComputeRefactoringResult> ComputeRefactoringsAsync(
             string projectId,
             string syntaxTreePath,
             TextSpan span,
-            CancellationToken cancellationToken = default )
+            CancellationToken cancellationToken )
         {
-            var service = this._parent._serviceProvider.GetRequiredService<CodeActionDiscoveryServiceImpl>();
+            var service = this._parent._serviceProvider.GetRequiredService<CodeActionDiscoveryService>();
 
-            return await service.ComputeRefactoringsAsync( projectId, syntaxTreePath, span, cancellationToken );
+            return service.ComputeRefactoringsAsync( projectId, syntaxTreePath, span, cancellationToken );
+        }
+
+        public Task<CodeActionResult> ExecuteCodeActionAsync( string projectId, CodeActionModel codeActionModel, CancellationToken cancellationToken )
+        {
+            var service = this._parent._serviceProvider.GetRequiredService<CodeActionExecutionService>();
+
+            return service.ExecuteCodeActionAsync( projectId, codeActionModel, cancellationToken );
         }
     }
 

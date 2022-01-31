@@ -13,7 +13,7 @@ internal class DesignTimeClassificationService : IClassificationService
     private readonly ClassificationService _classificationService;
 
     public DesignTimeClassificationService() : this(
-        VisualStudioServiceProviderFactory.GetServiceProvider().WithProjectScopedServices( Enumerable.Empty<MetadataReference>() ) ) { }
+        VsServiceProviderFactory.GetServiceProvider().WithProjectScopedServices( Enumerable.Empty<MetadataReference>() ) ) { }
 
     internal DesignTimeClassificationService( ServiceProvider serviceProvider )
     {

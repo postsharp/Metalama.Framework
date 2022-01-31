@@ -27,16 +27,16 @@ namespace Metalama.Framework.DesignTime
     /// Our implementation of <see cref="DiagnosticSuppressor"/>.
     /// </summary>
     [ExcludeFromCodeCoverage]
-    public class DesignTimeDiagnosticSuppressor : DiagnosticSuppressor
+    public class TheDiagnosticSuppressor : DiagnosticSuppressor
     {
         private readonly DesignTimeDiagnosticDefinitions _designTimeDiagnosticDefinitions = DesignTimeDiagnosticDefinitions.GetInstance();
 
         private readonly ILogger _logger;
         private readonly DesignTimeAspectPipelineFactory _pipelineFactory;
 
-        public DesignTimeDiagnosticSuppressor() : this( DesignTimeServiceProviderFactory.GetServiceProvider() ) { }
+        public TheDiagnosticSuppressor() : this( DesignTimeServiceProviderFactory.GetServiceProvider() ) { }
 
-        public DesignTimeDiagnosticSuppressor( IServiceProvider serviceProvider )
+        public TheDiagnosticSuppressor( IServiceProvider serviceProvider )
         {
             this._logger = serviceProvider.GetLoggerFactory().GetLogger( "DesignTime" );
             this._pipelineFactory = serviceProvider.GetRequiredService<DesignTimeAspectPipelineFactory>();

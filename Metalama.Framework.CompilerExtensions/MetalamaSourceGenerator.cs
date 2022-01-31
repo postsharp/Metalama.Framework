@@ -8,11 +8,11 @@ namespace Metalama.Framework.CompilerExtensions
     // ReSharper disable UnusedType.Global
 
     [Generator]
-    public class FacadeSourceGenerator : ISourceGenerator
+    public class MetalamaSourceGenerator : ISourceGenerator
     {
         private readonly ISourceGenerator? _impl;
 
-        public FacadeSourceGenerator()
+        public MetalamaSourceGenerator()
         {
             switch ( ProcessKindHelper.CurrentProcessKind )
             {

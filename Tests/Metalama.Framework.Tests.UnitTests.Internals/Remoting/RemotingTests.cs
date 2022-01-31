@@ -1,8 +1,11 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Framework.DesignTime.Contracts;
+using Metalama.Framework.DesignTime.Preview;
 using Metalama.Framework.DesignTime.VisualStudio.Remoting;
 using Metalama.Framework.Engine.Pipeline;
+using Metalama.Framework.Project;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -86,6 +89,31 @@ public class RemotingTests
         // Asserts.
         Assert.Single( projectHandler.GeneratedCodeEvents, x => x.ProjectId == projectId );
         Assert.Single( projectHandler.GeneratedCodeEvents[0].Sources, x => x.Key == sourceTreeName );
+    }
+
+    [Fact]
+    public async Task TransformPreviewAsync()
+    {
+        // Start the server.
+        var pipeName = $"Metalama_Test_{Guid.NewGuid()}";
+        using var server = new ServiceHost( ServiceProvider.Empty.WithService( new PreviewImpl()  ), pipeName );
+        server.Start();
+
+        using var client = new ServiceClient( ServiceProvider.Empty, pipeName );
+        var projectHandler = new TestProjectHandler();
+        await client.ConnectAsync();
+
+        var result = await (await client.GetServerApiAsync()).PreviewTransformationAsync( "projectId", "syntaxTreeName", CancellationToken.None );
+        Assert.True( result.IsSuccessful );
+        Assert.Equal("Transformed code", result.TransformedCode );
+    }
+
+    private class PreviewImpl : ITransformationPreviewServiceImpl
+    {
+        public Task<PreviewTransformationResult> PreviewTransformationAsync( string projectId, string syntaxTreeName, CancellationToken cancellationToken )
+        {
+            return Task.FromResult( new PreviewTransformationResult( true, "Transformed code", null ) );
+        }
     }
 
     private class TestProjectHandler : IProjectHandlerCallback
