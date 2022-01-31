@@ -59,7 +59,7 @@ namespace Metalama.Framework.Engine.CompileTime
             }
 
             switch ( memberDeclaration )
-            {                 
+            {
                 case PropertyDeclarationSyntax { ExpressionBody: { } } property:
                     // Expression bodied property - change the expression to throw exception.
                     return this.RewriteThrowNotSupported(

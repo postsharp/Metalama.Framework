@@ -25,7 +25,10 @@ namespace Metalama.Framework.Engine.Testing
             OutputKind outputKind = OutputKind.DynamicallyLinkedLibrary )
             => CreateEmptyCSharpCompilation( name, GetMetadataReferences( additionalAssemblies, addMetalamaReferences ), outputKind );
 
-        public static CSharpCompilation CreateEmptyCSharpCompilation( string? name, IEnumerable<MetadataReference> metadataReferences, OutputKind outputKind = OutputKind.DynamicallyLinkedLibrary )
+        public static CSharpCompilation CreateEmptyCSharpCompilation(
+            string? name,
+            IEnumerable<MetadataReference> metadataReferences,
+            OutputKind outputKind = OutputKind.DynamicallyLinkedLibrary )
             => CSharpCompilation.Create( name ?? "test_" + Guid.NewGuid() )
                 .WithOptions(
                     new CSharpCompilationOptions(

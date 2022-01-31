@@ -16,7 +16,7 @@ namespace Metalama.Framework.Engine.Templating
                 IFieldSymbol field => GetCompiledTemplateName( field.Name ),
                 IPropertySymbol property => GetCompiledTemplateName( property.Name ),
                 IEventSymbol @event => GetCompiledTemplateName( @event.Name ),
-                _ => throw new AssertionFailedException(),
+                _ => throw new AssertionFailedException()
             };
 
         public static string GetCompiledTemplateName( string templateMemberName ) => "__" + templateMemberName;

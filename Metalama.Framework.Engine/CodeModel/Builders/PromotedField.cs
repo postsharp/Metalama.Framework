@@ -38,13 +38,22 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         protected override bool HasBaseInvoker => true;
 
-        protected override bool GetPropertyInitializerExpressionOrMethod( in MemberIntroductionContext context, out ExpressionSyntax? initializerExpression, out MethodDeclarationSyntax? initializerMethod )
+        protected override bool GetPropertyInitializerExpressionOrMethod(
+            in MemberIntroductionContext context,
+            out ExpressionSyntax? initializerExpression,
+            out MethodDeclarationSyntax? initializerMethod )
         {
             if ( this._field is BuiltField builtField )
             {
                 var fieldBuilder = builtField.FieldBuilder;
 
-                return fieldBuilder.GetInitializerExpressionOrMethod( context, this.Type, fieldBuilder.InitializerExpression, fieldBuilder.InitializerTemplate, out initializerExpression, out initializerMethod );
+                return fieldBuilder.GetInitializerExpressionOrMethod(
+                    context,
+                    this.Type,
+                    fieldBuilder.InitializerExpression,
+                    fieldBuilder.InitializerTemplate,
+                    out initializerExpression,
+                    out initializerMethod );
             }
             else
             {
@@ -61,6 +70,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                 }
 
                 initializerMethod = null;
+
                 return true;
             }
         }

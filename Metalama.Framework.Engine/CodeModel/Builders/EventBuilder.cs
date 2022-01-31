@@ -81,8 +81,14 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public override IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context )
         {
             var syntaxGenerator = context.SyntaxGenerationContext.SyntaxGenerator;
-            
-            _ = this.GetInitializerExpressionOrMethod( context, this.Type, this.InitializerExpression, this.InitializerTemplate, out var initializerExpression, out var initializerMethod );
+
+            _ = this.GetInitializerExpressionOrMethod(
+                context,
+                this.Type,
+                this.InitializerExpression,
+                this.InitializerTemplate,
+                out var initializerExpression,
+                out var initializerMethod );
 
             Invariant.Assert( !(!this._isEventField && initializerExpression != null) );
 
@@ -96,12 +102,12 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                             SeparatedList(
                                 new[]
                                 {
-                                    VariableDeclarator( 
-                                        Identifier( this.Name ), 
+                                    VariableDeclarator(
+                                        Identifier( this.Name ),
                                         null,
                                         initializerExpression != null
-                                        ? EqualsValueClause( initializerExpression )
-                                        : null ) // TODO: Initializer.
+                                            ? EqualsValueClause( initializerExpression )
+                                            : null ) // TODO: Initializer.
                                 } ) ) )
                     : EventDeclaration(
                         List<AttributeListSyntax>(), // TODO: Attributes.
@@ -125,7 +131,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                 return new[]
                 {
                     new IntroducedMember( this, @event, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, this ),
-                    new IntroducedMember( this, initializerMethod, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.InitializerMethod, this ), 
+                    new IntroducedMember( this, initializerMethod, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.InitializerMethod, this )
                 };
             }
             else

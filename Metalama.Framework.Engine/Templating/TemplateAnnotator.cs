@@ -1306,6 +1306,7 @@ namespace Metalama.Framework.Engine.Templating
 
         public override SyntaxNode? VisitAttribute( AttributeSyntax node )
             =>
+
                 // Don't process attributes.
                 node;
 

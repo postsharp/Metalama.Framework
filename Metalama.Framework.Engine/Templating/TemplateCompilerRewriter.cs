@@ -906,7 +906,7 @@ namespace Metalama.Framework.Engine.Templating
 
                 return result;
             }
-            else if (node.Initializer is not null and { Value: var initializerExpression } )
+            else if ( node.Initializer is not null and { Value: var initializerExpression } )
             {
                 this.Indent( 3 );
 

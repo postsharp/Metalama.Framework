@@ -149,7 +149,7 @@ namespace Metalama.Framework.Engine.Linking
 
                 private static int GetTypeOrder( IMemberIntroduction introduction ) => introduction is IOverriddenDeclaration ? 0 : 1;
 
-                private static int GetSemanticOrder( IntroducedMemberSemantic semantic) => semantic != IntroducedMemberSemantic.InitializerMethod ? 0 : 1;
+                private static int GetSemanticOrder( IntroducedMemberSemantic semantic ) => semantic != IntroducedMemberSemantic.InitializerMethod ? 0 : 1;
 
                 private static IMember GetDeclaration( IntroducedMember introducedMember )
                 {

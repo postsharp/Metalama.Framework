@@ -16,6 +16,6 @@ namespace Metalama.Framework.Engine.Templating
         /// <summary>
         /// The template should be compiled with initializer semantics.
         /// </summary>
-        Initializer,
+        Initializer
     }
 }

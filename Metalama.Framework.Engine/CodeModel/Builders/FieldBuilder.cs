@@ -6,19 +6,12 @@ using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.Advices;
 using Metalama.Framework.Engine.CodeModel.Invokers;
-using Metalama.Framework.Engine.SyntaxSerialization;
-using Metalama.Framework.Engine.Templating;
-using Metalama.Framework.Engine.Templating.MetaModel;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities;
-using Metalama.Framework.Project;
 using Metalama.Framework.RunTime;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 using System.Reflection;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
@@ -39,7 +32,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public override bool IsExplicitInterfaceImplementation => false;
 
         public override IMember? OverriddenMember => null;
-        
+
         [Memo]
         public IInvokerFactory<IFieldOrPropertyInvoker> Invokers
             => new InvokerFactory<IFieldOrPropertyInvoker>( ( order, invokerOperator ) => new FieldOrPropertyInvoker( this, order, invokerOperator ), false );
@@ -70,7 +63,13 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             var syntaxGenerator = context.SyntaxGenerationContext.SyntaxGenerator;
 
             // If template fails to expand, we will still generate the field, albeit without the initializer.
-            _ = this.GetInitializerExpressionOrMethod( context, this.Type, this.InitializerExpression, this.InitializerTemplate, out var initializerExpression, out var initializerMethod );
+            _ = this.GetInitializerExpressionOrMethod(
+                context,
+                this.Type,
+                this.InitializerExpression,
+                this.InitializerTemplate,
+                out var initializerExpression,
+                out var initializerMethod );
 
             var field =
                 FieldDeclaration(
@@ -88,10 +87,10 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
             if ( initializerMethod != null )
             {
-                return new[] 
+                return new[]
                 {
                     new IntroducedMember( this, field, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, this ),
-                    new IntroducedMember( this, initializerMethod, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.InitializerMethod, this ),
+                    new IntroducedMember( this, initializerMethod, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.InitializerMethod, this )
                 };
             }
             else

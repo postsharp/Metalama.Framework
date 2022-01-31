@@ -12,6 +12,7 @@ using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
 using System.Diagnostics.CodeAnalysis;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
@@ -76,12 +77,12 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         {
             if ( context is null )
             {
-                throw new System.ArgumentNullException( nameof( context ) );
+                throw new ArgumentNullException( nameof(context) );
             }
 
             if ( targetType is null )
             {
-                throw new System.ArgumentNullException( nameof( targetType ) );
+                throw new ArgumentNullException( nameof(targetType) );
             }
 
             if ( initializerExpression != null )
@@ -89,6 +90,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                 // TODO: Error about the expression type?
                 initializerMethodSyntax = null;
                 initializerExpressionSyntax = ((IUserExpression) initializerExpression).ToRunTimeExpression().Syntax;
+
                 return true;
             }
             else if ( initializerTemplate.IsNotNull )
@@ -100,14 +102,17 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                     // Template expansion error.
                     initializerMethodSyntax = null;
                     initializerExpressionSyntax = null;
+
                     return false;
                 }
 
                 // If the initializer block contains only a single return statement, 
-                if ( initializerBlock.Statements.Count == 1 && initializerBlock.Statements[0] is ReturnStatementSyntax { Expression: not null } returnStatement )
+                if ( initializerBlock.Statements.Count == 1
+                     && initializerBlock.Statements[0] is ReturnStatementSyntax { Expression: not null } returnStatement )
                 {
                     initializerMethodSyntax = null;
                     initializerExpressionSyntax = returnStatement.Expression;
+
                     return true;
                 }
 
@@ -116,6 +121,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                 if ( initializerBlock != null )
                 {
                     initializerExpressionSyntax = InvocationExpression( IdentifierName( initializerName ) );
+
                     initializerMethodSyntax =
                         MethodDeclaration(
                             List<AttributeListSyntax>(),
@@ -134,6 +140,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                 else
                 {
                     initializerMethodSyntax = null;
+
                     return true;
                 }
             }
@@ -141,6 +148,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             {
                 initializerMethodSyntax = null;
                 initializerExpressionSyntax = null;
+
                 return true;
             }
         }

@@ -754,24 +754,28 @@ namespace Metalama.Framework.Engine.CompileTime
                          && this._serializerGenerator.ShouldSuppressReadOnly( serializableType, fieldSymbol ) )
                     {
                         // This field needs to have it's readonly modifier removed, so add it to the list.
-                        nonReadOnlyVariables.Add( this.TransformVariable( TemplateCompilerSemantics.Initializer, declarator, out var compiledInitializerTemplate ) );
+                        nonReadOnlyVariables.Add(
+                            this.TransformVariable( TemplateCompilerSemantics.Initializer, declarator, out var compiledInitializerTemplate ) );
 
                         // If the field had an initializer template, yield return the compiled member.
-                        if ( compiledInitializerTemplate != null)
+                        if ( compiledInitializerTemplate != null )
                         {
                             hasTemplateVariables = true;
+
                             yield return compiledInitializerTemplate;
                         }
                     }
                     else
                     {
                         // This field is unchanged, so add add it to the list.
-                        unchangedReadabilityVariables.Add( this.TransformVariable( TemplateCompilerSemantics.Initializer, declarator, out var compiledInitializerTemplate ) );
+                        unchangedReadabilityVariables.Add(
+                            this.TransformVariable( TemplateCompilerSemantics.Initializer, declarator, out var compiledInitializerTemplate ) );
 
                         // If the field had an initializer template, yield return the compiled member.
                         if ( compiledInitializerTemplate != null )
                         {
                             hasTemplateVariables = true;
+
                             yield return compiledInitializerTemplate;
                         }
                     }
@@ -821,6 +825,7 @@ namespace Metalama.Framework.Engine.CompileTime
                     if ( compiledInitializerTemplate != null )
                     {
                         hasTemplateVariables = true;
+
                         yield return compiledInitializerTemplate;
                     }
                 }
@@ -842,7 +847,10 @@ namespace Metalama.Framework.Engine.CompileTime
                 }
             }
 
-            private VariableDeclaratorSyntax TransformVariable( TemplateCompilerSemantics templateSyntaxKind, VariableDeclaratorSyntax variable, out MethodDeclarationSyntax? compiledInitializerTemplate )
+            private VariableDeclaratorSyntax TransformVariable(
+                TemplateCompilerSemantics templateSyntaxKind,
+                VariableDeclaratorSyntax variable,
+                out MethodDeclarationSyntax? compiledInitializerTemplate )
             {
                 var symbol = this.RunTimeCompilation.GetSemanticModel( variable.SyntaxTree ).GetDeclaredSymbol( variable ).AssertNotNull();
                 var isTemplate = !this.SymbolClassifier.GetTemplateInfo( symbol ).IsNone;
@@ -853,17 +861,18 @@ namespace Metalama.Framework.Engine.CompileTime
 
                     // This is field template with initializer.
                     if ( this._templateCompiler.TryCompile(
-                        templateName,
-                        this._compileTimeCompilation,
-                        variable,
-                        templateSyntaxKind,
-                        this.RunTimeCompilation.GetSemanticModel( variable.SyntaxTree ),
-                        this._diagnosticAdder,
-                        this._cancellationToken,
-                        out _,
-                        out var transformedFieldDeclaration ) )
+                            templateName,
+                            this._compileTimeCompilation,
+                            variable,
+                            templateSyntaxKind,
+                            this.RunTimeCompilation.GetSemanticModel( variable.SyntaxTree ),
+                            this._diagnosticAdder,
+                            this._cancellationToken,
+                            out _,
+                            out var transformedFieldDeclaration ) )
                     {
                         compiledInitializerTemplate = (MethodDeclarationSyntax) transformedFieldDeclaration;
+
                         return ((VariableDeclaratorSyntax) this.Visit( variable ).AssertNotNull())
                             .WithInitializer( null );
                     }
@@ -871,12 +880,14 @@ namespace Metalama.Framework.Engine.CompileTime
                     {
                         this.Success = false;
                         compiledInitializerTemplate = null;
+
                         return (VariableDeclaratorSyntax) this.Visit( variable ).AssertNotNull();
                     }
                 }
                 else
                 {
                     compiledInitializerTemplate = null;
+
                     return (VariableDeclaratorSyntax) this.Visit( variable ).AssertNotNull();
                 }
             }

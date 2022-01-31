@@ -4,9 +4,7 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.Templating;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System.Linq;
 
 namespace Metalama.Framework.Engine.Advices
 {
@@ -30,9 +28,9 @@ namespace Metalama.Framework.Engine.Advices
         {
             if ( fieldTemplate.IsNotNull )
             {
-                var fieldSyntax = (VariableDeclaratorSyntax)fieldTemplate.Declaration!.GetPrimaryDeclaration().AssertNotNull();
+                var fieldSyntax = (VariableDeclaratorSyntax) fieldTemplate.Declaration!.GetPrimaryDeclaration().AssertNotNull();
 
-                if (fieldSyntax.Initializer != null)
+                if ( fieldSyntax.Initializer != null )
                 {
                     return TemplateMember.Create( fieldTemplate.Declaration, fieldTemplate.TemplateInfo, TemplateKind.InitializerExpression );
                 }
@@ -49,7 +47,8 @@ namespace Metalama.Framework.Engine.Advices
 
         public static TemplateMember<IEvent> GetInitializerTemplate( this in TemplateMember<IEvent> eventFieldTemplate )
         {
-            if ( eventFieldTemplate.IsNotNull && eventFieldTemplate.Declaration!.GetPrimaryDeclaration().AssertNotNull() is VariableDeclaratorSyntax eventFieldSyntax)
+            if ( eventFieldTemplate.IsNotNull
+                 && eventFieldTemplate.Declaration!.GetPrimaryDeclaration().AssertNotNull() is VariableDeclaratorSyntax eventFieldSyntax )
             {
                 if ( eventFieldSyntax.Initializer != null )
                 {

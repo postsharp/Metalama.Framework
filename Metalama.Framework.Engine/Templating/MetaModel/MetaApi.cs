@@ -252,7 +252,7 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
             this._type = fieldOrProperty.DeclaringType;
         }
 
-        private MetaApi( IFieldOrProperty fieldOrProperty, MetaApiProperties common ) : this( (IDeclaration)fieldOrProperty, common )
+        private MetaApi( IFieldOrProperty fieldOrProperty, MetaApiProperties common ) : this( (IDeclaration) fieldOrProperty, common )
         {
             this._fieldOrProperty = fieldOrProperty switch
             {
@@ -285,8 +285,8 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
         public static MetaApi ForInitializer( IMember initializedDeclaration, MetaApiProperties common )
             => initializedDeclaration switch
             {
-                IFieldOrProperty fieldOrProperty => new( fieldOrProperty, common ),
-                IEvent eventField => new( eventField, common ),
+                IFieldOrProperty fieldOrProperty => new MetaApi( fieldOrProperty, common ),
+                IEvent eventField => new MetaApi( eventField, common ),
                 _ => throw new AssertionFailedException()
             };
 

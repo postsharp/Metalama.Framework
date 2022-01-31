@@ -20,7 +20,6 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 using System.Reflection;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 using MethodKind = Metalama.Framework.Code.MethodKind;
@@ -37,15 +36,14 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public RefKind RefKind { get; set; }
 
-        public Writeability Writeability => 
-            this switch
+        public Writeability Writeability
+            => this switch
             {
                 { SetMethod: null, IsAutoPropertyOrField: false } => Writeability.None,
                 { SetMethod: null, IsAutoPropertyOrField: true } => Writeability.ConstructorOnly,
                 { _hasInitOnlySetter: true } => Writeability.InitOnly,
                 _ => Writeability.All
             };
-        
 
         public bool IsAutoPropertyOrField { get; }
 
@@ -164,9 +162,15 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             out ExpressionSyntax? initializerExpression,
             out MethodDeclarationSyntax? initializerMethod )
         {
-            return this.GetInitializerExpressionOrMethod( context, this.Type, this.InitializerExpression, this.InitializerTemplate, out initializerExpression, out initializerMethod );
+            return this.GetInitializerExpressionOrMethod(
+                context,
+                this.Type,
+                this.InitializerExpression,
+                this.InitializerTemplate,
+                out initializerExpression,
+                out initializerMethod );
         }
-        
+
         public override IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context )
         {
             var syntaxGenerator = context.SyntaxGenerationContext.SyntaxGenerator;
@@ -193,10 +197,11 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                         : null );
 
             var introducedProperty = new IntroducedMember( this, property, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, this );
-            var introducedInitializerMethod = 
+
+            var introducedInitializerMethod =
                 initializerMethod != null
-                ? new IntroducedMember( this, initializerMethod, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.InitializerMethod, this )
-                : null;
+                    ? new IntroducedMember( this, initializerMethod, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.InitializerMethod, this )
+                    : null;
 
             if ( introducedInitializerMethod != null )
             {
@@ -276,7 +281,10 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             }
         }
 
-        protected virtual bool GetInitializerExpressionOrMethod( in MemberIntroductionContext context, out ExpressionSyntax? initializerExpression, out MethodDeclarationSyntax? initializerMethod )
+        protected virtual bool GetInitializerExpressionOrMethod(
+            in MemberIntroductionContext context,
+            out ExpressionSyntax? initializerExpression,
+            out MethodDeclarationSyntax? initializerMethod )
         {
             BlockSyntax? initializerBlock;
 
@@ -285,24 +293,29 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                 // TODO: Error about the expression type?
                 initializerMethod = null;
                 initializerExpression = ((IUserExpression) this.InitializerExpression).ToRunTimeExpression().Syntax;
+
                 return true;
             }
             else if ( this.InitializerTemplate.IsNotNull )
             {
                 initializerExpression = null;
+
                 if ( !this.TryExpandInitializerTemplate( context, this.InitializerTemplate, out initializerBlock ) )
                 {
                     // Template expansion error.
                     initializerMethod = null;
                     initializerExpression = null;
+
                     return false;
                 }
 
                 // If the initializer block contains only a single return statement, 
-                if ( initializerBlock.Statements.Count == 1 && initializerBlock.Statements[0] is ReturnStatementSyntax { Expression: not null } returnStatement )
+                if ( initializerBlock.Statements.Count == 1
+                     && initializerBlock.Statements[0] is ReturnStatementSyntax { Expression: not null } returnStatement )
                 {
                     initializerMethod = null;
                     initializerExpression = returnStatement.Expression;
+
                     return true;
                 }
             }
@@ -310,6 +323,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             {
                 initializerMethod = null;
                 initializerExpression = null;
+
                 return true;
             }
 
@@ -318,6 +332,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             if ( initializerBlock != null )
             {
                 initializerExpression = InvocationExpression( IdentifierName( initializerName ) );
+
                 initializerMethod =
                     MethodDeclaration(
                         List<AttributeListSyntax>(),
@@ -330,11 +345,13 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                         List<TypeParameterConstraintClauseSyntax>(),
                         initializerBlock,
                         null );
+
                 return true;
             }
             else
             {
                 initializerMethod = null;
+
                 return true;
             }
         }

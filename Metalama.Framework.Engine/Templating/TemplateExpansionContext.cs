@@ -113,7 +113,7 @@ namespace Metalama.Framework.Engine.Templating
                 // This is property initializer template expansion.
                 return this.CreateReturnStatementDefault( returnExpression, property.Type );
             }
-            else if ( this.MetaApi.Declaration is IEvent @event)
+            else if ( this.MetaApi.Declaration is IEvent @event )
             {
                 // This is property initializer template expansion.
                 return this.CreateReturnStatementDefault( returnExpression, @event.Type );
