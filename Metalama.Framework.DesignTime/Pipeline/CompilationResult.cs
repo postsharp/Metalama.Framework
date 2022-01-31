@@ -18,9 +18,29 @@ internal sealed class CompilationResult
         this.PipelineResult = pipelineResult;
     }
 
+    internal IEnumerable<Diagnostic> GetAllDiagnostics(string path)
+    {
+        if ( this.PipelineResult.SyntaxTreeResults.TryGetValue( path, out var syntaxTreeResults ) )
+        {
+            foreach ( var diagnostic in syntaxTreeResults.Diagnostics )
+            {
+                yield return diagnostic;
+            }
+        }
+        
+
+        if ( this.ValidationResult.SyntaxTreeResults.TryGetValue( path, out var validationResult ) )
+        {
+            foreach ( var diagnostic in validationResult.Diagnostics )
+            {
+                yield return diagnostic;
+            }
+        }
+    }
+    
     internal IEnumerable<Diagnostic> GetAllDiagnostics()
     {
-        foreach ( var syntaxTree in this.PipelineResult.SyntaxTreeResults )
+        foreach ( var syntaxTree in this.PipelineResult.SyntaxTreeResults.Values )
         {
             foreach ( var diagnostic in syntaxTree.Diagnostics )
             {
@@ -41,7 +61,7 @@ internal sealed class CompilationResult
     {
         foreach ( var syntaxTree in this.PipelineResult.SyntaxTreeResults )
         {
-            foreach ( var diagnostic in syntaxTree.Suppressions )
+            foreach ( var diagnostic in syntaxTree.Value.Suppressions )
             {
                 yield return diagnostic;
             }
@@ -50,6 +70,26 @@ internal sealed class CompilationResult
         foreach ( var syntaxTree in this.ValidationResult.SyntaxTreeResults )
         {
             foreach ( var diagnostic in syntaxTree.Value.Suppressions )
+            {
+                yield return diagnostic;
+            }
+        }
+    }
+    
+    internal IEnumerable<CacheableScopedSuppression> GetAllSuppressions(string path)
+    {
+        if ( this.PipelineResult.SyntaxTreeResults.TryGetValue( path, out var syntaxTreeResults ) )
+        {
+            foreach ( var diagnostic in syntaxTreeResults.Suppressions )
+            {
+                yield return diagnostic;
+            }
+        }
+        
+
+        if ( this.ValidationResult.SyntaxTreeResults.TryGetValue( path, out var validationResult ) )
+        {
+            foreach ( var diagnostic in validationResult.Suppressions )
             {
                 yield return diagnostic;
             }

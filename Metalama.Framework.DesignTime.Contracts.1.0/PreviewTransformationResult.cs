@@ -5,11 +5,14 @@ using System;
 
 namespace Metalama.Framework.DesignTime.Contracts
 {
+    /// <summary>
+    /// Result of the <see cref="ITransformationPreviewService.PreviewTransformationAsync"/> method.
+    /// </summary>
     public class PreviewTransformationResult
     {
         public bool IsSuccessful { get; set; }
 
-        public string? TransformedCode { get; set; }
+        public string? TransformedSourceText { get; set; }
 
         public string[]? ErrorMessages { get; set; }
 
@@ -19,7 +22,7 @@ namespace Metalama.Framework.DesignTime.Contracts
 
             if ( isSuccessful )
             {
-                this.TransformedCode = transformedCode ?? throw new ArgumentNullException( nameof(transformedCode) );
+                this.TransformedSourceText = transformedCode ?? throw new ArgumentNullException( nameof(transformedCode) );
             }
             else
             {

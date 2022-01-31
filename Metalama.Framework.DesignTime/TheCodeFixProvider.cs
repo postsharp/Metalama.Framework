@@ -23,6 +23,12 @@ namespace Metalama.Framework.DesignTime
 {
     // ReSharper disable UnusedType.Global
 
+    /// <summary>
+    /// Our implementation of <see cref="CodeFixProvider"/>. Code fixes are essentially implemented by adding properties
+    /// to diagnostics. These properties "register" the code fix for a given diagnostic. The current class reads these
+    /// properties and present the result to Visual Studio. When a code fix is executed by the user, the current
+    /// class invokes the code action in the analysis process using <see cref="ICodeActionExecutionService"/>.
+    /// </summary>
     [ExcludeFromCodeCoverage]
     public class TheCodeFixProvider : CodeFixProvider
     {
@@ -33,11 +39,14 @@ namespace Metalama.Framework.DesignTime
         private readonly ICodeActionExecutionService _codeActionExecutionService;
 
         public TheCodeFixProvider() : this( DesignTimeServiceProviderFactory.GetServiceProvider() ) { }
+        
+        public override ImmutableArray<string> FixableDiagnosticIds { get; } 
+            
 
         public TheCodeFixProvider( IServiceProvider serviceProvider )
         {
             this._logger = serviceProvider.GetLoggerFactory().GetLogger( "CodeFix" );
-            serviceProvider.GetRequiredService<ICodeActionDiscoveryService>();
+            serviceProvider.GetRequiredService<ICodeRefactoringDiscoveryService>();
             this._codeActionExecutionService = serviceProvider.GetRequiredService<ICodeActionExecutionService>();
 
             this.FixableDiagnosticIds =
@@ -146,8 +155,6 @@ namespace Metalama.Framework.DesignTime
                 { Parent: { } parent } => GetTypeDeclaration( parent ),
                 _ => null
             };
-
-        public override ImmutableArray<string> FixableDiagnosticIds { get; }
 
         private static ImmutableArray<CodeFixModel> ProvideCodeFixes( ImmutableArray<Diagnostic> diagnostics, CancellationToken cancellationToken )
         {

@@ -5,13 +5,27 @@ using System;
 
 namespace Metalama.Framework.DesignTime.Contracts
 {
+    /// <summary>
+    /// Entry point exposed by the compiler-side components, to be consumed by the Visual Studio extension.
+    /// An instance of Visual Studio can contain several versions of Metalama compiler components, and they
+    /// will be represented as different instances of this interface.
+    /// </summary>
     public interface ICompilerServiceProvider
     {
+        /// <summary>
+        /// Gets the version of the compiler-side component.
+        /// </summary>
         Version Version { get; }
 
-        // Cannot have a generic method in a type-equivalent interface.
-        ICompilerService? GetCompilerService( Type type );
+        /// <summary>
+        /// Gets a service.
+        /// </summary>
+        T? GetService<T>()
+            where T : class, ICompilerServiceProvider;
 
+        /// <summary>
+        /// Event raised when the compiler-side component is unloaded. (Which now never happens).
+        /// </summary>
         event Action Unloaded;
     }
 }

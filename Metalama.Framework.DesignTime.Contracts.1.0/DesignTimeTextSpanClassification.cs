@@ -6,14 +6,11 @@ namespace Metalama.Framework.DesignTime.Contracts
     // The type identifier cannot be modified even during refactoring.
 
     /// <summary>
-    /// An enumeration of classifications of <see cref="DesignTimeTextSpanClassification"/>, which typically
+    /// An enumeration of classifications of text spans, which typically
     /// map to different colors in the view layer.
     /// </summary>
     public enum DesignTimeTextSpanClassification
     {
-        // NOTE: Order of declaration (or at last enum value) matters. The higher value overwrites the lower.
-        // NOTE: Renaming these items will break the string-based tests.
-
         /// <summary>
         /// No category.
         /// </summary>

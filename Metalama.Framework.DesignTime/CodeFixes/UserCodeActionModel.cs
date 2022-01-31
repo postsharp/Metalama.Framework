@@ -9,6 +9,9 @@ using Microsoft.CodeAnalysis.Text;
 
 namespace Metalama.Framework.DesignTime.CodeFixes;
 
+/// <summary>
+/// Represents a code action specified by the user in an aspect.
+/// </summary>
 internal class UserCodeActionModel : CodeActionModel
 {
     public UserCodeActionModel()

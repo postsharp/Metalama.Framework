@@ -22,24 +22,31 @@ namespace Metalama.Framework.DesignTime.VisualStudio
 
         public Version Version { get; }
 
-        public ICompilerService? GetCompilerService( Type type )
+        public T? GetService<T>( ) 
+            where T : class, ICompilerServiceProvider
         {
+            var type = typeof(T);
+
+            object? service;
+            
             if ( type.IsEquivalentTo( typeof(IClassificationService) ) )
             {
-                return new DesignTimeClassificationService();
+                service = new DesignTimeClassificationService();
             }
             else if ( type.IsEquivalentTo( typeof(ITransformationPreviewService) ) )
             {
-                return new UserProcessTransformationPreviewService( VsServiceProviderFactory.GetServiceProvider() );
+                service = new UserProcessTransformationPreviewService( VsServiceProviderFactory.GetServiceProvider() );
             }
             else if ( type.IsEquivalentTo( typeof(ICompileTimeEditingStatusService) ) )
             {
-                return new CompileTimeEditingStatusService( this._serviceProvider );
+                service = new CompileTimeEditingStatusService( this._serviceProvider );
             }
             else
             {
-                return null;
+                service = null;
             }
+
+            return (T?) service;
         }
 
         event Action? ICompilerServiceProvider.Unloaded

@@ -13,11 +13,14 @@ namespace Metalama.Framework.DesignTime.CodeFixes
     /// </summary>
     public abstract class CodeActionModel : CodeActionBaseModel
     {
-        public abstract Task<CodeActionResult> ExecuteAsync( CodeActionExecutionContext executionContext, CancellationToken cancellationToken );
-
         protected CodeActionModel( string title ) : base( title ) { }
 
         protected CodeActionModel() { }
+        
+        /// <summary>
+        /// Executes the code action. This method is invoked in the analysis process.
+        /// </summary>
+        public abstract Task<CodeActionResult> ExecuteAsync( CodeActionExecutionContext executionContext, CancellationToken cancellationToken );
 
         public override ImmutableArray<CodeAction> ToCodeActions( CodeActionInvocationContext invocationContext, string titlePrefix = "" )
         {
@@ -26,6 +29,10 @@ namespace Metalama.Framework.DesignTime.CodeFixes
             return ImmutableArray.Create( CodeAction.Create( title, ct => this.InvokeAsync( invocationContext, ct ) ) );
         }
 
+        /// <summary>
+        /// Invokes the implementation of the code action. This method is invoked from the user process, but the code action
+        /// implementation runs in the analysis process. 
+        /// </summary>
         private async Task<Solution> InvokeAsync( CodeActionInvocationContext invocationContext, CancellationToken cancellationToken )
         {
             // Execute the current code action locally or remotely. In case of remote execution, the code action is serialized.

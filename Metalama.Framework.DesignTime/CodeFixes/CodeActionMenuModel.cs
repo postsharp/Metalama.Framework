@@ -9,7 +9,7 @@ namespace Metalama.Framework.DesignTime.CodeFixes
     /// <summary>
     /// Represents a code action menu, with children items.
     /// </summary>
-    public class CodeActionMenuModel : CodeActionBaseModel
+    public sealed class CodeActionMenuModel : CodeActionBaseModel
     {
         public List<CodeActionBaseModel> Items { get; } = new();
 

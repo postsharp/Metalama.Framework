@@ -6,11 +6,14 @@ using Microsoft.CodeAnalysis;
 
 namespace Metalama.Framework.DesignTime;
 
+/// <summary>
+/// Handles the compiler requests (currently only from source generators) for a specific project.
+/// </summary>
 public abstract class ProjectHandler : IDisposable
 {
-    public IServiceProvider ServiceProvider { get; }
+    protected IServiceProvider ServiceProvider { get; }
 
-    public IProjectOptions ProjectOptions { get; }
+    protected IProjectOptions ProjectOptions { get; }
 
     protected ProjectHandler( IServiceProvider serviceProvider, IProjectOptions projectOptions )
     {

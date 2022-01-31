@@ -6,7 +6,10 @@ using Metalama.Framework.Engine.Pipeline;
 
 namespace Metalama.Framework.DesignTime;
 
-public class AnalysisProcessSourceGenerator : TheSourceGenerator
+/// <summary>
+/// An implementation of <see cref="BaseSourceGenerator"/> that should execute in the analysis process.
+/// </summary>
+public class AnalysisProcessSourceGenerator : BaseSourceGenerator
 {
 #pragma warning disable CA1001 // ServiceHost is disposable but not owned.
 

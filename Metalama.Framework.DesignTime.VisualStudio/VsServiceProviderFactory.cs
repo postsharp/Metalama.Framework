@@ -11,6 +11,9 @@ using Metalama.Framework.Engine.Utilities;
 
 namespace Metalama.Framework.DesignTime.VisualStudio;
 
+/// <summary>
+/// Factory of <see cref="ServiceProvider"/> for both user and analysis Visual Studio processes. 
+/// </summary>
 public static class VsServiceProviderFactory
 {
     private static readonly object _initializeSync = new();
@@ -36,7 +39,7 @@ public static class VsServiceProviderFactory
                         case ProcessKind.DevEnv:
                             _serviceProvider = DesignTimeServiceProviderFactory.GetServiceProvider();
 
-                            var serviceClient = new ServiceClient( _serviceProvider );
+                            var serviceClient = new UserProcessEndpoint( _serviceProvider );
                             _ = serviceClient.ConnectAsync();
                             _serviceProvider = _serviceProvider.WithService( serviceClient );
 
@@ -53,12 +56,8 @@ public static class VsServiceProviderFactory
                                 _serviceProvider.WithService( new TransformationPreviewServiceImpl( _serviceProvider ) );
 
                             // ServiceHost depends on the services added above.
-                            var serviceHost = ServiceHost.GetInstance( _serviceProvider );
-
-                            if ( serviceHost != null )
-                            {
-                                _serviceProvider = _serviceProvider.WithService( serviceHost );
-                            }
+                            var serviceHost = AnalysisProcessEndpoint.GetInstance( _serviceProvider );
+                            _serviceProvider = _serviceProvider.WithService( serviceHost );
 
                             break;
 

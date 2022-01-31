@@ -3,9 +3,6 @@
 
 using Metalama.Backstage.Diagnostics;
 using Metalama.Framework.DesignTime.Pipeline;
-using Metalama.Framework.Engine.CodeFixes;
-using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
@@ -14,63 +11,15 @@ using System.Collections.Immutable;
 
 namespace Metalama.Framework.DesignTime.CodeFixes;
 
-public class CodeActionExecutionService : ICodeActionExecutionService
-{
-    private readonly DesignTimeAspectPipelineFactory _pipelineFactory;
-    private readonly ILogger _logger;
-
-    public CodeActionExecutionService( IServiceProvider serviceProvider )
-    {
-        this._pipelineFactory = serviceProvider.GetRequiredService<DesignTimeAspectPipelineFactory>();
-        this._logger = serviceProvider.GetLoggerFactory().GetLogger( "CodeAction" );
-    }
-
-    public async Task<CodeActionResult> ExecuteCodeActionAsync( string projectId, CodeActionModel codeActionModel, CancellationToken cancellationToken )
-    {
-        if ( !this._pipelineFactory.TryGetPipeline( projectId, out var pipeline ) )
-        {
-            this._logger.Error?.Log( "Cannot get the pipeline." );
-
-            return CodeActionResult.Empty;
-        }
-
-        var compilation = pipeline.LastCompilation;
-
-        if ( compilation == null )
-        {
-            this._logger.Error?.Log( "Cannot get the compilation." );
-
-            return CodeActionResult.Empty;
-        }
-
-        var partialCompilation = PartialCompilation.CreateComplete( compilation );
-
-        if ( !pipeline.TryGetConfiguration(
-                partialCompilation,
-                NullDiagnosticAdder.Instance,
-                true,
-                cancellationToken,
-                out var configuration ) )
-        {
-            this._logger.Error?.Log( "Cannot initialize the pipeline." );
-
-            return CodeActionResult.Empty;
-        }
-
-        var compilationModel = CompilationModel.CreateInitialInstance( configuration.ProjectModel, partialCompilation );
-
-        var executionContext = new CodeActionExecutionContext( configuration.ServiceProvider, compilationModel, this._logger, projectId );
-
-        return await codeActionModel.ExecuteAsync( executionContext, cancellationToken );
-    }
-}
-
-public class CodeActionDiscoveryService : ICodeActionDiscoveryService
+/// <summary>
+/// Implementation of <see cref="ICodeRefactoringDiscoveryService"/>, which runs in the analysis process.
+/// </summary>
+public class CodeRefactoringDiscoveryService : ICodeRefactoringDiscoveryService
 {
     private readonly ILogger _logger;
     private readonly DesignTimeAspectPipelineFactory _pipelineFactory;
 
-    public CodeActionDiscoveryService( IServiceProvider serviceProvider )
+    public CodeRefactoringDiscoveryService( IServiceProvider serviceProvider )
     {
         this._logger = serviceProvider.GetLoggerFactory().GetLogger( "CodeRefactoring" );
         this._pipelineFactory = serviceProvider.GetRequiredService<DesignTimeAspectPipelineFactory>();
@@ -128,7 +77,7 @@ public class CodeActionDiscoveryService : ICodeActionDiscoveryService
 
         foreach ( var aspect in eligibleAspects )
         {
-            var targetSymbolId = SymbolId.Create( symbol ).ToString();
+            var targetSymbolId = SymbolId.Create( symbol );
             aspectActions.Items.Add( new AddAspectAttributeCodeActionModel( aspect.FullName, targetSymbolId, syntaxTreePath ) );
 
             if ( aspect.IsLiveTemplate )

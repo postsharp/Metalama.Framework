@@ -7,14 +7,18 @@ using Metalama.Framework.Project;
 
 namespace Metalama.Framework.DesignTime.VisualStudio;
 
+/// <summary>
+/// User-side implementation of the <see cref="ICompileTimeEditingStatusService"/> interface.
+/// It essentially forwards messages to and from the analysis process.
+/// </summary>
 internal class CompileTimeEditingStatusService : ICompileTimeEditingStatusService, IDisposable
 {
-    private readonly ServiceClient _serviceClient;
+    private readonly UserProcessEndpoint _userProcessEndpoint;
 
     public CompileTimeEditingStatusService( IServiceProvider serviceProvider )
     {
-        this._serviceClient = serviceProvider.GetRequiredService<ServiceClient>();
-        this._serviceClient.IsEditingCompileTimeCodeChanged += this.OnIsEditingChanged;
+        this._userProcessEndpoint = serviceProvider.GetRequiredService<UserProcessEndpoint>();
+        this._userProcessEndpoint.IsEditingCompileTimeCodeChanged += this.OnIsEditingChanged;
     }
 
     private void OnIsEditingChanged( bool value )
@@ -29,12 +33,18 @@ internal class CompileTimeEditingStatusService : ICompileTimeEditingStatusServic
 
     public async Task OnEditingCompletedAsync( CancellationToken cancellationToken )
     {
-        var api = await this._serviceClient.GetServerApiAsync( cancellationToken );
+        var api = await this._userProcessEndpoint.GetServerApiAsync( cancellationToken );
         await api.OnCompileTimeCodeEditingCompletedAsync( cancellationToken );
+    }
+
+    public async Task OnUserInterfaceAttachedAsync( CancellationToken cancellationToken )
+    {
+        var api = await this._userProcessEndpoint.GetServerApiAsync( cancellationToken );
+        await api.OnUserInterfaceAttachedAsync( cancellationToken );
     }
 
     public void Dispose()
     {
-        this._serviceClient.IsEditingCompileTimeCodeChanged -= this.OnIsEditingChanged;
+        this._userProcessEndpoint.IsEditingCompileTimeCodeChanged -= this.OnIsEditingChanged;
     }
 }

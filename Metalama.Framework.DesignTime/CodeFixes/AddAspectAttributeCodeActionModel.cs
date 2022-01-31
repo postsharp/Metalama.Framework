@@ -9,15 +9,27 @@ using System.Collections.Immutable;
 
 namespace Metalama.Framework.DesignTime.CodeFixes;
 
-public class AddAspectAttributeCodeActionModel : CodeActionModel
+/// <summary>
+/// Represents a code action that adds a custom attribute representing an aspect.
+/// </summary>
+internal class AddAspectAttributeCodeActionModel : CodeActionModel
 {
+    /// <summary>
+    /// Gets or sets the full type of the aspect to add.
+    /// </summary>
     public string AspectTypeName { get; set; }
 
-    public string TargetSymbolId { get; set; }
+    /// <summary>
+    /// Gets or sets id of the symbol to which the custom attribute should be added.
+    /// </summary>
+    public SymbolId TargetSymbolId { get; set; }
 
+    /// <summary>
+    /// Gets or sets the path of the file in which the custom attribute should be added.
+    /// </summary>
     public string SyntaxTreeFilePath { get; set; }
 
-    public AddAspectAttributeCodeActionModel( string aspectTypeName, string targetSymbolId, string syntaxTreeFilePath ) : base(
+    public AddAspectAttributeCodeActionModel( string aspectTypeName, SymbolId targetSymbolId, string syntaxTreeFilePath ) : base(
         $"Add [{AttributeHelper.GetShortName( aspectTypeName )}]" )
     {
         this.AspectTypeName = aspectTypeName;
@@ -29,29 +41,14 @@ public class AddAspectAttributeCodeActionModel : CodeActionModel
     public AddAspectAttributeCodeActionModel()
     {
         this.AspectTypeName = null!;
-        this.TargetSymbolId = null!;
         this.SyntaxTreeFilePath = null!;
     }
 
     public override async Task<CodeActionResult> ExecuteAsync( CodeActionExecutionContext executionContext, CancellationToken cancellationToken )
     {
-        var lastDot = this.AspectTypeName.LastIndexOf( '.' );
-        string ns, typeName;
+        AttributeHelper.Parse( this.AspectTypeName, out var ns, out _, out var shortName );
 
-        if ( lastDot >= 0 )
-        {
-            ns = this.AspectTypeName.Substring( 0, lastDot - 1 );
-            typeName = this.AspectTypeName.Substring( lastDot + 1 );
-        }
-        else
-        {
-            ns = "";
-            typeName = this.AspectTypeName;
-        }
-
-        var attributeDescription = new AttributeDescription(
-            AttributeHelper.GetShortName( typeName ),
-            imports: ImmutableList.Create( ns ) );
+        var attributeDescription = new AttributeDescription( shortName, imports: ImmutableList.Create( ns ) );
 
         var compilation = executionContext.Compilation;
 
@@ -65,7 +62,7 @@ public class AddAspectAttributeCodeActionModel : CodeActionModel
 
         var syntaxRoot = await syntaxTree.GetRootAsync( cancellationToken );
 
-        var targetSymbol = new SymbolId( this.TargetSymbolId ).Resolve( compilation.RoslynCompilation, cancellationToken: cancellationToken );
+        var targetSymbol = this.TargetSymbolId.Resolve( compilation.RoslynCompilation, cancellationToken: cancellationToken );
 
         if ( targetSymbol == null )
         {

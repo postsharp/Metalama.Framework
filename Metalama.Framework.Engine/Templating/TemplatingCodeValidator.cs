@@ -36,11 +36,11 @@ namespace Metalama.Framework.Engine.Templating
             IServiceProvider serviceProvider,
             SemanticModel semanticModel,
             Action<Diagnostic> reportDiagnostic,
-            bool isCompileTimeTreeOutdated,
+            bool reportCompileTimeTreeOutdatedError,
             bool isDesignTime,
             CancellationToken cancellationToken )
         {
-            Visitor visitor = new( semanticModel, reportDiagnostic, serviceProvider, isCompileTimeTreeOutdated, isDesignTime, cancellationToken );
+            Visitor visitor = new( semanticModel, reportDiagnostic, serviceProvider, reportCompileTimeTreeOutdatedError, isDesignTime, cancellationToken );
             visitor.Visit( semanticModel.SyntaxTree.GetRoot() );
 
             return !visitor.HasError;

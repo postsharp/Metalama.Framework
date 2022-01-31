@@ -7,7 +7,7 @@ namespace Metalama.Framework.CompilerExtensions
 {
     // ReSharper disable UnusedType.Global
 
-    [Generator]
+    [Generator( LanguageNames.CSharp )]
     public class MetalamaSourceGenerator : ISourceGenerator
     {
         private readonly ISourceGenerator? _impl;

@@ -7,10 +7,10 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Metalama.Framework.DesignTime.Contracts.1.0\Metalama.Framework.DesignTime.Contracts.1.0.csproj"/>
-        <ProjectReference Include="..\Metalama.Framework.Engine\Metalama.Framework.Engine.csproj"/>
-        <InternalsVisibleTo Include="Metalama.Framework.Tests.UnitTests.Internals"/>
-        <ProjectReference Include="..\Metalama.SystemTypes\Metalama.SystemTypes.csproj"/>
+        <ProjectReference Include="..\Metalama.Framework.DesignTime.Contracts.1.0\Metalama.Framework.DesignTime.Contracts.1.0.csproj" />
+        <ProjectReference Include="..\Metalama.Framework.Engine\Metalama.Framework.Engine.csproj" />
+        <InternalsVisibleTo Include="Metalama.Framework.Tests.UnitTests.Internals" />
+        <ProjectReference Include="..\Metalama.SystemTypes\Metalama.SystemTypes.csproj" />
     </ItemGroup>
 
 </Project>

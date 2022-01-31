@@ -9,14 +9,14 @@ namespace Metalama.Framework.DesignTime;
 public static class ProjectIdHelper
 {
     // The project id is passed to a constant, because that's the only public way to push a property to a compilation.
-    public const string ProjectIdPreprocessorSymbolPrefix = "MetalamaProjectId_";
+    private const string _projectIdPreprocessorSymbolPrefix = "MetalamaProjectId_";
 
     public static bool TryGetProjectId( Compilation compilation, [NotNullWhen( true )] out string? projectId )
     {
         var projectIdConstant = compilation.SyntaxTrees.First()
-            .Options.PreprocessorSymbolNames.FirstOrDefault( x => x.StartsWith( ProjectIdPreprocessorSymbolPrefix, StringComparison.OrdinalIgnoreCase ) );
+            .Options.PreprocessorSymbolNames.FirstOrDefault( x => x.StartsWith( _projectIdPreprocessorSymbolPrefix, StringComparison.OrdinalIgnoreCase ) );
 
-        projectId = projectIdConstant?.Substring( ProjectIdPreprocessorSymbolPrefix.Length );
+        projectId = projectIdConstant?.Substring( _projectIdPreprocessorSymbolPrefix.Length );
 
         return !string.IsNullOrEmpty( projectId );
     }

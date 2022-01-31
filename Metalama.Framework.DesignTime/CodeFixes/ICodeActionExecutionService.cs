@@ -6,6 +6,9 @@ using Metalama.Framework.Project;
 
 namespace Metalama.Framework.DesignTime.CodeFixes;
 
+/// <summary>
+/// A cross-process interface implemented by the analysis process that allows the user process to execute a code action.
+/// </summary>
 public interface ICodeActionExecutionService : IService
 {
     Task<CodeActionResult> ExecuteCodeActionAsync( string projectId, CodeActionModel codeActionModel, CancellationToken cancellationToken );

@@ -6,8 +6,6 @@ using System.Collections.Generic;
 
 namespace Metalama.Framework.DesignTime.Contracts
 {
-    // The type identifier cannot be modified even during refactoring.
-
     /// <summary>
     /// A read-only collection of <see cref="DesignTimeClassifiedTextSpan"/> with additional methods.
     /// </summary>

@@ -6,6 +6,10 @@ using StreamJsonRpc;
 
 namespace Metalama.Framework.DesignTime.VisualStudio.Remoting;
 
+
+/// <summary>
+/// A base class for <see cref="UserProcessEndpoint"/> and <see cref="AnalysisProcessEndpoint"/>.
+/// </summary>
 internal class ServiceEndpoint
 {
     protected static JsonRpc CreateRpc( Stream stream )

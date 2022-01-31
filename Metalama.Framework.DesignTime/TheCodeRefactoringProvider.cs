@@ -13,11 +13,16 @@ namespace Metalama.Framework.DesignTime
 {
     // ReSharper disable UnusedType.Global
 
+    /// <summary>
+    /// Our implementation of <see cref="CodeRefactoringProvider"/>. All the work is essentially delegated to the implementation
+    /// of the <see cref="ICodeRefactoringDiscoveryService"/> and <see cref="ICodeActionExecutionService"/> services, which
+    /// run in the analysis process. The current implementation only wraps these interfaces for Visual Studio.
+    /// </summary>
     [ExcludeFromCodeCoverage]
     public class TheCodeRefactoringProvider : CodeRefactoringProvider
     {
         private readonly ILogger _logger;
-        private readonly ICodeActionDiscoveryService _codeActionDiscoveryService;
+        private readonly ICodeRefactoringDiscoveryService _codeRefactoringDiscoveryService;
         private readonly ICodeActionExecutionService _codeActionExecutionService;
 
         public TheCodeRefactoringProvider() : this( DesignTimeServiceProviderFactory.GetServiceProvider() ) { }
@@ -25,7 +30,7 @@ namespace Metalama.Framework.DesignTime
         public TheCodeRefactoringProvider( IServiceProvider serviceProvider )
         {
             this._logger = serviceProvider.GetLoggerFactory().GetLogger( "CodeRefactoring" );
-            this._codeActionDiscoveryService = serviceProvider.GetRequiredService<ICodeActionDiscoveryService>();
+            this._codeRefactoringDiscoveryService = serviceProvider.GetRequiredService<ICodeRefactoringDiscoveryService>();
             this._codeActionExecutionService = serviceProvider.GetRequiredService<ICodeActionExecutionService>();
         }
 
@@ -71,7 +76,7 @@ namespace Metalama.Framework.DesignTime
                 }
 
                 // Call the service.
-                var result = await this._codeActionDiscoveryService.ComputeRefactoringsAsync(
+                var result = await this._codeRefactoringDiscoveryService.ComputeRefactoringsAsync(
                     projectOptions.ProjectId,
                     context.Document.FilePath!,
                     context.Span,

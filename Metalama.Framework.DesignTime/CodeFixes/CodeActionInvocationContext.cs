@@ -7,19 +7,25 @@ using Microsoft.CodeAnalysis;
 
 namespace Metalama.Framework.DesignTime.CodeFixes;
 
+/// <summary>
+/// Context information passed to the <see cref="CodeActionBaseModel.ToCodeActions"/> method.  
+/// </summary>
 public class CodeActionInvocationContext
 {
-    public bool HierarchicalItemsSupported { get; } = HostProcess.Current.Product != HostProduct.Rider;
+    /// <summary>
+    /// Gets a value indicating whether the current IDE supports hierarchical code items.
+    /// </summary>
+    internal  bool HierarchicalItemsSupported { get; } = HostProcess.Current.Product != HostProduct.Rider;
 
-    public ICodeActionExecutionService Service { get; }
+    internal  ICodeActionExecutionService Service { get; }
 
-    public Document Document { get; }
+    internal  Document Document { get; }
 
-    public ILogger Logger { get; }
+    internal  ILogger Logger { get; }
 
-    public string ProjectId { get; }
+    internal  string ProjectId { get; }
 
-    public CodeActionInvocationContext( ICodeActionExecutionService service, Document document, ILogger logger, string projectId )
+    internal CodeActionInvocationContext( ICodeActionExecutionService service, Document document, ILogger logger, string projectId )
     {
         this.Service = service;
         this.Document = document;

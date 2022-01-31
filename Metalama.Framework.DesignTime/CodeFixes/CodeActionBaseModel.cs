@@ -13,8 +13,7 @@ namespace Metalama.Framework.DesignTime.CodeFixes
     public abstract class CodeActionBaseModel : ICodeAction
     {
         protected const string TitleJoin = ": ";
-        protected const int NextKey = 1;
-
+        
         /// <summary>
         /// Gets or sets the code action title.
         /// </summary>
@@ -32,11 +31,11 @@ namespace Metalama.Framework.DesignTime.CodeFixes
         }
 
         /// <summary>
-        /// Gets the single code action, or the collection of code actions, that is represented by the current element.
+        /// Gets the single <see cref="CodeAction"/>, or the collection of code actions, that is represented by the current element.
+        /// This method is invoked in the user process.
         /// </summary>
-        /// <param name="invocationContext"></param>
+        /// <param name="invocationContext">The invocation context.</param>
         /// <param name="titlePrefix">A string to be prepended to <see cref="Title"/>.</param>
-        /// <returns></returns>
         public abstract ImmutableArray<CodeAction> ToCodeActions( CodeActionInvocationContext invocationContext, string titlePrefix = "" );
     }
 }

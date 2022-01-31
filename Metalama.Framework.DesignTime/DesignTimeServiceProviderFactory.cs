@@ -10,6 +10,10 @@ using Metalama.Framework.Engine.Utilities;
 
 namespace Metalama.Framework.DesignTime;
 
+/// <summary>
+/// A <see cref="ServiceProvider"/> factory for design-time processes. Note that it should not be invoked directly from Visual Studio -- this
+/// process has its own factory.
+/// </summary>
 public static class DesignTimeServiceProviderFactory
 {
     private static readonly object _initializeSync = new();
@@ -33,7 +37,7 @@ public static class DesignTimeServiceProviderFactory
                     if ( DebuggingHelper.ProcessKind != ProcessKind.DevEnv )
                     {
                         _serviceProvider = _serviceProvider.WithServices(
-                            new CodeActionDiscoveryService( _serviceProvider ),
+                            new CodeRefactoringDiscoveryService( _serviceProvider ),
                             new CodeActionExecutionService( _serviceProvider ) );
                     }
                     else

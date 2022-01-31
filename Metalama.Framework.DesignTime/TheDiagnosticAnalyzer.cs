@@ -64,13 +64,17 @@ namespace Metalama.Framework.DesignTime
 
             context.ConfigureGeneratedCodeAnalysis( GeneratedCodeAnalysisFlags.None );
 
-            context.RegisterCompilationAction( this.AnalyzeCompilation );
+            context.RegisterSemanticModelAction( this.AnalyzeSemanticModel );
         }
 
-        private void AnalyzeCompilation( CompilationAnalysisContext context )
+        private void AnalyzeSemanticModel( SemanticModelAnalysisContext context )
         {
+            var compilation = context.SemanticModel.Compilation;
+
+            var syntaxTreeFilePath = context.SemanticModel.SyntaxTree.FilePath;
+
             this._logger.Trace?.Log(
-                $"DesignTimeAnalyzer.AnalyzeCompilation('{context.Compilation.AssemblyName}', CompilationId = {DebuggingHelper.GetObjectId( context.Compilation )}) started." );
+                $"DesignTimeAnalyzer.AnalyzeSemanticModel('{syntaxTreeFilePath}', CompilationId = {DebuggingHelper.GetObjectId( compilation )}) started." );
 
             try
             {
@@ -89,7 +93,7 @@ namespace Metalama.Framework.DesignTime
 
                 var pipeline = this._pipelineFactory.GetOrCreatePipeline(
                     projectOptions,
-                    context.Compilation,
+                    compilation,
                     cancellationToken );
 
                 if ( pipeline == null )
@@ -97,7 +101,6 @@ namespace Metalama.Framework.DesignTime
                     return;
                 }
 
-                var compilation = context.Compilation;
 
                 if ( !this._pipelineFactory.TryExecute(
                         projectOptions,
@@ -106,13 +109,13 @@ namespace Metalama.Framework.DesignTime
                         out var compilationResult ) )
                 {
                     this._logger.Trace?.Log(
-                        $"DesignTimeAnalyzer.AnalyzeCompilation('{context.Compilation.AssemblyName}', CompilationId = {DebuggingHelper.GetObjectId( context.Compilation )}): the pipeline failed." );
+                        $"DesignTimeAnalyzer.AnalyzeSemanticModel('{syntaxTreeFilePath}', CompilationId = {DebuggingHelper.GetObjectId( compilation )}): the pipeline failed." );
 
                     return;
                 }
 
-                var diagnostics = compilationResult.GetAllDiagnostics();
-                var suppressions = compilationResult.GetAllSuppressions();
+                var diagnostics = compilationResult.GetAllDiagnostics(syntaxTreeFilePath);
+                var suppressions = compilationResult.GetAllSuppressions(syntaxTreeFilePath);
 
                 // Report diagnostics.
                 DesignTimeDiagnosticHelper.ReportDiagnostics(

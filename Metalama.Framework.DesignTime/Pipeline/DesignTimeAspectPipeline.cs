@@ -77,6 +77,8 @@ namespace Metalama.Framework.DesignTime.Pipeline
             bool isTest )
             : base( serviceProvider.WithProjectScopedServices( metadataReferences ), isTest, domain )
         {
+            this.Factory = this.ServiceProvider.GetService<DesignTimeAspectPipelineFactory>();
+            
             this._currentState = new PipelineState( this );
 
             // The design-time pipeline contains project-scoped services for performance reasons: the pipeline may be called several
@@ -156,12 +158,14 @@ namespace Metalama.Framework.DesignTime.Pipeline
                     this.SetState( new PipelineState( this ) );
                     this.PipelineResumed?.Invoke( this, EventArgs.Empty );
 
-                    // Touching the files after having reset the pipeline.
-
-                    foreach ( var file in filesToTouch )
+                    if ( this.MustReportPausedPipelineAsErrors )
                     {
-                        Logger.DesignTime.Trace?.Log( $"Touching file '{file}'." );
-                        RetryHelper.Retry( () => File.SetLastWriteTimeUtc( file, DateTime.UtcNow ), logger: Logger.DesignTime );
+                        // Touching the files after having reset the pipeline.
+                        foreach ( var file in filesToTouch )
+                        {
+                            Logger.DesignTime.Trace?.Log( $"Touching file '{file}'." );
+                            RetryHelper.Retry( () => File.SetLastWriteTimeUtc( file, DateTime.UtcNow ), logger: Logger.DesignTime );
+                        }
                     }
                 }
                 else
@@ -191,6 +195,10 @@ namespace Metalama.Framework.DesignTime.Pipeline
         }
 
         public Compilation? LastCompilation { get; private set; }
+
+        public DesignTimeAspectPipelineFactory? Factory { get; }
+
+        public bool MustReportPausedPipelineAsErrors => this.Factory == null || !this.Factory.IsUserInterfaceAttached;
 
         protected override void Dispose( bool disposing )
         {
@@ -350,7 +358,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                     pipeline.ServiceProvider,
                     semanticModel,
                     diagnostics.Add,
-                    pipeline.IsCompileTimeSyntaxTreeOutdated( syntaxTree.FilePath ),
+                    pipeline.MustReportPausedPipelineAsErrors && pipeline.IsCompileTimeSyntaxTreeOutdated( syntaxTree.FilePath ),
                     true,
                     cancellationToken );
 

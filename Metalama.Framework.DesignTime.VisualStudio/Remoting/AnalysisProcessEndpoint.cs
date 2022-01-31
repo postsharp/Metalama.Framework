@@ -2,14 +2,9 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Backstage.Diagnostics;
-using Metalama.Framework.DesignTime.CodeFixes;
-using Metalama.Framework.DesignTime.Contracts;
 using Metalama.Framework.DesignTime.Pipeline;
-using Metalama.Framework.DesignTime.Preview;
-using Metalama.Framework.Engine.CodeFixes;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Project;
-using Microsoft.CodeAnalysis.Text;
 using StreamJsonRpc;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
@@ -18,11 +13,15 @@ using System.IO.Pipes;
 
 namespace Metalama.Framework.DesignTime.VisualStudio.Remoting;
 
-internal class ServiceHost : ServiceEndpoint, IService, IDisposable
+/// <summary>
+/// Implements the remoting API of the analysis process.
+/// </summary>
+
+internal partial class AnalysisProcessEndpoint : ServiceEndpoint, IService, IDisposable
 {
     private readonly ILogger _logger;
     private static readonly object _initializeLock = new();
-    private static ServiceHost? _instance;
+    private static AnalysisProcessEndpoint? _instance;
 
     private readonly string? _pipeName;
     private readonly ServiceImpl _service;
@@ -36,9 +35,12 @@ internal class ServiceHost : ServiceEndpoint, IService, IDisposable
 
     private NamedPipeServerStream? _pipeStream;
     private JsonRpc? _rpc;
-    private IClientApi? _client;
+    private IUserProcessApi? _client;
 
-    public static ServiceHost? GetInstance( IServiceProvider serviceProvider )
+    /// <summary>
+    /// Initializes the global instance of the service.
+    /// </summary>
+    public static AnalysisProcessEndpoint GetInstance( IServiceProvider serviceProvider )
     {
         if ( _instance == null )
         {
@@ -48,17 +50,17 @@ internal class ServiceHost : ServiceEndpoint, IService, IDisposable
                 {
                     if ( TryGetPipeName( out var pipeName ) )
                     {
-                        _instance = new ServiceHost( serviceProvider, pipeName );
+                        _instance = new AnalysisProcessEndpoint( serviceProvider, pipeName );
                         _instance.Start();
                     }
                 }
             }
         }
 
-        return _instance;
+        return _instance!;
     }
 
-    public ServiceHost( IServiceProvider serviceProvider, string pipeName )
+    public AnalysisProcessEndpoint( IServiceProvider serviceProvider, string pipeName )
     {
         this._logger = serviceProvider.GetLoggerFactory().GetLogger( "Remoting" );
         this._compileTimeCodeEditingStatusService = serviceProvider.GetService<ICompileTimeCodeEditingStatusService>();
@@ -99,6 +101,9 @@ internal class ServiceHost : ServiceEndpoint, IService, IDisposable
         return true;
     }
 
+    /// <summary>
+    /// Starts the RPC connection, but does not wait until the service is fully started.
+    /// </summary>
     public void Start()
     {
         _ = Task.Run( () => this.StartAsync( this._startCancellationSource.Token ) );
@@ -115,8 +120,8 @@ internal class ServiceHost : ServiceEndpoint, IService, IDisposable
 
             this._rpc = CreateRpc( this._pipeStream );
 
-            this._rpc.AddLocalRpcTarget<IServerApi>( this._service, null );
-            this._client = this._rpc.Attach<IClientApi>();
+            this._rpc.AddLocalRpcTarget<IAnalysisProcessApi>( this._service, null );
+            this._client = this._rpc.Attach<IUserProcessApi>();
             this._rpc.StartListening();
 
             this._logger.Trace?.Log( $"The ServiceHost '{this._pipeName}' is ready." );
@@ -148,68 +153,6 @@ internal class ServiceHost : ServiceEndpoint, IService, IDisposable
     }
 
     public event EventHandler<ClientConnectedEventArgs>? ClientConnected;
-
-    private class ServiceImpl : IServerApi
-    {
-        private readonly ServiceHost _parent;
-
-        public ServiceImpl( ServiceHost parent )
-        {
-            this._parent = parent;
-        }
-
-        public async Task RegisterProjectHandlerAsync( string projectId, CancellationToken cancellationToken )
-        {
-            this._parent._logger.Trace?.Log( $"The client '{projectId}' has connected." );
-
-            this._parent._connectedClients[projectId] = projectId;
-
-            Thread.MemoryBarrier();
-
-            // If we received source before the client connected, publish it for the client now.
-            if ( this._parent._sourcesForUnconnectedClients.TryRemove( projectId, out var sources ) )
-            {
-                this._parent._logger.Trace?.Log( $"Publishing source for the client '{projectId}'." );
-
-                await this._parent._client!.PublishGeneratedCodeAsync( projectId, sources, cancellationToken );
-            }
-
-            this._parent.ClientConnected?.Invoke( this._parent, new ClientConnectedEventArgs( projectId ) );
-        }
-
-        public Task<PreviewTransformationResult> PreviewTransformationAsync( string projectId, string syntaxTreeName, CancellationToken cancellationToken )
-        {
-            var implementation = this._parent._serviceProvider.GetRequiredService<ITransformationPreviewServiceImpl>();
-
-            return implementation.PreviewTransformationAsync( projectId, syntaxTreeName, cancellationToken );
-        }
-
-        public Task OnCompileTimeCodeEditingCompletedAsync( CancellationToken cancellationToken = default )
-        {
-            var service = this._parent._serviceProvider.GetRequiredService<ICompileTimeCodeEditingStatusService>();
-            service.OnEditingCompileTimeCodeCompleted();
-
-            return Task.CompletedTask;
-        }
-
-        public Task<ComputeRefactoringResult> ComputeRefactoringsAsync(
-            string projectId,
-            string syntaxTreePath,
-            TextSpan span,
-            CancellationToken cancellationToken )
-        {
-            var service = this._parent._serviceProvider.GetRequiredService<CodeActionDiscoveryService>();
-
-            return service.ComputeRefactoringsAsync( projectId, syntaxTreePath, span, cancellationToken );
-        }
-
-        public Task<CodeActionResult> ExecuteCodeActionAsync( string projectId, CodeActionModel codeActionModel, CancellationToken cancellationToken )
-        {
-            var service = this._parent._serviceProvider.GetRequiredService<CodeActionExecutionService>();
-
-            return service.ExecuteCodeActionAsync( projectId, codeActionModel, cancellationToken );
-        }
-    }
 
     public async Task PublishGeneratedSourcesAsync(
         string projectId,

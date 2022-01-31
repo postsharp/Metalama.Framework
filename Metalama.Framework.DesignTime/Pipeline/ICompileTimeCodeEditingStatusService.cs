@@ -12,4 +12,6 @@ public interface ICompileTimeCodeEditingStatusService : IService
     event Action<bool>? IsEditingCompileTimeCodeChanged;
 
     void OnEditingCompileTimeCodeCompleted();
+
+    void OnUserInterfaceAttached();
 }

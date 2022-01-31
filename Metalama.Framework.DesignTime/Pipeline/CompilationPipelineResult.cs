@@ -36,12 +36,10 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
         public ImmutableDictionary<string, IntroducedSyntaxTree> IntroducedSyntaxTrees { get; } = _emptyIntroducedSyntaxTrees;
 
-        public IEnumerable<SyntaxTreePipelineResult> SyntaxTreeResults => this._syntaxTreeResults.Values;
-
         /// <summary>
         /// Maps the syntax tree name to the pipeline result for this syntax tree.
         /// </summary>
-        private readonly ImmutableDictionary<string, SyntaxTreePipelineResult> _syntaxTreeResults = _emptySyntaxTreeResults;
+        public ImmutableDictionary<string, SyntaxTreePipelineResult> SyntaxTreeResults { get; } = _emptySyntaxTreeResults;
 
         /// <summary>
         /// List of SyntaxTreeResult that have been invalidated.
@@ -58,7 +56,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
             DesignTimeValidatorCollection validators,
             bool isDirty )
         {
-            this._syntaxTreeResults = syntaxTreeResults;
+            this.SyntaxTreeResults = syntaxTreeResults;
             this._invalidSyntaxTreeResults = invalidSyntaxTreeResults;
             this.IntroducedSyntaxTrees = introducedSyntaxTrees;
             this._inheritableAspects = inheritableAspects;
@@ -75,7 +73,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
         {
             var resultsByTree = SplitResultsByTree( compilation, pipelineResults );
 
-            var syntaxTreeResultBuilder = this._syntaxTreeResults.ToBuilder();
+            var syntaxTreeResultBuilder = this.SyntaxTreeResults.ToBuilder();
 
             ImmutableDictionary<string, IntroducedSyntaxTree>.Builder? introducedSyntaxTreeBuilder = null;
             ImmutableDictionaryOfHashSet<string, InheritableAspectInstance>.Builder? inheritableAspectsBuilder = null;
@@ -302,7 +300,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
             }
             else
             {
-                var syntaxTreeBuilders = this._syntaxTreeResults.ToBuilder();
+                var syntaxTreeBuilders = this.SyntaxTreeResults.ToBuilder();
                 var invalidSyntaxTreeBuilders = this._invalidSyntaxTreeResults.ToBuilder();
 
                 foreach ( var change in compilationChanges.SyntaxTreeChanges )
@@ -347,7 +345,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
         internal (ImmutableArray<Diagnostic> Diagnostics, ImmutableArray<CacheableScopedSuppression> Suppressions) GetDiagnosticsOnSyntaxTree( string path )
         {
-            if ( this._syntaxTreeResults.TryGetValue( path, out var syntaxTreeResult ) )
+            if ( this.SyntaxTreeResults.TryGetValue( path, out var syntaxTreeResult ) )
             {
                 return (syntaxTreeResult.Diagnostics, syntaxTreeResult.Suppressions);
             }
@@ -357,7 +355,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
             }
         }
 
-        public bool IsSyntaxTreeDirty( SyntaxTree syntaxTree ) => !this._syntaxTreeResults.ContainsKey( syntaxTree.FilePath );
+        public bool IsSyntaxTreeDirty( SyntaxTree syntaxTree ) => !this.SyntaxTreeResults.ContainsKey( syntaxTree.FilePath );
 
         public IEnumerable<string> InheritableAspectTypes => this._inheritableAspects.Keys;
 

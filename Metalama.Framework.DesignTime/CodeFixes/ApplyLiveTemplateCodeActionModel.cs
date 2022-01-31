@@ -8,22 +8,21 @@ using Metalama.Framework.Project;
 
 namespace Metalama.Framework.DesignTime.CodeFixes;
 
-public class ApplyLiveTemplateCodeActionModel : CodeActionModel
+internal class ApplyLiveTemplateCodeActionModel : CodeActionModel
 {
     public string AspectTypeName { get; set; }
 
-    public string TargetSymbolId { get; set; }
+    public SymbolId TargetSymbolId { get; set; }
 
     public string SyntaxTreeFilePath { get; set; }
 
     public ApplyLiveTemplateCodeActionModel()
     {
         this.AspectTypeName = null!;
-        this.TargetSymbolId = null!;
         this.SyntaxTreeFilePath = null!;
     }
 
-    public ApplyLiveTemplateCodeActionModel( string title, string aspectTypeName, string targetSymbolId, string syntaxTreeFilePath ) : base( title )
+    public ApplyLiveTemplateCodeActionModel( string title, string aspectTypeName, SymbolId targetSymbolId, string syntaxTreeFilePath ) : base( title )
     {
         this.AspectTypeName = aspectTypeName;
         this.TargetSymbolId = targetSymbolId;
@@ -40,7 +39,7 @@ public class ApplyLiveTemplateCodeActionModel : CodeActionModel
             return Task.FromResult( CodeActionResult.Empty );
         }
 
-        var targetSymbol = new SymbolId( this.TargetSymbolId ).Resolve( compilation, cancellationToken: cancellationToken );
+        var targetSymbol = this.TargetSymbolId.Resolve( compilation, cancellationToken: cancellationToken );
 
         if ( targetSymbol == null )
         {

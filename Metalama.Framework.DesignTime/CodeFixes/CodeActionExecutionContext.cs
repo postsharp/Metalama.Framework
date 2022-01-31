@@ -6,17 +6,17 @@ using Metalama.Framework.Engine.CodeModel;
 
 namespace Metalama.Framework.DesignTime.CodeFixes;
 
-public class CodeActionExecutionContext
+public sealed class CodeActionExecutionContext
 {
-    public IServiceProvider ServiceProvider { get; }
+    internal IServiceProvider ServiceProvider { get; }
 
-    public CompilationModel Compilation { get; }
+    internal CompilationModel Compilation { get; }
 
-    public ILogger Logger { get; }
+    internal ILogger Logger { get; }
 
-    public string ProjectId { get; }
+    internal string ProjectId { get; }
 
-    public CodeActionExecutionContext( IServiceProvider serviceProvider, CompilationModel compilation, ILogger logger, string projectId )
+    internal CodeActionExecutionContext( IServiceProvider serviceProvider, CompilationModel compilation, ILogger logger, string projectId )
     {
         this.ServiceProvider = serviceProvider;
         this.Compilation = compilation;

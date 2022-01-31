@@ -3,6 +3,7 @@
 
 using Metalama.Framework.DesignTime.CodeFixes;
 using Metalama.Framework.Engine.CodeFixes;
+using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Formatting;
@@ -30,10 +31,10 @@ public class SerializationTests
     {
         var roundloop = (AddAspectAttributeCodeActionModel) Roundloop(
             (CodeActionBaseModel)
-            new AddAspectAttributeCodeActionModel( "AspectTypeName", "SymbolId", "SyntaxTreeFilePath" ) );
+            new AddAspectAttributeCodeActionModel( "AspectTypeName",  new SymbolId("SymbolId"), "SyntaxTreeFilePath" ) );
 
         Assert.Equal( "AspectTypeName", roundloop.AspectTypeName );
-        Assert.Equal( "SymbolId", roundloop.TargetSymbolId );
+        Assert.Equal( "SymbolId", roundloop.TargetSymbolId.Id );
         Assert.Equal( "SyntaxTreeFilePath", roundloop.SyntaxTreeFilePath );
     }
 
@@ -49,7 +50,7 @@ public class SerializationTests
     public void Serialize_ComputeRefactoringResult()
     {
         var result = new ComputeRefactoringResult(
-            ImmutableArray.Create<CodeActionBaseModel>( new AddAspectAttributeCodeActionModel( "AspectTypeName", "SymbolId", "SyntaxTreeFilePath" ) ) );
+            ImmutableArray.Create<CodeActionBaseModel>( new AddAspectAttributeCodeActionModel( "AspectTypeName",  new SymbolId("SymbolId"), "SyntaxTreeFilePath" ) ) );
 
         Roundloop( result );
     }
@@ -58,7 +59,7 @@ public class SerializationTests
     public void Serialize_CodeActionMenu()
     {
         var input = new CodeActionMenuModel( "The title" );
-        input.Items.Add( new AddAspectAttributeCodeActionModel( "AspectTypeName", "SymbolId", "SyntaxTreeFilePath" ) );
+        input.Items.Add( new AddAspectAttributeCodeActionModel( "AspectTypeName",  new SymbolId("SymbolId"), "SyntaxTreeFilePath" ) );
 
         var roundloop = (CodeActionMenuModel) Roundloop( (CodeActionBaseModel) input );
 

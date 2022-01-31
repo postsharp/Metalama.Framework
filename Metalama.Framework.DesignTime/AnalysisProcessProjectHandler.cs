@@ -13,6 +13,15 @@ using System.Collections.Immutable;
 
 namespace Metalama.Framework.DesignTime;
 
+/// <summary>
+/// The real implementation of <see cref="ProjectHandler"/>, running in the analysis process. 
+/// </summary>
+/// <remarks>
+/// The implementation works by providing a cached result whenever one is available, and to schedule
+/// an asynchronous task to refresh the task. When the task is completed, a touch file is modified,
+/// which causes the compiler to call the <see cref="ProjectHandler"/> again, and to receive
+/// a fresh copy of the cache.
+/// </remarks>
 public class AnalysisProcessProjectHandler : ProjectHandler
 {
     private readonly DesignTimeAspectPipelineFactory _pipelineFactory;
@@ -32,6 +41,7 @@ public class AnalysisProcessProjectHandler : ProjectHandler
 
     public override void GenerateSources( Compilation compilation, GeneratorExecutionContext context )
     {
+        // A local function that adds the cached source to the compiler.
         void AddSources()
         {
             if ( this.Sources != null )
@@ -100,6 +110,9 @@ public class AnalysisProcessProjectHandler : ProjectHandler
         }
     }
 
+    /// <summary>
+    /// Executes the pipeline.
+    /// </summary>
     private bool Compute( Compilation compilation, CancellationToken cancellationToken )
     {
         // Execute the pipeline.
@@ -148,6 +161,9 @@ public class AnalysisProcessProjectHandler : ProjectHandler
         return true;
     }
 
+    /// <summary>
+    /// Executes the pipeline and then publishes the changes. 
+    /// </summary>
     private async Task ComputeAndPublishAsync( Compilation compilation, CancellationToken cancellationToken )
     {
         if ( this.Compute( compilation, cancellationToken ) )
@@ -156,6 +172,10 @@ public class AnalysisProcessProjectHandler : ProjectHandler
         }
     }
 
+    /// <summary>
+    /// Publish the current cached content to the client (if implemented in the derived class) or
+    /// by touching the touch file. 
+    /// </summary>
     private async Task PublishAsync( CancellationToken cancellationToken )
     {
         this._logger.Trace?.Log( $"{this.GetType().Name}.Publish('{this.ProjectOptions.ProjectId}'" );
@@ -180,6 +200,9 @@ public class AnalysisProcessProjectHandler : ProjectHandler
         RetryHelper.Retry( () => File.WriteAllText( this.ProjectOptions.SourceGeneratorTouchFile, Guid.NewGuid().ToString() ) );
     }
 
+    /// <summary>
+    /// When implemented by a derived class, publishes the generated source code to the client.
+    /// </summary>
     protected virtual Task PublishGeneratedSourcesAsync( string projectId, CancellationToken cancellationToken ) => Task.CompletedTask;
 
     protected override void Dispose( bool disposing )

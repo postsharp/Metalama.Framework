@@ -23,8 +23,8 @@ public class RemotingTests
         const string sourceTreeName = "mySource";
 
         var pipeName = $"Metalama_Test_{Guid.NewGuid()}";
-        using var server = new ServiceHost( ServiceProvider.Empty, pipeName );
-        using var client = new ServiceClient( ServiceProvider.Empty, pipeName );
+        using var server = new AnalysisProcessEndpoint( ServiceProvider.Empty, pipeName );
+        using var client = new UserProcessEndpoint( ServiceProvider.Empty, pipeName );
         var projectHandler = new TestProjectHandler();
 
         server.Start();
@@ -46,11 +46,11 @@ public class RemotingTests
 
         // Start the server.
         var pipeName = $"Metalama_Test_{Guid.NewGuid()}";
-        using var server = new ServiceHost( ServiceProvider.Empty, pipeName );
+        using var server = new AnalysisProcessEndpoint( ServiceProvider.Empty, pipeName );
         server.Start();
 
         // Start the client, but do not call Hello.
-        using var client = new ServiceClient( ServiceProvider.Empty, pipeName );
+        using var client = new UserProcessEndpoint( ServiceProvider.Empty, pipeName );
         var projectHandler = new TestProjectHandler();
         await client.ConnectAsync();
 
@@ -73,14 +73,14 @@ public class RemotingTests
 
         // Start the server.
         var pipeName = $"Metalama_Test_{Guid.NewGuid()}";
-        using var server = new ServiceHost( ServiceProvider.Empty, pipeName );
+        using var server = new AnalysisProcessEndpoint( ServiceProvider.Empty, pipeName );
         server.Start();
 
         // Publish from the server.
         await server.PublishGeneratedSourcesAsync( projectId, ImmutableDictionary.Create<string, string>().Add( sourceTreeName, "content" ) );
 
         // Start the client.
-        using var client = new ServiceClient( ServiceProvider.Empty, pipeName );
+        using var client = new UserProcessEndpoint( ServiceProvider.Empty, pipeName );
         var projectHandler = new TestProjectHandler();
         await client.ConnectAsync();
         await client.RegisterProjectHandlerAsync( projectId, projectHandler );
@@ -95,15 +95,15 @@ public class RemotingTests
     {
         // Start the server.
         var pipeName = $"Metalama_Test_{Guid.NewGuid()}";
-        using var server = new ServiceHost( ServiceProvider.Empty.WithService( new PreviewImpl() ), pipeName );
+        using var server = new AnalysisProcessEndpoint( ServiceProvider.Empty.WithService( new PreviewImpl() ), pipeName );
         server.Start();
 
-        using var client = new ServiceClient( ServiceProvider.Empty, pipeName );
+        using var client = new UserProcessEndpoint( ServiceProvider.Empty, pipeName );
         await client.ConnectAsync();
 
         var result = await (await client.GetServerApiAsync()).PreviewTransformationAsync( "projectId", "syntaxTreeName", CancellationToken.None );
         Assert.True( result.IsSuccessful );
-        Assert.Equal( "Transformed code", result.TransformedCode );
+        Assert.Equal( "Transformed code", result.TransformedSourceText );
     }
 
     private class PreviewImpl : ITransformationPreviewServiceImpl

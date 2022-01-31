@@ -115,7 +115,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
 
             var i = 0;
 
-            foreach ( var result in results.PipelineResult.SyntaxTreeResults.OrderBy( t => t.SyntaxTree.FilePath ) )
+            foreach ( var result in results.PipelineResult.SyntaxTreeResults.Values.OrderBy( t => t.SyntaxTree.FilePath ) )
             {
                 if ( i > 0 )
                 {

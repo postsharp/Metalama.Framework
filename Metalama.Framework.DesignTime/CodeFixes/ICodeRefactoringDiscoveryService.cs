@@ -6,8 +6,14 @@ using Microsoft.CodeAnalysis.Text;
 
 namespace Metalama.Framework.DesignTime.CodeFixes;
 
-public interface ICodeActionDiscoveryService : IService
+/// <summary>
+/// A cross-process service implemented by the analysis process that allows the user process to discover which code refactorings are present at a specified point of text.  
+/// </summary>
+public interface ICodeRefactoringDiscoveryService : IService
 {
+    /// <summary>
+    /// Returns the code refactorings present at a specific point of text.
+    /// </summary>
     Task<ComputeRefactoringResult> ComputeRefactoringsAsync(
         string projectId,
         string syntaxTreePath,

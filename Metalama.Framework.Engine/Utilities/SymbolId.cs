@@ -6,6 +6,7 @@
 #pragma warning disable SA1516 // Elements should be separated by blank line
 extern alias roslyn;
 using Microsoft.CodeAnalysis;
+using Newtonsoft.Json;
 using System.Threading;
 using SymbolKeyExtensions = roslyn::Microsoft.CodeAnalysis.SymbolKeyExtensions;
 
@@ -22,6 +23,9 @@ namespace Metalama.Framework.Engine.Utilities
         private roslyn::Microsoft.CodeAnalysis.SymbolKey _symbolKey;
 #pragma warning restore IDE0044
 
+        public string Id => this._symbolKey.ToString();
+
+        [JsonConstructor]
         public SymbolId( string id )
         {
             this._symbolKey = new roslyn::Microsoft.CodeAnalysis.SymbolKey( id );

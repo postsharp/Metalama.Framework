@@ -6,7 +6,7 @@ using Metalama.Framework.Engine.Pipeline;
 
 namespace Metalama.Framework.DesignTime.VisualStudio;
 
-public class VsUserProcessSourceGenerator : TheSourceGenerator
+public class VsUserProcessSourceGenerator : BaseSourceGenerator
 {
     protected override ProjectHandler CreateSourceGeneratorImpl( IProjectOptions projectOptions )
         => new VsUserProcessProjectHandler( this.ServiceProvider, projectOptions );

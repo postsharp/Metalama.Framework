@@ -8,14 +8,18 @@ using System.Collections.Immutable;
 
 namespace Metalama.Framework.DesignTime.VisualStudio;
 
+/// <summary>
+/// Implementation of <see cref="ProjectHandler"/> in the Visual Studio analysis process. It establishes a connection to the user process
+/// to publish generated sources.
+/// </summary>
 internal class VsAnalysisProcessProjectHandler : AnalysisProcessProjectHandler
 #pragma warning restore CA1001
 {
-    private readonly ServiceHost? _serviceHost;
+    private readonly AnalysisProcessEndpoint? _serviceHost;
 
     public VsAnalysisProcessProjectHandler( IServiceProvider serviceProvider, IProjectOptions projectOptions ) : base( serviceProvider, projectOptions )
     {
-        this._serviceHost = serviceProvider.GetService<ServiceHost>();
+        this._serviceHost = serviceProvider.GetService<AnalysisProcessEndpoint>();
 
         if ( this._serviceHost != null )
         {

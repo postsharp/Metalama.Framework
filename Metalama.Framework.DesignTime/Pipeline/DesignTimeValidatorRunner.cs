@@ -47,13 +47,15 @@ internal class DesignTimeValidatorRunner
             visitor.Visit( model );
         }
 
+
+        
         // Perform additional analysis not done by the design-time pipeline.
         // We do it from here so that we benefit from caching.
         TemplatingCodeValidator.Validate(
             this._serviceProvider,
             model,
             diagnosticSink.Report,
-            this._pipeline.IsCompileTimeSyntaxTreeOutdated( model.SyntaxTree.FilePath ),
+            this._pipeline.MustReportPausedPipelineAsErrors,
             true,
             cancellationToken );
     }

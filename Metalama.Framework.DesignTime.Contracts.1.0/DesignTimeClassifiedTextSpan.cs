@@ -5,6 +5,9 @@ using Microsoft.CodeAnalysis.Text;
 
 namespace Metalama.Framework.DesignTime.Contracts
 {
+    /// <summary>
+    /// Represents a <see cref="TextSpan"/> assigned to a classification.
+    /// </summary>
     public readonly struct DesignTimeClassifiedTextSpan
     {
         /// <summary>
