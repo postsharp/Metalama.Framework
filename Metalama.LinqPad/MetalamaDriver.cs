@@ -6,7 +6,7 @@ using LINQPad.Extensibility.DataContext;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Pipeline;
-using Metalama.Framework.Workspaces;
+using Metalama.Framework.Introspection;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -73,7 +73,7 @@ namespace {nameSpace}
         }
 
         public override IEnumerable<string> GetNamespacesToAdd( IConnectionInfo cxInfo )
-            => new[] { "Metalama.Framework.Workspaces", "Metalama.Framework.Code", "Metalama.Framework.Code.Collections" };
+            => new[] { "Metalama.Framework.Introspection", "Metalama.Framework.Code", "Metalama.Framework.Code.Collections" };
 
         private static void Compile( string cSharpSourceCode, string outputFile )
         {

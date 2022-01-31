@@ -3,7 +3,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Workspaces;
+using Metalama.Framework.Introspection;
 using System.Linq;
 
 namespace Metalama.LinqPad

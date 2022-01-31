@@ -5,7 +5,7 @@ using Metalama.Framework.Code;
 using System;
 using System.Collections.Immutable;
 
-namespace Metalama.Framework.Workspaces
+namespace Metalama.Framework.Introspection
 {
     /// <summary>
     /// Represents a set of projects. An <see cref="IProjectSet"/> can include several instances of the <see cref="Project"/>

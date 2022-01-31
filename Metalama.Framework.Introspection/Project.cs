@@ -8,7 +8,7 @@ using Metalama.Framework.Engine.Utilities;
 using System.Collections.Immutable;
 using System.Linq;
 
-namespace Metalama.Framework.Workspaces
+namespace Metalama.Framework.Introspection
 {
     /// <summary>
     /// Represents a C# project for a specific compilation.

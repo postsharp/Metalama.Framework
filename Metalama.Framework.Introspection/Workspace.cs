@@ -15,7 +15,7 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Metalama.Framework.Workspaces
+namespace Metalama.Framework.Introspection
 {
     /// <summary>
     /// Represents a set of projects. Workspaces can be created using the <see cref="WorkspaceCollection"/> class.  When projects target several frameworks,

@@ -8,7 +8,7 @@ using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 
-namespace Metalama.Framework.Workspaces
+namespace Metalama.Framework.Introspection
 {
     internal sealed class DiagnosticModel : IDiagnostic
     {

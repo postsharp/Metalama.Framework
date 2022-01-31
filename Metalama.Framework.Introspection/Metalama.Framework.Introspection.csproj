@@ -2,7 +2,7 @@
 
     <PropertyGroup>
         <TargetFramework>net6.0</TargetFramework>
-        <RootNamespace>Metalama.Framework.Workspaces</RootNamespace>
+        <RootNamespace>Metalama.Framework.Introspection</RootNamespace>
         <UseMetalamaCompiler>Private</UseMetalamaCompiler>
     </PropertyGroup>
 

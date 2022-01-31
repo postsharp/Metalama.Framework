@@ -1,6 +1,6 @@
 <Query Kind="Expression">
   <NuGetReference>Metalama.LinqPad</NuGetReference>
-  <Namespace>Metalama.Framework.Workspaces</Namespace>
+  <Namespace>Metalama.Framework.Introspection</Namespace>
   <Namespace>Metalama.Framework.Code</Namespace>
 </Query>
 
