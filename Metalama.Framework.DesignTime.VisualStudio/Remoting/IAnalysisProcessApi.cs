@@ -14,7 +14,6 @@ internal interface IAnalysisProcessApi : ICodeRefactoringDiscoveryService, ICode
     /// <summary>
     /// Notifies the analysis process that the user process is now ready to process notifications for a given project, which means that the analysis process will start
     /// calling <see cref="IProjectHandlerCallback.PublishGeneratedCodeAsync"/> for this project.
-    /// for this project.
     /// </summary>
     Task OnProjectHandlerReadyAsync( string projectId, CancellationToken cancellationToken = default );
 

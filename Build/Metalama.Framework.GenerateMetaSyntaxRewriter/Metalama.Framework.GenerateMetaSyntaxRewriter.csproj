@@ -11,7 +11,7 @@
 
     <ItemGroup>
       <None Update="Syntax-4.0.1.xml">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
     </ItemGroup>
 
