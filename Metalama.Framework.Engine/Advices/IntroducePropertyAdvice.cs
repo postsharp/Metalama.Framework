@@ -9,7 +9,6 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Transformations;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.Advices
@@ -49,13 +48,15 @@ namespace Metalama.Framework.Engine.Advices
                 name,
                 hasGet,
                 hasSet,
-                this.TemplateMember is { IsAutoPropertyOrField: true },
-                this.TemplateMember is { Writeability: Writeability.InitOnly } );
+                this.Template.Declaration is { IsAutoPropertyOrField: true },
+                this.Template.Declaration is { Writeability: Writeability.InitOnly } );
 
             if ( propertyTemplate.IsNotNull )
             {
                 this.MemberBuilder.ApplyTemplateAttribute( propertyTemplate.TemplateInfo.Attribute );
             }
+
+            this.MemberBuilder.InitializerTemplate = propertyTemplate.GetInitializerTemplate();
         }
 
         public override void Initialize( IReadOnlyList<Advice> declarativeAdvices, IDiagnosticAdder diagnosticAdder )
@@ -64,14 +65,8 @@ namespace Metalama.Framework.Engine.Advices
 
             // TODO: Indexers.
 
-            this.MemberBuilder.Type = (this.TemplateMember?.Type ?? this._getTemplate.Declaration?.ReturnType).AssertNotNull();
-            this.MemberBuilder.Accessibility = (this.TemplateMember?.Accessibility ?? this._getTemplate.Declaration?.Accessibility).AssertNotNull();
-
-            if ( this.TemplateMember != null )
-            {
-                var declaration = (PropertyDeclarationSyntax) this.TemplateMember.GetPrimaryDeclaration().AssertNotNull();
-                this.MemberBuilder.InitializerSyntax = declaration.Initializer?.Value;
-            }
+            this.MemberBuilder.Type = (this.Template.Declaration?.Type ?? this._getTemplate.Declaration?.ReturnType).AssertNotNull();
+            this.MemberBuilder.Accessibility = (this.Template.Declaration?.Accessibility ?? this._getTemplate.Declaration?.Accessibility).AssertNotNull();
         }
 
         public override AdviceResult ToResult( ICompilation compilation )

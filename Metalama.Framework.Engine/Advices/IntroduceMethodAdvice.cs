@@ -40,23 +40,23 @@ namespace Metalama.Framework.Engine.Advices
         {
             base.Initialize( declarativeAdvices, diagnosticAdder );
 
-            this.MemberBuilder.IsAsync = this.TemplateMember!.IsAsync;
+            this.MemberBuilder.IsAsync = this.Template.Declaration!.IsAsync;
 
             // Handle return type.
-            if ( this.TemplateMember.ReturnParameter.Type.TypeKind == TypeKind.Dynamic )
+            if ( this.Template.Declaration.ReturnParameter.Type.TypeKind == TypeKind.Dynamic )
             {
                 // Templates with dynamic return value result in object return type of the introduced member.
                 this.MemberBuilder.ReturnParameter.Type = this.MemberBuilder.Compilation.Factory.GetTypeByReflectionType( typeof(object) );
             }
             else
             {
-                this.MemberBuilder.ReturnParameter.Type = this.TemplateMember.ReturnParameter.Type;
-                this.MemberBuilder.ReturnParameter.RefKind = this.TemplateMember.ReturnParameter.RefKind;
+                this.MemberBuilder.ReturnParameter.Type = this.Template.Declaration.ReturnParameter.Type;
+                this.MemberBuilder.ReturnParameter.RefKind = this.Template.Declaration.ReturnParameter.RefKind;
             }
 
-            CopyAttributes( this.TemplateMember.ReturnParameter, this.MemberBuilder.ReturnParameter );
+            CopyAttributes( this.Template.Declaration.ReturnParameter, this.MemberBuilder.ReturnParameter );
 
-            foreach ( var templateParameter in this.TemplateMember.Parameters )
+            foreach ( var templateParameter in this.Template.Declaration.Parameters )
             {
                 var parameterBuilder = this.MemberBuilder.AddParameter(
                     templateParameter.Name,
@@ -67,7 +67,7 @@ namespace Metalama.Framework.Engine.Advices
                 CopyAttributes( templateParameter, parameterBuilder );
             }
 
-            foreach ( var templateGenericParameter in this.TemplateMember.TypeParameters )
+            foreach ( var templateGenericParameter in this.Template.Declaration.TypeParameters )
             {
                 var genericParameterBuilder = this.MemberBuilder.AddTypeParameter( templateGenericParameter.Name );
                 genericParameterBuilder.Variance = templateGenericParameter.Variance;

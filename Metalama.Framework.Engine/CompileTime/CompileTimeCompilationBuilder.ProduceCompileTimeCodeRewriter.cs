@@ -356,6 +356,11 @@ namespace Metalama.Framework.Engine.CompileTime
 
                                 break;
 
+                            case EventFieldDeclarationSyntax eventField:
+                                members.AddRange( this.VisitEventFieldDeclaration( eventField ).AssertNoneNull() );
+
+                                break;
+
                             default:
                                 members.Add( (MemberDeclarationSyntax) this.Visit( member ).AssertNotNull() );
 
@@ -527,6 +532,7 @@ namespace Metalama.Framework.Engine.CompileTime
                         TemplateNameHelper.GetCompiledTemplateName( methodSymbol ),
                         this._compileTimeCompilation,
                         node,
+                        TemplateCompilerSemantics.Default,
                         this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ),
                         this._diagnosticAdder,
                         this._cancellationToken,
@@ -591,6 +597,7 @@ namespace Metalama.Framework.Engine.CompileTime
                                     TemplateNameHelper.GetCompiledTemplateName( propertySymbol.GetMethod.AssertNotNull() ),
                                     this._compileTimeCompilation,
                                     getAccessor,
+                                    TemplateCompilerSemantics.Default,
                                     this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ),
                                     this._diagnosticAdder,
                                     this._cancellationToken,
@@ -608,6 +615,7 @@ namespace Metalama.Framework.Engine.CompileTime
                                     TemplateNameHelper.GetCompiledTemplateName( propertySymbol.SetMethod.AssertNotNull() ),
                                     this._compileTimeCompilation,
                                     setAccessor,
+                                    TemplateCompilerSemantics.Default,
                                     this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ),
                                     this._diagnosticAdder,
                                     this._cancellationToken,
@@ -615,6 +623,22 @@ namespace Metalama.Framework.Engine.CompileTime
                                     out transformedSetDeclaration );
 
                             templateAccessorCount++;
+                        }
+
+                        if ( propertyIsTemplate && node is PropertyDeclarationSyntax { Initializer: not null } )
+                        {
+                            success =
+                                success &&
+                                this._templateCompiler.TryCompile(
+                                    TemplateNameHelper.GetCompiledTemplateName( propertySymbol.Name ),
+                                    this._compileTimeCompilation,
+                                    node,
+                                    TemplateCompilerSemantics.Initializer,
+                                    this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ),
+                                    this._diagnosticAdder,
+                                    this._cancellationToken,
+                                    out _,
+                                    out transformedGetDeclaration );
                         }
 
                         if ( templateAccessorCount > 0 )
@@ -637,6 +661,7 @@ namespace Metalama.Framework.Engine.CompileTime
                                 TemplateNameHelper.GetCompiledTemplateName( propertySymbol.GetMethod.AssertNotNull() ),
                                 this._compileTimeCompilation,
                                 propertyNode,
+                                TemplateCompilerSemantics.Default,
                                 this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ),
                                 this._diagnosticAdder,
                                 this._cancellationToken,
@@ -715,7 +740,8 @@ namespace Metalama.Framework.Engine.CompileTime
 
             private new IEnumerable<MemberDeclarationSyntax> VisitFieldDeclaration( FieldDeclarationSyntax node )
             {
-                var unchangedVariables = new List<VariableDeclaratorSyntax>();
+                var hasTemplateVariables = false;
+                var unchangedReadabilityVariables = new List<VariableDeclaratorSyntax>();
                 var nonReadOnlyVariables = new List<VariableDeclaratorSyntax>();
 
                 foreach ( var declarator in node.Declaration.Variables )
@@ -727,26 +753,88 @@ namespace Metalama.Framework.Engine.CompileTime
                     if ( this._serializableFieldsAndProperties.TryGetValue( fieldSymbol, out var serializableType )
                          && this._serializerGenerator.ShouldSuppressReadOnly( serializableType, fieldSymbol ) )
                     {
-                        // This field needs to have it's readonly modifier removed.
-                        nonReadOnlyVariables.Add( (VariableDeclaratorSyntax) this.Visit( declarator ).AssertNotNull() );
+                        // This field needs to have it's readonly modifier removed, so add it to the list.
+                        nonReadOnlyVariables.Add(
+                            this.TransformVariable( TemplateCompilerSemantics.Initializer, declarator, out var compiledInitializerTemplate ) );
+
+                        // If the field had an initializer template, yield return the compiled member.
+                        if ( compiledInitializerTemplate != null )
+                        {
+                            hasTemplateVariables = true;
+
+                            yield return compiledInitializerTemplate;
+                        }
                     }
                     else
                     {
-                        unchangedVariables.Add( (VariableDeclaratorSyntax) this.Visit( declarator ).AssertNotNull() );
+                        // This field is unchanged, so add add it to the list.
+                        unchangedReadabilityVariables.Add(
+                            this.TransformVariable( TemplateCompilerSemantics.Initializer, declarator, out var compiledInitializerTemplate ) );
+
+                        // If the field had an initializer template, yield return the compiled member.
+                        if ( compiledInitializerTemplate != null )
+                        {
+                            hasTemplateVariables = true;
+
+                            yield return compiledInitializerTemplate;
+                        }
                     }
                 }
 
                 if ( nonReadOnlyVariables.Count > 0 )
                 {
-                    if ( unchangedVariables.Count > 0 )
+                    // There are some variable that need to have readonly modifier removed.
+                    if ( unchangedReadabilityVariables.Count > 0 )
                     {
+                        // There are some remaning variables that remain readonly.
                         yield return
-                            node.WithDeclaration( node.Declaration.WithVariables( SeparatedList( unchangedVariables ) ) );
+                            node.WithDeclaration( node.Declaration.WithVariables( SeparatedList( unchangedReadabilityVariables ) ) );
                     }
 
                     yield return
                         node.WithDeclaration( node.Declaration.WithVariables( SeparatedList( nonReadOnlyVariables ) ) )
                             .WithModifiers( TokenList( node.Modifiers.Where( t => !t.IsKind( SyntaxKind.ReadOnlyKeyword ) ) ) );
+                }
+                else if ( hasTemplateVariables )
+                {
+                    // There were some variables with initializer templates, which means their initializers got transformed.
+                    yield return
+                        node.WithDeclaration( node.Declaration.WithVariables( SeparatedList( unchangedReadabilityVariables ) ) );
+                }
+                else
+                {
+                    // Nothing was changed.
+                    var visitedNode = this.Visit( node );
+
+                    if ( visitedNode != null )
+                    {
+                        yield return (MemberDeclarationSyntax) visitedNode;
+                    }
+                }
+            }
+
+            private new IEnumerable<MemberDeclarationSyntax> VisitEventFieldDeclaration( EventFieldDeclarationSyntax node )
+            {
+                var hasTemplateVariables = false;
+                var variables = new List<VariableDeclaratorSyntax>();
+
+                foreach ( var declarator in node.Declaration.Variables )
+                {
+                    variables.Add( this.TransformVariable( TemplateCompilerSemantics.Initializer, declarator, out var compiledInitializerTemplate ) );
+
+                    if ( compiledInitializerTemplate != null )
+                    {
+                        hasTemplateVariables = true;
+
+                        yield return compiledInitializerTemplate;
+                    }
+                }
+
+                if ( hasTemplateVariables )
+                {
+                    // Having template variables means that we've changed nodes even though we did not change readability.
+                    yield return
+                        node.WithDeclaration( node.Declaration.WithVariables( SeparatedList( variables ) ) );
                 }
                 else
                 {
@@ -756,6 +844,51 @@ namespace Metalama.Framework.Engine.CompileTime
                     {
                         yield return (MemberDeclarationSyntax) visitedNode;
                     }
+                }
+            }
+
+            private VariableDeclaratorSyntax TransformVariable(
+                TemplateCompilerSemantics templateSyntaxKind,
+                VariableDeclaratorSyntax variable,
+                out MethodDeclarationSyntax? compiledInitializerTemplate )
+            {
+                var symbol = this.RunTimeCompilation.GetSemanticModel( variable.SyntaxTree ).GetDeclaredSymbol( variable ).AssertNotNull();
+                var isTemplate = !this.SymbolClassifier.GetTemplateInfo( symbol ).IsNone;
+
+                if ( isTemplate && variable.Initializer != null )
+                {
+                    var templateName = TemplateNameHelper.GetCompiledTemplateName( symbol.Name );
+
+                    // This is field template with initializer.
+                    if ( this._templateCompiler.TryCompile(
+                            templateName,
+                            this._compileTimeCompilation,
+                            variable,
+                            templateSyntaxKind,
+                            this.RunTimeCompilation.GetSemanticModel( variable.SyntaxTree ),
+                            this._diagnosticAdder,
+                            this._cancellationToken,
+                            out _,
+                            out var transformedFieldDeclaration ) )
+                    {
+                        compiledInitializerTemplate = (MethodDeclarationSyntax) transformedFieldDeclaration;
+
+                        return ((VariableDeclaratorSyntax) this.Visit( variable ).AssertNotNull())
+                            .WithInitializer( null );
+                    }
+                    else
+                    {
+                        this.Success = false;
+                        compiledInitializerTemplate = null;
+
+                        return (VariableDeclaratorSyntax) this.Visit( variable ).AssertNotNull();
+                    }
+                }
+                else
+                {
+                    compiledInitializerTemplate = null;
+
+                    return (VariableDeclaratorSyntax) this.Visit( variable ).AssertNotNull();
                 }
             }
 
@@ -794,6 +927,7 @@ namespace Metalama.Framework.Engine.CompileTime
                                       TemplateNameHelper.GetCompiledTemplateName( eventSymbol.AddMethod.AssertNotNull() ),
                                       this._compileTimeCompilation,
                                       addAccessor,
+                                      TemplateCompilerSemantics.Default,
                                       this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ),
                                       this._diagnosticAdder,
                                       this._cancellationToken,
@@ -805,6 +939,7 @@ namespace Metalama.Framework.Engine.CompileTime
                                       TemplateNameHelper.GetCompiledTemplateName( eventSymbol.RemoveMethod.AssertNotNull() ),
                                       this._compileTimeCompilation,
                                       removeAccessor,
+                                      TemplateCompilerSemantics.Default,
                                       this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ),
                                       this._diagnosticAdder,
                                       this._cancellationToken,

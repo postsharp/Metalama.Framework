@@ -3,6 +3,8 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Engine.CodeModel;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Metalama.Framework.Engine.Advices
 {
@@ -20,6 +22,68 @@ namespace Metalama.Framework.Engine.Advices
             }
 
             return (default, default);
+        }
+
+        public static TemplateMember<IField> GetInitializerTemplate( this in TemplateMember<IField> fieldTemplate )
+        {
+            if ( fieldTemplate.IsNotNull )
+            {
+                var fieldSyntax = (VariableDeclaratorSyntax) fieldTemplate.Declaration!.GetPrimaryDeclaration().AssertNotNull();
+
+                if ( fieldSyntax.Initializer != null )
+                {
+                    return TemplateMember.Create( fieldTemplate.Declaration, fieldTemplate.TemplateInfo, TemplateKind.InitializerExpression );
+                }
+                else
+                {
+                    return default;
+                }
+            }
+            else
+            {
+                return default;
+            }
+        }
+
+        public static TemplateMember<IEvent> GetInitializerTemplate( this in TemplateMember<IEvent> eventFieldTemplate )
+        {
+            if ( eventFieldTemplate.IsNotNull
+                 && eventFieldTemplate.Declaration!.GetPrimaryDeclaration().AssertNotNull() is VariableDeclaratorSyntax eventFieldSyntax )
+            {
+                if ( eventFieldSyntax.Initializer != null )
+                {
+                    return TemplateMember.Create( eventFieldTemplate.Declaration, eventFieldTemplate.TemplateInfo, TemplateKind.InitializerExpression );
+                }
+                else
+                {
+                    return default;
+                }
+            }
+            else
+            {
+                return default;
+            }
+        }
+
+        public static TemplateMember<IProperty> GetInitializerTemplate( this in TemplateMember<IProperty> propertyTemplate )
+        {
+            if ( propertyTemplate.IsNotNull )
+            {
+                var propertySyntax = (PropertyDeclarationSyntax) propertyTemplate.Declaration!.GetPrimaryDeclaration().AssertNotNull();
+
+                if ( propertySyntax.Initializer != null )
+                {
+                    return TemplateMember.Create( propertyTemplate.Declaration, propertyTemplate.TemplateInfo, TemplateKind.InitializerExpression );
+                }
+                else
+                {
+                    return default;
+                }
+            }
+            else
+            {
+                return default;
+            }
         }
 
         private static bool IsAsync( this TemplateKind selectionKind )

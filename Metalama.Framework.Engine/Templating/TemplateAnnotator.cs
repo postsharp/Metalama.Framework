@@ -1155,8 +1155,35 @@ namespace Metalama.Framework.Engine.Templating
 
             if ( symbol is not ILocalSymbol local )
             {
-                // it's a field, or a field-like event
-                return node;
+                // It's a field, or a field-like event.
+
+                // Detect if the current member is a template.
+                var isTemplate = !this._symbolScopeClassifier.GetTemplateInfo( symbol ).IsNone
+                                 || (symbol is IMethodSymbol { AssociatedSymbol: { } associatedSymbol }
+                                     && !this._symbolScopeClassifier.GetTemplateInfo( associatedSymbol ).IsNone);
+
+                // If it is a template, update the currentTemplateMember field.
+                if ( isTemplate )
+                {
+                    var previousTemplateMember = this._currentTemplateMember;
+                    this._currentTemplateMember = symbol;
+
+                    try
+                    {
+                        // We don't want to visit the whole member because only the implementation must be annotated and transformed
+                        // as a template.
+                        return node.WithInitializer( this.Visit( node.Initializer ) )!.AddIsTemplateAnnotation();
+                    }
+                    finally
+                    {
+                        this._currentTemplateMember = previousTemplateMember;
+                    }
+                }
+                else
+                {
+                    // Don't visit members that are not templates.
+                    return node;
+                }
             }
 
             TemplatingScope localScope;
@@ -1327,7 +1354,8 @@ namespace Metalama.Framework.Engine.Templating
             => this.VisitMemberDeclaration(
                 node,
                 n => n.WithAccessorList( this.Visit( n.AccessorList ) )
-                    .WithExpressionBody( this.Visit( n.ExpressionBody ) ) );
+                    .WithExpressionBody( this.Visit( n.ExpressionBody ) )
+                    .WithInitializer( this.Visit( n.Initializer ) ) );
 
         public override SyntaxNode? VisitEventDeclaration( EventDeclarationSyntax node )
             => this.VisitMemberDeclaration( node, n => n.WithAccessorList( this.Visit( n.AccessorList ) ) );

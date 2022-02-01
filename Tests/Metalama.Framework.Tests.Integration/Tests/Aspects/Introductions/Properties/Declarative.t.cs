@@ -33,7 +33,7 @@ public global::System.Int32 IntroducedProperty_Auto_GetOnly
 return this._introducedProperty_Auto_GetOnly;    }
 }
 
-private global::System.Int32 _introducedProperty_Auto_GetOnly_Initializer = 42;
+private global::System.Int32 _introducedProperty_Auto_GetOnly_Initializer = (global::System.Int32)42;
 
 
 public global::System.Int32 IntroducedProperty_Auto_GetOnly_Initializer
@@ -41,7 +41,7 @@ public global::System.Int32 IntroducedProperty_Auto_GetOnly_Initializer
 return this._introducedProperty_Auto_GetOnly_Initializer;    }
 }
 
-private global::System.Int32 _introducedProperty_Auto_Initializer = 42;
+private global::System.Int32 _introducedProperty_Auto_Initializer = (global::System.Int32)42;
 
 
 public global::System.Int32 IntroducedProperty_Auto_Initializer

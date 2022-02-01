@@ -29,21 +29,6 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             this.Accessibility = this._field.Accessibility;
             this.IsStatic = this._field.IsStatic;
 
-            // Copy the initializer.
-            if ( this._field is BuiltField builtField )
-            {
-                this.InitializerSyntax = builtField.FieldBuilder.InitializerSyntax;
-            }
-            else
-            {
-                var fieldDeclaration = (VariableDeclaratorSyntax) this._field.GetPrimaryDeclaration().AssertNotNull();
-
-                if ( fieldDeclaration.Initializer != null )
-                {
-                    this.InitializerSyntax = fieldDeclaration.Initializer.Value;
-                }
-            }
-
             // TODO: Attributes etc.
         }
 
@@ -52,5 +37,42 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public override bool IsDesignTime => false;
 
         protected override bool HasBaseInvoker => true;
+
+        protected override bool GetPropertyInitializerExpressionOrMethod(
+            in MemberIntroductionContext context,
+            out ExpressionSyntax? initializerExpression,
+            out MethodDeclarationSyntax? initializerMethod )
+        {
+            if ( this._field is BuiltField builtField )
+            {
+                var fieldBuilder = builtField.FieldBuilder;
+
+                return fieldBuilder.GetInitializerExpressionOrMethod(
+                    context,
+                    this.Type,
+                    fieldBuilder.InitializerExpression,
+                    fieldBuilder.InitializerTemplate,
+                    out initializerExpression,
+                    out initializerMethod );
+            }
+            else
+            {
+                // For original code fields, copy the initializer syntax.
+                var fieldDeclaration = (VariableDeclaratorSyntax) this._field.GetPrimaryDeclaration().AssertNotNull();
+
+                if ( fieldDeclaration.Initializer != null )
+                {
+                    initializerExpression = fieldDeclaration.Initializer.Value;
+                }
+                else
+                {
+                    initializerExpression = null;
+                }
+
+                initializerMethod = null;
+
+                return true;
+            }
+        }
     }
 }

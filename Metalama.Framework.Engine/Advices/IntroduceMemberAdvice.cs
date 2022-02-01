@@ -26,8 +26,6 @@ namespace Metalama.Framework.Engine.Advices
 
         protected TemplateMember<TMember> Template { get; }
 
-        protected TMember? TemplateMember => this.Template.Declaration;
-
         public IntroduceMemberAdvice(
             IAspectInstanceInternal aspect,
             TemplateClassInstance templateInstance,
@@ -49,13 +47,13 @@ namespace Metalama.Framework.Engine.Advices
 
         public override void Initialize( IReadOnlyList<Advice> declarativeAdvices, IDiagnosticAdder diagnosticAdder )
         {
-            this.MemberBuilder.Accessibility = this.TemplateMember?.Accessibility ?? Accessibility.Private;
+            this.MemberBuilder.Accessibility = this.Template.Declaration?.Accessibility ?? Accessibility.Private;
 
             // Handle the introduction scope.
             switch ( this.Scope )
             {
                 case IntroductionScope.Default:
-                    if ( this.TemplateMember is { IsStatic: true } || this.TargetDeclaration.IsStatic )
+                    if ( this.Template.Declaration is { IsStatic: true } || this.TargetDeclaration.IsStatic )
                     {
                         this.MemberBuilder.IsStatic = true;
                     }
@@ -94,9 +92,9 @@ namespace Metalama.Framework.Engine.Advices
                     throw new AssertionFailedException();
             }
 
-            if ( this.TemplateMember != null )
+            if ( this.Template.Declaration != null )
             {
-                CopyAttributes( this.TemplateMember, this.MemberBuilder );
+                CopyAttributes( this.Template.Declaration, this.MemberBuilder );
             }
         }
 

@@ -49,7 +49,7 @@ namespace Metalama.Framework.Engine.Aspects
 
         public abstract Type AspectType { get; }
 
-        public TemplateDriver GetTemplateDriver( IMethod sourceTemplate )
+        public TemplateDriver GetTemplateDriver( IMember sourceTemplate )
         {
             var templateSymbol = sourceTemplate.GetSymbol().AssertNotNull();
             var id = templateSymbol.GetDocumentationCommentId()!;

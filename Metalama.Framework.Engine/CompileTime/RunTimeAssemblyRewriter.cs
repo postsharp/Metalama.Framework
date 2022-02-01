@@ -7,6 +7,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
@@ -116,6 +117,34 @@ namespace Metalama.Compiler
                 .WithTrailingTrivia( trailingTrivia );
         }
 
+        public override SyntaxNode? VisitFieldDeclaration( FieldDeclarationSyntax node )
+        {
+            var anyChange = false;
+            var variables = new List<VariableDeclaratorSyntax>();
+
+            foreach ( var variable in node.Declaration.Variables )
+            {
+                if ( variable.Initializer != null && this.MustRemoveInitializer( variable ) )
+                {
+                    anyChange = true;
+                    variables.Add( variable.WithInitializer( null ) );
+                }
+                else
+                {
+                    variables.Add( variable );
+                }
+            }
+
+            if ( anyChange )
+            {
+                return node.WithDeclaration( node.Declaration.WithVariables( SeparatedList( variables ) ) );
+            }
+            else
+            {
+                return node;
+            }
+        }
+
         public override SyntaxNode VisitMethodDeclaration( MethodDeclarationSyntax node )
         {
             if ( this.MustReplaceByThrow( node ) )
@@ -125,6 +154,15 @@ namespace Metalama.Compiler
 
             return node;
         }
+
+        private bool MustRemoveInitializer( SyntaxNode node )
+        {
+            var symbol = this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node )!;
+
+            return this.MustRemoveInitializer( symbol );
+        }
+
+        private bool MustRemoveInitializer( ISymbol symbol ) => !this.SymbolClassifier.GetTemplateInfo( symbol ).IsNone;
 
         private bool MustReplaceByThrow( SyntaxNode node )
         {
@@ -170,6 +208,11 @@ namespace Metalama.Compiler
                 }
 
                 return this.WithThrowNotSupportedExceptionBody( node, "Compile-time only code cannot be called at run-time." );
+            }
+
+            if ( node.Initializer != null && this.MustRemoveInitializer( node ) )
+            {
+                return node.WithInitializer( null );
             }
 
             return node;

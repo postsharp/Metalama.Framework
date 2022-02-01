@@ -13,7 +13,7 @@
 
         <!-- Define a new build configuration named LamaDebug (configured below). -->
         <Configurations>$(Configurations);LamaDebug</Configurations>
-        
+
         <!-- Auxiliary files used at design time. -->
         <MetalamaAdditionalCompilationOutputDirectory>$(MSBuildProjectDirectory)\$(IntermediateOutputPath)\metalama-aux\</MetalamaAdditionalCompilationOutputDirectory>
 

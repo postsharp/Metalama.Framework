@@ -2,7 +2,6 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Backstage.Diagnostics;
-using Metalama.Backstage.Extensibility;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Observers;
 using Metalama.Framework.Engine.SyntaxSerialization;
@@ -94,6 +93,7 @@ namespace Metalama.Framework.Engine.Templating
             string templateName,
             Compilation compileTimeCompilation,
             SyntaxNode sourceSyntaxRoot,
+            TemplateCompilerSemantics templateSyntaxKind,
             SemanticModel semanticModel,
             IDiagnosticAdder diagnostics,
             CancellationToken cancellationToken,
@@ -171,6 +171,7 @@ namespace Metalama.Framework.Engine.Templating
             // Compile the syntax tree.
             var templateCompilerRewriter = new TemplateCompilerRewriter(
                 templateName,
+                templateSyntaxKind,
                 semanticModel.Compilation,
                 compileTimeCompilation,
                 this._syntaxTreeAnnotationMap,

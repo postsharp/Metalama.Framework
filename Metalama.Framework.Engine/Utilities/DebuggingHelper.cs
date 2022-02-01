@@ -17,7 +17,7 @@ namespace Metalama.Framework.Engine.Utilities
     internal static class DebuggingHelper
     {
         private static readonly ConditionalWeakTable<object, ObjectId> _objectIds = new();
-        
+
         public static ProcessKind ProcessKind
             => Process.GetCurrentProcess().ProcessName.ToLowerInvariant() switch
             {
