@@ -103,45 +103,62 @@ namespace Metalama.Framework.Engine.Templating
                 return ReturnStatement();
             }
 
-            var method = this.MetaApi.Method;
-
-            var returnType = method.ReturnType;
-
-            if ( this._templateMethod.MustInterpretAsAsyncTemplate() )
+            if ( this.MetaApi.Declaration is IField field )
             {
-                // If we are in an awaitable async method, the consider the return type as seen by the method body,
-                // not the one as seen from outside.
-                var asyncInfo = method.GetAsyncInfoImpl();
-
-                if ( asyncInfo.IsAwaitable )
-                {
-                    returnType = asyncInfo.ResultType;
-                }
+                // This is field initializer template expansion.
+                return this.CreateReturnStatementDefault( returnExpression, field.Type );
             }
-
-            if ( TypeExtensions.Equals( returnType, SpecialType.Void ) )
+            else if ( this.MetaApi.Declaration is IProperty property )
             {
-                return CreateReturnStatementVoid( returnExpression );
+                // This is property initializer template expansion.
+                return this.CreateReturnStatementDefault( returnExpression, property.Type );
             }
-            else if ( method.GetIteratorInfoImpl() is { EnumerableKind: EnumerableKind.IAsyncEnumerable or EnumerableKind.IAsyncEnumerator } iteratorInfo &&
-                      this._templateMethod.MustInterpretAsAsyncIteratorTemplate() )
+            else if ( this.MetaApi.Declaration is IEvent @event )
             {
-                switch ( iteratorInfo.EnumerableKind )
-                {
-                    case EnumerableKind.IAsyncEnumerable:
-
-                        return this.CreateReturnStatementAsyncEnumerable( returnExpression );
-
-                    case EnumerableKind.IAsyncEnumerator:
-                        return this.CreateReturnStatementAsyncEnumerator( returnExpression );
-
-                    default:
-                        throw new AssertionFailedException();
-                }
+                // This is property initializer template expansion.
+                return this.CreateReturnStatementDefault( returnExpression, @event.Type );
             }
             else
             {
-                return this.CreateReturnStatementDefault( returnExpression, returnType );
+                var method = this.MetaApi.Method;
+                var returnType = method.ReturnType;
+
+            if ( this._templateMethod.MustInterpretAsAsyncTemplate() )
+                {
+                    // If we are in an awaitable async method, the consider the return type as seen by the method body,
+                    // not the one as seen from outside.
+                    var asyncInfo = method.GetAsyncInfoImpl();
+
+                    if ( asyncInfo.IsAwaitable )
+                    {
+                        returnType = asyncInfo.ResultType;
+                    }
+                }
+
+                if ( TypeExtensions.Equals( returnType, SpecialType.Void ) )
+                {
+                    return CreateReturnStatementVoid( returnExpression );
+                }
+                else if ( method.GetIteratorInfoImpl() is { EnumerableKind: EnumerableKind.IAsyncEnumerable or EnumerableKind.IAsyncEnumerator } iteratorInfo &&
+                      this._templateMethod.MustInterpretAsAsyncIteratorTemplate() )
+                {
+                    switch ( iteratorInfo.EnumerableKind )
+                    {
+                        case EnumerableKind.IAsyncEnumerable:
+
+                            return this.CreateReturnStatementAsyncEnumerable( returnExpression );
+
+                        case EnumerableKind.IAsyncEnumerator:
+                            return this.CreateReturnStatementAsyncEnumerator( returnExpression );
+
+                        default:
+                            throw new AssertionFailedException();
+                    }
+                }
+                else
+                {
+                    return this.CreateReturnStatementDefault( returnExpression, returnType );
+                }
             }
         }
 

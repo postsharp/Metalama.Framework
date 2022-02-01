@@ -48,7 +48,9 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                 InsertPositionRelation.Within,
                 (MemberDeclarationSyntax) ((NamedType) this.DeclaringType).Symbol.GetPrimaryDeclaration().AssertNotNull() );
 
-        public ExpressionSyntax? InitializerSyntax { get; set; }
+        public IExpression? InitializerExpression { get; set; }
+
+        public TemplateMember<IField> InitializerTemplate { get; set; }
 
         public FieldBuilder( Advice parentAdvice, INamedType targetType, string name )
             : base( parentAdvice, targetType, name )
@@ -60,6 +62,15 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         {
             var syntaxGenerator = context.SyntaxGenerationContext.SyntaxGenerator;
 
+            // If template fails to expand, we will still generate the field, albeit without the initializer.
+            _ = this.GetInitializerExpressionOrMethod(
+                context,
+                this.Type,
+                this.InitializerExpression,
+                this.InitializerTemplate,
+                out var initializerExpression,
+                out var initializerMethod );
+
             var field =
                 FieldDeclaration(
                     List<AttributeListSyntax>(), // TODO: Attributes.
@@ -70,11 +81,22 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                             VariableDeclarator(
                                 Identifier( this.Name ),
                                 null,
-                                this.InitializerSyntax != null
-                                    ? EqualsValueClause( this.InitializerSyntax )
+                                initializerExpression != null
+                                    ? EqualsValueClause( initializerExpression! )
                                     : null ) ) ) );
 
-            return new[] { new IntroducedMember( this, field, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, this ) };
+            if ( initializerMethod != null )
+            {
+                return new[]
+                {
+                    new IntroducedMember( this, field, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, this ),
+                    new IntroducedMember( this, initializerMethod, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.InitializerMethod, this )
+                };
+            }
+            else
+            {
+                return new[] { new IntroducedMember( this, field, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, this ) };
+            }
         }
 
         public IMethod? GetAccessor( MethodKind methodKind )

@@ -93,6 +93,7 @@ namespace Metalama.Framework.Engine.Templating
             string templateName,
             Compilation compileTimeCompilation,
             SyntaxNode sourceSyntaxRoot,
+            TemplateCompilerSemantics templateSyntaxKind,
             SemanticModel semanticModel,
             IDiagnosticAdder diagnostics,
             CancellationToken cancellationToken,
@@ -170,6 +171,7 @@ namespace Metalama.Framework.Engine.Templating
             // Compile the syntax tree.
             var templateCompilerRewriter = new TemplateCompilerRewriter(
                 templateName,
+                templateSyntaxKind,
                 semanticModel.Compilation,
                 compileTimeCompilation,
                 this._syntaxTreeAnnotationMap,

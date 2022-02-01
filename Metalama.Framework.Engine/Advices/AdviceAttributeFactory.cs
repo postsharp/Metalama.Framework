@@ -117,12 +117,14 @@ namespace Metalama.Framework.Engine.Advices
                                 break;
 
                             case IField templateField:
+                                var fieldTemplate = TemplateMember.Create( templateField, template, TemplateKind.Introduction );
+
                                 var introduceFieldAdvice = new IntroduceFieldAdvice(
                                     aspect,
                                     templateInstance,
                                     targetType,
                                     null,
-                                    TemplateMember.Create( templateField, template, TemplateKind.Introduction ),
+                                    fieldTemplate,
                                     template.Attribute.Scope,
                                     template.Attribute.WhenExists,
                                     layerName );
