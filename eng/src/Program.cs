@@ -56,7 +56,8 @@ static bool OnPrepareCompleted( (BuildContext Context, BaseBuildSettings Setting
     var generatorDirectory =
         Path.Combine( arg.Context.RepoDirectory, "Build", "Metalama.Framework.GenerateMetaSyntaxRewriter" );
     var project =
-        new DotNetSolution( Path.Combine( generatorDirectory,
+        new DotNetSolution( Path.Combine( 
+            generatorDirectory,
             "Metalama.Framework.GenerateMetaSyntaxRewriter.csproj" ) );
 
     if ( !project.Restore( arg.Context, new BuildSettings() ) )
