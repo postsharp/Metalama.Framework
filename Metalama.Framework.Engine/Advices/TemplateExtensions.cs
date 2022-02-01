@@ -47,8 +47,8 @@ namespace Metalama.Framework.Engine.Advices
 
         public static bool MustInterpretAsAsyncIteratorTemplate( this in TemplateMember<IMethod> template )
             => template.InterpretedKind.IsAsyncIteratorTemplate() && (template.Declaration!.IsAsync || template.SelectedKind == TemplateKind.Default);
-        
-         public static TemplateMember<IField> GetInitializerTemplate( this in TemplateMember<IField> fieldTemplate )
+
+        public static TemplateMember<IField> GetInitializerTemplate( this in TemplateMember<IField> fieldTemplate )
         {
             if ( fieldTemplate.IsNotNull )
             {
