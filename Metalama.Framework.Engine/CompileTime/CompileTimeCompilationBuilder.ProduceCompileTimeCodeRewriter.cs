@@ -790,7 +790,7 @@ namespace Metalama.Framework.Engine.CompileTime
                     // There are some variable that need to have readonly modifier removed.
                     if ( unchangedReadabilityVariables.Count > 0 )
                     {
-                        // There are some remaning variables that remain readonly.
+                        // There are some renaming variables that remain readonly.
                         yield return
                             node.WithDeclaration( node.Declaration.WithVariables( SeparatedList( unchangedReadabilityVariables ) ) );
                     }

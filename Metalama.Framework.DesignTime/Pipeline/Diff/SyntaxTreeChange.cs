@@ -37,18 +37,26 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
         /// </summary>
         public SyntaxTree? NewTree { get; }
 
+        public ulong OldHash { get; }
+
+        public ulong NewHash { get; }
+
         public SyntaxTreeChange(
             string filePath,
             SyntaxTreeChangeKind syntaxTreeChangeKind,
             bool hasCompileTimeCode,
             CompileTimeChangeKind compileTimeChangeKind,
-            SyntaxTree? newTree )
+            SyntaxTree? newTree,
+            ulong oldHash,
+            ulong newHash )
         {
             this.SyntaxTreeChangeKind = syntaxTreeChangeKind;
             this.HasCompileTimeCode = hasCompileTimeCode;
             this.CompileTimeChangeKind = compileTimeChangeKind;
             this.FilePath = filePath;
             this.NewTree = newTree;
+            this.OldHash = oldHash;
+            this.NewHash = newHash;
         }
 
         public override string ToString() => $"{this.FilePath}, ChangeKind={this.SyntaxTreeChangeKind}, CompileTimeChangeKind={this.CompileTimeChangeKind}";
@@ -61,7 +69,8 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
                 (SyntaxTreeChangeKind.Added, SyntaxTreeChangeKind.Deleted) => SyntaxTreeChangeKind.None,
                 (SyntaxTreeChangeKind.Added, SyntaxTreeChangeKind.Added) => throw new AssertionFailedException(),
                 (_, SyntaxTreeChangeKind.Deleted) => SyntaxTreeChangeKind.Deleted,
-                (SyntaxTreeChangeKind.Deleted, SyntaxTreeChangeKind.Added) => SyntaxTreeChangeKind.Changed,
+                (SyntaxTreeChangeKind.Deleted, SyntaxTreeChangeKind.Added) when newChange.NewHash != this.OldHash => SyntaxTreeChangeKind.Changed,
+                (SyntaxTreeChangeKind.Deleted, SyntaxTreeChangeKind.Added) when newChange.NewHash == this.OldHash => SyntaxTreeChangeKind.None,
                 (SyntaxTreeChangeKind.Deleted, _) => throw new AssertionFailedException(),
                 (SyntaxTreeChangeKind.Changed, SyntaxTreeChangeKind.Changed) => SyntaxTreeChangeKind.Changed,
                 _ => throw new AssertionFailedException()
@@ -78,7 +87,14 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
                 _ => throw new AssertionFailedException()
             };
 
-            return new SyntaxTreeChange( this.FilePath, newSyntaxTreeChangeKind, newChange.HasCompileTimeCode, newCompileTimeChangeKind, newChange.NewTree );
+            return new SyntaxTreeChange(
+                this.FilePath,
+                newSyntaxTreeChangeKind,
+                newChange.HasCompileTimeCode,
+                newCompileTimeChangeKind,
+                newChange.NewTree,
+                this.OldHash,
+                newChange.NewHash );
         }
     }
 }
