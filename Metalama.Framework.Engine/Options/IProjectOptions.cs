@@ -16,7 +16,15 @@ namespace Metalama.Framework.Engine.Options
     {
         string ProjectId { get; }
 
+        /// <summary>
+        /// Gets the path to a file that gets touched when the project is built.
+        /// </summary>
         string? BuildTouchFile { get; }
+
+        /// <summary>
+        /// Gets the path to a file that gets touched when the Roslyn analysis process generates new sources.
+        /// </summary>
+        string? SourceGeneratorTouchFile { get; }
 
         string? AssemblyName { get; }
 

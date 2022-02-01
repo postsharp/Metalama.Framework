@@ -15,7 +15,7 @@ namespace Metalama.Framework.Engine.CompileTime
     /// Implements a fast way to detect whether a syntax tree contains compile-time code, just by looking at namespace imports.
     /// This way is imprecise, but it is enforced by an analyzer <see cref="TemplatingCodeValidator"/>. 
     /// </summary>
-    internal static class CompileTimeCodeDetector
+    public static class CompileTimeCodeDetector
     {
         public const string Namespace = "Metalama.Framework";
 
@@ -36,13 +36,24 @@ namespace Metalama.Framework.Engine.CompileTime
             public static readonly DetectCompileTimeVisitor Instance = new();
 
             public override bool VisitUsingDirective( UsingDirectiveSyntax node )
-                => node.Name switch
+            {
+                if ( node.GlobalKeyword.Kind() == SyntaxKind.GlobalKeyword )
                 {
-                    QualifiedNameSyntax q3 when SubNamespaces.Contains( q3.Right.Identifier.Text ) &&
-                                                q3.Left is QualifiedNameSyntax q2 && q2.Right.Identifier.Text == "Framework"
-                                                && q2.Left is IdentifierNameSyntax { Identifier: { Text: "Metalama" } } => true,
-                    _ => false
-                };
+                    // Any tree containing a global using must be included in the set of compile-time trees because they need to be scanned.
+                    return true;
+                }
+                else
+                {
+                    // Any tree containing a using directive for Metalama.Framework needs to be included.
+                    return node.Name switch
+                    {
+                        QualifiedNameSyntax q3 when SubNamespaces.Contains( q3.Right.Identifier.Text ) &&
+                                                    q3.Left is QualifiedNameSyntax q2 && q2.Right.Identifier.Text == "Framework"
+                                                    && q2.Left is IdentifierNameSyntax { Identifier: { Text: "Metalama" } } => true,
+                        _ => false
+                    };
+                }
+            }
 
             public override bool VisitNamespaceDeclaration( NamespaceDeclarationSyntax node ) => node.ChildNodes().Any( this.Visit );
 

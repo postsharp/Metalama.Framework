@@ -1,7 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Metalama.Framework.DesignTime.Contracts;
 using Metalama.Framework.Engine.Collections;
 using Microsoft.CodeAnalysis.Text;
 using System;
@@ -14,7 +13,7 @@ namespace Metalama.Framework.Engine.Formatting
     /// <summary>
     /// A set of <see cref="TextSpan"/>.
     /// </summary>
-    public sealed class ClassifiedTextSpanCollection : IClassifiedTextSpans, IReadOnlyCollection<ClassifiedTextSpan>
+    public sealed class ClassifiedTextSpanCollection : IReadOnlyCollection<ClassifiedTextSpan>
     {
         private readonly SkipListDictionary<int, MarkedTextSpan> _spans = new();
         private readonly int _length;
@@ -231,54 +230,5 @@ namespace Metalama.Framework.Engine.Formatting
         IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
 
         public int Count => this._spans.Count;
-
-        IEnumerable<IClassifiedTextSpan> IClassifiedTextSpans.GetClassifiedTextSpans() => new TextSpanEnumerable( this );
-
-        IEnumerable<IClassifiedTextSpan> IClassifiedTextSpans.GetClassifiedTextSpans( TextSpan textSpan )
-            => new TextSpanEnumerable( this.GetClassifiedSpans( textSpan ) );
-
-        /// <summary>
-        /// Implements <see cref="IEnumerable{ClassifiedTextSpan}"/> in a way that does not allocate memory for each item.
-        /// </summary>
-        private class TextSpanEnumerable : IEnumerable<IClassifiedTextSpan>
-        {
-            private readonly IEnumerable<ClassifiedTextSpan> _spans;
-
-            public TextSpanEnumerable( IEnumerable<ClassifiedTextSpan> spans )
-            {
-                this._spans = spans;
-            }
-
-            public IEnumerator<IClassifiedTextSpan> GetEnumerator() => new TextSpanEnumerator( this._spans );
-
-            IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
-        }
-
-        /// <summary>
-        /// Implements <see cref="IEnumerable{ClassifiedTextSpan}"/> in a way that does not allocate memory for each item.
-        /// </summary>
-        private class TextSpanEnumerator : IEnumerator<IClassifiedTextSpan>, IClassifiedTextSpan
-        {
-            private readonly IEnumerator<ClassifiedTextSpan> _enumerator;
-
-            public TextSpanEnumerator( IEnumerable<ClassifiedTextSpan> spans )
-            {
-                this._enumerator = spans.GetEnumerator();
-            }
-
-            bool IEnumerator.MoveNext() => this._enumerator.MoveNext();
-
-            void IEnumerator.Reset() => this._enumerator.Reset();
-
-            public IClassifiedTextSpan Current => this;
-
-            object IEnumerator.Current => this.Current;
-
-            void IDisposable.Dispose() => this._enumerator.Dispose();
-
-            TextSpan IClassifiedTextSpan.Span => this._enumerator.Current.Span;
-
-            TextSpanClassification IClassifiedTextSpan.Classification => this._enumerator.Current.Classification;
-        }
     }
 }

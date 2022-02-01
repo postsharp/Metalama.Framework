@@ -67,7 +67,7 @@ namespace Metalama.Framework.Engine.CodeModel.Pseudo
 
         public bool IsReturnParameter => this.Index < 0;
 
-        public override Ref<IDeclaration> ToRef() => throw new NotImplementedException();
+        internal override Ref<IDeclaration> ToRef() => throw new NotImplementedException();
 
         public override ImmutableArray<SyntaxReference> DeclaringSyntaxReferences => ImmutableArray<SyntaxReference>.Empty;
 

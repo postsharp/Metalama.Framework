@@ -7,7 +7,7 @@ using System.Collections.Immutable;
 
 namespace Metalama.Framework.Engine.Collections
 {
-    internal partial class ImmutableDictionaryOfHashSet<TKey, TValue>
+    public partial class ImmutableDictionaryOfHashSet<TKey, TValue>
     {
         public class Builder
         {

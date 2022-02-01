@@ -6,6 +6,7 @@
     <ItemGroup>
         <CompilerVisibleProperty Include="MetalamaProjectId" />
         <CompilerVisibleProperty Include="MetalamaBuildTouchFile" />
+        <CompilerVisibleProperty Include="MetalamaSourceGeneratorTouchFile" />
         <CompilerVisibleProperty Include="MetalamaEnabled" />
         <CompilerVisibleProperty Include="MetalamaFormatOutput" />
         <CompilerVisibleProperty Include="MetalamaFormatCompileTimeCode" />

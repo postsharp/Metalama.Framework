@@ -7,7 +7,7 @@
     <ItemGroup Condition="'$(IsTestProject)'=='true'">
         <!-- We include this to disable xUnit shadow copying because it is not compatible with public-signed test assemblies. -->
         <!-- The same is used by Arcade in Roslyn. -->
-        <Content Include="$(MSBuildThisFileDirectory)..\eng\xunit.runner.json" Link="%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+        <Content Include="$(MSBuildThisFileDirectory)..\eng\xunit.runner.json" Link="%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest"/>
     </ItemGroup>
 
 </Project>

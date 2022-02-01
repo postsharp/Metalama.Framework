@@ -15,7 +15,7 @@ namespace Metalama.Framework.Engine.Pipeline
     /// <summary>
     /// Contains the inputs and the outputs of a <see cref="PipelineStage"/>.
     /// </summary>
-    internal sealed class PipelineStageResult
+    public sealed class PipelineStageResult
     {
         public ProjectModel Project { get; }
 
@@ -32,9 +32,9 @@ namespace Metalama.Framework.Engine.Pipeline
         /// <summary>
         /// Gets the list of aspect sources.
         /// </summary>
-        public ImmutableArray<IAspectSource> AspectSources { get; }
+        internal ImmutableArray<IAspectSource> AspectSources { get; }
 
-        public ImmutableArray<IValidatorSource> ValidatorSources { get; }
+        internal ImmutableArray<IValidatorSource> ValidatorSources { get; }
 
         /// <summary>
         /// Gets the list of syntax trees to be added to the compilation (typically in a source generation scenario). The key is the "hint name" in the
@@ -45,7 +45,7 @@ namespace Metalama.Framework.Engine.Pipeline
         /// <summary>
         /// Gets the list of ordered aspect parts.
         /// </summary>
-        public ImmutableArray<OrderedAspectLayer> AspectLayers { get; }
+        internal ImmutableArray<OrderedAspectLayer> AspectLayers { get; }
 
         public ImmutableArray<IAspectInstance> ExternallyInheritableAspects { get; }
 
@@ -58,7 +58,7 @@ namespace Metalama.Framework.Engine.Pipeline
 
         public ImmutableArray<AdditionalCompilationOutputFile> AdditionalCompilationOutputFiles { get; }
 
-        public PipelineStageResult(
+        internal PipelineStageResult(
             PartialCompilation compilation,
             ProjectModel project,
             ImmutableArray<OrderedAspectLayer> aspectLayers,

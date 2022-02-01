@@ -15,7 +15,7 @@ using System.Threading;
 
 namespace Metalama.Framework.Engine.Templating
 {
-    internal partial class TemplatingCodeValidator
+    public partial class TemplatingCodeValidator
     {
         /// <summary>
         /// Performs the analysis that are not performed by the pipeline: essentially validates that run-time code does not
@@ -25,7 +25,7 @@ namespace Metalama.Framework.Engine.Templating
         {
             private readonly ISymbolClassifier _classifier;
             private readonly HashSet<ISymbol> _alreadyReportedDiagnostics = new( SymbolEqualityComparer.Default );
-            private readonly bool _isCompileTimeTreeOutdated;
+            private readonly bool _reportCompileTimeTreeOutdatedError;
             private readonly bool _isDesignTime;
             private readonly SemanticModel _semanticModel;
             private readonly Action<Diagnostic> _reportDiagnostic;
@@ -43,7 +43,7 @@ namespace Metalama.Framework.Engine.Templating
                 SemanticModel semanticModel,
                 Action<Diagnostic> reportDiagnostic,
                 IServiceProvider serviceProvider,
-                bool isCompileTimeTreeOutdated,
+                bool reportCompileTimeTreeOutdatedError,
                 bool isDesignTime,
                 CancellationToken cancellationToken )
             {
@@ -52,7 +52,7 @@ namespace Metalama.Framework.Engine.Templating
                 this._serviceProvider = serviceProvider;
                 this._classifier = this._serviceProvider.GetRequiredService<SymbolClassificationService>().GetClassifier( semanticModel.Compilation );
 
-                this._isCompileTimeTreeOutdated = isCompileTimeTreeOutdated;
+                this._reportCompileTimeTreeOutdatedError = reportCompileTimeTreeOutdatedError;
                 this._isDesignTime = isDesignTime;
                 this._cancellationToken = cancellationToken;
                 this._hasCompileTimeCodeFast = CompileTimeCodeDetector.HasCompileTimeCode( semanticModel.SyntaxTree.GetRoot() );
@@ -102,7 +102,7 @@ namespace Metalama.Framework.Engine.Templating
                 using var scope = this.WithScope( node );
 
                 if ( (scope.Scope == TemplatingScope.Both || scope.Scope == TemplatingScope.Both) &&
-                     this._isCompileTimeTreeOutdated )
+                     this._reportCompileTimeTreeOutdatedError )
                 {
                     this.Report(
                         TemplatingDiagnosticDescriptors.CompileTimeTypeNeedsRebuild.CreateRoslynDiagnostic(

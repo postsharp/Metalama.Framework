@@ -162,7 +162,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
             var oldTransformedTemplateSyntaxTree = transformedTemplateSyntax.SyntaxTree;
 
             var newTransformedTemplateSyntaxTree = CSharpSyntaxTree.Create(
-                (CSharpSyntaxNode) oldTransformedTemplateSyntaxTree.GetRoot(),
+                (CSharpSyntaxNode) await oldTransformedTemplateSyntaxTree.GetRootAsync(),
                 (CSharpParseOptions?) oldTransformedTemplateSyntaxTree.Options,
                 transformedTemplatePath,
                 Encoding.UTF8 );

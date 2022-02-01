@@ -14,14 +14,12 @@
         <EmbeddedResource Include="..\Metalama.Framework.CompileTime\bin\$(Configuration)\netstandard2.0\Metalama.Framework.dll">
             <LogicalName>Metalama.Framework.dll</LogicalName>
         </EmbeddedResource>
-        <EmbeddedResource Remove="ServiceProvider\**" />
     </ItemGroup>
 
     <ItemGroup>
         <!-- We cannot use InternalsVisibleTo for Metalama.TestFramework because of obfuscation in the release build. -->
         <InternalsVisibleTo Include="Metalama.Framework.Tests.UnitTests.Internals" />
         <InternalsVisibleTo Include="Metalama.Framework.Tests.Integration.Internals" />
-        <InternalsVisibleTo Include="Metalama.Framework.CompilerAddIn" />
         <InternalsVisibleTo Include="DynamicProxyGenAssembly2" Key="$(FakeItEasyKey)" LoadsWithinVisualStudio="false" />
     </ItemGroup>
 
@@ -36,7 +34,6 @@
         <PackageReference Include="Microsoft.CSharp" Version="$(MicrosoftCSharpVersion)" />
         <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonVersion)" />
         <PackageReference Include="System.Runtime.Serialization.Formatters" Version="4.3.0" />
-        <ProjectReference Include="..\Metalama.Framework.DesignTime.Contracts\Metalama.Framework.DesignTime.Contracts.csproj" />
         <ProjectReference Include="..\Metalama.Framework\Metalama.Framework.csproj" />
         <ProjectReference Include="..\Metalama.Framework.Sdk\Metalama.Framework.Sdk.csproj" />
 
@@ -58,17 +55,6 @@
         </PackageReference>
         <None Include="$(PkgMetalama_RoslynUtilities)\lib\netstandard2.0\Metalama.RoslynUtilities.dll" Pack="true" PackagePath="lib\netstandard2.0" CopyToOutputDirectory="Always" />
 
-    </ItemGroup>
-
-    <ItemGroup>
-
-        <Compile Remove="ServiceProvider\**" />
-        <Compile Remove="CodeModel\Builders\BuiltGenericParameter.cs" />
-        <Compile Remove="CompileTime\CompileTimeLogCategory.cs" />
-    </ItemGroup>
-
-    <ItemGroup>
-        <None Remove="ServiceProvider\**" />
     </ItemGroup>
 
     <!-- Obfuscation -->

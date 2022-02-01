@@ -135,10 +135,12 @@ namespace Metalama.Framework.Engine.CompileTime
             {
                 if ( this._runTimeAssemblyLocator.TryFindAssembly( runTimeAssemblyIdentity, out var metadataReference ) != true )
                 {
-                    diagnosticAdder.Report(
-                        GeneralDiagnosticDescriptors.CannotFindCompileTimeAssembly.CreateRoslynDiagnostic(
-                            Location.None,
-                            runTimeAssemblyIdentity ) );
+                    var diagnostic = GeneralDiagnosticDescriptors.CannotFindCompileTimeAssembly.CreateRoslynDiagnostic(
+                        Location.None,
+                        runTimeAssemblyIdentity );
+
+                    diagnosticAdder.Report( diagnostic );
+                    this._logger.Warning?.Log( diagnostic.ToString() );
 
                     compileTimeProject = null;
 
@@ -199,6 +201,8 @@ namespace Metalama.Framework.Engine.CompileTime
                     cancellationToken,
                     out compileTimeProject ) )
             {
+                this._logger.Warning?.Log( $"TryGetCompileTimeProject failed." );
+
                 compileTimeProject = null;
 
                 return false;
@@ -241,6 +245,15 @@ namespace Metalama.Framework.Engine.CompileTime
             CancellationToken cancellationToken,
             out CompileTimeProject? compileTimeProject )
         {
+            if ( !File.Exists( assemblyPath ) )
+            {
+                this._logger.Warning?.Log( $"The file '{assemblyPath}' does not exist." );
+
+                compileTimeProject = null;
+
+                return false;
+            }
+
             var assemblyIdentity = AssemblyName.GetAssemblyName( assemblyPath ).ToAssemblyIdentity();
 
             // If the assembly is a standard one, there is no need to analyze.
@@ -278,6 +291,8 @@ namespace Metalama.Framework.Engine.CompileTime
                     cancellationToken,
                     out compileTimeProject ) )
             {
+                this._logger.Warning?.Log( $"TryDeserializeCompileTimeProject failed." );
+
                 // Coverage: ignore
 
                 return false;
@@ -330,6 +345,9 @@ namespace Metalama.Framework.Engine.CompileTime
 
                         project = null;
 
+                        this._logger.Warning?.Log(
+                            $"TryDeserializeCompileTimeProject('{runTimeAssemblyIdentity}'): processing of reference '{referenceAssemblyIdentity}' failed." );
+
                         return false;
                     }
 
@@ -353,6 +371,8 @@ namespace Metalama.Framework.Engine.CompileTime
             {
                 // Coverage: ignore
                 // (this happens when the compile-time could not be compiled into a binary assembly.)
+
+                this._logger.Warning?.Log( $"TryDeserializeCompileTimeProject('{runTimeAssemblyIdentity}'): TryCompileDeserializedProject failed'." );
 
                 project = null;
 

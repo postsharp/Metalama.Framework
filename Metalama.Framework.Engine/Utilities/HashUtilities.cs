@@ -8,7 +8,7 @@ using System.Text;
 
 namespace Metalama.Framework.Engine.Utilities
 {
-    internal static class HashUtilities
+    public static class HashUtilities
     {
         public static string HashString( string s ) => XXH64.DigestOf( Encoding.UTF8.GetBytes( s ) ).ToString( "x16", CultureInfo.InvariantCulture );
 

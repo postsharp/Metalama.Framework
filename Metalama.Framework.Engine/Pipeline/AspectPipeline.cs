@@ -38,7 +38,7 @@ namespace Metalama.Framework.Engine.Pipeline
 
         public IProjectOptions ProjectOptions { get; }
 
-        private readonly CompileTimeDomain _domain;
+        protected CompileTimeDomain Domain { get; }
 
         // This member is intentionally protected because there can be one ServiceProvider per project,
         // but the pipeline can be used by many projects.
@@ -68,19 +68,19 @@ namespace Metalama.Framework.Engine.Pipeline
 
             if ( domain != null )
             {
-                this._domain = domain;
+                this.Domain = domain;
             }
             else
             {
                 // Coverage: Ignore (tests always provide a domain).
-                this._domain = this.ServiceProvider.GetRequiredService<ICompileTimeDomainFactory>().CreateDomain();
+                this.Domain = this.ServiceProvider.GetRequiredService<ICompileTimeDomainFactory>().CreateDomain();
                 this._ownsDomain = true;
             }
         }
 
         internal int PipelineInitializationCount { get; private set; }
 
-        private protected bool TryInitialize(
+        protected bool TryInitialize(
             IDiagnosticAdder diagnosticAdder,
             PartialCompilation compilation,
             IReadOnlyList<SyntaxTree>? compileTimeTreesHint,
@@ -92,7 +92,7 @@ namespace Metalama.Framework.Engine.Pipeline
             var roslynCompilation = compilation.Compilation;
 
             // Create dependencies.
-            var loader = CompileTimeProjectLoader.Create( this._domain, this.ServiceProvider );
+            var loader = CompileTimeProjectLoader.Create( this.Domain, this.ServiceProvider );
 
             // Prepare the compile-time assembly.
             if ( !loader.TryGetCompileTimeProjectFromCompilation(
@@ -244,6 +244,7 @@ namespace Metalama.Framework.Engine.Pipeline
                 .ToImmutableArray();
 
             configuration = new AspectPipelineConfiguration(
+                this.Domain,
                 stages,
                 allAspectClasses,
                 allOrderedAspectLayers,
@@ -277,7 +278,7 @@ namespace Metalama.Framework.Engine.Pipeline
             Compilation compilation,
             CancellationToken cancellationToken )
         {
-            var aspectClasses = configuration.AspectClasses.ToImmutableArray<IAspectClass>();
+            var aspectClasses = configuration.BoundAspectClasses.ToImmutableArray<IAspectClass>();
 
             var transitiveAspectSource = new TransitiveAspectSource( compilation, aspectClasses, configuration.ServiceProvider, cancellationToken );
 
@@ -312,18 +313,28 @@ namespace Metalama.Framework.Engine.Pipeline
         /// Executes the all stages of the current pipeline, report diagnostics, and returns the last <see cref="PipelineStageResult"/>.
         /// </summary>
         /// <returns><c>true</c> if there was no error, <c>false</c> otherwise.</returns>
-        private protected bool TryExecute(
+        public bool TryExecute(
             PartialCompilation compilation,
             IDiagnosticAdder diagnosticAdder,
-            AspectPipelineConfiguration pipelineConfiguration,
+            AspectPipelineConfiguration? pipelineConfiguration,
             CancellationToken cancellationToken,
             [NotNullWhen( true )] out PipelineStageResult? pipelineStageResult )
         {
+            if ( pipelineConfiguration == null )
+            {
+                if ( !this.TryInitialize( diagnosticAdder, compilation, null, cancellationToken, out pipelineConfiguration ) )
+                {
+                    pipelineStageResult = null;
+
+                    return false;
+                }
+            }
+
             // When we reuse a pipeline configuration created from a different pipeline (e.g. design-time to code fix),
             // we need to substitute the code fix filter.
             pipelineConfiguration = pipelineConfiguration.WithCodeFixFilter( this.FilterCodeFix );
 
-            if ( pipelineConfiguration.CompileTimeProject == null || pipelineConfiguration.AspectClasses.Count == 0 )
+            if ( pipelineConfiguration.CompileTimeProject == null || pipelineConfiguration.BoundAspectClasses.Count == 0 )
             {
                 // If there is no aspect in the compilation, don't execute the pipeline.
                 pipelineStageResult = new PipelineStageResult(
@@ -420,7 +431,7 @@ namespace Metalama.Framework.Engine.Pipeline
         {
             if ( this._ownsDomain )
             {
-                this._domain.Dispose();
+                this.Domain.Dispose();
             }
         }
 

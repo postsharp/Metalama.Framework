@@ -141,7 +141,8 @@ namespace Metalama.Framework.Engine.Templating
                                 (a.Parent is DefaultExpressionSyntax defaultExpression && defaultExpression.Type == a) ||
                                 (a.Parent is CastExpressionSyntax castExpression && castExpression.Type == a) ||
                                 (a.Parent is ExplicitInterfaceSpecifierSyntax explicitInterfaceSpecifier && explicitInterfaceSpecifier.Name == a) ||
-                                (a.Parent is ParameterSyntax parameter && parameter.Type == a) ) )
+                                (a.Parent is ParameterSyntax parameter && parameter.Type == a) ||
+                                a.Parent is SimpleBaseTypeSyntax ) )
                 {
                     return SyntaxFactory.MemberAccessExpression(
                         SyntaxKind.SimpleMemberAccessExpression,

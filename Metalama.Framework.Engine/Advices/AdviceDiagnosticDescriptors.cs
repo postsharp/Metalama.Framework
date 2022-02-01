@@ -9,13 +9,13 @@ using static Metalama.Framework.Diagnostics.Severity;
 
 namespace Metalama.Framework.Engine.Advices
 {
-    internal static class AdviceDiagnosticDescriptors
+    public static class AdviceDiagnosticDescriptors
     {
         // Reserved range 500-599
 
         private const string _category = "Metalama.Advices";
 
-        public static readonly DiagnosticDefinition<(string AspectType, IDeclaration Member, IDeclaration TargetType, IDeclaration DeclaringType)>
+        internal static readonly DiagnosticDefinition<(string AspectType, IDeclaration Member, IDeclaration TargetType, IDeclaration DeclaringType)>
             CannotIntroduceMemberAlreadyExists = new(
                 "CR0500",
                 "Cannot introduce member into a type because it already exists.",
@@ -23,7 +23,7 @@ namespace Metalama.Framework.Engine.Advices
                 _category,
                 Error );
 
-        public static readonly DiagnosticDefinition<(string AspectType, DeclarationKind IntroducedDeclarationKind, DeclarationKind TargetDeclarationKind)>
+        internal static readonly DiagnosticDefinition<(string AspectType, DeclarationKind IntroducedDeclarationKind, DeclarationKind TargetDeclarationKind)>
             CannotUseIntroduceWithoutDeclaringType = new(
                 "CR0501",
                 "Cannot use [Introduce] in an aspect that is applied to a declaration that is neither a type nor a type member.",
@@ -31,7 +31,7 @@ namespace Metalama.Framework.Engine.Advices
                 _category,
                 Error );
 
-        public static readonly DiagnosticDefinition<(string AspectType, IDeclaration Member, IDeclaration TargetType, IDeclaration DeclaringType)>
+        internal static readonly DiagnosticDefinition<(string AspectType, IDeclaration Member, IDeclaration TargetType, IDeclaration DeclaringType)>
             CannotIntroduceOverrideOfSealed = new(
                 "CR0502",
                 "Cannot introduce member into a type because it is sealed in a base class.",
@@ -40,7 +40,7 @@ namespace Metalama.Framework.Engine.Advices
                 _category,
                 Error );
 
-        public static readonly DiagnosticDefinition<(string AspectType, IDeclaration Member, IDeclaration TargetType, IDeclaration DeclaringType, IType
+        internal static readonly DiagnosticDefinition<(string AspectType, IDeclaration Member, IDeclaration TargetType, IDeclaration DeclaringType, IType
                 ReturnType)>
             CannotIntroduceDifferentExistingReturnType = new(
                 "CR0503",
@@ -50,7 +50,7 @@ namespace Metalama.Framework.Engine.Advices
                 _category,
                 Error );
 
-        public static readonly DiagnosticDefinition<(string AspectType, IDeclaration Member, IDeclaration TargetType, IDeclaration DeclaringType)>
+        internal static readonly DiagnosticDefinition<(string AspectType, IDeclaration Member, IDeclaration TargetType, IDeclaration DeclaringType)>
             CannotIntroduceWithDifferentStaticity = new(
                 "CR0504",
                 "Cannot introduce member into a type because it is sealed in a base class.",
@@ -59,7 +59,7 @@ namespace Metalama.Framework.Engine.Advices
                 _category,
                 Error );
 
-        public static readonly DiagnosticDefinition<(string AspectType, IDeclaration Member, IDeclaration TargetType)>
+        internal static readonly DiagnosticDefinition<(string AspectType, IDeclaration Member, IDeclaration TargetType)>
             CannotIntroduceInstanceMemberIntoStaticType = new(
                 "CR0505",
                 "Cannot introduce instance member into a static type.",
@@ -67,7 +67,7 @@ namespace Metalama.Framework.Engine.Advices
                 _category,
                 Error );
 
-        public static readonly DiagnosticDefinition<(string AspectType, INamedType TargetType, INamedType InterfaceType, IMember InterfaceMember)>
+        internal static readonly DiagnosticDefinition<(string AspectType, INamedType TargetType, INamedType InterfaceType, IMember InterfaceMember)>
             MissingDeclarativeInterfaceMember = new(
                 "CR0510",
                 "Declarative interface member introduction is missing.",
@@ -76,7 +76,7 @@ namespace Metalama.Framework.Engine.Advices
                 _category,
                 Error );
 
-        public static readonly DiagnosticDefinition<(string AspectType, INamedType TargetType, INamedType InterfaceType, IMember DeclarativeIntroduction,
+        internal static readonly DiagnosticDefinition<(string AspectType, INamedType TargetType, INamedType InterfaceType, IMember DeclarativeIntroduction,
                 IMember InterfaceMember)>
             DeclarativeInterfaceMemberDoesNotMatch = new(
                 "CR0511",
@@ -86,7 +86,7 @@ namespace Metalama.Framework.Engine.Advices
                 _category,
                 Error );
 
-        public static readonly DiagnosticDefinition<(string AspectType, INamedType InterfaceType, INamedType TargetType)>
+        internal static readonly DiagnosticDefinition<(string AspectType, INamedType InterfaceType, INamedType TargetType)>
             InterfaceIsAlreadyImplemented = new(
                 "CR0512",
                 "Cannot introduce an interface when the target type already implements it.",
@@ -94,7 +94,7 @@ namespace Metalama.Framework.Engine.Advices
                 _category,
                 Error );
 
-        public static readonly DiagnosticDefinition<(string AspectType, INamedType InterfaceType, INamedType TargetType)>
+        internal static readonly DiagnosticDefinition<(string AspectType, INamedType InterfaceType, INamedType TargetType)>
             InterfaceIsAlreadyIntroducedByTheAspect = new(
                 "CR0513",
                 "Cannot introduce an interface was already introduced by the aspect.",

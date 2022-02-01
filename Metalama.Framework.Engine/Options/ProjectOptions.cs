@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis.Diagnostics;
 using System;
 using System.Collections.Immutable;
@@ -32,30 +33,45 @@ namespace Metalama.Framework.Engine.Options
 
         public ProjectOptions( AnalyzerConfigOptions options, ImmutableArray<object>? plugIns = null ) : this( new OptionsAdapter( options ), plugIns ) { }
 
+        [Memo]
         public string ProjectId => this.GetStringOption( "MetalamaProjectId" ) ?? this._defaultProjectId;
 
+        [Memo]
         public string? BuildTouchFile => this.GetStringOption( "MetalamaBuildTouchFile" );
 
+        [Memo]
+        public string? SourceGeneratorTouchFile => this.GetStringOption( "MetalamaSourceGeneratorTouchFile" );
+
+        [Memo]
         public string? AssemblyName => this.GetStringOption( "AssemblyName" );
 
         public ImmutableArray<object> PlugIns { get; }
 
+        [Memo]
         public bool IsFrameworkEnabled => this.GetBooleanOption( "MetalamaEnabled", true ) && !this.GetBooleanOption( "MetalamaCompileTimeOnlyProject" );
 
+        [Memo]
         public bool FormatOutput => this.GetBooleanOption( "MetalamaFormatOutput" );
 
+        [Memo]
         public bool FormatCompileTimeCode => this.GetBooleanOption( "MetalamaFormatCompileTimeCode" );
 
+        [Memo]
         public bool IsUserCodeTrusted => this.GetBooleanOption( "MetalamaUserCodeTrusted", true );
 
+        [Memo]
         public string? ProjectPath => this.GetStringOption( "MSBuildProjectFullPath" );
 
+        [Memo]
         public string? TargetFramework => this.GetStringOption( "Configuration" );
 
+        [Memo]
         public string? Configuration => this.GetStringOption( "TargetFramework" );
 
+        [Memo]
         public bool IsDesignTimeEnabled => this.GetBooleanOption( "MetalamaDesignTimeEnabled", true );
 
+        [Memo]
         public string? AdditionalCompilationOutputDirectory => this.GetStringOption( "MetalamaAdditionalCompilationOutputDirectory" );
 
         public bool TryGetProperty( string name, [NotNullWhen( true )] out string? value )

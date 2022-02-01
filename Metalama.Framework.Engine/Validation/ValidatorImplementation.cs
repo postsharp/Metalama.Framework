@@ -8,7 +8,7 @@ using Metalama.Framework.Fabrics;
 
 namespace Metalama.Framework.Engine.Validation;
 
-internal readonly struct ValidatorImplementation
+public readonly struct ValidatorImplementation
 {
     public object Implementation { get; }
 
@@ -42,7 +42,7 @@ internal readonly struct ValidatorImplementation
         this.State = aspectState;
     }
 
-    internal void UpdateHash( XXH64 hasher )
+    public void UpdateHash( XXH64 hasher )
     {
         hasher.Update( this.Implementation.GetHashCode() );
 

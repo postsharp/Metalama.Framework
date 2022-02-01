@@ -82,7 +82,7 @@ namespace Metalama.Framework.Engine.Transformations
 
                 if ( !this.OverriddenDeclaration.IsAsync )
                 {
-                    if ( this.Template.MustInterpretAsAsync() )
+                    if ( this.Template.MustInterpretAsAsyncTemplate() )
                     {
                         // If the template is async but the overridden declaration is not, we have to add an async modifier.
                         modifiers = modifiers.Add( Token( SyntaxKind.AsyncKeyword ) );
@@ -90,7 +90,7 @@ namespace Metalama.Framework.Engine.Transformations
                 }
                 else
                 {
-                    if ( !this.Template.MustInterpretAsAsync() )
+                    if ( !this.Template.MustInterpretAsAsyncTemplate() )
                     {
                         // If the template is not async but the overridden declaration is, we have to remove the async modifier.
                         modifiers = TokenList( modifiers.Where( m => m.Kind() != SyntaxKind.AsyncKeyword ) );

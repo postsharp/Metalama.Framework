@@ -6,7 +6,7 @@ using System;
 
 namespace Metalama.Framework.Engine.Diagnostics
 {
-    internal partial class UserDiagnosticSink
+    public partial class UserDiagnosticSink
     {
         private class RestoreLocationCookie : IDisposable
         {

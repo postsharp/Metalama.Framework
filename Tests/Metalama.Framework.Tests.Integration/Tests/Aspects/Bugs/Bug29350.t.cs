@@ -6,10 +6,10 @@ using Metalama.Framework.Code.SyntaxBuilders;
 
 public class LogAttribute : OverrideMethodAspect
 {
-    public override dynamic? OverrideMethod() => throw new System.NotSupportedException("Compile-time only code cannot be called at run-time.");
+    public override dynamic? OverrideMethod() => throw new System.NotSupportedException("Compile-time-only code cannot be called at run-time.");
 
 
-    private static InterpolatedStringBuilder BuildInterpolatedString() => throw new System.NotSupportedException("Compile-time only code cannot be called at run-time.");
+    private static InterpolatedStringBuilder BuildInterpolatedString() => throw new System.NotSupportedException("Compile-time-only code cannot be called at run-time.");
 
 }
 #pragma warning restore CS0067

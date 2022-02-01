@@ -13,7 +13,7 @@ namespace Metalama.Framework.Tests.UnitTests
     public class ServiceProviderTests
     {
         [Fact]
-        public async Task AsyncLocalInstance()
+        public async Task AsyncLocalInstanceAsync()
         {
             Assert.False( ServiceProviderFactory.HasAsyncLocalProvider );
 

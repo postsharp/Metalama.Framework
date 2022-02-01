@@ -24,6 +24,30 @@ namespace Metalama.Framework.Engine.Advices
             return (default, default);
         }
 
+        private static bool IsAsyncTemplate( this TemplateKind selectionKind )
+            => selectionKind switch
+            {
+                TemplateKind.Async => true,
+                TemplateKind.IAsyncEnumerable => true,
+                TemplateKind.IAsyncEnumerator => true,
+                _ => false
+            };
+
+        private static bool IsAsyncIteratorTemplate( this TemplateKind selectionKind )
+            => selectionKind switch
+            {
+                TemplateKind.IAsyncEnumerable => true,
+                TemplateKind.IAsyncEnumerator => true,
+                _ => false
+            };
+
+        public static bool MustInterpretAsAsyncTemplate( this in TemplateMember<IMethod> template )
+            => template.Declaration is { IsAsync: true }
+               || (template.SelectedKind == TemplateKind.Default && template.InterpretedKind.IsAsyncTemplate());
+
+        public static bool MustInterpretAsAsyncIteratorTemplate( this in TemplateMember<IMethod> template )
+            => template.InterpretedKind.IsAsyncIteratorTemplate() && (template.Declaration!.IsAsync || template.SelectedKind == TemplateKind.Default);
+
         public static TemplateMember<IField> GetInitializerTemplate( this in TemplateMember<IField> fieldTemplate )
         {
             if ( fieldTemplate.IsNotNull )
@@ -85,29 +109,5 @@ namespace Metalama.Framework.Engine.Advices
                 return default;
             }
         }
-
-        private static bool IsAsync( this TemplateKind selectionKind )
-            => selectionKind switch
-            {
-                TemplateKind.Async => true,
-                TemplateKind.IAsyncEnumerable => true,
-                TemplateKind.IAsyncEnumerator => true,
-                _ => false
-            };
-
-        private static bool IsAsyncIterator( this TemplateKind selectionKind )
-            => selectionKind switch
-            {
-                TemplateKind.IAsyncEnumerable => true,
-                TemplateKind.IAsyncEnumerator => true,
-                _ => false
-            };
-
-        public static bool MustInterpretAsAsync( this in TemplateMember<IMethod> template )
-            => template.Declaration is { IsAsync: true }
-               || (template.SelectedKind == TemplateKind.Default && template.InterpretedKind.IsAsync());
-
-        public static bool MustInterpretAsAsyncIterator( this in TemplateMember<IMethod> template )
-            => template.InterpretedKind.IsAsyncIterator() && (template.Declaration!.IsAsync || template.SelectedKind == TemplateKind.Default);
     }
 }

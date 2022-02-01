@@ -11,7 +11,7 @@ namespace Metalama.Framework.Tests.UnitTests.Templating
     public class MetaApiTests : TestBase
     {
         [Fact]
-        public async Task OutOfContext()
+        public async Task OutOfContextAsync()
         {
             Assert.Throws<InvalidOperationException>( () => meta.Base );
             Assert.Throws<InvalidOperationException>( () => meta.Tags );

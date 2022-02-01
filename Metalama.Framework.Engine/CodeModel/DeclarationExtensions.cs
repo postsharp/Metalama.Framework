@@ -14,15 +14,17 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Editing;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using Accessibility = Metalama.Framework.Code.Accessibility;
 using DeclarationKind = Metalama.Framework.Code.DeclarationKind;
 using MethodKind = Microsoft.CodeAnalysis.MethodKind;
 using RefKind = Metalama.Framework.Code.RefKind;
+using SyntaxReference = Microsoft.CodeAnalysis.SyntaxReference;
 
 namespace Metalama.Framework.Engine.CodeModel
 {
-    internal static class DeclarationExtensions
+    public static class DeclarationExtensions
     {
         public static DeclarationKind GetDeclarationKind( this ISymbol symbol )
             => symbol switch
@@ -92,10 +94,13 @@ namespace Metalama.Framework.Engine.CodeModel
                 _ => Array.Empty<ISymbol>()
             };
 
-        public static IEnumerable<AttributeRef> ToAttributeLinks( this IEnumerable<AttributeData> attributes, ISymbol declaringSymbol, Compilation compilation )
+        internal static IEnumerable<AttributeRef> ToAttributeLinks(
+            this IEnumerable<AttributeData> attributes,
+            ISymbol declaringSymbol,
+            Compilation compilation )
             => attributes.Select( a => new AttributeRef( a, Ref.FromSymbol( declaringSymbol, compilation ) ) );
 
-        public static IEnumerable<AttributeRef> GetAllAttributes( this ISymbol symbol, Compilation compilation )
+        internal static IEnumerable<AttributeRef> GetAllAttributes( this ISymbol symbol, Compilation compilation )
             => symbol switch
             {
                 IMethodSymbol method => method
@@ -107,16 +112,16 @@ namespace Metalama.Framework.Engine.CodeModel
                 _ => symbol.GetAttributes().ToAttributeLinks( symbol, compilation )
             };
 
-        public static Ref<IDeclaration> ToTypedRef( this ISymbol symbol, Compilation compilation ) => Ref.FromSymbol( symbol, compilation );
+        internal static Ref<IDeclaration> ToTypedRef( this ISymbol symbol, Compilation compilation ) => Ref.FromSymbol( symbol, compilation );
 
-        public static Ref<T> ToTypedRef<T>( this T declaration )
+        internal static Ref<T> ToTypedRef<T>( this T declaration )
             where T : class, IDeclaration
             => ((IDeclarationImpl) declaration).ToRef().As<T>();
 
         public static ISymbol? GetSymbol( this IDeclaration declaration, Compilation compilation )
             => declaration.GetSymbol().Translate( declaration.GetCompilationModel().RoslynCompilation, compilation );
 
-        public static MemberRef<T> ToMemberRef<T>( this T member )
+        internal static MemberRef<T> ToMemberRef<T>( this T member )
             where T : class, IMemberOrNamedType
             => new( ((IDeclarationImpl) member).ToRef() );
 
@@ -352,5 +357,8 @@ namespace Metalama.Framework.Engine.CodeModel
                     throw new AssertionFailedException();
             }
         }
+
+        public static ImmutableArray<SyntaxReference> GetDeclaringSyntaxReferences( this IDeclaration declaration )
+            => ((IDeclarationImpl) declaration).DeclaringSyntaxReferences;
     }
 }

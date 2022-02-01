@@ -3,7 +3,7 @@
 
 namespace Metalama.Framework.Engine.Utilities
 {
-    internal enum HostProduct
+    public enum HostProduct
     {
         Compiler,
         VisualStudio,

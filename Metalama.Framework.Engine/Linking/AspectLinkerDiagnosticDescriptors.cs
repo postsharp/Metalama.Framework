@@ -9,13 +9,13 @@ using static Metalama.Framework.Diagnostics.Severity;
 
 namespace Metalama.Framework.Engine.Linking
 {
-    internal static class AspectLinkerDiagnosticDescriptors
+    public static class AspectLinkerDiagnosticDescriptors
     {
         // Reserved range 600-599
 
         private const string _category = "Metalama.Linker";
 
-        public static readonly DiagnosticDefinition<(string AspectType, ISymbol TargetDeclaration)>
+        internal static readonly DiagnosticDefinition<(string AspectType, ISymbol TargetDeclaration)>
             CannotUseBaseInvokerWithNonInstanceExpression = new(
                 "CR0600",
                 "Cannot use Base invoker with non-this instance expression.",

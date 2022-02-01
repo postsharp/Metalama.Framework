@@ -171,7 +171,7 @@ namespace Metalama.Framework.Engine.Pipeline
         /// <remarks>
         /// When the current service provider fails to find a service, it will try to find it using the next provider in the chain.
         /// </remarks>
-        public ServiceProvider WithNextProvider( IServiceProvider nextProvider ) => new( this._services, nextProvider );
+        internal ServiceProvider WithNextProvider( IServiceProvider nextProvider ) => new( this._services, nextProvider );
 
         public override string ToString()
         {

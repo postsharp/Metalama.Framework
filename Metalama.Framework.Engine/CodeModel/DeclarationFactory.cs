@@ -23,7 +23,7 @@ namespace Metalama.Framework.Engine.CodeModel
     /// <summary>
     /// Creates instances of <see cref="IDeclaration"/> for a given <see cref="CompilationModel"/>.
     /// </summary>
-    internal class DeclarationFactory : ITypeFactory
+    public class DeclarationFactory : ITypeFactory
     {
         private readonly ConcurrentDictionary<Ref<ICompilationElement>, object> _cache =
             new( DeclarationRefEqualityComparer<Ref<ICompilationElement>>.Instance );
@@ -156,7 +156,11 @@ namespace Metalama.Framework.Engine.CodeModel
         internal IDeclaration? GetDeclarationOrNull( ISymbol symbol, DeclarationRefTargetKind kind = DeclarationRefTargetKind.Default )
             => this.GetCompilationElement( symbol, kind ) as IDeclaration;
 
-        internal IDeclaration GetDeclaration( ISymbol symbol, DeclarationRefTargetKind kind = DeclarationRefTargetKind.Default )
+        public IDeclaration GetDeclaration( SymbolDictionaryKey key ) => this.GetDeclaration( key.GetId().Resolve( this.Compilation ).AssertNotNull() );
+
+        public IDeclaration GetDeclaration( ISymbol symbol ) => this.GetDeclaration( symbol, DeclarationRefTargetKind.Default );
+
+        internal IDeclaration GetDeclaration( ISymbol symbol, DeclarationRefTargetKind kind )
         {
             var compilationElement = this.GetCompilationElement( symbol, kind );
 
@@ -218,6 +222,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
                 case SymbolKind.Local:
                 case SymbolKind.Label:
+                case SymbolKind.ErrorType:
                     return null;
 
                 default:

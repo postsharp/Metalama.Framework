@@ -10,7 +10,7 @@ using SyntaxReference = Metalama.Framework.Code.SyntaxReference;
 
 namespace Metalama.Framework.Engine.Validation;
 
-internal abstract class ValidatorInstance : ISyntaxReferenceImpl
+public abstract class ValidatorInstance : ISyntaxReferenceImpl
 {
     public ValidatorDriver Driver { get; }
 

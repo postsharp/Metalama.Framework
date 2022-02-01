@@ -123,7 +123,7 @@ namespace Metalama.Framework.Engine.Templating
                 var method = this.MetaApi.Method;
                 var returnType = method.ReturnType;
 
-                if ( this._templateMethod.MustInterpretAsAsync() )
+                if ( this._templateMethod.MustInterpretAsAsyncTemplate() )
                 {
                     // If we are in an awaitable async method, the consider the return type as seen by the method body,
                     // not the one as seen from outside.
@@ -140,7 +140,7 @@ namespace Metalama.Framework.Engine.Templating
                     return CreateReturnStatementVoid( returnExpression );
                 }
                 else if ( method.GetIteratorInfoImpl() is { EnumerableKind: EnumerableKind.IAsyncEnumerable or EnumerableKind.IAsyncEnumerator } iteratorInfo &&
-                          this._templateMethod.MustInterpretAsAsyncIterator() )
+                          this._templateMethod.MustInterpretAsAsyncIteratorTemplate() )
                 {
                     switch ( iteratorInfo.EnumerableKind )
                     {

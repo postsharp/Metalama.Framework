@@ -149,7 +149,7 @@ namespace Metalama.Compiler
         {
             if ( this.MustReplaceByThrow( node ) )
             {
-                return this.WithThrowNotSupportedExceptionBody( node, "Compile-time only code cannot be called at run-time." );
+                return this.WithThrowNotSupportedExceptionBody( node, "Compile-time-only code cannot be called at run-time." );
             }
 
             return node;
@@ -182,7 +182,7 @@ namespace Metalama.Compiler
             /*
             if ( this.MustReplaceByThrow( node ) )
             {
-                return WithThrowNotSupportedExceptionBody( node, "Compile-time only code cannot be called at run-time." );
+                return WithThrowNotSupportedExceptionBody( node, "Compile-time-only code cannot be called at run-time." );
             }
 
             return node;
@@ -207,7 +207,7 @@ namespace Metalama.Compiler
                     return node;
                 }
 
-                return this.WithThrowNotSupportedExceptionBody( node, "Compile-time only code cannot be called at run-time." );
+                return this.WithThrowNotSupportedExceptionBody( node, "Compile-time-only code cannot be called at run-time." );
             }
 
             if ( node.Initializer != null && this.MustRemoveInitializer( node ) )
@@ -222,7 +222,7 @@ namespace Metalama.Compiler
         {
             if ( this.MustReplaceByThrow( node ) )
             {
-                return this.WithThrowNotSupportedExceptionBody( node, "Compile-time only code cannot be called at run-time." );
+                return this.WithThrowNotSupportedExceptionBody( node, "Compile-time-only code cannot be called at run-time." );
             }
 
             return node;

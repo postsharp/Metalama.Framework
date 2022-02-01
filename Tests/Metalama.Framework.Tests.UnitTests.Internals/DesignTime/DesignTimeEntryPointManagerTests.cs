@@ -12,7 +12,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
     public class DesignTimeEntryPointManagerTests
     {
         [Fact]
-        public async Task RegisterBeforeGet()
+        public async Task RegisterBeforeGetAsync()
         {
             IDesignTimeEntryPointManager instance = new DesignTimeEntryPointManager();
             var version = new Version( 1, 0 );
@@ -22,7 +22,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
         }
 
         [Fact]
-        public async Task GetBeforeRegister()
+        public async Task GetBeforeRegisterAsync()
         {
             IDesignTimeEntryPointManager instance = new DesignTimeEntryPointManager();
             var version = new Version( 1, 0 );
@@ -35,7 +35,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
         }
 
         [Fact]
-        public async Task CancelGetS()
+        public async Task CancelGetSAsync()
         {
             IDesignTimeEntryPointManager instance = new DesignTimeEntryPointManager();
             var version = new Version( 1, 0 );
@@ -62,7 +62,9 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
             instance.RegisterServiceProvider( provider );
             var task = instance.GetServiceProviderAsync( version, CancellationToken.None );
             Assert.True( task.IsCompleted );
+#pragma warning disable VSTHRD002
             Assert.Equal( provider, task.Result );
+#pragma warning restore VSTHRD002
             provider.Unload();
             var task2 = instance.GetServiceProviderAsync( version, CancellationToken.None );
             Assert.False( task2.IsCompleted );
@@ -77,7 +79,9 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
 
             public Version Version { get; }
 
-            public ICompilerService? GetCompilerService( Type type ) => throw new NotImplementedException();
+            public T? GetService<T>()
+                where T : class, ICompilerService
+                => throw new NotImplementedException();
 
             public event Action? Unloaded;
 

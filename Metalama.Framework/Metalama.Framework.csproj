@@ -12,19 +12,19 @@
 
 
     <ItemGroup>
-        <Compile Include="..\NullableAttributes.cs" Link="System Types\NullableAttributes.cs" />
-        <Compile Include="..\IsExternalInit.cs" Link="System Types\IsExternalInit.cs" />
+        <Compile Include="..\Metalama.SystemTypes\NullableAttributes.cs" Link="System Types\NullableAttributes.cs"/>
+        <Compile Include="..\Metalama.SystemTypes\IsExternalInit.cs" Link="System Types\IsExternalInit.cs"/>
     </ItemGroup>
 
     <ItemGroup>
-        <InternalsVisibleTo Include="Metalama.Framework.Engine" />
-        <InternalsVisibleTo Include="Metalama.TestFramework" />
-        <InternalsVisibleTo Include="Metalama.Framework.Tests.UnitTests.Internals" />
-        <InternalsVisibleTo Include="Metalama.Framework.Tests.Integration.Internals" />
-        <InternalsVisibleTo Include="Metalama.Roslyn" />
-        <InternalsVisibleTo Include="DynamicProxyGenAssembly2" Key="$(FakeItEasyKey)" LoadsWithinVisualStudio="false" />
-        <PackageReference Include="Microsoft.CSharp" Version="$(MicrosoftCSharpVersion)" />
-        <PackageReference Include="System.Collections.Immutable" Version="$(SystemCollectionsImmutableVersion)" />
+        <InternalsVisibleTo Include="Metalama.Framework.Engine"/>
+        <InternalsVisibleTo Include="Metalama.TestFramework"/>
+        <InternalsVisibleTo Include="Metalama.Framework.Tests.UnitTests.Internals"/>
+        <InternalsVisibleTo Include="Metalama.Framework.Tests.Integration.Internals"/>
+        <InternalsVisibleTo Include="Metalama.Roslyn"/>
+        <InternalsVisibleTo Include="DynamicProxyGenAssembly2" Key="$(FakeItEasyKey)" LoadsWithinVisualStudio="false"/>
+        <PackageReference Include="Microsoft.CSharp" Version="$(MicrosoftCSharpVersion)"/>
+        <PackageReference Include="System.Collections.Immutable" Version="$(SystemCollectionsImmutableVersion)"/>
     </ItemGroup>
 
     <!-- based on https://stackoverflow.com/a/56018426/41071 -->
@@ -33,8 +33,8 @@
     </PropertyGroup>
     <Target Name="SetPackageContent" DependsOnTargets="ResolveReferences">
         <ItemGroup>
-            <BuildOutputInPackage Include="@(ReferenceCopyLocalPaths)" Condition="%(ReferenceSourceTarget) == 'ProjectReference'" />
-            <BuildOutputInPackage Include="@(ReferenceCopyLocalPaths->'%(rootdir)%(directory)%(filename).xml')" Condition="%(ReferenceSourceTarget) == 'ProjectReference'" />
+            <BuildOutputInPackage Include="@(ReferenceCopyLocalPaths)" Condition="%(ReferenceSourceTarget) == 'ProjectReference'"/>
+            <BuildOutputInPackage Include="@(ReferenceCopyLocalPaths->'%(rootdir)%(directory)%(filename).xml')" Condition="%(ReferenceSourceTarget) == 'ProjectReference'"/>
         </ItemGroup>
     </Target>
 

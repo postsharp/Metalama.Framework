@@ -26,7 +26,7 @@ namespace Metalama.Framework.Engine.CompileTime
     /// Represents the compile-time project extracted from a run-time project, including its
     /// <see cref="System.Reflection.Assembly"/> allowing for execution, and metadata.
     /// </summary>
-    internal sealed class CompileTimeProject : IService
+    public sealed class CompileTimeProject : IService
     {
         private static readonly Assembly _frameworkAssembly = typeof(IAspect).Assembly;
         private static readonly AssemblyIdentity _frameworkAssemblyIdentity = _frameworkAssembly.GetName().ToAssemblyIdentity();
@@ -71,12 +71,13 @@ namespace Metalama.Framework.Engine.CompileTime
         }
 
         private readonly CompileTimeProjectManifest? _manifest;
-        private readonly CompileTimeDomain _domain;
         private readonly string? _compiledAssemblyPath;
         private readonly AssemblyIdentity? _compileTimeIdentity;
         private readonly Func<string, TextMapFile?>? _getLocationMap;
 
-        public DiagnosticManifest DiagnosticManifest { get; }
+        public CompileTimeDomain Domain { get; }
+
+        internal DiagnosticManifest DiagnosticManifest { get; }
 
         private Assembly? _assembly;
 
@@ -122,7 +123,7 @@ namespace Metalama.Framework.Engine.CompileTime
         /// <summary>
         /// Gets the list of transformed code files in the current project. 
         /// </summary>
-        public IReadOnlyList<CompileTimeFile> CodeFiles => this._manifest?.Files ?? Array.Empty<CompileTimeFile>();
+        internal IReadOnlyList<CompileTimeFile> CodeFiles => this._manifest?.Files ?? Array.Empty<CompileTimeFile>();
 
         /// <summary>
         /// Gets a <see cref="MetadataReference"/> corresponding to the current project.
@@ -179,7 +180,7 @@ namespace Metalama.Framework.Engine.CompileTime
             Assembly? assembly = null,
             DiagnosticManifest? diagnosticManifest = null )
         {
-            this._domain = domain;
+            this.Domain = domain;
             this._compiledAssemblyPath = compiledAssemblyPath;
             this._getLocationMap = getLocationMap;
             this.Directory = directory;
@@ -212,7 +213,7 @@ namespace Metalama.Framework.Engine.CompileTime
         /// <summary>
         /// Creates a <see cref="CompileTimeProject"/> that includes source code.
         /// </summary>
-        public static CompileTimeProject Create(
+        internal static CompileTimeProject Create(
             IServiceProvider serviceProvider,
             CompileTimeDomain domain,
             AssemblyIdentity runTimeIdentity,
@@ -342,7 +343,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 nameof(reflectionName),
                 $"Cannot find a type named '{reflectionName}' in the compile-time project '{this._compileTimeIdentity}'." );
 
-        public CompileTimeFile? FindCodeFileFromTransformedPath( string transformedCodePath )
+        internal CompileTimeFile? FindCodeFileFromTransformedPath( string transformedCodePath )
             => this.CodeFiles.Where( t => transformedCodePath.EndsWith( t.TransformedPath, StringComparison.OrdinalIgnoreCase ) )
                 .OrderByDescending( t => t.TransformedPath.Length )
                 .FirstOrDefault();
@@ -363,7 +364,7 @@ namespace Metalama.Framework.Engine.CompileTime
                     }
                 }
 
-                this._assembly = this._domain.GetOrLoadAssembly( this._compileTimeIdentity!, this._compiledAssemblyPath! );
+                this._assembly = this.Domain.GetOrLoadAssembly( this._compileTimeIdentity!, this._compiledAssemblyPath! );
             }
         }
 
@@ -372,9 +373,9 @@ namespace Metalama.Framework.Engine.CompileTime
         /// <summary>
         /// Gets a <see cref="TextMapFile"/> given a the path of the transformed code file.
         /// </summary>
-        public TextMapFile? GetTextMap( string csFilePath ) => this._getLocationMap?.Invoke( csFilePath );
+        internal TextMapFile? GetTextMap( string csFilePath ) => this._getLocationMap?.Invoke( csFilePath );
 
-        public DiagnosticManifest ClosureDiagnosticManifest { get; }
+        internal DiagnosticManifest ClosureDiagnosticManifest { get; }
 
         private DiagnosticManifest GetDiagnosticManifest( IServiceProvider serviceProvider )
         {

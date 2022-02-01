@@ -7,7 +7,7 @@ using System.Collections.Immutable;
 
 namespace Metalama.Framework.Engine.Collections
 {
-    internal partial class ImmutableDictionaryOfArray<TKey, TValue>
+    public partial class ImmutableDictionaryOfArray<TKey, TValue>
     {
         public class Builder
         {
