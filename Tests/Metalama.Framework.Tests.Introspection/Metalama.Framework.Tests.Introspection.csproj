@@ -12,7 +12,7 @@
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftNETTestSdkVersion)" />
         <PackageReference Include="xunit" Version="$(xUnitVersion)" />
         <PackageReference Include="xunit.runner.visualstudio" Version="$(xUnitVersion)" />
-        <ProjectReference Include="..\..\Metalama.Framework.Introspection\Metalama.Framework.Introspection.csproj" />
+        <ProjectReference Include="..\..\Metalama.Framework.Workspaces\Metalama.Framework.Workspaces.csproj" />
         <PackageReference Include="Metalama.Compiler.Sdk" Version="$(MetalamaCompilerVersion)" />
     </ItemGroup>
 

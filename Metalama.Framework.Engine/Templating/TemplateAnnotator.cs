@@ -1172,7 +1172,7 @@ namespace Metalama.Framework.Engine.Templating
                     {
                         // We don't want to visit the whole member because only the implementation must be annotated and transformed
                         // as a template.
-                        return node.WithInitializer( this.Visit( node.Initializer ) )!.AddIsTemplateAnnotation();
+                        return node.WithInitializer( this.Visit( node.Initializer ) ).AddIsTemplateAnnotation();
                     }
                     finally
                     {

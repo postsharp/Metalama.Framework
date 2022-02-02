@@ -26,7 +26,7 @@ namespace Metalama.Framework.Engine.Utilities
                 "csc" => ProcessKind.Compiler,
                 "dotnet" =>
                     Environment.CommandLine.Contains( "JetBrains.ReSharper.Roslyn.Worker.exe" ) ? ProcessKind.Rider :
-                    Environment.CommandLine.Contains( "VBCSCompiler.dll" ) ? ProcessKind.Compiler :
+                    Environment.CommandLine.Contains( "VBCSCompiler.dll" ) || Environment.CommandLine.Contains( "csc.dll" ) ? ProcessKind.Compiler :
                     ProcessKind.Other,
                 _ => ProcessKind.Other
             };

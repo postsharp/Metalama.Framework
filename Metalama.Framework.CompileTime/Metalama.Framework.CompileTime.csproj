@@ -15,12 +15,6 @@
         <UseMetalamaCompiler>Private</UseMetalamaCompiler>
     </PropertyGroup>
 
-
-    <ItemGroup>
-        <Compile Include="..\NullableAttributes.cs" Link="System Types\NullableAttributes.cs"/>
-        <Compile Include="..\IsExternalInit.cs" Link="System Types\IsExternalInit.cs"/>
-    </ItemGroup>
-
     <ItemGroup>
         <!-- Include all files from the Metalama.Framework project, but only in real builds because we don't want to import the files
              several times in the IDE. -->
@@ -38,6 +32,7 @@
 
         <!-- The following references change 'dynamic' into 'object' -->
         <ProjectReference Include="..\Build\Metalama.SourceTransformer\Metalama.SourceTransformer.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false"/>
+        <ProjectReference Include="..\Metalama.SystemTypes\Metalama.SystemTypes.csproj"/>
     </ItemGroup>
 
 </Project>

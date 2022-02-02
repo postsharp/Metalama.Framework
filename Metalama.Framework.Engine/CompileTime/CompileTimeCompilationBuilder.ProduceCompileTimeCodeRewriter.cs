@@ -787,10 +787,10 @@ namespace Metalama.Framework.Engine.CompileTime
 
                 if ( nonReadOnlyVariables.Count > 0 )
                 {
-                    // There are some variable that need to have readonly modifier removed.
+                    // There are some variables that need to have the readonly modifier removed.
                     if ( unchangedReadabilityVariables.Count > 0 )
                     {
-                        // There are some remaning variables that remain readonly.
+                        // There are some remaining variables that remain readonly.
                         yield return
                             node.WithDeclaration( node.Declaration.WithVariables( SeparatedList( unchangedReadabilityVariables ) ) );
                     }
@@ -1030,10 +1030,24 @@ namespace Metalama.Framework.Engine.CompileTime
                 }
             }
 
+            public override SyntaxNode? VisitFileScopedNamespaceDeclaration( FileScopedNamespaceDeclarationSyntax node )
+            {
+                var transformedMembers = this.VisitTypeOrNamespaceMembers( node.Members );
+
+                if ( transformedMembers.Any( m => m.HasAnnotation( _hasCompileTimeCodeAnnotation ) ) )
+                {
+                    return node.WithMembers( transformedMembers ).WithAdditionalAnnotations( _hasCompileTimeCodeAnnotation );
+                }
+                else
+                {
+                    return null;
+                }
+            }
+
             public override SyntaxNode? VisitCompilationUnit( CompilationUnitSyntax node )
             {
                 // Get the list of members that are not statements, local variables, local functions,...
-                var nonTopLevelMembers = node.Members.Where( m => m is BaseTypeDeclarationSyntax or NamespaceDeclarationSyntax or DelegateDeclarationSyntax )
+                var nonTopLevelMembers = node.Members.Where( m => m is BaseTypeDeclarationSyntax or NamespaceDeclarationSyntax or DelegateDeclarationSyntax or FileScopedNamespaceDeclarationSyntax )
                     .ToList();
 
                 var transformedMembers = this.VisitTypeOrNamespaceMembers( nonTopLevelMembers );

@@ -4,7 +4,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
 
-namespace Metalama.Framework.Introspection
+namespace Metalama.Framework.Workspaces
 {
     /// <summary>
     /// Represents a diagnostic (error, warning, information, hidden message).

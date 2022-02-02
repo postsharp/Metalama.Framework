@@ -9,7 +9,7 @@ using System.Collections.Concurrent;
 using System.Collections.Immutable;
 using System.Linq;
 
-namespace Metalama.Framework.Introspection
+namespace Metalama.Framework.Workspaces
 {
     internal sealed class ProjectSet : IProjectSet
     {

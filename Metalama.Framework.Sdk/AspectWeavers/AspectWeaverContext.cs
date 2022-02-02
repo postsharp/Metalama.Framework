@@ -12,7 +12,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 
-namespace Metalama.Framework.Engine.Sdk
+namespace Metalama.Framework.Engine.AspectWeavers
 {
     /// <summary>
     /// Context for the <see cref="IAspectWeaver"/>.

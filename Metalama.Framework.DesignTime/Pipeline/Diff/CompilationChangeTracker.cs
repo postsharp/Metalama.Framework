@@ -189,7 +189,9 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
                                 SyntaxTreeChangeKind.Changed,
                                 newHasCompileTimeCode,
                                 compileTimeChangeKind,
-                                newSyntaxTree ) );
+                                newSyntaxTree,
+                                oldEntry.Hash,
+                                newSyntaxTreeHash ) );
 
                         hasCompileTimeChange |= newHasCompileTimeCode || oldEntry.HasCompileTimeCode;
                     }
@@ -207,7 +209,9 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
                             SyntaxTreeChangeKind.Added,
                             newHasCompileTimeCode,
                             compileTimeChangeKind,
-                            newSyntaxTree ) );
+                            newSyntaxTree,
+                            0,
+                            newSyntaxTreeHash ) );
 
                     hasCompileTimeChange |= newHasCompileTimeCode;
                 }
@@ -227,7 +231,9 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
                             SyntaxTreeChangeKind.Deleted,
                             false,
                             GetCompileTimeChangeKind( oldSyntaxTree.Value.HasCompileTimeCode, false ),
-                            null ) );
+                            null,
+                            oldSyntaxTree.Value.Hash,
+                            0 ) );
                 }
             }
 

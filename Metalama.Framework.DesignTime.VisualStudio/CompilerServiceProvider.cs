@@ -17,7 +17,7 @@ namespace Metalama.Framework.DesignTime.VisualStudio
         public CompilerServiceProvider( IServiceProvider serviceProvider )
         {
             this._serviceProvider = serviceProvider;
-            this.Version = this.GetType().Assembly.GetName().Version;
+            this.Version = this.GetType().Assembly.GetName().Version!;
         }
 
         public Version Version { get; }

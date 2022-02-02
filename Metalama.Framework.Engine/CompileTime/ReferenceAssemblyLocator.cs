@@ -2,9 +2,9 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Backstage.Diagnostics;
+using Metalama.Framework.Engine.AspectWeavers;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Options;
-using Metalama.Framework.Engine.Sdk;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Project;
 using Metalama.Framework.RunTime;

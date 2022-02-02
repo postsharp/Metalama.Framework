@@ -4,7 +4,7 @@
 using Metalama.Framework.Engine.Utilities;
 using System.Collections.Immutable;
 
-namespace Metalama.Framework.Introspection
+namespace Metalama.Framework.Workspaces
 {
     /// <summary>
     /// Exposes the information needed to reconstruct a <see cref="Workspace"/>.

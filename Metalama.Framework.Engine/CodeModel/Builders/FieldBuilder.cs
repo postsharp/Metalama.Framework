@@ -82,7 +82,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                                 Identifier( this.Name ),
                                 null,
                                 initializerExpression != null
-                                    ? EqualsValueClause( initializerExpression! )
+                                    ? EqualsValueClause( initializerExpression )
                                     : null ) ) ) );
 
             if ( initializerMethod != null )

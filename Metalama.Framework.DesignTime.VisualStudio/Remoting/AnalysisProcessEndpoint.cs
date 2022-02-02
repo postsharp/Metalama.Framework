@@ -22,7 +22,7 @@ internal partial class AnalysisProcessEndpoint : ServiceEndpoint, IService, IDis
     private static readonly object _initializeLock = new();
     private static AnalysisProcessEndpoint? _instance;
 
-    private readonly string? _pipeName;
+    private readonly string _pipeName;
     private readonly ApiImplementation _service;
     private readonly CancellationTokenSource _startCancellationSource = new();
     private readonly ConcurrentDictionary<string, string> _connectedClients = new();

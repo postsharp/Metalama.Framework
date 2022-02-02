@@ -1,6 +1,8 @@
+// @Skipped(These tests need MetalamaPlugInAttribute, but for some reason the assembly is not accessible (TODO).)
+
 using System;
+using Metalama.Compiler;
 using Metalama.Framework.Aspects;
-using Metalama.Framework.Engine.Sdk;
 using Metalama.Framework.Project;
 
 namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Initialize.ServicePlugIn
@@ -21,7 +23,7 @@ namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Initialize.ServicePlug
         string Message { get; }
     }
 
-    [CompilerPlugin]
+    [MetalamaPlugIn]
     internal class MyService : IMyService
     {
         public string Message => "Hello, world.";

@@ -9,7 +9,7 @@ using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
-namespace Metalama.Framework.Introspection
+namespace Metalama.Framework.Workspaces
 {
     /// <summary>
     /// The implement of <see cref="IProjectOptions"/> used by <see cref="Workspace"/>.

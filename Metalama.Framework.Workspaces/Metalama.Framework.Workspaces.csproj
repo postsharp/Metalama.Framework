@@ -2,7 +2,7 @@
 
     <PropertyGroup>
         <TargetFramework>net6.0</TargetFramework>
-        <RootNamespace>Metalama.Framework.Introspection</RootNamespace>
+        <RootNamespace>Metalama.Framework.Workspaces</RootNamespace>
         <UseMetalamaCompiler>Private</UseMetalamaCompiler>
     </PropertyGroup>
 
@@ -22,9 +22,6 @@
 
     </ItemGroup>
 
-    <ItemGroup>
-        <Compile Include="..\NullableAttributes.cs" Link="NullableAttributes.cs"/>
-    </ItemGroup>
 
 
 </Project>

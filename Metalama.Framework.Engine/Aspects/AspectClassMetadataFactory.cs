@@ -47,9 +47,13 @@ namespace Metalama.Framework.Engine.Aspects
 
             // Add the abstract aspect classes from the framework because they define the abstract templates. The knowledge of abstract templates
             // is used by AspectClass. It is easier to do it here than to do it at the level of CompileTimeProject.
+            // We assume the compilation references a single version of Metalama.Framework.
+            
+            var frameworkAssemblyName = typeof(IAspect).Assembly.GetName();
+            var frameworkAssembly = compilation.SourceModule.ReferencedAssemblySymbols.Single( x => x.Name == frameworkAssemblyName.Name );
             var frameworkAspectClasses =
                 new[] { typeof(OverrideMethodAspect), typeof(OverrideEventAspect), typeof(OverrideFieldOrPropertyAspect) }
-                    .Select( t => new AspectTypeData( null, t.FullName, compilation.GetTypeByMetadataNameSafe( t.FullName ), t ) );
+                    .Select( t => new AspectTypeData( null, t.FullName, frameworkAssembly.GetTypeByMetadataName( t.FullName )!, t ) );
 
             // Gets the aspect types in the current compilation, including aspects types in referenced assemblies.
             var aspectTypeDataDictionary =

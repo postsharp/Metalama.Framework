@@ -133,6 +133,7 @@ namespace Metalama.Framework.Engine.Templating
                             a =>
                                 a is GenericNameSyntax or UsingDirectiveSyntax ||
                                 (a.Parent is NamespaceDeclarationSyntax namespaceDeclaration && namespaceDeclaration.Name == a) ||
+                                (a.Parent is FileScopedNamespaceDeclarationSyntax fileScopeNamespaceDeclaration && fileScopeNamespaceDeclaration.Name == a) ||
                                 (a.Parent is MethodDeclarationSyntax methodDeclaration && methodDeclaration.ReturnType == a) ||
                                 (a.Parent is VariableDeclarationSyntax variable && variable.Type == a) ||
                                 (a.Parent is TypeConstraintSyntax typeConstraint && typeConstraint.Type == a) ||
