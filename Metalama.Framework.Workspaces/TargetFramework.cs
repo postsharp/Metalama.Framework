@@ -3,7 +3,7 @@
 
 using System;
 
-namespace Metalama.Framework.Introspection
+namespace Metalama.Framework.Workspaces
 {
     /// <summary>
     /// Represents a target framework such as <c>net6.0</c> or <c>netstandard2.0</c>.

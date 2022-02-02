@@ -12,7 +12,7 @@
 
     <ItemGroup>
         <PackageReference Include="LINQPad.Reference" Version="1.2.0-beta" />
-        <ProjectReference Include="..\Metalama.Framework.Introspection\Metalama.Framework.Introspection.csproj" />
+        <ProjectReference Include="..\Metalama.Framework.Workspaces\Metalama.Framework.Workspaces.csproj" />
         <ProjectReference Include="..\Metalama.Framework.Engine\Metalama.Framework.Engine.csproj" />
 
         <InternalsVisibleTo Include="Metalama.LinqPad.Tests" />
