@@ -10,8 +10,6 @@
 
     </PropertyGroup>
 
-
-
     <ItemGroup>
         <InternalsVisibleTo Include="Metalama.Framework.Engine" />
         <InternalsVisibleTo Include="Metalama.TestFramework" />
@@ -26,16 +24,5 @@
     <ItemGroup>
       <ProjectReference Include="..\Metalama.SystemTypes\Metalama.SystemTypes.csproj" Condition="'$(TargetFramework)'=='netstandard2.0'"/>
     </ItemGroup>
-
-    <!-- based on https://stackoverflow.com/a/56018426/41071 -->
-    <PropertyGroup>
-        <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);SetPackageContent</TargetsForTfmSpecificBuildOutput>
-    </PropertyGroup>
-    <Target Name="SetPackageContent" DependsOnTargets="ResolveReferences">
-        <ItemGroup>
-            <BuildOutputInPackage Include="@(ReferenceCopyLocalPaths)" Condition="%(ReferenceSourceTarget) == 'ProjectReference'" />
-            <BuildOutputInPackage Include="@(ReferenceCopyLocalPaths->'%(rootdir)%(directory)%(filename).xml')" Condition="%(ReferenceSourceTarget) == 'ProjectReference'" />
-        </ItemGroup>
-    </Target>
 
 </Project>
