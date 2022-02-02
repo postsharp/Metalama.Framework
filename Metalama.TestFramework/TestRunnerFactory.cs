@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.Pipeline;
 using System;
 using System.Linq;
@@ -15,7 +16,7 @@ namespace Metalama.TestFramework
     {
         public static BaseTestRunner CreateTestRunner( TestInput testInput, ServiceProvider serviceProvider, ITestOutputHelper? logger )
         {
-            var metadataReferences = testInput.Options.References.Select( a => a.ToMetadataReference() ).ToArray();
+            var metadataReferences = testInput.Options.References.Select( a => a.ToMetadataReference() ).WhereNotNull().ToArray();
 
             if ( string.IsNullOrEmpty( testInput.Options.TestRunnerFactoryType ) )
             {

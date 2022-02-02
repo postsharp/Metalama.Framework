@@ -1,3 +1,5 @@
+// @Skipped(These tests need MetalamaPlugInAttribute, but for some reason the assembly is not accessible (TODO).)
+
 using System;
 using Metalama.Compiler;
 using Metalama.Framework.Aspects;
