@@ -5,7 +5,6 @@
 
     <PropertyGroup>
         <TargetFrameworks>net5.0;netframework4.8</TargetFrameworks>
-        <LangVersion>9.0</LangVersion>
         <IsPackable>false</IsPackable>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <MetalamaTestAutoExclude>False</MetalamaTestAutoExclude>
@@ -28,8 +27,6 @@
     </ItemGroup>
 
     <ItemGroup>
-        <Compile Include="..\..\IsExternalInit.cs" Link="IsExternalInit.cs" />
-        <Compile Include="..\..\NullableAttributes.cs" Link="NullableAttributes.cs" />
         <!-- Exclude files that intentionally do not compile -->
         <Compile Remove="Tests\**\__*.cs" />
     </ItemGroup>

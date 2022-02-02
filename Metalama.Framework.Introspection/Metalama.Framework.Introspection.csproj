@@ -22,9 +22,6 @@
 
     </ItemGroup>
 
-    <ItemGroup>
-        <Compile Include="..\NullableAttributes.cs" Link="NullableAttributes.cs"/>
-    </ItemGroup>
 
 
 </Project>

@@ -5,7 +5,7 @@ using Metalama.Framework.Validation;
 using Microsoft.CodeAnalysis;
 using System;
 
-namespace Metalama.Framework.Engine.Sdk
+namespace Metalama.Framework.Engine.AspectWeavers
 {
     /// <summary>
     /// Helper methods for implementation of <see cref="IAspectWeaver"/>.

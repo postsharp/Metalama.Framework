@@ -2,11 +2,11 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Engine.AspectOrdering;
+using Metalama.Framework.Engine.AspectWeavers;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Observers;
-using Metalama.Framework.Engine.Sdk;
 using Metalama.Framework.Project;
 using System;
 using System.Collections.Generic;

@@ -1,6 +1,7 @@
 using System;
+using Metalama.Compiler;
 using Metalama.Framework.Aspects;
-using Metalama.Framework.Engine.Sdk;
+using Metalama.Framework.Engine.AspectWeavers;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -9,7 +10,7 @@ namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Sdk.Simple
 {
     internal class Aspect : MethodAspect { }
 
-    [CompilerPlugin]
+    [MetalamaPlugIn]
     [AspectWeaver( typeof(Aspect) )]
     internal class AspectWeaver : IAspectWeaver
     {

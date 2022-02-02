@@ -25,7 +25,6 @@
         <ProjectReference Include="..\..\Metalama.Framework.Sdk\Metalama.Framework.Sdk.csproj" />
         <ProjectReference Include="..\..\Metalama.Framework\Metalama.Framework.csproj" />
         <ProjectReference Include="..\..\Metalama.TestFramework\Metalama.TestFramework.csproj" />
-        <PackageReference Include="Metalama.Compiler.Sdk" Version="$(MetalamaCompilerVersion)" />
     </ItemGroup>
 
 </Project>

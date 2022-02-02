@@ -1,13 +1,14 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Compiler;
 using System;
 
-namespace Metalama.Framework.Engine.Sdk
+namespace Metalama.Framework.Engine.AspectWeavers
 {
     /// <summary>
     /// Custom attribute that, when applied to a type implementing <see cref="IAspectWeaver"/>, exports this type
-    /// as an aspect weaver. Additionally, aspect weavers must have the <see cref="CompilerPluginAttribute"/>.
+    /// as an aspect weaver. Additionally, aspect weavers must have the <see cref="MetalamaPlugInAttribute"/>.
     /// </summary>
     [AttributeUsage( AttributeTargets.Class )]
     public sealed class AspectWeaverAttribute : Attribute

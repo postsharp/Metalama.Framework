@@ -3,6 +3,7 @@
 
 using K4os.Hash.xxHash;
 using Metalama.Backstage.Diagnostics;
+using Metalama.Compiler;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
@@ -10,7 +11,6 @@ using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.LamaSerialization;
 using Metalama.Framework.Engine.Observers;
 using Metalama.Framework.Engine.Options;
-using Metalama.Framework.Engine.Sdk;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.Mapping;
 using Metalama.Framework.Engine.Utilities;
@@ -751,7 +751,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
                         var compilerPlugInTypes = compileTimeCompilation.Assembly
                             .GetTypes()
-                            .Where( t => t.GetAttributes().Any( a => a is { AttributeClass: { Name: nameof(CompilerPluginAttribute) } } ) )
+                            .Where( t => t.GetAttributes().Any( a => a is { AttributeClass: { Name: nameof(MetalamaPlugInAttribute) } } ) )
                             .Select( t => t.GetReflectionName().AssertNotNull() )
                             .ToList();
 

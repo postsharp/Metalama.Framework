@@ -27,7 +27,7 @@ internal class VsAnalysisProcessProjectHandler : AnalysisProcessProjectHandler
         }
     }
 
-    private void OnClientConnected( object sender, ClientConnectedEventArgs e )
+    private void OnClientConnected( object? sender, ClientConnectedEventArgs e )
     {
         if ( e.ProjectId == this.ProjectOptions.ProjectId )
         {
