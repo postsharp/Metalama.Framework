@@ -18,7 +18,7 @@ namespace Metalama.Framework.Engine.Aspects
 
         public ImmutableUserDiagnosticList Diagnostics { get; }
 
-        public ImmutableArray<Advice> ProgrammaticAdvices { get; }
+        public ImmutableArray<Advice> Advices { get; }
 
         public IReadOnlyList<IAspectSource> AspectSources { get; }
 
@@ -28,14 +28,14 @@ namespace Metalama.Framework.Engine.Aspects
             IAspectInstance aspectInstance,
             bool success,
             ImmutableUserDiagnosticList diagnostics,
-            ImmutableArray<Advice> declarativeAdvices,
+            ImmutableArray<Advice> advices,
             ImmutableArray<IAspectSource> aspectSources,
             ImmutableArray<IValidatorSource> validatorSources )
         {
             this.AspectInstance = aspectInstance;
             this.Success = success;
             this.Diagnostics = diagnostics;
-            this.ProgrammaticAdvices = declarativeAdvices;
+            this.Advices = advices;
             this.AspectSources = aspectSources;
             this.ValidatorSources = validatorSources;
         }

@@ -122,9 +122,9 @@ namespace Metalama.LinqPad
                         {
                             var declaration = (IDeclaration) o;
 
-                            var workspaceExpression = this._factory.WorkspaceExpression( declaration );
+                            var getCompilationInfo = this._factory.GetGetCompilationInfo( declaration );
 
-                            return new Permalink( workspaceExpression, declaration );
+                            return new Permalink( getCompilationInfo, declaration );
                         } ) );
             }
 

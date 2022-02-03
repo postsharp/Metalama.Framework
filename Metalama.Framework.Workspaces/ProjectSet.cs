@@ -40,7 +40,7 @@ namespace Metalama.Framework.Workspaces
             return this._subsets.GetOrAdd( filteredProjectKey, _ => new ProjectSet( filteredProjects, $"Subset of {this}" ) );
         }
 
-        public IDeclaration? GetDeclaration( string projectPath, string targetFramework, string declarationId )
+        public IDeclaration? GetDeclaration( string projectPath, string targetFramework, string declarationId, bool metalamaOutput )
         {
             var projects = this.Projects
                 .Where( p => p.Path == projectPath && (string.IsNullOrEmpty( targetFramework ) || p.TargetFramework == targetFramework) )
@@ -55,11 +55,13 @@ namespace Metalama.Framework.Workspaces
                     throw new InvalidOperationException( "The project targets several frameworks. Specify the target framework." );
             }
 
-            return projects[0].Compilation.TypeFactory.GetDeclarationFromId( declarationId );
+            var compilation = metalamaOutput ? projects[0].MetalamaOutput.Compilation : projects[0].Compilation;
+
+            return compilation.TypeFactory.GetDeclarationFromId( declarationId );
         }
 
         [Memo]
-        public IMetalamaCompilationSet AfterMetalama
-            => new MetalamaCompilationSet( this.Projects.Select( x => x.IntrospectionCompilationOutput ).ToImmutableArray(), this.ToString() );
+        public IMetalamaCompilationSet MetalamaOutput
+            => new MetalamaCompilationSet( this.Projects.Select( x => x.MetalamaOutput ).ToImmutableArray(), this.ToString() );
     }
 }

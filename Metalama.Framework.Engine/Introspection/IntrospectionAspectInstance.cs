@@ -50,5 +50,5 @@ internal class IntrospectionAspectInstance : IIntrospectionAspectInstance
 
     [Memo]
     public ImmutableArray<IDeclaration> IntroducedMembers
-        => this.AspectInstanceResult.ProgrammaticAdvices.OfType<IIntroductionAdvice>().Select( x => x.Builder ).ToImmutableArray<IDeclaration>();
+        => this.AspectInstanceResult.Advices.OfType<IIntroductionAdvice>().Select( x => x.Builder ).ToImmutableArray<IDeclaration>();
 }

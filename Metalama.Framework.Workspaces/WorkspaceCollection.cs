@@ -94,12 +94,19 @@ namespace Metalama.Framework.Workspaces
         /// <summary>
         /// Finds the <see cref="Workspace"/> and <see cref="Project"/> that defines a given Roslyn <see cref="Compilation"/> in the current <see cref="WorkspaceCollection"/>.
         /// </summary>
-        public bool TryFindProject( Compilation compilation, [NotNullWhen( true )] out Workspace? workspace, [NotNullWhen( true )] out Project? project )
+        public bool TryFindProject(
+            Compilation compilation,
+            [NotNullWhen( true )] out Workspace? workspace,
+            [NotNullWhen( true )] out Project? project,
+            out bool isMetalamaOutput )
         {
             var found = this._workspaces.Values
                 .Select(
                     w => w.IsCompleted
-                        ? (Project: w.Result.Projects.FirstOrDefault( p => p.Compilation.GetRoslynCompilation() == compilation ), Workspace: w.Result)
+                        ? (Project: w.Result.Projects.FirstOrDefault(
+                               p => p.Compilation.GetRoslynCompilation() == compilation
+                                    || (p.IsMetalamaOutputEvaluated && p.MetalamaOutput.Compilation.GetRoslynCompilation() == compilation) ),
+                           Workspace: w.Result)
                         : (null, null) )
                 .FirstOrDefault( p => p.Project != null );
 
@@ -107,6 +114,7 @@ namespace Metalama.Framework.Workspaces
             {
                 workspace = found.Workspace!;
                 project = found.Project;
+                isMetalamaOutput = project.Compilation.GetRoslynCompilation() != compilation;
 
                 return true;
             }
@@ -114,6 +122,7 @@ namespace Metalama.Framework.Workspaces
             {
                 workspace = null;
                 project = null;
+                isMetalamaOutput = false;
 
                 return false;
             }

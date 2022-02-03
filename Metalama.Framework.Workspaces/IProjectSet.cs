@@ -28,19 +28,23 @@ namespace Metalama.Framework.Workspaces
         IProjectSet GetSubset( Predicate<Project> filter );
 
         /// <summary>
+        /// Gets all diagnostics reported in the <i>source code</i> loaded in the current subset.  
+        /// </summary>
+        ImmutableArray<IIntrospectionDiagnostic> SourceDiagnostics { get; }
+
+        /// <summary>
+        /// Gets the result of the compilation of the project by Metalama.
+        /// </summary>
+        IMetalamaCompilationSet MetalamaOutput { get; }
+
+        /// <summary>
         /// Gets a declaration in the current subset. 
         /// </summary>
         /// <param name="projectPath">Path of the project.</param>
         /// <param name="targetFramework">Target framework, or an empty string.</param>
         /// <param name="declarationId">Serialized identifier of the declaration obtained  with <see cref="IRef{T}.ToSerializableId"/>.</param>
+        /// <param name="metalamaOutput"></param>
         /// <returns></returns>
-        IDeclaration? GetDeclaration( string projectPath, string targetFramework, string declarationId );
-
-        /// <summary>
-        /// Gets all diagnostics reported in the <i>source code</i> loaded in the current subset.  
-        /// </summary>
-        ImmutableArray<IIntrospectionDiagnostic> SourceDiagnostics { get; }
-
-        IMetalamaCompilationSet AfterMetalama { get; }
+        IDeclaration? GetDeclaration( string projectPath, string targetFramework, string declarationId, bool metalamaOutput );
     }
 }

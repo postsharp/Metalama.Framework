@@ -21,6 +21,8 @@ namespace Metalama.Framework.Workspaces
         private readonly CompileTimeDomain _domain;
         private readonly ServiceProvider _serviceProvider;
 
+        internal bool IsMetalamaOutputEvaluated { get; private set; }
+
         public string Path { get; }
 
         public ICompilation Compilation { get; }
@@ -46,12 +48,16 @@ namespace Metalama.Framework.Workspaces
         [Memo]
         public ImmutableArray<INamedType> Types => this.Compilation.Types.SelectManyRecursive( t => t.NestedTypes ).ToImmutableArray();
 
+        /// <summary>
+        /// Gets the output of Metalama for this project.
+        /// </summary>
         [Memo]
-        public IIntrospectionCompilationOutput IntrospectionCompilationOutput => this.ApplyMetalama();
+        public IIntrospectionCompilationOutput MetalamaOutput => this.ApplyMetalama();
 
         private IIntrospectionCompilationOutput ApplyMetalama()
         {
             var compiler = new IntrospectionCompiler( this._domain );
+            this.IsMetalamaOutputEvaluated = true;
 
             return compiler.Compile( this.Compilation, this._serviceProvider );
         }

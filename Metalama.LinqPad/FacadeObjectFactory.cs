@@ -17,11 +17,11 @@ namespace Metalama.LinqPad
         private static readonly ConditionalWeakTable<object, FacadeObject> _objectFacades = new();
         private static readonly ConcurrentDictionary<Type, FacadeType> _types = new();
 
-        public Func<IDeclaration, string> WorkspaceExpression { get; }
+        public Func<IDeclaration, GetCompilationInfo> GetGetCompilationInfo { get; }
 
-        public FacadeObjectFactory( Func<IDeclaration, string>? workspaceExpression = null )
+        public FacadeObjectFactory( Func<IDeclaration, GetCompilationInfo>? workspaceExpression = null )
         {
-            this.WorkspaceExpression = workspaceExpression ?? (_ => "workspace");
+            this.GetGetCompilationInfo = workspaceExpression ?? (_ => new GetCompilationInfo( "workspace", false ));
         }
 
         internal FacadeObject? GetFacade( object? instance )

@@ -47,7 +47,7 @@ namespace Metalama.Framework.Engine.Pipeline
             var codeFixes = aspectInstanceResults.SelectMany( air => air.Diagnostics.CodeFixes );
             var addedAspectSources = aspectInstanceResults.SelectMany( air => air.AspectSources );
             var addedValidatorSources = aspectInstanceResults.SelectMany( air => air.ValidatorSources );
-            var addedAdvices = aspectInstanceResults.SelectMany( air => air.ProgrammaticAdvices );
+            var addedAdvices = aspectInstanceResults.SelectMany( air => air.Advices );
 
             pipelineStepsState.AddDiagnostics( reportedDiagnostics, diagnosticSuppressions, codeFixes );
             success &= pipelineStepsState.AddAspectSources( addedAspectSources );

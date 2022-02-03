@@ -6,8 +6,15 @@ using System.Collections.Immutable;
 
 namespace Metalama.Framework.Workspaces;
 
+/// <summary>
+/// Represents a set of compilations and exposes lists of declarations that merge the declarations from all
+/// the compilations in the set.
+/// </summary>
 public interface ICompilationSet
 {
+    /// <summary>
+    /// Gets the list of compilations in the current set.
+    /// </summary>
     ImmutableArray<ICompilation> Compilations { get; }
 
     /// <summary>

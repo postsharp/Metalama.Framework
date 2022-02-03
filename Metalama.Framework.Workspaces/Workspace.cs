@@ -169,37 +169,52 @@ namespace Metalama.Framework.Workspaces
             this.Disposed?.Invoke( this, EventArgs.Empty );
         }
 
+        /// <inheritdoc />
         public ImmutableArray<Project> Projects => this._projects.Projects;
 
+        /// <inheritdoc />
         public ImmutableArray<string> TargetFrameworks => this._projects.TargetFrameworks;
 
+        /// <inheritdoc />
         public ImmutableArray<ICompilation> Compilations => this._projects.Compilations;
 
+        /// <inheritdoc />
         public ImmutableArray<INamedType> Types => this._projects.Types;
 
+        /// <inheritdoc />
         public ImmutableArray<IMethod> Methods => this._projects.Methods;
 
+        /// <inheritdoc />
         public ImmutableArray<IField> Fields => this._projects.Fields;
 
+        /// <inheritdoc />
         ImmutableArray<string> IWorkspaceLoadInfo.LoadedPaths => this._loadedPaths;
 
+        /// <inheritdoc />
         ImmutableDictionary<string, string> IWorkspaceLoadInfo.Properties => this._properties;
 
+        /// <inheritdoc />
         public ImmutableArray<IProperty> Properties => this._projects.Properties;
 
+        /// <inheritdoc />
         public ImmutableArray<IFieldOrProperty> FieldsAndProperties => this._projects.FieldsAndProperties;
 
+        /// <inheritdoc />
         public ImmutableArray<IConstructor> Constructors => this._projects.Constructors;
 
+        /// <inheritdoc />
         public ImmutableArray<IEvent> Events => this._projects.Events;
 
+        /// <inheritdoc />
         public ImmutableArray<IIntrospectionDiagnostic> SourceDiagnostics => this._projects.SourceDiagnostics;
 
+        /// <inheritdoc />
         public IProjectSet GetSubset( Predicate<Project> filter ) => this._projects.GetSubset( filter );
 
-        public IDeclaration? GetDeclaration( string projectPath, string targetFramework, string declarationId )
-            => this._projects.GetDeclaration( projectPath, targetFramework, declarationId );
+        /// <inheritdoc />
+        public IDeclaration? GetDeclaration( string projectPath, string targetFramework, string declarationId, bool metalamaOutput )
+            => this._projects.GetDeclaration( projectPath, targetFramework, declarationId, metalamaOutput );
 
-        public IMetalamaCompilationSet AfterMetalama => this._projects.AfterMetalama;
+        public IMetalamaCompilationSet MetalamaOutput => this._projects.MetalamaOutput;
     }
 }

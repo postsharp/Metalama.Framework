@@ -69,13 +69,13 @@ namespace {nameSpace}
 
             var projectSchema = GetSchema( "workspace.", typeof(IProjectSet) );
 
-            var afterMetalamaItem =
-                new ExplorerItem( "AfterMetalama", ExplorerItemKind.Property, ExplorerIcon.Schema )
+            var metalamaOutputItem =
+                new ExplorerItem( "MetalamaOutput", ExplorerItemKind.Property, ExplorerIcon.Schema )
                 {
-                    Children = GetSchema( "workspace.AfterMetalama.", typeof(IMetalamaCompilationSet) )
+                    Children = GetSchema( "workspace.MetalamaOutput.", typeof(IMetalamaCompilationSet) )
                 };
 
-            projectSchema.Add( afterMetalamaItem );
+            projectSchema.Add( metalamaOutputItem );
 
             return projectSchema;
         }
