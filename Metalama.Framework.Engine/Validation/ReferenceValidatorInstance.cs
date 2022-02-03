@@ -15,7 +15,7 @@ public class ReferenceValidatorInstance : ValidatorInstance
     public ReferenceValidatorInstance(
         IDeclaration validatedDeclaration,
         ValidatorDriver driver,
-        in ValidatorImplementation implementation,
+        ValidatorImplementation implementation,
         ReferenceKinds referenceKinds ) : base( validatedDeclaration, driver, implementation )
     {
         this.ReferenceKinds = referenceKinds;

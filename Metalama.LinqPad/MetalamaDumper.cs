@@ -25,11 +25,15 @@ namespace Metalama.LinqPad
         /// Generates a C# expression that can load the workspace that contains a declaration. We assume the workspace
         /// is a part of the default <see cref="WorkspaceCollection"/>.
         /// </summary>
-        private static string GetWorkspaceExpression( IDeclaration declaration )
+        private static GetCompilationInfo GetWorkspaceExpression( IDeclaration declaration )
         {
-            if ( !WorkspaceCollection.Default.TryFindProject( declaration.Compilation.GetRoslynCompilation(), out var workspace, out _ ) )
+            if ( !WorkspaceCollection.Default.TryFindProject(
+                    declaration.Compilation.GetRoslynCompilation(),
+                    out var workspace,
+                    out _,
+                    out var isMetalamaOutput ) )
             {
-                return "workspace";
+                return new GetCompilationInfo( "workspace", isMetalamaOutput );
             }
 
             var workspaceLoadInfo = (IWorkspaceLoadInfo) workspace;
@@ -37,7 +41,7 @@ namespace Metalama.LinqPad
 
             // TODO: properties
 
-            return $"WorkspaceCollection.Default.Load({arguments})";
+            return new GetCompilationInfo( $"WorkspaceCollection.Default.Load({arguments})", isMetalamaOutput );
         }
     }
 }

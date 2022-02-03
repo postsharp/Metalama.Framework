@@ -7,7 +7,7 @@ using System.IO;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace Metalama.Framework.Tests.Introspection
+namespace Metalama.Framework.Tests.Workspaces
 {
     public class WorkspaceTests : TestBase
     {

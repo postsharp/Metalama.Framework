@@ -20,9 +20,9 @@ namespace Metalama.Framework.Engine.CodeFixes
         public CodeFixPipelineStage( CompileTimeProject compileTimeProject, IReadOnlyList<OrderedAspectLayer> aspectLayers, IServiceProvider serviceProvider ) :
             base( compileTimeProject, aspectLayers, serviceProvider ) { }
 
-        protected override PipelineStageResult GetStageResult(
+        protected override AspectPipelineResult GetStageResult(
             AspectPipelineConfiguration pipelineConfiguration,
-            PipelineStageResult input,
+            AspectPipelineResult input,
             IPipelineStepsResult pipelineStepsResult,
             CancellationToken cancellationToken )
             => new(
@@ -35,6 +35,7 @@ namespace Metalama.Framework.Engine.CodeFixes
                 default,
                 pipelineStepsResult.InheritableAspectInstances,
                 ImmutableArray<ReferenceValidatorInstance>.Empty,
-                input.AdditionalSyntaxTrees );
+                input.AdditionalSyntaxTrees,
+                input.AspectInstanceResults );
     }
 }

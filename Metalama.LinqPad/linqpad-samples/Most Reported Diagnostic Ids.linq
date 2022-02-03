@@ -9,7 +9,7 @@
 
 WorkspaceCollection.Default.Load(@"C:\src\metalama\Metalama.sln")
     .Diagnostics
-	.Where(d => d.Severity >= Metalama.Framework.Diagnostics.Severity.Warning)
+	.Where(d => d.Severity >= Metalama.Framework.SourceDiagnostics.Severity.Warning)
 	.GroupBy(g => g.Id)
 	.Select(x => new { Id = x.Key, Count = x.Count() })
 	.OrderByDescending(g => g.Count)

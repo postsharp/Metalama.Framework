@@ -35,11 +35,13 @@ internal class DesignTimeValidatorInstance
     }
 
     internal ReferenceValidatorInstance ToReferenceValidationInstance( CompilationModel compilation )
-        => new(
+    {
+        return new(
             compilation.Factory.GetDeclaration( this.ValidatedDeclaration ).AssertNotNull(),
             this._driver,
             this.Implementation,
             this._referenceKinds );
+    }
 
     internal ulong GetLongHashCode( XXH64 hasher )
     {

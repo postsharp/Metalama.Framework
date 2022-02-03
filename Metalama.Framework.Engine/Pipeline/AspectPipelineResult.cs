@@ -15,7 +15,7 @@ namespace Metalama.Framework.Engine.Pipeline
     /// <summary>
     /// Contains the inputs and the outputs of a <see cref="PipelineStage"/>.
     /// </summary>
-    public sealed class PipelineStageResult
+    public sealed class AspectPipelineResult
     {
         public ProjectModel Project { get; }
 
@@ -56,9 +56,11 @@ namespace Metalama.Framework.Engine.Pipeline
         /// </summary>
         public ImmutableArray<CompilationModel> CompilationModels { get; }
 
+        internal ImmutableArray<AspectInstanceResult> AspectInstanceResults { get; }
+
         public ImmutableArray<AdditionalCompilationOutputFile> AdditionalCompilationOutputFiles { get; }
 
-        internal PipelineStageResult(
+        internal AspectPipelineResult(
             PartialCompilation compilation,
             ProjectModel project,
             ImmutableArray<OrderedAspectLayer> aspectLayers,
@@ -69,6 +71,7 @@ namespace Metalama.Framework.Engine.Pipeline
             ImmutableArray<IAspectInstance> inheritableAspectInstances = default,
             ImmutableArray<ReferenceValidatorInstance> externallyVisibleValidators = default,
             ImmutableArray<IntroducedSyntaxTree> additionalSyntaxTrees = default,
+            ImmutableArray<AspectInstanceResult> aspectInstanceResults = default,
             ImmutableArray<AdditionalCompilationOutputFile> additionalCompilationOutputFiles = default )
         {
             this.Compilation = compilation;
@@ -77,6 +80,7 @@ namespace Metalama.Framework.Engine.Pipeline
             this.ValidatorSources = validatorSources.IsDefault ? ImmutableArray<IValidatorSource>.Empty : validatorSources;
             this.AspectLayers = aspectLayers;
             this.CompilationModels = compilationModels;
+            this.AspectInstanceResults = aspectInstanceResults.IsDefault ? ImmutableArray<AspectInstanceResult>.Empty : aspectInstanceResults;
             this.ExternallyInheritableAspects = inheritableAspectInstances.IsDefault ? ImmutableArray<IAspectInstance>.Empty : inheritableAspectInstances;
 
             this.ExternallyVisibleValidators =

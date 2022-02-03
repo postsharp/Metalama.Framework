@@ -37,9 +37,9 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
         }
 
         /// <inheritdoc/>
-        protected override PipelineStageResult GetStageResult(
+        protected override AspectPipelineResult GetStageResult(
             AspectPipelineConfiguration pipelineConfiguration,
-            PipelineStageResult input,
+            AspectPipelineResult input,
             IPipelineStepsResult pipelineStepsResult,
             CancellationToken cancellationToken )
         {
@@ -76,7 +76,7 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
             }
 
             // Return the result.
-            return new PipelineStageResult(
+            return new AspectPipelineResult(
                 linkerResult.Compilation,
                 input.Project,
                 input.AspectLayers,
@@ -88,11 +88,12 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
                 validationResult.ExternallyVisibleValidations,
                 additionalCompilationOutputFiles: additionalCompilationOutputFiles != null
                     ? input.AdditionalCompilationOutputFiles.AddRange( additionalCompilationOutputFiles )
-                    : input.AdditionalCompilationOutputFiles );
+                    : input.AdditionalCompilationOutputFiles,
+                aspectInstanceResults: input.AspectInstanceResults.AddRange( pipelineStepsResult.AspectInstanceResults ) );
         }
 
         private IReadOnlyList<AdditionalCompilationOutputFile> GenerateAdditionalCompilationOutputFiles(
-            PipelineStageResult input,
+            AspectPipelineResult input,
             IPipelineStepsResult pipelineStepResult,
             CancellationToken cancellationToken )
         {

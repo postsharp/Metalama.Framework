@@ -12,7 +12,7 @@ using System.IO;
 var product = new Product
 {
     ProductName = "Metalama",
-    Solutions = new[]
+    Solutions = new Solution[]
     {
         new DotNetSolution( "Metalama.sln" )
         {
@@ -33,11 +33,15 @@ var product = new Product
         new DotNetSolution( "Tests\\Metalama.Framework.TestApp\\Metalama.Framework.TestApp.sln" ) { IsTestOnly = true }
     },
     PublicArtifacts = Pattern.Create(
+        "Metalama.SystemTypes.$(PackageVersion).nupkg",
         "Metalama.Framework.$(PackageVersion).nupkg",
         "Metalama.TestFramework.$(PackageVersion).nupkg",
         "Metalama.Framework.Redist.$(PackageVersion).nupkg",
         "Metalama.Framework.Sdk.$(PackageVersion).nupkg",
-        "Metalama.Framework.Engine.$(PackageVersion).nupkg" ),
+        "Metalama.Framework.Engine.$(PackageVersion).nupkg",
+        "Metalama.Framework.Introspection.$(PackageVersion).nupkg",
+        "Metalama.Framework.Workspaces.$(PackageVersion).nupkg",
+        "Metalama.LinqPad.$(PackageVersion).nupkg" ),
     Dependencies = new[] { Dependencies.PostSharpEngineering, Dependencies.MetalamaCompiler }
 };
 
@@ -56,7 +60,7 @@ static bool OnPrepareCompleted( (BuildContext Context, BaseBuildSettings Setting
     var generatorDirectory =
         Path.Combine( arg.Context.RepoDirectory, "Build", "Metalama.Framework.GenerateMetaSyntaxRewriter" );
     var project =
-        new DotNetSolution( Path.Combine( 
+        new DotNetSolution( Path.Combine(
             generatorDirectory,
             "Metalama.Framework.GenerateMetaSyntaxRewriter.csproj" ) );
 

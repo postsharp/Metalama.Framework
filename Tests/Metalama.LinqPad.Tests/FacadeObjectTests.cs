@@ -2,7 +2,9 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Engine.Testing;
+using Metalama.LinqPad.Tests.Assets;
 using System;
+using System.Linq;
 using Xunit;
 
 namespace Metalama.LinqPad.Tests
@@ -70,6 +72,15 @@ namespace Metalama.LinqPad.Tests
             var type = _facadeObjectFactory.GetFormatterType( o.GetType() );
             Assert.Contains( "Id", type.PropertyNames );
             Assert.Contains( "Name", type.PropertyNames );
+        }
+
+        [Fact]
+        public void PropertyHiding()
+        {
+            var type = _facadeObjectFactory.GetFormatterType( typeof(Impl) );
+            Assert.Single( type.PropertyTypes );
+            var propertyType = type.PropertyTypes.First();
+            Assert.Equal( typeof(string), propertyType );
         }
     }
 }

@@ -32,6 +32,7 @@ namespace Metalama.Framework.Engine.Pipeline
         private readonly UserDiagnosticSink _diagnostics;
         private readonly List<INonObservableTransformation> _nonObservableTransformations = new();
         private readonly List<IAspectInstance> _inheritableAspectInstances = new();
+        private readonly List<AspectInstanceResult> _aspectInstanceResults = new();
         private readonly List<IValidatorSource> _validatorSources = new();
         private readonly OverflowAspectSource _overflowAspectSource = new();
         private PipelineStep? _currentStep;
@@ -49,6 +50,8 @@ namespace Metalama.Framework.Engine.Pipeline
         public ImmutableUserDiagnosticList Diagnostics => this._diagnostics.ToImmutable();
 
         public ImmutableArray<IAspectSource> ExternalAspectSources => ImmutableArray.Create<IAspectSource>( this._overflowAspectSource );
+
+        public ImmutableArray<AspectInstanceResult> AspectInstanceResults => this._aspectInstanceResults.ToImmutableArray();
 
         public AspectPipelineConfiguration PipelineConfiguration { get; }
 
@@ -274,5 +277,10 @@ namespace Metalama.Framework.Engine.Pipeline
         }
 
         public void Report( Diagnostic diagnostic ) => this._diagnostics.Report( diagnostic );
+
+        public void AddAspectInstanceResults( ImmutableArray<AspectInstanceResult> aspectInstanceResults )
+        {
+            this._aspectInstanceResults.AddRange( aspectInstanceResults );
+        }
     }
 }
