@@ -22,7 +22,7 @@ public abstract class BaseDesignTimeAspectPipeline : AspectPipeline
     private protected override HighLevelPipelineStage CreateHighLevelStage(
         PipelineStageConfiguration configuration,
         CompileTimeProject compileTimeProject )
-        => new DesignTimePipelineStage( compileTimeProject, configuration.Parts, this.ServiceProvider );
+        => new DesignTimePipelineStage( compileTimeProject, configuration.AspectLayers, this.ServiceProvider );
 
     private protected override LowLevelPipelineStage? CreateLowLevelStage( PipelineStageConfiguration configuration, CompileTimeProject compileTimeProject )
         => null;

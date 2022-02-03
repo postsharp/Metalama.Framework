@@ -60,6 +60,12 @@ namespace Metalama.LinqPad
                     {
                         var propertyName = publicGetter.Name.Substring( 4 );
 
+                        if ( properties.ContainsKey( propertyName ) )
+                        {
+                            // The property was defined in the parent interface.
+                            continue;
+                        }
+
                         var property =
                             publicGetter.DeclaringType!.GetProperty(
                                 propertyName,

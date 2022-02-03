@@ -12,7 +12,7 @@ using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.Advices
 {
-    internal abstract class IntroduceMemberAdvice<TMember, TBuilder> : Advice
+    internal abstract class IntroduceMemberAdvice<TMember, TBuilder> : Advice, IIntroductionAdvice
         where TMember : class, IMemberOrNamedType
         where TBuilder : MemberOrNamedTypeBuilder
     {
@@ -23,6 +23,8 @@ namespace Metalama.Framework.Engine.Advices
         public new INamedType TargetDeclaration => (INamedType) base.TargetDeclaration;
 
         protected TBuilder MemberBuilder { get; init; }
+
+        IDeclarationBuilder IIntroductionAdvice.Builder => this.MemberBuilder;
 
         protected TemplateMember<TMember> Template { get; }
 

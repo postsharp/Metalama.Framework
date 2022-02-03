@@ -24,9 +24,9 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
             : base( compileTimeProject, aspectLayers, serviceProvider ) { }
 
         /// <inheritdoc/>
-        protected override PipelineStageResult GetStageResult(
+        protected override AspectPipelineResult GetStageResult(
             AspectPipelineConfiguration pipelineConfiguration,
-            PipelineStageResult input,
+            AspectPipelineResult input,
             IPipelineStepsResult pipelineStepsResult,
             CancellationToken cancellationToken )
         {
@@ -60,7 +60,7 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                 cancellationToken,
                 out var additionalSyntaxTrees );
 
-            return new PipelineStageResult(
+            return new AspectPipelineResult(
                 input.Compilation,
                 input.Project,
                 input.AspectLayers,
@@ -70,7 +70,8 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                 validatorSources,
                 pipelineStepsResult.InheritableAspectInstances,
                 referenceValidators,
-                input.AdditionalSyntaxTrees.AddRange( additionalSyntaxTrees ) );
+                input.AdditionalSyntaxTrees.AddRange( additionalSyntaxTrees ),
+                input.AspectInstanceResults.AddRange( pipelineStepsResult.AspectInstanceResults ) );
         }
     }
 }

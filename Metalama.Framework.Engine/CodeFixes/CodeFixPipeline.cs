@@ -41,7 +41,7 @@ namespace Metalama.Framework.Engine.CodeFixes
         private protected override HighLevelPipelineStage CreateHighLevelStage(
             PipelineStageConfiguration configuration,
             CompileTimeProject compileTimeProject )
-            => new CodeFixPipelineStage( compileTimeProject, configuration.Parts, this.ServiceProvider );
+            => new CodeFixPipelineStage( compileTimeProject, configuration.AspectLayers, this.ServiceProvider );
 
         private protected override LowLevelPipelineStage? CreateLowLevelStage( PipelineStageConfiguration configuration, CompileTimeProject compileTimeProject )
             => null;

@@ -33,11 +33,16 @@ var product = new Product
         new DotNetSolution( "Tests\\Metalama.Framework.TestApp\\Metalama.Framework.TestApp.sln" ) { IsTestOnly = true }
     },
     PublicArtifacts = Pattern.Create(
+        "Metalama.SystemTypes.$(PackageVersion).nupkg",
         "Metalama.Framework.$(PackageVersion).nupkg",
         "Metalama.TestFramework.$(PackageVersion).nupkg",
         "Metalama.Framework.Redist.$(PackageVersion).nupkg",
         "Metalama.Framework.Sdk.$(PackageVersion).nupkg",
-        "Metalama.Framework.Engine.$(PackageVersion).nupkg" ),
+        "Metalama.Framework.Engine.$(PackageVersion).nupkg",
+        "Metalama.Framework.Introspection.$(PackageVersion).nupkg",
+        "Metalama.Framework.Workspaces.$(PackageVersion).nupkg",
+        "Metalama.LinqPad.$(PackageVersion).nupkg"
+        ),
     Dependencies = new[] { Dependencies.PostSharpEngineering, Dependencies.MetalamaCompiler }
 };
 

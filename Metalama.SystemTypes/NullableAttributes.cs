@@ -4,6 +4,8 @@
 #if !NET5_0_OR_GREATER
 using System.Reflection;
 
+// ReSharper disable All
+
 #pragma warning disable SA1642, SA1028, IDE0021, SA1649, SA1623, SA1402
 
 namespace System.Diagnostics.CodeAnalysis

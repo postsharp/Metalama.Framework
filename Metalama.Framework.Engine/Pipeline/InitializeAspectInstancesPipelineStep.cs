@@ -39,13 +39,15 @@ namespace Metalama.Framework.Engine.Pipeline
                 .Select( ai => aspectDriver.ExecuteAspect( ai, compilation, pipelineStepsState.PipelineConfiguration, cancellationToken ) )
                 .ToImmutableArray();
 
+            pipelineStepsState.AddAspectInstanceResults( aspectInstanceResults );
+
             var success = aspectInstanceResults.All( ar => ar.Success );
             var reportedDiagnostics = aspectInstanceResults.SelectMany( air => air.Diagnostics.ReportedDiagnostics );
             var diagnosticSuppressions = aspectInstanceResults.SelectMany( air => air.Diagnostics.DiagnosticSuppressions );
             var codeFixes = aspectInstanceResults.SelectMany( air => air.Diagnostics.CodeFixes );
             var addedAspectSources = aspectInstanceResults.SelectMany( air => air.AspectSources );
             var addedValidatorSources = aspectInstanceResults.SelectMany( air => air.ValidatorSources );
-            var addedAdvices = aspectInstanceResults.SelectMany( air => air.Advices );
+            var addedAdvices = aspectInstanceResults.SelectMany( air => air.ProgrammaticAdvices );
 
             pipelineStepsState.AddDiagnostics( reportedDiagnostics, diagnosticSuppressions, codeFixes );
             success &= pipelineStepsState.AddAspectSources( addedAspectSources );

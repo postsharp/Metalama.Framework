@@ -108,9 +108,10 @@ namespace Metalama.Framework.Engine.Aspects
             CancellationToken cancellationToken )
             where T : class, IDeclaration
         {
-            static AspectInstanceResult CreateResultForError( Diagnostic diagnostic )
+            AspectInstanceResult CreateResultForError( Diagnostic diagnostic )
             {
                 return new AspectInstanceResult(
+                    aspectInstance,
                     false,
                     new ImmutableUserDiagnosticList( ImmutableArray.Create( diagnostic ), ImmutableArray<ScopedSuppression>.Empty ),
                     ImmutableArray<Advice>.Empty,
@@ -184,6 +185,7 @@ namespace Metalama.Framework.Engine.Aspects
 
                 return
                     new AspectInstanceResult(
+                        aspectInstance,
                         false,
                         diagnosticSink.ToImmutable(),
                         ImmutableArray<Advice>.Empty,

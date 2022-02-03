@@ -1,8 +1,11 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Framework.Code;
+using Metalama.Framework.Engine.Introspection;
 using Metalama.Framework.Engine.Testing;
 using System;
+using System.Linq;
 using Xunit;
 
 namespace Metalama.LinqPad.Tests
@@ -70,6 +73,16 @@ namespace Metalama.LinqPad.Tests
             var type = _facadeObjectFactory.GetFormatterType( o.GetType() );
             Assert.Contains( "Id", type.PropertyNames );
             Assert.Contains( "Name", type.PropertyNames );
+        }
+
+        [Fact]
+        public void InspectionAspectInstance()
+        {
+            var type = _facadeObjectFactory.GetFormatterType( typeof(IntrospectionAspectInstance) );
+            Assert.Contains( "TargetDeclaration", type.PropertyNames );
+            var propertyIndex = type.PropertyNames.ToList().IndexOf( "TargetDeclaration" );
+            var propertyType = type.PropertyTypes.ElementAt( propertyIndex );
+            Assert.Equal( typeof(IDeclaration), propertyType );
         }
     }
 }

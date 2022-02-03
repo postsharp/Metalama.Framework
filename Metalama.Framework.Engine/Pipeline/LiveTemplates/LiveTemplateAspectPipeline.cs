@@ -75,7 +75,7 @@ namespace Metalama.Framework.Engine.Pipeline.LiveTemplates
         private protected override HighLevelPipelineStage CreateHighLevelStage(
             PipelineStageConfiguration configuration,
             CompileTimeProject compileTimeProject )
-            => new CompileTimePipelineStage( compileTimeProject, configuration.Parts, this.ServiceProvider );
+            => new CompileTimePipelineStage( compileTimeProject, configuration.AspectLayers, this.ServiceProvider );
 
         private class AspectSource : IAspectSource
         {

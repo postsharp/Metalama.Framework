@@ -4,9 +4,12 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CompileTime;
+using Metalama.Framework.Engine.Introspection;
+using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Introspection;
 using System.Collections.Immutable;
-using System.Linq;
 
 namespace Metalama.Framework.Workspaces
 {
@@ -15,26 +18,27 @@ namespace Metalama.Framework.Workspaces
     /// </summary>
     public sealed class Project
     {
+        private readonly CompileTimeDomain _domain;
+        private readonly ServiceProvider _serviceProvider;
+
         public string Path { get; }
 
         public ICompilation Compilation { get; }
 
-        public TargetFramework TargetFramework { get; }
+        public string TargetFramework { get; }
 
-        internal Project( string path, ICompilation compilation, string? targetFramework )
+        internal Project( CompileTimeDomain domain, ServiceProvider serviceProvider, string path, ICompilation compilation, string? targetFramework )
         {
+            this._domain = domain;
+            this._serviceProvider = serviceProvider;
             this.Path = path;
             this.Compilation = compilation;
-            this.TargetFramework = new TargetFramework( targetFramework );
+            this.TargetFramework = targetFramework ?? "";
         }
 
         [Memo]
-        public ImmutableArray<IDiagnostic> Diagnostics
-            => this.Compilation
-                .GetRoslynCompilation()
-                .GetDiagnostics()
-                .Select( x => new DiagnosticModel( x, this.Compilation ) )
-                .ToImmutableArray<IDiagnostic>();
+        public ImmutableArray<IIntrospectionDiagnostic> SourceDiagnostics
+            => this.Compilation.GetRoslynCompilation().GetDiagnostics().ToReportedDiagnostics( this.Compilation, DiagnosticSource.CSharp );
 
         /// <summary>
         /// Gets the set of types defined in the project, including nested types.
@@ -42,11 +46,21 @@ namespace Metalama.Framework.Workspaces
         [Memo]
         public ImmutableArray<INamedType> Types => this.Compilation.Types.SelectManyRecursive( t => t.NestedTypes ).ToImmutableArray();
 
+        [Memo]
+        public IIntrospectionCompilationOutput IntrospectionCompilationOutput => this.ApplyMetalama();
+
+        private IIntrospectionCompilationOutput ApplyMetalama()
+        {
+            var compiler = new IntrospectionCompiler( this._domain );
+
+            return compiler.Compile( this.Compilation, this._serviceProvider );
+        }
+
         public override string ToString()
         {
             var name = System.IO.Path.GetFileNameWithoutExtension( this.Path );
 
-            if ( this.TargetFramework.Id != null )
+            if ( !string.IsNullOrEmpty( this.TargetFramework ) )
             {
                 return name + "(" + this.TargetFramework + ")";
             }

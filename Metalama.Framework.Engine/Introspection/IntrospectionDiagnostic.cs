@@ -6,20 +6,22 @@ using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Introspection;
 using Microsoft.CodeAnalysis;
 
-namespace Metalama.Framework.Workspaces
+namespace Metalama.Framework.Engine.Introspection
 {
-    internal sealed class DiagnosticModel : IDiagnostic
+    internal sealed class IntrospectionDiagnostic : IIntrospectionDiagnostic
     {
         private readonly Diagnostic _diagnostic;
 
         public ICompilation Compilation { get; }
 
-        public DiagnosticModel( Diagnostic diagnostic, ICompilation compilation )
+        public IntrospectionDiagnostic( Diagnostic diagnostic, ICompilation compilation, DiagnosticSource source )
         {
             this._diagnostic = diagnostic;
             this.Compilation = compilation;
+            this.Source = source;
         }
 
         public string Id => this._diagnostic.Id;
@@ -34,6 +36,8 @@ namespace Metalama.Framework.Workspaces
         public IDeclaration? Declaration => this.GetDeclaration();
 
         public Severity Severity => this._diagnostic.Severity.ToOurSeverity();
+
+        public DiagnosticSource Source { get; }
 
         private IDeclaration? GetDeclaration()
         {

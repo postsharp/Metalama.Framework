@@ -4,7 +4,9 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Pipeline;
+using Metalama.Framework.Introspection;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Locator;
 using Microsoft.CodeAnalysis.MSBuild;
@@ -24,10 +26,9 @@ namespace Metalama.Framework.Workspaces
     public sealed class Workspace : IDisposable, IProjectSet, IWorkspaceLoadInfo
     {
         private readonly ImmutableDictionary<string, string> _properties;
-
         private readonly ImmutableArray<string> _loadedPaths;
-
         private readonly WorkspaceCollection _collection;
+        private readonly CompileTimeDomain _domain;
 
         internal string Key { get; }
 
@@ -46,13 +47,15 @@ namespace Metalama.Framework.Workspaces
             ImmutableDictionary<string, string>? properties,
             string key,
             ProjectSet projectSet,
-            WorkspaceCollection collection )
+            WorkspaceCollection collection,
+            CompileTimeDomain domain )
         {
             this._properties = properties ?? ImmutableDictionary<string, string>.Empty;
             this._loadedPaths = loadedPaths;
             this.Key = key;
             this._projects = projectSet;
             this._collection = collection;
+            this._domain = domain;
         }
 
         /// <summary>
@@ -61,7 +64,7 @@ namespace Metalama.Framework.Workspaces
         /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
         public async Task ReloadAsync( CancellationToken cancellationToken = default )
         {
-            this._projects = await LoadProjectSet( this._loadedPaths, this._properties, this._collection, cancellationToken );
+            this._projects = await LoadProjectSet( this._loadedPaths, this._properties, this._collection, this._domain, cancellationToken );
         }
 
         public void Reload( CancellationToken cancellationToken = default ) => this.ReloadAsync( cancellationToken ).Wait( cancellationToken );
@@ -73,19 +76,22 @@ namespace Metalama.Framework.Workspaces
             WorkspaceCollection collection,
             CancellationToken cancellationToken )
         {
-            var projectSet = await LoadProjectSet( projects, properties, collection, cancellationToken );
+            var domain = new CompileTimeDomain();
+            var projectSet = await LoadProjectSet( projects, properties, collection, domain, cancellationToken );
 
-            return new Workspace( projects, properties, key, projectSet, collection );
+            return new Workspace( projects, properties, key, projectSet, collection, domain );
         }
 
         private static async Task<ProjectSet> LoadProjectSet(
             ImmutableArray<string> projects,
             ImmutableDictionary<string, string> properties,
             WorkspaceCollection collection,
+            CompileTimeDomain domain,
             CancellationToken cancellationToken )
         {
             var ourProjects = ImmutableArray.CreateBuilder<Project>();
             var roslynWorkspace = MSBuildWorkspace.Create( properties );
+            string? name = null;
 
             foreach ( var path in projects )
             {
@@ -94,11 +100,18 @@ namespace Metalama.Framework.Workspaces
                     case ".csproj":
                         await roslynWorkspace.OpenProjectAsync( path, cancellationToken: cancellationToken );
 
+                        if ( projects.Length == 1 )
+                        {
+                            name = $"{Path.GetFileName( path )} and dependencies";
+                        }
+
                         break;
 
                     case ".sln":
                     case ".slnf":
                         await roslynWorkspace.OpenSolutionAsync( path, cancellationToken: cancellationToken );
+
+                        name = $"{Path.GetFileName( path )}";
 
                         break;
 
@@ -139,11 +152,11 @@ namespace Metalama.Framework.Workspaces
                 var compilationModel = CodeModelFactory.CreateCompilation( compilation, serviceProvider );
 
                 // Create our workspace project.
-                var ourProject = new Project( roslynProject.FilePath!, compilationModel, projectOptions.TargetFramework );
+                var ourProject = new Project( domain, serviceProvider, roslynProject.FilePath!, compilationModel, projectOptions.TargetFramework );
                 ourProjects.Add( ourProject );
             }
 
-            var projectSet = new ProjectSet( ourProjects.ToImmutable() );
+            var projectSet = new ProjectSet( ourProjects.ToImmutable(), name ?? $"{ourProjects.Count} projects" );
 
             return projectSet;
         }
@@ -158,7 +171,9 @@ namespace Metalama.Framework.Workspaces
 
         public ImmutableArray<Project> Projects => this._projects.Projects;
 
-        public ImmutableArray<TargetFramework> TargetFrameworks => this._projects.TargetFrameworks;
+        public ImmutableArray<string> TargetFrameworks => this._projects.TargetFrameworks;
+
+        public ImmutableArray<ICompilation> Compilations => this._projects.Compilations;
 
         public ImmutableArray<INamedType> Types => this._projects.Types;
 
@@ -178,11 +193,13 @@ namespace Metalama.Framework.Workspaces
 
         public ImmutableArray<IEvent> Events => this._projects.Events;
 
-        public ImmutableArray<IDiagnostic> Diagnostics => this._projects.Diagnostics;
+        public ImmutableArray<IIntrospectionDiagnostic> SourceDiagnostics => this._projects.SourceDiagnostics;
 
         public IProjectSet GetSubset( Predicate<Project> filter ) => this._projects.GetSubset( filter );
 
         public IDeclaration? GetDeclaration( string projectPath, string targetFramework, string declarationId )
             => this._projects.GetDeclaration( projectPath, targetFramework, declarationId );
+
+        public IMetalamaCompilationSet AfterMetalama => this._projects.AfterMetalama;
     }
 }

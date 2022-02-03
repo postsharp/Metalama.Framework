@@ -4,6 +4,8 @@
 using System.ComponentModel;
 using System.Reflection;
 
+// ReSharper disable All
+
 namespace System.Runtime.CompilerServices
 {
     /// <summary>

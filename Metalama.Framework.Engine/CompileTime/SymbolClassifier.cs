@@ -568,7 +568,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
                             if ( _wellKnownNamespaces.TryGetValue( nsString, out var wellKnownNamespace ) )
                             {
-                                if ( wellKnownNamespace.IncludeDescendants || ns == namedType.ContainingNamespace )
+                                if ( wellKnownNamespace.IncludeDescendants || ns.Equals( namedType.ContainingNamespace ) )
                                 {
                                     scope = wellKnownNamespace.Scope;
 

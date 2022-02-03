@@ -66,7 +66,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Metalama.Framework.Tests.Un
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Metalama.Framework.Workspaces", "Metalama.Framework.Workspaces\Metalama.Framework.Workspaces.csproj", "{8F215547-1833-486E-BC25-F403E89C8B4A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Metalama.Framework.Tests.Introspection", "Tests\Metalama.Framework.Tests.Introspection\Metalama.Framework.Tests.Introspection.csproj", "{6B0B4099-06FA-408A-8230-5F952198245B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Metalama.Framework.Tests.Workspaces", "Tests\Metalama.Framework.Tests.Workspaces\Metalama.Framework.Tests.Workspaces.csproj", "{6B0B4099-06FA-408A-8230-5F952198245B}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Metalama.LinqPad", "Metalama.LinqPad\Metalama.LinqPad.csproj", "{A651E922-244B-4EA3-B6C2-F609A5E66FC6}"
 EndProject
@@ -77,6 +77,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Metalama.Framework.DesignTime", "Metalama.Framework.DesignTime\Metalama.Framework.DesignTime.csproj", "{94DC3AA3-0753-47A4-A8BC-3AFF1ADFF959}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Metalama.SystemTypes", "Metalama.SystemTypes\Metalama.SystemTypes.csproj", "{593F39C7-66A8-4547-989C-6EB5E9313760}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Metalama.Framework.Introspection", "Metalama.Framework.Introspection\Metalama.Framework.Introspection.csproj", "{A9502D9A-60CB-434A-A68C-A0FEF1648131}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -180,6 +182,10 @@ Global
 		{593F39C7-66A8-4547-989C-6EB5E9313760}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{593F39C7-66A8-4547-989C-6EB5E9313760}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{593F39C7-66A8-4547-989C-6EB5E9313760}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A9502D9A-60CB-434A-A68C-A0FEF1648131}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A9502D9A-60CB-434A-A68C-A0FEF1648131}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A9502D9A-60CB-434A-A68C-A0FEF1648131}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A9502D9A-60CB-434A-A68C-A0FEF1648131}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

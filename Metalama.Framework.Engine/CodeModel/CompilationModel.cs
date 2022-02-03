@@ -360,8 +360,6 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public override ISymbol Symbol => this.RoslynCompilation.Assembly;
 
-        IAttributeList IDeclaration.Attributes => throw new NotSupportedException();
-
         public string? Name => this.RoslynCompilation.AssemblyName;
 
         public override string ToString() => $"{this.RoslynCompilation.AssemblyName}";
