@@ -38,7 +38,7 @@
         <RoslynPadVersion>4.0.1</RoslynPadVersion>
 
         <!-- This cannot be called just "PostSharpVersion", because that conflicts with a property used by PostSharp. -->
-        <PostSharpPackageVersion>6.9.12</PostSharpPackageVersion>
+        <PostSharpPackageVersion>6.10.6</PostSharpPackageVersion>
 
     </PropertyGroup>
 

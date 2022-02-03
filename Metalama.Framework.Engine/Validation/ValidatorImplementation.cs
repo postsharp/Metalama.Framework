@@ -44,11 +44,11 @@ public readonly struct ValidatorImplementation
 
     public void UpdateHash( XXH64 hasher )
     {
-        hasher.Update( this.Implementation.GetHashCode() );
+        HashUtilities.Update( hasher, this.Implementation.GetHashCode() );
 
         if ( this.State != null )
         {
-            hasher.Update( this.State.GetHashCode() );
+            HashUtilities.Update( hasher, this.State.GetHashCode() );
         }
     }
 }

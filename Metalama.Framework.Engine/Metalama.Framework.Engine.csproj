@@ -20,7 +20,6 @@
         <!-- We cannot use InternalsVisibleTo for Metalama.TestFramework because of obfuscation in the release build. -->
         <InternalsVisibleTo Include="Metalama.Framework.Tests.UnitTests.Internals"/>
         <InternalsVisibleTo Include="Metalama.Framework.Tests.Integration.Internals"/>
-        <InternalsVisibleTo Include="Metalama.LinqPad.Tests"/>
         <InternalsVisibleTo Include="DynamicProxyGenAssembly2" Key="$(FakeItEasyKey)" LoadsWithinVisualStudio="false"/>
     </ItemGroup>
 
