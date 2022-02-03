@@ -111,7 +111,7 @@ class MyClass
     }
 
     [Fact]
-    public void SyntaxError()
+    public void SyntaxErrorInCompileTimeCode()
     {
         var code = @"
 using Metalama.Framework.Aspects;
@@ -120,7 +120,10 @@ using Metalama.Framework.Diagnostics;
 
 class Aspect : TypeAspect
 {
-    xxx
+    public override BuildAspect( IAspectBuilder<INamedType> builder )
+   {
+        some_error;
+   }
 }
 
  
@@ -147,6 +150,6 @@ class MyClass
 
         Assert.False( compilerOutput.IsSuccessful );
         Assert.NotEmpty( compilerOutput.Diagnostics );
-        Assert.Single( compilerOutput.AspectInstances );
+        Assert.Empty( compilerOutput.AspectInstances );
     }
 }

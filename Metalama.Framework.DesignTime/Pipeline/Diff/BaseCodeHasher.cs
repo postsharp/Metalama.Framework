@@ -23,12 +23,12 @@ internal abstract class BaseCodeHasher : CSharpSyntaxWalker
 
     protected void VisitTrivialToken( SyntaxToken token )
     {
-        HashUtilities.Update( this._hasher, token.RawKind );
+        this._hasher.Update( token.RawKind );
     }
 
     protected void VisitNonTrivialToken( SyntaxToken token )
     {
-        HashUtilities.Update( this._hasher, token.Text );
+        this._hasher.Update( token.Text );
     }
 
     protected void Visit<T>( in SyntaxList<T> list )
@@ -51,7 +51,7 @@ internal abstract class BaseCodeHasher : CSharpSyntaxWalker
 
     protected void Visit( in SyntaxToken token )
     {
-        HashUtilities.Update( this._hasher, token.Text );
+        this._hasher.Update( token.Text );
     }
 
     protected void Visit( in SyntaxTokenList list )
