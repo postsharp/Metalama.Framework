@@ -74,8 +74,6 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
             public ImmutableDictionary<string, int> ContractVersions
                 => ImmutableDictionary<string, int>.Empty.Add( "1.0", Framework.DesignTime.Contracts.ContractsVersion.ContractVersion_1_0 );
 
-            public int ContractsVersion { get; }
-
             public T? GetService<T>()
                 where T : class, ICompilerService
                 => throw new NotImplementedException();
