@@ -49,7 +49,44 @@ namespace Metalama.Framework.Engine.Utilities
                 } );
         }
 
-        public IDiagnosticAdder Diagnostics => this._diagnosticAdder ?? throw new InvalidOperationException( "Cannot report diagnostics in a context without diagnostics adder." );
+        /// <summary>
+        /// Initializes a new instance of the <see cref="UserCodeExecutionContext"/> class that can be used
+        /// to invoke user code using <see cref="UserCodeInvoker.Invoke"/> but not <see cref="UserCodeInvoker.TryInvoke{T}"/>.
+        /// </summary>
+        public UserCodeExecutionContext(
+            IServiceProvider serviceProvider,
+            AspectLayerId? aspectAspectLayerId = null,
+            CompilationModel? compilationModel = null,
+            IDeclaration? targetDeclaration = null )
+        {
+            this.ServiceProvider = serviceProvider;
+            this.AspectLayerId = aspectAspectLayerId;
+            this.Compilation = compilationModel;
+            this.TargetDeclaration = targetDeclaration;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="UserCodeExecutionContext"/> class that can be used
+        /// to invoke user code using <see cref="UserCodeInvoker.TryInvoke{T}"/>.
+        /// </summary>
+        public UserCodeExecutionContext(
+            IServiceProvider serviceProvider,
+            IDiagnosticAdder diagnostics,
+            UserCodeMemberInfo invokedMember,
+            AspectLayerId? aspectAspectLayerId = null,
+            CompilationModel? compilationModel = null,
+            IDeclaration? targetDeclaration = null )
+        {
+            this.ServiceProvider = serviceProvider;
+            this.AspectLayerId = aspectAspectLayerId;
+            this.Compilation = compilationModel;
+            this._diagnosticAdder = diagnostics;
+            this.InvokedMember = invokedMember;
+            this.TargetDeclaration = targetDeclaration;
+        }
+
+        public IDiagnosticAdder Diagnostics
+            => this._diagnosticAdder ?? throw new InvalidOperationException( "Cannot report diagnostics in a context without diagnostics adder." );
 
         // This property is intentionally writable because it allows us to reuse the same context for several calls, when performance
         // is critical. This feature is used by validators.
@@ -74,34 +111,6 @@ namespace Metalama.Framework.Engine.Utilities
 
         ICompilation IExecutionContext.Compilation
             => this.Compilation ?? throw new InvalidOperationException( "There is no compilation in the current execution context" );
-
-        public UserCodeExecutionContext(
-            IServiceProvider serviceProvider,
-            AspectLayerId? aspectAspectLayerId = null,
-            CompilationModel? compilationModel = null,
-            IDeclaration? targetDeclaration = null )
-        {
-            this.ServiceProvider = serviceProvider;
-            this.AspectLayerId = aspectAspectLayerId;
-            this.Compilation = compilationModel;
-            this.TargetDeclaration = targetDeclaration;
-        }
-
-        public UserCodeExecutionContext(
-            IServiceProvider serviceProvider,
-            IDiagnosticAdder diagnostics,
-            UserCodeMemberInfo invokedMember,
-            AspectLayerId? aspectAspectLayerId = null,
-            CompilationModel? compilationModel = null,
-            IDeclaration? targetDeclaration = null )
-        {
-            this.ServiceProvider = serviceProvider;
-            this.AspectLayerId = aspectAspectLayerId;
-            this.Compilation = compilationModel;
-            this._diagnosticAdder = diagnostics;
-            this.InvokedMember = invokedMember;
-            this.TargetDeclaration = targetDeclaration;
-        }
 
         public UserCodeExecutionContext WithInvokedMember( UserCodeMemberInfo invokedMember )
             => new(
