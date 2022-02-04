@@ -1,52 +1,48 @@
-// @ApplyCodeFix
-
 using System;
-using System.Collections.Generic;
-using Metalama.Framework;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Diagnostics;
 using Metalama.Framework.CodeFixes;
-using System.ComponentModel;
+using Metalama.Framework.Diagnostics;
 
 namespace Metalama.Framework.Tests.Integration.CodeFixes.RemoveAttribute
 {
-    class Aspect : MethodAspect
+    internal class Aspect : MethodAspect
     {
-        static DiagnosticDefinition _diag = new ( "MY001", Severity.Warning, "Add some attribute" );
-    
-        public override void BuildAspect(IAspectBuilder<IMethod> builder)
-        {
-            base.BuildAspect(builder);
-            
-            _diag.WithCodeFixes( CodeFix.RemoveAttributes(  builder.Target.DeclaringType, typeof(MyAttribute) ) ).ReportTo( builder.Diagnostics );
-        }
-    }
-    
-    class MyAttribute : Attribute {}
-    class YourAttribute : Attribute {}
+        private static DiagnosticDefinition _diag = new( "MY001", Severity.Warning, "Add some attribute" );
 
-    partial class TargetCode
-    {
-        [Aspect, My]
-        int Method1(int a)
+        public override void BuildAspect( IAspectBuilder<IMethod> builder )
         {
-            return a;
+            base.BuildAspect( builder );
+
+            _diag.WithCodeFixes( CodeFixFactory.RemoveAttributes( builder.Target.DeclaringType, typeof(MyAttribute) ) ).ReportTo( builder.Diagnostics );
         }
-        
-        [My]
-        int Method2(int a)
-        {
-            return a;
-        }
-        
-     
     }
-    
-    partial class TargetCode
+
+    internal class MyAttribute : Attribute { }
+
+    internal class YourAttribute : Attribute { }
+
+    internal partial class TargetCode
     {
-       [My, Your]
-        int Method3(int a)
+        [Aspect]
+        [My]
+        private int Method1( int a )
+        {
+            return a;
+        }
+
+        [My]
+        private int Method2( int a )
+        {
+            return a;
+        }
+    }
+
+    internal partial class TargetCode
+    {
+        [My]
+        [Your]
+        private int Method3( int a )
         {
             return a;
         }
