@@ -3,6 +3,7 @@
 
 using Metalama.Framework.DesignTime.Contracts;
 using System;
+using System.Collections.Immutable;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
@@ -11,36 +12,43 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
 {
     public class DesignTimeEntryPointManagerTests
     {
+        private readonly ImmutableDictionary<string, int> _contractVersion = ImmutableDictionary<string, int>.Empty.Add(
+            "1.0",
+            ContractsVersion.ContractVersion_1_0 );
+
         [Fact]
         public async Task RegisterBeforeGetAsync()
         {
-            IDesignTimeEntryPointManager instance = new DesignTimeEntryPointManager();
+            IDesignTimeEntryPointManager manager = new DesignTimeEntryPointManager();
+            var consumer = manager.GetConsumer( this._contractVersion );
             var version = new Version( 1, 0 );
             var provider = new FakeProvider( version );
-            instance.RegisterServiceProvider( provider );
-            Assert.Equal( provider, await instance.GetServiceProviderAsync( version, CancellationToken.None ) );
+            manager.RegisterServiceProvider( provider );
+            Assert.Equal( provider, await consumer.GetServiceProviderAsync( version, CancellationToken.None ) );
         }
 
         [Fact]
         public async Task GetBeforeRegisterAsync()
         {
-            IDesignTimeEntryPointManager instance = new DesignTimeEntryPointManager();
+            IDesignTimeEntryPointManager manager = new DesignTimeEntryPointManager();
+            var consumer = manager.GetConsumer( this._contractVersion );
             var version = new Version( 1, 0 );
-            var getTask = instance.GetServiceProviderAsync( version, CancellationToken.None );
+            var getTask = consumer.GetServiceProviderAsync( version, CancellationToken.None );
             Assert.False( getTask.IsCompleted );
 
             var provider = new FakeProvider( version );
-            instance.RegisterServiceProvider( provider );
+            manager.RegisterServiceProvider( provider );
             Assert.Equal( provider, await getTask );
         }
 
         [Fact]
         public async Task CancelGetSAsync()
         {
-            IDesignTimeEntryPointManager instance = new DesignTimeEntryPointManager();
+            IDesignTimeEntryPointManager manager = new DesignTimeEntryPointManager();
+            var consumer = manager.GetConsumer( this._contractVersion );
             var version = new Version( 1, 0 );
             CancellationTokenSource cancellationTokenSource = new();
-            var task = instance.GetServiceProviderAsync( version, cancellationTokenSource.Token );
+            var task = consumer.GetServiceProviderAsync( version, cancellationTokenSource.Token );
             Assert.False( task.IsCompleted );
             cancellationTokenSource.Cancel();
             await Assert.ThrowsAsync<TaskCanceledException>( async () => await task );
@@ -49,43 +57,28 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
         [Fact]
         public void Version()
         {
-            IDesignTimeEntryPointManager instance = new DesignTimeEntryPointManager();
-            Assert.NotNull( instance.Version );
-        }
-
-        [Fact]
-        public void Unload()
-        {
-            IDesignTimeEntryPointManager instance = new DesignTimeEntryPointManager();
-            var version = new Version( 1, 0 );
-            var provider = new FakeProvider( version );
-            instance.RegisterServiceProvider( provider );
-            var task = instance.GetServiceProviderAsync( version, CancellationToken.None );
-            Assert.True( task.IsCompleted );
-#pragma warning disable VSTHRD002
-            Assert.Equal( provider, task.Result );
-#pragma warning restore VSTHRD002
-            provider.Unload();
-            var task2 = instance.GetServiceProviderAsync( version, CancellationToken.None );
-            Assert.False( task2.IsCompleted );
+            IDesignTimeEntryPointManager manager = new DesignTimeEntryPointManager();
+            Assert.NotNull( manager.Version );
         }
 
         private class FakeProvider : ICompilerServiceProvider
         {
-            public FakeProvider( Version version )
+            public FakeProvider( Version version, int contractsVersion = 0 )
             {
                 this.Version = version;
+                this.ContractsVersion = contractsVersion;
             }
 
             public Version Version { get; }
 
+            public ImmutableDictionary<string, int> ContractVersions
+                => ImmutableDictionary<string, int>.Empty.Add( "1.0", Framework.DesignTime.Contracts.ContractsVersion.ContractVersion_1_0 );
+
+            public int ContractsVersion { get; }
+
             public T? GetService<T>()
                 where T : class, ICompilerService
                 => throw new NotImplementedException();
-
-            public event Action? Unloaded;
-
-            public void Unload() => this.Unloaded?.Invoke();
         }
     }
 }

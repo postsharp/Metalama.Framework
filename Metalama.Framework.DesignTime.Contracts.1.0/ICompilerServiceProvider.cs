@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using System;
+using System.Collections.Immutable;
 
 namespace Metalama.Framework.DesignTime.Contracts
 {
@@ -18,14 +19,16 @@ namespace Metalama.Framework.DesignTime.Contracts
         Version Version { get; }
 
         /// <summary>
+        /// Gets a dictionary mapping the assembly fixed version (in form <c>Major.Minor</c>, e.g. <c>1.0</c> and the version
+        /// of the contract within that fixed version. This contract version may change between pre-releases but it must remain
+        /// constant in stable releases.
+        /// </summary>
+        ImmutableDictionary<string, int> ContractVersions { get; }
+
+        /// <summary>
         /// Gets a service.
         /// </summary>
         T? GetService<T>()
             where T : class, ICompilerService;
-
-        /// <summary>
-        /// Event raised when the compiler-side component is unloaded. (Which now never happens).
-        /// </summary>
-        event Action Unloaded;
     }
 }

@@ -15,7 +15,7 @@ namespace Metalama.Framework.DesignTime.Contracts
     /// Exposes a global connection point between compiler assemblies, included in NuGet packages and loaded by Roslyn,
     /// and the UI assemblies, included in the VSX and loaded by Visual Studio. Compiler assemblies register
     /// themselves using <see cref="IDesignTimeEntryPointManager.RegisterServiceProvider"/> and UI assemblies get the
-    /// interface using <see cref="IDesignTimeEntryPointManager.GetServiceProviderAsync"/>.
+    /// interface using <see cref="IDesignTimeEntryPointManager.GetConsumer"/> and then calling the methods of this interface.
     /// Since VS session can contain projects with several versions of Metalama, this class has the responsibility
     /// to match versions.
     /// </summary>
@@ -62,7 +62,6 @@ namespace Metalama.Framework.DesignTime.Contracts
         public DesignTimeEntryPointManager() { }
 
         private readonly object _sync = new();
-        private readonly ConcurrentDictionary<Version, Task<ICompilerServiceProvider>> _getProviderTasks = new();
         private volatile TaskCompletionSource<ICompilerServiceProvider> _registrationTask = new();
         private volatile ImmutableHashSet<ICompilerServiceProvider> _providers = ImmutableHashSet<ICompilerServiceProvider>.Empty;
         private int _nextObserverId;
@@ -70,58 +69,13 @@ namespace Metalama.Framework.DesignTime.Contracts
         private volatile ImmutableDictionary<int, IObserver<ICompilerServiceProvider>> _observers =
             ImmutableDictionary<int, IObserver<ICompilerServiceProvider>>.Empty;
 
-        async ValueTask<ICompilerServiceProvider?> IDesignTimeEntryPointManager.GetServiceProviderAsync( Version version, CancellationToken cancellationToken )
-        {
-            var task = this._getProviderTasks.GetOrAdd( version, this.GetProviderForVersion );
-
-            if ( !task.IsCompleted )
-            {
-                var taskCancelled = new TaskCompletionSource<bool>();
-
-#if NET5_0_OR_GREATER
-                await using ( cancellationToken.Register( () => taskCancelled.SetCanceled( cancellationToken ) ) )
-#else
-                using ( cancellationToken.Register( () => taskCancelled.SetCanceled() ) )
-#endif
-                {
-                    await Task.WhenAny( task, taskCancelled.Task );
-
-                    if ( taskCancelled.Task.IsCanceled )
-                    {
-                        throw new TaskCanceledException();
-                    }
-                }
-            }
-
-            return task.Result;
-        }
-
-        public IEnumerable<ICompilerServiceProvider> GetRegisteredProviders() => this._providers;
-
-        private async Task<ICompilerServiceProvider> GetProviderForVersion( Version version )
-        {
-            while ( true )
-            {
-                lock ( this._sync )
-                {
-                    foreach ( var entryPoint in this._providers )
-                    {
-                        if ( version == MatchAllVersion || entryPoint.Version == version )
-                        {
-                            return entryPoint;
-                        }
-                    }
-                }
-
-                await this._registrationTask.Task;
-            }
-        }
+        public IDesignTimeEntryPointConsumer GetConsumer( ImmutableDictionary<string, int> contractVersions )
+            => new DesignTimeEntryPointConsumer( this, contractVersions );
 
         void IDesignTimeEntryPointManager.RegisterServiceProvider( ICompilerServiceProvider provider )
         {
             lock ( this._sync )
             {
-                provider.Unloaded += () => this.OnUnloaded( provider );
                 this._providers = this._providers.Add( provider );
 
                 // The order here is important.
@@ -139,52 +93,125 @@ namespace Metalama.Framework.DesignTime.Contracts
 
         Version IDesignTimeEntryPointManager.Version => this.GetType().Assembly.GetName().Version!;
 
-        private void OnUnloaded( ICompilerServiceProvider entryPoint )
-        {
-            lock ( this._sync )
-            {
-                this._providers = this._providers.Remove( entryPoint );
-
-                this._getProviderTasks.TryRemove( entryPoint.Version, out _ );
-                this._getProviderTasks.TryRemove( MatchAllVersion, out _ );
-            }
-        }
-
-        /// <summary>
-        /// Subscribes an observer, which will be invoked when a new <see cref="ICompilerServiceProvider"/> is registered.
-        /// </summary>
-        public IDisposable Subscribe( IObserver<ICompilerServiceProvider> observer )
-        {
-            lock ( this._sync )
-            {
-                foreach ( var provider in this._providers )
-                {
-                    observer.OnNext( provider );
-                }
-
-                var observerId = this._nextObserverId++;
-                this._observers = this._observers.Add( observerId, observer );
-
-                return new ObserverCookie( this, observerId );
-            }
-        }
-
-        private class ObserverCookie : IDisposable
+        private class DesignTimeEntryPointConsumer : IDesignTimeEntryPointConsumer
         {
             private readonly DesignTimeEntryPointManager _parent;
-            private readonly int _id;
+            private readonly ImmutableDictionary<string, int> _contractVersions;
+            private readonly ConcurrentDictionary<Version, Task<ICompilerServiceProvider>> _getProviderTasks = new();
 
-            public ObserverCookie( DesignTimeEntryPointManager parent, int id )
+            public DesignTimeEntryPointConsumer( DesignTimeEntryPointManager parent, ImmutableDictionary<string, int> contractVersions )
             {
                 this._parent = parent;
-                this._id = id;
+                this._contractVersions = contractVersions;
             }
 
-            public void Dispose()
+            private bool ValidateContractVersions( ImmutableDictionary<string, int> candidate )
+            {
+                foreach ( var supportedVersion in this._contractVersions )
+                {
+                    if ( candidate.TryGetValue( supportedVersion.Key, out var candidateVersion ) && candidateVersion != supportedVersion.Value )
+                    {
+                        return false;
+                    }
+                }
+
+                return true;
+            }
+
+            public async ValueTask<ICompilerServiceProvider?> GetServiceProviderAsync( Version version, CancellationToken cancellationToken )
+            {
+                var task = this._getProviderTasks.GetOrAdd( version, this.GetProviderForVersionAsync );
+
+                if ( !task.IsCompleted )
+                {
+                    var taskCancelled = new TaskCompletionSource<bool>();
+
+#if NET5_0_OR_GREATER
+                    await using ( cancellationToken.Register( () => taskCancelled.SetCanceled( cancellationToken ) ) )
+#else
+                    using ( cancellationToken.Register( () => taskCancelled.SetCanceled() ) )
+#endif
+                    {
+                        await Task.WhenAny( task, taskCancelled.Task );
+
+                        if ( taskCancelled.Task.IsCanceled )
+                        {
+                            throw new TaskCanceledException();
+                        }
+                    }
+                }
+
+                return task.Result;
+            }
+
+            public IEnumerable<ICompilerServiceProvider> GetRegisteredProviders() => this._parent._providers;
+
+            public event Action<ICompilerServiceProvider>? ContractVersionMismatchDetected;
+
+            private async Task<ICompilerServiceProvider> GetProviderForVersionAsync( Version version )
+            {
+                while ( true )
+                {
+                    lock ( this._parent._sync )
+                    {
+                        foreach ( var entryPoint in this._parent._providers )
+                        {
+                            if ( version == MatchAllVersion || entryPoint.Version == version )
+                            {
+                                if ( this.ValidateContractVersions( entryPoint.ContractVersions ) )
+                                {
+                                    return entryPoint;
+                                }
+                                else
+                                {
+                                    this.ContractVersionMismatchDetected?.Invoke( entryPoint );
+
+                                    return new InvalidCompilerServiceProvider( entryPoint.Version, entryPoint.ContractVersions );
+                                }
+                            }
+                        }
+                    }
+
+                    await this._parent._registrationTask.Task;
+                }
+            }
+
+            /// <summary>
+            /// Subscribes an observer, which will be invoked when a new <see cref="ICompilerServiceProvider"/> is registered.
+            /// </summary>
+            public IDisposable Subscribe( IObserver<ICompilerServiceProvider> observer )
             {
                 lock ( this._parent._sync )
                 {
-                    this._parent._observers = this._parent._observers.Remove( this._id );
+                    foreach ( var provider in this._parent._providers )
+                    {
+                        observer.OnNext( provider );
+                    }
+
+                    var observerId = this._parent._nextObserverId++;
+                    this._parent._observers = this._parent._observers.Add( observerId, observer );
+
+                    return new ObserverCookie( this._parent, observerId );
+                }
+            }
+
+            private class ObserverCookie : IDisposable
+            {
+                private readonly DesignTimeEntryPointManager _parent;
+                private readonly int _id;
+
+                public ObserverCookie( DesignTimeEntryPointManager parent, int id )
+                {
+                    this._parent = parent;
+                    this._id = id;
+                }
+
+                public void Dispose()
+                {
+                    lock ( this._parent._sync )
+                    {
+                        this._parent._observers = this._parent._observers.Remove( this._id );
+                    }
                 }
             }
         }
