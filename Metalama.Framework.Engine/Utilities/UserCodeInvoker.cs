@@ -187,6 +187,18 @@ namespace Metalama.Framework.Engine.Utilities
                 context,
                 out _ );
 
+        public void Invoke( Action action, UserCodeExecutionContext context )
+        {
+            _ = this.Invoke(
+                () =>
+                {
+                    action();
+
+                    return true;
+                },
+                context );
+        }
+
         public T Invoke<T>( Func<T> func, UserCodeExecutionContext context )
         {
             var adapter = new UserCodeFuncAdapter<T>( func );

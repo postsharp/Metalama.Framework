@@ -12,8 +12,8 @@ namespace Metalama.Framework.Engine.LamaSerialization
 {
     internal sealed class BuiltInSerializerFactoryProvider : SerializerFactoryProvider
     {
-        public BuiltInSerializerFactoryProvider()
-            : base( new ReflectionSerializationProvider() )
+        public BuiltInSerializerFactoryProvider( IServiceProvider serviceProvider )
+            : base( serviceProvider, new ReflectionSerializationProvider( serviceProvider ) )
         {
             // intrinsic types
             this.AddSerializer<bool, BooleanSerializer>();

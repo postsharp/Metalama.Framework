@@ -2,25 +2,24 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Engine.LamaSerialization;
+using Metalama.Framework.Project;
 using Metalama.Framework.Serialization;
 using Metalama.Framework.Tests.UnitTests.LamaSerialization;
 using System;
 using Xunit;
-
-#pragma warning disable SA1106 // Code should not contain empty statements
 
 // attribute added for testing purposes
 [assembly: ImportSerializer( typeof(SerializerLocatorTests.TypeWoSerializer), typeof(SerializerLocatorTests.GenericSerializedClass<>.Serializer) )]
 
 namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
 {
-    public class SerializerLocatorTests
+    public class SerializerLocatorTests : SerializationTestsBase
     {
         private readonly ISerializerFactoryProvider _customSerializerProvider;
 
         public SerializerLocatorTests()
         {
-            var builtIn = new BuiltInSerializerFactoryProvider();
+            var builtIn = this.ServiceProvider.GetRequiredService<BuiltInSerializerFactoryProvider>();
             Assert.NotNull( builtIn.NextProvider );
             this._customSerializerProvider = builtIn.NextProvider!;
         }

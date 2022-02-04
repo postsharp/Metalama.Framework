@@ -3,7 +3,6 @@
 
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.LamaSerialization;
-using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Serialization;
 using System;
 using System.IO;
@@ -13,10 +12,8 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
 {
-    public class AdvancedClassSerializationTests
+    public class AdvancedClassSerializationTests : SerializationTestsBase
     {
-        private readonly IServiceProvider _serviceProvider = ServiceProvider.Empty.WithService( new BuiltInSerializerFactoryProvider() );
-
         [Fact]
         public void CyclicGraph_Classes()
         {
@@ -29,7 +26,7 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
             mother.Children[1] = ch2;
             mother.Children[2] = ch3;
 
-            var formatter = LamaFormatter.CreateTestInstance( this._serviceProvider );
+            var formatter = LamaFormatter.CreateTestInstance( this.ServiceProvider );
             var memoryStream = new MemoryStream();
             formatter.Serialize( mother, memoryStream );
             memoryStream.Seek( 0, SeekOrigin.Begin );
@@ -50,7 +47,7 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
             brother.Sibling[0] = sister;
             sister.Sibling[0] = brother;
 
-            var formatter = LamaFormatter.CreateTestInstance( this._serviceProvider );
+            var formatter = LamaFormatter.CreateTestInstance( this.ServiceProvider );
             var memoryStream = new MemoryStream();
             formatter.Serialize( brother, memoryStream );
             memoryStream.Seek( 0, SeekOrigin.Begin );
@@ -75,7 +72,7 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
             children[0] = brother;
             children[1] = sister;
 
-            var formatter = LamaFormatter.CreateTestInstance( this._serviceProvider );
+            var formatter = LamaFormatter.CreateTestInstance( this.ServiceProvider );
             var memoryStream = new MemoryStream();
             formatter.Serialize( children, memoryStream );
             memoryStream.Seek( 0, SeekOrigin.Begin );
@@ -102,7 +99,7 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
             var spouse1 = new Parent( "Mono" );
             spouse1.Spouse = spouse1;
 
-            var formatter = LamaFormatter.CreateTestInstance( this._serviceProvider );
+            var formatter = LamaFormatter.CreateTestInstance( this.ServiceProvider );
             var memoryStream = new MemoryStream();
             formatter.Serialize( spouse1, memoryStream );
             memoryStream.Seek( 0, SeekOrigin.Begin );

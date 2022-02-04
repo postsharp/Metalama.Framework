@@ -1,6 +1,8 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Project;
 using Metalama.Framework.Serialization;
 using System;
 using System.Collections.Generic;
@@ -25,11 +27,16 @@ namespace Metalama.Framework.Engine.LamaSerialization
         private readonly Dictionary<Type, Type> _surrogateTypesCache = new();
         private readonly Dictionary<object, ObjectInfo> _objects = new( new CanonicalComparer() );
 
-        public SerializationWriter( Stream stream, LamaFormatter formatter, bool shouldReportExceptionCause )
+        private readonly UserCodeInvoker _userCodeInvoker;
+        private readonly UserCodeExecutionContext _userCodeExecutionContext;
+
+        public SerializationWriter( IServiceProvider serviceProvider, Stream stream, LamaFormatter formatter, bool shouldReportExceptionCause )
         {
             this._formatter = formatter;
             this._shouldReportExceptionCause = shouldReportExceptionCause;
             this._binaryWriter = new SerializationBinaryWriter( new BinaryWriter( stream ) );
+            this._userCodeInvoker = serviceProvider.GetRequiredService<UserCodeInvoker>();
+            this._userCodeExecutionContext = new UserCodeExecutionContext( serviceProvider );
         }
 
         public void Serialize( object? obj )
@@ -80,7 +87,7 @@ namespace Metalama.Framework.Engine.LamaSerialization
 
                 if ( !type.IsArray )
                 {
-                    TrySerialize( serializer.AssertNotNull(), obj, objectInfo.ConstructorArguments, objectInfo.InitializationArguments, cause );
+                    this.TrySerialize( serializer.AssertNotNull(), obj, objectInfo.ConstructorArguments, objectInfo.InitializationArguments, cause );
                 }
 
                 this._objects.Add( obj, objectInfo );
@@ -89,7 +96,7 @@ namespace Metalama.Framework.Engine.LamaSerialization
             return objectInfo;
         }
 
-        private static void TrySerialize(
+        private void TrySerialize(
             ISerializer serializer,
             object obj,
             IArgumentsWriter constructorArguments,
@@ -98,7 +105,7 @@ namespace Metalama.Framework.Engine.LamaSerialization
         {
             try
             {
-                serializer.SerializeObject( obj, constructorArguments, initializationArguments );
+                this._userCodeInvoker.Invoke( () => serializer.SerializeObject( obj, constructorArguments, initializationArguments ), this._userCodeExecutionContext );
             }
             catch ( Exception exception )
             {
@@ -470,7 +477,7 @@ namespace Metalama.Framework.Engine.LamaSerialization
             var serializer = this._formatter.SerializerProvider.GetSerializer( type );
             var arguments = new Arguments();
 
-            TrySerialize( serializer, value, arguments, ThrowingArguments.Instance, cause );
+            this.TrySerialize( serializer, value, arguments, ThrowingArguments.Instance, cause );
 
             // structs have one phase serializers so we have to write initialization data inline
             this.WriteArguments( arguments, true, cause, type );
