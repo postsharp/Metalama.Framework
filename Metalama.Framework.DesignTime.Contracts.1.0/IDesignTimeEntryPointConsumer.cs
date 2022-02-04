@@ -8,6 +8,9 @@ using System.Threading.Tasks;
 
 namespace Metalama.Framework.DesignTime.Contracts;
 
+/// <summary>
+/// Allows to retrieve instances of <see cref="ICompilerServiceProvider"/> from the <see cref="IDesignTimeEntryPointManager"/>.
+/// </summary>
 public interface IDesignTimeEntryPointConsumer : IObservable<ICompilerServiceProvider>
 {
     /// <summary>

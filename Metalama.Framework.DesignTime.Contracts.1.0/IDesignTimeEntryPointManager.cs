@@ -13,6 +13,12 @@ namespace Metalama.Framework.DesignTime.Contracts
     /// </summary>
     public interface IDesignTimeEntryPointManager
     {
+        /// <summary>
+        /// Gets an interface that allows to retrieve compiler services.
+        /// </summary>
+        /// <param name="contractVersions">A dictionary mapping the fixed version of the assembly (e.g. <c>1.0</c>)
+        /// to the contract version within this fixed version.</param>
+        /// <returns></returns>
         IDesignTimeEntryPointConsumer GetConsumer( ImmutableDictionary<string, int> contractVersions );
 
         /// <summary>

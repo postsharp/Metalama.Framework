@@ -63,16 +63,15 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
 
         private class FakeProvider : ICompilerServiceProvider
         {
-            public FakeProvider( Version version, int contractsVersion = 0 )
+            public FakeProvider( Version version )
             {
                 this.Version = version;
-                this.ContractsVersion = contractsVersion;
             }
 
             public Version Version { get; }
 
             public ImmutableDictionary<string, int> ContractVersions
-                => ImmutableDictionary<string, int>.Empty.Add( "1.0", Framework.DesignTime.Contracts.ContractsVersion.ContractVersion_1_0 );
+                => ImmutableDictionary<string, int>.Empty.Add( "1.0", ContractsVersion.ContractVersion_1_0 );
 
             public T? GetService<T>()
                 where T : class, ICompilerService
