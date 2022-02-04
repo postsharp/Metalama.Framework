@@ -12,10 +12,16 @@ namespace Metalama.Framework.Engine.LamaSerialization
 {
     internal sealed class ReflectionSerializationProvider : ISerializerFactoryProvider, ISerializerDiscoverer
     {
+        private readonly IServiceProvider _serviceProvider;
         private readonly Dictionary<Type, ISerializerFactory> _serializerTypes = new();
         private readonly Dictionary<Type, bool> _inspectedTypes = new();
         private readonly Dictionary<Assembly, bool> _inspectedAssemblies = new();
         private readonly object _sync = new();
+
+        public ReflectionSerializationProvider( IServiceProvider serviceProvider )
+        {
+            this._serviceProvider = serviceProvider;
+        }
 
         public Type GetSurrogateType( Type objectType ) => objectType;
 
@@ -58,7 +64,7 @@ namespace Metalama.Framework.Engine.LamaSerialization
                 }
             }
 
-            this._serializerTypes.Add( objectType, new ReflectionSerializerFactory( serializerType ) );
+            this._serializerTypes.Add( objectType, new ReflectionSerializerFactory( this._serviceProvider, serializerType ) );
         }
 
         private void InspectType( Type type )
