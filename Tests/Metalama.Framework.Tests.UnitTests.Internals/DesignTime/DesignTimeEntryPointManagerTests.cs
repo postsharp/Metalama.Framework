@@ -42,7 +42,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
         }
 
         [Fact]
-        public async Task CancelGetSAsync()
+        public async Task CancelGetAsync()
         {
             IDesignTimeEntryPointManager manager = new DesignTimeEntryPointManager();
             var consumer = manager.GetConsumer( this._contractVersion );
