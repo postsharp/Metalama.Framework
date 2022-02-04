@@ -46,7 +46,7 @@ public partial class DesignTimeEntryPointManager
                 var taskCancelled = new TaskCompletionSource<bool>();
 
 #if NET5_0_OR_GREATER
-                    await using ( cancellationToken.Register( () => taskCancelled.SetCanceled( cancellationToken ) ) )
+                await using ( cancellationToken.Register( () => taskCancelled.SetCanceled( cancellationToken ) ) )
 #else
                 using ( cancellationToken.Register( () => taskCancelled.SetCanceled() ) )
 #endif
