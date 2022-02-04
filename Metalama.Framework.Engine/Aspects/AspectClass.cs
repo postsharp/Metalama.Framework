@@ -390,7 +390,7 @@ namespace Metalama.Framework.Engine.Aspects
             // We may execute user code, so we need to execute in a user context. This is not optimal, but we don't know,
             // in the current design, where we have user code. Also, we cannot report diagnostics in the current design,
             // so we have to let the exception fly.
-            var executionContext = new UserCodeExecutionContext( this.ServiceProvider, NullDiagnosticAdder.Instance, default );
+            var executionContext = new UserCodeExecutionContext( this.ServiceProvider );
 
             return this._userCodeInvoker.Invoke( GetEligibilityCore, executionContext );
 
@@ -437,7 +437,7 @@ namespace Metalama.Framework.Engine.Aspects
             // We may execute user code, so we need to execute in a user context. This is not optimal, but we don't know,
             // in the current design, where we have user code. Also, we cannot report diagnostics in the current design,
             // so we have to let the exception fly.
-            var executionContext = new UserCodeExecutionContext( this.ServiceProvider, NullDiagnosticAdder.Instance, default );
+            var executionContext = new UserCodeExecutionContext( this.ServiceProvider );
 
             return this._userCodeInvoker.Invoke(
                 () =>

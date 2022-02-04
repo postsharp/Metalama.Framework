@@ -10,6 +10,8 @@ namespace Metalama.Framework.Engine.LamaSerialization
 {
     internal class LamaFormatter
     {
+        private readonly IServiceProvider _serviceProvider;
+
         /// <summary>
         /// Gets the <see cref="LamaSerializationBinder"/> used by the current <see cref="LamaFormatter"/> to bind types to/from type names.
         /// </summary>
@@ -42,6 +44,7 @@ namespace Metalama.Framework.Engine.LamaSerialization
         /// <param name="serializerProvider">A custom implementation of <see cref="ISerializerFactoryProvider"/>, or <c>null</c> to use the default implementation.</param>
         private LamaFormatter( IServiceProvider serviceProvider, LamaSerializationBinder binder )
         {
+            this._serviceProvider = serviceProvider;
             this.Binder = binder;
             this.SerializerProvider = new SerializerProvider( serviceProvider.GetRequiredService<ISerializerFactoryProvider>() );
         }
@@ -55,12 +58,12 @@ namespace Metalama.Framework.Engine.LamaSerialization
         {
             try
             {
-                var serializationWriter = new SerializationWriter( stream, this, shouldReportExceptionCause: false );
+                var serializationWriter = new SerializationWriter( this._serviceProvider, stream, this, shouldReportExceptionCause: false );
                 serializationWriter.Serialize( obj );
             }
             catch ( LamaSerializationException )
             {
-                var serializationWriter = new SerializationWriter( Stream.Null, this, shouldReportExceptionCause: true );
+                var serializationWriter = new SerializationWriter( this._serviceProvider, Stream.Null, this, shouldReportExceptionCause: true );
                 serializationWriter.Serialize( obj );
             }
         }

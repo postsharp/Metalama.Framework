@@ -20,6 +20,8 @@ namespace Metalama.Framework.Engine.LamaSerialization
         /// <inheritdoc />
         public ISerializerFactoryProvider? NextProvider { get; }
 
+        protected IServiceProvider ServiceProvider { get; }
+
         /// <summary>
         /// Forbids further changes in the current <see cref="SerializerFactoryProvider"/>.
         /// </summary>
@@ -38,8 +40,9 @@ namespace Metalama.Framework.Engine.LamaSerialization
         /// </summary>
         /// <param name="nextProvider">The next provider in the chain, or <c>null</c> if there is none.</param>
         /// <param name="activatorProvider"></param>
-        public SerializerFactoryProvider( ISerializerFactoryProvider nextProvider )
+        public SerializerFactoryProvider( IServiceProvider serviceProvider, ISerializerFactoryProvider nextProvider )
         {
+            this.ServiceProvider = serviceProvider;
             this.NextProvider = nextProvider;
         }
 
@@ -71,7 +74,7 @@ namespace Metalama.Framework.Engine.LamaSerialization
                 throw new ArgumentOutOfRangeException( nameof(serializerType), "Type '{0}' does not implement ISerializer or IGenericSerializerFactory" );
             }
 
-            this._serializerTypes.Add( objectType, new ReflectionSerializerFactory( serializerType ) );
+            this._serializerTypes.Add( objectType, new ReflectionSerializerFactory( this.ServiceProvider, serializerType ) );
         }
 
         /// <inheritdoc />
