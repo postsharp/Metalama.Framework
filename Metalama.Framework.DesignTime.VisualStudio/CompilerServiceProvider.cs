@@ -4,6 +4,7 @@
 using Metalama.Framework.DesignTime.Contracts;
 using Metalama.Framework.DesignTime.VisualStudio.Classification;
 using Metalama.Framework.DesignTime.VisualStudio.Preview;
+using System.Collections.Immutable;
 
 namespace Metalama.Framework.DesignTime.VisualStudio
 {
@@ -14,13 +15,16 @@ namespace Metalama.Framework.DesignTime.VisualStudio
     {
         private readonly IServiceProvider _serviceProvider;
 
-        public CompilerServiceProvider( IServiceProvider serviceProvider )
+        public CompilerServiceProvider( IServiceProvider serviceProvider, ImmutableDictionary<string, int> contractVersions )
         {
+            this.ContractVersions = contractVersions;
             this._serviceProvider = serviceProvider;
             this.Version = this.GetType().Assembly.GetName().Version!;
         }
 
         public Version Version { get; }
+
+        public ImmutableDictionary<string, int> ContractVersions { get; }
 
         public T? GetService<T>()
             where T : class, ICompilerService
@@ -47,12 +51,6 @@ namespace Metalama.Framework.DesignTime.VisualStudio
             }
 
             return (T?) service;
-        }
-
-        event Action? ICompilerServiceProvider.Unloaded
-        {
-            add { }
-            remove { }
         }
     }
 }

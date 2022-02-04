@@ -1,1 +1,3 @@
-TODO: Replace this file with the correct program output. See the test output for the actual transformed code.
+Entering MyMethod( who = Lama )
+Hello, Lama!
+Leaving MyMethod( who = Lama )
