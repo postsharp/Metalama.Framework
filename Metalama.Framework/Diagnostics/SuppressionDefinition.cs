@@ -2,7 +2,6 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Aspects;
-using Metalama.Framework.Code;
 
 namespace Metalama.Framework.Diagnostics
 {
@@ -27,15 +26,5 @@ namespace Metalama.Framework.Diagnostics
         {
             this.SuppressedDiagnosticId = suppressedDiagnosticId;
         }
-
-        /// <summary>
-        /// Suppresses the diagnostic <see cref="SuppressedDiagnosticId"/> from a given declaration. 
-        /// </summary>
-        public void SuppressFrom( IDeclaration declaration, IDiagnosticSink sink ) => sink.Suppress( declaration, this );
-
-        /// <summary>
-        /// Suppresses the diagnostic <see cref="SuppressedDiagnosticId"/> from the default declaration of the current context.  
-        /// </summary>
-        public void SuppressFrom( in ScopedDiagnosticSink sink ) => sink.Suppress( this );
     }
 }

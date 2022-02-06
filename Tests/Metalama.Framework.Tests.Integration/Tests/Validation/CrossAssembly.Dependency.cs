@@ -20,7 +20,7 @@ namespace Metalama.Framework.Tests.Integration.Validation.CrossAssembly
 
         private static void Validate( in ReferenceValidationContext context )
         {
-            _warning.WithArguments( ( context.ReferenceKinds, context.ReferencingDeclaration ) ).ReportTo( context.Diagnostics );
+            context.Diagnostics.Report( _warning.WithArguments( ( context.ReferenceKinds, context.ReferencingDeclaration ) ) );
         }
     }
 

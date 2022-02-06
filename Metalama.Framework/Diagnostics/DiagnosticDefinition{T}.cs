@@ -63,4 +63,6 @@ public class DiagnosticDefinition<T> : IDiagnosticDefinition
     /// Creates an instance of the current diagnostic definition with specific arguments.
     /// </summary>
     public IDiagnostic WithArguments( T arguments ) => new DiagnosticImpl<T>( this, arguments, ImmutableArray<CodeFix>.Empty );
+
+    public override string ToString() => $"{this.Severity} {this.Id}: {this.Title}";
 }

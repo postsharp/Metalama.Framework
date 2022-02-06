@@ -269,7 +269,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
             var targetMetalamaType = compilation.Factory.GetTypeByReflectionName( targetType.FullName! );
             var targetMethod = targetMetalamaType.Methods.Single( m => string.Equals( m.Name, "Method", StringComparison.Ordinal ) );
 
-            var diagnostics = new UserDiagnosticSink( targetMethod );
+            var diagnostics = new UserDiagnosticSink();
 
             var roslynTargetType = roslynCompilation.Assembly.GetTypes().Single( t => t.Name.Equals( "TargetCode", StringComparison.Ordinal ) );
 

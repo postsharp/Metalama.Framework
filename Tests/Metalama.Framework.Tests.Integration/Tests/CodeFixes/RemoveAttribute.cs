@@ -14,7 +14,7 @@ namespace Metalama.Framework.Tests.Integration.CodeFixes.RemoveAttribute
         {
             base.BuildAspect( builder );
 
-            _diag.WithCodeFixes( CodeFixFactory.RemoveAttributes( builder.Target.DeclaringType, typeof(MyAttribute) ) ).ReportTo( builder.Diagnostics );
+            builder.Diagnostics.Report( _diag.WithCodeFixes( CodeFixFactory.RemoveAttributes( builder.Target.DeclaringType, typeof(MyAttribute) ) ) );
         }
     }
 

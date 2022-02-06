@@ -21,7 +21,7 @@ namespace Metalama.Framework.Tests.Integration.Validation.AllReferences
 
         private static void Validate( in ReferenceValidationContext context )
         {
-            _warning.WithArguments( ( context.ReferenceKinds, context.ReferencingDeclaration ) ).ReportTo( context.Diagnostics );
+            context.Diagnostics.Report( _warning.WithArguments( ( context.ReferenceKinds, context.ReferencingDeclaration ) ) );
         }
     }
 
@@ -48,16 +48,13 @@ namespace Metalama.Framework.Tests.Integration.Validation.AllReferences
             return null;
         }
     }
-    
+
     internal class ReferencingClass
     {
-    
-        void ReferencingMethod()
+        private void ReferencingMethod()
         {
-                    ValidatedClass variable;
+            ValidatedClass variable;
             ValidatedClass.Method( typeof(ValidatedClass) );
         }
-
-
     }
 }

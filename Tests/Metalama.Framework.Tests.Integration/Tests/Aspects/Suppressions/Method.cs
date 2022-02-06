@@ -16,7 +16,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Suppressions.Methods
 
         public override void BuildAspect( IAspectBuilder<IMethod> builder )
         {
-            builder.Diagnostics.Suppress( builder.Target, _suppression1 );
+            builder.Diagnostics.Suppress( _suppression1, builder.Target );
         }
     }
 

@@ -84,8 +84,6 @@ namespace Metalama.Framework.Engine.Templating
             this.SyntaxGenerationContext = syntaxGenerationContext;
             this.LexicalScope = lexicalScope;
             this._proceedExpression = proceedExpression;
-            Invariant.Assert( this.DiagnosticSink.DefaultScope != null );
-            Invariant.Assert( this.DiagnosticSink.DefaultScope!.Equals( this.MetaApi.Declaration ) );
         }
 
         public object TemplateInstance { get; }
