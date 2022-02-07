@@ -286,109 +286,13 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             out ExpressionSyntax? initializerExpression,
             out MethodDeclarationSyntax? initializerMethod )
         {
-            BlockSyntax? initializerBlock;
-
-            if ( this.InitializerExpression != null )
-            {
-                // TODO: Error about the expression type?
-                initializerMethod = null;
-                initializerExpression = ((IUserExpression) this.InitializerExpression).ToRunTimeExpression().Syntax;
-
-                return true;
-            }
-            else if ( this.InitializerTemplate.IsNotNull )
-            {
-                initializerExpression = null;
-
-                if ( !this.TryExpandInitializerTemplate( context, this.InitializerTemplate, out initializerBlock ) )
-                {
-                    // Template expansion error.
-                    initializerMethod = null;
-                    initializerExpression = null;
-
-                    return false;
-                }
-
-                // If the initializer block contains only a single return statement, 
-                if ( initializerBlock.Statements.Count == 1
-                     && initializerBlock.Statements[0] is ReturnStatementSyntax { Expression: not null } returnStatement )
-                {
-                    initializerMethod = null;
-                    initializerExpression = returnStatement.Expression;
-
-                    return true;
-                }
-            }
-            else
-            {
-                initializerMethod = null;
-                initializerExpression = null;
-
-                return true;
-            }
-
-            var initializerName = context.IntroductionNameProvider.GetInitializerName( this.DeclaringType, this.ParentAdvice.AspectLayerId, this );
-
-            if ( initializerBlock != null )
-            {
-                initializerExpression = InvocationExpression( IdentifierName( initializerName ) );
-
-                initializerMethod =
-                    MethodDeclaration(
-                        List<AttributeListSyntax>(),
-                        TokenList( Token( SyntaxKind.PrivateKeyword ), Token( SyntaxKind.StaticKeyword ) ),
-                        context.SyntaxGenerator.Type( this.Type.GetSymbol() ),
-                        null,
-                        Identifier( initializerName ),
-                        null,
-                        ParameterList(),
-                        List<TypeParameterConstraintClauseSyntax>(),
-                        initializerBlock,
-                        null );
-
-                return true;
-            }
-            else
-            {
-                initializerMethod = null;
-
-                return true;
-            }
-        }
-
-        private bool TryExpandInitializerTemplate(
-            MemberIntroductionContext context,
-            TemplateMember<IProperty> initializerTemplate,
-            [NotNullWhen( true )] out BlockSyntax? expression )
-        {
-            using ( context.DiagnosticSink.WithDefaultScope( this ) )
-            {
-                var metaApi = MetaApi.ForInitializer(
-                    this,
-                    new MetaApiProperties(
-                        context.DiagnosticSink,
-                        initializerTemplate.Cast(),
-                        this.ParentAdvice.ReadOnlyTags,
-                        this.ParentAdvice.AspectLayerId,
-                        context.SyntaxGenerationContext,
-                        this.ParentAdvice.Aspect,
-                        context.ServiceProvider ) );
-
-                var expansionContext = new TemplateExpansionContext(
-                    this.ParentAdvice.Aspect.Aspect,
-                    metaApi,
-                    this.Compilation,
-                    context.LexicalScopeProvider.GetLexicalScope( this ),
-                    context.ServiceProvider.GetRequiredService<SyntaxSerializationService>(),
-                    context.SyntaxGenerationContext,
-                    default,
-                    null,
-                    this.ParentAdvice.AspectLayerId );
-
-                var templateDriver = this.ParentAdvice.TemplateInstance.TemplateClass.GetTemplateDriver( this.InitializerTemplate.Declaration! );
-
-                return templateDriver.TryExpandDeclaration( expansionContext, context.DiagnosticSink, out expression );
-            }
+            return this.GetInitializerExpressionOrMethod(
+                context,
+                this.Type,
+                this.InitializerExpression,
+                this.InitializerTemplate,
+                out initializerExpression,
+                out initializerMethod );
         }
 
         public IMethod? GetAccessor( MethodKind methodKind )

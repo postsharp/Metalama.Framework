@@ -121,7 +121,7 @@ namespace Metalama.Framework.Engine.Linking
                     }
                     else
                     {
-                        var linkedExpression = this.GetLinkedExpression( aspectReference );
+                        var linkedExpression = this.GetLinkedExpression( aspectReference, inliningContext.SyntaxGenerationContext );
                         replacements.Add( aspectReference.Expression, linkedExpression );
                     }
                 }
@@ -491,7 +491,7 @@ namespace Metalama.Framework.Engine.Linking
         /// </summary>
         /// <param name="aspectReference"></param>
         /// <returns></returns>
-        private ExpressionSyntax GetLinkedExpression( ResolvedAspectReference aspectReference )
+        private ExpressionSyntax GetLinkedExpression( ResolvedAspectReference aspectReference, SyntaxGenerationContext syntaxGenerationContext )
         {
             if ( !SymbolEqualityComparer.Default.Equals(
                     aspectReference.ResolvedSemantic.Symbol.ContainingType,
@@ -567,18 +567,14 @@ namespace Metalama.Framework.Engine.Linking
 
                         if ( targetSymbol.IsStatic )
                         {
-                            // This was possible when base was able to point to hidden member. Now every
-                            // override must point to a (potentially introduced) member of the same type. 
-                            throw new AssertionFailedException( Justifications.ObsoleteBranch );
-
-                            // // Static member access where the target is a different type.
-                            // return
-                            //     MemberAccessExpression(
-                            //             SyntaxKind.SimpleMemberAccessExpression,
-                            //             LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( targetSymbol.ContainingType ),
-                            //             IdentifierName( targetMemberName ) )
-                            //         .WithLeadingTrivia( memberAccessExpression.GetLeadingTrivia() )
-                            //         .WithTrailingTrivia( memberAccessExpression.GetTrailingTrivia() );
+                            // Static member access where the target is a different type.
+                            return
+                                MemberAccessExpression(
+                                        SyntaxKind.SimpleMemberAccessExpression,
+                                        syntaxGenerationContext.SyntaxGenerator.Type( targetSymbol.ContainingType ),
+                                        IdentifierName( targetMemberName ) )
+                                    .WithLeadingTrivia( memberAccessExpression.GetLeadingTrivia() )
+                                    .WithTrailingTrivia( memberAccessExpression.GetTrailingTrivia() );
                         }
                         else
                         {

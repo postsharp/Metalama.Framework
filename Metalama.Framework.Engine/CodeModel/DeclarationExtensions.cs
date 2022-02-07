@@ -352,5 +352,56 @@ namespace Metalama.Framework.Engine.CodeModel
                     throw new AssertionFailedException();
             }
         }
+
+        internal static bool IsAccessibleWithin(this IMember member, INamedType within)
+        {
+            if ( member.GetSymbol() != null && within.GetSymbol() != null )
+            {
+                // Both are code elements, use Roslyn.
+                return member.GetCompilationModel().RoslynCompilation.IsSymbolAccessibleWithin( member.GetSymbol()!, within.GetSymbol() );
+            }
+            else if ( within.GetSymbol() != null && member.Compilation.InvariantComparer.Equals( member.DeclaringAssembly, within.DeclaringAssembly ) )
+            {
+                // Member is generated and in the same assembly as the other type.
+                var currentType = (INamedType?) within;
+
+                while ( currentType != null && currentType != member.DeclaringType )
+                {
+                    currentType = currentType.BaseType;
+                }
+
+                if ( currentType == null )
+                {
+                    // Other type is not super type of member's declaring type. We do not support this case atm.
+                    throw new NotImplementedException();
+                }
+
+                // Base type member is not accessible within the same assembly only if it private.
+                return member.Accessibility is not Accessibility.Private;
+            }
+            else
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        public static IMethod? FindClosestVisibleMethod(this INamedType namedType, IMethod signatureTemplate )
+        {
+            var currentType = (INamedType?)namedType;
+
+            while (currentType != null)
+            {
+                var method = currentType.Methods.OfExactSignature( signatureTemplate );
+
+                if ( method != null && method.IsAccessibleWithin(namedType) )
+                {
+                    return method;
+                }
+
+                currentType = currentType.BaseType;
+            }
+
+            return null;
+        }
     }
 }

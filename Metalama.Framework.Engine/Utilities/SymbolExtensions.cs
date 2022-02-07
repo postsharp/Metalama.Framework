@@ -231,5 +231,16 @@ namespace Metalama.Framework.Engine.Utilities
             => type.TypeKind == TypeKind.Struct ||
                (type.TypeKind == TypeKind.Class && !type.IsAbstract &&
                 type.InstanceConstructors.Any( ctor => ctor.Parameters.Length == 0 ));
+
+        public static bool IsVisibleTo(this ISymbol symbol, Compilation compilation, ISymbol otherSymbol)
+        {
+            return compilation.IsSymbolAccessibleWithin( 
+                symbol, 
+                otherSymbol switch 
+                {
+                    INamedTypeSymbol type => type,
+                    _ => otherSymbol.ContainingType,
+                } );
+        }
     }
 }

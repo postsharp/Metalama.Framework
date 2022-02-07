@@ -14,8 +14,8 @@ namespace Metalama.Framework.Engine.Linking
     {
         private class CleanupRewriter : CSharpSyntaxRewriter
         {
-            // TODO: Prune what we visit.
-            // TODO: Optimize (this reallocates multiple times.
+            // TODO: Prune what this visits.
+            // TODO: Optimize (this reallocates multiple times).
 
             public override SyntaxNode? VisitBlock( BlockSyntax node )
             {
@@ -62,8 +62,9 @@ namespace Metalama.Framework.Engine.Linking
                 }
 
                 var finalStatements = new List<StatementSyntax>();
+                var overflowingTrivia = SyntaxTriviaList.Empty;
 
-                // Process labeled statements.
+                // Process statements, cleaning empty labeled statements, and trivia empty statements.
                 for ( var i = 0; i < newStatements.Count; i++ )
                 {
                     var statement = newStatements[i];
@@ -86,12 +87,57 @@ namespace Metalama.Framework.Engine.Linking
 
                             i++;
                         }
+
+                        anyRewrittenStatement = true;
+                    }
+                    else if ( statement.GetLinkerGeneratedFlags().HasFlag( LinkerGeneratedFlags.EmptyTriviaStatement ) )
+                    {
+                        // This is statement that carries only trivias and should be removed, trivias added to the previous and next statement.
+                        if ( finalStatements.Count == 0 )
+                        {
+                            // There is not yet any statement to attach the trivia so everything goes into overflow.
+                            overflowingTrivia = statement.GetLeadingTrivia().AddRange(statement.GetTrailingTrivia());
+                        }
+                        else
+                        {
+                            // We need to replace trailing trivia of the last statement.
+                            var newTrailingTrivia =
+                                overflowingTrivia.Count > 0
+                                    ? statement.GetLeadingTrivia()
+                                        .AddRange( finalStatements[finalStatements.Count - 1].GetTrailingTrivia() )
+                                        .AddRange( statement.GetLeadingTrivia() )
+                                    : finalStatements[finalStatements.Count - 1].GetTrailingTrivia().AddRange( statement.GetLeadingTrivia() );
+
+                            finalStatements[finalStatements.Count - 1] =
+                                finalStatements[finalStatements.Count - 1]
+                                .WithTrailingTrivia( newTrailingTrivia );
+
+                            overflowingTrivia = statement.GetTrailingTrivia();
+                        }
+
+                        anyRewrittenStatement = true;
                     }
                     else
                     {
                         finalStatements.Add( statement );
                     }
                 }
+
+                if (overflowingTrivia != null)
+                {
+                    if ( finalStatements.Count > 0 )
+                    {
+                        finalStatements[finalStatements.Count - 1] =
+                            finalStatements[finalStatements.Count - 1]
+                            .WithTrailingTrivia( overflowingTrivia );
+                    }
+                    else
+                    {
+                        node = node.WithCloseBraceToken(
+                            node.CloseBraceToken.WithLeadingTrivia(
+                                overflowingTrivia.AddRange( node.CloseBraceToken.LeadingTrivia ) ) );
+                    }                    
+                }                
 
                 if ( anyRewrittenStatement )
                 {
@@ -104,6 +150,9 @@ namespace Metalama.Framework.Engine.Linking
 
                 void AddFlattenedBlockStatements( BlockSyntax block, List<StatementSyntax> statements )
                 {
+                    // Remember the predicted index of the first statement in the inlined block, which will receive trivia from open brace token.
+                    var firstStatementIndex = statements.Count;
+
                     foreach ( var statement in block.Statements )
                     {
                         if ( statement is BlockSyntax innerBlock && innerBlock.GetLinkerGeneratedFlags().HasFlag( LinkerGeneratedFlags.FlattenableBlock ) )
@@ -119,6 +168,30 @@ namespace Metalama.Framework.Engine.Linking
                                 statements.Add( visitedStatement.WithFormattingAnnotationsFrom( block ) );
                             }
                         }
+                    }
+
+                    // Index of the last statement.
+                    var lastStatementIndex = statements.Count - 1;
+                    var leadingTrivia = block.OpenBraceToken.LeadingTrivia.AddRange( block.OpenBraceToken.TrailingTrivia );
+                    var trailingTrivia = block.CloseBraceToken.LeadingTrivia.AddRange( block.CloseBraceToken.TrailingTrivia );
+
+                    if (firstStatementIndex >= statements.Count)
+                    {
+                        // There was no statement added.
+                        // We will add an empty statement to carry trivia, which we will prune above.
+                        statements.Add(
+                            EmptyStatement()
+                            .WithLeadingTrivia( leadingTrivia )
+                            .WithTrailingTrivia( trailingTrivia )
+                            .AddLinkerGeneratedFlags( LinkerGeneratedFlags.EmptyTriviaStatement ) );
+                    }
+                    else
+                    {
+                        statements[firstStatementIndex] =
+                            statements[firstStatementIndex].WithLeadingTrivia( leadingTrivia.AddRange( statements[firstStatementIndex].GetLeadingTrivia() ) );
+
+                        statements[lastStatementIndex] =
+                            statements[lastStatementIndex].WithTrailingTrivia( statements[lastStatementIndex].GetTrailingTrivia().AddRange( trailingTrivia ) );
                     }
                 }
             }
