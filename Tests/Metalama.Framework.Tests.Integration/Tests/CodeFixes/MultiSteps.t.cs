@@ -21,10 +21,10 @@ namespace Metalama.Framework.Tests.Integration.CodeFixes.MultiSteps
             if (builder.AspectInstance.Predecessors[0].Instance is IAttribute attribute)
             {
                 builder.Diagnostics.Suggest(
-                    attribute,
-                    CodeFixFactory.CreateCustomCodeFix(
-                        codeFixBuilder => ImplementManually( codeFixBuilder, builder.Target ),
-                        "Switch to manual implementation" ) );
+                    new CodeFix(
+                        "Switch to manual implementation",
+                        codeFixBuilder => ImplementManually( codeFixBuilder, builder.Target ) ),
+                    attribute );
             }
         }
 
