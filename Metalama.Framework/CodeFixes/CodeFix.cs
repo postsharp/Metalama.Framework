@@ -23,7 +23,7 @@ namespace Metalama.Framework.CodeFixes
         internal Func<ICodeFixBuilder, Task> Action { get; }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CodeFix"/> class. This constructor must be only be used to create multi-transformations
+        /// Initializes a new instance of the <see cref="CodeFix"/> class. This constructor must only be used to create multi-transformations
         /// code fixes. For single-step code fixes, use <see cref="CodeFixFactory"/>.
         /// </summary>
         /// <param name="title">Title of the code fix, shown to the user (must be unique).</param>
