@@ -22,7 +22,7 @@ namespace Metalama.Framework.Tests.Integration.Validation.DeclarationValidation
 
         private static void Validate( in DeclarationValidationContext context )
         {
-            _warning.WithArguments( context.Declaration ).ReportTo( context.Diagnostics );
+            context.Diagnostics.Report( _warning.WithArguments( context.Declaration ) );
         }
     }
 

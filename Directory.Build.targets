@@ -2,6 +2,7 @@
 
     <Import Sdk="PostSharp.Engineering.Sdk" Project="AssemblyMetadata.targets" />
     <Import Sdk="PostSharp.Engineering.Sdk" Project="TeamCity.targets" />
+    <Import Sdk="PostSharp.Engineering.Sdk" Project="CleanXmlDoc.targets" Condition="'$(EngineeringConfiguration)'=='Public'" />
 
     <ItemGroup>
         <!-- Specifically use the same version of Roslyn as we're using in Metalama Compiler -->

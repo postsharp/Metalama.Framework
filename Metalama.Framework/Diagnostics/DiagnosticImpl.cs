@@ -36,8 +36,4 @@ internal sealed class DiagnosticImpl<T> : IDiagnostic
 
         return this;
     }
-
-    void IDiagnostic.ReportTo( IDiagnosticLocation location, IDiagnosticSink sink ) => sink.Report( location, this );
-
-    void IDiagnostic.ReportTo( in ScopedDiagnosticSink sink ) => sink.Report( this );
 }

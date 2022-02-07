@@ -95,7 +95,8 @@ namespace Metalama.Framework.Engine.Linking
                 rewrittenBody = rewrittenBody.AddSourceCodeAnnotation();
             }
 
-            return rewrittenBody;
+            // Strip the leading and trailing trivia from the block (this is before and after the opening/closing brace).
+            return rewrittenBody.WithoutTrivia();
 
             void AddAspectReferenceReplacements()
             {
@@ -220,6 +221,10 @@ namespace Metalama.Framework.Engine.Linking
             }
         }
 
+        /// <summary>
+        /// Gets a node that becomes root node of the target symbol in the final compilation. This is used to get a block/expression for implicit
+        /// accessors, i.e. auto-properties and event fields.
+        /// </summary>
         private SyntaxNode GetBodyRootNode( IMethodSymbol symbol, SyntaxGenerationContext generationContext, out bool isImplicitlyLinked )
         {
             var declaration = symbol.GetPrimaryDeclaration();

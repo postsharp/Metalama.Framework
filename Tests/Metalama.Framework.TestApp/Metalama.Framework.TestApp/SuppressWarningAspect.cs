@@ -20,8 +20,8 @@ namespace Metalama.Framework.TestApp
 
         public void BuildAspect(IAspectBuilder<IDeclaration> aspectBuilder)
         {
-            aspectBuilder.Diagnostics.Suppress(aspectBuilder.Target, _mySuppression1);
-            aspectBuilder.Diagnostics.Suppress(aspectBuilder.Target, _mySuppression2);
+            aspectBuilder.Diagnostics.Suppress(_mySuppression1);
+            aspectBuilder.Diagnostics.Suppress(_mySuppression2);
         }
     }
 }

@@ -28,16 +28,5 @@ namespace Metalama.Framework.Diagnostics
         object? IDiagnostic.Arguments => default(None);
 
         public IDiagnostic WithCodeFixes( params CodeFix[] codeFixes ) => new DiagnosticImpl<None>( this, default, codeFixes.ToImmutableArray() );
-
-        /// <summary>
-        /// Reports the current diagnostic to a given <see cref="IDiagnosticLocation"/> (typically a declaration or syntax node). 
-        /// </summary>
-        public void ReportTo( IDiagnosticLocation location, IDiagnosticSink sink ) => sink.Report( location, this );
-
-        /// <summary>
-        /// Reports the current diagnostic to the default location (declaration or syntax node) of the current context.
-        /// </summary>
-        /// <param name="sink">The <see cref="ScopedDiagnosticSink"/> for the current context.</param>
-        public void ReportTo( in ScopedDiagnosticSink sink ) => sink.Report( this );
     }
 }

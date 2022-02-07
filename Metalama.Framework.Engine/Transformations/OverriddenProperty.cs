@@ -47,110 +47,107 @@ namespace Metalama.Framework.Engine.Transformations
 
         public override IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context )
         {
-            using ( context.DiagnosticSink.WithDefaultScope( this.OverriddenDeclaration ) )
+            var propertyName = context.IntroductionNameProvider.GetOverrideName(
+                this.OverriddenDeclaration.DeclaringType,
+                this.Advice.AspectLayerId,
+                this.OverriddenDeclaration );
+
+            var getTemplate = this.GetTemplate;
+            var setTemplate = this.SetTemplate;
+
+            var setAccessorDeclarationKind = this.OverriddenDeclaration.Writeability == Writeability.InitOnly
+                ? SyntaxKind.InitAccessorDeclaration
+                : SyntaxKind.SetAccessorDeclaration;
+
+            var templateExpansionError = false;
+            BlockSyntax? getAccessorBody = null;
+
+            if ( this.OverriddenDeclaration.GetMethod != null )
             {
-                var propertyName = context.IntroductionNameProvider.GetOverrideName(
-                    this.OverriddenDeclaration.DeclaringType,
-                    this.Advice.AspectLayerId,
-                    this.OverriddenDeclaration );
-
-                var getTemplate = this.GetTemplate;
-                var setTemplate = this.SetTemplate;
-
-                var setAccessorDeclarationKind = this.OverriddenDeclaration.Writeability == Writeability.InitOnly
-                    ? SyntaxKind.InitAccessorDeclaration
-                    : SyntaxKind.SetAccessorDeclaration;
-
-                var templateExpansionError = false;
-                BlockSyntax? getAccessorBody = null;
-
-                if ( this.OverriddenDeclaration.GetMethod != null )
+                if ( getTemplate.IsNotNull )
                 {
-                    if ( getTemplate.IsNotNull )
-                    {
-                        templateExpansionError = templateExpansionError || !this.TryExpandAccessorTemplate(
-                            context,
-                            getTemplate,
-                            this.OverriddenDeclaration.GetMethod,
-                            out getAccessorBody );
-                    }
-                    else
-                    {
-                        getAccessorBody = this.CreateIdentityAccessorBody( SyntaxKind.GetAccessorDeclaration, context.SyntaxGenerationContext );
-                    }
+                    templateExpansionError = templateExpansionError || !this.TryExpandAccessorTemplate(
+                        context,
+                        getTemplate,
+                        this.OverriddenDeclaration.GetMethod,
+                        out getAccessorBody );
                 }
                 else
                 {
-                    getAccessorBody = null;
+                    getAccessorBody = this.CreateIdentityAccessorBody( SyntaxKind.GetAccessorDeclaration, context.SyntaxGenerationContext );
                 }
-
-                BlockSyntax? setAccessorBody = null;
-
-                if ( this.OverriddenDeclaration.SetMethod != null )
-                {
-                    if ( setTemplate.IsNotNull )
-                    {
-                        templateExpansionError = templateExpansionError || !this.TryExpandAccessorTemplate(
-                            context,
-                            setTemplate,
-                            this.OverriddenDeclaration.SetMethod,
-                            out setAccessorBody );
-                    }
-                    else
-                    {
-                        setAccessorBody = this.CreateIdentityAccessorBody( SyntaxKind.SetAccessorDeclaration, context.SyntaxGenerationContext );
-                    }
-                }
-                else
-                {
-                    setAccessorBody = null;
-                }
-
-                if ( templateExpansionError )
-                {
-                    // Template expansion error.
-                    return Enumerable.Empty<IntroducedMember>();
-                }
-
-                var overrides = new[]
-                {
-                    new IntroducedMember(
-                        this,
-                        PropertyDeclaration(
-                            List<AttributeListSyntax>(),
-                            this.OverriddenDeclaration.GetSyntaxModifierList(),
-                            context.SyntaxGenerator.PropertyType( this.OverriddenDeclaration ),
-                            null,
-                            Identifier( propertyName ),
-                            AccessorList(
-                                List(
-                                    new[]
-                                        {
-                                            getAccessorBody != null
-                                                ? AccessorDeclaration(
-                                                    SyntaxKind.GetAccessorDeclaration,
-                                                    List<AttributeListSyntax>(),
-                                                    this.OverriddenDeclaration.GetMethod.AssertNotNull().GetSyntaxModifierList(),
-                                                    getAccessorBody )
-                                                : null,
-                                            setAccessorBody != null
-                                                ? AccessorDeclaration(
-                                                    setAccessorDeclarationKind,
-                                                    List<AttributeListSyntax>(),
-                                                    this.OverriddenDeclaration.SetMethod.AssertNotNull().GetSyntaxModifierList(),
-                                                    setAccessorBody )
-                                                : null
-                                        }.Where( a => a != null )
-                                        .AssertNoneNull() ) ),
-                            null,
-                            null ),
-                        this.Advice.AspectLayerId,
-                        IntroducedMemberSemantic.Override,
-                        this.OverriddenDeclaration )
-                };
-
-                return overrides;
             }
+            else
+            {
+                getAccessorBody = null;
+            }
+
+            BlockSyntax? setAccessorBody = null;
+
+            if ( this.OverriddenDeclaration.SetMethod != null )
+            {
+                if ( setTemplate.IsNotNull )
+                {
+                    templateExpansionError = templateExpansionError || !this.TryExpandAccessorTemplate(
+                        context,
+                        setTemplate,
+                        this.OverriddenDeclaration.SetMethod,
+                        out setAccessorBody );
+                }
+                else
+                {
+                    setAccessorBody = this.CreateIdentityAccessorBody( SyntaxKind.SetAccessorDeclaration, context.SyntaxGenerationContext );
+                }
+            }
+            else
+            {
+                setAccessorBody = null;
+            }
+
+            if ( templateExpansionError )
+            {
+                // Template expansion error.
+                return Enumerable.Empty<IntroducedMember>();
+            }
+
+            var overrides = new[]
+            {
+                new IntroducedMember(
+                    this,
+                    PropertyDeclaration(
+                        List<AttributeListSyntax>(),
+                        this.OverriddenDeclaration.GetSyntaxModifierList(),
+                        context.SyntaxGenerator.PropertyType( this.OverriddenDeclaration ),
+                        null,
+                        Identifier( propertyName ),
+                        AccessorList(
+                            List(
+                                new[]
+                                    {
+                                        getAccessorBody != null
+                                            ? AccessorDeclaration(
+                                                SyntaxKind.GetAccessorDeclaration,
+                                                List<AttributeListSyntax>(),
+                                                this.OverriddenDeclaration.GetMethod.AssertNotNull().GetSyntaxModifierList(),
+                                                getAccessorBody )
+                                            : null,
+                                        setAccessorBody != null
+                                            ? AccessorDeclaration(
+                                                setAccessorDeclarationKind,
+                                                List<AttributeListSyntax>(),
+                                                this.OverriddenDeclaration.SetMethod.AssertNotNull().GetSyntaxModifierList(),
+                                                setAccessorBody )
+                                            : null
+                                    }.Where( a => a != null )
+                                    .AssertNoneNull() ) ),
+                        null,
+                        null ),
+                    this.Advice.AspectLayerId,
+                    IntroducedMemberSemantic.Override,
+                    this.OverriddenDeclaration )
+            };
+
+            return overrides;
         }
 
         private bool TryExpandAccessorTemplate(
@@ -159,50 +156,47 @@ namespace Metalama.Framework.Engine.Transformations
             IMethod accessor,
             [NotNullWhen( true )] out BlockSyntax? body )
         {
-            using ( context.DiagnosticSink.WithDefaultScope( accessor ) )
-            {
-                var proceedExpression =
-                    accessor.MethodKind switch
-                    {
-                        MethodKind.PropertyGet => ProceedHelper.CreateProceedDynamicExpression(
-                            context.SyntaxGenerationContext,
-                            this.CreateProceedGetExpression( context.SyntaxGenerationContext ),
-                            this.GetTemplate,
-                            this.OverriddenDeclaration.GetMethod.AssertNotNull() ),
-                        MethodKind.PropertySet => new UserExpression(
-                            this.CreateProceedSetExpression( context.SyntaxGenerationContext ),
-                            this.OverriddenDeclaration.Compilation.TypeFactory.GetSpecialType( SpecialType.Void ),
-                            context.SyntaxGenerationContext ),
-                        _ => throw new AssertionFailedException()
-                    };
-
-                var metaApi = MetaApi.ForFieldOrProperty(
-                    this.OverriddenDeclaration,
-                    accessor,
-                    new MetaApiProperties(
-                        context.DiagnosticSink,
-                        accessorTemplate.Cast(),
-                        this.Advice.ReadOnlyTags,
-                        this.Advice.AspectLayerId,
+            var proceedExpression =
+                accessor.MethodKind switch
+                {
+                    MethodKind.PropertyGet => ProceedHelper.CreateProceedDynamicExpression(
                         context.SyntaxGenerationContext,
-                        this.Advice.Aspect,
-                        context.ServiceProvider ) );
+                        this.CreateProceedGetExpression( context.SyntaxGenerationContext ),
+                        this.GetTemplate,
+                        this.OverriddenDeclaration.GetMethod.AssertNotNull() ),
+                    MethodKind.PropertySet => new UserExpression(
+                        this.CreateProceedSetExpression( context.SyntaxGenerationContext ),
+                        this.OverriddenDeclaration.Compilation.TypeFactory.GetSpecialType( SpecialType.Void ),
+                        context.SyntaxGenerationContext ),
+                    _ => throw new AssertionFailedException()
+                };
 
-                var expansionContext = new TemplateExpansionContext(
-                    this.Advice.Aspect.Aspect,
-                    metaApi,
-                    (CompilationModel) this.OverriddenDeclaration.Compilation,
-                    context.LexicalScopeProvider.GetLexicalScope( accessor ),
-                    context.ServiceProvider.GetRequiredService<SyntaxSerializationService>(),
+            var metaApi = MetaApi.ForFieldOrProperty(
+                this.OverriddenDeclaration,
+                accessor,
+                new MetaApiProperties(
+                    context.DiagnosticSink,
+                    accessorTemplate.Cast(),
+                    this.Advice.ReadOnlyTags,
+                    this.Advice.AspectLayerId,
                     context.SyntaxGenerationContext,
-                    default,
-                    proceedExpression,
-                    this.Advice.AspectLayerId );
+                    this.Advice.Aspect,
+                    context.ServiceProvider ) );
 
-                var templateDriver = this.Advice.TemplateInstance.TemplateClass.GetTemplateDriver( accessorTemplate.Declaration! );
+            var expansionContext = new TemplateExpansionContext(
+                this.Advice.Aspect.Aspect,
+                metaApi,
+                (CompilationModel) this.OverriddenDeclaration.Compilation,
+                context.LexicalScopeProvider.GetLexicalScope( accessor ),
+                context.ServiceProvider.GetRequiredService<SyntaxSerializationService>(),
+                context.SyntaxGenerationContext,
+                default,
+                proceedExpression,
+                this.Advice.AspectLayerId );
 
-                return templateDriver.TryExpandDeclaration( expansionContext, context.DiagnosticSink, out body );
-            }
+            var templateDriver = this.Advice.TemplateInstance.TemplateClass.GetTemplateDriver( accessorTemplate.Declaration! );
+
+            return templateDriver.TryExpandDeclaration( expansionContext, context.DiagnosticSink, out body );
         }
 
         /// <summary>

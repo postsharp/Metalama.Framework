@@ -32,8 +32,6 @@ namespace Metalama.Framework.Engine.Templating
             IDiagnosticAdder diagnosticAdder,
             [NotNullWhen( true )] out BlockSyntax? block )
         {
-            Invariant.Assert( templateExpansionContext.DiagnosticSink.DefaultScope != null );
-
             var errorCountBefore = templateExpansionContext.DiagnosticSink.ErrorCount;
 
             using ( meta.WithContext( templateExpansionContext.MetaApi ) )

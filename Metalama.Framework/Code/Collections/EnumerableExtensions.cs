@@ -29,6 +29,8 @@ namespace Metalama.Framework.Code.Collections
                 }
             }
         }
+        
+        // NOTE: The next method is not public because it pollutes Intellisense and the documentation for all objects.
 
         /// <summary>
         /// Selects the closure of a graph. This is typically used to select all descendants of a tree node.  This method returns distinct nodes only.
@@ -39,7 +41,7 @@ namespace Metalama.Framework.Code.Collections
         /// <param name="throwOnDuplicate"><c>true</c> if an exception must be thrown if a duplicate if found.</param>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public static IEnumerable<T> SelectManyRecursive<T>(
+        internal static IEnumerable<T> SelectManyRecursive<T>(
             this T item,
             Func<T, IEnumerable<T>?> getItems,
             bool includeThis = false,

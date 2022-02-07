@@ -19,15 +19,13 @@ namespace Metalama.Framework.Engine.Diagnostics
     /// Implements the user-level <see cref="IDiagnosticSink"/> interface
     /// and maps user-level diagnostics into Roslyn <see cref="Diagnostic"/>.
     /// </summary>
-    public partial class UserDiagnosticSink : IDiagnosticSink, IDiagnosticAdder
+    public class UserDiagnosticSink : IDiagnosticSink, IDiagnosticAdder
     {
         private readonly DiagnosticManifest? _diagnosticManifest;
         private readonly CodeFixFilter _codeFixFilter;
         private ImmutableArray<Diagnostic>.Builder? _diagnostics;
         private ImmutableArray<ScopedSuppression>.Builder? _suppressions;
         private ImmutableArray<CodeFixInstance>.Builder? _codeFixes;
-
-        public IDeclaration? DefaultScope { get; private set; }
 
         public bool IsEmpty
         {
@@ -54,17 +52,15 @@ namespace Metalama.Framework.Engine.Diagnostics
 
         public UserDiagnosticSink( CompileTimeProject? compileTimeProject ) : this( compileTimeProject, null ) { }
 
-        internal UserDiagnosticSink( CompileTimeProject? compileTimeProject, CodeFixFilter? codeFixFilter, IDeclaration? defaultScope = null )
+        internal UserDiagnosticSink( CompileTimeProject? compileTimeProject, CodeFixFilter? codeFixFilter )
         {
             this._diagnosticManifest = compileTimeProject?.ClosureDiagnosticManifest;
             this._codeFixFilter = codeFixFilter ?? (( _, _ ) => false);
-            this.DefaultScope = defaultScope;
         }
 
         // This overload is used for tests only.
-        internal UserDiagnosticSink( IDeclaration? defaultScope = null, CodeFixFilter? codeFixFilter = null )
+        internal UserDiagnosticSink( CodeFixFilter? codeFixFilter = null )
         {
-            this.DefaultScope = defaultScope;
             this._codeFixFilter = codeFixFilter ?? (( _, _ ) => false);
         }
 
@@ -150,14 +146,6 @@ namespace Metalama.Framework.Engine.Diagnostics
             }
         }
 
-        public IDisposable WithDefaultScope( IDeclaration scope )
-        {
-            var oldScope = this.DefaultScope;
-            this.DefaultScope = scope;
-
-            return new RestoreLocationCookie( this, oldScope );
-        }
-
         public ImmutableUserDiagnosticList ToImmutable()
             => new( this._diagnostics?.ToImmutable(), this._suppressions?.ToImmutable(), this._codeFixes?.ToImmutable() );
 
@@ -184,7 +172,7 @@ namespace Metalama.Framework.Engine.Diagnostics
             }
         }
 
-        public void Report( IDiagnosticLocation? location, IDiagnostic diagnostic )
+        public void Report( IDiagnostic diagnostic, IDiagnosticLocation? location )
         {
             this.ValidateUserReport( diagnostic.Definition );
 
@@ -194,17 +182,13 @@ namespace Metalama.Framework.Engine.Diagnostics
             this.Report( diagnostic.Definition.CreateRoslynDiagnostic( resolvedLocation, diagnostic.Arguments, codeFixes: codeFixTitles ) );
         }
 
-        public void Suppress( IDeclaration? scope, SuppressionDefinition definition )
+        public void Suppress( SuppressionDefinition suppression, IDeclaration scope )
         {
-            this.ValidateUserSuppression( definition );
-
-            if ( this.DefaultScope != null )
-            {
-                this.Suppress( new ScopedSuppression( definition, scope ?? this.DefaultScope ) );
-            }
+            this.ValidateUserSuppression( suppression );
+            this.Suppress( new ScopedSuppression( suppression, scope ) );
         }
 
-        public void Suggest( IDiagnosticLocation? location, CodeFix codeFix )
+        public void Suggest( CodeFix codeFix, IDiagnosticLocation location )
         {
             var definition = GeneralDiagnosticDescriptors.SuggestedCodeFix;
             var resolvedLocation = GetLocation( location );

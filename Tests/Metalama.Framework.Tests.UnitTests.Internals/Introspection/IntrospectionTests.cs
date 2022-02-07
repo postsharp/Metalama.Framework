@@ -29,7 +29,7 @@ class Aspect : TypeAspect
 
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        _warning.ReportTo( builder.Diagnostics );
+builder.Diagnostics.Report(         _warning );
     }
 
     [Introduce]
@@ -80,7 +80,7 @@ class Aspect : TypeAspect
 
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        _error.ReportTo( builder.Diagnostics );
+builder.Diagnostics.Report(         _error );
     }
 
     [Introduce]

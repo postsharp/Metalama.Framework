@@ -11,7 +11,7 @@ namespace Metalama.Framework.Tests.Integration.CodeFixes.Suggest
         {
             base.BuildAspect( builder );
 
-            builder.Diagnostics.Suggest( builder.Target, CodeFixFactory.AddAttribute( builder.Target, typeof(MyAttribute) ) );
+            builder.Diagnostics.Suggest( CodeFixFactory.AddAttribute( builder.Target, typeof(MyAttribute) ), builder.Target );
         }
     }
 

@@ -1,4 +1,3 @@
-// @Skipped(29354)
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
@@ -12,7 +11,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Formatting.Output.Diagnosti
 
         public override void BuildAspect( IAspectBuilder<IMethod> builder )
         {
-            _warning.ReportTo( builder.Diagnostics );
+            builder.Diagnostics.Report( _warning );
         }
     }
 
