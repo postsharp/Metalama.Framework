@@ -4,6 +4,7 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Collections.Immutable;
 using System.Threading;
 
 namespace Metalama.Framework.Engine.CompileTime
@@ -18,14 +19,25 @@ namespace Metalama.Framework.Engine.CompileTime
             private readonly SemanticModel _semanticModel;
             private readonly ISymbolClassifier _classifier;
             private readonly CancellationToken _cancellationToken;
+            private readonly ImmutableArray<NameSyntax>.Builder _globalUsings = ImmutableArray.CreateBuilder<NameSyntax>();
 
             public bool HasCompileTimeCode { get; private set; }
+
+            public ImmutableArray<NameSyntax> GlobalUsings => this._globalUsings.ToImmutable();
 
             public FindCompileTimeCodeVisitor( SemanticModel semanticModel, ISymbolClassifier classifier, CancellationToken cancellationToken )
             {
                 this._semanticModel = semanticModel;
                 this._classifier = classifier;
                 this._cancellationToken = cancellationToken;
+            }
+
+            public override void VisitUsingDirective( UsingDirectiveSyntax node )
+            {
+                if ( node.GlobalKeyword.Kind() == SyntaxKind.GlobalKeyword )
+                {
+                    this._globalUsings.Add( node.Name );
+                }
             }
 
             private void VisitTypeDeclaration( SyntaxNode node )

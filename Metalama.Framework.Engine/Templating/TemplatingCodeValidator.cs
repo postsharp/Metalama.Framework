@@ -1,7 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Metalama.Framework.Engine.DesignTime.Pipeline;
 using Metalama.Framework.Engine.Diagnostics;
 using Microsoft.CodeAnalysis;
 using System;
@@ -9,23 +8,8 @@ using System.Threading;
 
 namespace Metalama.Framework.Engine.Templating
 {
-    internal static partial class TemplatingCodeValidator
+    public static partial class TemplatingCodeValidator
     {
-        internal static void Validate(
-            SemanticModel semanticModel,
-            Action<Diagnostic> reportDiagnostic,
-            DesignTimeAspectPipeline pipeline,
-            CancellationToken cancellationToken )
-        {
-            Validate(
-                pipeline.ServiceProvider,
-                semanticModel,
-                reportDiagnostic,
-                pipeline.IsCompileTimeSyntaxTreeOutdated( semanticModel.SyntaxTree.FilePath ),
-                true,
-                cancellationToken );
-        }
-
         internal static bool Validate(
             Compilation compilation,
             IDiagnosticAdder diagnosticAdder,
@@ -52,11 +36,11 @@ namespace Metalama.Framework.Engine.Templating
             IServiceProvider serviceProvider,
             SemanticModel semanticModel,
             Action<Diagnostic> reportDiagnostic,
-            bool isCompileTimeTreeOutdated,
+            bool reportCompileTimeTreeOutdatedError,
             bool isDesignTime,
             CancellationToken cancellationToken )
         {
-            Visitor visitor = new( semanticModel, reportDiagnostic, serviceProvider, isCompileTimeTreeOutdated, isDesignTime, cancellationToken );
+            Visitor visitor = new( semanticModel, reportDiagnostic, serviceProvider, reportCompileTimeTreeOutdatedError, isDesignTime, cancellationToken );
             visitor.Visit( semanticModel.SyntaxTree.GetRoot() );
 
             return !visitor.HasError;

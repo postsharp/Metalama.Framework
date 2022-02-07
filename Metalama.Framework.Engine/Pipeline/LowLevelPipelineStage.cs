@@ -4,9 +4,9 @@
 using Metalama.Compiler;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Aspects;
+using Metalama.Framework.Engine.AspectWeavers;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
-using Metalama.Framework.Engine.Sdk;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Project;
 using System;
@@ -35,10 +35,10 @@ namespace Metalama.Framework.Engine.Pipeline
         /// <inheritdoc/>
         public override bool TryExecute(
             AspectPipelineConfiguration pipelineConfiguration,
-            PipelineStageResult input,
+            AspectPipelineResult input,
             IDiagnosticAdder diagnostics,
             CancellationToken cancellationToken,
-            [NotNullWhen( true )] out PipelineStageResult? result )
+            [NotNullWhen( true )] out AspectPipelineResult? result )
         {
             // TODO: it is suboptimal to get a CompilationModel here.
             var compilationModel = CompilationModel.CreateInitialInstance( input.Project, input.Compilation );
@@ -87,7 +87,7 @@ namespace Metalama.Framework.Engine.Pipeline
             // (the problem here is that we don't necessarily need CompilationModels after a low-level pipeline, because
             // they are supposed to be "unmanaged" at the end of the pipeline. Currently this condition is not properly enforced,
             // and we don't test what happens when a low-level stage is before a high-level stage).
-            result = new PipelineStageResult(
+            result = new AspectPipelineResult(
                 newCompilation,
                 input.Project,
                 input.AspectLayers,

@@ -11,15 +11,15 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="LINQPad.Reference" Version="1.2.0-beta"/>
-        <ProjectReference Include="..\Metalama.Framework.Workspaces\Metalama.Framework.Workspaces.csproj"/>
-        <ProjectReference Include="..\Metalama.Framework.Engine\Metalama.Framework.Engine.csproj"/>
+        <PackageReference Include="LINQPad.Reference" Version="1.2.0-beta" />
+        <ProjectReference Include="..\Metalama.Framework.Workspaces\Metalama.Framework.Workspaces.csproj" />
+        <ProjectReference Include="..\Metalama.Framework.Engine\Metalama.Framework.Engine.csproj" />
 
-        <InternalsVisibleTo Include="Metalama.LinqPad.Tests"/>
+        <InternalsVisibleTo Include="Metalama.LinqPad.Tests" />
     </ItemGroup>
 
     <ItemGroup>
-        <None Include="linqpad-samples/*.linq" Pack="True" PackagePath="linqpad-samples"/>
+        <None Include="linqpad-samples/*.linq" Pack="True" PackagePath="linqpad-samples" />
     </ItemGroup>
 
 

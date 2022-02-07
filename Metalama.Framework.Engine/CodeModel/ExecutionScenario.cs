@@ -5,7 +5,7 @@ using Metalama.Framework.Project;
 
 namespace Metalama.Framework.Engine.CodeModel
 {
-    internal class ExecutionScenario : IExecutionScenario
+    public class ExecutionScenario : IExecutionScenario
     {
         public string Name { get; }
 
@@ -26,6 +26,8 @@ namespace Metalama.Framework.Engine.CodeModel
         public static IExecutionScenario CompileTime { get; } = new ExecutionScenario( nameof(CompileTime), false, true, false, false );
 
         public static IExecutionScenario CodeFix { get; } = new ExecutionScenario( nameof(CodeFix), true, false, true, true );
+
+        public static IExecutionScenario Introspection { get; } = new ExecutionScenario( nameof(Introspection), false, true, true, false );
 
         private ExecutionScenario(
             string name,

@@ -5,6 +5,7 @@ using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Immutable;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 
@@ -46,6 +47,27 @@ namespace Metalama.Framework.Engine.CompileTime
             => compilation.GetTypeByMetadataName( name ) ?? throw new ArgumentOutOfRangeException(
                 nameof(name),
                 $"Cannot find a type '{name}' in compilation '{compilation.AssemblyName}" );
+
+        public static IAssemblySymbol? GetAssembly( this Compilation compilation, AssemblyIdentity assemblyName )
+        {
+            if ( compilation.Assembly.Identity.Equals( assemblyName ) )
+            {
+                return compilation.Assembly;
+            }
+            else
+            {
+                var referencedAssembly = compilation.SourceModule.ReferencedAssemblySymbols.FirstOrDefault( a => a.Identity.Equals( assemblyName ) );
+
+                if ( referencedAssembly != null )
+                {
+                    return referencedAssembly;
+                }
+                else
+                {
+                    return null;
+                }
+            }
+        }
 
         /// <summary>
         /// Gets a string that would be equal to <see cref="Type.FullName"/>, except that we do not qualify type names with the assembly name.

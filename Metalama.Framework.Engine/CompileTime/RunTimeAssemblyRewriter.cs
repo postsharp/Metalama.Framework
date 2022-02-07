@@ -1,8 +1,8 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Framework.Engine.AspectWeavers;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.Sdk;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -149,7 +149,7 @@ namespace Metalama.Compiler
         {
             if ( this.MustReplaceByThrow( node ) )
             {
-                return this.WithThrowNotSupportedExceptionBody( node, "Compile-time only code cannot be called at run-time." );
+                return this.WithThrowNotSupportedExceptionBody( node, "Compile-time-only code cannot be called at run-time." );
             }
 
             return node;
@@ -182,7 +182,7 @@ namespace Metalama.Compiler
             /*
             if ( this.MustReplaceByThrow( node ) )
             {
-                return WithThrowNotSupportedExceptionBody( node, "Compile-time only code cannot be called at run-time." );
+                return WithThrowNotSupportedExceptionBody( node, "Compile-time-only code cannot be called at run-time." );
             }
 
             return node;
@@ -207,7 +207,7 @@ namespace Metalama.Compiler
                     return node;
                 }
 
-                return this.WithThrowNotSupportedExceptionBody( node, "Compile-time only code cannot be called at run-time." );
+                return this.WithThrowNotSupportedExceptionBody( node, "Compile-time-only code cannot be called at run-time." );
             }
 
             if ( node.Initializer != null && this.MustRemoveInitializer( node ) )
@@ -222,7 +222,7 @@ namespace Metalama.Compiler
         {
             if ( this.MustReplaceByThrow( node ) )
             {
-                return this.WithThrowNotSupportedExceptionBody( node, "Compile-time only code cannot be called at run-time." );
+                return this.WithThrowNotSupportedExceptionBody( node, "Compile-time-only code cannot be called at run-time." );
             }
 
             return node;

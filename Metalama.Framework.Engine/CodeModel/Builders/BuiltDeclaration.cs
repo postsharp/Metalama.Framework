@@ -53,7 +53,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         protected IDeclaration GetForCompilation( CompilationModel compilation )
             => this.Compilation == compilation ? this : compilation.Factory.GetDeclaration( this.Builder );
 
-        public override Ref<IDeclaration> ToRef() => Ref.FromBuilder( this.Builder );
+        internal override Ref<IDeclaration> ToRef() => Ref.FromBuilder( this.Builder );
 
         public override ImmutableArray<SyntaxReference> DeclaringSyntaxReferences => this.Builder.DeclaringSyntaxReferences;
 

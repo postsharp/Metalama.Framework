@@ -1,11 +1,12 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Backstage.Diagnostics;
+using Metalama.Framework.Engine.CodeFixes;
 using Metalama.Framework.Engine.CompileTime;
-using Metalama.Framework.Engine.DesignTime.CodeFixes;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Pipeline;
-using Metalama.Framework.Engine.Testing;
+using Metalama.Framework.Engine.Pipeline.CompileTime;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -90,7 +91,7 @@ namespace Metalama.TestFramework
                 if ( testInput.Options.ApplyCodeFix.GetValueOrDefault() )
                 {
                     // When we test code fixed, we don't apply the pipeline output, but we apply the code fix instead.
-                    if ( !await ApplyCodeFixAsync( testInput, testResult, domain ) )
+                    if ( !await ApplyCodeFixAsync( testInput, testResult, domain, serviceProviderWithObserver ) )
                     {
                         return;
                     }
@@ -114,20 +115,25 @@ namespace Metalama.TestFramework
             }
         }
 
-        private static async Task<bool> ApplyCodeFixAsync( TestInput testInput, TestResult testResult, CompileTimeDomain domain )
+        private static async Task<bool> ApplyCodeFixAsync(
+            TestInput testInput,
+            TestResult testResult,
+            CompileTimeDomain domain,
+            ServiceProvider serviceProvider )
         {
             var codeFixes = testResult.PipelineDiagnostics.SelectMany( d => CodeFixTitles.GetCodeFixTitles( d ).Select( t => (Diagnostic: d, Title: t) ) );
             var codeFix = codeFixes.ElementAt( testInput.Options.AppliedCodeFixIndex.GetValueOrDefault() );
-            var codeFixRunner = new CodeFixRunner( domain, new TestProjectOptions() );
+            var codeFixRunner = new StandaloneCodeFixRunner( domain, serviceProvider );
 
             var inputDocument = testResult.SyntaxTrees[0].InputDocument;
 
-            var transformedSolution = await codeFixRunner.ExecuteCodeFixAsync(
+            var codeActionResult = await codeFixRunner.ExecuteCodeFixAsync(
                 inputDocument,
                 codeFix.Diagnostic,
                 codeFix.Title,
                 CancellationToken.None );
 
+            var transformedSolution = await codeActionResult.ApplyAsync( testResult.InputProject!, NullLogger.Instance, true, CancellationToken.None );
             var transformedCompilation = await transformedSolution.GetProject( inputDocument.Project.Id )!.GetCompilationAsync();
 
             await testResult.SetOutputCompilationAsync( transformedCompilation! );

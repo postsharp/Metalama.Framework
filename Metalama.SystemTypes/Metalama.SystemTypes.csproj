@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netstandard2.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <PackageId>Metalama.SystemTypes</PackageId>
+        <PackageDescription>
+            Contains internal types to support nullability and init-only properties on .NET Framework. 
+            We apologize.
+        </PackageDescription>
+
+    </PropertyGroup>
+    
+    <ItemGroup>
+        <!-- Pretty much all projects in the solution should be listed here -->
+        <InternalsVisibleTo Include="Metalama.Framework"/>
+        <InternalsVisibleTo Include="Metalama.Framework.CompileTime"/>
+        <InternalsVisibleTo Include="Metalama.Framework.Sdk"/>
+        <InternalsVisibleTo Include="Metalama.Framework.DesignTime"/>
+        <InternalsVisibleTo Include="Metalama.Framework.DesignTime.VisualStudio"/>
+        <InternalsVisibleTo Include="Metalama.Framework.Engine"/>
+        <InternalsVisibleTo Include="Metalama.TestFramework"/>
+        <InternalsVisibleTo Include="Metalama.Framework.Tests.Integration"/>
+        <InternalsVisibleTo Include="Metalama.Framework.Tests.Integration.Internals"/>
+        <InternalsVisibleTo Include="Metalama.Framework.Tests.UnitTests.Internals"/>
+    </ItemGroup>
+
+</Project>

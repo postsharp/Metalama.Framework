@@ -44,7 +44,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
                 var introducedInterfaceSymbol = introducedInterface.InterfaceType.GetSymbol().AssertNotNull();
 
-                if ( introducedInterfaceSymbol.ContainingAssembly != this._compilation.Assembly )
+                if ( !introducedInterfaceSymbol.ContainingAssembly.Equals( this._compilation.Assembly ) )
                 {
                     // The type may not have been analyzed yet.
                     builder.AnalyzeType( introducedInterfaceSymbol );
@@ -118,7 +118,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
             public DerivedTypeIndex ToImmutable()
             {
-                var externalBaseTypes = this._processedTypes.Where( t => t.ContainingAssembly != this._compilation.Assembly )
+                var externalBaseTypes = this._processedTypes.Where( t => !t.ContainingAssembly.Equals( this._compilation.Assembly ) )
                     .ToImmutableHashSet<INamedTypeSymbol>( SymbolEqualityComparer.Default );
 
                 return new DerivedTypeIndex(

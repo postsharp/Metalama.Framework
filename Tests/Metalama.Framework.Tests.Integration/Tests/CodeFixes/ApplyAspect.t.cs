@@ -1,47 +1,44 @@
 // Warning MY001 on `Method`: `Apply Aspect2`
 //    CodeFix: Apply`
 using System;
-using System.Collections.Generic;
-using Metalama.Framework;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Diagnostics;
 using Metalama.Framework.CodeFixes;
-using System.ComponentModel;
+using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Tests.Integration.CodeFixes.ApplyAspect;
 
 namespace Metalama.Framework.Tests.Integration.CodeFixes.ApplyAspect
 {
-    class Aspect1 : MethodAspect
+#pragma warning disable CS0067
+    internal class Aspect1 : MethodAspect
     {
-        static DiagnosticDefinition _diag = new ( "MY001", Severity.Warning, "Apply Aspect2" );
-    
-        public override void BuildAspect(IAspectBuilder<IMethod> builder)
-        {
-            base.BuildAspect(builder);
-            
-            _diag.WithCodeFixes( CodeFix.ApplyAspect( builder.Target, new Aspect2(), "Apply" ) ).ReportTo( builder.Diagnostics );
-        }
-    }
-    
-    class Aspect2 : OverrideMethodAspect
-    {
-        public override dynamic? OverrideMethod()
-        {
-            Console.WriteLine("Oops");
-            return meta.Proceed();
-        }
-    }
-    
-    class MyAttribute : Attribute {}
+        private static DiagnosticDefinition _diag = new( "MY001", Severity.Warning, "Apply Aspect2" );
 
-    class TargetCode
+        public override void BuildAspect( IAspectBuilder<IMethod> builder )
+        {
+            base.BuildAspect( builder );
+
+            _diag.WithCodeFixes( CodeFixFactory.ApplyAspect( builder.Target, new Aspect2(), "Apply" ) ).ReportTo( builder.Diagnostics );
+        }
+    }
+#pragma warning restore CS0067
+#pragma warning disable CS0067
+
+    internal class Aspect2 : OverrideMethodAspect
+    {
+        public override dynamic? OverrideMethod() => throw new System.NotSupportedException("Compile-time-only code cannot be called at run-time.");
+
+    }
+#pragma warning restore CS0067
+
+    internal class MyAttribute : Attribute { }
+
+    internal class TargetCode
     {
         [Aspect1]
-        int Method(int a)
-{
-            Console.WriteLine("Oops");
+        private int Method( int a )
+        {
             return a;
-}
+        }
     }
 }

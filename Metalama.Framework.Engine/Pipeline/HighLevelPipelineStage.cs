@@ -2,11 +2,11 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Engine.AspectOrdering;
+using Metalama.Framework.Engine.AspectWeavers;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Observers;
-using Metalama.Framework.Engine.Sdk;
 using Metalama.Framework.Project;
 using System;
 using System.Collections.Generic;
@@ -37,12 +37,14 @@ namespace Metalama.Framework.Engine.Pipeline
         /// <inheritdoc/>
         public override bool TryExecute(
             AspectPipelineConfiguration pipelineConfiguration,
-            PipelineStageResult input,
+            AspectPipelineResult input,
             IDiagnosticAdder diagnostics,
             CancellationToken cancellationToken,
-            [NotNullWhen( true )] out PipelineStageResult? result )
+            [NotNullWhen( true )] out AspectPipelineResult? result )
         {
-            var compilation = CompilationModel.CreateInitialInstance( input.Project, input.Compilation );
+            var compilation = input.CompilationModels.IsDefaultOrEmpty
+                ? CompilationModel.CreateInitialInstance( input.Project, input.Compilation )
+                : input.CompilationModels[input.CompilationModels.Length - 1];
 
             this.ServiceProvider.GetService<ICompilationModelObserver>()?.OnInitialCompilationModelCreated( compilation );
 
@@ -62,16 +64,16 @@ namespace Metalama.Framework.Engine.Pipeline
 
         /// <summary>
         /// Generates the code required by the aspects whose execution resulted in a given <see cref="IPipelineStepsResult"/>, and combine it with an input
-        /// <see cref="PipelineStageResult"/> to produce an output <see cref="PipelineStageResult"/>.
+        /// <see cref="AspectPipelineResult"/> to produce an output <see cref="AspectPipelineResult"/>.
         /// </summary>
         /// <param name="pipelineConfiguration"></param>
         /// <param name="input"></param>
         /// <param name="pipelineStepsResult"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        protected abstract PipelineStageResult GetStageResult(
+        protected abstract AspectPipelineResult GetStageResult(
             AspectPipelineConfiguration pipelineConfiguration,
-            PipelineStageResult input,
+            AspectPipelineResult input,
             IPipelineStepsResult pipelineStepsResult,
             CancellationToken cancellationToken );
     }

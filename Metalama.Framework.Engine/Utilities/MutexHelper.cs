@@ -7,7 +7,7 @@ using System.Threading;
 
 namespace Metalama.Framework.Engine.Utilities
 {
-    internal static class MutexHelper
+    public static class MutexHelper
     {
         public static IDisposable WithGlobalLock( string name, ILogger? logger = null )
         {

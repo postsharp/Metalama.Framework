@@ -18,6 +18,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
@@ -39,6 +40,7 @@ namespace Metalama.Framework.Engine.CompileTime
         {
             private static readonly SyntaxAnnotation _hasCompileTimeCodeAnnotation = new( "Metalama_HasCompileTimeCode" );
             private readonly Compilation _compileTimeCompilation;
+            private readonly ImmutableArray<UsingDirectiveSyntax> _globalUsings;
             private readonly IReadOnlyDictionary<INamedTypeSymbol, SerializableTypeInfo> _serializableTypes;
             private readonly IReadOnlyDictionary<ISymbol, SerializableTypeInfo> _serializableFieldsAndProperties;
             private readonly IDiagnosticAdder _diagnosticAdder;
@@ -63,6 +65,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 Compilation runTimeCompilation,
                 Compilation compileTimeCompilation,
                 IReadOnlyList<SerializableTypeInfo> serializableTypes,
+                ImmutableArray<UsingDirectiveSyntax> globalUsings,
                 IDiagnosticAdder diagnosticAdder,
                 TemplateCompiler templateCompiler,
                 IServiceProvider serviceProvider,
@@ -70,6 +73,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 : base( runTimeCompilation, serviceProvider )
             {
                 this._compileTimeCompilation = compileTimeCompilation;
+                this._globalUsings = globalUsings;
                 this._diagnosticAdder = diagnosticAdder;
                 this._templateCompiler = templateCompiler;
                 this._cancellationToken = cancellationToken;
@@ -783,10 +787,10 @@ namespace Metalama.Framework.Engine.CompileTime
 
                 if ( nonReadOnlyVariables.Count > 0 )
                 {
-                    // There are some variable that need to have readonly modifier removed.
+                    // There are some variables that need to have the readonly modifier removed.
                     if ( unchangedReadabilityVariables.Count > 0 )
                     {
-                        // There are some remaning variables that remain readonly.
+                        // There are some remaining variables that remain readonly.
                         yield return
                             node.WithDeclaration( node.Declaration.WithVariables( SeparatedList( unchangedReadabilityVariables ) ) );
                     }
@@ -1026,17 +1030,33 @@ namespace Metalama.Framework.Engine.CompileTime
                 }
             }
 
+            public override SyntaxNode? VisitFileScopedNamespaceDeclaration( FileScopedNamespaceDeclarationSyntax node )
+            {
+                var transformedMembers = this.VisitTypeOrNamespaceMembers( node.Members );
+
+                if ( transformedMembers.Any( m => m.HasAnnotation( _hasCompileTimeCodeAnnotation ) ) )
+                {
+                    return node.WithMembers( transformedMembers ).WithAdditionalAnnotations( _hasCompileTimeCodeAnnotation );
+                }
+                else
+                {
+                    return null;
+                }
+            }
+
             public override SyntaxNode? VisitCompilationUnit( CompilationUnitSyntax node )
             {
                 // Get the list of members that are not statements, local variables, local functions,...
-                var nonTopLevelMembers = node.Members.Where( m => m is BaseTypeDeclarationSyntax or NamespaceDeclarationSyntax or DelegateDeclarationSyntax )
+                var nonTopLevelMembers = node.Members.Where( m => m is BaseTypeDeclarationSyntax or NamespaceDeclarationSyntax or DelegateDeclarationSyntax or FileScopedNamespaceDeclarationSyntax )
                     .ToList();
 
                 var transformedMembers = this.VisitTypeOrNamespaceMembers( nonTopLevelMembers );
 
                 if ( transformedMembers.Any( m => m.HasAnnotation( _hasCompileTimeCodeAnnotation ) ) )
                 {
-                    return node.WithMembers( transformedMembers ).WithAdditionalAnnotations( _hasCompileTimeCodeAnnotation );
+                    return node.WithMembers( transformedMembers )
+                        .WithAdditionalAnnotations( _hasCompileTimeCodeAnnotation )
+                        .WithUsings( node.Usings.AddRange( this._globalUsings ) );
                 }
                 else
                 {

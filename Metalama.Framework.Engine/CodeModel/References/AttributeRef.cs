@@ -2,8 +2,8 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel.Builders;
-using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -59,7 +59,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
         }
 
         public string? AttributeTypeName
-            => GetShortName(
+            => AttributeHelper.GetShortName(
                 this.Target switch
                 {
                     AttributeData attributeData => attributeData.AttributeClass?.Name,
@@ -132,8 +132,5 @@ namespace Metalama.Framework.Engine.CodeModel.References
         ISymbol ISdkRef<IAttribute>.GetSymbol( Compilation compilation ) => throw new NotSupportedException();
 
         public override string ToString() => this.Target?.ToString() ?? "null";
-
-        [return: NotNullIfNotNull( "name" )]
-        internal static string? GetShortName( string? name ) => name?.TrimEnd( "Attribute" );
     }
 }

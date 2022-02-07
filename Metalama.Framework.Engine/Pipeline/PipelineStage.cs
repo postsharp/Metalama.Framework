@@ -35,9 +35,9 @@ namespace Metalama.Framework.Engine.Pipeline
         /// <returns></returns>
         public abstract bool TryExecute(
             AspectPipelineConfiguration pipelineConfiguration,
-            PipelineStageResult input,
+            AspectPipelineResult input,
             IDiagnosticAdder diagnostics,
             CancellationToken cancellationToken,
-            [NotNullWhen( true )] out PipelineStageResult? result );
+            [NotNullWhen( true )] out AspectPipelineResult? result );
     }
 }

@@ -1,12 +1,11 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.DesignTime.Pipeline;
-using Metalama.Framework.Engine.DesignTime.Refactoring;
-using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Pipeline;
+using Metalama.Framework.Engine.Pipeline.LiveTemplates;
 using Metalama.Framework.Engine.Templating;
 using Metalama.TestFramework;
 using Microsoft.CodeAnalysis;
@@ -15,7 +14,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Xunit;
 using Xunit.Abstractions;
 
 namespace Metalama.Framework.Tests.Integration.Runners
@@ -40,33 +38,19 @@ namespace Metalama.Framework.Tests.Integration.Runners
             var serviceProvider = testResult.ProjectScopedServiceProvider;
             var compilation = CompilationModel.CreateInitialInstance( new NullProject( serviceProvider ), testResult.InputCompilation! );
 
-            using var designTimePipeline = new DesignTimeAspectPipeline( serviceProvider, domain, this.MetadataReferences, true );
-
-            Assert.True(
-                designTimePipeline.TryGetConfiguration(
-                    PartialCompilation.CreateComplete( testResult.InputCompilation! ),
-                    NullDiagnosticAdder.Instance,
-                    true,
-                    CancellationToken.None,
-                    out var configuration ) );
-
             var partialCompilation = PartialCompilation.CreateComplete( testResult.InputCompilation! );
             var target = compilation.Types.OfName( "TargetClass" ).Single().Methods.OfName( "TargetMethod" ).Single().GetSymbol();
-            var aspectClass = designTimePipeline.AspectClasses!.Single( a => a.ShortName == "TestAspect" );
 
             var success = LiveTemplateAspectPipeline.TryExecute(
-                configuration!.ServiceProvider,
+                serviceProvider,
                 domain,
-                configuration,
-                aspectClass,
-                aspectClass.CreateDefaultInstance(),
+                null,
+                c => c.BoundAspectClasses.Single<IAspectClass>( a => a.ShortName == "TestAspect" ),
                 partialCompilation,
                 target!,
+                testResult.PipelineDiagnostics,
                 CancellationToken.None,
-                out var outputCompilation,
-                out var diagnostics );
-
-            testResult.PipelineDiagnostics.Report( diagnostics );
+                out var outputCompilation );
 
             if ( success )
             {

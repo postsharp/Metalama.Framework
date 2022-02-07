@@ -14,7 +14,6 @@
     <ItemGroup>
         <Compile Include="..\Metalama.Framework.Engine\AssertionFailedException.cs" Link="Utilities\AssertionFailedException.cs"/>
         <Compile Include="..\Metalama.Framework.Engine\Utilities\AssemblyMetadataReader.cs" Link="Utilities\AssemblyMetadataReader.cs"/>
-        <Compile Include="..\Metalama.Framework.Engine\Utilities\RetryHelper.cs" Link="Utilities\RetryHelper.cs"/>
         <Compile Include="..\Metalama.Framework.Engine\Utilities\TempPathHelper.cs" Link="Utilities\TempPathHelper.cs"/>
     </ItemGroup>
 
@@ -47,10 +46,13 @@
         </PackageReference>
         <EmbeddedResource Include="$(PkgMetalama_Backstage)\lib\netstandard2.0\Metalama.Backstage.dll" Link="Resources\Metalama.Backstage.dll"/>
 
-        <EmbeddedResource Include="..\Metalama.Framework.Engine\bin\$(Configuration)\$(TargetFramework)\Metalama.Framework.Engine.dll" Link="Resources\Metalama.Framework.Engine.dll"/>
-        <EmbeddedResource Include="..\Metalama.Framework.DesignTime.Contracts\bin\$(Configuration)\$(TargetFramework)\Metalama.Framework.DesignTime.Contracts.dll" Link="Resources\Metalama.Framework.DesignTime.Contracts.dll"/>
-        <EmbeddedResource Include="..\Metalama.Framework.Sdk\bin\$(Configuration)\$(TargetFramework)\Metalama.Framework.Sdk.dll" Link="Resources\Metalama.Framework.Sdk.dll"/>
         <EmbeddedResource Include="..\Metalama.Framework\bin\$(Configuration)\$(TargetFramework)\Metalama.Framework.dll" Link="Resources\Metalama.Framework.dll"/>
+        <EmbeddedResource Include="..\Metalama.SystemTypes\bin\$(Configuration)\$(TargetFramework)\Metalama.SystemTypes.dll" Link="Resources\Metalama.SystemTypes.dll"/>
+        <EmbeddedResource Include="..\Metalama.Framework.Sdk\bin\$(Configuration)\$(TargetFramework)\Metalama.Framework.Sdk.dll" Link="Resources\Metalama.Framework.Sdk.dll"/>
+        <EmbeddedResource Include="..\Metalama.Framework.Engine\bin\$(Configuration)\$(TargetFramework)\Metalama.Framework.Engine.dll" Link="Resources\Metalama.Framework.Engine.dll"/>
+        <EmbeddedResource Include="..\Metalama.Framework.DesignTime\bin\$(Configuration)\$(TargetFramework)\Metalama.Framework.DesignTime.dll" Link="Resources\Metalama.Framework.DesignTime.dll"/>
+        <EmbeddedResource Include="..\Metalama.Framework.DesignTime.VisualStudio\bin\$(Configuration)\$(TargetFramework)\Metalama.Framework.DesignTime.VisualStudio.dll" Link="Resources\Metalama.Framework.DesignTime.VisualStudio.dll"/>
+        <EmbeddedResource Include="..\Metalama.Framework.DesignTime.Contracts.1.0\bin\$(Configuration)\$(TargetFramework)\Metalama.Framework.DesignTime.Contracts.1.0.dll" Link="Resources\Metalama.Framework.DesignTime.Contracts.1.0.dll"/>
 
 
         <PackageReference Include="Metalama.Compiler.Sdk" Version="$(MetalamaCompilerVersion)" PrivateAssets="true"/>

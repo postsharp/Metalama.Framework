@@ -3,6 +3,7 @@
 
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.LamaSerialization;
+using Metalama.Framework.Engine.Utilities;
 using System;
 using System.Collections;
 using System.IO;
@@ -10,9 +11,17 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
 {
-    public class SerializationTestsBase
+    public abstract class SerializationTestsBase
     {
-        protected IServiceProvider ServiceProvider { get; } = Engine.Pipeline.ServiceProvider.Empty.WithService( new BuiltInSerializerFactoryProvider() );
+        protected IServiceProvider ServiceProvider { get; }
+
+        public SerializationTestsBase()
+        {
+            var serviceProvider = Engine.Pipeline.ServiceProvider.Empty;
+            serviceProvider = serviceProvider.WithService( new UserCodeInvoker( serviceProvider ) );
+            serviceProvider = serviceProvider.WithService( new BuiltInSerializerFactoryProvider( serviceProvider ) );
+            this.ServiceProvider = serviceProvider;
+        }
 
         public T? TestSerialization<T>( T? instance, Func<T?, T?, bool>? assert = null )
         {

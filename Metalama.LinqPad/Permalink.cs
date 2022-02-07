@@ -12,12 +12,12 @@ namespace Metalama.LinqPad
     /// </summary>
     internal class Permalink
     {
-        private readonly string _workspaceExpression;
+        private readonly GetCompilationInfo _getCompilationInfo;
         private readonly IDeclaration _declaration;
 
-        public Permalink( string workspaceExpression, IDeclaration declaration )
+        public Permalink( GetCompilationInfo getCompilationInfo, IDeclaration declaration )
         {
-            this._workspaceExpression = workspaceExpression;
+            this._getCompilationInfo = getCompilationInfo;
             this._declaration = declaration;
         }
 
@@ -45,7 +45,7 @@ namespace Metalama.LinqPad
 
                 return new Hyperlinq(
                     QueryLanguage.Expression,
-                    $@"{this._workspaceExpression}.GetDeclaration(@""{project.Path}"", ""{project.TargetFramework ?? ""}"", ""{serializedReference}"")",
+                    $@"{this._getCompilationInfo.WorkspaceExpression}.GetDeclaration(@""{project.Path}"", ""{project.TargetFramework ?? ""}"", ""{serializedReference}"", {this._getCompilationInfo.IsMetalamaOutput.ToString().ToLowerInvariant()})",
                     "(open)" );
             }
         }

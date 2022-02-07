@@ -14,7 +14,7 @@ using System.Threading;
 namespace Metalama.Framework.Engine.Utilities
 {
     [ExcludeFromCodeCoverage]
-    internal static class DebuggingHelper
+    public static class DebuggingHelper
     {
         private static readonly ConditionalWeakTable<object, ObjectId> _objectIds = new();
 
@@ -26,7 +26,7 @@ namespace Metalama.Framework.Engine.Utilities
                 "csc" => ProcessKind.Compiler,
                 "dotnet" =>
                     Environment.CommandLine.Contains( "JetBrains.ReSharper.Roslyn.Worker.exe" ) ? ProcessKind.Rider :
-                    Environment.CommandLine.Contains( "VBCSCompiler.dll" ) ? ProcessKind.Compiler :
+                    Environment.CommandLine.Contains( "VBCSCompiler.dll" ) || Environment.CommandLine.Contains( "csc.dll" ) ? ProcessKind.Compiler :
                     ProcessKind.Other,
                 _ => ProcessKind.Other
             };

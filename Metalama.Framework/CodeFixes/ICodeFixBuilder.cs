@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 namespace Metalama.Framework.CodeFixes
 {
     /// <summary>
-    /// Argument of the delegate passed to <see cref="CodeFix.Create"/>. Exposes methods that allow to modify the current solution. 
+    /// Argument of the delegate passed to <see cref="CodeFixFactory.CreateCustomCodeFix"/>. Exposes methods that allow to modify the current solution. 
     /// </summary>
     [CompileTimeOnly]
     [InternalImplement]

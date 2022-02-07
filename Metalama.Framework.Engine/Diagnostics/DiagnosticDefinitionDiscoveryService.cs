@@ -13,7 +13,7 @@ using System.Reflection;
 
 namespace Metalama.Framework.Engine.Diagnostics
 {
-    internal class DiagnosticDefinitionDiscoveryService : IService
+    public class DiagnosticDefinitionDiscoveryService : IService
     {
         private readonly IServiceProvider _serviceProvider;
         private readonly UserCodeInvoker _userCodeInvoker;

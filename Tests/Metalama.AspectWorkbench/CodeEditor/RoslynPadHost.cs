@@ -3,7 +3,7 @@
 
 #pragma warning disable IDE0005
 using Metalama.Framework.Aspects;
-using Metalama.Framework.Engine.Sdk;
+using Metalama.Framework.Engine.AspectWeavers;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Tests.Integration.Runners;
 using Metalama.TestFramework;

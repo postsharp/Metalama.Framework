@@ -33,5 +33,7 @@ namespace Metalama.Framework.Engine.Pipeline
         ImmutableArray<IValidatorSource> ValidatorSources { get; }
 
         ImmutableArray<CompilationModel> Compilations { get; }
+
+        ImmutableArray<AspectInstanceResult> AspectInstanceResults { get; }
     }
 }

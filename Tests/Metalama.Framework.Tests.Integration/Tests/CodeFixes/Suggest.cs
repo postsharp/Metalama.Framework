@@ -1,33 +1,26 @@
-// @ApplyCodeFix
-
 using System;
-using System.Collections.Generic;
-using Metalama.Framework;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Diagnostics;
 using Metalama.Framework.CodeFixes;
-using System.ComponentModel;
 
 namespace Metalama.Framework.Tests.Integration.CodeFixes.Suggest
 {
-    class Aspect : MethodAspect
+    internal class Aspect : MethodAspect
     {
-    
-        public override void BuildAspect(IAspectBuilder<IMethod> builder)
+        public override void BuildAspect( IAspectBuilder<IMethod> builder )
         {
-            base.BuildAspect(builder);
-            
-            builder.Diagnostics.Suggest( builder.Target, CodeFix.AddAttribute(  builder.Target, typeof(MyAttribute) ) );
+            base.BuildAspect( builder );
+
+            builder.Diagnostics.Suggest( builder.Target, CodeFixFactory.AddAttribute( builder.Target, typeof(MyAttribute) ) );
         }
     }
-    
-    class MyAttribute : Attribute {}
 
-    class TargetCode
+    internal class MyAttribute : Attribute { }
+
+    internal class TargetCode
     {
         [Aspect]
-        int Method(int a)
+        private int Method( int a )
         {
             return a;
         }

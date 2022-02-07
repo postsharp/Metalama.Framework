@@ -1,16 +1,15 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Metalama.Framework.Engine.DesignTime.Pipeline;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Pipeline;
+using Metalama.Framework.Engine.Pipeline.DesignTime;
 using Metalama.Framework.Engine.Templating;
 using Metalama.TestFramework;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using Xunit.Abstractions;
 
@@ -34,26 +33,28 @@ namespace Metalama.Framework.Tests.Integration.Runners
 
             using var domain = new UnloadableCompileTimeDomain();
 
-            using var pipeline = new DesignTimeAspectPipeline( testResult.ProjectScopedServiceProvider, domain, this.MetadataReferences, true );
+            using var pipeline = new TestDesignTimeAspectPipeline( testResult.ProjectScopedServiceProvider, domain );
 
-            if ( !pipeline.TryExecute( testResult.InputCompilation!, CancellationToken.None, out var compilationResult ) )
+            var pipelineResult = pipeline.Execute( testResult.InputCompilation! );
+
+            testResult.PipelineDiagnostics.Report( pipelineResult.Diagnostics );
+
+            if ( pipelineResult.Success )
+            {
+                testResult.HasOutputCode = true;
+
+                var introducedSyntaxTree = pipelineResult.AdditionalSyntaxTrees.SingleOrDefault();
+
+                var introducedSyntaxRoot = introducedSyntaxTree == null
+                    ? SyntaxFactory.GlobalStatement( SyntaxFactoryEx.EmptyStatement )
+                    : await introducedSyntaxTree.GeneratedSyntaxTree.GetRootAsync();
+
+                await testResult.SyntaxTrees.Single().SetRunTimeCodeAsync( introducedSyntaxRoot );
+            }
+            else
             {
                 testResult.SetFailed( "DesignTimeAspectPipeline.TryExecute failed" );
-
-                return;
             }
-
-            testResult.InputCompilationDiagnostics.Report( compilationResult.PipelineResult.SyntaxTreeResults.SelectMany( t => t.Diagnostics ) );
-
-            testResult.HasOutputCode = true;
-
-            var introducedSyntaxTree = compilationResult.PipelineResult.IntroducedSyntaxTrees.SingleOrDefault();
-
-            var introducedSyntaxRoot = introducedSyntaxTree == null
-                ? SyntaxFactory.GlobalStatement( SyntaxFactoryEx.EmptyStatement )
-                : await introducedSyntaxTree.GeneratedSyntaxTree.GetRootAsync();
-
-            await testResult.SyntaxTrees.Single().SetRunTimeCodeAsync( introducedSyntaxRoot );
         }
     }
 }

@@ -1,50 +1,52 @@
 // Warning MY001 on `Method1`: `Add some attribute`
 //    CodeFix: Remove [My] from 'TargetCode'`
 using System;
-using System.Collections.Generic;
-using Metalama.Framework;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Diagnostics;
 using Metalama.Framework.CodeFixes;
-using System.ComponentModel;
+using Metalama.Framework.Diagnostics;
 
 namespace Metalama.Framework.Tests.Integration.CodeFixes.RemoveAttribute
 {
-    class Aspect : MethodAspect
+#pragma warning disable CS0067
+    internal class Aspect : MethodAspect
     {
-        static DiagnosticDefinition _diag = new ( "MY001", Severity.Warning, "Add some attribute" );
-    
-        public override void BuildAspect(IAspectBuilder<IMethod> builder)
+        private static DiagnosticDefinition _diag = new( "MY001", Severity.Warning, "Add some attribute" );
+
+        public override void BuildAspect( IAspectBuilder<IMethod> builder )
         {
-            base.BuildAspect(builder);
-            
-            _diag.WithCodeFixes( CodeFix.RemoveAttributes(  builder.Target.DeclaringType, typeof(MyAttribute) ) ).ReportTo( builder.Diagnostics );
+            base.BuildAspect( builder );
+
+            _diag.WithCodeFixes( CodeFixFactory.RemoveAttributes( builder.Target.DeclaringType, typeof(MyAttribute) ) ).ReportTo( builder.Diagnostics );
         }
     }
-    
-    class MyAttribute : Attribute {}
-    class YourAttribute : Attribute {}
+#pragma warning restore CS0067
 
-    partial class TargetCode
+    internal class MyAttribute : Attribute { }
+
+    internal class YourAttribute : Attribute { }
+
+    internal partial class TargetCode
     {
         [Aspect]
-        int Method1(int a)
+        [My]
+        private int Method1( int a )
         {
             return a;
         }
-        int Method2(int a)
+
+        [My]
+        private int Method2( int a )
         {
             return a;
         }
-        
-     
     }
-    
-    partial class TargetCode
+
+    internal partial class TargetCode
     {
-       [Your]
-        int Method3(int a)
+        [My]
+        [Your]
+        private int Method3( int a )
         {
             return a;
         }

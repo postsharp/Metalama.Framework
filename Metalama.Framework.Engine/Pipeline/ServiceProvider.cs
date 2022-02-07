@@ -153,12 +153,12 @@ namespace Metalama.Framework.Engine.Pipeline
             // user assembly. When we need to unload the user assembly, we first need to unload the ReflectionMapperFactory.
             var serviceProvider = this.WithServices(
                 new ReflectionMapperFactory(),
-                new AssemblyLocator( metadataReferences ),
-                new BuiltInSerializerFactoryProvider() );
+                new AssemblyLocator( metadataReferences ) );
 
+            serviceProvider = serviceProvider.WithService( new UserCodeInvoker( serviceProvider ) );
+            serviceProvider = serviceProvider.WithService( new BuiltInSerializerFactoryProvider( serviceProvider ) );
             serviceProvider = serviceProvider.WithServices( new SyntaxSerializationService( serviceProvider ), new CompileTimeTypeFactory() );
             serviceProvider = serviceProvider.WithServices( new SystemTypeResolver( serviceProvider ) );
-            serviceProvider = serviceProvider.WithService( new UserCodeInvoker( serviceProvider ) );
             serviceProvider = serviceProvider.WithMetricProviders();
 
             return serviceProvider;
@@ -171,7 +171,7 @@ namespace Metalama.Framework.Engine.Pipeline
         /// <remarks>
         /// When the current service provider fails to find a service, it will try to find it using the next provider in the chain.
         /// </remarks>
-        public ServiceProvider WithNextProvider( IServiceProvider nextProvider ) => new( this._services, nextProvider );
+        internal ServiceProvider WithNextProvider( IServiceProvider nextProvider ) => new( this._services, nextProvider );
 
         public override string ToString()
         {

@@ -6,6 +6,7 @@ using LINQPad.Extensibility.DataContext;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Pipeline;
+using Metalama.Framework.Introspection;
 using Metalama.Framework.Workspaces;
 using System;
 using System.Collections.Generic;
@@ -67,7 +68,14 @@ namespace {nameSpace}
             Compile( source, assemblyToBuild.CodeBase! );
 
             var projectSchema = GetSchema( "workspace.", typeof(IProjectSet) );
-            projectSchema.Add( new ExplorerItem( "GetSubset", ExplorerItemKind.Property, ExplorerIcon.View ) );
+
+            var metalamaOutputItem =
+                new ExplorerItem( "MetalamaOutput", ExplorerItemKind.Property, ExplorerIcon.Schema )
+                {
+                    Children = GetSchema( "workspace.MetalamaOutput.", typeof(IMetalamaCompilationSet) )
+                };
+
+            projectSchema.Add( metalamaOutputItem );
 
             return projectSchema;
         }
@@ -82,6 +90,7 @@ namespace {nameSpace}
             assembliesToReference.Add( typeof(MetalamaDriver).Assembly.Location );
             assembliesToReference.Add( typeof(MetalamaDataContext).Assembly.Location );
             assembliesToReference.Add( typeof(IDeclaration).Assembly.Location );
+            assembliesToReference.Add( typeof(IIntrospectionAspectInstance).Assembly.Location );
             assembliesToReference.Add( typeof(AspectPipeline).Assembly.Location );
 
             // CompileSource is a static helper method to compile C# source code using LINQPad's built-in Roslyn libraries.

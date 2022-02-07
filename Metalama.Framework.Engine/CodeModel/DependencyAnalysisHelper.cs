@@ -8,7 +8,7 @@ using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.CodeModel
 {
-    internal static class DependencyAnalysisHelper
+    public static class DependencyAnalysisHelper
     {
         public static IEnumerable<SyntaxNode> FindDeclaredTypes( this SyntaxTree syntaxTree )
         {

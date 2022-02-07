@@ -1,0 +1,50 @@
+// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+
+using Metalama.Framework.DesignTime.Contracts;
+using Metalama.Framework.DesignTime.VisualStudio.Remoting;
+using Metalama.Framework.Project;
+
+namespace Metalama.Framework.DesignTime.VisualStudio;
+
+/// <summary>
+/// User-side implementation of the <see cref="ICompileTimeEditingStatusService"/> interface.
+/// It essentially forwards messages to and from the analysis process.
+/// </summary>
+internal class CompileTimeEditingStatusService : ICompileTimeEditingStatusService, IDisposable
+{
+    private readonly UserProcessEndpoint _userProcessEndpoint;
+
+    public CompileTimeEditingStatusService( IServiceProvider serviceProvider )
+    {
+        this._userProcessEndpoint = serviceProvider.GetRequiredService<UserProcessEndpoint>();
+        this._userProcessEndpoint.IsEditingCompileTimeCodeChanged += this.OnIsEditingChanged;
+    }
+
+    private void OnIsEditingChanged( bool value )
+    {
+        this.IsEditing = value;
+        this.IsEditingChanged?.Invoke( value );
+    }
+
+    public bool IsEditing { get; private set; }
+
+    public event Action<bool>? IsEditingChanged;
+
+    public async Task OnEditingCompletedAsync( CancellationToken cancellationToken )
+    {
+        var api = await this._userProcessEndpoint.GetServerApiAsync( cancellationToken );
+        await api.OnCompileTimeCodeEditingCompletedAsync( cancellationToken );
+    }
+
+    public async Task OnUserInterfaceAttachedAsync( CancellationToken cancellationToken )
+    {
+        var api = await this._userProcessEndpoint.GetServerApiAsync( cancellationToken );
+        await api.OnUserInterfaceAttachedAsync( cancellationToken );
+    }
+
+    public void Dispose()
+    {
+        this._userProcessEndpoint.IsEditingCompileTimeCodeChanged -= this.OnIsEditingChanged;
+    }
+}

@@ -2,9 +2,10 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Aspects;
-using Metalama.Framework.Engine.DesignTime.Pipeline;
+using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Pipeline;
+using Metalama.Framework.Engine.Pipeline.CompileTime;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Testing;
 using Metalama.TestFramework;
@@ -114,7 +115,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
 
             var i = 0;
 
-            foreach ( var result in results.PipelineResult.SyntaxTreeResults.OrderBy( t => t.SyntaxTree.FilePath ) )
+            foreach ( var result in results.PipelineResult.SyntaxTreeResults.Values.OrderBy( t => t.SyntaxTree.FilePath ) )
             {
                 if ( i > 0 )
                 {
@@ -161,7 +162,7 @@ F1.cs:
         }
 
         [Fact]
-        public async Task ChangeInAspectCode()
+        public async Task ChangeInAspectCodeAsync()
         {
             var assemblyName = "test_" + Guid.NewGuid();
 
@@ -258,7 +259,7 @@ Target.cs:
 
             Assert.True( factory.TryExecute( projectOptions, compilation4, CancellationToken.None, out var results4 ) );
 
-            Assert.Equal( DesignTimeAspectPipelineStatus.NeedsExternalBuild, pipeline.Status );
+            Assert.Equal( DesignTimeAspectPipelineStatus.Paused, pipeline.Status );
             Assert.True( pipeline.IsCompileTimeSyntaxTreeOutdated( "Aspect.cs" ) );
 
             var dumpedResults4 = DumpResults( results4! );
@@ -270,7 +271,7 @@ Target.cs:
             // There must be an error on the aspect.
             List<Diagnostic> diagnostics4 = new();
 
-            TemplatingCodeValidator.Validate( compilation4.GetSemanticModel( aspect4 ), diagnostics4.Add, pipeline, CancellationToken.None );
+            pipeline.ValidateTemplatingCode( compilation4.GetSemanticModel( aspect4 ), diagnostics4.Add );
 
             Assert.Contains(
                 diagnostics4,
@@ -286,7 +287,7 @@ Target.cs:
 
             var aspect5 = compilation5.SyntaxTrees.Single( t => t.FilePath == "Aspect.cs" );
 
-            Assert.Equal( DesignTimeAspectPipelineStatus.NeedsExternalBuild, pipeline.Status );
+            Assert.Equal( DesignTimeAspectPipelineStatus.Paused, pipeline.Status );
 
             Assert.True( factory.TryExecute( projectOptions, compilation5, CancellationToken.None, out var results5 ) );
             var dumpedResults5 = DumpResults( results5! );
@@ -297,7 +298,7 @@ Target.cs:
 
             List<Diagnostic> diagnostics5 = new();
 
-            TemplatingCodeValidator.Validate( compilation5.GetSemanticModel( aspect5 ), diagnostics5.Add, pipeline, CancellationToken.None );
+            pipeline.ValidateTemplatingCode( compilation5.GetSemanticModel( aspect5 ), diagnostics5.Add );
 
             Assert.Contains(
                 diagnostics5,
@@ -315,8 +316,8 @@ Target.cs:
 
             Assert.NotNull( pipelineResult );
 
-            // Simulate an external build event. This is normally triggered by the build touch file.
-            pipeline.OnExternalBuildStarted();
+            // Simulate an external build event. This is normally triggered by the build touch file or by a UI signal.
+            pipeline.Resume( false );
 
             // A new evaluation of the design-time pipeline should now give the new results.
             Assert.True( factory.TryExecute( projectOptions, compilation5, CancellationToken.None, out var results6 ) );
@@ -329,7 +330,7 @@ Target.cs:
 
             List<Diagnostic> diagnostics6 = new();
 
-            TemplatingCodeValidator.Validate( compilation5.GetSemanticModel( aspect5 ), diagnostics6.Add, pipeline, CancellationToken.None );
+            pipeline.ValidateTemplatingCode( compilation5.GetSemanticModel( aspect5 ), diagnostics6.Add );
 
             Assert.DoesNotContain(
                 diagnostics6,

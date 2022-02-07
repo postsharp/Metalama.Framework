@@ -31,7 +31,7 @@ namespace Metalama.Framework.Engine.Fabrics
 
         public override Type AspectType => this.Driver.Fabric.GetType();
 
-        public override CompileTimeProject? Project { get; }
+        internal override CompileTimeProject? Project { get; }
 
         public override string FullName => this.Driver.FabricSymbol.GetReflectionName().AssertNotNull();
     }

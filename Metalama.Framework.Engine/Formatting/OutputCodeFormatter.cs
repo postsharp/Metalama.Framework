@@ -15,7 +15,7 @@ using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.Formatting
 {
-    public static class OutputCodeFormatter
+    public static partial class OutputCodeFormatter
     {
         /// <summary>
         /// Annotation used to mark locals and 'return;' statement that may be redundant. Currently we are not doing anything with them,
@@ -57,9 +57,14 @@ namespace Metalama.Framework.Engine.Formatting
             }
             else
             {
+                var classifiedTextSpans = new ClassifiedTextSpanCollection( outputSyntaxRoot.GetText() );
+                var visitor = new MarkTextSpansVisitor( classifiedTextSpans );
+                visitor.Visit( outputSyntaxRoot );
+                var generatedSpans = classifiedTextSpans.Where( s => s.Classification == TextSpanClassification.GeneratedCode ).Select( s => s.Span );
+
                 outputSyntaxRoot = (CompilationUnitSyntax) Formatter.Format(
                     outputSyntaxRoot,
-                    FormattingAnnotations.GeneratedCode,
+                    generatedSpans,
                     document.Project.Solution.Workspace );
             }
 
@@ -68,7 +73,7 @@ namespace Metalama.Framework.Engine.Formatting
 
         public static async Task<PartialCompilation> FormatToSyntaxAsync( PartialCompilation compilation, CancellationToken cancellationToken = default )
         {
-            var (project, syntaxTreeMap) = await CreateProjectFromCompilation( compilation.Compilation, cancellationToken );
+            var (project, syntaxTreeMap) = await CreateProjectFromCompilationAsync( compilation.Compilation, cancellationToken );
 
             List<SyntaxTreeModification> syntaxTreeReplacements = new( compilation.ModifiedSyntaxTrees.Count );
 
@@ -96,10 +101,10 @@ namespace Metalama.Framework.Engine.Formatting
         public static Compilation FormatAll( Compilation compilation, CancellationToken cancellationToken = default )
             => Task.Run( () => FormatAllAsync( compilation, cancellationToken ), cancellationToken ).Result;
 
-        public static async Task<Compilation> FormatAllAsync( Compilation compilation, CancellationToken cancellationToken = default )
+        private static async Task<Compilation> FormatAllAsync( Compilation compilation, CancellationToken cancellationToken = default )
         {
             var formattedCompilation = compilation;
-            var (project, syntaxTreeMap) = await CreateProjectFromCompilation( compilation, cancellationToken );
+            var (project, syntaxTreeMap) = await CreateProjectFromCompilationAsync( compilation, cancellationToken );
 
             foreach ( var syntaxTree in compilation.SyntaxTrees )
             {
@@ -122,7 +127,7 @@ namespace Metalama.Framework.Engine.Formatting
             return formattedCompilation;
         }
 
-        private static async Task<(Microsoft.CodeAnalysis.Project Project, Dictionary<SyntaxTree, DocumentId> SyntaxTreeMap)> CreateProjectFromCompilation(
+        private static async Task<(Microsoft.CodeAnalysis.Project Project, Dictionary<SyntaxTree, DocumentId> SyntaxTreeMap)> CreateProjectFromCompilationAsync(
             Compilation compilation,
             CancellationToken cancellationToken )
         {

@@ -7,7 +7,7 @@ using System.Collections.Immutable;
 
 namespace Metalama.Framework.Engine.Aspects
 {
-    internal interface ITransitiveAspectsManifest
+    public interface ITransitiveAspectsManifest
     {
         IEnumerable<string> InheritableAspectTypes { get; }
 

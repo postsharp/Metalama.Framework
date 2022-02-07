@@ -12,42 +12,37 @@ using System.IO;
 var product = new Product
 {
     ProductName = "Metalama",
-    Solutions = new[]
+    Solutions = new Solution[]
     {
-                    new DotNetSolution( "Metalama.sln" )
-                    {
-                        SupportsTestCoverage = true,
-                        CanFormatCode = true,
-                        FormatExclusions = new[]
-                        {
+        new DotNetSolution( "Metalama.sln" )
+        {
+            SupportsTestCoverage = true,
+            CanFormatCode = true,
+            FormatExclusions = new[]
+            {
+                // Test payloads should not be formatted because it would break the test output comparison.
+                // In some cases, formatting or redundant keywords may be intentional.
+                "Tests\\Metalama.Framework.Tests.Integration\\Tests\\**\\*",
+                "Tests\\Metalama.Framework.Tests.Integration.Internals\\Tests\\**\\*",
 
-                            // Test payloads should not be formatted because it would break the test output comparison.
-                            // In some cases, formatting or redundant keywords may be intentional.
-                            "Tests\\Metalama.Framework.Tests.Integration\\Tests\\**\\*",
-                            "Tests\\Metalama.Framework.Tests.Integration.Internals\\Tests\\**\\*",
-
-                            // This file should not be formatted because it contains assembly aliases, and JetBrains tools
-                            // don't support them properly.
-                            "Metalama.Framework.Engine\\Utilities\\SymbolId.cs"
-                        }
-                    },
-                    new DotNetSolution( "Tests\\Metalama.Framework.TestApp\\Metalama.Framework.TestApp.sln" )
-                    {
-                        IsTestOnly = true
-                    }
+                // This file should not be formatted because it contains assembly aliases, and JetBrains tools
+                // don't support them properly.
+                "Metalama.Framework.Engine\\Utilities\\SymbolId.cs"
+            }
+        },
+        new DotNetSolution( "Tests\\Metalama.Framework.TestApp\\Metalama.Framework.TestApp.sln" ) { IsTestOnly = true }
     },
     PublicArtifacts = Pattern.Create(
+        "Metalama.SystemTypes.$(PackageVersion).nupkg",
         "Metalama.Framework.$(PackageVersion).nupkg",
         "Metalama.TestFramework.$(PackageVersion).nupkg",
         "Metalama.Framework.Redist.$(PackageVersion).nupkg",
         "Metalama.Framework.Sdk.$(PackageVersion).nupkg",
         "Metalama.Framework.Engine.$(PackageVersion).nupkg",
-        "Metalama.Framework.DesignTime.Contracts.$(PackageVersion).nupkg" ),
-    Dependencies = new[]
-    {
-        Dependencies.PostSharpEngineering,
-        Dependencies.MetalamaCompiler
-    }
+        "Metalama.Framework.Introspection.$(PackageVersion).nupkg",
+        "Metalama.Framework.Workspaces.$(PackageVersion).nupkg",
+        "Metalama.LinqPad.$(PackageVersion).nupkg" ),
+    Dependencies = new[] { Dependencies.PostSharpEngineering, Dependencies.MetalamaCompiler }
 };
 
 product.PrepareCompleted += OnPrepareCompleted;
@@ -62,8 +57,12 @@ static bool OnPrepareCompleted( (BuildContext Context, BaseBuildSettings Setting
 {
     arg.Context.Console.WriteHeading( "Generating code" );
 
-    var generatorDirectory = Path.Combine( arg.Context.RepoDirectory, "Build", "Metalama.Framework.GenerateMetaSyntaxRewriter" );
-    var project = new DotNetSolution( Path.Combine( generatorDirectory, "Metalama.Framework.GenerateMetaSyntaxRewriter.csproj" ) );
+    var generatorDirectory =
+        Path.Combine( arg.Context.RepoDirectory, "Build", "Metalama.Framework.GenerateMetaSyntaxRewriter" );
+    var project =
+        new DotNetSolution( Path.Combine(
+            generatorDirectory,
+            "Metalama.Framework.GenerateMetaSyntaxRewriter.csproj" ) );
 
     if ( !project.Restore( arg.Context, new BuildSettings() ) )
     {
@@ -82,13 +81,21 @@ static bool OnPrepareCompleted( (BuildContext Context, BaseBuildSettings Setting
         return false;
     }
 
-    var targetFile = Path.Combine( arg.Context.RepoDirectory, "Metalama.Framework.Engine", "Templating", "MetaSyntaxRewriter.g.cs" );
-    if ( File.Exists( targetFile ) )
-    {
-        File.Delete( targetFile );
-    }
+    CopyFile( "MetaSyntaxRewriter.g.cs", "Metalama.Framework.Engine\\Templating" );
+    CopyFile( "RunTimeCodeHasher.g.cs", "Metalama.Framework.DesignTime\\Pipeline\\Diff" );
+    CopyFile( "CompileTimeCodeHasher.g.cs", "Metalama.Framework.DesignTime\\Pipeline\\Diff" );
 
-    File.Copy( Path.Combine( toolDirectory, "MetaSyntaxRewriter.g.cs" ), targetFile );
+    void CopyFile( string fileName, string targetDirectory )
+    {
+        var targetFile = Path.Combine( arg.Context.RepoDirectory, targetDirectory, fileName );
+
+        if ( File.Exists( targetFile ) )
+        {
+            File.Delete( targetFile );
+        }
+
+        File.Copy( Path.Combine( toolDirectory, fileName ), targetFile );
+    }
 
     return true;
 }

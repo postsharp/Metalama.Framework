@@ -10,7 +10,7 @@ namespace Metalama.Framework.Engine.Validation;
 /// <summary>
 /// Validation drivers cache and execute the method call to the user validation method.
 /// </summary>
-internal abstract class ValidatorDriver
+public abstract class ValidatorDriver
 {
     /// <summary>
     /// Gets the type defining the validation method.

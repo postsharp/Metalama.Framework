@@ -12,7 +12,7 @@ public partial class InheritableAspectInstance
     /// in a context where all instances are of the same class because we cannot have several instances of the same aspect class on the
     /// same target class.
     /// </summary>
-    internal class ByTargetComparer : IEqualityComparer<InheritableAspectInstance>
+    public class ByTargetComparer : IEqualityComparer<InheritableAspectInstance>
     {
         public static ByTargetComparer Instance { get; } = new();
 

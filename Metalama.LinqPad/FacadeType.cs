@@ -60,6 +60,12 @@ namespace Metalama.LinqPad
                     {
                         var propertyName = publicGetter.Name.Substring( 4 );
 
+                        if ( properties.ContainsKey( propertyName ) )
+                        {
+                            // The property was defined in the parent interface.
+                            continue;
+                        }
+
                         var property =
                             publicGetter.DeclaringType!.GetProperty(
                                 propertyName,
@@ -116,9 +122,9 @@ namespace Metalama.LinqPad
                         {
                             var declaration = (IDeclaration) o;
 
-                            var workspaceExpression = this._factory.WorkspaceExpression( declaration );
+                            var getCompilationInfo = this._factory.GetGetCompilationInfo( declaration );
 
-                            return new Permalink( workspaceExpression, declaration );
+                            return new Permalink( getCompilationInfo, declaration );
                         } ) );
             }
 
@@ -157,7 +163,7 @@ namespace Metalama.LinqPad
 
             var attribute = type.GetCustomAttribute<DumpBehaviorAttribute>();
 
-            if ( attribute != null && attribute.IsHidden )
+            if ( attribute is { IsHidden: true } )
             {
                 return false;
             }

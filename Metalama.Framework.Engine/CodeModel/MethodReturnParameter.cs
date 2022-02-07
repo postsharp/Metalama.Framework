@@ -34,7 +34,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public override ISymbol? Symbol => null;
 
-        public override Ref<IDeclaration> ToRef() => Ref.ReturnParameter( this.DeclaringMethod.MethodSymbol, this.GetCompilationModel().RoslynCompilation );
+        internal override Ref<IDeclaration> ToRef() => Ref.ReturnParameter( this.DeclaringMethod.MethodSymbol, this.GetCompilationModel().RoslynCompilation );
 
         public override IEnumerable<IDeclaration> GetDerivedDeclarations( bool deep = true )
             => this.DeclaringMember.GetContainedDeclarations().Select( d => ((IMethod) d).ReturnParameter );

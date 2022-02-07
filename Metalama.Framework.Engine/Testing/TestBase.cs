@@ -170,7 +170,7 @@ class Expression
                 bool addMetalamaReferences = true )
                 => this.CreateCompilationModel( code, dependentCode, ignoreErrors, additionalReferences, name );
 
-            internal CompilationModel CreateCompilationModel(
+            public CompilationModel CreateCompilationModel(
                 string code,
                 string? dependentCode = null,
                 bool ignoreErrors = false,
@@ -194,7 +194,7 @@ class Expression
                 bool addMetalamaReferences = true )
                 => this.CreateCompilationModel( code, dependentCode, ignoreErrors, additionalReferences, name );
 
-            internal CompilationModel CreateCompilationModel(
+            public CompilationModel CreateCompilationModel(
                 IReadOnlyDictionary<string, string> code,
                 string? dependentCode = null,
                 bool ignoreErrors = false,

@@ -1,6 +1,8 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Project;
 using Metalama.Framework.Serialization;
 using System;
 using System.Globalization;
@@ -9,10 +11,15 @@ namespace Metalama.Framework.Engine.LamaSerialization
 {
     internal sealed class ReflectionSerializerFactory : ISerializerFactory
     {
+        private readonly UserCodeInvoker _userCodeInvoker;
+        private readonly UserCodeExecutionContext _userCodeExecutionContext;
+
         public Type SerializerType { get; }
 
-        public ReflectionSerializerFactory( Type serializerType )
+        public ReflectionSerializerFactory( IServiceProvider serviceProvider, Type serializerType )
         {
+            this._userCodeInvoker = serviceProvider.GetRequiredService<UserCodeInvoker>();
+            this._userCodeExecutionContext = new UserCodeExecutionContext( serviceProvider );
             this.SerializerType = serializerType;
         }
 
@@ -46,7 +53,7 @@ namespace Metalama.Framework.Engine.LamaSerialization
                 serializerTypeInstance = this.SerializerType;
             }
 
-            var instance = Activator.CreateInstance( serializerTypeInstance );
+            var instance = this._userCodeInvoker.Invoke( () => Activator.CreateInstance( serializerTypeInstance ), this._userCodeExecutionContext );
 
             return instance switch
             {
@@ -55,7 +62,7 @@ namespace Metalama.Framework.Engine.LamaSerialization
                 _ => throw new LamaSerializationException(
                     string.Format(
                         CultureInfo.InvariantCulture,
-                        "Type {0} must implement interface ISerializer or ISerializerFactory.",
+                        "Type '{0}' must implement interface ISerializer or ISerializerFactory.",
                         serializerTypeInstance ) )
             };
         }

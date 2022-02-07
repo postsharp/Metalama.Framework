@@ -10,12 +10,12 @@ using SyntaxReference = Metalama.Framework.Code.SyntaxReference;
 
 namespace Metalama.Framework.Engine.Validation;
 
-internal class ReferenceValidatorInstance : ValidatorInstance
+public class ReferenceValidatorInstance : ValidatorInstance
 {
     public ReferenceValidatorInstance(
         IDeclaration validatedDeclaration,
         ValidatorDriver driver,
-        in ValidatorImplementation implementation,
+        ValidatorImplementation implementation,
         ReferenceKinds referenceKinds ) : base( validatedDeclaration, driver, implementation )
     {
         this.ReferenceKinds = referenceKinds;
@@ -25,7 +25,7 @@ internal class ReferenceValidatorInstance : ValidatorInstance
 
     public ReferenceKinds ReferenceKinds { get; }
 
-    public void Validate(
+    internal void Validate(
         IDeclaration referencingDeclaration,
         SyntaxNode node,
         ReferenceKinds referenceKind,

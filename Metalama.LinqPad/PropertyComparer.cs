@@ -22,7 +22,11 @@ namespace Metalama.LinqPad
                 "Id" => 0,
                 "Severity" => 1,
                 "Position" => 1,
-                "Name" => 2,
+                "ShortName" => 2,
+                "Name" => 3,
+                "DisplayName" => 3,
+                "FullName" => 4,
+
                 _ => 10
             };
 

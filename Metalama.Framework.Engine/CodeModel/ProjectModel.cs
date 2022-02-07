@@ -14,7 +14,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel
 {
-    internal class ProjectModel : IProject
+    public class ProjectModel : IProject
     {
         private readonly ConcurrentDictionary<Type, ProjectExtension> _extensions = new();
         private readonly IProjectOptions _projectOptions;

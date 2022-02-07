@@ -9,7 +9,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.Collections
 {
-    internal partial class ImmutableDictionaryOfArray<TKey, TValue> : IReadOnlyMultiValueDictionary<TKey, TValue>
+    public partial class ImmutableDictionaryOfArray<TKey, TValue> : IReadOnlyMultiValueDictionary<TKey, TValue>
         where TKey : notnull
     {
         private readonly ImmutableDictionary<TKey, Group> _dictionary;
