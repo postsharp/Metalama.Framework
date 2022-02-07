@@ -30,15 +30,4 @@ public interface IDiagnostic
     /// Adds a set of code fixes to the current instance, and returns the current augmented instance.
     /// </summary>
     IDiagnostic WithCodeFixes( params CodeFix[] codeFixes );
-
-    /// <summary>
-    /// Reports the current diagnostic to a given <see cref="IDiagnosticLocation"/> (typically a declaration or syntax node). 
-    /// </summary>
-    void ReportTo( IDiagnosticLocation location, IDiagnosticSink sink );
-
-    /// <summary>
-    /// Reports the current diagnostic to the default location (declaration or syntax node) of the current context.
-    /// </summary>
-    /// <param name="sink">The <see cref="ScopedDiagnosticSink"/> for the current context.</param>
-    void ReportTo( in ScopedDiagnosticSink sink );
 }

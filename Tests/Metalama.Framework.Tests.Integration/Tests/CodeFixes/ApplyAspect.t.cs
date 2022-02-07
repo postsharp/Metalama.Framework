@@ -18,7 +18,7 @@ namespace Metalama.Framework.Tests.Integration.CodeFixes.ApplyAspect
         {
             base.BuildAspect( builder );
 
-            _diag.WithCodeFixes( CodeFixFactory.ApplyAspect( builder.Target, new Aspect2(), "Apply" ) ).ReportTo( builder.Diagnostics );
+builder.Diagnostics.Report(             _diag.WithCodeFixes( CodeFixFactory.ApplyAspect( builder.Target, new Aspect2(), "Apply" ) ) );
         }
     }
 #pragma warning restore CS0067

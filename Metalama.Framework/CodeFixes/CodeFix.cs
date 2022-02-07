@@ -1,7 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Metalama.Framework.Diagnostics;
 using System;
 using System.Threading.Tasks;
 
@@ -9,7 +8,7 @@ namespace Metalama.Framework.CodeFixes
 {
     /// <summary>
     /// Represents a modification of the current solution, including the <see cref="Title"/> of transformation.
-    /// To create instantiate this class, use <see cref="CodeFixFactory"/>.
+    /// To instantiate a single-step code fix, use <see cref="CodeFixFactory"/>. To instantiate a more complex code fix, use the constructor.
     /// </summary>
     public sealed class CodeFix
     {
@@ -23,23 +22,16 @@ namespace Metalama.Framework.CodeFixes
         /// </summary>
         internal Func<ICodeFixBuilder, Task> Action { get; }
 
-        internal CodeFix( string title, Func<ICodeFixBuilder, Task> action )
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CodeFix"/> class. This constructor must only be used to create multi-transformations
+        /// code fixes. For single-step code fixes, use <see cref="CodeFixFactory"/>.
+        /// </summary>
+        /// <param name="title">Title of the code fix, shown to the user (must be unique).</param>
+        /// <param name="action">Delegate executed when the code fix is chosen by the user.</param>
+        public CodeFix( string title, Func<ICodeFixBuilder, Task> action )
         {
             this.Title = title;
             this.Action = action;
         }
-
-        /// <summary>
-        /// Suggests the current code fix for a given <see cref="IDiagnosticLocation"/> (typically for a declaration or syntax node). 
-        /// </summary>
-        /// <param name="location">The declaration or node where the code fix should be suggested.</param>
-        /// <param name="sink">A <see cref="ScopedDiagnosticSink"/>.</param>
-        public void SuggestFor( IDiagnosticLocation location, IDiagnosticSink sink ) => sink.Suggest( location, this );
-
-        /// <summary>
-        /// Suggests the current code fix for the default location (typically a declaration or syntax node) in the current context.
-        /// </summary>
-        /// <param name="sink">The <see cref="ScopedDiagnosticSink"/> for the current context.</param>
-        public void SuggestFor( in ScopedDiagnosticSink sink ) => sink.Suggest( this );
     }
 }

@@ -159,34 +159,31 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             [NotNullWhen( true )] out BlockSyntax? expression )
             where T : class, IMember
         {
-            using ( context.DiagnosticSink.WithDefaultScope( this ) )
-            {
-                var metaApi = MetaApi.ForInitializer(
-                    this,
-                    new MetaApiProperties(
-                        context.DiagnosticSink,
-                        initializerTemplate.Cast(),
-                        this.ParentAdvice.ReadOnlyTags,
-                        this.ParentAdvice.AspectLayerId,
-                        context.SyntaxGenerationContext,
-                        this.ParentAdvice.Aspect,
-                        context.ServiceProvider ) );
-
-                var expansionContext = new TemplateExpansionContext(
-                    this.ParentAdvice.Aspect.Aspect,
-                    metaApi,
-                    this.Compilation,
-                    context.LexicalScopeProvider.GetLexicalScope( this ),
-                    context.ServiceProvider.GetRequiredService<SyntaxSerializationService>(),
+            var metaApi = MetaApi.ForInitializer(
+                this,
+                new MetaApiProperties(
+                    context.DiagnosticSink,
+                    initializerTemplate.Cast(),
+                    this.ParentAdvice.ReadOnlyTags,
+                    this.ParentAdvice.AspectLayerId,
                     context.SyntaxGenerationContext,
-                    default,
-                    null,
-                    this.ParentAdvice.AspectLayerId );
+                    this.ParentAdvice.Aspect,
+                    context.ServiceProvider ) );
 
-                var templateDriver = this.ParentAdvice.TemplateInstance.TemplateClass.GetTemplateDriver( initializerTemplate.Declaration! );
+            var expansionContext = new TemplateExpansionContext(
+                this.ParentAdvice.Aspect.Aspect,
+                metaApi,
+                this.Compilation,
+                context.LexicalScopeProvider.GetLexicalScope( this ),
+                context.ServiceProvider.GetRequiredService<SyntaxSerializationService>(),
+                context.SyntaxGenerationContext,
+                default,
+                null,
+                this.ParentAdvice.AspectLayerId );
 
-                return templateDriver.TryExpandDeclaration( expansionContext, context.DiagnosticSink, out expression );
-            }
+            var templateDriver = this.ParentAdvice.TemplateInstance.TemplateClass.GetTemplateDriver( initializerTemplate.Declaration! );
+
+            return templateDriver.TryExpandDeclaration( expansionContext, context.DiagnosticSink, out expression );
         }
     }
 }

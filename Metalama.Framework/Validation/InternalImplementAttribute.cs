@@ -34,7 +34,7 @@ namespace Metalama.Framework.Validation
         {
             if ( context.ReferencingDeclaration.Compilation != context.ReferencedDeclaration.Compilation )
             {
-                _warning.WithArguments( (context.ReferencedDeclaration, context.ReferencingType) ).ReportTo( context.Diagnostics );
+                context.Diagnostics.Report( _warning.WithArguments( (context.ReferencedDeclaration, context.ReferencingType) ) );
             }
         }
     }

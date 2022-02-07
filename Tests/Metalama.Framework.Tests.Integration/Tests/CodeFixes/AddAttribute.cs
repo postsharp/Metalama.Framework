@@ -14,7 +14,7 @@ namespace Metalama.Framework.Tests.Integration.CodeFixes.AddAttribute
         {
             base.BuildAspect( builder );
 
-            _diag.WithCodeFixes( CodeFixFactory.AddAttribute( builder.Target, typeof(MyAttribute) ) ).ReportTo( builder.Diagnostics );
+            builder.Diagnostics.Report( _diag.WithCodeFixes( CodeFixFactory.AddAttribute( builder.Target, typeof(MyAttribute) ) ) );
         }
     }
 

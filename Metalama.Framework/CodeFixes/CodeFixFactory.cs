@@ -5,7 +5,6 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using System;
-using System.Threading.Tasks;
 
 namespace Metalama.Framework.CodeFixes;
 
@@ -87,15 +86,6 @@ public static class CodeFixFactory
         => new(
             title ?? $"Apply {aspect.GetType().Name} to {targetDeclaration.ToDisplayString( CodeDisplayFormat.MinimallyQualified )}",
             builder => builder.ApplyAspectAsync( targetDeclaration, aspect ) );
-
-    /// <summary>
-    /// Creates a <see cref="CodeFix"/> by specifying a delegate. This method is only useful when you need a code fix that combines several
-    /// operations. For code fixes composed of a single transformation, use the other static methods of this class.
-    /// </summary>
-    /// <param name="action">The delegate that transforms the solution.</param>
-    /// <param name="title">The title of the <see cref="CodeFix"/>, displayed to the user in the light bulb or refactoring menu.</param>
-    /// <returns></returns>
-    public static CodeFix CreateCustomCodeFix( Func<ICodeFixBuilder, Task> action, string title ) => new( title, action );
 
     private static string RemoveSuffix( string s, string suffix )
         => s.EndsWith( suffix, StringComparison.Ordinal ) ? s.Substring( 0, s.Length - suffix.Length ) : s;

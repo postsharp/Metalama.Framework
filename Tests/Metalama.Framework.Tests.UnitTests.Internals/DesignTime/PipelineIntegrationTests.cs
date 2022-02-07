@@ -179,7 +179,7 @@ class MyAspect : MethodAspect
 
    public override void BuildAspect( IAspectBuilder<IMethod> aspectBuilder )
    {
-        _description.WithArguments( this.Version ).ReportTo( aspectBuilder.Diagnostics );
+aspectBuilder.Diagnostics.Report(         _description.WithArguments( this.Version ) );
    }
 }
 ";
