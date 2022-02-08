@@ -106,7 +106,7 @@ namespace Metalama.TestFramework
             }
             else
             {
-                testResult.SetFailed( "CompileTimeAspectPipeline.TryExecute failed." );
+                testResult.SetFailed( "CompileTimeAspectPipeline.ExecuteAsync failed." );
             }
 
             if ( testInput.Options.WriteInputHtml.GetValueOrDefault() || testInput.Options.WriteOutputHtml.GetValueOrDefault() )

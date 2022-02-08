@@ -61,21 +61,8 @@ namespace Metalama.Framework.Engine.Linking.Inlining
             // Get the final body (after inlining) of the target.
             var inlinedTargetBody = context.GetLinkedBody( targetSymbol.ToSemantic( aspectReference.ResolvedSemantic.Kind ) );
 
-            var a = returnStatement.GetLeadingTrivia();
-            var b = inlinedTargetBody.GetLeadingTrivia();
-            var c = b.InsertRange( 0, a );
-
-            // Add the original trivia and mark the block as flattenable.
-            // This will skip any trivia within the return statement as we don't have a place to add them.
-            inlinedTargetBody = 
-                inlinedTargetBody
-                .WithOpenBraceToken( 
-                    inlinedTargetBody.OpenBraceToken
-                    .WithTrailingTrivia( inlinedTargetBody.OpenBraceToken.TrailingTrivia.InsertRange( 0, returnStatement.GetLeadingTrivia() ) ) )
-                .WithCloseBraceToken(
-                    inlinedTargetBody.CloseBraceToken
-                    .WithLeadingTrivia( inlinedTargetBody.CloseBraceToken.LeadingTrivia.AddRange( returnStatement.GetTrailingTrivia() ) ) )
-                .AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+            // Mark the block as flattenable.
+            inlinedTargetBody = inlinedTargetBody.AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
 
             replacedNode = returnStatement;
             newNode = inlinedTargetBody;

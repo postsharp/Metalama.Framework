@@ -498,6 +498,8 @@ namespace Metalama.Framework.Engine.Linking
         /// <returns></returns>
         private ExpressionSyntax GetLinkedExpression( ResolvedAspectReference aspectReference, SyntaxGenerationContext syntaxGenerationContext )
         {
+            // IMPORTANT: This method needs to always strip trivia if rewriting the existing expression.
+            //            Trivia existing around the expression are preserved during substitution.
             if ( !SymbolEqualityComparer.Default.Equals(
                     aspectReference.ResolvedSemantic.Symbol.ContainingType,
                     aspectReference.ResolvedSemantic.Symbol.ContainingType ) )
@@ -549,13 +551,16 @@ namespace Metalama.Framework.Engine.Linking
                         {
                             return memberAccessExpression
                                 .WithExpression( ThisExpression() )
-                                .WithName( IdentifierName( targetMemberName ) );
+                                .WithName( IdentifierName( targetMemberName ) )
+                                .WithoutTrivia();
                         }
                         else
                         {
                             // This is the same type, we can just change the identifier in the expression.
                             // TODO: Is the target always accessible?
-                            return memberAccessExpression.WithName( IdentifierName( targetMemberName ) );
+                            return memberAccessExpression
+                                .WithName( IdentifierName( targetMemberName ) )
+                                .WithoutTrivia();
                         }
                     }
                     else
@@ -575,11 +580,9 @@ namespace Metalama.Framework.Engine.Linking
                             // Static member access where the target is a different type.
                             return
                                 MemberAccessExpression(
-                                        SyntaxKind.SimpleMemberAccessExpression,
-                                        syntaxGenerationContext.SyntaxGenerator.Type( targetSymbol.ContainingType ),
-                                        IdentifierName( targetMemberName ) )
-                                    .WithLeadingTrivia( memberAccessExpression.GetLeadingTrivia() )
-                                    .WithTrailingTrivia( memberAccessExpression.GetTrailingTrivia() );
+                                    SyntaxKind.SimpleMemberAccessExpression,
+                                    syntaxGenerationContext.SyntaxGenerator.Type( targetSymbol.ContainingType ),
+                                    IdentifierName( targetMemberName ) );
                         }
                         else
                         {
@@ -599,9 +602,7 @@ namespace Metalama.Framework.Engine.Linking
                                             MemberAccessExpression(
                                                     SyntaxKind.SimpleMemberAccessExpression,
                                                     BaseExpression(),
-                                                    IdentifierName( targetMemberName ) )
-                                                .WithLeadingTrivia( memberAccessExpression.GetLeadingTrivia() )
-                                                .WithTrailingTrivia( memberAccessExpression.GetTrailingTrivia() );
+                                                    IdentifierName( targetMemberName ) );
 
                                     default:
                                         var aspectInstance = this.ResolveAspectInstance( aspectReference );
@@ -619,7 +620,9 @@ namespace Metalama.Framework.Engine.Linking
                             else
                             {
                                 // Resolved symbol is unrelated to the containing symbol.
-                                return memberAccessExpression.WithName( IdentifierName( targetMemberName ) );
+                                return memberAccessExpression
+                                    .WithName( IdentifierName( targetMemberName ) )
+                                    .WithoutTrivia();
                             }
                         }
                     }
@@ -637,7 +640,10 @@ namespace Metalama.Framework.Engine.Linking
                         {
                             var rewriter = new ConditionalAccessRewriter( targetMemberName );
 
-                            return (ExpressionSyntax) rewriter.Visit( conditionalAccessExpression );
+                            return 
+                                (ExpressionSyntax) rewriter.Visit( 
+                                    conditionalAccessExpression
+                                    .WithoutTrivia() );
                         }
                     }
                     else

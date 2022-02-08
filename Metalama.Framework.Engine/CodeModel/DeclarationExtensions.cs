@@ -399,11 +399,49 @@ namespace Metalama.Framework.Engine.CodeModel
 
             while (currentType != null)
             {
-                var method = currentType.Methods.OfExactSignature( signatureTemplate );
+                var method = currentType.Methods.OfExactSignature( signatureTemplate, matchIsStatic: false, declaredOnly: true );
 
                 if ( method != null && method.IsAccessibleWithin(namedType) )
                 {
                     return method;
+                }
+
+                currentType = currentType.BaseType;
+            }
+
+            return null;
+        }
+
+        public static IProperty? FindClosestVisibleProperty( this INamedType namedType, IProperty signatureTemplate )
+        {
+            var currentType = (INamedType?) namedType;
+
+            while ( currentType != null )
+            {
+                var property = currentType.Properties.OfExactSignature( signatureTemplate, matchIsStatic: false, declaredOnly: true );
+
+                if ( property != null && property.IsAccessibleWithin( namedType ) )
+                {
+                    return property;
+                }
+
+                currentType = currentType.BaseType;
+            }
+
+            return null;
+        }
+
+        public static IEvent? FindClosestVisibleEvent( this INamedType namedType, IEvent signatureTemplate )
+        {
+            var currentType = (INamedType?) namedType;
+
+            while ( currentType != null )
+            {
+                var @event = currentType.Events.OfExactSignature( signatureTemplate, matchIsStatic: false, declaredOnly: true );
+
+                if ( @event != null && @event.IsAccessibleWithin( namedType ) )
+                {
+                    return @event;
                 }
 
                 currentType = currentType.BaseType;

@@ -7,175 +7,126 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.Exis
         [Introduce(WhenExists = OverrideStrategy.New)]
         public int BaseClassMethod()
         {
-            meta.InsertComment("Should call the base method of the same name.");
-            return meta.Proceed();
-        }
-
-        [Introduce(WhenExists = OverrideStrategy.New)]
-        public static int BaseClassMethod_Static()
-        {
-            meta.InsertComment("Should call the base class method of the same name.");
+            meta.InsertComment("New keyword, call the base method of the same name.");
             return meta.Proceed();
         }
 
         [Introduce(WhenExists = OverrideStrategy.New)]
         public int BaseClassInaccessibleMethod()
         {
-            meta.InsertComment("Should return a default value.");
-            return meta.Proceed();
-        }
-
-        [Introduce(WhenExists = OverrideStrategy.New)]
-        public int BaseClassInaccessibleMethod_Static()
-        {
-            meta.InsertComment("Should return a default value.");
+            meta.InsertComment("No new keyword, return a default value.");
             return meta.Proceed();
         }
 
         [Introduce(WhenExists = OverrideStrategy.New)]
         public int BaseClassVirtualMethod()
         {
-            meta.InsertComment("Should call the base method of the same name.");
+            meta.InsertComment("New keyword, call the base method of the same name.");
             return meta.Proceed();
         }
 
         [Introduce(WhenExists = OverrideStrategy.New)]
         public int BaseClassVirtualSealedMethod()
         {
-            meta.InsertComment("Should call the base method of the same name.");
+            meta.InsertComment("New keyword, call the base method of the same name.");
             return meta.Proceed();
         }
 
         [Introduce(WhenExists = OverrideStrategy.New)]
         public int BaseClassVirtualOverriddenMethod()
         {
-            meta.InsertComment("Should call the base method of the same name.");
+            meta.InsertComment("New keyword, call the base method of the same name.");
             return meta.Proceed();
         }
 
         [Introduce(WhenExists = OverrideStrategy.New)]
         public int BaseClassAbstractMethod()
         {
-            meta.InsertComment("Should call the base method of the same name.");
+            meta.InsertComment("New keyword, call the base method of the same name.");
             return meta.Proceed();
         }
 
         [Introduce(WhenExists = OverrideStrategy.New)]
         public int BaseClassAbstractSealedMethod()
         {
-            meta.InsertComment("Should call the base method of the same name.");
+            meta.InsertComment("New keyword, call the base method of the same name.");
             return meta.Proceed();
         }
 
         [Introduce(WhenExists = OverrideStrategy.New)]
-        public int HiddenBaseClassMethod()
+        public int BaseClassMethodHiddenByMethod()
         {
-            meta.InsertComment("Should call the base method of the same name.");
+            meta.InsertComment("New keyword, call the base method of the same name.");
             return meta.Proceed();
         }
 
         [Introduce(WhenExists = OverrideStrategy.New)]
-        public static int HiddenBaseClassMethod_Static()
+        public int BaseClassVirtualMethodHiddenByMethod()
         {
-            meta.InsertComment("Should call the derived class method of the same name.");
-            return meta.Proceed();
-        }
-
-        [Introduce(WhenExists = OverrideStrategy.New)]
-        public int HiddenBaseClassVirtualMethod()
-        {
-            meta.InsertComment("Should call the base method of the same name.");
+            meta.InsertComment("New keyword, call the base method of the same name.");
             return meta.Proceed();
         }
 
         [Introduce(WhenExists = OverrideStrategy.New)]
         public int BaseClassMethodHiddenByVirtualMethod()
         {
-            meta.InsertComment("Should call the base method of the same name.");
+            meta.InsertComment("New keyword, call the base method of the same name.");
             return meta.Proceed();
         }
 
         [Introduce(WhenExists = OverrideStrategy.New)]
         public int BaseClassMethodHiddenByInaccessibleMethod()
         {
-            meta.InsertComment("Should call the base method of the same name.");
+            meta.InsertComment("New keyword, call the base method of the same name.");
             return meta.Proceed();
         }
 
         [Introduce(WhenExists = OverrideStrategy.New)]
         public int DerivedClassMethod()
         {
-            meta.InsertComment("Should call the base method of the same name.");
-            return meta.Proceed();
-        }
-
-        [Introduce(WhenExists = OverrideStrategy.New)]
-        public static int DerivedClassMethod_Static()
-        {
-            meta.InsertComment("Should call the derived class method of the same name.");
+            meta.InsertComment("New keyword, call the base method of the same name.");
             return meta.Proceed();
         }
 
         [Introduce(WhenExists = OverrideStrategy.New)]
         public int DerivedClassVirtualMethod()
         {
-            meta.InsertComment("Should call the base method of the same name.");
+            meta.InsertComment("New keyword, call the base method of the same name.");
             return meta.Proceed();
         }
 
         [Introduce(WhenExists = OverrideStrategy.New)]
         public int DerivedClassVirtualSealedMethod()
         {
-            meta.InsertComment("Should call the base method of the same name.");
+            meta.InsertComment("New keyword, call the base method of the same name.");
             return meta.Proceed();
         }
 
         [Introduce(WhenExists = OverrideStrategy.New)]
         public int DerivedClassInaccessibleMethod()
         {
-            meta.InsertComment("Should return a default value.");
-            return meta.Proceed();
-        }
-
-        [Introduce(WhenExists = OverrideStrategy.New)]
-        public int DerivedClassInaccessibleMethod_Static()
-        {
-            meta.InsertComment("Should return a default value.");
+            meta.InsertComment("No new keyword, return a default value.");
             return meta.Proceed();
         }
 
         [Introduce(WhenExists = OverrideStrategy.New)]
         public int ExistingMethod()
         {
-            meta.InsertComment("Should return a constant.");
-            return meta.Proceed();
-        }
-
-        [Introduce(WhenExists = OverrideStrategy.New)]
-        public static int ExistingMethod_Static()
-        {
-            meta.InsertComment("Should return a constant.");
+            meta.InsertComment("No new keyword, return a constant.");
             return meta.Proceed();
         }
 
         [Introduce(WhenExists = OverrideStrategy.New)]
         public int ExistingVirtualMethod()
         {
-            meta.InsertComment("Should return a constant.");
+            meta.InsertComment("No new keyword, return a constant.");
             return meta.Proceed();
         }
 
         [Introduce(WhenExists = OverrideStrategy.New)]
         public int NonExistentMethod()
         {
-            meta.InsertComment("Should return a default value.");
-            return meta.Proceed();
-        }
-
-        [Introduce(WhenExists = OverrideStrategy.New)]
-        public static int NonExistentMethod_Static()
-        {
-            meta.InsertComment("Should return a default value.");
+            meta.InsertComment("No new keyword, return a default value.");
             return meta.Proceed();
         }
     }
@@ -187,17 +138,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.Exis
             return 42;
         }
 
-        public static int BaseClassMethod_Static()
-        {
-            return 42;
-        }
-
         private int BaseClassInaccessibleMethod()
-        {
-            return 42;
-        }
-
-        private int BaseClassInaccessibleMethod_Static()
         {
             return 42;
         }
@@ -221,17 +162,12 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.Exis
 
         public abstract int BaseClassAbstractSealedMethod();
 
-        public int HiddenBaseClassMethod()
+        public int BaseClassMethodHiddenByMethod()
         {
             return 42;
         }
 
-        public static int HiddenBaseClassMethod_Static()
-        {
-            return 42;
-        }
-
-        public int HiddenBaseClassVirtualMethod()
+        public int BaseClassVirtualMethodHiddenByMethod()
         {
             return 42;
         }
@@ -249,17 +185,12 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.Exis
 
     internal class DerivedClass : BaseClass
     {
-        public new int HiddenBaseClassMethod()
+        public new int BaseClassMethodHiddenByMethod()
         {
             return 33;
         }
 
-        public new static int HiddenBaseClassMethod_Static()
-        {
-            return 33;
-        }
-
-        public new int HiddenBaseClassVirtualMethod()
+        public new int BaseClassVirtualMethodHiddenByMethod()
         {
             return 33;
         }
@@ -299,11 +230,6 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.Exis
             return 33;
         }
 
-        public static int DerivedClassMethod_Static()
-        {
-            return 33;
-        }
-
         public virtual int DerivedClassVirtualMethod()
         {
             return 33;
@@ -318,11 +244,6 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.Exis
         {
             return 42;
         }
-
-        private int DerivedClassInaccessibleMethod_Static()
-        {
-            return 42;
-        }
     }
 
     // <target>
@@ -332,11 +253,6 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.Exis
         // All methods in this class should contain a comment describing the correct output.
 
         public int ExistingMethod()
-        {
-            return 27;
-        }
-
-        public static int ExistingMethod_Static()
         {
             return 27;
         }
