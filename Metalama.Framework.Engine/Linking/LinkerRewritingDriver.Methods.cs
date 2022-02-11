@@ -82,12 +82,20 @@ namespace Metalama.Framework.Engine.Linking
                     modifiers = TokenList( modifiers.Where( m => m.Kind() != SyntaxKind.AsyncKeyword ) );
                 }
 
-                return methodDeclaration
+                var ret = methodDeclaration
                     .WithExpressionBody( null )
                     .WithModifiers( modifiers )
                     .WithBody( linkedBody )
                     .WithLeadingTrivia( methodDeclaration.GetLeadingTrivia() )
                     .WithTrailingTrivia( methodDeclaration.GetTrailingTrivia() );
+
+                var a = ret.Body!.OpenBraceToken.LeadingTrivia.ToArray();
+                var b = ret.Body!.OpenBraceToken.TrailingTrivia.ToArray();
+                var c = ret.Body!.CloseBraceToken.LeadingTrivia.ToArray();
+                var d = ret.Body!.CloseBraceToken.TrailingTrivia.ToArray();
+                var z = ret.ParameterList.CloseParenToken.TrailingTrivia.ToArray();
+
+                return ret;
             }
         }
 

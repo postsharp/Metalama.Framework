@@ -755,14 +755,19 @@ namespace Metalama.Framework.Engine.Templating
                                 Argument( IdentifierName( this._currentMetaContext!.StatementListVariableName ) ) );
 
                             // TemplateSyntaxFactory.AddComments( __s, comments );
-                            var add =
-                                this.DeepIndent(
-                                    ExpressionStatement(
-                                        InvocationExpression(
-                                            this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.AddComments) ),
-                                            ArgumentList( arguments ) ) ) );
 
-                            this._currentMetaContext.Statements.Add( add );
+                            var addCommentsMetaStatement =
+                                ExpressionStatement(
+                                    InvocationExpression(
+                                        this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof( TemplateSyntaxFactory.AddComments ) ),
+                                        ArgumentList( arguments ) ) );
+                                
+                            var addCommentsStatement = this.DeepIndent(
+                                addCommentsMetaStatement.WithLeadingTrivia( 
+                                    TriviaList( Comment( "// " + node.Parent!.WithoutTrivia().ToFullString() ) )
+                                    .AddRange( addCommentsMetaStatement.GetLeadingTrivia() ) ) );
+
+                            this._currentMetaContext.Statements.Add( addCommentsStatement );
 
                             return null;
                         }
@@ -774,14 +779,18 @@ namespace Metalama.Framework.Engine.Templating
                                 0,
                                 Argument( IdentifierName( this._currentMetaContext!.StatementListVariableName ) ) );
 
-                            var add =
-                                this.DeepIndent(
-                                    ExpressionStatement(
-                                        InvocationExpression(
-                                            this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.AddStatement) ),
-                                            ArgumentList( arguments ) ) ) );
+                            var addStatementMetaStatement =
+                                ExpressionStatement(
+                                    InvocationExpression(
+                                        this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof( TemplateSyntaxFactory.AddStatement ) ),
+                                        ArgumentList( arguments ) ) );
 
-                            this._currentMetaContext.Statements.Add( add );
+                            var addStatementStatement = this.DeepIndent( 
+                                addStatementMetaStatement.WithLeadingTrivia(
+                                    TriviaList( Comment( "// " + node.Parent!.WithoutTrivia().ToFullString() ) )
+                                    .AddRange( addStatementMetaStatement.GetLeadingTrivia() ) ) );
+
+                            this._currentMetaContext.Statements.Add( addStatementStatement );
 
                             return null;
                         }

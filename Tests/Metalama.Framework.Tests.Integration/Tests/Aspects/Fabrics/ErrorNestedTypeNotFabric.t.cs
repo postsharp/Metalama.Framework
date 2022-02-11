@@ -1,4 +1,4 @@
-// CompileTimeAspectPipeline.TryExecute failed. 
+// CompileTimeAspectPipeline.ExecuteAsync failed. 
 // Error CR0231 on `E`: `The compile-time type 'TargetCode.E' cannot be nested in a run-time class. The only compile-time type that can be nested in run-time type is a class implementing 'Metalama.Framework.Fabrics.TypeFabric'.`
 // Error CR0231 on `I`: `The compile-time type 'TargetCode.I' cannot be nested in a run-time class. The only compile-time type that can be nested in run-time type is a class implementing 'Metalama.Framework.Fabrics.TypeFabric'.`
 // Error CR0231 on `S`: `The compile-time type 'TargetCode.S' cannot be nested in a run-time class. The only compile-time type that can be nested in run-time type is a class implementing 'Metalama.Framework.Fabrics.TypeFabric'.`

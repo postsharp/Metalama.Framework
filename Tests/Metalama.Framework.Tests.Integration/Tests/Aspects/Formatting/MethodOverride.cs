@@ -1,16 +1,15 @@
 ﻿using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Tests.Integration.Tests.Aspects.Formatting.MethodOverride;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-[assembly:AspectOrder(
-    typeof(Metalama.Framework.Tests.Integration.Tests.Aspects.Formatting.Aspect1), 
-    typeof(Metalama.Framework.Tests.Integration.Tests.Aspects.Formatting.Aspect2))]
+[assembly:AspectOrder(typeof(Aspect1), typeof(Aspect2))]
 
-namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Formatting
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Formatting.MethodOverride
 {
     public class Aspect1 : MethodAspect
     {
@@ -22,8 +21,11 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Formatting
         [Template]
         public dynamic? Override()
         {
+            meta.InsertComment("Comment before Aspect1.");
             Console.WriteLine(nameof(Aspect1));
+            meta.InsertComment("Comment mid Aspect1.");
             return meta.Proceed();
+            meta.InsertComment("Comment after Aspect1.");
         }
     }
 
@@ -37,29 +39,41 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Formatting
         [Template]
         public dynamic? Override()
         {
+            meta.InsertComment("Comment before Aspect2.");
             Console.WriteLine(nameof(Aspect2));
+            meta.InsertComment("Comment mid Aspect2.");
             return meta.Proceed();
+            meta.InsertComment("Comment after Aspect2.");
         }
     }
 
     // <target>
     public class Target
     {
+        // Comment before Foo.
         [Aspect1]
         [Aspect2]
         public void Foo()
-        {
-            // Intentionally indented.
-                Console.WriteLine("Foo");
-        }
+        // Comment before Foo opening brace.
+        { // Comment after Foo opening brace.
+            // Comment inside Foo 1.
+            Console.WriteLine("Foo"); // Comment inside Foo 2.
+            // Comment before Foo closing brace.
+        } // Comment after Foo closing brace.
+        // Comment after Foo.
 
+        // Comment before Bar.
         [Aspect1]
         [Aspect2]
         public int Bar()
-        {
-            // Intentionally indented.
-                Console.WriteLine("Bar");
-            return 42;
-        }
+        // Comment before Bar opening brace.
+        { // Comment after Bar opening brace.
+            // Comment inside Bar 1.
+            Console.WriteLine("Bar"); // Comment inside Bar 2.
+            // Comment inside Bar 3.
+            return 42; // Comment inside Bar 4.
+            // Comment before Bar closing brace.
+        } // Comment after Bar closing brace.
+        // Comment after Bar.
     }
 }

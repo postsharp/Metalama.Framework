@@ -1056,7 +1056,8 @@ namespace Metalama.Framework.Engine.CompileTime
                 {
                     return node.WithMembers( transformedMembers )
                         .WithAdditionalAnnotations( _hasCompileTimeCodeAnnotation )
-                        .WithUsings( node.Usings.AddRange( this._globalUsings ) );
+                        .WithUsings( node.Usings.AddRange( this._globalUsings ) )
+                        .WithAttributeLists( List( node.AttributeLists.Select(x => (AttributeListSyntax?)this.Visit(x) ).Where(x => x != null).AssertNoneNull() ) );
                 }
                 else
                 {

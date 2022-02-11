@@ -54,6 +54,7 @@ namespace Metalama.Framework.Engine.Linking
         {
             var replacements = new Dictionary<SyntaxNode, SyntaxNode?>();
             var symbol = this.ResolveBodySource( semantic );
+            var triviaSource = this.ResolveBodyBlockTriviaSource( semantic, out var shouldRemoveExistingTrivia );
             var bodyRootNode = this.GetBodyRootNode( symbol, inliningContext.SyntaxGenerationContext, out var isImplicitlyLinked );
 
             if ( !isImplicitlyLinked )
@@ -95,8 +96,81 @@ namespace Metalama.Framework.Engine.Linking
                 rewrittenBody = rewrittenBody.AddSourceCodeAnnotation();
             }
 
-            // Strip the leading and trailing trivia from the block (this is before and after the opening/closing brace).
-            return rewrittenBody.WithoutTrivia();
+            if ( triviaSource == null )
+            {
+                // Strip the trivia from the block.
+                return rewrittenBody
+                    .WithOpenBraceToken( 
+                        Token(SyntaxKind.OpenBraceToken)
+                        .WithLeadingTrivia( ElasticMarker )
+                        .WithTrailingTrivia( ElasticMarker ) )
+                    .WithCloseBraceToken(
+                        Token( SyntaxKind.CloseBraceToken )
+                        .WithLeadingTrivia( ElasticMarker )
+                        .WithTrailingTrivia( ElasticMarker ) )
+                    .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+            }
+            else
+            {
+                var openBraceLeadingTrivia =
+                    triviaSource switch
+                    {
+                        BlockSyntax blockSyntax => blockSyntax.OpenBraceToken.LeadingTrivia,
+                        ArrowExpressionClauseSyntax arrowExpressionClause => arrowExpressionClause.ArrowToken.LeadingTrivia,
+                        _ => throw new AssertionFailedException( Justifications.CoverageMissing ),
+                    };
+
+                var openBraceTrailingTrivia =
+                    triviaSource switch
+                    {
+                        BlockSyntax blockSyntax => blockSyntax.OpenBraceToken.TrailingTrivia,
+                        ArrowExpressionClauseSyntax arrowExpressionClause => arrowExpressionClause.ArrowToken.TrailingTrivia,
+                        _ => throw new AssertionFailedException( Justifications.CoverageMissing ),
+                    };
+
+                var closeBraceLeadingTrivia =
+                    triviaSource switch
+                    {
+                        BlockSyntax blockSyntax => blockSyntax.CloseBraceToken.LeadingTrivia,
+                        ArrowExpressionClauseSyntax => TriviaList(),
+                        _ => throw new AssertionFailedException( Justifications.CoverageMissing ),
+                    };
+
+                var closeBraceTrailingTrivia =
+                    triviaSource switch
+                    {
+                        BlockSyntax blockSyntax => blockSyntax.CloseBraceToken.TrailingTrivia,
+                        ArrowExpressionClauseSyntax => TriviaList(),
+                        _ => throw new AssertionFailedException( Justifications.CoverageMissing ),
+                    };
+
+                if ( shouldRemoveExistingTrivia )
+                {
+                    rewrittenBody =
+                        rewrittenBody
+                        .WithOpenBraceToken( rewrittenBody.OpenBraceToken.WithoutTrivia() )
+                        .WithCloseBraceToken( rewrittenBody.CloseBraceToken.WithoutTrivia() )
+                        .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+                }
+                else
+                {
+                    rewrittenBody =
+                        rewrittenBody
+                        .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+                }
+
+                // Keep all trivia from the source block and add trivias from the root block.
+                return Block( rewrittenBody )
+                    .WithOpenBraceToken(
+                        Token( SyntaxKind.OpenBraceToken )
+                        .WithLeadingTrivia( openBraceLeadingTrivia.Add( ElasticMarker ) )
+                        .WithTrailingTrivia( openBraceTrailingTrivia.Insert( 0, ElasticMarker ) ) )
+                    .WithCloseBraceToken(
+                        Token( SyntaxKind.CloseBraceToken )
+                        .WithLeadingTrivia( closeBraceLeadingTrivia.Add( ElasticMarker ) )
+                        .WithTrailingTrivia( closeBraceTrailingTrivia.Insert( 0, ElasticMarker ) ) )
+                    .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+            }
 
             void AddAspectReferenceReplacements()
             {
@@ -144,7 +218,7 @@ namespace Metalama.Framework.Engine.Linking
                                     Block(
                                             CreateAssignmentStatement( returnStatement.Expression ),
                                             CreateGotoStatement() )
-                                        .AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+                                        .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
                             }
                             else
                             {
@@ -162,7 +236,7 @@ namespace Metalama.Framework.Engine.Linking
                                 Block(
                                         ExpressionStatement( returnExpression ),
                                         CreateGotoStatement() )
-                                    .AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+                                    .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
                         }
                         else
                         {
@@ -170,7 +244,7 @@ namespace Metalama.Framework.Engine.Linking
                                 Block(
                                         CreateAssignmentStatement( returnExpression ),
                                         CreateGotoStatement() )
-                                    .AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+                                    .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
                         }
                     }
                     else
@@ -216,7 +290,7 @@ namespace Metalama.Framework.Engine.Linking
                             Token( SyntaxKind.GotoKeyword ).WithLeadingTrivia( ElasticLineFeed ).WithTrailingTrivia( ElasticSpace ),
                             default,
                             IdentifierName( inliningContext.ReturnLabelName.AssertNotNull() ),
-                            Token( SyntaxKind.SemicolonToken ) )
+                            Token( SyntaxKind.SemicolonToken ).WithTrailingTrivia(ElasticMarker) )
                         .AddGeneratedCodeAnnotation();
             }
         }
@@ -339,7 +413,7 @@ namespace Metalama.Framework.Engine.Linking
                             case ExpressionSyntax rewrittenExpression:
                                 return
                                     Block( ExpressionStatement( rewrittenExpression ) )
-                                        .AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+                                        .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
 
                             case BlockSyntax rewrittenBlock:
                                 return rewrittenBlock;
@@ -370,7 +444,7 @@ namespace Metalama.Framework.Engine.Linking
                                                 Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( ElasticSpace ),
                                                 rewrittenExpression,
                                                 Token( SyntaxKind.SemicolonToken ) ) )
-                                        .AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+                                        .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
 
                             case BlockSyntax rewrittenBlock:
                                 return rewrittenBlock;
@@ -489,6 +563,61 @@ namespace Metalama.Framework.Engine.Linking
             }
 
             throw new AssertionFailedException();
+        }
+
+        /// <summary>
+        /// Gets a syntax node that will the the source of trivia of the specified declaration root block.
+        /// </summary>
+        /// <param name="semantic"></param>
+        /// <returns></returns>
+        private SyntaxNode? ResolveBodyBlockTriviaSource( IntermediateSymbolSemantic<IMethodSymbol> semantic, out bool shouldRemoveExistingTrivia )
+        {
+            ISymbol? symbol;
+            if ( this._introductionRegistry.IsOverride( semantic.Symbol ) )
+            {
+                Invariant.Assert( semantic.Kind == IntermediateSymbolSemanticKind.Default );
+
+                symbol = semantic.Symbol;
+                shouldRemoveExistingTrivia = true;
+            }
+            else if ( this._introductionRegistry.IsOverrideTarget( semantic.Symbol ) )
+            {
+                switch ( semantic.Kind )
+                {
+                    case IntermediateSymbolSemanticKind.Base:
+                    case IntermediateSymbolSemanticKind.Default:
+                        // Defualt/base semantic does not have trivia from any block.
+                        symbol = null;
+                        shouldRemoveExistingTrivia = false;
+                        break;
+
+                    case IntermediateSymbolSemanticKind.Final:
+                        // Final semantic sources trivia from the original block.
+                        symbol = semantic.Symbol;
+                        shouldRemoveExistingTrivia = false;
+                        break;
+
+                    default:
+                        throw new AssertionFailedException();
+                }
+            }
+            else if ( semantic.Symbol.AssociatedSymbol != null && semantic.Symbol.AssociatedSymbol.IsExplicitInterfaceEventField() )
+            {
+                symbol = semantic.Symbol;
+                shouldRemoveExistingTrivia = true;
+            }
+            else
+            {
+                throw new AssertionFailedException();
+            }
+
+            return symbol?.GetPrimaryDeclaration() switch
+            {
+                null => null,
+                MethodDeclarationSyntax methodDeclaration => (SyntaxNode?) methodDeclaration.Body ?? methodDeclaration.ExpressionBody,
+                AccessorDeclarationSyntax accessorDeclaration => (SyntaxNode?) accessorDeclaration.Body ?? accessorDeclaration.ExpressionBody,
+                _ => throw new AssertionFailedException(),
+            };
         }
 
         /// <summary>

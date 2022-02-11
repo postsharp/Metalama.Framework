@@ -83,7 +83,7 @@ namespace Metalama.Framework.Engine.Linking.Inlining
                 contextWithLocal.GetLinkedBody( targetSymbol.GetMethod.AssertNotNull().ToSemantic( aspectReference.ResolvedSemantic.Kind ) );
 
             // Mark the block as flattenable.
-            inlinedTargetBody = inlinedTargetBody.AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+            inlinedTargetBody = inlinedTargetBody.WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
 
             // We're replacing the whole return statement.
             newNode =
@@ -93,7 +93,7 @@ namespace Metalama.Framework.Engine.Linking.Inlining
                                 context.SyntaxGenerationContext.SyntaxGenerator.Type( targetSymbol.Type ).WithTrailingTrivia( Whitespace( " " ) ),
                                 SingletonSeparatedList( VariableDeclarator( variableDeclarator.Identifier ) ) ) ),
                         inlinedTargetBody )
-                    .AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+                    .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
 
             replacedNode = localDeclaration;
         }

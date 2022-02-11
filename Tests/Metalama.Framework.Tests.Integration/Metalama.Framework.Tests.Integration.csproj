@@ -32,6 +32,8 @@
     </ItemGroup>
 
     <ItemGroup>
+      <Compile Remove="Tests\Aspects\Formatting\PropertyAccessorOverride.t.cs" />
+      <Compile Remove="Tests\Aspects\Formatting\PropertySetterOverride.t.cs" />
       <Compile Remove="Tests\Aspects\Introductions\Events\ExistingConflictNewStatic.t.cs" />
       <Compile Remove="Tests\Aspects\Introductions\Methods\ExistingConflictNewStatic.t.cs" />
     </ItemGroup>
@@ -47,6 +49,8 @@
     </ItemGroup>
 
     <ItemGroup>
+      <None Include="Tests\Aspects\Formatting\PropertySetterOverride.t.cs" />
+      <None Include="Tests\Aspects\Formatting\PropertyAccessorOverride.t.cs" />
       <None Include="Tests\Aspects\Introductions\Events\ExistingConflictNewStatic.t.cs" />
       <None Include="Tests\Aspects\Introductions\Methods\ExistingConflictNewStatic.t.cs" />
       <None Include="Tests\Aspects\Sdk\ServicePlugIn.t.cs" />

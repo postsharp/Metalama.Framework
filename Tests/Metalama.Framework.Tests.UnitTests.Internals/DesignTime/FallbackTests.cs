@@ -165,7 +165,7 @@ public class TargetClass
 
             if ( compileTimeResult == null )
             {
-                throw new AssertionFailedException( "CompileTimeAspectPipeline.TryExecute failed." );
+                throw new AssertionFailedException( "CompileTimeAspectPipeline.ExecuteAsync failed." );
             }
 
             // Create a compilation from the input compilation with removed nodes plus auxiliary files.

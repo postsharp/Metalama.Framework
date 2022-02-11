@@ -1,2 +1,2 @@
-// CompileTimeAspectPipeline.TryExecute failed. 
+// CompileTimeAspectPipeline.ExecuteAsync failed. 
 // Error CR0600 on `TargetClass`: `The aspect 'Test' on 'TargetClass' uses Base invoker with an instance expression different than 'this'. Use 'meta.This' as the first argument or use Final invoker.`

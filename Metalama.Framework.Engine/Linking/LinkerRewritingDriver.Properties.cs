@@ -93,9 +93,12 @@ namespace Metalama.Framework.Engine.Linking
                                     SyntaxKind.GetAccessorDeclaration,
                                     getAccessorDeclaration.AttributeLists,
                                     getAccessorDeclaration.Modifiers,
+                                    Token( SyntaxKind.GetKeyword ),
                                     this.GetLinkedBody(
                                         symbol.GetMethod.ToSemantic( semanticKind ),
-                                        InliningContext.Create( this, symbol.GetMethod, generationContext ) ) ) );
+                                        InliningContext.Create( this, symbol.GetMethod, generationContext ) ),
+                                    null,
+                                    default ) );
 
                             break;
 
