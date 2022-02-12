@@ -3,6 +3,7 @@
 
 using Metalama.Framework.Validation;
 using System;
+using System.Threading;
 
 namespace Metalama.Framework.CodeFixes;
 
@@ -13,6 +14,11 @@ namespace Metalama.Framework.CodeFixes;
 [InternalImplement]
 public interface ICodeActionContext
 {
+    /// <summary>
+    /// Gets the cancellation token.
+    /// </summary>
+    CancellationToken CancellationToken { get; }
+     
     /// <summary>
     /// Gets the service provider.
     /// </summary>
