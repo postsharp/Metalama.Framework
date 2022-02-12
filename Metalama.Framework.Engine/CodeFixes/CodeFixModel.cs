@@ -9,7 +9,7 @@ namespace Metalama.Framework.Engine.CodeFixes
     /// <summary>
     /// Represents a code action and the set of diagnostics to which it is attached. 
     /// </summary>
-    public record CodeFixModel( ICodeAction CodeAction, ImmutableArray<Diagnostic> Diagnostic );
+    public record CodeFixModel( ICodeActionModel CodeAction, ImmutableArray<Diagnostic> Diagnostic );
 
-    public interface ICodeAction { }
+    public interface ICodeActionModel { }
 }

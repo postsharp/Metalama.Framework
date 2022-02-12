@@ -112,14 +112,14 @@ namespace Metalama.Framework.Engine.CodeFixes
                 return CodeActionResult.Empty;
             }
 
-            var context = new CodeFixContext( partialCompilation, designTimeConfiguration! );
+            var context = new CodeActionContext( partialCompilation, designTimeConfiguration!, cancellationToken );
 
-            var codeFixBuilder = new CodeFixBuilder( context, cancellationToken );
+            var codeFixBuilder = new CodeActionBuilder( context );
 
             // TODO: use user code invoker
-            await codeFix.CodeFix.Action( codeFixBuilder );
+            await codeFix.CodeFix.CodeAction( codeFixBuilder );
 
-            return codeFixBuilder.ToCodeActionResult();
+            return context.ToCodeActionResult();
         }
     }
 }

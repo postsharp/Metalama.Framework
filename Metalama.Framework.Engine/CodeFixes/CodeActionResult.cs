@@ -23,7 +23,8 @@ public class CodeActionResult
         this.SyntaxTreeChanges = syntaxTreeChanges;
     }
 
-    public CodeActionResult( IEnumerable<SyntaxTree> modifiedTrees ) : this( modifiedTrees.Select( x => new SerializableSyntaxTree( x ) ).ToImmutableArray() ) { }
+    public CodeActionResult( IEnumerable<SyntaxTree> modifiedTrees ) :
+        this( modifiedTrees.Select( x => new SerializableSyntaxTree( x ) ).ToImmutableArray() ) { }
 
     public static CodeActionResult Empty { get; } = new( ImmutableArray<SerializableSyntaxTree>.Empty );
 
@@ -44,7 +45,7 @@ public class CodeActionResult
 
                 continue;
             }
-            
+
             solution = solution.WithDocumentSyntaxRoot( document.Id, change.GetAnnotatedSyntaxNode( cancellationToken ) );
 
             if ( format )

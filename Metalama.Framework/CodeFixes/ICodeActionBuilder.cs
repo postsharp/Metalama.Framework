@@ -6,22 +6,21 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Validation;
 using System;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Metalama.Framework.CodeFixes
 {
     /// <summary>
-    /// Argument of the delegate passed to <see cref="CodeFixFactory"/> constructor. Exposes methods that allow to modify the current solution. 
+    /// Argument of the delegate passed to <see cref="CodeFix"/> constructor. Exposes methods that allow to modify the current solution. 
     /// </summary>
     [CompileTimeOnly]
     [InternalImplement]
-    public interface ICodeFixBuilder
+    public interface ICodeActionBuilder
     {
         /// <summary>
-        /// Gets the <see cref="CancellationToken"/> for the current code fix.
+        /// Gets the context of the current code action.
         /// </summary>
-        CancellationToken CancellationToken { get; }
+        ICodeActionContext Context { get; }
 
         /// <summary>
         /// Adds a custom attribute to a given declaration.
