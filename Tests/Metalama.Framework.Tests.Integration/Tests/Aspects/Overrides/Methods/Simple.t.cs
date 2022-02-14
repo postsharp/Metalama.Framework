@@ -5,7 +5,6 @@ internal class TargetClass
 {
     global::System.Console.WriteLine("This is the overriding method.");
             Console.WriteLine("This is the original method.");
-    return;
 }
     
         [Override]
@@ -13,7 +12,6 @@ internal class TargetClass
 {
     global::System.Console.WriteLine("This is the overriding method.");
             Console.WriteLine($"This is the original method {x} {y}.");
-    return;
 }
     
         [Override]
@@ -37,7 +35,6 @@ internal class TargetClass
 {
     global::System.Console.WriteLine("This is the overriding method.");
             Console.WriteLine("This is the original static method.");
-    return;
 }
     
         [Override]
@@ -46,7 +43,6 @@ internal class TargetClass
     global::System.Console.WriteLine("This is the overriding method.");
             Console.WriteLine("This is the original method.");
             x = 42;
-    return;
 }
     
         [Override]
@@ -55,7 +51,6 @@ internal class TargetClass
     global::System.Console.WriteLine("This is the overriding method.");
             Console.WriteLine($"This is the original method {x}.");
             x = 42;
-    return;
 }
     
         [Override]
@@ -63,6 +58,5 @@ internal class TargetClass
 {
     global::System.Console.WriteLine("This is the overriding method.");
             Console.WriteLine($"This is the original method {x}.");
-    return;
 }
     }

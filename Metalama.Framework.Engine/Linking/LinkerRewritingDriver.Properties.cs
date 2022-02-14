@@ -88,18 +88,7 @@ namespace Metalama.Framework.Engine.Linking
                     switch ( symbol.GetMethod.GetPrimaryDeclaration().AssertNotNull() )
                     {
                         case AccessorDeclarationSyntax getAccessorDeclaration:
-                            transformedAccessors.Add(
-                                AccessorDeclaration(
-                                    SyntaxKind.GetAccessorDeclaration,
-                                    getAccessorDeclaration.AttributeLists,
-                                    getAccessorDeclaration.Modifiers,
-                                    Token( SyntaxKind.GetKeyword ),
-                                    this.GetLinkedBody(
-                                        symbol.GetMethod.ToSemantic( semanticKind ),
-                                        InliningContext.Create( this, symbol.GetMethod, generationContext ) ),
-                                    null,
-                                    default ) );
-
+                            transformedAccessors.Add( GetLinkedAccessor ( semanticKind, getAccessorDeclaration, symbol.GetMethod ) );
                             break;
 
                         case ArrowExpressionClauseSyntax:
@@ -108,9 +97,13 @@ namespace Metalama.Framework.Engine.Linking
                                     SyntaxKind.GetAccessorDeclaration,
                                     List<AttributeListSyntax>(),
                                     TokenList(),
-                                    this.GetLinkedBody(
-                                        symbol.GetMethod.ToSemantic( semanticKind ),
-                                        InliningContext.Create( this, symbol.GetMethod, generationContext ) ) ) );
+                                    Block(
+                                        this.GetLinkedBody(
+                                            symbol.GetMethod.ToSemantic( semanticKind ),
+                                            InliningContext.Create( this, symbol.GetMethod, generationContext ) ) )
+                                    .WithOpenBraceToken( Token( TriviaList( ElasticLineFeed ), SyntaxKind.OpenBraceToken, TriviaList( ElasticLineFeed )) )
+                                    .WithCloseBraceToken( Token( TriviaList( ElasticLineFeed ), SyntaxKind.CloseBraceToken, TriviaList( ElasticMarker ) ) ) )
+                                .WithKeyword( Token( TriviaList( ElasticMarker ), SyntaxKind.GetKeyword, TriviaList( ElasticMarker ) ) ) );
 
                             break;
                     }
@@ -118,26 +111,77 @@ namespace Metalama.Framework.Engine.Linking
 
                 if ( symbol.SetMethod != null )
                 {
-                    var setDeclaration = (AccessorDeclarationSyntax) symbol.SetMethod.GetPrimaryDeclaration().AssertNotNull();
-
-                    transformedAccessors.Add(
-                        AccessorDeclaration(
-                            SyntaxKind.SetAccessorDeclaration,
-                            setDeclaration.AttributeLists,
-                            setDeclaration.Modifiers,
-                            this.GetLinkedBody(
-                                symbol.SetMethod.ToSemantic( semanticKind ),
-                                InliningContext.Create( this, symbol.SetMethod, generationContext ) ) ) );
+                    var setAccessorDeclaration = (AccessorDeclarationSyntax) symbol.SetMethod.GetPrimaryDeclaration().AssertNotNull();
+                    transformedAccessors.Add( GetLinkedAccessor( semanticKind, setAccessorDeclaration, symbol.SetMethod ) );
                 }
+
+                // Trivia processing for the property declaration:
+                //   * Properties with accessor lists are not changed (accessors are expected to be correct, accessor lists inherit the same trivia).
+                //   * Properties with expression body are transformed in the following way (trivia of the <expr> are already processed):
+                //      int Property <trivia_leading_equals_value> => <trivia_trailing_equals_value> <expr> <trivia_leading_semicolon>; <trivia_trailing_semicolon>
+                //      int Property <trivia_leading_equals_value> { <trivia_after_equals_value> get { ... } <trivia_before_semicolon> } <trivia_trailing_semicolon>
+
+                var (accessorListLeadingTrivia, accessorStartingTrivia, accessorEndingTrivia, accessorListTrailingTrivia) = propertyDeclaration switch
+                {
+                    { AccessorList: not null and var accessorList } => ( 
+                        accessorList.OpenBraceToken.LeadingTrivia, 
+                        accessorList.OpenBraceToken.TrailingTrivia,
+                        accessorList.CloseBraceToken.LeadingTrivia,
+                        accessorList.CloseBraceToken.TrailingTrivia ),
+                        { ExpressionBody: not null and var expressionBody } => (
+                        expressionBody.ArrowToken.LeadingTrivia,
+                        expressionBody.ArrowToken.TrailingTrivia,
+                        propertyDeclaration.SemicolonToken.LeadingTrivia,
+                        propertyDeclaration.SemicolonToken.TrailingTrivia),
+                    _ => throw new AssertionFailedException(),
+                };
 
                 return
                     propertyDeclaration
-                        .WithAccessorList( AccessorList( List( transformedAccessors ) ) )
-                        .WithLeadingTrivia( propertyDeclaration.GetLeadingTrivia() )
-                        .WithTrailingTrivia( propertyDeclaration.GetTrailingTrivia() )
+                        .WithAccessorList( 
+                            AccessorList( 
+                                Token( accessorListLeadingTrivia, SyntaxKind.OpenBraceToken, accessorStartingTrivia ),
+                                List( transformedAccessors ),
+                                Token( accessorEndingTrivia, SyntaxKind.CloseBraceToken, accessorListTrailingTrivia ) )
+                            .AddGeneratedCodeAnnotation() )
                         .WithExpressionBody( null )
                         .WithInitializer( null )
-                        .WithSemicolonToken( Token( SyntaxKind.None ) );
+                        .WithSemicolonToken( default );
+            }
+
+            AccessorDeclarationSyntax GetLinkedAccessor( IntermediateSymbolSemanticKind semanticKind, AccessorDeclarationSyntax accessorDeclaration, IMethodSymbol symbol )
+            {
+                var linkedBody =
+                    this.GetLinkedBody(
+                        symbol.ToSemantic( semanticKind ),
+                        InliningContext.Create( this, symbol, generationContext! ) );
+
+                // Trivia processing:
+                //   * For block bodies methods, we preserve trivia of the opening/closing brace.
+                //   * For expression bodied methods:
+                //       int Foo() <trivia_leading_equals_value> => <trivia_trailing_equals_value> <expression> <trivia_leading_semicolon> ; <trivia_trailing_semicolon>
+                //       int Foo() <trivia_leading_equals_value> { <trivia_trailing_equals_value> <linked_body> <trivia_leading_semicolon> } <trivia_trailing_semicolon>
+
+                var (openBraceLeadingTrivia, openBraceTrailingTrivia, closeBraceLeadingTrivia, closeBraceTrailingTrivia) =
+                    accessorDeclaration switch
+                    {
+                        { Body: { OpenBraceToken: var openBraceToken, CloseBraceToken: var closeBraceToken } } =>
+                            (openBraceToken.LeadingTrivia, openBraceToken.TrailingTrivia, closeBraceToken.LeadingTrivia, closeBraceToken.TrailingTrivia),
+                        { ExpressionBody: { ArrowToken: var arrowToken }, SemicolonToken: var semicolonToken } =>
+                            (arrowToken.LeadingTrivia.Add( ElasticLineFeed ), arrowToken.TrailingTrivia.Add( ElasticLineFeed ), semicolonToken.LeadingTrivia.Add( ElasticLineFeed ), semicolonToken.TrailingTrivia),
+                        { SemicolonToken: var semicolonToken } => (semicolonToken.LeadingTrivia.Add( ElasticLineFeed ), semicolonToken.TrailingTrivia.Add( ElasticLineFeed ), TriviaList( ElasticLineFeed ), TriviaList()),
+                        _ => throw new AssertionFailedException(),
+                    };
+
+                return accessorDeclaration
+                    .WithExpressionBody( null )
+                    .WithBody(
+                        Block( linkedBody )
+                        .WithOpenBraceToken( Token( openBraceLeadingTrivia, SyntaxKind.OpenBraceToken, openBraceTrailingTrivia ) )
+                        .WithCloseBraceToken( Token( closeBraceLeadingTrivia, SyntaxKind.CloseBraceToken, closeBraceTrailingTrivia ) )
+                        .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock )
+                        .AddGeneratedCodeAnnotation() )
+                    .WithSemicolonToken( default );
             }
         }
 

@@ -22,7 +22,6 @@ private async Task<int> MethodReturningTaskOfInt_Source(int a)
     await this.MethodReturningTaskd_Source(a);
     object result = null;
     global::System.Console.WriteLine("After");
-    return;
 }
 
 private async Task MethodReturningTaskd_Source(int a)

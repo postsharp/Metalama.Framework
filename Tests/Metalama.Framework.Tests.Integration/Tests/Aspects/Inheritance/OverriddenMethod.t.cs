@@ -5,7 +5,6 @@ internal class Targets
             [Aspect]
             public virtual void M() {
     global::System.Console.WriteLine("Overridden!");
-    return;
 }
         }
 
@@ -13,7 +12,6 @@ internal class Targets
         {
             public override void M() {
     global::System.Console.WriteLine("Overridden!");
-    return;
 }
         }
     }

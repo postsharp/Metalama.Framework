@@ -6,7 +6,6 @@ internal class TargetClass
 {
     var a = 0;
             var x = 0;
-    return;
 }
 #pragma warning restore CS0219
 

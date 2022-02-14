@@ -5,6 +5,5 @@ internal class TargetClass
     {
         global::System.Console.WriteLine("This is the overriding method.");
         Console.WriteLine("This is the original method.");
-        return;
     }
 }

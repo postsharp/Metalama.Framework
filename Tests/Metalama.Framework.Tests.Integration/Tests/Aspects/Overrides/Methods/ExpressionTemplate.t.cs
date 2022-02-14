@@ -9,6 +9,5 @@ public class Target
         [Test]
         public void Bar()
 {
-    return;
 }
     }

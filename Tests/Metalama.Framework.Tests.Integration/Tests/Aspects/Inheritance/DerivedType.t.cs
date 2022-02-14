@@ -5,7 +5,6 @@ internal class Targets
         {
             private void M(){
     global::System.Console.WriteLine("Overridden!");
-    return;
 }
         }
 
@@ -13,7 +12,6 @@ internal class Targets
         {
             private void N() {
     global::System.Console.WriteLine("Overridden!");
-    return;
 }
         }
     }

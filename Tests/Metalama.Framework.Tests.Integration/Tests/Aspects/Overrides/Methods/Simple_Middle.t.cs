@@ -7,7 +7,6 @@ internal class TargetClass
             Console.WriteLine("This is the original method.");
     object x = null;
     global::System.Console.WriteLine("This is the overriding method.");
-    return;
 }
 
         [Override]
@@ -17,7 +16,6 @@ internal class TargetClass
             Console.WriteLine($"This is the original method {x} {y}.");
     object x_1 = null;
     global::System.Console.WriteLine("This is the overriding method.");
-    return;
 }
 
         [Override]
@@ -27,8 +25,7 @@ internal class TargetClass
 global::System.Int32 x;
             Console.WriteLine("This is the original method.");
 x=42;
-goto __aspect_return_1;
-__aspect_return_1:    global::System.Console.WriteLine("This is the overriding method.");
+        global::System.Console.WriteLine("This is the overriding method.");
     return (global::System.Int32)x;
 }
 
@@ -39,8 +36,7 @@ __aspect_return_1:    global::System.Console.WriteLine("This is the overriding m
 global::System.Int32 x_1;
             Console.WriteLine($"This is the original method {x} {y}.");
 x_1=x + y;
-goto __aspect_return_1;
-__aspect_return_1:    global::System.Console.WriteLine("This is the overriding method.");
+    global::System.Console.WriteLine("This is the overriding method.");
     return (global::System.Int32)x_1;
 }
 
@@ -51,7 +47,6 @@ __aspect_return_1:    global::System.Console.WriteLine("This is the overriding m
             Console.WriteLine("This is the original static method.");
     object x = null;
     global::System.Console.WriteLine("This is the overriding method.");
-    return;
 }
 
         [Override]
@@ -62,7 +57,6 @@ __aspect_return_1:    global::System.Console.WriteLine("This is the overriding m
             x = 42;
     object x_1 = null;
     global::System.Console.WriteLine("This is the overriding method.");
-    return;
 }
 
         [Override]
@@ -73,7 +67,6 @@ __aspect_return_1:    global::System.Console.WriteLine("This is the overriding m
             x = 42;
     object x_1 = null;
     global::System.Console.WriteLine("This is the overriding method.");
-    return;
 }
 
         [Override]
@@ -83,6 +76,5 @@ __aspect_return_1:    global::System.Console.WriteLine("This is the overriding m
             Console.WriteLine($"This is the original method {x}.");
     object x_1 = null;
     global::System.Console.WriteLine("This is the overriding method.");
-    return;
 }
     }

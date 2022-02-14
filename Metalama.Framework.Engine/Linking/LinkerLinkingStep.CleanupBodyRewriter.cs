@@ -109,7 +109,7 @@ namespace Metalama.Framework.Engine.Linking
                                 finalStatements[finalStatements.Count - 1]
                                 .WithTrailingTrivia( newTrailingTrivia );
 
-                            overflowingTrivia = statement.GetTrailingTrivia();
+                            overflowingTrivia = statement.GetTrailingTrivia().StripFirstTrailingNewLine();
                         }
 
                         anyRewrittenStatement = true;
@@ -169,8 +169,8 @@ namespace Metalama.Framework.Engine.Linking
 
                     // Index of the last statement.
                     var lastStatementIndex = statements.Count - 1;
-                    var leadingTrivia = block.OpenBraceToken.LeadingTrivia.AddRange( block.OpenBraceToken.TrailingTrivia );
-                    var trailingTrivia = block.CloseBraceToken.LeadingTrivia.AddRange( block.CloseBraceToken.TrailingTrivia );
+                    var leadingTrivia = block.OpenBraceToken.LeadingTrivia.AddRange( block.OpenBraceToken.TrailingTrivia.StripFirstTrailingNewLine() );
+                    var trailingTrivia = block.CloseBraceToken.LeadingTrivia.AddRange( block.CloseBraceToken.TrailingTrivia.StripFirstTrailingNewLine() );
 
                     if (firstStatementIndex >= statements.Count)
                     {

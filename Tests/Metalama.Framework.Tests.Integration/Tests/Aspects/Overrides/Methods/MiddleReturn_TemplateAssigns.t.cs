@@ -13,7 +13,6 @@ goto __aspect_return_1;
 
 __aspect_return_1:    object result = null;
     global::System.Console.WriteLine("End override.");
-    return;
 }
 
         [Override]

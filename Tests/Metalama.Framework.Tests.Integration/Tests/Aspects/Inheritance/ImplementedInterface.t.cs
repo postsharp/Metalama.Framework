@@ -10,7 +10,6 @@ internal class Targets
         {
             private void N() {
     global::System.Console.WriteLine("Overridden!");
-    return;
 }
         }
     }

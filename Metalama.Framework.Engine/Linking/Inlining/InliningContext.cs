@@ -71,7 +71,7 @@ namespace Metalama.Framework.Engine.Linking.Inlining
                                                 VariableDeclaration(
                                                     this.SyntaxGenerationContext.SyntaxGenerator.Type( semantic.Symbol.ReturnType ),
                                                     SingletonSeparatedList( VariableDeclarator( this.ReturnVariableName.AssertNotNull() ) ) ) )
-                                            .WithLeadingTrivia( ElasticLineFeed )
+                                            .WithTrailingTrivia( ElasticLineFeed )
                                             .AddGeneratedCodeAnnotation()
                                         : null,
                                     linkedBody.WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock ),
@@ -79,7 +79,7 @@ namespace Metalama.Framework.Engine.Linking.Inlining
                                         ? LabeledStatement(
                                                 Identifier( this.ReturnLabelName.AssertNotNull() ),
                                                 EmptyStatement() )
-                                            .WithLeadingTrivia( ElasticLineFeed )
+                                            .WithTrailingTrivia( ElasticLineFeed )
                                             .AddGeneratedCodeAnnotation()
                                             .WithLinkerGeneratedFlags( LinkerGeneratedFlags.EmptyLabeledStatement )
                                         : null

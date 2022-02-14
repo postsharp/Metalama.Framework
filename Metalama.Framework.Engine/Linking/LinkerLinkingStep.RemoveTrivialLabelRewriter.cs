@@ -24,25 +24,28 @@ namespace Metalama.Framework.Engine.Linking
             public override SyntaxNode? VisitBlock( BlockSyntax node )
             {
                 var newStatements = new List<StatementSyntax>();
-                var overflowingTrivia = SyntaxTriviaList.Empty;
                 var anyChange = false;
 
-                for (var i = 0; i < node.Statements.Count - 1; i++ )
+                for (var i = 0; i < node.Statements.Count; i++ )
                 {
                     var statement = node.Statements[i];
-                    var nextStatement = node.Statements[i + 1];
+                    var nextStatement = i + 1 < node.Statements.Count ? node.Statements[i + 1] : null;
 
-                    if (statement is GotoStatementSyntax { Expression: IdentifierNameSyntax { Identifier: {ValueText: var gotoLabel } } }
-                        && nextStatement is LabeledStatementSyntax { Identifier: { ValueText: var declaredLabel } }
+                    if (statement is GotoStatementSyntax { Expression: IdentifierNameSyntax { Identifier: {ValueText: var gotoLabel } } } gotoStatement
+                        && nextStatement is LabeledStatementSyntax { Identifier: { ValueText: var declaredLabel } } labeledStatement
                         && gotoLabel == declaredLabel )
                     {
-                        if (this._observedLabelCounter.TryGetValue( declaredLabel, out var counter)
-                            && counter == 1)
+                        if ( this._observedLabelCounter.TryGetValue( declaredLabel, out var counter) && counter == 1 )
                         {
-                            overflowingTrivia.AddRange( statement.GetLeadingTrivia() );
-                            overflowingTrivia.AddRange( statement.GetTrailingTrivia() );
-                            overflowingTrivia.AddRange( nextStatement.GetLeadingTrivia() );
-                            overflowingTrivia.AddRange( nextStatement.GetTrailingTrivia() );
+                            newStatements.Add(
+                                labeledStatement.Statement
+                                    .WithLeadingTrivia(
+                                        TriviaList( ElasticMarker )
+                                        .AddRange( gotoStatement.GetLeadingTrivia() )
+                                        .AddRange( gotoStatement.GetTrailingTrivia().StripFirstTrailingNewLine() )
+                                        .AddRange( TriviaList( ElasticMarker ) )
+                                        .AddRange( labeledStatement.GetLeadingTrivia() )
+                                        .AddRange( labeledStatement.Statement.GetLeadingTrivia() ) ) );                            
 
                             anyChange = true;
 
@@ -51,26 +54,12 @@ namespace Metalama.Framework.Engine.Linking
                         }
                     }
 
-                    if ( overflowingTrivia.Count > 0 )
-                    {
-                        newStatements.Add(
-                            statement.WithLeadingTrivia(
-                                overflowingTrivia.AddRange( statement.GetLeadingTrivia() ) ) );
-
-                        overflowingTrivia = SyntaxTriviaList.Empty;
-                    }
-                    else
-                    {
-                        newStatements.Add( statement );
-                    }
+                    newStatements.Add( statement );
                 }
 
                 if ( anyChange )
                 {
-                    return node.WithStatements( List( newStatements ) )
-                        .WithCloseBraceToken(
-                            node.CloseBraceToken.WithLeadingTrivia(
-                                overflowingTrivia.AddRange( node.CloseBraceToken.LeadingTrivia ) ) );
+                    return node.WithStatements( List( newStatements ) );
                 }
                 else
                 {

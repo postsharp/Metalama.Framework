@@ -112,37 +112,17 @@ namespace Metalama.Framework.Engine.Linking
             }
             else
             {
-                var openBraceLeadingTrivia =
+                var (openBraceLeadingTrivia, openBraceTrailingTrivia, closeBraceLeadingTrivia, closeBraceTrailingTrivia) =
                     triviaSource switch
                     {
-                        BlockSyntax blockSyntax => blockSyntax.OpenBraceToken.LeadingTrivia,
-                        ArrowExpressionClauseSyntax arrowExpressionClause => arrowExpressionClause.ArrowToken.LeadingTrivia,
+                        BlockSyntax blockSyntax => ( 
+                            blockSyntax.OpenBraceToken.LeadingTrivia,
+                            blockSyntax.OpenBraceToken.TrailingTrivia,
+                            blockSyntax.CloseBraceToken.LeadingTrivia,
+                            blockSyntax.CloseBraceToken.TrailingTrivia
+                            ),
                         _ => throw new AssertionFailedException( Justifications.CoverageMissing ),
-                    };
-
-                var openBraceTrailingTrivia =
-                    triviaSource switch
-                    {
-                        BlockSyntax blockSyntax => blockSyntax.OpenBraceToken.TrailingTrivia,
-                        ArrowExpressionClauseSyntax arrowExpressionClause => arrowExpressionClause.ArrowToken.TrailingTrivia,
-                        _ => throw new AssertionFailedException( Justifications.CoverageMissing ),
-                    };
-
-                var closeBraceLeadingTrivia =
-                    triviaSource switch
-                    {
-                        BlockSyntax blockSyntax => blockSyntax.CloseBraceToken.LeadingTrivia,
-                        ArrowExpressionClauseSyntax => TriviaList(),
-                        _ => throw new AssertionFailedException( Justifications.CoverageMissing ),
-                    };
-
-                var closeBraceTrailingTrivia =
-                    triviaSource switch
-                    {
-                        BlockSyntax blockSyntax => blockSyntax.CloseBraceToken.TrailingTrivia,
-                        ArrowExpressionClauseSyntax => TriviaList(),
-                        _ => throw new AssertionFailedException( Justifications.CoverageMissing ),
-                    };
+                    };;
 
                 if ( shouldRemoveExistingTrivia )
                 {
@@ -279,7 +259,8 @@ namespace Metalama.Framework.Engine.Linking
                         AssignmentExpression(
                             SyntaxKind.SimpleAssignmentExpression,
                             identifier,
-                            expression ) );
+                            expression ),
+                        Token( SyntaxKind.SemicolonToken ).WithTrailingTrivia( ElasticLineFeed ) );
             }
 
             GotoStatementSyntax CreateGotoStatement()
@@ -287,10 +268,10 @@ namespace Metalama.Framework.Engine.Linking
                 return
                     GotoStatement(
                             SyntaxKind.GotoStatement,
-                            Token( SyntaxKind.GotoKeyword ).WithLeadingTrivia( ElasticLineFeed ).WithTrailingTrivia( ElasticSpace ),
+                            Token( SyntaxKind.GotoKeyword ).WithTrailingTrivia( ElasticSpace ),
                             default,
                             IdentifierName( inliningContext.ReturnLabelName.AssertNotNull() ),
-                            Token( SyntaxKind.SemicolonToken ).WithTrailingTrivia(ElasticMarker) )
+                            Token( SyntaxKind.SemicolonToken ).WithTrailingTrivia( ElasticLineFeed ) )
                         .AddGeneratedCodeAnnotation();
             }
         }
@@ -614,8 +595,9 @@ namespace Metalama.Framework.Engine.Linking
             return symbol?.GetPrimaryDeclaration() switch
             {
                 null => null,
-                MethodDeclarationSyntax methodDeclaration => (SyntaxNode?) methodDeclaration.Body ?? methodDeclaration.ExpressionBody,
-                AccessorDeclarationSyntax accessorDeclaration => (SyntaxNode?) accessorDeclaration.Body ?? accessorDeclaration.ExpressionBody,
+                MethodDeclarationSyntax methodDeclaration => (SyntaxNode?) methodDeclaration.Body,
+                AccessorDeclarationSyntax accessorDeclaration => (SyntaxNode?) accessorDeclaration.Body,     
+                ArrowExpressionClauseSyntax => null,
                 _ => throw new AssertionFailedException(),
             };
         }

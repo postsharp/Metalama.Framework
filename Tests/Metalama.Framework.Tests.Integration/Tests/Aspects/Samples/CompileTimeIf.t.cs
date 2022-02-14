@@ -5,7 +5,6 @@ internal class TargetCode
 {
     global::System.Console.WriteLine($"Invoking TargetCode.InstanceMethod() on instance {base.ToString()}.");
             Console.WriteLine("InstanceMethod");
-    return;
 }
 
         [CompileTimeIf]
@@ -13,6 +12,5 @@ internal class TargetCode
 {
     global::System.Console.WriteLine($"Invoking TargetCode.StaticMethod()");
             Console.WriteLine("StaticMethod");
-    return;
 }
     }

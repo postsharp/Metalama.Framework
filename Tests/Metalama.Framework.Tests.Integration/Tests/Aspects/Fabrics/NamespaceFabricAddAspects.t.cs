@@ -1,4 +1,4 @@
-using System;
+    using System;
 using System.Linq;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
@@ -25,9 +25,8 @@ namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Fabrics.NamespaceFabri
     internal class TargetCode
     {
         private int Method1( int a ) => a;
-        private string Method2( string s ) {
-    global::System.Console.WriteLine("overridden");
-return s;};
+        private string Method2( string s ) {     global::System.Console.WriteLine("overridden");
+    return s;}
     }
     
     namespace Sub
@@ -35,9 +34,8 @@ return s;};
         class AnotherClass
         {
             private int Method1( int a ) => a;
-            private string Method2( string s ) {
-    global::System.Console.WriteLine("overridden");
-return s;};
+            private string Method2( string s ) {     global::System.Console.WriteLine("overridden");
+    return s;}
         }
     }
 }

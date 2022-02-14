@@ -82,18 +82,32 @@ namespace Metalama.Framework.Engine.Linking
                     modifiers = TokenList( modifiers.Where( m => m.Kind() != SyntaxKind.AsyncKeyword ) );
                 }
 
+                // Trivia processing:
+                //   * For block bodies methods, we preserve trivia of the opening/closing brace.
+                //   * For expression bodied methods:
+                //       int Foo() <trivia_leading_equals_value> => <trivia_trailing_equals_value> <expression> <trivia_leading_semicolon> ; <trivia_trailing_semicolon>
+                //       int Foo() <trivia_leading_equals_value> { <trivia_trailing_equals_value> <linked_body> <trivia_leading_semicolon> } <trivia_trailing_semicolon>
+
+                var (openBraceLeadingTrivia, openBraceTrailingTrivia, closeBraceLeadingTrivia, closeBraceTrailingTrivia) =
+                    methodDeclaration switch
+                    {
+                        { Body: { OpenBraceToken: var openBraceToken, CloseBraceToken: var closeBraceToken } } => 
+                            (openBraceToken.LeadingTrivia, openBraceToken.TrailingTrivia, closeBraceToken.LeadingTrivia, closeBraceToken.TrailingTrivia ),
+                        { ExpressionBody: { ArrowToken: var arrowToken }, SemicolonToken: var semicolonToken } => 
+                            (arrowToken.LeadingTrivia.Add( ElasticLineFeed ), arrowToken.TrailingTrivia.Add( ElasticLineFeed ), semicolonToken.LeadingTrivia.Add( ElasticLineFeed ), semicolonToken.TrailingTrivia),
+                        _ => throw new AssertionFailedException(),
+                    };
+
                 var ret = methodDeclaration
                     .WithExpressionBody( null )
                     .WithModifiers( modifiers )
-                    .WithBody( linkedBody )
-                    .WithLeadingTrivia( methodDeclaration.GetLeadingTrivia() )
-                    .WithTrailingTrivia( methodDeclaration.GetTrailingTrivia() );
-
-                var a = ret.Body!.OpenBraceToken.LeadingTrivia.ToArray();
-                var b = ret.Body!.OpenBraceToken.TrailingTrivia.ToArray();
-                var c = ret.Body!.CloseBraceToken.LeadingTrivia.ToArray();
-                var d = ret.Body!.CloseBraceToken.TrailingTrivia.ToArray();
-                var z = ret.ParameterList.CloseParenToken.TrailingTrivia.ToArray();
+                    .WithBody(
+                        Block( linkedBody )
+                        .WithOpenBraceToken( Token( openBraceLeadingTrivia, SyntaxKind.OpenBraceToken, openBraceTrailingTrivia ) )
+                        .WithCloseBraceToken( Token( closeBraceLeadingTrivia, SyntaxKind.CloseBraceToken, closeBraceTrailingTrivia ) )
+                        .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock )
+                        .AddGeneratedCodeAnnotation() )
+                    .WithSemicolonToken( default );
 
                 return ret;
             }

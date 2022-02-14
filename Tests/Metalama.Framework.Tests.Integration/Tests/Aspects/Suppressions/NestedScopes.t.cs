@@ -9,7 +9,6 @@ internal class TargetClass
 
 
             var y = 0;
-    return;
 }
 #pragma warning restore CS0219
 

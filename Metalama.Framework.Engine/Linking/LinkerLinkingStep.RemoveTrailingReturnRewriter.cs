@@ -29,9 +29,9 @@ namespace Metalama.Framework.Engine.Linking
                         .WithStatements( List( newStatements ) )
                         .WithCloseBraceToken(
                             node.CloseBraceToken.WithLeadingTrivia(
-                                returnStatement.GetLeadingTrivia().
-                                AddRange( returnStatement.GetTrailingTrivia().
-                                AddRange( node.CloseBraceToken.LeadingTrivia ) ) ) );
+                                returnStatement.GetLeadingTrivia()
+                                .AddRange( returnStatement.SemicolonToken.TrailingTrivia.StripFirstTrailingNewLine() )
+                                .AddRange( node.CloseBraceToken.LeadingTrivia ) ) );
                 }
                 else
                 {
