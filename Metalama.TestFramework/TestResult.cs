@@ -311,12 +311,12 @@ namespace Metalama.TestFramework
                 comments.Add( SyntaxFactory.Comment( $"// {this.ErrorMessage} \n" ) );
             }
 
-            // We exclude CR0222 from the results because it contains randomly-generated info and tests need to be deterministic.
+            // We exclude LAMA0222 from the results because it contains randomly-generated info and tests need to be deterministic.
 
             comments.AddRange(
                 this.Diagnostics
                     .Where(
-                        d => d.Id != "CR0222" &&
+                        d => d.Id != "LAMA0222" &&
                              (this.TestInput!.Options.IncludeAllSeverities.GetValueOrDefault()
                               || d.Severity >= DiagnosticSeverity.Warning) )
                     .OrderBy( d => d.Location.SourceSpan.Start )
