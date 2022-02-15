@@ -8,3 +8,4 @@
 | 0300-0319 | Design-Time
 | 0400-0499 | Attribute deserialization
 | 0500-0599 | Advices
+| 0600-0699 | Metalama.Compiler
