@@ -42,6 +42,7 @@ namespace Metalama.Framework.Tests.Integration.CodeFixes.MultiSteps
         }
     }
 
+    // <target>
     [ToString]
     internal class MovingVertex
     {
