@@ -7,8 +7,7 @@ class Target
         Console.WriteLine("Get1");
         int foo;
 foo=_foo;
-goto __aspect_return_1;
-__aspect_return_1:        if (foo > 0)
+        if (foo > 0)
         {
             return foo;
         }

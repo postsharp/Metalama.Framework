@@ -9,8 +9,7 @@
             get // After Foo.get keyword.
             // Before Foo.get opening brace.
             { // After Foo.get opening brace.
-              // Before Foo.get opening brace.
-              // After Foo.get opening brace.            // Comment before Aspect1.
+              // Comment before Aspect1.
                 Console.WriteLine("Aspect1");
                 // Comment mid Aspect1.
                 // Comment before Aspect2.
@@ -21,17 +20,13 @@
                 // Comment after Aspect2.
 
 
-                // Comment after Aspect1.
-
                 // Before Foo.get closing brace.
-                // After Foo.get closing brace.                // Before Foo.get closing brace.
             } // After Foo.get closing brace.
             // After Foo.get and before Foo.set.
             set // After Foo.set keyword.
             // Before Foo.set opening brace.
             { // After Foo.set opening brace.
-              // Before Foo.set opening brace.
-              // After Foo.set opening brace.            // Comment before Aspect1.
+              // Comment before Aspect1.
                 Console.WriteLine("Aspect1");
                 // Comment mid Aspect1.
                 // Comment before Aspect2.
@@ -41,10 +36,7 @@
                 return;
                 // Comment after Aspect2.
 
-
-                // Comment after Aspect1.
                 // Before Foo.set closing brace.
-                // After Foo.set closing brace.                // Before Foo.set closing brace.
             } // After Foo.set closing brace.
             // Before Foo closing brace.
         } // After Foo closing brace.
@@ -71,7 +63,8 @@
                 // Comment after Aspect2.
 
 
-            }            // After Bar.get and before Bar.set.
+            }
+            // After Bar.get and before Bar.set.
             set // After Bar.set keyword.
                 // Before Bar.set semicolon
 
@@ -86,8 +79,8 @@
                 return;
                 // Comment after Aspect2.
 
-
-            }            // Before Bar closing brace.
+            }
+            // Before Bar closing brace.
         }// After Bar closing brace.
         // After Bar/before Baz.
         [Aspect1]
@@ -130,7 +123,6 @@
 ;
                 return;
                 // Comment after Aspect2.
-
 
                 // Before Baz.set semicolon.
             } // After Baz.set semicolon.

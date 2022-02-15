@@ -4,6 +4,5 @@
         public void Foo(OtherClass other)
 {
     other.Bar();
-    return;
 }
     }

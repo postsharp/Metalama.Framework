@@ -169,7 +169,7 @@ namespace Metalama.Framework.Engine.Linking
                             (openBraceToken.LeadingTrivia, openBraceToken.TrailingTrivia, closeBraceToken.LeadingTrivia, closeBraceToken.TrailingTrivia),
                         { ExpressionBody: { ArrowToken: var arrowToken }, SemicolonToken: var semicolonToken } =>
                             (arrowToken.LeadingTrivia.Add( ElasticLineFeed ), arrowToken.TrailingTrivia.Add( ElasticLineFeed ), semicolonToken.LeadingTrivia.Add( ElasticLineFeed ), semicolonToken.TrailingTrivia),
-                        { SemicolonToken: var semicolonToken } => (semicolonToken.LeadingTrivia.Add( ElasticLineFeed ), semicolonToken.TrailingTrivia.Add( ElasticLineFeed ), TriviaList( ElasticLineFeed ), TriviaList()),
+                        { SemicolonToken: var semicolonToken } => (semicolonToken.LeadingTrivia.Add( ElasticLineFeed ), semicolonToken.TrailingTrivia.Add( ElasticLineFeed ), TriviaList( ElasticLineFeed ), TriviaList( ElasticLineFeed )),
                         _ => throw new AssertionFailedException(),
                     };
 

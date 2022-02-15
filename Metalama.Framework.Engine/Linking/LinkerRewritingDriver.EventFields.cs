@@ -57,36 +57,45 @@ namespace Metalama.Framework.Engine.Linking
 
             MemberDeclarationSyntax GetLinkedDeclaration( IntermediateSymbolSemanticKind semanticKind )
             {
-                var transformedAdd =
-                    AccessorDeclaration(
-                        SyntaxKind.AddAccessorDeclaration,
-                        List<AttributeListSyntax>(),
-                        TokenList(),
-                        this.GetLinkedBody(
-                            symbol.AddMethod.AssertNotNull().ToSemantic( semanticKind ),
-                            InliningContext.Create( this, symbol.AddMethod.AssertNotNull(), generationContext ) ) );
-
-                var transformedRemove =
-                    AccessorDeclaration(
-                        SyntaxKind.RemoveAccessorDeclaration,
-                        List<AttributeListSyntax>(),
-                        TokenList(),
-                        this.GetLinkedBody(
-                            symbol.RemoveMethod.AssertNotNull().ToSemantic( semanticKind ),
-                            InliningContext.Create( this, symbol.RemoveMethod.AssertNotNull(), generationContext ) ) );
+                var transformedAdd = GetLinkedAccessor( semanticKind, SyntaxKind.AddAccessorDeclaration, SyntaxKind.AddKeyword, symbol.AddMethod.AssertNotNull() );
+                var transformedRemove= GetLinkedAccessor( semanticKind, SyntaxKind.RemoveAccessorDeclaration, SyntaxKind.RemoveKeyword, symbol.RemoveMethod.AssertNotNull() );
 
                 return
                     EventDeclaration(
                             List<AttributeListSyntax>(),
                             eventFieldDeclaration.Modifiers,
-                            Token( SyntaxKind.EventKeyword ).WithTrailingTrivia( ElasticSpace ),
+                            Token( TriviaList(), SyntaxKind.EventKeyword, TriviaList( ElasticSpace ) ),
                             eventFieldDeclaration.Declaration.Type,
                             null,
                             Identifier( symbol.Name ),
-                            AccessorList( List( new[] { transformedAdd, transformedRemove } ) ),
-                            MissingToken( SyntaxKind.SemicolonToken ) )
-                        .WithLeadingTrivia( eventFieldDeclaration.GetLeadingTrivia() )
-                        .WithTrailingTrivia( eventFieldDeclaration.GetTrailingTrivia() );
+                            AccessorList( List( new[] { transformedAdd, transformedRemove } ) )
+                                .WithOpenBraceToken( Token( TriviaList( ElasticLineFeed ), SyntaxKind.OpenBraceToken, TriviaList( ElasticLineFeed ) ) )
+                                .WithCloseBraceToken( Token( TriviaList( ElasticMarker ), SyntaxKind.CloseBraceToken, TriviaList( ElasticLineFeed ) ) ),
+                            MissingToken( SyntaxKind.SemicolonToken ) );
+            }
+
+            AccessorDeclarationSyntax GetLinkedAccessor( IntermediateSymbolSemanticKind semanticKind, SyntaxKind accessorKind, SyntaxKind accessorKeyword, IMethodSymbol symbol )
+            {
+                var linkedBody =
+                    this.GetLinkedBody(
+                        symbol.ToSemantic( semanticKind ),
+                        InliningContext.Create( this, symbol, generationContext! ) );
+
+                var (openBraceLeadingTrivia, openBraceTrailingTrivia, closeBraceLeadingTrivia, closeBraceTrailingTrivia) =
+                    (TriviaList(), TriviaList( ElasticLineFeed ), TriviaList( ElasticMarker ), TriviaList( ElasticLineFeed ));
+
+                return
+                    AccessorDeclaration(
+                        accessorKind,
+                        List<AttributeListSyntax>(),
+                        TokenList(),
+                        Token( TriviaList(), accessorKeyword, TriviaList( ElasticLineFeed ) ),
+                        Block( linkedBody )
+                            .WithOpenBraceToken( Token( openBraceLeadingTrivia, SyntaxKind.OpenBraceToken, openBraceTrailingTrivia ) )
+                            .WithCloseBraceToken( Token( closeBraceLeadingTrivia, SyntaxKind.CloseBraceToken, closeBraceTrailingTrivia ) )
+                            .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock ),
+                        null,
+                        default );
             }
         }
 

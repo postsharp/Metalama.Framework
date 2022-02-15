@@ -6,8 +6,7 @@ class Target
     int x;
             Console.WriteLine( "Original");
 x=42;
-goto __aspect_return_1;
-__aspect_return_1:    Console.WriteLine("After");
+    Console.WriteLine("After");
     return x;
 }
     }

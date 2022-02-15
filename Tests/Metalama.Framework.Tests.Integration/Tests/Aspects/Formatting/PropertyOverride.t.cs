@@ -9,8 +9,7 @@
             get // After Foo.get keyword.
             // Before Foo.get opening brace.
             { // After Foo.get opening brace.
-              // Before Foo.get opening brace.
-              // After Foo.get opening brace.            // Comment before Aspect1.
+              // Comment before Aspect1.
                 Console.WriteLine("Aspect1");
                 // Comment mid Aspect1.
                 // Comment before Aspect2.
@@ -21,17 +20,13 @@
                 // Comment after Aspect2.
 
 
-                // Comment after Aspect1.
-
                 // Before Foo.get closing brace.
-                // After Foo.get closing brace.                // Before Foo.get closing brace.
             } // After Foo.get closing brace.
             // After Foo.get and before Foo.set.
             set // After Foo.set keyword.
             // Before Foo.set opening brace.
             { // After Foo.set opening brace.
-              // Before Foo.set opening brace.
-              // After Foo.set opening brace.            // Comment before Aspect1.
+              // Comment before Aspect1.
                 Console.WriteLine("Aspect1");
                 // Comment mid Aspect1.
                 // Comment before Aspect2.
@@ -40,9 +35,7 @@
                 Console.WriteLine("Foo.set");
                 // Comment after Aspect2.
 
-                // Comment after Aspect1.
                 // Before Foo.set closing brace.
-                // After Foo.set closing brace.                // Before Foo.set closing brace.
             } // After Foo.set closing brace.
             // Before Foo closing brace.
         } // After Foo closing brace.
@@ -57,8 +50,9 @@
             // Before Bar.get.
             get // After Bar.get keyword.
                 // Before Bar.get semicolon
-                { // After Bar.get semicolon.
-                  // Comment before Aspect1.
+
+            { // After Bar.get semicolon.
+              // Comment before Aspect1.
                 Console.WriteLine("Aspect1");
                 // Comment mid Aspect1.
                 // Comment before Aspect2.
@@ -72,8 +66,9 @@
             // After Bar.get and before Bar.set.
             set // After Bar.set keyword.
                 // Before Bar.set semicolon
-                { // After Bar.set semicolon.
-                  // Comment before Aspect1.
+
+            { // After Bar.set semicolon.
+              // Comment before Aspect1.
                 Console.WriteLine("Aspect1");
                 // Comment mid Aspect1.
                 // Comment before Aspect2.
@@ -93,8 +88,9 @@
             // Before Baz.get.
             get // After Baz.get keyword.
                 // Before Baz.get arrow.
-                { // After Baz.get arrow.
-                  // Comment before Aspect1.
+
+            { // After Baz.get arrow.
+              // Comment before Aspect1.
                 Console.WriteLine("Aspect1");
                 // Comment mid Aspect1.
                 // Comment before Aspect2.
@@ -112,8 +108,9 @@
             // Before Baz.set.
             set // After Baz.set keyword.
                 // Before Baz.set arrow.
-                { // After Baz.set arrow.
-                  // Comment before Aspect1.
+
+            { // After Baz.set arrow.
+              // Comment before Aspect1.
                 Console.WriteLine("Aspect1");
                 // Comment mid Aspect1.
                 // Comment before Aspect2.
@@ -132,9 +129,10 @@
         [Aspect1]
         [Aspect2]
         public int Qux // After Qux name
-            // Before Qux.get arrow.
-            { // After Qux.get arrow.
-get{
+                       // Before Qux.get arrow.
+        { // After Qux.get arrow.
+            get
+            {
                 // Comment before Aspect1.
                 Console.WriteLine("Aspect1");
                 // Comment mid Aspect1.
@@ -143,11 +141,11 @@ get{
                 // Comment mid Aspect2.
                 return             // Before Qux.get expression.
             42 // After Qux.get expression.
-;    // Comment after Aspect2.
-    
+;
+                // Comment after Aspect2.
 
-}
+            }
             // Before Qux.get semicolon.
-            } // After Qux.get semicolon.
+        } // After Qux.get semicolon.
         // After Qux.
     }

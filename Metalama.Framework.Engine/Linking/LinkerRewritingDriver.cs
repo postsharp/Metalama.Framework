@@ -122,7 +122,7 @@ namespace Metalama.Framework.Engine.Linking
                             blockSyntax.CloseBraceToken.TrailingTrivia
                             ),
                         _ => throw new AssertionFailedException( Justifications.CoverageMissing ),
-                    };;
+                    };
 
                 if ( shouldRemoveExistingTrivia )
                 {
@@ -563,19 +563,16 @@ namespace Metalama.Framework.Engine.Linking
             }
             else if ( this._introductionRegistry.IsOverrideTarget( semantic.Symbol ) )
             {
+                symbol = null;
                 switch ( semantic.Kind )
                 {
                     case IntermediateSymbolSemanticKind.Base:
                     case IntermediateSymbolSemanticKind.Default:
-                        // Defualt/base semantic does not have trivia from any block.
-                        symbol = null;
                         shouldRemoveExistingTrivia = false;
                         break;
 
                     case IntermediateSymbolSemanticKind.Final:
-                        // Final semantic sources trivia from the original block.
-                        symbol = semantic.Symbol;
-                        shouldRemoveExistingTrivia = false;
+                        shouldRemoveExistingTrivia = true;
                         break;
 
                     default:

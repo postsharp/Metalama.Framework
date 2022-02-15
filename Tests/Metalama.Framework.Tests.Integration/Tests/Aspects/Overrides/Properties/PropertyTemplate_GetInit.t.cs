@@ -1,113 +1,137 @@
-internal class TargetClass
+    internal class TargetClass
     {
         [Override]
         public int Property
-{get    {
+        {
+            get
+            {
         global::System.Console.WriteLine("This is the overridden getter.");
-                Console.WriteLine("This is the original getter.");
+                        Console.WriteLine("This is the original getter.");
                 return 42;
-    }
-    
-set    {
+            }
+
+            init
+            {
         global::System.Console.WriteLine($"This is the overridden setter.");
-                Console.WriteLine($"This is the original setter, setting {value}.");
-    }
-}
-    
+                        Console.WriteLine($"This is the original setter, setting {value}.");
+            }
+        }
+
         [Override]
         private int PrivateProperty
-{get    {
+        {
+            get
+            {
         global::System.Console.WriteLine("This is the overridden getter.");
-                Console.WriteLine("This is the original getter.");
+                        Console.WriteLine("This is the original getter.");
                 return 42;
-    }
-    
-set    {
+            }
+
+            init
+            {
         global::System.Console.WriteLine($"This is the overridden setter.");
-                Console.WriteLine($"This is the original setter, setting {value}.");
-    }
-}
-    
+                        Console.WriteLine($"This is the original setter, setting {value}.");
+            }
+        }
+
         [Override]
         public int RestrictedGetProperty
-{            private get    {
+        {
+            private get
+            {
         global::System.Console.WriteLine("This is the overridden getter.");
-                Console.WriteLine("This is the original getter.");
+                        Console.WriteLine("This is the original getter.");
                 return 42;
-    }
-    
-set    {
+            }
+
+            init
+            {
         global::System.Console.WriteLine($"This is the overridden setter.");
-                Console.WriteLine($"This is the original setter, setting {value}.");
-    }
-}
-    
+                        Console.WriteLine($"This is the original setter, setting {value}.");
+            }
+        }
+
         [Override]
         protected int ProtectedRestrictedGetProperty
-{            private get    {
+        {
+            private get
+            {
         global::System.Console.WriteLine("This is the overridden getter.");
-                Console.WriteLine("This is the original getter.");
+                        Console.WriteLine("This is the original getter.");
                 return 42;
-    }
-    
-set    {
+            }
+
+            init
+            {
         global::System.Console.WriteLine($"This is the overridden setter.");
-                Console.WriteLine($"This is the original setter, setting {value}.");
-    }
-}
-    
+                        Console.WriteLine($"This is the original setter, setting {value}.");
+            }
+        }
+
         [Override]
         public int RestrictedSetProperty
-{get    {
+        {
+            get
+            {
         global::System.Console.WriteLine("This is the overridden getter.");
-                Console.WriteLine("This is the original getter.");
+                        Console.WriteLine("This is the original getter.");
                 return 42;
-    }
-    
-    
-            private set    {
+            }
+
+            private init
+            {
         global::System.Console.WriteLine($"This is the overridden setter.");
-                Console.WriteLine($"This is the original setter, setting {value}.");
-    }
-}
-    
+                        Console.WriteLine($"This is the original setter, setting {value}.");
+            }
+        }
+
         [Override]
         protected int ProtectedestrictedSetProperty
-{get    {
+        {
+            get
+            {
         global::System.Console.WriteLine("This is the overridden getter.");
-                Console.WriteLine("This is the original getter.");
+                        Console.WriteLine("This is the original getter.");
                 return 42;
-    }
-    
-    
-            private set    {
+            }
+
+            private init
+            {
         global::System.Console.WriteLine($"This is the overridden setter.");
-                Console.WriteLine($"This is the original setter, setting {value}.");
-    }
-}
-    
+                        Console.WriteLine($"This is the original setter, setting {value}.");
+            }
+        }
+
         [Override]
         public int GetExpressionProperty
-{get    {
+        {
+            get 
+{ 
         global::System.Console.WriteLine("This is the overridden getter.");
-    return 42;    }
-    
-set    {
-        global::System.Console.WriteLine($"This is the overridden setter.");
-                Console.WriteLine($"This is the original setter, setting {value}.");
-    }
+        return 42;
 }
-    
+
+            init
+            {
+        global::System.Console.WriteLine($"This is the overridden setter.");
+                        Console.WriteLine($"This is the original setter, setting {value}.");
+            }
+        }
+
         [Override]
         public int InitExpressionProperty
-{get    {
+        {
+            get
+            {
         global::System.Console.WriteLine("This is the overridden getter.");
-                Console.WriteLine("This is the original getter.");
+                        Console.WriteLine("This is the original getter.");
                 return 42;
-    }
-    
-set    {
+            }
+
+            init 
+{ 
         global::System.Console.WriteLine($"This is the overridden setter.");
-Console.WriteLine($"This is the original setter, setting {value}.");    }
+        Console.WriteLine($"This is the original setter, setting {value}.");
 }
+        }
     }
