@@ -279,7 +279,7 @@ namespace Metalama.Framework.Engine.Advices
             return selectedTemplate;
         }
 
-        public void OverrideMethod( IMethod targetMethod, in MethodTemplateSelector templateSelector, Tags? tags = null )
+        public void OverrideMethod( IMethod targetMethod, in MethodTemplateSelector templateSelector, TagDictionary? tags = null )
         {
             if ( this._templateInstance == null )
             {
@@ -311,7 +311,7 @@ namespace Metalama.Framework.Engine.Advices
             string defaultTemplate,
             IntroductionScope scope = IntroductionScope.Default,
             OverrideStrategy whenExists = OverrideStrategy.Default,
-            Tags? tags = null )
+            TagDictionary? tags = null )
         {
             if ( this._templateInstance == null )
             {
@@ -351,7 +351,7 @@ namespace Metalama.Framework.Engine.Advices
         public void OverrideFieldOrProperty(
             IFieldOrProperty targetDeclaration,
             string defaultTemplate,
-            Tags? tags = null )
+            TagDictionary? tags = null )
         {
             if ( this._templateInstance == null )
             {
@@ -395,7 +395,7 @@ namespace Metalama.Framework.Engine.Advices
             IFieldOrProperty targetDeclaration,
             in GetterTemplateSelector getTemplateSelector,
             string? setTemplate,
-            Tags? tags = null )
+            TagDictionary? tags = null )
         {
             if ( this._templateInstance == null )
             {
@@ -480,7 +480,7 @@ namespace Metalama.Framework.Engine.Advices
             string defaultTemplate,
             IntroductionScope scope = IntroductionScope.Default,
             OverrideStrategy whenExists = OverrideStrategy.Default,
-            Tags? tags = null )
+            TagDictionary? tags = null )
         {
             if ( this._templateInstance == null )
             {
@@ -529,7 +529,7 @@ namespace Metalama.Framework.Engine.Advices
             string? setTemplate,
             IntroductionScope scope = IntroductionScope.Default,
             OverrideStrategy whenExists = OverrideStrategy.Default,
-            Tags? tags = null )
+            TagDictionary? tags = null )
         {
             if ( this._templateInstance == null )
             {
@@ -577,7 +577,7 @@ namespace Metalama.Framework.Engine.Advices
             string? addTemplate,
             string? removeTemplate,
             string? invokeTemplate,
-            Tags? tags = null )
+            TagDictionary? tags = null )
         {
             if ( this._templateInstance == null )
             {
@@ -630,7 +630,7 @@ namespace Metalama.Framework.Engine.Advices
             string eventTemplate,
             IntroductionScope scope = IntroductionScope.Default,
             OverrideStrategy whenExists = OverrideStrategy.Default,
-            Tags? tags = null )
+            TagDictionary? tags = null )
         {
             if ( this._templateInstance == null )
             {
@@ -678,7 +678,7 @@ namespace Metalama.Framework.Engine.Advices
             string? invokeTemplate = null,
             IntroductionScope scope = IntroductionScope.Default,
             OverrideStrategy whenExists = OverrideStrategy.Default,
-            Tags? tags = null )
+            TagDictionary? tags = null )
         {
             if ( this._templateInstance == null )
             {
@@ -725,7 +725,7 @@ namespace Metalama.Framework.Engine.Advices
             INamedType targetType,
             INamedType interfaceType,
             OverrideStrategy whenExists = OverrideStrategy.Default,
-            Tags? tags = null )
+            TagDictionary? tags = null )
         {
             if ( this._templateInstance == null )
             {
@@ -753,7 +753,7 @@ namespace Metalama.Framework.Engine.Advices
             INamedType targetType,
             Type interfaceType,
             OverrideStrategy whenExists = OverrideStrategy.Default,
-            Tags? tags = null )
+            TagDictionary? tags = null )
         {
             this.ImplementInterface(
                 targetType,
@@ -767,7 +767,7 @@ namespace Metalama.Framework.Engine.Advices
             INamedType interfaceType,
             IReadOnlyList<InterfaceMemberSpecification> interfaceMemberSpecifications,
             OverrideStrategy whenExists = OverrideStrategy.Default,
-            Tags? tags = null )
+            TagDictionary? tags = null )
         {
             if ( this._templateInstance == null )
             {
@@ -796,7 +796,7 @@ namespace Metalama.Framework.Engine.Advices
             Type interfaceType,
             IReadOnlyList<InterfaceMemberSpecification> interfaceMemberSpecifications,
             OverrideStrategy whenExists = OverrideStrategy.Default,
-            Tags? tags = null )
+            TagDictionary? tags = null )
         {
             this.ImplementInterface(
                 targetType,
