@@ -62,7 +62,7 @@ internal partial class AnalysisProcessEndpoint
         public Task OnUserInterfaceAttachedAsync( CancellationToken cancellationToken = default )
         {
             var implementation = this._parent._serviceProvider.GetService<ICompileTimeCodeEditingStatusService>();
-            
+
             implementation?.OnUserInterfaceAttached();
 
             return Task.CompletedTask;

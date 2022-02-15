@@ -10,10 +10,10 @@ namespace Metalama.Framework.DesignTime.CodeFixes
     /// <summary>
     /// Represents a code action or a code action menu.
     /// </summary>
-    public abstract class CodeActionBaseModel : ICodeAction
+    public abstract class CodeActionBaseModel : ICodeActionModel
     {
         protected const string TitleJoin = ": ";
-        
+
         /// <summary>
         /// Gets or sets the code action title.
         /// </summary>
