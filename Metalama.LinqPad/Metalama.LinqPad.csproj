@@ -8,6 +8,7 @@
         <RootNamespace>Metalama.LinqPad</RootNamespace>
         <ImplicitUsings>disable</ImplicitUsings>
         <PackageTags>$(PackageTags) linqpaddriver linqpad-samples</PackageTags>
+        <PackageDescription>Loads any C# project or solution into LINQPad and exposes its code model to queries. This package contains an optional driver, samples, and dumping methods.</PackageDescription>
     </PropertyGroup>
 
     <ItemGroup>

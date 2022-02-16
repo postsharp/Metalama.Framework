@@ -15,8 +15,8 @@ project {
    buildType(DebugBuild)
    buildType(ReleaseBuild)
    buildType(PublicBuild)
-
-   buildType(Deploy)
+   buildType(PublicDeployment)
+   buildTypesOrder = arrayListOf(DebugBuild,ReleaseBuild,PublicBuild,PublicDeployment)
 }
 
 object DebugBuild : BuildType({
@@ -151,10 +151,10 @@ object PublicBuild : BuildType({
 
 })
 
-// Publish the release build to public feeds
-object Deploy : BuildType({
+object PublicDeployment : BuildType({
 
     name = "Deploy [Public]"
+
     type = Type.DEPLOYMENT
 
     vcs {
@@ -170,20 +170,7 @@ object Deploy : BuildType({
             param("jetbrains_powershell_scriptArguments", "publish --configuration Public")
         }
     }
-    
-    dependencies {
-        dependency(PublicBuild) {
-            snapshot {
-                onDependencyFailure = FailureAction.FAIL_TO_START
-            }
 
-            artifacts {
-                cleanDestination = true
-                artifactRules = "+:artifacts/publish/public/**/*=>artifacts/publish/public\n+:artifacts/publish/private/**/*=>artifacts/publish/private"
-            }
-        }
-    }
-    
     requirements {
         equals("env.BuildAgentType", "caravela02")
     }
@@ -194,6 +181,21 @@ object Deploy : BuildType({
             verbose = true
         }
     }
-})
 
+  dependencies {
+
+        dependency(PublicBuild) {
+            snapshot {
+                onDependencyFailure = FailureAction.FAIL_TO_START
+            }
+
+            artifacts {
+                cleanDestination = true
+                artifactRules = "+:artifacts/publish/public/**/*=>artifacts/publish/public\n+:artifacts/publish/private/**/*=>artifacts/publish/private"
+            }
+        }
+
+     }
+
+})
 
