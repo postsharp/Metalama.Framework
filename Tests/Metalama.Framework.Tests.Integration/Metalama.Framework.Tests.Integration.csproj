@@ -32,13 +32,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Compile Remove="Tests\Aspects\Formatting\InnerBlock.t.cs" />
-      <Compile Remove="Tests\Aspects\Formatting\PropertyAccessorOverride.t.cs" />
-      <Compile Remove="Tests\Aspects\Introductions\Events\ExistingConflictNewStatic.t.cs" />
-      <Compile Remove="Tests\Aspects\Introductions\Methods\ExistingConflictNewStatic.t.cs" />
-    </ItemGroup>
-
-    <ItemGroup>
         <ProjectReference Include="..\..\Metalama.Framework.Engine\Metalama.Framework.Engine.csproj" />
         <ProjectReference Include="..\..\Metalama.Framework\Metalama.Framework.csproj" />
         <ProjectReference Include="..\..\Metalama.TestFramework\Metalama.TestFramework.csproj" />
@@ -46,14 +39,6 @@
 
     <ItemGroup>
         <InternalsVisibleTo Include="Metalama.AspectWorkbench" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <None Include="Tests\Aspects\Formatting\InnerBlock.t.cs" />
-      <None Include="Tests\Aspects\Formatting\PropertyAccessorOverride.t.cs" />
-      <None Include="Tests\Aspects\Introductions\Events\ExistingConflictNewStatic.t.cs" />
-      <None Include="Tests\Aspects\Introductions\Methods\ExistingConflictNewStatic.t.cs" />
-      <None Include="Tests\Aspects\Sdk\ServicePlugIn.t.cs" />
     </ItemGroup>
 
     <Import Project="..\..\Metalama.TestFramework\Metalama.TestFramework.targets" />
