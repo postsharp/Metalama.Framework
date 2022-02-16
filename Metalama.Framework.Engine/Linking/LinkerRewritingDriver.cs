@@ -259,20 +259,22 @@ namespace Metalama.Framework.Engine.Linking
                         AssignmentExpression(
                             SyntaxKind.SimpleAssignmentExpression,
                             identifier,
+                            Token( TriviaList(ElasticSpace), SyntaxKind.EqualsToken, TriviaList( ElasticSpace )),
                             expression ),
-                        Token( SyntaxKind.SemicolonToken ).WithTrailingTrivia( ElasticLineFeed ) );
+                        Token( SyntaxKind.SemicolonToken ).WithTrailingTrivia( ElasticLineFeed ) )
+                    .AddGeneratedCodeAnnotation();
             }
 
             GotoStatementSyntax CreateGotoStatement()
             {
                 return
                     GotoStatement(
-                            SyntaxKind.GotoStatement,
-                            Token( SyntaxKind.GotoKeyword ).WithTrailingTrivia( ElasticSpace ),
-                            default,
-                            IdentifierName( inliningContext.ReturnLabelName.AssertNotNull() ),
-                            Token( SyntaxKind.SemicolonToken ).WithTrailingTrivia( ElasticLineFeed ) )
-                        .AddGeneratedCodeAnnotation();
+                        SyntaxKind.GotoStatement,
+                        Token( SyntaxKind.GotoKeyword ).WithTrailingTrivia( ElasticSpace ),
+                        default,
+                        IdentifierName( inliningContext.ReturnLabelName.AssertNotNull() ),
+                        Token( SyntaxKind.SemicolonToken ).WithTrailingTrivia( ElasticLineFeed ) )
+                    .AddGeneratedCodeAnnotation();
             }
         }
 
