@@ -16,7 +16,7 @@ namespace Metalama.Framework.DesignTime.CodeFixes
         protected CodeActionModel( string title ) : base( title ) { }
 
         protected CodeActionModel() { }
-        
+
         /// <summary>
         /// Executes the code action. This method is invoked in the analysis process.
         /// </summary>

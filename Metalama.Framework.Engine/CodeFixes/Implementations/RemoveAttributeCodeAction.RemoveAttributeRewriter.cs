@@ -7,9 +7,9 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Linq;
 
-namespace Metalama.Framework.Engine.CodeFixes
+namespace Metalama.Framework.Engine.CodeFixes.Implementations
 {
-    internal partial class CodeFixBuilder
+    internal partial class RemoveAttributeCodeAction
     {
         private class RemoveAttributeRewriter : CSharpSyntaxRewriter
         {
