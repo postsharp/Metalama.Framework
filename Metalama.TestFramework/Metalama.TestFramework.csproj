@@ -16,7 +16,6 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Metalama.Framework.DesignTime.Contracts.1.0\Metalama.Framework.DesignTime.Contracts.1.0.csproj" />
         <ProjectReference Include="..\Metalama.Framework.Engine\Metalama.Framework.Engine.csproj" />
         <ProjectReference Include="..\Metalama.Framework.Sdk\Metalama.Framework.Sdk.csproj" />
         <ProjectReference Include="..\Metalama.Framework\Metalama.Framework.csproj" />
