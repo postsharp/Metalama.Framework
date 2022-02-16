@@ -16,7 +16,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Metho
             builder.Advices.IntroduceMethod(
                 builder.Target,
                 nameof(OnPropertyChanged),
-                tags: new Tags { { "event", eventBuilder } } );
+                tags: new TagDictionary { { "event", eventBuilder } } );
         }
 
         [Template]
