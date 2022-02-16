@@ -50,7 +50,7 @@ namespace Metalama.Framework.Engine.Diagnostics
 
                             case DeclarationKind.AssemblyReference:
                                 return "assembly reference";
-                            
+
                             case DeclarationKind.NamedType:
                                 return "type";
 

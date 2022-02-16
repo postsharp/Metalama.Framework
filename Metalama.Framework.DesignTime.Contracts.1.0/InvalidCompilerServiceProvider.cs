@@ -17,7 +17,7 @@ internal class InvalidCompilerServiceProvider : ICompilerServiceProvider
     public ImmutableDictionary<string, int> ContractVersions { get; }
 
     public T? GetService<T>()
-        where T : class, ICompilerService 
+        where T : class, ICompilerService
         => null;
 
     public InvalidCompilerServiceProvider( Version version, ImmutableDictionary<string, int> contractVersions )

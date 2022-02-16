@@ -52,26 +52,26 @@ namespace Metalama.Framework.DesignTime
                 if ( !context.Document.SupportsSemanticModel )
                 {
                     this._logger.Trace?.Log( $"ComputeRefactorings('{context.Document.Name}'): no semantic model." );
-                    
+
                     return;
                 }
-                
+
                 // Do not attempt a remote call if we cannot get the declared symbol.
                 var semanticModel = await context.Document.GetSemanticModelAsync( context.CancellationToken );
 
                 if ( semanticModel == null )
                 {
                     this._logger.Trace?.Log( $"ComputeRefactorings('{context.Document.Name}'): no semantic model." );
-                    
+
                     return;
                 }
-                
+
                 var node = (await semanticModel.SyntaxTree.GetRootAsync( context.CancellationToken )).FindNode( context.Span );
 
                 if ( semanticModel.GetDeclaredSymbol( node ) == null )
                 {
                     this._logger.Trace?.Log( $"ComputeRefactorings('{context.Document.Name}'): no symbol." );
-                    
+
                     return;
                 }
 

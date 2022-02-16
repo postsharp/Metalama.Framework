@@ -32,7 +32,7 @@ namespace Metalama.Framework.Engine.Formatting
         public static SyntaxAnnotation Simplify
         {
             get => _simplifier ?? throw new InvalidOperationException();
-            
+
             // This property must be set by the engine assembly because we don't want a dependency on workspaces here.
             internal set => _simplifier = value;
         }

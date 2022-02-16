@@ -14,7 +14,7 @@ namespace Metalama.TestFramework
     public class TestAssemblyReference
     {
         public string? Path { get; set; }
-        
+
         public string? Name { get; set; }
 
         internal MetadataReference? ToMetadataReference()
@@ -35,7 +35,7 @@ namespace Metalama.TestFramework
 
                 return MetadataReference.CreateFromFile( assembly.Location );
             }
-            
+
             return null;
         }
 

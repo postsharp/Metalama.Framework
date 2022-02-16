@@ -1047,7 +1047,8 @@ namespace Metalama.Framework.Engine.CompileTime
             public override SyntaxNode? VisitCompilationUnit( CompilationUnitSyntax node )
             {
                 // Get the list of members that are not statements, local variables, local functions,...
-                var nonTopLevelMembers = node.Members.Where( m => m is BaseTypeDeclarationSyntax or NamespaceDeclarationSyntax or DelegateDeclarationSyntax or FileScopedNamespaceDeclarationSyntax )
+                var nonTopLevelMembers = node.Members.Where(
+                        m => m is BaseTypeDeclarationSyntax or NamespaceDeclarationSyntax or DelegateDeclarationSyntax or FileScopedNamespaceDeclarationSyntax )
                     .ToList();
 
                 var transformedMembers = this.VisitTypeOrNamespaceMembers( nonTopLevelMembers );

@@ -29,7 +29,7 @@ namespace Metalama.Framework.Code.Collections
                 }
             }
         }
-        
+
         // NOTE: The next method is not public because it pollutes Intellisense and the documentation for all objects.
 
         /// <summary>

@@ -18,7 +18,7 @@ public interface ICodeActionContext
     /// Gets the cancellation token.
     /// </summary>
     CancellationToken CancellationToken { get; }
-     
+
     /// <summary>
     /// Gets the service provider.
     /// </summary>
