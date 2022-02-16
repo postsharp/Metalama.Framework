@@ -9,10 +9,10 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Metalama.Framework.DesignTime\Metalama.Framework.DesignTime.csproj" />
-        <PackageReference Include="StreamJsonRpc" Version="$(StreamJsonRpcVersion)" />
-        <InternalsVisibleTo Include="Metalama.Framework.Tests.UnitTests.Internals" />
-        <ProjectReference Include="..\Metalama.SystemTypes\Metalama.SystemTypes.csproj" Condition="'$(TargetFramework)'=='netstandard2.0'" />
+        <ProjectReference Include="..\Metalama.Framework.DesignTime\Metalama.Framework.DesignTime.csproj"/>
+        <PackageReference Include="StreamJsonRpc" Version="$(StreamJsonRpcVersion)"/>
+        <InternalsVisibleTo Include="Metalama.Framework.Tests.UnitTests.Internals"/>
+        <ProjectReference Include="..\Metalama.SystemTypes\Metalama.SystemTypes.csproj" Condition="'$(TargetFramework)'=='netstandard2.0'"/>
     </ItemGroup>
 
 </Project>

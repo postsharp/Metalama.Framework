@@ -1,0 +1,3 @@
+<component name="DependencyValidationManager">
+  <scope name="All files except tests" pattern="file[rider.module]:*/&amp;&amp;!file[rider.module]:eng//*&amp;&amp;!file:.editorconfig&amp;&amp;!file[rider.module]:Tests/Metalama.Framework.Tests.Integration/Tests//*&amp;&amp;!file[rider.module]:Tests/Metalama.Framework.Tests.Integration.Internals/Tests//*" />
+</component>

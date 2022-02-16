@@ -105,7 +105,9 @@ namespace Metalama.Framework.Engine.LamaSerialization
         {
             try
             {
-                this._userCodeInvoker.Invoke( () => serializer.SerializeObject( obj, constructorArguments, initializationArguments ), this._userCodeExecutionContext );
+                this._userCodeInvoker.Invoke(
+                    () => serializer.SerializeObject( obj, constructorArguments, initializationArguments ),
+                    this._userCodeExecutionContext );
             }
             catch ( Exception exception )
             {

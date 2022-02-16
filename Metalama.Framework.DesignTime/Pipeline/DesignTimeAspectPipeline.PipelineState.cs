@@ -200,10 +200,10 @@ namespace Metalama.Framework.DesignTime.Pipeline
                                     // We require an external build because we don't want to invalidate the pipeline configuration at
                                     // each keystroke.
                                     Logger.DesignTime.Trace?.Log( $"Compile-time change detected: {change.FilePath} has changed." );
-                                    
+
                                     // Generated files may change during the startup sequence, and it is safe to reset the pipeline in this case.
                                     var requiresRebuild = !change.FilePath.EndsWith( ".g.cs", StringComparison.OrdinalIgnoreCase );
-                                    
+
                                     OnCompileTimeChange( requiresRebuild );
                                 }
 

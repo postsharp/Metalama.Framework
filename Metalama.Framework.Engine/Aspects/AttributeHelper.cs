@@ -15,7 +15,7 @@ public static class AttributeHelper
         {
             return null;
         }
-        
+
         Parse( name, out _, out _, out var shortName );
 
         return shortName;
@@ -24,7 +24,7 @@ public static class AttributeHelper
     public static void Parse( string fullName, out string ns, out string typeName, out string shortName )
     {
         var lastDot = fullName.LastIndexOf( '.' );
-        
+
         if ( lastDot >= 0 )
         {
             ns = fullName.Substring( 0, lastDot );

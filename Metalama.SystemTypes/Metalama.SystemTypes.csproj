@@ -6,12 +6,12 @@
         <Nullable>enable</Nullable>
         <PackageId>Metalama.SystemTypes</PackageId>
         <PackageDescription>
-            Contains internal types to support nullability and init-only properties on .NET Framework. 
+            Contains internal types to support nullability and init-only properties on .NET Framework.
             We apologize.
         </PackageDescription>
 
     </PropertyGroup>
-    
+
     <ItemGroup>
         <!-- Pretty much all projects in the solution should be listed here -->
         <InternalsVisibleTo Include="Metalama.Framework"/>
