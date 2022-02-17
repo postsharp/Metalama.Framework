@@ -77,8 +77,8 @@ namespace Metalama.Framework.Engine
                     Error,
                     "Cannot use an expression in an out or ref parameter." );
 
-        internal static readonly DiagnosticDefinition<string> CannotFindType =
-            new( "CR0020", _category, "Cannot find the type '{0}'.", Error, "Cannot find a type" );
+        internal static readonly DiagnosticDefinition<(string TypeNane, string? AssemblyName)> CannotFindType =
+            new( "CR0020", _category, "Cannot find the type '{0}' of assembly '{1}'.", Error, "Cannot find a type" );
 
         internal static readonly DiagnosticDefinition<string> CycleInAspectOrdering =
             new(

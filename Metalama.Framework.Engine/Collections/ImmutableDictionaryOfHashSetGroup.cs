@@ -31,6 +31,8 @@ namespace Metalama.Framework.Engine.Collections
             }
 
             IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
+
+            public override string ToString() => $"Key={this.Key}, Items={this.Items.Count}";
         }
     }
 }

@@ -14,10 +14,18 @@
         <EmbeddedResource Include="..\Metalama.Framework.CompileTime\bin\$(Configuration)\netstandard2.0\Metalama.Framework.dll">
             <LogicalName>Metalama.Framework.dll</LogicalName>
         </EmbeddedResource>
+
+        <!-- We also embed the self-contained build of Metalama.Compiler.Interface.dll because at run-time, this project
+            may receive the build containing forwarders (this happens in Metalama.Try). However, we need to compile against
+            the self-contained version -->
+        <EmbeddedResource Include="$(PkgMetalama_Compiler_Sdk)\lib\netstandard2.0\Metalama.Compiler.Interface.dll">
+            <LogicalName>Metalama.Compiler.Interface.dll</LogicalName>
+        </EmbeddedResource>
     </ItemGroup>
 
+
     <ItemGroup>
-        <!-- We cannot use InternalsVisibleTo for Metalama.TestFramework because of obfuscation in the release build. -->
+        <!-- By convention, we use InternalsVisibleTo only for test projects that must have access to internals.. -->
         <InternalsVisibleTo Include="Metalama.Framework.Tests.UnitTests.Internals"/>
         <InternalsVisibleTo Include="Metalama.Framework.Tests.Integration.Internals"/>
         <InternalsVisibleTo Include="DynamicProxyGenAssembly2" Key="$(FakeItEasyKey)" LoadsWithinVisualStudio="false"/>
@@ -26,7 +34,9 @@
     <ItemGroup>
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="$(RoslynVersion)"/>
         <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.Common" Version="$(RoslynVersion)"/>
-        <PackageReference Include="Metalama.Compiler.Sdk" Version="$(MetalamaCompilerVersion)"/>
+        <PackageReference Include="Metalama.Compiler.Sdk" Version="$(MetalamaCompilerVersion)">
+            <GeneratePathProperty>True</GeneratePathProperty>
+        </PackageReference>
         <PackageReference Include="Metalama.Backstage" Version="$(MetalamaBackstageVersion)"/>
 
         <PackageReference Include="Microsoft.Bcl.HashCode" Version="$(MicrosoftBclHashCodeVersion)"/>
