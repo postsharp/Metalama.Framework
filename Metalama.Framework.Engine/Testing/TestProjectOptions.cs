@@ -66,7 +66,7 @@ namespace Metalama.Framework.Engine.Testing
 
         public bool IsFrameworkEnabled => true;
 
-        public bool FormatOutput => false;
+        public bool FormatOutput { get; set; }
 
         public bool FormatCompileTimeCode { get; set; }
 

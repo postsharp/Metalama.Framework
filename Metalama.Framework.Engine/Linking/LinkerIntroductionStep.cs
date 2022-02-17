@@ -7,8 +7,10 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -230,12 +232,15 @@ namespace Metalama.Framework.Engine.Linking
                 syntaxTreeMapping,
                 syntaxTransformationCollection.IntroducedMembers );
 
+            var projectOptions = this._serviceProvider.GetService<IProjectOptions>();
+
             return new LinkerIntroductionStepOutput(
                 diagnostics,
                 input.CompilationModel,
                 intermediateCompilation,
                 introductionRegistry,
-                input.OrderedAspectLayers );
+                input.OrderedAspectLayers,
+                projectOptions );
         }
 
         private static IEnumerable<ITransformation> MergeOrderedTransformations(

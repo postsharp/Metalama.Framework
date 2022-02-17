@@ -41,10 +41,6 @@
         <InternalsVisibleTo Include="Metalama.AspectWorkbench"/>
     </ItemGroup>
 
-    <ItemGroup>
-        <None Include="Tests\Aspects\Sdk\ServicePlugIn.t.cs"/>
-    </ItemGroup>
-
     <Import Project="..\..\Metalama.TestFramework\Metalama.TestFramework.targets"/>
 
 </Project>

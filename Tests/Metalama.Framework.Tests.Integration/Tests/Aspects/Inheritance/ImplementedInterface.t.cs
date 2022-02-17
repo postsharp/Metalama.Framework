@@ -1,16 +1,12 @@
-internal class Targets
-    {
-        [Aspect]
-        private interface I
+    internal class Targets
         {
-            
-        }
-
-        private class DerivedClass : I
-        {
-            private void N() {
-    global::System.Console.WriteLine("Overridden!");
-    return;
-}
-        }
+            [Aspect]
+            private interface I { }
+    
+            private class DerivedClass : I
+            {
+                private void N() {     global::System.Console.WriteLine("Overridden!");
+            return;
     }
+            }
+        }

@@ -93,7 +93,7 @@ namespace Metalama.Framework.Engine.Linking.Inlining
             var inlinedTargetBody = contextWithLocal.GetLinkedBody( targetSymbol.ToSemantic( aspectReference.ResolvedSemantic.Kind ) );
 
             // Mark the block as flattenable.
-            inlinedTargetBody = inlinedTargetBody.AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+            inlinedTargetBody = inlinedTargetBody.WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
 
             // We're replacing the whole return statement.
             newNode = Block(
@@ -105,7 +105,7 @@ namespace Metalama.Framework.Engine.Linking.Inlining
                         .WithTrailingTrivia( ElasticLineFeed ),
                     inlinedTargetBody )
                 .WithFormattingAnnotationsFrom( localDeclaration )
-                .AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+                .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
 
             replacedNode = localDeclaration;
         }

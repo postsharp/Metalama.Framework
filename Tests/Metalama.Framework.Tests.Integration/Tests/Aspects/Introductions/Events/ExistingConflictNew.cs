@@ -22,39 +22,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Events.Exist
         }
 
         [Introduce( WhenExists = OverrideStrategy.New )]
-        public static event EventHandler BaseClassEvent_Static
-        {
-            add
-            {
-                Console.WriteLine( "This is introduced event." );
-                meta.Proceed();
-            }
-
-            remove
-            {
-                Console.WriteLine( "This is introduced event." );
-                meta.Proceed();
-            }
-        }
-
-        [Introduce( WhenExists = OverrideStrategy.New )]
         public event EventHandler HiddenBaseClassEvent
-        {
-            add
-            {
-                Console.WriteLine( "This is introduced event." );
-                meta.Proceed();
-            }
-
-            remove
-            {
-                Console.WriteLine( "This is introduced event." );
-                meta.Proceed();
-            }
-        }
-
-        [Introduce( WhenExists = OverrideStrategy.New )]
-        public static event EventHandler HiddenBaseClassEvent_Static
         {
             add
             {
@@ -198,22 +166,6 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Events.Exist
         }
 
         [Introduce( WhenExists = OverrideStrategy.New )]
-        public static event EventHandler DerivedClassEvent_Static
-        {
-            add
-            {
-                Console.WriteLine( "This is introduced event." );
-                meta.Proceed();
-            }
-
-            remove
-            {
-                Console.WriteLine( "This is introduced event." );
-                meta.Proceed();
-            }
-        }
-
-        [Introduce( WhenExists = OverrideStrategy.New )]
         public event EventHandler DerivedClassVirtualEvent
         {
             add
@@ -262,22 +214,6 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Events.Exist
         }
 
         [Introduce( WhenExists = OverrideStrategy.New )]
-        public static event EventHandler ExistingEvent_Static
-        {
-            add
-            {
-                Console.WriteLine( "This is introduced event." );
-                meta.Proceed();
-            }
-
-            remove
-            {
-                Console.WriteLine( "This is introduced event." );
-                meta.Proceed();
-            }
-        }
-
-        [Introduce( WhenExists = OverrideStrategy.New )]
         public event EventHandler ExistingVirtualEvent
         {
             add
@@ -308,22 +244,6 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Events.Exist
                 meta.Proceed();
             }
         }
-
-        [Introduce( WhenExists = OverrideStrategy.New )]
-        public static event EventHandler NonExistentEvent_Static
-        {
-            add
-            {
-                Console.WriteLine( "This is introduced event." );
-                meta.Proceed();
-            }
-
-            remove
-            {
-                Console.WriteLine( "This is introduced event." );
-                meta.Proceed();
-            }
-        }
     }
 
     internal abstract class BaseClass
@@ -341,33 +261,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Events.Exist
             }
         }
 
-        public static event EventHandler BaseClassEvent_Static
-        {
-            add
-            {
-                Console.WriteLine( "This is original event." );
-            }
-
-            remove
-            {
-                Console.WriteLine( "This is original event." );
-            }
-        }
-
         public event EventHandler HiddenBaseClassEvent
-        {
-            add
-            {
-                Console.WriteLine( "This is original event." );
-            }
-
-            remove
-            {
-                Console.WriteLine( "This is original event." );
-            }
-        }
-
-        public static event EventHandler HiddenBaseClassEvent_Static
         {
             add
             {
@@ -453,19 +347,6 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Events.Exist
     internal class DerivedClass : BaseClass
     {
         public new event EventHandler HiddenBaseClassEvent
-        {
-            add
-            {
-                Console.WriteLine( "This is original event." );
-            }
-
-            remove
-            {
-                Console.WriteLine( "This is original event." );
-            }
-        }
-
-        public new static event EventHandler HiddenBaseClassEvent_Static
         {
             add
             {
@@ -569,19 +450,6 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Events.Exist
             }
         }
 
-        public static event EventHandler DerivedClassEvent_Static
-        {
-            add
-            {
-                Console.WriteLine( "This is original event." );
-            }
-
-            remove
-            {
-                Console.WriteLine( "This is original event." );
-            }
-        }
-
         public virtual event EventHandler DerivedClassVirtualEvent
         {
             add
@@ -614,19 +482,6 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Events.Exist
     internal class TargetClass : DerivedClass
     {
         public event EventHandler ExistingEvent
-        {
-            add
-            {
-                Console.WriteLine( "This is original event." );
-            }
-
-            remove
-            {
-                Console.WriteLine( "This is original event." );
-            }
-        }
-
-        public static event EventHandler ExistingEvent_Static
         {
             add
             {

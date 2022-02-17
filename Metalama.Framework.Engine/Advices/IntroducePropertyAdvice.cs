@@ -72,7 +72,7 @@ namespace Metalama.Framework.Engine.Advices
         public override AdviceResult ToResult( ICompilation compilation )
         {
             // Determine whether we need introduction transformation (something may exist in the original code or could have been introduced by previous steps).
-            var existingDeclaration = this.TargetDeclaration.Properties.OfExactSignature( this.MemberBuilder, false, false );
+            var existingDeclaration = this.TargetDeclaration.FindClosestVisibleProperty( this.MemberBuilder );
 
             // TODO: Introduce attributes that are added not present on the existing member?
             if ( existingDeclaration == null )
@@ -128,7 +128,6 @@ namespace Metalama.Framework.Engine.Advices
                         else
                         {
                             this.MemberBuilder.IsNew = true;
-                            this.MemberBuilder.OverriddenProperty = existingDeclaration;
 
                             var overriddenProperty = new OverriddenProperty(
                                 this,

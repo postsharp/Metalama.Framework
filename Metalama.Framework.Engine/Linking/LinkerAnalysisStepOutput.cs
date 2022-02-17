@@ -3,6 +3,7 @@
 
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Options;
 
 namespace Metalama.Framework.Engine.Linking
 {
@@ -16,13 +17,15 @@ namespace Metalama.Framework.Engine.Linking
             PartialCompilation intermediateCompilation,
             LinkerIntroductionRegistry introductionRegistry,
             LinkerAnalysisRegistry analysisRegistry,
-            AspectReferenceResolver referenceResolver )
+            AspectReferenceResolver referenceResolver,
+            IProjectOptions? projectOptions )
         {
             this.DiagnosticSink = diagnosticSink;
             this.IntermediateCompilation = intermediateCompilation;
             this.IntroductionRegistry = introductionRegistry;
             this.AnalysisRegistry = analysisRegistry;
             this.ReferenceResolver = referenceResolver;
+            this.ProjectOptions = projectOptions;
         }
 
         /// <summary>
@@ -45,6 +48,14 @@ namespace Metalama.Framework.Engine.Linking
         /// </summary>
         public LinkerAnalysisRegistry AnalysisRegistry { get; }
 
+        /// <summary>
+        /// Gets reference resolver.
+        /// </summary>
         public AspectReferenceResolver ReferenceResolver { get; }
+
+        /// <summary>
+        /// Gets project options.
+        /// </summary>
+        public IProjectOptions? ProjectOptions { get; }
     }
 }

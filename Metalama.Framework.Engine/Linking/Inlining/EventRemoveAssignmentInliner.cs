@@ -74,7 +74,7 @@ namespace Metalama.Framework.Engine.Linking.Inlining
             var inlinedTargetBody = context.GetLinkedBody( targetSymbol.RemoveMethod.AssertNotNull().ToSemantic( aspectReference.ResolvedSemantic.Kind ) );
 
             // Mark the block as flattenable.
-            inlinedTargetBody = inlinedTargetBody.AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+            inlinedTargetBody = inlinedTargetBody.WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
 
             newNode = inlinedTargetBody;
             replacedNode = expressionStatement;

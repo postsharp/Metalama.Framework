@@ -21,47 +21,76 @@ namespace Metalama.Framework.Engine.Templating
             // This flattens the block structure when possible (i.e. there is no local variable)
             // and when it is requested through an annotation.
 
+            var previousTrivia = SyntaxTriviaList.Empty;
             var statements = new List<StatementSyntax>();
 
-            void Flatten( BlockSyntax block )
+            foreach ( var statement in node.Statements )
             {
-                foreach ( var statement in block.Statements )
+                var processedStatement = (StatementSyntax) this.Visit( statement );
+
+                switch ( processedStatement )
                 {
-                    var processedStatement = (StatementSyntax) this.Visit( statement );
+                    case EmptyStatementSyntax emptyStatement:
+                        // Empty statements are to be removed, but trivia needs to be preserved.
+                        previousTrivia =
+                            previousTrivia
+                                .AddRange( emptyStatement.SemicolonToken.LeadingTrivia )
+                                .AddRange( emptyStatement.SemicolonToken.TrailingTrivia );
 
-                    switch ( processedStatement )
-                    {
-                        case EmptyStatementSyntax _:
-                            continue;
+                        continue;
 
-                        case BlockSyntax subBlock:
+                    case BlockSyntax innerBlock:
+                        {
+                            // This block was already processed - it does not contain empty statements and nested flattanable blocks.
+                            var mustFlatten = innerBlock.HasFlattenBlockAnnotation();
+
+                            if ( mustFlatten || !innerBlock.Statements.Any( s => s is LocalDeclarationStatementSyntax ) )
                             {
-                                var mustFlatten = subBlock.HasFlattenBlockAnnotation();
+                                previousTrivia =
+                                    previousTrivia
+                                        .AddRange( innerBlock.OpenBraceToken.LeadingTrivia )
+                                        .AddRange( innerBlock.OpenBraceToken.TrailingTrivia );
 
-                                if ( mustFlatten ||
-                                     !subBlock.Statements.Any( s => s is LocalDeclarationStatementSyntax ) )
+                                foreach ( var innerStatement in innerBlock.Statements )
                                 {
-                                    Flatten( subBlock );
-                                }
-                                else
-                                {
-                                    statements.Add( processedStatement );
+                                    statements.Add(
+                                        innerStatement
+                                            .WithLeadingTrivia( previousTrivia.AddRange( innerStatement.GetLeadingTrivia() ) ) );
+
+                                    previousTrivia = SyntaxTriviaList.Empty;
                                 }
 
-                                break;
+                                previousTrivia =
+                                    previousTrivia
+                                        .AddRange( innerBlock.CloseBraceToken.LeadingTrivia )
+                                        .AddRange( innerBlock.CloseBraceToken.TrailingTrivia );
+                            }
+                            else
+                            {
+                                statements.Add(
+                                    innerBlock
+                                        .WithLeadingTrivia( previousTrivia.AddRange( processedStatement.GetLeadingTrivia() ) ) );
+
+                                previousTrivia = SyntaxTriviaList.Empty;
                             }
 
-                        default:
-                            statements.Add( processedStatement );
-
                             break;
-                    }
+                        }
+
+                    default:
+                        statements.Add(
+                            processedStatement
+                                .WithLeadingTrivia( previousTrivia.AddRange( processedStatement.GetLeadingTrivia() ) ) );
+
+                        previousTrivia = SyntaxTriviaList.Empty;
+
+                        break;
                 }
             }
 
-            Flatten( node );
-
-            return node.CopyAnnotationsTo( Block( statements.ToArray() ) );
+            return node
+                .WithStatements( List( statements ) )
+                .WithCloseBraceToken( node.CloseBraceToken.WithLeadingTrivia( previousTrivia.AddRange( node.CloseBraceToken.LeadingTrivia ) ) );
         }
     }
 }

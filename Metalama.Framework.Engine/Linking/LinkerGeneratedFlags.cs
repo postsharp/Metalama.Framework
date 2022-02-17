@@ -9,7 +9,20 @@ namespace Metalama.Framework.Engine.Linking
     internal enum LinkerGeneratedFlags
     {
         None = 0,
+
+        /// <summary>
+        /// Block that was added by the linker but can be flattened.
+        /// </summary>
         FlattenableBlock = 1,
-        EmptyLabeledStatement = 2
+
+        /// <summary>
+        /// Labeled empty statement added by the linker and can be attached to the next statement.
+        /// </summary>
+        EmptyLabeledStatement = 2,
+
+        /// <summary>
+        /// Empty statement that was added by the linker to carry trivias, which should be attached to surrounding statements.
+        /// </summary>
+        EmptyTriviaStatement = 4
     }
 }

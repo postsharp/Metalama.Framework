@@ -64,7 +64,7 @@ namespace Metalama.Framework.Engine.Advices
         public override AdviceResult ToResult( ICompilation compilation )
         {
             // TODO: Override transformations.
-            var existingDeclaration = this.TargetDeclaration.Events.OfExactSignature( this.MemberBuilder, false, false );
+            var existingDeclaration = this.TargetDeclaration.FindClosestVisibleEvent( this.MemberBuilder );
             var hasNoOverrideSemantics = this.Template.Declaration != null && this.Template.Declaration.IsEventField();
 
             if ( existingDeclaration == null )
@@ -134,7 +134,6 @@ namespace Metalama.Framework.Engine.Advices
                         else
                         {
                             this.MemberBuilder.IsNew = true;
-                            this.MemberBuilder.OverriddenEvent = existingDeclaration;
 
                             if ( hasNoOverrideSemantics )
                             {

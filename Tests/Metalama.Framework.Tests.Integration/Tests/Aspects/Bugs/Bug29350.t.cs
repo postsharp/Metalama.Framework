@@ -1,4 +1,4 @@
-using System;
+    using System;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.SyntaxBuilders;
@@ -23,12 +23,12 @@ internal class Program
 
     [Log]
     private static int Add(int a, int b)
-{
+    {
     global::System.Console.WriteLine($"Program.Add(a = {{{a}}}, b = {{{b}}}) started.");
     try
     {
-global::System.Int32 result;
-result=a + b;
+        global::System.Int32 result;
+        result = a + b;
 goto __aspect_return_1;
 __aspect_return_1:        global::System.Console.WriteLine($"Program.Add(a = {{{a}}}, b = {{{b}}}) returned {result}.");
         return (global::System.Int32)result;
@@ -38,5 +38,5 @@ __aspect_return_1:        global::System.Console.WriteLine($"Program.Add(a = {{{
         global::System.Console.WriteLine($"Program.Add(a = {{{a}}}, b = {{{b}}}) failed: {e.Message}");
         throw;
     }
-}
+    }
 }

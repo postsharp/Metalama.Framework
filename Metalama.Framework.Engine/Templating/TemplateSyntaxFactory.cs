@@ -51,21 +51,23 @@ namespace Metalama.Framework.Engine.Templating
 
         public static void AddComments( List<StatementOrTrivia> list, params string?[]? comments )
         {
-            static SyntaxTrivia CreateTrivia( string comment )
+            static IEnumerable<SyntaxTrivia> CreateTrivia( string comment )
             {
                 if ( comment.Contains( '\n' ) || comment.Contains( '\r' ) )
                 {
-                    return SyntaxFactory.Comment( "/* " + comment + " */" + "\n" );
+                    yield return SyntaxFactory.ElasticLineFeed;
+                    yield return SyntaxFactory.Comment( "/* " + comment + " */" );
                 }
                 else
                 {
-                    return SyntaxFactory.Comment( "// " + comment + "\n" );
+                    yield return SyntaxFactory.ElasticLineFeed;
+                    yield return SyntaxFactory.Comment( "// " + comment );
                 }
             }
 
             if ( comments != null )
             {
-                list.Add( new StatementOrTrivia( SyntaxFactory.TriviaList( comments.WhereNotNull().Select( CreateTrivia ) ) ) );
+                list.Add( new StatementOrTrivia( SyntaxFactory.TriviaList( comments.WhereNotNull().SelectMany( CreateTrivia ) ) ) );
             }
         }
 
@@ -77,8 +79,8 @@ namespace Metalama.Framework.Engine.Templating
             var statementList = new List<StatementSyntax>( list.Count );
 
             // List of trivia added by previous items in the list, and not yet added to a statement.
-            // This is used when trivia are added before the first statement.
-            var previousTrivia = SyntaxTriviaList.Empty;
+            // This is used when trivia are added before the first statement and after a first newline withing the trivia block.
+            var nextLeadingTrivia = SyntaxTriviaList.Empty;
 
             foreach ( var statementOrTrivia in list )
             {
@@ -86,10 +88,10 @@ namespace Metalama.Framework.Engine.Templating
                 {
                     case StatementSyntax statement:
                         // Add
-                        if ( previousTrivia.Count > 0 )
+                        if ( nextLeadingTrivia.Count > 0 )
                         {
-                            statement = statement.WithLeadingTrivia( previousTrivia );
-                            previousTrivia = SyntaxTriviaList.Empty;
+                            statement = statement.WithLeadingTrivia( nextLeadingTrivia.AddRange( statement.GetLeadingTrivia() ) );
+                            nextLeadingTrivia = SyntaxTriviaList.Empty;
                         }
 
                         statementList.Add( statement );
@@ -99,15 +101,48 @@ namespace Metalama.Framework.Engine.Templating
                     case SyntaxTriviaList trivia:
                         if ( statementList.Count == 0 )
                         {
-                            // It will be added as the leading trivia of the next statement.
-                            previousTrivia = previousTrivia.AddRange( trivia );
+                            // Add the trivia as the leading trivia of the next statement.
+                            nextLeadingTrivia = nextLeadingTrivia.AddRange( trivia );
                         }
                         else
                         {
                             var previousStatement = statementList[statementList.Count - 1];
 
-                            statementList[statementList.Count - 1] =
-                                previousStatement.WithTrailingTrivia( previousStatement.GetTrailingTrivia().AddRange( trivia ) );
+                            // TODO: Optimize the lookup for newline.
+                            if ( previousStatement.GetTrailingTrivia().Any( x => x.IsKind( SyntaxKind.EndOfLineTrivia ) ) )
+                            {
+                                nextLeadingTrivia = nextLeadingTrivia.AddRange( trivia );
+                            }
+                            else
+                            {
+                                var triviaUpToFirstNewLine = SyntaxTriviaList.Empty;
+                                var triviaAfterFirstNewLine = SyntaxTriviaList.Empty;
+                                var isAfterFirstNewLine = false;
+
+                                // Split the trivia after the first newline.
+                                foreach ( var t in trivia )
+                                {
+                                    if ( !isAfterFirstNewLine )
+                                    {
+                                        triviaUpToFirstNewLine = triviaUpToFirstNewLine.Add( t );
+
+                                        if ( t.IsKind( SyntaxKind.EndOfLineTrivia ) )
+                                        {
+                                            isAfterFirstNewLine = true;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        triviaAfterFirstNewLine = triviaAfterFirstNewLine.Add( t );
+                                    }
+                                }
+
+                                statementList[statementList.Count - 1] =
+                                    previousStatement
+                                        .WithTrailingTrivia( previousStatement.GetTrailingTrivia().AddRange( triviaUpToFirstNewLine ) );
+
+                                nextLeadingTrivia = triviaAfterFirstNewLine;
+                            }
                         }
 
                         break;
@@ -117,12 +152,10 @@ namespace Metalama.Framework.Engine.Templating
                 }
             }
 
-            // If there was no statement at all and we have comments, we need to generate a dummy statement with trivia.
-            if ( previousTrivia.Count > 0 )
+            // If there is any trivia left, we need to generate a dummy statement with the trivia (will be removed later).
+            if ( nextLeadingTrivia.Count > 0 )
             {
-                // This produce incorrectly indented code, but I didn't find a quick way to solve it.
-                previousTrivia = previousTrivia.Insert( 0, SyntaxFactory.ElasticLineFeed );
-                statementList.Add( SyntaxFactoryEx.EmptyStatement.WithTrailingTrivia( previousTrivia ) );
+                statementList.Add( SyntaxFactory.EmptyStatement().WithoutTrailingTrivia().WithLeadingTrivia( nextLeadingTrivia ) );
             }
 
             return statementList.ToArray();

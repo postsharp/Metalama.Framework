@@ -54,6 +54,7 @@ namespace Metalama.Framework.Engine.Linking
         {
             var replacements = new Dictionary<SyntaxNode, SyntaxNode?>();
             var symbol = this.ResolveBodySource( semantic );
+            var triviaSource = this.ResolveBodyBlockTriviaSource( semantic, out var shouldRemoveExistingTrivia );
             var bodyRootNode = this.GetBodyRootNode( symbol, inliningContext.SyntaxGenerationContext, out var isImplicitlyLinked );
 
             if ( !isImplicitlyLinked )
@@ -95,7 +96,61 @@ namespace Metalama.Framework.Engine.Linking
                 rewrittenBody = rewrittenBody.AddSourceCodeAnnotation();
             }
 
-            return rewrittenBody;
+            if ( triviaSource == null )
+            {
+                // Strip the trivia from the block.
+                return rewrittenBody
+                    .WithOpenBraceToken(
+                        Token( SyntaxKind.OpenBraceToken )
+                            .WithLeadingTrivia( ElasticMarker )
+                            .WithTrailingTrivia( ElasticMarker ) )
+                    .WithCloseBraceToken(
+                        Token( SyntaxKind.CloseBraceToken )
+                            .WithLeadingTrivia( ElasticMarker )
+                            .WithTrailingTrivia( ElasticMarker ) )
+                    .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+            }
+            else
+            {
+                var (openBraceLeadingTrivia, openBraceTrailingTrivia, closeBraceLeadingTrivia, closeBraceTrailingTrivia) =
+                    triviaSource switch
+                    {
+                        BlockSyntax blockSyntax => (
+                            blockSyntax.OpenBraceToken.LeadingTrivia,
+                            blockSyntax.OpenBraceToken.TrailingTrivia,
+                            blockSyntax.CloseBraceToken.LeadingTrivia,
+                            blockSyntax.CloseBraceToken.TrailingTrivia
+                        ),
+                        _ => throw new AssertionFailedException( Justifications.CoverageMissing )
+                    };
+
+                if ( shouldRemoveExistingTrivia )
+                {
+                    rewrittenBody =
+                        rewrittenBody
+                            .WithOpenBraceToken( rewrittenBody.OpenBraceToken.WithoutTrivia() )
+                            .WithCloseBraceToken( rewrittenBody.CloseBraceToken.WithoutTrivia() )
+                            .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+                }
+                else
+                {
+                    rewrittenBody =
+                        rewrittenBody
+                            .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+                }
+
+                // Keep all trivia from the source block and add trivias from the root block.
+                return Block( rewrittenBody )
+                    .WithOpenBraceToken(
+                        Token( SyntaxKind.OpenBraceToken )
+                            .WithLeadingTrivia( openBraceLeadingTrivia.Add( ElasticMarker ) )
+                            .WithTrailingTrivia( openBraceTrailingTrivia.Insert( 0, ElasticMarker ) ) )
+                    .WithCloseBraceToken(
+                        Token( SyntaxKind.CloseBraceToken )
+                            .WithLeadingTrivia( closeBraceLeadingTrivia.Add( ElasticMarker ) )
+                            .WithTrailingTrivia( closeBraceTrailingTrivia.Insert( 0, ElasticMarker ) ) )
+                    .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+            }
 
             void AddAspectReferenceReplacements()
             {
@@ -121,7 +176,7 @@ namespace Metalama.Framework.Engine.Linking
                     }
                     else
                     {
-                        var linkedExpression = this.GetLinkedExpression( aspectReference );
+                        var linkedExpression = this.GetLinkedExpression( aspectReference, inliningContext.SyntaxGenerationContext );
                         replacements.Add( aspectReference.Expression, linkedExpression );
                     }
                 }
@@ -143,7 +198,7 @@ namespace Metalama.Framework.Engine.Linking
                                     Block(
                                             CreateAssignmentStatement( returnStatement.Expression ),
                                             CreateGotoStatement() )
-                                        .AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+                                        .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
                             }
                             else
                             {
@@ -161,7 +216,7 @@ namespace Metalama.Framework.Engine.Linking
                                 Block(
                                         ExpressionStatement( returnExpression ),
                                         CreateGotoStatement() )
-                                    .AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+                                    .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
                         }
                         else
                         {
@@ -169,7 +224,7 @@ namespace Metalama.Framework.Engine.Linking
                                 Block(
                                         CreateAssignmentStatement( returnExpression ),
                                         CreateGotoStatement() )
-                                    .AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+                                    .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
                         }
                     }
                     else
@@ -201,10 +256,13 @@ namespace Metalama.Framework.Engine.Linking
 
                 return
                     ExpressionStatement(
-                        AssignmentExpression(
-                            SyntaxKind.SimpleAssignmentExpression,
-                            identifier,
-                            expression ) );
+                            AssignmentExpression(
+                                SyntaxKind.SimpleAssignmentExpression,
+                                identifier,
+                                Token( TriviaList( ElasticSpace ), SyntaxKind.EqualsToken, TriviaList( ElasticSpace ) ),
+                                expression ),
+                            Token( SyntaxKind.SemicolonToken ).WithTrailingTrivia( ElasticLineFeed ) )
+                        .AddGeneratedCodeAnnotation();
             }
 
             GotoStatementSyntax CreateGotoStatement()
@@ -212,14 +270,18 @@ namespace Metalama.Framework.Engine.Linking
                 return
                     GotoStatement(
                             SyntaxKind.GotoStatement,
-                            Token( SyntaxKind.GotoKeyword ).WithLeadingTrivia( ElasticLineFeed ).WithTrailingTrivia( ElasticSpace ),
+                            Token( SyntaxKind.GotoKeyword ).WithTrailingTrivia( ElasticSpace ),
                             default,
                             IdentifierName( inliningContext.ReturnLabelName.AssertNotNull() ),
-                            Token( SyntaxKind.SemicolonToken ) )
+                            Token( SyntaxKind.SemicolonToken ).WithTrailingTrivia( ElasticLineFeed ) )
                         .AddGeneratedCodeAnnotation();
             }
         }
 
+        /// <summary>
+        /// Gets a node that becomes root node of the target symbol in the final compilation. This is used to get a block/expression for implicit
+        /// accessors, i.e. auto-properties and event fields.
+        /// </summary>
         private SyntaxNode GetBodyRootNode( IMethodSymbol symbol, SyntaxGenerationContext generationContext, out bool isImplicitlyLinked )
         {
             var declaration = symbol.GetPrimaryDeclaration();
@@ -334,7 +396,7 @@ namespace Metalama.Framework.Engine.Linking
                             case ExpressionSyntax rewrittenExpression:
                                 return
                                     Block( ExpressionStatement( rewrittenExpression ) )
-                                        .AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+                                        .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
 
                             case BlockSyntax rewrittenBlock:
                                 return rewrittenBlock;
@@ -365,7 +427,7 @@ namespace Metalama.Framework.Engine.Linking
                                                 Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( ElasticSpace ),
                                                 rewrittenExpression,
                                                 Token( SyntaxKind.SemicolonToken ) ) )
-                                        .AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+                                        .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
 
                             case BlockSyntax rewrittenBlock:
                                 return rewrittenBlock;
@@ -487,12 +549,71 @@ namespace Metalama.Framework.Engine.Linking
         }
 
         /// <summary>
+        /// Gets a syntax node that will the the source of trivia of the specified declaration root block.
+        /// </summary>
+        /// <param name="semantic"></param>
+        /// <returns></returns>
+        private SyntaxNode? ResolveBodyBlockTriviaSource( IntermediateSymbolSemantic<IMethodSymbol> semantic, out bool shouldRemoveExistingTrivia )
+        {
+            ISymbol? symbol;
+
+            if ( this._introductionRegistry.IsOverride( semantic.Symbol ) )
+            {
+                Invariant.Assert( semantic.Kind == IntermediateSymbolSemanticKind.Default );
+
+                symbol = semantic.Symbol;
+                shouldRemoveExistingTrivia = true;
+            }
+            else if ( this._introductionRegistry.IsOverrideTarget( semantic.Symbol ) )
+            {
+                symbol = null;
+
+                switch ( semantic.Kind )
+                {
+                    case IntermediateSymbolSemanticKind.Base:
+                    case IntermediateSymbolSemanticKind.Default:
+                        shouldRemoveExistingTrivia = false;
+
+                        break;
+
+                    case IntermediateSymbolSemanticKind.Final:
+                        shouldRemoveExistingTrivia = true;
+
+                        break;
+
+                    default:
+                        throw new AssertionFailedException();
+                }
+            }
+            else if ( semantic.Symbol.AssociatedSymbol != null && semantic.Symbol.AssociatedSymbol.IsExplicitInterfaceEventField() )
+            {
+                symbol = semantic.Symbol;
+                shouldRemoveExistingTrivia = true;
+            }
+            else
+            {
+                throw new AssertionFailedException();
+            }
+
+            return symbol?.GetPrimaryDeclaration() switch
+            {
+                null => null,
+                MethodDeclarationSyntax methodDeclaration => methodDeclaration.Body,
+                AccessorDeclarationSyntax accessorDeclaration => accessorDeclaration.Body,
+                ArrowExpressionClauseSyntax => null,
+                _ => throw new AssertionFailedException()
+            };
+        }
+
+        /// <summary>
         /// Gets an expression that replaces the expression represented by the aspect reference. This for cases where the reference is not inlined.
         /// </summary>
         /// <param name="aspectReference"></param>
         /// <returns></returns>
-        private ExpressionSyntax GetLinkedExpression( ResolvedAspectReference aspectReference )
+        private ExpressionSyntax GetLinkedExpression( ResolvedAspectReference aspectReference, SyntaxGenerationContext syntaxGenerationContext )
         {
+            // IMPORTANT: This method needs to always strip trivia if rewriting the existing expression.
+            //            Trivia existing around the expression are preserved during substitution.
             if ( !SymbolEqualityComparer.Default.Equals(
                     aspectReference.ResolvedSemantic.Symbol.ContainingType,
                     aspectReference.ResolvedSemantic.Symbol.ContainingType ) )
@@ -544,13 +665,16 @@ namespace Metalama.Framework.Engine.Linking
                         {
                             return memberAccessExpression
                                 .WithExpression( ThisExpression() )
-                                .WithName( IdentifierName( targetMemberName ) );
+                                .WithName( IdentifierName( targetMemberName ) )
+                                .WithoutTrivia();
                         }
                         else
                         {
                             // This is the same type, we can just change the identifier in the expression.
                             // TODO: Is the target always accessible?
-                            return memberAccessExpression.WithName( IdentifierName( targetMemberName ) );
+                            return memberAccessExpression
+                                .WithName( IdentifierName( targetMemberName ) )
+                                .WithoutTrivia();
                         }
                     }
                     else
@@ -567,18 +691,12 @@ namespace Metalama.Framework.Engine.Linking
 
                         if ( targetSymbol.IsStatic )
                         {
-                            // This was possible when base was able to point to hidden member. Now every
-                            // override must point to a (potentially introduced) member of the same type. 
-                            throw new AssertionFailedException( Justifications.ObsoleteBranch );
-
-                            // // Static member access where the target is a different type.
-                            // return
-                            //     MemberAccessExpression(
-                            //             SyntaxKind.SimpleMemberAccessExpression,
-                            //             LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( targetSymbol.ContainingType ),
-                            //             IdentifierName( targetMemberName ) )
-                            //         .WithLeadingTrivia( memberAccessExpression.GetLeadingTrivia() )
-                            //         .WithTrailingTrivia( memberAccessExpression.GetTrailingTrivia() );
+                            // Static member access where the target is a different type.
+                            return
+                                MemberAccessExpression(
+                                    SyntaxKind.SimpleMemberAccessExpression,
+                                    syntaxGenerationContext.SyntaxGenerator.Type( targetSymbol.ContainingType ),
+                                    IdentifierName( targetMemberName ) );
                         }
                         else
                         {
@@ -596,11 +714,9 @@ namespace Metalama.Framework.Engine.Linking
                                     case ThisExpressionSyntax:
                                         return
                                             MemberAccessExpression(
-                                                    SyntaxKind.SimpleMemberAccessExpression,
-                                                    BaseExpression(),
-                                                    IdentifierName( targetMemberName ) )
-                                                .WithLeadingTrivia( memberAccessExpression.GetLeadingTrivia() )
-                                                .WithTrailingTrivia( memberAccessExpression.GetTrailingTrivia() );
+                                                SyntaxKind.SimpleMemberAccessExpression,
+                                                BaseExpression(),
+                                                IdentifierName( targetMemberName ) );
 
                                     default:
                                         var aspectInstance = this.ResolveAspectInstance( aspectReference );
@@ -618,7 +734,9 @@ namespace Metalama.Framework.Engine.Linking
                             else
                             {
                                 // Resolved symbol is unrelated to the containing symbol.
-                                return memberAccessExpression.WithName( IdentifierName( targetMemberName ) );
+                                return memberAccessExpression
+                                    .WithName( IdentifierName( targetMemberName ) )
+                                    .WithoutTrivia();
                             }
                         }
                     }
@@ -636,7 +754,10 @@ namespace Metalama.Framework.Engine.Linking
                         {
                             var rewriter = new ConditionalAccessRewriter( targetMemberName );
 
-                            return (ExpressionSyntax) rewriter.Visit( conditionalAccessExpression );
+                            return
+                                (ExpressionSyntax) rewriter.Visit(
+                                    conditionalAccessExpression
+                                        .WithoutTrivia() );
                         }
                     }
                     else

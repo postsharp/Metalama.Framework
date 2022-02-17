@@ -26,7 +26,7 @@ namespace Metalama.Framework.Engine.Linking
             return flags;
         }
 
-        public static T AddLinkerGeneratedFlags<T>( this T node, in LinkerGeneratedFlags flags )
+        public static T WithLinkerGeneratedFlags<T>( this T node, in LinkerGeneratedFlags flags )
             where T : SyntaxNode
         {
             return node.WithAdditionalAnnotations( new SyntaxAnnotation( AnnotationKind, new LinkerGeneratedAnnotation( flags ).ToString() ) );
