@@ -29,7 +29,8 @@ internal class Program
     {
         global::System.Int32 result;
         result = a + b;
-        global::System.Console.WriteLine($"Program.Add(a = {{{a}}}, b = {{{b}}}) returned {result}.");
+goto __aspect_return_1;
+__aspect_return_1:        global::System.Console.WriteLine($"Program.Add(a = {{{a}}}, b = {{{b}}}) returned {result}.");
         return (global::System.Int32)result;
     }
     catch (global::System.Exception e)

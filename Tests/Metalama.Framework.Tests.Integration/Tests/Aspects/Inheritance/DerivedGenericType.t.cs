@@ -1,17 +1,19 @@
-internal class Targets
-    {
-        [Aspect]
-        private class BaseClass<T>
+    internal class Targets
         {
-            private T M( T a ) {
-    global::System.Console.WriteLine("Overridden!");
-return a;}
-        }
-
-        private class DerivedClass : BaseClass<int>
-        {
-            private void N() {
-    global::System.Console.WriteLine("Overridden!");
-}
-        }
+            [Aspect]
+            private class BaseClass<T>
+            {
+                private T M( T a ) 
+    { 
+        global::System.Console.WriteLine("Overridden!");
+        return a;
     }
+            }
+    
+            private class DerivedClass : BaseClass<int>
+            {
+                private void N() {     global::System.Console.WriteLine("Overridden!");
+            return;
+    }
+            }
+        }

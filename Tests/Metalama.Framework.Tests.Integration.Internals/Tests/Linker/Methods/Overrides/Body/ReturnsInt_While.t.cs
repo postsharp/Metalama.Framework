@@ -10,7 +10,8 @@
         int result;
                     Console.WriteLine( "Original");
             result = x;
-        k += result;
+goto __aspect_return_1;
+__aspect_return_1:        k += result;
         i++;
     }
 

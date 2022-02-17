@@ -50,7 +50,7 @@ namespace Metalama.Framework.Engine.Linking
                 this._serviceProvider );
 
             var linkingRewriter = new LinkingRewriter( this._serviceProvider, input.IntermediateCompilation.Compilation, rewritingDriver );
-            var cleanupRewriter = new CleanupRewriter();
+            var cleanupRewriter = new CleanupRewriter( input.ProjectOptions );
 
             List<SyntaxTreeModification> replacedTrees = new();
 

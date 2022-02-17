@@ -13,7 +13,8 @@ public global::System.Int32 AutoProperty { get
 set
 { 
         global::System.Console.WriteLine("This is overridden method.");
-        this._autoProperty=value;        
+        this._autoProperty=value;        return;
+
 }
 }
 
@@ -33,7 +34,8 @@ public global::System.Int32 Property
         global::System.Console.WriteLine("This is overridden method.");
                     global::System.Console.WriteLine("This is introduced interface member.");
     
-            }
+        return;
+    }
 }
 
 public global::System.Int32 InterfaceMethod()
@@ -51,14 +53,16 @@ public event global::System.EventHandler? Event
                     global::System.Console.WriteLine("This is introduced interface member.");
     
 
-            }
+        return;
+    }
 
     remove
     {
         global::System.Console.WriteLine("This is overridden method.");
                     global::System.Console.WriteLine("This is introduced interface member.");
     
-            }
+        return;
+    }
 }
 private global::System.EventHandler? _eventField;
 
@@ -70,11 +74,13 @@ add
 {
         global::System.Console.WriteLine("This is overridden method.");
         this._eventField+=value;
-        }
+        return;
+}
 remove
 {
         global::System.Console.WriteLine("This is overridden method.");
         this._eventField-=value;
-        }
+        return;
+}
 }
 }

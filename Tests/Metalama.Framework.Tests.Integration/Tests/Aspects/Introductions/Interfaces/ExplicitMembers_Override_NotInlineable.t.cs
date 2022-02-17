@@ -17,7 +17,8 @@ set
         global::System.Console.WriteLine("This is overridden method.");
         this.AutoProperty_Source = value;
         this.AutoProperty_Source = value;
-        
+        return;
+
 }
 }
 private global::System.Int32 AutoProperty_Source
@@ -62,7 +63,8 @@ global::System.Int32 global::Metalama.Framework.Tests.Integration.TestInputs.Asp
         global::System.Console.WriteLine("This is overridden method.");
         this.IInterface_Property_Introduction = value;
         this.IInterface_Property_Introduction = value;
-            }
+        return;
+    }
 }
 
 global::System.Int32 IInterface_InterfaceMethod_Introduction()
@@ -98,14 +100,16 @@ event global::System.EventHandler? global::Metalama.Framework.Tests.Integration.
         global::System.Console.WriteLine("This is overridden method.");
         this.IInterface_Event_Introduction += value;
         this.IInterface_Event_Introduction += value;
-            }
+        return;
+    }
 
     remove
     {
         global::System.Console.WriteLine("This is overridden method.");
         this.IInterface_Event_Introduction -= value;
         this.IInterface_Event_Introduction -= value;
-            }
+        return;
+    }
 }
 private global::System.EventHandler? _eventField;
 
@@ -118,14 +122,16 @@ event global::System.EventHandler? global::Metalama.Framework.Tests.Integration.
         global::System.Console.WriteLine("This is overridden method.");
         this.EventField_Source += value;
         this.EventField_Source += value;
-            }
+        return;
+    }
 
     remove
     {
         global::System.Console.WriteLine("This is overridden method.");
         this.EventField_Source -= value;
         this.EventField_Source -= value;
-            }
+        return;
+    }
 }
 private event global::System.EventHandler? EventField_Source
 {

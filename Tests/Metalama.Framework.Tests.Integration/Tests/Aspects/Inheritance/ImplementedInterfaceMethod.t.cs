@@ -1,4 +1,4 @@
-internal class Targets
+    internal class Targets
     {
         private interface I
         {
@@ -6,10 +6,10 @@ internal class Targets
             void M();
         }
 
-        private class C: I
+        private class C : I
         {
-            public void M() {
-    global::System.Console.WriteLine("Overridden!");
+            public void M() {     global::System.Console.WriteLine("Overridden!");
+        return;
 }
         }
     }

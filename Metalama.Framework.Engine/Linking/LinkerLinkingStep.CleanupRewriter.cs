@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Framework.Engine.Options;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -13,53 +14,65 @@ namespace Metalama.Framework.Engine.Linking
     {
         private class CleanupRewriter : CSharpSyntaxRewriter
         {
+            private readonly IProjectOptions? _projectOptions;
+
+            public CleanupRewriter( IProjectOptions? projectOptions )
+            {
+                this._projectOptions = projectOptions;
+            }
+
             public override SyntaxNode? VisitMethodDeclaration( MethodDeclarationSyntax node )
             {
                 return
                     node
-                        .WithBody( RewriteBodyBlock( node.Body ) );
+                        .WithBody( this.RewriteBodyBlock( node.Body ) );
             }
 
             public override SyntaxNode? VisitPropertyDeclaration( PropertyDeclarationSyntax node )
             {
-                return VisitBasePropertyDeclaration( node );
+                return this.VisitBasePropertyDeclaration( node );
             }
 
             public override SyntaxNode? VisitIndexerDeclaration( IndexerDeclarationSyntax node )
             {
-                return VisitBasePropertyDeclaration( node );
+                return this.VisitBasePropertyDeclaration( node );
             }
 
             public override SyntaxNode? VisitEventDeclaration( EventDeclarationSyntax node )
             {
-                return VisitBasePropertyDeclaration( node );
+                return this.VisitBasePropertyDeclaration( node );
             }
 
-            private static SyntaxNode? VisitBasePropertyDeclaration( BasePropertyDeclarationSyntax node )
+            private SyntaxNode? VisitBasePropertyDeclaration( BasePropertyDeclarationSyntax node )
             {
                 return
                     node.WithAccessorList(
                         node.AccessorList?.WithAccessors(
                             List(
                                 node.AccessorList.Accessors
-                                    .Select( a => a.WithBody( RewriteBodyBlock( a.Body ) ) ) ) ) );
+                                    .Select( a => a.WithBody( this.RewriteBodyBlock( a.Body ) ) ) ) ) );
             }
 
-            private static BlockSyntax? RewriteBodyBlock( BlockSyntax? block )
+            private BlockSyntax? RewriteBodyBlock( BlockSyntax? block )
             {
                 if ( block == null )
                 {
                     return null;
                 }
-                else
+                else if ( this._projectOptions?.FormatOutput == true )
                 {
                     var countLabelUsesWalker = new CountLabelUsesWalker();
                     countLabelUsesWalker.Visit( block );
 
-                    return
-                        (BlockSyntax?)
-                        new RemoveTrailingReturnRewriter().Visit(
-                            new RemoveTrivialLabelRewriter( countLabelUsesWalker.ObservedLabelCounters ).Visit( new CleanupBodyRewriter().Visit( block ) ) );
+                    var withFlattenedBlocks = new CleanupBodyRewriter().Visit( block );
+                    var withoutTrivialLabels = new RemoveTrivialLabelRewriter( countLabelUsesWalker.ObservedLabelCounters ).Visit(withFlattenedBlocks);
+                    var withoutTrailingReturns = new RemoveTrailingReturnRewriter().Visit( withoutTrivialLabels );
+
+                    return (BlockSyntax?)withoutTrailingReturns;
+                }
+                else
+                {
+                    return (BlockSyntax?) new CleanupBodyRewriter().Visit( block );
                 }
             }
         }

@@ -5,7 +5,7 @@
         private int _myField1;
 
 
-        private int _myField
+        public int _myField
         {
             get
             {

@@ -81,7 +81,8 @@ namespace Metalama.Framework.Engine.Linking
                 input.IntermediateCompilation,
                 input.IntroductionRegistry,
                 analysisRegistry,
-                referenceResolver );
+                referenceResolver,
+                input.ProjectOptions );
         }
     }
 }

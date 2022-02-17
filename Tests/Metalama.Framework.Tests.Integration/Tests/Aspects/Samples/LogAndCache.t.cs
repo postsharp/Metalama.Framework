@@ -22,7 +22,8 @@ goto __aspect_return_1;
         global::System.Int32 result;
             Console.WriteLine("Thinking...");
             result = a + b;
-        global::Metalama.Framework.IntegrationTests.Aspects.Overrides.Composition.LogAndCache.SampleCache.Cache.TryAdd(cacheKey, result);
+goto __aspect_return_2;
+__aspect_return_2:        global::Metalama.Framework.IntegrationTests.Aspects.Overrides.Composition.LogAndCache.SampleCache.Cache.TryAdd(cacheKey, result);
         result_1 = (global::System.Int32)result;
 goto __aspect_return_1;
     }

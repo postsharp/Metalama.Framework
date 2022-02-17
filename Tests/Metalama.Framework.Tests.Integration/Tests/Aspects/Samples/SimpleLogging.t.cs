@@ -10,7 +10,8 @@
             if (a == 0)
                 throw new ArgumentOutOfRangeException(nameof(a));
             result = a + b;
-        global::System.Console.WriteLine("TargetClass.Add(int, int) succeeded.");
+goto __aspect_return_1;
+__aspect_return_1:        global::System.Console.WriteLine("TargetClass.Add(int, int) succeeded.");
         return (global::System.Int32)result;
     }
     catch (global::System.Exception e)
