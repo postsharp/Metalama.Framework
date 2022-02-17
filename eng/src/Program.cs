@@ -53,7 +53,7 @@ commandApp.AddProductCommands( product );
 
 return commandApp.Run( args );
 
-static bool OnPrepareCompleted( (BuildContext Context, BaseBuildSettings Settings) arg )
+static void OnPrepareCompleted( PrepareCompletedEventArgs arg )
 {
     arg.Context.Console.WriteHeading( "Generating code" );
 
@@ -66,19 +66,22 @@ static bool OnPrepareCompleted( (BuildContext Context, BaseBuildSettings Setting
 
     if ( !project.Restore( arg.Context, new BuildSettings() ) )
     {
-        return false;
+        arg.IsFailed = true;
+        return;
     }
 
     if ( !project.Build( arg.Context, new BuildSettings() ) )
     {
-        return false;
+        arg.IsFailed = true;
+        return;
     }
 
     var toolDirectory = Path.Combine( generatorDirectory, "bin", "Debug", "net48" );
     var toolPath = Path.Combine( toolDirectory, "Metalama.Framework.GenerateMetaSyntaxRewriter.exe" );
     if ( !ToolInvocationHelper.InvokeTool( arg.Context.Console, toolPath, "", toolDirectory ) )
     {
-        return false;
+        arg.IsFailed = true;
+        return;
     }
 
     CopyFile( "MetaSyntaxRewriter.g.cs", "Metalama.Framework.Engine\\Templating" );
@@ -96,6 +99,4 @@ static bool OnPrepareCompleted( (BuildContext Context, BaseBuildSettings Setting
 
         File.Copy( Path.Combine( toolDirectory, fileName ), targetFile );
     }
-
-    return true;
 }

@@ -1,2 +1,2 @@
 // CompileTimeAspectPipeline.ExecuteAsync failed. 
-// Error CR0003 on `Method`: `Aspect 'Introduction' cannot be applied to method 'TargetClass.Method()', because this aspect does not implement the 'IAspect<IMethod>' interface.`
+// Error LAMA0003 on `Method`: `Aspect 'Introduction' cannot be applied to method 'TargetClass.Method()', because this aspect does not implement the 'IAspect<IMethod>' interface.`

@@ -22,7 +22,7 @@ namespace Metalama.Framework.Engine
 
         internal static readonly DiagnosticDefinition<(string Message, string File)> UnhandledException =
             new(
-                "CR0001",
+                "LAMA0001",
                 _category,
                 "Unexpected exception occurred in Metalama: {0} Exception details are in '{1}'. " +
                 " Please report this issue at https://www.postsharp.net/support and attach this file to the ticket.",
@@ -33,28 +33,28 @@ namespace Metalama.Framework.Engine
             DiagnosticDefinition<(string AspectType, DeclarationKind DeclarationKind, IDeclaration Declaration, ITypeSymbol InterfaceType)>
             AspectAppliedToIncorrectDeclaration =
                 new(
-                    "CR0003",
+                    "LAMA0003",
                     _category,
                     "Aspect '{0}' cannot be applied to {1} '{2}', because this aspect does not implement the '{3}' interface.",
                     Error,
                     "Aspect applied to incorrect kind of declaration." );
 
         internal static readonly DiagnosticDefinition<(INamedTypeSymbol AspectType, string Weavers)> AspectHasMoreThanOneWeaver =
-            new( "CR0004", _category, "Aspect '{0}' can have at most one weaver, but it has the following: {1}.", Error, "Aspect has more than one weaver." );
+            new( "LAMA0004", _category, "Aspect '{0}' can have at most one weaver, but it has the following: {1}.", Error, "Aspect has more than one weaver." );
 
         internal static readonly DiagnosticDefinition<(string AspectType, string Exception)> ExceptionInWeaver =
-            new( "CR0006", _category, "Exception occurred while executing the weaver of aspect '{0}': {1}", Error, "Exception in aspect weaver." );
+            new( "LAMA0006", _category, "Exception occurred while executing the weaver of aspect '{0}': {1}", Error, "Exception in aspect weaver." );
 
         internal static readonly DiagnosticDefinition<(IDeclaration Member, int RequiredArgumentsCount, int ActualArgumentsCount)> MemberRequiresNArguments =
-            new( "CR0012", _category, "Member '{0}' requires {1} arguments but received {2}.", Error, "Member requires number of arguments." );
+            new( "LAMA0012", _category, "Member '{0}' requires {1} arguments but received {2}.", Error, "Member requires number of arguments." );
 
         internal static readonly DiagnosticDefinition<(IDeclaration Member, int RequiredArgumentsCount, int ActualArgumentsCount)>
             MemberRequiresAtLeastNArguments =
-                new( "CR0013", _category, "Member '{0}' requires at least {1} arguments but received {2}.", Error, "Member requires more arguments." );
+                new( "LAMA0013", _category, "Member '{0}' requires at least {1} arguments but received {2}.", Error, "Member requires more arguments." );
 
         internal static readonly DiagnosticDefinition<IMemberOrNamedType> MustProvideInstanceForInstanceMember =
             new(
-                "CR0015",
+                "LAMA0015",
                 _category,
                 "Member {0} is not static, but has been used with a null instance.",
                 Error,
@@ -62,7 +62,7 @@ namespace Metalama.Framework.Engine
 
         internal static readonly DiagnosticDefinition<IMemberOrNamedType> CannotProvideInstanceForLocalFunction =
             new(
-                "CR0018",
+                "LAMA0018",
                 _category,
                 "{0} is a local function, so it Cannot be invoked with a non-null instance.",
                 Error,
@@ -71,32 +71,32 @@ namespace Metalama.Framework.Engine
         internal static readonly DiagnosticDefinition<(string Expression, string ParameterName, IMemberOrNamedType Method)>
             CannotPassExpressionToByRefParameter =
                 new(
-                    "CR0019",
+                    "LAMA0019",
                     _category,
                     "Cannot pass the expression '{0}' to the '{1}' parameter of method '{2}' because the parameter is 'out' or 'ref'.",
                     Error,
                     "Cannot use an expression in an out or ref parameter." );
 
         internal static readonly DiagnosticDefinition<string> CannotFindType =
-            new( "CR0020", _category, "Cannot find the type '{0}'.", Error, "Cannot find a type" );
+            new( "LAMA0020", _category, "Cannot find the type '{0}'.", Error, "Cannot find a type" );
 
         internal static readonly DiagnosticDefinition<string> CycleInAspectOrdering =
             new(
-                "CR0021",
+                "LAMA0021",
                 _category,
                 "A cycle was found in the specifications of aspect ordering between the following aspect part: {0}.",
                 Error,
                 "A cycle was found in aspect ordering." );
 
         internal static readonly DiagnosticDefinition<(string ParentType, string ChildType)> CannotAddChildAspectToPreviousPipelineStep = new(
-            "CR0022",
+            "LAMA0022",
             _category,
             "The aspect '{0}' cannot add a child aspect to of type '{1}' because this aspect type has already been processed.",
             Error,
             "Cannot add an aspect to a previous step of the compilation pipeline." );
 
         internal static readonly DiagnosticDefinition<(string AspectType, IDeclaration Target)> CannotAddAdviceToPreviousPipelineStep = new(
-            "CR0023",
+            "LAMA0023",
             _category,
             "The aspect '{0}' cannot add an advice to '{1}' because this declaration has already been processed.",
             Error,
@@ -104,21 +104,21 @@ namespace Metalama.Framework.Engine
 
         internal static readonly DiagnosticDefinition<(DeclarationKind ElementKind, ISymbol Symbol, ITypeSymbol AttributeType, string AdviceMethod)>
             TemplateMemberMissesAttribute = new(
-                "CR0024",
+                "LAMA0024",
                 "The template member does not have the expected custom attribute.",
                 "The template {0} '{1}' must be annotated with the custom attribute [{2}] otherwise it cannot be used with the dynamic advice '{3}'.",
                 _category,
                 Error );
 
         internal static readonly DiagnosticDefinition<(string AspectType, string MethodName)> AspectMustHaveExactlyOneTemplateMember = new(
-            "CR0025",
+            "LAMA0025",
             "The aspect type must have exactly one member of a given name otherwise it cannot be used as a dynamic advice.",
             "The type '{0}' must have exactly one member named '{1}'.",
             _category,
             Error );
 
         internal static readonly DiagnosticDefinition<AssemblyIdentity> CannotFindCompileTimeAssembly = new(
-            "CR0027",
+            "LAMA0027",
             _category,
             "The assembly '{0}' required at compile-time cannot be found.",
             Error,
@@ -126,7 +126,7 @@ namespace Metalama.Framework.Engine
 
         internal static readonly DiagnosticDefinition<(string AspectType, IDeclarationBuilder MemberBuilder, INamedType AttributeType)>
             CompatibleAttributeConstructorDoesNotExist = new(
-                "CR0028",
+                "LAMA0028",
                 _category,
                 "The aspect '{0}' cannot add attribute '{1}' to member '{2}' because no compatible constructor exists for given types.",
                 Error,
@@ -134,7 +134,7 @@ namespace Metalama.Framework.Engine
 
         internal static readonly DiagnosticDefinition<string>
             InvalidCachedManifestFile = new(
-                "CR0029",
+                "LAMA0029",
                 _category,
                 "The cache file '{0}' was corrupted. It has been deleted. Please restart the compilation.",
                 Error,
@@ -142,7 +142,7 @@ namespace Metalama.Framework.Engine
 
         internal static readonly DiagnosticDefinition<string>
             InvalidCompileTimeProjectResource = new(
-                "CR0030",
+                "LAMA0030",
                 _category,
                 "The compile-time project in assembly '{0}' is corrupted.",
                 Error,
@@ -150,7 +150,7 @@ namespace Metalama.Framework.Engine
 
         internal static readonly DiagnosticDefinition<(string TemplateName, string ClassName)>
             TemplateWithSameNameAlreadyDefined = new(
-                "CR0032",
+                "LAMA0032",
                 _category,
                 "The class '{1}' defines several templates named '{0}'. Template names must be unique.",
                 Error,
@@ -158,7 +158,7 @@ namespace Metalama.Framework.Engine
 
         internal static readonly DiagnosticDefinition<(string ClassName, string MemberName, string AttributeName)>
             MemberDoesNotHaveTemplateAttribute = new(
-                "CR0033",
+                "LAMA0033",
                 _category,
                 "The class '{0}' defines a member named '{1}', but the member is not annotated with the '{2}' custom attribute.",
                 Error,
@@ -166,14 +166,14 @@ namespace Metalama.Framework.Engine
 
         internal static readonly DiagnosticDefinition<(string ClassName, string MemberName, string ExpectedAttribute, string ActualAttribute)>
             TemplateIsOfTheWrongType = new(
-                "CR0034",
+                "LAMA0034",
                 _category,
                 "The template '{0}.{1}' was expected to be annotated with the [{2}] attribute, but it is annotated with [{3}].",
                 Error,
                 "The member does not have a template custom attribute." );
 
         internal static readonly DiagnosticDefinition<(string Layer1, string Layer2)> UnorderedLayers = new(
-            "CR0035",
+            "LAMA0035",
             _category,
             "The aspect layers '{0}' and '{1}' are not strongly ordered. Add an [assembly: " + nameof(AspectOrderAttribute) +
             "(...)] attribute to specify the order relationship between these two layers, otherwise the compilation will be non-deterministic.",
@@ -182,7 +182,7 @@ namespace Metalama.Framework.Engine
 
         internal static readonly DiagnosticDefinition<(string TemplateName, string ClassName, string BaseClassName)>
             TemplateWithSameNameAlreadyDefinedInBaseClass = new(
-                "CR0036",
+                "LAMA0036",
                 _category,
                 "The class '{1}' defines a new template named '{0}', but the base class '{2}' already defines a template of the same name. Template names must be unique.",
                 Error,
@@ -190,7 +190,7 @@ namespace Metalama.Framework.Engine
 
         internal static readonly DiagnosticDefinition<(string AspectName, IDeclaration Target, FormattableString Reason)>
             AspectNotEligibleOnAspect = new(
-                "CR0037",
+                "LAMA0037",
                 _category,
                 "The aspect '{0}' cannot be applied to '{1}' because {2}.",
                 Error,
@@ -198,7 +198,7 @@ namespace Metalama.Framework.Engine
 
         internal static readonly DiagnosticDefinition<(FormattableString Predecessor, string AspectType, IDeclaration Child, IDeclaration Parent)>
             CanAddChildAspectOnlyUnderParent = new(
-                "CR0038",
+                "LAMA0038",
                 _category,
                 "The {0} cannot add a child aspect of type '{1}' to '{2}' because it is not contained in '{3}'.",
                 Error,
@@ -206,7 +206,7 @@ namespace Metalama.Framework.Engine
 
         internal static readonly DiagnosticDefinition<(FormattableString Predecessor, string AspectType, IDeclaration Child, FormattableString Reason)>
             IneligibleChildAspect = new(
-                "CR0039",
+                "LAMA0039",
                 _category,
                 "The {0} cannot add a child aspect of type '{1}' to '{2}' because {3}.",
                 Error,
@@ -214,7 +214,7 @@ namespace Metalama.Framework.Engine
 
         internal static readonly DiagnosticDefinition<Type>
             TypeMustHavePublicDefaultConstructor = new(
-                "CR0040",
+                "LAMA0040",
                 _category,
                 "The  type '{0}' must have a default constructor.",
                 Error,
@@ -224,7 +224,7 @@ namespace Metalama.Framework.Engine
                 ExceptionMessage, string Details)>
             ExceptionInUserCodeWithTarget
                 = new(
-                    "CR0041",
+                    "LAMA0041",
                     "Exception in user code",
                     "'{0}' threw '{2}' when applied to '{1}': {3}. Exception details are in '{4}'. To attach a debugger to the compiler, use the " +
                     " '-p:MetalamaDebug=True' command-line option.",
@@ -234,7 +234,7 @@ namespace Metalama.Framework.Engine
         internal static readonly DiagnosticDefinition<(UserCodeMemberInfo TemplateSymbol, string ExceptionType, string ExceptionMessage, string Details)>
             ExceptionInUserCodeWithoutTarget
                 = new(
-                    "CR0042",
+                    "LAMA0042",
                     "Exception in user code",
                     "'{0}' threw '{1}': {2}. Exception details are in '{3}'. To attach a debugger to the compiler, use the " +
                     " '-p:MetalamaDebug=True' command-line option.",
@@ -244,7 +244,7 @@ namespace Metalama.Framework.Engine
         public static readonly DiagnosticDefinition<string>
             SuggestedCodeFix
                 = new(
-                    "CR0043",
+                    "LAMA0043",
                     Hidden,
                     "Suggestion: {0}",
                     "Code fix suggestion",
@@ -252,7 +252,7 @@ namespace Metalama.Framework.Engine
 
         internal static readonly DiagnosticDefinition<(FormattableString Predecessor, IDeclaration Child, IDeclaration Parent)>
             CanAddValidatorOnlyUnderParent = new(
-                "CR0044",
+                "LAMA0044",
                 _category,
                 "The {0} cannot add a validator to '{1}' because it is not contained in '{2}'.",
                 Error,
@@ -260,7 +260,7 @@ namespace Metalama.Framework.Engine
 
         internal static readonly DiagnosticDefinition<INamedTypeSymbol>
             LiveTemplateMustHaveDefaultConstructor = new(
-                "CR0045",
+                "LAMA0045",
                 _category,
                 "The class '{0}' must have a default constructor because of the [LiveTemplate] attribute.",
                 Error,
@@ -269,7 +269,7 @@ namespace Metalama.Framework.Engine
         public static readonly DiagnosticDefinition<INamedType>
             TypeNotPartial
                 = new(
-                    "CR0048",
+                    "LAMA0048",
                     "The type must be made partial.",
                     "Aspects add members to '{0}' but it is not marked as 'partial'. Make the type 'partial' to make it possible to "
                     + "reference aspect-generated artefacts from source code.",
@@ -279,7 +279,7 @@ namespace Metalama.Framework.Engine
         // TODO: Use formattable string (C# does not seem to find extension methods).
         internal static readonly DiagnosticDefinition<string>
             UnsupportedFeature = new(
-                "CR0099",
+                "LAMA0099",
                 "Feature is not yet supported.",
                 "Feature is not yet supported: {0}",
                 _category,

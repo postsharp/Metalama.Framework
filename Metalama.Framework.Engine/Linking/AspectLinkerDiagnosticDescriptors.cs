@@ -17,7 +17,7 @@ namespace Metalama.Framework.Engine.Linking
 
         internal static readonly DiagnosticDefinition<(string AspectType, ISymbol TargetDeclaration)>
             CannotUseBaseInvokerWithNonInstanceExpression = new(
-                "CR0600",
+                "LAMA0600",
                 "Cannot use Base invoker with non-this instance expression.",
                 "The aspect '{0}' on '{1}' uses Base invoker with an instance expression different than 'this'."
                 + " Use 'meta.This' as the first argument or use Final invoker.",
