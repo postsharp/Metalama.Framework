@@ -594,8 +594,8 @@ namespace Metalama.Framework.Engine.Linking
             return symbol?.GetPrimaryDeclaration() switch
             {
                 null => null,
-                MethodDeclarationSyntax methodDeclaration => (SyntaxNode?) methodDeclaration.Body,
-                AccessorDeclarationSyntax accessorDeclaration => (SyntaxNode?) accessorDeclaration.Body,     
+                MethodDeclarationSyntax methodDeclaration => methodDeclaration.Body,
+                AccessorDeclarationSyntax accessorDeclaration => accessorDeclaration.Body,     
                 ArrowExpressionClauseSyntax => null,
                 _ => throw new AssertionFailedException(),
             };

@@ -32,6 +32,6 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Formatting.FieldPro
     public class Target
     {
         [TestAspect]
-        private int _myField;
+        public int _myField;
     }
 }

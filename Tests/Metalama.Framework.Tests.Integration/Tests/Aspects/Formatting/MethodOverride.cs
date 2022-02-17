@@ -7,6 +7,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+#pragma warning disable CS0162
+
 [assembly:AspectOrder(typeof(Aspect1), typeof(Aspect2))]
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Formatting.MethodOverride

@@ -13,8 +13,13 @@ using Xunit.Abstractions;
 
 namespace Metalama.TestFramework
 {
-    // Temporary
+    // This whole file is temporary before we have FormatOutput in TestOptions properly controlling FormatOutput in ProjectOptions.
+
+#pragma warning disable SA1402 // File may only contain a single type
+#pragma warning disable SA1649 // File name should match first type name
     internal class OutputFormatterAspectTestRunnerFactory : ITestRunnerFactory
+#pragma warning restore SA1649 // File name should match first type name
+#pragma warning restore SA1402 // File may only contain a single type
     {
         public BaseTestRunner CreateTestRunner(
             ServiceProvider serviceProvider,
