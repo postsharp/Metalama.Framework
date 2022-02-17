@@ -18,7 +18,7 @@ namespace Metalama.Framework.DesignTime
         internal static readonly DiagnosticDefinition<(string Id, string Message)>
             UserError
                 = new(
-                    "CR0301",
+                    "LAMA0301",
                     Error,
                     "{0}: {1} The diagnostic {0} was not defined in the user profile and has been replaced by a generic diagnostic ID.",
                     "A Metalama user error." );
@@ -26,7 +26,7 @@ namespace Metalama.Framework.DesignTime
         internal static readonly DiagnosticDefinition<(string Id, string Message)>
             UserWarning
                 = new(
-                    "CR0302",
+                    "LAMA0302",
                     Warning,
                     "{0}: {1} The diagnostic {0} was not defined in the user profile and has been replaced by a generic diagnostic ID. "
                     + "Please restart your IDE.",
@@ -36,7 +36,7 @@ namespace Metalama.Framework.DesignTime
         internal static readonly DiagnosticDefinition<(string Id, string Message)>
             UserInfo
                 = new(
-                    "CR0303",
+                    "LAMA0303",
                     Info,
                     "{0}: {1} The diagnostic {0} was not defined in the user profile and has been replaced by a generic diagnostic ID. "
                     + " Please restart your IDE.",
@@ -46,7 +46,7 @@ namespace Metalama.Framework.DesignTime
         internal static readonly DiagnosticDefinition<(string Id, string Message)>
             UserHidden
                 = new(
-                    "CR0304",
+                    "LAMA0304",
                     Hidden,
                     "{0}: {1} The diagnostic {0} was not defined in the user profile and has been replaced by a generic diagnostic ID."
                     + " Please restart your IDE.",
@@ -56,7 +56,7 @@ namespace Metalama.Framework.DesignTime
         internal static readonly DiagnosticDefinition<(string Id, ISymbol Symbol)>
             UnregisteredSuppression
                 = new(
-                    "CR0306",
+                    "LAMA0306",
                     Warning,
                     "An aspect tried to suppress an unregistered diagnostic.",
                     "An aspect tried to suppress the diagnostic {0} on '{1}', but this diagnostic ID has not been configured for "
