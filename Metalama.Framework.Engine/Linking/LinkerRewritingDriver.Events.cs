@@ -99,7 +99,7 @@ namespace Metalama.Framework.Engine.Linking
                         accessorList.OpenBraceToken.TrailingTrivia,
                         accessorList.CloseBraceToken.LeadingTrivia,
                         accessorList.CloseBraceToken.TrailingTrivia),
-                    _ => throw new AssertionFailedException(),
+                    _ => throw new AssertionFailedException()
                 };
 
                 return eventDeclaration
@@ -110,7 +110,10 @@ namespace Metalama.Framework.Engine.Linking
                             Token( accessorEndingTrivia, SyntaxKind.CloseBraceToken, accessorListTrailingTrivia ) ) );
             }
 
-            AccessorDeclarationSyntax GetLinkedAccessor( IntermediateSymbolSemanticKind semanticKind, AccessorDeclarationSyntax accessorDeclaration, IMethodSymbol symbol )
+            AccessorDeclarationSyntax GetLinkedAccessor(
+                IntermediateSymbolSemanticKind semanticKind,
+                AccessorDeclarationSyntax accessorDeclaration,
+                IMethodSymbol symbol )
             {
                 var linkedBody =
                     this.GetLinkedBody(
@@ -129,18 +132,19 @@ namespace Metalama.Framework.Engine.Linking
                         { Body: { OpenBraceToken: var openBraceToken, CloseBraceToken: var closeBraceToken } } =>
                             (openBraceToken.LeadingTrivia, openBraceToken.TrailingTrivia, closeBraceToken.LeadingTrivia, closeBraceToken.TrailingTrivia),
                         { ExpressionBody: { ArrowToken: var arrowToken }, SemicolonToken: var semicolonToken } =>
-                            (arrowToken.LeadingTrivia.Add( ElasticLineFeed ), arrowToken.TrailingTrivia.Add( ElasticLineFeed ), semicolonToken.LeadingTrivia.Add( ElasticLineFeed ), semicolonToken.TrailingTrivia),
-                        _ => throw new AssertionFailedException(),
+                            (arrowToken.LeadingTrivia.Add( ElasticLineFeed ), arrowToken.TrailingTrivia.Add( ElasticLineFeed ),
+                             semicolonToken.LeadingTrivia.Add( ElasticLineFeed ), semicolonToken.TrailingTrivia),
+                        _ => throw new AssertionFailedException()
                     };
 
                 return accessorDeclaration
                     .WithExpressionBody( null )
                     .WithBody(
                         Block( linkedBody )
-                        .WithOpenBraceToken( Token( openBraceLeadingTrivia, SyntaxKind.OpenBraceToken, openBraceTrailingTrivia ) )
-                        .WithCloseBraceToken( Token( closeBraceLeadingTrivia, SyntaxKind.CloseBraceToken, closeBraceTrailingTrivia ) )
-                        .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock )
-                        .AddGeneratedCodeAnnotation() )
+                            .WithOpenBraceToken( Token( openBraceLeadingTrivia, SyntaxKind.OpenBraceToken, openBraceTrailingTrivia ) )
+                            .WithCloseBraceToken( Token( closeBraceLeadingTrivia, SyntaxKind.CloseBraceToken, closeBraceTrailingTrivia ) )
+                            .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock )
+                            .AddGeneratedCodeAnnotation() )
                     .WithSemicolonToken( default );
             }
         }
@@ -148,30 +152,30 @@ namespace Metalama.Framework.Engine.Linking
         private static BlockSyntax GetImplicitAdderBody( IMethodSymbol symbol, SyntaxGenerationContext generationContext )
             => Block(
                 ExpressionStatement(
-                    AssignmentExpression(
-                        SyntaxKind.AddAssignmentExpression,
-                        MemberAccessExpression(
-                            SyntaxKind.SimpleMemberAccessExpression,
-                            symbol.IsStatic
-                                ? generationContext.SyntaxGenerator.Type( symbol.ContainingType )
-                                : ThisExpression(),
-                            IdentifierName( GetBackingFieldName( (IEventSymbol) symbol.AssociatedSymbol.AssertNotNull() ) ) ),
-                        IdentifierName( "value" ) ) )
-                .WithTrailingTrivia( TriviaList( ElasticLineFeed ) ) );
+                        AssignmentExpression(
+                            SyntaxKind.AddAssignmentExpression,
+                            MemberAccessExpression(
+                                SyntaxKind.SimpleMemberAccessExpression,
+                                symbol.IsStatic
+                                    ? generationContext.SyntaxGenerator.Type( symbol.ContainingType )
+                                    : ThisExpression(),
+                                IdentifierName( GetBackingFieldName( (IEventSymbol) symbol.AssociatedSymbol.AssertNotNull() ) ) ),
+                            IdentifierName( "value" ) ) )
+                    .WithTrailingTrivia( TriviaList( ElasticLineFeed ) ) );
 
         private static BlockSyntax GetImplicitRemoverBody( IMethodSymbol symbol, SyntaxGenerationContext generationContext )
             => Block(
                 ExpressionStatement(
-                    AssignmentExpression(
-                        SyntaxKind.SubtractAssignmentExpression,
-                        MemberAccessExpression(
-                            SyntaxKind.SimpleMemberAccessExpression,
-                            symbol.IsStatic
-                                ? generationContext.SyntaxGenerator.Type( symbol.ContainingType )
-                                : ThisExpression(),
-                            IdentifierName( GetBackingFieldName( (IEventSymbol) symbol.AssociatedSymbol.AssertNotNull() ) ) ),
-                        IdentifierName( "value" ) ) )
-                .WithTrailingTrivia( TriviaList( ElasticLineFeed ) ) );
+                        AssignmentExpression(
+                            SyntaxKind.SubtractAssignmentExpression,
+                            MemberAccessExpression(
+                                SyntaxKind.SimpleMemberAccessExpression,
+                                symbol.IsStatic
+                                    ? generationContext.SyntaxGenerator.Type( symbol.ContainingType )
+                                    : ThisExpression(),
+                                IdentifierName( GetBackingFieldName( (IEventSymbol) symbol.AssociatedSymbol.AssertNotNull() ) ) ),
+                            IdentifierName( "value" ) ) )
+                    .WithTrailingTrivia( TriviaList( ElasticLineFeed ) ) );
 
         private static FieldDeclarationSyntax GetEventBackingField( EventDeclarationSyntax eventDeclaration, IEventSymbol symbol )
             => GetEventBackingField( eventDeclaration.Type, symbol );

@@ -107,9 +107,9 @@ namespace Metalama.Framework.Engine.Templating
                         else
                         {
                             var previousStatement = statementList[statementList.Count - 1];
-                            
+
                             // TODO: Optimize the lookup for newline.
-                            if (previousStatement.GetTrailingTrivia().Any(x => x.IsKind(SyntaxKind.EndOfLineTrivia ) ))
+                            if ( previousStatement.GetTrailingTrivia().Any( x => x.IsKind( SyntaxKind.EndOfLineTrivia ) ) )
                             {
                                 nextLeadingTrivia = nextLeadingTrivia.AddRange( trivia );
                             }
@@ -139,7 +139,7 @@ namespace Metalama.Framework.Engine.Templating
 
                                 statementList[statementList.Count - 1] =
                                     previousStatement
-                                    .WithTrailingTrivia( previousStatement.GetTrailingTrivia().AddRange( triviaUpToFirstNewLine ) );
+                                        .WithTrailingTrivia( previousStatement.GetTrailingTrivia().AddRange( triviaUpToFirstNewLine ) );
 
                                 nextLeadingTrivia = triviaAfterFirstNewLine;
                             }

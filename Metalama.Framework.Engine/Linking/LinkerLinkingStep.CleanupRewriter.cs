@@ -15,9 +15,9 @@ namespace Metalama.Framework.Engine.Linking
         {
             public override SyntaxNode? VisitMethodDeclaration( MethodDeclarationSyntax node )
             {
-                return 
+                return
                     node
-                    .WithBody( RewriteBodyBlock( node.Body ) );
+                        .WithBody( RewriteBodyBlock( node.Body ) );
             }
 
             public override SyntaxNode? VisitPropertyDeclaration( PropertyDeclarationSyntax node )
@@ -45,7 +45,7 @@ namespace Metalama.Framework.Engine.Linking
                                     .Select( a => a.WithBody( RewriteBodyBlock( a.Body ) ) ) ) ) );
             }
 
-            private static BlockSyntax? RewriteBodyBlock(BlockSyntax? block)
+            private static BlockSyntax? RewriteBodyBlock( BlockSyntax? block )
             {
                 if ( block == null )
                 {
@@ -55,11 +55,11 @@ namespace Metalama.Framework.Engine.Linking
                 {
                     var countLabelUsesWalker = new CountLabelUsesWalker();
                     countLabelUsesWalker.Visit( block );
-                    return 
+
+                    return
                         (BlockSyntax?)
                         new RemoveTrailingReturnRewriter().Visit(
-                            new RemoveTrivialLabelRewriter(countLabelUsesWalker.ObservedLabelCounters).Visit(
-                                new CleanupBodyRewriter().Visit(block) ) );
+                            new RemoveTrivialLabelRewriter( countLabelUsesWalker.ObservedLabelCounters ).Visit( new CleanupBodyRewriter().Visit( block ) ) );
                 }
             }
         }

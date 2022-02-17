@@ -759,13 +759,13 @@ namespace Metalama.Framework.Engine.Templating
                             var addCommentsMetaStatement =
                                 ExpressionStatement(
                                     InvocationExpression(
-                                        this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof( TemplateSyntaxFactory.AddComments ) ),
+                                        this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.AddComments) ),
                                         ArgumentList( arguments ) ) );
-                                
+
                             var addCommentsStatement = this.DeepIndent(
-                                addCommentsMetaStatement.WithLeadingTrivia( 
+                                addCommentsMetaStatement.WithLeadingTrivia(
                                     TriviaList( Comment( "// " + node.Parent!.WithoutTrivia().ToFullString() ) )
-                                    .AddRange( addCommentsMetaStatement.GetLeadingTrivia() ) ) );
+                                        .AddRange( addCommentsMetaStatement.GetLeadingTrivia() ) ) );
 
                             this._currentMetaContext.Statements.Add( addCommentsStatement );
 
@@ -782,13 +782,13 @@ namespace Metalama.Framework.Engine.Templating
                             var addStatementMetaStatement =
                                 ExpressionStatement(
                                     InvocationExpression(
-                                        this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof( TemplateSyntaxFactory.AddStatement ) ),
+                                        this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.AddStatement) ),
                                         ArgumentList( arguments ) ) );
 
-                            var addStatementStatement = this.DeepIndent( 
+                            var addStatementStatement = this.DeepIndent(
                                 addStatementMetaStatement.WithLeadingTrivia(
                                     TriviaList( Comment( "// " + node.Parent!.WithoutTrivia().ToFullString() ) )
-                                    .AddRange( addStatementMetaStatement.GetLeadingTrivia() ) ) );
+                                        .AddRange( addStatementMetaStatement.GetLeadingTrivia() ) ) );
 
                             this._currentMetaContext.Statements.Add( addStatementStatement );
 

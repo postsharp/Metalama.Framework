@@ -31,10 +31,16 @@ namespace Metalama.TestFramework
 
     internal class OutputFormatterAspectTestRunner : AspectTestRunner
     {
-        public OutputFormatterAspectTestRunner( ServiceProvider serviceProvider, string? projectDirectory, IEnumerable<MetadataReference> metadataReferences, ITestOutputHelper? logger )
-            : base( serviceProvider.WithService(new OptionsWrapper(serviceProvider.GetRequiredService<IProjectOptions>() ) ), projectDirectory, metadataReferences, logger )
-        {
-        }
+        public OutputFormatterAspectTestRunner(
+            ServiceProvider serviceProvider,
+            string? projectDirectory,
+            IEnumerable<MetadataReference> metadataReferences,
+            ITestOutputHelper? logger )
+            : base(
+                serviceProvider.WithService( new OptionsWrapper( serviceProvider.GetRequiredService<IProjectOptions>() ) ),
+                projectDirectory,
+                metadataReferences,
+                logger ) { }
 
         protected override Task RunAsync( TestInput testInput, TestResult testResult, Dictionary<string, object?> state )
         {
@@ -85,9 +91,10 @@ namespace Metalama.TestFramework
 
             public bool TryGetProperty( string name, [NotNullWhen( true )] out string? value )
             {
-                if (name == nameof(this.FormatOutput))
+                if ( name == nameof(this.FormatOutput) )
                 {
                     value = "true";
+
                     return true;
                 }
                 else

@@ -34,8 +34,8 @@ namespace Metalama.Framework.Engine.Templating
                         // Empty statements are to be removed, but trivia needs to be preserved.
                         previousTrivia =
                             previousTrivia
-                            .AddRange( emptyStatement.SemicolonToken.LeadingTrivia )
-                            .AddRange( emptyStatement.SemicolonToken.TrailingTrivia );
+                                .AddRange( emptyStatement.SemicolonToken.LeadingTrivia )
+                                .AddRange( emptyStatement.SemicolonToken.TrailingTrivia );
 
                         continue;
 
@@ -45,31 +45,31 @@ namespace Metalama.Framework.Engine.Templating
                             var mustFlatten = innerBlock.HasFlattenBlockAnnotation();
 
                             if ( mustFlatten || !innerBlock.Statements.Any( s => s is LocalDeclarationStatementSyntax ) )
-                            {                                
+                            {
                                 previousTrivia =
                                     previousTrivia
-                                    .AddRange( innerBlock.OpenBraceToken.LeadingTrivia )
-                                    .AddRange( innerBlock.OpenBraceToken.TrailingTrivia );
+                                        .AddRange( innerBlock.OpenBraceToken.LeadingTrivia )
+                                        .AddRange( innerBlock.OpenBraceToken.TrailingTrivia );
 
-                                foreach (var innerStatement in innerBlock.Statements )
+                                foreach ( var innerStatement in innerBlock.Statements )
                                 {
                                     statements.Add(
                                         innerStatement
-                                        .WithLeadingTrivia( previousTrivia.AddRange( innerStatement.GetLeadingTrivia() ) ) );
+                                            .WithLeadingTrivia( previousTrivia.AddRange( innerStatement.GetLeadingTrivia() ) ) );
 
                                     previousTrivia = SyntaxTriviaList.Empty;
                                 }
 
                                 previousTrivia =
                                     previousTrivia
-                                    .AddRange( innerBlock.CloseBraceToken.LeadingTrivia )
-                                    .AddRange( innerBlock.CloseBraceToken.TrailingTrivia );
+                                        .AddRange( innerBlock.CloseBraceToken.LeadingTrivia )
+                                        .AddRange( innerBlock.CloseBraceToken.TrailingTrivia );
                             }
                             else
                             {
                                 statements.Add(
                                     innerBlock
-                                    .WithLeadingTrivia( previousTrivia.AddRange( processedStatement.GetLeadingTrivia() ) ) );
+                                        .WithLeadingTrivia( previousTrivia.AddRange( processedStatement.GetLeadingTrivia() ) ) );
 
                                 previousTrivia = SyntaxTriviaList.Empty;
                             }
@@ -80,7 +80,7 @@ namespace Metalama.Framework.Engine.Templating
                     default:
                         statements.Add(
                             processedStatement
-                            .WithLeadingTrivia( previousTrivia.AddRange( processedStatement.GetLeadingTrivia() ) ) );
+                                .WithLeadingTrivia( previousTrivia.AddRange( processedStatement.GetLeadingTrivia() ) ) );
 
                         previousTrivia = SyntaxTriviaList.Empty;
 
@@ -89,10 +89,8 @@ namespace Metalama.Framework.Engine.Templating
             }
 
             return node
-                .WithStatements(List(statements))
-                .WithCloseBraceToken(
-                    node.CloseBraceToken.WithLeadingTrivia(
-                        previousTrivia.AddRange(node.CloseBraceToken.LeadingTrivia) ) );
+                .WithStatements( List( statements ) )
+                .WithCloseBraceToken( node.CloseBraceToken.WithLeadingTrivia( previousTrivia.AddRange( node.CloseBraceToken.LeadingTrivia ) ) );
         }
     }
 }

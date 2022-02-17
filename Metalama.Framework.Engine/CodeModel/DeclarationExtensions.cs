@@ -361,7 +361,7 @@ namespace Metalama.Framework.Engine.CodeModel
         public static ImmutableArray<SyntaxReference> GetDeclaringSyntaxReferences( this IDeclaration declaration )
             => ((IDeclarationImpl) declaration).DeclaringSyntaxReferences;
 
-        internal static bool IsAccessibleWithin(this IMember member, INamedType within)
+        internal static bool IsAccessibleWithin( this IMember member, INamedType within )
         {
             if ( member.GetSymbol() != null && within.GetSymbol() != null )
             {
@@ -393,15 +393,15 @@ namespace Metalama.Framework.Engine.CodeModel
             }
         }
 
-        public static IMethod? FindClosestVisibleMethod(this INamedType namedType, IMethod signatureTemplate )
+        public static IMethod? FindClosestVisibleMethod( this INamedType namedType, IMethod signatureTemplate )
         {
-            var currentType = (INamedType?)namedType;
+            var currentType = (INamedType?) namedType;
 
-            while (currentType != null)
+            while ( currentType != null )
             {
                 var method = currentType.Methods.OfExactSignature( signatureTemplate, matchIsStatic: false, declaredOnly: true );
 
-                if ( method != null && method.IsAccessibleWithin(namedType) )
+                if ( method != null && method.IsAccessibleWithin( namedType ) )
                 {
                     return method;
                 }

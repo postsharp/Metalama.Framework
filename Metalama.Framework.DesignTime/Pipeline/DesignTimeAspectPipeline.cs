@@ -78,7 +78,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
             : base( serviceProvider.WithProjectScopedServices( metadataReferences ), isTest, domain )
         {
             this.Factory = this.ServiceProvider.GetService<DesignTimeAspectPipelineFactory>();
-            
+
             this._currentState = new PipelineState( this );
 
             // The design-time pipeline contains project-scoped services for performance reasons: the pipeline may be called several
@@ -212,7 +212,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
 #pragma warning disable CS8603 // Probably a compiler issue.
             return this._currentState.UnprocessedChanges.AssertNotNull();
-#pragma warning restore CS8603            
+#pragma warning restore CS8603
         }
 
         public void InvalidateCache()

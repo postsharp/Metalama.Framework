@@ -23,6 +23,6 @@ namespace Metalama.Framework.Engine.Linking
         /// <summary>
         /// Empty statement that was added by the linker to carry trivias, which should be attached to surrounding statements.
         /// </summary>
-        EmptyTriviaStatement = 4,
+        EmptyTriviaStatement = 4
     }
 }

@@ -57,24 +57,37 @@ namespace Metalama.Framework.Engine.Linking
 
             MemberDeclarationSyntax GetLinkedDeclaration( IntermediateSymbolSemanticKind semanticKind )
             {
-                var transformedAdd = GetLinkedAccessor( semanticKind, SyntaxKind.AddAccessorDeclaration, SyntaxKind.AddKeyword, symbol.AddMethod.AssertNotNull() );
-                var transformedRemove= GetLinkedAccessor( semanticKind, SyntaxKind.RemoveAccessorDeclaration, SyntaxKind.RemoveKeyword, symbol.RemoveMethod.AssertNotNull() );
+                var transformedAdd = GetLinkedAccessor(
+                    semanticKind,
+                    SyntaxKind.AddAccessorDeclaration,
+                    SyntaxKind.AddKeyword,
+                    symbol.AddMethod.AssertNotNull() );
+
+                var transformedRemove = GetLinkedAccessor(
+                    semanticKind,
+                    SyntaxKind.RemoveAccessorDeclaration,
+                    SyntaxKind.RemoveKeyword,
+                    symbol.RemoveMethod.AssertNotNull() );
 
                 return
                     EventDeclaration(
-                            List<AttributeListSyntax>(),
-                            eventFieldDeclaration.Modifiers,
-                            Token( TriviaList(), SyntaxKind.EventKeyword, TriviaList( ElasticSpace ) ),
-                            eventFieldDeclaration.Declaration.Type,
-                            null,
-                            Identifier( symbol.Name ),
-                            AccessorList( List( new[] { transformedAdd, transformedRemove } ) )
-                                .WithOpenBraceToken( Token( TriviaList( ElasticLineFeed ), SyntaxKind.OpenBraceToken, TriviaList( ElasticLineFeed ) ) )
-                                .WithCloseBraceToken( Token( TriviaList( ElasticMarker ), SyntaxKind.CloseBraceToken, TriviaList( ElasticLineFeed ) ) ),
-                            MissingToken( SyntaxKind.SemicolonToken ) );
+                        List<AttributeListSyntax>(),
+                        eventFieldDeclaration.Modifiers,
+                        Token( TriviaList(), SyntaxKind.EventKeyword, TriviaList( ElasticSpace ) ),
+                        eventFieldDeclaration.Declaration.Type,
+                        null,
+                        Identifier( symbol.Name ),
+                        AccessorList( List( new[] { transformedAdd, transformedRemove } ) )
+                            .WithOpenBraceToken( Token( TriviaList( ElasticLineFeed ), SyntaxKind.OpenBraceToken, TriviaList( ElasticLineFeed ) ) )
+                            .WithCloseBraceToken( Token( TriviaList( ElasticMarker ), SyntaxKind.CloseBraceToken, TriviaList( ElasticLineFeed ) ) ),
+                        MissingToken( SyntaxKind.SemicolonToken ) );
             }
 
-            AccessorDeclarationSyntax GetLinkedAccessor( IntermediateSymbolSemanticKind semanticKind, SyntaxKind accessorKind, SyntaxKind accessorKeyword, IMethodSymbol symbol )
+            AccessorDeclarationSyntax GetLinkedAccessor(
+                IntermediateSymbolSemanticKind semanticKind,
+                SyntaxKind accessorKind,
+                SyntaxKind accessorKeyword,
+                IMethodSymbol symbol )
             {
                 var linkedBody =
                     this.GetLinkedBody(

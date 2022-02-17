@@ -36,7 +36,7 @@ internal class DesignTimeValidatorInstance
 
     internal ReferenceValidatorInstance ToReferenceValidationInstance( CompilationModel compilation )
     {
-        return new(
+        return new ReferenceValidatorInstance(
             compilation.Factory.GetDeclaration( this.ValidatedDeclaration ).AssertNotNull(),
             this._driver,
             this.Implementation,

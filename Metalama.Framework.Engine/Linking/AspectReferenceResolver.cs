@@ -115,13 +115,13 @@ namespace Metalama.Framework.Engine.Linking
 
             var overrideIndices = this.GetOverrideIndices( referencedSymbol );
 
-            this.ResolveLayerIndex( 
-                referenceSpecification, 
-                annotationLayerIndex, 
-                targetMemberIntroduction, 
-                targetMemberIntroductionIndex, 
-                overrideIndices, 
-                out var resolvedIndex, 
+            this.ResolveLayerIndex(
+                referenceSpecification,
+                annotationLayerIndex,
+                targetMemberIntroduction,
+                targetMemberIntroductionIndex,
+                overrideIndices,
+                out var resolvedIndex,
                 out var resolvedIntroducedMember );
 
             if ( referencedSymbol is IFieldSymbol field )
@@ -195,7 +195,7 @@ namespace Metalama.Framework.Engine.Linking
                             new IntermediateSymbolSemantic( referencedSymbol, IntermediateSymbolSemanticKind.Default ),
                             expression,
                             referenceSpecification );
-                    } 
+                    }
                     else
                     {
                         // Introduction is a new member, resolve to base semantics, i.e. empty method.
@@ -309,9 +309,17 @@ namespace Metalama.Framework.Engine.Linking
             }
         }
 
-        private void ResolveLayerIndex( AspectReferenceSpecification referenceSpecification, MemberLayerIndex annotationLayerIndex, LinkerIntroducedMember? targetMemberIntroduction, MemberLayerIndex? targetMemberIntroductionIndex, IReadOnlyList<(MemberLayerIndex Index, LinkerIntroducedMember Override)> overrideIndices, out MemberLayerIndex resolvedIndex, out LinkerIntroducedMember? resolvedIntroducedMember )
+        private void ResolveLayerIndex(
+            AspectReferenceSpecification referenceSpecification,
+            MemberLayerIndex annotationLayerIndex,
+            LinkerIntroducedMember? targetMemberIntroduction,
+            MemberLayerIndex? targetMemberIntroductionIndex,
+            IReadOnlyList<(MemberLayerIndex Index, LinkerIntroducedMember Override)> overrideIndices,
+            out MemberLayerIndex resolvedIndex,
+            out LinkerIntroducedMember? resolvedIntroducedMember )
         {
             resolvedIntroducedMember = null;
+
             switch ( referenceSpecification.Order )
             {
                 case AspectReferenceOrder.Original:
@@ -380,7 +388,7 @@ namespace Metalama.Framework.Engine.Linking
             // Compute indices of overrides of the referenced declaration.
             return (from overrideIntroduction in referencedDeclarationOverrides
                     group overrideIntroduction by overrideIntroduction.AspectLayerId
-                 into g
+                    into g
                     select g.Select( ( o, i ) => (Index: new MemberLayerIndex( this._layerIndex[o.AspectLayerId], i + 1 ), Override: o) )
                 ).SelectMany( g => g )
                 .ToReadOnlyList();
@@ -419,7 +427,10 @@ namespace Metalama.Framework.Engine.Linking
             return new MemberLayerIndex( this._layerIndex[introducedMember.AspectLayerId], 0 );
         }
 
-        private MemberLayerIndex GetAnnotationLayerIndex( ISymbol containingSymbol, ISymbol referencedSymbol, AspectReferenceSpecification referenceSpecification )
+        private MemberLayerIndex GetAnnotationLayerIndex(
+            ISymbol containingSymbol,
+            ISymbol referencedSymbol,
+            AspectReferenceSpecification referenceSpecification )
         {
             var referencedDeclarationOverrides = this._introductionRegistry.GetOverridesForSymbol( referencedSymbol );
 
@@ -451,6 +462,7 @@ namespace Metalama.Framework.Engine.Linking
                     : new MemberLayerIndex(
                         this._layerIndex[referenceSpecification.AspectLayerId],
                         referencedDeclarationOverrides.Count( x => x.AspectLayerId == referenceSpecification.AspectLayerId ) );
+
             return annotationLayerIndex;
         }
 
@@ -529,17 +541,20 @@ namespace Metalama.Framework.Engine.Linking
         /// </summary>
         /// <param name="symbol">Hiding symbol.</param>
         /// <returns>Hidden symbol or null.</returns>
-        private bool TryGetHiddenSymbol(ISymbol symbol, [NotNullWhen(true)] out ISymbol? hiddenSymbol)
+        private bool TryGetHiddenSymbol( ISymbol symbol, [NotNullWhen( true )] out ISymbol? hiddenSymbol )
         {
             var currentType = symbol.ContainingType.BaseType;
 
-            while (currentType != null)
+            while ( currentType != null )
             {
-                var matchingSymbol = currentType.GetMembers().SingleOrDefault( member => member.IsVisibleTo(this._intermediateCompilation, symbol) && StructuralSymbolComparer.Signature.Equals( symbol, member ) );
+                var matchingSymbol = currentType.GetMembers()
+                    .SingleOrDefault(
+                        member => member.IsVisibleTo( this._intermediateCompilation, symbol ) && StructuralSymbolComparer.Signature.Equals( symbol, member ) );
 
-                if (matchingSymbol != null)
+                if ( matchingSymbol != null )
                 {
                     hiddenSymbol = matchingSymbol;
+
                     return true;
                 }
 
@@ -547,6 +562,7 @@ namespace Metalama.Framework.Engine.Linking
             }
 
             hiddenSymbol = null;
+
             return false;
         }
 

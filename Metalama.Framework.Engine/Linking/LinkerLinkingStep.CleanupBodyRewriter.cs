@@ -93,7 +93,7 @@ namespace Metalama.Framework.Engine.Linking
                         if ( finalStatements.Count == 0 )
                         {
                             // There is not yet any statement to attach the trivia so everything goes into overflow.
-                            overflowingTrivia = statement.GetLeadingTrivia().AddRange(statement.GetTrailingTrivia());
+                            overflowingTrivia = statement.GetLeadingTrivia().AddRange( statement.GetTrailingTrivia() );
                         }
                         else
                         {
@@ -107,7 +107,7 @@ namespace Metalama.Framework.Engine.Linking
 
                             finalStatements[finalStatements.Count - 1] =
                                 finalStatements[finalStatements.Count - 1]
-                                .WithTrailingTrivia( newTrailingTrivia );
+                                    .WithTrailingTrivia( newTrailingTrivia );
 
                             overflowingTrivia = statement.GetTrailingTrivia().StripFirstTrailingNewLine();
                         }
@@ -120,20 +120,19 @@ namespace Metalama.Framework.Engine.Linking
                     }
                 }
 
-                if (overflowingTrivia != null)
+                if ( overflowingTrivia != null )
                 {
                     if ( finalStatements.Count > 0 )
                     {
                         finalStatements[finalStatements.Count - 1] =
                             finalStatements[finalStatements.Count - 1]
-                            .WithTrailingTrivia( finalStatements[finalStatements.Count - 1].GetTrailingTrivia().AddRange( overflowingTrivia ) );
+                                .WithTrailingTrivia( finalStatements[finalStatements.Count - 1].GetTrailingTrivia().AddRange( overflowingTrivia ) );
                     }
                     else
                     {
                         node = node.WithCloseBraceToken(
-                            node.CloseBraceToken.WithLeadingTrivia(
-                                overflowingTrivia.AddRange( node.CloseBraceToken.LeadingTrivia ) ) );
-                    }                    
+                            node.CloseBraceToken.WithLeadingTrivia( overflowingTrivia.AddRange( node.CloseBraceToken.LeadingTrivia ) ) );
+                    }
                 }
 
                 if ( anyRewrittenStatement )
@@ -172,15 +171,15 @@ namespace Metalama.Framework.Engine.Linking
                     var leadingTrivia = block.OpenBraceToken.LeadingTrivia.AddRange( block.OpenBraceToken.TrailingTrivia.StripFirstTrailingNewLine() );
                     var trailingTrivia = block.CloseBraceToken.LeadingTrivia.AddRange( block.CloseBraceToken.TrailingTrivia.StripFirstTrailingNewLine() );
 
-                    if (firstStatementIndex >= statements.Count)
+                    if ( firstStatementIndex >= statements.Count )
                     {
                         // There was no statement added.
                         // We will add an empty statement to carry trivia, which we will prune above.
                         statements.Add(
                             EmptyStatement()
-                            .WithLeadingTrivia( leadingTrivia )
-                            .WithTrailingTrivia( trailingTrivia )
-                            .WithLinkerGeneratedFlags( LinkerGeneratedFlags.EmptyTriviaStatement ) );
+                                .WithLeadingTrivia( leadingTrivia )
+                                .WithTrailingTrivia( trailingTrivia )
+                                .WithLinkerGeneratedFlags( LinkerGeneratedFlags.EmptyTriviaStatement ) );
                     }
                     else
                     {

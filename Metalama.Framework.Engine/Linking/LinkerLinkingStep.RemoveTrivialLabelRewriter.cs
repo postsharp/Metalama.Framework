@@ -16,7 +16,7 @@ namespace Metalama.Framework.Engine.Linking
         {
             private readonly IReadOnlyDictionary<string, int> _observedLabelCounter;
 
-            public RemoveTrivialLabelRewriter(IReadOnlyDictionary<string, int> observedLabelCounter)
+            public RemoveTrivialLabelRewriter( IReadOnlyDictionary<string, int> observedLabelCounter )
             {
                 this._observedLabelCounter = observedLabelCounter;
             }
@@ -49,23 +49,24 @@ namespace Metalama.Framework.Engine.Linking
                     }
 
                     if ( currentStatement is GotoStatementSyntax { Expression: IdentifierNameSyntax { Identifier: { ValueText: var gotoLabel } } } gotoStatement
-                        && nextStatement is LabeledStatementSyntax { Identifier: { ValueText: var declaredLabel } } labeledStatement
-                        && gotoLabel == declaredLabel
-                        && this._observedLabelCounter.TryGetValue( declaredLabel, out var counter ) 
-                        && counter == 1 )
+                         && nextStatement is LabeledStatementSyntax { Identifier: { ValueText: var declaredLabel } } labeledStatement
+                         && gotoLabel == declaredLabel
+                         && this._observedLabelCounter.TryGetValue( declaredLabel, out var counter )
+                         && counter == 1 )
                     {
                         newStatements.Add(
                             labeledStatement.Statement
-                            .WithLeadingTrivia(
-                                TriviaList( ElasticMarker )
-                                .AddRange( gotoStatement.GetLeadingTrivia() )
-                                .AddRange( gotoStatement.GetTrailingTrivia().StripFirstTrailingNewLine() )
-                                .AddRange( TriviaList( ElasticMarker ) )
-                                .AddRange( labeledStatement.GetLeadingTrivia() )
-                                .AddRange( labeledStatement.Statement.GetLeadingTrivia() ) ) );
+                                .WithLeadingTrivia(
+                                    TriviaList( ElasticMarker )
+                                        .AddRange( gotoStatement.GetLeadingTrivia() )
+                                        .AddRange( gotoStatement.GetTrailingTrivia().StripFirstTrailingNewLine() )
+                                        .AddRange( TriviaList( ElasticMarker ) )
+                                        .AddRange( labeledStatement.GetLeadingTrivia() )
+                                        .AddRange( labeledStatement.Statement.GetLeadingTrivia() ) ) );
 
                         anyChange = true;
                         nextStatement = null;
+
                         continue;
                     }
 

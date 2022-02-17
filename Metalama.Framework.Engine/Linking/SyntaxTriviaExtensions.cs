@@ -9,20 +9,20 @@ namespace Metalama.Framework.Engine.Linking
 {
     internal static class SyntaxTriviaExtensions
     {
-        public static SyntaxTriviaList StripFirstTrailingNewLine(this SyntaxTriviaList list)
+        public static SyntaxTriviaList StripFirstTrailingNewLine( this SyntaxTriviaList list )
         {
             var newTrivias = new List<SyntaxTrivia>();
             var firstNewLine = true;
 
-            for (var i = 0; i < list.Count; i++)
+            for ( var i = 0; i < list.Count; i++ )
             {
-                if (list[i].IsKind(SyntaxKind.EndOfLineTrivia) && firstNewLine)
+                if ( list[i].IsKind( SyntaxKind.EndOfLineTrivia ) && firstNewLine )
                 {
                     firstNewLine = false;
                 }
                 else
                 {
-                    newTrivias.Add(list[i]);
+                    newTrivias.Add( list[i] );
                 }
             }
 

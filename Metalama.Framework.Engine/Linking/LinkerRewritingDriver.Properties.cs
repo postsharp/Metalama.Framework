@@ -88,22 +88,25 @@ namespace Metalama.Framework.Engine.Linking
                     switch ( symbol.GetMethod.GetPrimaryDeclaration().AssertNotNull() )
                     {
                         case AccessorDeclarationSyntax getAccessorDeclaration:
-                            transformedAccessors.Add( GetLinkedAccessor ( semanticKind, getAccessorDeclaration, symbol.GetMethod ) );
+                            transformedAccessors.Add( GetLinkedAccessor( semanticKind, getAccessorDeclaration, symbol.GetMethod ) );
+
                             break;
 
                         case ArrowExpressionClauseSyntax:
                             transformedAccessors.Add(
                                 AccessorDeclaration(
-                                    SyntaxKind.GetAccessorDeclaration,
-                                    List<AttributeListSyntax>(),
-                                    TokenList(),
-                                    Block(
-                                        this.GetLinkedBody(
-                                            symbol.GetMethod.ToSemantic( semanticKind ),
-                                            InliningContext.Create( this, symbol.GetMethod, generationContext ) ) )
-                                    .WithOpenBraceToken( Token( TriviaList( ElasticLineFeed ), SyntaxKind.OpenBraceToken, TriviaList( ElasticLineFeed )) )
-                                    .WithCloseBraceToken( Token( TriviaList( ElasticLineFeed ), SyntaxKind.CloseBraceToken, TriviaList( ElasticMarker ) ) ) )
-                                .WithKeyword( Token( TriviaList( ElasticMarker ), SyntaxKind.GetKeyword, TriviaList( ElasticMarker ) ) ) );
+                                        SyntaxKind.GetAccessorDeclaration,
+                                        List<AttributeListSyntax>(),
+                                        TokenList(),
+                                        Block(
+                                                this.GetLinkedBody(
+                                                    symbol.GetMethod.ToSemantic( semanticKind ),
+                                                    InliningContext.Create( this, symbol.GetMethod, generationContext ) ) )
+                                            .WithOpenBraceToken(
+                                                Token( TriviaList( ElasticLineFeed ), SyntaxKind.OpenBraceToken, TriviaList( ElasticLineFeed ) ) )
+                                            .WithCloseBraceToken(
+                                                Token( TriviaList( ElasticLineFeed ), SyntaxKind.CloseBraceToken, TriviaList( ElasticMarker ) ) ) )
+                                    .WithKeyword( Token( TriviaList( ElasticMarker ), SyntaxKind.GetKeyword, TriviaList( ElasticMarker ) ) ) );
 
                             break;
                     }
@@ -123,33 +126,36 @@ namespace Metalama.Framework.Engine.Linking
 
                 var (accessorListLeadingTrivia, accessorStartingTrivia, accessorEndingTrivia, accessorListTrailingTrivia) = propertyDeclaration switch
                 {
-                    { AccessorList: not null and var accessorList } => ( 
-                        accessorList.OpenBraceToken.LeadingTrivia, 
+                    { AccessorList: not null and var accessorList } => (
+                        accessorList.OpenBraceToken.LeadingTrivia,
                         accessorList.OpenBraceToken.TrailingTrivia,
                         accessorList.CloseBraceToken.LeadingTrivia,
-                        accessorList.CloseBraceToken.TrailingTrivia ),
-                        { ExpressionBody: not null and var expressionBody } => (
+                        accessorList.CloseBraceToken.TrailingTrivia),
+                    { ExpressionBody: not null and var expressionBody } => (
                         expressionBody.ArrowToken.LeadingTrivia,
                         expressionBody.ArrowToken.TrailingTrivia,
                         propertyDeclaration.SemicolonToken.LeadingTrivia,
                         propertyDeclaration.SemicolonToken.TrailingTrivia),
-                    _ => throw new AssertionFailedException(),
+                    _ => throw new AssertionFailedException()
                 };
 
                 return
                     propertyDeclaration
-                        .WithAccessorList( 
-                            AccessorList( 
-                                Token( accessorListLeadingTrivia, SyntaxKind.OpenBraceToken, accessorStartingTrivia ),
-                                List( transformedAccessors ),
-                                Token( accessorEndingTrivia, SyntaxKind.CloseBraceToken, accessorListTrailingTrivia ) )
-                            .AddGeneratedCodeAnnotation() )
+                        .WithAccessorList(
+                            AccessorList(
+                                    Token( accessorListLeadingTrivia, SyntaxKind.OpenBraceToken, accessorStartingTrivia ),
+                                    List( transformedAccessors ),
+                                    Token( accessorEndingTrivia, SyntaxKind.CloseBraceToken, accessorListTrailingTrivia ) )
+                                .AddGeneratedCodeAnnotation() )
                         .WithExpressionBody( null )
                         .WithInitializer( null )
                         .WithSemicolonToken( default );
             }
 
-            AccessorDeclarationSyntax GetLinkedAccessor( IntermediateSymbolSemanticKind semanticKind, AccessorDeclarationSyntax accessorDeclaration, IMethodSymbol symbol )
+            AccessorDeclarationSyntax GetLinkedAccessor(
+                IntermediateSymbolSemanticKind semanticKind,
+                AccessorDeclarationSyntax accessorDeclaration,
+                IMethodSymbol symbol )
             {
                 var linkedBody =
                     this.GetLinkedBody(
@@ -168,19 +174,22 @@ namespace Metalama.Framework.Engine.Linking
                         { Body: { OpenBraceToken: var openBraceToken, CloseBraceToken: var closeBraceToken } } =>
                             (openBraceToken.LeadingTrivia, openBraceToken.TrailingTrivia, closeBraceToken.LeadingTrivia, closeBraceToken.TrailingTrivia),
                         { ExpressionBody: { ArrowToken: var arrowToken }, SemicolonToken: var semicolonToken } =>
-                            (arrowToken.LeadingTrivia.Add( ElasticLineFeed ), arrowToken.TrailingTrivia.Add( ElasticLineFeed ), semicolonToken.LeadingTrivia.Add( ElasticLineFeed ), semicolonToken.TrailingTrivia),
-                        { SemicolonToken: var semicolonToken } => (semicolonToken.LeadingTrivia.Add( ElasticLineFeed ), semicolonToken.TrailingTrivia.Add( ElasticLineFeed ), TriviaList( ElasticLineFeed ), TriviaList( ElasticLineFeed )),
-                        _ => throw new AssertionFailedException(),
+                            (arrowToken.LeadingTrivia.Add( ElasticLineFeed ), arrowToken.TrailingTrivia.Add( ElasticLineFeed ),
+                             semicolonToken.LeadingTrivia.Add( ElasticLineFeed ), semicolonToken.TrailingTrivia),
+                        { SemicolonToken: var semicolonToken } => (
+                            semicolonToken.LeadingTrivia.Add( ElasticLineFeed ), semicolonToken.TrailingTrivia.Add( ElasticLineFeed ),
+                            TriviaList( ElasticLineFeed ), TriviaList( ElasticLineFeed )),
+                        _ => throw new AssertionFailedException()
                     };
 
                 return accessorDeclaration
                     .WithExpressionBody( null )
                     .WithBody(
                         Block( linkedBody )
-                        .WithOpenBraceToken( Token( openBraceLeadingTrivia, SyntaxKind.OpenBraceToken, openBraceTrailingTrivia ) )
-                        .WithCloseBraceToken( Token( closeBraceLeadingTrivia, SyntaxKind.CloseBraceToken, closeBraceTrailingTrivia ) )
-                        .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock )
-                        .AddGeneratedCodeAnnotation() )
+                            .WithOpenBraceToken( Token( openBraceLeadingTrivia, SyntaxKind.OpenBraceToken, openBraceTrailingTrivia ) )
+                            .WithCloseBraceToken( Token( closeBraceLeadingTrivia, SyntaxKind.CloseBraceToken, closeBraceTrailingTrivia ) )
+                            .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock )
+                            .AddGeneratedCodeAnnotation() )
                     .WithSemicolonToken( default );
             }
         }

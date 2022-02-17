@@ -105,7 +105,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 pipeline.Resume( true );
             }
         }
-        
+
         public bool IsUserInterfaceAttached { get; private set; }
 
         void ICompileTimeCodeEditingStatusService.OnUserInterfaceAttached()

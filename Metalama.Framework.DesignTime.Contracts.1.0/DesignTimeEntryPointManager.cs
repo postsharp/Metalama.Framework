@@ -67,8 +67,7 @@ namespace Metalama.Framework.DesignTime.Contracts
         private volatile ImmutableDictionary<int, IObserver<ICompilerServiceProvider>> _observers =
             ImmutableDictionary<int, IObserver<ICompilerServiceProvider>>.Empty;
 
-        public IDesignTimeEntryPointConsumer GetConsumer( ImmutableDictionary<string, int> contractVersions )
-            => new Consumer( this, contractVersions );
+        public IDesignTimeEntryPointConsumer GetConsumer( ImmutableDictionary<string, int> contractVersions ) => new Consumer( this, contractVersions );
 
         void IDesignTimeEntryPointManager.RegisterServiceProvider( ICompilerServiceProvider provider )
         {

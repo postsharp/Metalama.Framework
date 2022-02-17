@@ -91,11 +91,12 @@ namespace Metalama.Framework.Engine.Linking
                 var (openBraceLeadingTrivia, openBraceTrailingTrivia, closeBraceLeadingTrivia, closeBraceTrailingTrivia) =
                     methodDeclaration switch
                     {
-                        { Body: { OpenBraceToken: var openBraceToken, CloseBraceToken: var closeBraceToken } } => 
-                            (openBraceToken.LeadingTrivia, openBraceToken.TrailingTrivia, closeBraceToken.LeadingTrivia, closeBraceToken.TrailingTrivia ),
-                        { ExpressionBody: { ArrowToken: var arrowToken }, SemicolonToken: var semicolonToken } => 
-                            (arrowToken.LeadingTrivia.Add( ElasticLineFeed ), arrowToken.TrailingTrivia.Add( ElasticLineFeed ), semicolonToken.LeadingTrivia.Add( ElasticLineFeed ), semicolonToken.TrailingTrivia),
-                        _ => throw new AssertionFailedException(),
+                        { Body: { OpenBraceToken: var openBraceToken, CloseBraceToken: var closeBraceToken } } =>
+                            (openBraceToken.LeadingTrivia, openBraceToken.TrailingTrivia, closeBraceToken.LeadingTrivia, closeBraceToken.TrailingTrivia),
+                        { ExpressionBody: { ArrowToken: var arrowToken }, SemicolonToken: var semicolonToken } =>
+                            (arrowToken.LeadingTrivia.Add( ElasticLineFeed ), arrowToken.TrailingTrivia.Add( ElasticLineFeed ),
+                             semicolonToken.LeadingTrivia.Add( ElasticLineFeed ), semicolonToken.TrailingTrivia),
+                        _ => throw new AssertionFailedException()
                     };
 
                 var ret = methodDeclaration
@@ -103,10 +104,10 @@ namespace Metalama.Framework.Engine.Linking
                     .WithModifiers( modifiers )
                     .WithBody(
                         Block( linkedBody )
-                        .WithOpenBraceToken( Token( openBraceLeadingTrivia, SyntaxKind.OpenBraceToken, openBraceTrailingTrivia ) )
-                        .WithCloseBraceToken( Token( closeBraceLeadingTrivia, SyntaxKind.CloseBraceToken, closeBraceTrailingTrivia ) )
-                        .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock )
-                        .AddGeneratedCodeAnnotation() )
+                            .WithOpenBraceToken( Token( openBraceLeadingTrivia, SyntaxKind.OpenBraceToken, openBraceTrailingTrivia ) )
+                            .WithCloseBraceToken( Token( closeBraceLeadingTrivia, SyntaxKind.CloseBraceToken, closeBraceTrailingTrivia ) )
+                            .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock )
+                            .AddGeneratedCodeAnnotation() )
                     .WithSemicolonToken( default );
 
                 return ret;
