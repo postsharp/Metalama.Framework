@@ -426,8 +426,23 @@ namespace Metalama.Framework.Engine.CompileTime
                     }
 
                     var diagnosticPath = Path.Combine( troubleshootingDirectory, "errors.txt" );
-                    var diagnostics = emitResult.Diagnostics.Select( d => d.ToString() ).ToArray();
-                    File.WriteAllLines( diagnosticPath, diagnostics );
+
+                    using ( var errorFile = File.CreateText( diagnosticPath ) )
+                    {
+                        errorFile.WriteLine( "Diagnostics:" );
+
+                        foreach ( var diagnostic in emitResult.Diagnostics )
+                        {
+                            errorFile.WriteLine( "  " + diagnostic );
+                        }
+
+                        errorFile.WriteLine( "References:" );
+
+                        foreach ( var reference in compileTimeCompilation.References )
+                        {
+                            errorFile.WriteLine( "  " + reference );
+                        }
+                    }
 
                     this._logger.Trace?.Log(
                         $"TryEmit( '{compileTimeCompilation.AssemblyName}' ): failure: " +

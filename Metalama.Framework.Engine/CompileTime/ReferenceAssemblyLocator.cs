@@ -5,9 +5,9 @@ using Metalama.Backstage.Diagnostics;
 using Metalama.Framework.Engine.AspectWeavers;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Options;
+using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Project;
-using Metalama.Framework.RunTime;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -15,7 +15,6 @@ using System.Collections.Immutable;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Runtime.InteropServices;
 
 namespace Metalama.Framework.Engine.CompileTime
@@ -33,9 +32,7 @@ namespace Metalama.Framework.Engine.CompileTime
         /// <summary>
         /// Gets the name (without path and extension) of Metalama assemblies.
         /// </summary>
-        private ImmutableArray<string> MetalamaImplementationAssemblyNames { get; } = ImmutableArray.Create(
-            "Metalama.Framework.Sdk",
-            "Metalama.Framework.Engine" );
+        private ImmutableArray<string> MetalamaImplementationAssemblyNames { get; }
 
         /// <summary>
         /// Gets the name (without path and extension) of all standard assemblies, including Metalama, Roslyn and .NET standard.
@@ -70,52 +67,43 @@ namespace Metalama.Framework.Engine.CompileTime
             this._cacheDirectory = serviceProvider.GetRequiredService<IPathOptions>().AssemblyLocatorCacheDirectory;
             this._logger = serviceProvider.GetLoggerFactory().CompileTime();
 
+            // Get Metalama implementation assemblies (but not the public API, for which we need a special compile-time build).
+            var metalamaImplementationAssemblies = new Dictionary<string, string>()
+            {
+                [typeof(AspectWeaverAttribute).Assembly.GetName().Name] = typeof(AspectWeaverAttribute).Assembly.Location,
+                [typeof(TemplateSyntaxFactory).Assembly.GetName().Name] = typeof(TemplateSyntaxFactory).Assembly.Location
+            };
+
+            this.MetalamaImplementationAssemblyNames = metalamaImplementationAssemblies.Keys.ToImmutableArray();
+            var metalamaImplementationPaths = metalamaImplementationAssemblies.Values;
+
+            // Get system assemblies.
             this.SystemAssemblyPaths = this.GetSystemAssemblyPaths().ToImmutableArray();
 
             this.SystemAssemblyNames = this.SystemAssemblyPaths
                 .Select( Path.GetFileNameWithoutExtension )
                 .ToImmutableHashSet( StringComparer.OrdinalIgnoreCase );
 
+            // Sets the collection of all standard assemblies, i.e. system assemblies and ours.
             this.StandardAssemblyNames = this.MetalamaImplementationAssemblyNames
-                .Concat( _compileTimeFrameworkAssemblyName )
+                .Concat( new[] { _compileTimeFrameworkAssemblyName } )
                 .Concat( this.SystemAssemblyPaths.Select( Path.GetFileNameWithoutExtension ) )
                 .ToImmutableHashSet( StringComparer.OrdinalIgnoreCase );
 
-            // Make sure all necessary assemblies are loaded in the current AppDomain.
-            _ = new AspectWeaverAttribute( null! );
-            _ = new[] { 1, 2, 3 }.Buffer();
+            // Also provide our embedded assemblies.
 
-            // Get our public API assembly in its .NET Standard 2.0 build.
-            var currentAssembly = this.GetType().Assembly;
-
-            var frameworkAssemblyReference = (MetadataReference)
-                MetadataReference.CreateFromStream(
-                    currentAssembly.GetManifestResourceStream( _compileTimeFrameworkAssemblyName + ".dll" ),
-                    filePath: $"[{currentAssembly.Location}]{_compileTimeFrameworkAssemblyName}.dll" );
-
-            // Get implementation assembly paths from the current AppDomain. We need to match our exact version number.
-            var metalamaImplementationPaths = AppDomain.CurrentDomain.GetAssemblies()
-                .Where( a => !a.IsDynamic ) // accessing Location of dynamic assemblies throws
-                .Where(
-                    a => this.MetalamaImplementationAssemblyNames.Contains( Path.GetFileNameWithoutExtension( a.Location ) ) &&
-                         AssemblyName.GetAssemblyName( a.Location ).Version == currentAssembly.GetName().Version )
-                .Select( a => a.Location )
-                .ToList();
-
-            // Assert that we found everything we need, because debugging is difficult when this step goes wrong.
-            foreach ( var assemblyName in this.MetalamaImplementationAssemblyNames )
-            {
-                if ( !metalamaImplementationPaths.Any( a => a.EndsWith( assemblyName + ".dll", StringComparison.OrdinalIgnoreCase ) ) )
-                {
-                    throw new AssertionFailedException( $"Cannot find {assemblyName}." );
-                }
-            }
+            var embeddedAssemblies =
+                new[] { _compileTimeFrameworkAssemblyName, "Metalama.Compiler.Interface" }.Select(
+                    name => (MetadataReference)
+                        MetadataReference.CreateFromStream(
+                            this.GetType().Assembly.GetManifestResourceStream( name + ".dll" ),
+                            filePath: $"[{this.GetType().Assembly.Location}]{name}.dll" ) );
 
             this.StandardCompileTimeMetadataReferences =
                 this.SystemAssemblyPaths
                     .Concat( metalamaImplementationPaths )
                     .Select( MetadataReferenceCache.GetFromFile )
-                    .Prepend( frameworkAssemblyReference )
+                    .Concat( embeddedAssemblies )
                     .ToImmutableArray();
         }
 
