@@ -8,7 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Formatting.FieldPromotion
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Formatting.SourceProperty
 {
     public class TestAspect : TypeAspect
     {
