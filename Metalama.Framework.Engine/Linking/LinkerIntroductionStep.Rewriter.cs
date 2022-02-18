@@ -194,7 +194,7 @@ namespace Metalama.Framework.Engine.Linking
                         var introducedNode = introducedMember.Syntax.TrackNodes( introducedMember.Syntax );
 
                         introducedNode = introducedNode.NormalizeWhitespace()
-                            .WithLeadingTrivia( LineFeed, LineFeed )
+                            .WithLeadingTrivia( ElasticLineFeed, ElasticLineFeed )
                             .AddGeneratedCodeAnnotation();
 
                         if ( introducedMember.Declaration != null )

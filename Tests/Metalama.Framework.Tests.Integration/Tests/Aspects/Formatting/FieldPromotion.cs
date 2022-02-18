@@ -10,28 +10,44 @@ using System.Threading.Tasks;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Formatting.FieldPromotion
 {
-    public class TestAspect : OverrideFieldOrPropertyAspect
+    public class TestAspect : TypeAspect
     {
-        public override dynamic? OverrideProperty 
-        { 
-            get
+        public override void BuildAspect(IAspectBuilder<INamedType> builder)
+        {
+            foreach (var property in builder.Target.Properties.Where(p => !p.IsAbstract && p.Writeability == Writeability.All))
             {
-                Console.WriteLine("Aspect code");
-                return meta.Proceed();
+                builder.Advices.OverrideFieldOrPropertyAccessors(property, null, nameof(this.OverridePropertySetter));
             }
+        }
 
-            set
+        [Template]
+        private dynamic OverridePropertySetter(dynamic value)
+        {
+            if (value != meta.Target.Property.Value)
             {
-                Console.WriteLine("Aspect code");
                 meta.Proceed();
             }
+
+            return value;
         }
     }
 
     // <target>
+    [TestAspect]
     public class Target
     {
-        [TestAspect]
-        public int _myField;
+        public int _field;
+
+        public int GetAutoProperty { get; }
+        
+        public int InitAutoProperty { get; init; }
+
+        public int AutoProperty { get; set; }
+
+        public int Property
+        {
+            get => _field;
+            set => _field = value;
+        }
     }
 }

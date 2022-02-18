@@ -35,7 +35,8 @@ namespace Metalama.Framework.Engine.Linking
                 var lastOverride = (IPropertySymbol) this._introductionRegistry.GetLastOverride( symbol );
 
                 if ( propertyDeclaration.IsAutoPropertyDeclaration()
-                     && this._analysisRegistry.IsReachable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Default ) ) )
+                     && this._analysisRegistry.IsReachable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Default ) )
+                     && this._analysisRegistry.IsInlineable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Default ), out _ ) )
                 {
                     // Backing field for auto property.
                     members.Add( GetPropertyBackingField( propertyDeclaration, symbol ) );
@@ -53,7 +54,7 @@ namespace Metalama.Framework.Engine.Linking
                 if ( this._analysisRegistry.IsReachable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Default ) )
                      && !this._analysisRegistry.IsInlineable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Default ), out _ ) )
                 {
-                    members.Add( GetOriginalImplProperty( propertyDeclaration, symbol, generationContext ) );
+                    members.Add( GetOriginalImplProperty( propertyDeclaration, symbol, generationContext, propertyDeclaration.IsAutoPropertyDeclaration() ) );
                 }
 
                 if ( this._analysisRegistry.IsReachable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Base ) )
@@ -138,6 +139,13 @@ namespace Metalama.Framework.Engine.Linking
                         propertyDeclaration.SemicolonToken.TrailingTrivia),
                     _ => throw new AssertionFailedException()
                 };
+                                
+                accessorListLeadingTrivia =
+                    propertyDeclaration.Identifier switch
+                    {
+                        var identifier when identifier.TrailingTrivia.HasAnyNewLine() => accessorListLeadingTrivia,
+                        _ => TriviaList( ElasticLineFeed ).AddRange( accessorListLeadingTrivia ),
+                    };
 
                 return
                     propertyDeclaration
@@ -242,27 +250,45 @@ namespace Metalama.Framework.Engine.Linking
         private static MemberDeclarationSyntax GetOriginalImplProperty(
             PropertyDeclarationSyntax property,
             IPropertySymbol symbol,
-            SyntaxGenerationContext generationContext )
+            SyntaxGenerationContext generationContext,
+            bool autoProperty )
         {
             var accessorList =
                 property.IsAutoPropertyDeclaration()
                     ? AccessorList(
-                            List(
-                                new[]
-                                    {
-                                        symbol.GetMethod != null
-                                            ? AccessorDeclaration(
-                                                SyntaxKind.GetAccessorDeclaration,
-                                                GetImplicitGetterBody( symbol.GetMethod, generationContext ) )
-                                            : null,
-                                        symbol.SetMethod != null
-                                            ? AccessorDeclaration(
-                                                SyntaxKind.SetAccessorDeclaration,
-                                                GetImplicitSetterBody( symbol.SetMethod, generationContext ) )
-                                            : null
-                                    }.Where( a => a != null )
-                                    .AssertNoneNull() ) )
-                        .NormalizeWhitespace()
+                        List(
+                            new[]
+                            {
+                                symbol.GetMethod != null
+                                    ? autoProperty
+                                        ? AccessorDeclaration( 
+                                            SyntaxKind.GetAccessorDeclaration, 
+                                            List<AttributeListSyntax>(), 
+                                            TokenList(), 
+                                            Token(SyntaxKind.GetKeyword), 
+                                            null, 
+                                            null, 
+                                            Token(SyntaxKind.SemicolonToken) )
+                                        : AccessorDeclaration(
+                                            SyntaxKind.GetAccessorDeclaration,
+                                            GetImplicitGetterBody( symbol.GetMethod, generationContext ) )
+                                    : null,
+                                symbol.SetMethod != null
+                                    ? autoProperty
+                                        ? AccessorDeclaration(
+                                            SyntaxKind.SetAccessorDeclaration,
+                                            List<AttributeListSyntax>(),
+                                            TokenList(),
+                                            Token(SyntaxKind.SetKeyword),
+                                            null,
+                                            null,
+                                            Token(SyntaxKind.SemicolonToken) )
+                                        : AccessorDeclaration(
+                                            SyntaxKind.SetAccessorDeclaration,
+                                            GetImplicitSetterBody( symbol.SetMethod, generationContext ) )
+                                    : null
+                            }.Where( a => a != null )
+                            .AssertNoneNull() ) )
                     : property.AccessorList.AssertNotNull().AddSourceCodeAnnotation();
 
             var initializer = property.Initializer;
@@ -292,7 +318,6 @@ namespace Metalama.Framework.Engine.Linking
                                             : null
                                     }.Where( a => a != null )
                                     .AssertNoneNull() ) )
-                        .NormalizeWhitespace()
                     : property.AccessorList.AssertNotNull();
 
             return GetSpecialImplProperty( property.Type, accessorList, null, symbol, GetEmptyImplMemberName( symbol ) );
@@ -317,11 +342,11 @@ namespace Metalama.Framework.Engine.Linking
                         null,
                         null,
                         null )
-                    .NormalizeWhitespace()
-                    .WithLeadingTrivia( ElasticLineFeed )
-                    .WithInitializer( initializer.AddSourceCodeAnnotation() )
-                    .WithTrailingTrivia( ElasticLineFeed )
                     .WithAccessorList( accessorList )
+                    .NormalizeWhitespace()
+                    .WithInitializer( initializer.AddSourceCodeAnnotation() )
+                    .WithLeadingTrivia( ElasticLineFeed )
+                    .WithTrailingTrivia( ElasticLineFeed )
                     .AddGeneratedCodeAnnotation();
         }
     }

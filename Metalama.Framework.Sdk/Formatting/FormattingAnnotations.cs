@@ -67,9 +67,17 @@ namespace Metalama.Framework.Engine.Formatting
             => node?.AddAnnotationInsideBlock( GeneratedCode );
 
         [return: NotNullIfNotNull( "node" )]
+        public static SyntaxTrivia AddGeneratedCodeAnnotation( this SyntaxTrivia node )
+            => node.WithAdditionalAnnotations( GeneratedCode );
+
+        [return: NotNullIfNotNull( "node" )]
         public static T? AddSourceCodeAnnotation<T>( this T? node )
             where T : SyntaxNode
             => node?.AddAnnotationInsideBlock( SourceCode );
+
+        [return: NotNullIfNotNull( "node" )]
+        public static SyntaxTrivia AddSourceCodeAnnotation( this SyntaxTrivia node )
+            => node.WithAdditionalAnnotations( SourceCode );
 
         public static T WithFormattingAnnotationsFrom<T>( this T node, SyntaxNode source )
             where T : SyntaxNode

@@ -4,6 +4,7 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Metalama.Framework.Engine.Linking
 {
@@ -27,6 +28,11 @@ namespace Metalama.Framework.Engine.Linking
             }
 
             return SyntaxFactory.TriviaList( newTrivias );
+        }
+
+        public static bool HasAnyNewLine(this SyntaxTriviaList list)
+        {
+            return list.Any( x => x.IsKind( SyntaxKind.EndOfLineTrivia ) );
         }
     }
 }
