@@ -1,33 +1,50 @@
 [Introduction]
-    internal class TargetClass : BaseClass
+internal class TargetClass : BaseClass
+{
+    public int ExistingMethod()
     {
-        public int ExistingMethod()
-{
-    global::System.Console.WriteLine("This is introduced method.");
-            return 27;
+        // Return a constant
+
+
+        return 27;
+    }
+
+    public void ExistingMethod_Void()
+    {
+        // Do nothing.
+
+
+
+    }
+
+
+    public override global::System.Int32 ExistingBaseMethod()
+    {
+        // Call the base method of the same name
+
+        return base.ExistingBaseMethod();
+    }
+
+    public override void ExistingBaseMethod_Void()
+    {
+        // Call the base method of the same name
+
+        base.ExistingBaseMethod_Void();
+    }
+
+    public global::System.Int32 NotExistingMethod()
+    {
+        // Return default value
+
+
+        return default(global::System.Int32);
+    }
+
+    public void NotExistingMethod_Void()
+    {
+        // Do nothing
+
+
+
+    }
 }
-
-        public static int ExistingMethod_Static()
-{
-    global::System.Console.WriteLine("This is introduced method.");
-            return 27;
-}
-
-
-public override global::System.Int32 ExistingBaseMethod()
-{
-    global::System.Console.WriteLine("This is introduced method.");
-    return base.ExistingBaseMethod();
-}
-
-public global::System.Int32 NotExistingMethod()
-{
-    global::System.Console.WriteLine("This is introduced method.");
-    return default(global::System.Int32);
-}
-
-public static global::System.Int32 NotExistingMethod_Static()
-{
-    global::System.Console.WriteLine("This is introduced method.");
-    return default(global::System.Int32);
-}    }

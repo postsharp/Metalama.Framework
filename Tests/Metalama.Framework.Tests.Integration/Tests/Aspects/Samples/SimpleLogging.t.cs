@@ -1,15 +1,15 @@
-internal class TargetClass
+    internal class TargetClass
     {
         [Log]
         public static int Add(int a, int b)
-{
+        {
     global::System.Console.WriteLine("TargetClass.Add(int, int) started.");
     try
     {
-global::System.Int32 result;
+        global::System.Int32 result;
             if (a == 0)
                 throw new ArgumentOutOfRangeException(nameof(a));
-result=a + b;
+            result = a + b;
 goto __aspect_return_1;
 __aspect_return_1:        global::System.Console.WriteLine("TargetClass.Add(int, int) succeeded.");
         return (global::System.Int32)result;
@@ -19,5 +19,5 @@ __aspect_return_1:        global::System.Console.WriteLine("TargetClass.Add(int,
         global::System.Console.WriteLine("TargetClass.Add(int, int) failed: " + e.Message);
         throw;
     }
-}
+        }
     }

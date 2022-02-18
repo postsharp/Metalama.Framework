@@ -4,6 +4,7 @@
 using Metalama.Framework.Engine.AspectOrdering;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Options;
 using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.Linking
@@ -15,13 +16,15 @@ namespace Metalama.Framework.Engine.Linking
             CompilationModel finalCompilationModel,
             PartialCompilation intermediateCompilation,
             LinkerIntroductionRegistry introductionRegistry,
-            IReadOnlyList<OrderedAspectLayer> orderedAspectLayers )
+            IReadOnlyList<OrderedAspectLayer> orderedAspectLayers,
+            IProjectOptions? projectOptions )
         {
             this.DiagnosticSink = diagnosticSink;
             this.FinalCompilationModel = finalCompilationModel;
             this.IntermediateCompilation = intermediateCompilation;
             this.IntroductionRegistry = introductionRegistry;
             this.OrderedAspectLayers = orderedAspectLayers;
+            this.ProjectOptions = projectOptions;
         }
 
         /// <summary>
@@ -48,5 +51,10 @@ namespace Metalama.Framework.Engine.Linking
         /// Gets a list of ordered aspect layers.
         /// </summary>
         public IReadOnlyList<OrderedAspectLayer> OrderedAspectLayers { get; }
+
+        /// <summary>
+        /// Gets project options.
+        /// </summary>
+        public IProjectOptions? ProjectOptions { get; }
     }
 }

@@ -90,7 +90,7 @@ namespace Metalama.TestFramework
             {
                 if ( testInput.Options.ApplyCodeFix.GetValueOrDefault() )
                 {
-                    // When we test code fixed, we don't apply the pipeline output, but we apply the code fix instead.
+                    // When we test code fixes, we don't apply the pipeline output, but we apply the code fix instead.
                     if ( !await ApplyCodeFixAsync( testInput, testResult, domain, serviceProviderWithObserver ) )
                     {
                         return;
@@ -106,7 +106,7 @@ namespace Metalama.TestFramework
             }
             else
             {
-                testResult.SetFailed( "CompileTimeAspectPipeline.TryExecute failed." );
+                testResult.SetFailed( "CompileTimeAspectPipeline.ExecuteAsync failed." );
             }
 
             if ( testInput.Options.WriteInputHtml.GetValueOrDefault() || testInput.Options.WriteOutputHtml.GetValueOrDefault() )

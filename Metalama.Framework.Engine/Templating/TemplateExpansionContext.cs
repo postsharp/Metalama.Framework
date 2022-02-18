@@ -336,7 +336,7 @@ namespace Metalama.Framework.Engine.Templating
                         Block(
                                 ExpressionStatement( invocationExpression ),
                                 ReturnStatement().WithAdditionalAnnotations( OutputCodeFormatter.PossibleRedundantAnnotation ) )
-                            .AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+                            .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
 
                 case null:
                 case LiteralExpressionSyntax:
@@ -363,7 +363,7 @@ namespace Metalama.Framework.Engine.Templating
                                             PredefinedType( Token( SyntaxKind.ObjectKeyword ) ),
                                             TemplateSyntaxFactory.AddSimplifierAnnotations( ParenthesizedExpression( returnExpression ) ) ) ) ),
                                 ReturnStatement() )
-                            .AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+                            .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
             }
         }
 
@@ -383,7 +383,7 @@ namespace Metalama.Framework.Engine.Templating
                         Block(
                                 ExpressionStatement( returnExpression.ToRunTimeExpression() ),
                                 ReturnStatement().WithAdditionalAnnotations( OutputCodeFormatter.PossibleRedundantAnnotation ) )
-                            .AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+                            .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
                 }
                 else
                 {

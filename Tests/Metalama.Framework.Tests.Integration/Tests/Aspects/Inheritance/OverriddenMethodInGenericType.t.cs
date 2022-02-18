@@ -5,13 +5,15 @@ internal class Targets
             [Aspect]
             public virtual T M( T a ) {
     global::System.Console.WriteLine("Overridden!");
-return a;};
+return a;
+        }
         }
 
         private class DerivedClass : BaseClass<int>
         {
             public override int M( int a ) {
     global::System.Console.WriteLine("Overridden!");
-return a + 1;};
+return a + 1;
+        }
         }
     }

@@ -1,209 +1,226 @@
-[Introduction]
+    [Introduction]
     internal class TargetClass : DerivedClass
     {
         public event EventHandler ExistingEvent
-{add    {
+        {
+            add
+            {
         global::System.Console.WriteLine("This is introduced event.");
-                Console.WriteLine("This is original event.");
-    }
+                        Console.WriteLine( "This is original event." );
+            }
 
-remove    {
+            remove
+            {
         global::System.Console.WriteLine("This is introduced event.");
-                Console.WriteLine("This is original event.");
-    }
-}
-
-        public static event EventHandler ExistingEvent_Static
-{add    {
-        global::System.Console.WriteLine("This is introduced event.");
-                Console.WriteLine("This is original event.");
-    }
-
-remove    {
-        global::System.Console.WriteLine("This is introduced event.");
-                Console.WriteLine("This is original event.");
-    }
-}
+                        Console.WriteLine( "This is original event." );
+            }
+        }
 
         public virtual event EventHandler ExistingVirtualEvent
-{add    {
+        {
+            add
+            {
         global::System.Console.WriteLine("This is introduced event.");
-                Console.WriteLine("This is original event.");
-    }
+                        Console.WriteLine( "This is original event." );
+            }
 
-remove    {
+            remove
+            {
         global::System.Console.WriteLine("This is introduced event.");
-                Console.WriteLine("This is original event.");
-    }
-}
+                        Console.WriteLine( "This is original event." );
+            }
+        }
 
 
 public new event global::System.EventHandler BaseClassAbstractEvent
-{add    {
+{
+    add
+    {
         global::System.Console.WriteLine("This is introduced event.");
+        base.BaseClassAbstractEvent += value;
     }
 
-remove    {
+    remove
+    {
         global::System.Console.WriteLine("This is introduced event.");
+        base.BaseClassAbstractEvent -= value;
     }
 }
 
 public new event global::System.EventHandler BaseClassAbstractSealedEvent
-{add    {
+{
+    add
+    {
         global::System.Console.WriteLine("This is introduced event.");
+        base.BaseClassAbstractSealedEvent += value;
     }
 
-remove    {
+    remove
+    {
         global::System.Console.WriteLine("This is introduced event.");
+        base.BaseClassAbstractSealedEvent -= value;
     }
 }
 
 public new event global::System.EventHandler BaseClassEvent
-{add    {
+{
+    add
+    {
         global::System.Console.WriteLine("This is introduced event.");
+        base.BaseClassEvent += value;
     }
 
-remove    {
+    remove
+    {
         global::System.Console.WriteLine("This is introduced event.");
-    }
-}
-
-public static new event global::System.EventHandler BaseClassEvent_Static
-{add    {
-        global::System.Console.WriteLine("This is introduced event.");
-    }
-
-remove    {
-        global::System.Console.WriteLine("This is introduced event.");
+        base.BaseClassEvent -= value;
     }
 }
 
 public new event global::System.EventHandler BaseClassVirtualEvent
-{add    {
+{
+    add
+    {
         global::System.Console.WriteLine("This is introduced event.");
+        base.BaseClassVirtualEvent += value;
     }
 
-remove    {
+    remove
+    {
         global::System.Console.WriteLine("This is introduced event.");
+        base.BaseClassVirtualEvent -= value;
     }
 }
 
 public new event global::System.EventHandler BaseClassVirtualOverridenEvent
-{add    {
+{
+    add
+    {
         global::System.Console.WriteLine("This is introduced event.");
+        base.BaseClassVirtualOverridenEvent += value;
     }
 
-remove    {
+    remove
+    {
         global::System.Console.WriteLine("This is introduced event.");
+        base.BaseClassVirtualOverridenEvent -= value;
     }
 }
 
 public new event global::System.EventHandler BaseClassVirtualSealedEvent
-{add    {
+{
+    add
+    {
         global::System.Console.WriteLine("This is introduced event.");
+        base.BaseClassVirtualSealedEvent += value;
     }
 
-remove    {
+    remove
+    {
         global::System.Console.WriteLine("This is introduced event.");
+        base.BaseClassVirtualSealedEvent -= value;
     }
 }
 
 public new event global::System.EventHandler DerivedClassEvent
-{add    {
+{
+    add
+    {
         global::System.Console.WriteLine("This is introduced event.");
+        base.DerivedClassEvent += value;
     }
 
-remove    {
+    remove
+    {
         global::System.Console.WriteLine("This is introduced event.");
-    }
-}
-
-public static new event global::System.EventHandler DerivedClassEvent_Static
-{add    {
-        global::System.Console.WriteLine("This is introduced event.");
-    }
-
-remove    {
-        global::System.Console.WriteLine("This is introduced event.");
+        base.DerivedClassEvent -= value;
     }
 }
 
 public new event global::System.EventHandler DerivedClassVirtualEvent
-{add    {
+{
+    add
+    {
         global::System.Console.WriteLine("This is introduced event.");
+        base.DerivedClassVirtualEvent += value;
     }
 
-remove    {
+    remove
+    {
         global::System.Console.WriteLine("This is introduced event.");
+        base.DerivedClassVirtualEvent -= value;
     }
 }
 
 public new event global::System.EventHandler DerivedClassVirtualSealedEvent
-{add    {
+{
+    add
+    {
         global::System.Console.WriteLine("This is introduced event.");
+        base.DerivedClassVirtualSealedEvent += value;
     }
 
-remove    {
+    remove
+    {
         global::System.Console.WriteLine("This is introduced event.");
+        base.DerivedClassVirtualSealedEvent -= value;
     }
 }
 
 public new event global::System.EventHandler HiddenBaseClassEvent
-{add    {
+{
+    add
+    {
         global::System.Console.WriteLine("This is introduced event.");
+        base.HiddenBaseClassEvent += value;
     }
 
-remove    {
+    remove
+    {
         global::System.Console.WriteLine("This is introduced event.");
-    }
-}
-
-public static new event global::System.EventHandler HiddenBaseClassEvent_Static
-{add    {
-        global::System.Console.WriteLine("This is introduced event.");
-    }
-
-remove    {
-        global::System.Console.WriteLine("This is introduced event.");
+        base.HiddenBaseClassEvent -= value;
     }
 }
 
 public new event global::System.EventHandler HiddenBaseClassVirtualEvent
-{add    {
+{
+    add
+    {
         global::System.Console.WriteLine("This is introduced event.");
+        base.HiddenBaseClassVirtualEvent += value;
     }
 
-remove    {
+    remove
+    {
         global::System.Console.WriteLine("This is introduced event.");
+        base.HiddenBaseClassVirtualEvent -= value;
     }
 }
 
 public new event global::System.EventHandler HiddenVirtualBaseClassVirtualEvent
-{add    {
+{
+    add
+    {
         global::System.Console.WriteLine("This is introduced event.");
+        base.HiddenVirtualBaseClassVirtualEvent += value;
     }
 
-remove    {
+    remove
+    {
         global::System.Console.WriteLine("This is introduced event.");
+        base.HiddenVirtualBaseClassVirtualEvent -= value;
     }
 }
 
 public event global::System.EventHandler NonExistentEvent
-{add    {
+{
+    add
+    {
         global::System.Console.WriteLine("This is introduced event.");
-    }
+            }
 
-remove    {
+    remove
+    {
         global::System.Console.WriteLine("This is introduced event.");
-    }
-}
-
-public static event global::System.EventHandler NonExistentEvent_Static
-{add    {
-        global::System.Console.WriteLine("This is introduced event.");
-    }
-
-remove    {
-        global::System.Console.WriteLine("This is introduced event.");
-    }
+            }
 }    }

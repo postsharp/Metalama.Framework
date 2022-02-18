@@ -1,11 +1,11 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Metalama.Framework.Engine.Formatting;
+using Metalama.Framework.Engine.Options;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System.Collections.Generic;
+using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.Linking
@@ -14,112 +14,65 @@ namespace Metalama.Framework.Engine.Linking
     {
         private class CleanupRewriter : CSharpSyntaxRewriter
         {
-            // TODO: Prune what we visit.
-            // TODO: Optimize (this reallocates multiple times.
+            private readonly IProjectOptions? _projectOptions;
 
-            public override SyntaxNode? VisitBlock( BlockSyntax node )
+            public CleanupRewriter( IProjectOptions? projectOptions )
             {
-                var anyRewrittenStatement = false;
-                var newStatements = new List<StatementSyntax>();
+                this._projectOptions = projectOptions;
+            }
 
-                foreach ( var statement in node.Statements )
+            public override SyntaxNode? VisitMethodDeclaration( MethodDeclarationSyntax node )
+            {
+                return
+                    node
+                        .WithBody( this.RewriteBodyBlock( node.Body ) );
+            }
+
+            public override SyntaxNode? VisitPropertyDeclaration( PropertyDeclarationSyntax node )
+            {
+                return this.VisitBasePropertyDeclaration( node );
+            }
+
+            public override SyntaxNode? VisitIndexerDeclaration( IndexerDeclarationSyntax node )
+            {
+                return this.VisitBasePropertyDeclaration( node );
+            }
+
+            public override SyntaxNode? VisitEventDeclaration( EventDeclarationSyntax node )
+            {
+                return this.VisitBasePropertyDeclaration( node );
+            }
+
+            private SyntaxNode? VisitBasePropertyDeclaration( BasePropertyDeclarationSyntax node )
+            {
+                return
+                    node.WithAccessorList(
+                        node.AccessorList?.WithAccessors(
+                            List(
+                                node.AccessorList.Accessors
+                                    .Select( a => a.WithBody( this.RewriteBodyBlock( a.Body ) ) ) ) ) );
+            }
+
+            private BlockSyntax? RewriteBodyBlock( BlockSyntax? block )
+            {
+                if ( block == null )
                 {
-                    if ( statement is BlockSyntax innerBlock )
-                    {
-                        var innerBlockFlags = innerBlock.GetLinkerGeneratedFlags();
-
-                        if ( innerBlockFlags.HasFlag( LinkerGeneratedFlags.FlattenableBlock ) )
-                        {
-                            anyRewrittenStatement = true;
-
-                            AddFlattenedBlockStatements( innerBlock, newStatements );
-
-                            // TODO: Solve trivia!
-                        }
-                        else
-                        {
-                            var rewritten = this.VisitBlock( innerBlock );
-
-                            if ( rewritten != statement )
-                            {
-                                anyRewrittenStatement = true;
-                            }
-
-                            newStatements.Add( (StatementSyntax) rewritten.AssertNotNull() );
-                        }
-                    }
-                    else
-                    {
-                        var rewritten = this.Visit( statement );
-
-                        if ( rewritten != statement )
-                        {
-                            anyRewrittenStatement = true;
-                        }
-
-                        newStatements.Add( (StatementSyntax) rewritten.AssertNotNull() );
-                    }
+                    return null;
                 }
-
-                var finalStatements = new List<StatementSyntax>();
-
-                // Process labeled statements.
-                for ( var i = 0; i < newStatements.Count; i++ )
+                else if ( this._projectOptions?.FormatOutput == true )
                 {
-                    var statement = newStatements[i];
+                    var countLabelUsesWalker = new CountLabelUsesWalker();
+                    countLabelUsesWalker.Visit( block );
 
-                    if ( statement.GetLinkerGeneratedFlags().HasFlag( LinkerGeneratedFlags.EmptyLabeledStatement ) )
-                    {
-                        var labeledStatement = (statement as LabeledStatementSyntax).AssertNotNull();
+                    var withFlattenedBlocks = new CleanupBodyRewriter().Visit( block );
+                    var withoutTrivialLabels = new RemoveTrivialLabelRewriter( countLabelUsesWalker.ObservedLabelCounters ).Visit(withFlattenedBlocks);
+                    var withoutTrailingReturns = new RemoveTrailingReturnRewriter().Visit( withoutTrivialLabels );
 
-                        if ( i == newStatements.Count - 1 )
-                        {
-                            finalStatements.Add( labeledStatement );
-                        }
-                        else
-                        {
-                            finalStatements.Add(
-                                LabeledStatement(
-                                    labeledStatement.Identifier.AddGeneratedCodeAnnotation(),
-                                    Token( SyntaxKind.ColonToken ).AddGeneratedCodeAnnotation(),
-                                    newStatements[i + 1] ) );
-
-                            i++;
-                        }
-                    }
-                    else
-                    {
-                        finalStatements.Add( statement );
-                    }
-                }
-
-                if ( anyRewrittenStatement )
-                {
-                    return node.Update( node.OpenBraceToken, List( finalStatements ), node.CloseBraceToken );
+                    return (BlockSyntax?)withoutTrailingReturns;
                 }
                 else
                 {
-                    return node;
-                }
-
-                void AddFlattenedBlockStatements( BlockSyntax block, List<StatementSyntax> statements )
-                {
-                    foreach ( var statement in block.Statements )
-                    {
-                        if ( statement is BlockSyntax innerBlock && innerBlock.GetLinkerGeneratedFlags().HasFlag( LinkerGeneratedFlags.FlattenableBlock ) )
-                        {
-                            AddFlattenedBlockStatements( innerBlock, statements );
-                        }
-                        else
-                        {
-                            var visitedStatement = (StatementSyntax?) this.Visit( statement );
-
-                            if ( visitedStatement != null )
-                            {
-                                statements.Add( visitedStatement.WithFormattingAnnotationsFrom( block ) );
-                            }
-                        }
-                    }
+                    return (BlockSyntax?) new CleanupBodyRewriter().Visit( block );
                 }
             }
         }

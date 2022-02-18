@@ -71,25 +71,25 @@ namespace Metalama.Framework.Engine.Linking.Inlining
                                                 VariableDeclaration(
                                                     this.SyntaxGenerationContext.SyntaxGenerator.Type( semantic.Symbol.ReturnType ),
                                                     SingletonSeparatedList( VariableDeclarator( this.ReturnVariableName.AssertNotNull() ) ) ) )
-                                            .WithLeadingTrivia( ElasticLineFeed )
+                                            .WithTrailingTrivia( ElasticLineFeed )
                                             .AddGeneratedCodeAnnotation()
                                         : null,
-                                    linkedBody.AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock ),
+                                    linkedBody.WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock ),
                                     this._labelUsed
                                         ? LabeledStatement(
                                                 Identifier( this.ReturnLabelName.AssertNotNull() ),
                                                 EmptyStatement() )
-                                            .WithLeadingTrivia( ElasticLineFeed )
+                                            .WithTrailingTrivia( ElasticLineFeed )
                                             .AddGeneratedCodeAnnotation()
-                                            .AddLinkerGeneratedFlags( LinkerGeneratedFlags.EmptyLabeledStatement )
+                                            .WithLinkerGeneratedFlags( LinkerGeneratedFlags.EmptyLabeledStatement )
                                         : null
                                 }.Where( x => x != null )
                                 .AssertNoneNull() )
-                        .AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+                        .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
             }
             else
             {
-                return linkedBody.AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+                return linkedBody.WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
             }
         }
 

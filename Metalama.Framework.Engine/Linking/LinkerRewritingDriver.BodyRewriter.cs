@@ -21,7 +21,7 @@ namespace Metalama.Framework.Engine.Linking
                 // Check that the input is correct - all replaced nodes should be independent in terms of ancestor relation.
                 var nodes = new HashSet<SyntaxNode>( replacements.Select( x => x.Key ) );
 
-                // Temporary restriction.                
+                // Temporary restriction.
                 foreach ( var node in nodes )
                 {
                     var current = node.Parent;
@@ -48,7 +48,11 @@ namespace Metalama.Framework.Engine.Linking
                 }
                 else if ( this._replacements.TryGetValue( node, out var replacement ) )
                 {
-                    return replacement;
+                    var ret = replacement
+                        ?.WithLeadingTrivia( node.GetLeadingTrivia().AddRange( replacement.GetLeadingTrivia() ) )
+                        ?.WithTrailingTrivia( replacement.GetTrailingTrivia().AddRange( node.GetTrailingTrivia() ) );
+
+                    return ret;
                 }
                 else
                 {

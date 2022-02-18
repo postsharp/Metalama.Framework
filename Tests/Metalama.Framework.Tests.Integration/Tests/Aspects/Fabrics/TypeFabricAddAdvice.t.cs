@@ -1,12 +1,16 @@
-internal class TargetCode
+    internal class TargetCode
     {
-        private int Method1( int a ) {
+        private int Method1( int a ) 
+{ 
     global::System.Console.WriteLine("overridden");
-return a;};
+    return a;
+}
 
-        private string Method2( string s ) {
+        private string Method2( string s ) 
+{ 
     global::System.Console.WriteLine("overridden");
-return s;};
+    return s;
+}
 #pragma warning disable CS0067
 
         private class Fabric : TypeFabric

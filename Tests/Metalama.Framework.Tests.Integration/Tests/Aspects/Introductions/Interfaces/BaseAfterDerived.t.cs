@@ -1,2 +1,2 @@
-// CompileTimeAspectPipeline.TryExecute failed. 
-// Error CR0513 on `aspectBuilder.Advices.ImplementInterface( aspectBuilder.Target, typeof(IBaseInterface), OverrideStrategy.Ignore );`: `The aspect 'Introduction' cannot introduce interface 'IBaseInterface' into type 'TargetClass' because there is already introduced an implementation of this interface. This happens when you introduce an interface after introducing another interface that extends it.`
+// CompileTimeAspectPipeline.ExecuteAsync failed. 
+// Error LAMA0513 on `aspectBuilder.Advices.ImplementInterface( aspectBuilder.Target, typeof(IBaseInterface), OverrideStrategy.Ignore );`: `The aspect 'Introduction' cannot introduce interface 'IBaseInterface' into type 'TargetClass' because there is already introduced an implementation of this interface. This happens when you introduce an interface after introducing another interface that extends it.`

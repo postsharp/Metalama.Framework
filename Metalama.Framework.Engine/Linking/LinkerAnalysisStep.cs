@@ -19,7 +19,12 @@ namespace Metalama.Framework.Engine.Linking
         public override LinkerAnalysisStepOutput Execute( LinkerIntroductionStepOutput input )
         {
             var inlinerProvider = new InlinerProvider();
-            var referenceResolver = new AspectReferenceResolver( input.IntroductionRegistry, input.OrderedAspectLayers, input.FinalCompilationModel );
+
+            var referenceResolver = new AspectReferenceResolver(
+                input.IntroductionRegistry,
+                input.OrderedAspectLayers,
+                input.FinalCompilationModel,
+                input.IntermediateCompilation.Compilation );
 
             // Analyze method bodies (aspect references & flow).
             var methodBodyAnalyzer = new MethodBodyAnalyzer(
@@ -76,7 +81,8 @@ namespace Metalama.Framework.Engine.Linking
                 input.IntermediateCompilation,
                 input.IntroductionRegistry,
                 analysisRegistry,
-                referenceResolver );
+                referenceResolver,
+                input.ProjectOptions );
         }
     }
 }

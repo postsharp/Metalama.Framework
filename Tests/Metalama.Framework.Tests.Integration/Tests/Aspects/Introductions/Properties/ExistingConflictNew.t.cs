@@ -1,140 +1,183 @@
-[Introduction]
+    [Introduction]
     internal class TargetClass : DerivedClass
     {
         public int ExistingProperty
-{get    {
+        {
+            get 
+{ 
         global::System.Console.WriteLine("This is introduced property.");
-return 27;    }
+        return 27;
 }
+        }
 
         public static int ExistingProperty_Static
-{get    {
+        {
+            get 
+{ 
         global::System.Console.WriteLine("This is introduced property.");
-return 27;    }
+        return 27;
 }
+        }
 
         public virtual int ExistingVirtualProperty
-{get    {
+        {
+            get 
+{ 
         global::System.Console.WriteLine("This is introduced property.");
-return 27;    }
+        return 27;
 }
+        }
 
 
 public new global::System.Int32 BaseClassAbstractProperty
-{get    {
+{
+    get
+    {
         global::System.Console.WriteLine("This is introduced property.");
-        return default(global::System.Int32);
+        return base.BaseClassAbstractProperty;
     }
 }
 
 public new global::System.Int32 BaseClassAbstractSealedProperty
-{get    {
+{
+    get
+    {
         global::System.Console.WriteLine("This is introduced property.");
-        return default(global::System.Int32);
+        return base.BaseClassAbstractSealedProperty;
     }
 }
 
 public new global::System.Int32 BaseClassProperty
-{get    {
+{
+    get
+    {
         global::System.Console.WriteLine("This is introduced property.");
-        return default(global::System.Int32);
+        return base.BaseClassProperty;
     }
 }
 
 public static new global::System.Int32 BaseClassProperty_Static
-{get    {
+{
+    get
+    {
         global::System.Console.WriteLine("This is introduced property.");
-        return default(global::System.Int32);
+        return global::Metalama.Framework.IntegrationTests.Aspects.Introductions.Properties.ExistingConflictNew.BaseClass.BaseClassProperty_Static;
     }
 }
 
 public new global::System.Int32 BaseClassVirtualOverridenProperty
-{get    {
+{
+    get
+    {
         global::System.Console.WriteLine("This is introduced property.");
-        return default(global::System.Int32);
+        return base.BaseClassVirtualOverridenProperty;
     }
 }
 
 public new global::System.Int32 BaseClassVirtualProperty
-{get    {
+{
+    get
+    {
         global::System.Console.WriteLine("This is introduced property.");
-        return default(global::System.Int32);
+        return base.BaseClassVirtualProperty;
     }
 }
 
 public new global::System.Int32 BaseClassVirtualSealedProperty
-{get    {
+{
+    get
+    {
         global::System.Console.WriteLine("This is introduced property.");
-        return default(global::System.Int32);
+        return base.BaseClassVirtualSealedProperty;
     }
 }
 
 public new global::System.Int32 DerivedClassProperty
-{get    {
+{
+    get
+    {
         global::System.Console.WriteLine("This is introduced property.");
-        return default(global::System.Int32);
+        return base.DerivedClassProperty;
     }
 }
 
 public static new global::System.Int32 DerivedClassProperty_Static
-{get    {
+{
+    get
+    {
         global::System.Console.WriteLine("This is introduced property.");
-        return default(global::System.Int32);
+        return global::Metalama.Framework.IntegrationTests.Aspects.Introductions.Properties.ExistingConflictNew.DerivedClass.DerivedClassProperty_Static;
     }
 }
 
 public new global::System.Int32 DerivedClassVirtualProperty
-{get    {
+{
+    get
+    {
         global::System.Console.WriteLine("This is introduced property.");
-        return default(global::System.Int32);
+        return base.DerivedClassVirtualProperty;
     }
 }
 
 public new global::System.Int32 DerivedClassVirtualSealedProperty
-{get    {
+{
+    get
+    {
         global::System.Console.WriteLine("This is introduced property.");
-        return default(global::System.Int32);
+        return base.DerivedClassVirtualSealedProperty;
     }
 }
 
 public new global::System.Int32 HiddenBaseClassProperty
-{get    {
+{
+    get
+    {
         global::System.Console.WriteLine("This is introduced property.");
-        return default(global::System.Int32);
+        return base.HiddenBaseClassProperty;
     }
 }
 
 public static new global::System.Int32 HiddenBaseClassProperty_Static
-{get    {
+{
+    get
+    {
         global::System.Console.WriteLine("This is introduced property.");
-        return default(global::System.Int32);
+        return global::Metalama.Framework.IntegrationTests.Aspects.Introductions.Properties.ExistingConflictNew.DerivedClass.HiddenBaseClassProperty_Static;
     }
 }
 
 public new global::System.Int32 HiddenBaseClassVirtualProperty
-{get    {
+{
+    get
+    {
         global::System.Console.WriteLine("This is introduced property.");
-        return default(global::System.Int32);
+        return base.HiddenBaseClassVirtualProperty;
     }
 }
 
 public new global::System.Int32 HiddenVirtualBaseClassVirtualProperty
-{get    {
+{
+    get
+    {
         global::System.Console.WriteLine("This is introduced property.");
-        return default(global::System.Int32);
+        return base.HiddenVirtualBaseClassVirtualProperty;
     }
 }
 
 public global::System.Int32 NonExistentProperty
-{get    {
+{
+    get
+    {
         global::System.Console.WriteLine("This is introduced property.");
-        return default(global::System.Int32);
+                return default(global::System.Int32);
     }
 }
 
 public static global::System.Int32 NonExistentProperty_Static
-{get    {
+{
+    get
+    {
         global::System.Console.WriteLine("This is introduced property.");
-        return default(global::System.Int32);
+                return default(global::System.Int32);
     }
 }    }

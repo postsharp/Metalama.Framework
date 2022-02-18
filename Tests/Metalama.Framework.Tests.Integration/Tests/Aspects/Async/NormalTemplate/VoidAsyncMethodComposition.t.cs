@@ -1,14 +1,14 @@
-class TargetCode
+    class TargetCode
     {
        [Aspect1, Aspect2]
         async void MethodReturningValueTaskOfInt(int a)
-{
+        {
     global::System.Console.WriteLine("Aspect1.Before");
     await this.MethodReturningValueTaskOfInt_Aspect2(a);
     object result_1 = null;
     global::System.Console.WriteLine("Aspect1.After");
     return;
-}
+        }
 
 private async global::System.Threading.Tasks.ValueTask MethodReturningValueTaskOfInt_Source(int a)
         {

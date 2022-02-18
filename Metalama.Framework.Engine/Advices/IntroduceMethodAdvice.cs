@@ -86,7 +86,7 @@ namespace Metalama.Framework.Engine.Advices
         public override AdviceResult ToResult( ICompilation compilation )
         {
             // Determine whether we need introduction transformation (something may exist in the original code or could have been introduced by previous steps).
-            var existingDeclaration = this.TargetDeclaration.Methods.OfExactSignature( this.MemberBuilder, false, false );
+            var existingDeclaration = this.TargetDeclaration.FindClosestVisibleMethod( this.MemberBuilder );
 
             // TODO: Introduce attributes that are added not present on the existing member?
             if ( existingDeclaration == null )
@@ -124,7 +124,7 @@ namespace Metalama.Framework.Engine.Advices
                         return AdviceResult.Create();
 
                     case OverrideStrategy.New:
-                        // If the existing declaration is in the current type, we fail, otherwise, declare a new method and override.
+                        // If the existing declaration is in the current type, override it, otherwise, declare a new method and override.
                         if ( ((IEqualityComparer<IType>) compilation.InvariantComparer).Equals( this.TargetDeclaration, existingDeclaration.DeclaringType ) )
                         {
                             var overriddenMethod = new OverriddenMethod( this, existingDeclaration, this.Template );
@@ -135,7 +135,7 @@ namespace Metalama.Framework.Engine.Advices
                         {
                             this.MemberBuilder.IsNew = true;
                             this.MemberBuilder.IsOverride = false;
-                            this.MemberBuilder.OverriddenMethod = existingDeclaration;
+
                             var overriddenMethod = new OverriddenMethod( this, this.MemberBuilder, this.Template );
 
                             return AdviceResult.Create( this.MemberBuilder, overriddenMethod );

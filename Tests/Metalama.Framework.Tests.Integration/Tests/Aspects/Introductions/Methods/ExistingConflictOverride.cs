@@ -5,44 +5,46 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.Exis
 {
     public class IntroductionAttribute : TypeAspect
     {
-        [Introduce( WhenExists = OverrideStrategy.Override )]
+        [Introduce(WhenExists = OverrideStrategy.Override)]
         public int ExistingBaseMethod()
         {
-            Console.WriteLine( "This is introduced method." );
-
+            meta.InsertComment("Call the base method of the same name");
             return meta.Proceed();
         }
 
-        [Introduce( WhenExists = OverrideStrategy.Override )]
+        [Introduce(WhenExists = OverrideStrategy.Override)]
+        public void ExistingBaseMethod_Void()
+        {
+            meta.InsertComment("Call the base method of the same name");
+            meta.Proceed();
+        }
+
+        [Introduce(WhenExists = OverrideStrategy.Override)]
         public int ExistingMethod()
         {
-            Console.WriteLine( "This is introduced method." );
-
+            meta.InsertComment("Return a constant");
             return meta.Proceed();
         }
 
-        [Introduce( WhenExists = OverrideStrategy.Override )]
-        public static int ExistingMethod_Static()
+        [Introduce(WhenExists = OverrideStrategy.Override)]
+        public void ExistingMethod_Void()
         {
-            Console.WriteLine( "This is introduced method." );
-
-            return meta.Proceed();
+            meta.InsertComment("Do nothing.");
+            meta.Proceed();
         }
 
-        [Introduce( WhenExists = OverrideStrategy.Override )]
+        [Introduce(WhenExists = OverrideStrategy.Override)]
         public int NotExistingMethod()
         {
-            Console.WriteLine( "This is introduced method." );
-
+            meta.InsertComment("Return default value");
             return meta.Proceed();
         }
 
-        [Introduce( WhenExists = OverrideStrategy.Override )]
-        public static int NotExistingMethod_Static()
+        [Introduce(WhenExists = OverrideStrategy.Override)]
+        public void NotExistingMethod_Void()
         {
-            Console.WriteLine( "This is introduced method." );
-
-            return meta.Proceed();
+            meta.InsertComment("Do nothing");
+            meta.Proceed();
         }
     }
 
@@ -51,6 +53,10 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.Exis
         public virtual int ExistingBaseMethod()
         {
             return 27;
+        }
+
+        public virtual void ExistingBaseMethod_Void()
+        {
         }
     }
 
@@ -63,9 +69,8 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.Exis
             return 27;
         }
 
-        public static int ExistingMethod_Static()
+        public void ExistingMethod_Void()
         {
-            return 27;
         }
     }
 }

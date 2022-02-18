@@ -1,0 +1,4 @@
+{
+    "TestRunnerFactoryType": "Metalama.TestFramework.OutputFormatterAspectTestRunnerFactory, Metalama.TestFramework",
+    "FormatOutput": false
+}

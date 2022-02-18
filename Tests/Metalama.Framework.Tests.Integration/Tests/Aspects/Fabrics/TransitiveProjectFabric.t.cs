@@ -1,6 +1,8 @@
-public class TargetCode
+    public class TargetCode
     {
-        public int Method() {
+        public int Method() 
+{ 
     global::System.Console.WriteLine("Configured");
-return 0;};
+    return 0;
+}
     }
