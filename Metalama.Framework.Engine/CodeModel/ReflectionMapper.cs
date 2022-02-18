@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.ReflectionMocks;
 using Microsoft.CodeAnalysis;
@@ -8,6 +9,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Globalization;
 using System.Linq;
+using System.Reflection;
 
 namespace Metalama.Framework.Engine.CodeModel
 {
@@ -18,6 +20,7 @@ namespace Metalama.Framework.Engine.CodeModel
     {
         private readonly Compilation _compilation;
         private readonly ConcurrentDictionary<Type, ITypeSymbol> _symbolCache = new();
+        private ImmutableDictionaryOfArray<string, IAssemblySymbol>? _referencedAssemblies;
 
         internal ReflectionMapper( Compilation compilation )
         {
@@ -28,13 +31,41 @@ namespace Metalama.Framework.Engine.CodeModel
         /// Gets a <see cref="INamedTypeSymbol"/> by metadata name.
         /// </summary>
         /// <param name="metadataName"></param>
-        public INamedTypeSymbol GetNamedTypeSymbolByMetadataName( string metadataName )
+        public INamedTypeSymbol GetNamedTypeSymbolByMetadataName( string metadataName, AssemblyName? assemblyName )
         {
             var symbol = this._compilation.GetTypeByMetadataName( metadataName );
 
             if ( symbol == null )
             {
-                throw GeneralDiagnosticDescriptors.CannotFindType.CreateException( metadataName );
+                // When the first attempt to resolve a symbol fails, we try harder to determine the cause 
+                // and display a better error message. We may also be able to resolve version conflicts.
+
+                // This field cannot be set in the constructor because of linker tests.
+                this._referencedAssemblies ??= this._compilation.SourceModule.ReferencedAssemblySymbols.ToMultiValueDictionary( a => a.Identity.Name, a => a );
+
+                var assemblyShortName = assemblyName?.Name;
+
+                if ( assemblyShortName != null )
+                {
+                    var assemblies = this._referencedAssemblies[assemblyShortName];
+
+                    if ( assemblies.IsEmpty )
+                    {
+                        throw new InvalidOperationException( $"Cannot find the reference '{assemblyName}' in project '{this._compilation.AssemblyName}'." );
+                    }
+                    else if ( assemblies.Length > 1 )
+                    {
+                        throw new InvalidOperationException(
+                            $"Found more than one assembly named '{assemblyShortName}' in project '{this._compilation.AssemblyName}': {string.Join( ",", assemblies.Select( x => $"'{x.Identity}'" ) )}." );
+                    }
+
+                    symbol = assemblies[0].GetTypeByMetadataName( metadataName );
+                }
+            }
+
+            if ( symbol == null )
+            {
+                throw GeneralDiagnosticDescriptors.CannotFindType.CreateException( (metadataName, assemblyName?.ToString()) );
             }
 
             return symbol;
@@ -122,14 +153,14 @@ namespace Metalama.Framework.Engine.CodeModel
             }
             else if ( genericArguments.Length > 0 )
             {
-                var genericDefinition = this.GetNamedTypeSymbolByMetadataName( type.GetGenericTypeDefinition().FullName );
+                var genericDefinition = this.GetNamedTypeSymbolByMetadataName( type.GetGenericTypeDefinition().FullName, type.Assembly.GetName() );
                 var genericArgumentSymbols = genericArguments.Select( this.GetTypeSymbol ).ToArray();
 
                 return genericDefinition.Construct( genericArgumentSymbols );
             }
             else
             {
-                return this.GetNamedTypeSymbolByMetadataName( type.FullName.AssertNotNull() );
+                return this.GetNamedTypeSymbolByMetadataName( type.FullName.AssertNotNull(), type.Assembly.GetName() );
             }
         }
     }

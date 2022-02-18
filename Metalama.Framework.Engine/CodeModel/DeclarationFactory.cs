@@ -41,7 +41,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public INamedType GetTypeByReflectionName( string reflectionName )
         {
-            var symbol = this._compilationModel.ReflectionMapper.GetNamedTypeSymbolByMetadataName( reflectionName );
+            var symbol = this._compilationModel.ReflectionMapper.GetNamedTypeSymbolByMetadataName( reflectionName, null );
 
             return this.GetNamedType( symbol );
         }
