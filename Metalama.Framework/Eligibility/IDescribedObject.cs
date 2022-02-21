@@ -12,6 +12,7 @@ namespace Metalama.Framework.Eligibility
     /// Implemented by <see cref="DescribedObject{T}"/>.
     /// </summary>
     /// <typeparam name="T"></typeparam>
+    /// <seealso href="@eligibility"/>
     [InternalImplement]
     [CompileTimeOnly]
     public interface IDescribedObject<out T> : IFormattable

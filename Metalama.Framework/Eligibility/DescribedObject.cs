@@ -10,6 +10,7 @@ namespace Metalama.Framework.Eligibility
     /// Encapsulates an object and a human-readable description.
     /// </summary>
     /// <typeparam name="T"></typeparam>
+    /// <seealso href="@eligibility"/>
     public sealed class DescribedObject<T> : IDescribedObject<T>
     {
         /// <inheritdoc />

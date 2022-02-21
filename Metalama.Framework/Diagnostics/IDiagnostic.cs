@@ -9,6 +9,7 @@ namespace Metalama.Framework.Diagnostics;
 /// <summary>
 /// Represents an instance of a diagnostic, including its parameters and its optional code fixes.
 /// </summary>
+/// <seealso href="@diagnostics"/>
 public interface IDiagnostic
 {
     /// <summary>

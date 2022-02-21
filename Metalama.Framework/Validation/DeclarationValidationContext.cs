@@ -12,6 +12,7 @@ namespace Metalama.Framework.Validation
     /// <summary>
     /// The context object passed to the single parameter of validators added using <see cref="IDeclarationSelection{TDeclaration}.RegisterFinalValidator"/>.
     /// </summary>
+    /// <seealso href="@validation"/>
     [CompileTimeOnly]
     public readonly struct DeclarationValidationContext
     {

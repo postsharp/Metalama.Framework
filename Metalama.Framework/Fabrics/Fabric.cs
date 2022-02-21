@@ -11,6 +11,7 @@ namespace Metalama.Framework.Fabrics
     /// You must not implement this interface directly, but <see cref="ProjectFabric"/>, <see cref="NamespaceFabric"/>,
     /// or <see cref="TypeFabric"/>. 
     /// </summary>
+    /// <seealso href="@applying-aspects"/>
     [CompileTimeOnly]
     public abstract class Fabric : ILamaSerializable { }
 }
