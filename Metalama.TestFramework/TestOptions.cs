@@ -82,7 +82,7 @@ namespace Metalama.TestFramework
         public bool? WriteOutputHtml
         {
             get => this._writeOutputHtml;
-            
+
             set
             {
                 this._writeOutputHtml = value;
@@ -334,10 +334,10 @@ namespace Metalama.TestFramework
                         }
 
                         break;
-                    
+
                     case "ExecuteProgram":
                         this.ExecuteProgram = true;
-                        
+
                         break;
 
                     default:
