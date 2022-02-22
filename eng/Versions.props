@@ -11,7 +11,7 @@
 
     <!-- Versions of dependencies -->
     <PropertyGroup>
-        <PostSharpEngineeringVersion>1.0.45-preview</PostSharpEngineeringVersion>
+        <PostSharpEngineeringVersion>1.0.47-preview</PostSharpEngineeringVersion>
         <MetalamaCompilerVersion>branch:master</MetalamaCompilerVersion>
         <MicrosoftCSharpVersion>4.7.0</MicrosoftCSharpVersion>
         <!-- We should match the versions used by the lowest version of Roslyn we support.-->
