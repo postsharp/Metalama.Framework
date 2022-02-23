@@ -1,28 +1,19 @@
-class TargetCode
+    class TargetCode
     {
 
 
-private global::System.Int32 _field1;
-
-
-private global::System.Int32 field {get    {
+private global::System.Int32 field 
+{ get
+{ 
         return this.field_Source;
-    }
 
-set    {
-        this.field_Source= value;
-    }
 }
-private global::System.Int32 field_Source
-{
-    get
-    {
-        return this._field1;
-    }
+set
+{ 
+        this.field_Source = value;
 
-    set
-    {
-        this._field1 = value;
-    }
-}        
+}
+}
+private global::System.Int32 field_Source { get; set; }
+        
     }

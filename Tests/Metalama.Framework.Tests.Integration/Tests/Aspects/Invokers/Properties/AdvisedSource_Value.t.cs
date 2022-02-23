@@ -1,27 +1,18 @@
-internal class TargetClass
+    internal class TargetClass
     {
-
-
-private int _property;
         [Test]
-        public int Property {get    {
+        public int Property 
+{ get
+{ 
         return this.Property_Source;
-    }
 
-set    {
-        this.Property_Source= value;
-    }
+}
+set
+{ 
+        this.Property_Source = value;
+
+}
 }
 
-private int Property_Source
-{
-    get
-    {
-        return this._property;
+private int Property_Source { get; set; }
     }
-
-    set
-    {
-        this._property = value;
-    }
-}    }
