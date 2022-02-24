@@ -17,15 +17,42 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
     /// <summary>
     /// Encapsulates properties that are common to all constructors of <see cref="Metalama.Framework.Engine.Templating.MetaModel.MetaApi"/>.
     /// </summary>
-    internal record MetaApiProperties(
-        UserDiagnosticSink Diagnostics,
-        TemplateMember<IMemberOrNamedType> Template,
-        IReadOnlyDictionary<string, object?> Tags,
-        AspectLayerId AspectLayerId,
-        SyntaxGenerationContext SyntaxGenerationContext,
-        IAspectInstance AspectInstance,
-        IServiceProvider ServiceProvider )
+    internal class MetaApiProperties
     {
-        public AspectPipelineDescription PipelineDescription { get; } = ServiceProvider.GetRequiredService<AspectPipelineDescription>();
+        public UserDiagnosticSink Diagnostics { get; }
+
+        public TemplateMember<IMemberOrNamedType> Template { get; }
+
+        public IReadOnlyDictionary<string, object?> Tags { get; }
+
+        public AspectLayerId AspectLayerId { get; }
+
+        public SyntaxGenerationContext SyntaxGenerationContext { get; }
+
+        public IAspectInstance AspectInstance { get; }
+
+        public IServiceProvider ServiceProvider { get; }
+
+        public AspectPipelineDescription PipelineDescription => this.ServiceProvider.GetRequiredService<AspectPipelineDescription>();
+
+        public MetaApiProperties(
+            UserDiagnosticSink diagnostics,
+            TemplateMember<IMemberOrNamedType> template,
+            IReadOnlyDictionary<string, object?> tags,
+            AspectLayerId aspectLayerId,
+            SyntaxGenerationContext syntaxGenerationContext,
+            IAspectInstance aspectInstance,
+            IServiceProvider serviceProvider )
+        {
+            serviceProvider.GetRequiredService<ServiceProviderMark>().RequireProjectWide();
+
+            this.Diagnostics = diagnostics;
+            this.Template = template;
+            this.Tags = tags;
+            this.AspectLayerId = aspectLayerId;
+            this.SyntaxGenerationContext = syntaxGenerationContext;
+            this.AspectInstance = aspectInstance;
+            this.ServiceProvider = serviceProvider;
+        }
     }
 }
