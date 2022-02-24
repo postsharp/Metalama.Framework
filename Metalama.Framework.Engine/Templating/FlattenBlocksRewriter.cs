@@ -41,7 +41,7 @@ namespace Metalama.Framework.Engine.Templating
 
                     case BlockSyntax innerBlock:
                         {
-                            // This block was already processed - it does not contain empty statements and nested flattanable blocks.
+                            // This block was already processed - it does not contain empty statements and nested blocks that can be flattened.
                             var mustFlatten = innerBlock.HasFlattenBlockAnnotation();
 
                             if ( mustFlatten || !innerBlock.Statements.Any( s => s is LocalDeclarationStatementSyntax ) )

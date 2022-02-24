@@ -65,10 +65,10 @@ namespace Metalama.Framework.Engine.Linking
                     countLabelUsesWalker.Visit( block );
 
                     var withFlattenedBlocks = new CleanupBodyRewriter().Visit( block );
-                    var withoutTrivialLabels = new RemoveTrivialLabelRewriter( countLabelUsesWalker.ObservedLabelCounters ).Visit(withFlattenedBlocks);
+                    var withoutTrivialLabels = new RemoveTrivialLabelRewriter( countLabelUsesWalker.ObservedLabelCounters ).Visit( withFlattenedBlocks );
                     var withoutTrailingReturns = new RemoveTrailingReturnRewriter().Visit( withoutTrivialLabels );
 
-                    return (BlockSyntax?)withoutTrailingReturns;
+                    return (BlockSyntax?) withoutTrailingReturns;
                 }
                 else
                 {

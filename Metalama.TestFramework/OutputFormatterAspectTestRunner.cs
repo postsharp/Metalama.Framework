@@ -8,7 +8,6 @@ using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
-using System.Threading.Tasks;
 using Xunit.Abstractions;
 
 namespace Metalama.TestFramework
@@ -41,11 +40,6 @@ namespace Metalama.TestFramework
                 projectDirectory,
                 metadataReferences,
                 logger ) { }
-
-        protected override Task RunAsync( TestInput testInput, TestResult testResult, Dictionary<string, object?> state )
-        {
-            return base.RunAsync( testInput, testResult, state );
-        }
 
         private class OptionsWrapper : IProjectOptions
         {
