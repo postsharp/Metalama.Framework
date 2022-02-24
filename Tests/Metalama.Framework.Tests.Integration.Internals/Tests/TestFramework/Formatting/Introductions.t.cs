@@ -1,7 +1,6 @@
 [Introduction]
     internal class TargetClass
     {
-
         public int IntroducedMethod_Int()
         {
             Console.WriteLine("This is introduced method.");
