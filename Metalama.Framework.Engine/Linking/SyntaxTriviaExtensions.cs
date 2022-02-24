@@ -30,7 +30,7 @@ namespace Metalama.Framework.Engine.Linking
             return SyntaxFactory.TriviaList( newTrivias );
         }
 
-        public static bool HasAnyNewLine(this SyntaxTriviaList list)
+        public static bool HasAnyNewLine( this SyntaxTriviaList list )
         {
             return list.Any( x => x.IsKind( SyntaxKind.EndOfLineTrivia ) );
         }

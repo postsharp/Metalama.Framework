@@ -16,7 +16,7 @@ namespace Metalama.Framework.Engine.CodeModel
         public OurSyntaxGenerator SyntaxGenerator { get; }
 
         public IServiceProvider ServiceProvider { get; }
-        
+
         public bool IsPartial { get; }
 
         [Memo]
@@ -42,7 +42,12 @@ namespace Metalama.Framework.Engine.CodeModel
         public static SyntaxGenerationContext Create( IServiceProvider serviceProvider, Compilation compilation, SyntaxNode node, bool isPartial = false )
             => Create( serviceProvider, compilation, node.SyntaxTree, node.SpanStart, isPartial );
 
-        public static SyntaxGenerationContext Create( IServiceProvider serviceProvider, Compilation compilation, SyntaxTree syntaxTree, int position, bool isPartial = false )
+        public static SyntaxGenerationContext Create(
+            IServiceProvider serviceProvider,
+            Compilation compilation,
+            SyntaxTree syntaxTree,
+            int position,
+            bool isPartial = false )
         {
             var semanticModel = compilation.GetSemanticModel( syntaxTree );
             var nullableContext = semanticModel.GetNullableContext( position );
