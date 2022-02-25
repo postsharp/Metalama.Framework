@@ -44,9 +44,9 @@ namespace Metalama.TestFramework
 
         /// <summary>
         /// Gets or sets a value indicating whether diagnostics of all severities should be included in the rest result. By default, only
-        /// warnings and errors are included. 
+        /// warnings and errors are included.
+        /// To enable this option in a test, add this comment to your test file: <c>// @IncludeAllSeverities</c>.  
         /// </summary>
-        /// To enable this option in a test, add this comment to your test file: <c>// @IncludeAllSeverities</c>.
         public bool? IncludeAllSeverities { get; set; }
 
         /// <summary>
