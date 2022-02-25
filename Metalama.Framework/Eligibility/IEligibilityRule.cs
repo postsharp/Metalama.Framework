@@ -10,6 +10,7 @@ namespace Metalama.Framework.Eligibility
     /// Encapsulates a predicate determining the eligibility of an object (typically a declaration or a type).
     /// </summary>
     /// <typeparam name="T">The type of object that the extension can be applied to.</typeparam>
+    /// <seealso href="@eligibility"/>
     [CompileTimeOnly]
     public interface IEligibilityRule<in T>
     {

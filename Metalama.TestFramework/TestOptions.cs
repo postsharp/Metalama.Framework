@@ -9,15 +9,18 @@ namespace Metalama.TestFramework
 {
     /// <summary>
     /// A set of test options, which can be included in the source text of tests using special comments like <c>// @ReportOutputWarnings</c>.
-    /// This class is JSON-serializable.
+    /// This class is JSON-serializable. Another way to define options is to add a file named <c>metalamaTests.json</c> into the test directory or
+    /// any parent directory.
     /// </summary>
     public class TestOptions
     {
         private static readonly Regex _optionRegex = new( @"^\s*//\s*@(?<name>\w+)\s*(\((?<arg>[^\)]*)\))?", RegexOptions.Multiline );
         private readonly List<string> _invalidSourceOptions = new();
+        private bool? _writeOutputHtml;
 
         /// <summary>
-        /// Gets or sets the reason for which the test must be skipped, or <c>null</c> if the test must not be skipped. 
+        /// Gets or sets the reason for which the test must be skipped, or <c>null</c> if the test must not be skipped.
+        /// To skip a test, add this comment to your test file: <c>// @Skipped(reason)</c>. 
         /// </summary>
         public string? SkipReason { get; set; }
 
@@ -29,96 +32,127 @@ namespace Metalama.TestFramework
         /// <summary>
         /// Gets or sets a value indicating whether the diagnostics of the compilation of the transformed target code should be included in the test result.
         /// This is useful when diagnostic suppression is being tested.
+        /// To enable this option in a test, add this comment to your test file: <c>// @ReportOutputWarnings</c>. 
         /// </summary>
         public bool? ReportOutputWarnings { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether the output file must be compiled into a binary (e.g. emitted).
+        /// To enable this option in a test, add this comment to your test file: <c>// @OutputCompilationDisabled</c>.
         /// </summary>
         public bool? OutputCompilationDisabled { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether diagnostics of all severities should be included in the rest result. By default, only
-        /// warnings and errors are included. 
+        /// warnings and errors are included.
+        /// To enable this option in a test, add this comment to your test file: <c>// @IncludeAllSeverities</c>.  
         /// </summary>
         public bool? IncludeAllSeverities { get; set; }
 
         /// <summary>
         /// Gets or sets the fully-qualified name of the test runner factory type (implementing <see cref="ITestRunnerFactory"/>).
+        /// You can only define this option in the <c>metalamaTests.json</c> file of a directory.
         /// </summary>
         public string? TestRunnerFactoryType { get; set; }
 
         /// <summary>
         /// Gets the list of assembly names that should be included in the compilation.
+        /// You can only define this option in the <c>metalamaTests.json</c> file of a directory.
         /// </summary>
         public List<TestAssemblyReference> References { get; } = new();
 
         /// <summary>
         /// Gets the list of source code files that should be included in the compilation.
+        /// To enable this option in a test, add this comment to your test file: <c>// @IncludedFiles(relativePath)</c>. 
         /// </summary>
         public List<string> IncludedFiles { get; } = new();
 
         /// <summary>
         /// Gets or sets a value indicating whether HTML of syntax-highlighted files should be produced for input files. If <c>true</c>, these files
         /// are created to the <c>obj/html</c> directory.
+        /// To enable this option in a test, add this comment to your test file: <c>// @WriteInputHtml</c>. 
         /// </summary>
         public bool? WriteInputHtml { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether HTML of syntax-highlighted files should be produced for the consolidated output file. If <c>true</c>, this file
-        /// is created to the <c>obj/html</c> directory.
+        /// is created to the <c>obj/html</c> directory. Setting this property to <c>true</c> automatically sets the <see cref="FormatOutput"/> property to <c>true</c>. 
+        /// To enable this option in a test, add this comment to your test file: <c>// @WriteOutputHtml</c>. 
         /// </summary>
-        public bool? WriteOutputHtml { get; set; }
+        public bool? WriteOutputHtml
+        {
+            get => this._writeOutputHtml;
+
+            set
+            {
+                this._writeOutputHtml = value;
+
+                if ( value.GetValueOrDefault() )
+                {
+                    this.FormatOutput = true;
+                }
+            }
+        }
 
         /// <summary>
         /// Gets or sets a value indicating whether titles (tooltips) should be added to HTML files.
+        /// To enable this option in a test, add this comment to your test file: <c>// @AddHtmlTitles</c>. 
         /// </summary>
         public bool? AddHtmlTitles { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether the <see cref="TestResult.ErrorMessage"/> should be added to
         /// the test output.
+        /// You can only define this option in the <c>metalamaTests.json</c> file of a directory. 
         /// </summary>
         public bool? ReportErrorMessage { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether the output <c>t.cs</c> file should be formatted. The default behavior is <c>true</c>.
+        /// To enable this option in a test, add this comment to your test file: <c>// @FormatOutput</c>.
         /// </summary>
         public bool? FormatOutput { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether C# nullability is disabled for the compilation.
+        /// To enable this option in a test, add this comment to your test file: <c>// @NullabilityDisabled</c>.
         /// </summary>
         public bool? NullabilityDisabled { get; set; }
 
         /// <summary>
         /// Gets a list of warnings that are not reported even if <see cref="ReportOutputWarnings"/> is set to <c>true</c>.
+        /// To add an item into this collection from a test, add this comment to your test file: <c>// @IgnoredDiagnostic(id)</c>.
         /// </summary>
         public List<string> IgnoredDiagnostics { get; } = new();
 
         /// <summary>
         /// Gets or sets a value indicating whether the list of <see cref="IgnoredDiagnostics"/> inherited from the parent level (directory or base directory)
         /// must be cleared before new diagnostics are added to this list. This option is not inherited from the base level.
+        /// To enable this option in a test, add this comment to your test file: <c>// @ClearIgnoredDiagnostics</c>.
         /// </summary>
         public bool? ClearIgnoredDiagnostics { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether the test is allowed to have compile-time code that has dynamic calls.
+        /// To enable this option in a test, add this comment to your test file: <c>// @AllowCompileTimeDynamicCode</c>.
         /// </summary>
         internal bool? AllowCompileTimeDynamicCode { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether the `Program.Main` method should be executed if it exists. The default value is <c>true</c>.
+        /// To enable this option in a test, add this comment to your test file: <c>// @ExecuteProgram</c>.
         /// </summary>
         public bool? ExecuteProgram { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether the test should be executed even if the input compilation has errors.
+        /// To enable this option in a test, add this comment to your test file: <c>// @AcceptInvalidInput</c>.
         /// </summary>
         public bool? AcceptInvalidInput { get; set; }
 
         /// <summary>
         /// Gets the set of preprocessor symbols that are required for this test, otherwise the test would be skipped.
+        /// To add an item into this collection from a test, add this comment to your test file: <c>// @RequiredConstant(constant)</c>.
         /// </summary>
         public List<string> RequiredConstants { get; } = new();
 
@@ -127,11 +161,13 @@ namespace Metalama.TestFramework
         /// of the test is not the one transformed by the aspect, but the one transformed by the code fix. The test will fail
         /// if it does not generate any diagnostic with a code fix. By default, the first emitted code fix is applied.
         /// To apply a different code fix, use the <see cref="AppliedCodeFixIndex"/> property.
+        /// To enable this option in a test, add this comment to your test file: <c>// @AcceptInvalidInput</c>.
         /// </summary>
         public bool? ApplyCodeFix { get; set; }
 
         /// <summary>
         /// Gets or sets the zero-based index of the code fix to be applied when <see cref="ApplyCodeFix"/> is <c>true</c>.
+        /// To set this option in a test, add this comment to your test file: <c>// @AppliedCodeFixIndex(id)</c>.
         /// </summary>
         public int? AppliedCodeFixIndex { get; set; }
 
@@ -246,7 +282,6 @@ namespace Metalama.TestFramework
 
                     case "WriteOutputHtml":
                         this.WriteOutputHtml = true;
-                        this.FormatOutput = true;
 
                         break;
 
@@ -297,6 +332,11 @@ namespace Metalama.TestFramework
                         {
                             this.AppliedCodeFixIndex = index;
                         }
+
+                        break;
+
+                    case "ExecuteProgram":
+                        this.ExecuteProgram = true;
 
                         break;
 

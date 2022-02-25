@@ -11,6 +11,7 @@ namespace Metalama.Framework.Eligibility
     /// An interface that allows aspect to specify to which declarations they are allowed to be applied.
     /// </summary>
     /// <typeparam name="T"></typeparam>
+    /// <seealso href="@eligibility"/>
     [CompileTimeOnly]
     public interface IEligible<in T>
         where T : class, IDeclaration

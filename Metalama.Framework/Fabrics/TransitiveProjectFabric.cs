@@ -14,5 +14,7 @@ namespace Metalama.Framework.Fabrics
     /// executed first. Then, transitive fabrics are ordered by assembly name, then by distance to the root directory in the file system,
     /// then by type name.
     /// </remarks>
+    /// <seealso href="@exposing-configuration"/>
+    /// <seealso href="@applying-aspects"/>
     public abstract class TransitiveProjectFabric : ProjectFabric { }
 }

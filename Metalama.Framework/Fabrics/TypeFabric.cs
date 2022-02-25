@@ -7,6 +7,7 @@ namespace Metalama.Framework.Fabrics
     /// An interface that, when implemented by a nested type in a given type, allows that nested type to analyze and
     /// add aspects to the parent type.
     /// </summary>
+    /// <seealso href="@type-fabrics"/> 
     public abstract class TypeFabric : Fabric
     {
         /// <summary>
