@@ -50,7 +50,7 @@ namespace Metalama.Framework.Engine.Linking
                 {
                     var ret = replacement
                         ?.WithLeadingTrivia( node.GetLeadingTrivia().AddRange( replacement.GetLeadingTrivia() ) )
-                        ?.WithTrailingTrivia( replacement.GetTrailingTrivia().AddRange( node.GetTrailingTrivia() ) );
+                        .WithTrailingTrivia( replacement.GetTrailingTrivia().AddRange( node.GetTrailingTrivia() ) );
 
                     return ret;
                 }
