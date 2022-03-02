@@ -136,6 +136,11 @@ namespace Metalama.TestFramework
         public int? AppliedCodeFixIndex { get; set; }
 
         /// <summary>
+        /// Gets or sets a value indicating which end-of-line sequence is expected.
+        /// </summary>
+        public string? ExpectedEndOfLine { get; set; }
+
+        /// <summary>
         /// Applies <see cref="TestDirectoryOptions"/> to the current object by overriding any property
         /// that is not defined in the current object but defined in the argument.
         /// </summary>
@@ -297,6 +302,11 @@ namespace Metalama.TestFramework
                         {
                             this.AppliedCodeFixIndex = index;
                         }
+
+                        break;
+
+                    case "ExpectedEndOfLine":
+                        this.ExpectedEndOfLine = optionArg;
 
                         break;
 
