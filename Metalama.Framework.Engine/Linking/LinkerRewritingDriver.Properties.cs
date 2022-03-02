@@ -163,12 +163,12 @@ namespace Metalama.Framework.Engine.Linking
             AccessorDeclarationSyntax GetLinkedAccessor(
                 IntermediateSymbolSemanticKind semanticKind,
                 AccessorDeclarationSyntax accessorDeclaration,
-                IMethodSymbol symbol )
+                IMethodSymbol methodSymbol )
             {
                 var linkedBody =
                     this.GetLinkedBody(
-                        symbol.ToSemantic( semanticKind ),
-                        InliningContext.Create( this, symbol, generationContext! ) );
+                        methodSymbol.ToSemantic( semanticKind ),
+                        InliningContext.Create( this, methodSymbol, generationContext ) );
 
                 // Trivia processing:
                 //   * For block bodies methods, we preserve trivia of the opening/closing brace.

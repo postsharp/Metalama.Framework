@@ -7,6 +7,7 @@ namespace Metalama.Framework.Fabrics
     /// An interface that, when implemented by a type in a given namespace, allows that type to analyze and
     /// add aspects to that namespace.
     /// </summary>
+    /// <seealso href="@applying-aspects"/>
     public abstract class NamespaceFabric : Fabric
     {
         /// <summary>

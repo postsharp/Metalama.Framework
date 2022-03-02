@@ -1,4 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Compiler;
@@ -14,11 +14,6 @@ using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
 
 namespace Metalama.Framework.DesignTime.Preview;
-
-public interface ITransformationPreviewServiceImpl : IService
-{
-    Task<PreviewTransformationResult> PreviewTransformationAsync( string projectId, string syntaxTreeName, CancellationToken cancellationToken );
-}
 
 public class TransformationPreviewServiceImpl : ITransformationPreviewServiceImpl
 {

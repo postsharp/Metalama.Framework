@@ -10,6 +10,11 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Framework.Project
 {
+    /// <summary>
+    /// Exposes the properties of the current C# project, such as <see cref="Path"/>, <see cref="AssemblyReferences"/>, <see cref="PreprocessorSymbols"/>,
+    /// <see cref="Configuration"/> or <see cref="TargetFramework"/>. To access a custom MSBuild property, use <see cref="TryGetProperty"/>. You can extend
+    /// this interface with your own framework-specific by using the <see cref="Extension{T}"/> method.
+    /// </summary>
     [InternalImplement]
     [CompileTimeOnly]
     public interface IProject
@@ -43,6 +48,7 @@ namespace Metalama.Framework.Project
         /// Gets the set of properties passed from MSBuild. To expose an MSBuild property to this collection,
         /// define the <c>CompilerVisibleProperty</c> item. 
         /// </summary>
+        /// <seealso href="@exposing-configuration"/>
         bool TryGetProperty( string name, [NotNullWhen( true )] out string? value );
 
         /// <summary>
@@ -50,6 +56,7 @@ namespace Metalama.Framework.Project
         /// and have a default constructor. New instances will be initialized using <see cref="ProjectExtension.Initialize"/>.
         /// </summary>
         /// <typeparam name="T">The extension type, which must derive from <see cref="ProjectExtension"/> and have a default constructor.</typeparam>
+        /// <seealso href="@exposing-configuration"/>
         T Extension<T>()
             where T : ProjectExtension, new();
 

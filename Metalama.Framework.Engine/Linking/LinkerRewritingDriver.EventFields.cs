@@ -87,12 +87,12 @@ namespace Metalama.Framework.Engine.Linking
                 IntermediateSymbolSemanticKind semanticKind,
                 SyntaxKind accessorKind,
                 SyntaxKind accessorKeyword,
-                IMethodSymbol symbol )
+                IMethodSymbol methodSymbol )
             {
                 var linkedBody =
                     this.GetLinkedBody(
-                        symbol.ToSemantic( semanticKind ),
-                        InliningContext.Create( this, symbol, generationContext! ) );
+                        methodSymbol.ToSemantic( semanticKind ),
+                        InliningContext.Create( this, methodSymbol, generationContext ) );
 
                 var (openBraceLeadingTrivia, openBraceTrailingTrivia, closeBraceLeadingTrivia, closeBraceTrailingTrivia) =
                     (TriviaList(), TriviaList( ElasticLineFeed ), TriviaList( ElasticMarker ), TriviaList( ElasticLineFeed ));

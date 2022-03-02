@@ -1,7 +1,7 @@
 <Project>
 
     <!-- Set the default version -->
-    <Import Project="MainVersion.props"/>
+    <Import Project="MainVersion.props" />
 
     <PropertyGroup>
         <MetalamaVersion>$(MainVersion)$(PackageVersionSuffix)</MetalamaVersion>
@@ -11,7 +11,7 @@
 
     <!-- Versions of dependencies -->
     <PropertyGroup>
-        <PostSharpEngineeringVersion>1.0.43-preview</PostSharpEngineeringVersion>
+        <PostSharpEngineeringVersion>1.0.48-preview</PostSharpEngineeringVersion>
         <MetalamaCompilerVersion>branch:master</MetalamaCompilerVersion>
         <MicrosoftCSharpVersion>4.7.0</MicrosoftCSharpVersion>
         <!-- We should match the versions used by the lowest version of Roslyn we support.-->
@@ -43,7 +43,7 @@
     </PropertyGroup>
 
     <!-- Import overrides for the local build -->
-    <Import Project="Versions.g.props" Condition="Exists('Versions.g.props')"/>
+    <Import Project="Versions.g.props" Condition="Exists('Versions.g.props')" />
 
     <PropertyGroup>
         <AssemblyVersion>$(MetalamaAssemblyVersion)</AssemblyVersion>

@@ -41,6 +41,7 @@ namespace Metalama.Framework.Aspects
         /// <summary>
         /// Gets access to the declaration being overridden or introduced.
         /// </summary>
+        /// <seealso href="@templates"/>
         [TemplateKeyword]
         public static IMetaTarget Target => CurrentContext.Target;
 
@@ -49,6 +50,7 @@ namespace Metalama.Framework.Aspects
         /// calling <see cref="Proceed"/> invokes the method being overridden. Note that the way how the
         /// logic is invoked (as a method call or inlining) is considered an implementation detail.
         /// </summary>
+        /// <seealso href="@templates"/>
         [TemplateKeyword]
         public static dynamic? Proceed() => throw CreateException();
 
@@ -58,18 +60,21 @@ namespace Metalama.Framework.Aspects
         /// the actual return type of the overridden method or accessor is the one of the overwritten semantic, so it
         /// can be a void <see cref="Task"/>, a <see cref="ValueType"/>, or any other type.
         /// </summary>
+        /// <seealso href="@templates"/>
         [TemplateKeyword]
         public static Task<dynamic?> ProceedAsync() => throw CreateException();
 
         /// <summary>
         /// Synonym to <see cref="Proceed"/>, but the return type is exposed as a <c>IEnumerable&lt;dynamic?&gt;</c>.
         /// </summary>
+        /// <seealso href="@templates"/>
         [TemplateKeyword]
         public static IEnumerable<dynamic?> ProceedEnumerable() => throw CreateException();
 
         /// <summary>
         /// Synonym to <see cref="Proceed"/>, but the return type is exposed as a <c>IEnumerator&lt;dynamic?&gt;</c>.
         /// </summary>
+        /// <seealso href="@templates"/>
         [TemplateKeyword]
         public static IEnumerator<dynamic?> ProceedEnumerator() => throw CreateException();
 
@@ -77,12 +82,14 @@ namespace Metalama.Framework.Aspects
         /// <summary>
         /// Synonym to <see cref="Proceed"/>, but the return type is exposed as a <c>IAsyncEnumerable&lt;dynamic?&gt;</c>.
         /// </summary>
+        /// <seealso href="@templates"/>
         [TemplateKeyword]
         public static IAsyncEnumerable<dynamic?> ProceedAsyncEnumerable() => throw CreateException();
 
         /// <summary>
         /// Synonym to <see cref="Proceed"/>, but the return type is exposed as a <c>IAsyncEnumerator&lt;dynamic?&gt;</c>.
         /// </summary>
+        /// <seealso href="@templates"/>
         [TemplateKeyword]
         public static IAsyncEnumerator<dynamic?> ProceedAsyncEnumerator() => throw CreateException();
 #endif
@@ -191,6 +198,7 @@ namespace Metalama.Framework.Aspects
         /// Gets the current <see cref="IAspectInstance"/>, which gives access to the <see cref="IAspectInstance.Predecessors"/>
         /// and the <see cref="IAspectInstance.SecondaryInstances"/> of the current aspect.
         /// </summary>
+        /// <seealso href="@templates"/>
         public static IAspectInstance AspectInstance => CurrentContext.AspectInstance;
 
         /// <summary>
@@ -210,12 +218,14 @@ namespace Metalama.Framework.Aspects
         /// <remarks>
         /// This method is not able to add a comment to an empty block. The block must contain at least one statement.
         /// </remarks>
+        /// <seealso href="@templates"/>
         [TemplateKeyword]
         public static void InsertComment( params string?[] lines ) => throw CreateException();
 
         /// <summary>
         /// Inserts a statement into the target code, where the statement is given as an <see cref="IStatement"/>.
         /// </summary>
+        /// <seealso href="@templates"/>
         [TemplateKeyword]
         public static void InsertStatement( IStatement statement ) => throw CreateException();
 
@@ -223,6 +233,7 @@ namespace Metalama.Framework.Aspects
         /// Inserts a statement into the target code, where the statement is given as an <see cref="IExpression"/>.
         /// Note that not all expressions can be used as statements.
         /// </summary>
+        /// <seealso href="@templates"/>
         [TemplateKeyword]
         public static void InsertStatement( IExpression statement ) => throw CreateException();
 
@@ -231,6 +242,7 @@ namespace Metalama.Framework.Aspects
         /// Calling this overload is equivalent to calling the <see cref="InsertStatement(Metalama.Framework.Code.SyntaxBuilders.IStatement)"/> overload
         /// with the result of the <see cref="ParseStatement"/> method.
         /// </summary>
+        /// <seealso href="@templates"/>
         [TemplateKeyword]
         public static void InsertStatement( string statement ) => throw CreateException();
 
@@ -242,6 +254,7 @@ namespace Metalama.Framework.Aspects
         /// <param name="expression">A run-time expression, possibly containing compile-time sub-expressions.</param>
         /// <param name="definedException">A compile-time object representing <paramref name="expression"/>. Note that may have to specify the
         /// type of the <c>out</c> variable explicitly, as <c>out var</c> does not work when another argument is dynamic.</param>
+        /// <seealso href="@templates"/>
         [TemplateKeyword]
         public static void DefineExpression( dynamic? expression, out IExpression definedException )
             => definedException = CurrentContext.CodeBuilder.Expression( expression );
@@ -250,6 +263,7 @@ namespace Metalama.Framework.Aspects
         /// Parses a string containing a C# expression and returns an <see cref="IExpression"/>. The <see cref="IExpression.Value"/> property
         /// allows to use this expression in a template.
         /// </summary>
+        /// <seealso href="@templates"/>
         public static IExpression ParseExpression( string code ) => CurrentContext.CodeBuilder.ParseExpression( code );
 
         /// <summary>
@@ -257,6 +271,7 @@ namespace Metalama.Framework.Aspects
         /// using <see cref="InsertStatement(Metalama.Framework.Code.SyntaxBuilders.IStatement)"/>. The string must contain a single statement,
         /// and must be finished by a semicolon or a closing bracket.
         /// </summary>
+        /// <seealso href="@templates"/>
         public static IStatement ParseStatement( string code ) => CurrentContext.CodeBuilder.ParseStatement( code );
 
         internal static IDisposable WithContext( IMetaApi current )

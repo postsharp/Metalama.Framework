@@ -9,6 +9,7 @@ namespace Metalama.Framework.Diagnostics;
 /// <summary>
 /// Encapsulates an <see cref="IDiagnosticSink"/> and the default target of diagnostics, suppressions, and code fixes.
 /// </summary>
+/// <seealso href="@diagnostics"/>
 public readonly struct ScopedDiagnosticSink : IDiagnosticSink
 {
     private readonly IDiagnosticSink _sink;

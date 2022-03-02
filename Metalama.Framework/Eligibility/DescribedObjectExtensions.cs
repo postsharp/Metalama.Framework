@@ -8,6 +8,7 @@ namespace Metalama.Framework.Eligibility
     /// <summary>
     /// Extension methods for <see cref="IDescribedObject{T}"/>.
     /// </summary>
+    /// <seealso href="@eligibility"/>
     [CompileTimeOnly]
     public static class DescribedObjectExtensions
     {
