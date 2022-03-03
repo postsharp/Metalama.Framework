@@ -3,6 +3,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
+using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Diagnostics;
@@ -406,9 +407,21 @@ namespace Metalama.Framework.Engine.CodeModel
         /// </summary>
         /// <param name="namedType">Type.</param>
         /// <param name="signatureTemplate">Method that acts as a template for the signature.</param>
+        /// <param name="additionalMethods">A set of additional methods that have been added to <paramref name="namedType"/>.</param>
         /// <returns>A method of the given signature that is visible from the given type or <c>null</c> if no such method exists.</returns>
-        public static IMethod? FindClosestVisibleMethod( this INamedType namedType, IMethod signatureTemplate )
+        public static IMethod? FindClosestVisibleMethod( this INamedType namedType, IMethod signatureTemplate, IReadOnlyList<IMethod> additionalMethods )
         {
+            if ( additionalMethods.Count > 0 )
+            {
+                var additionalMethodList = new MethodList( (Declaration) namedType, additionalMethods.Select( x => x.ToMemberRef() ) );
+                var method = additionalMethodList.OfExactSignature( signatureTemplate, matchIsStatic: false, declaredOnly: true );
+
+                if ( method != null )
+                {
+                    return method;
+                }
+            }
+
             var currentType = (INamedType?) namedType;
 
             while ( currentType != null )
@@ -431,8 +444,12 @@ namespace Metalama.Framework.Engine.CodeModel
         /// </summary>
         /// <param name="namedType">Type.</param>
         /// <param name="signatureTemplate">Property that acts as a template for the signature.</param>
+        /// <param name="additionalProperties">A set of additional properties that have been added to <paramref name="namedType"/>.</param> 
         /// <returns>A property of the given signature that is visible from the given type or <c>null</c> if no such property exists.</returns>
-        public static IProperty? FindClosestVisibleProperty( this INamedType namedType, IProperty signatureTemplate )
+        public static IProperty? FindClosestVisibleProperty(
+            this INamedType namedType,
+            IProperty signatureTemplate,
+            IReadOnlyList<IProperty> additionalProperties )
         {
             var currentType = (INamedType?) namedType;
 
@@ -456,8 +473,9 @@ namespace Metalama.Framework.Engine.CodeModel
         /// </summary>
         /// <param name="namedType">Type.</param>
         /// <param name="signatureTemplate">Event that acts as a template for the signature.</param>
+        /// <param name="additionalEvents">A set of additional events that have been added to <paramref name="namedType"/>.</param>
         /// <returns>An event of the given signature that is visible from the given type or <c>null</c> if no such method exists.</returns>
-        public static IEvent? FindClosestVisibleEvent( this INamedType namedType, IEvent signatureTemplate )
+        public static IEvent? FindClosestVisibleEvent( this INamedType namedType, IEvent signatureTemplate, IReadOnlyList<IEvent> additionalEvents )
         {
             var currentType = (INamedType?) namedType;
 

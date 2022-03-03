@@ -13,15 +13,19 @@ namespace Metalama.Framework.Engine.Pipeline
     {
         public AspectLayerId AspectLayerId { get; }
 
+        public PipelineStepPhase Phase { get; }
+
         public int Depth { get; }
 
-        public PipelineStepId( AspectLayerId aspectLayerId, int depth )
+        public PipelineStepId( AspectLayerId aspectLayerId, PipelineStepPhase phase, int depth )
         {
             this.AspectLayerId = aspectLayerId;
+            this.Phase = phase;
             this.Depth = depth;
         }
 
-        public bool Equals( PipelineStepId other ) => this.AspectLayerId.Equals( other.AspectLayerId ) && this.Depth == other.Depth;
+        public bool Equals( PipelineStepId other )
+            => this.AspectLayerId.Equals( other.AspectLayerId ) && this.Depth == other.Depth && this.Phase == other.Phase;
 
         public override bool Equals( object? obj ) => obj is PipelineStepId other && this.Equals( other );
 

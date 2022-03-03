@@ -1093,29 +1093,41 @@ namespace Metalama.Framework.Engine.CompileTime
             {
                 if ( this._currentContext.Scope != TemplatingScope.RunTimeOnly )
                 {
-                    if ( this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetSymbolInfo( node.Type ).Symbol is ITypeSymbol typeSymbol
-                         && this.SymbolClassifier.GetTemplatingScope( typeSymbol ) == TemplatingScope.RunTimeOnly )
+                    var typeSymbol = (ITypeSymbol?) this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetSymbolInfo( node.Type ).Symbol;
+
+                    if ( typeSymbol != null )
                     {
-                        // We are in a compile-time-only block but we have a typeof to a run-time-only block. 
-                        // This is a situation we can handle by rewriting the typeof to a call to UserCodeContext.GetCompileTimeType.
+                        if ( typeSymbol is INamedTypeSymbol { IsUnboundGenericType: true } namedType
+                             && namedType.TypeArguments[0].Kind == SymbolKind.ErrorType )
+                        {
+                            // We have a case like typeof(Foo<>). We need to fix it here, otherwise later processing is incorrect.
 
-                        var memberAccess =
-                            MemberAccessExpression(
-                                SyntaxKind.SimpleMemberAccessExpression,
-                                this._compileTimeTypeName,
-                                IdentifierName( nameof(CompileTimeType.GetCompileTimeType) ) );
+                            typeSymbol = namedType.OriginalDefinition;
+                        }
 
-                        var invocation = InvocationExpression(
-                            memberAccess,
-                            ArgumentList(
-                                SeparatedList(
-                                    new[]
-                                    {
-                                        Argument( SyntaxFactoryEx.LiteralExpression( typeSymbol.GetSymbolId().ToString() ) ),
-                                        Argument( SyntaxFactoryEx.LiteralExpression( typeSymbol.GetReflectionName() ) )
-                                    } ) ) );
+                        if ( this.SymbolClassifier.GetTemplatingScope( typeSymbol ) == TemplatingScope.RunTimeOnly )
+                        {
+                            // We are in a compile-time-only block but we have a typeof to a run-time-only block. 
+                            // This is a situation we can handle by rewriting the typeof to a call to UserCodeContext.GetCompileTimeType.
 
-                        return invocation;
+                            var memberAccess =
+                                MemberAccessExpression(
+                                    SyntaxKind.SimpleMemberAccessExpression,
+                                    this._compileTimeTypeName,
+                                    IdentifierName( nameof(CompileTimeType.GetCompileTimeType) ) );
+
+                            var invocation = InvocationExpression(
+                                memberAccess,
+                                ArgumentList(
+                                    SeparatedList(
+                                        new[]
+                                        {
+                                            Argument( SyntaxFactoryEx.LiteralExpression( typeSymbol.GetSymbolId().ToString() ) ),
+                                            Argument( SyntaxFactoryEx.LiteralExpression( typeSymbol.GetReflectionName() ) )
+                                        } ) ) );
+
+                            return invocation;
+                        }
                     }
                 }
 

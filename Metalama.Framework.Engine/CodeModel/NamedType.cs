@@ -315,7 +315,12 @@ namespace Metalama.Framework.Engine.CodeModel
                         $"Cannot construct a generic instance of this nested type because the declaring type '{this.DeclaringType}' has unbound type parameters." ) );
             }
 
-            return this.Compilation.Factory.GetNamedType( this.TypeSymbol.Construct( typeArguments.Select( a => a.GetSymbol() ).ToArray() ) );
+            var typeArgumentSymbols = typeArguments.Select( a => a.GetSymbol() ).ToArray();
+
+            var typeSymbol = this.TypeSymbol;
+            var constructedTypeSymbol = typeSymbol.Construct( typeArgumentSymbols );
+
+            return this.Compilation.Factory.GetNamedType( constructedTypeSymbol );
         }
 
         public IEnumerable<IMember> GetOverridingMembers( IMember member )

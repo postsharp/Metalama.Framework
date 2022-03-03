@@ -112,6 +112,23 @@ namespace Metalama.Framework.Engine.Templating
                     decimal s => this.Literal( s ),
                     _ => throw new ArgumentOutOfRangeException()
                 };
+
+            public ExpressionSyntax Literal( object literal )
+                => literal switch
+                {
+                    string s => this.Literal( s ),
+                    char s => this.Literal( s ),
+                    int s => this.Literal( s ),
+                    uint s => this.Literal( s ),
+                    long s => this.Literal( s ),
+                    ulong s => this.Literal( s ),
+                    short s => this.Literal( s ),
+                    ushort s => this.Literal( s ),
+                    double s => this.Literal( s ),
+                    float s => this.Literal( s ),
+                    decimal s => this.Literal( s ),
+                    _ => throw new ArgumentOutOfRangeException()
+                };
         }
     }
 }

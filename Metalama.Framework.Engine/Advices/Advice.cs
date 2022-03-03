@@ -4,6 +4,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Transformations;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 
@@ -23,6 +24,8 @@ namespace Metalama.Framework.Engine.Advices
 
         public ImmutableDictionary<string, object?> ReadOnlyTags => this.Tags?.ToImmutableDictionary() ?? ImmutableDictionary<string, object?>.Empty;
 
+        public int Order { get; set; }
+
         protected Advice(
             IAspectInstanceInternal aspect,
             TemplateClassInstance template,
@@ -37,8 +40,8 @@ namespace Metalama.Framework.Engine.Advices
             this.AspectLayerId = new AspectLayerId( this.Aspect.AspectClass, layerName );
         }
 
-        public abstract void Initialize( IReadOnlyList<Advice> previousAdvices, IDiagnosticAdder diagnosticAdder );
+        public abstract void Initialize( IDiagnosticAdder diagnosticAdder );
 
-        public abstract AdviceResult ToResult( ICompilation compilation );
+        public abstract AdviceResult ToResult( ICompilation compilation, IReadOnlyList<IObservableTransformation> observableTransformations );
     }
 }

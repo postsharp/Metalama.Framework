@@ -124,7 +124,7 @@ namespace Metalama.Framework.Engine.Pipeline
                             (previousStep.AspectLayer.AspectLayerId.ToString(), currentStep.AspectLayer.AspectLayerId.ToString()) ) );
                 }
 
-                if ( previousStep.AspectLayer == currentStep.AspectLayer && previousStep.Id.Depth >= currentStep.Id.Depth )
+                if ( this._comparer.Compare( currentStep.Id, previousStep.Id ) < 0 )
                 {
                     throw new AssertionFailedException( "Steps with lower depth must be processed before steps with higher depth." );
                 }
@@ -150,7 +150,7 @@ namespace Metalama.Framework.Engine.Pipeline
                     }
                     else
                     {
-                        if ( !this.TryGetOrAddStep( aspectLayerId, -1, false, out var step ) )
+                        if ( !this.TryGetOrAddStep( aspectLayerId, PipelineStepPhase.Initialize, -1, false, out var step ) )
                         {
                             this._diagnostics.Report(
                                 GeneralDiagnosticDescriptors.CannotAddChildAspectToPreviousPipelineStep.CreateRoslynDiagnostic(
@@ -171,9 +171,14 @@ namespace Metalama.Framework.Engine.Pipeline
             return success;
         }
 
-        private bool TryGetOrAddStep( AspectLayerId aspectLayerId, int depth, bool allowAddToCurrentLayer, [NotNullWhen( true )] out PipelineStep? step )
+        private bool TryGetOrAddStep(
+            AspectLayerId aspectLayerId,
+            PipelineStepPhase phase,
+            int depth,
+            bool allowAddToCurrentLayer,
+            [NotNullWhen( true )] out PipelineStep? step )
         {
-            var stepId = new PipelineStepId( aspectLayerId, depth );
+            var stepId = new PipelineStepId( aspectLayerId, phase, depth );
 
             var aspectLayer = this._comparer.GetOrderedAspectLayer( aspectLayerId );
 
@@ -181,7 +186,9 @@ namespace Metalama.Framework.Engine.Pipeline
             {
                 var currentLayerOrder = this._currentStep.AspectLayer.Order;
 
-                if ( aspectLayer.Order < currentLayerOrder || (!allowAddToCurrentLayer && aspectLayer.Order == currentLayerOrder) )
+                if ( aspectLayer.Order < currentLayerOrder ||
+                     (aspectLayerId == this._currentStep.AspectLayer.AspectLayerId
+                      && (!allowAddToCurrentLayer || this._comparer.Compare( stepId, this._currentStep.Id ) < 0)) )
                 {
                     // Cannot add a step before the current one.
                     step = null;
@@ -217,7 +224,7 @@ namespace Metalama.Framework.Engine.Pipeline
             {
                 var depth = this.LastCompilation.GetDepth( advice.TargetDeclaration );
 
-                if ( !this.TryGetOrAddStep( advice.AspectLayerId, depth, true, out var step ) )
+                if ( !this.TryGetOrAddStep( advice.AspectLayerId, PipelineStepPhase.Transform, depth, true, out var step ) )
                 {
                     this._diagnostics.Report(
                         GeneralDiagnosticDescriptors.CannotAddAdviceToPreviousPipelineStep.CreateRoslynDiagnostic(
@@ -241,7 +248,12 @@ namespace Metalama.Framework.Engine.Pipeline
             {
                 var depth = this.LastCompilation.GetDepth( aspectInstance.TargetDeclaration );
 
-                if ( !this.TryGetOrAddStep( new AspectLayerId( aspectInstance.AspectInstance.AspectClass ), depth, true, out var step ) )
+                if ( !this.TryGetOrAddStep(
+                        new AspectLayerId( aspectInstance.AspectInstance.AspectClass ),
+                        PipelineStepPhase.Initialize,
+                        depth,
+                        true,
+                        out var step ) )
                 {
                     // This should not happen here. The source should not have been added.
                     throw new AssertionFailedException();

@@ -356,11 +356,19 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
                 var semanticModel = compilation.GetSemanticModel( syntaxTree );
 
+                var pipelineMustReportPausedPipelineAsErrors =
+                    pipeline.MustReportPausedPipelineAsErrors && pipeline.IsCompileTimeSyntaxTreeOutdated( syntaxTree.FilePath );
+
+                if ( pipelineMustReportPausedPipelineAsErrors )
+                {
+                    Logger.DesignTime.Trace?.Log( $"The syntax tree '{syntaxTree.FilePath}' is marked as outdated." );
+                }
+
                 TemplatingCodeValidator.Validate(
                     pipeline.ServiceProvider,
                     semanticModel,
                     diagnostics.Add,
-                    pipeline.MustReportPausedPipelineAsErrors && pipeline.IsCompileTimeSyntaxTreeOutdated( syntaxTree.FilePath ),
+                    pipelineMustReportPausedPipelineAsErrors,
                     true,
                     cancellationToken );
 

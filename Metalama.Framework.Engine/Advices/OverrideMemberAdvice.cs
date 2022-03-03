@@ -20,7 +20,7 @@ namespace Metalama.Framework.Engine.Advices
             string? layerName,
             Dictionary<string, object?>? tags ) : base( aspect, templateInstance, targetDeclaration, layerName, tags ) { }
 
-        public override void Initialize( IReadOnlyList<Advice>? declarativeAdvices, IDiagnosticAdder diagnosticAdder )
+        public override void Initialize( IDiagnosticAdder diagnosticAdder )
         {
             // TODO: Test that the advice is not applied to declaration in a base class.
         }

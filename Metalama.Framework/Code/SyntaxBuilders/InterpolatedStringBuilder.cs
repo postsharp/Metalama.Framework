@@ -44,7 +44,7 @@ namespace Metalama.Framework.Code.SyntaxBuilders
         /// <summary>
         /// Creates a compile-time <see cref="IExpression"/> from the current <see cref="ExpressionBuilder"/>.
         /// </summary>
-        public IExpression ToExpression() => meta.CurrentContext.CodeBuilder.BuildInterpolatedString( this );
+        public IExpression ToExpression() => SyntaxBuilder.CurrentImplementation.BuildInterpolatedString( this );
 
         public InterpolatedStringBuilder Clone() => new( this );
     }

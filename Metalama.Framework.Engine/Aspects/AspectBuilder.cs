@@ -32,14 +32,14 @@ namespace Metalama.Framework.Engine.Aspects
         public AspectBuilder(
             T target,
             UserDiagnosticSink diagnosticSink,
-            IEnumerable<Advice> declarativeAdvices,
+            ImmutableArray<Advice> declarativeAdvices,
             AdviceFactory adviceFactory,
             AspectPipelineConfiguration configuration,
             IAspectInstance aspectInstance,
             CancellationToken cancellationToken )
         {
             this.Target = target;
-            this._declarativeAdvices = declarativeAdvices.ToImmutableArray();
+            this._declarativeAdvices = declarativeAdvices;
             this._diagnosticSink = diagnosticSink;
             this._configuration = configuration;
             this.AspectInstance = aspectInstance;
@@ -132,7 +132,7 @@ namespace Metalama.Framework.Engine.Aspects
                     this.AspectInstance,
                     success,
                     this._diagnosticSink.ToImmutable(),
-                    this._declarativeAdvices.ToImmutableArray().AddRange( this.AdviceFactory.Advices ),
+                    this._declarativeAdvices.AddRange( this.AdviceFactory.Advices ),
                     this.AspectSources,
                     this.ValidatorSources )
                 : new AspectInstanceResult(

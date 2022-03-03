@@ -5,8 +5,9 @@ using Metalama.Framework.Engine.Advices;
 using Metalama.Framework.Engine.AspectOrdering;
 using Metalama.Framework.Engine.CodeFixes;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Transformations;
+using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -22,7 +23,11 @@ namespace Metalama.Framework.Engine.Pipeline
 
         public AdvicePipelineStep( PipelineStepId id, OrderedAspectLayer aspectLayer ) : base( id, aspectLayer ) { }
 
-        public void AddAdvice( Advice advice ) => this._advices.Add( advice );
+        public void AddAdvice( Advice advice )
+        {
+            advice.Order = this._advices.Count + 1;
+            this._advices.Add( advice );
+        }
 
         public override CompilationModel Execute(
             CompilationModel compilation,
@@ -31,18 +36,38 @@ namespace Metalama.Framework.Engine.Pipeline
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            var adviceResults = this._advices
-                .Select( ai => ai.ToResult( compilation ) )
-                .ToList();
+            if ( this._advices.Count == 0 )
+            {
+                // Nothing to do, so don't allocate memory.
 
-            var addedObservableIntroductions = adviceResults.SelectMany( ar => ar.ObservableTransformations ).ToReadOnlyList();
-            var addedNonObservableTransformations = adviceResults.SelectMany( ar => ar.NonObservableTransformations );
-            var addedDiagnostics = adviceResults.SelectMany( ar => ar.Diagnostics );
+                return compilation;
+            }
 
-            pipelineStepsState.AddNonObservableTransformations( addedNonObservableTransformations );
-            pipelineStepsState.AddDiagnostics( addedDiagnostics, Enumerable.Empty<ScopedSuppression>(), Enumerable.Empty<CodeFixInstance>() );
+            var observableTransformations = new List<IObservableTransformation>();
+            var nonObservableTransformations = new List<INonObservableTransformation>();
+            var diagnostics = new List<Diagnostic>();
 
-            return compilation.WithTransformations( addedObservableIntroductions );
+            foreach ( var advice in this._advices )
+            {
+                var result = advice.ToResult( compilation, observableTransformations );
+
+                foreach ( var transformation in result.ObservableTransformations )
+                {
+                    observableTransformations.Add( transformation );
+                }
+
+                foreach ( var transformation in result.NonObservableTransformations )
+                {
+                    nonObservableTransformations.Add( transformation );
+                }
+
+                diagnostics.AddRange( result.Diagnostics );
+            }
+
+            pipelineStepsState.AddNonObservableTransformations( nonObservableTransformations );
+            pipelineStepsState.AddDiagnostics( diagnostics, Enumerable.Empty<ScopedSuppression>(), Enumerable.Empty<CodeFixInstance>() );
+
+            return compilation.WithTransformations( observableTransformations );
         }
     }
 }

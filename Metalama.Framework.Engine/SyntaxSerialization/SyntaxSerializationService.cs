@@ -253,17 +253,35 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
         /// <exception cref="DiagnosticException">When the object cannot be serialized, for example if it's of an unsupported type.</exception>
         public ExpressionSyntax Serialize<T>( T? o, SyntaxSerializationContext serializationContext )
         {
+            if ( !this.TrySerialize( o, serializationContext, out var expression ) )
+            {
+                throw SerializationDiagnosticDescriptors.UnsupportedSerialization.CreateException( o!.GetType() );
+            }
+            else
+            {
+                return expression;
+            }
+        }
+
+        public bool TrySerialize<T>( T? o, SyntaxSerializationContext serializationContext, [NotNullWhen( true )] out ExpressionSyntax? expression )
+        {
             if ( o == null )
             {
-                return LiteralExpression( SyntaxKind.NullLiteralExpression );
+                expression = LiteralExpression( SyntaxKind.NullLiteralExpression );
+
+                return true;
             }
 
             if ( !this.TryGetSerializer( o, out var serializer ) )
             {
-                throw SerializationDiagnosticDescriptors.UnsupportedSerialization.CreateException( o.GetType() );
+                expression = null;
+
+                return false;
             }
 
-            return serializer.Serialize( o, serializationContext );
+            expression = serializer.Serialize( o, serializationContext );
+
+            return true;
         }
     }
 }

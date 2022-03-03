@@ -81,6 +81,7 @@ namespace Metalama.Framework.Engine.Templating
             this.TemplateInstance = templateInstance;
             this.MetaApi = metaApi;
             this.SyntaxSerializationService = syntaxSerializationService;
+            this.SyntaxSerializationContext = new SyntaxSerializationContext( compilation, syntaxGenerationContext.SyntaxGenerator );
             this.SyntaxGenerationContext = syntaxGenerationContext;
             this.LexicalScope = lexicalScope;
             this._proceedExpression = proceedExpression;
@@ -89,6 +90,8 @@ namespace Metalama.Framework.Engine.Templating
         public object TemplateInstance { get; }
 
         public SyntaxSerializationService SyntaxSerializationService { get; }
+
+        public SyntaxSerializationContext SyntaxSerializationContext { get; }
 
         public SyntaxGenerationContext SyntaxGenerationContext { get; }
 

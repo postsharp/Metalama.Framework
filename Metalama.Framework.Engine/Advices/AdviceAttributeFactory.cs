@@ -138,7 +138,7 @@ namespace Metalama.Framework.Engine.Advices
                                 throw new AssertionFailedException( $"Don't know how to introduce a {templateDeclaration.DeclarationKind}." );
                         }
 
-                        advice.Initialize( Array.Empty<Advice>(), diagnosticAdder );
+                        advice.Initialize( diagnosticAdder );
 
                         ((MemberBuilder) builder).ApplyTemplateAttribute( template.Attribute );
 

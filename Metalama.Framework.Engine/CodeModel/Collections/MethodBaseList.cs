@@ -201,7 +201,9 @@ namespace Metalama.Framework.Engine.CodeModel.Collections
                     IsMatchingParameter,
                     isStatic );
 
-                return matching.SingleOrDefault();
+                // We use First and not Single because advices may provide many methods with same signature.
+                // They do not make it to the final code, but they are stored in this class.
+                return matching.FirstOrDefault();
             }
 
             static bool IsMatchingParameter(

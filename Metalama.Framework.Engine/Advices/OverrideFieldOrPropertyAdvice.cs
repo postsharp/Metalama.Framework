@@ -34,9 +34,9 @@ namespace Metalama.Framework.Engine.Advices
             this.SetTemplate = setTemplate;
         }
 
-        public override void Initialize( IReadOnlyList<Advice>? declarativeAdvices, IDiagnosticAdder diagnosticAdder ) { }
+        public override void Initialize( IDiagnosticAdder diagnosticAdder ) { }
 
-        public override AdviceResult ToResult( ICompilation compilation )
+        public override AdviceResult ToResult( ICompilation compilation, IReadOnlyList<IObservableTransformation> observableTransformations )
         {
             // TODO: Translate templates to this compilation.
             // TODO: order should be self if the target is introduced on the same layer.

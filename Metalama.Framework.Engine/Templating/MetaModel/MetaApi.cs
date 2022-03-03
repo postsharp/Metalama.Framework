@@ -25,96 +25,19 @@ using SpecialType = Metalama.Framework.Code.SpecialType;
 
 namespace Metalama.Framework.Engine.Templating.MetaModel
 {
-    /// <summary>
-    /// The implementation of <see cref="IMetaApi"/>.
-    /// </summary>
-    internal class MetaApi : IMetaApi, IMetaTarget, IMetaCodeBuilder
+    internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
     {
-        private readonly IAdvisedFieldOrProperty? _fieldOrProperty;
-        private readonly IAdvisedMethod? _method;
-        private readonly IAdvisedEvent? _event;
-        private readonly INamedType? _type;
-        private readonly MetaApiProperties _common;
-
-        private Exception CreateInvalidOperationException( string memberName, string? description = null )
-            => TemplatingDiagnosticDescriptors.MemberMemberNotAvailable.CreateException(
-                (this._common.Template.Declaration!, "meta." + memberName, this.Declaration, this.Declaration.DeclarationKind,
-                 description ?? "I" + memberName) );
-
-        public IConstructor Constructor => throw new NotImplementedException();
-
-        public IMethodBase MethodBase => this._method ?? throw this.CreateInvalidOperationException( nameof(this.MethodBase) );
-
-        public IAdvisedField Field => this._fieldOrProperty as IAdvisedField ?? throw this.CreateInvalidOperationException( nameof(this.Field) );
-
-        public IAdvisedFieldOrProperty FieldOrProperty => this._fieldOrProperty ?? throw this.CreateInvalidOperationException( nameof(this.FieldOrProperty) );
-
-        public IDeclaration Declaration { get; }
-
-        public IMember Member => this.Declaration as IMember ?? throw this.CreateInvalidOperationException( nameof(this.Member) );
-
-        public IAdvisedMethod Method => this._method ?? throw this.CreateInvalidOperationException( nameof(this.Method) );
-
-        public IAdvisedProperty Property => this._fieldOrProperty as IAdvisedProperty ?? throw this.CreateInvalidOperationException( nameof(this.Property) );
-
-        public IAdvisedEvent Event => this._event ?? throw this.CreateInvalidOperationException( nameof(this.Event) );
-
-        public IAdvisedParameterList Parameters => this._method?.Parameters ?? throw this.CreateInvalidOperationException( nameof(this.Parameters) );
-
-        public INamedType Type => this._type ?? throw this.CreateInvalidOperationException( nameof(this.Type) );
-
         public ICompilation Compilation { get; }
 
-        public IProject Project => this.Compilation.Project;
+        public OurSyntaxGenerator SyntaxGenerator { get; }
 
-        private ThisInstanceUserReceiver GetThisOrBase( string expressionName, AspectReferenceSpecification linkerAnnotation )
-            => this._type switch
-            {
-                null => throw this.CreateInvalidOperationException( expressionName ),
-                { IsStatic: false } when this.Declaration is IMemberOrNamedType { IsStatic: false }
-                    => new ThisInstanceUserReceiver(
-                        this.Type,
-                        linkerAnnotation ),
-
-                _ => throw TemplatingDiagnosticDescriptors.CannotUseThisInStaticContext.CreateException(
-                    (this._common.Template.Declaration!, expressionName, this.Declaration, this.Declaration.DeclarationKind) )
-            };
-
-        public IMetaTarget Target => this;
-
-        public IMetaCodeBuilder CodeBuilder => this;
-
-        public IAspectInstance AspectInstance => this._common.AspectInstance;
-
-        public object This => this.GetThisOrBase( "meta.This", new AspectReferenceSpecification( this._common.AspectLayerId, AspectReferenceOrder.Final ) );
-
-        public object Base => this.GetThisOrBase( "meta.Base", new AspectReferenceSpecification( this._common.AspectLayerId, AspectReferenceOrder.Base ) );
-
-        public object ThisStatic
-            => new ThisTypeUserReceiver( this.Type, new AspectReferenceSpecification( this._common.AspectLayerId, AspectReferenceOrder.Final ) );
-
-        public object BaseStatic
-            => new ThisTypeUserReceiver( this.Type, new AspectReferenceSpecification( this._common.AspectLayerId, AspectReferenceOrder.Base ) );
-
-        public IReadOnlyDictionary<string, object?> Tags => this._common.Tags;
-
-        IDiagnosticSink IMetaApi.Diagnostics => this._common.Diagnostics;
-
-        [ExcludeFromCodeCoverage]
-        public void DebugBreak()
+        public SyntaxBuilderImpl( ICompilation compilation, OurSyntaxGenerator syntaxGenerator )
         {
-            var trustOptions = this._common.ServiceProvider.GetRequiredService<IProjectOptions>();
-
-            if ( !trustOptions.IsUserCodeTrusted )
-            {
-                return;
-            }
-
-            if ( Debugger.IsAttached )
-            {
-                Debugger.Break();
-            }
+            this.Compilation = compilation;
+            this.SyntaxGenerator = syntaxGenerator;
         }
+
+        public IProject Project => this.Compilation.Project;
 
         public IExpression Expression( object? expression )
             => RuntimeExpression.FromValue( expression, this.Compilation, TemplateExpansionContext.CurrentSyntaxGenerationContext )
@@ -187,7 +110,7 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
 
         public void AppendTypeName( IType type, StringBuilder stringBuilder )
         {
-            var code = this._common.SyntaxGenerationContext.SyntaxGenerator.Type( type.GetSymbol().AssertNotNull() ).ToString();
+            var code = this.SyntaxGenerator.Type( type.GetSymbol().AssertNotNull() ).ToString();
             stringBuilder.Append( code );
         }
 
@@ -210,15 +133,100 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
                 expression == null
                     ? "null"
                     : ((RuntimeExpression) expression).Syntax.NormalizeWhitespace().ToFullString() );
+    }
+
+    /// <summary>
+    /// The implementation of <see cref="IMetaApi"/>.
+    /// </summary>
+    internal class MetaApi : SyntaxBuilderImpl, IMetaApi, IMetaTarget
+    {
+        private readonly IAdvisedFieldOrProperty? _fieldOrProperty;
+        private readonly IAdvisedMethod? _method;
+        private readonly IAdvisedEvent? _event;
+        private readonly INamedType? _type;
+        private readonly MetaApiProperties _common;
+
+        private Exception CreateInvalidOperationException( string memberName, string? description = null )
+            => TemplatingDiagnosticDescriptors.MemberMemberNotAvailable.CreateException(
+                (this._common.Template.Declaration!, "meta." + memberName, this.Declaration, this.Declaration.DeclarationKind,
+                 description ?? "I" + memberName) );
+
+        public IConstructor Constructor => throw new NotImplementedException();
+
+        public IMethodBase MethodBase => this._method ?? throw this.CreateInvalidOperationException( nameof(this.MethodBase) );
+
+        public IAdvisedField Field => this._fieldOrProperty as IAdvisedField ?? throw this.CreateInvalidOperationException( nameof(this.Field) );
+
+        public IAdvisedFieldOrProperty FieldOrProperty => this._fieldOrProperty ?? throw this.CreateInvalidOperationException( nameof(this.FieldOrProperty) );
+
+        public IDeclaration Declaration { get; }
+
+        public IMember Member => this.Declaration as IMember ?? throw this.CreateInvalidOperationException( nameof(this.Member) );
+
+        public IAdvisedMethod Method => this._method ?? throw this.CreateInvalidOperationException( nameof(this.Method) );
+
+        public IAdvisedProperty Property => this._fieldOrProperty as IAdvisedProperty ?? throw this.CreateInvalidOperationException( nameof(this.Property) );
+
+        public IAdvisedEvent Event => this._event ?? throw this.CreateInvalidOperationException( nameof(this.Event) );
+
+        public IAdvisedParameterList Parameters => this._method?.Parameters ?? throw this.CreateInvalidOperationException( nameof(this.Parameters) );
+
+        public INamedType Type => this._type ?? throw this.CreateInvalidOperationException( nameof(this.Type) );
+
+        private ThisInstanceUserReceiver GetThisOrBase( string expressionName, AspectReferenceSpecification linkerAnnotation )
+            => this._type switch
+            {
+                null => throw this.CreateInvalidOperationException( expressionName ),
+                { IsStatic: false } when this.Declaration is IMemberOrNamedType { IsStatic: false }
+                    => new ThisInstanceUserReceiver(
+                        this.Type,
+                        linkerAnnotation ),
+
+                _ => throw TemplatingDiagnosticDescriptors.CannotUseThisInStaticContext.CreateException(
+                    (this._common.Template.Declaration!, expressionName, this.Declaration, this.Declaration.DeclarationKind) )
+            };
+
+        public IMetaTarget Target => this;
+
+        public IAspectInstance AspectInstance => this._common.AspectInstance;
+
+        public object This => this.GetThisOrBase( "meta.This", new AspectReferenceSpecification( this._common.AspectLayerId, AspectReferenceOrder.Final ) );
+
+        public object Base => this.GetThisOrBase( "meta.Base", new AspectReferenceSpecification( this._common.AspectLayerId, AspectReferenceOrder.Base ) );
+
+        public object ThisStatic
+            => new ThisTypeUserReceiver( this.Type, new AspectReferenceSpecification( this._common.AspectLayerId, AspectReferenceOrder.Final ) );
+
+        public object BaseStatic
+            => new ThisTypeUserReceiver( this.Type, new AspectReferenceSpecification( this._common.AspectLayerId, AspectReferenceOrder.Base ) );
+
+        public IReadOnlyDictionary<string, object?> Tags => this._common.Tags;
+
+        IDiagnosticSink IMetaApi.Diagnostics => this._common.Diagnostics;
+
+        [ExcludeFromCodeCoverage]
+        public void DebugBreak()
+        {
+            var trustOptions = this._common.ServiceProvider.GetRequiredService<IProjectOptions>();
+
+            if ( !trustOptions.IsUserCodeTrusted )
+            {
+                return;
+            }
+
+            if ( Debugger.IsAttached )
+            {
+                Debugger.Break();
+            }
+        }
 
         public IExecutionScenario ExecutionScenario => this._common.PipelineDescription.ExecutionScenario;
 
         public UserDiagnosticSink Diagnostics => this._common.Diagnostics;
 
-        private MetaApi( IDeclaration declaration, MetaApiProperties common )
+        private MetaApi( IDeclaration declaration, MetaApiProperties common ) : base( declaration.Compilation, common.SyntaxGenerationContext.SyntaxGenerator )
         {
             this.Declaration = declaration;
-            this.Compilation = declaration.Compilation;
             this._common = common;
 
             var serviceProviderMark = this._common.ServiceProvider.GetRequiredService<ServiceProviderMark>();

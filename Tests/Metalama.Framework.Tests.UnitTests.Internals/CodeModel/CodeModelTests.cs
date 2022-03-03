@@ -9,6 +9,7 @@ using Metalama.Framework.Tests.UnitTests.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using Xunit;
 using static Metalama.Framework.Code.MethodKind;
 using static Metalama.Framework.Code.RefKind;
@@ -624,6 +625,9 @@ class C<TC>
             Assert.Throws<InvalidOperationException>( () => openTypeMethod.ConstructGenericInstance( typeof(int) ) );
             Assert.Equal( "(string, TM)", closedTypeMethod.ReturnType.ToString() );
             Assert.Equal( "(string, int)", closedMethod.ReturnType.ToString() );
+
+            // Generic type from a typeof.
+            var fromTypeOf = ((INamedType) compilation.Factory.GetTypeByReflectionType( typeof(AsyncLocal<>) )).ConstructGenericInstance( typeof(int) );
         }
 
         [Fact]
