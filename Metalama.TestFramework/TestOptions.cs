@@ -173,6 +173,7 @@ namespace Metalama.TestFramework
 
         /// <summary>
         /// Gets or sets a value indicating which end-of-line sequence is expected.
+        /// To set this option in a test, add this comment to your test file: <c>// @ExpectedEndOfLine(eol)</c> where EOL is <c>CR</c>, <c>LF</c> or <c>CRLF</c>.
         /// </summary>
         public string? ExpectedEndOfLine { get; set; }
 

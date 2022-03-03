@@ -10,7 +10,7 @@ namespace Metalama.Framework.Engine.Formatting
     internal partial class EndOfLineHelper
     {
         /// <summary>
-        /// Represents allocation-less text writer that writes into a string intended for repeated use.
+        /// Implements an allocation-less text writer that writes into a string intended for repeated use.
         /// </summary>
         private class ReusableTextWriter : TextWriter
         {
