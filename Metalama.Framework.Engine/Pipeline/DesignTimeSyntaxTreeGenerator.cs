@@ -67,7 +67,7 @@ namespace Metalama.Framework.Engine.Pipeline
                     default );
 
                 // Add members to the class.
-                var syntaxGenerationContext = SyntaxGenerationContext.CreateDefault( serviceProvider, partialCompilation.Compilation );
+                var syntaxGenerationContext = SyntaxGenerationContext.CreateDefault( serviceProvider, partialCompilation.Compilation, true );
 
                 foreach ( var transformation in transformationGroup.Transformations )
                 {

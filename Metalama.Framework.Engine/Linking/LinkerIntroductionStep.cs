@@ -8,6 +8,7 @@ using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Options;
+using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Project;
@@ -73,6 +74,8 @@ namespace Metalama.Framework.Engine.Linking
 
         public LinkerIntroductionStep( IServiceProvider serviceProvider )
         {
+            serviceProvider.GetRequiredService<ServiceProviderMark>().RequireProjectWide();
+
             this._serviceProvider = serviceProvider;
         }
 
