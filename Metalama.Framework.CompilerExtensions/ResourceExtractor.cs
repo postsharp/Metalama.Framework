@@ -116,6 +116,11 @@ namespace Metalama.Framework.CompilerExtensions
 
             if ( !File.Exists( completedFilePath ) )
             {
+                if ( !Directory.Exists( _snapshotDirectory ) )
+                {
+                    Directory.CreateDirectory( _snapshotDirectory );
+                }
+
                 using var log = File.CreateText( Path.Combine( _snapshotDirectory, $"extract-{Guid.NewGuid()}.log" ) );
                 
                 var mutexName = "Global\\Metalama_Extract_" + AssemblyMetadataReader.BuildId;
@@ -143,8 +148,7 @@ namespace Metalama.Framework.CompilerExtensions
                 {
                     if ( !File.Exists( completedFilePath ) )
                     {
-                        Directory.CreateDirectory( _snapshotDirectory );
-
+                        
                         foreach ( var resourceName in currentAssembly.GetManifestResourceNames() )
                         {
                             if ( resourceName.EndsWith( ".dll", StringComparison.OrdinalIgnoreCase ) )
