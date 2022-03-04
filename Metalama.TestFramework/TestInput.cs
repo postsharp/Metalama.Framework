@@ -74,6 +74,26 @@ namespace Metalama.TestFramework
             }
         }
 
+        private TestInput( 
+            TestProjectProperties projectProperties,
+            string testName,
+            string sourceCode,
+            string projectDirectory,
+            string? relativePath,
+            string? fullPath,
+            TestOptions options,
+            string? skipReason )
+        {
+            this.ProjectProperties = projectProperties;
+            this.TestName = testName;
+            this.SourceCode = sourceCode;
+            this.ProjectDirectory = projectDirectory;
+            this.RelativePath = relativePath;
+            this.FullPath = fullPath;
+            this.Options = options;
+            this.SkipReason = skipReason;
+        }
+
         [ExcludeFromCodeCoverage]
         public static TestInput FromSource( TestProjectProperties projectProperties, string sourceCode, string path )
         {
@@ -133,6 +153,19 @@ namespace Metalama.TestFramework
                 projectProperties.ProjectDirectory,
                 relativePath,
                 fullPath );
+        }
+
+        internal TestInput WithSource( string newSource )
+        {
+            return new TestInput(
+                this.ProjectProperties,
+                this.TestName,
+                newSource,
+                this.ProjectDirectory,
+                this.RelativePath,
+                this.FullPath,
+                this.Options,
+                this.SkipReason );
         }
 
         /// <summary>
