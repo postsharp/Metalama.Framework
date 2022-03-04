@@ -8,7 +8,6 @@ using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Options;
-using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Project;
 using System;
 using System.Collections.Generic;
@@ -110,14 +109,6 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
         {
             this.Declaration = declaration;
             this._common = common;
-
-            var serviceProviderMark = this._common.ServiceProvider.GetRequiredService<ServiceProviderMark>();
-
-            if ( serviceProviderMark != ServiceProviderMark.Project && serviceProviderMark != ServiceProviderMark.Test )
-            {
-                // We should get a project-specific service provider here.
-                throw new AssertionFailedException();
-            }
         }
 
         private MetaApi( IMethod method, MetaApiProperties common ) : this(

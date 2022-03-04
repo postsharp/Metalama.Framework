@@ -27,6 +27,15 @@ namespace Metalama.Framework.Engine.Pipeline
         // The testing mark is the only public because it is used by the testing API and this is the only use case of this class.
         public static readonly ServiceProviderMark Test = new( "Test" );
 
+        internal void RequireProjectWide()
+        {
+            if ( this != Project && this != Test )
+            {
+                // We should get a project-specific service provider here.
+                throw new AssertionFailedException();
+            }
+        }
+
         public override string ToString() => this._name;
     }
 }
