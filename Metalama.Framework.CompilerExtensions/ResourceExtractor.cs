@@ -117,22 +117,27 @@ namespace Metalama.Framework.CompilerExtensions
 
             if ( !File.Exists( completedFilePath ) )
             {
-                StringBuilder log = new();
-                log.AppendLine( $"Extracting resources..." );
+                using var log = File.CreateText( Path.Combine( _snapshotDirectory, $"extract-{Guid.NewGuid()}.log" ) );
+                
+                var mutexName = "Global\\Metalama_Extract_" + AssemblyMetadataReader.BuildId;
+                
+                log.WriteLine( $"Extracting resources..." );
 
                 var processName = Process.GetCurrentProcess();
-                log.AppendLine( $"Process Name: {processName.ProcessName}" );
-                log.AppendLine( $"Process Id: {processName.Id}" );
-                log.AppendLine( $"Process Kind: {ProcessKindHelper.CurrentProcessKind}" );
-                log.AppendLine( $"Command Line: {Environment.CommandLine}" );
-                log.AppendLine( $"Source Assembly Name: '{currentAssembly.FullName}'" );
-                log.AppendLine( $"Source Assembly Location: '{currentAssembly.Location}'" );
-                log.AppendLine( "Stack trace:" );
-                log.AppendLine( new StackTrace().ToString() );
-                log.AppendLine( "----" );
+                log.WriteLine( $"Process Name: {processName.ProcessName}" );
+                log.WriteLine( $"Process Id: {processName.Id}" );
+                log.WriteLine( $"Process Kind: {ProcessKindHelper.CurrentProcessKind}" );
+                log.WriteLine( $"Command Line: {Environment.CommandLine}" );
+                log.WriteLine( $"Source Assembly Name: '{currentAssembly.FullName}'" );
+                log.WriteLine( $"Source Assembly Location: '{currentAssembly.Location}'" );
+                log.WriteLine( $"Mutex name: '{mutexName}'" );
+                log.WriteLine( "Stack trace:" );
+                log.WriteLine( new StackTrace().ToString() );
+                log.WriteLine( "----" );
 
                 // We cannot use MutexHelper because of dependencies on an embedded assembly.
-                using var extractMutex = new Mutex( false, "Global\\Metalama_Extract_" + AssemblyMetadataReader.BuildId );
+                
+                using var extractMutex = new Mutex( false, mutexName );
                 extractMutex.WaitOne();
 
                 try
@@ -145,7 +150,7 @@ namespace Metalama.Framework.CompilerExtensions
                         {
                             if ( resourceName.EndsWith( ".dll", StringComparison.OrdinalIgnoreCase ) )
                             {
-                                log.AppendLine( $"Extracting resource " + resourceName );
+                                log.WriteLine( $"Extracting resource " + resourceName );
 
                                 // Extract the file to disk.
                                 using var stream = currentAssembly.GetManifestResourceStream( resourceName )!;
@@ -173,11 +178,11 @@ namespace Metalama.Framework.CompilerExtensions
                             }
                             else
                             {
-                                log.AppendLine( "Ignoring resource " + resourceName );
+                                log.WriteLine( "Ignoring resource " + resourceName );
                             }
                         }
 
-                        File.WriteAllText( completedFilePath, log.ToString() );
+                        File.WriteAllText( completedFilePath, "completed" );
                     }
                 }
                 finally
