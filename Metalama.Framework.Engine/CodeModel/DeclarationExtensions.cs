@@ -451,6 +451,17 @@ namespace Metalama.Framework.Engine.CodeModel
             IProperty signatureTemplate,
             IReadOnlyList<IProperty> additionalProperties )
         {
+            if ( additionalProperties.Count > 0 )
+            {
+                var additionalPropertyList = new PropertyList( (NamedType) namedType, additionalProperties.Select( x => x.ToMemberRef() ) );
+                var property = additionalPropertyList.OfExactSignature( signatureTemplate, matchIsStatic: false, declaredOnly: true );
+
+                if ( property != null )
+                {
+                    return property;
+                }
+            }
+
             var currentType = (INamedType?) namedType;
 
             while ( currentType != null )
@@ -477,6 +488,17 @@ namespace Metalama.Framework.Engine.CodeModel
         /// <returns>An event of the given signature that is visible from the given type or <c>null</c> if no such method exists.</returns>
         public static IEvent? FindClosestVisibleEvent( this INamedType namedType, IEvent signatureTemplate, IReadOnlyList<IEvent> additionalEvents )
         {
+            if ( additionalEvents.Count > 0 )
+            {
+                var additionalEventList = new EventList( (NamedType) namedType, additionalEvents.Select( x => x.ToMemberRef() ) );
+                var @event = additionalEventList.OfExactSignature( signatureTemplate, matchIsStatic: false, declaredOnly: true );
+
+                if ( @event != null )
+                {
+                    return @event;
+                }
+            }
+            
             var currentType = (INamedType?) namedType;
 
             while ( currentType != null )
