@@ -4,7 +4,9 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.Aspects;
+using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities;
+using Microsoft.CodeAnalysis;
 using System;
 
 namespace Metalama.Framework.Engine.CodeModel.Invokers
@@ -33,5 +35,16 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
         }
 
         public InvokerOrder Order { get; }
+
+        protected internal static INamedTypeSymbol? GetTargetTypeSymbol()
+        {
+            return TemplateExpansionContext.CurrentTargetDeclaration switch
+            {
+                INamedType type => type.GetSymbol().OriginalDefinition,
+                IMember member => member.DeclaringType.GetSymbol().OriginalDefinition,
+                null => null,
+                _ => throw new AssertionFailedException(),
+            };
+        }
     }
 }

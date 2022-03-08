@@ -1,5 +1,4 @@
-// @Skipped(29985)
-
+using System;
 using System.Linq;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
@@ -35,12 +34,18 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Misc.OptionalValues
             {
                 var propertyBuilder = builder.Advices.IntroduceProperty( nestedType, nameof(OptionalPropertyTemplate) );
                 propertyBuilder.Name = property.Name;
-                propertyBuilder.Type = optionalType.ConstructGenericInstance( property.Type );
+                var constructedOptionalType = optionalType.ConstructGenericInstance(property.Type);
+                propertyBuilder.Type = constructedOptionalType;
+                var optionalTypeConstructor = constructedOptionalType.Constructors.Single(x => x.Parameters.Count == 1);
 
                 builder.Advices.OverrideFieldOrProperty(
                     property,
                     nameof(OverridePropertyTemplate),
-                    tags: new TagDictionary { ["optionalProperty"] = propertyBuilder } );
+                    tags: new TagDictionary 
+                    { 
+                        ["optionalProperty"] = propertyBuilder,
+                        ["optionalTypeConstructor"] = optionalTypeConstructor,
+                    } );
             }
         }
 
@@ -56,33 +61,41 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Misc.OptionalValues
             get
             {
                 var optionalProperty = (IProperty)meta.Tags["optionalProperty"]!;
-
-                return optionalProperty.Invokers.Final.GetValue( meta.This.OptionalValues );
+                return optionalProperty.Invokers.Final.GetValue( meta.This.OptionalValues ).Value;
             }
 
             set
             {
                 var optionalProperty = (IProperty)meta.Tags["optionalProperty"]!;
-                optionalProperty.Invokers.Final.SetValue( meta.This.OptionalValues, value );
+                var constructor = (IConstructor)meta.Tags["optionalTypeConstructor"]!;
+
+                // TODO: I guess here we would need to execute ctor, but how?.
+                //optionalProperty.Invokers.Final.SetValue( meta.This.OptionalValues, constructor. value);
             }
         }
     }
 
     public struct OptionalValue<T>
     {
-        private T _value;
+        private T? _value;
 
-        public bool IsSpecified { get; private set; }
+        public bool IsSpecified { get; }
 
-        public T Value
+        public OptionalValue(T value)
         {
-            get => _value;
-            private set
+            if (value != null)
             {
-                IsSpecified = true;
-                _value = value;
+                this._value = value;
+                this.IsSpecified = true;
+            }
+            else
+            {
+                this._value = default;
+                this.IsSpecified = false;
             }
         }
+
+        public T Value => _value ?? throw new InvalidOperationException();
     }
 
     [OptionalValueType]

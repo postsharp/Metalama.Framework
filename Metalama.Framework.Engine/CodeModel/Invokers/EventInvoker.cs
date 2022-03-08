@@ -6,6 +6,7 @@ using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.MetaModel;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -42,12 +43,19 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
 
             this.AssertNoArgument();
 
-            return
+            var expression = 
                 MemberAccessExpression(
-                        SyntaxKind.SimpleMemberAccessExpression,
-                        this._event.GetReceiverSyntax( instance, generationContext ),
-                        IdentifierName( this._event.Name ) )
-                    .WithAspectReferenceAnnotation( this.AspectReference.WithTargetKind( targetKind ) );
+                    SyntaxKind.SimpleMemberAccessExpression,
+                    this._event.GetReceiverSyntax( instance, generationContext ),
+                    IdentifierName( this._event.Name ) );
+
+            // Only create an aspect reference when the target type is the target of the template.
+            if ( SymbolEqualityComparer.Default.Equals( GetTargetTypeSymbol(), this._event.DeclaringType.GetSymbol().OriginalDefinition ) )
+            {
+                expression = expression.WithAspectReferenceAnnotation( this.AspectReference.WithTargetKind( targetKind ) );
+            }
+
+            return expression;
         }
 
         public object Add( object? instance, object? value )

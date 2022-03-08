@@ -7,10 +7,12 @@ using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.MetaModel;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Linq;
+using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.CodeModel.Invokers
 {
@@ -50,23 +52,23 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
 
             switch ( this._method.MethodKind )
             {
-                case MethodKind.Default:
-                case MethodKind.LocalFunction:
+                case Code.MethodKind.Default:
+                case Code.MethodKind.LocalFunction:
                     return this.InvokeDefaultMethod( instance, args );
 
-                case MethodKind.EventAdd:
+                case Code.MethodKind.EventAdd:
                     return ((IEvent) this._method.DeclaringMember!).Invokers.GetInvoker( this.Order, this._invokerOperator )!.Add( instance, args[0] );
 
-                case MethodKind.EventRaise:
+                case Code.MethodKind.EventRaise:
                     return ((IEvent) this._method.DeclaringMember!).Invokers.GetInvoker( this.Order, this._invokerOperator )!.Raise( instance, args );
 
-                case MethodKind.EventRemove:
+                case Code.MethodKind.EventRemove:
                     return ((IEvent) this._method.DeclaringMember!).Invokers.GetInvoker( this.Order, this._invokerOperator )!.Remove( instance, args[0] );
 
-                case MethodKind.PropertyGet:
+                case Code.MethodKind.PropertyGet:
                     return ((IProperty) this._method.DeclaringMember!).Invokers.GetInvoker( this.Order, this._invokerOperator )!.GetValue( instance );
 
-                case MethodKind.PropertySet:
+                case Code.MethodKind.PropertySet:
                     return ((IProperty) this._method.DeclaringMember!).Invokers.GetInvoker( this.Order, this._invokerOperator )!.SetValue( instance, args[0] );
 
                 default:
@@ -79,69 +81,114 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
         {
             SimpleNameSyntax name;
 
-            var syntaxGenerationContext = TemplateExpansionContext.CurrentSyntaxGenerationContext;
+            var generationContext = TemplateExpansionContext.CurrentSyntaxGenerationContext;
 
             if ( this._method.IsGeneric )
             {
-                name = SyntaxFactory.GenericName( this._method.Name )
-                    .WithTypeArgumentList(
-                        SyntaxFactory.TypeArgumentList(
-                            SyntaxFactory.SeparatedList(
-                                this._method.TypeArguments.Select(
-                                        t =>
-                                            syntaxGenerationContext.SyntaxGenerator.Type( t.GetSymbol() ) )
-                                    .ToArray() ) ) );
+                name = GenericName( 
+                    Identifier( this._method.Name ),
+                    TypeArgumentList(
+                        SeparatedList(
+                            this._method.TypeArguments.Select( t => generationContext.SyntaxGenerator.Type( t.GetSymbol() ) ).ToArray() ) ) );
             }
             else
             {
-                name = SyntaxFactory.IdentifierName( this._method.Name );
+                name = IdentifierName( this._method.Name );
             }
 
             var arguments = this._method.GetArguments(
                 this._method.Parameters,
-                RuntimeExpression.FromValue( args, this.Compilation, syntaxGenerationContext ) );
+                RuntimeExpression.FromValue( args, this.Compilation, generationContext ) );
 
-            if ( this._method.MethodKind == MethodKind.LocalFunction )
+            if ( this._method.MethodKind == Code.MethodKind.LocalFunction )
             {
-                var instanceExpression = RuntimeExpression.FromValue( instance, this.Compilation, syntaxGenerationContext );
+                var instanceExpression = RuntimeExpression.FromValue( instance, this.Compilation, generationContext );
 
                 if ( instanceExpression.Syntax.Kind() != SyntaxKind.NullLiteralExpression )
                 {
                     throw GeneralDiagnosticDescriptors.CannotProvideInstanceForLocalFunction.CreateException( this._method );
                 }
 
-                return new UserExpression(
-                    SyntaxFactory.InvocationExpression(
-                            name
-                                .WithAspectReferenceAnnotation( this.AspectReference ) )
-                        .AddArgumentListArguments( arguments ),
-                    this._method.ReturnType,
-                    syntaxGenerationContext );
-            }
-
-            var receiver = this._method.GetReceiverSyntax(
-                RuntimeExpression.FromValue( instance!, this.Compilation, syntaxGenerationContext ),
-                syntaxGenerationContext );
-
-            if ( this._invokerOperator == InvokerOperator.Default )
-            {
-                var invocationExpression = SyntaxFactory.InvocationExpression(
-                        SyntaxFactory.MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, receiver, name )
-                            .WithAspectReferenceAnnotation( this.AspectReference ) )
-                    .AddArgumentListArguments( arguments );
-
-                return new UserExpression( invocationExpression, this._method.ReturnType, syntaxGenerationContext );
+                return this.CreateInvocationExpression( null, name, arguments, AspectReferenceTargetKind.Self, generationContext );
             }
             else
             {
-                var invocationExpression = SyntaxFactory.ConditionalAccessExpression(
-                        receiver,
-                        SyntaxFactory.InvocationExpression( SyntaxFactory.MemberBindingExpression( name ) )
-                            .AddArgumentListArguments( arguments ) )
-                    .WithAspectReferenceAnnotation( this.AspectReference );
+                var instanceExpression = 
+                    this._method.GetReceiverSyntax( 
+                        RuntimeExpression.FromValue( instance!, this.Compilation, generationContext ), 
+                        generationContext );
 
-                return new UserExpression( invocationExpression, this._method.ReturnType.ConstructNullable(), syntaxGenerationContext );
+                return this.CreateInvocationExpression( instanceExpression, name, arguments, AspectReferenceTargetKind.Self, generationContext );
             }
+        }
+
+        private UserExpression CreateInvocationExpression(
+            ExpressionSyntax? instanceExpression,
+            SimpleNameSyntax name,
+            ArgumentSyntax[]? arguments,
+            AspectReferenceTargetKind targetKind,
+            SyntaxGenerationContext generationContext )
+        {
+            if ( this._method.DeclaringType.IsOpenGeneric )
+            {
+                throw new InvalidOperationException(
+                    $"Cannot invoke the '{this._method.ToDisplayString()}' method because the declaring type has unbound type parameters." );
+            }
+
+            ExpressionSyntax expression;
+            IType returnType;
+
+            if ( this._invokerOperator == InvokerOperator.Default)
+            {
+                returnType = this._method.ReturnType;
+
+                ExpressionSyntax receiverExpression =
+                    instanceExpression != null
+                    ? MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, instanceExpression, name )
+                    : name;
+
+                // Only create an aspect reference when the target type is the target of the template.
+                if ( SymbolEqualityComparer.Default.Equals( GetTargetTypeSymbol(), this._method.DeclaringType.GetSymbol().OriginalDefinition ) )
+                {
+                    receiverExpression = receiverExpression.WithAspectReferenceAnnotation( this.AspectReference.WithTargetKind( targetKind ) );
+                }
+
+                expression =
+                    arguments != null
+                    ? InvocationExpression(
+                        receiverExpression,
+                        ArgumentList( SeparatedList( arguments ) ) )
+                    : InvocationExpression(
+                        receiverExpression );
+            }
+            else
+            {
+                returnType = this._method.ReturnType.ConstructNullable();
+
+                if (instanceExpression == null )
+                {
+                    throw new AssertionFailedException();
+                }
+
+                expression =
+                    arguments != null
+                    ? ConditionalAccessExpression(
+                            instanceExpression,
+                            InvocationExpression(
+                                MemberBindingExpression( name ),
+                                ArgumentList( SeparatedList( arguments ) ) ) )
+                    : ConditionalAccessExpression(
+                            instanceExpression,
+                            InvocationExpression( MemberBindingExpression( name ) ) );
+
+                // Only create an aspect reference when the target type is the target of the template.
+                if ( SymbolEqualityComparer.Default.Equals( GetTargetTypeSymbol(), this._method.DeclaringType.GetSymbol().OriginalDefinition ) )
+                {
+                    expression = expression.WithAspectReferenceAnnotation( this.AspectReference.WithTargetKind( targetKind ) );
+                }
+            }
+
+            return new UserExpression( expression, returnType, generationContext );
         }
     }
 }

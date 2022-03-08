@@ -6,6 +6,7 @@ using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.MetaModel;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -43,16 +44,24 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
             var receiver = this.Member.GetReceiverSyntax( instance, generationContext );
             var name = IdentifierName( this.Member.Name );
 
+            ExpressionSyntax expression;
             if ( this._invokerOperator == InvokerOperator.Default )
             {
-                return MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, receiver, name )
-                    .WithAspectReferenceAnnotation( this.AspectReference.WithTargetKind( targetKind ) );
+                expression = MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, receiver, name );
             }
             else
             {
-                return ConditionalAccessExpression( receiver, MemberBindingExpression( name ) )
-                    .WithAspectReferenceAnnotation( this.AspectReference.WithTargetKind( targetKind ) );
+                expression = ConditionalAccessExpression( receiver, MemberBindingExpression( name ) );
             }
+
+            // Only create an aspect reference when the declaring type of the invoked declaration is the target of the template.
+            if ( SymbolEqualityComparer.Default.Equals( GetTargetTypeSymbol(), this.Member.DeclaringType.GetSymbol().OriginalDefinition) )
+            {
+                // This is an aspect reference iff the expression type is the same as the declaring type of the member, otherwise it is not.
+                expression = expression.WithAspectReferenceAnnotation( this.AspectReference.WithTargetKind( targetKind ) );
+            }
+
+            return expression;
         }
 
         public object GetValue( object? instance )
