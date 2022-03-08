@@ -85,6 +85,18 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                 throw new ArgumentNullException( nameof(targetType) );
             }
 
+            if ( context.SyntaxGenerationContext.IsPartial && (initializerExpression != null || initializerTemplate.IsNotNull) )
+            {
+                // At design time when generating the partial code for source generators, we do not expand templates.
+                // This may cause warnings in the constructor (because some fields will not be initialized)
+                // but we will add that later. The main point is that we should not execute the template here.
+
+                initializerMethodSyntax = null;
+                initializerExpressionSyntax = null;
+
+                return true;
+            }
+
             if ( initializerExpression != null )
             {
                 // TODO: Error about the expression type?

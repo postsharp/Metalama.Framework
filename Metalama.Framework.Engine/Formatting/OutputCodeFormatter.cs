@@ -68,6 +68,8 @@ namespace Metalama.Framework.Engine.Formatting
                     document.Project.Solution.Workspace );
             }
 
+            outputSyntaxRoot = EndOfLineHelper.NormalizeEndOfLineStyle( outputSyntaxRoot );
+
             return outputSyntaxRoot;
         }
 
