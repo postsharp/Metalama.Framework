@@ -9,6 +9,7 @@ using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline;
+using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
@@ -100,6 +101,8 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
         void ICompileTimeCodeEditingStatusService.OnEditingCompileTimeCodeCompleted()
         {
+            Logger.DesignTime.Trace?.Log( "Received ICompileTimeCodeEditingStatusService.OnEditingCompileTimeCodeCompleted." );
+            
             foreach ( var pipeline in this._pipelinesByProjectId.Values )
             {
                 pipeline.Resume( true );
