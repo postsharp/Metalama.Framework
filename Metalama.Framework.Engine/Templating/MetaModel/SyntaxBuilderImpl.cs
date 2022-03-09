@@ -1,3 +1,6 @@
+// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.SyntaxBuilders;
@@ -7,6 +10,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Formatting;
 using System;
+using System.Reflection;
 using System.Text;
 using AnnotationExtensions = Microsoft.CodeAnalysis.AnnotationExtensions;
 using SyntaxNodeExtensions = Microsoft.CodeAnalysis.SyntaxNodeExtensions;
@@ -25,6 +29,7 @@ internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
         this.SyntaxGenerator = syntaxGenerator;
     }
 
+    [Obfuscation( Exclude = true )]
     public IProject Project => this.Compilation.Project;
 
     public IExpression Expression( object? expression )

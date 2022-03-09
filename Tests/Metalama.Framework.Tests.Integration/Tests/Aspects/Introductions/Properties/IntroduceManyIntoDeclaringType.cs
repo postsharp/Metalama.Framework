@@ -5,7 +5,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Introductions.Properties.
     internal class Aspect : MethodAspect
     {
         [Introduce( WhenExists = OverrideStrategy.Ignore )]
-        private string Property { get; set; }
+        private string? Property { get; set; }
     }
 
     // <target>

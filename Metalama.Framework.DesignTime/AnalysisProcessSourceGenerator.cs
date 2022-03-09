@@ -11,8 +11,6 @@ namespace Metalama.Framework.DesignTime;
 /// </summary>
 public class AnalysisProcessSourceGenerator : BaseSourceGenerator
 {
-#pragma warning disable CA1001 // ServiceHost is disposable but not owned.
-
     protected override ProjectHandler CreateSourceGeneratorImpl( IProjectOptions projectOptions )
         => new AnalysisProcessProjectHandler( this.ServiceProvider, projectOptions );
 
