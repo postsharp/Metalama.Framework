@@ -13,7 +13,6 @@ namespace Metalama.Framework.DesignTime.VisualStudio;
 /// to publish generated sources.
 /// </summary>
 internal class VsAnalysisProcessProjectHandler : AnalysisProcessProjectHandler
-#pragma warning restore CA1001
 {
     private readonly AnalysisProcessEndpoint? _serviceHost;
 
