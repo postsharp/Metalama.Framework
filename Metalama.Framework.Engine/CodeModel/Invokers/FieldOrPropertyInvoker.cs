@@ -54,10 +54,9 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
                 expression = ConditionalAccessExpression( receiver, MemberBindingExpression( name ) );
             }
 
-            // Only create an aspect reference when the declaring type of the invoked declaration is the target of the template.
+            // Only create an aspect reference when the declaring type of the invoked declaration is the target of the template (or it's declaring type).
             if ( SymbolEqualityComparer.Default.Equals( GetTargetTypeSymbol(), this.Member.DeclaringType.GetSymbol().OriginalDefinition) )
             {
-                // This is an aspect reference iff the expression type is the same as the declaring type of the member, otherwise it is not.
                 expression = expression.WithAspectReferenceAnnotation( this.AspectReference.WithTargetKind( targetKind ) );
             }
 

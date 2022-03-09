@@ -49,7 +49,7 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
                     this._event.GetReceiverSyntax( instance, generationContext ),
                     IdentifierName( this._event.Name ) );
 
-            // Only create an aspect reference when the target type is the target of the template.
+            // Only create an aspect reference when the declaring type of the invoked declaration is the target of the template (or it's declaring type).
             if ( SymbolEqualityComparer.Default.Equals( GetTargetTypeSymbol(), this._event.DeclaringType.GetSymbol().OriginalDefinition ) )
             {
                 expression = expression.WithAspectReferenceAnnotation( this.AspectReference.WithTargetKind( targetKind ) );
