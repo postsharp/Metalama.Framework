@@ -210,7 +210,9 @@ namespace Metalama.Framework.DesignTime.Pipeline
         {
             this.SetState( this._currentState.InvalidateCacheForNewCompilation( compilation, invalidateCompilationResult, cancellationToken ) );
 
+#pragma warning disable CS8603 // Probably a compiler error. Happens only in the release build.
             return this._currentState.UnprocessedChanges.AssertNotNull();
+#pragma warning restore CS8603
         }
 
         public void InvalidateCache()
