@@ -147,7 +147,7 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
                     ? MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, instanceExpression, name )
                     : name;
 
-                // Only create an aspect reference when the target type is the target of the template.
+                // Only create an aspect reference when the declaring type of the invoked declaration is the target of the template (or it's declaring type).
                 if ( SymbolEqualityComparer.Default.Equals( GetTargetTypeSymbol(), this._method.DeclaringType.GetSymbol().OriginalDefinition ) )
                 {
                     receiverExpression = receiverExpression.WithAspectReferenceAnnotation( this.AspectReference.WithTargetKind( targetKind ) );
@@ -181,7 +181,7 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
                             instanceExpression,
                             InvocationExpression( MemberBindingExpression( name ) ) );
 
-                // Only create an aspect reference when the target type is the target of the template.
+                // Only create an aspect reference when the declaring type of the invoked declaration is the target of the template (or it's declaring type).
                 if ( SymbolEqualityComparer.Default.Equals( GetTargetTypeSymbol(), this._method.DeclaringType.GetSymbol().OriginalDefinition ) )
                 {
                     expression = expression.WithAspectReferenceAnnotation( this.AspectReference.WithTargetKind( targetKind ) );
