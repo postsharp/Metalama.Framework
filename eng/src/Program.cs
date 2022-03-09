@@ -45,13 +45,14 @@ var product = new Product
         "Metalama.LinqPad.$(PackageVersion).nupkg" ),
     Dependencies = new[] { Dependencies.PostSharpEngineering, Dependencies.MetalamaCompiler },
     Configurations = Product.DefaultConfigurations
-        .WithValue( BuildConfiguration.Debug, new BuildConfigurationInfo(
-            MSBuildName: "Debug",
-            AdditionalArtifactRules: new string[]
+        .WithValue( BuildConfiguration.Debug, Product.DefaultConfigurations.Debug with
+        {
+            AdditionalArtifactRules = new string[]
             {
                 $@"+:%system.teamcity.build.tempDir%/Metalama/ExtractExceptions/**/*=>logs",
                 $@"+:%system.teamcity.build.tempDir%/Metalama/Extract/**/.completed=>logs"
-            } ) )
+            }
+        } )
 };
 
 product.PrepareCompleted += OnPrepareCompleted;

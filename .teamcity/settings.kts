@@ -50,6 +50,15 @@ object DebugBuild : BuildType({
         }
     }
 
+    triggers {
+
+        vcs {
+            watchChangesInDependencies = true
+            branchFilter = "+:<default>"
+        }        
+
+    }
+
   dependencies {
 
         snapshot(AbsoluteId("Metalama_MetalamaCompiler_ReleaseBuild")) {
