@@ -132,6 +132,13 @@ namespace Metalama.Framework.Engine.Linking
                         return aspectLayerComparison;
                     }
 
+                    var adviceOrderComparison = x.Introduction.Advice.Order.CompareTo( y.Introduction.Advice.Order );
+
+                    if ( adviceOrderComparison != 0 )
+                    {
+                        return adviceOrderComparison;
+                    }
+
                     var semanticComparison = GetSemanticOrder( x.Semantic ).CompareTo( GetSemanticOrder( y.Semantic ) );
 
                     if ( semanticComparison != 0 )

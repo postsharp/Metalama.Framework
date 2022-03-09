@@ -1,0 +1,2 @@
+// CompileTimeAspectPipeline.ExecuteAsync failed. 
+// Error LAMA0041 on `propertyBuilder.Type = optionalType.ConstructGenericInstance( property.Type );`: `'OptionalValueTypeAttribute.BuildAspect' threw 'InvalidOperationException' when applied to 'Account': Cannot create constructed generic type from another constructed generic type. Exception details are in '(none)'. To attach a debugger to the compiler, use the  '-p:MetalamaDebug=True' command-line option.`

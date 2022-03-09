@@ -10,6 +10,7 @@ using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Transformations;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Metalama.Framework.Engine.Advices
 {
@@ -36,9 +37,9 @@ namespace Metalama.Framework.Engine.Advices
             this.MemberBuilder.ApplyTemplateAttribute( templateMethod.TemplateInfo.Attribute );
         }
 
-        public override void Initialize( IReadOnlyList<Advice> declarativeAdvices, IDiagnosticAdder diagnosticAdder )
+        public override void Initialize( IDiagnosticAdder diagnosticAdder )
         {
-            base.Initialize( declarativeAdvices, diagnosticAdder );
+            base.Initialize( diagnosticAdder );
 
             this.MemberBuilder.IsAsync = this.Template.Declaration!.IsAsync;
 
@@ -83,10 +84,12 @@ namespace Metalama.Framework.Engine.Advices
             }
         }
 
-        public override AdviceResult ToResult( ICompilation compilation )
+        public override AdviceResult ToResult( ICompilation compilation, IReadOnlyList<IObservableTransformation> observableTransformations )
         {
             // Determine whether we need introduction transformation (something may exist in the original code or could have been introduced by previous steps).
-            var existingDeclaration = this.TargetDeclaration.FindClosestVisibleMethod( this.MemberBuilder );
+            var existingDeclaration = this.TargetDeclaration.FindClosestVisibleMethod(
+                this.MemberBuilder,
+                observableTransformations.OfType<IMethod>().ToList() );
 
             // TODO: Introduce attributes that are added not present on the existing member?
             if ( existingDeclaration == null )

@@ -51,7 +51,7 @@ namespace Metalama.Framework.Code.SyntaxBuilders
         /// <summary>
         /// Returns a clone of the current <see cref="ArrayBuilder"/>.
         /// </summary>
-        public IExpression ToExpression() => meta.CurrentContext.CodeBuilder.BuildArray( this );
+        public IExpression ToExpression() => SyntaxBuilder.CurrentImplementation.BuildArray( this );
 
         /// <summary>
         /// Returns a clone of the current <see cref="ArrayBuilder"/>.

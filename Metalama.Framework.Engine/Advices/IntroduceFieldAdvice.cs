@@ -7,6 +7,7 @@ using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Transformations;
 using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.Advices
@@ -35,9 +36,9 @@ namespace Metalama.Framework.Engine.Advices
             this.MemberBuilder.InitializerTemplate = fieldTemplate.GetInitializerTemplate();
         }
 
-        public override void Initialize( IReadOnlyList<Advice> declarativeAdvices, IDiagnosticAdder diagnosticAdder )
+        public override void Initialize( IDiagnosticAdder diagnosticAdder )
         {
-            base.Initialize( declarativeAdvices, diagnosticAdder );
+            base.Initialize( diagnosticAdder );
 
             if ( !this.Template.IsNull )
             {
@@ -53,7 +54,7 @@ namespace Metalama.Framework.Engine.Advices
             }
         }
 
-        public override AdviceResult ToResult( ICompilation compilation )
+        public override AdviceResult ToResult( ICompilation compilation, IReadOnlyList<IObservableTransformation> observableTransformations )
         {
             return AdviceResult.Create( this.MemberBuilder );
         }

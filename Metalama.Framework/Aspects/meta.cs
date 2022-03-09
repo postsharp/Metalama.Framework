@@ -257,14 +257,14 @@ namespace Metalama.Framework.Aspects
         /// <seealso href="@templates"/>
         [TemplateKeyword]
         public static void DefineExpression( dynamic? expression, out IExpression definedException )
-            => definedException = CurrentContext.CodeBuilder.Expression( expression );
+            => definedException = SyntaxBuilder.CurrentImplementation.Expression( expression );
 
         /// <summary>
         /// Parses a string containing a C# expression and returns an <see cref="IExpression"/>. The <see cref="IExpression.Value"/> property
         /// allows to use this expression in a template.
         /// </summary>
         /// <seealso href="@templates"/>
-        public static IExpression ParseExpression( string code ) => CurrentContext.CodeBuilder.ParseExpression( code );
+        public static IExpression ParseExpression( string code ) => SyntaxBuilder.CurrentImplementation.ParseExpression( code );
 
         /// <summary>
         /// Parses a string containing a C# statement and returns an <see cref="IStatement"/>, which can be inserted into the run-time code
@@ -272,18 +272,30 @@ namespace Metalama.Framework.Aspects
         /// and must be finished by a semicolon or a closing bracket.
         /// </summary>
         /// <seealso href="@templates"/>
-        public static IStatement ParseStatement( string code ) => CurrentContext.CodeBuilder.ParseStatement( code );
+        public static IStatement ParseStatement( string code ) => SyntaxBuilder.CurrentImplementation.ParseStatement( code );
 
-        internal static IDisposable WithContext( IMetaApi current )
+        internal static ImplementationCookie WithImplementation( IMetaApi current )
         {
             _currentContext.Value = current;
+            var syntaxBuilderCookie = SyntaxBuilder.WithImplementation( current );
 
-            return new InitializeCookie();
+            return new ImplementationCookie( syntaxBuilderCookie );
         }
 
-        private class InitializeCookie : IDisposable
+        internal class ImplementationCookie : IDisposable
         {
-            public void Dispose() => _currentContext.Value = null;
+            private readonly SyntaxBuilder.ImplementationCookie _syntaxBuilderCookie;
+
+            public ImplementationCookie( SyntaxBuilder.ImplementationCookie syntaxBuilderCookie )
+            {
+                this._syntaxBuilderCookie = syntaxBuilderCookie;
+            }
+
+            public void Dispose()
+            {
+                _currentContext.Value = null;
+                this._syntaxBuilderCookie.Dispose();
+            }
         }
     }
 }

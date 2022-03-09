@@ -34,7 +34,7 @@ namespace Metalama.Framework.Engine.Templating
         {
             var errorCountBefore = templateExpansionContext.DiagnosticSink.ErrorCount;
 
-            using ( meta.WithContext( templateExpansionContext.MetaApi ) )
+            using ( meta.WithImplementation( templateExpansionContext.MetaApi ) )
             {
                 if ( !this._userCodeInvoker.TryInvoke(
                         () => (SyntaxNode) this._templateMethod.Invoke( templateExpansionContext.TemplateInstance, Array.Empty<object>() ),

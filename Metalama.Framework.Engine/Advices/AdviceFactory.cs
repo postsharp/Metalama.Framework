@@ -28,7 +28,7 @@ namespace Metalama.Framework.Engine.Advices
         private readonly TemplateClassInstance? _templateInstance;
         private readonly IServiceProvider _serviceProvider;
         private readonly IDiagnosticAdder _diagnosticAdder;
-        private readonly IReadOnlyList<Advice> _declarativeAdvices;
+        private readonly ImmutableArray<Advice> _declarativeAdvices;
         private readonly List<Advice> _advices;
 
         private readonly Dictionary<INamedType, ImplementInterfaceAdvice> _implementInterfaceAdvices;
@@ -38,7 +38,7 @@ namespace Metalama.Framework.Engine.Advices
         public AdviceFactory(
             CompilationModel compilation,
             IDiagnosticAdder diagnosticAdder,
-            IReadOnlyList<Advice> declarativeAdvices,
+            ImmutableArray<Advice> declarativeAdvices,
             IAspectInstanceInternal aspect,
             TemplateClassInstance? templateInstance, // null if the aspect has several template classes.
             IServiceProvider serviceProvider )
@@ -299,7 +299,7 @@ namespace Metalama.Framework.Engine.Advices
                 .ValidateTarget( targetMethod );
 
             var advice = new OverrideMethodAdvice( this._aspect, this._templateInstance, targetMethod, template, _layerName, tags );
-            advice.Initialize( this._declarativeAdvices, diagnosticList );
+            advice.Initialize( diagnosticList );
             ThrowOnErrors( diagnosticList );
             this._advices.Add( advice );
 
@@ -339,7 +339,7 @@ namespace Metalama.Framework.Engine.Advices
                 _layerName,
                 tags );
 
-            advice.Initialize( this._declarativeAdvices, diagnosticList );
+            advice.Initialize( diagnosticList );
             ThrowOnErrors( diagnosticList );
             this._advices.Add( advice );
 
@@ -384,7 +384,7 @@ namespace Metalama.Framework.Engine.Advices
                 _layerName,
                 tags );
 
-            advice.Initialize( this._declarativeAdvices, diagnosticList );
+            advice.Initialize( diagnosticList );
             ThrowOnErrors( diagnosticList );
             this._advices.Add( advice );
 
@@ -436,7 +436,7 @@ namespace Metalama.Framework.Engine.Advices
                 _layerName,
                 tags );
 
-            advice.Initialize( this._declarativeAdvices, diagnosticList );
+            advice.Initialize( diagnosticList );
             ThrowOnErrors( diagnosticList );
             this._advices.Add( advice );
 
@@ -466,7 +466,7 @@ namespace Metalama.Framework.Engine.Advices
                 whenExists,
                 _layerName );
 
-            advice.Initialize( this._declarativeAdvices, diagnosticList );
+            advice.Initialize( diagnosticList );
             ThrowOnErrors( diagnosticList );
             this._advices.Add( advice );
 
@@ -513,7 +513,7 @@ namespace Metalama.Framework.Engine.Advices
                 _layerName,
                 tags );
 
-            advice.Initialize( this._declarativeAdvices, diagnosticList );
+            advice.Initialize( diagnosticList );
             ThrowOnErrors( diagnosticList );
             this._advices.Add( advice );
 
@@ -563,7 +563,7 @@ namespace Metalama.Framework.Engine.Advices
                 _layerName,
                 tags );
 
-            advice.Initialize( this._declarativeAdvices, diagnosticList );
+            advice.Initialize( diagnosticList );
             ThrowOnErrors( diagnosticList );
             this._advices.Add( advice );
 
@@ -618,7 +618,7 @@ namespace Metalama.Framework.Engine.Advices
                 _layerName,
                 tags );
 
-            advice.Initialize( this._declarativeAdvices, diagnosticList );
+            advice.Initialize( diagnosticList );
             ThrowOnErrors( diagnosticList );
             this._advices.Add( advice );
 
@@ -661,7 +661,7 @@ namespace Metalama.Framework.Engine.Advices
                 _layerName,
                 tags );
 
-            advice.Initialize( this._declarativeAdvices, diagnosticList );
+            advice.Initialize( diagnosticList );
             ThrowOnErrors( diagnosticList );
             this._advices.Add( advice );
 
@@ -712,7 +712,7 @@ namespace Metalama.Framework.Engine.Advices
                 _layerName,
                 tags );
 
-            advice.Initialize( this._declarativeAdvices, diagnosticList );
+            advice.Initialize( diagnosticList );
             ThrowOnErrors( diagnosticList );
             this._advices.Add( advice );
 
@@ -739,7 +739,7 @@ namespace Metalama.Framework.Engine.Advices
                 this._implementInterfaceAdvices[targetType] =
                     advice = new ImplementInterfaceAdvice( this._aspect, this._templateInstance, targetType, _layerName );
 
-                advice.Initialize( this._declarativeAdvices, diagnosticList );
+                advice.Initialize( diagnosticList );
                 this._advices.Add( advice );
             }
 
@@ -781,7 +781,7 @@ namespace Metalama.Framework.Engine.Advices
                 this._implementInterfaceAdvices[targetType] =
                     advice = new ImplementInterfaceAdvice( this._aspect, this._templateInstance, targetType, _layerName );
 
-                advice.Initialize( this._declarativeAdvices, diagnosticList );
+                advice.Initialize( diagnosticList );
                 this._advices.Add( advice );
             }
 

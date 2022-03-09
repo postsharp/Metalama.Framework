@@ -53,13 +53,22 @@ namespace Metalama.Framework.Engine.Pipeline
                 }
             }
 
+            // Compare the phase.
+            if ( x.Phase < y.Phase )
+            {
+                return -1;
+            }
+            else if ( x.Phase > y.Phase )
+            {
+                return 1;
+            }
+
             // Finally, order by depth in the code mode.
             if ( x.Depth < y.Depth )
             {
                 return -1;
             }
-
-            if ( x.Depth > y.Depth )
+            else if ( x.Depth > y.Depth )
             {
                 return 1;
             }

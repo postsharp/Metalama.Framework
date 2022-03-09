@@ -53,7 +53,7 @@ internal class DesignTimeValidatorRunner
             this._serviceProvider,
             model,
             diagnosticSink.Report,
-            this._pipeline.MustReportPausedPipelineAsErrors,
+            this._pipeline.MustReportPausedPipelineAsErrors && this._pipeline.IsCompileTimeSyntaxTreeOutdated( model.SyntaxTree.FilePath ),
             true,
             cancellationToken );
     }

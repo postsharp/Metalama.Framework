@@ -21,7 +21,7 @@ namespace Metalama.Framework.Engine.Pipeline
         private readonly List<IAspectSource> _aspectSources = new();
 
         public EvaluateAspectSourcesPipelineStep( OrderedAspectLayer aspectLayer ) : base(
-            new PipelineStepId( aspectLayer.AspectLayerId, -1 ),
+            new PipelineStepId( aspectLayer.AspectLayerId, PipelineStepPhase.Initialize, -1 ),
             aspectLayer ) { }
 
         public override CompilationModel Execute(

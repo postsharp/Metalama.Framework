@@ -42,7 +42,7 @@ namespace Metalama.Framework.Engine.Advices
                 targetType.Compilation.InvariantComparer );
         }
 
-        public override void Initialize( IReadOnlyList<Advice> declarativeAdvices, IDiagnosticAdder diagnosticAdder )
+        public override void Initialize( IDiagnosticAdder diagnosticAdder )
         {
             var aspectTypeName = this.Aspect.AspectClass.FullName.AssertNotNull();
             var compilation = this.TargetDeclaration.Compilation;
@@ -280,7 +280,7 @@ namespace Metalama.Framework.Engine.Advices
             }
         }
 
-        public override AdviceResult ToResult( ICompilation compilation )
+        public override AdviceResult ToResult( ICompilation compilation, IReadOnlyList<IObservableTransformation> observableTransformations )
         {
             var result = AdviceResult.Create();
 

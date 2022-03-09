@@ -50,9 +50,9 @@ namespace Metalama.Framework.Engine.Advices
             this.MemberBuilder.InitializerTemplate = eventTemplate.GetInitializerTemplate();
         }
 
-        public override void Initialize( IReadOnlyList<Advice> declarativeAdvices, IDiagnosticAdder diagnosticAdder )
+        public override void Initialize( IDiagnosticAdder diagnosticAdder )
         {
-            base.Initialize( declarativeAdvices, diagnosticAdder );
+            base.Initialize( diagnosticAdder );
 
             this.MemberBuilder.Type =
                 (this.Template.Declaration?.Type ?? (INamedType?) this._addTemplate.Declaration?.Parameters.FirstOrDefault().AssertNotNull().Type)
@@ -61,10 +61,10 @@ namespace Metalama.Framework.Engine.Advices
             this.MemberBuilder.Accessibility = (this.Template.Declaration?.Accessibility ?? this._addTemplate.Declaration?.Accessibility).AssertNotNull();
         }
 
-        public override AdviceResult ToResult( ICompilation compilation )
+        public override AdviceResult ToResult( ICompilation compilation, IReadOnlyList<IObservableTransformation> observableTransformations )
         {
             // TODO: Override transformations.
-            var existingDeclaration = this.TargetDeclaration.FindClosestVisibleEvent( this.MemberBuilder );
+            var existingDeclaration = this.TargetDeclaration.FindClosestVisibleEvent( this.MemberBuilder, observableTransformations.OfType<IEvent>().ToList() );
             var hasNoOverrideSemantics = this.Template.Declaration != null && this.Template.Declaration.IsEventField();
 
             if ( existingDeclaration == null )

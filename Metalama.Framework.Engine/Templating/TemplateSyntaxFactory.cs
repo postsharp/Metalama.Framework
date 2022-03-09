@@ -71,8 +71,19 @@ namespace Metalama.Framework.Engine.Templating
             }
         }
 
-        public static StatementSyntax? ToStatement( ExpressionSyntax? expression )
-            => expression == null ? null : SyntaxFactory.ExpressionStatement( expression );
+        public static StatementSyntax? ToStatement( ExpressionSyntax expression )
+        {
+            if ( expression.Kind() == SyntaxKind.NullLiteralExpression )
+            {
+                // This is a special hack used when e.g. `meta.Proceed();` is invoked on a non-existing method.
+                // Such call would be translated to the `null` expression, and we need to ignore it.
+                return null;
+            }
+            else
+            {
+                return SyntaxFactory.ExpressionStatement( expression );
+            }
+        }
 
         public static StatementSyntax[] ToStatementArray( List<StatementOrTrivia> list )
         {
@@ -372,14 +383,18 @@ namespace Metalama.Framework.Engine.Templating
         {
             switch ( expression )
             {
-                case null:
-                    // This is typically because we are emitting the return value of a void method.
-                    return null;
-
                 case IUserExpression dynamicExpression:
                     return dynamicExpression.ToRunTimeExpression();
 
                 default:
+                    if ( TemplateExpansionContext.Current.SyntaxSerializationService.TrySerialize(
+                            expression,
+                            TemplateExpansionContext.Current.SyntaxSerializationContext,
+                            out var result ) )
+                    {
+                        return result;
+                    }
+
                     throw new ArgumentOutOfRangeException( nameof(expression), $"Don't know how to extract the syntax from '{expression}'." );
             }
         }

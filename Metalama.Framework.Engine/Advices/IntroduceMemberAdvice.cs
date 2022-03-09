@@ -47,7 +47,7 @@ namespace Metalama.Framework.Engine.Advices
             this.MemberBuilder = null!;
         }
 
-        public override void Initialize( IReadOnlyList<Advice> declarativeAdvices, IDiagnosticAdder diagnosticAdder )
+        public override void Initialize( IDiagnosticAdder diagnosticAdder )
         {
             this.MemberBuilder.Accessibility = this.Template.Declaration?.Accessibility ?? Accessibility.Private;
 

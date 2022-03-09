@@ -77,9 +77,7 @@ public static class ProcessUtilities
         {
             if ( _isCurrentProcessUnattended == 0 )
             {
-#pragma warning disable IDE0059 // Unnecessary assignment of a value
                 _isCurrentProcessUnattended = DetectUnattendedProcess( out _ ) ? 1 : 2;
-#pragma warning restore IDE0059 // Unnecessary assignment of a value
             }
 
             return _isCurrentProcessUnattended == 1;

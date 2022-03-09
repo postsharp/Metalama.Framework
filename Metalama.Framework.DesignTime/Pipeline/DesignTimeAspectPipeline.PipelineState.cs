@@ -199,7 +199,8 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
                                     // We require an external build because we don't want to invalidate the pipeline configuration at
                                     // each keystroke.
-                                    Logger.DesignTime.Trace?.Log( $"Compile-time change detected: {change.FilePath} has changed." );
+                                    Logger.DesignTime.Trace?.Log(
+                                        $"Compile-time change detected: {change.FilePath} has changed. Old hash: {change.OldHash}, new hash: {change.NewHash}." );
 
                                     // Generated files may change during the startup sequence, and it is safe to reset the pipeline in this case.
                                     var requiresRebuild = !change.FilePath.EndsWith( ".g.cs", StringComparison.OrdinalIgnoreCase );
@@ -213,7 +214,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                                 // We don't require an external rebuild when a new syntax tree is added because Roslyn does not give us a complete
                                 // compilation in the first call in the Visual Studio initializations sequence. Roslyn calls us later with
                                 // a complete compilation, but we don't want to bother the user with the need of an external build.
-                                compileTimeSyntaxTreesBuilder[change.FilePath] = change.NewTree;
+                                compileTimeSyntaxTreesBuilder[change.FilePath] = change.NewTree.AssertNotNull();
                                 Logger.DesignTime.Trace?.Log( $"Compile-time change detected: {change.FilePath} is a new compile-time syntax tree." );
                                 OnCompileTimeChange( false );
 

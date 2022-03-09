@@ -210,9 +210,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
         {
             this.SetState( this._currentState.InvalidateCacheForNewCompilation( compilation, invalidateCompilationResult, cancellationToken ) );
 
-#pragma warning disable CS8603 // Probably a compiler issue.
             return this._currentState.UnprocessedChanges.AssertNotNull();
-#pragma warning restore CS8603
         }
 
         public void InvalidateCache()
@@ -356,11 +354,19 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
                 var semanticModel = compilation.GetSemanticModel( syntaxTree );
 
+                var pipelineMustReportPausedPipelineAsErrors =
+                    pipeline.MustReportPausedPipelineAsErrors && pipeline.IsCompileTimeSyntaxTreeOutdated( syntaxTree.FilePath );
+
+                if ( pipelineMustReportPausedPipelineAsErrors )
+                {
+                    Logger.DesignTime.Trace?.Log( $"The syntax tree '{syntaxTree.FilePath}' is marked as outdated." );
+                }
+
                 TemplatingCodeValidator.Validate(
                     pipeline.ServiceProvider,
                     semanticModel,
                     diagnostics.Add,
-                    pipeline.MustReportPausedPipelineAsErrors && pipeline.IsCompileTimeSyntaxTreeOutdated( syntaxTree.FilePath ),
+                    pipelineMustReportPausedPipelineAsErrors,
                     true,
                     cancellationToken );
 

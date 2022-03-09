@@ -4,6 +4,7 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
+using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.Eligibility;
 using Metalama.Framework.Eligibility.Implementation;
 using Metalama.Framework.Engine.Advices;
@@ -12,6 +13,7 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Pipeline;
+using Metalama.Framework.Engine.Templating.MetaModel;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Validation;
 using Metalama.Framework.Project;
@@ -56,7 +58,12 @@ namespace Metalama.Framework.Engine.Aspects
             {
                 this.EligibilityRule = new EligibilityRule<IDeclaration>(
                     EligibleScenarios.Inheritance,
-                    x => x is INamedType t && t.TypeKind != TypeKind.Interface,
+                    x =>
+                    {
+                        var t = x.GetDeclaringType();
+
+                        return t != null && t.TypeKind != TypeKind.Interface;
+                    },
                     _ => $"the aspect {this._aspectClass.ShortName} cannot be added to an interface (because the aspect contains a declarative introduction)" );
             }
         }
@@ -152,7 +159,7 @@ namespace Metalama.Framework.Engine.Aspects
                             x.TemplateInfo,
                             x.Symbol ) )
                     .WhereNotNull()
-                    .ToArray();
+                    .ToImmutableArray();
 
             var adviceFactory = new AdviceFactory(
                 compilationModelRevision,
@@ -171,36 +178,39 @@ namespace Metalama.Framework.Engine.Aspects
                 aspectInstance,
                 cancellationToken );
 
-            var executionContext = new UserCodeExecutionContext(
-                this._serviceProvider,
-                diagnosticSink,
-                UserCodeMemberInfo.FromDelegate( new Action<IAspectBuilder<T>>( aspectOfT.BuildAspect ) ),
-                new AspectLayerId( this._aspectClass ),
-                compilationModelRevision,
-                targetDeclaration );
-
-            if ( !this._serviceProvider.GetRequiredService<UserCodeInvoker>().TryInvoke( () => aspectOfT.BuildAspect( aspectBuilder ), executionContext ) )
+            using ( SyntaxBuilder.WithImplementation( new SyntaxBuilderImpl( compilationModelRevision, OurSyntaxGenerator.Default ) ) )
             {
-                aspectInstance.Skip();
+                var executionContext = new UserCodeExecutionContext(
+                    this._serviceProvider,
+                    diagnosticSink,
+                    UserCodeMemberInfo.FromDelegate( new Action<IAspectBuilder<T>>( aspectOfT.BuildAspect ) ),
+                    new AspectLayerId( this._aspectClass ),
+                    compilationModelRevision,
+                    targetDeclaration );
 
-                return
-                    new AspectInstanceResult(
-                        aspectInstance,
-                        false,
-                        diagnosticSink.ToImmutable(),
-                        ImmutableArray<Advice>.Empty,
-                        ImmutableArray<IAspectSource>.Empty,
-                        ImmutableArray<IValidatorSource>.Empty );
+                if ( !this._serviceProvider.GetRequiredService<UserCodeInvoker>().TryInvoke( () => aspectOfT.BuildAspect( aspectBuilder ), executionContext ) )
+                {
+                    aspectInstance.Skip();
+
+                    return
+                        new AspectInstanceResult(
+                            aspectInstance,
+                            false,
+                            diagnosticSink.ToImmutable(),
+                            ImmutableArray<Advice>.Empty,
+                            ImmutableArray<IAspectSource>.Empty,
+                            ImmutableArray<IValidatorSource>.Empty );
+                }
+
+                var aspectResult = aspectBuilder.ToResult();
+
+                if ( !aspectResult.Success )
+                {
+                    aspectInstance.Skip();
+                }
+
+                return aspectResult;
             }
-
-            var aspectResult = aspectBuilder.ToResult();
-
-            if ( !aspectResult.Success )
-            {
-                aspectInstance.Skip();
-            }
-
-            return aspectResult;
         }
 
         private static Advice? CreateDeclarativeAdvice<T>(
