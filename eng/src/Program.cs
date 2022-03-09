@@ -47,10 +47,11 @@ var product = new Product
     Configurations = Product.DefaultConfigurations
         .WithValue( BuildConfiguration.Debug, new BuildConfigurationInfo(
             MSBuildName: "Debug",
-            AdditionalArtifactRules: string.Join(
-                $@"\n",
+            AdditionalArtifactRules: new string[]
+            {
                 $@"+:%system.teamcity.build.tempDir%/Metalama/ExtractExceptions/**/*=>logs",
-                $@"+:%system.teamcity.build.tempDir%/Metalama/Extract/**/.completed=>logs" ) ) )
+                $@"+:%system.teamcity.build.tempDir%/Metalama/Extract/**/.completed=>logs"
+            } ) )
 };
 
 product.PrepareCompleted += OnPrepareCompleted;
