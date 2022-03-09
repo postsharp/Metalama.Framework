@@ -7,4 +7,4 @@ internal class TargetCode
         private void M2() { }
 
 
-private event global::System.Action Event;    }
+private event global::System.Action? Event;    }

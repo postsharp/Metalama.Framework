@@ -1,3 +1,5 @@
+#pragma warning disable CS0067
+
 using System;
 using Metalama.Framework.Aspects;
 
@@ -6,7 +8,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Introductions.Events.Intr
     internal class Aspect : MethodAspect
     {
         [Introduce( WhenExists = OverrideStrategy.Ignore )]
-        private event Action Event;
+        private event Action? Event;
     }
 
     // <target>

@@ -7,10 +7,10 @@ internal class TargetCode
         private void M2() { }
 
 
-private global::System.String _property;
+private global::System.String? _property;
 
 
-private global::System.String Property 
+private global::System.String? Property 
 { get
 { 
         return this._property;

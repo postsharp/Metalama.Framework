@@ -8,8 +8,6 @@ namespace Metalama.Framework.DesignTime.VisualStudio;
 
 public class VsAnalysisProcessSourceGenerator : AnalysisProcessSourceGenerator
 {
-#pragma warning disable CA1001 // ServiceHost is disposable but not owned.
-
     public VsAnalysisProcessSourceGenerator() : this( VsServiceProviderFactory.GetServiceProvider() ) { }
 
     public VsAnalysisProcessSourceGenerator( ServiceProvider serviceProvider ) : base( serviceProvider ) { }

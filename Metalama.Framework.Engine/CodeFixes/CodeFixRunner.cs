@@ -20,7 +20,6 @@ namespace Metalama.Framework.Engine.CodeFixes
     /// Executes code fixes.
     /// </summary>
     public abstract class CodeFixRunner
-#pragma warning restore CA1001
     {
         private protected abstract bool TryGetConfiguration(
             PartialCompilation compilation,
