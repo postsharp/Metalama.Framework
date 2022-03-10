@@ -15,8 +15,7 @@
     <!-- Names -->
     <AbstractNode Name="NameSyntax" Base="TypeSyntax">
         <TypeComment>
-            <summary>
-                Provides the base class from which the classes that represent name syntax nodes are derived. This
+            <summary>Provides the base class from which the classes that represent name syntax nodes are derived. This
                 is an abstract class.
             </summary>
         </TypeComment>
@@ -29,8 +28,7 @@
             <Kind Name="IdentifierToken"/>
         </Field>
         <TypeComment>
-            <summary>
-                Provides the base class from which the classes that represent simple name syntax nodes are derived.
+            <summary>Provides the base class from which the classes that represent simple name syntax nodes are derived.
                 This is an abstract class.
             </summary>
         </TypeComment>
@@ -55,8 +53,7 @@
         <Kind Name="QualifiedName"/>
         <Field Name="Left" Type="NameSyntax">
             <PropertyComment>
-                <summary>
-                    NameSyntax node representing the name on the left side of the dot token of the qualified
+                <summary>NameSyntax node representing the name on the left side of the dot token of the qualified
                     name.
                 </summary>
             </PropertyComment>
@@ -69,8 +66,7 @@
         </Field>
         <Field Name="Right" Type="SimpleNameSyntax">
             <PropertyComment>
-                <summary>
-                    SimpleNameSyntax node representing the name on the right side of the dot token of the qualified
+                <summary>SimpleNameSyntax node representing the name on the right side of the dot token of the qualified
                     name.
                 </summary>
             </PropertyComment>
@@ -92,8 +88,7 @@
         </Field>
         <Field Name="TypeArgumentList" Type="TypeArgumentListSyntax">
             <PropertyComment>
-                <summary>
-                    TypeArgumentListSyntax node representing the list of type arguments of the generic name.
+                <summary>TypeArgumentListSyntax node representing the list of type arguments of the generic name.
                 </summary>
             </PropertyComment>
         </Field>
@@ -158,8 +153,7 @@
     <!-- Type names -->
     <AbstractNode Name="TypeSyntax" Base="ExpressionSyntax">
         <TypeComment>
-            <summary>
-                Provides the base class from which the classes that represent type syntax nodes are derived. This
+            <summary>Provides the base class from which the classes that represent type syntax nodes are derived. This
                 is an abstract class.
             </summary>
         </TypeComment>
@@ -203,8 +197,7 @@
         </Field>
         <Field Name="RankSpecifiers" Type="SyntaxList&lt;ArrayRankSpecifierSyntax&gt;" MinCount="1">
             <PropertyComment>
-                <summary>
-                    SyntaxList of ArrayRankSpecifierSyntax nodes representing the list of rank specifiers for the
+                <summary>SyntaxList of ArrayRankSpecifierSyntax nodes representing the list of rank specifiers for the
                     array.
                 </summary>
             </PropertyComment>
@@ -284,8 +277,7 @@
         </Field>
         <Field Name="Parameters" Type="SeparatedSyntaxList&lt;FunctionPointerParameterSyntax&gt;" MinCount="1">
             <PropertyComment>
-                <summary>
-                    SeparatedSyntaxList of ParameterSyntaxes representing the list of parameters and return type.
+                <summary>SeparatedSyntaxList of ParameterSyntaxes representing the list of parameters and return type.
                 </summary>
             </PropertyComment>
         </Field>
@@ -419,8 +411,7 @@
             </PropertyComment>
         </Field>
         <TypeComment>
-            <summary>
-                Class which represents a placeholder in the type argument list of an unbound generic type.
+            <summary>Class which represents a placeholder in the type argument list of an unbound generic type.
             </summary>
         </TypeComment>
         <FactoryComment>
@@ -447,8 +438,7 @@
     <AbstractNode Name="ExpressionOrPatternSyntax" Base="CSharpSyntaxNode"/>
     <AbstractNode Name="ExpressionSyntax" Base="ExpressionOrPatternSyntax">
         <TypeComment>
-            <summary>
-                Provides the base class from which the classes that represent expression syntax nodes are derived.
+            <summary>Provides the base class from which the classes that represent expression syntax nodes are derived.
                 This is an abstract class.
             </summary>
         </TypeComment>
@@ -627,8 +617,7 @@
         </Field>
         <Field Name="WhenNotNull" Type="ExpressionSyntax">
             <PropertyComment>
-                <summary>
-                    ExpressionSyntax node representing the access expression to be executed when the object is not
+                <summary>ExpressionSyntax node representing the access expression to be executed when the object is not
                     null.
                 </summary>
             </PropertyComment>
@@ -664,8 +653,7 @@
         <Kind Name="ElementBindingExpression"/>
         <Field Name="ArgumentList" Type="BracketedArgumentListSyntax">
             <PropertyComment>
-                <summary>
-                    BracketedArgumentListSyntax node representing the list of arguments of the element binding
+                <summary>BracketedArgumentListSyntax node representing the list of arguments of the element binding
                     expression.
                 </summary>
             </PropertyComment>
@@ -706,8 +694,7 @@
         <Kind Name="ImplicitElementAccess"/>
         <Field Name="ArgumentList" Type="BracketedArgumentListSyntax">
             <PropertyComment>
-                <summary>
-                    BracketedArgumentListSyntax node representing the list of arguments of the implicit element
+                <summary>BracketedArgumentListSyntax node representing the list of arguments of the implicit element
                     access expression.
                 </summary>
             </PropertyComment>
@@ -774,8 +761,7 @@
         </Field>
         <Field Name="Right" Type="ExpressionSyntax">
             <PropertyComment>
-                <summary>
-                    ExpressionSyntax node representing the expression on the right of the binary operator.
+                <summary>ExpressionSyntax node representing the expression on the right of the binary operator.
                 </summary>
             </PropertyComment>
         </Field>
@@ -801,8 +787,7 @@
         <Kind Name="CoalesceAssignmentExpression"/>
         <Field Name="Left" Type="ExpressionSyntax">
             <PropertyComment>
-                <summary>
-                    ExpressionSyntax node representing the expression on the left of the assignment operator.
+                <summary>ExpressionSyntax node representing the expression on the left of the assignment operator.
                 </summary>
             </PropertyComment>
         </Field>
@@ -825,8 +810,7 @@
         </Field>
         <Field Name="Right" Type="ExpressionSyntax">
             <PropertyComment>
-                <summary>
-                    ExpressionSyntax node representing the expression on the right of the assignment operator.
+                <summary>ExpressionSyntax node representing the expression on the right of the assignment operator.
                 </summary>
             </PropertyComment>
         </Field>
@@ -852,8 +836,7 @@
         </Field>
         <Field Name="WhenTrue" Type="ExpressionSyntax">
             <PropertyComment>
-                <summary>
-                    ExpressionSyntax node representing the expression to be executed when the condition is true.
+                <summary>ExpressionSyntax node representing the expression to be executed when the condition is true.
                 </summary>
             </PropertyComment>
         </Field>
@@ -865,8 +848,7 @@
         </Field>
         <Field Name="WhenFalse" Type="ExpressionSyntax">
             <PropertyComment>
-                <summary>
-                    ExpressionSyntax node representing the expression to be executed when the condition is false.
+                <summary>ExpressionSyntax node representing the expression to be executed when the condition is false.
                 </summary>
             </PropertyComment>
         </Field>
@@ -879,8 +861,7 @@
     </Node>
     <AbstractNode Name="InstanceExpressionSyntax" Base="ExpressionSyntax">
         <TypeComment>
-            <summary>
-                Provides the base class from which the classes that represent instance expression syntax nodes are
+            <summary>Provides the base class from which the classes that represent instance expression syntax nodes are
                 derived. This is an abstract class.
             </summary>
         </TypeComment>
@@ -934,8 +915,7 @@
             <Kind Name="NullKeyword"/>
             <Kind Name="DefaultKeyword"/>
             <PropertyComment>
-                <summary>
-                    SyntaxToken representing the keyword corresponding to the kind of the literal expression.
+                <summary>SyntaxToken representing the keyword corresponding to the kind of the literal expression.
                 </summary>
             </PropertyComment>
         </Field>
@@ -1192,8 +1172,7 @@
         </Field>
         <Field Name="ArgumentList" Type="ArgumentListSyntax">
             <PropertyComment>
-                <summary>
-                    ArgumentListSyntax node representing the list of arguments of the invocation expression.
+                <summary>ArgumentListSyntax node representing the list of arguments of the invocation expression.
                 </summary>
             </PropertyComment>
         </Field>
@@ -1213,8 +1192,7 @@
         </Field>
         <Field Name="ArgumentList" Type="BracketedArgumentListSyntax">
             <PropertyComment>
-                <summary>
-                    BracketedArgumentListSyntax node representing the list of arguments of the element access
+                <summary>BracketedArgumentListSyntax node representing the list of arguments of the element access
                     expression.
                 </summary>
             </PropertyComment>
@@ -1233,8 +1211,7 @@
             </PropertyComment>
         </Field>
         <TypeComment>
-            <summary>
-                Provides the base class from which the classes that represent argument list syntax nodes are
+            <summary>Provides the base class from which the classes that represent argument list syntax nodes are
                 derived. This is an abstract class.
             </summary>
         </TypeComment>
@@ -1358,8 +1335,7 @@
             </PropertyComment>
         </Field>
         <TypeComment>
-            <summary>
-                Class which represents the syntax node for the variable declaration in an out var declaration or a
+            <summary>Class which represents the syntax node for the variable declaration in an out var declaration or a
                 deconstruction declaration.
             </summary>
         </TypeComment>
@@ -1400,8 +1376,7 @@
     </Node>
     <AbstractNode Name="AnonymousFunctionExpressionSyntax" Base="ExpressionSyntax">
         <TypeComment>
-            <summary>
-                Provides the base class from which the classes that represent anonymous function expressions are
+            <summary>Provides the base class from which the classes that represent anonymous function expressions are
                 derived.
             </summary>
         </TypeComment>
@@ -1437,8 +1412,7 @@
         </Field>
         <Field Name="ParameterList" Type="ParameterListSyntax" Optional="true">
             <PropertyComment>
-                <summary>
-                    List of parameters of the anonymous method expression, or null if there no parameters are
+                <summary>List of parameters of the anonymous method expression, or null if there no parameters are
                     specified.
                 </summary>
             </PropertyComment>
@@ -1468,8 +1442,7 @@
     </Node>
     <AbstractNode Name="LambdaExpressionSyntax" Base="AnonymousFunctionExpressionSyntax">
         <TypeComment>
-            <summary>
-                Provides the base class from which the classes that represent lambda expressions are derived.
+            <summary>Provides the base class from which the classes that represent lambda expressions are derived.
             </summary>
         </TypeComment>
         <Field Name="AttributeLists" Type="SyntaxList&lt;AttributeListSyntax&gt;"/>
@@ -1537,8 +1510,7 @@
         <Field Name="ReturnType" Type="TypeSyntax" Optional="true"/>
         <Field Name="ParameterList" Type="ParameterListSyntax">
             <PropertyComment>
-                <summary>
-                    ParameterListSyntax node representing the list of parameters for the lambda expression.
+                <summary>ParameterListSyntax node representing the list of parameters for the lambda expression.
                 </summary>
             </PropertyComment>
         </Field>
@@ -1588,8 +1560,7 @@
         </Field>
         <Field Name="Expressions" Type="SeparatedSyntaxList&lt;ExpressionSyntax&gt;" AllowTrailingSeparator="true">
             <PropertyComment>
-                <summary>
-                    SeparatedSyntaxList of ExpressionSyntax representing the list of expressions in the initializer
+                <summary>SeparatedSyntaxList of ExpressionSyntax representing the list of expressions in the initializer
                     expression.
                 </summary>
             </PropertyComment>
@@ -1616,16 +1587,14 @@
         </Field>
         <Field Name="ArgumentList" Type="ArgumentListSyntax" Optional="true">
             <PropertyComment>
-                <summary>
-                    ArgumentListSyntax representing the list of arguments passed as part of the object creation
+                <summary>ArgumentListSyntax representing the list of arguments passed as part of the object creation
                     expression.
                 </summary>
             </PropertyComment>
         </Field>
         <Field Name="Initializer" Type="InitializerExpressionSyntax" Optional="true">
             <PropertyComment>
-                <summary>
-                    InitializerExpressionSyntax representing the initializer expression for the object being
+                <summary>InitializerExpressionSyntax representing the initializer expression for the object being
                     created.
                 </summary>
             </PropertyComment>
@@ -1641,16 +1610,14 @@
         </Field>
         <Field Name="ArgumentList" Type="ArgumentListSyntax" Optional="false" Override="true">
             <PropertyComment>
-                <summary>
-                    ArgumentListSyntax representing the list of arguments passed as part of the object creation
+                <summary>ArgumentListSyntax representing the list of arguments passed as part of the object creation
                     expression.
                 </summary>
             </PropertyComment>
         </Field>
         <Field Name="Initializer" Type="InitializerExpressionSyntax" Optional="true" Override="true">
             <PropertyComment>
-                <summary>
-                    InitializerExpressionSyntax representing the initializer expression for the object being
+                <summary>InitializerExpressionSyntax representing the initializer expression for the object being
                     created.
                 </summary>
             </PropertyComment>
@@ -1677,16 +1644,14 @@
         </Field>
         <Field Name="ArgumentList" Type="ArgumentListSyntax" Optional="true" Override="true">
             <PropertyComment>
-                <summary>
-                    ArgumentListSyntax representing the list of arguments passed as part of the object creation
+                <summary>ArgumentListSyntax representing the list of arguments passed as part of the object creation
                     expression.
                 </summary>
             </PropertyComment>
         </Field>
         <Field Name="Initializer" Type="InitializerExpressionSyntax" Optional="true" Override="true">
             <PropertyComment>
-                <summary>
-                    InitializerExpressionSyntax representing the initializer expression for the object being
+                <summary>InitializerExpressionSyntax representing the initializer expression for the object being
                     created.
                 </summary>
             </PropertyComment>
@@ -1706,8 +1671,7 @@
         </Field>
         <Field Name="Initializer" Type="InitializerExpressionSyntax">
             <PropertyComment>
-                <summary>
-                    InitializerExpressionSyntax representing the initializer expression for the with expression.
+                <summary>InitializerExpressionSyntax representing the initializer expression for the with expression.
                 </summary>
             </PropertyComment>
         </Field>
@@ -1745,8 +1709,7 @@
         <Field Name="Initializers" Type="SeparatedSyntaxList&lt;AnonymousObjectMemberDeclaratorSyntax&gt;"
                AllowTrailingSeparator="true">
             <PropertyComment>
-                <summary>
-                    SeparatedSyntaxList of AnonymousObjectMemberDeclaratorSyntax representing the list of object
+                <summary>SeparatedSyntaxList of AnonymousObjectMemberDeclaratorSyntax representing the list of object
                     member initializers.
                 </summary>
             </PropertyComment>
@@ -1779,8 +1742,7 @@
         </Field>
         <Field Name="Initializer" Type="InitializerExpressionSyntax" Optional="true">
             <PropertyComment>
-                <summary>
-                    InitializerExpressionSyntax node representing the initializer of the array creation
+                <summary>InitializerExpressionSyntax node representing the initializer of the array creation
                     expression.
                 </summary>
             </PropertyComment>
@@ -1808,8 +1770,7 @@
         </Field>
         <Field Name="Commas" Type="SyntaxList&lt;SyntaxToken&gt;">
             <PropertyComment>
-                <summary>
-                    SyntaxList of SyntaxToken representing the commas in the implicit array creation expression.
+                <summary>SyntaxList of SyntaxToken representing the commas in the implicit array creation expression.
                 </summary>
             </PropertyComment>
         </Field>
@@ -1821,8 +1782,7 @@
         </Field>
         <Field Name="Initializer" Type="InitializerExpressionSyntax">
             <PropertyComment>
-                <summary>
-                    InitializerExpressionSyntax representing the initializer expression of the implicit array
+                <summary>InitializerExpressionSyntax representing the initializer expression of the implicit array
                     creation expression.
                 </summary>
             </PropertyComment>
@@ -1849,8 +1809,7 @@
         </Field>
         <Field Name="Initializer" Type="InitializerExpressionSyntax" Optional="true">
             <PropertyComment>
-                <summary>
-                    InitializerExpressionSyntax node representing the initializer of the stackalloc array creation
+                <summary>InitializerExpressionSyntax node representing the initializer of the stackalloc array creation
                     expression.
                 </summary>
             </PropertyComment>
@@ -1884,8 +1843,7 @@
         </Field>
         <Field Name="Initializer" Type="InitializerExpressionSyntax">
             <PropertyComment>
-                <summary>
-                    InitializerExpressionSyntax representing the initializer expression of the implicit stackalloc
+                <summary>InitializerExpressionSyntax representing the initializer expression of the implicit stackalloc
                     array creation expression.
                 </summary>
             </PropertyComment>
@@ -2063,8 +2021,7 @@
         </Field>
         <Field Name="Contents" Type="SyntaxList&lt;InterpolatedStringContentSyntax&gt;">
             <PropertyComment>
-                <summary>
-                    List of parts of the interpolated string, each one is either a literal part or an
+                <summary>List of parts of the interpolated string, each one is either a literal part or an
                     interpolation.
                 </summary>
             </PropertyComment>
@@ -2228,6 +2185,27 @@
             <Kind Name="NotKeyword"/>
         </Field>
         <Field Name="Pattern" Type="PatternSyntax"/>
+    </Node>
+    <Node Name="ListPatternSyntax" Base="PatternSyntax">
+        <Kind Name="ListPattern"/>
+        <Field Name="OpenBracketToken" Type="SyntaxToken">
+            <Kind Name="OpenBracketToken"/>
+        </Field>
+        <Field Name="Patterns" Type="SeparatedSyntaxList&lt;PatternSyntax&gt;" AllowTrailingSeparator="true"/>
+        <Field Name="CloseBracketToken" Type="SyntaxToken">
+            <Kind Name="CloseBracketToken"/>
+        </Field>
+        <Field Name="Designation" Type="VariableDesignationSyntax" Optional="true">
+            <Kind Name="SingleVariableDesignation"/>
+            <Kind Name="DiscardDesignation"/>
+        </Field>
+    </Node>
+    <Node Name="SlicePatternSyntax" Base="PatternSyntax">
+        <Kind Name="SlicePattern"/>
+        <Field Name="DotDotToken" Type="SyntaxToken">
+            <Kind Name="DotDotToken"/>
+        </Field>
+        <Field Name="Pattern" Type="PatternSyntax" Optional="true"/>
     </Node>
 
     <AbstractNode Name="InterpolatedStringContentSyntax" Base="CSharpSyntaxNode"/>
@@ -3662,8 +3640,7 @@
 
     <AbstractNode Name="BaseTypeSyntax" Base="CSharpSyntaxNode">
         <TypeComment>
-            <summary>
-                Provides the base class from which the classes that represent base type syntax nodes are derived.
+            <summary>Provides the base class from which the classes that represent base type syntax nodes are derived.
                 This is an abstract class.
             </summary>
         </TypeComment>
@@ -4202,8 +4179,7 @@
         <Choice>
             <Field Name="Body" Type="BlockSyntax">
                 <PropertyComment>
-                    <summary>
-                        Gets the optional body block which may be empty, but it is null if there are no braces.
+                    <summary>Gets the optional body block which may be empty, but it is null if there are no braces.
                     </summary>
                 </PropertyComment>
             </Field>
@@ -4308,6 +4284,9 @@
             </PropertyComment>
             <Kind Name="IdentifierToken"/>
             <Kind Name="ArgListKeyword"/>
+        </Field>
+        <Field Name="ExclamationExclamationToken" Type="SyntaxToken" Optional="true">
+            <Kind Name="ExclamationExclamationToken"/>
         </Field>
         <Field Name="Default" Type="EqualsValueClauseSyntax" Optional="true"/>
     </Node>

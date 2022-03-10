@@ -18,6 +18,11 @@ namespace Metalama.Framework.Engine.Templating
     {
         public static LiteralExpressionSyntax Null => SyntaxFactory.LiteralExpression( SyntaxKind.NullLiteralExpression );
 
+        public static LiteralExpressionSyntax Default
+            => SyntaxFactory.LiteralExpression(
+                SyntaxKind.DefaultLiteralExpression,
+                SyntaxFactory.Token( SyntaxKind.DefaultKeyword ) );
+
         public static ExpressionSyntax LiteralExpression( object? obj )
             => LiteralExpressionOrNull( obj ) ?? throw new ArgumentOutOfRangeException( nameof(obj) );
 
@@ -38,6 +43,23 @@ namespace Metalama.Framework.Engine.Templating
                 _ => null
             };
 
+        public static SyntaxToken LiteralTokenOrDefault( object obj )
+            => obj switch
+            {
+                string s => SyntaxFactory.Literal( s ),
+                char s => SyntaxFactory.Literal( s ),
+                int s => SyntaxFactory.Literal( s ),
+                uint s => SyntaxFactory.Literal( s ),
+                long s => SyntaxFactory.Literal( s ),
+                ulong s => SyntaxFactory.Literal( s ),
+                short s => SyntaxFactory.Literal( s ),
+                ushort s => SyntaxFactory.Literal( s ),
+                double s => SyntaxFactory.Literal( s ),
+                float s => SyntaxFactory.Literal( s ),
+                decimal s => SyntaxFactory.Literal( s ),
+                _ => default
+            };
+
         public static ExpressionSyntax LiteralExpression( string? s )
             => s == null
                 ? SyntaxFactory.ParenthesizedExpression(
@@ -45,7 +67,10 @@ namespace Metalama.Framework.Engine.Templating
                             SyntaxFactory.NullableType( SyntaxFactory.PredefinedType( SyntaxFactory.Token( SyntaxKind.StringKeyword ) ) ),
                             SyntaxFactory.LiteralExpression( SyntaxKind.NullLiteralExpression ) ) )
                     .WithAdditionalAnnotations( Simplifier.Annotation )
-                : SyntaxFactory.LiteralExpression( SyntaxKind.StringLiteralExpression, SyntaxFactory.Literal( s ) );
+                : LiteralNonNullExpression( s );
+
+        public static LiteralExpressionSyntax LiteralNonNullExpression( string s )
+            => SyntaxFactory.LiteralExpression( SyntaxKind.StringLiteralExpression, SyntaxFactory.Literal( s ) );
 
         public static LiteralExpressionSyntax LiteralExpression( int i )
             => SyntaxFactory.LiteralExpression( SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal( i ) );

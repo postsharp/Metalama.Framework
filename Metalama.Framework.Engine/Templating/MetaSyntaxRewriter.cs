@@ -141,7 +141,7 @@ namespace Metalama.Framework.Engine.Templating
                 return this.MetaSyntaxFactory.SingletonSeparatedList<T>( this.Transform( list[0] ) );
             }
 
-            return this.MetaSyntaxFactory.SeparatedList2<T>( list.Select( this.Transform ) );
+            return this.MetaSyntaxFactory.SeparatedList<T>( list.Select( this.Transform ) );
         }
 
         protected ExpressionSyntax Transform( BracketedArgumentListSyntax? list )

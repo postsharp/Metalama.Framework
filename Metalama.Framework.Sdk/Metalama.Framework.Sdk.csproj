@@ -21,7 +21,7 @@
         <InternalsVisibleTo Include="Metalama.Framework.Tests.Integration.Internals"/>
         <InternalsVisibleTo Include="DynamicProxyGenAssembly2" Key="$(FakeItEasyKey)" LoadsWithinVisualStudio="false"/>
 
-        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="$(RoslynVersion)"/>
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="$(RoslynMinimalVersion)"/>
         <PackageReference Include="Metalama.Compiler.Sdk" Version="$(MetalamaCompilerVersion)"/>
 
         <!-- We don't want Metalama to customize the build of SDK projects, so we have to list private assets.

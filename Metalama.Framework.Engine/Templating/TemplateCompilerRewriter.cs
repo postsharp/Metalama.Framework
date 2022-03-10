@@ -382,7 +382,7 @@ namespace Metalama.Framework.Engine.Templating
             {
                 if ( this._currentMetaContext!.TryGetRunTimeSymbolLocal( identifierSymbol!, out var declaredSymbolNameLocal ) )
                 {
-                    return this.MetaSyntaxFactory.IdentifierName1( IdentifierName( declaredSymbolNameLocal.Text ) );
+                    return this.MetaSyntaxFactory.IdentifierName( IdentifierName( declaredSymbolNameLocal.Text ) );
                 }
                 else if ( identifierSymbol is IParameterSymbol parameterSymbol
                           && SymbolEqualityComparer.Default.Equals( parameterSymbol.ContainingSymbol, this._rootTemplateSymbol ) )
@@ -407,7 +407,7 @@ namespace Metalama.Framework.Engine.Templating
                 }
             }
 
-            return this.MetaSyntaxFactory.IdentifierName2( SyntaxFactoryEx.LiteralExpression( node.Identifier.Text ) );
+            return this.MetaSyntaxFactory.IdentifierName( SyntaxFactoryEx.LiteralExpression( node.Identifier.Text ) );
         }
 
         protected override ExpressionSyntax TransformArgument( ArgumentSyntax node )
@@ -416,7 +416,7 @@ namespace Metalama.Framework.Engine.Templating
             if ( node.RefKindKeyword.Kind() == SyntaxKind.None )
             {
                 var transformedExpression = this.Transform( node.Expression );
-                var transformedArgument = this.MetaSyntaxFactory.Argument( transformedExpression );
+                var transformedArgument = this.MetaSyntaxFactory.Argument( SyntaxFactoryEx.Null, SyntaxFactoryEx.Default, transformedExpression );
 
                 if ( node.NameColon != null )
                 {
@@ -1049,9 +1049,9 @@ namespace Metalama.Framework.Engine.Templating
 
                 this._currentMetaContext.Statements.AddRange( createMetaStatements() );
 
-                // TemplateSyntaxFactory.ToStatementArray( __s1 )
+                // TemplateSyntaxFactory.ToStatementList( __s1 )
                 var toArrayStatementExpression = InvocationExpression(
-                    this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.ToStatementArray) ),
+                    this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.ToStatementList) ),
                     ArgumentList( SingletonSeparatedList( Argument( IdentifierName( this._currentMetaContext.StatementListVariableName ) ) ) ) );
 
                 if ( generateExpression )
@@ -1061,17 +1061,12 @@ namespace Metalama.Framework.Engine.Templating
                     var returnStatementSyntax = ReturnStatement( toArrayStatementExpression ).WithLeadingTrivia( this.GetIndentation() ).NormalizeWhitespace();
                     this._currentMetaContext.Statements.Add( returnStatementSyntax );
 
-                    // Block( Func<StatementSyntax[]>( delegate { ... } )
+                    // Block( Func<SyntaxList<StatementSyntax>>( delegate { ... } )
                     return this.DeepIndent(
                         this.MetaSyntaxFactory.Block(
+                            SyntaxFactoryEx.Default,
                             InvocationExpression(
-                                ObjectCreationExpression(
-                                        this.MetaSyntaxFactory.GenericType(
-                                            typeof(Func<>),
-                                            ArrayType( this.MetaSyntaxFactory.Type( typeof(StatementSyntax) ) )
-                                                .WithRankSpecifiers(
-                                                    SingletonList(
-                                                        ArrayRankSpecifier( SingletonSeparatedList<ExpressionSyntax>( OmittedArraySizeExpression() ) ) ) ) ) )
+                                ObjectCreationExpression( this.MetaSyntaxFactory.Type( typeof(Func<SyntaxList<StatementSyntax>>) ) )
                                     .NormalizeWhitespace()
                                     .WithArgumentList(
                                         ArgumentList(
@@ -1086,7 +1081,8 @@ namespace Metalama.Framework.Engine.Templating
                 {
                     // return __s;
                     this._currentMetaContext.Statements.Add(
-                        ReturnStatement( this.MetaSyntaxFactory.Block( toArrayStatementExpression ).WithLeadingTrivia( this.GetIndentation() ) ) );
+                        ReturnStatement(
+                            this.MetaSyntaxFactory.Block( SyntaxFactoryEx.Default, toArrayStatementExpression ).WithLeadingTrivia( this.GetIndentation() ) ) );
 
                     return Block( this._currentMetaContext.Statements );
                 }
@@ -1471,7 +1467,7 @@ namespace Metalama.Framework.Engine.Templating
                                 return this.MetaSyntaxFactory.MemberAccessExpression(
                                     this.MetaSyntaxFactory.Kind( SyntaxKind.SimpleMemberAccessExpression ),
                                     this.Transform( OurSyntaxGenerator.CompileTime.NameExpression( symbol.ContainingType ) ),
-                                    this.MetaSyntaxFactory.IdentifierName2( SyntaxFactoryEx.LiteralExpression( node.Identifier.Text ) ) );
+                                    this.MetaSyntaxFactory.IdentifierName( SyntaxFactoryEx.LiteralExpression( node.Identifier.Text ) ) );
                         }
                     }
                 }
