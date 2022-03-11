@@ -22,12 +22,6 @@ namespace Metalama.Framework.Engine.Formatting
                 this._targetEndOfLineStyle = targetEndOfLineStyle;
             }
 
-            public EndOfLineStyle EndOfLineStyle { get; }
-
-            public TriviaRewriter() : base(true)
-            {
-            }
-
             public override SyntaxNode? Visit( SyntaxNode? node )
             {
                 if ( node == null || !node.ContainsAnnotations )
@@ -93,11 +87,12 @@ namespace Metalama.Framework.Engine.Formatting
                     {
                         try
                         {
-                            switch ( (endOfLineStyle, this._targetEndOfLineStyle) )
+                            switch (endOfLineStyle, this._targetEndOfLineStyle)
                             {
                                 // CRLF -> CR or CRLF -> LF
-                                case (EndOfLineStyle.Windows, EndOfLineStyle.CR or EndOfLineStyle.LF ):
+                                case (EndOfLineStyle.Windows, EndOfLineStyle.CR or EndOfLineStyle.LF):
                                     this._destWriter.Write( chars, 0, chars.Length - 2 );
+
                                     this._destWriter.Write(
                                         this._targetEndOfLineStyle switch
                                         {
@@ -105,18 +100,21 @@ namespace Metalama.Framework.Engine.Formatting
                                             EndOfLineStyle.LF => '\n',
                                             _ => throw new AssertionFailedException()
                                         } );
+
                                     break;
 
                                 // LF -> CRLF or CR -> CRLF
-                                case (EndOfLineStyle.LF or EndOfLineStyle.CR, EndOfLineStyle.Windows ):
+                                case (EndOfLineStyle.LF or EndOfLineStyle.CR, EndOfLineStyle.Windows):
                                     this._destWriter.Write( chars, 0, chars.Length - 1 );
                                     this._destWriter.Write( '\r' );
                                     this._destWriter.Write( '\n' );
+
                                     break;
 
                                 // LF -> CR or CR -> LF
-                                case (EndOfLineStyle.LF or EndOfLineStyle.CR, EndOfLineStyle.CR or EndOfLineStyle.LF ):
+                                case (EndOfLineStyle.LF or EndOfLineStyle.CR, EndOfLineStyle.CR or EndOfLineStyle.LF):
                                     this._destWriter.Write( chars, 0, chars.Length - 1 );
+
                                     this._destWriter.Write(
                                         this._targetEndOfLineStyle switch
                                         {
@@ -124,6 +122,7 @@ namespace Metalama.Framework.Engine.Formatting
                                             EndOfLineStyle.LF => '\n',
                                             _ => throw new AssertionFailedException()
                                         } );
+
                                     break;
 
                                 default:
@@ -141,6 +140,7 @@ namespace Metalama.Framework.Engine.Formatting
                     else
                     {
                         this._sourceWriter.Reset();
+
                         return trivia;
                     }
                 }

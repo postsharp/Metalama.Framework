@@ -19,10 +19,13 @@ namespace Metalama.Framework.Engine.Utilities
     /// </summary>
     public readonly struct SymbolId
     {
+        // ReSharper disable once PrivateFieldCanBeConvertedToLocalVariable
+        private static readonly Func<string, object> _newSymbolKeyFunc;
+        
+        private static readonly Func<object, Compilation, bool, CancellationToken, ISymbol> _resolveSymbolKeyFunc;
+        private static readonly Func<ISymbol, CancellationToken, object> _getSymbolKeyFunc;
+
         private readonly object _symbolKey;
-        private static readonly Func<string,object> _newSymbolKeyFunc;
-        private static readonly Func<object,Compilation,bool,CancellationToken,ISymbol> _resolveSymbolKeyFunc;
-        private static readonly Func<ISymbol,CancellationToken,object> _getSymbolKeyFunc;
 
         public string Id => this._symbolKey.ToString();
 
@@ -38,7 +41,7 @@ namespace Metalama.Framework.Engine.Utilities
             var idParameter = Expression.Parameter( typeof(string), "id" );
             var newSymbolKey = Expression.ConvertChecked( Expression.New( symbolKeyConstructor, idParameter ), typeof(object) );
             _newSymbolKeyFunc = Expression.Lambda<Func<string, object>>( newSymbolKey, idParameter ).Compile();
-            
+
             // Get SymbolKey.Resolve.
             var symbolKeyResolve = symbolKeyType.GetMethod( "Resolve" );
             var symbolKeyResolutionGetSymbol = symbolKeyResolutionType.GetProperty( "Symbol" );
@@ -49,7 +52,7 @@ namespace Metalama.Framework.Engine.Utilities
             var cancellationTokenParameter = Expression.Parameter( typeof(CancellationToken), "cancellationToken" );
 
             var callResolve = Expression.Call(
-               Expression.Convert( symbolKeyParameter, symbolKeyType ),
+                Expression.Convert( symbolKeyParameter, symbolKeyType ),
                 symbolKeyResolve,
                 compilationParameter,
                 ignoreAssemblyKeyParameter,

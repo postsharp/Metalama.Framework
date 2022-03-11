@@ -627,7 +627,7 @@ class C<TC>
             Assert.Equal( "(string, int)", closedMethod.ReturnType.ToString() );
 
             // Generic type from a typeof.
-            var fromTypeOf = ((INamedType) compilation.Factory.GetTypeByReflectionType( typeof(AsyncLocal<>) )).ConstructGenericInstance( typeof(int) );
+            _ = ((INamedType) compilation.Factory.GetTypeByReflectionType( typeof(AsyncLocal<>) )).ConstructGenericInstance( typeof(int) );
         }
 
         [Fact]

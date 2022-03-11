@@ -240,8 +240,8 @@ namespace Metalama.Framework.Engine.Templating
                 var result = SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( nameof(SyntaxFactory.Token) ) )
                     .WithArgumentList(
                         SyntaxFactory.ArgumentList(
-                            SyntaxFactory.SeparatedList<ArgumentSyntax>(
-                                new ArgumentSyntax[]
+                            SyntaxFactory.SeparatedList(
+                                new[]
                                 {
                                     SyntaxFactory.Argument( leading ),
                                     SyntaxFactory.Argument( kind ),

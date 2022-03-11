@@ -6,14 +6,14 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Project;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Formatting;
 using System;
 using System.Reflection;
 using System.Text;
-using AnnotationExtensions = Microsoft.CodeAnalysis.AnnotationExtensions;
-using SyntaxNodeExtensions = Microsoft.CodeAnalysis.SyntaxNodeExtensions;
+using SpecialType = Metalama.Framework.Code.SpecialType;
 
 namespace Metalama.Framework.Engine.Templating.MetaModel;
 
@@ -43,7 +43,7 @@ internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
 
     public IExpression ParseExpression( string code )
     {
-        var expression = AnnotationExtensions.WithAdditionalAnnotations( SyntaxFactory.ParseExpression( code ), Formatter.Annotation );
+        var expression = SyntaxFactory.ParseExpression( code ).WithAdditionalAnnotations( Formatter.Annotation );
 
         return new RuntimeExpression( expression, this.Compilation, this.Project.ServiceProvider ).ToUserExpression( this.Compilation );
     }
@@ -115,9 +115,8 @@ internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
     public void AppendExpression( IExpression expression, StringBuilder stringBuilder )
     {
         stringBuilder.Append(
-            SyntaxNodeExtensions.NormalizeWhitespace(
-                ((IUserExpression) expression.Value!).ToRunTimeExpression()
-                .Syntax )
+            ((IUserExpression) expression.Value!).ToRunTimeExpression()
+            .Syntax.NormalizeWhitespace()
             .ToFullString() );
     }
 
@@ -125,5 +124,5 @@ internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
         => stringBuilder.Append(
             expression == null
                 ? "null"
-                : SyntaxNodeExtensions.NormalizeWhitespace( ((RuntimeExpression) expression).Syntax ).ToFullString() );
+                : ((RuntimeExpression) expression).Syntax.NormalizeWhitespace().ToFullString() );
 }

@@ -8,11 +8,11 @@ namespace Metalama.Framework.GenerateMetaSyntaxRewriter.Model;
 
 public static class TreeReader
 {
-    public static Tree ReadTree(string inputFile)
+    public static Tree ReadTree( string inputFile )
     {
-        var reader = XmlReader.Create(inputFile, new XmlReaderSettings { DtdProcessing = DtdProcessing.Prohibit });
-        var serializer = new XmlSerializer(typeof(Tree));
-        var tree = (Tree)serializer.Deserialize(reader);
+        var reader = XmlReader.Create( inputFile, new XmlReaderSettings { DtdProcessing = DtdProcessing.Prohibit } );
+        var serializer = new XmlSerializer( typeof(Tree) );
+        var tree = (Tree) serializer.Deserialize( reader );
         TreeFlattening.FlattenChildren( tree );
 
         return tree;

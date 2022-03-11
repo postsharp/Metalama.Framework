@@ -45,6 +45,7 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
             var name = IdentifierName( this.Member.Name );
 
             ExpressionSyntax expression;
+
             if ( this._invokerOperator == InvokerOperator.Default )
             {
                 expression = MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, receiver, name );
@@ -55,7 +56,7 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
             }
 
             // Only create an aspect reference when the declaring type of the invoked declaration is the target of the template (or it's declaring type).
-            if ( SymbolEqualityComparer.Default.Equals( GetTargetTypeSymbol(), this.Member.DeclaringType.GetSymbol().OriginalDefinition) )
+            if ( SymbolEqualityComparer.Default.Equals( GetTargetTypeSymbol(), this.Member.DeclaringType.GetSymbol().OriginalDefinition ) )
             {
                 expression = expression.WithAspectReferenceAnnotation( this.AspectReference.WithTargetKind( targetKind ) );
             }
