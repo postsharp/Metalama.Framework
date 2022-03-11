@@ -12,7 +12,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.CodeAnalysis" Version="$(RoslynVersion)"/>
+        <PackageReference Include="Microsoft.CodeAnalysis" Version="$(RoslynMinimalVersion)"/>
     </ItemGroup>
 
 
