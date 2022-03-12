@@ -52,6 +52,14 @@ namespace Metalama.Framework.Engine.Utilities
                     }
 
                     break;
+                
+                case (IParameterSymbol parameterX, IParameterSymbol parameterY):
+                    if ( !Equals( parameterX.ContainingSymbol, parameterY.ContainingSymbol ) )
+                    {
+                        return false;
+                    }
+
+                    return parameterX.Ordinal == parameterY.Ordinal;
 
                 case (IPropertySymbol propertyX, IPropertySymbol propertyY):
                     if ( !PropertyEquals( propertyX, propertyY, this._options ) )
@@ -329,6 +337,11 @@ namespace Metalama.Framework.Engine.Utilities
 
             switch ( symbol )
             {
+                case IParameterSymbol parameter:
+                    h = HashCode.Combine( h, GetHashCode( symbol.ContainingSymbol, options ), parameter.Ordinal );
+                    
+                    break;
+                
                 case INamedTypeSymbol type:
                     if ( options.HasFlag( StructuralSymbolComparerOptions.Name ) )
                     {
