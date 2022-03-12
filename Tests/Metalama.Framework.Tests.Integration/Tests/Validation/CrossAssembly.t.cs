@@ -5,7 +5,7 @@
 // Warning MY001 on `ValidatedClass`: `Reference constraint of type 'ParameterType, ArrayType' in declaration 'DerivedClass.Method(ValidatedClass[], List<ValidatedClass>)/param1'.`
 // Warning MY001 on `ValidatedClass`: `Reference constraint of type 'TypeArgument, ParameterType' in declaration 'DerivedClass.Method(ValidatedClass[], List<ValidatedClass>)/param2'.`
 // Warning MY001 on `ValidatedClass`: `Reference constraint of type 'LocalVariableType' in declaration 'ReferencingClass.Method()'.`
-// Warning MY001 on `Method`: `Reference constraint of type 'MemberAccess' in declaration 'ReferencingClass.Method()'.`
+// Warning MY001 on `ValidatedClass.Method`: `Reference constraint of type 'Invocation' in declaration 'ReferencingClass.Method()'.`
 // Warning MY001 on `ValidatedClass`: `Reference constraint of type 'TypeOf' in declaration 'ReferencingClass.Method()'.`
 using System;
 using System.Collections.Generic;
@@ -28,8 +28,7 @@ namespace Metalama.Framework.Tests.Integration.Validation.CrossAssembly
             return null;
         }
     }
-    
-    
+
     internal class ReferencingClass
     {
         private void Method()

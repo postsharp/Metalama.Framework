@@ -1,3 +1,6 @@
+// Warning MY001 on `Validate`: `Reference constraint of type 'Other' in declaration 'Fabric.AmendNamespace(INamespaceAmender)'.`
+// Warning MY001 on `context`: `Reference constraint of type 'Other' in declaration 'Fabric.Validate(in ReferenceValidationContext)'.`
+// Warning MY001 on `context`: `Reference constraint of type 'Other' in declaration 'Fabric.Validate(in ReferenceValidationContext)'.`
 // Warning MY001 on `ValidatedClass`: `Reference constraint of type 'BaseType' in declaration 'DerivedClass'.`
 // Warning MY001 on `ValidatedClass`: `Reference constraint of type 'FieldType' in declaration 'DerivedClass._field1'.`
 // Warning MY001 on `ValidatedClass`: `Reference constraint of type 'TypeOf' in declaration 'DerivedClass._field2'.`
@@ -5,9 +8,10 @@
 // Warning MY001 on `ValidatedClass`: `Reference constraint of type 'ParameterType, ArrayType' in declaration 'DerivedClass.Method(ValidatedClass[], List<ValidatedClass>)/param1'.`
 // Warning MY001 on `ValidatedClass`: `Reference constraint of type 'TypeArgument, ParameterType' in declaration 'DerivedClass.Method(ValidatedClass[], List<ValidatedClass>)/param2'.`
 // Warning MY001 on `ValidatedClass`: `Reference constraint of type 'LocalVariableType' in declaration 'DerivedClass.Method(ValidatedClass[], List<ValidatedClass>)'.`
+// Warning MY001 on `Method`: `Reference constraint of type 'Invocation' in declaration 'DerivedClass.Method(ValidatedClass[], List<ValidatedClass>)'.`
 // Warning MY001 on `ValidatedClass`: `Reference constraint of type 'TypeOf' in declaration 'DerivedClass.Method(ValidatedClass[], List<ValidatedClass>)'.`
 // Warning MY001 on `ValidatedClass`: `Reference constraint of type 'LocalVariableType' in declaration 'ReferencingClass.ReferencingMethod()'.`
-// Warning MY001 on `Method`: `Reference constraint of type 'MemberAccess' in declaration 'ReferencingClass.ReferencingMethod()'.`
+// Warning MY001 on `ValidatedClass.Method`: `Reference constraint of type 'Invocation' in declaration 'ReferencingClass.ReferencingMethod()'.`
 // Warning MY001 on `ValidatedClass`: `Reference constraint of type 'TypeOf' in declaration 'ReferencingClass.ReferencingMethod()'.`
 using System;
 using System.Collections.Generic;
