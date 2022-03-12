@@ -145,15 +145,6 @@ namespace Metalama.Framework.Engine.CodeModel.References
         // ReSharper disable once UnusedParameter.Local
         public Ref( SyntaxNode? declaration, DeclarationRefTargetKind targetKind, Compilation compilation )
         {
-#if DEBUG
-            if ( declaration != null )
-            {
-                // Check that we have received a node that we can resolve to a symbol
-                var semanticModel = compilation.GetSemanticModel( declaration.SyntaxTree );
-                semanticModel.GetDeclaredSymbol( declaration ).AssertNotNull();
-            }
-#endif
-
             this.Target = declaration;
             this.TargetKind = targetKind;
             this._compilation = compilation;

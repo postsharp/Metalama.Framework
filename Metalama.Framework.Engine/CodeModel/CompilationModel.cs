@@ -82,7 +82,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
             foreach ( var tree in partialCompilation.SyntaxTrees )
             {
-                attributeDiscoveryVisitor.Visit( tree.Value.GetRoot() );
+                attributeDiscoveryVisitor.Visit( tree.Value );
             }
 
             this._allMemberAttributesByTypeName = attributeDiscoveryVisitor.GetDiscoveredAttributes();
