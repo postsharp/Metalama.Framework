@@ -335,6 +335,30 @@ public class ReferenceValidationVisitor : CSharpSyntaxWalker, IDisposable
         {
             return false;
         }
+
+        switch ( symbol.Kind )
+        {
+            case SymbolKind.ArrayType:
+            case SymbolKind.Assembly:
+            case SymbolKind.DynamicType:
+            case SymbolKind.Event:
+            case SymbolKind.Field:
+            case SymbolKind.Method:
+            case SymbolKind.NetModule:
+            case SymbolKind.NamedType:
+            case SymbolKind.Namespace:
+            case SymbolKind.Parameter:
+            case SymbolKind.PointerType:
+            case SymbolKind.Property:
+            case SymbolKind.TypeParameter:
+            case SymbolKind.FunctionPointerType:
+                // Supported.
+                break;
+
+            default:
+                // Unsupported.
+                return false;
+        }
        
         var currentDeclaration = this.GetCurrentDeclaration();
 
