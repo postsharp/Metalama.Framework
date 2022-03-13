@@ -3,25 +3,22 @@
 
 using System;
 
-namespace Metalama.Framework.Aspects
+namespace Metalama.Framework.Aspects;
+
+/// <summary>
+/// Custom attribute attribute that, when applied to a declaration, specifies that this declaration must not be
+/// the target of aspects of given types.
+/// (Not implemented.)
+/// </summary>
+[AttributeUsage( AttributeTargets.All )]
+public class ExcludeAspectAttribute : Attribute
 {
     /// <summary>
-    /// Custom attribute attribute that, when applied to a declaration, specifies that this declaration must not be
-    /// the target of aspects of given types.
-    /// (Not implemented.)
+    /// Initializes a new instance of the <see cref="ExcludeAspectAttribute"/> class.
     /// </summary>
-    [Obsolete( "Not implemented." )]
-    [AttributeUsage( AttributeTargets.All )]
-    public class ExcludeAspectAttribute : Attribute
+    /// <param name="excludedAspectTypes"></param>
+    public ExcludeAspectAttribute( params Type[] excludedAspectTypes )
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ExcludeAspectAttribute"/> class.
-        /// </summary>
-        /// <param name="excludedAspectTypes"></param>
-        [Obsolete( "Not implemented." )]
-        public ExcludeAspectAttribute( params Type[] excludedAspectTypes )
-        {
-            _ = excludedAspectTypes;
-        }
+        _ = excludedAspectTypes;
     }
 }

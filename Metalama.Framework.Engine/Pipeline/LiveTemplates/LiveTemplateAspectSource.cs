@@ -5,32 +5,31 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Diagnostics;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
 using System.Threading;
 
-namespace Metalama.Framework.Engine.Pipeline.LiveTemplates
+namespace Metalama.Framework.Engine.Pipeline.LiveTemplates;
+
+/// <summary>
+/// A fake instance of <see cref="IAspectSource"/> to avoid having to support null sources.
+/// </summary>
+internal sealed class LiveTemplateAspectSource : IAspectSource
 {
-    /// <summary>
-    /// A fake instance of <see cref="IAspectSource"/> to avoid having to support null sources.
-    /// </summary>
-    internal sealed class LiveTemplateAspectSource : IAspectSource
-    {
-        public static readonly LiveTemplateAspectSource Instance = new();
+    public static readonly LiveTemplateAspectSource Instance = new();
 
-        private LiveTemplateAspectSource() { }
+    private LiveTemplateAspectSource() { }
 
-        public ImmutableArray<IAspectClass> AspectClasses => ImmutableArray<IAspectClass>.Empty;
+    public ImmutableArray<IAspectClass> AspectClasses => ImmutableArray<IAspectClass>.Empty;
 
-        public IEnumerable<IDeclaration> GetExclusions( INamedType aspectType ) => Array.Empty<IDeclaration>();
-
-        public IEnumerable<AspectInstance> GetAspectInstances(
-            CompilationModel compilation,
-            IAspectClass aspectClass,
-            IDiagnosticAdder diagnosticAdder,
-            CancellationToken cancellationToken )
-            => Array.Empty<AspectInstance>();
-    }
+    public AspectSourceResult GetAspectInstances(
+        CompilationModel compilation,
+        IAspectClass aspectClass,
+        IDiagnosticAdder diagnosticAdder,
+        CancellationToken cancellationToken )
+        => AspectSourceResult.Empty;
 }
