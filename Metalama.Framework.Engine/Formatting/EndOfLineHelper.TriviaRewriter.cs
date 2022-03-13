@@ -17,14 +17,10 @@ namespace Metalama.Framework.Engine.Formatting
             private readonly EndOfLineStyle _targetEndOfLineStyle;
             private readonly Stack<NodeKind> _nodeAnnotationStack = new();
 
-            public TriviaRewriter( EndOfLineStyle targetEndOfLineStyle )
+            public TriviaRewriter( EndOfLineStyle targetEndOfLineStyle ) : base( true )
             {
                 this._targetEndOfLineStyle = targetEndOfLineStyle;
             }
-
-            public EndOfLineStyle EndOfLineStyle { get; }
-
-            public TriviaRewriter() : base( true ) { }
 
             public override SyntaxNode? Visit( SyntaxNode? node )
             {
@@ -91,7 +87,7 @@ namespace Metalama.Framework.Engine.Formatting
                     {
                         try
                         {
-                            switch ( (endOfLineStyle, this._targetEndOfLineStyle) )
+                            switch (endOfLineStyle, this._targetEndOfLineStyle)
                             {
                                 // CRLF -> CR or CRLF -> LF
                                 case (EndOfLineStyle.Windows, EndOfLineStyle.CR or EndOfLineStyle.LF):

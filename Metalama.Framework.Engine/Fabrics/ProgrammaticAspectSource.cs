@@ -35,8 +35,6 @@ internal class ProgrammaticAspectSource<TAspect, TDeclaration> : IAspectSource
 
     public ImmutableArray<IAspectClass> AspectClasses { get; }
 
-    public IEnumerable<IDeclaration> GetExclusions( INamedType aspectType ) => Array.Empty<IDeclaration>();
-
     public AspectSourceResult GetAspectInstances(
         CompilationModel compilation,
         IAspectClass aspectClass,

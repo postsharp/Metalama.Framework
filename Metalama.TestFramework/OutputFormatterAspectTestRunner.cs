@@ -64,9 +64,9 @@ namespace Metalama.TestFramework
                 for ( var i = 0; i < testInput.SourceCode.Length; i++ )
                 {
                     var current = testInput.SourceCode[i];
-                    var next = (i < testInput.SourceCode.Length - 1) ? testInput.SourceCode[i + 1] : (char?) null;
+                    var next = i < testInput.SourceCode.Length - 1 ? testInput.SourceCode[i + 1] : (char?) null;
 
-                    switch ( (current, next) )
+                    switch (current, next)
                     {
                         case ('\r', '\n'):
                             sb.Append( expectedEol );
@@ -101,7 +101,7 @@ namespace Metalama.TestFramework
                     for ( var i = 0; i < outputSource.Length; i++ )
                     {
                         var current = outputSource[i];
-                        var next = (i < outputSource.Length - 1) ? outputSource[i + 1] : (char?) null;
+                        var next = i < outputSource.Length - 1 ? outputSource[i + 1] : (char?) null;
 
                         static string MapEolToString( string value )
                             => value switch
@@ -114,7 +114,7 @@ namespace Metalama.TestFramework
 
                         var error = false;
 
-                        switch ( (current, next) )
+                        switch (current, next)
                         {
                             case ('\r', '\n'):
                                 if ( expectedEol != "\r\n" )
@@ -137,9 +137,6 @@ namespace Metalama.TestFramework
                                         $"ERROR: Expected \"{MapEolToString( expectedEol )}\" end of lines, but got \"{MapEolToString( $"{current}" )}\"." );
                                 }
 
-                                break;
-
-                            default:
                                 break;
                         }
 

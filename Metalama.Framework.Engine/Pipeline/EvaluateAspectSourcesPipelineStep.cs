@@ -44,7 +44,7 @@ internal class EvaluateAspectSourcesPipelineStep : PipelineStep
 
         bool IsExcluded( IDeclaration declaration )
         {
-            if ( exclusions!.Count == 0 )
+            if ( exclusions.Count == 0 )
             {
                 return false;
             }

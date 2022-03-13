@@ -43,7 +43,7 @@ internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
 
     public IExpression ParseExpression( string code )
     {
-        var expression = AnnotationExtensions.WithAdditionalAnnotations( SyntaxFactory.ParseExpression( code ), Formatter.Annotation );
+        var expression = SyntaxFactory.ParseExpression( code ).WithAdditionalAnnotations( Formatter.Annotation );
 
         return new RuntimeExpression( expression, this.Compilation, this.Project.ServiceProvider ).ToUserExpression( this.Compilation );
     }
@@ -115,15 +115,14 @@ internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
     public void AppendExpression( IExpression expression, StringBuilder stringBuilder )
     {
         stringBuilder.Append(
-            SyntaxNodeExtensions.NormalizeWhitespace(
-                    ((IUserExpression) expression.Value!).ToRunTimeExpression()
-                    .Syntax )
-                .ToFullString() );
+            ((IUserExpression) expression.Value!).ToRunTimeExpression()
+            .Syntax.NormalizeWhitespace()
+            .ToFullString() );
     }
 
     public void AppendDynamic( object? expression, StringBuilder stringBuilder )
         => stringBuilder.Append(
             expression == null
                 ? "null"
-                : SyntaxNodeExtensions.NormalizeWhitespace( ((RuntimeExpression) expression).Syntax ).ToFullString() );
+                : ((RuntimeExpression) expression).Syntax.NormalizeWhitespace().ToFullString() );
 }

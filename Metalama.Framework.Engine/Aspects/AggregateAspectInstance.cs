@@ -23,13 +23,13 @@ internal sealed class AggregateAspectInstance : IAspectInstanceInternal
         this._otherInstances = otherInstances;
     }
 
-    public static IAspectInstanceInternal? GetInstance( IEnumerable<AspectInstance> aspectInstances )
+    public static IAspectInstanceInternal GetInstance( IEnumerable<AspectInstance> aspectInstances )
     {
         var instancesList = aspectInstances.ToList();
 
         if ( instancesList.Count == 0 )
         {
-            return null;
+            throw new AssertionFailedException();
         }
         else if ( instancesList.Count == 1 )
         {
