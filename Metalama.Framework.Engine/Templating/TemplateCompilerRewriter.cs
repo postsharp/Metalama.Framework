@@ -29,7 +29,7 @@ namespace Metalama.Framework.Engine.Templating
     internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDiagnosticAdder
     {
         private const string _rewrittenTypeOfAnnotation = "Metalama.RewrittenTypeOf";
-        
+
         private readonly TemplateCompilerSemantics _syntaxKind;
         private readonly string _templateName;
         private readonly SyntaxTreeAnnotationMap _syntaxTreeAnnotationMap;
@@ -40,11 +40,11 @@ namespace Metalama.Framework.Engine.Templating
         private readonly TemplateMemberClassifier _templateMemberClassifier;
         private readonly BuildTimeOnlyRewriter _buildTimeOnlyRewriter;
         private readonly TypeOfRewriter _typeOfRewriter;
-        
+
         private MetaContext? _currentMetaContext;
         private int _nextStatementListId;
         private ISymbol? _rootTemplateSymbol;
-        
+
         public TemplateCompilerRewriter(
             string templateName,
             TemplateCompilerSemantics syntaxKind,
@@ -171,7 +171,7 @@ namespace Metalama.Framework.Engine.Templating
             // which have special interpretation.
             var parent = node.Parent;
 
-            switch (parent)
+            switch ( parent )
             {
                 case null:
                     // This situation seems to happen only when Transform is called from a newly created syntax node,
@@ -486,12 +486,8 @@ namespace Metalama.Framework.Engine.Templating
 
                         if ( typeOfAnnotation != null )
                         {
-
-                            
                             return InvocationExpression( this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.TypeOf) ) )
-                                .AddArgumentListArguments(
-                                    Argument( SyntaxFactoryEx.LiteralExpression( typeOfAnnotation.Data! ) ) );
-                            
+                                .AddArgumentListArguments( Argument( SyntaxFactoryEx.LiteralExpression( typeOfAnnotation.Data! ) ) );
                         }
 
                         break;
@@ -1643,7 +1639,7 @@ namespace Metalama.Framework.Engine.Templating
             {
                 var typeId = SymbolId.Create( typeSymbol ).Id;
 
-                return this._typeOfRewriter.RewriteTypeOf( typeSymbol ).WithAdditionalAnnotations( new SyntaxAnnotation(  _rewrittenTypeOfAnnotation, typeId ) );
+                return this._typeOfRewriter.RewriteTypeOf( typeSymbol ).WithAdditionalAnnotations( new SyntaxAnnotation( _rewrittenTypeOfAnnotation, typeId ) );
             }
 
             return base.VisitTypeOfExpression( node );

@@ -8,7 +8,6 @@ using Metalama.Framework.Eligibility;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.LamaSerialization;
-using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Fabrics;
@@ -53,11 +52,10 @@ namespace Metalama.Framework.Engine.CompileTime
             private readonly ITypeSymbol _typeFabricType;
             private readonly ISerializerGenerator _serializerGenerator;
             private readonly TypeOfRewriter _typeOfRewriter;
-            
+
             private Context _currentContext;
             private HashSet<string>? _currentTypeTemplateNames;
             private string? _currentTypeName;
-            
 
             public bool Success { get; private set; } = true;
 
@@ -97,7 +95,6 @@ namespace Metalama.Framework.Engine.CompileTime
                 this._serializerGenerator = new SerializerGenerator( runTimeCompilation, this._syntaxGenerationContext );
                 this._typeOfRewriter = new TypeOfRewriter( this._syntaxGenerationContext );
 
-            
                 this._originalNameTypeSyntax = (NameSyntax)
                     this._syntaxGenerationContext.SyntaxGenerator.Type(
                         this._syntaxGenerationContext.ReflectionMapper.GetTypeSymbol( typeof(OriginalIdAttribute) ) );

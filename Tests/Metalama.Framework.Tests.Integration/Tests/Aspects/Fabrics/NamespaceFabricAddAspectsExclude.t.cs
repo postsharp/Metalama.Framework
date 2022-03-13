@@ -4,40 +4,48 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Fabrics;
 
-namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Fabrics.NamespaceFabricAddAspectsExclude
+namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Fabrics.NamespaceFabricAddAspectsExclude;
+#pragma warning disable CS0067
+
+internal class Fabric : NamespaceFabric
 {
-#pragma warning disable CS0067
-    internal class Fabric : NamespaceFabric
-    {
-        public override void AmendNamespace(INamespaceAmender amender) => throw new System.NotSupportedException("Compile-time-only code cannot be called at run-time.");
+    public override void AmendNamespace(INamespaceAmender amender) => throw new System.NotSupportedException("Compile-time-only code cannot be called at run-time.");
 
-    }
-#pragma warning restore CS0067
-#pragma warning disable CS0067
-
-    internal class Aspect : OverrideMethodAspect
-    {
-        public override dynamic? OverrideMethod() => throw new System.NotSupportedException("Compile-time-only code cannot be called at run-time.");
-
-    }
-#pragma warning restore CS0067
-
-    internal class TargetCode
-    {
-        private int Method1( int a ) => a;
-        private string Method2( string s ) 
-{ 
-    global::System.Console.WriteLine("overridden");
-    return s;
 }
-    }
+#pragma warning restore CS0067
+#pragma warning disable CS0067
 
-    [ExcludeAspect(typeof(Aspect))]
-    internal class ExcludedCode
+internal class Aspect : OverrideMethodAspect
+{
+    public override dynamic? OverrideMethod() => throw new System.NotSupportedException("Compile-time-only code cannot be called at run-time.");
+
+}
+#pragma warning restore CS0067
+
+internal class TargetCode
+{
+    private int Method1( int a )
     {
-        private int Method1( int a ) => a;
-        private string Method2( string s ) => s;
+        return a;
     }
 
+    private string Method2( string s )
+    {
+    global::System.Console.WriteLine("overridden");
+            return s;
+    }
+}
 
+[ExcludeAspect( typeof(Aspect) )]
+internal class ExcludedCode
+{
+    private int Method1( int a )
+    {
+        return a;
+    }
+
+    private string Method2( string s )
+    {
+        return s;
+    }
 }

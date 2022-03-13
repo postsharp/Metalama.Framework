@@ -421,7 +421,7 @@ namespace Metalama.Framework.Engine.Templating
                 return operand;
             }
         }
-        
+
         public static ExpressionSyntax StringLiteralExpression( string? value ) => SyntaxFactoryEx.LiteralExpression( value );
 
         public static Type GetCompileTimeType( string id, string name )

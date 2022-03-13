@@ -207,7 +207,6 @@ namespace Metalama.Framework.Engine.Utilities
             return this.Invoke( adapter.UserCodeFunc, ref adapter, context );
         }
 
-      
         public TResult Invoke<TResult, TPayload>( UserCodeFunc<TResult, TPayload> func, ref TPayload payload, UserCodeExecutionContext? context )
         {
             using ( UserCodeExecutionContext.WithContext( context ) )
@@ -234,9 +233,7 @@ namespace Metalama.Framework.Engine.Utilities
 
             return this.InvokeAsync( Wrapper, context );
         }
-        
-        
-        
+
         public async Task<TResult> InvokeAsync<TResult>( Func<Task<TResult>> func, UserCodeExecutionContext? context )
         {
             using ( UserCodeExecutionContext.WithContext( context ) )

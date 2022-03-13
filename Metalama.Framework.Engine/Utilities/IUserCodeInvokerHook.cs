@@ -16,6 +16,10 @@ namespace Metalama.Framework.Engine.Utilities
         /// The implementation of this method must call the delegate given delegate. It can wrap the call with any logic.
         /// </summary>
         TResult Invoke<TResult, TPayload>( UserCodeFunc<TResult, TPayload> func, ref TPayload payload );
-        ValueTask<TResult> InvokeAsync<TResult>( Func<Task<TResult>> func );
+
+        /// <summary>
+        /// The implementation of this method must call the delegate given delegate. It can wrap the call with any logic.
+        /// </summary>
+        Task<TResult> InvokeAsync<TResult>( Func<Task<TResult>> func );
     }
 }

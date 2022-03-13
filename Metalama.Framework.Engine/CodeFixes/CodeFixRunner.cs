@@ -30,7 +30,7 @@ namespace Metalama.Framework.Engine.CodeFixes
         {
             this._userCodeInvoker = serviceProvider.GetRequiredService<UserCodeInvoker>();
         }
-        
+
         private protected abstract bool TryGetConfiguration(
             PartialCompilation compilation,
             CancellationToken cancellationToken,
@@ -129,9 +129,9 @@ namespace Metalama.Framework.Engine.CodeFixes
                 serviceProvider,
                 NullDiagnosticAdder.Instance,
                 UserCodeMemberInfo.FromDelegate( codeFix.CodeFix.CodeAction ) );
-            
+
             await this._userCodeInvoker.InvokeAsync( () => codeFix.CodeFix.CodeAction( codeFixBuilder ), userCodeExecutionContext );
-            
+
             return context.ToCodeActionResult();
         }
     }
