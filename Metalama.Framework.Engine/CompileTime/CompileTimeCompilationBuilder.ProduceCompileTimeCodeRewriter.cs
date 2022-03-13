@@ -46,16 +46,18 @@ namespace Metalama.Framework.Engine.CompileTime
             private readonly IDiagnosticAdder _diagnosticAdder;
             private readonly TemplateCompiler _templateCompiler;
             private readonly CancellationToken _cancellationToken;
-            private readonly NameSyntax _compileTimeTypeName;
             private readonly SyntaxGenerationContext _syntaxGenerationContext;
             private readonly NameSyntax _originalNameTypeSyntax;
             private readonly NameSyntax _originalPathTypeSyntax;
             private readonly ITypeSymbol _fabricType;
             private readonly ITypeSymbol _typeFabricType;
             private readonly ISerializerGenerator _serializerGenerator;
+            private readonly TypeOfRewriter _typeOfRewriter;
+            
             private Context _currentContext;
             private HashSet<string>? _currentTypeTemplateNames;
             private string? _currentTypeName;
+            
 
             public bool Success { get; private set; } = true;
 
@@ -93,11 +95,9 @@ namespace Metalama.Framework.Engine.CompileTime
 
                 // TODO: This should be probably injected as a service, but we are creating the generation context here.
                 this._serializerGenerator = new SerializerGenerator( runTimeCompilation, this._syntaxGenerationContext );
+                this._typeOfRewriter = new TypeOfRewriter( this._syntaxGenerationContext );
 
-                this._compileTimeTypeName = (NameSyntax)
-                    this._syntaxGenerationContext.SyntaxGenerator.Type(
-                        this._syntaxGenerationContext.ReflectionMapper.GetTypeSymbol( typeof(CompileTimeType) ) );
-
+            
                 this._originalNameTypeSyntax = (NameSyntax)
                     this._syntaxGenerationContext.SyntaxGenerator.Type(
                         this._syntaxGenerationContext.ReflectionMapper.GetTypeSymbol( typeof(OriginalIdAttribute) ) );
@@ -1097,36 +1097,9 @@ namespace Metalama.Framework.Engine.CompileTime
 
                     if ( typeSymbol != null )
                     {
-                        if ( typeSymbol is INamedTypeSymbol { IsUnboundGenericType: true } namedType
-                             && namedType.TypeArguments[0].Kind == SymbolKind.ErrorType )
-                        {
-                            // We have a case like typeof(Foo<>). We need to fix it here, otherwise later processing is incorrect.
-
-                            typeSymbol = namedType.OriginalDefinition;
-                        }
-
                         if ( this.SymbolClassifier.GetTemplatingScope( typeSymbol ) == TemplatingScope.RunTimeOnly )
                         {
-                            // We are in a compile-time-only block but we have a typeof to a run-time-only block. 
-                            // This is a situation we can handle by rewriting the typeof to a call to UserCodeContext.GetCompileTimeType.
-
-                            var memberAccess =
-                                MemberAccessExpression(
-                                    SyntaxKind.SimpleMemberAccessExpression,
-                                    this._compileTimeTypeName,
-                                    IdentifierName( nameof(CompileTimeType.GetCompileTimeType) ) );
-
-                            var invocation = InvocationExpression(
-                                memberAccess,
-                                ArgumentList(
-                                    SeparatedList(
-                                        new[]
-                                        {
-                                            Argument( SyntaxFactoryEx.LiteralExpression( typeSymbol.GetSymbolId().ToString() ) ),
-                                            Argument( SyntaxFactoryEx.LiteralExpression( typeSymbol.GetReflectionName() ) )
-                                        } ) ) );
-
-                            return invocation;
+                            return this._typeOfRewriter.RewriteTypeOf( typeSymbol );
                         }
                     }
                 }

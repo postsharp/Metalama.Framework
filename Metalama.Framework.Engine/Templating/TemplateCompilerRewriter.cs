@@ -28,6 +28,8 @@ namespace Metalama.Framework.Engine.Templating
     /// </summary>
     internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDiagnosticAdder
     {
+        private const string _rewrittenTypeOfAnnotation = "Metalama.RewrittenTypeOf";
+        
         private readonly TemplateCompilerSemantics _syntaxKind;
         private readonly string _templateName;
         private readonly SyntaxTreeAnnotationMap _syntaxTreeAnnotationMap;
@@ -37,10 +39,12 @@ namespace Metalama.Framework.Engine.Templating
         private readonly TemplateMetaSyntaxFactoryImpl _templateMetaSyntaxFactory;
         private readonly TemplateMemberClassifier _templateMemberClassifier;
         private readonly BuildTimeOnlyRewriter _buildTimeOnlyRewriter;
+        private readonly TypeOfRewriter _typeOfRewriter;
+        
         private MetaContext? _currentMetaContext;
         private int _nextStatementListId;
         private ISymbol? _rootTemplateSymbol;
-
+        
         public TemplateCompilerRewriter(
             string templateName,
             TemplateCompilerSemantics syntaxKind,
@@ -61,6 +65,7 @@ namespace Metalama.Framework.Engine.Templating
             this._templateMetaSyntaxFactory = new TemplateMetaSyntaxFactoryImpl( this.MetaSyntaxFactory );
             this._templateMemberClassifier = new TemplateMemberClassifier( runTimeCompilation, syntaxTreeAnnotationMap, serviceProvider );
             this._buildTimeOnlyRewriter = new BuildTimeOnlyRewriter( this );
+            this._typeOfRewriter = new TypeOfRewriter( SyntaxGenerationContext.CreateDefault( serviceProvider, compileTimeCompilation ) );
         }
 
         public bool Success { get; private set; } = true;
@@ -166,25 +171,25 @@ namespace Metalama.Framework.Engine.Templating
             // which have special interpretation.
             var parent = node.Parent;
 
-            if ( parent == null )
+            switch (parent)
             {
-                // This situation seems to happen only when Transform is called from a newly created syntax node,
-                // which has not been added to the syntax tree yet. Transform then calls Visit and, which then calls GetTransformationKind
-                // so we need to return Transform here. This is not nice and would need to be refactored.
+                case null:
+                    // This situation seems to happen only when Transform is called from a newly created syntax node,
+                    // which has not been added to the syntax tree yet. Transform then calls Visit and, which then calls GetTransformationKind
+                    // so we need to return Transform here. This is not nice and would need to be refactored.
 
-                return TransformationKind.Transform;
+                    return TransformationKind.Transform;
+
+                case IfStatementSyntax:
+                case ForEachStatementSyntax:
+                case ElseClauseSyntax:
+                case WhileStatementSyntax:
+                case SwitchSectionSyntax:
+                    throw new AssertionFailedException( $"The node '{node}' must be annotated." );
+
+                default:
+                    return this.GetTransformationKind( parent );
             }
-
-            if ( parent is IfStatementSyntax ||
-                 parent is ForEachStatementSyntax ||
-                 parent is ElseClauseSyntax ||
-                 parent is WhileStatementSyntax ||
-                 parent is SwitchSectionSyntax )
-            {
-                throw new AssertionFailedException( $"The node '{node}' must be annotated." );
-            }
-
-            return this.GetTransformationKind( parent );
         }
 
         public override SyntaxNode? Visit( SyntaxNode? node )
@@ -470,6 +475,23 @@ namespace Metalama.Framework.Engine.Templating
                         if ( identifierName.IsVar )
                         {
                             return this.TransformIdentifierName( (IdentifierNameSyntax) expression );
+                        }
+
+                        break;
+                    }
+
+                case SyntaxKind.InvocationExpression:
+                    {
+                        var typeOfAnnotation = expression.GetAnnotations( _rewrittenTypeOfAnnotation ).FirstOrDefault();
+
+                        if ( typeOfAnnotation != null )
+                        {
+
+                            
+                            return InvocationExpression( this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.TypeOf) ) )
+                                .AddArgumentListArguments(
+                                    Argument( SyntaxFactoryEx.LiteralExpression( typeOfAnnotation.Data! ) ) );
+                            
                         }
 
                         break;
@@ -1608,6 +1630,23 @@ namespace Metalama.Framework.Engine.Templating
             {
                 return base.TransformPostfixUnaryExpression( node );
             }
+        }
+
+        public override SyntaxNode VisitTypeOfExpression( TypeOfExpressionSyntax node )
+        {
+            if ( this.GetTransformationKind( node ) == TransformationKind.Transform )
+            {
+                return this.TransformTypeOfExpression( node );
+            }
+
+            if ( this._syntaxTreeAnnotationMap.GetSymbol( node.Type ) is ITypeSymbol typeSymbol )
+            {
+                var typeId = SymbolId.Create( typeSymbol ).Id;
+
+                return this._typeOfRewriter.RewriteTypeOf( typeSymbol ).WithAdditionalAnnotations( new SyntaxAnnotation(  _rewrittenTypeOfAnnotation, typeId ) );
+            }
+
+            return base.VisitTypeOfExpression( node );
         }
     }
 }

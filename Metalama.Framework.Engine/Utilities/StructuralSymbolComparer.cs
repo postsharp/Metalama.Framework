@@ -100,6 +100,9 @@ namespace Metalama.Framework.Engine.Utilities
                     }
 
                     break;
+                
+                case (IAssemblySymbol assemblyX, IAssemblySymbol assemblyY):
+                    return assemblyX.Identity.Equals( assemblyY.Identity );
 
                 default:
                     throw new NotImplementedException( $"{x.Kind}" );
@@ -455,6 +458,9 @@ namespace Metalama.Framework.Engine.Utilities
                     h = 41574;
 
                     break;
+                
+                case IAssemblySymbol assembly:
+                    return assembly.Identity.GetHashCode();
 
                 default:
                     throw new NotImplementedException( $"{symbol.Kind}" );

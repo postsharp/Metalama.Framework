@@ -16,7 +16,7 @@ public class DesignTimeCodeFixRunner : CodeFixRunner
 {
     private readonly IAspectPipelineConfigurationProvider _configurationProvider;
 
-    public DesignTimeCodeFixRunner( IServiceProvider serviceProvider )
+    public DesignTimeCodeFixRunner( IServiceProvider serviceProvider ) : base( serviceProvider )
     {
         this._configurationProvider = serviceProvider.GetRequiredService<IAspectPipelineConfigurationProvider>();
     }

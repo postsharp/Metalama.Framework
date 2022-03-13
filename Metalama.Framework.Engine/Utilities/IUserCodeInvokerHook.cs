@@ -2,6 +2,8 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Project;
+using System;
+using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.Utilities
 {
@@ -14,5 +16,6 @@ namespace Metalama.Framework.Engine.Utilities
         /// The implementation of this method must call the delegate given delegate. It can wrap the call with any logic.
         /// </summary>
         TResult Invoke<TResult, TPayload>( UserCodeFunc<TResult, TPayload> func, ref TPayload payload );
+        ValueTask<TResult> InvokeAsync<TResult>( Func<Task<TResult>> func );
     }
 }

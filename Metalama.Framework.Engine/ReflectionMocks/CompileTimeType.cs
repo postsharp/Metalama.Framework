@@ -145,7 +145,7 @@ namespace Metalama.Framework.Engine.ReflectionMocks
 
         public override Type[] GetInterfaces() => throw CompileTimeMocksHelper.CreateNotSupportedException();
 
-        public override string ToString() => $"Compile-time mock for run-time type '{this.FullName}'";
+        public override string ToString() => this.FullName;
 
         public override int GetHashCode() => this.Target.GetHashCode();
     }
