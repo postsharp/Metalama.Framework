@@ -43,9 +43,7 @@ namespace Metalama.TestFramework
                 serviceProvider.WithService( new OptionsWrapper( serviceProvider.GetRequiredService<IProjectOptions>() ) ),
                 projectDirectory,
                 metadataReferences,
-                logger ) 
-        {
-        }
+                logger ) { }
 
         protected override Task RunAsync( TestInput testInput, TestResult testResult, Dictionary<string, object?> state )
         {
@@ -56,35 +54,40 @@ namespace Metalama.TestFramework
                     "CR" => "\r",
                     "LF" => "\n",
                     "CRLF" => "\r\n",
-                    _ => throw new AssertionFailedException(),
+                    _ => throw new AssertionFailedException()
                 };
 
-            if ( expectedEol != null)
+            if ( expectedEol != null )
             {
                 var sb = new StringBuilder();
 
-                for ( var i = 0; i < testInput.SourceCode.Length; i++)
+                for ( var i = 0; i < testInput.SourceCode.Length; i++ )
                 {
                     var current = testInput.SourceCode[i];
-                    var next = (i < testInput.SourceCode.Length - 1) ? testInput.SourceCode[i + 1] : (char?)null;
+                    var next = (i < testInput.SourceCode.Length - 1) ? testInput.SourceCode[i + 1] : (char?) null;
 
                     switch ( (current, next) )
                     {
-                        case ('\r', '\n' ):
+                        case ('\r', '\n'):
                             sb.Append( expectedEol );
                             i++;
+
                             break;
-                        case ('\r', _ ):
-                        case ('\n', _ ):
+
+                        case ('\r', _):
+                        case ('\n', _):
                             sb.Append( expectedEol );
+
                             break;
+
                         default:
                             sb.Append( current );
+
                             break;
                     }
                 }
 
-                testInput = testInput.WithSource(sb.ToString());
+                testInput = testInput.WithSource( sb.ToString() );
             }
 
             var result = base.RunAsync( testInput, testResult, state );
@@ -100,19 +103,20 @@ namespace Metalama.TestFramework
                         var current = outputSource[i];
                         var next = (i < outputSource.Length - 1) ? outputSource[i + 1] : (char?) null;
 
-                        static string MapEolToString( string value ) => value switch
-                        {
-                            "\r\n" => "\\r\\n",
-                            "\r" => "\\r",
-                            "\n" => "\\n",
-                            _ => throw new AssertionFailedException(),
-                        };
+                        static string MapEolToString( string value )
+                            => value switch
+                            {
+                                "\r\n" => "\\r\\n",
+                                "\r" => "\\r",
+                                "\n" => "\\n",
+                                _ => throw new AssertionFailedException()
+                            };
 
                         var error = false;
 
                         switch ( (current, next) )
                         {
-                            case ('\r', '\n' ):
+                            case ('\r', '\n'):
                                 if ( expectedEol != "\r\n" )
                                 {
                                     error = true;
@@ -120,16 +124,21 @@ namespace Metalama.TestFramework
                                 }
 
                                 i++;
+
                                 break;
-                            case ('\r', _ ):
-                            case ('\n', _ ):
+
+                            case ('\r', _):
+                            case ('\n', _):
                                 if ( expectedEol.Length > 1 || expectedEol[0] != current )
                                 {
                                     error = true;
-                                    testResult.SetFailed( $"ERROR: Expected \"{MapEolToString( expectedEol )}\" end of lines, but got \"{MapEolToString( $"{current}" )}\"." );
+
+                                    testResult.SetFailed(
+                                        $"ERROR: Expected \"{MapEolToString( expectedEol )}\" end of lines, but got \"{MapEolToString( $"{current}" )}\"." );
                                 }
 
                                 break;
+
                             default:
                                 break;
                         }

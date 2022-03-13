@@ -21,4 +21,6 @@ public class ExcludeAspectAttribute : Attribute
     {
         _ = excludedAspectTypes;
     }
+
+    public string? Justification { get; set; }
 }

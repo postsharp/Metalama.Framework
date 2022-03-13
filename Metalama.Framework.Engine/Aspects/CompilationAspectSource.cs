@@ -10,12 +10,9 @@ using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
-using Microsoft.CodeAnalysis;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
-using TypedConstant = Microsoft.CodeAnalysis.TypedConstant;
 
 namespace Metalama.Framework.Engine.Aspects;
 
@@ -45,7 +42,7 @@ internal class CompilationAspectSource : IAspectSource
             this._exclusions =
                 compilation.GetAllAttributesOfType( excludeAspectType )
                     .SelectMany(
-                        a => ((ImmutableArray<Metalama.Framework.Code.TypedConstant>) a.ConstructorArguments[0].Value!).Select(
+                        a => ((ImmutableArray<TypedConstant>) a.ConstructorArguments[0].Value!).Select(
                             arg => (TargetDeclaration: a.ContainingDeclaration.ToTypedRef(), AspectType: (IType) arg.Value!) ) )
                     .ToMultiValueDictionary( x => x.AspectType, x => x.TargetDeclaration );
         }

@@ -22,7 +22,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 ImmutableDictionaryOfArray<string, AttributeRef>.CreateBuilder( StringComparer.Ordinal );
 
             private readonly Compilation _compilation;
-         
+
             public AttributeDiscoveryVisitor( Compilation compilation )
             {
                 this._compilation = compilation;
@@ -158,7 +158,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
             public void Visit( SyntaxTree tree )
             {
-                this.Visit( tree.GetRoot(  ) );
+                this.Visit( tree.GetRoot() );
             }
         }
     }

@@ -6,14 +6,14 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Project;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Formatting;
 using System;
 using System.Reflection;
 using System.Text;
-using AnnotationExtensions = Microsoft.CodeAnalysis.AnnotationExtensions;
-using SyntaxNodeExtensions = Microsoft.CodeAnalysis.SyntaxNodeExtensions;
+using SpecialType = Metalama.Framework.Code.SpecialType;
 
 namespace Metalama.Framework.Engine.Templating.MetaModel;
 
@@ -116,9 +116,9 @@ internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
     {
         stringBuilder.Append(
             SyntaxNodeExtensions.NormalizeWhitespace(
-                ((IUserExpression) expression.Value!).ToRunTimeExpression()
-                .Syntax )
-            .ToFullString() );
+                    ((IUserExpression) expression.Value!).ToRunTimeExpression()
+                    .Syntax )
+                .ToFullString() );
     }
 
     public void AppendDynamic( object? expression, StringBuilder stringBuilder )

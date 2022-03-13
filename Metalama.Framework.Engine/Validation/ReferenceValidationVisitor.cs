@@ -71,11 +71,11 @@ public class ReferenceValidationVisitor : CSharpSyntaxWalker, IDisposable
         this.ValidateSymbol( node, ReferenceKinds.Other );
     }
 
-    public override void VisitAssignmentExpression( AssignmentExpressionSyntax node ) 
+    public override void VisitAssignmentExpression( AssignmentExpressionSyntax node )
     {
         this.Visit( node.Right );
 
-        if (!this.ValidateSymbol( node.Left, ReferenceKinds.Assignment ) )
+        if ( !this.ValidateSymbol( node.Left, ReferenceKinds.Assignment ) )
         {
             this.Visit( node.Left );
         }
@@ -90,9 +90,7 @@ public class ReferenceValidationVisitor : CSharpSyntaxWalker, IDisposable
             this.Visit( arg );
         }
     }
-    
-    
-    
+
     public override void VisitBaseList( BaseListSyntax node )
     {
         foreach ( var baseType in node.Types )
@@ -145,8 +143,6 @@ public class ReferenceValidationVisitor : CSharpSyntaxWalker, IDisposable
     {
         this.VisitTypeReference( node.Type, ReferenceKinds.Other );
     }
-
-    
 
     public override void VisitClassDeclaration( ClassDeclarationSyntax node )
     {
@@ -359,7 +355,7 @@ public class ReferenceValidationVisitor : CSharpSyntaxWalker, IDisposable
                 // Unsupported.
                 return false;
         }
-       
+
         var currentDeclaration = this.GetCurrentDeclaration();
 
         if ( currentDeclaration == null )

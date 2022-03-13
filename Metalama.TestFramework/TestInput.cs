@@ -74,7 +74,7 @@ namespace Metalama.TestFramework
             }
         }
 
-        private TestInput( 
+        private TestInput(
             TestProjectProperties projectProperties,
             string testName,
             string sourceCode,

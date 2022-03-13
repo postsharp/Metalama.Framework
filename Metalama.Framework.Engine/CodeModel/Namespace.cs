@@ -73,10 +73,9 @@ namespace Metalama.Framework.Engine.CodeModel
             }
 
             return false;
-    }
+        }
 
         public bool IsDescendantOf( INamespace ns ) => ns.IsAncestorOf( this );
-        
 
         public override string ToString() => this.IsGlobalNamespace ? "<Global Namespace>" : this.FullName;
 

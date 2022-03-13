@@ -855,7 +855,6 @@ class T2 {}
             Assert.True( compilation.GlobalNamespace.IsAncestorOf( ns2 ) );
             Assert.True( ns1.IsAncestorOf( ns2 ) );
 
-
             Assert.Equal( 2, ns2.AllTypes.Count );
 
             var t1 = ns2.Types.Single();

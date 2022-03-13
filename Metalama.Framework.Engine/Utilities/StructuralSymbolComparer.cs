@@ -52,9 +52,9 @@ namespace Metalama.Framework.Engine.Utilities
                     }
 
                     break;
-                
+
                 case (IParameterSymbol parameterX, IParameterSymbol parameterY):
-                    if ( !Equals( parameterX.ContainingSymbol, parameterY.ContainingSymbol ) )
+                    if ( !this.Equals( parameterX.ContainingSymbol, parameterY.ContainingSymbol ) )
                     {
                         return false;
                     }
@@ -339,9 +339,9 @@ namespace Metalama.Framework.Engine.Utilities
             {
                 case IParameterSymbol parameter:
                     h = HashCode.Combine( h, GetHashCode( symbol.ContainingSymbol, options ), parameter.Ordinal );
-                    
+
                     break;
-                
+
                 case INamedTypeSymbol type:
                     if ( options.HasFlag( StructuralSymbolComparerOptions.Name ) )
                     {

@@ -21,7 +21,7 @@ namespace Metalama.Framework.Engine.Formatting
             {
                 var rewriter = new TriviaRewriter( dominantStyle );
 
-                return (CompilationUnitSyntax)rewriter.Visit( compilationUnit ).AssertNotNull();
+                return (CompilationUnitSyntax) rewriter.Visit( compilationUnit ).AssertNotNull();
             }
         }
 
@@ -35,8 +35,8 @@ namespace Metalama.Framework.Engine.Formatting
             endOfLineStyle = visitor.EndOfLineStyle;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static EndOfLineStyle GetEndOfLineStyle(in Span<char> chars)
+        [MethodImpl( MethodImplOptions.AggressiveInlining )]
+        public static EndOfLineStyle GetEndOfLineStyle( in Span<char> chars )
         {
             if ( chars.Length >= 1 )
             {

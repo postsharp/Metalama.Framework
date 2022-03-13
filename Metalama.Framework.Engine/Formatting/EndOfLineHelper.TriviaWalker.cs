@@ -18,9 +18,7 @@ namespace Metalama.Framework.Engine.Formatting
             private int _crNumber;
             private int _lfNumber;
 
-            public TriviaWalker() : base(SyntaxWalkerDepth.StructuredTrivia)
-            {
-            }
+            public TriviaWalker() : base( SyntaxWalkerDepth.StructuredTrivia ) { }
 
             public EndOfLineStyle EndOfLineStyle
             {
@@ -87,10 +85,10 @@ namespace Metalama.Framework.Engine.Formatting
                 }
             }
 
-            public bool IsMixed =>
-                this._crLfNumber != 0
-                ? this._lfNumber != 0 || this._crNumber != 0
-                : this._lfNumber != 0 && this._crNumber != 0;
+            public bool IsMixed
+                => this._crLfNumber != 0
+                    ? this._lfNumber != 0 || this._crNumber != 0
+                    : this._lfNumber != 0 && this._crNumber != 0;
 
             private bool IsInSourceCode()
             {
@@ -100,7 +98,7 @@ namespace Metalama.Framework.Engine.Formatting
             public override void VisitTrivia( SyntaxTrivia trivia )
             {
                 // We are interested only in trivia in source code.
-                if (trivia.IsKind( SyntaxKind.EndOfLineTrivia) && this.IsInSourceCode())
+                if ( trivia.IsKind( SyntaxKind.EndOfLineTrivia ) && this.IsInSourceCode() )
                 {
                     trivia.WriteTo( this._writer );
 
@@ -110,12 +108,17 @@ namespace Metalama.Framework.Engine.Formatting
                     {
                         case EndOfLineStyle.Windows:
                             this._crLfNumber++;
+
                             break;
+
                         case EndOfLineStyle.Unix:
                             this._lfNumber++;
+
                             break;
+
                         case EndOfLineStyle.MacOs:
                             this._crNumber++;
+
                             break;
                     }
 

@@ -23,7 +23,7 @@ namespace Metalama.Framework.Engine.Formatting
 
             public override void Write( char value )
             {
-                if (this._offset >= this._data.Length)
+                if ( this._offset >= this._data.Length )
                 {
                     var newData = new char[this._data.Length * 2];
                     Buffer.BlockCopy( this._data, 0, newData, 0, this._offset );
@@ -37,7 +37,8 @@ namespace Metalama.Framework.Engine.Formatting
             {
                 // TODO: This is not optimal.
                 chars = chars.Slice( start, length );
-                for (var i = 0; i < chars.Length; i++)
+
+                for ( var i = 0; i < chars.Length; i++ )
                 {
                     this.Write( chars[i] );
                 }

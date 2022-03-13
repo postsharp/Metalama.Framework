@@ -498,7 +498,7 @@ namespace Metalama.Framework.Engine.CodeModel
                     return @event;
                 }
             }
-            
+
             var currentType = (INamedType?) namedType;
 
             while ( currentType != null )

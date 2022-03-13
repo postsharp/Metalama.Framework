@@ -13,6 +13,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
+using MethodKind = Metalama.Framework.Code.MethodKind;
 
 namespace Metalama.Framework.Engine.CodeModel.Invokers
 {
@@ -52,23 +53,23 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
 
             switch ( this._method.MethodKind )
             {
-                case Code.MethodKind.Default:
-                case Code.MethodKind.LocalFunction:
+                case MethodKind.Default:
+                case MethodKind.LocalFunction:
                     return this.InvokeDefaultMethod( instance, args );
 
-                case Code.MethodKind.EventAdd:
+                case MethodKind.EventAdd:
                     return ((IEvent) this._method.DeclaringMember!).Invokers.GetInvoker( this.Order, this._invokerOperator )!.Add( instance, args[0] );
 
-                case Code.MethodKind.EventRaise:
+                case MethodKind.EventRaise:
                     return ((IEvent) this._method.DeclaringMember!).Invokers.GetInvoker( this.Order, this._invokerOperator )!.Raise( instance, args );
 
-                case Code.MethodKind.EventRemove:
+                case MethodKind.EventRemove:
                     return ((IEvent) this._method.DeclaringMember!).Invokers.GetInvoker( this.Order, this._invokerOperator )!.Remove( instance, args[0] );
 
-                case Code.MethodKind.PropertyGet:
+                case MethodKind.PropertyGet:
                     return ((IProperty) this._method.DeclaringMember!).Invokers.GetInvoker( this.Order, this._invokerOperator )!.GetValue( instance );
 
-                case Code.MethodKind.PropertySet:
+                case MethodKind.PropertySet:
                     return ((IProperty) this._method.DeclaringMember!).Invokers.GetInvoker( this.Order, this._invokerOperator )!.SetValue( instance, args[0] );
 
                 default:
@@ -85,11 +86,10 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
 
             if ( this._method.IsGeneric )
             {
-                name = GenericName( 
+                name = GenericName(
                     Identifier( this._method.Name ),
                     TypeArgumentList(
-                        SeparatedList(
-                            this._method.TypeArguments.Select( t => generationContext.SyntaxGenerator.Type( t.GetSymbol() ) ).ToArray() ) ) );
+                        SeparatedList( this._method.TypeArguments.Select( t => generationContext.SyntaxGenerator.Type( t.GetSymbol() ) ).ToArray() ) ) );
             }
             else
             {
@@ -100,7 +100,7 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
                 this._method.Parameters,
                 RuntimeExpression.FromValue( args, this.Compilation, generationContext ) );
 
-            if ( this._method.MethodKind == Code.MethodKind.LocalFunction )
+            if ( this._method.MethodKind == MethodKind.LocalFunction )
             {
                 var instanceExpression = RuntimeExpression.FromValue( instance, this.Compilation, generationContext );
 
@@ -113,9 +113,9 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
             }
             else
             {
-                var instanceExpression = 
-                    this._method.GetReceiverSyntax( 
-                        RuntimeExpression.FromValue( instance!, this.Compilation, generationContext ), 
+                var instanceExpression =
+                    this._method.GetReceiverSyntax(
+                        RuntimeExpression.FromValue( instance!, this.Compilation, generationContext ),
                         generationContext );
 
                 return this.CreateInvocationExpression( instanceExpression, name, arguments, AspectReferenceTargetKind.Self, generationContext );
@@ -138,14 +138,14 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
             ExpressionSyntax expression;
             IType returnType;
 
-            if ( this._invokerOperator == InvokerOperator.Default)
+            if ( this._invokerOperator == InvokerOperator.Default )
             {
                 returnType = this._method.ReturnType;
 
                 ExpressionSyntax receiverExpression =
                     instanceExpression != null
-                    ? MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, instanceExpression, name )
-                    : name;
+                        ? MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, instanceExpression, name )
+                        : name;
 
                 // Only create an aspect reference when the declaring type of the invoked declaration is the target of the template (or it's declaring type).
                 if ( SymbolEqualityComparer.Default.Equals( GetTargetTypeSymbol(), this._method.DeclaringType.GetSymbol().OriginalDefinition ) )
@@ -155,29 +155,28 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
 
                 expression =
                     arguments != null
-                    ? InvocationExpression(
-                        receiverExpression,
-                        ArgumentList( SeparatedList( arguments ) ) )
-                    : InvocationExpression(
-                        receiverExpression );
+                        ? InvocationExpression(
+                            receiverExpression,
+                            ArgumentList( SeparatedList( arguments ) ) )
+                        : InvocationExpression( receiverExpression );
             }
             else
             {
                 returnType = this._method.ReturnType.ConstructNullable();
 
-                if (instanceExpression == null )
+                if ( instanceExpression == null )
                 {
                     throw new AssertionFailedException();
                 }
 
                 expression =
                     arguments != null
-                    ? ConditionalAccessExpression(
+                        ? ConditionalAccessExpression(
                             instanceExpression,
                             InvocationExpression(
                                 MemberBindingExpression( name ),
                                 ArgumentList( SeparatedList( arguments ) ) ) )
-                    : ConditionalAccessExpression(
+                        : ConditionalAccessExpression(
                             instanceExpression,
                             InvocationExpression( MemberBindingExpression( name ) ) );
 

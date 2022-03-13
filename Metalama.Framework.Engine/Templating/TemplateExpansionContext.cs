@@ -38,8 +38,7 @@ namespace Metalama.Framework.Engine.Templating
                ?? _currentSyntaxGenerationContext.Value
                ?? throw new InvalidOperationException( "TemplateExpansionContext.CurrentSyntaxGenerationContext has not be set." );
 
-        internal static IDeclaration? CurrentTargetDeclaration
-            => (CurrentInternal as TemplateExpansionContext)?.TargetDeclaration;
+        internal static IDeclaration? CurrentTargetDeclaration => (CurrentInternal as TemplateExpansionContext)?.TargetDeclaration;
 
         /// <summary>
         /// Sets the <see cref="CurrentSyntaxGenerationContext"/> but not the <see cref="Current"/> property.
