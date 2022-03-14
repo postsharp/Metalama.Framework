@@ -6,9 +6,8 @@ using System;
 namespace Metalama.Framework.Aspects;
 
 /// <summary>
-/// Custom attribute attribute that, when applied to a declaration, specifies that this declaration must not be
-/// the target of aspects of given types.
-/// (Not implemented.)
+/// Custom attribute attribute that, when applied to a declaration, specifies that this declaration and all its members must not be
+/// the target of aspects of given types, unless the aspect is explicitly specified as a custom attribute.
 /// </summary>
 [AttributeUsage( AttributeTargets.All )]
 public class ExcludeAspectAttribute : Attribute
@@ -22,5 +21,8 @@ public class ExcludeAspectAttribute : Attribute
         _ = excludedAspectTypes;
     }
 
+    /// <summary>
+    /// Gets or sets the justification of the exclusion.
+    /// </summary>
     public string? Justification { get; set; }
 }
