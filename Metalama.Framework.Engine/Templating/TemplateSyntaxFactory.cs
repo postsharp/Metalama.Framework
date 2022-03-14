@@ -427,5 +427,18 @@ namespace Metalama.Framework.Engine.Templating
         public static Type GetCompileTimeType( string id, string name )
             => TemplateExpansionContext.Current.SyntaxGenerationContext.ServiceProvider.GetRequiredService<CompileTimeTypeFactory>()
                 .Get( new SymbolId( id ), name );
+
+        public static TypeOfExpressionSyntax TypeOf( string typeId )
+        {
+            var compilation = TemplateExpansionContext.Current.SyntaxGenerationContext.Compilation;
+            var type = (ITypeSymbol?) new SymbolId( typeId ).Resolve( compilation );
+
+            if ( type == null )
+            {
+                throw new InvalidOperationException( $"Cannot find the type {typeId} in compilation '{compilation.AssemblyName}'." );
+            }
+
+            return TemplateExpansionContext.Current.SyntaxGenerationContext.SyntaxGenerator.TypeOfExpression( type );
+        }
     }
 }

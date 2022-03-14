@@ -43,7 +43,7 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
                 INamedType type => type.GetSymbol().OriginalDefinition,
                 IMember member => member.DeclaringType.GetSymbol().OriginalDefinition,
                 null => null,
-                _ => throw new AssertionFailedException(),
+                _ => throw new AssertionFailedException()
             };
         }
     }

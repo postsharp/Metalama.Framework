@@ -2,7 +2,6 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Aspects;
-using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Engine.CodeModel;
@@ -22,127 +21,129 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 
-namespace Metalama.Framework.Engine.Aspects
+namespace Metalama.Framework.Engine.Aspects;
+
+/// <summary>
+/// An aspect source that applies aspects that are inherited from referenced assemblies or projects.
+/// </summary>
+internal class TransitiveAspectSource : IAspectSource, IValidatorSource
 {
-    /// <summary>
-    /// An aspect source that applies aspects that are inherited from referenced assemblies or projects.
-    /// </summary>
-    internal class TransitiveAspectSource : IAspectSource, IValidatorSource
+    private readonly ImmutableDictionaryOfArray<IAspectClass, InheritableAspectInstance> _inheritedAspects;
+    private readonly ImmutableArray<TransitiveValidatorInstance> _validators;
+
+    public TransitiveAspectSource(
+        Compilation compilation,
+        ImmutableArray<IAspectClass> aspectClasses,
+        IServiceProvider serviceProvider,
+        CancellationToken cancellationToken )
     {
-        private readonly ImmutableDictionaryOfArray<IAspectClass, InheritableAspectInstance> _inheritedAspects;
-        private readonly ImmutableArray<TransitiveValidatorInstance> _validators;
+        var inheritableAspectProvider = serviceProvider.GetService<ITransitiveAspectManifestProvider>();
 
-        public TransitiveAspectSource(
-            Compilation compilation,
-            ImmutableArray<IAspectClass> aspectClasses,
-            IServiceProvider serviceProvider,
-            CancellationToken cancellationToken )
+        var inheritedAspectsBuilder = ImmutableDictionaryOfArray<IAspectClass, InheritableAspectInstance>.CreateBuilder();
+        var validatorsBuilder = ImmutableArray.CreateBuilder<TransitiveValidatorInstance>();
+
+        var aspectClassesByName = aspectClasses.ToDictionary( t => t.FullName, t => t );
+
+        foreach ( var reference in compilation.References )
         {
-            var inheritableAspectProvider = serviceProvider.GetService<ITransitiveAspectManifestProvider>();
+            // Get the manifest of the reference.
+            ITransitiveAspectsManifest? manifest = null;
 
-            var inheritedAspectsBuilder = ImmutableDictionaryOfArray<IAspectClass, InheritableAspectInstance>.CreateBuilder();
-            var validatorsBuilder = ImmutableArray.CreateBuilder<TransitiveValidatorInstance>();
-
-            var aspectClassesByName = aspectClasses.ToDictionary( t => t.FullName, t => t );
-
-            foreach ( var reference in compilation.References )
+            switch ( reference )
             {
-                // Get the manifest of the reference.
-                ITransitiveAspectsManifest? manifest = null;
-
-                switch ( reference )
-                {
-                    case PortableExecutableReference { FilePath: { } filePath }:
-                        if ( ManagedResourceReader.TryGetCompileTimeResource( filePath, out var resources ) )
-                        {
-                            if ( resources.TryGetValue( CompileTimeConstants.InheritableAspectManifestResourceName, out var bytes ) )
-                            {
-                                manifest = TransitiveAspectsManifest.Deserialize( new MemoryStream( bytes ), serviceProvider );
-                            }
-                        }
-
-                        break;
-
-                    case CompilationReference compilationReference:
-                        manifest = inheritableAspectProvider?.GetTransitiveAspectsManifest( compilationReference.Compilation, cancellationToken );
-
-                        break;
-
-                    default:
-                        throw new AssertionFailedException( $"Unexpected reference kind: {reference}." );
-                }
-
-                // Process the manifest.
-                if ( manifest != null )
-                {
-                    // Process inherited aspects.
-                    foreach ( var aspectClassName in manifest.InheritableAspectTypes )
+                case PortableExecutableReference { FilePath: { } filePath }:
+                    if ( ManagedResourceReader.TryGetCompileTimeResource( filePath, out var resources ) )
                     {
-                        // TODO: the next line may throw KeyNotFoundException.
-                        var aspectClass = aspectClassesByName[aspectClassName];
-
-                        var targets = manifest.GetInheritedAspects( aspectClassName )
-                            .WhereNotNull();
-
-                        inheritedAspectsBuilder.AddRange( aspectClass, targets );
+                        if ( resources.TryGetValue( CompileTimeConstants.InheritableAspectManifestResourceName, out var bytes ) )
+                        {
+                            manifest = TransitiveAspectsManifest.Deserialize( new MemoryStream( bytes ), serviceProvider );
+                        }
                     }
 
-                    // Process validators.
-                    validatorsBuilder.AddRange( manifest.Validators );
-                }
+                    break;
+
+                case CompilationReference compilationReference:
+                    manifest = inheritableAspectProvider?.GetTransitiveAspectsManifest( compilationReference.Compilation, cancellationToken );
+
+                    break;
+
+                default:
+                    throw new AssertionFailedException( $"Unexpected reference kind: {reference}." );
             }
 
-            this._inheritedAspects = inheritedAspectsBuilder.ToImmutable();
-            this._validators = validatorsBuilder.ToImmutable();
-        }
-
-        public ImmutableArray<IAspectClass> AspectClasses => this._inheritedAspects.Keys.ToImmutableArray();
-
-        public IEnumerable<IDeclaration> GetExclusions( INamedType aspectType ) => Enumerable.Empty<IDeclaration>();
-
-        public IEnumerable<AspectInstance> GetAspectInstances(
-            CompilationModel compilation,
-            IAspectClass aspectClass,
-            IDiagnosticAdder diagnosticAdder,
-            CancellationToken cancellationToken )
-        {
-            foreach ( var inheritedAspectInstance in this._inheritedAspects[aspectClass] )
+            // Process the manifest.
+            if ( manifest != null )
             {
-                var targetSymbol = inheritedAspectInstance.TargetDeclaration.GetSymbol( compilation.RoslynCompilation );
-
-                if ( targetSymbol == null )
+                // Process inherited aspects.
+                foreach ( var aspectClassName in manifest.InheritableAspectTypes )
                 {
-                    continue;
+                    // TODO: the next line may throw KeyNotFoundException.
+                    var aspectClass = aspectClassesByName[aspectClassName];
+
+                    var targets = manifest.GetInheritedAspects( aspectClassName )
+                        .WhereNotNull();
+
+                    inheritedAspectsBuilder.AddRange( aspectClass, targets );
                 }
 
-                var baseDeclaration = compilation.Factory.GetDeclaration( targetSymbol );
+                // Process validators.
+                validatorsBuilder.AddRange( manifest.Validators );
+            }
+        }
 
-                // We need to provide instances on the first level of derivation only because the caller will add to the next levels.
+        this._inheritedAspects = inheritedAspectsBuilder.ToImmutable();
+        this._validators = validatorsBuilder.ToImmutable();
+    }
 
-                foreach ( var derived in ((IDeclarationImpl) baseDeclaration).GetDerivedDeclarations( false ) )
-                {
-                    yield return new AspectInstance(
+    public ImmutableArray<IAspectClass> AspectClasses => this._inheritedAspects.Keys.ToImmutableArray();
+
+    public AspectSourceResult GetAspectInstances(
+        CompilationModel compilation,
+        IAspectClass aspectClass,
+        IDiagnosticAdder diagnosticAdder,
+        CancellationToken cancellationToken )
+    {
+        List<AspectInstance> aspectInstances = new();
+
+        foreach ( var inheritedAspectInstance in this._inheritedAspects[aspectClass] )
+        {
+            var targetSymbol = inheritedAspectInstance.TargetDeclaration.GetSymbol( compilation.RoslynCompilation );
+
+            if ( targetSymbol == null )
+            {
+                continue;
+            }
+
+            var baseDeclaration = compilation.Factory.GetDeclaration( targetSymbol );
+
+            // We need to provide instances on the first level of derivation only because the caller will add to the next levels.
+
+            foreach ( var derived in ((IDeclarationImpl) baseDeclaration).GetDerivedDeclarations( false ) )
+            {
+                aspectInstances.Add(
+                    new AspectInstance(
                         inheritedAspectInstance.Aspect,
                         derived.ToTypedRef(),
                         (AspectClass) aspectClass,
-                        new AspectPredecessor( AspectPredecessorKind.Inherited, inheritedAspectInstance ) );
-                }
+                        new AspectPredecessor( AspectPredecessorKind.Inherited, inheritedAspectInstance ) ) );
             }
         }
 
-        IEnumerable<ValidatorInstance> IValidatorSource.GetValidators( CompilationModel compilation, IDiagnosticSink diagnosticAdder )
-            => this._validators.Select(
-                v => new ReferenceValidatorInstance(
-                    v.ValidatedDeclaration.GetTarget( compilation ),
-                    GetValidatorDriver( v.Object.GetType(), v.MethodName ),
-                    ValidatorImplementation.Create( v.Object, v.State ),
-                    v.ReferenceKinds ) );
-
-        public ValidatorKind Kind => ValidatorKind.Reference;
-
-        private static ValidatorDriver<ReferenceValidationContext> GetValidatorDriver( Type type, string methodName )
-            => ValidatorDriverFactory.GetInstance( type )
-                .GetValidatorDriver<ReferenceValidationContext>(
-                    type.GetMethod( methodName, BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic ) );
+        return new AspectSourceResult( aspectInstances );
     }
+
+    IEnumerable<ValidatorInstance> IValidatorSource.GetValidators( CompilationModel compilation, IDiagnosticSink diagnosticAdder )
+        => this._validators.Select(
+            v => new ReferenceValidatorInstance(
+                v.ValidatedDeclaration.GetTarget( compilation ),
+                GetValidatorDriver( v.Object.GetType(), v.MethodName ),
+                ValidatorImplementation.Create( v.Object, v.State ),
+                v.ReferenceKinds ) );
+
+    public ValidatorKind Kind => ValidatorKind.Reference;
+
+    private static ValidatorDriver<ReferenceValidationContext> GetValidatorDriver( Type type, string methodName )
+        => ValidatorDriverFactory.GetInstance( type )
+            .GetValidatorDriver<ReferenceValidationContext>(
+                type.GetMethod( methodName, BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic ) );
 }

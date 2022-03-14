@@ -43,7 +43,7 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
 
             this.AssertNoArgument();
 
-            var expression = 
+            var expression =
                 MemberAccessExpression(
                     SyntaxKind.SimpleMemberAccessExpression,
                     this._event.GetReceiverSyntax( instance, generationContext ),

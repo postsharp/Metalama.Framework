@@ -627,7 +627,7 @@ class C<TC>
             Assert.Equal( "(string, int)", closedMethod.ReturnType.ToString() );
 
             // Generic type from a typeof.
-            var fromTypeOf = ((INamedType) compilation.Factory.GetTypeByReflectionType( typeof(AsyncLocal<>) )).ConstructGenericInstance( typeof(int) );
+            _ = ((INamedType) compilation.Factory.GetTypeByReflectionType( typeof(AsyncLocal<>) )).ConstructGenericInstance( typeof(int) );
         }
 
         [Fact]
@@ -841,6 +841,8 @@ class T2 {}
             var ns1 = compilation.GlobalNamespace.Namespaces.Single();
             Assert.Equal( "Ns1", ns1.Name );
             Assert.Equal( "Ns1", ns1.FullName );
+            Assert.True( ns1.IsDescendantOf( compilation.GlobalNamespace ) );
+            Assert.True( compilation.GlobalNamespace.IsAncestorOf( ns1 ) );
 
             Assert.Equal( 2, ns1.Namespaces.Count );
 
@@ -848,6 +850,10 @@ class T2 {}
             Assert.Equal( "Ns2", ns2.Name );
             Assert.Equal( "Ns1.Ns2", ns2.FullName );
             Assert.Same( ns1, ns2.ParentNamespace );
+            Assert.True( ns2.IsDescendantOf( compilation.GlobalNamespace ) );
+            Assert.True( ns2.IsDescendantOf( ns1 ) );
+            Assert.True( compilation.GlobalNamespace.IsAncestorOf( ns2 ) );
+            Assert.True( ns1.IsAncestorOf( ns2 ) );
 
             Assert.Equal( 2, ns2.AllTypes.Count );
 

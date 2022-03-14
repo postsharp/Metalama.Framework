@@ -122,9 +122,9 @@ namespace Metalama.Framework.CompilerExtensions
                 }
 
                 using var log = File.CreateText( Path.Combine( _snapshotDirectory, $"extract-{Guid.NewGuid()}.log" ) );
-                
+
                 var mutexName = "Global\\Metalama_Extract_" + AssemblyMetadataReader.BuildId;
-                
+
                 log.WriteLine( $"Extracting resources..." );
 
                 var processName = Process.GetCurrentProcess();
@@ -140,7 +140,7 @@ namespace Metalama.Framework.CompilerExtensions
                 log.WriteLine( "----" );
 
                 // We cannot use MutexHelper because of dependencies on an embedded assembly.
-                
+
                 using var extractMutex = new Mutex( false, mutexName );
                 extractMutex.WaitOne();
 
@@ -148,7 +148,6 @@ namespace Metalama.Framework.CompilerExtensions
                 {
                     if ( !File.Exists( completedFilePath ) )
                     {
-                        
                         foreach ( var resourceName in currentAssembly.GetManifestResourceNames() )
                         {
                             if ( resourceName.EndsWith( ".dll", StringComparison.OrdinalIgnoreCase ) )

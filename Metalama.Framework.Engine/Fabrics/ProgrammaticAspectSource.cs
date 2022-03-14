@@ -11,37 +11,34 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Threading;
 
-namespace Metalama.Framework.Engine.Fabrics
+namespace Metalama.Framework.Engine.Fabrics;
+
+/// <summary>
+/// An implementation of <see cref="IAspectSource"/> that relies on a delegate that returns the aspect instances.
+/// </summary>
+internal class ProgrammaticAspectSource<TAspect, TDeclaration> : IAspectSource
+    where TDeclaration : class, IDeclaration
+    where TAspect : IAspect<TDeclaration>
 {
-    /// <summary>
-    /// An implementation of <see cref="IAspectSource"/> that relies on a delegate that returns the aspect instances.
-    /// </summary>
-    internal class ProgrammaticAspectSource<TAspect, TDeclaration> : IAspectSource
-        where TDeclaration : class, IDeclaration
-        where TAspect : IAspect<TDeclaration>
+    private readonly Func<CompilationModel, IDiagnosticAdder, IEnumerable<AspectInstance>> _getInstances;
+
+    public ProgrammaticAspectSource( IAspectClass aspectClass, Func<CompilationModel, IDiagnosticAdder, IEnumerable<AspectInstance>> getInstances )
     {
-        private readonly Func<CompilationModel, IDiagnosticAdder, IEnumerable<AspectInstance>> _getInstances;
-
-        public ProgrammaticAspectSource( IAspectClass aspectClass, Func<CompilationModel, IDiagnosticAdder, IEnumerable<AspectInstance>> getInstances )
+        if ( aspectClass.FullName != typeof(TAspect).FullName )
         {
-            if ( aspectClass.FullName != typeof(TAspect).FullName )
-            {
-                throw new ArgumentOutOfRangeException( nameof(aspectClass) );
-            }
-
-            this._getInstances = getInstances;
-            this.AspectClasses = ImmutableArray.Create( aspectClass );
+            throw new ArgumentOutOfRangeException( nameof(aspectClass) );
         }
 
-        public ImmutableArray<IAspectClass> AspectClasses { get; }
-
-        public IEnumerable<IDeclaration> GetExclusions( INamedType aspectType ) => Array.Empty<IDeclaration>();
-
-        public IEnumerable<AspectInstance> GetAspectInstances(
-            CompilationModel compilation,
-            IAspectClass aspectClass,
-            IDiagnosticAdder diagnosticAdder,
-            CancellationToken cancellationToken )
-            => this._getInstances( compilation, diagnosticAdder );
+        this._getInstances = getInstances;
+        this.AspectClasses = ImmutableArray.Create( aspectClass );
     }
+
+    public ImmutableArray<IAspectClass> AspectClasses { get; }
+
+    public AspectSourceResult GetAspectInstances(
+        CompilationModel compilation,
+        IAspectClass aspectClass,
+        IDiagnosticAdder diagnosticAdder,
+        CancellationToken cancellationToken )
+        => new( this._getInstances( compilation, diagnosticAdder ) );
 }

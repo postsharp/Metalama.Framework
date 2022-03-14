@@ -8,7 +8,7 @@ namespace Metalama.Framework.Engine.Formatting
         private enum NodeKind
         {
             SourceCode,
-            GeneratedCode,
+            GeneratedCode
         }
     }
 }

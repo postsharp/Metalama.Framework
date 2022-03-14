@@ -40,5 +40,17 @@ namespace Metalama.Framework.Code
         /// Gets the list of children namespaces of the current namespace in the current assembly.
         /// </summary>
         INamespaceList Namespaces { get; }
+
+        /// <summary>
+        /// Gets a value indicating whether the current namespace is the ancestor of another given namespace.
+        /// This method returns <c>false</c> when both namespaces are equal.
+        /// </summary>
+        bool IsAncestorOf( INamespace ns );
+
+        /// <summary>
+        /// Gets a value indicating whether the current namespace is the descendant of another given namespace.
+        /// This method returns <c>false</c> when both namespaces are equal.
+        /// </summary>
+        bool IsDescendantOf( INamespace ns );
     }
 }

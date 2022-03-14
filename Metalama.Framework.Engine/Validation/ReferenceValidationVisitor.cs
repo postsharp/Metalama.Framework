@@ -66,9 +66,29 @@ public class ReferenceValidationVisitor : CSharpSyntaxWalker, IDisposable
         base.DefaultVisit( node );
     }
 
-    public override void VisitMemberAccessExpression( MemberAccessExpressionSyntax node )
+    public override void VisitIdentifierName( IdentifierNameSyntax node )
     {
-        this.ValidateSymbol( node.Name, ReferenceKinds.MemberAccess );
+        this.ValidateSymbol( node, ReferenceKinds.Other );
+    }
+
+    public override void VisitAssignmentExpression( AssignmentExpressionSyntax node )
+    {
+        this.Visit( node.Right );
+
+        if ( !this.ValidateSymbol( node.Left, ReferenceKinds.Assignment ) )
+        {
+            this.Visit( node.Left );
+        }
+    }
+
+    public override void VisitInvocationExpression( InvocationExpressionSyntax node )
+    {
+        this.ValidateSymbol( node.Expression, ReferenceKinds.Invocation );
+
+        foreach ( var arg in node.ArgumentList.Arguments )
+        {
+            this.Visit( arg );
+        }
     }
 
     public override void VisitBaseList( BaseListSyntax node )
@@ -222,6 +242,14 @@ public class ReferenceValidationVisitor : CSharpSyntaxWalker, IDisposable
         using ( this.EnterContext( node.Declaration.Variables[0] ) )
         {
             this.VisitTypeReference( node.Declaration.Type, ReferenceKinds.LocalVariableType );
+
+            foreach ( var variable in node.Declaration.Variables )
+            {
+                if ( variable.Initializer != null )
+                {
+                    this.Visit( variable.Initializer );
+                }
+            }
         }
     }
 
@@ -279,30 +307,60 @@ public class ReferenceValidationVisitor : CSharpSyntaxWalker, IDisposable
         base.VisitObjectCreationExpression( node );
     }
 
-    private void ValidateSymbol( SyntaxNode? node, ReferenceKinds referenceKind )
+    public override void VisitImplicitObjectCreationExpression( ImplicitObjectCreationExpressionSyntax node )
+    {
+        this.ValidateSymbol( node, ReferenceKinds.ObjectCreation );
+        base.VisitImplicitObjectCreationExpression( node );
+    }
+
+    private bool ValidateSymbol( SyntaxNode? node, ReferenceKinds referenceKind )
     {
         if ( node == null )
         {
-            return;
+            return false;
         }
 
         var symbol = this._semanticModel!.GetSymbolInfo( node ).Symbol;
 
-        this.ValidateSymbol( node, symbol, referenceKind );
+        return this.ValidateSymbol( node, symbol, referenceKind );
     }
 
-    private void ValidateSymbol( SyntaxNode node, ISymbol? symbol, ReferenceKinds referenceKinds )
+    private bool ValidateSymbol( SyntaxNode node, ISymbol? symbol, ReferenceKinds referenceKinds )
     {
         if ( symbol == null )
         {
-            return;
+            return false;
+        }
+
+        switch ( symbol.Kind )
+        {
+            case SymbolKind.ArrayType:
+            case SymbolKind.Assembly:
+            case SymbolKind.DynamicType:
+            case SymbolKind.Event:
+            case SymbolKind.Field:
+            case SymbolKind.Method:
+            case SymbolKind.NetModule:
+            case SymbolKind.NamedType:
+            case SymbolKind.Namespace:
+            case SymbolKind.Parameter:
+            case SymbolKind.PointerType:
+            case SymbolKind.Property:
+            case SymbolKind.TypeParameter:
+            case SymbolKind.FunctionPointerType:
+                // Supported.
+                break;
+
+            default:
+                // Unsupported.
+                return false;
         }
 
         var currentDeclaration = this.GetCurrentDeclaration();
 
         if ( currentDeclaration == null )
         {
-            return;
+            return false;
         }
 
         var validators = this._getValidatorsFunc( symbol );
@@ -324,6 +382,8 @@ public class ReferenceValidationVisitor : CSharpSyntaxWalker, IDisposable
         {
             this.ValidateSymbol( node, symbol.ContainingNamespace, referenceKinds );
         }
+
+        return true;
     }
 
     private IDeclaration? GetCurrentDeclaration()
