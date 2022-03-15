@@ -2,6 +2,8 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Backstage.Diagnostics;
+using Metalama.Backstage.Utilities;
+using Metalama.Compiler;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Utilities;
@@ -22,7 +24,7 @@ namespace Metalama.Framework.DesignTime
 
         private readonly ILogger _logger;
         private readonly ConcurrentDictionary<string, ProjectHandler?> _projectHandlers = new();
-
+        
         protected BaseSourceGenerator( ServiceProvider serviceProvider )
         {
             this.ServiceProvider = serviceProvider;
@@ -33,7 +35,7 @@ namespace Metalama.Framework.DesignTime
 
         void ISourceGenerator.Execute( GeneratorExecutionContext context )
         {
-            if ( context.Compilation is not CSharpCompilation compilation )
+            if ( MetalamaCompilerInfo.IsActive || context.Compilation is not CSharpCompilation compilation )
             {
                 return;
             }
