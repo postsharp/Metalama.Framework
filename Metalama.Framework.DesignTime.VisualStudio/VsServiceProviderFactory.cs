@@ -2,12 +2,12 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Backstage.Diagnostics;
+using Metalama.Backstage.Utilities;
 using Metalama.Framework.DesignTime.Contracts;
 using Metalama.Framework.DesignTime.Preview;
 using Metalama.Framework.DesignTime.VisualStudio.Remoting;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Pipeline;
-using Metalama.Framework.Engine.Utilities;
 using System.Collections.Immutable;
 
 namespace Metalama.Framework.DesignTime.VisualStudio;
@@ -22,7 +22,7 @@ public static class VsServiceProviderFactory
 
     public static ServiceProvider GetServiceProvider()
     {
-        var processKind = DebuggingHelper.ProcessKind;
+        var processKind = ProcessUtilities.ProcessKind;
 
         if ( processKind == ProcessKind.Compiler )
         {

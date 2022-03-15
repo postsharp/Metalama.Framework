@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Backstage.Diagnostics;
+using Metalama.Backstage.Utilities;
 using Metalama.Framework.DesignTime.CodeFixes;
 using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.Engine.CompileTime;
@@ -34,7 +35,7 @@ public static class DesignTimeServiceProviderFactory
                     _serviceProvider = _serviceProvider
                         .WithService( new DesignTimeAspectPipelineFactory( _serviceProvider, new CompileTimeDomain() ) );
 
-                    if ( DebuggingHelper.ProcessKind != ProcessKind.DevEnv )
+                    if ( ProcessUtilities.ProcessKind != ProcessKind.DevEnv )
                     {
                         _serviceProvider = _serviceProvider.WithServices(
                             new CodeRefactoringDiscoveryService( _serviceProvider ),
