@@ -6,8 +6,6 @@ using Metalama.Backstage.Utilities;
 using Metalama.Compiler;
 using Metalama.Framework.Engine.Pipeline;
 using Microsoft.CodeAnalysis;
-using System;
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Threading;
