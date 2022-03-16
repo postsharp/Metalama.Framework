@@ -177,7 +177,7 @@ namespace Metalama.TestFramework
                 testResult.AddInputDocument( mainDocument, testInput.FullPath );
 
                 var initialCompilation = CSharpCompilation.Create(
-                    "test",
+                    project.Name,
                     new[] { syntaxTree },
                     project.MetadataReferences,
                     (CSharpCompilationOptions?) project.CompilationOptions );
@@ -255,7 +255,7 @@ namespace Metalama.TestFramework
         private async Task<MetadataReference?> CompileDependencyAsync( string code, Project emptyProject, TestResult testResult )
         {
             // The assembly name must match the file name otherwise it wont be found bu AssemblyLocator.
-            var name = Guid.NewGuid().ToString();
+            var name = "dependency_" + Guid.NewGuid().ToString();
             var project = emptyProject.AddDocument( "dependency.cs", code ).Project;
 
             using var domain = new UnloadableCompileTimeDomain();
@@ -456,11 +456,11 @@ namespace Metalama.TestFramework
         {
             var compilation = TestCompilationFactory.CreateEmptyCSharpCompilation( null, this.MetadataReferences );
 
-            var guid = Guid.NewGuid();
+            var projectName = "test";
             var workspace1 = new AdhocWorkspace();
             var solution = workspace1.CurrentSolution;
 
-            var project = solution.AddProject( guid.ToString(), guid.ToString(), LanguageNames.CSharp )
+            var project = solution.AddProject( projectName, projectName, LanguageNames.CSharp )
                 .WithCompilationOptions(
                     new CSharpCompilationOptions(
                         OutputKind.DynamicallyLinkedLibrary,

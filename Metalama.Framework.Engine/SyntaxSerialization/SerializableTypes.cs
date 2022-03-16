@@ -53,8 +53,7 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
             {
                 return true;
             }
-
-            if ( type is IArrayTypeSymbol arrayType )
+            else if ( type is IArrayTypeSymbol arrayType )
             {
                 return this.IsSerializable( arrayType.ElementType, diagnosticLocation, diagnosticAdder );
             }
@@ -72,7 +71,11 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
             }
             else if ( type is INamedTypeSymbol namedType )
             {
-                if ( namedType.IsGenericType && !SymbolEqualityComparer.Default.Equals( namedType, namedType.ConstructedFrom ) )
+                if ( namedType.EnumUnderlyingType != null )
+                {
+                    return true;
+                }
+                else if ( namedType.IsGenericType && !SymbolEqualityComparer.Default.Equals( namedType, namedType.ConstructedFrom ) )
                 {
                     if ( namedType.ConstructedFrom.SpecialType == SpecialType.System_Nullable_T )
                     {

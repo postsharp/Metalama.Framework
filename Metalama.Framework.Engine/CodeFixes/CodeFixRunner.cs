@@ -3,10 +3,13 @@
 
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
+using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
+using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
@@ -21,6 +24,13 @@ namespace Metalama.Framework.Engine.CodeFixes
     /// </summary>
     public abstract class CodeFixRunner
     {
+        private readonly UserCodeInvoker _userCodeInvoker;
+
+        protected CodeFixRunner( IServiceProvider serviceProvider )
+        {
+            this._userCodeInvoker = serviceProvider.GetRequiredService<UserCodeInvoker>();
+        }
+
         private protected abstract bool TryGetConfiguration(
             PartialCompilation compilation,
             CancellationToken cancellationToken,
@@ -115,8 +125,12 @@ namespace Metalama.Framework.Engine.CodeFixes
 
             var codeFixBuilder = new CodeActionBuilder( context );
 
-            // TODO: use user code invoker
-            await codeFix.CodeFix.CodeAction( codeFixBuilder );
+            var userCodeExecutionContext = new UserCodeExecutionContext(
+                serviceProvider,
+                NullDiagnosticAdder.Instance,
+                UserCodeMemberInfo.FromDelegate( codeFix.CodeFix.CodeAction ) );
+
+            await this._userCodeInvoker.InvokeAsync( () => codeFix.CodeFix.CodeAction( codeFixBuilder ), userCodeExecutionContext );
 
             return context.ToCodeActionResult();
         }

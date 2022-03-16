@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Backstage.Diagnostics;
+using Metalama.Backstage.Utilities;
 using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Project;
@@ -82,7 +83,7 @@ internal partial class AnalysisProcessEndpoint : ServiceEndpoint, IService, IDis
 
         Logger.Remoting.Trace?.Log( $"Parent processes: {string.Join( ", ", parentProcesses.Select( x => x.ToString() ) )}" );
 
-        if ( parentProcesses.Length < 3 ||
+        if ( parentProcesses.Count < 3 ||
              !string.Equals( parentProcesses[1].ProcessName, "Microsoft.ServiceHub.Controller", StringComparison.OrdinalIgnoreCase ) ||
              !string.Equals( parentProcesses[2].ProcessName, "devenv", StringComparison.OrdinalIgnoreCase )
            )

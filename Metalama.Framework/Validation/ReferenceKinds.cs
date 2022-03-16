@@ -32,6 +32,8 @@ namespace Metalama.Framework.Validation
         NullableType = 1 << 13,
         PointerType = 1 << 14,
         RefType = 1 << 15,
-        TupleType = 1 << 16
+        TupleType = 1 << 16,
+        Invocation = 1 << 17,
+        Assignment = 1 << 18
     }
 }

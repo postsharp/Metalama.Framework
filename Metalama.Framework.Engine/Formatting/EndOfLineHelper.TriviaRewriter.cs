@@ -17,7 +17,7 @@ namespace Metalama.Framework.Engine.Formatting
             private readonly EndOfLineStyle _targetEndOfLineStyle;
             private readonly Stack<NodeKind> _nodeAnnotationStack = new();
 
-            public TriviaRewriter( EndOfLineStyle targetEndOfLineStyle )
+            public TriviaRewriter( EndOfLineStyle targetEndOfLineStyle ) : base( true )
             {
                 this._targetEndOfLineStyle = targetEndOfLineStyle;
             }

@@ -15,6 +15,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.Utilities
 {
@@ -217,6 +218,33 @@ namespace Metalama.Framework.Engine.Utilities
                 else
                 {
                     return func( ref payload );
+                }
+            }
+        }
+
+        public Task InvokeAsync( Func<Task> func, UserCodeExecutionContext? context )
+        {
+            async Task<bool> Wrapper()
+            {
+                await func();
+
+                return true;
+            }
+
+            return this.InvokeAsync( Wrapper, context );
+        }
+
+        public async Task<TResult> InvokeAsync<TResult>( Func<Task<TResult>> func, UserCodeExecutionContext? context )
+        {
+            using ( UserCodeExecutionContext.WithContext( context ) )
+            {
+                if ( this._hook != null )
+                {
+                    return await this._hook.InvokeAsync( func );
+                }
+                else
+                {
+                    return await func();
                 }
             }
         }

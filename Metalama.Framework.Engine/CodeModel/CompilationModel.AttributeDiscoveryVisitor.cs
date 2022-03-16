@@ -43,18 +43,33 @@ namespace Metalama.Framework.Engine.CodeModel
                 // A local method that adds the attribute.
                 void IndexAttribute( SyntaxNode? parentDeclaration, DeclarationRefTargetKind kind )
                 {
-                    if ( parentDeclaration is BaseFieldDeclarationSyntax field )
+                    void Add( SyntaxNode? realDeclaration )
                     {
-                        // In case of fields and field-like events, add the attribute to all defined fields.
-
-                        foreach ( var variable in field.Declaration.Variables )
-                        {
-                            this._builder.Add( name, new AttributeRef( node, variable, kind, this._compilation ) );
-                        }
+                        this._builder.Add( name, new AttributeRef( node, realDeclaration, kind, this._compilation ) );
                     }
-                    else
+
+                    switch ( parentDeclaration )
                     {
-                        this._builder.Add( name, new AttributeRef( node, parentDeclaration, kind, this._compilation ) );
+                        case IncompleteMemberSyntax:
+                            // This happens at design time when we have an invalid syntax.
+                            break;
+
+                        case BaseFieldDeclarationSyntax field:
+                            {
+                                // In case of fields and field-like events, add the attribute to all defined fields.
+
+                                foreach ( var variable in field.Declaration.Variables )
+                                {
+                                    Add( variable );
+                                }
+
+                                break;
+                            }
+
+                        default:
+                            Add( parentDeclaration );
+
+                            break;
                     }
                 }
 
@@ -140,6 +155,11 @@ namespace Metalama.Framework.Engine.CodeModel
             }
 
             public ImmutableDictionaryOfArray<string, AttributeRef> GetDiscoveredAttributes() => this._builder.ToImmutable();
+
+            public void Visit( SyntaxTree tree )
+            {
+                this.Visit( tree.GetRoot() );
+            }
         }
     }
 }

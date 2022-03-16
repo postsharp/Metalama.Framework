@@ -38,9 +38,9 @@ namespace Metalama.Framework.Engine.Formatting
                 // TODO: This is not optimal.
                 chars = chars.Slice( start, length );
 
-                foreach ( var t in chars )
+                foreach ( var c in chars )
                 {
-                    this.Write( t );
+                    this.Write( c );
                 }
             }
 

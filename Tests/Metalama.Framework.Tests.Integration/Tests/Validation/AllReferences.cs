@@ -11,8 +11,8 @@ namespace Metalama.Framework.Tests.Integration.Validation.AllReferences
 {
     internal class Aspect : TypeAspect
     {
-        private static readonly DiagnosticDefinition<(ReferenceKinds ReferenceKinds, IDeclaration Declaration)> _warning =
-            new( "MY001", Severity.Warning, "Reference constraint of type '{0}' in declaration '{1}'." );
+        private static readonly DiagnosticDefinition<(ReferenceKinds ReferenceKinds, IDeclaration Declaration, string SyntaxKind)> _warning =
+            new( "MY001", Severity.Warning, "Reference constraint of type '{0}' in declaration '{1}' (SyntaxKind={2})." );
 
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
@@ -21,7 +21,8 @@ namespace Metalama.Framework.Tests.Integration.Validation.AllReferences
 
         private static void Validate( in ReferenceValidationContext context )
         {
-            context.Diagnostics.Report( _warning.WithArguments( ( context.ReferenceKinds, context.ReferencingDeclaration ) ) );
+        
+            context.Diagnostics.Report( _warning.WithArguments( ( context.ReferenceKinds, context.ReferencingDeclaration, context.Syntax.Kind ) ) );
         }
     }
 
@@ -29,6 +30,11 @@ namespace Metalama.Framework.Tests.Integration.Validation.AllReferences
     internal class ValidatedClass
     {
         public static void Method( object o ) { }
+        
+        public static int StaticField;
+        public int InstanceField;
+        
+        
     }
 
     // <target>
@@ -42,7 +48,12 @@ namespace Metalama.Framework.Tests.Integration.Validation.AllReferences
 
         private ValidatedClass? Method( ValidatedClass[] param1, List<ValidatedClass> param2 )
         {
-            ValidatedClass variable;
+            ValidatedClass variable = new();
+            var x = new ValidatedClass();
+            _ = x.InstanceField;
+            x.InstanceField = 5;
+            x.InstanceField += 5;
+            ValidatedClass.StaticField = 5;
             Method( typeof(ValidatedClass) );
 
             return null;

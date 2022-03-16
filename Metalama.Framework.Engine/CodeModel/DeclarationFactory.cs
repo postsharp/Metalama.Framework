@@ -68,7 +68,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         internal INamespace GetNamespace( INamespaceSymbol namespaceSymbol )
         {
-            if ( !namespaceSymbol.ContainingAssembly.Equals( this.Compilation.Assembly ) )
+            if ( !StructuralSymbolComparer.Default.Equals( namespaceSymbol.ContainingAssembly, this.Compilation.Assembly ) )
             {
                 throw new InvalidOperationException( "Cannot get the namespace of a type that is not a part of the current compilation." );
             }
