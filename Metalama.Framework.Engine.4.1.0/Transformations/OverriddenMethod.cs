@@ -94,7 +94,7 @@ namespace Metalama.Framework.Engine.Transformations
                 if ( !this.Template.MustInterpretAsAsyncTemplate() )
                 {
                     // If the template is not async but the overridden declaration is, we have to remove the async modifier.
-                    modifiers = TokenList( modifiers.Where( m => m.IsKind( SyntaxKind.AsyncKeyword ) ) );
+                    modifiers = TokenList( modifiers.Where( m => !m.IsKind( SyntaxKind.AsyncKeyword ) ) );
                 }
 
                 // If the template is async and the target declaration is `async void`, and regardless of the async flag the template, we have to change the type to ValueTask, otherwise
