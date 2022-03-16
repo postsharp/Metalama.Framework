@@ -11,6 +11,8 @@ namespace Metalama.Framework.GenerateMetaSyntaxRewriter;
 
 internal class Generator
 {
+    private readonly string _targetDirectory;
+
     private static string RemoveSuffix( string s, string suffix )
         => s.EndsWith( suffix, StringComparison.Ordinal ) ? s.Substring( 0, s.Length - suffix.Length ) : s;
 
@@ -19,17 +21,30 @@ internal class Generator
 
     private readonly IDictionary<string, Node> _nodeMap;
 
-    public Generator()
+    public Generator( string version, string targetDirectory )
     {
-        this._syntaxDocument = TreeReader.ReadTree( "Syntax-4.0.1.xml" );
+        this._targetDirectory = targetDirectory;
+        this._syntaxDocument = TreeReader.ReadTree( $"Syntax-{version}.xml" );
         this._nodeMap = this._syntaxDocument.Types.OfType<Node>().ToDictionary( n => n.Name );
         this._parentMap = this._syntaxDocument.Types.ToDictionary( n => n.Name, n => n.Base )!;
         this._parentMap.Add( this._syntaxDocument.Root, null );
     }
 
-    public void GenerateTemplateFiles()
+    private static void CreateDirectoryForFile( string path )
     {
-        var targetFile = Path.GetFullPath( "MetaSyntaxRewriter.g.cs" );
+        var directory = Path.GetDirectoryName( path );
+
+        if ( !Directory.Exists( directory ) )
+        {
+            Directory.CreateDirectory( directory );
+        }
+    }
+
+    public void GenerateTemplateFiles( string path )
+    {
+        var targetFile = Path.GetFullPath( Path.Combine( this._targetDirectory, path ) );
+        CreateDirectoryForFile( targetFile );
+
         Console.WriteLine( "Creating " + targetFile );
 
         using var writer = File.CreateText( targetFile );
@@ -422,9 +437,12 @@ internal class Generator
         writer.WriteLine( "}" );
     }
 
-    public void GenerateHasher( string path, string className, bool isCompileTime )
+    public void GenerateHasher( string fileName, string className, bool isCompileTime )
     {
-        Console.WriteLine( "Creating " + Path.GetFullPath( path ) );
+        var path = Path.GetFullPath( Path.Combine( this._targetDirectory, fileName ) );
+        CreateDirectoryForFile( path );
+
+        Console.WriteLine( "Creating " + path );
 
         using var writer = File.CreateText( path );
 

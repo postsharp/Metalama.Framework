@@ -16,7 +16,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Metalama.Framework.Engine\Metalama.Framework.Engine.csproj"/>
+        <ProjectReference Include="..\Metalama.Framework.Engine.$(RoslynVersion)\Metalama.Framework.Engine.$(RoslynVersion).csproj"/>
         <ProjectReference Include="..\Metalama.Framework.Sdk\Metalama.Framework.Sdk.csproj"/>
         <ProjectReference Include="..\Metalama.Framework\Metalama.Framework.csproj"/>
     </ItemGroup>

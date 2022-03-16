@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Engine.Utilities;
+using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -25,6 +26,7 @@ namespace Metalama.Framework.CompilerExtensions
 
         private static string? _snapshotDirectory;
         private static volatile bool _initialized;
+        private static string? _versionNumber;
 
         private static void Initialize()
         {
@@ -59,6 +61,8 @@ namespace Metalama.Framework.CompilerExtensions
                             _embeddedAssemblies[loadedAssemblyName.Name] = (file, loadedAssemblyName);
                         }
 
+                        _versionNumber = GetRoslynVersion();
+
                         _initialized = true;
                     }
                 }
@@ -73,6 +77,8 @@ namespace Metalama.Framework.CompilerExtensions
             try
             {
                 Initialize();
+
+                assemblyName = assemblyName + "." + _versionNumber;
 
                 var assemblyQualifiedName = _embeddedAssemblies[assemblyName].Name.ToString();
 
@@ -236,5 +242,19 @@ namespace Metalama.Framework.CompilerExtensions
         }
 
         private static Assembly? OnAssemblyResolve( object sender, ResolveEventArgs args ) => GetAssembly( args.Name );
+
+        private static string GetRoslynVersion()
+        {
+            var version = typeof(SyntaxNode).Assembly.GetName().Version;
+
+            if ( version >= new Version( 4, 1 ) )
+            {
+                return "4.1.0";
+            }
+            else
+            {
+                return "4.0.1";
+            }
+        }
     }
 }

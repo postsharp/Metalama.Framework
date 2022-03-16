@@ -21,7 +21,7 @@
         <PackageReference Include="Metalama.Compiler.Sdk" Version="$(MetalamaCompilerVersion)"/>
         <PackageReference Include="System.Collections.Immutable" Version="$(SystemCollectionsImmutableVersion)"/>
         <ProjectReference Include="..\..\Metalama.Framework.DesignTime.Contracts.1.0\Metalama.Framework.DesignTime.Contracts.1.0.csproj"/>
-        <ProjectReference Include="..\..\Metalama.Framework.Engine\Metalama.Framework.Engine.csproj"/>
+        <ProjectReference Include="..\..\Metalama.Framework.Engine.$(RoslynVersion)\Metalama.Framework.Engine.$(RoslynVersion).csproj"/>
         <ProjectReference Include="..\..\Metalama.Framework.Sdk\Metalama.Framework.Sdk.csproj"/>
         <ProjectReference Include="..\..\Metalama.Framework\Metalama.Framework.csproj"/>
         <ProjectReference Include="..\..\Metalama.TestFramework\Metalama.TestFramework.csproj"/>

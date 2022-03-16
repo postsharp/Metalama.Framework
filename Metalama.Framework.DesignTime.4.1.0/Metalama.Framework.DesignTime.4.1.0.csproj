@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netstandard2.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <IsPackable>false</IsPackable>
+
+        <!-- This property is overridden by project copies that target of lower version of Roslyn -->
+        <ThisRoslynVersion Condition="'$(ThisRoslynVersion)'==''">$(RoslynVersion)</ThisRoslynVersion>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\Metalama.Framework.DesignTime.Contracts.1.0\Metalama.Framework.DesignTime.Contracts.1.0.csproj"/>
+        <ProjectReference Include="..\Metalama.Framework.Engine.$(ThisRoslynVersion)\Metalama.Framework.Engine.$(ThisRoslynVersion).csproj"/>
+        <InternalsVisibleTo Include="Metalama.Framework.Tests.UnitTests.Internals"/>
+    </ItemGroup>
+
+
+    <ItemGroup>
+        <Compile Include="..\.generated\$(ThisRoslynVersion)\Metalama.Framework.DesignTime\*.cs"/>
+    </ItemGroup>
+
+
+</Project>

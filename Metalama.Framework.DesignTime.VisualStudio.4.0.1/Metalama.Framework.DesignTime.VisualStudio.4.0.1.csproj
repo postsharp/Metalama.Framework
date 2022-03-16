@@ -1,0 +1,15 @@
+<Project DefaultTargets="Build">
+
+    <PropertyGroup>
+        <TargetFramework>netstandard2.0</TargetFramework>
+        <ThisRoslynVersion>4.0.1</ThisRoslynVersion>
+        <DisableCodeQuality>True</DisableCodeQuality>
+    </PropertyGroup>
+
+    <Import Project="..\Metalama.Framework.DesignTime.VisualStudio.4.1.0\Metalama.Framework.DesignTime.VisualStudio.4.1.0.csproj"/>
+
+    <ItemGroup>
+        <Compile Include="..\Metalama.Framework.DesignTime.VisualStudio.4.1.0\**\*.cs" Exclude="..\Metalama.Framework.DesignTime.VisualStudio.4.1.0\obj\**\*.cs"/>
+    </ItemGroup>
+
+</Project>
