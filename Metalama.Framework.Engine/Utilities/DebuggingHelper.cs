@@ -2,11 +2,10 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Backstage.Diagnostics;
+using Metalama.Backstage.Utilities;
 using Metalama.Compiler;
 using Metalama.Framework.Engine.Pipeline;
 using Microsoft.CodeAnalysis;
-using System;
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Threading;
@@ -18,22 +17,9 @@ namespace Metalama.Framework.Engine.Utilities
     {
         private static readonly ConditionalWeakTable<object, ObjectId> _objectIds = new();
 
-        public static ProcessKind ProcessKind
-            => Process.GetCurrentProcess().ProcessName.ToLowerInvariant() switch
-            {
-                "devenv" => ProcessKind.DevEnv,
-                "servicehub.roslyncodeanalysisservice" => ProcessKind.RoslynCodeAnalysisService,
-                "csc" => ProcessKind.Compiler,
-                "dotnet" =>
-                    Environment.CommandLine.Contains( "JetBrains.ReSharper.Roslyn.Worker.exe" ) ? ProcessKind.Rider :
-                    Environment.CommandLine.Contains( "VBCSCompiler.dll" ) || Environment.CommandLine.Contains( "csc.dll" ) ? ProcessKind.Compiler :
-                    ProcessKind.Other,
-                _ => ProcessKind.Other
-            };
-
         public static void RequireMetalamaCompiler()
         {
-            if ( ProcessKind == ProcessKind.Compiler && !MetalamaCompilerInfo.IsActive )
+            if ( ProcessUtilities.ProcessKind == ProcessKind.Compiler && !MetalamaCompilerInfo.IsActive )
             {
                 throw new AssertionFailedException( "Metalama is running in the vanilla C# compiler instead of the customized one." );
             }

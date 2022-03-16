@@ -74,13 +74,14 @@ static void OnPrepareCompleted( PrepareCompletedEventArgs arg )
             generatorDirectory,
             "Metalama.Framework.GenerateMetaSyntaxRewriter.csproj" ) );
 
-    if ( !project.Restore( arg.Context, new BuildSettings() ) )
+    var settings = new BuildSettings() { BuildConfiguration = BuildConfiguration.Debug };
+    if ( !project.Restore( arg.Context, settings ) )
     {
         arg.IsFailed = true;
         return;
     }
 
-    if ( !project.Build( arg.Context, new BuildSettings() ) )
+    if ( !project.Build( arg.Context, settings ) )
     {
         arg.IsFailed = true;
         return;
