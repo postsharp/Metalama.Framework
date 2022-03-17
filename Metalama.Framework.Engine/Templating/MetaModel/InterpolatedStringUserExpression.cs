@@ -3,11 +3,13 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.SyntaxBuilders;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using SpecialType = Metalama.Framework.Code.SpecialType;
 
 namespace Metalama.Framework.Engine.Templating.MetaModel
 {
@@ -62,7 +64,7 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
 
                         var tokenSyntax = RuntimeExpression.FromValue( token.Expression, this.Type.Compilation, syntaxGenerationContext ).Syntax;
 
-                        if ( tokenSyntax is LiteralExpressionSyntax literal && literal.Token.Kind() == SyntaxKind.StringLiteralToken )
+                        if ( tokenSyntax is LiteralExpressionSyntax literal && literal.Token.IsKind( SyntaxKind.StringLiteralToken ) )
                         {
                             textAccumulator.Append( literal.Token.Text.Substring( 1, literal.Token.Text.Length - 2 ) );
                         }

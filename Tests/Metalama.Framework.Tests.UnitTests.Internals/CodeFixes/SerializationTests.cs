@@ -85,7 +85,7 @@ public class SerializationTests
         var code = "class Program { static void Main() {} }";
         var tree = CSharpSyntaxTree.ParseText( code, path: "path.cs" );
         var root = tree.GetRoot();
-        var node = root.DescendantNodes().Single( n => n.Kind() == SyntaxKind.ClassDeclaration );
+        var node = root.DescendantNodes().Single( n => n.IsKind( SyntaxKind.ClassDeclaration ) );
         var rootWithAnnotation = root.ReplaceNode( node, node.WithAdditionalAnnotations( Formatter.Annotation ) );
         var treeWithAnnotation = tree.WithRootAndOptions( rootWithAnnotation, tree.Options );
         var input = new SerializableSyntaxTree( treeWithAnnotation );
@@ -95,7 +95,7 @@ public class SerializationTests
         Assert.Equal( node.Span, roundloop.Annotations[0].TextSpan );
 
         var roundloopRoot = roundloop.GetAnnotatedSyntaxNode();
-        var roundloopNode = roundloopRoot.DescendantNodes().Single( n => n.Kind() == SyntaxKind.ClassDeclaration );
+        var roundloopNode = roundloopRoot.DescendantNodes().Single( n => n.IsKind( SyntaxKind.ClassDeclaration ) );
         Assert.True( roundloopNode.HasAnnotation( Formatter.Annotation ) );
     }
 }

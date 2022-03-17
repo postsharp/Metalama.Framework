@@ -1,11 +1,15 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
+    <Import Project="..\Build\RoslynVersion\Latest.imports"/>
+
     <PropertyGroup>
         <!-- This project never executes under .NET 5.0 in production, but we are including the framework
              for simplicity because the tests also run under .NET 5.0. -->
         <TargetFrameworks>netstandard2.0;net5.0</TargetFrameworks>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <IsPackable>false</IsPackable>
+        <AssemblyName>Metalama.Framework.DesignTime.VisualStudio.$(ThisRoslynVersion)</AssemblyName>
     </PropertyGroup>
 
     <ItemGroup>

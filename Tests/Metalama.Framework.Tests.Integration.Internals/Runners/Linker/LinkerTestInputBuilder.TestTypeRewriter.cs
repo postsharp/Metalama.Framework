@@ -732,7 +732,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
             {
                 return method
                     .WithAttributeLists( List<AttributeListSyntax>() )
-                    .WithModifiers( TokenList( method.Modifiers.Where( m => m.Kind() != SyntaxKind.OverrideKeyword ) ) )
+                    .WithModifiers( TokenList( method.Modifiers.Where( m => !m.IsKind( SyntaxKind.OverrideKeyword ) ) ) )
                     .WithIdentifier( Identifier( GetSymbolHelperName( memberNameOverride ?? method.Identifier.ValueText ) ) )
                     .WithExpressionBody( null )
                     .WithBody(
@@ -752,7 +752,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                     return property
                         .WithAttributeLists( List<AttributeListSyntax>() )
                         .WithIdentifier( Identifier( GetSymbolHelperName( memberNameOverride ?? property.Identifier.ValueText ) ) )
-                        .WithModifiers( TokenList( property.Modifiers.Where( m => m.Kind() != SyntaxKind.OverrideKeyword ) ) )
+                        .WithModifiers( TokenList( property.Modifiers.Where( m => !m.IsKind( SyntaxKind.OverrideKeyword ) ) ) )
                         .WithInitializer( null )
                         .WithAccessorList(
                             AccessorList(
@@ -779,7 +779,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                     return property
                         .WithAttributeLists( List<AttributeListSyntax>() )
                         .WithIdentifier( Identifier( GetSymbolHelperName( memberNameOverride ?? property.Identifier.ValueText ) ) )
-                        .WithModifiers( TokenList( property.Modifiers.Where( m => m.Kind() != SyntaxKind.OverrideKeyword ) ) )
+                        .WithModifiers( TokenList( property.Modifiers.Where( m => !m.IsKind( SyntaxKind.OverrideKeyword ) ) ) )
                         .WithExpressionBody(
                             ArrowExpressionClause(
                                 LiteralExpression(
@@ -793,7 +793,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                 return @event
                     .WithAttributeLists( List<AttributeListSyntax>() )
                     .WithIdentifier( Identifier( GetSymbolHelperName( memberNameOverride ?? @event.Identifier.ValueText ) ) )
-                    .WithModifiers( TokenList( @event.Modifiers.Where( m => m.Kind() != SyntaxKind.OverrideKeyword ) ) )
+                    .WithModifiers( TokenList( @event.Modifiers.Where( m => !m.IsKind( SyntaxKind.OverrideKeyword ) ) ) )
                     .WithAccessorList( AccessorList( List( @event.AccessorList.AssertNotNull().Accessors.Select( a => a.WithBody( Block() ) ) ) ) );
             }
 

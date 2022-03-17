@@ -995,7 +995,7 @@ namespace Metalama.Framework.Engine.Templating
             TemplatingScope forEachScope;
             string reason;
 
-            if ( node.AwaitKeyword.Kind() == SyntaxKind.None )
+            if ( node.AwaitKeyword.IsKind( SyntaxKind.None ) )
             {
                 forEachScope = this.GetNodeScope( annotatedExpression ).GetExpressionValueScope( true ).ReplaceIndeterminate( TemplatingScope.RunTimeOnly );
                 reason = $"foreach ( {node.Type} {node.Identifier} in ... )";

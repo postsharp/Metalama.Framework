@@ -24,7 +24,7 @@ namespace Metalama.Framework.Engine.Utilities
             for ( var oldNodeCursor = oldNode; oldNodeCursor?.Parent != null; oldNodeCursor = oldNodeCursor.Parent )
             {
                 var syntaxKind = oldNodeCursor.Kind();
-                var childrenOfSameKind = oldNodeCursor.Parent.ChildNodes().Where( n => n.Kind() == syntaxKind );
+                var childrenOfSameKind = oldNodeCursor.Parent.ChildNodes().Where( n => n.IsKind( syntaxKind ) );
 
                 var index = 0;
 
@@ -54,7 +54,7 @@ namespace Metalama.Framework.Engine.Utilities
             while ( stack.Count > 0 )
             {
                 var slice = stack.Pop();
-                var childrenOfSameKind = newNode.ChildNodes().Where( n => n.Kind() == slice.Kind );
+                var childrenOfSameKind = newNode.ChildNodes().Where( n => n.IsKind( slice.Kind ) );
                 var childAtPosition = childrenOfSameKind.ElementAtOrDefault( slice.Position );
 
                 if ( childAtPosition == null )
