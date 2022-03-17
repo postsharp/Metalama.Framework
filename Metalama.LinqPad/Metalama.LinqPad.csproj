@@ -14,7 +14,7 @@
     <ItemGroup>
         <PackageReference Include="LINQPad.Reference" Version="1.2.0-beta"/>
         <ProjectReference Include="..\Metalama.Framework.Workspaces\Metalama.Framework.Workspaces.csproj"/>
-        <ProjectReference Include="..\Metalama.Framework.Engine.$(RoslynVersion)\Metalama.Framework.Engine.$(RoslynVersion).csproj"/>
+        <ProjectReference Include="..\Metalama.Framework.Engine\Metalama.Framework.Engine.csproj"/>
         <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="$(RoslynVersion)"/>
         <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.Common" Version="$(RoslynVersion)"/>
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="$(RoslynVersion)"/>

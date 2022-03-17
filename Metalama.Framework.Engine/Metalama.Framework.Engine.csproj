@@ -1,13 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
+    <Import Project="..\Build\RoslynVersion\Latest.imports"/>
+
     <PropertyGroup>
         <TargetFramework>netstandard2.0</TargetFramework>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <MetalamaCompilerDisablePackCustomization>True</MetalamaCompilerDisablePackCustomization>
         <UseMetalamaCompiler>Private</UseMetalamaCompiler>
-
-        <!-- This property is overridden by project copies that target of lower version of Roslyn -->
-        <ThisRoslynVersion Condition="'$(ThisRoslynVersion)'==''">$(RoslynVersion)</ThisRoslynVersion>
+        <AssemblyName>Metalama.Framework.Engine.$(ThisRoslynVersion)</AssemblyName>
     </PropertyGroup>
 
     <ItemGroup>

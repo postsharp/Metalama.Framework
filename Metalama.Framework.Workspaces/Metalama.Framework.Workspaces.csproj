@@ -7,7 +7,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Metalama.Framework.Engine.$(RoslynVersion)\Metalama.Framework.Engine.$(RoslynVersion).csproj"/>
+        <ProjectReference Include="..\Metalama.Framework.Engine\Metalama.Framework.Engine.csproj"/>
         <ProjectReference Include="..\Metalama.Framework.Introspection\Metalama.Framework.Introspection.csproj"/>
         <ProjectReference Include="..\Metalama.Framework\Metalama.Framework.csproj"/>
     </ItemGroup>

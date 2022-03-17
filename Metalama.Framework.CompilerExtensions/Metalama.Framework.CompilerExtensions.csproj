@@ -12,9 +12,9 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <Compile Include="..\Metalama.Framework.Engine.$(RoslynVersion)\AssertionFailedException.cs" Link="Utilities\AssertionFailedException.cs"/>
-        <Compile Include="..\Metalama.Framework.Engine.$(RoslynVersion)\Utilities\AssemblyMetadataReader.cs" Link="Utilities\AssemblyMetadataReader.cs"/>
-        <Compile Include="..\Metalama.Framework.Engine.$(RoslynVersion)\Utilities\TempPathHelper.cs" Link="Utilities\TempPathHelper.cs"/>
+        <Compile Include="..\Metalama.Framework.Engine\AssertionFailedException.cs" Link="Utilities\AssertionFailedException.cs"/>
+        <Compile Include="..\Metalama.Framework.Engine\Utilities\AssemblyMetadataReader.cs" Link="Utilities\AssemblyMetadataReader.cs"/>
+        <Compile Include="..\Metalama.Framework.Engine\Utilities\TempPathHelper.cs" Link="Utilities\TempPathHelper.cs"/>
     </ItemGroup>
 
 
@@ -54,9 +54,9 @@
         <PackageReference Include="Metalama.Compiler.Sdk" Version="$(MetalamaCompilerVersion)" PrivateAssets="true"/>
 
         <!-- 4.1.0 -->
-        <EmbeddedResource Include="..\Metalama.Framework.Engine.4.1.0\bin\$(Configuration)\$(TargetFramework)\Metalama.Framework.Engine.4.1.0.dll" Link="Resources\Metalama.Framework.Engine.4.1.0.dll"/>
-        <EmbeddedResource Include="..\Metalama.Framework.DesignTime.4.1.0\bin\$(Configuration)\$(TargetFramework)\Metalama.Framework.DesignTime.4.1.0.dll" Link="Resources\Metalama.Framework.DesignTime.4.1.0.dll"/>
-        <EmbeddedResource Include="..\Metalama.Framework.DesignTime.VisualStudio.4.1.0\bin\$(Configuration)\$(TargetFramework)\Metalama.Framework.DesignTime.VisualStudio.4.1.0.dll" Link="Resources\Metalama.Framework.DesignTime.VisualStudio.4.1.0.dll"/>
+        <EmbeddedResource Include="..\Metalama.Framework.Engine\bin\$(Configuration)\$(TargetFramework)\Metalama.Framework.Engine.$(RoslynVersion).dll" Link="Resources\Metalama.Framework.Engine.4.1.0.dll"/>
+        <EmbeddedResource Include="..\Metalama.Framework.DesignTime\bin\$(Configuration)\$(TargetFramework)\Metalama.Framework.DesignTime.$(RoslynVersion).dll" Link="Resources\Metalama.Framework.DesignTime.4.1.0.dll"/>
+        <EmbeddedResource Include="..\Metalama.Framework.DesignTime.VisualStudio\bin\$(Configuration)\$(TargetFramework)\Metalama.Framework.DesignTime.VisualStudio.$(RoslynVersion).dll" Link="Resources\Metalama.Framework.DesignTime.VisualStudio.4.1.0.dll"/>
 
         <!-- 4.0.1 -->
         <EmbeddedResource Include="..\Metalama.Framework.Engine.4.0.1\bin\$(Configuration)\$(TargetFramework)\Metalama.Framework.Engine.4.0.1.dll" Link="Resources\Metalama.Framework.Engine.4.0.1.dll"/>

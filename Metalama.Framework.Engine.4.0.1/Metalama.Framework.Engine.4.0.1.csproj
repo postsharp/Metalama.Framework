@@ -1,15 +1,15 @@
 <Project DefaultTargets="Build">
 
+    <Import Project="..\Build\RoslynVersion\Roslyn4.0.1.props"/>
+
     <PropertyGroup>
         <TargetFramework>netstandard2.0</TargetFramework>
-        <ThisRoslynVersion>4.0.1</ThisRoslynVersion>
-        <DisableCodeQuality>True</DisableCodeQuality>
     </PropertyGroup>
 
-    <Import Project="..\Metalama.Framework.Engine.4.1.0\Metalama.Framework.Engine.4.1.0.csproj"/>
+    <Import Project="..\Metalama.Framework.Engine\Metalama.Framework.Engine.csproj"/>
 
     <ItemGroup>
-        <Compile Include="..\Metalama.Framework.Engine.4.1.0\**\*.cs" Exclude="..\Metalama.Framework.Engine.4.1.0\obj\**\*.cs"/>
+        <Compile Include="..\Metalama.Framework.Engine\**\*.cs" Exclude="..\Metalama.Framework.Engine\obj\**\*.cs"/>
     </ItemGroup>
 
 </Project>
