@@ -244,7 +244,7 @@ namespace Metalama.Framework.Engine.CodeModel
                     _ => default
                 };
 
-                return modifiers.Any( m => m.IsKind( SyntaxKind.PartialKeyword )  );
+                return modifiers.Any( m => m.IsKind( SyntaxKind.PartialKeyword ) );
             }
         }
 

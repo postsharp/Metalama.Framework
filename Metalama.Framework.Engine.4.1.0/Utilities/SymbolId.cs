@@ -21,7 +21,7 @@ namespace Metalama.Framework.Engine.Utilities
     {
         // ReSharper disable once PrivateFieldCanBeConvertedToLocalVariable
         private static readonly Func<string, object> _newSymbolKeyFunc;
-        
+
         private static readonly Func<object, Compilation, bool, CancellationToken, ISymbol> _resolveSymbolKeyFunc;
         private static readonly Func<ISymbol, CancellationToken, object> _getSymbolKeyFunc;
 

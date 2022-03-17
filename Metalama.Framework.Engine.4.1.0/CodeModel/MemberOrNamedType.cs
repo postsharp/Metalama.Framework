@@ -31,13 +31,13 @@ namespace Metalama.Framework.Engine.CodeModel
                 switch ( syntaxReference.GetSyntax() )
                 {
                     case MemberDeclarationSyntax memberDeclaration:
-                        return memberDeclaration.Modifiers.Any( m => m.IsKind( SyntaxKind.NewKeyword )  );
+                        return memberDeclaration.Modifiers.Any( m => m.IsKind( SyntaxKind.NewKeyword ) );
 
                     case VariableDeclaratorSyntax { Parent: { Parent: EventFieldDeclarationSyntax eventFieldDeclaration } }:
-                        return eventFieldDeclaration.Modifiers.Any( m => m.IsKind( SyntaxKind.NewKeyword )  );
+                        return eventFieldDeclaration.Modifiers.Any( m => m.IsKind( SyntaxKind.NewKeyword ) );
 
                     case VariableDeclaratorSyntax { Parent: { Parent: FieldDeclarationSyntax fieldDeclaration } }:
-                        return fieldDeclaration.Modifiers.Any( m => m.IsKind( SyntaxKind.NewKeyword )  );
+                        return fieldDeclaration.Modifiers.Any( m => m.IsKind( SyntaxKind.NewKeyword ) );
 
                     case LocalFunctionStatementSyntax:
                         return false;
