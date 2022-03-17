@@ -40,5 +40,8 @@ namespace Metalama.Framework.GenerateMetaSyntaxRewriter.Model
         public bool IsToken => this.Type == "SyntaxToken";
 
         public bool IsOptional => this.Optional == "true";
+
+        [XmlIgnore]
+        public RoslynVersion? MinimalRoslynVersion { get; set; }
     }
 }

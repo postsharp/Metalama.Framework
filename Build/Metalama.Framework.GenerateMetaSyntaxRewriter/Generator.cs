@@ -12,22 +12,15 @@ namespace Metalama.Framework.GenerateMetaSyntaxRewriter;
 internal class Generator
 {
     private readonly string _targetDirectory;
+    private readonly SyntaxDocument _syntax;
 
     private static string RemoveSuffix( string s, string suffix )
         => s.EndsWith( suffix, StringComparison.Ordinal ) ? s.Substring( 0, s.Length - suffix.Length ) : s;
 
-    private readonly Tree _syntaxDocument;
-    private readonly IDictionary<string, string?> _parentMap;
-
-    private readonly IDictionary<string, Node> _nodeMap;
-
-    public Generator( string version, string targetDirectory )
+    public Generator( SyntaxDocument syntax, string targetDirectory )
     {
+        this._syntax = syntax;
         this._targetDirectory = targetDirectory;
-        this._syntaxDocument = TreeReader.ReadTree( $"Syntax-{version}.xml" );
-        this._nodeMap = this._syntaxDocument.Types.OfType<Node>().ToDictionary( n => n.Name );
-        this._parentMap = this._syntaxDocument.Types.ToDictionary( n => n.Name, n => n.Base )!;
-        this._parentMap.Add( this._syntaxDocument.Root, null );
     }
 
     private static void CreateDirectoryForFile( string path )
@@ -40,7 +33,7 @@ internal class Generator
         }
     }
 
-    public void GenerateTemplateFiles( string path )
+    public void GenerateTemplateFiles( string path, SyntaxDocument[] versions )
     {
         var targetFile = Path.GetFullPath( Path.Combine( this._targetDirectory, path ) );
         CreateDirectoryForFile( targetFile );
@@ -51,13 +44,82 @@ internal class Generator
 
         WriteUsings( writer );
         writer.WriteLine();
-        writer.WriteLine( "namespace Metalama.Framework.Engine.Templating" );
-        writer.WriteLine( "{" );
-        this.GenerateMetaSyntaxRewriter( writer );
+        writer.WriteLine( "namespace Metalama.Framework.Engine.Templating;" );
+        this.GenerateMetaSyntaxRewriter( writer, versions );
 
         // Generate MetaSyntaxFactoryImpl.
         this.GenerateMetaSyntaxFactory( writer );
         writer.WriteLine( "}" );
+    }
+
+    public void GenerateRoslynApiVersionEnum( string path, SyntaxDocument[] versions )
+    {
+        var targetFile = Path.GetFullPath( Path.Combine( this._targetDirectory, path ) );
+        CreateDirectoryForFile( targetFile );
+
+        Console.WriteLine( "Creating " + targetFile );
+
+        using var writer = File.CreateText( targetFile );
+
+        WriteUsings( writer );
+        writer.WriteLine();
+        writer.WriteLine( "namespace Metalama.Framework.Engine.Templating;" );
+
+        writer.WriteLine( "internal enum RoslynApiVersion " );
+        writer.WriteLine( "{" );
+
+        foreach ( var version in versions )
+        {
+            writer.WriteLine( $"\t{version.Version.EnumValue} = {version.Version.Index}," );
+        }
+
+        writer.WriteLine( $"\tCurrent = {this._syntax.Version.EnumValue}," );
+        writer.WriteLine( $"\tLowest = {versions[0].Version.EnumValue}," );
+        writer.WriteLine( $"\tHighest = {versions[versions.Length - 1].Version.EnumValue}" );
+
+        writer.WriteLine( "}" );
+    }
+
+    public void GenerateVersionChecker( string path )
+    {
+        var targetFile = Path.GetFullPath( Path.Combine( this._targetDirectory, path ) );
+        CreateDirectoryForFile( targetFile );
+
+        Console.WriteLine( "Creating " + targetFile );
+
+        using var writer = File.CreateText( targetFile );
+
+        WriteUsings( writer );
+        writer.WriteLine();
+        writer.WriteLine( "namespace Metalama.Framework.Engine.Templating;" );
+
+        writer.WriteLine( "internal partial class RoslynVersionSyntaxVerifier" );
+        writer.WriteLine( "{" );
+
+        // Process syntax types that are not common to all Roslyn versions.
+        foreach ( var type in this._syntax.Types.OfType<Node>().Where( t => t.MinimalRoslynVersion!.Index > 0 ) )
+        {
+            writer.WriteLine( $"\tpublic override void Visit{RemoveSuffix( type.Name, "Syntax" )}( {type.Name} node )" );
+            writer.WriteLine( "\t{" );
+            writer.WriteLine( $"\t\tthis.VisitVersionSpecificNode( node, {type.MinimalRoslynVersion!.QualifiedEnumValue} );" );
+            writer.WriteLine( "\t}" );
+        }
+
+        // Process syntax types that are common to all Roslyn versions, but have version-specific fields.
+        foreach ( var type in this._syntax.Types.OfType<Node>()
+                     .Where( t => t.MinimalRoslynVersion!.Index == 0 && t.Fields.Any( f => f.MinimalRoslynVersion!.Index > 0 ) ) )
+        {
+            writer.WriteLine( $"\tpublic override void Visit{RemoveSuffix( type.Name, "Syntax" )}( {type.Name} node )" );
+            writer.WriteLine( "\t{" );
+
+            foreach ( var field in type.Fields.Where( f => f.MinimalRoslynVersion!.Index > 0 ) )
+            {
+                writer.WriteLine( $"\t\tthis.VisitVersionSpecificField( node.{field.Name}, {field.MinimalRoslynVersion!.QualifiedEnumValue} ); " );
+            }
+
+            writer.WriteLine( "\t}" );
+        }
+
         writer.WriteLine( "}" );
     }
 
@@ -88,8 +150,6 @@ internal class Generator
         return nd.Fields.Where( f => !IsAutoCreatableToken( nd, f ) );
     }
 
-    private Node? GetNode( string typeName ) => this._nodeMap.TryGetValue( typeName, out var node ) ? node : null;
-
     private static bool IsAnyList( string typeName )
     {
         return IsNodeList( typeName ) || IsSeparatedNodeList( typeName ) || typeName == "SyntaxNodeOrTokenList";
@@ -99,7 +159,7 @@ internal class Generator
 
     private bool IsAutoCreatableNode( Field field )
     {
-        var referencedNode = this.GetNode( field.Type );
+        var referencedNode = this._syntax.GetNode( field.Type );
 
         return referencedNode != null && this.RequiredFactoryArgumentCount( referencedNode ) == 0;
     }
@@ -132,11 +192,6 @@ internal class Generator
 
     private static bool IsOptional( Field f ) => IsTrue( f.Optional );
 
-    private bool IsNode( string typeName )
-    {
-        return this._parentMap.ContainsKey( typeName );
-    }
-
     private static bool IsTrue( string? val ) => val != null && string.Compare( val, "true", StringComparison.OrdinalIgnoreCase ) == 0;
 
     private bool IsValueField( Field field )
@@ -146,7 +201,7 @@ internal class Generator
 
     private bool IsNodeOrNodeList( string typeName )
     {
-        return this.IsNode( typeName ) || IsNodeList( typeName ) || IsSeparatedNodeList( typeName ) || typeName == "SyntaxNodeOrTokenList";
+        return this._syntax.IsNode( typeName ) || IsNodeList( typeName ) || IsSeparatedNodeList( typeName ) || typeName == "SyntaxNodeOrTokenList";
     }
 
     private static bool IsNodeList( string typeName )
@@ -285,12 +340,12 @@ internal class Generator
         return IsNodeList( typeName ) || IsSeparatedNodeList( typeName );
     }
 
-    private void GenerateMetaSyntaxRewriter( StreamWriter writer )
+    private void GenerateMetaSyntaxRewriter( StreamWriter writer, SyntaxDocument[] syntaxVersions )
     {
         writer.WriteLine( "\tpartial class MetaSyntaxRewriter" );
         writer.WriteLine( "\t{" );
 
-        var nodes = this._syntaxDocument.Types.Where( n => n is not PredefinedNode ).OfType<Node>().ToList();
+        var nodes = this._syntax.Types.Where( n => n is not PredefinedNode ).OfType<Node>().ToList();
 
         foreach ( var node in nodes )
         {
@@ -305,8 +360,6 @@ internal class Generator
             writer.WriteLine( "\t\t\t{" );
 
             // Generating Clone is interesting to validate the current code generation, but it is not used.
-            // writer.WriteLine( "\t\t\t\tcase TransformationKind.Clone: " );
-            // writer.WriteLine( $"\t\t\t\t\treturn {factoryMethod.Name}( {string.Join( ", ", parameters.Select( FindProperty ) )});" );
             writer.WriteLine( "\t\t\t\tcase TransformationKind.Transform: " );
             writer.WriteLine( $"\t\t\t\t\treturn this.Transform{factoryMethodName}( node );" );
 
@@ -315,46 +368,76 @@ internal class Generator
             writer.WriteLine( "\t\t\t}" );
             writer.WriteLine( "\t\t}" );
 
-            // Generate the Transform* method.
+            // Generate the Transform* method. We need to generate it for many target versions of the Roslyn API.
             writer.WriteLine( $"\t\t[ExcludeFromCodeCoverage]" );
             writer.WriteLine( $"\t\tprotected virtual ExpressionSyntax Transform{factoryMethodName}( {nodeTypeName} node)" );
             writer.WriteLine( "\t\t{" );
             writer.WriteLine( "\t\t\tthis.Indent();" );
-            writer.Write( $"\t\t\tvar result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof({factoryMethodName})))" );
+            writer.WriteLine( "\t\t\tExpressionSyntax result;" );
 
-            var hasKindParameter = node.Kinds.Count > 1;
-
-            if ( node.Fields.Count == 0 && !hasKindParameter )
+            if ( node.Fields.Select( f => f.MinimalRoslynVersion ).Distinct().Count() == 1 )
             {
-                writer.WriteLine( ";" );
+                // All fields in the syntax node are available in all versions of the Roslyn API supporting this syntax type.
+                GenerateForFields( "\t\t\t", node.Fields );
             }
             else
             {
-                writer.WriteLine( ".WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{" );
+                writer.WriteLine( "\t\t\tswitch ( this.TargetApiVersion )" );
+                writer.WriteLine( "\t\t\t{" );
 
-                var appendComma = false;
-
-                if ( hasKindParameter )
+                for ( var versionIndex = node.MinimalRoslynVersion!.Index; versionIndex <= this._syntax.Version.Index; versionIndex++ )
                 {
-                    writer.WriteLine( $"\t\t\t\tArgument(this.Transform(node.Kind())).WithLeadingTrivia(this.GetIndentation())," );
-                    appendComma = true;
+                    var version = syntaxVersions[versionIndex].Version;
+
+                    writer.WriteLine( $"\t\t\t\tcase {version.QualifiedEnumValue}:" );
+                    var fields = node.Fields.Where( f => f.MinimalRoslynVersion!.Index <= versionIndex ).ToList();
+                    GenerateForFields( "\t\t\t\t\t", fields );
+                    writer.WriteLine( $"\t\t\t\t\tbreak;" );
                 }
 
-                foreach ( var field in node.Fields )
+                writer.WriteLine( $"\t\t\t\tdefault:" );
+                writer.WriteLine( $"\t\t\t\t\tthrow new AssertionFailedException();" );
+                writer.WriteLine( "\t\t\t}" );
+            }
+
+            void GenerateForFields( string indentation, List<Field> fields )
+            {
+                writer.Write( $"{indentation}result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof({factoryMethodName})))" );
+
+                var hasKindParameter = node.Kinds.Count > 1;
+
+                if ( fields.Count == 0 && !hasKindParameter )
                 {
-                    if ( appendComma )
+                    writer.WriteLine( ";" );
+                }
+                else
+                {
+                    writer.WriteLine( ".WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{" );
+
+                    var appendComma = false;
+
+                    if ( hasKindParameter )
                     {
-                        writer.WriteLine( "\t\t\t\tToken(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak())," );
-                    }
-                    else
-                    {
+                        writer.WriteLine( $"{indentation}\tArgument(this.Transform(node.Kind())).WithLeadingTrivia(this.GetIndentation())," );
                         appendComma = true;
                     }
 
-                    writer.WriteLine( $"\t\t\t\tArgument(this.Transform(node.{field.Name})).WithLeadingTrivia(this.GetIndentation())," );
-                }
+                    foreach ( var field in fields )
+                    {
+                        if ( appendComma )
+                        {
+                            writer.WriteLine( $"{indentation}\tToken(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak())," );
+                        }
+                        else
+                        {
+                            appendComma = true;
+                        }
 
-                writer.WriteLine( "\t\t\t})));" );
+                        writer.WriteLine( $"{indentation}\tArgument(this.Transform(node.{field.Name})).WithLeadingTrivia(this.GetIndentation())," );
+                    }
+
+                    writer.WriteLine( $"{indentation}}})));" );
+                }
             }
 
             writer.WriteLine( "\t\t\tthis.Unindent();" );
@@ -368,7 +451,7 @@ internal class Generator
         writer.WriteLine( "\tpartial class MetaSyntaxFactoryImpl" );
         writer.WriteLine( "\t{" );
 
-        var nodes = this._syntaxDocument.Types.Where( n => n is not PredefinedNode and not AbstractNode ).OfType<Node>().ToList();
+        var nodes = this._syntax.Types.Where( n => n is not PredefinedNode and not AbstractNode ).OfType<Node>().ToList();
 
         // Generate methods for all types of syntax nodes.
         foreach ( var node in nodes )
@@ -456,7 +539,7 @@ internal class Generator
         writer.WriteLine( $"\t\tpublic {className}(XXH64 hasher) : base(hasher) {{}}" );
         writer.WriteLine();
 
-        var nodes = this._syntaxDocument.Types.Where( n => n is not PredefinedNode ).OfType<Node>().ToList();
+        var nodes = this._syntax.Types.Where( n => n is not PredefinedNode ).OfType<Node>().ToList();
 
         foreach ( var node in nodes )
         {

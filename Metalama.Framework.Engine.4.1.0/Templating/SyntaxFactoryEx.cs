@@ -132,7 +132,7 @@ namespace Metalama.Framework.Engine.Templating
         /// </summary>
         public static string ToSyntaxFactoryDebug( this SyntaxNode node, Compilation compilation, IServiceProvider serviceProvider )
         {
-            MetaSyntaxRewriter rewriter = new( serviceProvider, compilation );
+            MetaSyntaxRewriter rewriter = new( serviceProvider, compilation, RoslynApiVersion.Current );
             var normalized = NormalizeRewriter.Instance.Visit( node );
             var transformedNode = rewriter.Visit( normalized );
 

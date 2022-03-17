@@ -29,5 +29,8 @@ namespace Metalama.Framework.GenerateMetaSyntaxRewriter.Model
         [XmlElement( ElementName = "Choice", Type = typeof(Choice) )]
         [XmlElement( ElementName = "Sequence", Type = typeof(Sequence) )]
         public List<TreeTypeChild> Children { get; set; } = new();
+
+        [XmlIgnore]
+        public RoslynVersion? MinimalRoslynVersion { get; set; }
     }
 }

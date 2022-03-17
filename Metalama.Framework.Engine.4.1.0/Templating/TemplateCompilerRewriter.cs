@@ -54,7 +54,8 @@ namespace Metalama.Framework.Engine.Templating
             IDiagnosticAdder diagnosticAdder,
             IServiceProvider serviceProvider,
             SerializableTypes serializableTypes,
-            CancellationToken cancellationToken ) : base( serviceProvider, compileTimeCompilation )
+            RoslynApiVersion targetApiVersion,
+            CancellationToken cancellationToken ) : base( serviceProvider, compileTimeCompilation, targetApiVersion )
         {
             this._templateName = templateName;
             this._syntaxKind = syntaxKind;

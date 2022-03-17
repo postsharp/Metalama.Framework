@@ -32,14 +32,17 @@ namespace Metalama.Framework.Engine.Templating
         /// </summary>
         /// <param name="compileTimeCompilation">The <see cref="Compilation"/> used to create the compile-time assembly,
         /// possibly with no source code, but with metadata references. Used to resolve symbols in the compile-time assembly.</param>
-        public MetaSyntaxRewriter( IServiceProvider serviceProvider, Compilation compileTimeCompilation )
+        public MetaSyntaxRewriter( IServiceProvider serviceProvider, Compilation compileTimeCompilation, RoslynApiVersion targetApiVersion )
         {
+            this.TargetApiVersion = targetApiVersion;
             this._indentTriviaStack.Push( "" );
             this._indentRewriter = new IndentRewriter( this );
             this.MetaSyntaxFactory = new MetaSyntaxFactoryImpl( serviceProvider, compileTimeCompilation );
         }
 
         protected MetaSyntaxFactoryImpl MetaSyntaxFactory { get; }
+
+        public RoslynApiVersion TargetApiVersion { get; }
 
         /// <summary>
         /// Determines how a given <see cref="SyntaxNode"/> must be transformed.
