@@ -89,7 +89,7 @@
     </PropertyGroup>
 
     <Target Name="FixPublicSigning" Inputs="@(IntermediateAssembly->'%(FullPath)')" Outputs="$(_FixPublicSigningTouchFile)" AfterTargets="PostSharp">
-        <Exec Command="$(PkgFakeSign)\tools\FakeSign.exe $(MSBuildThisFileDirectory)\obj\$(Configuration)\$(TargetFramework)\$(AssemblyName).dll"/>
+        <Exec Command="$(PkgFakeSign)\tools\FakeSign.exe $(MSBuildProjectDirectory)\obj\$(Configuration)\$(TargetFramework)\$(AssemblyName).dll"/>
         <Touch Files="$(_FixPublicSigningTouchFile)" AlwaysCreate="True" ContinueOnError="True"/>
     </Target>
 
