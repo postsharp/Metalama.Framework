@@ -42,6 +42,6 @@ namespace Metalama.Framework.GenerateMetaSyntaxRewriter.Model
         public bool IsOptional => this.Optional == "true";
 
         [XmlIgnore]
-        public RoslynVersion? MinimalRoslynVersion { get; set; }
+        public RoslynVersion MinimalRoslynVersion { get; set; }
     }
 }
