@@ -496,9 +496,9 @@ namespace Metalama.Framework.Engine.CompileTime
                             name.Text ) );
                 }
 
-                foreach ( var trivia in member.DescendantNodes( descendIntoTrivia: true ).Where( t => t.Kind() == SyntaxKind.NullableDirectiveTrivia ) )
+                foreach ( var trivia in member.DescendantNodes( descendIntoTrivia: true ).Where( t => t.IsKind( SyntaxKind.NullableDirectiveTrivia ) ) )
                 {
-                    if ( ((NullableDirectiveTriviaSyntax) trivia).SettingToken.Kind() != SyntaxKind.EnableKeyword )
+                    if ( !((NullableDirectiveTriviaSyntax) trivia).SettingToken.IsKind( SyntaxKind.EnableKeyword ) )
                     {
                         this.Success = false;
 
@@ -1178,7 +1178,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 {
                     return PredefinedType( Token( SyntaxKind.ObjectKeyword ) ).WithTriviaFrom( node );
                 }
-                else if ( node.Identifier.Kind() == SyntaxKind.IdentifierToken && !node.IsVar )
+                else if ( node.Identifier.IsKind( SyntaxKind.IdentifierToken ) && !node.IsVar )
                 {
                     // Fully qualifies simple identifiers.
 

@@ -79,7 +79,7 @@ namespace Metalama.Framework.DesignTime.Diagnostics
                     var oldToken = oldNode.FindToken( diagnostic.Location.SourceSpan.Start );
                     var newToken = newNode.ChildTokens().SingleOrDefault( t => t.Text == oldToken.Text );
 
-                    if ( newToken.Kind() == SyntaxKind.None )
+                    if ( newToken.IsKind( SyntaxKind.None ) )
                     {
                         // We could not find the old token in the new tree. This should not happen if cache invalidation is correct.
                         continue;

@@ -85,7 +85,7 @@ namespace Metalama.Framework.Engine.Templating
             }
         }
 
-        public static StatementSyntax[] ToStatementArray( List<StatementOrTrivia> list )
+        public static SyntaxList<StatementSyntax> ToStatementList( List<StatementOrTrivia> list )
         {
             var statementList = new List<StatementSyntax>( list.Count );
 
@@ -169,7 +169,7 @@ namespace Metalama.Framework.Engine.Templating
                 statementList.Add( SyntaxFactory.EmptyStatement().WithoutTrailingTrivia().WithLeadingTrivia( nextLeadingTrivia ) );
             }
 
-            return statementList.ToArray();
+            return SyntaxFactory.List( statementList );
         }
 
         public static BlockSyntax WithFlattenBlockAnnotation( this BlockSyntax block ) => block.WithAdditionalAnnotations( _flattenBlockAnnotation );

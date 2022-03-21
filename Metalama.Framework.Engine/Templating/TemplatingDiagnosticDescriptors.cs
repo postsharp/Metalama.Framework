@@ -259,5 +259,13 @@ namespace Metalama.Framework.Engine.Templating
                 "The compile-time type '{0}' cannot be nested in a run-time class. The only compile-time type that can be nested in run-time type is a class implementing '{1}'.",
                 _category,
                 Error );
+
+        internal static readonly DiagnosticDefinition<string> TemplateUsesUnsupportedLanguageFeature
+            = new(
+                "LAMA0232",
+                "Template code must be written in the specified C# version.",
+                "Template code must be written in C# {0}.",
+                _category,
+                Error );
     }
 }

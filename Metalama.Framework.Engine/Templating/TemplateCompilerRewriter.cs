@@ -54,7 +54,8 @@ namespace Metalama.Framework.Engine.Templating
             IDiagnosticAdder diagnosticAdder,
             IServiceProvider serviceProvider,
             SerializableTypes serializableTypes,
-            CancellationToken cancellationToken ) : base( serviceProvider, compileTimeCompilation )
+            RoslynApiVersion targetApiVersion,
+            CancellationToken cancellationToken ) : base( serviceProvider, compileTimeCompilation, targetApiVersion )
         {
             this._templateName = templateName;
             this._syntaxKind = syntaxKind;
@@ -267,7 +268,7 @@ namespace Metalama.Framework.Engine.Templating
         protected override ExpressionSyntax Transform( SyntaxToken token )
         {
             // Following renaming of local variables cannot be apply for TupleElement  
-            if ( token.Kind() == SyntaxKind.IdentifierToken && token.Parent != null && token.Parent is not TupleElementSyntax )
+            if ( token.IsKind( SyntaxKind.IdentifierToken ) && token.Parent != null && token.Parent is not TupleElementSyntax )
             {
                 // Transforms identifier declarations (local variables and local functions). Local identifiers must have
                 // a unique name in the target code, which is unknown when the template is compiled, therefore local identifiers
@@ -387,7 +388,7 @@ namespace Metalama.Framework.Engine.Templating
             {
                 if ( this._currentMetaContext!.TryGetRunTimeSymbolLocal( identifierSymbol!, out var declaredSymbolNameLocal ) )
                 {
-                    return this.MetaSyntaxFactory.IdentifierName1( IdentifierName( declaredSymbolNameLocal.Text ) );
+                    return this.MetaSyntaxFactory.IdentifierName( IdentifierName( declaredSymbolNameLocal.Text ) );
                 }
                 else if ( identifierSymbol is IParameterSymbol parameterSymbol
                           && SymbolEqualityComparer.Default.Equals( parameterSymbol.ContainingSymbol, this._rootTemplateSymbol ) )
@@ -412,16 +413,16 @@ namespace Metalama.Framework.Engine.Templating
                 }
             }
 
-            return this.MetaSyntaxFactory.IdentifierName2( SyntaxFactoryEx.LiteralExpression( node.Identifier.Text ) );
+            return this.MetaSyntaxFactory.IdentifierName( SyntaxFactoryEx.LiteralExpression( node.Identifier.Text ) );
         }
 
         protected override ExpressionSyntax TransformArgument( ArgumentSyntax node )
         {
             // The base implementation is very verbose, so we use this one:
-            if ( node.RefKindKeyword.Kind() == SyntaxKind.None )
+            if ( node.RefKindKeyword.IsKind( SyntaxKind.None ) )
             {
                 var transformedExpression = this.Transform( node.Expression );
-                var transformedArgument = this.MetaSyntaxFactory.Argument( transformedExpression );
+                var transformedArgument = this.MetaSyntaxFactory.Argument( SyntaxFactoryEx.Null, SyntaxFactoryEx.Default, transformedExpression );
 
                 if ( node.NameColon != null )
                 {
@@ -869,7 +870,7 @@ namespace Metalama.Framework.Engine.Templating
             }
             else
             {
-                var isVoid = node.ReturnType is PredefinedTypeSyntax predefinedType && predefinedType.Keyword.Kind() == SyntaxKind.VoidKeyword;
+                var isVoid = node.ReturnType is PredefinedTypeSyntax predefinedType && predefinedType.Keyword.IsKind( SyntaxKind.VoidKeyword );
 
                 body = (BlockSyntax) this.BuildRunTimeBlock(
                     node.ExpressionBody.AssertNotNull().Expression,
@@ -904,7 +905,7 @@ namespace Metalama.Framework.Engine.Templating
             }
             else
             {
-                var isVoid = node.Keyword.Kind() != SyntaxKind.GetKeyword;
+                var isVoid = !node.Keyword.IsKind( SyntaxKind.GetKeyword );
 
                 body = (BlockSyntax) this.BuildRunTimeBlock(
                     node.ExpressionBody.AssertNotNull().Expression,
@@ -1067,9 +1068,9 @@ namespace Metalama.Framework.Engine.Templating
 
                 this._currentMetaContext.Statements.AddRange( createMetaStatements() );
 
-                // TemplateSyntaxFactory.ToStatementArray( __s1 )
+                // TemplateSyntaxFactory.ToStatementList( __s1 )
                 var toArrayStatementExpression = InvocationExpression(
-                    this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.ToStatementArray) ),
+                    this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.ToStatementList) ),
                     ArgumentList( SingletonSeparatedList( Argument( IdentifierName( this._currentMetaContext.StatementListVariableName ) ) ) ) );
 
                 if ( generateExpression )
@@ -1079,17 +1080,12 @@ namespace Metalama.Framework.Engine.Templating
                     var returnStatementSyntax = ReturnStatement( toArrayStatementExpression ).WithLeadingTrivia( this.GetIndentation() ).NormalizeWhitespace();
                     this._currentMetaContext.Statements.Add( returnStatementSyntax );
 
-                    // Block( Func<StatementSyntax[]>( delegate { ... } )
+                    // Block( Func<SyntaxList<StatementSyntax>>( delegate { ... } )
                     return this.DeepIndent(
                         this.MetaSyntaxFactory.Block(
+                            SyntaxFactoryEx.Default,
                             InvocationExpression(
-                                ObjectCreationExpression(
-                                        this.MetaSyntaxFactory.GenericType(
-                                            typeof(Func<>),
-                                            ArrayType( this.MetaSyntaxFactory.Type( typeof(StatementSyntax) ) )
-                                                .WithRankSpecifiers(
-                                                    SingletonList(
-                                                        ArrayRankSpecifier( SingletonSeparatedList<ExpressionSyntax>( OmittedArraySizeExpression() ) ) ) ) ) )
+                                ObjectCreationExpression( this.MetaSyntaxFactory.Type( typeof(Func<SyntaxList<StatementSyntax>>) ) )
                                     .NormalizeWhitespace()
                                     .WithArgumentList(
                                         ArgumentList(
@@ -1104,7 +1100,8 @@ namespace Metalama.Framework.Engine.Templating
                 {
                     // return __s;
                     this._currentMetaContext.Statements.Add(
-                        ReturnStatement( this.MetaSyntaxFactory.Block( toArrayStatementExpression ).WithLeadingTrivia( this.GetIndentation() ) ) );
+                        ReturnStatement(
+                            this.MetaSyntaxFactory.Block( SyntaxFactoryEx.Default, toArrayStatementExpression ).WithLeadingTrivia( this.GetIndentation() ) ) );
 
                     return Block( this._currentMetaContext.Statements );
                 }
@@ -1465,7 +1462,7 @@ namespace Metalama.Framework.Engine.Templating
 
         public override SyntaxNode VisitIdentifierName( IdentifierNameSyntax node )
         {
-            if ( node.Identifier.Kind() == SyntaxKind.IdentifierToken && !node.IsVar )
+            if ( node.Identifier.IsKind( SyntaxKind.IdentifierToken ) && !node.IsVar )
             {
                 var symbol = this._syntaxTreeAnnotationMap.GetSymbol( node );
 
@@ -1489,7 +1486,7 @@ namespace Metalama.Framework.Engine.Templating
                                 return this.MetaSyntaxFactory.MemberAccessExpression(
                                     this.MetaSyntaxFactory.Kind( SyntaxKind.SimpleMemberAccessExpression ),
                                     this.Transform( OurSyntaxGenerator.CompileTime.NameExpression( symbol.ContainingType ) ),
-                                    this.MetaSyntaxFactory.IdentifierName2( SyntaxFactoryEx.LiteralExpression( node.Identifier.Text ) ) );
+                                    this.MetaSyntaxFactory.IdentifierName( SyntaxFactoryEx.LiteralExpression( node.Identifier.Text ) ) );
                         }
                     }
                 }

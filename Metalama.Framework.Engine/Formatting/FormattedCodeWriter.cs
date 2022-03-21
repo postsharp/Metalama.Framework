@@ -106,12 +106,13 @@ namespace Metalama.Framework.Engine.Formatting
             FormattingVisitor formattingVisitor = new( classifiedTextSpans );
             formattingVisitor.Visit( syntaxRoot );
 
-            foreach ( var csharpSpan in Classifier.GetClassifiedSpans(
-                             semanticModel,
-                             syntaxRoot.Span,
-                             document.Project.Solution.Workspace )
-                         .OrderBy( c => c.TextSpan.Start )
-                         .ThenBy( c => c.ClassificationType ) )
+            var classifiedSpans = (await Classifier.GetClassifiedSpansAsync(
+                    document,
+                    syntaxRoot.Span ))
+                .OrderBy( c => c.TextSpan.Start )
+                .ThenBy( c => c.ClassificationType );
+
+            foreach ( var csharpSpan in classifiedSpans )
             {
                 foreach ( var existingSpan in classifiedTextSpans.GetClassifiedSpans( csharpSpan.TextSpan ) )
                 {

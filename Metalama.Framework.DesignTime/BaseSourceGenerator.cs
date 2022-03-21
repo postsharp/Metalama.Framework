@@ -23,7 +23,7 @@ namespace Metalama.Framework.DesignTime
 
         private readonly ILogger _logger;
         private readonly ConcurrentDictionary<string, ProjectHandler?> _projectHandlers = new();
-        
+
         protected BaseSourceGenerator( ServiceProvider serviceProvider )
         {
             this.ServiceProvider = serviceProvider;

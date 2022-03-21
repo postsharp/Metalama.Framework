@@ -43,7 +43,8 @@ namespace Metalama.Framework.Engine.Templating
             SemanticModel semanticModel,
             IDiagnosticAdder diagnostics,
             CancellationToken cancellationToken,
-            out SyntaxNode annotatedSyntaxRoot )
+            out SyntaxNode annotatedSyntaxRoot,
+            out RoslynApiVersion usedApiVersion )
         {
             SyntaxNode currentSyntaxRoot;
 
@@ -59,6 +60,11 @@ namespace Metalama.Framework.Engine.Templating
 
                 currentSyntaxRoot = annotatedTree.GetAnnotatedNodes( markerAnnotation ).Single();
             }
+
+            // Verify the language version of the template. We now support only C# 10.0.
+            var versionVerifier = new RoslynVersionSyntaxVerifier( diagnostics, RoslynApiVersion.V4_0_1, "10.0" );
+            versionVerifier.Visit( sourceSyntaxRoot );
+            usedApiVersion = versionVerifier.MaximalUsedVersion;
 
             // Annotate the syntax tree with symbols.
             currentSyntaxRoot = this._syntaxTreeAnnotationMap.AnnotateTemplate( sourceSyntaxRoot, semanticModel );
@@ -100,7 +106,7 @@ namespace Metalama.Framework.Engine.Templating
             [NotNullWhen( true )] out SyntaxNode? annotatedSyntaxRoot,
             [NotNullWhen( true )] out SyntaxNode? transformedSyntaxRoot )
         {
-            if ( !this.TryAnnotate( sourceSyntaxRoot, semanticModel, diagnostics, cancellationToken, out annotatedSyntaxRoot ) )
+            if ( !this.TryAnnotate( sourceSyntaxRoot, semanticModel, diagnostics, cancellationToken, out annotatedSyntaxRoot, out var usedApiVersion ) )
             {
                 transformedSyntaxRoot = null;
 
@@ -178,6 +184,7 @@ namespace Metalama.Framework.Engine.Templating
                 diagnostics,
                 this._serviceProvider,
                 this._serializableTypes,
+                usedApiVersion,
                 cancellationToken );
 
             transformedSyntaxRoot = templateCompilerRewriter.Visit( annotatedSyntaxRoot );

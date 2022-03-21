@@ -3,7 +3,6 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:editor="clr-namespace:RoslynPad.Editor;assembly=RoslynPad.Editor.Windows"
         xmlns:viewModels="clr-namespace:Metalama.AspectWorkbench.ViewModels"
         mc:Ignorable="d"
         Title="{Binding Title}" Height="1100" Width="1620">
@@ -47,10 +46,10 @@
                 <TextBlock DockPanel.Dock="Top">Test Source Code</TextBlock>
                 <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"
                               HorizontalAlignment="Stretch">
-                    <editor:RoslynCodeEditor Name="sourceTextBox" FontSize="12" FontFamily="Consolas"
-                                             ShowLineNumbers="False" HorizontalScrollBarVisibility="Auto"
-                                             VerticalScrollBarVisibility="Auto"
-                                             WordWrap="False" />
+                    <TextBox Name="sourceTextBox" Text="{Binding SourceCode, Mode=TwoWay}"
+                             HorizontalAlignment="Stretch" VerticalAlignment="Stretch" FontFamily="Consolas"
+                             AcceptsReturn="True" HorizontalScrollBarVisibility="Auto"
+                             VerticalScrollBarVisibility="Auto" />
                 </ScrollViewer>
             </DockPanel>
 

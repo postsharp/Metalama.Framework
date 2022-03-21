@@ -30,6 +30,6 @@ namespace Metalama.Framework.Engine.Utilities
         public static bool IsAutoPropertyDeclaration( this PropertyDeclarationSyntax propertyDeclaration )
             => propertyDeclaration.ExpressionBody == null
                && propertyDeclaration.AccessorList?.Accessors.All( x => x.Body == null && x.ExpressionBody == null ) == true
-               && propertyDeclaration.Modifiers.All( x => x.Kind() != SyntaxKind.AbstractKeyword );
+               && propertyDeclaration.Modifiers.All( x => !x.IsKind( SyntaxKind.AbstractKeyword ) );
     }
 }

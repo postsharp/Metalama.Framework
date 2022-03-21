@@ -122,7 +122,7 @@ namespace Metalama.Framework.Engine.Templating
                     if ( this._isDesignTime )
                     {
                         this._templateCompiler ??= new TemplateCompiler( this._serviceProvider, this._semanticModel.Compilation );
-                        _ = this._templateCompiler.TryAnnotate( node, this._semanticModel, this, this._cancellationToken, out _ );
+                        _ = this._templateCompiler.TryAnnotate( node, this._semanticModel, this, this._cancellationToken, out _, out _ );
                     }
                     else
                     {
