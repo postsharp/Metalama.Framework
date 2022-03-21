@@ -51,9 +51,9 @@ public static class VsServiceProviderFactory
 
                             if ( Logger.DesignTimeEntryPointManager.Trace != null )
                             {
-                                DesignTimeEntryPointManager.Instance.SetLogger(  Logger.DesignTimeEntryPointManager.Trace.Log );
+                                DesignTimeEntryPointManager.Instance.SetLogger( Logger.DesignTimeEntryPointManager.Trace.Log );
                             }
-                            
+
                             DesignTimeEntryPointManager.Instance.RegisterServiceProvider( compilerServiceProvider );
 
                             break;
