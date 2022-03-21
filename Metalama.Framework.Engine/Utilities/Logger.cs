@@ -22,11 +22,14 @@ namespace Metalama.Framework.Engine.Utilities
 
             DesignTime = DiagnosticsService.Instance.DesignTime();
             Remoting = DiagnosticsService.Instance.Remoting();
+            DesignTimeEntryPointManager = DiagnosticsService.Instance.GetLogger( "DesignTimeEntryPointManager" );
         }
 
         // The DesignTime logger is used before the service container is initialized, therefore we use the global instance.
         public static ILogger DesignTime { get; private set; } = NullLogger.Instance;
 
         public static ILogger Remoting { get; private set; } = NullLogger.Instance;
+        
+        public static ILogger DesignTimeEntryPointManager { get; private set; } = NullLogger.Instance;
     }
 }

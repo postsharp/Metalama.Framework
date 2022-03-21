@@ -1,7 +1,7 @@
 <Project>
     <PropertyGroup>
         <ThisRoslynVersion>4.0.1</ThisRoslynVersion>
-        <ThisRoslynProjectPrefix>.4.0.1</ThisRoslynProjectPrefix>
+        <ThisRoslynVersionProjectSuffix>.4.0.1</ThisRoslynVersionProjectSuffix>
         <DefineConstants>$(DefinedConstants);ROSLYN_4_0_1</DefineConstants>
         <DisableCodeQuality>True</DisableCodeQuality>
     </PropertyGroup>

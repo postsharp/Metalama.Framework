@@ -19,6 +19,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		nuget.config = nuget.config
 		THIRD-PARTY-NOTICES.TXT = THIRD-PARTY-NOTICES.TXT
 		eng\Versions.props = eng\Versions.props
+		Build\RoslynVersion\Latest.imports = Build\RoslynVersion\Latest.imports
+		Build\RoslynVersion\Roslyn4.0.1.props = Build\RoslynVersion\Roslyn4.0.1.props
+		Build\RoslynVersion\Roslyn4.1.0.props = Build\RoslynVersion\Roslyn4.1.0.props
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Metalama.SourceTransformer", "Build\Metalama.SourceTransformer\Metalama.SourceTransformer.csproj", "{DB6B2103-3DB0-4C86-BA11-46A2DC5B3E62}"

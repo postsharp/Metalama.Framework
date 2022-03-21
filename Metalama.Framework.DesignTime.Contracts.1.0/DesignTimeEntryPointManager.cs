@@ -20,7 +20,7 @@ namespace Metalama.Framework.DesignTime.Contracts
     public partial class DesignTimeEntryPointManager : IDesignTimeEntryPointManager
     {
         private const string _appDomainDataName = "Metalama.Framework.DesignTime.Contracts.DesignTimeEntryPointManager";
-
+        
         public static Version MatchAllVersion { get; } = new( 9999, 99 );
 
         [ExcludeFromCodeCoverage]
@@ -67,6 +67,10 @@ namespace Metalama.Framework.DesignTime.Contracts
         private volatile ImmutableDictionary<int, IObserver<ICompilerServiceProvider>> _observers =
             ImmutableDictionary<int, IObserver<ICompilerServiceProvider>>.Empty;
 
+        private Action<string>? _logger;
+
+        public void SetLogger( Action<string>? logger ) => this._logger = logger;
+
         public IDesignTimeEntryPointConsumer GetConsumer( ImmutableDictionary<string, int> contractVersions ) => new Consumer( this, contractVersions );
 
         void IDesignTimeEntryPointManager.RegisterServiceProvider( ICompilerServiceProvider provider )
@@ -74,6 +78,8 @@ namespace Metalama.Framework.DesignTime.Contracts
             lock ( this._sync )
             {
                 this._providers = this._providers.Add( provider );
+
+                this._logger?.Invoke( $"Registering service provider v{provider.Version}." );
 
                 // The order here is important.
                 var oldRegistrationTask = this._registrationTask;
@@ -83,6 +89,8 @@ namespace Metalama.Framework.DesignTime.Contracts
                 // Send notifications.
                 foreach ( var observer in this._observers )
                 {
+                    this._logger?.Invoke( $"Notifying observer." );
+                    
                     observer.Value.OnNext( provider );
                 }
             }

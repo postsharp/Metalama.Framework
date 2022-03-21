@@ -8,6 +8,7 @@ using Metalama.Framework.DesignTime.Preview;
 using Metalama.Framework.DesignTime.VisualStudio.Remoting;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Pipeline;
+using Metalama.Framework.Engine.Utilities;
 using System.Collections.Immutable;
 
 namespace Metalama.Framework.DesignTime.VisualStudio;
@@ -48,6 +49,11 @@ public static class VsServiceProviderFactory
                                 _serviceProvider,
                                 ImmutableDictionary<string, int>.Empty.Add( "1.0", ContractsVersion.ContractVersion_1_0 ) );
 
+                            if ( Logger.DesignTimeEntryPointManager.Trace != null )
+                            {
+                                DesignTimeEntryPointManager.Instance.SetLogger(  Logger.DesignTimeEntryPointManager.Trace.Log );
+                            }
+                            
                             DesignTimeEntryPointManager.Instance.RegisterServiceProvider( compilerServiceProvider );
 
                             break;

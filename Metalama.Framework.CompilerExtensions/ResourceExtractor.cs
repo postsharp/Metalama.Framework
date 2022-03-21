@@ -86,14 +86,14 @@ namespace Metalama.Framework.CompilerExtensions
 
                 if ( assembly == null )
                 {
-                    throw new ArgumentOutOfRangeException( $"Cannot load the assembly '{assemblyQualifiedName}'" );
+                    throw new ArgumentOutOfRangeException( nameof(assemblyName), $"Cannot load the assembly '{assemblyQualifiedName}'" );
                 }
 
                 var type = assembly.GetType( typeName );
 
                 if ( type == null )
                 {
-                    throw new ArgumentOutOfRangeException( $"Cannot load the type '{typeName}' in assembly '{assemblyQualifiedName}'" );
+                    throw new ArgumentOutOfRangeException( nameof(typeName), $"Cannot load the type '{typeName}' in assembly '{assemblyQualifiedName}'" );
                 }
 
                 return Activator.CreateInstance( type );
