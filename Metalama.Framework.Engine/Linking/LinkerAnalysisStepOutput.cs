@@ -17,6 +17,7 @@ namespace Metalama.Framework.Engine.Linking
             PartialCompilation intermediateCompilation,
             LinkerIntroductionRegistry introductionRegistry,
             LinkerAnalysisRegistry analysisRegistry,
+            LinkerCodeTransformationRegistry codeTransformationRegistry,
             AspectReferenceResolver referenceResolver,
             IProjectOptions? projectOptions )
         {
@@ -24,6 +25,7 @@ namespace Metalama.Framework.Engine.Linking
             this.IntermediateCompilation = intermediateCompilation;
             this.IntroductionRegistry = introductionRegistry;
             this.AnalysisRegistry = analysisRegistry;
+            this.CodeTransformationRegistry = codeTransformationRegistry;
             this.ReferenceResolver = referenceResolver;
             this.ProjectOptions = projectOptions;
         }
@@ -47,6 +49,11 @@ namespace Metalama.Framework.Engine.Linking
         /// Gets the analysis registry.
         /// </summary>
         public LinkerAnalysisRegistry AnalysisRegistry { get; }
+
+        /// <summary>
+        /// Gets the analysis registry.
+        /// </summary>
+        public LinkerCodeTransformationRegistry CodeTransformationRegistry { get; }
 
         /// <summary>
         /// Gets reference resolver.

@@ -16,6 +16,8 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Globalization;
 using System.Linq;
 
 namespace Metalama.Framework.Engine.Linking
@@ -135,6 +137,15 @@ namespace Metalama.Framework.Engine.Linking
                 }
             }
 
+            var initializationResults = new Dictionary<IHierarchicalTransformation, TransformationInitializationResult?>();
+            var initializationContext = new InitializationContext( diagnostics, nameProvider, initializationResults );
+
+            // Initialize hierarchical transformations.
+            foreach ( var hierarchicalTransformation in allTransformations.OfType<IHierarchicalTransformation>().OrderByReverseTopology(t => t.Dependencies) )
+            {
+                initializationResults[hierarchicalTransformation] = hierarchicalTransformation.Initialize( initializationContext );
+            }
+
             // Visit all transformations, respect aspect part ordering.
             foreach ( var transformation in allTransformations )
             {
@@ -176,13 +187,20 @@ namespace Metalama.Framework.Engine.Linking
                         memberIntroduction.TargetSyntaxTree,
                         positionInSyntaxTree );
 
+                    var initializationResult =
+                        transformation is IHierarchicalTransformation hierarchicalTransformation
+                        ? initializationResults[hierarchicalTransformation]
+                        : null;
+
                     // Call GetIntroducedMembers
                     var introductionContext = new MemberIntroductionContext(
                         diagnostics,
                         nameProvider,
                         lexicalScopeFactory,
                         syntaxGenerationContext,
-                        this._serviceProvider );
+                        this._serviceProvider,
+                        initializationResult,
+                        initializationResults );
 
                     var introducedMembers = memberIntroduction.GetIntroducedMembers( introductionContext );
 
@@ -196,6 +214,30 @@ namespace Metalama.Framework.Engine.Linking
                 }
             }
 
+            var codeTransformationsBySyntaxTree = new Dictionary<SyntaxTree, List<ICodeTransformation>>();
+
+            foreach (var codeTransformationSource in allTransformations.OfType<ICodeTransformationSource>())
+            {
+                var initializationResult =
+                    codeTransformationSource is IHierarchicalTransformation hierarchicalTransformation
+                    ? initializationResults[hierarchicalTransformation]
+                    : null;
+
+                var codeTransformationSourceContext =
+                    new CodeTransformationSourceContext(
+                        initializationResult,
+                        initializationResults );
+
+                var codeTransformations = codeTransformationSource.GetCodeTransformations( codeTransformationSourceContext );
+
+                if (!codeTransformationsBySyntaxTree.TryGetValue(codeTransformationSource.TargetSyntaxTree, out var list))
+                {
+                    codeTransformationsBySyntaxTree[codeTransformationSource.TargetSyntaxTree] = list = new List<ICodeTransformation>();
+                }
+
+                list.AddRange( codeTransformations );
+            }
+
             // Group diagnostic suppressions by target.
             var suppressionsByTarget = input.DiagnosticSuppressions.ToMultiValueDictionary(
                 s => s.Declaration,
@@ -204,18 +246,46 @@ namespace Metalama.Framework.Engine.Linking
             // Process syntax trees one by one.
             var intermediateCompilation = input.InitialCompilation;
 
-            Rewriter addIntroducedElementsRewriter = new(
+            var markedNodes = new Dictionary<SyntaxNode, (string Id, IReadOnlyList<CodeTransformationMark> Marks)>();
+            var nextMarkedNodeId = 0;
+
+            foreach ( var initialSyntaxTree in input.InitialCompilation.SyntaxTrees.Values )
+            {
+                var oldRoot = initialSyntaxTree.GetRoot();
+
+                if ( codeTransformationsBySyntaxTree.TryGetValue( initialSyntaxTree, out var codeTransformations ) )
+                {
+                    var codeTransformationVisitor = new CodeTransformationVisitor( input.InitialCompilation.Compilation.GetSemanticModel(initialSyntaxTree), codeTransformations );
+                    codeTransformationVisitor.Visit( oldRoot );
+
+                    if ( codeTransformationVisitor.Marks.Count > 0 )
+                    {
+                        foreach ( var mark in codeTransformationVisitor.Marks )
+                        {
+                            if ( !markedNodes.TryGetValue(mark.Target, out var record) )
+                            {
+                                markedNodes[mark.Target] = record = (nextMarkedNodeId++.ToString(CultureInfo.InvariantCulture), new List<CodeTransformationMark>());
+                            }
+
+                            ((List<CodeTransformationMark>) record.Marks).Add( mark );
+                        }
+                    }
+                }
+            }
+
+            Rewriter rewriter = new(
                 syntaxTransformationCollection,
                 suppressionsByTarget,
                 input.CompilationModel,
-                input.OrderedAspectLayers );
+                input.OrderedAspectLayers,
+                markedNodes );
 
             var syntaxTreeMapping = new Dictionary<SyntaxTree, SyntaxTree>();
 
             foreach ( var initialSyntaxTree in input.InitialCompilation.SyntaxTrees.Values )
             {
                 var oldRoot = initialSyntaxTree.GetRoot();
-                var newRoot = addIntroducedElementsRewriter.Visit( oldRoot );
+                var newRoot = rewriter.Visit( oldRoot ).AssertNotNull();
 
                 if ( oldRoot != newRoot )
                 {
@@ -224,6 +294,8 @@ namespace Metalama.Framework.Engine.Linking
                     syntaxTreeMapping.Add( initialSyntaxTree, intermediateSyntaxTree );
                 }
             }
+
+            var codeTransformationRegistry = new LinkerCodeTransformationRegistry( markedNodes.ToDictionary( x => x.Value.Id, x => x.Value.Marks ) );
 
             intermediateCompilation = intermediateCompilation.Update(
                 syntaxTreeMapping.Select( p => new SyntaxTreeModification( p.Value, p.Key ) ).ToList(),
@@ -242,6 +314,7 @@ namespace Metalama.Framework.Engine.Linking
                 input.CompilationModel,
                 intermediateCompilation,
                 introductionRegistry,
+                codeTransformationRegistry,
                 input.OrderedAspectLayers,
                 projectOptions );
         }

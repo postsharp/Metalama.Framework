@@ -1,16 +1,15 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Metalama.Framework.Engine.Advices;
 using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.Transformations
 {
     /// <summary>
-    /// Represents any transformation.
+    /// Represents a transformation that provides code transformations.
     /// </summary>
-    internal interface ITransformation
+    internal interface ICodeTransformationSource : ISyntaxTreeTransformation
     {
-        Advice Advice { get; }
+        IEnumerable<ICodeTransformation> GetCodeTransformations( in CodeTransformationSourceContext context );
     }
 }

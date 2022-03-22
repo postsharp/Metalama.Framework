@@ -16,6 +16,7 @@ namespace Metalama.Framework.Engine.Linking
             CompilationModel finalCompilationModel,
             PartialCompilation intermediateCompilation,
             LinkerIntroductionRegistry introductionRegistry,
+            LinkerCodeTransformationRegistry codeTransformationRegistry,
             IReadOnlyList<OrderedAspectLayer> orderedAspectLayers,
             IProjectOptions? projectOptions )
         {
@@ -23,6 +24,7 @@ namespace Metalama.Framework.Engine.Linking
             this.FinalCompilationModel = finalCompilationModel;
             this.IntermediateCompilation = intermediateCompilation;
             this.IntroductionRegistry = introductionRegistry;
+            this.CodeTransformationRegistry = codeTransformationRegistry;
             this.OrderedAspectLayers = orderedAspectLayers;
             this.ProjectOptions = projectOptions;
         }
@@ -56,5 +58,10 @@ namespace Metalama.Framework.Engine.Linking
         /// Gets project options.
         /// </summary>
         public IProjectOptions? ProjectOptions { get; }
+
+        /// <summary>
+        /// Gets code transformations.
+        /// </summary>
+        public LinkerCodeTransformationRegistry CodeTransformationRegistry { get; }
     }
 }

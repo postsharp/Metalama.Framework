@@ -28,6 +28,7 @@ namespace Metalama.Framework.Engine.Linking
             private readonly ImmutableDictionary<AspectLayerId, OrderedAspectLayer> _orderedAspectLayers;
             private readonly ImmutableDictionaryOfArray<IDeclaration, ScopedSuppression> _diagnosticSuppressions;
             private readonly SyntaxTransformationCollection _introducedMemberCollection;
+            private readonly IReadOnlyDictionary<SyntaxNode, (string Id, IReadOnlyList<CodeTransformationMark> Marks)> _marksByNode;
 
             // Maps a diagnostic id to the number of times it has been suppressed.
             private ImmutableHashSet<string> _activeSuppressions = ImmutableHashSet.Create<string>( StringComparer.OrdinalIgnoreCase );
@@ -36,12 +37,14 @@ namespace Metalama.Framework.Engine.Linking
                 SyntaxTransformationCollection introducedMemberCollection,
                 ImmutableDictionaryOfArray<IDeclaration, ScopedSuppression> diagnosticSuppressions,
                 CompilationModel compilation,
-                IReadOnlyList<OrderedAspectLayer> inputOrderedAspectLayers )
+                IReadOnlyList<OrderedAspectLayer> inputOrderedAspectLayers,
+                IReadOnlyDictionary<SyntaxNode, (string Id, IReadOnlyList<CodeTransformationMark> Marks)> marksByNode )
             {
                 this._diagnosticSuppressions = diagnosticSuppressions;
                 this._compilation = compilation;
                 this._orderedAspectLayers = inputOrderedAspectLayers.ToImmutableDictionary( e => e.AspectLayerId, e => e );
                 this._introducedMemberCollection = introducedMemberCollection;
+                this._marksByNode = marksByNode;
             }
 
             public override bool VisitIntoStructuredTrivia => true;
@@ -319,6 +322,19 @@ namespace Metalama.Framework.Engine.Linking
             private SuppressionContext WithSuppressions( SyntaxNode node ) => new( this, this.GetSuppressions( node ) );
 
             private SuppressionContext WithSuppressions( IDeclaration declaration ) => new( this, this.GetSuppressions( declaration ) );
+
+            public override SyntaxNode? Visit( SyntaxNode? node )
+            {
+                if ( node != null && this._marksByNode.TryGetValue( node, out var record ) )
+                {
+                    // If this node has a code transformation mark, add the node id.
+                    return base.Visit( node ).WithLinkerMarkedNodeId( record.Id );
+                }
+                else
+                {
+                    return base.Visit( node );
+                }
+            }
         }
     }
 }

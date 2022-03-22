@@ -1,16 +1,12 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Metalama.Framework.Engine.Advices;
-using System.Collections.Generic;
-
 namespace Metalama.Framework.Engine.Transformations
 {
     /// <summary>
-    /// Represents any transformation.
+    /// Base class for initialization result classes.
     /// </summary>
-    internal interface ITransformation
+    internal abstract class TransformationInitializationResult
     {
-        Advice Advice { get; }
     }
 }

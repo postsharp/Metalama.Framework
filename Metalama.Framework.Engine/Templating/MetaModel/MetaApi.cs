@@ -158,6 +158,21 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
             this._method = new AdvisedMethod( accessor );
         }
 
+        private MetaApi( INamedType type, MetaApiProperties common ) : this( (IDeclaration) type, common )
+        {
+            this._type = type;
+        }
+
+        public static MetaApi ForDeclaration( IDeclaration declaration, MetaApiProperties common ) 
+            => declaration switch
+            {
+                INamedType type=> new( type, common ),
+                IMethod method => new( method, common ),
+                IFieldOrProperty fieldOrProperty => new( fieldOrProperty, common ),
+                IEvent @event => new( @event, common ),
+                _ => throw new AssertionFailedException(),
+            };
+
         public static MetaApi ForMethod( IMethodBase methodBase, MetaApiProperties common ) => new( (IMethod) methodBase, common );
 
         public static MetaApi ForFieldOrProperty( IFieldOrProperty fieldOrProperty, IMethod accessor, MetaApiProperties common )

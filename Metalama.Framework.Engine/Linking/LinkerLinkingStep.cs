@@ -46,6 +46,7 @@ namespace Metalama.Framework.Engine.Linking
                 input.IntermediateCompilation.Compilation,
                 input.IntroductionRegistry,
                 input.AnalysisRegistry,
+                input.CodeTransformationRegistry,
                 input.DiagnosticSink,
                 this._serviceProvider );
 

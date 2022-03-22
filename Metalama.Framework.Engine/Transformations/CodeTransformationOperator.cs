@@ -1,16 +1,16 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Metalama.Framework.Engine.Advices;
-using System.Collections.Generic;
-
 namespace Metalama.Framework.Engine.Transformations
 {
     /// <summary>
-    /// Represents any transformation.
+    /// Operators for code transformations.
     /// </summary>
-    internal interface ITransformation
+    internal enum CodeTransformationOperator
     {
-        Advice Advice { get; }
+        /// <summary>
+        /// Insert as a first statement into the target block.
+        /// </summary>
+        InsertHead,
     }
 }

@@ -1,46 +1,29 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
-using System;
 using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.Transformations
 {
-    internal sealed class MemberIntroductionContext
+    /// <summary>
+    /// Allows the transformation to initialize itself and pass data to further parts of the system.
+    /// </summary>
+    internal readonly struct InitializationContext
     {
-        public IServiceProvider ServiceProvider { get; }
-
         public UserDiagnosticSink DiagnosticSink { get; }
 
         public IntroductionNameProvider IntroductionNameProvider { get; }
 
-        public ITemplateLexicalScopeProvider LexicalScopeProvider { get; }
-
-        public SyntaxGenerationContext SyntaxGenerationContext { get; }
-
-        public OurSyntaxGenerator SyntaxGenerator => this.SyntaxGenerationContext.SyntaxGenerator;
-
-        public TransformationInitializationResult? InitializationResult { get; }
-
         public IReadOnlyDictionary<IHierarchicalTransformation, TransformationInitializationResult?> DependencyInitializationResults { get; }
 
-        public MemberIntroductionContext(
+        public InitializationContext(
             UserDiagnosticSink diagnosticSink,
             IntroductionNameProvider introductionNameProvider,
-            ITemplateLexicalScopeProvider lexicalScopeProvider,
-            SyntaxGenerationContext syntaxGenerationContext,
-            IServiceProvider serviceProvider,
-            TransformationInitializationResult? initializationResult,
             IReadOnlyDictionary<IHierarchicalTransformation, TransformationInitializationResult?> dependencyInitializationResults )
         {
             this.DiagnosticSink = diagnosticSink;
-            this.LexicalScopeProvider = lexicalScopeProvider;
-            this.ServiceProvider = serviceProvider;
             this.IntroductionNameProvider = introductionNameProvider;
-            this.SyntaxGenerationContext = syntaxGenerationContext;
-            this.InitializationResult = initializationResult;
             this.DependencyInitializationResults = dependencyInitializationResults;
         }
     }

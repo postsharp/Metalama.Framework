@@ -65,6 +65,11 @@ namespace Metalama.Framework.Engine.Linking
 
                         break;
 
+                    case NamedType namedType:
+                        this._scopes[declaration] = lexicalScope = new TemplateLexicalScope( namedType.LookupSymbols() );
+
+                        break;
+
                     default:
                         // GetLexicalScope must be called first with the ICodeElementBuilder. In this flow,
                         // we don't have the target SyntaxTree, so we cannot compute the lexical scope.

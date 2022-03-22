@@ -806,6 +806,36 @@ namespace Metalama.Framework.Engine.Advices
                 tags );
         }
 
+        public void Initialize( IMemberOrNamedType targetDeclaration, string template, InitializationReason initializationReason, TagDictionary? tags = null )
+        {
+            if ( this._templateInstance == null )
+            {
+                throw new InvalidOperationException();
+            }
+
+            var diagnosticList = new DiagnosticList();
+
+            var templateRef = this.ValidateTemplateName( template, TemplateKind.Default, true )
+                .GetTemplateMember<IMethod>( this._compilation, this._serviceProvider );
+
+            var advice = new InitializeAdvice( this._aspect, this._templateInstance, targetDeclaration, templateRef, initializationReason, _layerName, tags );
+            advice.Initialize( diagnosticList );
+            ThrowOnErrors( diagnosticList );
+            this._advices.Add( advice );
+
+            this._diagnosticAdder.Report( diagnosticList );
+        }
+
+        public void OverrideConstructor( IConstructor targetConstructor, string template, TagDictionary? tags = null )
+        {
+            throw new NotImplementedException();
+        }
+
+        public void IntroduceConstructor( INamedType targetType, string template, IntroductionScope scope = IntroductionScope.Default, OverrideStrategy whenExists = OverrideStrategy.Default, TagDictionary? tags = null )
+        {
+            throw new NotImplementedException();
+        }
+
         private static void ThrowOnErrors( DiagnosticList diagnosticList )
         {
             if ( diagnosticList.HasErrors() )

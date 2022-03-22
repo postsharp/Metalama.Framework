@@ -97,23 +97,25 @@ namespace Metalama.Framework.Engine.Linking
                     }
 
                     // Order by implemented interface.
-                    var isExplicitInterfaceImplementationComparison =
-                        declaration.IsExplicitInterfaceImplementation.CompareTo( otherDeclaration.IsExplicitInterfaceImplementation );
-
-                    if ( isExplicitInterfaceImplementationComparison != 0 )
+                    if ( declaration is IMember declarationMember && declaration is IMember otherDeclarationMember)
                     {
-                        return -isExplicitInterfaceImplementationComparison;
-                    }
-                    else if ( declaration.IsExplicitInterfaceImplementation )
-                    {
-                        var interfaceComparison = string.Compare(
-                            declaration.GetExplicitInterfaceImplementation().DeclaringType.FullName,
-                            otherDeclaration.GetExplicitInterfaceImplementation().DeclaringType.FullName,
-                            StringComparison.Ordinal );
+                        var isExplicitInterfaceImplementationComparison = declarationMember.IsExplicitInterfaceImplementation.CompareTo( otherDeclarationMember.IsExplicitInterfaceImplementation );
 
-                        if ( interfaceComparison != 0 )
+                        if ( isExplicitInterfaceImplementationComparison != 0 )
                         {
-                            return interfaceComparison;
+                            return -isExplicitInterfaceImplementationComparison;
+                        }
+                        else if ( declarationMember.IsExplicitInterfaceImplementation )
+                        {
+                            var interfaceComparison = string.Compare(
+                                declarationMember.GetExplicitInterfaceImplementation().DeclaringType.FullName,
+                                otherDeclarationMember.GetExplicitInterfaceImplementation().DeclaringType.FullName,
+                                StringComparison.Ordinal );
+
+                            if ( interfaceComparison != 0 )
+                            {
+                                return interfaceComparison;
+                            }
                         }
                     }
 
@@ -158,13 +160,13 @@ namespace Metalama.Framework.Engine.Linking
 
                 private static int GetSemanticOrder( IntroducedMemberSemantic semantic ) => semantic != IntroducedMemberSemantic.InitializerMethod ? 0 : 1;
 
-                private static IMember GetDeclaration( IntroducedMember introducedMember )
+                private static IMemberOrNamedType GetDeclaration( IntroducedMember introducedMember )
                 {
                     var declaration = introducedMember.Declaration ?? introducedMember.Introduction as IMember;
 
                     if ( declaration == null && introducedMember.Introduction is IOverriddenDeclaration overridden )
                     {
-                        declaration = (IMember) overridden.OverriddenDeclaration;
+                        declaration = (IMemberOrNamedType) overridden.OverriddenDeclaration;
                     }
 
                     if ( declaration == null )

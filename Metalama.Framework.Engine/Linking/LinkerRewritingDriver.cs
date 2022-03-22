@@ -27,6 +27,7 @@ namespace Metalama.Framework.Engine.Linking
     {
         private readonly LinkerIntroductionRegistry _introductionRegistry;
         private readonly LinkerAnalysisRegistry _analysisRegistry;
+        private readonly LinkerCodeTransformationRegistry _codeTransformationRegistry;
         private readonly IServiceProvider _serviceProvider;
         private readonly Compilation _intermediateCompilation;
         private readonly UserDiagnosticSink _diagnosticSink;
@@ -35,11 +36,13 @@ namespace Metalama.Framework.Engine.Linking
             Compilation intermediateCompilation,
             LinkerIntroductionRegistry introductionRegistry,
             LinkerAnalysisRegistry analysisRegistry,
+            LinkerCodeTransformationRegistry codeTransformationRegistry,
             UserDiagnosticSink diagnosticSink,
             IServiceProvider serviceProvider )
         {
             this._introductionRegistry = introductionRegistry;
             this._analysisRegistry = analysisRegistry;
+            this._codeTransformationRegistry = codeTransformationRegistry;
             this._intermediateCompilation = intermediateCompilation;
             this._diagnosticSink = diagnosticSink;
             this._serviceProvider = serviceProvider;
@@ -467,7 +470,7 @@ namespace Metalama.Framework.Engine.Linking
         /// <returns></returns>
         public bool IsRewriteTarget( ISymbol symbol )
         {
-            if ( this._introductionRegistry.IsOverride( symbol ) || this._introductionRegistry.IsOverrideTarget( symbol ) )
+            if ( this._introductionRegistry.IsOverride( symbol ) || this._introductionRegistry.IsOverrideTarget( symbol ) || symbol is IMethodSymbol { MethodKind: MethodKind.Constructor } )
             {
                 return true;
             }
@@ -490,6 +493,8 @@ namespace Metalama.Framework.Engine.Linking
         {
             switch ( symbol )
             {
+                case IMethodSymbol { MethodKind: MethodKind.Constructor } constructorSymbol:
+                    return this.RewriteConstructor( (ConstructorDeclarationSyntax) syntax, constructorSymbol, generationContext );
                 case IMethodSymbol methodSymbol:
                     return this.RewriteMethod( (MethodDeclarationSyntax) syntax, methodSymbol, generationContext );
 

@@ -290,5 +290,26 @@ namespace Metalama.Framework.Aspects
             IReadOnlyList<InterfaceMemberSpecification> interfaceMemberSpecifications,
             OverrideStrategy whenExists = OverrideStrategy.Default,
             TagDictionary? tags = null );
+
+        void Initialize(
+            IMemberOrNamedType targetDeclaration,
+            string template,
+            InitializationReason initializationReason,
+            TagDictionary? tags = null );
+
+        [Obsolete( "Not implemented." )]
+        void OverrideConstructor( 
+            IConstructor targetConstructor,
+            string template,
+            TagDictionary? tags = null );
+
+        [Obsolete( "Not implemented." )]
+        void IntroduceConstructor(
+            INamedType targetType, 
+            string template,
+            IntroductionScope scope = IntroductionScope.Default,
+            OverrideStrategy whenExists = OverrideStrategy.Default,
+            TagDictionary? tags = null );
+
     }
 }

@@ -11,6 +11,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -74,12 +75,15 @@ namespace Metalama.Framework.Engine.Pipeline
                     if ( transformation is IMemberIntroduction memberIntroduction )
                     {
                         // TODO: Provide other implementations or allow nulls (because this pipeline should not execute anything).
+                        // TODO: Implement support for initializable transformations.
                         var introductionContext = new MemberIntroductionContext(
                             diagnostics,
                             introductionNameProvider,
                             lexicalScopeFactory,
                             syntaxGenerationContext,
-                            serviceProvider );
+                            serviceProvider,
+                            null,
+                            ImmutableDictionary<IHierarchicalTransformation, TransformationInitializationResult?>.Empty );
 
                         var introducedMembers = memberIntroduction.GetIntroducedMembers( introductionContext )
                             .Select( m => m.Syntax.NormalizeWhitespace() )
