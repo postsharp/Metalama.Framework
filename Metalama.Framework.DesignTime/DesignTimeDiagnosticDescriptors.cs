@@ -58,9 +58,9 @@ namespace Metalama.Framework.DesignTime
                 = new(
                     "LAMA0306",
                     Warning,
-                    "An aspect tried to suppress an unregistered diagnostic.",
                     "An aspect tried to suppress the diagnostic {0} on '{1}', but this diagnostic ID has not been configured for "
                     + "suppression in the user profile. Please restart your IDE.",
+                    "An aspect tried to suppress an unregistered diagnostic.",
                     _category );
     }
 }
