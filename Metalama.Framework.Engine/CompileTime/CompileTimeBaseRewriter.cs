@@ -44,7 +44,7 @@ namespace Metalama.Framework.Engine.CompileTime
                     .WithBody( null )
                     .WithExpressionBody( ArrowExpressionClause( GetNotSupportedExceptionExpression( message ) ) )
                     .WithSemicolonToken( Token( SyntaxKind.SemicolonToken ) )
-                    .WithModifiers( TokenList( method.Modifiers.Where( m => m.Kind() != SyntaxKind.AsyncKeyword ) ) )
+                    .WithModifiers( TokenList( method.Modifiers.Where( m => !m.IsKind( SyntaxKind.AsyncKeyword ) ) ) )
                     .NormalizeWhitespace()
                     .WithLeadingTrivia( method.GetLeadingTrivia() )
                     .WithTrailingTrivia( LineFeed, LineFeed ) );
@@ -52,7 +52,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
         protected BasePropertyDeclarationSyntax WithThrowNotSupportedExceptionBody( BasePropertyDeclarationSyntax memberDeclaration, string message )
         {
-            if ( memberDeclaration.Modifiers.Any( x => x.Kind() == SyntaxKind.AbstractKeyword ) )
+            if ( memberDeclaration.Modifiers.Any( x => x.IsKind( SyntaxKind.AbstractKeyword ) ) )
             {
                 // Should not be called with an abstract property.
                 throw new ArgumentOutOfRangeException( nameof(memberDeclaration) );

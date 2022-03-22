@@ -7,6 +7,9 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
+using System.Collections.Generic;
+
+// ReSharper disable MemberCanBePrivate.Global
 
 namespace Metalama.Framework.Engine.Templating
 {
@@ -20,6 +23,13 @@ namespace Metalama.Framework.Engine.Templating
             {
                 this._reflectionMapper = serviceProvider.GetRequiredService<ReflectionMapperFactory>().GetInstance( compileTimeCompilation );
             }
+
+            public ExpressionSyntax Null => this.LiteralExpression( this.Kind( SyntaxKind.NullLiteralExpression ) );
+
+            public ExpressionSyntax Default
+                => this.LiteralExpression(
+                    this.Kind( SyntaxKind.DefaultLiteralExpression ),
+                    this.Token( this.Kind( SyntaxKind.DefaultKeyword ) ) );
 
             public TypeSyntax Type( Type type ) => OurSyntaxGenerator.CompileTime.Type( this._reflectionMapper.GetTypeSymbol( type ) );
 
@@ -59,27 +69,35 @@ namespace Metalama.Framework.Engine.Templating
                         SyntaxFactory.Identifier( name ),
                         SyntaxFactory.TypeArgumentList( SyntaxFactory.SeparatedList( typeArguments ) ) ) );
 
-            public ExpressionSyntax Literal( string? s ) => s == null ? SyntaxFactoryEx.Null : this.Literal( SyntaxFactoryEx.LiteralExpression( s ) );
+            public ExpressionSyntax LiteralExpression( string? s )
+                => s == null ? SyntaxFactoryEx.Null : this.MakeLiteralExpression( SyntaxFactoryEx.LiteralNonNullExpression( s ) );
 
-            public ExpressionSyntax Literal( char c ) => this.Literal( SyntaxFactoryEx.LiteralExpression( c ) );
+            public ExpressionSyntax LiteralExpression( char c ) => this.MakeLiteralExpression( SyntaxFactoryEx.LiteralExpression( c ) );
 
-            public ExpressionSyntax Literal( int i ) => this.Literal( SyntaxFactoryEx.LiteralExpression( i ) );
+            public ExpressionSyntax LiteralExpression( int i ) => this.MakeLiteralExpression( SyntaxFactoryEx.LiteralExpression( i ) );
 
-            public ExpressionSyntax Literal( uint i ) => this.Literal( SyntaxFactoryEx.LiteralExpression( i ) );
+            public ExpressionSyntax LiteralExpression( uint i ) => this.MakeLiteralExpression( SyntaxFactoryEx.LiteralExpression( i ) );
 
-            public ExpressionSyntax Literal( long i ) => this.Literal( SyntaxFactoryEx.LiteralExpression( i ) );
+            public ExpressionSyntax LiteralExpression( long i ) => this.MakeLiteralExpression( SyntaxFactoryEx.LiteralExpression( i ) );
 
-            public ExpressionSyntax Literal( ulong i ) => this.Literal( SyntaxFactoryEx.LiteralExpression( i ) );
+            public ExpressionSyntax LiteralExpression( ulong i ) => this.MakeLiteralExpression( SyntaxFactoryEx.LiteralExpression( i ) );
 
-            public ExpressionSyntax Literal( short i ) => this.Literal( SyntaxFactoryEx.LiteralExpression( i ) );
+            public ExpressionSyntax LiteralExpression( short i ) => this.MakeLiteralExpression( SyntaxFactoryEx.LiteralExpression( i ) );
 
-            public ExpressionSyntax Literal( ushort i ) => this.Literal( SyntaxFactoryEx.LiteralExpression( i ) );
+            public ExpressionSyntax LiteralExpression( ushort i ) => this.MakeLiteralExpression( SyntaxFactoryEx.LiteralExpression( i ) );
 
-            public ExpressionSyntax Literal( double i ) => this.Literal( SyntaxFactoryEx.LiteralExpression( i ) );
+            public ExpressionSyntax LiteralExpression( double i ) => this.MakeLiteralExpression( SyntaxFactoryEx.LiteralExpression( i ) );
 
-            public ExpressionSyntax Literal( float i ) => this.Literal( SyntaxFactoryEx.LiteralExpression( i ) );
+            public ExpressionSyntax LiteralExpression( float i ) => this.MakeLiteralExpression( SyntaxFactoryEx.LiteralExpression( i ) );
 
-            public ExpressionSyntax Literal( decimal i ) => this.Literal( SyntaxFactoryEx.LiteralExpression( i ) );
+            public ExpressionSyntax LiteralExpression( decimal i ) => this.MakeLiteralExpression( SyntaxFactoryEx.LiteralExpression( i ) );
+
+            private InvocationExpressionSyntax MakeLiteralExpression( LiteralExpressionSyntax i )
+            {
+                return this.LiteralExpression(
+                    this.Kind( i.Kind() ),
+                    this.Literal( i.Token ) );
+            }
 
             public ArrayTypeSyntax ArrayType<T>()
             {
@@ -96,39 +114,148 @@ namespace Metalama.Framework.Engine.Templating
                     this.Type( typeof(SyntaxKind) ),
                     SyntaxFactory.IdentifierName( kind.ToString() ) );
 
-            public ExpressionSyntax Literal( SyntaxToken literal )
+            public ExpressionSyntax LiteralExpression( SyntaxToken literal )
                 => literal.Value switch
                 {
-                    string s => this.Literal( s ),
-                    char s => this.Literal( s ),
-                    int s => this.Literal( s ),
-                    uint s => this.Literal( s ),
-                    long s => this.Literal( s ),
-                    ulong s => this.Literal( s ),
-                    short s => this.Literal( s ),
-                    ushort s => this.Literal( s ),
-                    double s => this.Literal( s ),
-                    float s => this.Literal( s ),
-                    decimal s => this.Literal( s ),
+                    string s => this.LiteralExpression( s ),
+                    char s => this.LiteralExpression( s ),
+                    int s => this.LiteralExpression( s ),
+                    uint s => this.LiteralExpression( s ),
+                    long s => this.LiteralExpression( s ),
+                    ulong s => this.LiteralExpression( s ),
+                    short s => this.LiteralExpression( s ),
+                    ushort s => this.LiteralExpression( s ),
+                    double s => this.LiteralExpression( s ),
+                    float s => this.LiteralExpression( s ),
+                    decimal s => this.LiteralExpression( s ),
                     _ => throw new ArgumentOutOfRangeException()
                 };
 
-            public ExpressionSyntax Literal( object literal )
+            public ExpressionSyntax LiteralExpression( object literal )
                 => literal switch
                 {
-                    string s => this.Literal( s ),
-                    char s => this.Literal( s ),
-                    int s => this.Literal( s ),
-                    uint s => this.Literal( s ),
-                    long s => this.Literal( s ),
-                    ulong s => this.Literal( s ),
-                    short s => this.Literal( s ),
-                    ushort s => this.Literal( s ),
-                    double s => this.Literal( s ),
-                    float s => this.Literal( s ),
-                    decimal s => this.Literal( s ),
+                    string s => this.LiteralExpression( s ),
+                    char s => this.LiteralExpression( s ),
+                    int s => this.LiteralExpression( s ),
+                    uint s => this.LiteralExpression( s ),
+                    long s => this.LiteralExpression( s ),
+                    ulong s => this.LiteralExpression( s ),
+                    short s => this.LiteralExpression( s ),
+                    ushort s => this.LiteralExpression( s ),
+                    double s => this.LiteralExpression( s ),
+                    float s => this.LiteralExpression( s ),
+                    decimal s => this.LiteralExpression( s ),
                     _ => throw new ArgumentOutOfRangeException()
                 };
+
+            public ExpressionSyntax Literal( ExpressionSyntax expression )
+            {
+                var result = SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( nameof(SyntaxFactory.Literal) ) )
+                    .WithArgumentList(
+                        SyntaxFactory.ArgumentList(
+                            SyntaxFactory.SeparatedList<ArgumentSyntax>( new SyntaxNodeOrToken[] { SyntaxFactory.Argument( expression ) } ) ) );
+
+                return result;
+            }
+
+            public ExpressionSyntax Literal( SyntaxToken token ) => token.IsKind( SyntaxKind.NullKeyword ) ? this.Null : this.Literal( token.Value! );
+
+            public ExpressionSyntax Literal( object value )
+            {
+                var result = SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( nameof(SyntaxFactory.Literal) ) )
+                    .WithArgumentList(
+                        SyntaxFactory.ArgumentList(
+                            SyntaxFactory.SeparatedList<ArgumentSyntax>(
+                                new SyntaxNodeOrToken[] { SyntaxFactory.Argument( SyntaxFactoryEx.LiteralExpression( value ) ) } ) ) );
+
+                return result;
+            }
+
+            public ExpressionSyntax SingletonSeparatedList<T>( ExpressionSyntax item )
+                where T : SyntaxNode
+            {
+                var itemType = this.Type( typeof(T) );
+
+                var result = SyntaxFactory.InvocationExpression( this.GenericSyntaxFactoryMethod( nameof(SyntaxFactory.SingletonSeparatedList), itemType ) )
+                    .WithArgumentList(
+                        SyntaxFactory.ArgumentList(
+                            SyntaxFactory.SeparatedList<ArgumentSyntax>( new SyntaxNodeOrToken[] { SyntaxFactory.Argument( item ) } ) ) );
+
+                return result;
+            }
+
+            public ExpressionSyntax SeparatedList<T>( IEnumerable<ExpressionSyntax> items )
+                where T : SyntaxNode
+                => this.List<T>( nameof(SyntaxFactory.SeparatedList), items );
+
+            private ExpressionSyntax List<T>( string methodName, IEnumerable<ExpressionSyntax> items )
+                where T : SyntaxNode
+            {
+                var itemType = this.Type( typeof(T) );
+
+                var argument =
+                    SyntaxFactory.ArrayCreationExpression(
+                        SyntaxFactory.ArrayType( itemType )
+                            .WithRankSpecifiers(
+                                SyntaxFactory.SingletonList(
+                                    SyntaxFactory.ArrayRankSpecifier(
+                                        SyntaxFactory.SingletonSeparatedList<ExpressionSyntax>( SyntaxFactory.OmittedArraySizeExpression() ) ) ) ),
+                        SyntaxFactory.InitializerExpression( SyntaxKind.ArrayInitializerExpression, SyntaxFactory.SeparatedList( items ) ) );
+
+                var result = SyntaxFactory.InvocationExpression( this.GenericSyntaxFactoryMethod( methodName, itemType ) )
+                    .WithArgumentList(
+                        SyntaxFactory.ArgumentList(
+                            SyntaxFactory.SeparatedList<ArgumentSyntax>( new SyntaxNodeOrToken[] { SyntaxFactory.Argument( argument ) } ) ) );
+
+                return result.NormalizeWhitespace();
+            }
+
+            public ExpressionSyntax Identifier( ExpressionSyntax text )
+            {
+                var result = SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( nameof(SyntaxFactory.Identifier) ) )
+                    .WithArgumentList(
+                        SyntaxFactory.ArgumentList(
+                            SyntaxFactory.SeparatedList<ArgumentSyntax>( new SyntaxNodeOrToken[] { SyntaxFactory.Argument( text ) } ) ) );
+
+                return result;
+            }
+
+            public ExpressionSyntax Token( ExpressionSyntax kind )
+            {
+                var result = SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( nameof(SyntaxFactory.Token) ) )
+                    .WithArgumentList(
+                        SyntaxFactory.ArgumentList(
+                            SyntaxFactory.SeparatedList<ArgumentSyntax>( new SyntaxNodeOrToken[] { SyntaxFactory.Argument( kind ) } ) ) );
+
+                return result;
+            }
+
+            public ExpressionSyntax Token(
+                ExpressionSyntax leading,
+                ExpressionSyntax kind,
+                ExpressionSyntax text,
+                ExpressionSyntax valueText,
+                ExpressionSyntax trailing )
+            {
+                var result = SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( nameof(SyntaxFactory.Token) ) )
+                    .WithArgumentList(
+                        SyntaxFactory.ArgumentList(
+                            SyntaxFactory.SeparatedList(
+                                new[]
+                                {
+                                    SyntaxFactory.Argument( leading ),
+                                    SyntaxFactory.Argument( kind ),
+                                    SyntaxFactory.Argument( text ),
+                                    SyntaxFactory.Argument( valueText ),
+                                    SyntaxFactory.Argument( trailing )
+                                } ) ) );
+
+                return result;
+            }
+
+            public ExpressionSyntax List<T>( IEnumerable<ExpressionSyntax> items )
+                where T : SyntaxNode
+                => this.List<T>( nameof(SyntaxFactory.List), items );
         }
     }
 }

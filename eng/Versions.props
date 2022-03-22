@@ -1,7 +1,7 @@
 <Project>
 
     <!-- Set the default version -->
-    <Import Project="MainVersion.props" />
+    <Import Project="MainVersion.props"/>
 
     <PropertyGroup>
         <MetalamaVersion>$(MainVersion)$(PackageVersionSuffix)</MetalamaVersion>
@@ -11,9 +11,11 @@
 
     <!-- Versions of dependencies -->
     <PropertyGroup>
-        <PostSharpEngineeringVersion>1.0.50-preview</PostSharpEngineeringVersion>
+        <PostSharpEngineeringVersion>1.0.54-preview</PostSharpEngineeringVersion>
         <MetalamaCompilerVersion>branch:master</MetalamaCompilerVersion>
         <MicrosoftCSharpVersion>4.7.0</MicrosoftCSharpVersion>
+        <!-- This is the minimal version of Roslyn we support. The version corresponding to Metalama.Compiler is stored in the RoslynVersion property. -->
+        <RoslynMinimalVersion>4.0.1</RoslynMinimalVersion>
         <!-- We should match the versions used by the lowest version of Roslyn we support.-->
         <NewtonsoftJsonVersion>13.0.1</NewtonsoftJsonVersion>
         <StreamJsonRpcVersion>2.8.28</StreamJsonRpcVersion>
@@ -28,22 +30,13 @@
         <xUnitAbstractionsVersion>2.0.3</xUnitAbstractionsVersion>
         <CoverletVersion>3.1.0</CoverletVersion>
 
-        <!-- RoslynPad packages are no longer published to nuget.org, so we build and publish ourselves
-             from https://github.com/roslynpad/roslynpad to https://nuget.postsharp.net/feeds/caravela .
-             To build and publish from the RoslynPad repo:
-             - In Directory.Build.props, set EditorPackageVersion to the same as RoslynPackageVersion to avoid conflicts.
-             - Call `dotnet pack` from the `src` directory.
-             - Upload all .nupkg files to https://nuget.postsharp.net/feeds/caravela.
-             - Make sure that all RoslynPad* packages are of the same version on the feed. -->
-        <RoslynPadVersion>4.0.1</RoslynPadVersion>
-
         <!-- This cannot be called just "PostSharpVersion", because that conflicts with a property used by PostSharp. -->
         <PostSharpPackageVersion>6.10.6</PostSharpPackageVersion>
 
     </PropertyGroup>
 
     <!-- Import overrides for the local build -->
-    <Import Project="Versions.g.props" Condition="Exists('Versions.g.props')" />
+    <Import Project="Versions.g.props" Condition="Exists('Versions.g.props')"/>
 
     <PropertyGroup>
         <AssemblyVersion>$(MetalamaAssemblyVersion)</AssemblyVersion>

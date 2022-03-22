@@ -34,7 +34,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
             public override void VisitUsingDirective( UsingDirectiveSyntax node )
             {
-                if ( node.GlobalKeyword.Kind() == SyntaxKind.GlobalKeyword )
+                if ( node.GlobalKeyword.IsKind( SyntaxKind.GlobalKeyword ) )
                 {
                     this._globalUsings.Add( node.Name );
                 }

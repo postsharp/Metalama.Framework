@@ -313,8 +313,8 @@ namespace Metalama.Framework.Engine.Formatting
         {
             foreach ( var trivia in triviaList )
             {
-                if ( trivia.Kind() == SyntaxKind.SingleLineCommentTrivia ||
-                     trivia.Kind() == SyntaxKind.MultiLineCommentTrivia )
+                if ( trivia.IsKind( SyntaxKind.SingleLineCommentTrivia ) ||
+                     trivia.IsKind( SyntaxKind.MultiLineCommentTrivia ) )
                 {
                     // Don't highlight comments.
                     continue;

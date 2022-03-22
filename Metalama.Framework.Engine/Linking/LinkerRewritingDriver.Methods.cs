@@ -79,7 +79,7 @@ namespace Metalama.Framework.Engine.Linking
                 }
                 else if ( !isAsync && symbol.IsAsync )
                 {
-                    modifiers = TokenList( modifiers.Where( m => m.Kind() != SyntaxKind.AsyncKeyword ) );
+                    modifiers = TokenList( modifiers.Where( m => !m.IsKind( SyntaxKind.AsyncKeyword ) ) );
                 }
 
                 // Trivia processing:

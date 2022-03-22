@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Backstage.Diagnostics;
+using Metalama.Backstage.Utilities;
 using Metalama.Framework.DesignTime.Contracts;
 using Metalama.Framework.DesignTime.Preview;
 using Metalama.Framework.DesignTime.VisualStudio.Remoting;
@@ -22,7 +23,7 @@ public static class VsServiceProviderFactory
 
     public static ServiceProvider GetServiceProvider()
     {
-        var processKind = DebuggingHelper.ProcessKind;
+        var processKind = ProcessUtilities.ProcessKind;
 
         if ( processKind == ProcessKind.Compiler )
         {
@@ -47,6 +48,11 @@ public static class VsServiceProviderFactory
                             var compilerServiceProvider = new CompilerServiceProvider(
                                 _serviceProvider,
                                 ImmutableDictionary<string, int>.Empty.Add( "1.0", ContractsVersion.ContractVersion_1_0 ) );
+
+                            if ( Logger.DesignTimeEntryPointManager.Trace != null )
+                            {
+                                DesignTimeEntryPointManager.Instance.SetLogger( Logger.DesignTimeEntryPointManager.Trace.Log );
+                            }
 
                             DesignTimeEntryPointManager.Instance.RegisterServiceProvider( compilerServiceProvider );
 

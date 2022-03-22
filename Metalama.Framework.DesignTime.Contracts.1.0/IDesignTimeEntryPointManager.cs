@@ -14,6 +14,11 @@ namespace Metalama.Framework.DesignTime.Contracts
     public interface IDesignTimeEntryPointManager
     {
         /// <summary>
+        /// Sets the logging delegate.
+        /// </summary>
+        void SetLogger( Action<string>? logger );
+        
+        /// <summary>
         /// Gets an interface that allows to retrieve compiler services.
         /// </summary>
         /// <param name="contractVersions">A dictionary mapping the fixed version of the assembly (e.g. <c>1.0</c>)

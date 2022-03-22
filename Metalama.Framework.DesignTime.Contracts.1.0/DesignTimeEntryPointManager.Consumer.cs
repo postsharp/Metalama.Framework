@@ -69,6 +69,8 @@ public partial class DesignTimeEntryPointManager
 
         private async Task<ICompilerServiceProvider> GetProviderForVersionAsync( Version version )
         {
+            this._parent._logger?.Invoke( $"GetProviderForVersionAsync({version})" );
+            
             while ( true )
             {
                 lock ( this._parent._sync )
@@ -79,10 +81,14 @@ public partial class DesignTimeEntryPointManager
                         {
                             if ( this.ValidateContractVersions( entryPoint.ContractVersions ) )
                             {
+                                this._parent._logger?.Invoke( $"GetProviderForVersionAsync({version}): found a valid version with matching contract versions." );
+                                
                                 return entryPoint;
                             }
                             else
                             {
+                                this._parent._logger?.Invoke( $"GetProviderForVersionAsync({version}): found a valid version, but contract versions do not match." );
+                                
                                 this.ContractVersionMismatchDetected?.Invoke( entryPoint );
 
                                 return new InvalidCompilerServiceProvider( entryPoint.Version, entryPoint.ContractVersions );
@@ -90,6 +96,8 @@ public partial class DesignTimeEntryPointManager
                         }
                     }
                 }
+                
+                this._parent._logger?.Invoke( $"GetProviderForVersionAsync({version}): waiting for a new registration." );
 
                 await this._parent._registrationTask.Task;
             }

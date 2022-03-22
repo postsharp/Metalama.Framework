@@ -37,7 +37,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
             public override bool VisitUsingDirective( UsingDirectiveSyntax node )
             {
-                if ( node.GlobalKeyword.Kind() == SyntaxKind.GlobalKeyword )
+                if ( node.GlobalKeyword.IsKind( SyntaxKind.GlobalKeyword ) )
                 {
                     // Any tree containing a global using must be included in the set of compile-time trees because they need to be scanned.
                     return true;

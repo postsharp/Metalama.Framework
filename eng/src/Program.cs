@@ -39,7 +39,8 @@ var product = new Product
         "Metalama.TestFramework.$(PackageVersion).nupkg",
         "Metalama.Framework.Redist.$(PackageVersion).nupkg",
         "Metalama.Framework.Sdk.$(PackageVersion).nupkg",
-        "Metalama.Framework.Engine.$(PackageVersion).nupkg",
+        "Metalama.Framework.Engine.4.1.0.$(PackageVersion).nupkg",
+        "Metalama.Framework.Engine.4.0.1.$(PackageVersion).nupkg",
         "Metalama.Framework.Introspection.$(PackageVersion).nupkg",
         "Metalama.Framework.Workspaces.$(PackageVersion).nupkg",
         "Metalama.LinqPad.$(PackageVersion).nupkg" ),
@@ -74,13 +75,14 @@ static void OnPrepareCompleted( PrepareCompletedEventArgs arg )
             generatorDirectory,
             "Metalama.Framework.GenerateMetaSyntaxRewriter.csproj" ) );
 
-    if ( !project.Restore( arg.Context, new BuildSettings() ) )
+    var settings = new BuildSettings() { BuildConfiguration = BuildConfiguration.Debug };
+    if ( !project.Restore( arg.Context, settings ) )
     {
         arg.IsFailed = true;
         return;
     }
 
-    if ( !project.Build( arg.Context, new BuildSettings() ) )
+    if ( !project.Build( arg.Context, settings ) )
     {
         arg.IsFailed = true;
         return;
@@ -88,25 +90,11 @@ static void OnPrepareCompleted( PrepareCompletedEventArgs arg )
 
     var toolDirectory = Path.Combine( generatorDirectory, "bin", "Debug", "net48" );
     var toolPath = Path.Combine( toolDirectory, "Metalama.Framework.GenerateMetaSyntaxRewriter.exe" );
-    if ( !ToolInvocationHelper.InvokeTool( arg.Context.Console, toolPath, "", toolDirectory ) )
+    var srcDirectory = arg.Context.RepoDirectory;
+
+    if ( !ToolInvocationHelper.InvokeTool( arg.Context.Console, toolPath, srcDirectory, toolDirectory ) )
     {
         arg.IsFailed = true;
         return;
-    }
-
-    CopyFile( "MetaSyntaxRewriter.g.cs", "Metalama.Framework.Engine\\Templating" );
-    CopyFile( "RunTimeCodeHasher.g.cs", "Metalama.Framework.DesignTime\\Pipeline\\Diff" );
-    CopyFile( "CompileTimeCodeHasher.g.cs", "Metalama.Framework.DesignTime\\Pipeline\\Diff" );
-
-    void CopyFile( string fileName, string targetDirectory )
-    {
-        var targetFile = Path.Combine( arg.Context.RepoDirectory, targetDirectory, fileName );
-
-        if ( File.Exists( targetFile ) )
-        {
-            File.Delete( targetFile );
-        }
-
-        File.Copy( Path.Combine( toolDirectory, fileName ), targetFile );
     }
 }

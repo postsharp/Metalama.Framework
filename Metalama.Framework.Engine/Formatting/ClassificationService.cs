@@ -30,7 +30,7 @@ namespace Metalama.Framework.Engine.Formatting
 
             var templateCompiler = new TemplateCompiler( this._serviceProvider, model.Compilation );
 
-            _ = templateCompiler.TryAnnotate( syntaxRoot, model, diagnostics, cancellationToken, out var annotatedSyntaxRoot );
+            _ = templateCompiler.TryAnnotate( syntaxRoot, model, diagnostics, cancellationToken, out var annotatedSyntaxRoot, out _ );
 
             var text = model.SyntaxTree.GetText();
             var classifier = new TextSpanClassifier( text );

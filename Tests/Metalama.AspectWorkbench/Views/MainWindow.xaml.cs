@@ -1,16 +1,12 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Metalama.AspectWorkbench.CodeEditor;
 using Metalama.AspectWorkbench.ViewModels;
-using Microsoft.CodeAnalysis;
 using Microsoft.Win32;
 using PostSharp;
-using RoslynPad.Editor;
 using System;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -29,22 +25,12 @@ namespace Metalama.AspectWorkbench.Views
         public MainWindow()
         {
             this.InitializeComponent();
-            this.InitializeRoslynEditor();
 
             var newViewModel = new MainViewModel();
             this._viewModel = newViewModel;
             this.DataContext = newViewModel;
             this.detailPaneComboBox.ItemsSource = Enum.GetValues( typeof(DetailPaneContent) ).Cast<DetailPaneContent>();
             Post.Cast<MainViewModel, INotifyPropertyChanged>( newViewModel ).PropertyChanged += this.ViewModel_PropertyChanged;
-        }
-
-        private void InitializeRoslynEditor()
-        {
-            var roslynHost = RoslynPadHost.Create();
-            var highlightColors = new ClassificationHighlightColors();
-            var workingDirectory = Directory.GetCurrentDirectory();
-
-            this.sourceTextBox.Initialize( roslynHost, highlightColors, workingDirectory, "", SourceCodeKind.Regular );
         }
 
         private void ViewModel_PropertyChanged( object? sender, PropertyChangedEventArgs e )

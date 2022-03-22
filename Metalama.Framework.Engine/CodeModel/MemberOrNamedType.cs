@@ -3,11 +3,13 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Utilities;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Linq;
 using System.Reflection;
+using Accessibility = Metalama.Framework.Code.Accessibility;
 
 namespace Metalama.Framework.Engine.CodeModel
 {
@@ -29,13 +31,13 @@ namespace Metalama.Framework.Engine.CodeModel
                 switch ( syntaxReference.GetSyntax() )
                 {
                     case MemberDeclarationSyntax memberDeclaration:
-                        return memberDeclaration.Modifiers.Any( m => m.Kind() == SyntaxKind.NewKeyword );
+                        return memberDeclaration.Modifiers.Any( m => m.IsKind( SyntaxKind.NewKeyword ) );
 
                     case VariableDeclaratorSyntax { Parent: { Parent: EventFieldDeclarationSyntax eventFieldDeclaration } }:
-                        return eventFieldDeclaration.Modifiers.Any( m => m.Kind() == SyntaxKind.NewKeyword );
+                        return eventFieldDeclaration.Modifiers.Any( m => m.IsKind( SyntaxKind.NewKeyword ) );
 
                     case VariableDeclaratorSyntax { Parent: { Parent: FieldDeclarationSyntax fieldDeclaration } }:
-                        return fieldDeclaration.Modifiers.Any( m => m.Kind() == SyntaxKind.NewKeyword );
+                        return fieldDeclaration.Modifiers.Any( m => m.IsKind( SyntaxKind.NewKeyword ) );
 
                     case LocalFunctionStatementSyntax:
                         return false;

@@ -167,7 +167,7 @@ namespace Metalama.Framework.Engine.Utilities
             }
 
             return symbol.DeclaringSyntaxReferences.Any(
-                r => r.GetSyntax() is MemberDeclarationSyntax member && member.Modifiers.Any( m => m.Kind() == kind ) );
+                r => r.GetSyntax() is MemberDeclarationSyntax member && member.Modifiers.Any( m => m.IsKind( kind ) ) );
         }
 
         // TODO: Partial methods etc.
