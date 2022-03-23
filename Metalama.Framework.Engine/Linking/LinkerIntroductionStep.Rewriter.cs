@@ -9,6 +9,7 @@ using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Transformations;
+using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -29,6 +30,7 @@ namespace Metalama.Framework.Engine.Linking
             private readonly ImmutableDictionaryOfArray<IDeclaration, ScopedSuppression> _diagnosticSuppressions;
             private readonly SyntaxTransformationCollection _introducedMemberCollection;
             private readonly IReadOnlyDictionary<SyntaxNode, (string Id, IReadOnlyList<CodeTransformationMark> Marks)> _marksByNode;
+            private readonly IReadOnlyDictionary<ISymbol, (bool Static, bool Instance)> _typesWithIntroducedDefaultCtor;
 
             // Maps a diagnostic id to the number of times it has been suppressed.
             private ImmutableHashSet<string> _activeSuppressions = ImmutableHashSet.Create<string>( StringComparer.OrdinalIgnoreCase );
@@ -38,13 +40,15 @@ namespace Metalama.Framework.Engine.Linking
                 ImmutableDictionaryOfArray<IDeclaration, ScopedSuppression> diagnosticSuppressions,
                 CompilationModel compilation,
                 IReadOnlyList<OrderedAspectLayer> inputOrderedAspectLayers,
-                IReadOnlyDictionary<SyntaxNode, (string Id, IReadOnlyList<CodeTransformationMark> Marks)> marksByNode )
+                IReadOnlyDictionary<SyntaxNode, (string Id, IReadOnlyList<CodeTransformationMark> Marks)> marksByNode,
+                IReadOnlyDictionary<ISymbol, (bool Static, bool Instance)> typesWithIntroducedDefaultCtor )
             {
                 this._diagnosticSuppressions = diagnosticSuppressions;
                 this._compilation = compilation;
                 this._orderedAspectLayers = inputOrderedAspectLayers.ToImmutableDictionary( e => e.AspectLayerId, e => e );
                 this._introducedMemberCollection = introducedMemberCollection;
                 this._marksByNode = marksByNode;
+                this._typesWithIntroducedDefaultCtor = typesWithIntroducedDefaultCtor;
             }
 
             public override bool VisitIntoStructuredTrivia => true;
@@ -108,7 +112,7 @@ namespace Metalama.Framework.Engine.Linking
                     // TODO: We are probably processing classes incorrectly.
 
                     // Since we're adding suppressions, we need to visit each `#pragma warning` of the added node to update them.
-                    transformedNode = (T) this.Visit( transformedNode );
+                    transformedNode = (T) this.Visit( transformedNode ).AssertNotNull();
                 }
 
                 if ( suppressionsOnThisElement.Any() )
@@ -140,6 +144,39 @@ namespace Metalama.Framework.Engine.Linking
 
                 using ( var classSuppressions = this.WithSuppressions( node ) )
                 {
+                    var typeSymbol = this._compilation.RoslynCompilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node );
+
+                    if ( typeSymbol != null
+                        && this._typesWithIntroducedDefaultCtor.TryGetValue( typeSymbol, out var defaultCtors )
+                        && typeSymbol.GetPrimarySyntaxReference().AssertNotNull().GetSyntax() == node )
+                    {
+                        if ( defaultCtors.Instance )
+                        {
+                            members.Add(
+                                ConstructorDeclaration(
+                                    List<AttributeListSyntax>(),
+                                    TokenList( Token( SyntaxKind.PublicKeyword ) ),
+                                    node.Identifier,
+                                    ParameterList(),
+                                    null,
+                                    Block(),
+                                    null ) );
+                        }
+
+                        if ( defaultCtors.Static )
+                        {
+                            members.Add(
+                                ConstructorDeclaration(
+                                    List<AttributeListSyntax>(),
+                                    TokenList( Token( SyntaxKind.StaticKeyword ) ),
+                                    node.Identifier,
+                                    ParameterList(),
+                                    null,
+                                    Block(),
+                                    null ) );
+                        }
+                    }
+
                     foreach ( var member in node.Members )
                     {
                         var visitedMember = (MemberDeclarationSyntax?) this.Visit( member );

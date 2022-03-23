@@ -3,6 +3,7 @@
 
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Transformations;
+using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -17,15 +18,20 @@ namespace Metalama.Framework.Engine.Linking
         private class CodeTransformationVisitor : CSharpSyntaxWalker
         {
             private readonly SemanticModel _semanticModel;
+            private readonly Dictionary<ISymbol, (bool Static, bool Instance)> _typesWithRequiredImplicitCtors;
+            private readonly List<CodeTransformationMark> _marks;
             private Context _currentContext;
 
-            internal List<CodeTransformationMark> Marks { get; }
+            public IReadOnlyList<CodeTransformationMark> Marks => this._marks;
+
+            public IReadOnlyDictionary<ISymbol, (bool Static, bool Instance)> TypesWithRequiredImplicitCtors => this._typesWithRequiredImplicitCtors;
 
             public CodeTransformationVisitor( SemanticModel semanticModel, IReadOnlyList<ICodeTransformation> transformations)
             {
                 this._semanticModel = semanticModel;
-                this.Marks = new List<CodeTransformationMark>();
+                this._marks = new List<CodeTransformationMark>();
                 this._currentContext = new Context( transformations );
+                this._typesWithRequiredImplicitCtors = new Dictionary<ISymbol, (bool Static, bool Instance)>();
             }
 
             public override void Visit( SyntaxNode? node )
@@ -71,7 +77,7 @@ namespace Metalama.Framework.Engine.Linking
                             unrejectedTransformations.Remove( transformation );
                         }
 
-                        this.Marks.AddRange( context.Marks );
+                        this._marks.AddRange( context.Marks );
                     }
 
                     this._currentContext = new Context( unrejectedTransformations.ToImmutable() );
@@ -85,6 +91,69 @@ namespace Metalama.Framework.Engine.Linking
                 {
                     this._currentContext = previousContext;
                 }
+            }
+
+            public override void VisitClassDeclaration( ClassDeclarationSyntax node )
+            {
+                this.VisitTypeDeclaration( node, n => base.VisitClassDeclaration( n) );
+            }
+
+            public override void VisitStructDeclaration( StructDeclarationSyntax node )
+            {
+                this.VisitTypeDeclaration( node, n => base.VisitStructDeclaration( n ) );
+            }
+
+            public override void VisitRecordDeclaration( RecordDeclarationSyntax node )
+            {
+                this.VisitTypeDeclaration( node, n => base.VisitRecordDeclaration( n ) );
+            }
+
+            private void VisitTypeDeclaration<T>(T node, Action<T> baseVisit)
+                where T : TypeDeclarationSyntax
+            {
+                var symbol = this._semanticModel.GetDeclaredSymbol( node ).AssertNotNull();
+                var hasStaticRequiredImplicitCtor = false;
+                var hasInstanceRequiredImplicitCtor = false;
+
+                foreach (var ctor in symbol.Constructors)
+                {
+                    var syntaxReference = ctor.GetPrimarySyntaxReference();
+
+                    if ( syntaxReference == null )
+                    {
+                        foreach ( var transformation in this._currentContext.CodeTransformations )
+                        {
+                            if (!SymbolEqualityComparer.Default.Equals(ctor, transformation.TargetDeclaration.GetSymbol()))
+                            {
+                                continue;
+                            }
+                            
+                            var context = new CodeTransformationContext( transformation, null );
+                            transformation.EvaluateSyntaxNode( context );
+
+                            if ( context.Marks.Count > 0 )
+                            {
+                                if (ctor.IsStatic)
+                                {
+                                    hasStaticRequiredImplicitCtor = true;
+                                }
+                                else
+                                {
+                                    hasInstanceRequiredImplicitCtor = true;
+                                }
+
+                                this._marks.AddRange( context.Marks );
+                            }
+                        }
+                    }
+                }
+
+                if ( hasStaticRequiredImplicitCtor || hasInstanceRequiredImplicitCtor )
+                {
+                    this._typesWithRequiredImplicitCtors.Add( symbol, (hasStaticRequiredImplicitCtor, hasInstanceRequiredImplicitCtor) );
+                }
+
+                baseVisit( node );
             }
 
             internal class Context

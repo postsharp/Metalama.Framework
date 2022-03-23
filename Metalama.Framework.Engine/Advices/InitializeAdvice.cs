@@ -61,7 +61,7 @@ namespace Metalama.Framework.Engine.Advices
                 .Concat( containingType.Constructors.Where( x => !x.IsStatic && this.Reason.HasFlag( InitializationReason.Constructing ) ) )
                 .GroupBy(x => (x, x.GetSymbol()) switch 
                     { 
-                        (_, not null and var s) => s.GetPrimarySyntaxReference().AssertNotNull().SyntaxTree,
+                        (_, not null and var s) => s.GetPrimarySyntaxReference()?.SyntaxTree ?? s.ContainingType.GetPrimarySyntaxReference().AssertNotNull().SyntaxTree,
                         (ISyntaxTreeTransformation t, null) => t.TargetSyntaxTree,
                         _ => throw new AssertionFailedException(),
                     } );

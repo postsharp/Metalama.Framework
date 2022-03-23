@@ -191,8 +191,14 @@ namespace Metalama.Framework.Engine.Transformations
 
             public void EvaluateSyntaxNode( CodeTransformationContext context )
             {
-                switch ( context.Target )
+                switch ( context.TargetNode )
                 {
+                    case null:
+                        // Constructor without a body.
+                        context.AddMark( CodeTransformationOperator.InsertHead, this.GetCallSyntax() );
+                        context.Decline();
+                        break;
+
                     case BlockSyntax:
                         // Insert the syntax into the beginning of a body and decline the subtree.
                         context.AddMark( CodeTransformationOperator.InsertHead, this.GetCallSyntax() );

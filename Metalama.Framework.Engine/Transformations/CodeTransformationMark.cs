@@ -18,7 +18,7 @@ namespace Metalama.Framework.Engine.Transformations
         /// <summary>
         /// Gets the target syntax node for this mark. 
         /// </summary>
-        public SyntaxNode Target { get; }
+        public SyntaxNode? Target { get; }
 
         /// <summary>
         /// Gets the operator for this code transformation.
@@ -30,7 +30,7 @@ namespace Metalama.Framework.Engine.Transformations
         /// </summary>
         public SyntaxNode? Operand { get; }
 
-        public CodeTransformationMark( ICodeTransformation source, SyntaxNode target, CodeTransformationOperator @operator, SyntaxNode? operand)
+        public CodeTransformationMark( ICodeTransformation source, SyntaxNode? target, CodeTransformationOperator @operator, SyntaxNode? operand)
         {
             this.Source = source;
             this.Target = target;

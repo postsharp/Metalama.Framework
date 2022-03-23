@@ -87,7 +87,6 @@ namespace Metalama.Framework.Engine.Linking
             var diagnostics = new UserDiagnosticSink( input.CompileTimeProject, null );
 
             var nameProvider = new LinkerIntroductionNameProvider();
-            var lexicalScopeFactory = new LexicalScopeFactory( input.CompilationModel );
             var syntaxTransformationCollection = new SyntaxTransformationCollection();
 
             // TODO: Merge observable and non-observable transformations so that the order is preserved.
@@ -99,7 +98,73 @@ namespace Metalama.Framework.Engine.Linking
                         input.NonObservableTransformations.OfType<ISyntaxTreeTransformation>() )
                     .ToList();
 
-            var replacedTransformations = new HashSet<ISyntaxTreeTransformation>();
+            ProcessReplaceTransformations( input, allTransformations, syntaxTransformationCollection, out var replacedTransformations );
+            ProcessHierarchicalTransformations( diagnostics, allTransformations, nameProvider, out var initializationResults );
+            this.ProcessIntroduceTransformations( input, allTransformations, diagnostics, nameProvider, syntaxTransformationCollection, replacedTransformations, initializationResults );
+            PrepareCodeTransformationMarkedNodes( input, allTransformations, initializationResults, out var markedNodes, out var typesWithRequiredImplicitCtors );
+
+            // Group diagnostic suppressions by target.
+            var suppressionsByTarget = input.DiagnosticSuppressions.ToMultiValueDictionary(
+                s => s.Declaration,
+                input.CompilationModel.InvariantComparer );
+
+            Rewriter rewriter = new(
+                syntaxTransformationCollection,
+                suppressionsByTarget,
+                input.CompilationModel,
+                input.OrderedAspectLayers,
+                markedNodes,
+                typesWithRequiredImplicitCtors );
+
+            var syntaxTreeMapping = new Dictionary<SyntaxTree, SyntaxTree>();
+
+            // Process syntax trees one by one.
+            var intermediateCompilation = input.InitialCompilation;
+
+            foreach ( var initialSyntaxTree in input.InitialCompilation.SyntaxTrees.Values )
+            {
+                var oldRoot = initialSyntaxTree.GetRoot();
+                var newRoot = rewriter.Visit( oldRoot ).AssertNotNull();
+
+                if ( oldRoot != newRoot )
+                {
+                    var intermediateSyntaxTree = initialSyntaxTree.WithRootAndOptions( newRoot, initialSyntaxTree.Options );
+
+                    syntaxTreeMapping.Add( initialSyntaxTree, intermediateSyntaxTree );
+                }
+            }
+
+            var codeTransformationRegistry = new LinkerCodeTransformationRegistry( markedNodes.ToDictionary( x => x.Value.Id, x => x.Value.Marks ) );
+
+            intermediateCompilation = intermediateCompilation.Update(
+                syntaxTreeMapping.Select( p => new SyntaxTreeModification( p.Value, p.Key ) ).ToList(),
+                Array.Empty<SyntaxTree>() );
+
+            var introductionRegistry = new LinkerIntroductionRegistry(
+                input.CompilationModel,
+                intermediateCompilation.Compilation,
+                syntaxTreeMapping,
+                syntaxTransformationCollection.IntroducedMembers );
+
+            var projectOptions = this._serviceProvider.GetService<IProjectOptions>();
+
+            return new LinkerIntroductionStepOutput(
+                diagnostics,
+                input.CompilationModel,
+                intermediateCompilation,
+                introductionRegistry,
+                codeTransformationRegistry,
+                input.OrderedAspectLayers,
+                projectOptions );
+        }
+
+        private static void ProcessReplaceTransformations(
+            AspectLinkerInput input,
+            List<ITransformation> allTransformations,
+            SyntaxTransformationCollection syntaxTransformationCollection,
+            out HashSet<ISyntaxTreeTransformation> replacedTransformations )
+        {
+            replacedTransformations = new HashSet<ISyntaxTreeTransformation>();
 
             foreach ( var transformation in allTransformations.OfType<IReplaceMember>() )
             {
@@ -136,15 +201,34 @@ namespace Metalama.Framework.Engine.Linking
                         throw new AssertionFailedException();
                 }
             }
+        }
 
-            var initializationResults = new Dictionary<IHierarchicalTransformation, TransformationInitializationResult?>();
+        private static void ProcessHierarchicalTransformations(
+            UserDiagnosticSink diagnostics,
+            List<ITransformation> allTransformations,
+            LinkerIntroductionNameProvider nameProvider,
+            out Dictionary<IHierarchicalTransformation, TransformationInitializationResult?> initializationResults )
+        {
+            initializationResults = new Dictionary<IHierarchicalTransformation, TransformationInitializationResult?>();
             var initializationContext = new InitializationContext( diagnostics, nameProvider, initializationResults );
 
             // Initialize hierarchical transformations.
-            foreach ( var hierarchicalTransformation in allTransformations.OfType<IHierarchicalTransformation>().OrderByReverseTopology(t => t.Dependencies) )
+            foreach ( var hierarchicalTransformation in allTransformations.OfType<IHierarchicalTransformation>().OrderByReverseTopology( t => t.Dependencies ) )
             {
                 initializationResults[hierarchicalTransformation] = hierarchicalTransformation.Initialize( initializationContext );
             }
+        }
+
+        private void ProcessIntroduceTransformations(
+            AspectLinkerInput input,
+            List<ITransformation> allTransformations,
+            UserDiagnosticSink diagnostics,
+            LinkerIntroductionNameProvider nameProvider,
+            SyntaxTransformationCollection syntaxTransformationCollection,
+            HashSet<ISyntaxTreeTransformation>? replacedTransformations,
+            Dictionary<IHierarchicalTransformation, TransformationInitializationResult?> initializationResults )
+        {
+            var lexicalScopeFactory = new LexicalScopeFactory( input.CompilationModel );
 
             // Visit all transformations, respect aspect part ordering.
             foreach ( var transformation in allTransformations )
@@ -213,10 +297,18 @@ namespace Metalama.Framework.Engine.Linking
                     syntaxTransformationCollection.Add( interfaceIntroduction, introducedInterface );
                 }
             }
+        }
 
+        private static void PrepareCodeTransformationMarkedNodes( 
+            AspectLinkerInput input,
+            List<ITransformation> allTransformations,
+            Dictionary<IHierarchicalTransformation, TransformationInitializationResult?> initializationResults,
+            out Dictionary<SyntaxNode, (string Id, IReadOnlyList<CodeTransformationMark> Marks)> markedNodes, 
+            out Dictionary<ISymbol, (bool Static, bool Instance)> typesWithRequiredImplicitCtors )
+        {
             var codeTransformationsBySyntaxTree = new Dictionary<SyntaxTree, List<ICodeTransformation>>();
 
-            foreach (var codeTransformationSource in allTransformations.OfType<ICodeTransformationSource>())
+            foreach ( var codeTransformationSource in allTransformations.OfType<ICodeTransformationSource>() )
             {
                 var initializationResult =
                     codeTransformationSource is IHierarchicalTransformation hierarchicalTransformation
@@ -230,7 +322,7 @@ namespace Metalama.Framework.Engine.Linking
 
                 var codeTransformations = codeTransformationSource.GetCodeTransformations( codeTransformationSourceContext );
 
-                if (!codeTransformationsBySyntaxTree.TryGetValue(codeTransformationSource.TargetSyntaxTree, out var list))
+                if ( !codeTransformationsBySyntaxTree.TryGetValue( codeTransformationSource.TargetSyntaxTree, out var list ) )
                 {
                     codeTransformationsBySyntaxTree[codeTransformationSource.TargetSyntaxTree] = list = new List<ICodeTransformation>();
                 }
@@ -238,85 +330,43 @@ namespace Metalama.Framework.Engine.Linking
                 list.AddRange( codeTransformations );
             }
 
-            // Group diagnostic suppressions by target.
-            var suppressionsByTarget = input.DiagnosticSuppressions.ToMultiValueDictionary(
-                s => s.Declaration,
-                input.CompilationModel.InvariantComparer );
-
-            // Process syntax trees one by one.
-            var intermediateCompilation = input.InitialCompilation;
-
-            var markedNodes = new Dictionary<SyntaxNode, (string Id, IReadOnlyList<CodeTransformationMark> Marks)>();
+            markedNodes = new Dictionary<SyntaxNode, (string Id, IReadOnlyList<CodeTransformationMark> Marks)>();
+            typesWithRequiredImplicitCtors = new Dictionary<ISymbol, (bool Static, bool Instance)>();
             var nextMarkedNodeId = 0;
 
+            // Collect transformation marks.
+            // TODO: This does not work with introduced code (because it's not expanded yet).
             foreach ( var initialSyntaxTree in input.InitialCompilation.SyntaxTrees.Values )
             {
                 var oldRoot = initialSyntaxTree.GetRoot();
 
                 if ( codeTransformationsBySyntaxTree.TryGetValue( initialSyntaxTree, out var codeTransformations ) )
                 {
-                    var codeTransformationVisitor = new CodeTransformationVisitor( input.InitialCompilation.Compilation.GetSemanticModel(initialSyntaxTree), codeTransformations );
+                    var codeTransformationVisitor = new CodeTransformationVisitor( input.InitialCompilation.Compilation.GetSemanticModel( initialSyntaxTree ), codeTransformations );
                     codeTransformationVisitor.Visit( oldRoot );
+
+                    foreach ( var type in codeTransformationVisitor.TypesWithRequiredImplicitCtors )
+                    {
+                        typesWithRequiredImplicitCtors.Add( type.Key, type.Value );
+                    }
 
                     if ( codeTransformationVisitor.Marks.Count > 0 )
                     {
                         foreach ( var mark in codeTransformationVisitor.Marks )
                         {
-                            if ( !markedNodes.TryGetValue(mark.Target, out var record) )
+                            if ( mark.Target != null )
                             {
-                                markedNodes[mark.Target] = record = (nextMarkedNodeId++.ToString(CultureInfo.InvariantCulture), new List<CodeTransformationMark>());
-                            }
+                                if ( !markedNodes.TryGetValue( mark.Target, out var record ) )
+                                {
+                                    markedNodes[mark.Target] = record = (nextMarkedNodeId++.ToString( CultureInfo.InvariantCulture ), new List<CodeTransformationMark>());
+                                }
 
-                            ((List<CodeTransformationMark>) record.Marks).Add( mark );
+                                ((List<CodeTransformationMark>) record.Marks).Add( mark );
+                            }
                         }
                     }
                 }
             }
-
-            Rewriter rewriter = new(
-                syntaxTransformationCollection,
-                suppressionsByTarget,
-                input.CompilationModel,
-                input.OrderedAspectLayers,
-                markedNodes );
-
-            var syntaxTreeMapping = new Dictionary<SyntaxTree, SyntaxTree>();
-
-            foreach ( var initialSyntaxTree in input.InitialCompilation.SyntaxTrees.Values )
-            {
-                var oldRoot = initialSyntaxTree.GetRoot();
-                var newRoot = rewriter.Visit( oldRoot ).AssertNotNull();
-
-                if ( oldRoot != newRoot )
-                {
-                    var intermediateSyntaxTree = initialSyntaxTree.WithRootAndOptions( newRoot, initialSyntaxTree.Options );
-
-                    syntaxTreeMapping.Add( initialSyntaxTree, intermediateSyntaxTree );
-                }
-            }
-
-            var codeTransformationRegistry = new LinkerCodeTransformationRegistry( markedNodes.ToDictionary( x => x.Value.Id, x => x.Value.Marks ) );
-
-            intermediateCompilation = intermediateCompilation.Update(
-                syntaxTreeMapping.Select( p => new SyntaxTreeModification( p.Value, p.Key ) ).ToList(),
-                Array.Empty<SyntaxTree>() );
-
-            var introductionRegistry = new LinkerIntroductionRegistry(
-                input.CompilationModel,
-                intermediateCompilation.Compilation,
-                syntaxTreeMapping,
-                syntaxTransformationCollection.IntroducedMembers );
-
-            var projectOptions = this._serviceProvider.GetService<IProjectOptions>();
-
-            return new LinkerIntroductionStepOutput(
-                diagnostics,
-                input.CompilationModel,
-                intermediateCompilation,
-                introductionRegistry,
-                codeTransformationRegistry,
-                input.OrderedAspectLayers,
-                projectOptions );
         }
 
         private static IEnumerable<ITransformation> MergeOrderedTransformations(

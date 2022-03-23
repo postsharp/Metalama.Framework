@@ -17,15 +17,18 @@ namespace Metalama.Framework.Engine.Transformations
 
         internal ICodeTransformation Transformation { get; }
 
-        public SyntaxNode Target { get; }
+        /// <summary>
+        /// Gets the target syntax node. If the target declaration does not have a body this is going to be null.
+        /// </summary>
+        public SyntaxNode? TargetNode { get; }
 
         internal IReadOnlyList<CodeTransformationMark> Marks => this._marks;
 
-        public CodeTransformationContext( ICodeTransformation transformation, SyntaxNode target)
+        public CodeTransformationContext( ICodeTransformation transformation, SyntaxNode? targetNode)
         {
             this._marks = new List<CodeTransformationMark>();
             this.Transformation = transformation;
-            this.Target = target;
+            this.TargetNode = targetNode;
             this.IsDeclined = false;
         }
 
@@ -36,7 +39,7 @@ namespace Metalama.Framework.Engine.Transformations
         /// <param name="operand"></param>
         public void AddMark( CodeTransformationOperator @operator, SyntaxNode? operand )
         {
-            this._marks.Add( new CodeTransformationMark(this.Transformation, this.Target, @operator, operand ) );
+            this._marks.Add( new CodeTransformationMark(this.Transformation, this.TargetNode, @operator, operand ) );
         }
 
         /// <summary>

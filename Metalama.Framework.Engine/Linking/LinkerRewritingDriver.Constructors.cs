@@ -7,8 +7,9 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Linq;
 using System.Collections.Generic;
-using System.Text;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
+using Metalama.Framework.Engine.Transformations;
+using System;
 
 namespace Metalama.Framework.Engine.Linking
 {
@@ -40,10 +41,20 @@ namespace Metalama.Framework.Engine.Linking
                     switch ( node )
                     {
                         case BlockSyntax block:
+                            var statements = new List<StatementSyntax>();
+
+                            // Not supporting anything else yet.
+                            Invariant.Assert( marks.All( m => m.Operator == CodeTransformationOperator.InsertHead ) );
+
+                            foreach ( var mark in marks )
+                            {
+                                statements.Add( (StatementSyntax)mark.Operand.AssertNotNull() );
+                            }
+
                             return block.WithStatements(
                                 block.Statements.Insert(
                                     0,
-                                    Block( marks.Select( m => (StatementSyntax) m.Operand.AssertNotNull() ).ToArray() )
+                                    Block( statements )
                                     .NormalizeWhitespace()
                                     .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock ) ) );
 

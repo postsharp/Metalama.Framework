@@ -310,6 +310,5 @@ namespace Metalama.Framework.Aspects
             IntroductionScope scope = IntroductionScope.Default,
             OverrideStrategy whenExists = OverrideStrategy.Default,
             TagDictionary? tags = null );
-
     }
 }

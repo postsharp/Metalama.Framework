@@ -5,48 +5,49 @@ using System;
 
 namespace Metalama.Framework.Aspects
 {
+    [Flags]
     public enum InitializationReason
     {
         /// <summary>
         /// Indicates that the advice should be executed at the beginning of the instance constructor. 
         /// The advice is executed before the instance constructor code is executed.
         /// </summary>
-        Constructing,
+        Constructing = 0x01,
 
         /// <summary>
         /// Indicates that the advice should be executed at the beginning of the type constructor. 
         /// This is before the instance constructor code is executed.
         /// </summary>
-        TypeConstructing,
+        TypeConstructing = 0x02,
 
         [Obsolete("Not implemented")]
         /// <summary>
         /// Indicates that the advice should be executed after all constructors are finished but before the initialization block.
         /// </summary>
-        Constructed,
+        Constructed = 0x04,
 
         [Obsolete( "Not implemented" )]
         /// <summary>
         /// Indicates that the advice should be executed after all constructors are finished and after the initialization block.
         /// </summary>
-        Initialized,
+        Initialized = 0x08,
 
         [Obsolete( "Not implemented" )]
         /// <summary>
         /// Indicates that the advice should be executed when the instance of a target class is deserialized.
         /// </summary>
-        Deserialized,
+        Deserialized = 0x10,
 
         [Obsolete( "Not implemented" )]
         /// <summary>
         /// Indicates that the advice should be executed when the instance of a target class is cloned.
         /// </summary>
-        Cloned,
+        Cloned = 0x20,
 
         [Obsolete( "Not implemented" )]
         /// <summary>
         /// Indicated that the advice should be executed when the the target value type is mutated using the "with" expression.
         /// </summary>
-        Mutated,
+        Mutated = 0x40,
     }
 }
