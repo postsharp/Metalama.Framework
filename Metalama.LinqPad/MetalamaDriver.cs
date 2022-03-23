@@ -83,15 +83,38 @@ namespace {nameSpace}
         public override IEnumerable<string> GetNamespacesToAdd( IConnectionInfo cxInfo )
             => new[] { "Metalama.Framework.Workspaces", "Metalama.Framework.Code", "Metalama.Framework.Code.Collections" };
 
-        private static void Compile( string cSharpSourceCode, string outputFile )
+        private static IReadOnlyList<string> GetAssembliesToAdd( bool addReferenceAssemblies )
         {
             List<string> assembliesToReference = new();
-            assembliesToReference.AddRange( GetCoreFxReferenceAssemblies() );
+
+            if ( addReferenceAssemblies )
+            {
+                assembliesToReference.AddRange( GetCoreFxReferenceAssemblies() );
+            }
+
+            // Metalama.LinqPad
             assembliesToReference.Add( typeof(MetalamaDriver).Assembly.Location );
-            assembliesToReference.Add( typeof(MetalamaDataContext).Assembly.Location );
+            
+            // Metalama.Framework
             assembliesToReference.Add( typeof(IDeclaration).Assembly.Location );
+            
+            // Metalama.Framework.Workspaces
+            assembliesToReference.Add( typeof(Workspace).Assembly.Location );
+            
+            // Metalama.Framework.Inspection
             assembliesToReference.Add( typeof(IIntrospectionAspectInstance).Assembly.Location );
+            
+            // Metalama.Framework.Engine
             assembliesToReference.Add( typeof(AspectPipeline).Assembly.Location );
+
+            return assembliesToReference;
+        }
+
+        public override IEnumerable<string> GetAssembliesToAdd( IConnectionInfo cxInfo ) => GetAssembliesToAdd( false );
+
+        private static void Compile( string cSharpSourceCode, string outputFile )
+        {
+            var assembliesToReference = GetAssembliesToAdd( true );
 
             // CompileSource is a static helper method to compile C# source code using LINQPad's built-in Roslyn libraries.
             // If you prefer, you can add a NuGet reference to the Roslyn libraries and use them directly.
