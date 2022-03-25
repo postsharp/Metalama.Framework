@@ -5,19 +5,19 @@
         {
             static TargetCode()
             {
-        TypeConstructing_Aspect2();
+        TypeConstructing_Aspect2_Foo();
         TypeConstructing_Aspect1();
             }
     
             public static int Foo { get; }
-    
-    
+
+
+    private static void TypeConstructing_Aspect2_Foo()
+    {
+        global::System.Console.WriteLine($"Foo: Aspect2");
+    }
+
     private static void TypeConstructing_Aspect1()
     {
         global::System.Console.WriteLine($"TargetCode: Aspect1");
-    }
-    
-    private static void TypeConstructing_Aspect2()
-    {
-        global::System.Console.WriteLine($"Foo: Aspect2");
     }    }

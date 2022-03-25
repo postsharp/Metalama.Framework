@@ -83,7 +83,7 @@ namespace Metalama.Framework.Engine.Advices
                     var initialization = new InitializationTransformation(
                         this,
                         mainInitialization,
-                        containingType,
+                        this.TargetDeclaration,
                         declaration,
                         constructorsBelongingToReference,
                         this.Template,

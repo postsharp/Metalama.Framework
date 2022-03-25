@@ -22,7 +22,7 @@ namespace Metalama.Framework.Engine.Transformations
 {
     internal class InitializationTransformation : INonObservableTransformation, IMemberIntroduction, ICodeTransformationSource, IHierarchicalTransformation
     {
-        private readonly IMemberOrNamedType _targetDeclaration;
+        private readonly IMemberOrNamedType _initializedDeclaration;
         private readonly TypeDeclarationSyntax _typeDeclaration;
         private readonly IReadOnlyList<IConstructor> _constructors;
         private readonly TemplateMember<IMethod> _template;
@@ -38,13 +38,13 @@ namespace Metalama.Framework.Engine.Transformations
         public InitializationTransformation( 
             Advice advice,
             InitializationTransformation? mainTransformation,
-            IMemberOrNamedType targetDeclaration, 
+            IMemberOrNamedType initializatedDeclaration, 
             TypeDeclarationSyntax typeDeclaration, 
             IReadOnlyList<IConstructor> constructors, 
             TemplateMember<IMethod> template, 
             InitializationReason reason )
         {
-            this._targetDeclaration = targetDeclaration;
+            this._initializedDeclaration = initializatedDeclaration;
             this._mainTransformation = mainTransformation;
             this._typeDeclaration = typeDeclaration;
             this._constructors = constructors;
@@ -61,14 +61,14 @@ namespace Metalama.Framework.Engine.Transformations
         {
             if ( this._mainTransformation == null )
             {
-                var targetType = this._targetDeclaration switch
+                var targetType = this._initializedDeclaration switch
                 {
                     INamedType t => t,
-                    _ => this._targetDeclaration.DeclaringType.AssertNotNull(),
+                    _ => this._initializedDeclaration.DeclaringType.AssertNotNull(),
                 };
 
                 return new InitializationResult(
-                    context.IntroductionNameProvider.GetInitializationName( targetType, this.Advice.AspectLayerId, this._targetDeclaration, this._reason ) );
+                    context.IntroductionNameProvider.GetInitializationName( targetType, this.Advice.AspectLayerId, this._initializedDeclaration, this._reason ) );
             }
             else
             {
@@ -83,7 +83,7 @@ namespace Metalama.Framework.Engine.Transformations
                 var initializationResult = (InitializationResult) context.InitializationResult.AssertNotNull();
 
                 var metaApi = MetaApi.ForDeclaration(
-                    this._targetDeclaration,
+                    this._initializedDeclaration,
                     new MetaApiProperties(
                         context.DiagnosticSink,
                         this._template.Cast(),
@@ -97,8 +97,8 @@ namespace Metalama.Framework.Engine.Transformations
                 var expansionContext = new TemplateExpansionContext(
                     this.Advice.TemplateInstance.Instance,
                     metaApi,
-                    (CompilationModel) this._targetDeclaration.Compilation,
-                    context.LexicalScopeProvider.GetLexicalScope( this._targetDeclaration ),
+                    (CompilationModel) this._initializedDeclaration.Compilation,
+                    context.LexicalScopeProvider.GetLexicalScope( this._initializedDeclaration ),
                     context.ServiceProvider.GetRequiredService<SyntaxSerializationService>(),
                     context.SyntaxGenerationContext,
                     this._template,
@@ -131,7 +131,7 @@ namespace Metalama.Framework.Engine.Transformations
                 return
                     new[]
                     {
-                        new IntroducedMember( this, DeclarationKind.Method, methodDeclaration, this.Advice.AspectLayerId, IntroducedMemberSemantic.Initialization, this._targetDeclaration )
+                        new IntroducedMember( this, DeclarationKind.Method, methodDeclaration, this.Advice.AspectLayerId, IntroducedMemberSemantic.Initialization, this._initializedDeclaration )
                     };
             }
             else
@@ -184,6 +184,8 @@ namespace Metalama.Framework.Engine.Transformations
             public IMethodBase TargetDeclaration { get; }
 
             public string IntroductionName { get; }
+
+            public IMemberOrNamedType ContextDeclaration => this.Parent._initializedDeclaration;
 
             public CodeTransformation( InitializationTransformation parent, IMethodBase targetDeclaration, string introductionName )
             {

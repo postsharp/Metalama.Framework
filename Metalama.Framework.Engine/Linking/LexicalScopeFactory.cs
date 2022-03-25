@@ -40,6 +40,16 @@ namespace Metalama.Framework.Engine.Linking
 
                         break;
 
+                    case Property sourceProperty:
+                        this._scopes[declaration] = lexicalScope = new TemplateLexicalScope( sourceProperty.LookupSymbols() );
+
+                        break;
+
+                    case Event sourceEvent:
+                        this._scopes[declaration] = lexicalScope = new TemplateLexicalScope( sourceEvent.LookupSymbols() );
+
+                        break;
+
                     case MethodBuilder { DeclaringType: NamedType containingType }:
                         this._scopes[declaration] = lexicalScope = new TemplateLexicalScope( containingType.LookupSymbols() );
 

@@ -135,7 +135,7 @@ namespace Metalama.Framework.Engine.Linking
                 }
             }
 
-            var codeTransformationRegistry = new LinkerCodeTransformationRegistry( markedNodes.ToDictionary( x => x.Value.Id, x => x.Value.Marks ) );
+            var codeTransformationRegistry = new LinkerCodeTransformationRegistry( input.CompilationModel, markedNodes.ToDictionary( x => x.Value.Id, x => x.Value.Marks ) );
 
             intermediateCompilation = intermediateCompilation.Update(
                 syntaxTreeMapping.Select( p => new SyntaxTreeModification( p.Value, p.Key ) ).ToList(),
