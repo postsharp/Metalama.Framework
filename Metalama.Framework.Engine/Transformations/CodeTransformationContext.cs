@@ -15,19 +15,22 @@ namespace Metalama.Framework.Engine.Transformations
 
         public bool IsDeclined { get; private set; }
 
-        internal ICodeTransformation Transformation { get; }
+        public ICodeTransformation Transformation { get; }
+
+        public ISymbol DeclarationSymbol { get; }
 
         /// <summary>
         /// Gets the target syntax node. If the target declaration does not have a body this is going to be null.
         /// </summary>
         public SyntaxNode? TargetNode { get; }
 
-        internal IReadOnlyList<CodeTransformationMark> Marks => this._marks;
+        public IReadOnlyList<CodeTransformationMark> Marks => this._marks;
 
-        public CodeTransformationContext( ICodeTransformation transformation, SyntaxNode? targetNode)
+        public CodeTransformationContext( ICodeTransformation transformation, ISymbol declarationSymbol, SyntaxNode? targetNode)
         {
             this._marks = new List<CodeTransformationMark>();
             this.Transformation = transformation;
+            this.DeclarationSymbol = declarationSymbol;
             this.TargetNode = targetNode;
             this.IsDeclined = false;
         }

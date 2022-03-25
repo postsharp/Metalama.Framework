@@ -35,6 +35,8 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
 
         public AspectPipelineDescription PipelineDescription => this.ServiceProvider.GetRequiredService<AspectPipelineDescription>();
 
+        public MetaApiStaticity Staticity { get; }
+
         public MetaApiProperties(
             UserDiagnosticSink diagnostics,
             TemplateMember<IMemberOrNamedType> template,
@@ -42,7 +44,8 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
             AspectLayerId aspectLayerId,
             SyntaxGenerationContext syntaxGenerationContext,
             IAspectInstance aspectInstance,
-            IServiceProvider serviceProvider )
+            IServiceProvider serviceProvider,
+            MetaApiStaticity staticity )
         {
             serviceProvider.GetRequiredService<ServiceProviderMark>().RequireProjectWide();
 
@@ -53,6 +56,7 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
             this.SyntaxGenerationContext = syntaxGenerationContext;
             this.AspectInstance = aspectInstance;
             this.ServiceProvider = serviceProvider;
+            this.Staticity = staticity;
         }
     }
 }

@@ -3,13 +3,13 @@ using System.Linq;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
-namespace Metalama.Framework.Tests.Integration.Aspects.Initialization.InstanceConstructing_Implicit
+namespace Metalama.Framework.Tests.Integration.Aspects.Initialization.TypeAndInstanceConstructing_Implicit
 {
     public class Aspect : TypeAspect
     {
         public override void BuildAspect(IAspectBuilder<INamedType> builder)
         {
-            builder.Advices.Initialize(builder.Target, nameof(Template), InitializationReason.Constructing);
+            builder.Advices.Initialize(builder.Target, nameof(Template), InitializationReason.Constructing | InitializationReason.TypeConstructing);
         }
 
         [Template]
@@ -23,7 +23,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Initialization.InstanceCo
     [Aspect]
     public class TargetCode
     {
-        private int Method( int a )
+        private int Method(int a)
         {
             return a;
         }

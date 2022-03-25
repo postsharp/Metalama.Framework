@@ -5,10 +5,8 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace Metalama.Framework.Engine.Linking
 {
@@ -19,23 +17,36 @@ namespace Metalama.Framework.Engine.Linking
         /// </summary>
         public IReadOnlyDictionary<string, IReadOnlyList<CodeTransformationMark>> CodeTransformations { get; }
 
+        private readonly HashSet<ISymbol> _declarationsWithStaticCtorCodeTransformations;
         private readonly HashSet<ISymbol> _declarationsWithCodeTransformations;
 
         public LinkerCodeTransformationRegistry(
             IReadOnlyDictionary<string, IReadOnlyList<CodeTransformationMark>> codeTransformations )
         {
             this.CodeTransformations = codeTransformations;
+            this._declarationsWithStaticCtorCodeTransformations = new HashSet<ISymbol>( StructuralSymbolComparer.Default );
             this._declarationsWithCodeTransformations = new HashSet<ISymbol>(StructuralSymbolComparer.Default);
 
             foreach ( var codeTransformationMark in codeTransformations.Values.SelectMany( x => x ) )
             {
-                this._declarationsWithCodeTransformations.Add( codeTransformationMark.Source.TargetDeclaration.GetSymbol().AssertNotNull() );
+                var symbol = codeTransformationMark.Source.TargetDeclaration.GetSymbol();
+
+                if ( symbol != null )
+                {
+                    this._declarationsWithCodeTransformations.Add( symbol );
+                }
+                else
+                {
+                    var typeSymbol = codeTransformationMark.Source.TargetDeclaration.DeclaringType.GetSymbol();
+                    this._declarationsWithStaticCtorCodeTransformations.Add( typeSymbol );
+                }
             }
         }
 
         public bool HasCodeTransformations(ISymbol symbol )
         {
-            return this._declarationsWithCodeTransformations.Contains( symbol );
+            return this._declarationsWithCodeTransformations.Contains( symbol ) 
+                || (symbol is IMethodSymbol { MethodKind: MethodKind.StaticConstructor } && this._declarationsWithStaticCtorCodeTransformations.Contains( symbol.ContainingSymbol ) );
         }
     }
 }

@@ -7,13 +7,11 @@ using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Transformations;
+using Metalama.Framework.Engine.Utilities;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Metalama.Framework.Engine.Utilities;
-using Metalama.Framework.Code.DeclarationBuilders;
-using Metalama.Framework.Engine.CodeModel.Builders;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Metalama.Framework.Engine.Advices
 {
@@ -63,7 +61,7 @@ namespace Metalama.Framework.Engine.Advices
                     { 
                         (_, not null and var s) => s.GetPrimarySyntaxReference()?.SyntaxTree ?? s.ContainingType.GetPrimarySyntaxReference().AssertNotNull().SyntaxTree,
                         (ISyntaxTreeTransformation t, null) => t.TargetSyntaxTree,
-                        _ => throw new AssertionFailedException(),
+                        (_, null ) => containingType.GetPrimaryDeclaration()?.SyntaxTree ?? throw new AssertionFailedException(),
                     } );
 
             var initializations = new List<InitializationTransformation>();
@@ -71,21 +69,33 @@ namespace Metalama.Framework.Engine.Advices
 
             foreach (var syntaxTreeConstructors in syntaxTrees)
             {
-                var initialization = new InitializationTransformation( 
-                    this, 
-                    mainInitialization,
-                    containingType, 
-                    (TypeDeclarationSyntax)containingType.GetSymbol().DeclaringSyntaxReferences.Single( x=> x.SyntaxTree == syntaxTreeConstructors.Key ).GetSyntax(), 
-                    syntaxTreeConstructors.ToArray(), 
-                    this.Template,
-                    this.Reason );
-
-                if (mainInitialization == null)
+                foreach ( var syntaxReference in containingType.GetSymbol().DeclaringSyntaxReferences.Where( x => x.SyntaxTree == syntaxTreeConstructors.Key ) )
                 {
-                    mainInitialization = initialization;
-                }
+                    var constructorsBelongingToReference = syntaxTreeConstructors.Where( x => x.GetPrimaryDeclaration() == null || x.GetPrimaryDeclaration().AssertNotNull()?.Parent == syntaxReference.GetSyntax() ).ToArray();
 
-                initializations.Add( initialization );
+                    if (constructorsBelongingToReference.Length == 0)
+                    {
+                        continue;
+                    }
+
+                    var declaration = (TypeDeclarationSyntax) syntaxReference.GetSyntax();
+
+                    var initialization = new InitializationTransformation(
+                        this,
+                        mainInitialization,
+                        containingType,
+                        declaration,
+                        constructorsBelongingToReference,
+                        this.Template,
+                        this.Reason );
+
+                    if ( mainInitialization == null )
+                    {
+                        mainInitialization = initialization;
+                    }
+
+                    initializations.Add( initialization );
+                }
             }
 
             return AdviceResult.Create( initializations );

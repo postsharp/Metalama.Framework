@@ -180,7 +180,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                     this.ParentAdvice.AspectLayerId,
                     context.SyntaxGenerationContext,
                     this.ParentAdvice.Aspect,
-                    context.ServiceProvider ) );
+                    context.ServiceProvider,
+                    MetaApiStaticity.Default ) );
 
             var expansionContext = new TemplateExpansionContext(
                 this.ParentAdvice.Aspect.Aspect,

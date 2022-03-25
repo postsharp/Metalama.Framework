@@ -30,10 +30,10 @@ namespace Metalama.Framework.Engine.Linking
             private readonly ImmutableDictionaryOfArray<IDeclaration, ScopedSuppression> _diagnosticSuppressions;
             private readonly SyntaxTransformationCollection _introducedMemberCollection;
             private readonly IReadOnlyDictionary<SyntaxNode, (string Id, IReadOnlyList<CodeTransformationMark> Marks)> _marksByNode;
-            private readonly IReadOnlyDictionary<ISymbol, (bool Static, bool Instance)> _typesWithIntroducedDefaultCtor;
+            private readonly IReadOnlyDictionary<ISymbol, (ConstructorDeclarationSyntax? Static, ConstructorDeclarationSyntax? Instance)> _typesWithIntroducedDefaultCtors;
 
             // Maps a diagnostic id to the number of times it has been suppressed.
-            private ImmutableHashSet<string> _activeSuppressions = ImmutableHashSet.Create<string>( StringComparer.OrdinalIgnoreCase );
+            private ImmutableHashSet<string> _activeSuppressions = ImmutableHashSet.Create<string>( StringComparer.OrdinalIgnoreCase );            
 
             public Rewriter(
                 SyntaxTransformationCollection introducedMemberCollection,
@@ -41,14 +41,14 @@ namespace Metalama.Framework.Engine.Linking
                 CompilationModel compilation,
                 IReadOnlyList<OrderedAspectLayer> inputOrderedAspectLayers,
                 IReadOnlyDictionary<SyntaxNode, (string Id, IReadOnlyList<CodeTransformationMark> Marks)> marksByNode,
-                IReadOnlyDictionary<ISymbol, (bool Static, bool Instance)> typesWithIntroducedDefaultCtor )
+                IReadOnlyDictionary<ISymbol, (ConstructorDeclarationSyntax? Static, ConstructorDeclarationSyntax? Instance)> typesWithIntroducedDefaultCtors )
             {
                 this._diagnosticSuppressions = diagnosticSuppressions;
                 this._compilation = compilation;
                 this._orderedAspectLayers = inputOrderedAspectLayers.ToImmutableDictionary( e => e.AspectLayerId, e => e );
                 this._introducedMemberCollection = introducedMemberCollection;
                 this._marksByNode = marksByNode;
-                this._typesWithIntroducedDefaultCtor = typesWithIntroducedDefaultCtor;
+                this._typesWithIntroducedDefaultCtors = typesWithIntroducedDefaultCtors;
             }
 
             public override bool VisitIntoStructuredTrivia => true;
@@ -146,34 +146,19 @@ namespace Metalama.Framework.Engine.Linking
                 {
                     var typeSymbol = this._compilation.RoslynCompilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node );
 
+                    // Temporary (implicit ctors).
                     if ( typeSymbol != null
-                        && this._typesWithIntroducedDefaultCtor.TryGetValue( typeSymbol, out var defaultCtors )
+                        && this._typesWithIntroducedDefaultCtors.TryGetValue( typeSymbol, out var defaultCtors )
                         && typeSymbol.GetPrimarySyntaxReference().AssertNotNull().GetSyntax() == node )
                     {
-                        if ( defaultCtors.Instance )
+                        if ( defaultCtors.Instance != null )
                         {
-                            members.Add(
-                                ConstructorDeclaration(
-                                    List<AttributeListSyntax>(),
-                                    TokenList( Token( SyntaxKind.PublicKeyword ) ),
-                                    node.Identifier,
-                                    ParameterList(),
-                                    null,
-                                    Block(),
-                                    null ) );
+                            members.Add(defaultCtors.Instance);
                         }
 
-                        if ( defaultCtors.Static )
+                        if ( defaultCtors.Static != null )
                         {
-                            members.Add(
-                                ConstructorDeclaration(
-                                    List<AttributeListSyntax>(),
-                                    TokenList( Token( SyntaxKind.StaticKeyword ) ),
-                                    node.Identifier,
-                                    ParameterList(),
-                                    null,
-                                    Block(),
-                                    null ) );
+                            members.Add( defaultCtors.Static );
                         }
                     }
 

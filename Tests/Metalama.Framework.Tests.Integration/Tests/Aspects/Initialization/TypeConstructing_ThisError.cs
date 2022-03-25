@@ -2,13 +2,10 @@ using System;
 using System.Linq;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Tests.Integration.Aspects.Initialization.TypeConstructing;
 
-[assembly: AspectOrder(typeof(Aspect2), typeof(Aspect1))]
-
-namespace Metalama.Framework.Tests.Integration.Aspects.Initialization.TypeConstructing
+namespace Metalama.Framework.Tests.Integration.Aspects.Initialization.TypeConstructing_ThisError
 {
-    public class AspectBase : TypeAspect
+    public class Aspect : TypeAspect
     {
         public override void BuildAspect(IAspectBuilder<INamedType> builder)
         {
@@ -18,23 +15,18 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Initialization.TypeConstr
         [Template]
         public void Template()
         {
-            Console.WriteLine($"{meta.Target.Type.Name}: {meta.AspectInstance.AspectClass.ShortName}");
+            Console.WriteLine($"{meta.Target.Type.Name} {meta.This}: {meta.AspectInstance.AspectClass.ShortName}");
         }
     }
 
-    public class Aspect1 : AspectBase
-    {
-    }
-
-    public class Aspect2 : AspectBase
-    {
-    }
-
     // <target>
-    [Aspect1]
-    [Aspect2]
+    [Aspect]
     public class TargetCode
     {
+        public TargetCode()
+        {
+        }
+
         static TargetCode()
         {
         }

@@ -55,10 +55,20 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
         public INamedType Type => this._type ?? throw this.CreateInvalidOperationException( nameof(this.Type) );
 
         private ThisInstanceUserReceiver GetThisOrBase( string expressionName, AspectReferenceSpecification linkerAnnotation )
-            => this._type switch
+            => (this._common.Staticity, this._type, this.Declaration) switch
             {
-                null => throw this.CreateInvalidOperationException( expressionName ),
-                { IsStatic: false } when this.Declaration is IMemberOrNamedType { IsStatic: false }
+                ( _, null, _ ) => throw this.CreateInvalidOperationException( expressionName ),
+
+                ( MetaApiStaticity.AlwaysInstance, _,  _ ) 
+                    => new ThisInstanceUserReceiver(
+                        this.Type,
+                        linkerAnnotation ),
+
+                (MetaApiStaticity.AlwaysStatic, _, _ ) 
+                    => throw TemplatingDiagnosticDescriptors.CannotUseThisInStaticContext.CreateException(
+                        (this._common.Template.Declaration!, expressionName, this.Declaration, this.Declaration.DeclarationKind) ),
+
+                ( MetaApiStaticity.Default, { IsStatic: false }, IMemberOrNamedType { IsStatic: false } )
                     => new ThisInstanceUserReceiver(
                         this.Type,
                         linkerAnnotation ),

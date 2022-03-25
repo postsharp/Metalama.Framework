@@ -13,6 +13,7 @@ using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
@@ -304,7 +305,7 @@ namespace Metalama.Framework.Engine.Linking
             List<ITransformation> allTransformations,
             Dictionary<IHierarchicalTransformation, TransformationInitializationResult?> initializationResults,
             out Dictionary<SyntaxNode, (string Id, IReadOnlyList<CodeTransformationMark> Marks)> markedNodes, 
-            out Dictionary<ISymbol, (bool Static, bool Instance)> typesWithRequiredImplicitCtors )
+            out Dictionary<ISymbol, (ConstructorDeclarationSyntax? Static, ConstructorDeclarationSyntax? Instance)> typesWithRequiredImplicitCtors )
         {
             var codeTransformationsBySyntaxTree = new Dictionary<SyntaxTree, List<ICodeTransformation>>();
 
@@ -331,23 +332,62 @@ namespace Metalama.Framework.Engine.Linking
             }
 
             markedNodes = new Dictionary<SyntaxNode, (string Id, IReadOnlyList<CodeTransformationMark> Marks)>();
-            typesWithRequiredImplicitCtors = new Dictionary<ISymbol, (bool Static, bool Instance)>();
+            typesWithRequiredImplicitCtors = new Dictionary<ISymbol, (ConstructorDeclarationSyntax? Static, ConstructorDeclarationSyntax? Instance)>( SymbolEqualityComparer.Default );
             var nextMarkedNodeId = 0;
 
             // Collect transformation marks.
             // TODO: This does not work with introduced code (because it's not expanded yet).
             foreach ( var initialSyntaxTree in input.InitialCompilation.SyntaxTrees.Values )
             {
-                var oldRoot = initialSyntaxTree.GetRoot();
+                var root = initialSyntaxTree.GetRoot();
 
                 if ( codeTransformationsBySyntaxTree.TryGetValue( initialSyntaxTree, out var codeTransformations ) )
                 {
                     var codeTransformationVisitor = new CodeTransformationVisitor( input.InitialCompilation.Compilation.GetSemanticModel( initialSyntaxTree ), codeTransformations );
-                    codeTransformationVisitor.Visit( oldRoot );
+                    codeTransformationVisitor.Visit( root );
 
+                    // Temporary (implicit ctors).
                     foreach ( var type in codeTransformationVisitor.TypesWithRequiredImplicitCtors )
                     {
-                        typesWithRequiredImplicitCtors.Add( type.Key, type.Value );
+                        ConstructorDeclarationSyntax? staticCtor = null;
+                        ConstructorDeclarationSyntax? instanceCtor = null;
+                        if ( type.Value.Static )
+                        {
+                            var mark = nextMarkedNodeId++.ToString( CultureInfo.InvariantCulture );
+
+                            staticCtor =
+                                SyntaxFactory.ConstructorDeclaration(
+                                    SyntaxFactory.List<AttributeListSyntax>(),
+                                    SyntaxFactory.TokenList( SyntaxFactory.Token( SyntaxKind.StaticKeyword ) ),
+                                    type.Value.Declaration.Identifier,
+                                    SyntaxFactory.ParameterList(),
+                                    null,
+                                    SyntaxFactory.Block().WithLinkerMarkedNodeId( mark ),
+                                    null )
+                                .NormalizeWhitespace()
+                                .WithTrailingTrivia( SyntaxFactory.ElasticLineFeed );
+                        }
+
+                        if ( !type.Value.Static )
+                        {
+                            var mark = nextMarkedNodeId++.ToString( CultureInfo.InvariantCulture );
+
+                            instanceCtor =
+                                SyntaxFactory.ConstructorDeclaration(
+                                    SyntaxFactory.List<AttributeListSyntax>(),
+                                    SyntaxFactory.TokenList( SyntaxFactory.Token( SyntaxKind.PublicKeyword ) ),
+                                    type.Value.Declaration.Identifier,
+                                    SyntaxFactory.ParameterList(),
+                                    null,
+                                    SyntaxFactory.Block().WithLinkerMarkedNodeId( mark ),
+                                    null )
+                                .NormalizeWhitespace()
+                                .WithTrailingTrivia( SyntaxFactory.ElasticLineFeed );                                
+                        }
+
+                        typesWithRequiredImplicitCtors.Add(
+                            type.Key,
+                            (staticCtor, instanceCtor) );
                     }
 
                     if ( codeTransformationVisitor.Marks.Count > 0 )
@@ -362,6 +402,53 @@ namespace Metalama.Framework.Engine.Linking
                                 }
 
                                 ((List<CodeTransformationMark>) record.Marks).Add( mark );
+                            }
+                            else
+                            {
+                                var declarationNode = mark.Source.TargetDeclaration.GetPrimaryDeclaration();
+
+                                if ( declarationNode != null )
+                                {
+                                    if ( !markedNodes.TryGetValue( declarationNode, out var record ) )
+                                    {
+                                        markedNodes[declarationNode] = record = (nextMarkedNodeId++.ToString( CultureInfo.InvariantCulture ), new List<CodeTransformationMark>());
+                                    }
+
+                                    ((List<CodeTransformationMark>) record.Marks).Add( mark );
+                                }
+                                else
+                                {
+                                    // Temporary (implicit ctors).
+                                    var typeSymbol = mark.Source.TargetDeclaration.ContainingDeclaration.AssertNotNull().GetSymbol().AssertNotNull();
+
+                                    if ( typesWithRequiredImplicitCtors.TryGetValue( typeSymbol, out var typeRecord ) )
+                                    {
+                                        if (mark.Source.TargetDeclaration.IsStatic)
+                                        {
+                                            // Implicit static ctor.
+                                            var key = typeRecord.Static.AssertNotNull();
+
+                                            if ( !markedNodes.TryGetValue( key, out var record ) )
+                                            {
+                                                markedNodes[key] = record = (key.Body.AssertNotNull().GetLinkerMarkedNodeId().AssertNotNull(), new List<CodeTransformationMark>());
+                                            }
+
+                                            ((List<CodeTransformationMark>) record.Marks).Add( mark );
+                                        }
+                                        else
+                                        {
+                                            // Implicit instance ctor.
+                                            var key = typeRecord.Instance.AssertNotNull();
+
+                                            if ( !markedNodes.TryGetValue( key, out var record ) )
+                                            {
+                                                markedNodes[key] = record = (key.Body.AssertNotNull().GetLinkerMarkedNodeId().AssertNotNull(), new List<CodeTransformationMark>());
+                                            }
+
+                                            ((List<CodeTransformationMark>) record.Marks).Add( mark );
+                                        }
+                                    }
+                                }
                             }
                         }
                     }

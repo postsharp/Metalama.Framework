@@ -18,20 +18,20 @@ namespace Metalama.Framework.Engine.Linking
         private class CodeTransformationVisitor : CSharpSyntaxWalker
         {
             private readonly SemanticModel _semanticModel;
-            private readonly Dictionary<ISymbol, (bool Static, bool Instance)> _typesWithRequiredImplicitCtors;
+            private readonly Dictionary<ISymbol, (TypeDeclarationSyntax Declaration, bool Static, bool Instance)> _typesWithRequiredImplicitCtors;
             private readonly List<CodeTransformationMark> _marks;
             private Context _currentContext;
 
             public IReadOnlyList<CodeTransformationMark> Marks => this._marks;
 
-            public IReadOnlyDictionary<ISymbol, (bool Static, bool Instance)> TypesWithRequiredImplicitCtors => this._typesWithRequiredImplicitCtors;
+            public IReadOnlyDictionary<ISymbol, (TypeDeclarationSyntax Declaration, bool Static, bool Instance)> TypesWithRequiredImplicitCtors => this._typesWithRequiredImplicitCtors;
 
             public CodeTransformationVisitor( SemanticModel semanticModel, IReadOnlyList<ICodeTransformation> transformations)
             {
                 this._semanticModel = semanticModel;
                 this._marks = new List<CodeTransformationMark>();
                 this._currentContext = new Context( transformations );
-                this._typesWithRequiredImplicitCtors = new Dictionary<ISymbol, (bool Static, bool Instance)>();
+                this._typesWithRequiredImplicitCtors = new Dictionary<ISymbol, (TypeDeclarationSyntax Declaration, bool Static, bool Instance)>();
             }
 
             public override void Visit( SyntaxNode? node )
@@ -69,7 +69,7 @@ namespace Metalama.Framework.Engine.Linking
                             continue;
                         }
 
-                        var context = new CodeTransformationContext( transformation, node );
+                        var context = new CodeTransformationContext( transformation, this._semanticModel.GetDeclaredSymbol(node.Parent).AssertNotNull(), node );
                         transformation.EvaluateSyntaxNode( context );
 
                         if ( context.IsDeclined )
@@ -115,6 +115,7 @@ namespace Metalama.Framework.Engine.Linking
                 var hasStaticRequiredImplicitCtor = false;
                 var hasInstanceRequiredImplicitCtor = false;
 
+                // Temporary detection of implicit instance ctors.
                 foreach (var ctor in symbol.Constructors)
                 {
                     var syntaxReference = ctor.GetPrimarySyntaxReference();
@@ -128,19 +129,36 @@ namespace Metalama.Framework.Engine.Linking
                                 continue;
                             }
                             
-                            var context = new CodeTransformationContext( transformation, null );
+                            var context = new CodeTransformationContext( transformation, this._semanticModel.GetDeclaredSymbol( node ).AssertNotNull(), null );
+                            transformation.EvaluateSyntaxNode( context );
+
+                            Invariant.Assert( !ctor.IsStatic );
+
+                            if ( context.Marks.Count > 0 )
+                            {
+                                hasInstanceRequiredImplicitCtor = true;
+
+                                this._marks.AddRange( context.Marks );
+                            }
+                        }
+                    }
+                }
+
+                // Temporary detection of missing static ctors.
+                if ( symbol.StaticConstructors.Length == 0)
+                {
+                    foreach ( var transformation in this._currentContext.CodeTransformations )
+                    {
+                        if ( transformation.TargetDeclaration.DeclarationKind == Code.DeclarationKind.Constructor
+                            && transformation.TargetDeclaration.IsStatic
+                            && transformation.TargetDeclaration.GetSymbol() == null )
+                        {
+                            var context = new CodeTransformationContext( transformation, this._semanticModel.GetDeclaredSymbol( node ).AssertNotNull(), null );
                             transformation.EvaluateSyntaxNode( context );
 
                             if ( context.Marks.Count > 0 )
                             {
-                                if (ctor.IsStatic)
-                                {
-                                    hasStaticRequiredImplicitCtor = true;
-                                }
-                                else
-                                {
-                                    hasInstanceRequiredImplicitCtor = true;
-                                }
+                                hasStaticRequiredImplicitCtor = true;
 
                                 this._marks.AddRange( context.Marks );
                             }
@@ -150,7 +168,7 @@ namespace Metalama.Framework.Engine.Linking
 
                 if ( hasStaticRequiredImplicitCtor || hasInstanceRequiredImplicitCtor )
                 {
-                    this._typesWithRequiredImplicitCtors.Add( symbol, (hasStaticRequiredImplicitCtor, hasInstanceRequiredImplicitCtor) );
+                    this._typesWithRequiredImplicitCtors.Add( symbol, (node, hasStaticRequiredImplicitCtor, hasInstanceRequiredImplicitCtor) );
                 }
 
                 baseVisit( node );

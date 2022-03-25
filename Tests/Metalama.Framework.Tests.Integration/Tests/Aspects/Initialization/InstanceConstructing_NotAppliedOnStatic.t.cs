@@ -1,11 +1,15 @@
     [Aspect]
         public class TargetCode
         {
-    public TargetCode()
-    {
+            public TargetCode()
+            {
         this.Constructing_Aspect();
-    }
-            private int Method( int a )
+            }
+            static TargetCode()
+            {
+            }
+    
+            private int Method(int a)
             {
                 return a;
             }

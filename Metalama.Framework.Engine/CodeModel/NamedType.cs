@@ -20,6 +20,7 @@ using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using System.Threading.Tasks;
 using Accessibility = Metalama.Framework.Code.Accessibility;
 using MethodKind = Microsoft.CodeAnalysis.MethodKind;
@@ -221,7 +222,8 @@ namespace Metalama.Framework.Engine.CodeModel
                 .OfType<IMethodSymbol>()
                 .Where( m => m.MethodKind == MethodKind.StaticConstructor )
                 .Select( m => this.Compilation.Factory.GetConstructor( m ) )
-                .SingleOrDefault();
+                .SingleOrDefault()
+            ?? new VirtualStaticConstructor(this);
 
         public bool IsPartial
         {
@@ -621,6 +623,85 @@ namespace Metalama.Framework.Engine.CodeModel
             this.PopulateAllInterfaces( builder, this.Compilation.EmptyGenericMap );
 
             return builder.ToImmutable();
+        }
+
+        private class VirtualStaticConstructor : IConstructor, ISdkDeclaration
+        {
+            public VirtualStaticConstructor(INamedType declaringType)
+            {
+                this.DeclaringType = declaringType;
+            }
+
+            public IMethodList LocalFunctions => MethodList.Empty;
+
+            public Code.MethodKind MethodKind => Code.MethodKind.StaticConstructor;
+
+            public bool IsVirtual => false;
+
+            public bool IsAsync => false;
+
+            public bool IsOverride => false;
+
+            public bool IsExplicitInterfaceImplementation => false;
+
+            public INamedType DeclaringType { get; private set; }
+
+            public Accessibility Accessibility => Accessibility.Public;
+
+            public bool IsAbstract => false;
+
+            public bool IsStatic => true;
+
+            public bool IsSealed => false;
+
+            public bool IsNew => false;
+
+            public string Name => ".cctor";
+
+            public IAssembly DeclaringAssembly => this.DeclaringType.DeclaringAssembly;
+
+            public DeclarationOrigin Origin => DeclarationOrigin.Source;
+
+            public IDeclaration? ContainingDeclaration => this.DeclaringType;
+
+            public IAttributeList Attributes => AttributeList.Empty;
+
+            public DeclarationKind DeclarationKind => DeclarationKind.Constructor;
+
+            public IParameterList Parameters => ParameterList.Empty;
+
+            public ICompilation Compilation => this.DeclaringType.Compilation;
+
+            public ISymbol? Symbol => null;
+
+            public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
+            {
+                StringBuilder stringBuilder = new();
+                stringBuilder.Append( this.DeclaringType.ToDisplayString( format, context ) );
+                stringBuilder.Append( '.' );
+                stringBuilder.Append( this.DeclaringType.Name );
+                return stringBuilder.ToString();
+            }
+
+            public MemberInfo ToMemberInfo()
+            {
+                throw new NotImplementedException();
+            }
+
+            public ConstructorInfo ToConstructorInfo()
+            {
+                throw new NotImplementedException();
+            }
+
+            public System.Reflection.MethodBase ToMethodBase()
+            {
+                throw new NotImplementedException();
+            }
+
+            public IRef<IDeclaration> ToRef()
+            {
+                throw new NotImplementedException();
+            }
         }
     }
 }

@@ -91,7 +91,8 @@ namespace Metalama.Framework.Engine.Transformations
                         this.Advice.AspectLayerId,
                         context.SyntaxGenerationContext,
                         this.Advice.Aspect,
-                        context.ServiceProvider ) );
+                        context.ServiceProvider,
+                        this._reason.HasFlag( InitializationReason.TypeConstructing ) ? MetaApiStaticity.AlwaysStatic : MetaApiStaticity.AlwaysInstance ) );
 
                 var expansionContext = new TemplateExpansionContext(
                     this.Advice.TemplateInstance.Instance,
@@ -115,7 +116,9 @@ namespace Metalama.Framework.Engine.Transformations
                 var methodDeclaration =
                     MethodDeclaration(
                         List<AttributeListSyntax>(),
-                        TokenList( Token( SyntaxKind.PrivateKeyword ) ),
+                        this._reason.HasFlag(InitializationReason.TypeConstructing)
+                        ? TokenList( Token( SyntaxKind.PrivateKeyword ), Token( SyntaxKind.StaticKeyword ) )
+                        : TokenList( Token( SyntaxKind.PrivateKeyword ) ),
                         PredefinedType( Token( SyntaxKind.VoidKeyword ) ),
                         null,
                         Identifier( initializationResult.IntroductionName ),
@@ -194,6 +197,7 @@ namespace Metalama.Framework.Engine.Transformations
                 switch ( context.TargetNode )
                 {
                     case null:
+                        // This is temporary for implicit constructors.
                         // Constructor without a body.
                         context.AddMark( CodeTransformationOperator.InsertHead, this.GetCallSyntax() );
                         context.Decline();
@@ -218,14 +222,25 @@ namespace Metalama.Framework.Engine.Transformations
 
             private SyntaxNode GetCallSyntax()
             {
-                return
-                    ExpressionStatement(
-                        InvocationExpression(
-                            MemberAccessExpression(
-                                SyntaxKind.SimpleMemberAccessExpression,
-                                ThisExpression(),
-                                IdentifierName( this.IntroductionName ) ),
-                            ArgumentList() ) );
+                if ( this.Parent._reason.HasFlag( InitializationReason.TypeConstructing ) )
+                {
+                    return
+                        ExpressionStatement(
+                            InvocationExpression(
+                                IdentifierName( this.IntroductionName ),
+                                ArgumentList() ) );
+                }
+                else
+                {
+                    return
+                        ExpressionStatement(
+                            InvocationExpression(
+                                MemberAccessExpression(
+                                    SyntaxKind.SimpleMemberAccessExpression,
+                                    ThisExpression(),
+                                    IdentifierName( this.IntroductionName ) ),
+                                ArgumentList() ) );
+                }
             }
         }
     }

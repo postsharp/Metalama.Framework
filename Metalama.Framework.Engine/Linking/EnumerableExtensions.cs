@@ -3,33 +3,60 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace Metalama.Framework.Engine.Linking
 {
     internal static class EnumerableExtensions
     {
         /// <summary>
-        /// Orders the input in reverse topological order, where descendants preceed their ancestors.
+        /// Orders the input in reverse topological order, where the dependencies preceed the dependents.
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="enumerable"></param>
-        /// <param name="getDescendants"></param>
+        /// <param name="getDependencies"></param>
         /// <returns></returns>
-        public static IEnumerable<T> OrderByReverseTopology<T>(this IEnumerable<T> enumerable, Func<T, IReadOnlyList<T>> getDescendants)
+        public static IEnumerable<T> OrderByReverseTopology<T>(this IEnumerable<T> enumerable, Func<T, IReadOnlyList<T>> getDependencies)
             where T : class
         {            
             // Topological sort using stack-based DFS.
             // First find entry points (nodes without any incoming edge)
             var entryPoints = new HashSet<T>( enumerable );
+            var descendants = new Dictionary<T, List<T>>();
+
+            foreach (var o in enumerable)
+            {
+                var dependenceis = getDependencies( o );
+
+                foreach (var dependency in dependenceis )
+                {
+                    if ( !descendants.TryGetValue( dependency, out var list) )
+                    {
+                        descendants[dependency] = list = new List<T>();
+                    }
+
+                    list.Add( o );
+                }
+            }
 
             foreach ( var o in enumerable )
             {
-                var descendants = getDescendants( o );
-                foreach ( var e in descendants )
+                var dependencies = getDependencies( o );
+
+                if ( dependencies.Count > 0 )
                 {
-                    entryPoints.Remove( e );
+                    entryPoints.Remove( o );
+                }
+            }
+
+            IReadOnlyList<T> GetDescendants(T x)
+            {
+                if (!descendants!.TryGetValue(x, out var l))
+                {
+                    return Array.Empty<T>();
+                }
+                else
+                {
+                    return l;
                 }
             }
 
@@ -49,7 +76,7 @@ namespace Metalama.Framework.Engine.Linking
                     if (current.Descendants == null)
                     {
                         // Opening a new node.
-                        current.Descendants = getDescendants(current.Node);
+                        current.Descendants = GetDescendants( current.Node);
 
                         if ( current.Descendants != null && current.Descendants.Count > 0 )
                         {
@@ -57,7 +84,7 @@ namespace Metalama.Framework.Engine.Linking
                             stack.Push( current );
                             stack.Push( (current.Descendants[0], null, -1) );
 
-                            if (!stackSet.Contains( current.Descendants[0] ) )
+                            if ( stackSet.Contains( current.Descendants[0] ) )
                             {
                                 // Dependency cycle.
                                 throw new AssertionFailedException();
@@ -82,7 +109,7 @@ namespace Metalama.Framework.Engine.Linking
                             stack.Push( current );
                             stack.Push( (current.Descendants[current.Index], null, -1) );
 
-                            if ( !stackSet.Contains( current.Descendants[current.Index] ) )
+                            if ( stackSet.Contains( current.Descendants[current.Index] ) )
                             {
                                 // Dependency cycle.
                                 throw new AssertionFailedException();

@@ -3,7 +3,7 @@ using System.Linq;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
-namespace Metalama.Framework.Tests.Integration.Aspects.Initialization.InstanceConstructing_Implicit
+namespace Metalama.Framework.Tests.Integration.Aspects.Initialization.InstanceConstructing_This
 {
     public class Aspect : TypeAspect
     {
@@ -15,7 +15,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Initialization.InstanceCo
         [Template]
         public void Template()
         {
-            Console.WriteLine($"{meta.Target.Type.Name}: {meta.AspectInstance.AspectClass.ShortName}");
+            Console.WriteLine($"{meta.Target.Type.Name} {meta.This}: {meta.AspectInstance.AspectClass.ShortName}");
         }
     }
 
@@ -23,7 +23,11 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Initialization.InstanceCo
     [Aspect]
     public class TargetCode
     {
-        private int Method( int a )
+        public TargetCode()
+        {
+        }
+
+        private int Method(int a)
         {
             return a;
         }
