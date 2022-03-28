@@ -151,7 +151,8 @@ namespace Metalama.Framework.Engine.Linking
                     {
                         if ( transformation.TargetDeclaration.DeclarationKind == Code.DeclarationKind.Constructor
                             && transformation.TargetDeclaration.IsStatic
-                            && transformation.TargetDeclaration.GetSymbol() == null )
+                            && transformation.TargetDeclaration.GetSymbol() == null
+                            && SymbolEqualityComparer.Default.Equals( symbol, transformation.TargetDeclaration.DeclaringType.GetSymbol() ) )
                         {
                             var context = new CodeTransformationContext( transformation, this._semanticModel.GetDeclaredSymbol( node ).AssertNotNull(), null );
                             transformation.EvaluateSyntaxNode( context );

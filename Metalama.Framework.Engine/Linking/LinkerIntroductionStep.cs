@@ -368,7 +368,7 @@ namespace Metalama.Framework.Engine.Linking
                                 .WithTrailingTrivia( SyntaxFactory.ElasticLineFeed );
                         }
 
-                        if ( !type.Value.Static )
+                        if ( type.Value.Instance )
                         {
                             var mark = nextMarkedNodeId++.ToString( CultureInfo.InvariantCulture );
 
