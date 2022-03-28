@@ -16,6 +16,10 @@ namespace Metalama.Framework.Engine.Transformations
 
         internal abstract string GetInitializerName( INamedType targetType, AspectLayerId aspectLayer, IMember initializedMember );
 
-        internal abstract string GetInitializationName( INamedType targetType, AspectLayerId aspectLayer, IDeclaration targetDeclaration, InitializationReason reason );
+        internal abstract string GetInitializationName(
+            INamedType targetType,
+            AspectLayerId aspectLayer,
+            IDeclaration targetDeclaration,
+            InitializationReason reason );
     }
 }

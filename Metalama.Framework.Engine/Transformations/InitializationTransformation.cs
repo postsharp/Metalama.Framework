@@ -35,13 +35,13 @@ namespace Metalama.Framework.Engine.Transformations
 
         public SyntaxTree TargetSyntaxTree => this._typeDeclaration.SyntaxTree;
 
-        public InitializationTransformation( 
+        public InitializationTransformation(
             Advice advice,
             InitializationTransformation? mainTransformation,
-            IMemberOrNamedType initializatedDeclaration, 
-            TypeDeclarationSyntax typeDeclaration, 
-            IReadOnlyList<IConstructor> constructors, 
-            TemplateMember<IMethod> template, 
+            IMemberOrNamedType initializatedDeclaration,
+            TypeDeclarationSyntax typeDeclaration,
+            IReadOnlyList<IConstructor> constructors,
+            TemplateMember<IMethod> template,
             InitializationReason reason )
         {
             this._initializedDeclaration = initializatedDeclaration;
@@ -55,7 +55,8 @@ namespace Metalama.Framework.Engine.Transformations
         }
 
         [Memo]
-        public IReadOnlyList<IHierarchicalTransformation> Dependencies => this._mainTransformation != null ? new[] { this._mainTransformation } : Array.Empty<IHierarchicalTransformation>();
+        public IReadOnlyList<IHierarchicalTransformation> Dependencies
+            => this._mainTransformation != null ? new[] { this._mainTransformation } : Array.Empty<IHierarchicalTransformation>();
 
         public TransformationInitializationResult? Initialize( in InitializationContext context )
         {
@@ -64,11 +65,15 @@ namespace Metalama.Framework.Engine.Transformations
                 var targetType = this._initializedDeclaration switch
                 {
                     INamedType t => t,
-                    _ => this._initializedDeclaration.DeclaringType.AssertNotNull(),
+                    _ => this._initializedDeclaration.DeclaringType.AssertNotNull()
                 };
 
                 return new InitializationResult(
-                    context.IntroductionNameProvider.GetInitializationName( targetType, this.Advice.AspectLayerId, this._initializedDeclaration, this._reason ) );
+                    context.IntroductionNameProvider.GetInitializationName(
+                        targetType,
+                        this.Advice.AspectLayerId,
+                        this._initializedDeclaration,
+                        this._reason ) );
             }
             else
             {
@@ -116,9 +121,9 @@ namespace Metalama.Framework.Engine.Transformations
                 var methodDeclaration =
                     MethodDeclaration(
                         List<AttributeListSyntax>(),
-                        this._reason.HasFlag(InitializationReason.TypeConstructing)
-                        ? TokenList( Token( SyntaxKind.PrivateKeyword ), Token( SyntaxKind.StaticKeyword ) )
-                        : TokenList( Token( SyntaxKind.PrivateKeyword ) ),
+                        this._reason.HasFlag( InitializationReason.TypeConstructing )
+                            ? TokenList( Token( SyntaxKind.PrivateKeyword ), Token( SyntaxKind.StaticKeyword ) )
+                            : TokenList( Token( SyntaxKind.PrivateKeyword ) ),
                         PredefinedType( Token( SyntaxKind.VoidKeyword ) ),
                         null,
                         Identifier( initializationResult.IntroductionName ),
@@ -131,7 +136,13 @@ namespace Metalama.Framework.Engine.Transformations
                 return
                     new[]
                     {
-                        new IntroducedMember( this, DeclarationKind.Method, methodDeclaration, this.Advice.AspectLayerId, IntroducedMemberSemantic.Initialization, this._initializedDeclaration )
+                        new IntroducedMember(
+                            this,
+                            DeclarationKind.Method,
+                            methodDeclaration,
+                            this.Advice.AspectLayerId,
+                            IntroducedMemberSemantic.Initialization,
+                            this._initializedDeclaration )
                     };
             }
             else
@@ -144,7 +155,7 @@ namespace Metalama.Framework.Engine.Transformations
         {
             string introductionName;
 
-            if (this._mainTransformation == null)
+            if ( this._mainTransformation == null )
             {
                 introductionName = ((InitializationResult) context.InitializationResult.AssertNotNull()).IntroductionName;
             }
@@ -155,7 +166,7 @@ namespace Metalama.Framework.Engine.Transformations
 
             var codeTransformations = new List<ICodeTransformation>();
 
-            foreach (var constructor in this._constructors)
+            foreach ( var constructor in this._constructors )
             {
                 codeTransformations.Add( new CodeTransformation( this, constructor, introductionName ) );
             }
@@ -203,18 +214,21 @@ namespace Metalama.Framework.Engine.Transformations
                         // Constructor without a body.
                         context.AddMark( CodeTransformationOperator.InsertHead, this.GetCallSyntax() );
                         context.Decline();
+
                         break;
 
                     case BlockSyntax:
                         // Insert the syntax into the beginning of a body and decline the subtree.
                         context.AddMark( CodeTransformationOperator.InsertHead, this.GetCallSyntax() );
                         context.Decline();
+
                         break;
 
                     case EqualsValueClauseSyntax:
                         // Insert the syntax into the beginning of the body and decline the subtree.
                         context.AddMark( CodeTransformationOperator.InsertHead, this.GetCallSyntax() );
                         context.Decline();
+
                         break;
 
                     default:

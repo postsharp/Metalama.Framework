@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities;
@@ -24,9 +25,10 @@ namespace Metalama.Framework.Engine.Linking
 
             public IReadOnlyList<CodeTransformationMark> Marks => this._marks;
 
-            public IReadOnlyDictionary<ISymbol, (TypeDeclarationSyntax Declaration, bool Static, bool Instance)> TypesWithRequiredImplicitCtors => this._typesWithRequiredImplicitCtors;
+            public IReadOnlyDictionary<ISymbol, (TypeDeclarationSyntax Declaration, bool Static, bool Instance)> TypesWithRequiredImplicitCtors
+                => this._typesWithRequiredImplicitCtors;
 
-            public CodeTransformationVisitor( SemanticModel semanticModel, IReadOnlyList<ICodeTransformation> transformations)
+            public CodeTransformationVisitor( SemanticModel semanticModel, IReadOnlyList<ICodeTransformation> transformations )
             {
                 this._semanticModel = semanticModel;
                 this._marks = new List<CodeTransformationMark>();
@@ -41,7 +43,7 @@ namespace Metalama.Framework.Engine.Linking
 
             public override void VisitBlock( BlockSyntax node )
             {
-                this.VisitBody( node, n => base.VisitBlock(n) );
+                this.VisitBody( node, n => base.VisitBlock( n ) );
             }
 
             public override void VisitArrowExpressionClause( ArrowExpressionClauseSyntax node )
@@ -62,14 +64,19 @@ namespace Metalama.Framework.Engine.Linking
                 try
                 {
                     var unrejectedTransformations = previousContext.CodeTransformations.ToBuilder();
+
                     foreach ( var transformation in previousContext.CodeTransformations )
                     {
-                        if (!SymbolEqualityComparer.Default.Equals(transformation.TargetDeclaration.GetSymbol(), symbol))
+                        if ( !SymbolEqualityComparer.Default.Equals( transformation.TargetDeclaration.GetSymbol(), symbol ) )
                         {
                             continue;
                         }
 
-                        var context = new CodeTransformationContext( transformation, this._semanticModel.GetDeclaredSymbol(node.Parent).AssertNotNull(), node );
+                        var context = new CodeTransformationContext(
+                            transformation,
+                            this._semanticModel.GetDeclaredSymbol( node.Parent ).AssertNotNull(),
+                            node );
+
                         transformation.EvaluateSyntaxNode( context );
 
                         if ( context.IsDeclined )
@@ -95,7 +102,7 @@ namespace Metalama.Framework.Engine.Linking
 
             public override void VisitClassDeclaration( ClassDeclarationSyntax node )
             {
-                this.VisitTypeDeclaration( node, n => base.VisitClassDeclaration( n) );
+                this.VisitTypeDeclaration( node, n => base.VisitClassDeclaration( n ) );
             }
 
             public override void VisitStructDeclaration( StructDeclarationSyntax node )
@@ -108,7 +115,7 @@ namespace Metalama.Framework.Engine.Linking
                 this.VisitTypeDeclaration( node, n => base.VisitRecordDeclaration( n ) );
             }
 
-            private void VisitTypeDeclaration<T>(T node, Action<T> baseVisit)
+            private void VisitTypeDeclaration<T>( T node, Action<T> baseVisit )
                 where T : TypeDeclarationSyntax
             {
                 var symbol = this._semanticModel.GetDeclaredSymbol( node ).AssertNotNull();
@@ -116,7 +123,7 @@ namespace Metalama.Framework.Engine.Linking
                 var hasInstanceRequiredImplicitCtor = false;
 
                 // Temporary detection of implicit instance ctors.
-                foreach (var ctor in symbol.Constructors)
+                foreach ( var ctor in symbol.Constructors )
                 {
                     var syntaxReference = ctor.GetPrimarySyntaxReference();
 
@@ -124,11 +131,11 @@ namespace Metalama.Framework.Engine.Linking
                     {
                         foreach ( var transformation in this._currentContext.CodeTransformations )
                         {
-                            if (!SymbolEqualityComparer.Default.Equals(ctor, transformation.TargetDeclaration.GetSymbol()))
+                            if ( !SymbolEqualityComparer.Default.Equals( ctor, transformation.TargetDeclaration.GetSymbol() ) )
                             {
                                 continue;
                             }
-                            
+
                             var context = new CodeTransformationContext( transformation, this._semanticModel.GetDeclaredSymbol( node ).AssertNotNull(), null );
                             transformation.EvaluateSyntaxNode( context );
 
@@ -145,14 +152,14 @@ namespace Metalama.Framework.Engine.Linking
                 }
 
                 // Temporary detection of missing static ctors.
-                if ( symbol.StaticConstructors.Length == 0)
+                if ( symbol.StaticConstructors.Length == 0 )
                 {
                     foreach ( var transformation in this._currentContext.CodeTransformations )
                     {
-                        if ( transformation.TargetDeclaration.DeclarationKind == Code.DeclarationKind.Constructor
-                            && transformation.TargetDeclaration.IsStatic
-                            && transformation.TargetDeclaration.GetSymbol() == null
-                            && SymbolEqualityComparer.Default.Equals( symbol, transformation.TargetDeclaration.DeclaringType.GetSymbol() ) )
+                        if ( transformation.TargetDeclaration.DeclarationKind == DeclarationKind.Constructor
+                             && transformation.TargetDeclaration.IsStatic
+                             && transformation.TargetDeclaration.GetSymbol() == null
+                             && SymbolEqualityComparer.Default.Equals( symbol, transformation.TargetDeclaration.DeclaringType.GetSymbol() ) )
                         {
                             var context = new CodeTransformationContext( transformation, this._semanticModel.GetDeclaredSymbol( node ).AssertNotNull(), null );
                             transformation.EvaluateSyntaxNode( context );
@@ -179,7 +186,7 @@ namespace Metalama.Framework.Engine.Linking
             {
                 public ImmutableList<ICodeTransformation> CodeTransformations { get; }
 
-                public Context( IReadOnlyList<ICodeTransformation> transformations)
+                public Context( IReadOnlyList<ICodeTransformation> transformations )
                 {
                     var builder = ImmutableList.CreateBuilder<ICodeTransformation>();
                     builder.AddRange( transformations );

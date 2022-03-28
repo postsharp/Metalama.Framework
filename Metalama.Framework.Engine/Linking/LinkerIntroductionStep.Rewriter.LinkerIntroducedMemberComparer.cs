@@ -97,9 +97,10 @@ namespace Metalama.Framework.Engine.Linking
                     }
 
                     // Order by implemented interface.
-                    if ( declaration is IMember declarationMember && declaration is IMember otherDeclarationMember)
+                    if ( declaration is IMember declarationMember && declaration is IMember otherDeclarationMember )
                     {
-                        var isExplicitInterfaceImplementationComparison = declarationMember.IsExplicitInterfaceImplementation.CompareTo( otherDeclarationMember.IsExplicitInterfaceImplementation );
+                        var isExplicitInterfaceImplementationComparison =
+                            declarationMember.IsExplicitInterfaceImplementation.CompareTo( otherDeclarationMember.IsExplicitInterfaceImplementation );
 
                         if ( isExplicitInterfaceImplementationComparison != 0 )
                         {

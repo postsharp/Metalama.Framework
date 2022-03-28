@@ -21,6 +21,6 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
         /// <summary>
         /// Staticity of meta api is always instance.
         /// </summary>
-        AlwaysInstance = 2,
+        AlwaysInstance = 2
     }
 }

@@ -57,18 +57,18 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
         private ThisInstanceUserReceiver GetThisOrBase( string expressionName, AspectReferenceSpecification linkerAnnotation )
             => (this._common.Staticity, this._type, this.Declaration) switch
             {
-                ( _, null, _ ) => throw this.CreateInvalidOperationException( expressionName ),
+                (_, null, _) => throw this.CreateInvalidOperationException( expressionName ),
 
-                ( MetaApiStaticity.AlwaysInstance, _,  _ ) 
+                (MetaApiStaticity.AlwaysInstance, _, _)
                     => new ThisInstanceUserReceiver(
                         this.Type,
                         linkerAnnotation ),
 
-                (MetaApiStaticity.AlwaysStatic, _, _ ) 
+                (MetaApiStaticity.AlwaysStatic, _, _)
                     => throw TemplatingDiagnosticDescriptors.CannotUseThisInStaticContext.CreateException(
                         (this._common.Template.Declaration!, expressionName, this.Declaration, this.Declaration.DeclarationKind) ),
 
-                ( MetaApiStaticity.Default, { IsStatic: false }, IMemberOrNamedType { IsStatic: false } )
+                (MetaApiStaticity.Default, { IsStatic: false }, IMemberOrNamedType { IsStatic: false })
                     => new ThisInstanceUserReceiver(
                         this.Type,
                         linkerAnnotation ),
@@ -173,14 +173,14 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
             this._type = type;
         }
 
-        public static MetaApi ForDeclaration( IDeclaration declaration, MetaApiProperties common ) 
+        public static MetaApi ForDeclaration( IDeclaration declaration, MetaApiProperties common )
             => declaration switch
             {
-                INamedType type=> new( type, common ),
-                IMethod method => new( method, common ),
-                IFieldOrProperty fieldOrProperty => new( fieldOrProperty, common ),
-                IEvent @event => new( @event, common ),
-                _ => throw new AssertionFailedException(),
+                INamedType type => new MetaApi( type, common ),
+                IMethod method => new MetaApi( method, common ),
+                IFieldOrProperty fieldOrProperty => new MetaApi( fieldOrProperty, common ),
+                IEvent @event => new MetaApi( @event, common ),
+                _ => throw new AssertionFailedException()
             };
 
         public static MetaApi ForMethod( IMethodBase methodBase, MetaApiProperties common ) => new( (IMethod) methodBase, common );

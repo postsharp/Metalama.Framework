@@ -6,7 +6,5 @@ namespace Metalama.Framework.Engine.Transformations
     /// <summary>
     /// Base class for initialization result classes.
     /// </summary>
-    internal abstract class TransformationInitializationResult
-    {
-    }
+    internal abstract class TransformationInitializationResult { }
 }

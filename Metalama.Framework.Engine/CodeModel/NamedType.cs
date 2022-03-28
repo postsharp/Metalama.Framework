@@ -218,12 +218,12 @@ namespace Metalama.Framework.Engine.CodeModel
         [Memo]
         public IConstructor? StaticConstructor
             => this.TypeSymbol
-                .GetMembers()
-                .OfType<IMethodSymbol>()
-                .Where( m => m.MethodKind == MethodKind.StaticConstructor )
-                .Select( m => this.Compilation.Factory.GetConstructor( m ) )
-                .SingleOrDefault()
-            ?? new VirtualStaticConstructor(this);
+                   .GetMembers()
+                   .OfType<IMethodSymbol>()
+                   .Where( m => m.MethodKind == MethodKind.StaticConstructor )
+                   .Select( m => this.Compilation.Factory.GetConstructor( m ) )
+                   .SingleOrDefault()
+               ?? new VirtualStaticConstructor( this );
 
         public bool IsPartial
         {
@@ -627,7 +627,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         private class VirtualStaticConstructor : IConstructor, ISdkDeclaration
         {
-            public VirtualStaticConstructor(INamedType declaringType)
+            public VirtualStaticConstructor( INamedType declaringType )
             {
                 this.DeclaringType = declaringType;
             }
@@ -680,6 +680,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 stringBuilder.Append( this.DeclaringType.ToDisplayString( format, context ) );
                 stringBuilder.Append( '.' );
                 stringBuilder.Append( this.DeclaringType.Name );
+
                 return stringBuilder.ToString();
             }
 

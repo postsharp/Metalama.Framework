@@ -470,9 +470,9 @@ namespace Metalama.Framework.Engine.Linking
         /// <returns></returns>
         public bool IsRewriteTarget( ISymbol symbol )
         {
-            if ( this._introductionRegistry.IsOverride( symbol ) 
-                || this._introductionRegistry.IsOverrideTarget( symbol ) 
-                || this._codeTransformationRegistry.HasCodeTransformations(symbol) )
+            if ( this._introductionRegistry.IsOverride( symbol )
+                 || this._introductionRegistry.IsOverrideTarget( symbol )
+                 || this._codeTransformationRegistry.HasCodeTransformations( symbol ) )
             {
                 return true;
             }
@@ -497,6 +497,7 @@ namespace Metalama.Framework.Engine.Linking
             {
                 case IMethodSymbol { MethodKind: MethodKind.Constructor or MethodKind.StaticConstructor } constructorSymbol:
                     return this.RewriteConstructor( (ConstructorDeclarationSyntax) syntax, constructorSymbol, generationContext );
+
                 case IMethodSymbol methodSymbol:
                     return this.RewriteMethod( (MethodDeclarationSyntax) syntax, methodSymbol, generationContext );
 

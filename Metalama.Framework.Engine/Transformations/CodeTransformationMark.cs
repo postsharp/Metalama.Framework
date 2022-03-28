@@ -30,7 +30,7 @@ namespace Metalama.Framework.Engine.Transformations
         /// </summary>
         public SyntaxNode? Operand { get; }
 
-        public CodeTransformationMark( ICodeTransformation source, SyntaxNode? target, CodeTransformationOperator @operator, SyntaxNode? operand)
+        public CodeTransformationMark( ICodeTransformation source, SyntaxNode? target, CodeTransformationOperator @operator, SyntaxNode? operand )
         {
             this.Source = source;
             this.Target = target;

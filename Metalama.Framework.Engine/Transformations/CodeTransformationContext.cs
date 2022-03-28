@@ -26,7 +26,7 @@ namespace Metalama.Framework.Engine.Transformations
 
         public IReadOnlyList<CodeTransformationMark> Marks => this._marks;
 
-        public CodeTransformationContext( ICodeTransformation transformation, ISymbol declarationSymbol, SyntaxNode? targetNode)
+        public CodeTransformationContext( ICodeTransformation transformation, ISymbol declarationSymbol, SyntaxNode? targetNode )
         {
             this._marks = new List<CodeTransformationMark>();
             this.Transformation = transformation;
@@ -42,7 +42,7 @@ namespace Metalama.Framework.Engine.Transformations
         /// <param name="operand"></param>
         public void AddMark( CodeTransformationOperator @operator, SyntaxNode? operand )
         {
-            this._marks.Add( new CodeTransformationMark(this.Transformation, this.TargetNode, @operator, operand ) );
+            this._marks.Add( new CodeTransformationMark( this.Transformation, this.TargetNode, @operator, operand ) );
         }
 
         /// <summary>

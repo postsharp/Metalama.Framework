@@ -831,7 +831,12 @@ namespace Metalama.Framework.Engine.Advices
             throw new NotImplementedException();
         }
 
-        public void IntroduceConstructor( INamedType targetType, string template, IntroductionScope scope = IntroductionScope.Default, OverrideStrategy whenExists = OverrideStrategy.Default, TagDictionary? tags = null )
+        public void IntroduceConstructor(
+            INamedType targetType,
+            string template,
+            IntroductionScope scope = IntroductionScope.Default,
+            OverrideStrategy whenExists = OverrideStrategy.Default,
+            TagDictionary? tags = null )
         {
             throw new NotImplementedException();
         }

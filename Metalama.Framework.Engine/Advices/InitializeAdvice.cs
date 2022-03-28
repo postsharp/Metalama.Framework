@@ -48,32 +48,36 @@ namespace Metalama.Framework.Engine.Advices
                 {
                     INamedType t => t,
                     IMember m => m.DeclaringType,
-                    _ => throw new AssertionFailedException(),
+                    _ => throw new AssertionFailedException()
                 };
 
             // TODO: We don't want to include constructors that call other constructor of this class, i.e. ": this(...)".
             var syntaxTrees =
-                ( containingType.StaticConstructor != null && this.Reason.HasFlag( InitializationReason.TypeConstructing )
+                (containingType.StaticConstructor != null && this.Reason.HasFlag( InitializationReason.TypeConstructing )
                     ? new IConstructor[] { containingType.StaticConstructor }
-                    : Array.Empty<IConstructor>() )
+                    : Array.Empty<IConstructor>())
                 .Concat( containingType.Constructors.Where( x => !x.IsStatic && this.Reason.HasFlag( InitializationReason.Constructing ) ) )
-                .GroupBy(x => (x, x.GetSymbol()) switch 
-                    { 
-                        (_, not null and var s) => s.GetPrimarySyntaxReference()?.SyntaxTree ?? s.ContainingType.GetPrimarySyntaxReference().AssertNotNull().SyntaxTree,
+                .GroupBy(
+                    x => (x, x.GetSymbol()) switch
+                    {
+                        (_, not null and var s) => s.GetPrimarySyntaxReference()?.SyntaxTree
+                                                   ?? s.ContainingType.GetPrimarySyntaxReference().AssertNotNull().SyntaxTree,
                         (ISyntaxTreeTransformation t, null) => t.TargetSyntaxTree,
-                        (_, null ) => containingType.GetPrimaryDeclaration()?.SyntaxTree ?? throw new AssertionFailedException(),
+                        (_, null) => containingType.GetPrimaryDeclaration()?.SyntaxTree ?? throw new AssertionFailedException()
                     } );
 
             var initializations = new List<InitializationTransformation>();
             InitializationTransformation? mainInitialization = null;
 
-            foreach (var syntaxTreeConstructors in syntaxTrees)
+            foreach ( var syntaxTreeConstructors in syntaxTrees )
             {
                 foreach ( var syntaxReference in containingType.GetSymbol().DeclaringSyntaxReferences.Where( x => x.SyntaxTree == syntaxTreeConstructors.Key ) )
                 {
-                    var constructorsBelongingToReference = syntaxTreeConstructors.Where( x => x.GetPrimaryDeclaration() == null || x.GetPrimaryDeclaration().AssertNotNull()?.Parent == syntaxReference.GetSyntax() ).ToArray();
+                    var constructorsBelongingToReference = syntaxTreeConstructors.Where(
+                            x => x.GetPrimaryDeclaration() == null || x.GetPrimaryDeclaration().AssertNotNull()?.Parent == syntaxReference.GetSyntax() )
+                        .ToArray();
 
-                    if (constructorsBelongingToReference.Length == 0)
+                    if ( constructorsBelongingToReference.Length == 0 )
                     {
                         continue;
                     }

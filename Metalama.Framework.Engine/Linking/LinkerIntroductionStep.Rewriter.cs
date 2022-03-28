@@ -30,10 +30,12 @@ namespace Metalama.Framework.Engine.Linking
             private readonly ImmutableDictionaryOfArray<IDeclaration, ScopedSuppression> _diagnosticSuppressions;
             private readonly SyntaxTransformationCollection _introducedMemberCollection;
             private readonly IReadOnlyDictionary<SyntaxNode, (string Id, IReadOnlyList<CodeTransformationMark> Marks)> _marksByNode;
-            private readonly IReadOnlyDictionary<ISymbol, (ConstructorDeclarationSyntax? Static, ConstructorDeclarationSyntax? Instance)> _typesWithIntroducedDefaultCtors;
+
+            private readonly IReadOnlyDictionary<ISymbol, (ConstructorDeclarationSyntax? Static, ConstructorDeclarationSyntax? Instance)>
+                _typesWithIntroducedDefaultCtors;
 
             // Maps a diagnostic id to the number of times it has been suppressed.
-            private ImmutableHashSet<string> _activeSuppressions = ImmutableHashSet.Create<string>( StringComparer.OrdinalIgnoreCase );            
+            private ImmutableHashSet<string> _activeSuppressions = ImmutableHashSet.Create<string>( StringComparer.OrdinalIgnoreCase );
 
             public Rewriter(
                 SyntaxTransformationCollection introducedMemberCollection,
@@ -148,12 +150,12 @@ namespace Metalama.Framework.Engine.Linking
 
                     // Temporary (implicit ctors).
                     if ( typeSymbol != null
-                        && this._typesWithIntroducedDefaultCtors.TryGetValue( typeSymbol, out var defaultCtors )
-                        && typeSymbol.GetPrimarySyntaxReference().AssertNotNull().GetSyntax() == node )
+                         && this._typesWithIntroducedDefaultCtors.TryGetValue( typeSymbol, out var defaultCtors )
+                         && typeSymbol.GetPrimarySyntaxReference().AssertNotNull().GetSyntax() == node )
                     {
                         if ( defaultCtors.Instance != null )
                         {
-                            members.Add(defaultCtors.Instance);
+                            members.Add( defaultCtors.Instance );
                         }
 
                         if ( defaultCtors.Static != null )

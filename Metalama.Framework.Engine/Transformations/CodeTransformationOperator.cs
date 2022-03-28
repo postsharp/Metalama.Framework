@@ -11,6 +11,6 @@ namespace Metalama.Framework.Engine.Transformations
         /// <summary>
         /// Insert as a first statement into the target block.
         /// </summary>
-        InsertHead,
+        InsertHead
     }
 }

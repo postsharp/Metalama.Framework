@@ -298,14 +298,14 @@ namespace Metalama.Framework.Aspects
             TagDictionary? tags = null );
 
         [Obsolete( "Not implemented." )]
-        void OverrideConstructor( 
+        void OverrideConstructor(
             IConstructor targetConstructor,
             string template,
             TagDictionary? tags = null );
 
         [Obsolete( "Not implemented." )]
         void IntroduceConstructor(
-            INamedType targetType, 
+            INamedType targetType,
             string template,
             IntroductionScope scope = IntroductionScope.Default,
             OverrideStrategy whenExists = OverrideStrategy.Default,

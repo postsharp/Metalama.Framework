@@ -57,14 +57,18 @@ namespace Metalama.Framework.Engine.Linking
             var shortLayerName = aspectLayer.LayerName;
 
             var nameHint =
-                    shortLayerName != null
-                        ? $"Initialize_{shortAspectName}_{shortLayerName}_{initializedMember.Name}"
-                        : $"Initialize_{shortAspectName}_{initializedMember.Name}";
+                shortLayerName != null
+                    ? $"Initialize_{shortAspectName}_{shortLayerName}_{initializedMember.Name}"
+                    : $"Initialize_{shortAspectName}_{initializedMember.Name}";
 
             return this.FindUniqueName( targetType, nameHint );
         }
 
-        internal override string GetInitializationName( INamedType targetType, AspectLayerId aspectLayer, IDeclaration targetDeclaration, InitializationReason reason )
+        internal override string GetInitializationName(
+            INamedType targetType,
+            AspectLayerId aspectLayer,
+            IDeclaration targetDeclaration,
+            InitializationReason reason )
         {
             var shortAspectName = aspectLayer.AspectShortName;
             var shortLayerName = aspectLayer.LayerName;
@@ -73,20 +77,20 @@ namespace Metalama.Framework.Engine.Linking
             {
                 INamedType => null,
                 IMember member => member.Name,
-                _ => throw new AssertionFailedException(),
+                _ => throw new AssertionFailedException()
             };
 
             // TODO: Not optimal.
             var reasonName = reason.ToString().Replace( ", ", "_" );
 
             var nameHint =
-                    shortLayerName != null
-                        ? targetName != null 
-                            ? $"{reasonName}_{shortAspectName}_{shortLayerName}_{targetName}"
-                            : $"{reasonName}_{shortAspectName}_{shortLayerName}"
-                        : targetName != null 
-                            ? $"{reasonName}_{shortAspectName}_{targetName}"
-                            : $"{reasonName}_{shortAspectName}";
+                shortLayerName != null
+                    ? targetName != null
+                        ? $"{reasonName}_{shortAspectName}_{shortLayerName}_{targetName}"
+                        : $"{reasonName}_{shortAspectName}_{shortLayerName}"
+                    : targetName != null
+                        ? $"{reasonName}_{shortAspectName}_{targetName}"
+                        : $"{reasonName}_{shortAspectName}";
 
             return this.FindUniqueName( targetType, nameHint );
         }

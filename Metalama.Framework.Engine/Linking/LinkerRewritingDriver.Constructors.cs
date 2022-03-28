@@ -19,7 +19,10 @@ namespace Metalama.Framework.Engine.Linking
             IMethodSymbol symbol,
             SyntaxGenerationContext generationContext )
         {
-            return new[] { (ConstructorDeclarationSyntax) new CodeMarkRewriter( this._codeTransformationRegistry ).Visit( constructorDeclaration ).AssertNotNull() };
+            return new[]
+            {
+                (ConstructorDeclarationSyntax) new CodeMarkRewriter( this._codeTransformationRegistry ).Visit( constructorDeclaration ).AssertNotNull()
+            };
         }
 
         private class CodeMarkRewriter : CSharpSyntaxRewriter
@@ -45,21 +48,21 @@ namespace Metalama.Framework.Engine.Linking
 
                             foreach ( var mark in marks )
                             {
-                                statements.Add( (StatementSyntax)mark.Operand.AssertNotNull() );
+                                statements.Add( (StatementSyntax) mark.Operand.AssertNotNull() );
                             }
 
                             return block.WithStatements(
                                 block.Statements.Insert(
                                     0,
                                     Block( statements )
-                                    .NormalizeWhitespace()
-                                    .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock ) ) );
+                                        .NormalizeWhitespace()
+                                        .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock ) ) );
 
                         default:
                             throw new AssertionFailedException();
-                    }                    
+                    }
                 }
-                else if (node?.ContainsAnnotations == true)
+                else if ( node?.ContainsAnnotations == true )
                 {
                     return base.Visit( node );
                 }

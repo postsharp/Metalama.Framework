@@ -17,7 +17,6 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Globalization;
 using System.Linq;
 
@@ -101,8 +100,22 @@ namespace Metalama.Framework.Engine.Linking
 
             ProcessReplaceTransformations( input, allTransformations, syntaxTransformationCollection, out var replacedTransformations );
             ProcessHierarchicalTransformations( diagnostics, allTransformations, nameProvider, out var initializationResults );
-            this.ProcessIntroduceTransformations( input, allTransformations, diagnostics, nameProvider, syntaxTransformationCollection, replacedTransformations, initializationResults );
-            PrepareCodeTransformationMarkedNodes( input, allTransformations, initializationResults, out var markedNodes, out var typesWithRequiredImplicitCtors );
+
+            this.ProcessIntroduceTransformations(
+                input,
+                allTransformations,
+                diagnostics,
+                nameProvider,
+                syntaxTransformationCollection,
+                replacedTransformations,
+                initializationResults );
+
+            PrepareCodeTransformationMarkedNodes(
+                input,
+                allTransformations,
+                initializationResults,
+                out var markedNodes,
+                out var typesWithRequiredImplicitCtors );
 
             // Group diagnostic suppressions by target.
             var suppressionsByTarget = input.DiagnosticSuppressions.ToMultiValueDictionary(
@@ -135,7 +148,9 @@ namespace Metalama.Framework.Engine.Linking
                 }
             }
 
-            var codeTransformationRegistry = new LinkerCodeTransformationRegistry( input.CompilationModel, markedNodes.ToDictionary( x => x.Value.Id, x => x.Value.Marks ) );
+            var codeTransformationRegistry = new LinkerCodeTransformationRegistry(
+                input.CompilationModel,
+                markedNodes.ToDictionary( x => x.Value.Id, x => x.Value.Marks ) );
 
             intermediateCompilation = intermediateCompilation.Update(
                 syntaxTreeMapping.Select( p => new SyntaxTreeModification( p.Value, p.Key ) ).ToList(),
@@ -274,8 +289,8 @@ namespace Metalama.Framework.Engine.Linking
 
                     var initializationResult =
                         transformation is IHierarchicalTransformation hierarchicalTransformation
-                        ? initializationResults[hierarchicalTransformation]
-                        : null;
+                            ? initializationResults[hierarchicalTransformation]
+                            : null;
 
                     // Call GetIntroducedMembers
                     var introductionContext = new MemberIntroductionContext(
@@ -300,11 +315,11 @@ namespace Metalama.Framework.Engine.Linking
             }
         }
 
-        private static void PrepareCodeTransformationMarkedNodes( 
+        private static void PrepareCodeTransformationMarkedNodes(
             AspectLinkerInput input,
             List<ITransformation> allTransformations,
             Dictionary<IHierarchicalTransformation, TransformationInitializationResult?> initializationResults,
-            out Dictionary<SyntaxNode, (string Id, IReadOnlyList<CodeTransformationMark> Marks)> markedNodes, 
+            out Dictionary<SyntaxNode, (string Id, IReadOnlyList<CodeTransformationMark> Marks)> markedNodes,
             out Dictionary<ISymbol, (ConstructorDeclarationSyntax? Static, ConstructorDeclarationSyntax? Instance)> typesWithRequiredImplicitCtors )
         {
             var codeTransformationsBySyntaxTree = new Dictionary<SyntaxTree, List<ICodeTransformation>>();
@@ -313,8 +328,8 @@ namespace Metalama.Framework.Engine.Linking
             {
                 var initializationResult =
                     codeTransformationSource is IHierarchicalTransformation hierarchicalTransformation
-                    ? initializationResults[hierarchicalTransformation]
-                    : null;
+                        ? initializationResults[hierarchicalTransformation]
+                        : null;
 
                 var codeTransformationSourceContext =
                     new CodeTransformationSourceContext(
@@ -332,7 +347,10 @@ namespace Metalama.Framework.Engine.Linking
             }
 
             markedNodes = new Dictionary<SyntaxNode, (string Id, IReadOnlyList<CodeTransformationMark> Marks)>();
-            typesWithRequiredImplicitCtors = new Dictionary<ISymbol, (ConstructorDeclarationSyntax? Static, ConstructorDeclarationSyntax? Instance)>( SymbolEqualityComparer.Default );
+
+            typesWithRequiredImplicitCtors =
+                new Dictionary<ISymbol, (ConstructorDeclarationSyntax? Static, ConstructorDeclarationSyntax? Instance)>( SymbolEqualityComparer.Default );
+
             var nextMarkedNodeId = 0;
 
             // Collect transformation marks.
@@ -343,7 +361,10 @@ namespace Metalama.Framework.Engine.Linking
 
                 if ( codeTransformationsBySyntaxTree.TryGetValue( initialSyntaxTree, out var codeTransformations ) )
                 {
-                    var codeTransformationVisitor = new CodeTransformationVisitor( input.InitialCompilation.Compilation.GetSemanticModel( initialSyntaxTree ), codeTransformations );
+                    var codeTransformationVisitor = new CodeTransformationVisitor(
+                        input.InitialCompilation.Compilation.GetSemanticModel( initialSyntaxTree ),
+                        codeTransformations );
+
                     codeTransformationVisitor.Visit( root );
 
                     // Temporary (implicit ctors).
@@ -351,21 +372,22 @@ namespace Metalama.Framework.Engine.Linking
                     {
                         ConstructorDeclarationSyntax? staticCtor = null;
                         ConstructorDeclarationSyntax? instanceCtor = null;
+
                         if ( type.Value.Static )
                         {
                             var mark = nextMarkedNodeId++.ToString( CultureInfo.InvariantCulture );
 
                             staticCtor =
                                 SyntaxFactory.ConstructorDeclaration(
-                                    SyntaxFactory.List<AttributeListSyntax>(),
-                                    SyntaxFactory.TokenList( SyntaxFactory.Token( SyntaxKind.StaticKeyword ) ),
-                                    type.Value.Declaration.Identifier,
-                                    SyntaxFactory.ParameterList(),
-                                    null,
-                                    SyntaxFactory.Block().WithLinkerMarkedNodeId( mark ),
-                                    null )
-                                .NormalizeWhitespace()
-                                .WithTrailingTrivia( SyntaxFactory.ElasticLineFeed );
+                                        SyntaxFactory.List<AttributeListSyntax>(),
+                                        SyntaxFactory.TokenList( SyntaxFactory.Token( SyntaxKind.StaticKeyword ) ),
+                                        type.Value.Declaration.Identifier,
+                                        SyntaxFactory.ParameterList(),
+                                        null,
+                                        SyntaxFactory.Block().WithLinkerMarkedNodeId( mark ),
+                                        null )
+                                    .NormalizeWhitespace()
+                                    .WithTrailingTrivia( SyntaxFactory.ElasticLineFeed );
                         }
 
                         if ( type.Value.Instance )
@@ -374,15 +396,15 @@ namespace Metalama.Framework.Engine.Linking
 
                             instanceCtor =
                                 SyntaxFactory.ConstructorDeclaration(
-                                    SyntaxFactory.List<AttributeListSyntax>(),
-                                    SyntaxFactory.TokenList( SyntaxFactory.Token( SyntaxKind.PublicKeyword ) ),
-                                    type.Value.Declaration.Identifier,
-                                    SyntaxFactory.ParameterList(),
-                                    null,
-                                    SyntaxFactory.Block().WithLinkerMarkedNodeId( mark ),
-                                    null )
-                                .NormalizeWhitespace()
-                                .WithTrailingTrivia( SyntaxFactory.ElasticLineFeed );                                
+                                        SyntaxFactory.List<AttributeListSyntax>(),
+                                        SyntaxFactory.TokenList( SyntaxFactory.Token( SyntaxKind.PublicKeyword ) ),
+                                        type.Value.Declaration.Identifier,
+                                        SyntaxFactory.ParameterList(),
+                                        null,
+                                        SyntaxFactory.Block().WithLinkerMarkedNodeId( mark ),
+                                        null )
+                                    .NormalizeWhitespace()
+                                    .WithTrailingTrivia( SyntaxFactory.ElasticLineFeed );
                         }
 
                         typesWithRequiredImplicitCtors.Add(
@@ -398,7 +420,8 @@ namespace Metalama.Framework.Engine.Linking
                             {
                                 if ( !markedNodes.TryGetValue( mark.Target, out var record ) )
                                 {
-                                    markedNodes[mark.Target] = record = (nextMarkedNodeId++.ToString( CultureInfo.InvariantCulture ), new List<CodeTransformationMark>());
+                                    markedNodes[mark.Target] = record = (
+                                        nextMarkedNodeId++.ToString( CultureInfo.InvariantCulture ), new List<CodeTransformationMark>());
                                 }
 
                                 ((List<CodeTransformationMark>) record.Marks).Add( mark );
@@ -411,7 +434,8 @@ namespace Metalama.Framework.Engine.Linking
                                 {
                                     if ( !markedNodes.TryGetValue( declarationNode, out var record ) )
                                     {
-                                        markedNodes[declarationNode] = record = (nextMarkedNodeId++.ToString( CultureInfo.InvariantCulture ), new List<CodeTransformationMark>());
+                                        markedNodes[declarationNode] = record = (
+                                            nextMarkedNodeId++.ToString( CultureInfo.InvariantCulture ), new List<CodeTransformationMark>());
                                     }
 
                                     ((List<CodeTransformationMark>) record.Marks).Add( mark );
@@ -423,14 +447,15 @@ namespace Metalama.Framework.Engine.Linking
 
                                     if ( typesWithRequiredImplicitCtors.TryGetValue( typeSymbol, out var typeRecord ) )
                                     {
-                                        if (mark.Source.TargetDeclaration.IsStatic)
+                                        if ( mark.Source.TargetDeclaration.IsStatic )
                                         {
                                             // Implicit static ctor.
                                             var key = typeRecord.Static.AssertNotNull();
 
                                             if ( !markedNodes.TryGetValue( key, out var record ) )
                                             {
-                                                markedNodes[key] = record = (key.Body.AssertNotNull().GetLinkerMarkedNodeId().AssertNotNull(), new List<CodeTransformationMark>());
+                                                markedNodes[key] = record = (
+                                                    key.Body.AssertNotNull().GetLinkerMarkedNodeId().AssertNotNull(), new List<CodeTransformationMark>());
                                             }
 
                                             ((List<CodeTransformationMark>) record.Marks).Add( mark );
@@ -442,7 +467,8 @@ namespace Metalama.Framework.Engine.Linking
 
                                             if ( !markedNodes.TryGetValue( key, out var record ) )
                                             {
-                                                markedNodes[key] = record = (key.Body.AssertNotNull().GetLinkerMarkedNodeId().AssertNotNull(), new List<CodeTransformationMark>());
+                                                markedNodes[key] = record = (
+                                                    key.Body.AssertNotNull().GetLinkerMarkedNodeId().AssertNotNull(), new List<CodeTransformationMark>());
                                             }
 
                                             ((List<CodeTransformationMark>) record.Marks).Add( mark );

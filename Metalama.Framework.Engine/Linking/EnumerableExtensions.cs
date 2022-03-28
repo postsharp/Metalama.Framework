@@ -15,21 +15,21 @@ namespace Metalama.Framework.Engine.Linking
         /// <param name="enumerable"></param>
         /// <param name="getDependencies"></param>
         /// <returns></returns>
-        public static IEnumerable<T> OrderByReverseTopology<T>(this IEnumerable<T> enumerable, Func<T, IReadOnlyList<T>> getDependencies)
+        public static IEnumerable<T> OrderByReverseTopology<T>( this IEnumerable<T> enumerable, Func<T, IReadOnlyList<T>> getDependencies )
             where T : class
-        {            
+        {
             // Topological sort using stack-based DFS.
             // First find entry points (nodes without any incoming edge)
             var entryPoints = new HashSet<T>( enumerable );
             var descendants = new Dictionary<T, List<T>>();
 
-            foreach (var o in enumerable)
+            foreach ( var o in enumerable )
             {
                 var dependenceis = getDependencies( o );
 
-                foreach (var dependency in dependenceis )
+                foreach ( var dependency in dependenceis )
                 {
-                    if ( !descendants.TryGetValue( dependency, out var list) )
+                    if ( !descendants.TryGetValue( dependency, out var list ) )
                     {
                         descendants[dependency] = list = new List<T>();
                     }
@@ -48,9 +48,9 @@ namespace Metalama.Framework.Engine.Linking
                 }
             }
 
-            IReadOnlyList<T> GetDescendants(T x)
+            IReadOnlyList<T> GetDescendants( T x )
             {
-                if (!descendants!.TryGetValue(x, out var l))
+                if ( !descendants!.TryGetValue( x, out var l ) )
                 {
                     return Array.Empty<T>();
                 }
@@ -73,10 +73,10 @@ namespace Metalama.Framework.Engine.Linking
                 {
                     var current = stack.Pop();
 
-                    if (current.Descendants == null)
+                    if ( current.Descendants == null )
                     {
                         // Opening a new node.
-                        current.Descendants = GetDescendants( current.Node);
+                        current.Descendants = GetDescendants( current.Node );
 
                         if ( current.Descendants != null && current.Descendants.Count > 0 )
                         {
@@ -96,6 +96,7 @@ namespace Metalama.Framework.Engine.Linking
                         {
                             // Current node has no children, we are leaving it.
                             stackSet.Remove( current.Node );
+
                             yield return current.Node;
                         }
                     }
@@ -103,7 +104,7 @@ namespace Metalama.Framework.Engine.Linking
                     {
                         // Going to the next child.
 
-                        if (current.Index + 1 < current.Descendants.Count )
+                        if ( current.Index + 1 < current.Descendants.Count )
                         {
                             current.Index++;
                             stack.Push( current );
@@ -119,6 +120,7 @@ namespace Metalama.Framework.Engine.Linking
                         {
                             // We've visited all children, leaving the node.
                             stackSet.Remove( current.Node );
+
                             yield return current.Node;
                         }
                     }
