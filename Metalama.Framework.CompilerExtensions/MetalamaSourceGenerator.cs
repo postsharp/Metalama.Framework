@@ -16,6 +16,10 @@ namespace Metalama.Framework.CompilerExtensions
         {
             switch ( ProcessKindHelper.CurrentProcessKind )
             {
+                case ProcessKind.Compiler:
+                    // No implementation required.
+                    break;
+
                 case ProcessKind.DevEnv:
                     this._impl = (ISourceGenerator) ResourceExtractor.CreateInstance(
                         "Metalama.Framework.DesignTime.VisualStudio",
@@ -30,15 +34,11 @@ namespace Metalama.Framework.CompilerExtensions
 
                     break;
 
-                case ProcessKind.Other:
+                default:
                     this._impl = (ISourceGenerator) ResourceExtractor.CreateInstance(
                         "Metalama.Framework.DesignTime",
                         "Metalama.Framework.DesignTime.AnalysisProcessSourceGenerator" );
 
-                    break;
-
-                case ProcessKind.Compiler:
-                    // No implementation required.
                     break;
             }
         }
