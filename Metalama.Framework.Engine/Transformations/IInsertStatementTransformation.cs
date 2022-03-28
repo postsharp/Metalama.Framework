@@ -8,7 +8,7 @@ namespace Metalama.Framework.Engine.Transformations
     /// <summary>
     /// Represents a single code transformation.
     /// </summary>
-    internal interface ICodeTransformation : INonObservableTransformation
+    internal interface IInsertStatementTransformation : INonObservableTransformation
     {
         ITransformation Parent { get; }
 
@@ -27,6 +27,6 @@ namespace Metalama.Framework.Engine.Transformations
         /// Evaluates the target syntax node and transforms the state.
         /// </summary>
         /// <param name="context"></param>
-        void EvaluateSyntaxNode( CodeTransformationContext context );
+        InsertedStatement GetInsertedStatement( InsertStatementTransformationContext context );
     }
 }

@@ -10,68 +10,62 @@ using System.Collections.Generic;
 using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
-namespace Metalama.Framework.Engine.Linking
+namespace Metalama.Framework.Engine.Linking;
+
+internal partial class LinkerRewritingDriver
 {
-    internal partial class LinkerRewritingDriver
+    public IReadOnlyList<MemberDeclarationSyntax> RewriteConstructor(
+        ConstructorDeclarationSyntax constructorDeclaration,
+        IMethodSymbol symbol,
+        SyntaxGenerationContext generationContext )
+        => new[] { (ConstructorDeclarationSyntax) new CodeMarkRewriter( this._codeTransformationRegistry ).Visit( constructorDeclaration ).AssertNotNull() };
+
+    private class CodeMarkRewriter : CSharpSyntaxRewriter
     {
-        public IReadOnlyList<MemberDeclarationSyntax> RewriteConstructor(
-            ConstructorDeclarationSyntax constructorDeclaration,
-            IMethodSymbol symbol,
-            SyntaxGenerationContext generationContext )
+        private readonly LinkerCodeTransformationRegistry _codeTransformationRegistry;
+
+        public CodeMarkRewriter( LinkerCodeTransformationRegistry codeTransformationRegistry )
         {
-            return new[]
-            {
-                (ConstructorDeclarationSyntax) new CodeMarkRewriter( this._codeTransformationRegistry ).Visit( constructorDeclaration ).AssertNotNull()
-            };
+            this._codeTransformationRegistry = codeTransformationRegistry;
         }
 
-        private class CodeMarkRewriter : CSharpSyntaxRewriter
+        public override SyntaxNode? Visit( SyntaxNode? node )
         {
-            private readonly LinkerCodeTransformationRegistry _codeTransformationRegistry;
-
-            public CodeMarkRewriter( LinkerCodeTransformationRegistry codeTransformationRegistry )
+            if ( node != null && this._codeTransformationRegistry.TryGetTransformationMarksForNode( node, out var marks ) )
             {
-                this._codeTransformationRegistry = codeTransformationRegistry;
+                switch ( node )
+                {
+                    case BlockSyntax block:
+                        var statements = new List<StatementSyntax>();
+
+                        // Not supporting anything else yet.
+                        // ReSharper disable once PossibleMultipleEnumeration
+                        Invariant.Assert( marks.All( m => m.Position == InsertedStatementPosition.Beginning ) );
+
+                        // ReSharper disable once PossibleMultipleEnumeration
+                        foreach ( var mark in marks )
+                        {
+                            statements.Add( (StatementSyntax) mark.Statement.AssertNotNull() );
+                        }
+
+                        return block.WithStatements(
+                            block.Statements.Insert(
+                                0,
+                                Block( statements )
+                                    .NormalizeWhitespace()
+                                    .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock ) ) );
+
+                    default:
+                        throw new AssertionFailedException();
+                }
             }
-
-            public override SyntaxNode? Visit( SyntaxNode? node )
+            else if ( node?.ContainsAnnotations == true )
             {
-                if ( node != null && this._codeTransformationRegistry.TryGetTransformationMarksForNode( node, out var marks ) )
-                {
-                    switch ( node )
-                    {
-                        case BlockSyntax block:
-                            var statements = new List<StatementSyntax>();
-
-                            // Not supporting anything else yet.
-                            // ReSharper disable once PossibleMultipleEnumeration
-                            Invariant.Assert( marks.All( m => m.Operator == CodeTransformationOperator.InsertHead ) );
-
-                            // ReSharper disable once PossibleMultipleEnumeration
-                            foreach ( var mark in marks )
-                            {
-                                statements.Add( (StatementSyntax) mark.Operand.AssertNotNull() );
-                            }
-
-                            return block.WithStatements(
-                                block.Statements.Insert(
-                                    0,
-                                    Block( statements )
-                                        .NormalizeWhitespace()
-                                        .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock ) ) );
-
-                        default:
-                            throw new AssertionFailedException();
-                    }
-                }
-                else if ( node?.ContainsAnnotations == true )
-                {
-                    return base.Visit( node );
-                }
-                else
-                {
-                    return node;
-                }
+                return base.Visit( node );
+            }
+            else
+            {
+                return node;
             }
         }
     }

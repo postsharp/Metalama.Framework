@@ -20,7 +20,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.Transformations
 {
-    internal class InitializationTransformation : INonObservableTransformation, IMemberIntroduction, ICodeTransformationSource, IHierarchicalTransformation
+    internal class InitializationTransformation : INonObservableTransformation, IMemberIntroduction, IBodyTransformationSource, IHierarchicalTransformation
     {
         private readonly IMemberOrNamedType _initializedDeclaration;
         private readonly TypeDeclarationSyntax _typeDeclaration;
@@ -151,7 +151,7 @@ namespace Metalama.Framework.Engine.Transformations
             }
         }
 
-        public IEnumerable<ICodeTransformation> GetCodeTransformations( in CodeTransformationSourceContext context )
+        public IEnumerable<IInsertStatementTransformation> GetBodyTransformations( in CodeTransformationSourceContext context )
         {
             string introductionName;
 
@@ -164,11 +164,11 @@ namespace Metalama.Framework.Engine.Transformations
                 introductionName = ((InitializationResult) context.DependencyInitializationResults[this._mainTransformation].AssertNotNull()).IntroductionName;
             }
 
-            var codeTransformations = new List<ICodeTransformation>();
+            var codeTransformations = new List<IInsertStatementTransformation>();
 
             foreach ( var constructor in this._constructors )
             {
-                codeTransformations.Add( new CodeTransformation( this, constructor, introductionName ) );
+                codeTransformations.Add( new InsertStatementTransformation( this, constructor, introductionName ) );
             }
 
             return codeTransformations;
@@ -184,12 +184,12 @@ namespace Metalama.Framework.Engine.Transformations
             }
         }
 
-        private class CodeTransformation : ICodeTransformation
+        private class InsertStatementTransformation : IInsertStatementTransformation
         {
             private readonly InitializationTransformation _parent;
             private readonly string _introductionName;
-            
-            ITransformation ICodeTransformation.Parent => this._parent;
+
+            ITransformation IInsertStatementTransformation.Parent => this._parent;
 
             public Advice Advice => this._parent.Advice;
 
@@ -197,49 +197,20 @@ namespace Metalama.Framework.Engine.Transformations
 
             public IMemberOrNamedType ContextDeclaration => this._parent._initializedDeclaration;
 
-            public CodeTransformation( InitializationTransformation parent, IMethodBase targetDeclaration, string introductionName )
+            public InsertStatementTransformation( InitializationTransformation parent, IMethodBase targetDeclaration, string introductionName )
             {
                 this._parent = parent;
                 this.TargetDeclaration = targetDeclaration;
                 this._introductionName = introductionName;
             }
 
-            public void EvaluateSyntaxNode( CodeTransformationContext context )
+            public InsertedStatement GetInsertedStatement( InsertStatementTransformationContext context )
             {
-                switch ( context.TargetNode )
-                {
-                    case null:
-                        // This is temporary for implicit constructors.
-                        // Constructor without a body.
-                        context.AddMark( CodeTransformationOperator.InsertHead, this.GetCallSyntax() );
-                        context.Decline();
+                StatementSyntax statement;
 
-                        break;
-
-                    case BlockSyntax:
-                        // Insert the syntax into the beginning of a body and decline the subtree.
-                        context.AddMark( CodeTransformationOperator.InsertHead, this.GetCallSyntax() );
-                        context.Decline();
-
-                        break;
-
-                    case EqualsValueClauseSyntax:
-                        // Insert the syntax into the beginning of the body and decline the subtree.
-                        context.AddMark( CodeTransformationOperator.InsertHead, this.GetCallSyntax() );
-                        context.Decline();
-
-                        break;
-
-                    default:
-                        throw new AssertionFailedException();
-                }
-            }
-
-            private SyntaxNode GetCallSyntax()
-            {
                 if ( this._parent._reason.HasFlag( InitializationReason.TypeConstructing ) )
                 {
-                    return
+                    statement =
                         ExpressionStatement(
                             InvocationExpression(
                                 IdentifierName( this._introductionName ),
@@ -247,7 +218,7 @@ namespace Metalama.Framework.Engine.Transformations
                 }
                 else
                 {
-                    return
+                    statement =
                         ExpressionStatement(
                             InvocationExpression(
                                 MemberAccessExpression(
@@ -256,6 +227,8 @@ namespace Metalama.Framework.Engine.Transformations
                                     IdentifierName( this._introductionName ) ),
                                 ArgumentList() ) );
                 }
+
+                return new InsertedStatement( InsertedStatementPosition.Beginning, statement );
             }
         }
     }

@@ -322,12 +322,12 @@ namespace Metalama.Framework.Engine.Linking
             AspectLinkerInput input,
             List<ITransformation> allTransformations,
             Dictionary<IHierarchicalTransformation, TransformationInitializationResult?> initializationResults,
-            out Dictionary<SyntaxNode, (string Id, IReadOnlyList<CodeTransformationMark> Marks)> markedNodes,
+            out Dictionary<SyntaxNode, (string Id, IReadOnlyList<InsertedStatement> Marks)> markedNodes,
             out Dictionary<ISymbol, (ConstructorDeclarationSyntax? Static, ConstructorDeclarationSyntax? Instance)> typesWithRequiredImplicitConstructors )
         {
-            var codeTransformationsBySyntaxTree = new Dictionary<SyntaxTree, List<ICodeTransformation>>();
+            var codeTransformationsBySyntaxTree = new Dictionary<SyntaxTree, List<IInsertStatementTransformation>>();
 
-            foreach ( var codeTransformationSource in allTransformations.OfType<ICodeTransformationSource>() )
+            foreach ( var codeTransformationSource in allTransformations.OfType<IBodyTransformationSource>() )
             {
                 var initializationResult =
                     codeTransformationSource is IHierarchicalTransformation hierarchicalTransformation
@@ -339,17 +339,17 @@ namespace Metalama.Framework.Engine.Linking
                         initializationResult,
                         initializationResults );
 
-                var codeTransformations = codeTransformationSource.GetCodeTransformations( codeTransformationSourceContext );
+                var codeTransformations = codeTransformationSource.GetBodyTransformations( codeTransformationSourceContext );
 
                 if ( !codeTransformationsBySyntaxTree.TryGetValue( codeTransformationSource.TargetSyntaxTree, out var list ) )
                 {
-                    codeTransformationsBySyntaxTree[codeTransformationSource.TargetSyntaxTree] = list = new List<ICodeTransformation>();
+                    codeTransformationsBySyntaxTree[codeTransformationSource.TargetSyntaxTree] = list = new List<IInsertStatementTransformation>();
                 }
 
                 list.AddRange( codeTransformations );
             }
 
-            markedNodes = new Dictionary<SyntaxNode, (string Id, IReadOnlyList<CodeTransformationMark> Marks)>();
+            markedNodes = new Dictionary<SyntaxNode, (string Id, IReadOnlyList<InsertedStatement> Marks)>();
 
             typesWithRequiredImplicitConstructors =
                 new Dictionary<ISymbol, (ConstructorDeclarationSyntax? Static, ConstructorDeclarationSyntax? Instance)>( SymbolEqualityComparer.Default );
@@ -364,7 +364,7 @@ namespace Metalama.Framework.Engine.Linking
 
                 if ( codeTransformationsBySyntaxTree.TryGetValue( initialSyntaxTree, out var codeTransformations ) )
                 {
-                    var codeTransformationVisitor = new CodeTransformationVisitor(
+                    var codeTransformationVisitor = new BodyTransformationVisitor(
                         input.InitialCompilation.Compilation.GetSemanticModel( initialSyntaxTree ),
                         codeTransformations );
 
@@ -419,38 +419,38 @@ namespace Metalama.Framework.Engine.Linking
                     {
                         foreach ( var mark in codeTransformationVisitor.Marks )
                         {
-                            if ( mark.Target != null )
+                            if ( mark.TargetBody != null )
                             {
-                                if ( !markedNodes.TryGetValue( mark.Target, out var record ) )
+                                if ( !markedNodes.TryGetValue( mark.TargetBody, out var record ) )
                                 {
-                                    markedNodes[mark.Target] = record = (
-                                        nextMarkedNodeId++.ToString( CultureInfo.InvariantCulture ), new List<CodeTransformationMark>());
+                                    markedNodes[mark.TargetBody] = record = (
+                                        nextMarkedNodeId++.ToString( CultureInfo.InvariantCulture ), new List<InsertedStatement>());
                                 }
 
-                                ((List<CodeTransformationMark>) record.Marks).Add( mark );
+                                ((List<InsertedStatement>) record.Marks).Add( mark );
                             }
                             else
                             {
-                                var declarationNode = mark.Source.TargetDeclaration.GetPrimaryDeclaration();
+                                var declarationNode = mark.Parent.TargetDeclaration.GetPrimaryDeclaration();
 
                                 if ( declarationNode != null )
                                 {
                                     if ( !markedNodes.TryGetValue( declarationNode, out var record ) )
                                     {
                                         markedNodes[declarationNode] = record = (
-                                            nextMarkedNodeId++.ToString( CultureInfo.InvariantCulture ), new List<CodeTransformationMark>());
+                                            nextMarkedNodeId++.ToString( CultureInfo.InvariantCulture ), new List<InsertedStatement>());
                                     }
 
-                                    ((List<CodeTransformationMark>) record.Marks).Add( mark );
+                                    ((List<InsertedStatement>) record.Marks).Add( mark );
                                 }
                                 else
                                 {
                                     // Temporary (implicit ctors).
-                                    var typeSymbol = mark.Source.TargetDeclaration.ContainingDeclaration.AssertNotNull().GetSymbol().AssertNotNull();
+                                    var typeSymbol = mark.Parent.TargetDeclaration.ContainingDeclaration.AssertNotNull().GetSymbol().AssertNotNull();
 
                                     if ( typesWithRequiredImplicitConstructors.TryGetValue( typeSymbol, out var typeRecord ) )
                                     {
-                                        if ( mark.Source.TargetDeclaration.IsStatic )
+                                        if ( mark.Parent.TargetDeclaration.IsStatic )
                                         {
                                             // Implicit static ctor.
                                             var key = typeRecord.Static.AssertNotNull();
@@ -458,10 +458,10 @@ namespace Metalama.Framework.Engine.Linking
                                             if ( !markedNodes.TryGetValue( key, out var record ) )
                                             {
                                                 markedNodes[key] = record = (
-                                                    key.Body.AssertNotNull().GetLinkerMarkedNodeId().AssertNotNull(), new List<CodeTransformationMark>());
+                                                    key.Body.AssertNotNull().GetLinkerMarkedNodeId().AssertNotNull(), new List<InsertedStatement>());
                                             }
 
-                                            ((List<CodeTransformationMark>) record.Marks).Add( mark );
+                                            ((List<InsertedStatement>) record.Marks).Add( mark );
                                         }
                                         else
                                         {
@@ -471,10 +471,10 @@ namespace Metalama.Framework.Engine.Linking
                                             if ( !markedNodes.TryGetValue( key, out var record ) )
                                             {
                                                 markedNodes[key] = record = (
-                                                    key.Body.AssertNotNull().GetLinkerMarkedNodeId().AssertNotNull(), new List<CodeTransformationMark>());
+                                                    key.Body.AssertNotNull().GetLinkerMarkedNodeId().AssertNotNull(), new List<InsertedStatement>());
                                             }
 
-                                            ((List<CodeTransformationMark>) record.Marks).Add( mark );
+                                            ((List<InsertedStatement>) record.Marks).Add( mark );
                                         }
                                     }
                                 }

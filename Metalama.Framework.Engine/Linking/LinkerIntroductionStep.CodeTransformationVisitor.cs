@@ -12,171 +12,171 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 
-namespace Metalama.Framework.Engine.Linking
+namespace Metalama.Framework.Engine.Linking;
+
+internal partial class LinkerIntroductionStep
 {
-    internal partial class LinkerIntroductionStep
+    private class BodyTransformationVisitor : CSharpSyntaxWalker
     {
-        private class CodeTransformationVisitor : CSharpSyntaxWalker
+        private readonly SemanticModel _semanticModel;
+        private readonly Dictionary<ISymbol, (TypeDeclarationSyntax Declaration, bool Static, bool Instance)> _typesWithRequiredImplicitConstructors;
+        private readonly List<InsertedStatement> _marks;
+        private Context _currentContext;
+
+        public IReadOnlyList<InsertedStatement> Marks => this._marks;
+
+        public IReadOnlyDictionary<ISymbol, (TypeDeclarationSyntax Declaration, bool Static, bool Instance)> TypesWithRequiredImplicitConstructors
+            => this._typesWithRequiredImplicitConstructors;
+
+        public BodyTransformationVisitor( SemanticModel semanticModel, IReadOnlyList<IInsertStatementTransformation> transformations )
         {
-            private readonly SemanticModel _semanticModel;
-            private readonly Dictionary<ISymbol, (TypeDeclarationSyntax Declaration, bool Static, bool Instance)> _typesWithRequiredImplicitConstructors;
-            private readonly List<CodeTransformationMark> _marks;
-            private Context _currentContext;
+            this._semanticModel = semanticModel;
+            this._marks = new List<InsertedStatement>();
+            this._currentContext = new Context( transformations );
+            this._typesWithRequiredImplicitConstructors = new Dictionary<ISymbol, (TypeDeclarationSyntax Declaration, bool Static, bool Instance)>();
+        }
 
-            public IReadOnlyList<CodeTransformationMark> Marks => this._marks;
+        public override void VisitBlock( BlockSyntax node ) => this.VisitBody( node, n => base.VisitBlock( n ) );
 
-            public IReadOnlyDictionary<ISymbol, (TypeDeclarationSyntax Declaration, bool Static, bool Instance)> TypesWithRequiredImplicitConstructors
-                => this._typesWithRequiredImplicitConstructors;
+        public override void VisitArrowExpressionClause( ArrowExpressionClauseSyntax node )
+            => this.VisitBody( node, n => base.VisitArrowExpressionClause( n ) );
 
-            public CodeTransformationVisitor( SemanticModel semanticModel, IReadOnlyList<ICodeTransformation> transformations )
+        private void VisitBody<T>( T? node, Action<T> visitBase )
+            where T : SyntaxNode
+        {
+            if ( node == null || node.Parent == null || !(this._semanticModel.GetDeclaredSymbol( node.Parent ) is not null and var symbol) )
             {
-                this._semanticModel = semanticModel;
-                this._marks = new List<CodeTransformationMark>();
-                this._currentContext = new Context( transformations );
-                this._typesWithRequiredImplicitConstructors = new Dictionary<ISymbol, (TypeDeclarationSyntax Declaration, bool Static, bool Instance)>();
+                return;
             }
 
-            public override void VisitBlock( BlockSyntax node ) 
-                => this.VisitBody( node, n => base.VisitBlock( n ) );
+            var previousContext = this._currentContext;
 
-            public override void VisitArrowExpressionClause( ArrowExpressionClauseSyntax node ) 
-                => this.VisitBody( node, n => base.VisitArrowExpressionClause( n ) );
-
-            private void VisitBody<T>( T? node, Action<T> visitBase )
-                where T : SyntaxNode
+            try
             {
-                if ( node == null || node.Parent == null || !(this._semanticModel.GetDeclaredSymbol( node.Parent ) is not null and var symbol) )
+                var unrejectedTransformations = previousContext.CodeTransformations.ToBuilder();
+
+                foreach ( var transformation in previousContext.CodeTransformations )
                 {
-                    return;
+                    if ( !SymbolEqualityComparer.Default.Equals( transformation.TargetDeclaration.GetSymbol(), symbol ) )
+                    {
+                        continue;
+                    }
+
+                    var context = new InsertStatementTransformationContext(
+                        transformation,
+                        this._semanticModel.GetDeclaredSymbol( node.Parent ).AssertNotNull(),
+                        node );
+
+                    transformation.GetInsertedStatement( context );
+
+                    if ( !visitDeeper )
+                    {
+                        unrejectedTransformations.Remove( transformation );
+                    }
+
+                    this._marks.AddRange( transformations );
                 }
 
-                var previousContext = this._currentContext;
+                this._currentContext = new Context( unrejectedTransformations.ToImmutable() );
 
-                try
+                if ( unrejectedTransformations.Count > 0 )
                 {
-                    var unrejectedTransformations = previousContext.CodeTransformations.ToBuilder();
+                    visitBase( node );
+                }
+            }
+            finally
+            {
+                this._currentContext = previousContext;
+            }
+        }
 
-                    foreach ( var transformation in previousContext.CodeTransformations )
+        public override void VisitClassDeclaration( ClassDeclarationSyntax node ) => this.VisitTypeDeclaration( node, n => base.VisitClassDeclaration( n ) );
+
+        public override void VisitStructDeclaration( StructDeclarationSyntax node ) => this.VisitTypeDeclaration( node, n => base.VisitStructDeclaration( n ) );
+
+        public override void VisitRecordDeclaration( RecordDeclarationSyntax node ) => this.VisitTypeDeclaration( node, n => base.VisitRecordDeclaration( n ) );
+
+        private void VisitTypeDeclaration<T>( T node, Action<T> baseVisit )
+            where T : TypeDeclarationSyntax
+        {
+            var symbol = this._semanticModel.GetDeclaredSymbol( node ).AssertNotNull();
+            var hasStaticRequiredImplicitCtor = false;
+            var hasInstanceRequiredImplicitCtor = false;
+
+            bool AddSyntaxNodeTransformations( IInsertStatementTransformation transformation )
+            {
+                var context = new InsertStatementTransformationContext( transformation, this._semanticModel.GetDeclaredSymbol( node ).AssertNotNull(), null );
+                transformation.GetInsertedStatement( context );
+
+                if ( !transformations.IsDefaultOrEmpty )
+                {
+                    this._marks.AddRange( transformations );
+
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+
+            // Temporary detection of implicit instance constructors.
+            foreach ( var ctor in symbol.Constructors )
+            {
+                var syntaxReference = ctor.GetPrimarySyntaxReference();
+
+                if ( syntaxReference == null )
+                {
+                    foreach ( var transformation in this._currentContext.CodeTransformations )
                     {
-                        if ( !SymbolEqualityComparer.Default.Equals( transformation.TargetDeclaration.GetSymbol(), symbol ) )
+                        if ( !SymbolEqualityComparer.Default.Equals( ctor, transformation.TargetDeclaration.GetSymbol() ) )
                         {
                             continue;
                         }
 
-                        var context = new CodeTransformationContext(
-                            transformation,
-                            this._semanticModel.GetDeclaredSymbol( node.Parent ).AssertNotNull(),
-                            node );
-
-                        transformation.EvaluateSyntaxNode( context );
-
-                        if ( context.IsDeclined )
+                        if ( AddSyntaxNodeTransformations( transformation ) )
                         {
-                            unrejectedTransformations.Remove( transformation );
+                            hasInstanceRequiredImplicitCtor = true;
                         }
-
-                        this._marks.AddRange( context.Marks );
                     }
-
-                    this._currentContext = new Context( unrejectedTransformations.ToImmutable() );
-
-                    if ( unrejectedTransformations.Count > 0 )
-                    {
-                        visitBase( node );
-                    }
-                }
-                finally
-                {
-                    this._currentContext = previousContext;
                 }
             }
 
-            public override void VisitClassDeclaration( ClassDeclarationSyntax node ) 
-                => this.VisitTypeDeclaration( node, n => base.VisitClassDeclaration( n ) );
-
-            public override void VisitStructDeclaration( StructDeclarationSyntax node ) 
-                => this.VisitTypeDeclaration( node, n => base.VisitStructDeclaration( n ) );
-
-            public override void VisitRecordDeclaration( RecordDeclarationSyntax node ) 
-                => this.VisitTypeDeclaration( node, n => base.VisitRecordDeclaration( n ) );
-
-            private void VisitTypeDeclaration<T>( T node, Action<T> baseVisit )
-                where T : TypeDeclarationSyntax
+            // Temporary detection of missing static constructors.
+            if ( symbol.StaticConstructors.Length == 0 )
             {
-                var symbol = this._semanticModel.GetDeclaredSymbol( node ).AssertNotNull();
-                var hasStaticRequiredImplicitCtor = false;
-                var hasInstanceRequiredImplicitCtor = false;
-
-                // Temporary detection of implicit instance constructors.
-                foreach ( var ctor in symbol.Constructors )
+                foreach ( var transformation in this._currentContext.CodeTransformations )
                 {
-                    var syntaxReference = ctor.GetPrimarySyntaxReference();
-
-                    if ( syntaxReference == null )
+                    if ( transformation.TargetDeclaration.DeclarationKind == DeclarationKind.Constructor
+                         && transformation.TargetDeclaration.IsStatic
+                         && transformation.TargetDeclaration.GetSymbol() == null
+                         && SymbolEqualityComparer.Default.Equals( symbol, transformation.TargetDeclaration.DeclaringType.GetSymbol() ) )
                     {
-                        foreach ( var transformation in this._currentContext.CodeTransformations )
+                        if ( AddSyntaxNodeTransformations( transformation ) )
                         {
-                            if ( !SymbolEqualityComparer.Default.Equals( ctor, transformation.TargetDeclaration.GetSymbol() ) )
-                            {
-                                continue;
-                            }
-
-                            var context = new CodeTransformationContext( transformation, this._semanticModel.GetDeclaredSymbol( node ).AssertNotNull(), null );
-                            transformation.EvaluateSyntaxNode( context );
-
-                            Invariant.Assert( !ctor.IsStatic );
-
-                            if ( context.Marks.Count > 0 )
-                            {
-                                hasInstanceRequiredImplicitCtor = true;
-
-                                this._marks.AddRange( context.Marks );
-                            }
+                            hasStaticRequiredImplicitCtor = true;
                         }
                     }
                 }
-
-                // Temporary detection of missing static constructors.
-                if ( symbol.StaticConstructors.Length == 0 )
-                {
-                    foreach ( var transformation in this._currentContext.CodeTransformations )
-                    {
-                        if ( transformation.TargetDeclaration.DeclarationKind == DeclarationKind.Constructor
-                             && transformation.TargetDeclaration.IsStatic
-                             && transformation.TargetDeclaration.GetSymbol() == null
-                             && SymbolEqualityComparer.Default.Equals( symbol, transformation.TargetDeclaration.DeclaringType.GetSymbol() ) )
-                        {
-                            var context = new CodeTransformationContext( transformation, this._semanticModel.GetDeclaredSymbol( node ).AssertNotNull(), null );
-                            transformation.EvaluateSyntaxNode( context );
-
-                            if ( context.Marks.Count > 0 )
-                            {
-                                hasStaticRequiredImplicitCtor = true;
-
-                                this._marks.AddRange( context.Marks );
-                            }
-                        }
-                    }
-                }
-
-                if ( hasStaticRequiredImplicitCtor || hasInstanceRequiredImplicitCtor )
-                {
-                    this._typesWithRequiredImplicitConstructors.Add( symbol, (node, hasStaticRequiredImplicitCtor, hasInstanceRequiredImplicitCtor) );
-                }
-
-                baseVisit( node );
             }
 
-            internal class Context
+            if ( hasStaticRequiredImplicitCtor || hasInstanceRequiredImplicitCtor )
             {
-                public ImmutableList<ICodeTransformation> CodeTransformations { get; }
+                this._typesWithRequiredImplicitConstructors.Add( symbol, (node, hasStaticRequiredImplicitCtor, hasInstanceRequiredImplicitCtor) );
+            }
 
-                public Context( IReadOnlyList<ICodeTransformation> transformations )
-                {
-                    var builder = ImmutableList.CreateBuilder<ICodeTransformation>();
-                    builder.AddRange( transformations );
-                    this.CodeTransformations = builder.ToImmutable();
-                }
+            baseVisit( node );
+        }
+
+        internal class Context
+        {
+            public ImmutableList<IInsertStatementTransformation> CodeTransformations { get; }
+
+            public Context( IReadOnlyList<IInsertStatementTransformation> transformations )
+            {
+                var builder = ImmutableList.CreateBuilder<IInsertStatementTransformation>();
+                builder.AddRange( transformations );
+                this.CodeTransformations = builder.ToImmutable();
             }
         }
     }

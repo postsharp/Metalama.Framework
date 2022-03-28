@@ -29,7 +29,7 @@ namespace Metalama.Framework.Engine.Linking
             private readonly ImmutableDictionary<AspectLayerId, OrderedAspectLayer> _orderedAspectLayers;
             private readonly ImmutableDictionaryOfArray<IDeclaration, ScopedSuppression> _diagnosticSuppressions;
             private readonly SyntaxTransformationCollection _introducedMemberCollection;
-            private readonly IReadOnlyDictionary<SyntaxNode, (string Id, IReadOnlyList<CodeTransformationMark> Marks)> _marksByNode;
+            private readonly IReadOnlyDictionary<SyntaxNode, (string Id, IReadOnlyList<InsertedStatement> Marks)> _marksByNode;
 
             private readonly IReadOnlyDictionary<ISymbol, (ConstructorDeclarationSyntax? Static, ConstructorDeclarationSyntax? Instance)>
                 _typesWithIntroducedDefaultConstructors;
@@ -42,8 +42,9 @@ namespace Metalama.Framework.Engine.Linking
                 ImmutableDictionaryOfArray<IDeclaration, ScopedSuppression> diagnosticSuppressions,
                 CompilationModel compilation,
                 IReadOnlyList<OrderedAspectLayer> inputOrderedAspectLayers,
-                IReadOnlyDictionary<SyntaxNode, (string Id, IReadOnlyList<CodeTransformationMark> Marks)> marksByNode,
-                IReadOnlyDictionary<ISymbol, (ConstructorDeclarationSyntax? Static, ConstructorDeclarationSyntax? Instance)> typesWithIntroducedDefaultConstructors )
+                IReadOnlyDictionary<SyntaxNode, (string Id, IReadOnlyList<InsertedStatement> Marks)> marksByNode,
+                IReadOnlyDictionary<ISymbol, (ConstructorDeclarationSyntax? Static, ConstructorDeclarationSyntax? Instance)>
+                    typesWithIntroducedDefaultConstructors )
             {
                 this._diagnosticSuppressions = diagnosticSuppressions;
                 this._compilation = compilation;

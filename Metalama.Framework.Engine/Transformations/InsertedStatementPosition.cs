@@ -6,11 +6,12 @@ namespace Metalama.Framework.Engine.Transformations
     /// <summary>
     /// Operators for code transformations.
     /// </summary>
-    internal enum CodeTransformationOperator
+    internal enum InsertedStatementPosition
     {
         /// <summary>
         /// Insert as a first statement into the target block.
         /// </summary>
-        InsertHead
+        Beginning,
+        End
     }
 }

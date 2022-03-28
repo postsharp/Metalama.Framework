@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.Transformations
 {
-    internal struct CodeTransformationSourceContext
+    internal readonly struct CodeTransformationSourceContext
     {
         public TransformationInitializationResult? InitializationResult { get; }
 
