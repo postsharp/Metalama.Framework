@@ -48,21 +48,25 @@ namespace Metalama.Framework.DesignTime
             serviceProvider.GetRequiredService<ICodeRefactoringDiscoveryService>();
             this._codeActionExecutionService = serviceProvider.GetRequiredService<ICodeActionExecutionService>();
 
-            this.FixableDiagnosticIds =
-                ImmutableArray.Create( GeneralDiagnosticDescriptors.TypeNotPartial.Id )
-                    .Add( GeneralDiagnosticDescriptors.SuggestedCodeFix.Id )
-                    .AddRange( this._designTimeDiagnosticDefinitions.UserDiagnosticDescriptors.Keys );
+            var fixableDiagnosticIds = ImmutableArray.Create( GeneralDiagnosticDescriptors.TypeNotPartial.Id )
+                .Add( GeneralDiagnosticDescriptors.SuggestedCodeFix.Id )
+                .AddRange( this._designTimeDiagnosticDefinitions.UserDiagnosticDescriptors.Keys );
+
+            this.FixableDiagnosticIds = fixableDiagnosticIds;
+            
+            this._logger.Trace?.Log( $"Registered {fixableDiagnosticIds.Length} fixable diagnostic ids." );
         }
 
         public override Task RegisterCodeFixesAsync( CodeFixContext context )
         {
-            this._logger.Trace?.Log( "DesignTimeCodeFixProvider.RegisterCodeFixesAsync" );
+            this._logger.Trace?.Log( $"DesignTimeCodeFixProvider.RegisterCodeFixesAsync( project='{context.Document.Project.Name}')" );
+            this._logger.Trace?.Log( $"DesignTimeCodeFixProvider.RegisterCodeFixesAsync( project='{context.Document.Project.Name}'): input diagnostics = {context.Diagnostics.Select( x=>x.Id ).Distinct()}" );
 
             var projectOptions = new ProjectOptions( context.Document.Project );
 
             if ( string.IsNullOrEmpty( projectOptions.ProjectId ) )
             {
-                this._logger.Trace?.Log( "Not a Metalama project." );
+                this._logger.Trace?.Log( "DesignTimeCodeFixProvider.RegisterCodeFixesAsync( project='{context.Document.Project.Name}'): not a Metalama project." );
 
                 return Task.CompletedTask;
             }
@@ -70,6 +74,8 @@ namespace Metalama.Framework.DesignTime
             if ( context.Diagnostics.Any( d => d.Id == GeneralDiagnosticDescriptors.TypeNotPartial.Id ) )
             {
                 // This is a hard-coded code fix. It may need to be refactored with our framework.
+                
+                this._logger.Trace?.Log( "DesignTimeCodeFixProvider.RegisterCodeFixesAsync( project='{context.Document.Project.Name}'): registering 'make partial'" );
 
                 context.RegisterCodeFix(
                     CodeAction.Create(
@@ -78,10 +84,13 @@ namespace Metalama.Framework.DesignTime
                         _makePartialKey ),
                     context.Diagnostics );
             }
-            else if ( context.Diagnostics.Any( d => d.Properties.ContainsKey( CodeFixTitles.DiagnosticPropertyKey ) ) )
+            
+            if ( context.Diagnostics.Any( d => d.Properties.ContainsKey( CodeFixTitles.DiagnosticPropertyKey ) ) )
             {
                 // We have a user diagnostics where a code fix provider was specified. We need to execute the CodeFix pipeline to gather
                 // the actual code fixes.
+                
+                this._logger.Trace?.Log( "DesignTimeCodeFixProvider.RegisterCodeFixesAsync( project='{context.Document.Project.Name}'): relevant diagnostic ID detected." );
 
                 var codeFixes = ProvideCodeFixes(
                     context.Diagnostics,
@@ -103,9 +112,15 @@ namespace Metalama.Framework.DesignTime
                 {
                     foreach ( var codeAction in ((CodeActionBaseModel) fix.CodeAction).ToCodeActions( invocationContext ) )
                     {
+                        this._logger.Trace?.Log( $"DesignTimeCodeFixProvider.RegisterCodeFixesAsync( project='{{context.Document.Project.Name}}'): registering '{codeAction.Title}'." );
+                        
                         context.RegisterCodeFix( codeAction, fix.Diagnostic );
                     }
                 }
+            }
+            else
+            {
+                this._logger.Trace?.Log( "DesignTimeCodeFixProvider.RegisterCodeFixesAsync( project='{context.Document.Project.Name}'): no relevant diagnostic ID detected" );
             }
 
             return Task.CompletedTask;
