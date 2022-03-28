@@ -1,10 +1,28 @@
 <Project>
 
-    <!-- Exclude *.t.cs from the main compilation, display them as text files instead. -->
+    
     <ItemGroup>
+
+        <!-- Exclude *.t.cs from the main compilation, display them as text files instead, and fix file nesting -->
         <Compile Remove="$(MSBuildProjectDirectory)\**\*.t.cs"/>
-        <None Include="$(MSBuildProjectDirectory)\**\*.t.cs"/>
+        <None Include="$(MSBuildProjectDirectory)\**\*.t.cs">
+            <DependentUpon>$([System.String]::Copy('%(Filename)').Replace('.t','')).cs</DependentUpon>
+            <SubType>Code</SubType>
+        </None>
+        
         <None Remove="$(MSBuildProjectDirectory)\obj\**\*.t.cs"/>
+        
+        <!-- Fix file nesting for *.Aspect.cs -->
+        <Compile Update="$(MSBuildProjectDirectory)\**\*.Aspect.cs">
+            <DependentUpon>$([System.String]::Copy('%(Filename)').Replace('.Aspect','')).cs</DependentUpon>
+            <SubType>Code</SubType>
+        </Compile>
+
+        <!-- Fix file nesting for *.t.txt -->
+        <None Include="$(MSBuildProjectDirectory)\**\*.t.txt" Exclude="$(MSBuildProjectDirectory)\obj\**\*.t.txt" >
+            <DependentUpon>$([System.String]::Copy('%(Filename)').Replace('.t','')).cs</DependentUpon>
+        </None>
+        
     </ItemGroup>
 
     <ItemGroup>

@@ -7,6 +7,8 @@ using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeRefactorings;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Framework.DesignTime
@@ -56,6 +58,26 @@ namespace Metalama.Framework.DesignTime
                     return;
                 }
 
+                // Find the declaring node.
+                var syntaxRoot = await context.Document.GetSyntaxRootAsync( context.CancellationToken );
+
+                if ( syntaxRoot == null )
+                {
+                    this._logger.Trace?.Log( $"ComputeRefactorings('{context.Document.Name}'): no syntax root." );
+
+                    return;
+                }
+                
+                var node = syntaxRoot.FindNode( context.Span );
+
+                // Do not provide refactorings on the method body, only on the declaration.
+                if ( node.AncestorsAndSelf().Any( x => x is ExpressionSyntax or StatementSyntax) )
+                {
+                    this._logger.Trace?.Log( $"ComputeRefactorings('{context.Document.Name}'): caret is in a method body or expression body ({node.Kind()})." );
+
+                    return;
+                }
+
                 // Do not attempt a remote call if we cannot get the declared symbol.
                 var semanticModel = await context.Document.GetSemanticModelAsync( context.CancellationToken );
 
@@ -66,14 +88,17 @@ namespace Metalama.Framework.DesignTime
                     return;
                 }
 
-                var node = (await semanticModel.SyntaxTree.GetRootAsync( context.CancellationToken )).FindNode( context.Span );
+                // Get the symbol.
+                var declaredSymbol = semanticModel.GetDeclaredSymbol( node );
 
-                if ( semanticModel.GetDeclaredSymbol( node ) == null )
+                if ( declaredSymbol == null )
                 {
-                    this._logger.Trace?.Log( $"ComputeRefactorings('{context.Document.Name}'): no symbol." );
+                    this._logger.Trace?.Log( $"ComputeRefactorings('{context.Document.Name}'): no symbol for node '{node.Kind()}'." );
 
                     return;
                 }
+                
+                this._logger.Trace?.Log( $"ComputeRefactorings('{context.Document.Name}'): we are on symbol '{declaredSymbol}'." );
 
                 // Call the service.
                 var result = await this._codeRefactoringDiscoveryService.ComputeRefactoringsAsync(
@@ -95,9 +120,15 @@ namespace Metalama.Framework.DesignTime
                     {
                         foreach ( var action in actionModel.ToCodeActions( invocationContext ) )
                         {
+                            this._logger.Trace?.Log( $"ComputeRefactorings('{context.Document.Name}'): registering '{action.Title}'." );
+                            
                             context.RegisterRefactoring( action );
                         }
                     }
+                }
+                else
+                {
+                    this._logger.Trace?.Log( $"ComputeRefactorings('{context.Document.Name}'): no refactoring available." );
                 }
             }
             catch ( Exception e ) when ( DesignTimeExceptionHandler.MustHandle( e ) )
