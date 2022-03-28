@@ -115,7 +115,7 @@ namespace Metalama.Framework.Engine.Linking
                 allTransformations,
                 initializationResults,
                 out var markedNodes,
-                out var typesWithRequiredImplicitCtors );
+                out var typesWithRequiredImplicitConstructors );
 
             // Group diagnostic suppressions by target.
             var suppressionsByTarget = input.DiagnosticSuppressions.ToMultiValueDictionary(
@@ -128,7 +128,7 @@ namespace Metalama.Framework.Engine.Linking
                 input.CompilationModel,
                 input.OrderedAspectLayers,
                 markedNodes,
-                typesWithRequiredImplicitCtors );
+                typesWithRequiredImplicitConstructors );
 
             var syntaxTreeMapping = new Dictionary<SyntaxTree, SyntaxTree>();
 
@@ -241,7 +241,7 @@ namespace Metalama.Framework.Engine.Linking
             UserDiagnosticSink diagnostics,
             LinkerIntroductionNameProvider nameProvider,
             SyntaxTransformationCollection syntaxTransformationCollection,
-            HashSet<ISyntaxTreeTransformation>? replacedTransformations,
+            HashSet<ISyntaxTreeTransformation> replacedTransformations,
             Dictionary<IHierarchicalTransformation, TransformationInitializationResult?> initializationResults )
         {
             var lexicalScopeFactory = new LexicalScopeFactory( input.CompilationModel );
@@ -254,63 +254,66 @@ namespace Metalama.Framework.Engine.Linking
                     continue;
                 }
 
-                if ( transformation is IMemberIntroduction memberIntroduction )
+                switch ( transformation )
                 {
-                    // Create the SyntaxGenerationContext for the insertion point.
-                    var positionInSyntaxTree = 0;
+                    case IMemberIntroduction memberIntroduction:
+                        // Create the SyntaxGenerationContext for the insertion point.
+                        var positionInSyntaxTree = 0;
 
-                    if ( memberIntroduction.InsertPosition.SyntaxNode != null )
-                    {
-                        switch ( memberIntroduction.InsertPosition.Relation )
+                        if ( memberIntroduction.InsertPosition.SyntaxNode != null )
                         {
-                            case InsertPositionRelation.After:
-                                positionInSyntaxTree = memberIntroduction.InsertPosition.SyntaxNode.Span.End + 1;
+                            switch ( memberIntroduction.InsertPosition.Relation )
+                            {
+                                case InsertPositionRelation.After:
+                                    positionInSyntaxTree = memberIntroduction.InsertPosition.SyntaxNode.Span.End + 1;
 
-                                break;
+                                    break;
 
-                            case InsertPositionRelation.Within:
-                                positionInSyntaxTree = ((BaseTypeDeclarationSyntax) memberIntroduction.InsertPosition.SyntaxNode).CloseBraceToken.Span.Start
-                                                       - 1;
+                                case InsertPositionRelation.Within:
+                                    positionInSyntaxTree = ((BaseTypeDeclarationSyntax) memberIntroduction.InsertPosition.SyntaxNode).CloseBraceToken.Span.Start
+                                                           - 1;
 
-                                break;
+                                    break;
 
-                            default:
-                                positionInSyntaxTree = 0;
+                                default:
+                                    positionInSyntaxTree = 0;
 
-                                break;
+                                    break;
+                            }
                         }
-                    }
 
-                    var syntaxGenerationContext = SyntaxGenerationContext.Create(
-                        this._serviceProvider,
-                        input.InitialCompilation.Compilation,
-                        memberIntroduction.TargetSyntaxTree,
-                        positionInSyntaxTree );
+                        var syntaxGenerationContext = SyntaxGenerationContext.Create(
+                            this._serviceProvider,
+                            input.InitialCompilation.Compilation,
+                            memberIntroduction.TargetSyntaxTree,
+                            positionInSyntaxTree );
 
-                    var initializationResult =
-                        transformation is IHierarchicalTransformation hierarchicalTransformation
-                            ? initializationResults[hierarchicalTransformation]
-                            : null;
+                        var initializationResult =
+                            transformation is IHierarchicalTransformation hierarchicalTransformation
+                                ? initializationResults[hierarchicalTransformation]
+                                : null;
 
-                    // Call GetIntroducedMembers
-                    var introductionContext = new MemberIntroductionContext(
-                        diagnostics,
-                        nameProvider,
-                        lexicalScopeFactory,
-                        syntaxGenerationContext,
-                        this._serviceProvider,
-                        initializationResult,
-                        initializationResults );
+                        // Call GetIntroducedMembers
+                        var introductionContext = new MemberIntroductionContext(
+                            diagnostics,
+                            nameProvider,
+                            lexicalScopeFactory,
+                            syntaxGenerationContext,
+                            this._serviceProvider,
+                            initializationResult,
+                            initializationResults );
 
-                    var introducedMembers = memberIntroduction.GetIntroducedMembers( introductionContext );
+                        var introducedMembers = memberIntroduction.GetIntroducedMembers( introductionContext );
 
-                    syntaxTransformationCollection.Add( memberIntroduction, introducedMembers );
-                }
+                        syntaxTransformationCollection.Add( memberIntroduction, introducedMembers );
 
-                if ( transformation is IIntroducedInterface interfaceIntroduction )
-                {
-                    var introducedInterface = interfaceIntroduction.GetSyntax();
-                    syntaxTransformationCollection.Add( interfaceIntroduction, introducedInterface );
+                        break;
+
+                    case IIntroducedInterface interfaceIntroduction:
+                        var introducedInterface = interfaceIntroduction.GetSyntax();
+                        syntaxTransformationCollection.Add( interfaceIntroduction, introducedInterface );
+
+                        break;
                 }
             }
         }
@@ -320,7 +323,7 @@ namespace Metalama.Framework.Engine.Linking
             List<ITransformation> allTransformations,
             Dictionary<IHierarchicalTransformation, TransformationInitializationResult?> initializationResults,
             out Dictionary<SyntaxNode, (string Id, IReadOnlyList<CodeTransformationMark> Marks)> markedNodes,
-            out Dictionary<ISymbol, (ConstructorDeclarationSyntax? Static, ConstructorDeclarationSyntax? Instance)> typesWithRequiredImplicitCtors )
+            out Dictionary<ISymbol, (ConstructorDeclarationSyntax? Static, ConstructorDeclarationSyntax? Instance)> typesWithRequiredImplicitConstructors )
         {
             var codeTransformationsBySyntaxTree = new Dictionary<SyntaxTree, List<ICodeTransformation>>();
 
@@ -348,7 +351,7 @@ namespace Metalama.Framework.Engine.Linking
 
             markedNodes = new Dictionary<SyntaxNode, (string Id, IReadOnlyList<CodeTransformationMark> Marks)>();
 
-            typesWithRequiredImplicitCtors =
+            typesWithRequiredImplicitConstructors =
                 new Dictionary<ISymbol, (ConstructorDeclarationSyntax? Static, ConstructorDeclarationSyntax? Instance)>( SymbolEqualityComparer.Default );
 
             var nextMarkedNodeId = 0;
@@ -368,7 +371,7 @@ namespace Metalama.Framework.Engine.Linking
                     codeTransformationVisitor.Visit( root );
 
                     // Temporary (implicit ctors).
-                    foreach ( var type in codeTransformationVisitor.TypesWithRequiredImplicitCtors )
+                    foreach ( var type in codeTransformationVisitor.TypesWithRequiredImplicitConstructors )
                     {
                         ConstructorDeclarationSyntax? staticCtor = null;
                         ConstructorDeclarationSyntax? instanceCtor = null;
@@ -407,7 +410,7 @@ namespace Metalama.Framework.Engine.Linking
                                     .WithTrailingTrivia( SyntaxFactory.ElasticLineFeed );
                         }
 
-                        typesWithRequiredImplicitCtors.Add(
+                        typesWithRequiredImplicitConstructors.Add(
                             type.Key,
                             (staticCtor, instanceCtor) );
                     }
@@ -445,7 +448,7 @@ namespace Metalama.Framework.Engine.Linking
                                     // Temporary (implicit ctors).
                                     var typeSymbol = mark.Source.TargetDeclaration.ContainingDeclaration.AssertNotNull().GetSymbol().AssertNotNull();
 
-                                    if ( typesWithRequiredImplicitCtors.TryGetValue( typeSymbol, out var typeRecord ) )
+                                    if ( typesWithRequiredImplicitConstructors.TryGetValue( typeSymbol, out var typeRecord ) )
                                     {
                                         if ( mark.Source.TargetDeclaration.IsStatic )
                                         {

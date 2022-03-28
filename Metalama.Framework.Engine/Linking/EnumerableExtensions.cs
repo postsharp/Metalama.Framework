@@ -9,7 +9,7 @@ namespace Metalama.Framework.Engine.Linking
     internal static class EnumerableExtensions
     {
         /// <summary>
-        /// Orders the input in reverse topological order, where the dependencies preceed the dependents.
+        /// Orders the input in reverse topological order, where the dependencies precede the dependents.
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="enumerable"></param>
@@ -20,14 +20,15 @@ namespace Metalama.Framework.Engine.Linking
         {
             // Topological sort using stack-based DFS.
             // First find entry points (nodes without any incoming edge)
-            var entryPoints = new HashSet<T>( enumerable );
+            var nodes = new List<T>( enumerable );
+            var entryPoints = new HashSet<T>( nodes );
             var descendants = new Dictionary<T, List<T>>();
 
-            foreach ( var o in enumerable )
+            foreach ( var o in nodes )
             {
-                var dependenceis = getDependencies( o );
+                var dependencies = getDependencies( o );
 
-                foreach ( var dependency in dependenceis )
+                foreach ( var dependency in dependencies )
                 {
                     if ( !descendants.TryGetValue( dependency, out var list ) )
                     {
@@ -38,7 +39,7 @@ namespace Metalama.Framework.Engine.Linking
                 }
             }
 
-            foreach ( var o in enumerable )
+            foreach ( var o in nodes )
             {
                 var dependencies = getDependencies( o );
 
@@ -50,7 +51,7 @@ namespace Metalama.Framework.Engine.Linking
 
             IReadOnlyList<T> GetDescendants( T x )
             {
-                if ( !descendants!.TryGetValue( x, out var l ) )
+                if ( !descendants.TryGetValue( x, out var l ) )
                 {
                     return Array.Empty<T>();
                 }
@@ -89,8 +90,6 @@ namespace Metalama.Framework.Engine.Linking
                                 // Dependency cycle.
                                 throw new AssertionFailedException();
                             }
-
-                            continue;
                         }
                         else
                         {

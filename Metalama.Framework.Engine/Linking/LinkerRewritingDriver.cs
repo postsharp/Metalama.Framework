@@ -52,6 +52,7 @@ namespace Metalama.Framework.Engine.Linking
         /// Assembles a linked body of the method/accessor, where aspect reference annotations are replaced by target symbols and inlineable references are inlined.
         /// </summary>
         /// <param name="semantic">Method or accessor symbol.</param>
+        /// <param name="inliningContext"></param>
         /// <returns>Block representing the linked body.</returns>
         public BlockSyntax GetLinkedBody( IntermediateSymbolSemantic<IMethodSymbol> semantic, InliningContext inliningContext )
         {
@@ -490,6 +491,7 @@ namespace Metalama.Framework.Engine.Linking
         /// </summary>
         /// <param name="syntax"></param>
         /// <param name="symbol"></param>
+        /// <param name="generationContext"></param>
         /// <returns></returns>
         public IReadOnlyList<MemberDeclarationSyntax> RewriteMember( MemberDeclarationSyntax syntax, ISymbol symbol, SyntaxGenerationContext generationContext )
         {
@@ -560,6 +562,7 @@ namespace Metalama.Framework.Engine.Linking
         /// Gets a syntax node that will the the source of trivia of the specified declaration root block.
         /// </summary>
         /// <param name="semantic"></param>
+        /// <param name="shouldRemoveExistingTrivia"></param>
         /// <returns></returns>
         private SyntaxNode? ResolveBodyBlockTriviaSource( IntermediateSymbolSemantic<IMethodSymbol> semantic, out bool shouldRemoveExistingTrivia )
         {
@@ -617,6 +620,7 @@ namespace Metalama.Framework.Engine.Linking
         /// Gets an expression that replaces the expression represented by the aspect reference. This for cases where the reference is not inlined.
         /// </summary>
         /// <param name="aspectReference"></param>
+        /// <param name="syntaxGenerationContext"></param>
         /// <returns></returns>
         private ExpressionSyntax GetLinkedExpression( ResolvedAspectReference aspectReference, SyntaxGenerationContext syntaxGenerationContext )
         {

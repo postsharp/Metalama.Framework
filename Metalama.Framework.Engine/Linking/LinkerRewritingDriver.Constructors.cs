@@ -44,8 +44,10 @@ namespace Metalama.Framework.Engine.Linking
                             var statements = new List<StatementSyntax>();
 
                             // Not supporting anything else yet.
+                            // ReSharper disable once PossibleMultipleEnumeration
                             Invariant.Assert( marks.All( m => m.Operator == CodeTransformationOperator.InsertHead ) );
 
+                            // ReSharper disable once PossibleMultipleEnumeration
                             foreach ( var mark in marks )
                             {
                                 statements.Add( (StatementSyntax) mark.Operand.AssertNotNull() );

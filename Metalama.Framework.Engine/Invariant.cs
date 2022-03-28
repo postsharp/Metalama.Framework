@@ -90,6 +90,7 @@ namespace Metalama.Framework.Engine
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="obj"></param>
+        /// <param name="justification"></param>
         /// <returns></returns>
 #if !DEBUG
         [MethodImpl( MethodImplOptions.AggressiveInlining )]

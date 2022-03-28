@@ -192,6 +192,7 @@ namespace Metalama.Framework.Engine.Transformations
         /// Creates a trivial passthrough body for cases where we have template only for one accessor kind.
         /// </summary>
         /// <param name="accessorDeclarationKind"></param>
+        /// <param name="generationContext"></param>
         /// <returns></returns>
         private BlockSyntax? CreateIdentityAccessorBody( SyntaxKind accessorDeclarationKind, SyntaxGenerationContext generationContext )
         {

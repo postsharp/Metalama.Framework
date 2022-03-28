@@ -13,8 +13,8 @@ namespace Metalama.Framework.Engine.Transformations
         ITransformation Parent { get; }
 
         /// <summary>
-        /// Gets a context of this code transformation. If there are transformation marks on the same syntax node, those coming from member-context transformations preceed
-        /// type-context transformation. Member-context transformations do not have defined order between them.
+        /// Gets a context of this code transformation. If there are transformation marks on the same syntax node, those coming from member-context
+        /// transformations precede type-context transformation. Member-context transformations do not have defined order between them.
         /// </summary>
         IMemberOrNamedType ContextDeclaration { get; }
 

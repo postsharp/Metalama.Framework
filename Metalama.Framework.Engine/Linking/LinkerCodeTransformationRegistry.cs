@@ -54,7 +54,7 @@ namespace Metalama.Framework.Engine.Linking
 
         public bool TryGetTransformationMarksForNode( SyntaxNode node, [NotNullWhen( true )] out IEnumerable<CodeTransformationMark>? marks )
         {
-            if ( node.GetLinkerMarkedNodeId() is not null and string id
+            if ( node.GetLinkerMarkedNodeId() is { } id
                  && this._codeTransformations.TryGetValue( id, out var unsortedMarks ) )
             {
                 marks = this.SortMarks( unsortedMarks );
@@ -78,7 +78,7 @@ namespace Metalama.Framework.Engine.Linking
             {
                 switch ( mark.Source.ContextDeclaration )
                 {
-                    case INamedType type:
+                    case INamedType:
                         typeMarks.Add( mark );
 
                         break;

@@ -19,37 +19,28 @@ namespace Metalama.Framework.Engine.Linking
         private class CodeTransformationVisitor : CSharpSyntaxWalker
         {
             private readonly SemanticModel _semanticModel;
-            private readonly Dictionary<ISymbol, (TypeDeclarationSyntax Declaration, bool Static, bool Instance)> _typesWithRequiredImplicitCtors;
+            private readonly Dictionary<ISymbol, (TypeDeclarationSyntax Declaration, bool Static, bool Instance)> _typesWithRequiredImplicitConstructors;
             private readonly List<CodeTransformationMark> _marks;
             private Context _currentContext;
 
             public IReadOnlyList<CodeTransformationMark> Marks => this._marks;
 
-            public IReadOnlyDictionary<ISymbol, (TypeDeclarationSyntax Declaration, bool Static, bool Instance)> TypesWithRequiredImplicitCtors
-                => this._typesWithRequiredImplicitCtors;
+            public IReadOnlyDictionary<ISymbol, (TypeDeclarationSyntax Declaration, bool Static, bool Instance)> TypesWithRequiredImplicitConstructors
+                => this._typesWithRequiredImplicitConstructors;
 
             public CodeTransformationVisitor( SemanticModel semanticModel, IReadOnlyList<ICodeTransformation> transformations )
             {
                 this._semanticModel = semanticModel;
                 this._marks = new List<CodeTransformationMark>();
                 this._currentContext = new Context( transformations );
-                this._typesWithRequiredImplicitCtors = new Dictionary<ISymbol, (TypeDeclarationSyntax Declaration, bool Static, bool Instance)>();
+                this._typesWithRequiredImplicitConstructors = new Dictionary<ISymbol, (TypeDeclarationSyntax Declaration, bool Static, bool Instance)>();
             }
 
-            public override void Visit( SyntaxNode? node )
-            {
-                base.Visit( node );
-            }
+            public override void VisitBlock( BlockSyntax node ) 
+                => this.VisitBody( node, n => base.VisitBlock( n ) );
 
-            public override void VisitBlock( BlockSyntax node )
-            {
-                this.VisitBody( node, n => base.VisitBlock( n ) );
-            }
-
-            public override void VisitArrowExpressionClause( ArrowExpressionClauseSyntax node )
-            {
-                this.VisitBody( node, n => base.VisitArrowExpressionClause( n ) );
-            }
+            public override void VisitArrowExpressionClause( ArrowExpressionClauseSyntax node ) 
+                => this.VisitBody( node, n => base.VisitArrowExpressionClause( n ) );
 
             private void VisitBody<T>( T? node, Action<T> visitBase )
                 where T : SyntaxNode
@@ -100,20 +91,14 @@ namespace Metalama.Framework.Engine.Linking
                 }
             }
 
-            public override void VisitClassDeclaration( ClassDeclarationSyntax node )
-            {
-                this.VisitTypeDeclaration( node, n => base.VisitClassDeclaration( n ) );
-            }
+            public override void VisitClassDeclaration( ClassDeclarationSyntax node ) 
+                => this.VisitTypeDeclaration( node, n => base.VisitClassDeclaration( n ) );
 
-            public override void VisitStructDeclaration( StructDeclarationSyntax node )
-            {
-                this.VisitTypeDeclaration( node, n => base.VisitStructDeclaration( n ) );
-            }
+            public override void VisitStructDeclaration( StructDeclarationSyntax node ) 
+                => this.VisitTypeDeclaration( node, n => base.VisitStructDeclaration( n ) );
 
-            public override void VisitRecordDeclaration( RecordDeclarationSyntax node )
-            {
-                this.VisitTypeDeclaration( node, n => base.VisitRecordDeclaration( n ) );
-            }
+            public override void VisitRecordDeclaration( RecordDeclarationSyntax node ) 
+                => this.VisitTypeDeclaration( node, n => base.VisitRecordDeclaration( n ) );
 
             private void VisitTypeDeclaration<T>( T node, Action<T> baseVisit )
                 where T : TypeDeclarationSyntax
@@ -122,7 +107,7 @@ namespace Metalama.Framework.Engine.Linking
                 var hasStaticRequiredImplicitCtor = false;
                 var hasInstanceRequiredImplicitCtor = false;
 
-                // Temporary detection of implicit instance ctors.
+                // Temporary detection of implicit instance constructors.
                 foreach ( var ctor in symbol.Constructors )
                 {
                     var syntaxReference = ctor.GetPrimarySyntaxReference();
@@ -151,7 +136,7 @@ namespace Metalama.Framework.Engine.Linking
                     }
                 }
 
-                // Temporary detection of missing static ctors.
+                // Temporary detection of missing static constructors.
                 if ( symbol.StaticConstructors.Length == 0 )
                 {
                     foreach ( var transformation in this._currentContext.CodeTransformations )
@@ -176,7 +161,7 @@ namespace Metalama.Framework.Engine.Linking
 
                 if ( hasStaticRequiredImplicitCtor || hasInstanceRequiredImplicitCtor )
                 {
-                    this._typesWithRequiredImplicitCtors.Add( symbol, (node, hasStaticRequiredImplicitCtor, hasInstanceRequiredImplicitCtor) );
+                    this._typesWithRequiredImplicitConstructors.Add( symbol, (node, hasStaticRequiredImplicitCtor, hasInstanceRequiredImplicitCtor) );
                 }
 
                 baseVisit( node );

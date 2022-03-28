@@ -32,7 +32,7 @@ namespace Metalama.Framework.Engine.Linking
             private readonly IReadOnlyDictionary<SyntaxNode, (string Id, IReadOnlyList<CodeTransformationMark> Marks)> _marksByNode;
 
             private readonly IReadOnlyDictionary<ISymbol, (ConstructorDeclarationSyntax? Static, ConstructorDeclarationSyntax? Instance)>
-                _typesWithIntroducedDefaultCtors;
+                _typesWithIntroducedDefaultConstructors;
 
             // Maps a diagnostic id to the number of times it has been suppressed.
             private ImmutableHashSet<string> _activeSuppressions = ImmutableHashSet.Create<string>( StringComparer.OrdinalIgnoreCase );
@@ -43,14 +43,14 @@ namespace Metalama.Framework.Engine.Linking
                 CompilationModel compilation,
                 IReadOnlyList<OrderedAspectLayer> inputOrderedAspectLayers,
                 IReadOnlyDictionary<SyntaxNode, (string Id, IReadOnlyList<CodeTransformationMark> Marks)> marksByNode,
-                IReadOnlyDictionary<ISymbol, (ConstructorDeclarationSyntax? Static, ConstructorDeclarationSyntax? Instance)> typesWithIntroducedDefaultCtors )
+                IReadOnlyDictionary<ISymbol, (ConstructorDeclarationSyntax? Static, ConstructorDeclarationSyntax? Instance)> typesWithIntroducedDefaultConstructors )
             {
                 this._diagnosticSuppressions = diagnosticSuppressions;
                 this._compilation = compilation;
                 this._orderedAspectLayers = inputOrderedAspectLayers.ToImmutableDictionary( e => e.AspectLayerId, e => e );
                 this._introducedMemberCollection = introducedMemberCollection;
                 this._marksByNode = marksByNode;
-                this._typesWithIntroducedDefaultCtors = typesWithIntroducedDefaultCtors;
+                this._typesWithIntroducedDefaultConstructors = typesWithIntroducedDefaultConstructors;
             }
 
             public override bool VisitIntoStructuredTrivia => true;
@@ -148,19 +148,19 @@ namespace Metalama.Framework.Engine.Linking
                 {
                     var typeSymbol = this._compilation.RoslynCompilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node );
 
-                    // Temporary (implicit ctors).
+                    // Temporary (implicit constructors).
                     if ( typeSymbol != null
-                         && this._typesWithIntroducedDefaultCtors.TryGetValue( typeSymbol, out var defaultCtors )
+                         && this._typesWithIntroducedDefaultConstructors.TryGetValue( typeSymbol, out var defaultConstructors )
                          && typeSymbol.GetPrimarySyntaxReference().AssertNotNull().GetSyntax() == node )
                     {
-                        if ( defaultCtors.Instance != null )
+                        if ( defaultConstructors.Instance != null )
                         {
-                            members.Add( defaultCtors.Instance );
+                            members.Add( defaultConstructors.Instance );
                         }
 
-                        if ( defaultCtors.Static != null )
+                        if ( defaultConstructors.Static != null )
                         {
-                            members.Add( defaultCtors.Static );
+                            members.Add( defaultConstructors.Static );
                         }
                     }
 

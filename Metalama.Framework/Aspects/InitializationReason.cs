@@ -20,39 +20,34 @@ namespace Metalama.Framework.Aspects
         /// </summary>
         TypeConstructing = 0x02,
 
-        [Obsolete( "Not implemented" )]
-
         /// <summary>
         /// Indicates that the advice should be executed after all constructors are finished but before the initialization block.
         /// </summary>
-        Constructed = 0x04,
-
         [Obsolete( "Not implemented" )]
+        Constructed = 0x04,
 
         /// <summary>
         /// Indicates that the advice should be executed after all constructors are finished and after the initialization block.
         /// </summary>
-        Initialized = 0x08,
-
         [Obsolete( "Not implemented" )]
+        Initialized = 0x08,
 
         /// <summary>
         /// Indicates that the advice should be executed when the instance of a target class is deserialized.
         /// </summary>
-        Deserialized = 0x10,
-
         [Obsolete( "Not implemented" )]
+        Deserialized = 0x10,
 
         /// <summary>
         /// Indicates that the advice should be executed when the instance of a target class is cloned.
         /// </summary>
-        Cloned = 0x20,
-
         [Obsolete( "Not implemented" )]
+        Cloned = 0x20,
 
         /// <summary>
         /// Indicated that the advice should be executed when the the target value type is mutated using the "with" expression.
         /// </summary>
+        [Obsolete( "Not implemented" )]
         Mutated = 0x40
     }
 }

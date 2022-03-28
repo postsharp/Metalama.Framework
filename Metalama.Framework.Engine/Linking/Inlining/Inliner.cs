@@ -28,6 +28,7 @@ namespace Metalama.Framework.Engine.Linking.Inlining
         /// Determines whether an aspect reference can be inlined.
         /// </summary>
         /// <param name="aspectReference">Resolved aspect reference.</param>
+        /// <param name="semanticModel"></param>
         /// <returns></returns>
         public virtual bool CanInline( ResolvedAspectReference aspectReference, SemanticModel semanticModel )
         {

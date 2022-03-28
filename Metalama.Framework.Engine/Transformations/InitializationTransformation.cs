@@ -38,13 +38,13 @@ namespace Metalama.Framework.Engine.Transformations
         public InitializationTransformation(
             Advice advice,
             InitializationTransformation? mainTransformation,
-            IMemberOrNamedType initializatedDeclaration,
+            IMemberOrNamedType initializedDeclaration,
             TypeDeclarationSyntax typeDeclaration,
             IReadOnlyList<IConstructor> constructors,
             TemplateMember<IMethod> template,
             InitializationReason reason )
         {
-            this._initializedDeclaration = initializatedDeclaration;
+            this._initializedDeclaration = initializedDeclaration;
             this._mainTransformation = mainTransformation;
             this._typeDeclaration = typeDeclaration;
             this._constructors = constructors;
@@ -186,23 +186,22 @@ namespace Metalama.Framework.Engine.Transformations
 
         private class CodeTransformation : ICodeTransformation
         {
-            public InitializationTransformation Parent { get; }
+            private readonly InitializationTransformation _parent;
+            private readonly string _introductionName;
+            
+            ITransformation ICodeTransformation.Parent => this._parent;
 
-            ITransformation ICodeTransformation.Parent => this.Parent;
-
-            public Advice Advice => this.Parent.Advice;
+            public Advice Advice => this._parent.Advice;
 
             public IMethodBase TargetDeclaration { get; }
 
-            public string IntroductionName { get; }
-
-            public IMemberOrNamedType ContextDeclaration => this.Parent._initializedDeclaration;
+            public IMemberOrNamedType ContextDeclaration => this._parent._initializedDeclaration;
 
             public CodeTransformation( InitializationTransformation parent, IMethodBase targetDeclaration, string introductionName )
             {
-                this.Parent = parent;
+                this._parent = parent;
                 this.TargetDeclaration = targetDeclaration;
-                this.IntroductionName = introductionName;
+                this._introductionName = introductionName;
             }
 
             public void EvaluateSyntaxNode( CodeTransformationContext context )
@@ -238,12 +237,12 @@ namespace Metalama.Framework.Engine.Transformations
 
             private SyntaxNode GetCallSyntax()
             {
-                if ( this.Parent._reason.HasFlag( InitializationReason.TypeConstructing ) )
+                if ( this._parent._reason.HasFlag( InitializationReason.TypeConstructing ) )
                 {
                     return
                         ExpressionStatement(
                             InvocationExpression(
-                                IdentifierName( this.IntroductionName ),
+                                IdentifierName( this._introductionName ),
                                 ArgumentList() ) );
                 }
                 else
@@ -254,7 +253,7 @@ namespace Metalama.Framework.Engine.Transformations
                                 MemberAccessExpression(
                                     SyntaxKind.SimpleMemberAccessExpression,
                                     ThisExpression(),
-                                    IdentifierName( this.IntroductionName ) ),
+                                    IdentifierName( this._introductionName ) ),
                                 ArgumentList() ) );
                 }
             }
