@@ -32,22 +32,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Compile Remove="Tests\Aspects\Initialization\AddChildAspect.t.cs" />
-      <Compile Remove="Tests\Aspects\Initialization\ImplicitConstructor - Copy.t.cs" />
-      <Compile Remove="Tests\Aspects\Initialization\InstanceConstructing - Copy.t.cs" />
-      <Compile Remove="Tests\Aspects\Initialization\InstanceConstructing_Implicit - Copy.t.cs" />
-      <Compile Remove="Tests\Aspects\Initialization\InstanceConstructing_MemberAndType - Copy.t.cs" />
-      <Compile Remove="Tests\Aspects\Initialization\InstanceConstructing_MultipleConstructors - Copy.t.cs" />
-      <Compile Remove="Tests\Aspects\Initialization\InstanceConstructing_NotAppliedOnStatic - Copy.t.cs" />
-      <Compile Remove="Tests\Aspects\Initialization\InstanceConstructing_This - Copy.t.cs" />
-      <Compile Remove="Tests\Aspects\Initialization\TypeAndInstanceConstructing - Copy.t.cs" />
-      <Compile Remove="Tests\Aspects\Initialization\TypeAndInstanceConstructing_ThisError - Copy.t.cs" />
-      <Compile Remove="Tests\Aspects\Initialization\TypeConstructing - Copy.t.cs" />
-      <Compile Remove="Tests\Aspects\Initialization\TypeConstructing_ThisError - Copy.t.cs" />
-      <Compile Remove="Tests\Aspects\Overrides\Methods\Simple - Copy.t.cs" />
-    </ItemGroup>
-
-    <ItemGroup>
         <ProjectReference Include="..\..\Metalama.Framework.Engine\Metalama.Framework.Engine.csproj" />
         <ProjectReference Include="..\..\Metalama.Framework\Metalama.Framework.csproj" />
         <ProjectReference Include="..\..\Metalama.TestFramework\Metalama.TestFramework.csproj" />
@@ -59,24 +43,6 @@
 
     <ItemGroup>
         <Folder Include="Tests\Aspects\Initializers" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <None Include="Tests\Aspects\Initialization\TypeConstructing_StaticMemberAndType.t.cs" />
-      <None Include="Tests\Aspects\Initialization\InstanceConstructing_MemberAndType.t.cs" />
-      <None Include="Tests\Aspects\Initialization\InstanceConstructing_MultipleDeclarations.t.cs" />
-      <None Include="Tests\Aspects\Initialization\InstanceConstructing_MultipleConstructors.t.cs" />
-      <None Include="Tests\Aspects\Initialization\TypeAndInstanceConstructing_Implicit.t.cs" />
-      <None Include="Tests\Aspects\Initialization\TypeConstructing_NotAppliedOnInstance.t.cs" />
-      <None Include="Tests\Aspects\Initialization\InstanceConstructing_NotAppliedOnStatic.t.cs" />
-      <None Include="Tests\Aspects\Initialization\InstanceConstructing_This.t.cs" />
-      <None Include="Tests\Aspects\Initialization\TypeConstructing_ThisError.t.cs" />
-      <None Include="Tests\Aspects\Initialization\TypeAndInstanceConstructing_ThisError.t.cs" />
-      <None Include="Tests\Aspects\Initialization\TypeAndInstanceConstructing.t.cs" />
-      <None Include="Tests\Aspects\Initialization\TypeConstructing_Implicit.t.cs" />
-      <None Include="Tests\Aspects\Initialization\TypeConstructing.t.cs" />
-      <None Include="Tests\Aspects\Initialization\InstanceConstructing_Implicit.t.cs" />
-      <None Include="Tests\Aspects\Initialization\InstanceConstructing.t.cs" />
     </ItemGroup>
 
     <Import Project="..\..\Metalama.TestFramework\Metalama.TestFramework.targets" />
