@@ -115,7 +115,7 @@ class C
         }
 
         [Fact]
-        public void AttributeData()
+        public void Attributes()
         {
             using var testContext = this.CreateTestContext();
 
@@ -151,6 +151,26 @@ class TestAttribute : Attribute
             var type1 = Assert.IsAssignableFrom<INamedType>( types[1].Value );
             Assert.Equal( "System.Action<,>", type1.FullName );
             Assert.Null( types[2].Value );
+        }
+
+        [Fact]
+        public void InvalidAttributes()
+        {
+            using var testContext = this.CreateTestContext();
+
+            var code = @"
+using System;
+
+[Test(typeof(ErrorType))]
+class TestAttribute : Attribute
+{
+    public TestAttribute( params Type[] types ) {}
+}";
+
+            var compilation = testContext.CreateCompilationModel( code, ignoreErrors: true );
+            var type = compilation.Types.Single();
+            var attribute = type.Attributes.Single();
+            Assert.Single( attribute.ConstructorArguments );
         }
 
         [Fact]
