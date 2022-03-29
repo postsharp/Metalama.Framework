@@ -68,8 +68,10 @@ namespace Metalama.Framework.Engine.CompileTime
         /// </summary>
         /// <param name="serviceProvider">Service provider.</param>
         /// <param name="compilation">The compilation, or null if the compilation has no reference to Metalama.</param>
-        public SymbolClassifier( IServiceProvider serviceProvider, Compilation? compilation )
+        public SymbolClassifier( ReferenceAssemblyLocator referenceAssemblyLocator, Compilation? compilation )
         {
+            this._referenceAssemblyLocator = referenceAssemblyLocator;
+            
             if ( compilation != null )
             {
                 this._compilation = compilation;
@@ -78,8 +80,6 @@ namespace Metalama.Framework.Engine.CompileTime
                 this._templateAttribute = this._compilation.GetTypeByMetadataName( typeof(TemplateAttribute).FullName ).AssertNotNull();
                 this._ignoreUnlessOverriddenAttribute = this._compilation.GetTypeByMetadataName( typeof(AbstractAttribute).FullName ).AssertNotNull();
             }
-
-            this._referenceAssemblyLocator = serviceProvider.GetRequiredService<ReferenceAssemblyLocator>();
         }
 
         public TemplateInfo GetTemplateInfo( ISymbol symbol ) => this.GetTemplateInfo( symbol, false );
