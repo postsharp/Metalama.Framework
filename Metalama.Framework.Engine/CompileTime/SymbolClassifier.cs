@@ -3,7 +3,6 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Utilities;
-using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Concurrent;
@@ -71,7 +70,7 @@ namespace Metalama.Framework.Engine.CompileTime
         public SymbolClassifier( ReferenceAssemblyLocator referenceAssemblyLocator, Compilation? compilation )
         {
             this._referenceAssemblyLocator = referenceAssemblyLocator;
-            
+
             if ( compilation != null )
             {
                 this._compilation = compilation;

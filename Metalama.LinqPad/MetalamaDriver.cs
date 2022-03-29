@@ -94,16 +94,16 @@ namespace {nameSpace}
 
             // Metalama.LinqPad
             assembliesToReference.Add( typeof(MetalamaDriver).Assembly.Location );
-            
+
             // Metalama.Framework
             assembliesToReference.Add( typeof(IDeclaration).Assembly.Location );
-            
+
             // Metalama.Framework.Workspaces
             assembliesToReference.Add( typeof(Workspace).Assembly.Location );
-            
+
             // Metalama.Framework.Inspection
             assembliesToReference.Add( typeof(IIntrospectionAspectInstance).Assembly.Location );
-            
+
             // Metalama.Framework.Engine
             assembliesToReference.Add( typeof(AspectPipeline).Assembly.Location );
 

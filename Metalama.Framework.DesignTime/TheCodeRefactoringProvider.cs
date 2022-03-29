@@ -67,11 +67,11 @@ namespace Metalama.Framework.DesignTime
 
                     return;
                 }
-                
+
                 var node = syntaxRoot.FindNode( context.Span );
 
                 // Do not provide refactorings on the method body, only on the declaration.
-                if ( node.AncestorsAndSelf().Any( x => x is ExpressionSyntax or StatementSyntax) )
+                if ( node.AncestorsAndSelf().Any( x => x is ExpressionSyntax or StatementSyntax ) )
                 {
                     this._logger.Trace?.Log( $"ComputeRefactorings('{context.Document.Name}'): caret is in a method body or expression body ({node.Kind()})." );
 
@@ -97,7 +97,7 @@ namespace Metalama.Framework.DesignTime
 
                     return;
                 }
-                
+
                 this._logger.Trace?.Log( $"ComputeRefactorings('{context.Document.Name}'): we are on symbol '{declaredSymbol}'." );
 
                 // Call the service.
@@ -121,7 +121,7 @@ namespace Metalama.Framework.DesignTime
                         foreach ( var action in actionModel.ToCodeActions( invocationContext ) )
                         {
                             this._logger.Trace?.Log( $"ComputeRefactorings('{context.Document.Name}'): registering '{action.Title}'." );
-                            
+
                             context.RegisterRefactoring( action );
                         }
                     }

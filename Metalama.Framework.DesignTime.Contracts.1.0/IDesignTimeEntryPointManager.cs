@@ -17,7 +17,7 @@ namespace Metalama.Framework.DesignTime.Contracts
         /// Sets the logging delegate.
         /// </summary>
         void SetLogger( Action<string>? logger );
-        
+
         /// <summary>
         /// Gets an interface that allows to retrieve compiler services.
         /// </summary>

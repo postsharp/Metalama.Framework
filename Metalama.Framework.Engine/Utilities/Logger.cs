@@ -29,7 +29,7 @@ namespace Metalama.Framework.Engine.Utilities
         public static ILogger DesignTime { get; private set; } = NullLogger.Instance;
 
         public static ILogger Remoting { get; private set; } = NullLogger.Instance;
-        
+
         public static ILogger DesignTimeEntryPointManager { get; private set; } = NullLogger.Instance;
     }
 }

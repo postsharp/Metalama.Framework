@@ -20,7 +20,7 @@ namespace Metalama.Framework.Engine.CompileTime
             // It is essential not to store the IServiceProvider in the object, otherwise we are making it impossible to
             // unload the AppDomain. The reason is that the IServiceProvider is project-specific, but the current object
             // is cached as project-neutral. Therefore, we cannot store anything project-specific.
-            
+
             this._referenceAssemblyLocator = serviceProvider.GetRequiredService<ReferenceAssemblyLocator>();
             this._noMetalamaReferenceClassifier = new SymbolClassifier( this._referenceAssemblyLocator, null );
         }
