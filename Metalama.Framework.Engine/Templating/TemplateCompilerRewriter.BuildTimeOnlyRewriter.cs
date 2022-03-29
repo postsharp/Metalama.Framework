@@ -32,11 +32,12 @@ namespace Metalama.Framework.Engine.Templating
                         _ => throw new AssertionFailedException( $"Don't know how to get the member name in {node.Expression.GetType().Name}" )
                     };
 
+                    // ReSharper disable once RedundantSuppressNullableWarningExpression
                     transformedNode =
                         node.CopyAnnotationsTo(
                             InvocationExpression(
                                     this._rewriter._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.Proceed) ) )
-                                .WithArgumentList( ArgumentList( SeparatedList( new[] { Argument( SyntaxFactoryEx.LiteralExpression( methodName ) ) } ) ) ) );
+                                .WithArgumentList( ArgumentList( SeparatedList( new[] { Argument( SyntaxFactoryEx.LiteralExpression( methodName ) ) } ) ) ) )!;
 
                     return true;
                 }
