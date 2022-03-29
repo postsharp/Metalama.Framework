@@ -192,6 +192,7 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
         /// if necessary.
         /// </summary>
         /// <param name="targetType">The target type, or <c>null</c> if no cast must be emitted in any case.</param>
+        /// <param name="addsParenthesis"></param>
         /// <returns></returns>
         public ExpressionSyntax ToTypedExpression( IType targetType, bool addsParenthesis = false )
         {

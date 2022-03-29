@@ -30,7 +30,6 @@ namespace Metalama.Framework.Engine.CodeModel
         /// <summary>
         /// Gets a <see cref="INamedTypeSymbol"/> by metadata name.
         /// </summary>
-        /// <param name="metadataName"></param>
         public INamedTypeSymbol GetNamedTypeSymbolByMetadataName( string metadataName, AssemblyName? assemblyName )
         {
             var symbol = this._compilation.GetTypeByMetadataName( metadataName );

@@ -7,6 +7,7 @@ using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
+using System.IO;
 using System.Linq;
 
 namespace Metalama.Framework.Workspaces
@@ -72,6 +73,21 @@ namespace Metalama.Framework.Workspaces
         public bool IsDesignTimeEnabled => false;
 
         public string? AdditionalCompilationOutputDirectory => null;
+
+        public string? DotNetSdkDirectory
+        {
+            get
+            {
+                if ( this._properties.TryGetValue( "NETCoreSdkBundledVersionsProps", out var propsFilePath ) && !string.IsNullOrEmpty( propsFilePath ) )
+                {
+                    return Path.GetFullPath( Path.GetDirectoryName( propsFilePath )! );
+                }
+                else
+                {
+                    return null;
+                }
+            }
+        }
 
         public static string? GetTargetFrameworkFromRoslynProject( Microsoft.CodeAnalysis.Project roslynProject )
         {

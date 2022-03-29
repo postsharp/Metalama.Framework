@@ -90,8 +90,6 @@ namespace Metalama.Framework.Engine.Aspects
         /// <summary>
         /// Initializes a new instance of the <see cref="AspectClass"/> class.
         /// </summary>
-        /// <param name="aspectTypeSymbol"></param>
-        /// <param name="aspectDriver">Can be null for testing.</param>
         internal AspectClass(
             IServiceProvider serviceProvider,
             INamedTypeSymbol aspectTypeSymbol,

@@ -539,7 +539,8 @@ namespace Metalama.Framework.Engine.Linking
         /// <summary>
         /// Gets a symbol the "new" symbol is hiding.
         /// </summary>
-        /// <param name="symbol">Hiding symbol.</param>
+        /// <param name="symbol">The hiding symbol.</param>
+        /// <param name="hiddenSymbol">The hidden symbol.</param>
         /// <returns>Hidden symbol or null.</returns>
         private bool TryGetHiddenSymbol( ISymbol symbol, [NotNullWhen( true )] out ISymbol? hiddenSymbol )
         {

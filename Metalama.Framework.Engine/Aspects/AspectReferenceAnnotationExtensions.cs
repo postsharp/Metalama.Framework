@@ -58,6 +58,7 @@ namespace Metalama.Framework.Engine.Aspects
         /// <param name="aspectLayerId">Aspect layer which created the syntax node.</param>
         /// <param name="order">Version of the target semantic in relation to the aspect layer.</param>
         /// <param name="targetKind">Target kind. For example self or property get accessor.</param>
+        /// <param name="flags">Flags.</param>
         /// <returns>Annotated syntax node.</returns>
         public static T WithAspectReferenceAnnotation<T>(
             this T node,

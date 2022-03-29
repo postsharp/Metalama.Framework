@@ -1,9 +1,11 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Backstage.Diagnostics;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline.CompileTime;
+using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Project;
 using System;
 using System.Diagnostics.CodeAnalysis;
@@ -59,14 +61,18 @@ namespace Metalama.Framework.Engine.Pipeline
 
         private static ServiceProvider CreateBaseServiceProvider( IPathOptions pathOptions )
         {
-            var serviceProvider = ServiceProvider.Empty.WithServices(
-                pathOptions,
-                new DefaultCompileTimeDomainFactory(),
-                new CompileTimeExceptionHandler() );
+            // If DiagnosticsService is not initialized at this point, do it.
+            Logger.Initialize();
 
-            serviceProvider = serviceProvider.WithLateBoundServices(
-                LateBoundService.Create( s => new ReferenceAssemblyLocator( s ) ),
-                LateBoundService.Create( s => new SymbolClassificationService( s ) ) );
+            var serviceProvider = ServiceProvider.Empty.WithServices(
+                    pathOptions,
+                    new DefaultCompileTimeDomainFactory(),
+                    new CompileTimeExceptionHandler() )
+                .WithExternalService<ILoggerFactory>( DiagnosticsService.Instance );
+
+            serviceProvider = serviceProvider
+                .WithSharedLazyInitializedService( sp => new ReferenceAssemblyLocator( sp ) )
+                .WithSharedLazyInitializedService( sp => new SymbolClassificationService( sp ) );
 
             return serviceProvider;
         }
