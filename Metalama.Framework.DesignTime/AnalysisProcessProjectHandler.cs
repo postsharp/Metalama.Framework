@@ -3,13 +3,11 @@
 
 using Metalama.Backstage.Diagnostics;
 using Metalama.Framework.DesignTime.Pipeline;
+using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Options;
-using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.Text;
-using System.Collections.Immutable;
 
 namespace Metalama.Framework.DesignTime;
 
@@ -29,9 +27,7 @@ public class AnalysisProcessProjectHandler : ProjectHandler
 
     private volatile CancellationTokenSource? _currentCancellationSource;
 
-    private ImmutableDictionary<string, IntroducedSyntaxTree>? _lastIntroducedTrees;
-
-    protected ImmutableDictionary<string, SourceText>? Sources { get; private set; }
+    public SyntaxTreeSourceGeneratorResult? LastSourceGeneratorResult { get; private set; }
 
     public AnalysisProcessProjectHandler( IServiceProvider serviceProvider, IProjectOptions projectOptions ) : base( serviceProvider, projectOptions )
     {
@@ -39,28 +35,11 @@ public class AnalysisProcessProjectHandler : ProjectHandler
         this._logger = this.ServiceProvider.GetLoggerFactory().GetLogger( "DesignTime" );
     }
 
-    public override void GenerateSources( Compilation compilation, GeneratorExecutionContext context )
+    public override SourceGeneratorResult GenerateSources( Compilation compilation, CancellationToken cancellationToken )
     {
-        // A local function that adds the cached source to the compiler.
-        void AddSources()
-        {
-            if ( this.Sources != null )
-            {
-                foreach ( var source in this.Sources )
-                {
-                    this._logger.Trace?.Log( $"  AddSource('{source.Key}')" );
-
-                    context.AddSource( source.Key, source.Value );
-                }
-            }
-        }
-
-        if ( this.Sources != null )
+        if ( this.LastSourceGeneratorResult != null )
         {
             this._logger.Trace?.Log( "Serving the generated sources from the cache." );
-
-            // Serve from the cache.
-            AddSources();
 
             // Atomically cancel the previous computation and create a new cancellation token.
             CancellationToken newCancellationToken;
@@ -90,7 +69,6 @@ public class AnalysisProcessProjectHandler : ProjectHandler
             }
 
             // Schedule a new computation.
-
             _ = Task.Run( () => this.ComputeAndPublishAsync( compilation, newCancellationToken ), newCancellationToken );
         }
         else
@@ -99,15 +77,15 @@ public class AnalysisProcessProjectHandler : ProjectHandler
 
             this._logger.Trace?.Log( $"No generated sources in the cache for project '{this.ProjectOptions.ProjectId}'. Need to generate them synchronously." );
 
-            if ( this.Compute( compilation, context.CancellationToken ) )
+            if ( this.Compute( compilation, cancellationToken ) )
             {
-                AddSources();
-
                 // Publish the changes asynchronously.
                 var cancellationSource = this._currentCancellationSource = new CancellationTokenSource();
                 _ = Task.Run( () => this.PublishAsync( cancellationSource.Token ), cancellationSource.Token );
             }
         }
+
+        return this.LastSourceGeneratorResult.AssertNotNull();
     }
 
     /// <summary>
@@ -133,8 +111,10 @@ public class AnalysisProcessProjectHandler : ProjectHandler
             return false;
         }
 
+        var newSourceGeneratorResult = new SyntaxTreeSourceGeneratorResult( compilationResult.PipelineResult.IntroducedSyntaxTrees );
+
         // Check if the pipeline returned any difference. If not, do not update our cache.
-        if ( compilationResult.PipelineResult.IntroducedSyntaxTrees == this._lastIntroducedTrees )
+        if ( this.LastSourceGeneratorResult != null && this.LastSourceGeneratorResult.Equals( newSourceGeneratorResult ) )
         {
             this._logger.Trace?.Log(
                 $"{this.GetType().Name}.Execute('{compilation.AssemblyName}', CompilationId = {DebuggingHelper.GetObjectId( compilation )}): generated sources did not change." );
@@ -142,21 +122,10 @@ public class AnalysisProcessProjectHandler : ProjectHandler
             return false;
         }
 
-        this._lastIntroducedTrees = compilationResult.PipelineResult.IntroducedSyntaxTrees;
-
-        // Cache the introduces trees.
-        var generatedSources = ImmutableDictionary.CreateBuilder<string, SourceText>();
-
-        foreach ( var introducedSyntaxTree in this._lastIntroducedTrees! )
-        {
-            var sourceText = introducedSyntaxTree.Value.GeneratedSyntaxTree.GetText();
-            generatedSources[introducedSyntaxTree.Value.Name] = sourceText;
-        }
-
-        this.Sources = generatedSources.ToImmutable();
+        this.LastSourceGeneratorResult = newSourceGeneratorResult;
 
         this._logger.Trace?.Log(
-            $"{this.GetType().Name}.Execute('{compilation.AssemblyName}', CompilationId = {DebuggingHelper.GetObjectId( compilation )}): {this._lastIntroducedTrees!.Count} sources generated." );
+            $"{this.GetType().Name}.Execute('{compilation.AssemblyName}', CompilationId = {DebuggingHelper.GetObjectId( compilation )}): {newSourceGeneratorResult.AdditionalSources.Count} sources generated." );
 
         return true;
     }

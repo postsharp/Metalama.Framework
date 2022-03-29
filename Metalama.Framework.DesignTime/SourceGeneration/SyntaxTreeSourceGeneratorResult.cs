@@ -1,0 +1,50 @@
+﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+
+using K4os.Hash.xxHash;
+using Metalama.Framework.DesignTime.Pipeline.Diff;
+using Metalama.Framework.Engine.Pipeline;
+using Microsoft.CodeAnalysis;
+using System.Collections.Immutable;
+
+namespace Metalama.Framework.DesignTime;
+
+/// <summary>
+/// An implementation of <see cref="SourceGeneratorResult"/> backed by a set of <see cref="SyntaxTree"/>.
+/// </summary>
+public sealed class SyntaxTreeSourceGeneratorResult : SourceGeneratorResult
+{
+    public ImmutableDictionary<string, IntroducedSyntaxTree> AdditionalSources { get; }
+
+    public SyntaxTreeSourceGeneratorResult( ImmutableDictionary<string, IntroducedSyntaxTree> additionalSources )
+    {
+        this.AdditionalSources = additionalSources;
+    }
+
+    protected override ulong ComputeHashCodeImpl()
+    {
+        var xxh = new XXH64();
+        var hasher = new RunTimeCodeHasher( xxh );
+        ulong hash = 0;
+
+        foreach ( var tree in this.AdditionalSources.Values )
+        {
+            xxh.Reset();
+            hasher.Visit( tree.SourceSyntaxTree.GetRoot() );
+
+            hash ^= xxh.Digest();
+        }
+
+        return hash;
+    }
+
+    public override void ProduceContent( SourceProductionContext context )
+    {
+        foreach ( var source in this.AdditionalSources.Values )
+        {
+            context.AddSource( source.Name, source.GeneratedSyntaxTree.GetText( context.CancellationToken ) );
+        }
+    }
+
+    public override string ToString() => $"{nameof(SyntaxTreeSourceGeneratorResult)} Count={this.AdditionalSources.Count}";
+}
