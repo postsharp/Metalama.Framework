@@ -32,6 +32,7 @@ internal partial class RoslynVersionSyntaxVerifier : CSharpSyntaxWalker
                 this.MaximalAcceptableLanguageVersion ) );
     }
 
+    // ReSharper disable once UnusedMember.Local
     private void VisitVersionSpecificNode( SyntaxNode node, RoslynApiVersion version )
     {
         if ( version > this.MaximalAcceptableApiVersion )
@@ -45,6 +46,7 @@ internal partial class RoslynVersionSyntaxVerifier : CSharpSyntaxWalker
         }
     }
 
+    // ReSharper disable once UnusedMember.Local
     private void VisitVersionSpecificField( in SyntaxNodeOrToken nodeOrToken, RoslynApiVersion version )
     {
         if ( !nodeOrToken.IsKind( SyntaxKind.None ) )

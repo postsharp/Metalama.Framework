@@ -249,6 +249,7 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
         /// Serializes an object into a Roslyn expression that would create it. For example, serializes a list containing "4" and "8" into <c>new System.Collections.Generic.List&lt;System.Int32&gt;{4, 8}</c>.
         /// </summary>
         /// <param name="o">An object to serialize.</param>
+        /// <param name="serializationContext"></param>
         /// <returns>An expression that would create the object.</returns>
         /// <exception cref="DiagnosticException">When the object cannot be serialized, for example if it's of an unsupported type.</exception>
         public ExpressionSyntax Serialize<T>( T? o, SyntaxSerializationContext serializationContext )

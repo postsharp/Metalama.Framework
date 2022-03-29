@@ -38,8 +38,8 @@ namespace Metalama.Framework.Engine.LamaSerialization
         /// <summary>
         /// Initializes a new instance of the <see cref="SerializerFactoryProvider"/> class.
         /// </summary>
+        /// <param name="serviceProvider"></param>
         /// <param name="nextProvider">The next provider in the chain, or <c>null</c> if there is none.</param>
-        /// <param name="activatorProvider"></param>
         public SerializerFactoryProvider( IServiceProvider serviceProvider, ISerializerFactoryProvider nextProvider )
         {
             this.ServiceProvider = serviceProvider;

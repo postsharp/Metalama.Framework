@@ -41,7 +41,6 @@ namespace Metalama.Framework.Engine.LamaSerialization
         /// </summary>
         /// <param name="serviceProvider"></param>
         /// <param name="binder">A <see cref="LamaSerializationBinder"/> customizing bindings between types and type names, or <c>null</c> to use the default implementation.</param>
-        /// <param name="serializerProvider">A custom implementation of <see cref="ISerializerFactoryProvider"/>, or <c>null</c> to use the default implementation.</param>
         private LamaFormatter( IServiceProvider serviceProvider, LamaSerializationBinder binder )
         {
             this._serviceProvider = serviceProvider;

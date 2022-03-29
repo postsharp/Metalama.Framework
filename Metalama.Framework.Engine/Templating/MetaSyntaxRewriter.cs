@@ -30,8 +30,10 @@ namespace Metalama.Framework.Engine.Templating
         /// <summary>
         /// Initializes a new instance of the <see cref="MetaSyntaxRewriter"/> class.
         /// </summary>
+        /// <param name="serviceProvider"></param>
         /// <param name="compileTimeCompilation">The <see cref="Compilation"/> used to create the compile-time assembly,
         /// possibly with no source code, but with metadata references. Used to resolve symbols in the compile-time assembly.</param>
+        /// <param name="targetApiVersion"></param>
         public MetaSyntaxRewriter( IServiceProvider serviceProvider, Compilation compileTimeCompilation, RoslynApiVersion targetApiVersion )
         {
             this.TargetApiVersion = targetApiVersion;

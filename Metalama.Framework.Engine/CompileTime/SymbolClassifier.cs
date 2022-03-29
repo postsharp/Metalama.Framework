@@ -65,7 +65,7 @@ namespace Metalama.Framework.Engine.CompileTime
         /// <summary>
         /// Initializes a new instance of the <see cref="SymbolClassifier"/> class.
         /// </summary>
-        /// <param name="serviceProvider">Service provider.</param>
+        /// <param name="referenceAssemblyLocator"></param>
         /// <param name="compilation">The compilation, or null if the compilation has no reference to Metalama.</param>
         public SymbolClassifier( ReferenceAssemblyLocator referenceAssemblyLocator, Compilation? compilation )
         {
