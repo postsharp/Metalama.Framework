@@ -21,7 +21,7 @@ public sealed class TextSourceGeneratorResult : SourceGeneratorResult
         this.Sources = sources;
     }
 
-    protected override ulong ComputeHashCodeImpl()
+    protected override ulong ComputeDigest()
     {
         var xxh = new XXH64();
         ulong hash = 0;

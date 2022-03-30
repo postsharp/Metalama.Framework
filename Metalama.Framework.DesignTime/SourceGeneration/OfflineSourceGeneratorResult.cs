@@ -23,7 +23,7 @@ public sealed class OfflineSourceGeneratorResult : SourceGeneratorResult
         this.OfflineFiles = offlineFiles;
     }
 
-    protected override ulong ComputeHashCodeImpl()
+    protected override ulong ComputeDigest()
     {
         var xxh = new XXH64();
         ulong hash = 0;

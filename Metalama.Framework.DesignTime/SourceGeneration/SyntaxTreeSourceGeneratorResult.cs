@@ -21,7 +21,7 @@ public sealed class SyntaxTreeSourceGeneratorResult : SourceGeneratorResult
         this.AdditionalSources = additionalSources;
     }
 
-    protected override ulong ComputeHashCodeImpl()
+    protected override ulong ComputeDigest()
     {
         var xxh = new XXH64();
         var hasher = new RunTimeCodeHasher( xxh );

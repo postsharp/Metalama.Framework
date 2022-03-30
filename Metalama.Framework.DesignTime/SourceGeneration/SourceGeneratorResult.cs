@@ -17,7 +17,7 @@ public abstract class SourceGeneratorResult : IEquatable<SourceGeneratorResult>
     /// </summary>
     public static SourceGeneratorResult Empty { get; } = new SyntaxTreeSourceGeneratorResult( ImmutableDictionary<string, IntroducedSyntaxTree>.Empty );
 
-    private ulong _hash;
+    private ulong _digest;
 
     public bool Equals( SourceGeneratorResult? other )
     {
@@ -31,26 +31,26 @@ public abstract class SourceGeneratorResult : IEquatable<SourceGeneratorResult>
             return true;
         }
 
-        return this.ComputeHashCode() == other.ComputeHashCode();
+        return this.GetDigest() == other.GetDigest();
     }
 
-    private ulong ComputeHashCode()
+    public ulong GetDigest()
     {
-        if ( this._hash == 0 )
+        if ( this._digest == 0 )
         {
-            this._hash = this.ComputeHashCodeImpl();
+            this._digest = this.ComputeDigest();
         }
 
-        return this._hash;
+        return this._digest;
     }
 
-    protected abstract ulong ComputeHashCodeImpl();
+    protected abstract ulong ComputeDigest();
 
     public override int GetHashCode()
     {
         unchecked
         {
-            return (int) this.ComputeHashCode();
+            return (int) this.GetDigest();
         }
     }
 

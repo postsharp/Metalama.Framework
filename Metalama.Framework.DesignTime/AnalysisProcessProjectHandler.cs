@@ -125,7 +125,7 @@ public class AnalysisProcessProjectHandler : ProjectHandler
         this.LastSourceGeneratorResult = newSourceGeneratorResult;
 
         this._logger.Trace?.Log(
-            $"{this.GetType().Name}.Execute('{compilation.AssemblyName}', CompilationId = {DebuggingHelper.GetObjectId( compilation )}): {newSourceGeneratorResult.AdditionalSources.Count} sources generated." );
+            $"{this.GetType().Name}.Execute('{compilation.AssemblyName}', CompilationId = {DebuggingHelper.GetObjectId( compilation )}): {newSourceGeneratorResult.AdditionalSources.Count} source(s) generated. New digest: {newSourceGeneratorResult.GetDigest()}." );
 
         return true;
     }
