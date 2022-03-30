@@ -3,6 +3,7 @@
 
 using Metalama.Backstage.Diagnostics;
 using Metalama.Framework.DesignTime.VisualStudio.Remoting;
+using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
@@ -28,7 +29,7 @@ internal class VsUserProcessProjectHandler : ProjectHandler, IProjectHandlerCall
         _ = this._userProcessEndpoint.RegisterProjectHandlerAsync( projectOptions.ProjectId, this );
     }
 
-    public override void GenerateSources( Compilation compilation, GeneratorExecutionContext context )
+    public override SourceGeneratorResult GenerateSources( Compilation compilation, CancellationToken cancellationToken )
     {
         if ( this._sources == null )
         {
@@ -42,14 +43,11 @@ internal class VsUserProcessProjectHandler : ProjectHandler, IProjectHandlerCall
             {
                 this._logger.Warning?.Log( $"Information about generated sources for '{this.ProjectOptions.ProjectId}' is not available." );
 
-                return;
+                return SourceGeneratorResult.Empty;
             }
         }
 
-        foreach ( var source in this._sources! )
-        {
-            context.AddSource( source.Key, source.Value );
-        }
+        return new TextSourceGeneratorResult( this._sources.AssertNotNull() );
     }
 
     Task IProjectHandlerCallback.PublishGeneratedCodeAsync( string projectId, ImmutableDictionary<string, string> sources, CancellationToken cancellationToken )

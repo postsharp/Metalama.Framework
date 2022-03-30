@@ -6,7 +6,7 @@ using Metalama.Framework.DesignTime.Offline;
 using Metalama.Framework.Engine.AdditionalOutputs;
 using Metalama.Framework.Engine.Options;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.Text;
+using System.Collections.Immutable;
 
 namespace Metalama.Framework.DesignTime;
 
@@ -21,7 +21,7 @@ public partial class BaseSourceGenerator
             this._logger = serviceProvider.GetLoggerFactory().GetLogger( "DesignTime" );
         }
 
-        public override void GenerateSources( Compilation compilation, GeneratorExecutionContext context )
+        public override SourceGeneratorResult GenerateSources( Compilation compilation, CancellationToken cancellationToken )
         {
             var serviceProvider = Engine.Pipeline.ServiceProvider.Empty.WithServices( this.ProjectOptions );
 
@@ -29,22 +29,19 @@ public partial class BaseSourceGenerator
 
             if ( this.ProjectOptions.AdditionalCompilationOutputDirectory == null )
             {
-                return;
+                return SourceGeneratorResult.Empty;
             }
 
-            var sourcesCount = 0;
+            var result = new OfflineSourceGeneratorResult(
+                provider.GetAdditionalCompilationOutputFiles()
+                    .Where(
+                        f => f.Kind == AdditionalCompilationOutputFileKind.DesignTimeGeneratedCode
+                             && StringComparer.Ordinal.Equals( Path.GetExtension( f.Path ), ".cs" ) )
+                    .ToImmutableArray() );
 
-            foreach ( var file in provider.GetAdditionalCompilationOutputFiles()
-                         .Where(
-                             f => f.Kind == AdditionalCompilationOutputFileKind.DesignTimeGeneratedCode
-                                  && StringComparer.Ordinal.Equals( Path.GetExtension( f.Path ), ".cs" ) ) )
-            {
-                using var stream = file.GetStream();
-                context.AddSource( Path.GetFileName( file.Path ), SourceText.From( stream ) );
-                sourcesCount++;
-            }
+            this._logger.Trace?.Log( $"DesignTimeSourceGenerator.Execute('{compilation.AssemblyName}'): {result.OfflineFiles.Length} sources generated." );
 
-            this._logger.Trace?.Log( $"DesignTimeSourceGenerator.Execute('{context.Compilation.AssemblyName}'): {sourcesCount} sources generated." );
+            return result;
         }
     }
 }
