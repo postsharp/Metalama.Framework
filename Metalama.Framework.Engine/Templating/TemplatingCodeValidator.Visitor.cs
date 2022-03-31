@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Utilities;
@@ -34,8 +35,9 @@ namespace Metalama.Framework.Engine.Templating
             private readonly bool _hasCompileTimeCodeFast;
             private TemplateCompiler? _templateCompiler;
 
-            private TemplatingScope? _currentScope;
             private ISymbol? _currentDeclaration;
+            private TemplatingScope? _currentScope;
+            private bool? _currentDeclarationIsTemplate;
 
             public bool HasError { get; private set; }
 
@@ -60,6 +62,13 @@ namespace Metalama.Framework.Engine.Templating
 
             public override void Visit( SyntaxNode? node )
             {
+                bool AvoidDuplicates( ISymbol symbol )
+                {
+                    return this._alreadyReportedDiagnostics.Add( symbol ) &&
+                           !(symbol.ContainingSymbol != null
+                             && this._alreadyReportedDiagnostics.Contains( symbol.ContainingSymbol ));
+                }
+
                 if ( node == null )
                 {
                     return;
@@ -71,30 +80,64 @@ namespace Metalama.Framework.Engine.Templating
                 // This allows to reduce redundant messages.
                 base.Visit( node );
 
-                // If the scope is null (e.g. in a using statement) or compile-time-only, we should not analyze.
-                // Otherwise, we cannot reference a compile-time-only declaration, except in a typeof() or nameof() expression
-                // because these are transformed by the CompileTimeCompilationBuilder.
-
-                if ( this._currentScope is TemplatingScope.RunTimeOnly )
+                // If the scope is null (e.g. in a using statement), we should not analyze.
+                if ( !this._currentScope.HasValue )
                 {
-                    var symbolInfo = this._semanticModel.GetSymbolInfo( node );
+                    return;
+                }
 
-                    var referencedSymbol = symbolInfo.Symbol;
+                // Otherwise, we have to check references.
 
-                    if ( referencedSymbol is { } and not ITypeParameterSymbol &&
-                         this._classifier.GetTemplatingScope( referencedSymbol ) == TemplatingScope.CompileTimeOnly && !node.AncestorsAndSelf()
-                             .Any( n => n is TypeOfExpressionSyntax || (n is InvocationExpressionSyntax invocation && invocation.IsNameOf()) ) )
+                var referencedSymbol = this._semanticModel.GetSymbolInfo( node ).Symbol;
+
+                if ( referencedSymbol is { } and not ITypeParameterSymbol )
+                {
+                    var referencedScope = this._classifier.GetTemplatingScope( referencedSymbol );
+
+                    if ( referencedScope == TemplatingScope.CompileTimeOnly )
                     {
-                        if ( this._alreadyReportedDiagnostics.Add( referencedSymbol ) &&
-                             !(referencedSymbol.ContainingSymbol != null && this._alreadyReportedDiagnostics.Contains( referencedSymbol.ContainingSymbol )) )
+                        if ( referencedSymbol is
+                            {
+                                ContainingSymbol: { Name: nameof(meta) },
+                                Name: nameof(meta.Proceed) or nameof(meta.ProceedAsync) or nameof(meta.ProceedEnumerable) or nameof(meta.ProceedEnumerator)
+                            } && !this._currentDeclarationIsTemplate!.Value )
                         {
-                            this.Report(
-                                TemplatingDiagnosticDescriptors.CannotReferenceCompileTimeOnly.CreateRoslynDiagnostic(
-                                    node.GetLocation(),
-                                    (this._currentDeclaration!, referencedSymbol) ) );
+                            // Cannot reference 'meta.Proceed' out of a template.
+                            if ( AvoidDuplicates( referencedSymbol ) )
+                            {
+                                this.Report(
+                                    TemplatingDiagnosticDescriptors.CannotUseProceedOutOfTemplate.CreateRoslynDiagnostic(
+                                        node.GetLocation(),
+                                        this._currentDeclaration! ) );
+                            }
+                        }
+                        else if ( !(this._currentScope.Value.ExecutesAtCompileTimeOnly() || this._currentDeclarationIsTemplate!.Value) && !node
+                                     .AncestorsAndSelf()
+                                     .Any( n => n is TypeOfExpressionSyntax || (n is InvocationExpressionSyntax invocation && invocation.IsNameOf()) ) )
+                        {
+                            // We cannot reference a compile-time-only declaration, except in a typeof() or nameof() expression
+                            // because these are transformed by the CompileTimeCompilationBuilder.
+
+                            if ( AvoidDuplicates( referencedSymbol ) )
+                            {
+                                this.Report(
+                                    TemplatingDiagnosticDescriptors.CannotReferenceCompileTimeOnly.CreateRoslynDiagnostic(
+                                        node.GetLocation(),
+                                        (this._currentDeclaration!, referencedSymbol) ) );
+                            }
                         }
                     }
                 }
+            }
+
+            public override void VisitAttribute( AttributeSyntax node )
+            {
+                // Do not validate custom attributes.
+            }
+
+            public override void VisitBaseList( BaseListSyntax node )
+            {
+                // Do not validate the base list.
             }
 
             public override void VisitClassDeclaration( ClassDeclarationSyntax node )
@@ -146,14 +189,6 @@ namespace Metalama.Framework.Engine.Templating
                 }
             }
 
-            public override void VisitFieldDeclaration( FieldDeclarationSyntax node )
-            {
-                using ( this.WithScope( node ) )
-                {
-                    base.VisitFieldDeclaration( node );
-                }
-            }
-
             public override void VisitConstructorDeclaration( ConstructorDeclarationSyntax node )
             {
                 using ( this.WithScope( node ) )
@@ -167,6 +202,36 @@ namespace Metalama.Framework.Engine.Templating
                 using ( this.WithScope( node ) )
                 {
                     base.VisitOperatorDeclaration( node );
+                }
+            }
+
+            public override void VisitEventDeclaration( EventDeclarationSyntax node )
+            {
+                using ( this.WithScope( node ) )
+                {
+                    base.VisitEventDeclaration( node );
+                }
+            }
+
+            public override void VisitEventFieldDeclaration( EventFieldDeclarationSyntax node )
+            {
+                foreach ( var f in node.Declaration.Variables )
+                {
+                    using ( this.WithScope( f ) )
+                    {
+                        this.VisitVariableDeclarator( f );
+                    }
+                }
+            }
+
+            public override void VisitFieldDeclaration( FieldDeclarationSyntax node )
+            {
+                foreach ( var f in node.Declaration.Variables )
+                {
+                    using ( this.WithScope( f ) )
+                    {
+                        this.VisitVariableDeclarator( f );
+                    }
                 }
             }
 
@@ -206,6 +271,7 @@ namespace Metalama.Framework.Engine.Templating
 
                     var context = new ScopeCookie( this, scope, declaredSymbol );
                     this._currentScope = scope;
+                    this._currentDeclarationIsTemplate = scope.ExecutesAtCompileTimeOnly() && !this._classifier.GetTemplateInfo( declaredSymbol ).IsNone;
                     this._currentDeclaration = declaredSymbol;
 
                     return context;
@@ -218,12 +284,14 @@ namespace Metalama.Framework.Engine.Templating
             {
                 private readonly Visitor? _parent;
                 private readonly TemplatingScope? _previousScope;
+                private readonly bool? _previousDeclarationIsTemplate;
                 private readonly ISymbol? _previousDeclaration;
 
                 public ScopeCookie( Visitor parent, TemplatingScope scope, ISymbol? symbol )
                 {
                     this._parent = parent;
                     this._previousScope = parent._currentScope;
+                    this._previousDeclarationIsTemplate = parent._currentDeclarationIsTemplate;
                     this._previousDeclaration = parent._currentDeclaration;
                     this.Scope = scope;
                     this.Symbol = symbol;
@@ -238,6 +306,7 @@ namespace Metalama.Framework.Engine.Templating
                     if ( this._parent != null )
                     {
                         this._parent._currentScope = this._previousScope;
+                        this._parent._currentDeclarationIsTemplate = this._previousDeclarationIsTemplate;
                         this._parent._currentDeclaration = this._previousDeclaration;
                     }
                 }

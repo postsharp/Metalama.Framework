@@ -267,5 +267,13 @@ namespace Metalama.Framework.Engine.Templating
                 "Template code must be written in C# {0}.",
                 _category,
                 Error );
+
+        internal static readonly DiagnosticDefinition<IDeclaration> CannotUseProceedOutOfTemplate
+            = new(
+                "LAMA0233",
+                "Cannot use the 'meta.Proceed' method out of a template.",
+                "Cannot use the 'meta.Proceed' method in '{0}' because it is not a template.",
+                _category,
+                Error );
     }
 }
