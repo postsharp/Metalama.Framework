@@ -73,11 +73,19 @@ namespace Metalama.Framework.Engine.Templating
                         // Report invalid symbols.
                         if ( symbolInfo.Symbol is IErrorTypeSymbol )
                         {
-                            ReportError( TemplatingDiagnosticDescriptors.UnresolvedSymbolInTemplate, symbolInfo.Symbol );
+                            // Do not report this error because it is reported by Roslyn anyway.
                         }
-                        else if ( this.IsPartiallyError( symbolInfo.Symbol ) )
+                        else if ( this.IsPartiallyError( symbolInfo.Symbol ))
                         {
-                            ReportError( TemplatingDiagnosticDescriptors.PartiallyUnresolvedSymbolInTemplate, symbolInfo.Symbol );
+                            if ( node is IdentifierNameSyntax { IsVar: true } )
+                            {
+                                // We don't report an error on the 'var' keyword because it is reported on the right side
+                                // of the assignment anyway.
+                            }
+                            else
+                            {
+                                ReportError( TemplatingDiagnosticDescriptors.PartiallyUnresolvedSymbolInTemplate, symbolInfo.Symbol );
+                            }
                         }
 
                         if ( !this._map._symbolToAnnotationMap.TryGetValue( symbolInfo.Symbol, out var annotation ) )
@@ -91,17 +99,8 @@ namespace Metalama.Framework.Engine.Templating
                     }
                     else 
                     {
-                        if ( node.IsKind( SyntaxKind.IdentifierName ) )
-                        {
-                            var identifier = (IdentifierNameSyntax) node;
-
-                            if ( !identifier.IsVar )
-                            {
-                                ReportError( TemplatingDiagnosticDescriptors.UnresolvedIdentifierInTemplate, identifier.Identifier.ToString() );
-                            }
-                        }
-
-                        return originalNode;
+                        // If we should have got a symbol we did not because of unresolved symbol, Roslyn should have reported
+                        // this situation.
                     }
 
                     // Cache semanticModel.GetDeclaredSymbol
@@ -139,7 +138,7 @@ namespace Metalama.Framework.Engine.Templating
                     this._nodesWithErrorReports ??= new HashSet<SyntaxNode>();
 
                     // Avoid reporting on the parent if we have reported anything on a child.
-                    if ( !originalNode.ChildNodes().Any( n => this._nodesWithErrorReports.Contains( n ) ) )
+                    if ( !originalNode.DescendantNodes().Any( n => this._nodesWithErrorReports.Contains( n ) ) )
                     {
                         this._diagnosticAdder.Report(
                             diagnostic.CreateRoslynDiagnostic( originalNode.GetLocation(), arg ) );
