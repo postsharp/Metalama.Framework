@@ -275,5 +275,29 @@ namespace Metalama.Framework.Engine.Templating
                 "Cannot use the 'meta.Proceed' method in '{0}' because it is not a template.",
                 _category,
                 Error );
+
+        internal static readonly DiagnosticDefinition<ISymbol> UnresolvedSymbolInTemplate
+            = new(
+                "LAMA0234",
+                "Cannot resolve a type or member in a template.",
+                "Cannot resolve the type or member '{0}'.",
+                _category,
+                Error );
+
+        internal static readonly DiagnosticDefinition<ISymbol> PartiallyUnresolvedSymbolInTemplate
+            = new(
+                "LAMA0235",
+                "The definition of a type or member used in a template is partially invalid.",
+                "The definition of the type or member '{0}' is invalid.",
+                _category,
+                Error );
+        
+        internal static readonly DiagnosticDefinition<string> UnresolvedIdentifierInTemplate
+            = new(
+                "LAMA0236",
+                "Cannot resolve an identifier in a template.",
+                "Cannot resolve the identifier '{0}'.",
+                _category,
+                Error );
     }
 }
