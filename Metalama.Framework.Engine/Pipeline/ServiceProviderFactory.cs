@@ -61,8 +61,7 @@ namespace Metalama.Framework.Engine.Pipeline
         {
             var serviceProvider = ServiceProvider.Empty.WithServices(
                 pathOptions,
-                new DefaultCompileTimeDomainFactory(),
-                new CompileTimeExceptionHandler() );
+                new DefaultCompileTimeDomainFactory() );
 
             serviceProvider = serviceProvider.WithLateBoundServices(
                 LateBoundService.Create( s => new ReferenceAssemblyLocator( s ) ),

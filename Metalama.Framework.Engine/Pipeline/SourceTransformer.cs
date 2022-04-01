@@ -28,6 +28,13 @@ namespace Metalama.Framework.Engine.Pipeline
         {
             var serviceProvider = ServiceProviderFactory.GetServiceProvider( nextServiceProvider: context.Services );
 
+            // Try has its own handler. Having the default ICompileTimeExceptionHandler added earlier
+            // is not possible, because it needs access to IExceptionReporter service, which comes from the TransformerContext.
+            if ( serviceProvider.GetService<ICompileTimeExceptionHandler>() == null )
+            {
+                serviceProvider = serviceProvider.WithService( new CompileTimeExceptionHandler( serviceProvider ) );
+            }
+
             // Try.Metalama ships its own project options using the async-local service provider.
             var projectOptions = serviceProvider.GetService<IProjectOptions>();
 
@@ -65,7 +72,8 @@ namespace Metalama.Framework.Engine.Pipeline
             {
                 var mustRethrow = true;
 
-                ServiceProviderFactory.AsyncLocalProvider.GetService<ICompileTimeExceptionHandler>()
+                serviceProvider
+                    .GetService<ICompileTimeExceptionHandler>()
                     ?.ReportException( e, context.ReportDiagnostic, out mustRethrow );
 
                 if ( mustRethrow )
