@@ -66,8 +66,7 @@ namespace Metalama.Framework.Engine.Pipeline
 
             var serviceProvider = ServiceProvider.Empty.WithServices(
                     pathOptions,
-                    new DefaultCompileTimeDomainFactory(),
-                    new CompileTimeExceptionHandler() )
+                    new DefaultCompileTimeDomainFactory() )
                 .WithExternalService<ILoggerFactory>( DiagnosticsService.Instance );
 
             serviceProvider = serviceProvider
