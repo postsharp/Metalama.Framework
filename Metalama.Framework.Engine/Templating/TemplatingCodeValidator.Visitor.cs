@@ -96,11 +96,14 @@ namespace Metalama.Framework.Engine.Templating
 
                     if ( referencedScope == TemplatingScope.CompileTimeOnly )
                     {
-                        if ( referencedSymbol is
-                            {
-                                ContainingSymbol: { Name: nameof(meta) },
-                                Name: nameof(meta.Proceed) or nameof(meta.ProceedAsync) or nameof(meta.ProceedEnumerable) or nameof(meta.ProceedEnumerator)
-                            } && !this._currentDeclarationIsTemplate!.Value )
+                        // ReSharper disable once MissingIndent
+                        var isProceed = referencedSymbol is
+                        {
+                            ContainingSymbol: { Name: nameof(meta) },
+                            Name: nameof(meta.Proceed) or nameof(meta.ProceedAsync) or nameof(meta.ProceedEnumerable) or nameof(meta.ProceedEnumerator)
+                        };
+
+                        if ( isProceed && !this._currentDeclarationIsTemplate!.Value )
                         {
                             // Cannot reference 'meta.Proceed' out of a template.
                             if ( AvoidDuplicates( referencedSymbol ) )
