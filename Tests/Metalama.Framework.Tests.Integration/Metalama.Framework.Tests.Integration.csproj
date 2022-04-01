@@ -45,10 +45,6 @@
         <Folder Include="Tests\Aspects\Initializers"/>
     </ItemGroup>
 
-    <ItemGroup>
-        <None Include="Tests\Aspects\Inheritance\CrossAssemblyChildAspect.t.cs"/>
-    </ItemGroup>
-
     <Import Project="..\..\Metalama.TestFramework\Metalama.TestFramework.targets"/>
 
 </Project>

@@ -42,7 +42,7 @@ namespace Metalama.Framework.Engine.Pipeline
 
         // This member is intentionally protected because there can be one ServiceProvider per project,
         // but the pipeline can be used by many projects.
-        protected internal ServiceProvider ServiceProvider { get; }
+        public ServiceProvider ServiceProvider { get; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AspectPipeline"/> class.

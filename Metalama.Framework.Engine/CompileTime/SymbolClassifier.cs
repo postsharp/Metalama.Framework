@@ -390,7 +390,14 @@ namespace Metalama.Framework.Engine.CompileTime
 
                 if ( typeScope != TemplatingScope.Both )
                 {
-                    signatureScope = signatureScope == TemplatingScope.Both ? typeScope : TemplatingScope.Conflict;
+                    if ( signatureScope == TemplatingScope.Both )
+                    {
+                        signatureScope = typeScope;
+                    }
+                    else
+                    {
+                        signatureScope = TemplatingScope.Conflict;
+                    }
                 }
             }
 

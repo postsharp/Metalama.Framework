@@ -257,10 +257,12 @@ namespace Metalama.TestFramework
 
             if ( this.HasOutputCode && outputSyntaxTree is { OutputRunTimeSyntaxRoot: not null } )
             {
+                // Adding syntax annotations for the output compilation. We cannot add syntax annotations for diagnostics
+                // on the input compilation because they would potentially not map properly to the output compilation.
                 var outputSyntaxRoot = FormattedCodeWriter.AddDiagnosticAnnotations(
                     outputSyntaxTree.OutputRunTimeSyntaxRoot,
                     outputSyntaxTree.InputPath,
-                    this.OutputCompilationDiagnostics.Concat( this.PipelineDiagnostics ).ToArray() );
+                    this.OutputCompilationDiagnostics.ToArray() );
 
                 // Find notes annotated with // <target> or with a comment containing <target> and choose the first one. If there is none, the test output is the whole tree
                 // passed to this method.

@@ -11,10 +11,15 @@ namespace Metalama.Framework.Engine.CompileTime
             => scope.GetExpressionExecutionScope().ReplaceIndeterminate( TemplatingScope.RunTimeOnly ) is
                 TemplatingScope.RunTimeOnly;
 
-        public static bool IsDynamic( this TemplatingScope scope ) => scope is TemplatingScope.CompileTimeOnlyReturningRuntimeOnly or TemplatingScope.Dynamic;
+        public static bool IsCompileTimeMemberReturningRunTimeValue( this TemplatingScope scope )
+            => scope is TemplatingScope.CompileTimeOnlyReturningRuntimeOnly or TemplatingScope.Dynamic;
 
-        public static bool IsRunTime( this TemplatingScope scope )
+        public static bool EvaluatesToRunTimeValue( this TemplatingScope scope )
             => scope is TemplatingScope.Dynamic or TemplatingScope.CompileTimeOnlyReturningRuntimeOnly or TemplatingScope.RunTimeOnly;
+
+        public static bool ExecutesAtCompileTimeOnly( this TemplatingScope scope )
+            => scope is TemplatingScope.CompileTimeOnly or TemplatingScope.CompileTimeOnlyReturningBoth or TemplatingScope.CompileTimeOnlyReturningRuntimeOnly
+                or TemplatingScope.Dynamic;
 
         public static TemplatingScope ReplaceIndeterminate( this TemplatingScope scope, TemplatingScope defaultScope )
             => IsUndetermined( scope ) ? defaultScope : scope;

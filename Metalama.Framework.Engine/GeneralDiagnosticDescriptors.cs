@@ -227,7 +227,7 @@ namespace Metalama.Framework.Engine
                     "LAMA0041",
                     "Exception in user code",
                     "'{0}' threw '{2}' when applied to '{1}': {3}. Exception details are in '{4}'. To attach a debugger to the compiler, use the " +
-                    " '-p:MetalamaDebug=True' command-line option.",
+                    " '-p:MetalamaDebugCompiler=True' command-line option.",
                     _category,
                     Error );
 
@@ -237,7 +237,7 @@ namespace Metalama.Framework.Engine
                     "LAMA0042",
                     "Exception in user code",
                     "'{0}' threw '{1}': {2}. Exception details are in '{3}'. To attach a debugger to the compiler, use the " +
-                    " '-p:MetalamaDebug=True' command-line option.",
+                    " '-p:MetalamaDebugCompiler=True' command-line option.",
                     _category,
                     Error );
 
