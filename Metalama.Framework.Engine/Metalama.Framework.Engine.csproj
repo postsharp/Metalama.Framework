@@ -85,7 +85,7 @@
     </ItemGroup>
 
     <PropertyGroup>
-        <_FixPublicSigningTouchFile>$(MSBuildThisFileDirectory)\obj\PostSharp\fakesign_touch</_FixPublicSigningTouchFile>
+        <_FixPublicSigningTouchFile>$(MSBuildThisFileDirectory)\obj\$(Configuration)\$(TargetFramework)\fakesign_touch</_FixPublicSigningTouchFile>
     </PropertyGroup>
 
     <Target Name="FixPublicSigning" Inputs="@(IntermediateAssembly->'%(FullPath)')" Outputs="$(_FixPublicSigningTouchFile)" AfterTargets="PostSharp">
