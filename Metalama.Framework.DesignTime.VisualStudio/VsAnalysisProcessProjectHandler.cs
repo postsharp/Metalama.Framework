@@ -37,9 +37,10 @@ internal class VsAnalysisProcessProjectHandler : AnalysisProcessProjectHandler
 
     protected override Task PublishGeneratedSourcesAsync( string projectId, CancellationToken cancellationToken )
     {
-        if ( this._serviceHost != null && this.Sources != null )
+        if ( this._serviceHost != null && this.LastSourceGeneratorResult != null )
         {
-            var generatedSources = this.Sources.ToImmutableDictionary( x => x.Key, x => x.Value.ToString() );
+            var generatedSources = this.LastSourceGeneratorResult.AdditionalSources
+                .ToImmutableDictionary( x => x.Key, x => x.Value.GeneratedSyntaxTree.ToString() );
 
             return this._serviceHost.PublishGeneratedSourcesAsync(
                 projectId,

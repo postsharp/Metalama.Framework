@@ -245,7 +245,25 @@ namespace Metalama.Framework.CompilerExtensions
 
         private static string GetRoslynVersion()
         {
-            var version = typeof(SyntaxNode).Assembly.GetName().Version;
+            var assembly = typeof(SyntaxNode).Assembly;
+            var version = assembly.GetName().Version;
+
+            if ( version == new Version( 42, 42, 42, 42 ) )
+            {
+                // This is the JetBrains build. The real version is in AssemblyInformationalVersionAttribute.
+
+                var informationalVersionAttribute = assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>();
+
+                if ( informationalVersionAttribute != null )
+                {
+                    var informationalVersionString = informationalVersionAttribute.InformationalVersion.Split( '-' );
+
+                    if ( Version.TryParse( informationalVersionString[0], out var informationVersion ) )
+                    {
+                        version = informationVersion;
+                    }
+                }
+            }
 
             if ( version >= new Version( 4, 1 ) )
             {

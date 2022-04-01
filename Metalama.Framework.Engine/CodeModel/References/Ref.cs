@@ -59,8 +59,6 @@ namespace Metalama.Framework.Engine.CodeModel.References
         /// <summary>
         /// Creates a <see cref="Ref{T}"/> from a Roslyn symbol.
         /// </summary>
-        /// <param name="symbol"></param>
-        /// <returns></returns>
         public static Ref<IDeclaration> FromSymbol( ISymbol symbol, Compilation compilation ) => new( symbol, compilation );
 
         public static Ref<T> FromSymbolId<T>( SymbolId symbolKey )
@@ -74,9 +72,6 @@ namespace Metalama.Framework.Engine.CodeModel.References
         /// <summary>
         /// Creates a <see cref="Ref{T}"/> from a Roslyn symbol.
         /// </summary>
-        /// <param name="symbol"></param>
-        /// <typeparam name="T"></typeparam>
-        /// <returns></returns>
         public static Ref<T> FromSymbol<T>( ISymbol symbol, Compilation compilation )
             where T : class, ICompilationElement
             => new( symbol, compilation );

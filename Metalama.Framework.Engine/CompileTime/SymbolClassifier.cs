@@ -3,7 +3,6 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Utilities;
-using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Concurrent;
@@ -66,10 +65,12 @@ namespace Metalama.Framework.Engine.CompileTime
         /// <summary>
         /// Initializes a new instance of the <see cref="SymbolClassifier"/> class.
         /// </summary>
-        /// <param name="serviceProvider">Service provider.</param>
+        /// <param name="referenceAssemblyLocator"></param>
         /// <param name="compilation">The compilation, or null if the compilation has no reference to Metalama.</param>
-        public SymbolClassifier( IServiceProvider serviceProvider, Compilation? compilation )
+        public SymbolClassifier( ReferenceAssemblyLocator referenceAssemblyLocator, Compilation? compilation )
         {
+            this._referenceAssemblyLocator = referenceAssemblyLocator;
+
             if ( compilation != null )
             {
                 this._compilation = compilation;
@@ -78,8 +79,6 @@ namespace Metalama.Framework.Engine.CompileTime
                 this._templateAttribute = this._compilation.GetTypeByMetadataName( typeof(TemplateAttribute).FullName ).AssertNotNull();
                 this._ignoreUnlessOverriddenAttribute = this._compilation.GetTypeByMetadataName( typeof(AbstractAttribute).FullName ).AssertNotNull();
             }
-
-            this._referenceAssemblyLocator = serviceProvider.GetRequiredService<ReferenceAssemblyLocator>();
         }
 
         public TemplateInfo GetTemplateInfo( ISymbol symbol ) => this.GetTemplateInfo( symbol, false );
@@ -391,7 +390,14 @@ namespace Metalama.Framework.Engine.CompileTime
 
                 if ( typeScope != TemplatingScope.Both )
                 {
-                    signatureScope = signatureScope == TemplatingScope.Both ? typeScope : TemplatingScope.Conflict;
+                    if ( signatureScope == TemplatingScope.Both )
+                    {
+                        signatureScope = typeScope;
+                    }
+                    else
+                    {
+                        signatureScope = TemplatingScope.Conflict;
+                    }
                 }
             }
 

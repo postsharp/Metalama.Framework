@@ -13,12 +13,8 @@ namespace Metalama.Framework.Tests.Integration.CodeFixes.RemoveAttribute
     {
         private static DiagnosticDefinition _diag = new( "MY001", Severity.Warning, "Add some attribute" );
 
-        public override void BuildAspect( IAspectBuilder<IMethod> builder )
-        {
-            base.BuildAspect( builder );
+        public override void BuildAspect(IAspectBuilder<IMethod> builder) => throw new System.NotSupportedException("Compile-time-only code cannot be called at run-time.");
 
-builder.Diagnostics.Report(             _diag.WithCodeFixes( CodeFixFactory.RemoveAttributes( builder.Target.DeclaringType, typeof(MyAttribute) ) ) );
-        }
     }
 #pragma warning restore CS0067
 

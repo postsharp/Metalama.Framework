@@ -135,17 +135,30 @@ namespace Metalama.Framework.Engine.CompileTime
             for ( var i = 0; i < attribute.ConstructorArguments.Length; i++ )
             {
                 var constructorArgument = attribute.ConstructorArguments[i];
+                var isInParams = paramsParameter != null && i >= paramsParameter.Position;
 
-                var translatedArgument = this.TranslateAttributeArgument(
-                    attribute,
-                    constructorArgument,
-                    constructorParameters[i].ParameterType,
-                    diagnosticAdder );
+                var parameterInfo = isInParams ? paramsParameter! : constructorParameters[i];
 
-                if ( paramsParameter != null && i >= paramsParameter.Position )
+                if ( !this.TryTranslateAttributeArgument(
+                        attribute,
+                        constructorArgument,
+                        parameterInfo.ParameterType,
+                        diagnosticAdder,
+                        out var translatedArgument ) )
                 {
-                    paramsArgument!.SetValue( translatedArgument, paramsIndex );
-                    paramsIndex++;
+                    attributeInstance = null;
+
+                    return false;
+                }
+
+                if ( isInParams )
+                {
+                    if ( translatedArgument == null ||
+                         paramsArgument!.GetType().GetElementType()!.IsInstanceOfType( translatedArgument ) )
+                    {
+                        paramsArgument!.SetValue( translatedArgument, paramsIndex );
+                        paramsIndex++;
+                    }
                 }
                 else
                 {
@@ -180,7 +193,12 @@ namespace Metalama.Framework.Engine.CompileTime
 
                 if ( (property = type.GetProperty( arg.Key )) != null )
                 {
-                    var translatedValue = this.TranslateAttributeArgument( attribute, arg.Value, property.PropertyType, diagnosticAdder );
+                    if ( !this.TryTranslateAttributeArgument( attribute, arg.Value, property.PropertyType, diagnosticAdder, out var translatedValue ) )
+                    {
+                        attributeInstance = null;
+
+                        return false;
+                    }
 
                     if ( !this._userCodeInvoker.TryInvoke(
                             () => property.SetValue( localAttributeInstance, translatedValue ),
@@ -193,7 +211,12 @@ namespace Metalama.Framework.Engine.CompileTime
                 }
                 else if ( (field = type.GetField( arg.Key )) != null )
                 {
-                    var translatedValue = this.TranslateAttributeArgument( attribute, arg.Value, field.FieldType, diagnosticAdder );
+                    if ( !this.TryTranslateAttributeArgument( attribute, arg.Value, field.FieldType, diagnosticAdder, out var translatedValue ) )
+                    {
+                        attributeInstance = null;
+
+                        return false;
+                    }
 
                     if ( !this._userCodeInvoker.TryInvoke(
                             () => field.SetValue( localAttributeInstance, translatedValue ),
@@ -216,11 +239,12 @@ namespace Metalama.Framework.Engine.CompileTime
             return true;
         }
 
-        private object? TranslateAttributeArgument(
+        private bool TryTranslateAttributeArgument(
             AttributeData attribute,
             TypedConstant typedConstant,
             Type targetType,
-            IDiagnosticAdder diagnosticAdder )
+            IDiagnosticAdder diagnosticAdder,
+            out object? translatedValue )
         {
             object? value;
 
@@ -231,7 +255,9 @@ namespace Metalama.Framework.Engine.CompileTime
                     throw new AssertionFailedException( "Got an invalid attribute argument value. " );
 
                 case TypedConstantKind.Array when typedConstant.Values.IsDefault:
-                    return null;
+                    translatedValue = null;
+
+                    return true;
 
                 case TypedConstantKind.Array:
                     value = typedConstant.Values;
@@ -244,39 +270,56 @@ namespace Metalama.Framework.Engine.CompileTime
                     break;
             }
 
-            return this.TranslateAttributeArgument(
+            return this.TryTranslateAttributeArgument(
                 attribute,
                 value,
                 typedConstant.Type,
                 targetType,
-                diagnosticAdder );
+                diagnosticAdder,
+                out translatedValue );
         }
 
-        private object? TranslateAttributeArgument(
+        private bool TryTranslateAttributeArgument(
             AttributeData attribute,
             object? value,
             ITypeSymbol? sourceType,
             Type targetType,
-            IDiagnosticAdder diagnosticAdder )
+            IDiagnosticAdder diagnosticAdder,
+            out object? translatedValue )
         {
             if ( value == null )
             {
-                return null;
+                translatedValue = null;
+
+                return true;
             }
 
             switch ( value )
             {
                 case TypedConstant typedConstant:
-                    return this.TranslateAttributeArgument( attribute, typedConstant, targetType, diagnosticAdder );
+                    return this.TryTranslateAttributeArgument( attribute, typedConstant, targetType, diagnosticAdder, out translatedValue );
+
+                case IErrorTypeSymbol:
+                    translatedValue = null;
+
+                    return false;
 
                 case ITypeSymbol type:
-                    if ( !targetType.IsAssignableFrom( typeof(Type) ) )
-                    {
-                        // This should not happen because we don't process invalid values.
-                        throw new AssertionFailedException( $"Cannot convert '{value.GetType().Name}' to '{targetType.Name}'." );
-                    }
 
-                    return this._compileTimeTypeResolver.GetCompileTimeType( type, true );
+                    var compileTimeTime = this._compileTimeTypeResolver.GetCompileTimeType( type, true );
+
+                    if ( targetType.IsAssignableFrom( typeof(Type) ) || targetType.IsAssignableFrom( typeof(Type[]) ) )
+                    {
+                        translatedValue = compileTimeTime;
+
+                        return true;
+                    }
+                    else
+                    {
+                        translatedValue = null;
+
+                        return false;
+                    }
 
                 case string str:
                     // Make sure we don't fall under the IEnumerable case.
@@ -286,7 +329,9 @@ namespace Metalama.Framework.Engine.CompileTime
                         throw new AssertionFailedException( $"Cannot convert '{value.GetType().Name}' to '{targetType.Name}'." );
                     }
 
-                    return str;
+                    translatedValue = str;
+
+                    return true;
 
                 case IEnumerable enumerable:
                     // We cannot use generic collections here because array of value types are not convertible to arrays of objects.
@@ -307,13 +352,20 @@ namespace Metalama.Framework.Engine.CompileTime
 
                     foreach ( var item in list )
                     {
-                        var translatedItem = this.TranslateAttributeArgument( attribute, item, sourceType, elementType, diagnosticAdder );
+                        if ( !this.TryTranslateAttributeArgument( attribute, item, sourceType, elementType, diagnosticAdder, out var translatedItem ) )
+                        {
+                            translatedValue = null;
+
+                            return false;
+                        }
 
                         array.SetValue( translatedItem, index );
                         index++;
                     }
 
-                    return array;
+                    translatedValue = array;
+
+                    return true;
 
                 default:
                     if ( sourceType is INamedTypeSymbol { TypeKind: TypeKind.Enum } enumType )
@@ -329,11 +381,14 @@ namespace Metalama.Framework.Engine.CompileTime
 
                     if ( !targetType.IsInstanceOfType( value ) )
                     {
-                        // This should not happen because we don't process invalid values.
-                        throw new AssertionFailedException( $"Cannot convert '{value.GetType().Name}' to '{targetType.Name}'." );
+                        translatedValue = value;
+
+                        return false;
                     }
 
-                    return value;
+                    translatedValue = value;
+
+                    return true;
             }
         }
 

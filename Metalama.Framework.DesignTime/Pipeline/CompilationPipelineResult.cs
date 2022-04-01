@@ -169,8 +169,6 @@ namespace Metalama.Framework.DesignTime.Pipeline
         /// Splits a <see cref="DesignTimePipelineExecutionResult"/>, which includes data for several syntax trees, into
         /// a list of <see cref="SyntaxTreePipelineResult"/> which each have information related to a single syntax tree.
         /// </summary>
-        /// <param name="pipelineResults"></param>
-        /// <returns></returns>
         private static IEnumerable<SyntaxTreePipelineResult> SplitResultsByTree(
             PartialCompilation compilation,
             DesignTimePipelineExecutionResult pipelineResults )

@@ -1,4 +1,5 @@
-    internal class TargetClass
+// Warning CS0219 on `a`: `The variable 'a' is assigned but its value is never used`
+internal class TargetClass
     {
 #pragma warning disable CS0219
         [SuppressWarning]

@@ -437,8 +437,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 var validationRunner = new DesignTimeValidatorRunner(
                     state.Configuration!.ServiceProvider,
                     state.PipelineResult,
-                    configuration.ProjectModel,
-                    state._pipeline );
+                    configuration.ProjectModel );
 
                 IEnumerable<SyntaxTree> syntaxTreesToValidate;
 

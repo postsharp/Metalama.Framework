@@ -1013,6 +1013,7 @@ namespace Metalama.Framework.Engine.Templating
         /// <param name="generateExpression"><c>true</c> if the returned <see cref="SyntaxNode"/> must be an
         /// expression (in this case, a delegate invocation is returned), or <c>false</c> if it can be a statement
         /// (in this case, a return statement is returned).</param>
+        /// <param name="isVoid"></param>
         /// <returns></returns>
         private SyntaxNode BuildRunTimeBlock( ExpressionSyntax node, bool generateExpression, bool isVoid )
         {

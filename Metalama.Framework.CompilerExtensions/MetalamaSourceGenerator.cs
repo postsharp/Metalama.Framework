@@ -8,43 +8,41 @@ namespace Metalama.Framework.CompilerExtensions
     // ReSharper disable UnusedType.Global
 
     [Generator( LanguageNames.CSharp )]
-    public class MetalamaSourceGenerator : ISourceGenerator
+    public class MetalamaSourceGenerator : IIncrementalGenerator
     {
-        private readonly ISourceGenerator? _impl;
+        private readonly IIncrementalGenerator? _impl;
 
         public MetalamaSourceGenerator()
         {
             switch ( ProcessKindHelper.CurrentProcessKind )
             {
+                case ProcessKind.Compiler:
+                    // No implementation required.
+                    break;
+
                 case ProcessKind.DevEnv:
-                    this._impl = (ISourceGenerator) ResourceExtractor.CreateInstance(
+                    this._impl = (IIncrementalGenerator) ResourceExtractor.CreateInstance(
                         "Metalama.Framework.DesignTime.VisualStudio",
                         "Metalama.Framework.DesignTime.VisualStudio.VsUserProcessSourceGenerator" );
 
                     break;
 
                 case ProcessKind.RoslynCodeAnalysisService:
-                    this._impl = (ISourceGenerator) ResourceExtractor.CreateInstance(
+                    this._impl = (IIncrementalGenerator) ResourceExtractor.CreateInstance(
                         "Metalama.Framework.DesignTime.VisualStudio",
                         "Metalama.Framework.DesignTime.VisualStudio.VsAnalysisProcessSourceGenerator" );
 
                     break;
 
-                case ProcessKind.Other:
-                    this._impl = (ISourceGenerator) ResourceExtractor.CreateInstance(
+                default:
+                    this._impl = (IIncrementalGenerator) ResourceExtractor.CreateInstance(
                         "Metalama.Framework.DesignTime",
                         "Metalama.Framework.DesignTime.AnalysisProcessSourceGenerator" );
 
                     break;
-
-                case ProcessKind.Compiler:
-                    // No implementation required.
-                    break;
             }
         }
 
-        void ISourceGenerator.Execute( GeneratorExecutionContext context ) => this._impl?.Execute( context );
-
-        void ISourceGenerator.Initialize( GeneratorInitializationContext context ) => this._impl?.Initialize( context );
+        public void Initialize( IncrementalGeneratorInitializationContext context ) => this._impl?.Initialize( context );
     }
 }

@@ -534,7 +534,7 @@ internal class Generator
         writer.WriteLine();
         writer.WriteLine( "namespace Metalama.Framework.DesignTime.Pipeline.Diff" );
         writer.WriteLine( "{" );
-        writer.WriteLine( $"\tinternal class {className} : BaseCodeHasher" );
+        writer.WriteLine( $"\tpublic class {className} : BaseCodeHasher" );
         writer.WriteLine( "\t{" );
         writer.WriteLine( $"\t\tpublic {className}(XXH64 hasher) : base(hasher) {{}}" );
         writer.WriteLine();
