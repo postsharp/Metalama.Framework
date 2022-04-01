@@ -95,6 +95,7 @@ namespace Metalama.Framework.Engine.Templating
             return true;
         }
 
+        
         public bool TryCompile(
             string templateName,
             Compilation compileTimeCompilation,
