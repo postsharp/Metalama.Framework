@@ -27,6 +27,7 @@ namespace Metalama.Framework.Tests.Integration.CodeFixes.MultiSteps
             }
         }
 
+        [CompileTimeOnly]
         private async Task ImplementManually( ICodeActionBuilder builder, INamedType targetType )
         {
             await builder.ApplyAspectAsync( targetType, this );

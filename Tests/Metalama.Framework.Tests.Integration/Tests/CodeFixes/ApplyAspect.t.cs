@@ -14,12 +14,8 @@ namespace Metalama.Framework.Tests.Integration.CodeFixes.ApplyAspect
     {
         private static DiagnosticDefinition _diag = new( "MY001", Severity.Warning, "Apply Aspect2" );
 
-        public override void BuildAspect( IAspectBuilder<IMethod> builder )
-        {
-            base.BuildAspect( builder );
+        public override void BuildAspect(IAspectBuilder<IMethod> builder) => throw new System.NotSupportedException("Compile-time-only code cannot be called at run-time.");
 
-builder.Diagnostics.Report(             _diag.WithCodeFixes( CodeFixFactory.ApplyAspect( builder.Target, new Aspect2(), "Apply" ) ) );
-        }
     }
 #pragma warning restore CS0067
 #pragma warning disable CS0067
