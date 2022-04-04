@@ -75,7 +75,7 @@ namespace Metalama.Framework.Engine.Templating
                         {
                             // Do not report this error because it is reported by Roslyn anyway.
                         }
-                        else if ( this.IsPartiallyError( symbolInfo.Symbol ))
+                        else if ( this.IsPartiallyError( symbolInfo.Symbol ) )
                         {
                             if ( node is IdentifierNameSyntax { IsVar: true } )
                             {
@@ -97,7 +97,7 @@ namespace Metalama.Framework.Engine.Templating
 
                         annotatedNode = annotatedNode.WithAdditionalAnnotations( annotation );
                     }
-                    else 
+                    else
                     {
                         // If we should have got a symbol we did not because of unresolved symbol, Roslyn should have reported
                         // this situation.
@@ -132,7 +132,7 @@ namespace Metalama.Framework.Engine.Templating
 
                 return annotatedNode;
 
-                void ReportError<T>( DiagnosticDefinition<T> diagnostic, T arg ) 
+                void ReportError<T>( DiagnosticDefinition<T> diagnostic, T arg )
                     where T : notnull
                 {
                     this._nodesWithErrorReports ??= new HashSet<SyntaxNode>();
@@ -140,8 +140,7 @@ namespace Metalama.Framework.Engine.Templating
                     // Avoid reporting on the parent if we have reported anything on a child.
                     if ( !originalNode.DescendantNodes().Any( n => this._nodesWithErrorReports.Contains( n ) ) )
                     {
-                        this._diagnosticAdder.Report(
-                            diagnostic.CreateRoslynDiagnostic( originalNode.GetLocation(), arg ) );
+                        this._diagnosticAdder.Report( diagnostic.CreateRoslynDiagnostic( originalNode.GetLocation(), arg ) );
 
                         this.Success = false;
                         this._nodesWithErrorReports.Add( originalNode );
