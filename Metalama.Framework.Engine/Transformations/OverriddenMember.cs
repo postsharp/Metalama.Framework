@@ -26,11 +26,11 @@ namespace Metalama.Framework.Engine.Transformations
 
         public SyntaxTree TargetSyntaxTree
             => this.OverriddenDeclaration switch
-            { 
+            {
                 ISyntaxTreeTransformation introduction => introduction.TargetSyntaxTree,
-                BuiltDeclaration builtDeclaration => ((ISyntaxTreeTransformation)builtDeclaration.Builder).TargetSyntaxTree,
+                BuiltDeclaration builtDeclaration => ((ISyntaxTreeTransformation) builtDeclaration.Builder).TargetSyntaxTree,
                 Declaration codeDeclaration => codeDeclaration.GetSymbol().AssertNotNull().GetPrimarySyntaxReference().AssertNotNull().SyntaxTree,
-                _ => throw new AssertionFailedException(),
+                _ => throw new AssertionFailedException()
             };
 
         protected OverriddenMember( Advice advice, IMember overriddenDeclaration )

@@ -47,7 +47,6 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public abstract InsertPosition InsertPosition { get; }
 
         // TODO: This is temporary.
-        public virtual SyntaxTree TargetSyntaxTree => 
-            ((NamedType) this.DeclaringType).Symbol.GetPrimarySyntaxReference().AssertNotNull().SyntaxTree;
+        public virtual SyntaxTree TargetSyntaxTree => ((NamedType) this.DeclaringType).Symbol.GetPrimarySyntaxReference().AssertNotNull().SyntaxTree;
     }
 }

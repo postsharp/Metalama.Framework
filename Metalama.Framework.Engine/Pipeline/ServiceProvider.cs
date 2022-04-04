@@ -76,7 +76,7 @@ namespace Metalama.Framework.Engine.Pipeline
         /// </summary>
         public ServiceProvider WithService( IService service ) => this.WithService( new ServiceNode( _ => service, service.GetType() ) );
 
-        public ServiceProvider WithExternalService<T>( T service ) 
+        public ServiceProvider WithExternalService<T>( T service )
             where T : notnull
             => new( this._services.Add( typeof(T), new ServiceNode( _ => service, typeof(T) ) ), this._nextProvider );
 

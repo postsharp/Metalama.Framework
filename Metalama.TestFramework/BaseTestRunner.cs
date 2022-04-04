@@ -366,7 +366,7 @@ namespace Metalama.TestFramework
                 Path.GetFileNameWithoutExtension( sourceAbsolutePath ) + FileExtensions.TransformedCode );
 
             var consolidatedTestOutput = testResult.GetConsolidatedTestOutput();
-            var actualTransformedNonNormalizedText = JoinSyntaxTrees(consolidatedTestOutput);
+            var actualTransformedNonNormalizedText = JoinSyntaxTrees( consolidatedTestOutput );
             var actualTransformedNormalizedSourceText = NormalizeTestOutput( actualTransformedNonNormalizedText, formatCode );
 
             // If the expectation file does not exist, create it with some placeholder content.
@@ -432,15 +432,15 @@ namespace Metalama.TestFramework
             state["expectedTransformedSourceText"] = expectedTransformedSourceText;
             state["actualTransformedNormalizedSourceText"] = actualTransformedNormalizedSourceText;
 
-            static string JoinSyntaxTrees( IEnumerable<SyntaxTree> compilationUnits)
+            static string JoinSyntaxTrees( IEnumerable<SyntaxTree> compilationUnits )
             {
                 var arr = compilationUnits.ToArray();
 
-                if (arr.Length == 0)
+                if ( arr.Length == 0 )
                 {
                     return "// --- No output compilation units ---";
                 }
-                else if (arr.Length == 1)
+                else if ( arr.Length == 1 )
                 {
                     return arr[0].GetRoot().ToFullString();
                 }

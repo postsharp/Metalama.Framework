@@ -42,7 +42,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                 ISyntaxTreeTransformation introduction => introduction.TargetSyntaxTree,
                 BuiltDeclaration builtDeclaration => ((ISyntaxTreeTransformation) builtDeclaration.Builder).TargetSyntaxTree,
                 Declaration codeDeclaration => codeDeclaration.GetSymbol().AssertNotNull().GetPrimarySyntaxReference().AssertNotNull().SyntaxTree,
-                _ => throw new AssertionFailedException(),
+                _ => throw new AssertionFailedException()
             };
 
         public override bool IsDesignTime => false;

@@ -253,10 +253,10 @@ namespace Metalama.TestFramework
             }
 
             // Adding the syntax of the transformed run-time code, but only if the pipeline was successful.
-            var outputSyntaxTrees = 
+            var outputSyntaxTrees =
                 this.TestInput.Options.OutputAllSyntaxTrees == true
-                ? this.SyntaxTrees.AsEnumerable()
-                : this.SyntaxTrees.Take(1);
+                    ? this.SyntaxTrees.AsEnumerable()
+                    : this.SyntaxTrees.Take( 1 );
 
             foreach ( var outputSyntaxTree in outputSyntaxTrees )
             {
@@ -264,12 +264,12 @@ namespace Metalama.TestFramework
 
                 if ( this.HasOutputCode && outputSyntaxTree is { OutputRunTimeSyntaxRoot: not null } )
                 {
-                // Adding syntax annotations for the output compilation. We cannot add syntax annotations for diagnostics
-                // on the input compilation because they would potentially not map properly to the output compilation.
+                    // Adding syntax annotations for the output compilation. We cannot add syntax annotations for diagnostics
+                    // on the input compilation because they would potentially not map properly to the output compilation.
                     var outputSyntaxRoot = FormattedCodeWriter.AddDiagnosticAnnotations(
                         outputSyntaxTree.OutputRunTimeSyntaxRoot,
                         outputSyntaxTree.InputPath,
-                    this.OutputCompilationDiagnostics.ToArray() );
+                        this.OutputCompilationDiagnostics.ToArray() );
 
                     // Find notes annotated with // <target> or with a comment containing <target> and choose the first one. If there is none, the test output is the whole tree
                     // passed to this method.
@@ -287,7 +287,7 @@ namespace Metalama.TestFramework
                     outputNodes = outputNodes switch
                     {
                         { Length: 0 } => new[] { outputSyntaxRoot },
-                        _ => outputNodes,
+                        _ => outputNodes
                     };
 
                     for ( var i = 0; i < outputNodes.Length; i++ )
