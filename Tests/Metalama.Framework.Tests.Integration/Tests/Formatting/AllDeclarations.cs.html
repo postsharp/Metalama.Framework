@@ -57,7 +57,7 @@
         <span class="cr-CompileTime cs-keyword">public</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-keyword">override</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-keyword">dynamic</span><span class="cr-CompileTime cs-operator">?</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-method-name">OverrideMethod</span><span class="cr-CompileTime cs-punctuation">()</span><span class="cr-CompileTime"> </span><span class="cr-RunTime cs-operator">=&gt;</span><span class="cr-RunTime"> </span><span class="cr-RunTime cs-keyword">null</span><span class="cs-punctuation">;</span>
     <span class="cr-CompileTime cs-punctuation">}</span>
     
-    <span class="cr-CompileTime cs-punctuation">[</span><span class="cr-CompileTime cs-class-name">CompileTimeOnly</span><span class="cr-CompileTime cs-punctuation">]</span>
+    <span class="cr-CompileTime cs-punctuation">[</span><span class="cr-CompileTime cs-class-name">CompileTime</span><span class="cr-CompileTime cs-punctuation">]</span>
     <span class="cr-CompileTime cs-keyword">struct</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-struct-name">CompileTimeStruct</span>
     <span class="cr-CompileTime cs-punctuation">{</span>
         <span class="cr-CompileTime cs-keyword">public</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-keyword">event</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-delegate-name">EventHandler</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-event-name">FieldEvent</span><span class="cr-CompileTime cs-punctuation">;</span>
@@ -82,12 +82,12 @@
         <span class="cs-keyword">public</span> <span class="cs-keyword">string</span> <span class="cs-property-name">Property</span> <span class="cs-punctuation">{</span> <span class="cs-keyword">get</span><span class="cs-punctuation">;</span> <span class="cs-keyword">set</span><span class="cs-punctuation">;</span> <span class="cs-punctuation">}</span>
     <span class="cs-punctuation">}</span>
 
-    <span class="cr-CompileTime cs-punctuation">[</span><span class="cr-CompileTime cs-class-name">CompileTimeOnly</span><span class="cr-CompileTime cs-punctuation">]</span>
+    <span class="cr-CompileTime cs-punctuation">[</span><span class="cr-CompileTime cs-class-name">CompileTime</span><span class="cr-CompileTime cs-punctuation">]</span>
     <span class="cr-CompileTime cs-keyword">record</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-record-class-name">CompileTimeRecord</span><span class="cr-CompileTime cs-punctuation">(</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-keyword">int</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-parameter-name">f</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-punctuation">)</span><span class="cs-punctuation">;</span>
 
     <span class="cs-keyword">record</span> <span class="cs-record-class-name">RunTimeRecord</span><span class="cs-punctuation">(</span> <span class="cs-keyword">int</span> <span class="cs-parameter-name">f</span> <span class="cs-punctuation">);</span>
 
-    <span class="cr-CompileTime cs-punctuation">[</span><span class="cr-CompileTime cs-class-name">CompileTimeOnly</span><span class="cr-CompileTime cs-punctuation">]</span>
+    <span class="cr-CompileTime cs-punctuation">[</span><span class="cr-CompileTime cs-class-name">CompileTime</span><span class="cr-CompileTime cs-punctuation">]</span>
     <span class="cr-CompileTime cs-keyword">delegate</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-keyword">void</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-delegate-name">CompileTimeDelegate</span><span class="cr-CompileTime cs-punctuation">();</span>
 
     <span class="cs-keyword">delegate</span> <span class="cs-keyword">void</span> <span class="cs-delegate-name">RunTimeDelegate</span><span class="cs-punctuation">();</span>

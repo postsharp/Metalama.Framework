@@ -108,7 +108,7 @@ class C
             var code = @"
 using Metalama.Framework.Aspects;
 
-[CompileTimeOnly]
+[CompileTime]
 class C 
 {
   void M() {}

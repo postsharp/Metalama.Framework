@@ -7,7 +7,7 @@ using Metalama.Framework.Code;
 
 namespace Metalama.Framework.Tests.Integration.Templating.Syntax.Switch.CompileTimePatternMatchingSwitch
 {
-    [CompileTimeOnly]
+    [CompileTime]
     enum SwitchEnum
     {
         one = 1,

@@ -19,7 +19,7 @@ using Metalama.Framework.Fabrics;
 
 public class A
 {
-    [CompileTimeOnly]
+    [CompileTime]
     public class B : TypeFabric
     {
         public int Field;

@@ -27,7 +27,7 @@ namespace Metalama.Framework.Tests.Integration.Templating.CSharpSyntax.TypeOf.Ty
         }
     }
 
-    [CompileTimeOnly]
+    [CompileTime]
     public class MyClass1 { }
 
     class TargetCode
