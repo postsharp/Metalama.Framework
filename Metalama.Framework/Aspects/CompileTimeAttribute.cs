@@ -7,8 +7,8 @@ namespace Metalama.Framework.Aspects
 {
     /// <summary>
     /// Attribute that means that the target declaration (and all children declarations) can only be called from compile-time
-    /// code, therefore not from run-time code. See <see cref="RunTimeOrCompileTimeAttribute"/> for declarations
-    /// that can be called both from compile- and run-time code.
+    /// code and, therefore, not from run-time code. See <see cref="RunTimeOrCompileTimeAttribute"/> for declarations
+    /// that can be called both from compile-time and run-time code.
     /// </summary>
     [AttributeUsage(
         AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Enum | AttributeTargets.Delegate | AttributeTargets.Interface
