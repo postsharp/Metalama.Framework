@@ -13,7 +13,7 @@ namespace Metalama.TestFramework
     /// </summary>
     /// <param name="ProjectDirectory">Root directory of the project, or <c>null</c> when executed from Aspect Workbench.</param>
     /// <param name="PreprocessorSymbols">List of preprocessor symbols.</param>
-    /// <param name="TargetFramework">Identifier of the target framework, as set in MSBuild (e.g. <c>net5.0</c>, <c>netframework4.8</c>, ...</param>
+    /// <param name="TargetFramework">Identifier of the target framework, as set in MSBuild (e.g. <c>net6.0</c>, <c>netframework4.8</c>, ...</param>
     public class TestProjectProperties
     {
         private readonly string? _projectDirectory;

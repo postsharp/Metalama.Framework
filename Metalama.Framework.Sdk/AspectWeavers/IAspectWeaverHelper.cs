@@ -14,7 +14,7 @@ namespace Metalama.Framework.Engine.AspectWeavers
     public interface IAspectWeaverHelper
     {
         /// <summary>
-        /// Gets an <see cref="ITypeSymbol"/> given a reflection <see cref="Type"/>.
+        /// Gets an <see cref="ITypeSymbol" /> given a reflection <see cref="Type"/>.
         /// </summary>
         ITypeSymbol? GetTypeSymbol( Type type );
     }

@@ -30,8 +30,8 @@
         <MetalamaCompilerTransformedFilesOutputPath Condition="'$(MetalamaCompilerTransformedFilesOutputPath)'==''">$(IntermediateOutputPath)metalama</MetalamaCompilerTransformedFilesOutputPath>
     </PropertyGroup>
 
-    <ItemGroup Condition="'$(MetalamaCompileTimeOnlyProject)'=='True'">
-        <AssemblyAttribute Include="Metalama.Framework.Aspects.CompileTimeOnlyAttribute"/>
+    <ItemGroup Condition="'$(MetalamaCompileTimeProject)'=='True'">
+        <AssemblyAttribute Include="Metalama.Framework.Aspects.CompileTimeAttribute"/>
     </ItemGroup>
 
     <ItemGroup Condition="'$(DesignTimeBuild)' == 'True' AND '$(MetalamaDesignTimeEnabled)'=='False'">

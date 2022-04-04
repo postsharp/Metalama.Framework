@@ -20,12 +20,12 @@ public interface ISdkCodeActionContext : ICodeActionContext
     IPartialCompilation Compilation { get; }
 
     /// <summary>
-    /// Updates a <see cref="SyntaxTree"/>.
+    /// Updates a <see cref="SyntaxTree" />.
     /// </summary>
     void UpdateTree( SyntaxTree transformedTree, SyntaxTree originalTree );
 
     /// <summary>
-    /// Updates a <see cref="SyntaxTree"/> by passing the new root syntax node.
+    /// Updates a <see cref="SyntaxTree" /> by passing the new root syntax node.
     /// </summary>
     void UpdateTree( SyntaxNode transformedRoot, SyntaxTree originalTree );
 

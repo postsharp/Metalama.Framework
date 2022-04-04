@@ -74,8 +74,8 @@ namespace Metalama.Framework.Engine.CompileTime
             if ( compilation != null )
             {
                 this._compilation = compilation;
-                this._compileTimeAttribute = this._compilation.GetTypeByMetadataName( typeof(CompileTimeAttribute).FullName ).AssertNotNull();
-                this._compileTimeOnlyAttribute = this._compilation.GetTypeByMetadataName( typeof(CompileTimeOnlyAttribute).FullName ).AssertNotNull();
+                this._compileTimeAttribute = this._compilation.GetTypeByMetadataName( typeof(RunTimeOrCompileTimeAttribute).FullName ).AssertNotNull();
+                this._compileTimeOnlyAttribute = this._compilation.GetTypeByMetadataName( typeof(CompileTimeAttribute).FullName ).AssertNotNull();
                 this._templateAttribute = this._compilation.GetTypeByMetadataName( typeof(TemplateAttribute).FullName ).AssertNotNull();
                 this._ignoreUnlessOverriddenAttribute = this._compilation.GetTypeByMetadataName( typeof(AbstractAttribute).FullName ).AssertNotNull();
             }

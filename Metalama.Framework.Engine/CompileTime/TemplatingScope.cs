@@ -14,20 +14,20 @@ namespace Metalama.Framework.Engine.CompileTime
         /// The symbol can be used both at compile time or at run time.
         /// The node has not been classified as necessarily compile-time or run-time.
         /// This is typically the case for symbols of system libraries and
-        /// aspects, or any declaration marked with <see cref="CompileTimeAttribute"/>.
+        /// aspects, or any declaration marked with <see cref="RunTimeOrCompileTimeAttribute"/>.
         /// </summary>
         Both,
 
         /// <summary>
         /// The symbol can be only used at run time only. This is the case for any symbol that is
-        /// not contained in a system library and that is not annotated with <see cref="CompileTimeOnlyAttribute"/> or <see cref="CompileTimeAttribute"/>.
+        /// not contained in a system library and that is not annotated with <see cref="CompileTimeAttribute"/> or <see cref="RunTimeOrCompileTimeAttribute"/>.
         /// The node must be evaluated at run-time, but its children can be compile-time expressions.
         /// </summary>
         RunTimeOnly,
 
         /// <summary>
         /// The symbol can be used only at compile time. This is the case for the compile-time API of
-        /// Metalama, which is marked by <see cref="CompileTimeOnlyAttribute"/>.
+        /// Metalama, which is marked by <see cref="CompileTimeAttribute"/>.
         /// The node including all children nodes must be evaluated at compile time.
         /// </summary>
         CompileTimeOnly,

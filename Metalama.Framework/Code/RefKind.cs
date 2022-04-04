@@ -8,7 +8,7 @@ namespace Metalama.Framework.Code
     /// <summary>
     /// Kinds of parameters, such as <c>ref</c>, <c>in</c>, <c>out</c>...
     /// </summary>
-    [CompileTimeOnly]
+    [CompileTime]
     public enum RefKind
     {
         /// <summary>

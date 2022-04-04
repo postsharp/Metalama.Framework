@@ -12,7 +12,7 @@ namespace Metalama.Framework.Code
     /// Represents an assembly identity, used in project references.
     /// </summary>
     [InternalImplement]
-    [CompileTimeOnly]
+    [CompileTime]
     public interface IAssemblyIdentity
     {
         /// <summary>

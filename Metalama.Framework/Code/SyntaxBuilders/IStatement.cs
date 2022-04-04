@@ -10,7 +10,7 @@ namespace Metalama.Framework.Code.SyntaxBuilders
     /// Represents a statement, which can be inserted into run-time code using the <see cref="meta.InsertStatement(Metalama.Framework.Code.SyntaxBuilders.IStatement)"/>
     /// method.
     /// </summary>
-    [CompileTimeOnly]
+    [CompileTime]
     [InternalImplement]
     public interface IStatement { }
 }

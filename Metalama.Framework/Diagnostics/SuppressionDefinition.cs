@@ -10,7 +10,7 @@ namespace Metalama.Framework.Diagnostics
     /// defined as static fields or properties of an aspect classes. Suppressions are instantiated with <see cref="IDiagnosticSink.Suppress"/>.
     /// </summary>
     /// <seealso href="@diagnostics"/>
-    [CompileTimeOnly]
+    [CompileTime]
     public sealed class SuppressionDefinition
     {
         /// <summary>

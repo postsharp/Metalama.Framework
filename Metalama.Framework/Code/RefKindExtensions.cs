@@ -9,7 +9,7 @@ namespace Metalama.Framework.Code
     /// <summary>
     /// Extension methods for <see cref="RefKind"/>.
     /// </summary>
-    [CompileTimeOnly]
+    [CompileTime]
     public static class RefKindExtensions
     {
         // Coverage: ignore

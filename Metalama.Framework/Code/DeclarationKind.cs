@@ -8,7 +8,7 @@ namespace Metalama.Framework.Code
     /// <summary>
     /// Kinds of <see cref="IDeclaration"/>.
     /// </summary>
-    [CompileTimeOnly]
+    [CompileTime]
     public enum DeclarationKind
     {
         /// <summary>

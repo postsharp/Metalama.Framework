@@ -92,7 +92,7 @@ namespace Metalama.Framework.Workspaces
         }
 
         /// <summary>
-        /// Finds the <see cref="Workspace"/> and <see cref="Project"/> that defines a given Roslyn <see cref="Compilation"/> in the current <see cref="WorkspaceCollection"/>.
+        /// Finds the <see cref="Workspace"/> and <see cref="Project"/> that defines a given Roslyn <see cref="Compilation" /> in the current <see cref="WorkspaceCollection"/>.
         /// </summary>
         public bool TryFindProject(
             Compilation compilation,

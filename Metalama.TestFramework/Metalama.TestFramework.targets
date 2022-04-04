@@ -97,8 +97,8 @@ namespace $(RootNamespace)
 
     <Target Name="AcceptTestOutput">
         <ItemGroup>
-            <_AcceptTestOutput Include="obj\\transformed\net5.0\**\*.cs"/>
-            <_AcceptTestOutput Include="obj\\transformed\net5.0\**\*.txt"/>
+            <_AcceptTestOutput Include="obj\\transformed\net6.0\**\*.cs"/>
+            <_AcceptTestOutput Include="obj\\transformed\net6.0\**\*.txt"/>
             <_AcceptTestOutput Include="obj\\transformed\netframework4.8\**\*.cs"/>
             <_AcceptTestOutput Include="obj\\transformed\netframework4.8\**\*.txt"/>
         </ItemGroup>
@@ -109,7 +109,7 @@ namespace $(RootNamespace)
 
     <Target Name="AcceptTestHtml">
         <ItemGroup>
-            <_AcceptTestOutput Include="obj\\html\$(TargetFramework)\net5.0\**\*.cs.html"/>
+            <_AcceptTestOutput Include="obj\\html\$(TargetFramework)\net6.0\**\*.cs.html"/>
             <_AcceptTestOutput Include="obj\\html\$(TargetFramework)\netframework4.8\**\*.cs.html"/>
         </ItemGroup>
         <Copy

@@ -74,7 +74,7 @@ namespace Metalama.Framework.Engine.Testing
 
         public string? ProjectPath => null;
 
-        public string? TargetFramework => "net5.0";
+        public string? TargetFramework => "net6.0";
 
         public string? Configuration => "Debug";
 

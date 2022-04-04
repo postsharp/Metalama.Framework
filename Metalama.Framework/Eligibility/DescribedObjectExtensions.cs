@@ -9,7 +9,7 @@ namespace Metalama.Framework.Eligibility
     /// Extension methods for <see cref="IDescribedObject{T}"/>.
     /// </summary>
     /// <seealso href="@eligibility"/>
-    [CompileTimeOnly]
+    [CompileTime]
     public static class DescribedObjectExtensions
     {
         public static IDescribedObject<TOut> Cast<TIn, TOut>( this IDescribedObject<TIn> describedObject )

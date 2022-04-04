@@ -14,7 +14,7 @@ namespace Metalama.Framework.Aspects
     /// </summary>
     /// <typeparam name="TDeclaration"></typeparam>
     [InternalImplement]
-    [CompileTimeOnly]
+    [CompileTime]
     public interface IDeclarationSelection<out TDeclaration>
         where TDeclaration : class, IDeclaration
     {

@@ -11,7 +11,7 @@ namespace Metalama.Framework.Code
     /// Defines the formatting options of <see cref="IDisplayable.ToDisplayString"/>. Only well-known instances of this classes,
     /// exposed as properties, are currently supported.
     /// </summary>
-    [CompileTimeOnly]
+    [CompileTime]
     public sealed class CodeDisplayFormat
     {
         // Prevents creation of custom instances.

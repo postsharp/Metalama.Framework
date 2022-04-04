@@ -10,7 +10,7 @@ namespace Metalama.Framework.Code
     /// <summary>
     /// Allows to get instances of the <see cref="IType"/> interface or to test for type equality or inheritance.
     /// </summary>
-    [CompileTimeOnly]
+    [CompileTime]
     public interface ITypeFactory
     {
         /// <summary>

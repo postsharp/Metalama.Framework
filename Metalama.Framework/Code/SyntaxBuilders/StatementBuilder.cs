@@ -9,7 +9,7 @@ namespace Metalama.Framework.Code.SyntaxBuilders
     /// Allows to build a run-time statement that can be injected to run-time code using
     /// <see cref="ToStatement"/> and <see cref="meta.InsertStatement(Metalama.Framework.Code.SyntaxBuilders.IStatement)"/>.
     /// </summary>
-    [CompileTimeOnly]
+    [CompileTime]
     public sealed class StatementBuilder : SyntaxBuilder
     {
         private int _indentLevel;

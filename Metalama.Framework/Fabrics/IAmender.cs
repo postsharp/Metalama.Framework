@@ -13,7 +13,7 @@ namespace Metalama.Framework.Fabrics
     /// or <see cref="TypeFabric.AmendType"/>. Allows to report diagnostics and add aspects to the target declaration of the fabric.
     /// </summary>
     [InternalImplement]
-    [CompileTimeOnly]
+    [CompileTime]
     public interface IAmender<T> : IDeclarationSelector<T>
         where T : class, IDeclaration
     {

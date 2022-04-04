@@ -128,7 +128,7 @@ namespace Metalama.Framework.Engine.Templating
                     "LAMA0117",
                     "Cannot reference a compile-time-only declaration in a non-compile-time-only declaration.",
                     "Cannot reference '{1}' in '{0}' because '{1}' is compile-time-only but '{0}' is not. " +
-                    "Consider adding [CompileTimeOnly] to '{0}', or do not use '{1}' in '{0}'.'",
+                    "Consider adding [CompileTime] to '{0}', or do not use '{1}' in '{0}'.'",
                     _category,
                     Error );
 
@@ -240,7 +240,7 @@ namespace Metalama.Framework.Engine.Templating
             = new(
                 "LAMA0229",
                 "Types that are both compile-time and run-time are forbidden in run-time-only types.",
-                "The type '{0}' cannot be [CompileTime] because it is nested in a run-time-type. It can however be [CompileTimeOnly].",
+                "The type '{0}' cannot be [CompileTime] because it is nested in a run-time-type. It can however be [CompileTime].",
                 _category,
                 Error );
 

@@ -16,7 +16,7 @@ namespace Metalama.Framework.Project
     /// this interface with your own framework-specific by using the <see cref="Extension{T}"/> method.
     /// </summary>
     [InternalImplement]
-    [CompileTimeOnly]
+    [CompileTime]
     public interface IProject
     {
         /// <summary>

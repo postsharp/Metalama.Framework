@@ -10,7 +10,7 @@ namespace Metalama.Framework.Code.SyntaxBuilders
     /// <summary>
     /// Compile-time object that allows to build a run-time array. Items of the array are run-time expressions.
     /// </summary>
-    [CompileTimeOnly]
+    [CompileTime]
     public sealed class ArrayBuilder : INotNullExpressionBuilder
     {
         private readonly List<object?> _items = new();

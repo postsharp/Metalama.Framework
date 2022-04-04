@@ -3,7 +3,7 @@ using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.Integration.TestInputs.Highlighting.IfStatements.TemplateKeywords
 {
-    [CompileTime]
+    [RunTimeOrCompileTime]
     class Aspect
     {
         [TestTemplate]

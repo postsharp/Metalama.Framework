@@ -10,7 +10,7 @@ namespace Metalama.Framework.Code
     /// <summary>
     /// Extension methods for <see cref="IDeclaration"/>.
     /// </summary>
-    [CompileTimeOnly]
+    [CompileTime]
     public static class DeclarationExtensions
     {
         /// <summary>
