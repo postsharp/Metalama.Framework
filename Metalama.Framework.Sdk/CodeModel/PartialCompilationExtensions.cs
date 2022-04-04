@@ -17,7 +17,7 @@ namespace Metalama.Framework.Engine.CodeModel
     {
         /// <summary>
         /// Updates the syntax trees of a given <see cref="IPartialCompilation"/> by providing a function that maps
-        /// a <see cref="SyntaxTree"/>to a transformed <see cref="SyntaxTree"/>.
+        /// a <see cref="SyntaxTree"/> to a transformed <see cref="SyntaxTree"/>.
         /// </summary>
         /// <param name="compilation"></param>
         /// <param name="updateTree">A function that maps the old <see cref="SyntaxTree"/> to the new <see cref="SyntaxTree"/>.</param>
@@ -35,7 +35,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         /// <summary>
         /// Updates the syntax trees of a given <see cref="IPartialCompilation"/> by providing a function that maps
-        /// a <see cref="SyntaxTree"/>to a transformed <see cref="SyntaxTree"/>.
+        /// a <see cref="SyntaxTree"/> to a transformed <see cref="SyntaxTree"/>.
         /// </summary>
         /// <param name="compilation"></param>
         /// <param name="updateSyntaxRoot">A function that maps the old root <see cref="SyntaxNode"/> to the new <see cref="SyntaxNode"/>.</param>

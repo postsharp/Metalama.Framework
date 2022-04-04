@@ -71,7 +71,7 @@ namespace Metalama.Framework.Engine.AspectWeavers
         /// <summary>
         /// Rewrites the syntax trees affected by aspects.
         /// </summary>
-        /// <param name="rewriter">A <c>CSharpSyntaxRewriter</c> whose <c>Visit</c> method is invoked for all declarations
+        /// <param name="rewriter">A <see cref="CSharpSyntaxRewriter"/> whose <c>Visit</c> method is invoked for all declarations
         /// that are the target of aspects handled by the current <see cref="IAspectWeaver"/> (see <see cref="AspectInstances"/>).
         /// In case of partial classes or methods, the <c>Visit</c> method is invoked for each partial declaration.
         /// </param>

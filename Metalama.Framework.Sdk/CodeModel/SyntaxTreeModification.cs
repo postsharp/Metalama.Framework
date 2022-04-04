@@ -7,7 +7,7 @@ using System;
 namespace Metalama.Framework.Engine.CodeModel
 {
     /// <summary>
-    /// Maps an old <see cref="SyntaxTree"/>to a new <see cref="SyntaxTree"/> in an <see cref="IPartialCompilation"/>.
+    /// Maps an old <see cref="SyntaxTree"/> to a new <see cref="SyntaxTree"/> in an <see cref="IPartialCompilation"/>.
     /// </summary>
     public readonly struct SyntaxTreeModification
     {
