@@ -1,4 +1,4 @@
-﻿// @Skipped(BUG_ID_TBD)
+﻿// @Skipped(#30159)
 // @OutputAllSyntaxTrees
 
 using System;

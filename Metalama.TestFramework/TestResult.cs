@@ -176,12 +176,8 @@ namespace Metalama.TestFramework
                 throw new InvalidOperationException( "The object has not bee properly initialized." );
             }
 
-            var i = -1;
-
             foreach ( var syntaxTree in runTimeCompilation.SyntaxTrees )
             {
-                i++;
-
                 var testSyntaxTree = this.SyntaxTrees.SingleOrDefault( x => StringComparer.Ordinal.Equals( x.InputDocument.FilePath, syntaxTree.FilePath ) );
 
                 if ( testSyntaxTree == null )
@@ -286,7 +282,7 @@ namespace Metalama.TestFramework
 
                     outputNodes = outputNodes switch
                     {
-                        { Length: 0 } => new[] { outputSyntaxRoot },
+                        { Length: 0 } => new SyntaxNode[] { outputSyntaxRoot },
                         _ => outputNodes
                     };
 

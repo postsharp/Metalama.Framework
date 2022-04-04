@@ -436,27 +436,26 @@ namespace Metalama.TestFramework
             {
                 var arr = compilationUnits.ToArray();
 
-                if ( arr.Length == 0 )
+                switch ( arr.Length )
                 {
-                    return "// --- No output compilation units ---";
-                }
-                else if ( arr.Length == 1 )
-                {
-                    return arr[0].GetRoot().ToFullString();
-                }
-                else
-                {
-                    var sb = new StringBuilder();
+                    case 0:
+                        return "// --- No output compilation units ---";
 
-                    for ( var i = 0; i < arr.Length; i++ )
-                    {
-                        sb.AppendLine();
-                        sb.AppendLine( $"// --- {arr[i].FilePath} ---" );
-                        sb.AppendLine();
-                        sb.AppendLine( arr[i].GetRoot().ToFullString() );
-                    }
+                    case 1:
+                        return arr[0].GetRoot().ToFullString();
 
-                    return sb.ToString();
+                    default:
+                        var sb = new StringBuilder();
+
+                        foreach ( var syntaxTree in arr )
+                        {
+                            sb.AppendLine();
+                            sb.AppendLine( $"// --- {syntaxTree.FilePath} ---" );
+                            sb.AppendLine();
+                            sb.AppendLine( syntaxTree.GetRoot().ToFullString() );
+                        }
+
+                        return sb.ToString();
                 }
             }
         }
