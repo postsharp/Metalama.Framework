@@ -82,7 +82,9 @@ namespace Metalama.Framework.Tests.Integration.Runners
 
             foreach ( var classification in Enum.GetValues( typeof(TextSpanClassification) ) )
             {
+#pragma warning disable CA1305
                 epilogueBuilder.AppendLine( $"<span class='cr-{classification}'>{classification}</span>" );
+#pragma warning restore CA1305
             }
 
             epilogueBuilder.AppendLine( "       </pre>" );
