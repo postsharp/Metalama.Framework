@@ -8,7 +8,7 @@ using Metalama.Framework.Aspects;
 namespace Metalama.Framework.Tests.Integration.Templating.Syntax.ForEach.CompileTimeReturningBoth
 {
 
-    [CompileTimeOnly]
+    [CompileTime]
     class CompileTimeClass
     {
         public IEnumerable<int> compileTimeEnumerable = new[] { 1, 2, 3 };

@@ -49,7 +49,7 @@ namespace Metalama.Framework.Engine.Options
         public ImmutableArray<object> PlugIns { get; }
 
         [Memo]
-        public bool IsFrameworkEnabled => this.GetBooleanOption( "MetalamaEnabled", true ) && !this.GetBooleanOption( "MetalamaCompileTimeOnlyProject" );
+        public bool IsFrameworkEnabled => this.GetBooleanOption( "MetalamaEnabled", true ) && !this.GetBooleanOption( "MetalamaCompileTimeProject" );
 
         [Memo]
         public bool FormatOutput => this.GetBooleanOption( "MetalamaFormatOutput" );

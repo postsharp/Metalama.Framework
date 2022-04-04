@@ -77,7 +77,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 this._diagnosticAdder = diagnosticAdder;
                 this._templateCompiler = templateCompiler;
                 this._cancellationToken = cancellationToken;
-                this._currentContext = new Context( TemplatingScope.Both, null, null, 0, this );
+                this._currentContext = new Context( TemplatingScope.RunTimeOrCompileTime, null, null, 0, this );
 
                 this._serializableTypes =
                     serializableTypes.ToDictionary<SerializableTypeInfo, INamedTypeSymbol, SerializableTypeInfo>(
@@ -321,16 +321,15 @@ namespace Metalama.Framework.Engine.CompileTime
 
                 this._currentTypeTemplateNames = new HashSet<string>( StringComparer.OrdinalIgnoreCase );
                 this._currentTypeName = symbol.Name;
-                
+
                 // Check the diagnostics in this type.
                 // Any diagnostic in compile-time code must be reported because it will be removed from the final compilation.
                 // In case of templates, the code will be transformed, and understanding diagnostics in the transformed code is highly cumbersome.
 
                 var typeHasError = false;
-                
+
                 foreach ( var diagnostic in this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetDiagnostics( node.Span, this._cancellationToken ) )
                 {
-            
                     this._diagnosticAdder.Report( diagnostic );
 
                     if ( diagnostic.Severity == DiagnosticSeverity.Error )

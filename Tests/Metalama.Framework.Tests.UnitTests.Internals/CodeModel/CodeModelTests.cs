@@ -804,12 +804,12 @@ namespace Ns1
             var code = @"
 using Metalama.Framework.Aspects;
 
-[CompileTimeOnly]
+[CompileTime]
 class C { }
 
 class D 
 {
-    [CompileTimeOnly]
+    [CompileTime]
     class E { }
 }
 ";

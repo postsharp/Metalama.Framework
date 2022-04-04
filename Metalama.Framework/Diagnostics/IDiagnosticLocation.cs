@@ -10,7 +10,7 @@ namespace Metalama.Framework.Diagnostics
     /// A base interface for objects to which a diagnostic can be reported.
     /// </summary>
     /// <seealso href="@diagnostics"/>
-    [CompileTimeOnly]
+    [CompileTime]
     [InternalImplement]
     public interface IDiagnosticLocation { }
 }

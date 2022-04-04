@@ -87,7 +87,7 @@ public class AnalysisProcessProjectHandler : ProjectHandler
 
 #pragma warning disable CS8603 // Possible null reference return -- analyzer bug
         return this.LastSourceGeneratorResult.AssertNotNull();
-#pragma warning restore CS8603        
+#pragma warning restore CS8603
     }
 
     /// <summary>

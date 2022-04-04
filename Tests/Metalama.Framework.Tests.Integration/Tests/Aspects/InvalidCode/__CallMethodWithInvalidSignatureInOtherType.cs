@@ -15,7 +15,7 @@ namespace Metalama.Framework.Tests.PublicPipeline.Aspects.InvalidCode.CallMethod
         }
     }
 
-    [CompileTimeOnly]
+    [CompileTime]
     class OtherType
     {
         public static BadType? Method() => null;

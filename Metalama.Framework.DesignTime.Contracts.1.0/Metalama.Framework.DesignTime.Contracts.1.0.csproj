@@ -1,9 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <!-- We need to target .NET Standard 2.0 and .NET 5.0 separately because of NullableAttributes.cs. We don't want these
+        <!-- We need to target .NET Standard 2.0 and .NET 6.0 separately because of NullableAttributes.cs. We don't want these
            types to be in a .NET 5 build, otherwise it would conflict with the types in System.Runtime. -->
-        <TargetFrameworks>netstandard2.0;net5.0</TargetFrameworks>
+        <TargetFrameworks>netstandard2.0;net6.0</TargetFrameworks>
         <RootNamespace>Metalama.Framework.DesignTime.Contracts</RootNamespace>
 
         <!-- It is essential that the assembly version remains constant and that no changes are done in the contracts

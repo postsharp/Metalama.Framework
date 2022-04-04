@@ -9,7 +9,7 @@ namespace Metalama.Framework.Aspects
     /// An exception thrown by <see cref="IAdviceFactory"/> when compile-time code attempts to add a template
     /// to a target declaration and the template is not compatible with the target declaration.
     /// </summary>
-    [CompileTimeOnly]
+    [CompileTime]
     public sealed class InvalidAdviceTargetException : Exception
     {
         internal InvalidAdviceTargetException( string message ) : base( message ) { }

@@ -11,7 +11,7 @@ namespace Metalama.Framework.Engine.Templating
         {
             private readonly TemplatingScope _preferredScope;
 
-            public static ScopeContext Default => new( TemplatingScope.Both, false, null, TemplatingScope.Both, null );
+            public static ScopeContext Default => new( TemplatingScope.RunTimeOrCompileTime, false, null, TemplatingScope.RunTimeOrCompileTime, null );
 
             public TemplatingScope CurrentBreakOrContinueScope { get; }
 

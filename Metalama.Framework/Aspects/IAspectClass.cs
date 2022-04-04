@@ -11,7 +11,7 @@ namespace Metalama.Framework.Aspects
     /// Represents the metadata of an aspect class.
     /// </summary>
     [InternalImplement]
-    [CompileTimeOnly]
+    [CompileTime]
     public interface IAspectClass
     {
         /// <summary>
@@ -47,7 +47,7 @@ namespace Metalama.Framework.Aspects
         bool IsInherited { get; }
 
         /// <summary>
-        /// Gets a value indicating whether the aspect class derives from <c>System.Attribute</c>.
+        /// Gets a value indicating whether the aspect class derives from <see cref="System.Attribute" />.
         /// </summary>
         bool IsAttribute { get; }
 

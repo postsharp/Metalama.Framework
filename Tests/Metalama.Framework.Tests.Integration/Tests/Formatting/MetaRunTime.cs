@@ -5,7 +5,7 @@ using Metalama.TestFramework;
 namespace Metalama.Framework.Tests.Integration.Tests.Formatting.MetaRunTime
 {
    
-    [CompileTime]
+    [RunTimeOrCompileTime]
     class Aspect
     {
         [TestTemplate]

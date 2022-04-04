@@ -12,7 +12,7 @@ namespace Metalama.Framework.Code
     /// derive from <see cref="IType"/>.
     /// </summary>
     /// <seealso cref="TypeExtensions"/>
-    [CompileTimeOnly]
+    [CompileTime]
     public interface IType : ICompilationElement, IDisplayable
     {
         /// <summary>

@@ -6,7 +6,7 @@ using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.Integration.Templating.Syntax.Using.CompileTimeUsing
 {
-    [CompileTimeOnly]
+    [CompileTime]
     class DisposableClass : IDisposable
     {
         public void Dispose()

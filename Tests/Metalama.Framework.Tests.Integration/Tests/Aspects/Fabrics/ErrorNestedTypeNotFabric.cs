@@ -5,22 +5,22 @@ namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Fabrics.ErrorNestedTyp
     // <target>
     internal class TargetCode
     {
-        [CompileTimeOnly]
+        [CompileTime]
         private enum E { }
 
-        [CompileTimeOnly]
+        [CompileTime]
         private interface I { }
 
-        [CompileTimeOnly]
+        [CompileTime]
         private struct S { }
 
-        [CompileTimeOnly]
+        [CompileTime]
         private delegate void D();
 
-        [CompileTimeOnly]
+        [CompileTime]
         private record R( int x );
 
-        [CompileTimeOnly]
+        [CompileTime]
         private class C { }
     }
 }

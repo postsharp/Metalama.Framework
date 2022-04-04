@@ -33,7 +33,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 compilation,
                 c =>
                 {
-                    var hasMetalamaReference = compilation.GetTypeByMetadataName( typeof(CompileTimeAttribute).FullName ) != null;
+                    var hasMetalamaReference = compilation.GetTypeByMetadataName( typeof(RunTimeOrCompileTimeAttribute).FullName ) != null;
 
                     return hasMetalamaReference ? new SymbolClassifier( this._referenceAssemblyLocator, c ) : this._noMetalamaReferenceClassifier;
                 } );

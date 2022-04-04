@@ -12,7 +12,7 @@ namespace Metalama.Framework.Diagnostics
     /// A sink that reports diagnostics reported from user code.
     /// </summary>
     /// <seealso href="@diagnostics"/>
-    [CompileTimeOnly]
+    [CompileTime]
     [InternalImplement]
     public interface IDiagnosticSink
     {

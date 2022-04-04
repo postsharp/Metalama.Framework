@@ -9,6 +9,6 @@ namespace Metalama.Framework.Project
     /// <summary>
     /// Base interface to be inherited by all types that want to be exposed to <see cref="IServiceProvider"/>.
     /// </summary>
-    [CompileTimeOnly]
+    [CompileTime]
     public interface IService { }
 }

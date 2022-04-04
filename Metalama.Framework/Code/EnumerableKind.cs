@@ -16,22 +16,22 @@ namespace Metalama.Framework.Code
         None,
 
         /// <summary>
-        /// An iterator returning <c>System.Collections.Generic.IEnumerable</c>.
+        /// An iterator returning a generic <see cref="System.Collections.Generic.IEnumerable{T}" />.
         /// </summary>
         IEnumerable,
 
         /// <summary>
-        /// An iterator returning <c>System.Collections.Generic.IEnumerator</c>.
+        /// An iterator returning a generic <see cref="System.Collections.Generic.IEnumerator{T}" />.
         /// </summary>
         IEnumerator,
 
         /// <summary>
-        /// An iterator returning <c>System.Collections.IEnumerable</c>.
+        /// An iterator returning a non-generic <see cref="System.Collections.IEnumerable" />.
         /// </summary>
         UntypedIEnumerable,
 
         /// <summary>
-        /// An iterator returning <c>System.Collections.IEnumerator</c>.
+        /// An iterator returning a non-generic <see cref="System.Collections.IEnumerator" />.
         /// </summary>
         UntypedIEnumerator,
 

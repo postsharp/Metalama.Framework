@@ -13,7 +13,7 @@ namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Misc.CompileTimeDelega
         }
     }
 
-    [CompileTimeOnly]
+    [CompileTime]
     internal delegate void CompileTimeDelegate();
 
     internal delegate void RunTimeOnlyDelegate();

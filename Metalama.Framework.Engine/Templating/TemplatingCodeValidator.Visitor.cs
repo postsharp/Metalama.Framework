@@ -147,7 +147,7 @@ namespace Metalama.Framework.Engine.Templating
             {
                 using var scope = this.WithScope( node );
 
-                if ( (scope.Scope == TemplatingScope.Both || scope.Scope == TemplatingScope.Both) &&
+                if ( (scope.Scope == TemplatingScope.RunTimeOrCompileTime || scope.Scope == TemplatingScope.RunTimeOrCompileTime) &&
                      this._reportCompileTimeTreeOutdatedError )
                 {
                     this.Report(

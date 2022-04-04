@@ -14,7 +14,7 @@ namespace Metalama.Framework.Aspects
     /// aspects and validators, or report diagnostics. This is a weakly-typed variant of the <see cref="IAspectLayerBuilder{T}"/> interface.
     /// </summary>
     [InternalImplement]
-    [CompileTimeOnly]
+    [CompileTime]
     public interface IAspectLayerBuilder
     {
         /// <summary>

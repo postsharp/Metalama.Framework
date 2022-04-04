@@ -7,10 +7,10 @@ namespace Metalama.Framework.IntegrationTests.Aspects.AspectMemberRef.MethodRef
 {
     public class RetryAttribute : OverrideMethodAspect
     {
-        [CompileTimeOnly]
+        [CompileTime]
         public string GetParameterName() => meta.Target.Parameters.First().Name;
 
-        [CompileTimeOnly]
+        [CompileTime]
         public static string GetParameterNameStatic( IParameter p ) => p.Name;
 
         public override dynamic? OverrideMethod()

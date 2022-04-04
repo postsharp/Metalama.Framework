@@ -9,7 +9,7 @@ namespace Metalama.Framework.Aspects
     /// <summary>
     /// Kinds of <see cref="AspectPredecessor"/>.
     /// </summary>
-    [CompileTimeOnly]
+    [CompileTime]
     public enum AspectPredecessorKind
     {
         // First (lower) priorities are evaluated first. Order matters.

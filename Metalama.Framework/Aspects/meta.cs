@@ -18,7 +18,7 @@ namespace Metalama.Framework.Aspects
     /// features of the template language.
     /// </summary>
     /// <seealso href="@templates"/>
-    [CompileTimeOnly]
+    [CompileTime]
     [TemplateKeyword]
 #pragma warning disable SA1300, IDE1006 // Element should begin with upper-case letter
     public static class meta
@@ -112,7 +112,7 @@ namespace Metalama.Framework.Aspects
         /// <returns>Exactly <paramref name="expression"/>, but coerced as a compile-time expression.</returns>
         /// <seealso href="@templates"/>
         [return: NotNullIfNotNull( "expression" )]
-        [return: CompileTimeOnly]
+        [return: CompileTime]
         [TemplateKeyword]
         public static T? CompileTime<T>( T? expression )
         {

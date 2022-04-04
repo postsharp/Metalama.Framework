@@ -11,7 +11,7 @@
         <CompilerVisibleProperty Include="MetalamaFormatOutput"/>
         <CompilerVisibleProperty Include="MetalamaFormatCompileTimeCode"/>
         <CompilerVisibleProperty Include="MetalamaUserCodeTrusted"/>
-        <CompilerVisibleProperty Include="MetalamaCompileTimeOnlyProject"/>
+        <CompilerVisibleProperty Include="MetalamaCompileTimeProject"/>
         <CompilerVisibleProperty Include="AssemblyName"/>
         <CompilerVisibleProperty Include="MetalamaDesignTimeEnabled"/>
         <CompilerVisibleProperty Include="MetalamaAdditionalCompilationOutputDirectory"/>

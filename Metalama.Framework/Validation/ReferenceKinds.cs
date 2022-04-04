@@ -10,7 +10,7 @@ namespace Metalama.Framework.Validation
     /// Enumerates all kinds of references.
     /// </summary>
     /// <seealso href="@validation"/>
-    [CompileTimeOnly]
+    [CompileTime]
     [Flags]
     public enum ReferenceKinds
     {

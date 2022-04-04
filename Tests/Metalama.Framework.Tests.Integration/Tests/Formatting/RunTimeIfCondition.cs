@@ -10,7 +10,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Highlighting.IfStateme
         }
     }
 
-    [CompileTimeOnly]
+    [CompileTime]
     class CompileTimeClass
     {
         public void CompileTimeMethod()
@@ -18,7 +18,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Highlighting.IfStateme
         }
     }
 
-    [CompileTime]
+    [RunTimeOrCompileTime]
     class Aspect
     {
         [TestTemplate]
