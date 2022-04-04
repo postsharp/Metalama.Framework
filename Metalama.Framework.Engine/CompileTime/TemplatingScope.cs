@@ -16,7 +16,7 @@ namespace Metalama.Framework.Engine.CompileTime
         /// This is typically the case for symbols of system libraries and
         /// aspects, or any declaration marked with <see cref="RunTimeOrCompileTimeAttribute"/>.
         /// </summary>
-        Both,
+        RunTimeOrCompileTime,
 
         /// <summary>
         /// The symbol can be only used at run time only. This is the case for any symbol that is
@@ -43,7 +43,7 @@ namespace Metalama.Framework.Engine.CompileTime
         CompileTimeOnlyReturningRuntimeOnly,
 
         /// <summary>
-        /// A <see cref="CompileTimeOnly"/> member whose evaluated value is <see cref="Both"/>. 
+        /// A <see cref="CompileTimeOnly"/> member whose evaluated value is <see cref="RunTimeOrCompileTime"/>. 
         /// </summary>
         CompileTimeOnlyReturningBoth,
 

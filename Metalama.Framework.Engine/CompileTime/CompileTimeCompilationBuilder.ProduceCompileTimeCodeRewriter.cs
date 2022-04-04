@@ -77,7 +77,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 this._diagnosticAdder = diagnosticAdder;
                 this._templateCompiler = templateCompiler;
                 this._cancellationToken = cancellationToken;
-                this._currentContext = new Context( TemplatingScope.Both, null, null, 0, this );
+                this._currentContext = new Context( TemplatingScope.RunTimeOrCompileTime, null, null, 0, this );
 
                 this._serializableTypes =
                     serializableTypes.ToDictionary<SerializableTypeInfo, INamedTypeSymbol, SerializableTypeInfo>(

@@ -4,7 +4,7 @@ using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.Integration.Templating.CSharpSyntax.Misc.Generics
 {
-    [CompileTime]
+    [RunTimeOrCompileTime]
     class Aspect
     {
         [TestTemplate]

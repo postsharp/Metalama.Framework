@@ -49,9 +49,9 @@ class C : TypeAspect
 
             var compilation = testContext.CreateCompilationModel( code );
             var type = compilation.Types.OfName( "C" ).Single();
-            this.AssertScope( type, TemplatingScope.Both );
-            this.AssertScope( type.Fields.OfName( "F" ).Single(), TemplatingScope.Both );
-            this.AssertScope( type.Methods.OfName( "M" ).Single(), TemplatingScope.Both );
+            this.AssertScope( type, TemplatingScope.RunTimeOrCompileTime );
+            this.AssertScope( type.Fields.OfName( "F" ).Single(), TemplatingScope.RunTimeOrCompileTime );
+            this.AssertScope( type.Methods.OfName( "M" ).Single(), TemplatingScope.RunTimeOrCompileTime );
             this.AssertScope( type.Methods.OfName( "Template" ).Single(), TemplatingScope.CompileTimeOnly );
         }
 
@@ -91,7 +91,7 @@ class D : System.IDisposable
 
             var code = @"
 using Metalama.Framework.Aspects;
-[assembly: CompileTime]
+[assembly: RunTimeOrCompileTime]
 class C 
 {
 }
@@ -99,7 +99,7 @@ class C
 
             var compilation = testContext.CreateCompilationModel( code );
             var type = compilation.Types.OfName( "C" ).Single();
-            this.AssertScope( type, TemplatingScope.Both );
+            this.AssertScope( type, TemplatingScope.RunTimeOrCompileTime );
         }
 
         [Fact]
@@ -136,7 +136,7 @@ class C
             var code = @"
 using Metalama.Framework.Aspects;
 
-[CompileTime]
+[RunTimeOrCompileTime]
 class C 
 {
   void M() {}
@@ -145,7 +145,7 @@ class C
 ";
 
             var compilation = testContext.CreateCompilationModel( code );
-            this.AssertScope( compilation.Types.OfName( "C" ).Single(), TemplatingScope.Both );
+            this.AssertScope( compilation.Types.OfName( "C" ).Single(), TemplatingScope.RunTimeOrCompileTime );
         }
 
         [Fact]
@@ -155,7 +155,7 @@ class C
 
             var code = "class C {}";
             var compilation = testContext.CreateCompilationModel( code, addMetalamaReferences: false );
-            this.AssertScope( (INamedType) compilation.Factory.GetTypeByReflectionType( typeof(int) ), TemplatingScope.Both );
+            this.AssertScope( (INamedType) compilation.Factory.GetTypeByReflectionType( typeof(int) ), TemplatingScope.RunTimeOrCompileTime );
             this.AssertScope( (INamedType) compilation.Factory.GetTypeByReflectionType( typeof(Console) ), TemplatingScope.RunTimeOnly );
             this.AssertScope( compilation.Types.Single(), TemplatingScope.RunTimeOnly );
         }

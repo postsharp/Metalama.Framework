@@ -83,7 +83,7 @@ namespace Metalama.Framework.Engine.Templating
                     return TemplatingScope.Dynamic;
 
                 case _bothAnnotationData:
-                    return TemplatingScope.Both;
+                    return TemplatingScope.RunTimeOrCompileTime;
 
                 default:
                     throw new AssertionFailedException();
@@ -97,7 +97,7 @@ namespace Metalama.Framework.Engine.Templating
             // No annotation means it is default scope usable for both (runTime or compileTime)
             if ( annotation == null )
             {
-                return TemplatingScope.Both;
+                return TemplatingScope.RunTimeOrCompileTime;
             }
 
             switch ( annotation.Data )
@@ -216,7 +216,7 @@ namespace Metalama.Framework.Engine.Templating
                 case TemplatingScope.Dynamic:
                     return node.WithAdditionalAnnotations( _runTimeDynamicAnnotation );
 
-                case TemplatingScope.Both:
+                case TemplatingScope.RunTimeOrCompileTime:
                     return node.WithAdditionalAnnotations( _bothAnnotation );
 
                 default:

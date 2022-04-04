@@ -43,11 +43,11 @@ namespace Metalama.Framework.Engine.CompileTime
         private static readonly ImmutableDictionary<string, (TemplatingScope Scope, bool IncludeDescendants)> _wellKnownNamespaces =
             new (string Namespace, TemplatingScope Scope, bool IncludeDescendants)[]
             {
-                ("System", TemplatingScope.Both, false),
-                ("System.Reflection", TemplatingScope.Both, true),
-                ("System.Text", TemplatingScope.Both, true),
-                ("System.Collections", TemplatingScope.Both, true),
-                ("System.Linq", TemplatingScope.Both, true),
+                ("System", TemplatingScope.RunTimeOrCompileTime, false),
+                ("System.Reflection", TemplatingScope.RunTimeOrCompileTime, true),
+                ("System.Text", TemplatingScope.RunTimeOrCompileTime, true),
+                ("System.Collections", TemplatingScope.RunTimeOrCompileTime, true),
+                ("System.Linq", TemplatingScope.RunTimeOrCompileTime, true),
                 ("Microsoft.CodeAnalysis", TemplatingScope.RunTimeOnly, true)
             }.ToImmutableDictionary( t => t.Namespace, t => (t.Scope, t.IncludeDescendants), StringComparer.Ordinal );
 
@@ -167,7 +167,7 @@ namespace Metalama.Framework.Engine.CompileTime
             }
             else if ( this._compilation.HasImplicitConversion( attribute.AttributeClass, this._compileTimeAttribute ) )
             {
-                return TemplatingScope.Both;
+                return TemplatingScope.RunTimeOrCompileTime;
             }
             else
             {
@@ -230,7 +230,7 @@ namespace Metalama.Framework.Engine.CompileTime
                         case TemplatingScope.RunTimeOnly:
                             return TemplatingScope.CompileTimeOnlyReturningRuntimeOnly;
 
-                        case TemplatingScope.Both:
+                        case TemplatingScope.RunTimeOrCompileTime:
                             return TemplatingScope.CompileTimeOnlyReturningBoth;
                     }
                 }
@@ -323,7 +323,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
                                     break;
 
-                                case TemplatingScope.Both:
+                                case TemplatingScope.RunTimeOrCompileTime:
                                     break;
 
                                 default:
@@ -347,7 +347,7 @@ namespace Metalama.Framework.Engine.CompileTime
                                     }
                                     else
                                     {
-                                        return TemplatingScope.Both;
+                                        return TemplatingScope.RunTimeOrCompileTime;
                                     }
                                 }
                         }
@@ -371,7 +371,7 @@ namespace Metalama.Framework.Engine.CompileTime
             // From attributes.
             var scopeFromAttributes = this.GetScopeFromAttributes( symbol ) ?? TemplatingScope.RunTimeOnly;
 
-            if ( scopeFromAttributes != TemplatingScope.Both )
+            if ( scopeFromAttributes != TemplatingScope.RunTimeOrCompileTime )
             {
                 return scopeFromAttributes;
             }
@@ -382,15 +382,15 @@ namespace Metalama.Framework.Engine.CompileTime
 
         private TemplatingScope GetScopeFromSignature( ISymbol symbol, int recursion )
         {
-            var signatureScope = TemplatingScope.Both;
+            var signatureScope = TemplatingScope.RunTimeOrCompileTime;
 
             void CombineScope( ITypeSymbol type )
             {
                 var typeScope = this.GetTemplatingScopeCore( type, recursion + 1 );
 
-                if ( typeScope != TemplatingScope.Both )
+                if ( typeScope != TemplatingScope.RunTimeOrCompileTime )
                 {
-                    if ( signatureScope == TemplatingScope.Both )
+                    if ( signatureScope == TemplatingScope.RunTimeOrCompileTime )
                     {
                         signatureScope = typeScope;
                     }
@@ -430,7 +430,7 @@ namespace Metalama.Framework.Engine.CompileTime
                     return this.GetTemplatingScopeCore( @event.Type, recursion + 1 );
 
                 default:
-                    return TemplatingScope.Both;
+                    return TemplatingScope.RunTimeOrCompileTime;
             }
         }
 
@@ -533,7 +533,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
                 case INamespaceSymbol:
                     // Namespace can be either run-time, build-time or both. We don't do more now but we may have to do it based on assemblies defining the namespace.
-                    return AddToCache( TemplatingScope.Both );
+                    return AddToCache( TemplatingScope.RunTimeOrCompileTime );
             }
 
             return AddToCache( null );
