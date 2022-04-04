@@ -38,7 +38,7 @@ namespace Metalama.Framework.Engine.CodeModel
                     _ => throw new AssertionFailedException()
                 };
 
-                name = name.TrimEnd( "Attribute" );
+                name = name.TrimSuffix( "Attribute" );
 
                 // A local method that adds the attribute.
                 void IndexAttribute( SyntaxNode? parentDeclaration, DeclarationRefTargetKind kind )

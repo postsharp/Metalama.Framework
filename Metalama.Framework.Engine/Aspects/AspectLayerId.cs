@@ -28,7 +28,7 @@ namespace Metalama.Framework.Engine.Aspects
         {
             this.AspectName = aspectName;
             this.LayerName = layerName;
-            this.AspectShortName = aspectName.Split( '.' ).Last().TrimEnd( "Attribute" );
+            this.AspectShortName = aspectName.Split( '.' ).Last().TrimSuffix( "Attribute" );
         }
 
         public static AspectLayerId FromString( string s )

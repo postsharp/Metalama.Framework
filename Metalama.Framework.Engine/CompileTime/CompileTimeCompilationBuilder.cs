@@ -82,11 +82,11 @@ namespace Metalama.Framework.Engine.CompileTime
                 var text = syntaxTree.GetText().ToString();
                 h.Update( text );
 
-                log?.AppendLine( $"Source:{syntaxTree.FilePath}={string.Join( "", HashUtilities.HashString( text ) )}" );
+                log?.AppendLineInvariant( $"Source:{syntaxTree.FilePath}={string.Join( "", HashUtilities.HashString( text ) )}" );
             }
 
             var digest = h.Digest();
-            log?.AppendLine( $"Digest:{digest:x}" );
+            log?.AppendLineInvariant( $"Digest:{digest:x}" );
 
             return digest;
         }
@@ -100,19 +100,19 @@ namespace Metalama.Framework.Engine.CompileTime
 
             XXH64 h = new();
             h.Update( _buildId );
-            log?.AppendLine( $"BuildId={_buildId}" );
+            log?.AppendLineInvariant( $"BuildId={_buildId}" );
 
             foreach ( var reference in referencedProjects.OrderBy( r => r.Hash ) )
             {
                 h.Update( reference.Hash );
-                log?.AppendLine( $"Reference:={reference.RunTimeIdentity.Name}={reference.Hash}" );
+                log?.AppendLineInvariant( $"Reference:={reference.RunTimeIdentity.Name}={reference.Hash}" );
             }
 
             h.Update( sourceHash );
-            log?.AppendLine( $"Source:={sourceHash:x}" );
+            log?.AppendLineInvariant( $"Source:={sourceHash:x}" );
 
             var digest = h.Digest();
-            log?.AppendLine( $"Digest:{digest:x}" );
+            log?.AppendLineInvariant( $"Digest:{digest:x}" );
 
             return digest;
         }

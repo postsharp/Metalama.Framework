@@ -36,6 +36,6 @@ public static class AttributeHelper
             typeName = fullName;
         }
 
-        shortName = typeName.TrimEnd( "Attribute" );
+        shortName = typeName.TrimSuffix( "Attribute" );
     }
 }
