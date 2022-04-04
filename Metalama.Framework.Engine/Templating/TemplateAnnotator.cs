@@ -714,7 +714,7 @@ namespace Metalama.Framework.Engine.Templating
             {
                 context = ScopeContext.CreateForcedCompileTimeScope( this._currentScopeContext, $"element of the compile-time collection '{node.Expression}'" );
             }
-            else if ( scope.IsDynamic() )
+            else if ( scope.IsCompileTimeMemberReturningRunTimeValue() )
             {
                 scope = TemplatingScope.Dynamic;
 
@@ -851,7 +851,7 @@ namespace Metalama.Framework.Engine.Templating
                     ExpressionSyntax transformedArgumentValue;
 
                     // Transform the argument value.
-                    if ( expressionScope.IsDynamic() || TemplateMemberClassifier.IsDynamicParameter( argumentType ) )
+                    if ( expressionScope.IsCompileTimeMemberReturningRunTimeValue() || TemplateMemberClassifier.IsDynamicParameter( argumentType ) )
                     {
                         // dynamic or dynamic[]
 
@@ -863,7 +863,7 @@ namespace Metalama.Framework.Engine.Templating
                             transformedArgumentValue = this.Visit( argument.Expression );
                         }
                     }
-                    else if ( expressionScope.IsRunTime() )
+                    else if ( expressionScope.EvaluatesToRunTimeValue() )
                     {
                         using ( this.WithScopeContext(
                                    ScopeContext.CreatePreferredRunTimeScope(
@@ -1520,7 +1520,7 @@ namespace Metalama.Framework.Engine.Templating
             {
                 ScopeContext context;
 
-                if ( leftScope.IsRunTime() )
+                if ( leftScope.EvaluatesToRunTimeValue() )
                 {
                     context = ScopeContext.CreatePreferredRunTimeScope( this._currentScopeContext, $"right part of the run-time '{node.Left} ??'" );
                     combinedScope = TemplatingScope.RunTimeOnly;

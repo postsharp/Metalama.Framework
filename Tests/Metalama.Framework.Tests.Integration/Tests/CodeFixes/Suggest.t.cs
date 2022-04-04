@@ -5,15 +5,13 @@ using Metalama.Framework.CodeFixes;
 
 namespace Metalama.Framework.Tests.Integration.CodeFixes.Suggest
 {
+#pragma warning disable CS0067
     internal class Aspect : MethodAspect
     {
-        public override void BuildAspect( IAspectBuilder<IMethod> builder )
-        {
-            base.BuildAspect( builder );
+        public override void BuildAspect(IAspectBuilder<IMethod> builder) => throw new System.NotSupportedException("Compile-time-only code cannot be called at run-time.");
 
-            builder.Diagnostics.Suggest( CodeFixFactory.AddAttribute( builder.Target, typeof(MyAttribute) ), builder.Target );
-        }
     }
+#pragma warning restore CS0067
 
     internal class MyAttribute : Attribute { }
 

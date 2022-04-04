@@ -57,6 +57,8 @@ namespace Metalama.Framework.Engine.CompileTime
 
             public override bool VisitNamespaceDeclaration( NamespaceDeclarationSyntax node ) => node.ChildNodes().Any( this.Visit );
 
+            public override bool VisitFileScopedNamespaceDeclaration( FileScopedNamespaceDeclarationSyntax node ) => node.ChildNodes().Any( this.Visit );
+
             public override bool VisitCompilationUnit( CompilationUnitSyntax node ) => node.ChildNodes().Any( this.Visit );
 
             public override bool DefaultVisit( SyntaxNode node ) => false;

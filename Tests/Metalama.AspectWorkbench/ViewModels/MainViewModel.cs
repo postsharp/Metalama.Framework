@@ -122,40 +122,43 @@ namespace Metalama.AspectWorkbench.ViewModels
                 compilationStopwatch.Stop();
             }
 
-            var testSyntaxTree = testResult.SyntaxTrees.First();
-
-            var annotatedTemplateSyntax = testSyntaxTree.AnnotatedSyntaxRoot;
-
-            if ( annotatedTemplateSyntax != null )
-            {
-                // Display the annotated syntax tree.
-                this.ColoredSourceCodeDocument = await syntaxColorizer.WriteSyntaxColoringAsync(
-                    testResult.SyntaxTrees.First().InputDocument,
-                    diagnostics: testResult.Diagnostics );
-            }
-
             var errorsDocument = new FlowDocument();
 
-            var transformedTemplateSyntax = testSyntaxTree.OutputCompileTimeSyntaxRoot;
+            var testSyntaxTree = testResult.SyntaxTrees.FirstOrDefault();
 
-            if ( transformedTemplateSyntax != null )
+            if ( testSyntaxTree != null )
             {
-                if ( testResult.CompileTimeCompilation != null )
+                var annotatedTemplateSyntax = testSyntaxTree.AnnotatedSyntaxRoot;
+
+                if ( annotatedTemplateSyntax != null )
                 {
-                    SyntaxTreeStructureVerifier.Verify( testResult.CompileTimeCompilation, serviceProvider );
+                    // Display the annotated syntax tree.
+                    this.ColoredSourceCodeDocument = await syntaxColorizer.WriteSyntaxColoringAsync(
+                        testResult.SyntaxTrees.First().InputDocument,
+                        diagnostics: testResult.Diagnostics );
                 }
 
-                // Render the transformed tree.
-                var project3 = testRunner.CreateProject( testInput.Options );
+                var transformedTemplateSyntax = testSyntaxTree.OutputCompileTimeSyntaxRoot;
 
-                var document3 = project3.AddDocument(
-                    testSyntaxTree.OutputCompileTimePath ?? "TransformedTemplate.cs",
-                    transformedTemplateSyntax,
-                    filePath: testSyntaxTree.OutputCompileTimePath );
+                if ( transformedTemplateSyntax != null )
+                {
+                    if ( testResult.CompileTimeCompilation != null )
+                    {
+                        SyntaxTreeStructureVerifier.Verify( testResult.CompileTimeCompilation, serviceProvider );
+                    }
 
-                var formattedDocument3 = await OutputCodeFormatter.FormatToDocumentAsync( document3, testResult.CompileTimeCompilationDiagnostics );
+                    // Render the transformed tree.
+                    var project3 = testRunner.CreateProject( testInput.Options );
 
-                this.CompiledTemplateDocument = await syntaxColorizer.WriteSyntaxColoringAsync( formattedDocument3.Document, true );
+                    var document3 = project3.AddDocument(
+                        testSyntaxTree.OutputCompileTimePath ?? "TransformedTemplate.cs",
+                        transformedTemplateSyntax,
+                        filePath: testSyntaxTree.OutputCompileTimePath );
+
+                    var formattedDocument3 = await OutputCodeFormatter.FormatToDocumentAsync( document3, testResult.CompileTimeCompilationDiagnostics );
+
+                    this.CompiledTemplateDocument = await syntaxColorizer.WriteSyntaxColoringAsync( formattedDocument3.Document, true );
+                }
             }
 
             // TODO: Multi file tests in the workbench.

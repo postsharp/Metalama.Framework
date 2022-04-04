@@ -267,5 +267,21 @@ namespace Metalama.Framework.Engine.Templating
                 "Template code must be written in C# {0}.",
                 _category,
                 Error );
+
+        internal static readonly DiagnosticDefinition<IDeclaration> CannotUseProceedOutOfTemplate
+            = new(
+                "LAMA0233",
+                "Cannot use the 'meta.Proceed' method out of a template.",
+                "Cannot use the 'meta.Proceed' method in '{0}' because it is not a template.",
+                _category,
+                Error );
+
+        internal static readonly DiagnosticDefinition<ISymbol> PartiallyUnresolvedSymbolInTemplate
+            = new(
+                "LAMA0235",
+                "The definition of a type or member used in a template is partially invalid.",
+                "The definition of the type or member '{0}' is invalid. Metalama could report irrelevant errors in the current template.",
+                _category,
+                Error );
     }
 }

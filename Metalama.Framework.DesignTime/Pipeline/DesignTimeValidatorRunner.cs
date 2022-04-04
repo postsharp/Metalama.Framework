@@ -3,7 +3,6 @@
 
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
-using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Validation;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
@@ -16,19 +15,16 @@ internal class DesignTimeValidatorRunner
     private readonly IServiceProvider _serviceProvider;
     private readonly CompilationPipelineResult _compilationResult;
     private readonly IProject _project;
-    private readonly DesignTimeAspectPipeline _pipeline;
     private readonly Dictionary<ISymbol, ImmutableArray<ReferenceValidatorInstance>> _validators = new();
 
     public DesignTimeValidatorRunner(
         IServiceProvider serviceProvider,
         CompilationPipelineResult compilationResult,
-        IProject project,
-        DesignTimeAspectPipeline pipeline )
+        IProject project )
     {
         this._serviceProvider = serviceProvider;
         this._compilationResult = compilationResult;
         this._project = project;
-        this._pipeline = pipeline;
     }
 
     public void Validate( SemanticModel model, UserDiagnosticSink diagnosticSink, CancellationToken cancellationToken )
@@ -46,16 +42,6 @@ internal class DesignTimeValidatorRunner
 
             visitor.Visit( model );
         }
-
-        // Perform additional analysis not done by the design-time pipeline.
-        // We do it from here so that we benefit from caching.
-        TemplatingCodeValidator.Validate(
-            this._serviceProvider,
-            model,
-            diagnosticSink.Report,
-            this._pipeline.MustReportPausedPipelineAsErrors && this._pipeline.IsCompileTimeSyntaxTreeOutdated( model.SyntaxTree.FilePath ),
-            true,
-            cancellationToken );
     }
 
     private ImmutableArray<ReferenceValidatorInstance> GetValidatorsForSymbol( ISymbol symbol, CompilationModel compilation )
