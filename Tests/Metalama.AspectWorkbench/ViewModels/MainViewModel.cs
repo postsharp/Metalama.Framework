@@ -158,7 +158,8 @@ namespace Metalama.AspectWorkbench.ViewModels
                 this.CompiledTemplateDocument = await syntaxColorizer.WriteSyntaxColoringAsync( formattedDocument3.Document, true );
             }
 
-            var consolidatedOutputSyntax = testResult.GetConsolidatedTestOutput();
+            // TODO: Multi file tests in the workbench.
+            var consolidatedOutputSyntax = testResult.GetConsolidatedTestOutput().Single().GetRoot();
             var consolidatedOutputText = await consolidatedOutputSyntax.SyntaxTree.GetTextAsync();
 
             var project = testResult.OutputProject ?? testResult.InputProject;

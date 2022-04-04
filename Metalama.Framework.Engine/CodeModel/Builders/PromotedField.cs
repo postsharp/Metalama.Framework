@@ -5,6 +5,8 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advices;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Transformations;
+using Metalama.Framework.Engine.Utilities;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders
@@ -33,6 +35,15 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         }
 
         public override InsertPosition InsertPosition => this._field.ToInsertPosition();
+
+        public override SyntaxTree TargetSyntaxTree
+            => this._field switch
+            {
+                ISyntaxTreeTransformation introduction => introduction.TargetSyntaxTree,
+                BuiltDeclaration builtDeclaration => ((ISyntaxTreeTransformation) builtDeclaration.Builder).TargetSyntaxTree,
+                Declaration codeDeclaration => codeDeclaration.GetSymbol().AssertNotNull().GetPrimarySyntaxReference().AssertNotNull().SyntaxTree,
+                _ => throw new AssertionFailedException(),
+            };
 
         public override bool IsDesignTime => false;
 
