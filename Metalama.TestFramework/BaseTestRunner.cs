@@ -450,7 +450,7 @@ namespace Metalama.TestFramework
                         foreach ( var syntaxTree in arr )
                         {
                             sb.AppendLine();
-                            sb.AppendLine( $"// --- {syntaxTree.FilePath} ---" );
+                            sb.AppendLineInvariant( $"// --- {syntaxTree.FilePath} ---" );
                             sb.AppendLine();
                             sb.AppendLine( syntaxTree.GetRoot().ToFullString() );
                         }
