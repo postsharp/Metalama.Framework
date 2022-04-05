@@ -527,7 +527,7 @@ namespace Metalama.TestFramework
             // Write the consolidated output.
             if ( testInput.Options.WriteOutputHtml.GetValueOrDefault() )
             {
-                // TODO: Multi file tests not yet supported for html output.
+                // Multi file tests are not supported for html output.
                 var output = testResult.GetConsolidatedTestOutput().Single().GetRoot();
                 var outputDocument = testResult.InputProject!.AddDocument( "Consolidated.cs", output );
 

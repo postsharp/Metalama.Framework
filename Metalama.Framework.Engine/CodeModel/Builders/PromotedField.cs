@@ -39,9 +39,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public override SyntaxTree TargetSyntaxTree
             => this._field switch
             {
-                ISyntaxTreeTransformation introduction => introduction.TargetSyntaxTree,
-                BuiltDeclaration builtDeclaration => ((ISyntaxTreeTransformation) builtDeclaration.Builder).TargetSyntaxTree,
-                Declaration codeDeclaration => codeDeclaration.GetSymbol().AssertNotNull().GetPrimarySyntaxReference().AssertNotNull().SyntaxTree,
+                IDeclarationImpl declaration => declaration.PrimarySyntaxTree.AssertNotNull(),
                 _ => throw new AssertionFailedException()
             };
 

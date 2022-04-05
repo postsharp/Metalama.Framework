@@ -67,5 +67,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public override IDeclaration OriginalDefinition => this.Compilation.Factory.GetDeclaration( this.Builder.OriginalDefinition );
 
         public override Location? DiagnosticLocation => this.Builder.DiagnosticLocation;
+
+        public override SyntaxTree? PrimarySyntaxTree => this.Builder.PrimarySyntaxTree;
     }
 }

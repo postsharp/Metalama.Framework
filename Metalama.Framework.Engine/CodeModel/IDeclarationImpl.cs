@@ -3,6 +3,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel.References;
+using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using SyntaxReference = Microsoft.CodeAnalysis.SyntaxReference;
@@ -24,6 +25,11 @@ namespace Metalama.Framework.Engine.CodeModel
         /// Gets a value indicating whether a declaration can be inherited or overridden.
         /// </summary>
         bool CanBeInherited { get; }
+
+        /// <summary>
+        /// Gets a value indicating the syntax tree where the decalration primary resides.
+        /// </summary>
+        SyntaxTree? PrimarySyntaxTree { get; }
 
         IEnumerable<IDeclaration> GetDerivedDeclarations( bool deep = true );
     }

@@ -390,5 +390,7 @@ namespace Metalama.Framework.Engine.CodeModel
         public override Location? DiagnosticLocation => null;
 
         public override bool CanBeInherited => false;
+
+        public override SyntaxTree? PrimarySyntaxTree => null;
     }
 }

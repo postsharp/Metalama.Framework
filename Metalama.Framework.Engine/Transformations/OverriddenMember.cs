@@ -27,9 +27,7 @@ namespace Metalama.Framework.Engine.Transformations
         public SyntaxTree TargetSyntaxTree
             => this.OverriddenDeclaration switch
             {
-                ISyntaxTreeTransformation introduction => introduction.TargetSyntaxTree,
-                BuiltDeclaration builtDeclaration => ((ISyntaxTreeTransformation) builtDeclaration.Builder).TargetSyntaxTree,
-                Declaration codeDeclaration => codeDeclaration.GetSymbol().AssertNotNull().GetPrimarySyntaxReference().AssertNotNull().SyntaxTree,
+                IDeclarationImpl declaration => declaration.PrimarySyntaxTree.AssertNotNull(),
                 _ => throw new AssertionFailedException()
             };
 

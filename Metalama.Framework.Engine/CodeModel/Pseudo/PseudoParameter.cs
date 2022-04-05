@@ -80,5 +80,7 @@ namespace Metalama.Framework.Engine.CodeModel.Pseudo
         public override IAssembly DeclaringAssembly => this.DeclaringMember.DeclaringAssembly;
 
         public override Location? DiagnosticLocation => this.DeclaringMember.GetDiagnosticLocation();
+
+        public override SyntaxTree? PrimarySyntaxTree => ((IDeclarationImpl) this.DeclaringAccessor).PrimarySyntaxTree;
     }
 }

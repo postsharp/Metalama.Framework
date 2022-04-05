@@ -59,5 +59,7 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
             => this.Underlying.GetMetric<TExtension>();
 
         public IDeclaration OriginalDefinition => this.Underlying.OriginalDefinition;
+
+        public SyntaxTree? PrimarySyntaxTree => this.Underlying.PrimarySyntaxTree;
     }
 }

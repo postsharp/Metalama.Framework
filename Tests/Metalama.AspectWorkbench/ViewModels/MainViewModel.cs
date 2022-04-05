@@ -161,7 +161,7 @@ namespace Metalama.AspectWorkbench.ViewModels
                 }
             }
 
-            // TODO: Multi file tests in the workbench.
+            // Multi file tests are not supported.
             var consolidatedOutputSyntax = testResult.GetConsolidatedTestOutput().Single().GetRoot();
             var consolidatedOutputText = await consolidatedOutputSyntax.SyntaxTree.GetTextAsync();
 

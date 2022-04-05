@@ -6,9 +6,11 @@ using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.Transformations;
+using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using TypedConstant = Metalama.Framework.Code.TypedConstant;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders
 {
@@ -50,6 +52,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public ImmutableArray<KeyValuePair<string, TypedConstant>> NamedArguments => this._attributeConstruction.NamedArguments;
 
         IType IHasType.Type => this.Type;
+
+        public override SyntaxTree? PrimarySyntaxTree => ((IDeclarationImpl)this.ContainingDeclaration).PrimarySyntaxTree;
 
         public FormattableString FormatPredecessor() => $"attribute of type '{this.Type}' on '{this.ContainingDeclaration}'";
     }
