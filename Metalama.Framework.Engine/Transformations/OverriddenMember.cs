@@ -5,7 +5,6 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advices;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -23,11 +22,12 @@ namespace Metalama.Framework.Engine.Transformations
 
         IDeclaration IOverriddenDeclaration.OverriddenDeclaration => this.OverriddenDeclaration;
 
-        // TODO: Temporary
         public SyntaxTree TargetSyntaxTree
-            => this.OverriddenDeclaration is ISyntaxTreeTransformation introduction
-                ? introduction.TargetSyntaxTree
-                : ((NamedType) this.OverriddenDeclaration.DeclaringType).Symbol.GetPrimarySyntaxReference().AssertNotNull().SyntaxTree;
+            => this.OverriddenDeclaration switch
+            {
+                IDeclarationImpl declaration => declaration.PrimarySyntaxTree.AssertNotNull(),
+                _ => throw new AssertionFailedException()
+            };
 
         protected OverriddenMember( Advice advice, IMember overriddenDeclaration )
         {

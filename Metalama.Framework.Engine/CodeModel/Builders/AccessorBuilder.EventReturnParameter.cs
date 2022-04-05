@@ -2,7 +2,10 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Code;
+using Microsoft.CodeAnalysis;
 using System;
+using RefKind = Metalama.Framework.Code.RefKind;
+using SpecialType = Metalama.Framework.Code.SpecialType;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders
 {
@@ -32,6 +35,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
             public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
                 => this.Accessor.ToDisplayString( format, context ) + "@<return>";
+
+            public override SyntaxTree? PrimarySyntaxTree => this.Accessor.PrimarySyntaxTree;
         }
     }
 }

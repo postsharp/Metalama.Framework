@@ -176,13 +176,11 @@ namespace Metalama.TestFramework
                 throw new InvalidOperationException( "The object has not bee properly initialized." );
             }
 
-            var i = -1;
-
             foreach ( var syntaxTree in runTimeCompilation.SyntaxTrees )
             {
-                i++;
+                var testSyntaxTree = this.SyntaxTrees.SingleOrDefault( x => StringComparer.Ordinal.Equals( x.InputDocument.FilePath, syntaxTree.FilePath ) );
 
-                if ( i >= this.SyntaxTrees.Count )
+                if ( testSyntaxTree == null )
                 {
                     // This is the "Intrinsics" syntax tree.
                     continue;
@@ -191,7 +189,7 @@ namespace Metalama.TestFramework
                 var syntaxNode = await syntaxTree.GetRootAsync();
 
                 // Format the output code.
-                await this.SyntaxTrees[i].SetRunTimeCodeAsync( syntaxNode );
+                await testSyntaxTree.SetRunTimeCodeAsync( syntaxNode );
             }
         }
 
@@ -243,95 +241,122 @@ namespace Metalama.TestFramework
         /// Gets the content of the <c>.t.cs</c> file, i.e. the output transformed code with comments
         /// for diagnostics.
         /// </summary>
-        public CompilationUnitSyntax GetConsolidatedTestOutput()
+        public IEnumerable<SyntaxTree> GetConsolidatedTestOutput()
         {
             if ( this.TestInput == null )
             {
                 throw new InvalidOperationException();
             }
 
-            var consolidatedCompilationUnit = SyntaxFactory.CompilationUnit();
-
             // Adding the syntax of the transformed run-time code, but only if the pipeline was successful.
-            var outputSyntaxTree = this.SyntaxTrees.FirstOrDefault();
+            var outputSyntaxTrees =
+                this.TestInput.Options.OutputAllSyntaxTrees == true
+                    ? this.SyntaxTrees.AsEnumerable()
+                    : this.SyntaxTrees.Take( 1 );
 
-            if ( this.HasOutputCode && outputSyntaxTree is { OutputRunTimeSyntaxRoot: not null } )
+            foreach ( var outputSyntaxTree in outputSyntaxTrees )
             {
-                // Adding syntax annotations for the output compilation. We cannot add syntax annotations for diagnostics
-                // on the input compilation because they would potentially not map properly to the output compilation.
-                var outputSyntaxRoot = FormattedCodeWriter.AddDiagnosticAnnotations(
-                    outputSyntaxTree.OutputRunTimeSyntaxRoot,
-                    outputSyntaxTree.InputPath,
-                    this.OutputCompilationDiagnostics.ToArray() );
+                var consolidatedCompilationUnit = SyntaxFactory.CompilationUnit();
 
-                // Find notes annotated with // <target> or with a comment containing <target> and choose the first one. If there is none, the test output is the whole tree
-                // passed to this method.
-
-                var outputNodes =
-                    outputSyntaxRoot
-                        .DescendantNodesAndSelf( _ => true )
-                        .OfType<MemberDeclarationSyntax>()
-                        .Where(
-                            m => m.GetLeadingTrivia().ToString().ContainsOrdinal( "<target>" ) ||
-                                 m.AttributeLists.Any( a => a.GetLeadingTrivia().ToString().ContainsOrdinal( "<target>" ) ) )
-                        .ToList();
-
-                var outputNode = outputNodes.FirstOrDefault() ?? (SyntaxNode) outputSyntaxRoot;
-
-                switch ( outputNode )
+                if ( this.HasOutputCode && outputSyntaxTree is { OutputRunTimeSyntaxRoot: not null } )
                 {
-                    case MemberDeclarationSyntax member:
-                        consolidatedCompilationUnit = consolidatedCompilationUnit.AddMembers( member.WithoutTrivia() );
+                    // Adding syntax annotations for the output compilation. We cannot add syntax annotations for diagnostics
+                    // on the input compilation because they would potentially not map properly to the output compilation.
+                    var outputSyntaxRoot = FormattedCodeWriter.AddDiagnosticAnnotations(
+                        outputSyntaxTree.OutputRunTimeSyntaxRoot,
+                        outputSyntaxTree.InputPath,
+                        this.OutputCompilationDiagnostics.ToArray() );
 
-                        break;
+                    // Find notes annotated with // <target> or with a comment containing <target> and choose the first one. If there is none, the test output is the whole tree
+                    // passed to this method.
 
-                    case CompilationUnitSyntax compilationUnit:
-                        consolidatedCompilationUnit = consolidatedCompilationUnit
-                            .AddMembers( compilationUnit.Members.ToArray() )
-                            .AddUsings( compilationUnit.Usings.ToArray() );
+                    var outputNodes =
+                        outputSyntaxRoot
+                            .DescendantNodesAndSelf( _ => true )
+                            .OfType<MemberDeclarationSyntax>()
+                            .Where(
+                                m => m.GetLeadingTrivia().ToString().ContainsOrdinal( "<target>" ) ||
+                                     m.AttributeLists.Any( a => a.GetLeadingTrivia().ToString().ContainsOrdinal( "<target>" ) ) )
+                            .Cast<SyntaxNode>()
+                            .ToArray();
 
-                        break;
+                    outputNodes = outputNodes switch
+                    {
+                        { Length: 0 } => new SyntaxNode[] { outputSyntaxRoot },
+                        _ => outputNodes
+                    };
 
-                    case ExpressionStatementSyntax statementSyntax when statementSyntax.ToString() == "":
-                        // This is an empty statement
-                        consolidatedCompilationUnit = consolidatedCompilationUnit
-                            .WithLeadingTrivia( statementSyntax.GetLeadingTrivia().AddRange( consolidatedCompilationUnit.GetLeadingTrivia() ) );
+                    for ( var i = 0; i < outputNodes.Length; i++ )
+                    {
+                        switch ( outputNodes[i] )
+                        {
+                            case MemberDeclarationSyntax member:
+                                if ( i != outputNodes.Length - 1 )
+                                {
+                                    consolidatedCompilationUnit =
+                                        consolidatedCompilationUnit.AddMembers(
+                                            member.WithoutTrivia().WithTrailingTrivia( SyntaxFactory.ElasticLineFeed, SyntaxFactory.ElasticLineFeed ) );
+                                }
+                                else
+                                {
+                                    consolidatedCompilationUnit = consolidatedCompilationUnit.AddMembers( member.WithoutTrivia() );
+                                }
 
-                        break;
+                                break;
 
-                    default:
-                        throw new InvalidOperationException( $"Don't know how to add a {outputNode.Kind()} to the compilation unit." );
+                            case CompilationUnitSyntax compilationUnit:
+                                consolidatedCompilationUnit = consolidatedCompilationUnit
+                                    .AddMembers( compilationUnit.Members.ToArray() )
+                                    .AddUsings( compilationUnit.Usings.ToArray() );
+
+                                break;
+
+                            case ExpressionStatementSyntax statementSyntax when statementSyntax.ToString() == "":
+                                // This is an empty statement
+                                consolidatedCompilationUnit = consolidatedCompilationUnit
+                                    .WithLeadingTrivia( statementSyntax.GetLeadingTrivia().AddRange( consolidatedCompilationUnit.GetLeadingTrivia() ) );
+
+                                break;
+
+                            default:
+                                throw new InvalidOperationException( $"Don't know how to add a {outputNodes[i].Kind()} to the compilation unit." );
+                        }
+                    }
                 }
+
+                // Adding the diagnostics as trivia.
+                List<SyntaxTrivia> comments = new();
+
+                if ( !this.Success && (this.TestInput!.Options.ReportErrorMessage.GetValueOrDefault()
+                                       || this.Diagnostics.All( c => c.Severity != DiagnosticSeverity.Error )) )
+                {
+                    comments.Add( SyntaxFactory.Comment( $"// {this.ErrorMessage} \n" ) );
+                }
+
+                // We exclude LAMA0222 from the results because it contains randomly-generated info and tests need to be deterministic.
+
+                comments.AddRange(
+                    this.Diagnostics
+                        .Where(
+                            d => d.Id != "LAMA0222" &&
+                                 (this.TestInput!.Options.IncludeAllSeverities.GetValueOrDefault()
+                                  || d.Severity >= DiagnosticSeverity.Warning) )
+                        .OrderBy( d => d.Location.SourceSpan.Start )
+                        .ThenBy( d => d.GetMessage(), StringComparer.Ordinal )
+                        .SelectMany( this.GetDiagnosticComments )
+                        .Select( SyntaxFactory.Comment )
+                        .ToList() );
+
+                consolidatedCompilationUnit = consolidatedCompilationUnit.WithLeadingTrivia( comments );
+
+                // Individual trees should be formatted, so we don't need to format again.
+
+                yield return CSharpSyntaxTree.Create(
+                    consolidatedCompilationUnit,
+                    path: Path.GetFileName(
+                        outputSyntaxTree.InputPath
+                        ?? throw new InvalidOperationException( "Output syntax tree has no path" ) ) );
             }
-
-            // Adding the diagnostics as trivia.
-            List<SyntaxTrivia> comments = new();
-
-            if ( !this.Success && (this.TestInput!.Options.ReportErrorMessage.GetValueOrDefault()
-                                   || this.Diagnostics.All( c => c.Severity != DiagnosticSeverity.Error )) )
-            {
-                comments.Add( SyntaxFactory.Comment( $"// {this.ErrorMessage} \n" ) );
-            }
-
-            // We exclude LAMA0222 from the results because it contains randomly-generated info and tests need to be deterministic.
-
-            comments.AddRange(
-                this.Diagnostics
-                    .Where(
-                        d => d.Id != "LAMA0222" &&
-                             (this.TestInput!.Options.IncludeAllSeverities.GetValueOrDefault()
-                              || d.Severity >= DiagnosticSeverity.Warning) )
-                    .OrderBy( d => d.Location.SourceSpan.Start )
-                    .ThenBy( d => d.GetMessage(), StringComparer.Ordinal )
-                    .SelectMany( this.GetDiagnosticComments )
-                    .Select( SyntaxFactory.Comment )
-                    .ToList() );
-
-            consolidatedCompilationUnit = consolidatedCompilationUnit.WithLeadingTrivia( comments );
-
-            // Individual trees should be formatted, so we don't need to format again.
-
-            return consolidatedCompilationUnit;
         }
 
         private IEnumerable<string> GetDiagnosticComments( Diagnostic d )

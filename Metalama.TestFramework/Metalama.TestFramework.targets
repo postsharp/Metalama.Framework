@@ -30,11 +30,16 @@
             <_Parameter1>TargetFramework</_Parameter1>
             <_Parameter2>$(TargetFramework)</_Parameter2>
         </AssemblyAttribute>
-        <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
-            <_Parameter1>DefineConstants</_Parameter1>
-            <_Parameter2>$(DefineConstants)</_Parameter2>
-        </AssemblyAttribute>
     </ItemGroup>
+
+    <Target Name="AddAttributeForDefineConstants" DependsOnTargets="AddImplicitDefineConstants" BeforeTargets="CoreGenerateAssemblyInfo">
+        <ItemGroup>
+            <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+                <_Parameter1>DefineConstants</_Parameter1>
+                <_Parameter2>$(DefineConstants)</_Parameter2>
+            </AssemblyAttribute>
+        </ItemGroup>
+    </Target>
 
     <Target Name='WriteReferenceAssemblies' AfterTargets="Build">
         <WriteLinesToFile File='$(IntermediateOutputPath)assemblies.txt' Overwrite='true'

@@ -178,6 +178,12 @@ namespace Metalama.TestFramework
         public string? ExpectedEndOfLine { get; set; }
 
         /// <summary>
+        /// Gets or sets a value indicating whether all input syntax trees should be used as a part of test output. 
+        /// If <c>false</c> only the primary syntax tree is processed and used as test output. If <c>true</c>, all syntax trees are processed and used as test output.
+        /// </summary>
+        public bool? OutputAllSyntaxTrees { get; set; }
+
+        /// <summary>
         /// Applies <see cref="TestDirectoryOptions"/> to the current object by overriding any property
         /// that is not defined in the current object but defined in the argument.
         /// </summary>
@@ -223,6 +229,8 @@ namespace Metalama.TestFramework
             }
 
             this.RequiredConstants.AddRange( baseOptions.RequiredConstants );
+
+            this.OutputAllSyntaxTrees ??= baseOptions.OutputAllSyntaxTrees;
         }
 
         public IReadOnlyList<string> InvalidSourceOptions => this._invalidSourceOptions;
@@ -348,6 +356,11 @@ namespace Metalama.TestFramework
 
                     case "ExpectedEndOfLine":
                         this.ExpectedEndOfLine = optionArg;
+
+                        break;
+
+                    case "OutputAllSyntaxTrees":
+                        this.OutputAllSyntaxTrees = true;
 
                         break;
 

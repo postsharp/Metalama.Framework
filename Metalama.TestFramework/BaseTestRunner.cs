@@ -366,8 +366,8 @@ namespace Metalama.TestFramework
                 Path.GetFileNameWithoutExtension( sourceAbsolutePath ) + FileExtensions.TransformedCode );
 
             var consolidatedTestOutput = testResult.GetConsolidatedTestOutput();
-            var actualTransformedNonNormalizedText = consolidatedTestOutput.ToFullString();
-            var actualTransformedNormalizedSourceText = NormalizeTestOutput( consolidatedTestOutput, formatCode );
+            var actualTransformedNonNormalizedText = JoinSyntaxTrees( consolidatedTestOutput );
+            var actualTransformedNormalizedSourceText = NormalizeTestOutput( actualTransformedNonNormalizedText, formatCode );
 
             // If the expectation file does not exist, create it with some placeholder content.
             if ( !File.Exists( expectedTransformedPath ) )
@@ -431,6 +431,33 @@ namespace Metalama.TestFramework
 
             state["expectedTransformedSourceText"] = expectedTransformedSourceText;
             state["actualTransformedNormalizedSourceText"] = actualTransformedNormalizedSourceText;
+
+            static string JoinSyntaxTrees( IEnumerable<SyntaxTree> compilationUnits )
+            {
+                var arr = compilationUnits.ToArray();
+
+                switch ( arr.Length )
+                {
+                    case 0:
+                        return "// --- No output compilation units ---";
+
+                    case 1:
+                        return arr[0].GetRoot().ToFullString();
+
+                    default:
+                        var sb = new StringBuilder();
+
+                        foreach ( var syntaxTree in arr )
+                        {
+                            sb.AppendLine();
+                            sb.AppendLine( $"// --- {syntaxTree.FilePath} ---" );
+                            sb.AppendLine();
+                            sb.AppendLine( syntaxTree.GetRoot().ToFullString() );
+                        }
+
+                        return sb.ToString();
+                }
+            }
         }
 
         protected virtual void ExecuteAssertions( TestInput testInput, TestResult testResult, Dictionary<string, object?> state )
@@ -500,7 +527,8 @@ namespace Metalama.TestFramework
             // Write the consolidated output.
             if ( testInput.Options.WriteOutputHtml.GetValueOrDefault() )
             {
-                var output = testResult.GetConsolidatedTestOutput();
+                // Multi file tests are not supported for html output.
+                var output = testResult.GetConsolidatedTestOutput().Single().GetRoot();
                 var outputDocument = testResult.InputProject!.AddDocument( "Consolidated.cs", output );
 
                 var formattedOutput = await OutputCodeFormatter.FormatToSyntaxAsync( outputDocument );

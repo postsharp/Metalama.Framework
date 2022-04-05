@@ -84,5 +84,7 @@ namespace Metalama.Framework.Engine.CodeModel
             // Always write in full.
             return this._symbol.ToDisplayString();
         }
+
+        public override SyntaxTree? PrimarySyntaxTree => null;
     }
 }

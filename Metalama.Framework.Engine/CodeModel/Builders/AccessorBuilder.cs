@@ -8,11 +8,16 @@ using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.Utilities;
+using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Reflection;
+using Accessibility = Metalama.Framework.Code.Accessibility;
+using MethodKind = Metalama.Framework.Code.MethodKind;
+using RefKind = Metalama.Framework.Code.RefKind;
+using TypedConstant = Metalama.Framework.Code.TypedConstant;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders
 {
@@ -245,5 +250,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public IMember? OverriddenMember => (IMemberImpl?) this.OverriddenMethod;
 
         public override bool CanBeInherited => this.IsVirtual && !this.IsSealed && ((IDeclarationImpl) this.DeclaringType).CanBeInherited;
+
+        public override SyntaxTree? PrimarySyntaxTree => this.ContainingMember.TargetSyntaxTree;
     }
 }

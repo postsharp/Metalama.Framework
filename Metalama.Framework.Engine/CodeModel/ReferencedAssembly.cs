@@ -32,5 +32,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         [Memo]
         public IAssemblyIdentity Identity => new AssemblyIdentityModel( this.AssemblySymbol.Identity );
+
+        public override SyntaxTree? PrimarySyntaxTree => null;
     }
 }
