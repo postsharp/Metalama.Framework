@@ -53,7 +53,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         IType IHasType.Type => this.Type;
 
-        public override SyntaxTree? PrimarySyntaxTree => ((IDeclarationImpl)this.ContainingDeclaration).PrimarySyntaxTree;
+        public override SyntaxTree? PrimarySyntaxTree => ((IDeclarationImpl) this.ContainingDeclaration).PrimarySyntaxTree;
 
         public FormattableString FormatPredecessor() => $"attribute of type '{this.Type}' on '{this.ContainingDeclaration}'";
     }

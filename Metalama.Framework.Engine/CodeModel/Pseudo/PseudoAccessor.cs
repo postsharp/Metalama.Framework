@@ -126,7 +126,7 @@ namespace Metalama.Framework.Engine.CodeModel.Pseudo
 
         public IDeclaration OriginalDefinition => throw new NotImplementedException();
 
-        public IMember? OverriddenMember => ((IMemberWithAccessors?) ((IMemberImpl) this.DeclaringMember).OverriddenMember)?.GetAccessor( this.MethodKind );
+        public IMember? OverriddenMember => ((IMemberWithAccessors?) this.DeclaringMember.OverriddenMember)?.GetAccessor( this.MethodKind );
 
         public Location? DiagnosticLocation => this.DeclaringMember.GetDiagnosticLocation();
 

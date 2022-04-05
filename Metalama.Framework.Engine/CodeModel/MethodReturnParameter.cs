@@ -50,6 +50,7 @@ namespace Metalama.Framework.Engine.CodeModel
                     .Select( a => new AttributeRef( a, this.ToRef() ) ) );
 
         public override bool IsReturnParameter => true;
+
         public override SyntaxTree? PrimarySyntaxTree => ((IDeclarationImpl) this.DeclaringMember).PrimarySyntaxTree;
     }
 }
