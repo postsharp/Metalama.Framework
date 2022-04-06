@@ -3,8 +3,11 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.Builders;
+using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities;
@@ -51,58 +54,55 @@ namespace Metalama.Framework.Engine.Advices
                     _ => throw new AssertionFailedException()
                 };
 
-            // TODO: We don't want to include constructors that call other constructor of this class, i.e. ": this(...)".
-            var syntaxTrees =
-                (containingType.StaticConstructor != null && this.Reason.HasFlag( InitializationReason.TypeConstructing )
+            // TODO: merging localConstructors with constructors from the compilation does not take into account signatures, only implicit instance ctor and missing static ctor.
+            var localConstructors =
+                observableTransformations
+                    .OfType<IConstructorBuilder>()
+                    .Where( c =>
+                        c.IsStatic == ((this.Reason & InitializationReason.TypeConstructing) != 0)
+                        || !c.IsStatic == ((this.Reason & InitializationReason.Constructing) != 0) )
+                    .ToReadOnlyList();
+
+            var constructors =
+                (this.Reason & InitializationReason.TypeConstructing) != 0
                     ? new[] { containingType.StaticConstructor }
-                    : Array.Empty<IConstructor>())
-                .Concat( containingType.Constructors.Where( x => !x.IsStatic && this.Reason.HasFlag( InitializationReason.Constructing ) ) )
-                .GroupBy(
-                    x => (x, x.GetSymbol()) switch
-                    {
-                        (_, not null and var s) => s.GetPrimarySyntaxReference()?.SyntaxTree
-                                                   ?? s.ContainingType.GetPrimarySyntaxReference().AssertNotNull().SyntaxTree,
-                        (ISyntaxTreeTransformation t, null) => t.TargetSyntaxTree,
-                        (_, null) => containingType.GetPrimaryDeclaration()?.SyntaxTree ?? throw new AssertionFailedException()
-                    } );
+                    : Array.Empty<IConstructor>()
+                .Concat(
+                    containingType.Constructors
+                    .Where( x =>
+                        !x.IsStatic
+                        && this.Reason.HasFlag( InitializationReason.Constructing )
+                        && x.InitializerKind != ConstructorInitializerKind.This ) )
+                .Where(c => !(c.Parameters.Count == 0 && localConstructors.Any(cc => cc.Parameters.Count == 0 && c.IsStatic == cc.IsStatic) ) )
+                .Concat( localConstructors );
 
-            var initializations = new List<InitializationTransformation>();
-            InitializationTransformation? mainInitialization = null;
+            var transformations = new List<ITransformation>();
 
-            foreach ( var syntaxTreeConstructors in syntaxTrees )
+            foreach ( var ctor in constructors )
             {
-                foreach ( var syntaxReference in containingType.GetSymbol().DeclaringSyntaxReferences.Where( x => x.SyntaxTree == syntaxTreeConstructors.Key ) )
+                if (ctor.IsStatic && ctor.GetSymbol() == null && ctor is not IConstructorBuilder )
                 {
-                    var constructorsBelongingToReference = syntaxTreeConstructors.Where(
-                            x => x.GetPrimaryDeclaration() == null || x.GetPrimaryDeclaration().AssertNotNull().Parent == syntaxReference.GetSyntax() )
-                        .ToArray();
-
-                    if ( constructorsBelongingToReference.Length == 0 )
-                    {
-                        continue;
-                    }
-
-                    var declaration = (TypeDeclarationSyntax) syntaxReference.GetSyntax();
-
-                    var initialization = new InitializationTransformation(
-                        this,
-                        mainInitialization,
-                        this.TargetDeclaration,
-                        declaration,
-                        constructorsBelongingToReference,
-                        this.Template,
-                        this.Reason );
-
-                    if ( mainInitialization == null )
-                    {
-                        mainInitialization = initialization;
-                    }
-
-                    initializations.Add( initialization );
+                    // Missing static ctor.
+                    transformations.Add( new ConstructorBuilder( this, ctor.DeclaringType ) { IsStatic = true } );
                 }
+
+                if ( !ctor.IsStatic && ctor.GetSymbol() != null && ctor.GetSymbol()!.GetPrimaryDeclaration() == null)
+                {
+                    // Missing implicit ctor.
+                    transformations.Add( new ConstructorBuilder( this, ctor.DeclaringType ) );
+                }
+
+                var initialization = new InitializationTransformation(
+                    this,
+                    this.TargetDeclaration,
+                    ctor,
+                    this.Template,
+                    this.Reason );
+
+                transformations.Add( initialization );
             }
 
-            return AdviceResult.Create( initializations );
+            return AdviceResult.Create( transformations );
         }
     }
 }

@@ -8,10 +8,8 @@ namespace Metalama.Framework.Engine.Transformations
     /// <summary>
     /// Represents a single code transformation.
     /// </summary>
-    internal interface IInsertStatementTransformation : INonObservableTransformation
+    internal interface IInsertStatementTransformation : INonObservableTransformation, ISyntaxTreeTransformation
     {
-        ITransformation Parent { get; }
-
         /// <summary>
         /// Gets a context of this code transformation. If there are transformation marks on the same syntax node, those coming from member-context
         /// transformations precede type-context transformation. Member-context transformations do not have defined order between them.
@@ -27,6 +25,7 @@ namespace Metalama.Framework.Engine.Transformations
         /// Evaluates the target syntax node and transforms the state.
         /// </summary>
         /// <param name="context"></param>
-        InsertedStatement GetInsertedStatement( InsertStatementTransformationContext context );
+        /// <returns>Inserted statement or <c>null</c> if an error has occured.</returns>
+        InsertedStatement? GetInsertedStatement( InsertStatementTransformationContext context );
     }
 }

@@ -28,11 +28,14 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             INamedType targetType,
             string name,
             bool isEventField )
-            : base( parentAdvice, targetType, name )
+            : base( parentAdvice, targetType )
         {
+            this.Name = name;
             this._isEventField = isEventField;
             this.Type = (INamedType) targetType.Compilation.TypeFactory.GetTypeByReflectionType( typeof(EventHandler) );
         }
+
+        public override string Name { get; set; }
 
         public INamedType Type { get; set; }
 

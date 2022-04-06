@@ -14,9 +14,6 @@ namespace Metalama.Framework.Aspects
     [InternalImplement]
     public interface IMetaTarget
     {
-        [Obsolete( "Not implemented." )]
-        IConstructor Constructor { get; }
-
         /// <summary>
         /// Gets the method metadata, or the accessor if this is a template for a field, property or event.
         /// </summary>
@@ -31,6 +28,9 @@ namespace Metalama.Framework.Aspects
         /// <seealso href="@templates"/>
         IAdvisedFieldOrProperty FieldOrProperty { get; }
 
+        /// <summary>
+        /// Gets the target declaration.
+        /// </summary>
         IDeclaration Declaration { get; }
 
         /// <summary>
@@ -48,6 +48,11 @@ namespace Metalama.Framework.Aspects
         /// e.g. <c>meta.Target.Method.Invoke(1, 2, 3);</c>.
         /// </remarks>
         IAdvisedMethod Method { get; }
+
+        /// <summary>
+        /// Gets the target constructor, or null if the advsice does not target a constructor.
+        /// </summary>
+        IConstructor Constructor { get; }
 
         /// <summary>
         /// Gets the target field or property, or null if the advice does not target a field or a property.

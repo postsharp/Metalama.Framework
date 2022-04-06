@@ -26,6 +26,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public GenericParameterBuilderList GenericParameters { get; } = new();
 
+        public override string Name { get; set; }
+
         // A builder is never accessed directly from user code and never represents a generic type instance,
         // so we don't need an implementation of GenericArguments.
         public IReadOnlyList<IType> TypeArguments => throw new NotSupportedException();
@@ -105,8 +107,9 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public IReadOnlyList<IMethod> ExplicitInterfaceImplementations { get; private set; } = Array.Empty<IMethod>();
 
         public MethodBuilder( Advice parentAdvice, INamedType targetType, string name )
-            : base( parentAdvice, targetType, name )
+            : base( parentAdvice, targetType )
         {
+            this.Name = name;
             this.ReturnParameter =
                 new ParameterBuilder(
                     this,

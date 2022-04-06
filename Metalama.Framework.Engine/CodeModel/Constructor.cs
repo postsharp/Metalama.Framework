@@ -3,7 +3,10 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.ReflectionMocks;
+using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,6 +25,17 @@ namespace Metalama.Framework.Engine.CodeModel
             }
         }
 
+        [Memo]
+        public ConstructorInitializerKind InitializerKind
+            => (ConstructorDeclarationSyntax?) this.GetPrimaryDeclaration() switch
+            {
+                null => ConstructorInitializerKind.Undetermined,
+                ConstructorDeclarationSyntax { Initializer: null } => ConstructorInitializerKind.Undetermined,
+                ConstructorDeclarationSyntax { Initializer: { } initializer } when initializer.Kind() == SyntaxKind.ThisConstructorInitializer => ConstructorInitializerKind.This,
+                ConstructorDeclarationSyntax { Initializer: { } initializer } when initializer.Kind() == SyntaxKind.BaseConstructorInitializer => ConstructorInitializerKind.Base,
+                _ => throw new AssertionFailedException(),
+            };
+
         public override DeclarationKind DeclarationKind => DeclarationKind.Constructor;
 
         public override IEnumerable<IDeclaration> GetDerivedDeclarations( bool deep = true ) => Enumerable.Empty<IDeclaration>();
@@ -29,6 +43,8 @@ namespace Metalama.Framework.Engine.CodeModel
         public override bool IsExplicitInterfaceImplementation => false;
 
         public override bool IsAsync => false;
+
+        public bool IsExplicit => this.GetSymbol()?.GetPrimarySyntaxReference() != null;
 
         public ConstructorInfo ToConstructorInfo() => CompileTimeConstructorInfo.Create( this );
 

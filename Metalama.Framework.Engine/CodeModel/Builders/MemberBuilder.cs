@@ -20,7 +20,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 {
     internal abstract class MemberBuilder : MemberOrNamedTypeBuilder, IMemberBuilder, IMemberImpl
     {
-        protected MemberBuilder( Advice parentAdvice, INamedType declaringType, string name ) : base( parentAdvice, declaringType, name ) { }
+        protected MemberBuilder( Advice parentAdvice, INamedType declaringType ) : base( parentAdvice, declaringType ) { }
 
         public new INamedType DeclaringType => base.DeclaringType.AssertNotNull();
 

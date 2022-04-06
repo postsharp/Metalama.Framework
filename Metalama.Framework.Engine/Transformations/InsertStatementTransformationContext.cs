@@ -1,7 +1,9 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Microsoft.CodeAnalysis;
+using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Diagnostics;
+using System;
 
 namespace Metalama.Framework.Engine.Transformations
 {
@@ -10,20 +12,24 @@ namespace Metalama.Framework.Engine.Transformations
     /// </summary>
     internal readonly struct InsertStatementTransformationContext
     {
-        public IInsertStatementTransformation Transformation { get; }
+        public IServiceProvider ServiceProvider { get; }
 
-        public ISymbol DeclarationSymbol { get; }
+        public UserDiagnosticSink DiagnosticSink { get; }
 
-        /// <summary>
-        /// Gets the target syntax node. If the target declaration does not have a body this is going to be null.
-        /// </summary>
-        public SyntaxNode? Body { get; }
+        public SyntaxGenerationContext SyntaxGenerationContext { get; }
 
-        public InsertStatementTransformationContext( IInsertStatementTransformation transformation, ISymbol declarationSymbol, SyntaxNode? body )
+        public ITemplateLexicalScopeProvider LexicalScopeProvider { get; }
+
+        public InsertStatementTransformationContext(
+            UserDiagnosticSink diagnosticSink,
+            ITemplateLexicalScopeProvider lexicalScopeProvider,
+            SyntaxGenerationContext syntaxGenerationContext,
+            IServiceProvider serviceProvider )
         {
-            this.Transformation = transformation;
-            this.DeclarationSymbol = declarationSymbol;
-            this.Body = body;
+            this.DiagnosticSink = diagnosticSink;
+            this.LexicalScopeProvider = lexicalScopeProvider;
+            this.SyntaxGenerationContext = syntaxGenerationContext;
+            this.ServiceProvider = serviceProvider;
         }
     }
 }

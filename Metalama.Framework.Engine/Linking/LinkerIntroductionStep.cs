@@ -99,7 +99,12 @@ namespace Metalama.Framework.Engine.Linking
                     .ToList();
 
             ProcessReplaceTransformations( input, allTransformations, syntaxTransformationCollection, out var replacedTransformations );
-            ProcessHierarchicalTransformations( diagnostics, allTransformations, nameProvider, out var initializationResults );
+
+            ProcessInsertStatementTransformations(
+                input,
+                syntaxTransformationCollection,
+                out var memberIntroductionInsertStatements,
+                out var syntaxNodeInsertStatements );
 
             this.ProcessIntroduceTransformations(
                 input,
@@ -107,15 +112,7 @@ namespace Metalama.Framework.Engine.Linking
                 diagnostics,
                 nameProvider,
                 syntaxTransformationCollection,
-                replacedTransformations,
-                initializationResults );
-
-            PrepareCodeTransformationMarkedNodes(
-                input,
-                allTransformations,
-                initializationResults,
-                out var markedNodes,
-                out var typesWithRequiredImplicitConstructors );
+                replacedTransformations );
 
             // Group diagnostic suppressions by target.
             var suppressionsByTarget = input.DiagnosticSuppressions.ToMultiValueDictionary(
@@ -219,30 +216,13 @@ namespace Metalama.Framework.Engine.Linking
             }
         }
 
-        private static void ProcessHierarchicalTransformations(
-            UserDiagnosticSink diagnostics,
-            List<ITransformation> allTransformations,
-            LinkerIntroductionNameProvider nameProvider,
-            out Dictionary<IHierarchicalTransformation, TransformationInitializationResult?> initializationResults )
-        {
-            initializationResults = new Dictionary<IHierarchicalTransformation, TransformationInitializationResult?>();
-            var initializationContext = new InitializationContext( diagnostics, nameProvider, initializationResults );
-
-            // Initialize hierarchical transformations.
-            foreach ( var hierarchicalTransformation in allTransformations.OfType<IHierarchicalTransformation>().OrderByReverseTopology( t => t.Dependencies ) )
-            {
-                initializationResults[hierarchicalTransformation] = hierarchicalTransformation.Initialize( initializationContext );
-            }
-        }
-
         private void ProcessIntroduceTransformations(
             AspectLinkerInput input,
             List<ITransformation> allTransformations,
             UserDiagnosticSink diagnostics,
             LinkerIntroductionNameProvider nameProvider,
             SyntaxTransformationCollection syntaxTransformationCollection,
-            HashSet<ISyntaxTreeTransformation> replacedTransformations,
-            Dictionary<IHierarchicalTransformation, TransformationInitializationResult?> initializationResults )
+            HashSet<ISyntaxTreeTransformation> replacedTransformations )
         {
             var lexicalScopeFactory = new LexicalScopeFactory( input.CompilationModel );
 
@@ -258,29 +238,7 @@ namespace Metalama.Framework.Engine.Linking
                 {
                     case IMemberIntroduction memberIntroduction:
                         // Create the SyntaxGenerationContext for the insertion point.
-                        var positionInSyntaxTree = 0;
-
-                        if ( memberIntroduction.InsertPosition.SyntaxNode != null )
-                        {
-                            switch ( memberIntroduction.InsertPosition.Relation )
-                            {
-                                case InsertPositionRelation.After:
-                                    positionInSyntaxTree = memberIntroduction.InsertPosition.SyntaxNode.Span.End + 1;
-
-                                    break;
-
-                                case InsertPositionRelation.Within:
-                                    positionInSyntaxTree = ((BaseTypeDeclarationSyntax) memberIntroduction.InsertPosition.SyntaxNode).CloseBraceToken.Span.Start
-                                                           - 1;
-
-                                    break;
-
-                                default:
-                                    positionInSyntaxTree = 0;
-
-                                    break;
-                            }
-                        }
+                        var positionInSyntaxTree = GetSyntaxTreePosition( memberIntroduction.InsertPosition );
 
                         var syntaxGenerationContext = SyntaxGenerationContext.Create(
                             this._serviceProvider,
@@ -288,20 +246,13 @@ namespace Metalama.Framework.Engine.Linking
                             memberIntroduction.TargetSyntaxTree,
                             positionInSyntaxTree );
 
-                        var initializationResult =
-                            transformation is IHierarchicalTransformation hierarchicalTransformation
-                                ? initializationResults[hierarchicalTransformation]
-                                : null;
-
                         // Call GetIntroducedMembers
                         var introductionContext = new MemberIntroductionContext(
                             diagnostics,
                             nameProvider,
                             lexicalScopeFactory,
                             syntaxGenerationContext,
-                            this._serviceProvider,
-                            initializationResult,
-                            initializationResults );
+                            this._serviceProvider );
 
                         var introducedMembers = memberIntroduction.GetIntroducedMembers( introductionContext );
 
@@ -318,170 +269,77 @@ namespace Metalama.Framework.Engine.Linking
             }
         }
 
-        private static void PrepareCodeTransformationMarkedNodes(
-            AspectLinkerInput input,
-            List<ITransformation> allTransformations,
-            Dictionary<IHierarchicalTransformation, TransformationInitializationResult?> initializationResults,
-            out Dictionary<SyntaxNode, (string Id, IReadOnlyList<InsertedStatement> Marks)> markedNodes,
-            out Dictionary<ISymbol, (ConstructorDeclarationSyntax? Static, ConstructorDeclarationSyntax? Instance)> typesWithRequiredImplicitConstructors )
+        private static int GetSyntaxTreePosition( InsertPosition insertPosition )
         {
-            var codeTransformationsBySyntaxTree = new Dictionary<SyntaxTree, List<IInsertStatementTransformation>>();
+            var positionInSyntaxTree = 0;
 
-            foreach ( var codeTransformationSource in allTransformations.OfType<IBodyTransformationSource>() )
+            if ( insertPosition.SyntaxNode != null )
             {
-                var initializationResult =
-                    codeTransformationSource is IHierarchicalTransformation hierarchicalTransformation
-                        ? initializationResults[hierarchicalTransformation]
-                        : null;
-
-                var codeTransformationSourceContext =
-                    new CodeTransformationSourceContext(
-                        initializationResult,
-                        initializationResults );
-
-                var codeTransformations = codeTransformationSource.GetBodyTransformations( codeTransformationSourceContext );
-
-                if ( !codeTransformationsBySyntaxTree.TryGetValue( codeTransformationSource.TargetSyntaxTree, out var list ) )
+                switch ( insertPosition.Relation )
                 {
-                    codeTransformationsBySyntaxTree[codeTransformationSource.TargetSyntaxTree] = list = new List<IInsertStatementTransformation>();
-                }
+                    case InsertPositionRelation.After:
+                        positionInSyntaxTree = insertPosition.SyntaxNode.Span.End + 1;
 
-                list.AddRange( codeTransformations );
+                        break;
+
+                    case InsertPositionRelation.Within:
+                        positionInSyntaxTree = ((BaseTypeDeclarationSyntax) insertPosition.SyntaxNode).CloseBraceToken.Span.Start
+                                               - 1;
+
+                        break;
+
+                    default:
+                        positionInSyntaxTree = 0;
+
+                        break;
+                }
             }
 
-            markedNodes = new Dictionary<SyntaxNode, (string Id, IReadOnlyList<InsertedStatement> Marks)>();
+            return positionInSyntaxTree;
+        }
 
-            typesWithRequiredImplicitConstructors =
-                new Dictionary<ISymbol, (ConstructorDeclarationSyntax? Static, ConstructorDeclarationSyntax? Instance)>( SymbolEqualityComparer.Default );
+        private void ProcessInsertStatementTransformations(
+            AspectLinkerInput input,
+            List<ITransformation> allTransformations,
+            out IReadOnlyList<LinkerInsertedStatement> insertedStatements,
+            out Dictionary<ISymbol, IReadOnlyList<LinkerInsertedStatement>> symbolInsertedStatements,
+            out Dictionary<IMemberIntroduction, IReadOnlyList<LinkerInsertedStatement>> introductionInsertedStatements )
+        {
+            symbolInsertedStatements = new Dictionary<ISymbol, IReadOnlyList<LinkerInsertedStatement>>();
+            introductionInsertedStatements = new Dictionary<IMemberIntroduction, IReadOnlyList<LinkerInsertedStatement>>();
 
-            var nextMarkedNodeId = 0;
-
-            // Collect transformation marks.
-            // TODO: This does not work with introduced code (because it's not expanded yet).
-            foreach ( var initialSyntaxTree in input.InitialCompilation.SyntaxTrees.Values )
+            foreach ( var insertStatementTransformation in allTransformations.OfType<IInsertStatementTransformation>() )
             {
-                var root = initialSyntaxTree.GetRoot();
+                var positionInSyntaxTree = GetSyntaxTreePosition( memberIntroduction.InsertPosition );
 
-                if ( codeTransformationsBySyntaxTree.TryGetValue( initialSyntaxTree, out var codeTransformations ) )
+                var syntaxGenerationContext = SyntaxGenerationContext.Create(
+                    this._serviceProvider,
+                    input.InitialCompilation.Compilation,
+                    memberIntroduction.TargetSyntaxTree,
+                    positionInSyntaxTree );
+
+                var context = new InsertStatementTransformationContext(
+                    diagnosticSunk,
+                    lexicalScopeProvider,
+                    syntaxGenerationContext,
+                    serviceProvider)
+                insertStatementTransformation.GetInsertedStatement( )
+
+                switch ( insertStatementTransformation.TargetDeclaration )
                 {
-                    var codeTransformationVisitor = new BodyTransformationVisitor(
-                        input.InitialCompilation.Compilation.GetSemanticModel( initialSyntaxTree ),
-                        codeTransformations );
+                    case Declaration sourceDeclaration:
+                        var symbol = sourceDeclaration.Symbol;
 
-                    codeTransformationVisitor.Visit( root );
-
-                    // Temporary (implicit ctors).
-                    foreach ( var type in codeTransformationVisitor.TypesWithRequiredImplicitConstructors )
-                    {
-                        ConstructorDeclarationSyntax? staticCtor = null;
-                        ConstructorDeclarationSyntax? instanceCtor = null;
-
-                        if ( type.Value.Static )
+                        if ( !symbolInsertedStatements.TryGetValue( symbol, out var list ) )
                         {
-                            var mark = nextMarkedNodeId++.ToString( CultureInfo.InvariantCulture );
-
-                            staticCtor =
-                                SyntaxFactory.ConstructorDeclaration(
-                                        SyntaxFactory.List<AttributeListSyntax>(),
-                                        SyntaxFactory.TokenList( SyntaxFactory.Token( SyntaxKind.StaticKeyword ) ),
-                                        type.Value.Declaration.Identifier,
-                                        SyntaxFactory.ParameterList(),
-                                        null,
-                                        SyntaxFactory.Block().WithLinkerMarkedNodeId( mark ),
-                                        null )
-                                    .NormalizeWhitespace()
-                                    .WithTrailingTrivia( SyntaxFactory.ElasticLineFeed );
+                            symbolInsertedStatements[symbol] = list = new List<LinkerInsertedStatement>();
                         }
 
-                        if ( type.Value.Instance )
-                        {
-                            var mark = nextMarkedNodeId++.ToString( CultureInfo.InvariantCulture );
+                        ((List<LinkerInsertedStatement>) list).Add(  );
 
-                            instanceCtor =
-                                SyntaxFactory.ConstructorDeclaration(
-                                        SyntaxFactory.List<AttributeListSyntax>(),
-                                        SyntaxFactory.TokenList( SyntaxFactory.Token( SyntaxKind.PublicKeyword ) ),
-                                        type.Value.Declaration.Identifier,
-                                        SyntaxFactory.ParameterList(),
-                                        null,
-                                        SyntaxFactory.Block().WithLinkerMarkedNodeId( mark ),
-                                        null )
-                                    .NormalizeWhitespace()
-                                    .WithTrailingTrivia( SyntaxFactory.ElasticLineFeed );
-                        }
-
-                        typesWithRequiredImplicitConstructors.Add(
-                            type.Key,
-                            (staticCtor, instanceCtor) );
-                    }
-
-                    if ( codeTransformationVisitor.Marks.Count > 0 )
-                    {
-                        foreach ( var mark in codeTransformationVisitor.Marks )
-                        {
-                            if ( mark.TargetBody != null )
-                            {
-                                if ( !markedNodes.TryGetValue( mark.TargetBody, out var record ) )
-                                {
-                                    markedNodes[mark.TargetBody] = record = (
-                                        nextMarkedNodeId++.ToString( CultureInfo.InvariantCulture ), new List<InsertedStatement>());
-                                }
-
-                                ((List<InsertedStatement>) record.Marks).Add( mark );
-                            }
-                            else
-                            {
-                                var declarationNode = mark.Parent.TargetDeclaration.GetPrimaryDeclaration();
-
-                                if ( declarationNode != null )
-                                {
-                                    if ( !markedNodes.TryGetValue( declarationNode, out var record ) )
-                                    {
-                                        markedNodes[declarationNode] = record = (
-                                            nextMarkedNodeId++.ToString( CultureInfo.InvariantCulture ), new List<InsertedStatement>());
-                                    }
-
-                                    ((List<InsertedStatement>) record.Marks).Add( mark );
-                                }
-                                else
-                                {
-                                    // Temporary (implicit ctors).
-                                    var typeSymbol = mark.Parent.TargetDeclaration.ContainingDeclaration.AssertNotNull().GetSymbol().AssertNotNull();
-
-                                    if ( typesWithRequiredImplicitConstructors.TryGetValue( typeSymbol, out var typeRecord ) )
-                                    {
-                                        if ( mark.Parent.TargetDeclaration.IsStatic )
-                                        {
-                                            // Implicit static ctor.
-                                            var key = typeRecord.Static.AssertNotNull();
-
-                                            if ( !markedNodes.TryGetValue( key, out var record ) )
-                                            {
-                                                markedNodes[key] = record = (
-                                                    key.Body.AssertNotNull().GetLinkerMarkedNodeId().AssertNotNull(), new List<InsertedStatement>());
-                                            }
-
-                                            ((List<InsertedStatement>) record.Marks).Add( mark );
-                                        }
-                                        else
-                                        {
-                                            // Implicit instance ctor.
-                                            var key = typeRecord.Instance.AssertNotNull();
-
-                                            if ( !markedNodes.TryGetValue( key, out var record ) )
-                                            {
-                                                markedNodes[key] = record = (
-                                                    key.Body.AssertNotNull().GetLinkerMarkedNodeId().AssertNotNull(), new List<InsertedStatement>());
-                                            }
-
-                                            ((List<InsertedStatement>) record.Marks).Add( mark );
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
+                        break;
                 }
+                
             }
         }
 

@@ -18,7 +18,7 @@ namespace Metalama.Framework.Engine.Transformations
         /// <summary>
         /// Gets the operand syntax.
         /// </summary>
-        public StatementSyntax Statement { get; }
+        public StatementSyntax? Statement { get; }
 
         public InsertedStatement( InsertedStatementPosition position, StatementSyntax newNode )
         {

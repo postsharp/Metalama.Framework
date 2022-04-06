@@ -23,6 +23,7 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
     {
         private readonly IAdvisedFieldOrProperty? _fieldOrProperty;
         private readonly IAdvisedMethod? _method;
+        private readonly IAdvisedConstructor? _constructor;
         private readonly IAdvisedEvent? _event;
         private readonly INamedType? _type;
         private readonly MetaApiProperties _common;
@@ -32,7 +33,7 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
                 (this._common.Template.Declaration!, "meta." + memberName, this.Declaration, this.Declaration.DeclarationKind,
                  description ?? "I" + memberName) );
 
-        public IConstructor Constructor => throw new NotImplementedException();
+        public IConstructor Constructor => this.Constructor ?? throw this.CreateInvalidOperationException( nameof( this.Constructor ) );
 
         public IMethodBase MethodBase => this._method ?? throw this.CreateInvalidOperationException( nameof(this.MethodBase) );
 
@@ -129,6 +130,12 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
             this._type = method.DeclaringType;
         }
 
+        private MetaApi( IConstructor constructor, MetaApiProperties common ) : this( (IDeclaration) constructor, common )
+        {
+            this._constructor = new AdvisedConstructor( constructor );
+            this._type = constructor.DeclaringType;
+        }
+
         private MetaApi( IFieldOrProperty fieldOrProperty, IMethod accessor, MetaApiProperties common ) : this( accessor, common )
         {
             this._method = new AdvisedMethod( accessor );
@@ -180,6 +187,7 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
                 IMethod method => new MetaApi( method, common ),
                 IFieldOrProperty fieldOrProperty => new MetaApi( fieldOrProperty, common ),
                 IEvent @event => new MetaApi( @event, common ),
+                IConstructor constructor => new MetaApi(constructor, common ),
                 _ => throw new AssertionFailedException()
             };
 

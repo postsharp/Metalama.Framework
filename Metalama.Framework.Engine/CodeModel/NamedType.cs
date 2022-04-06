@@ -209,20 +209,22 @@ namespace Metalama.Framework.Engine.CodeModel
         public IConstructorList Constructors
             => new ConstructorList(
                 this,
-                this.TypeSymbol
-                    .GetMembers()
-                    .OfType<IMethodSymbol>()
-                    .Where( m => m.MethodKind == MethodKind.Constructor )
-                    .Select( m => new MemberRef<IConstructor>( m, this.Compilation.RoslynCompilation ) ) );
+                this.TransformMembers<IConstructor, IConstructorBuilder, IMethodSymbol>(
+                    this.TypeSymbol
+                        .GetMembers()
+                        .OfType<IMethodSymbol>()
+                        .Where( m => m.MethodKind == MethodKind.Constructor )
+                        .ToReadOnlyList() ) );
 
         [Memo]
-        public IConstructor? StaticConstructor
-            => this.TypeSymbol
+        public IConstructor StaticConstructor // TODO: This is a bit of a hack (VirtualStaticConstructor disappears is ConstructorBuilder is used).
+            => this.TransformMembers<IConstructor, IConstructorBuilder, IMethodSymbol>(
+                   this.TypeSymbol
                    .GetMembers()
                    .OfType<IMethodSymbol>()
                    .Where( m => m.MethodKind == MethodKind.StaticConstructor )
-                   .Select( m => this.Compilation.Factory.GetConstructor( m ) )
-                   .SingleOrDefault()
+                   .ToReadOnlyList() )
+               .SingleOrDefault().GetTarget()
                ?? new VirtualStaticConstructor( this );
 
         public bool IsPartial
@@ -673,6 +675,10 @@ namespace Metalama.Framework.Engine.CodeModel
             public ICompilation Compilation => this.DeclaringType.Compilation;
 
             public ISymbol? Symbol => null;
+
+            public ConstructorInitializerKind InitializerKind => ConstructorInitializerKind.Undetermined;
+
+            public bool IsExplicit => false;
 
             public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
             {

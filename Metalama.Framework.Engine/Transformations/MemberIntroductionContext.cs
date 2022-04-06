@@ -22,26 +22,18 @@ namespace Metalama.Framework.Engine.Transformations
 
         public OurSyntaxGenerator SyntaxGenerator => this.SyntaxGenerationContext.SyntaxGenerator;
 
-        public TransformationInitializationResult? InitializationResult { get; }
-
-        public IReadOnlyDictionary<IHierarchicalTransformation, TransformationInitializationResult?> DependencyInitializationResults { get; }
-
         public MemberIntroductionContext(
             UserDiagnosticSink diagnosticSink,
             IntroductionNameProvider introductionNameProvider,
             ITemplateLexicalScopeProvider lexicalScopeProvider,
             SyntaxGenerationContext syntaxGenerationContext,
-            IServiceProvider serviceProvider,
-            TransformationInitializationResult? initializationResult,
-            IReadOnlyDictionary<IHierarchicalTransformation, TransformationInitializationResult?> dependencyInitializationResults )
+            IServiceProvider serviceProvider )
         {
             this.DiagnosticSink = diagnosticSink;
             this.LexicalScopeProvider = lexicalScopeProvider;
             this.ServiceProvider = serviceProvider;
             this.IntroductionNameProvider = introductionNameProvider;
             this.SyntaxGenerationContext = syntaxGenerationContext;
-            this.InitializationResult = initializationResult;
-            this.DependencyInitializationResults = dependencyInitializationResults;
         }
     }
 }
