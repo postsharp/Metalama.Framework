@@ -92,34 +92,43 @@ namespace $(RootNamespace)
 
     <Target Name="CleanTestOutput">
         <ItemGroup>
-            <_CleanTestOutput Include="obj\\transformed\**\*.*"/>
-            <_CleanTestOutput Include="obj\\html\**\*.*"/>
+            <_CleanTestOutput Include="obj\transformed\**\*.*"/>
+            <_CleanTestOutput Include="obj\html\**\*.*"/>
         </ItemGroup>
-        <RemoveDir Directories="obj\\transformed"/>
-        <RemoveDir Directories="obj\\html"/>
+        <RemoveDir Directories="obj\transformed"/>
+        <RemoveDir Directories="obj\html"/>
         <Delete Files="@(_CleanTestOutput)"/>
+    </Target>
+    
+    <Target Name="_AcceptTestOutput">
+        <ItemGroup>
+            <_AcceptTestOutput Include="obj\transformed\$(TargetFramework)\**\*.cs"/>
+            <_AcceptTestOutput Include="obj\transformed\$(TargetFramework)\**\*.txt"/>
+        </ItemGroup>
+        <Message Text="Accepting @(_AcceptTestOutput)" Importance="high"/>
+        <Copy
+                SourceFiles="@(_AcceptTestOutput)"
+                DestinationFiles="@(_AcceptTestOutput->'%(RecursiveDir)%(Filename)%(Extension)')"/>
     </Target>
 
     <Target Name="AcceptTestOutput">
+        <CallTarget Targets="_AcceptTestOutput" Condition="'$(TargetFramework)'!=''" />
+        <MSBuild Projects="$(MSBuildProjectFullPath)" Targets="_AcceptTestOutput" Properties="TargetFramework=%(TargetFrameworks.Identity)" Condition="'$(TargetFramework)'==''"/> 
+    </Target>
+
+    <Target Name="_AcceptTestHtml">
         <ItemGroup>
-            <_AcceptTestOutput Include="obj\\transformed\net6.0\**\*.cs"/>
-            <_AcceptTestOutput Include="obj\\transformed\net6.0\**\*.txt"/>
-            <_AcceptTestOutput Include="obj\\transformed\netframework4.8\**\*.cs"/>
-            <_AcceptTestOutput Include="obj\\transformed\netframework4.8\**\*.txt"/>
+            <_AcceptTestOutput Include="obj\html\$(TargetFramework)\**\*.cs.html"/>
         </ItemGroup>
+        <Message Text="Accepting @(_AcceptTestOutput)" Importance="high"/>
         <Copy
                 SourceFiles="@(_AcceptTestOutput)"
                 DestinationFiles="@(_AcceptTestOutput->'%(RecursiveDir)%(Filename)%(Extension)')"/>
     </Target>
 
     <Target Name="AcceptTestHtml">
-        <ItemGroup>
-            <_AcceptTestOutput Include="obj\\html\$(TargetFramework)\net6.0\**\*.cs.html"/>
-            <_AcceptTestOutput Include="obj\\html\$(TargetFramework)\netframework4.8\**\*.cs.html"/>
-        </ItemGroup>
-        <Copy
-                SourceFiles="@(_AcceptTestOutput)"
-                DestinationFiles="@(_AcceptTestOutput->'%(RecursiveDir)%(Filename)%(Extension)')"/>
+        <CallTarget Targets="_AcceptTestHtml" Condition="'$(TargetFramework)'!=''" />
+        <MSBuild Projects="$(MSBuildProjectFullPath)" Targets="_AcceptTestHtml" Properties="TargetFramework=%(TargetFrameworks.Identity)" Condition="'$(TargetFramework)'==''"/>
     </Target>
 
 
