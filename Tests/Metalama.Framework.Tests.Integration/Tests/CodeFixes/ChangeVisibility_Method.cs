@@ -3,7 +3,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.CodeFixes;
 
-namespace Metalama.Framework.Tests.Integration.CodeFixes.Suggest
+namespace Metalama.Framework.Tests.Integration.CodeFixes.ChangeVisibility_Method
 {
     internal class Aspect : MethodAspect
     {
@@ -11,7 +11,7 @@ namespace Metalama.Framework.Tests.Integration.CodeFixes.Suggest
         {
             base.BuildAspect( builder );
 
-            builder.Diagnostics.Suggest( CodeFixFactory.AddAttribute( builder.Target, typeof(MyAttribute) ), builder.Target );
+            builder.Diagnostics.Suggest( CodeFixFactory.ChangeAccessibility( builder.Target, Accessibility.Public ) );
         }
     }
 

@@ -44,18 +44,22 @@ namespace Metalama.Framework.Tests.Integration.CodeFixes.MultiSteps
     }
 
     // <target>
-    [ToString]
-    internal class MovingVertex
+
+    internal class TargetCode
     {
-        [NotToString]
-        public double X;
+        [ToString]
+        internal class MovingVertex
+        {
+            [NotToString]
+            public double X;
 
-        public double Y;
+            public double Y;
 
-        public double DX;
+            public double DX;
 
-        public double DY { get; set; }
+            public double DY { get; set; }
 
-        public double Velocity => Math.Sqrt( ( DX * DX ) + ( DY * DY ) );
+            public double Velocity => Math.Sqrt( ( DX * DX ) + ( DY * DY ) );
+        }
     }
 }

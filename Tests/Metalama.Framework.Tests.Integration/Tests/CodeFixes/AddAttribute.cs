@@ -20,6 +20,7 @@ namespace Metalama.Framework.Tests.Integration.CodeFixes.AddAttribute
 
     internal class MyAttribute : Attribute { }
 
+    // <target>
     internal class TargetCode
     {
         [Aspect]
